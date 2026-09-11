@@ -1,0 +1,186 @@
+/**
+ * Normalizes the typed ingestion context: fight boundaries, phases, catalogs.
+ *
+ * Everything here comes from typed GraphQL fields rather than the non-frozen
+ * events JSON, which is why it can be implemented now — the schema itself is
+ * the evidence.
+ */
+
+import { isRecord, readInteger, readNullableInteger, readString } from "../../wcl/decode.js";
+import type { RawFightContextReport } from "../../wcl/fight-context-query.js";
+import { normalizeAbilities, type AbilityCatalog } from "./abilities.js";
+import { normalizeActors, type ActorCatalog } from "./actors.js";
+import { mapFinality, type CombatPhase, type FightFinality } from "./combat-fight.js";
+
+export interface NormalizedFightHeader {
+  readonly id: number;
+  readonly name: string;
+  readonly encounterId: number;
+  readonly difficulty: number | null;
+  readonly size: number | null;
+  readonly kill: boolean | null;
+  readonly startTimeMs: number;
+  readonly endTimeMs: number;
+  readonly durationMs: number;
+  readonly finality: FightFinality;
+  readonly inProgressRaw: boolean | null;
+  readonly friendlyPlayers: readonly number[];
+  readonly talentImportCode: string | null;
+}
+
+export type FightContextOutcome =
+  | {
+      readonly ok: true;
+      readonly fight: NormalizedFightHeader;
+      readonly phases: readonly CombatPhase[];
+      readonly actors: ActorCatalog;
+      readonly abilities: AbilityCatalog;
+    }
+  | {
+      readonly ok: false;
+      readonly reason: "FIGHT_NOT_FOUND" | "FIGHT_RANGE_INVALID" | "UPSTREAM_DATA_INVALID";
+    };
+
+function readBooleanOrNull(source: Record<string, unknown>, key: string): boolean | null {
+  const value = source[key];
+  return typeof value === "boolean" ? value : null;
+}
+
+function readIntegerArray(source: Record<string, unknown>, key: string): readonly number[] {
+  const value = source[key];
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value.filter((entry): entry is number => Number.isSafeInteger(entry));
+}
+
+/**
+ * Phase metadata for one encounter, keyed by phase id.
+ *
+ * `isIntermission` is nullable in the schema and stays nullable here. An absent
+ * flag is not "not an intermission".
+ */
+function phaseMetadataFor(
+  rawPhases: readonly unknown[],
+  encounterId: number,
+): ReadonlyMap<number, { readonly name: string | null; readonly isIntermission: boolean | null }> {
+  const metadata = new Map<number, { name: string | null; isIntermission: boolean | null }>();
+  for (const entry of rawPhases) {
+    if (!isRecord(entry) || readInteger(entry, "encounterID") !== encounterId) {
+      continue;
+    }
+    const phases = entry["phases"];
+    if (!Array.isArray(phases)) {
+      continue;
+    }
+    for (const phase of phases) {
+      if (!isRecord(phase)) {
+        continue;
+      }
+      const id = readInteger(phase, "id");
+      if (id === undefined) {
+        continue;
+      }
+      metadata.set(id, {
+        name: readString(phase, "name") ?? null,
+        isIntermission: readBooleanOrNull(phase, "isIntermission"),
+      });
+    }
+  }
+  return metadata;
+}
+
+function normalizePhases(
+  rawFight: Record<string, unknown>,
+  rawPhases: readonly unknown[],
+  encounterId: number,
+  fightStartTimeMs: number,
+): readonly CombatPhase[] {
+  const transitions = rawFight["phaseTransitions"];
+  if (!Array.isArray(transitions)) {
+    return [];
+  }
+  const metadata = phaseMetadataFor(rawPhases, encounterId);
+
+  const phases: CombatPhase[] = [];
+  for (const transition of transitions) {
+    if (!isRecord(transition)) {
+      continue;
+    }
+    const phaseId = readInteger(transition, "id");
+    const startTimeMs = readInteger(transition, "startTime");
+    if (phaseId === undefined || startTimeMs === undefined) {
+      continue;
+    }
+    const meta = metadata.get(phaseId);
+    phases.push({
+      phaseId,
+      name: meta?.name ?? null,
+      isIntermission: meta?.isIntermission ?? null,
+      startTimeMs,
+      fightTimeMs: startTimeMs - fightStartTimeMs,
+    });
+  }
+  return phases;
+}
+
+export function normalizeFightContext(report: RawFightContextReport, fightId: number): FightContextOutcome {
+  if (report.fights.length === 0) {
+    return { ok: false, reason: "FIGHT_NOT_FOUND" };
+  }
+  if (report.fights.length > 1) {
+    return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
+  }
+
+  const rawFight = report.fights[0];
+  if (!isRecord(rawFight) || readInteger(rawFight, "id") !== fightId) {
+    return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
+  }
+
+  const name = readString(rawFight, "name");
+  const encounterId = readInteger(rawFight, "encounterID");
+  const difficulty = readNullableInteger(rawFight, "difficulty");
+  const startTimeMs = readInteger(rawFight, "startTime");
+  const endTimeMs = readInteger(rawFight, "endTime");
+  if (
+    name === undefined ||
+    encounterId === undefined ||
+    difficulty === undefined ||
+    startTimeMs === undefined ||
+    endTimeMs === undefined
+  ) {
+    return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
+  }
+
+  // A zero-length or inverted fight would make every fight-relative timestamp
+  // meaningless, so it fails closed rather than producing nonsense offsets.
+  if (endTimeMs <= startTimeMs) {
+    return { ok: false, reason: "FIGHT_RANGE_INVALID" };
+  }
+
+  const inProgressRaw = readBooleanOrNull(rawFight, "inProgress");
+
+  return {
+    ok: true,
+    fight: {
+      id: fightId,
+      name,
+      encounterId,
+      difficulty,
+      size: readNullableInteger(rawFight, "size") ?? null,
+      kill: readBooleanOrNull(rawFight, "kill"),
+      startTimeMs,
+      endTimeMs,
+      durationMs: endTimeMs - startTimeMs,
+      finality: mapFinality(inProgressRaw),
+      inProgressRaw,
+      friendlyPlayers: readIntegerArray(rawFight, "friendlyPlayers"),
+      // Documented null for Classic and pre-Dragonflight fights. Recorded
+      // unparsed: decoding it into talent ids needs runtime game data.
+      talentImportCode: readString(rawFight, "talentImportCode") ?? null,
+    },
+    phases: normalizePhases(rawFight, report.phases, encounterId, startTimeMs),
+    actors: normalizeActors(report.actors),
+    abilities: normalizeAbilities(report.abilities),
+  };
+}

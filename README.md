@@ -597,8 +597,8 @@ npm.cmd run deploy
 
 ## Current Status
 
-Milestone 1 (foundation) and Milestone 2 (Warcraft Logs connectivity and
-identity preflight) are implemented.
+Milestone 1 (foundation), Milestone 2 (Warcraft Logs connectivity and identity
+preflight) and the Milestone 3 ingestion machinery are implemented.
 
 `POST /v1/analysis` now validates the request, resolves configuration,
 authenticates to Warcraft Logs with OAuth Client Credentials, and runs a
@@ -622,9 +622,96 @@ request returns an explicit `ANALYSIS_NOT_IMPLEMENTED` error. It never returns a
 successful-looking empty report, because absence of analysis is not evidence of
 good play.
 
-Milestone 2 deliberately retrieves **no combat events**: no pagination, no
-completeness reconstruction, no normalized combat model, no coaching. Those
-begin in Milestone 3.
+### Milestone 3 — ingestion, built and deliberately not wired
+
+Milestone 3 adds the event ingestion capability: a reusable paginator, a
+declared retrieval plan, evidence capability and coverage, and a normalized
+`CombatFight`.
+
+It is **not connected to `/v1/analysis`**, and that is the design rather than an
+oversight. No analyzer is enabled, so no analyzer declares required inputs, so
+there is nothing to ingest for. Wiring it now would make the route spend
+Warcraft Logs API points retrieving evidence nothing reads, while still
+answering `ANALYSIS_NOT_IMPLEMENTED` — the route lying about what it did. An
+integration test asserts a valid request issues exactly one GraphQL call and
+never an events query.
+
+`CombatIngestionPort` exists as a type with no production binding. Milestone 5
+injects it at the same time as the first analyzer declares its inputs.
+
+What ingestion establishes when it is called:
+
+```text
+context query -> archive gate -> fight, phases, actor and ability catalogs
+              -> paginate the All stream, normalizing each page
+              -> revision recheck
+              -> CombatFight + provenance + capability + coverage
+```
+
+Three distinctions it keeps apart, each replacing a way the old analyzer went
+wrong:
+
+- **Capability vs coverage.** COMPLETE/PARTIAL/ABSENT describe coverage of
+  evidence Warcraft Logs is *capable* of supplying. A fully retrieved stream
+  with zero targetability events does not become `TARGETABILITY: COMPLETE` —
+  capability is tracked separately, and failing to observe something never
+  proves it cannot be observed.
+- **Retrieval completeness vs fight finality.** An in-progress fight that was
+  fully retrieved is COMPLETE coverage *and* IN_PROGRESS finality.
+- **Events vs malformed observations.** An observation whose timestamp and type
+  could not be established is not an event and is kept out of the event
+  sequence, rather than being given a fabricated envelope.
+
+**Event family support is evidence-gated.** A raw event type string is
+recognised only when a sanitized live capture committed under
+`tests/fixtures/wcl/events/` contains it — envelope-only handling included. A
+contract test fails the build if code names a type that no fixture carries.
+
+Twenty raw types are currently contracted, covering casts, auras, damage,
+healing, absorbs, resources, summons and combatant info. Four categories remain
+`UNVERIFIED` because no capture has contained them yet: `TARGETABILITY`,
+`DEATHS`, `INTERRUPTS`, `DISPELS`. **None of them is `NOT_OBSERVABLE`** —
+failing to observe something is not evidence that it cannot be observed.
+
+Three behaviours were measured against the live API rather than assumed:
+
+- `events(endTime:)` is INCLUSIVE and `startTime` is inclusive, so the request
+  window is closed and an event at exactly `endTime` is inside the requested
+  range. Pagination cursors are exclusive. Intervals carry the bound kind
+  explicitly rather than adding a millisecond or assuming integer timestamps.
+- `-1` is a no-actor sentinel on both `sourceID` and `targetID`, and never
+  becomes actor -1.
+- Resource snapshots are flattened onto the event with a `resourceActor`
+  discriminator (1 = source, 2 = target). A target-side snapshot carries the
+  target's health, so it is never attributed to the source.
+
+See `tests/fixtures/wcl/events/PROVENANCE.md` for the full evidence record.
+
+### Live Warcraft Logs probe
+
+Raw event shapes are verified by a manual probe, never in CI:
+
+```powershell
+Copy-Item .dev.vars.example .dev.vars   # then fill in real credentials
+npm.cmd run probe
+```
+
+It spends real API points, writes raw output to the gitignored `.probe/`, and
+never prints or persists a credential. Only reviewed slices produced by
+`node scripts/sanitize-probe.mjs` may enter `tests/fixtures/`.
+
+Measured on one 24-player heroic pull at `EVENT_PAGE_LIMIT = 5000` with
+resources: 40 pages, 196,366 events, ~8.2 s, ~54.8 MB decoded JSON, largest page
+~1.45 MB, 41 API points. `limit` is a soft cap — pages returned up to 5,030
+events. That is an evidence-supported operating value, not a claim of
+optimality.
+
+Point a capture at a different log with:
+
+```powershell
+$env:PROBE_REPORT_CODE="..."; $env:PROBE_FIGHT_ID="6"; $env:PROBE_SOURCE_ID="5"
+npm.cmd run probe
+```
 
 ### Deployment smoke test
 

@@ -3,6 +3,9 @@ node_modules/
 .env.*
 .dev.vars
 .wrangler/
+# Raw live-probe output. Never committed; only reviewed, sanitized slices
+# produced by scripts/sanitize-probe.mjs may enter tests/fixtures/.
+.probe/
 dist/
 coverage/
 *.tsbuildinfo

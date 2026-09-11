@@ -389,10 +389,26 @@ Test:
 - Single-page response
 - Multiple pages
 - Final page
-- Retry success
-- Retry exhaustion
 - Missing intermediate page
 - Truncated response
+- Stalled cursor (no progress)
+- Decreasing cursor
+- Malformed paginator
+- Rate limit mid-pagination
+- Safety ceiling reached
+
+## No Page-Level Retry
+
+Earlier drafts of this document listed "retry success" and "retry exhaustion"
+as pagination tests. Those are withdrawn.
+
+CLAUDE.md forbids inventing generic retries, and the only retry in the system is
+the bounded cached-token 401 refresh inside the WCL transport. A page-level
+retry would spend more API points on a rate limit and would blur the line
+between "we could not retrieve this" and "there was nothing here".
+
+The correct tests are therefore that a failed page is NOT retried, and that the
+stream reports PARTIAL with the covered ranges it can actually vouch for.
 
 Critical regression:
 
@@ -475,6 +491,179 @@ does NOT mean:
 ```text
 player was idle
 ```
+
+---
+
+# Capability Tests
+
+Coverage and capability are different questions and must be tested separately.
+
+```text
+COVERAGE    did we obtain the evidence we requested for this range?
+CAPABILITY  can the selected WCL source supply this category at all?
+```
+
+Required tests:
+
+- A category whose capability is not `OBSERVABLE` exposes NO coverage value.
+- A fully retrieved stream containing zero events of a category does NOT make
+  that category `COMPLETE` unless capability is independently `OBSERVABLE`.
+- Capability is never inferred from a fight's contents: two fights with
+  identical retrieval and different event counts produce identical capability.
+- Every category key is always present.
+
+## Capability Evidence Is Directional
+
+This is the most important negative test in the group.
+
+```text
+a sanitized capture may establish        OBSERVABLE
+absence from any number of captures establishes NOTHING
+NOT_OBSERVABLE requires authoritative NEGATIVE evidence
+```
+
+Failing to observe a category proves only that the captured fights did not
+contain it. Specifically:
+
+```text
+targetability events not observed
+```
+
+must leave:
+
+```text
+TARGETABILITY = UNVERIFIED
+```
+
+and must NOT produce:
+
+```text
+TARGETABILITY = NOT_OBSERVABLE
+```
+
+Test that the capture-to-capability function cannot return `NOT_OBSERVABLE` at
+all, and that any `NOT_OBSERVABLE` registry entry cites schema-exhaustive or
+documented-unsupported evidence.
+
+---
+
+# Evidence-Gated Contract Tests
+
+A raw event type string or field name recognised by name is a CONTRACT against
+a non-frozen upstream.
+
+Test that:
+
+- every recognised raw type cites committed evidence — a sanitized capture or a
+  typed schema path
+- envelope-only handling is NOT exempt: decoding no family fields lowers the
+  size of the contract, not the evidence bar for it
+- a cited fixture id actually resolves to a committed fixture
+- any raw type without evidence normalizes to `UNSUPPORTED_TYPE`
+
+A contract may never be written to satisfy a milestone exit criterion.
+
+---
+
+# Malformed Envelope Tests
+
+Three outcomes, tested as three distinct things:
+
+```text
+valid envelope + recognised type + valid fields  -> normal event
+valid envelope + recognised type + bad fields    -> MALFORMED_FAMILY, in events[]
+valid envelope + unknown type                    -> UNSUPPORTED_TYPE, in events[]
+NO valid envelope                                -> malformed raw observation,
+                                                    OUTSIDE events[]
+```
+
+Required negative tests:
+
+- A malformed raw observation invents no timestamp, type, source or target.
+- It still preserves its retrieval position (stream, page, index, ordinal) and
+  which fields were missing or invalid.
+- A known type with a bad required field does NOT become an unknown type.
+- An unknown type does NOT degrade any category; a malformed known event does.
+
+---
+
+# Coverage Interval Tests
+
+Intervals carry an explicit upper bound: `INCLUSIVE` or `EXCLUSIVE`. The lower
+bound is always inclusive.
+
+Verified semantics:
+
+```text
+non-terminal page  [start, cursor)   cursor is the first timestamp NOT returned
+terminal page      [start, endTime]  endTime returns events at its own instant
+```
+
+Required tests:
+
+- An event at exactly the requested `endTime` is INSIDE the requested range.
+- An exclusive range does NOT satisfy an inclusive request of the same numbers.
+- Adjacent cursor ranges chain with no gap and no double-counted instant.
+- No test may rely on adding a millisecond, an epsilon, or integer timestamps.
+
+- A page containing ZERO events still vouches for its full range. A quiet
+  period is observed absence of events, not unobserved time.
+- Coverage is derived from request and cursor, never from event timestamps.
+  Prove it: identical requests and cursors with different event contents must
+  produce identical coverage.
+- Consecutive pages chain with no gap and no double-counted boundary instant.
+- A mid-stream failure bounds coverage at the last cursor.
+- `ABSENT` implies empty covered ranges; empty covered ranges do NOT by
+  themselves imply `ABSENT`.
+
+Timestamps are typed `Float` upstream. Do not assume integer milliseconds.
+
+---
+
+# Actor Sentinel Tests
+
+`-1` is a verified no-actor sentinel on both `sourceID` and `targetID`.
+
+Required named regressions:
+
+- `sourceID: -1` produces no source actor, and no `ActorRef` anywhere holds -1.
+- `targetID: -1` produces no target actor.
+- Absence, the sentinel, and an uninterpretable value are distinguishable.
+- An unobserved negative is NOT given the sentinel's meaning.
+
+---
+
+# Attached Resource Direction Tests
+
+Required named regression: a TARGET-side resource attachment
+(`resourceActor: 2`) must not be attributed to the source.
+
+Also test:
+
+- a source-side attachment binds to the source
+- attached and standalone `resourcechange` observations stay distinct
+- no snapshot is manufactured from `armor` / `absorb` on events with no
+  `resourceActor`
+- a snapshot whose side has no concrete actor is preserved with a null actor
+  rather than bound to the other side
+
+---
+
+# Fight Finality Tests
+
+Retrieval completeness and fight finality answer different questions and must
+not be folded together.
+
+```text
+COVERAGE  did we obtain the evidence requested for this range?
+FINALITY  was the fight itself finished?
+```
+
+Test that an in-progress fight whose full requested range was retrieved reports
+`COMPLETE` coverage AND `IN_PROGRESS` finality, and that neither value is
+derivable from the other.
+
+A null `inProgress` is `UNKNOWN`, never assumed finished.
 
 ---
 

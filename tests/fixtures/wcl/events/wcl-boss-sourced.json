@@ -1,0 +1,57 @@
+[
+  {
+    "timestamp": 7550304,
+    "type": "damage",
+    "sourceID": 160,
+    "targetID": 7,
+    "abilityGameID": 1285998,
+    "fight": 6,
+    "hitType": 1,
+    "amount": 55734,
+    "mitigated": 16918,
+    "unmitigatedAmount": 72652,
+    "isAoE": true
+  },
+  {
+    "timestamp": 7550304,
+    "type": "damage",
+    "sourceID": 160,
+    "targetID": 22,
+    "abilityGameID": 1285998,
+    "fight": 6,
+    "hitType": 1,
+    "amount": 54904,
+    "mitigated": 13678,
+    "unmitigatedAmount": 72652,
+    "absorbed": 4070,
+    "isAoE": true
+  },
+  {
+    "timestamp": 7550305,
+    "type": "damage",
+    "sourceID": 160,
+    "targetID": 5,
+    "abilityGameID": 1285998,
+    "fight": 6,
+    "hitType": 1,
+    "amount": 0,
+    "mitigated": 44184,
+    "unmitigatedAmount": 65387,
+    "absorbed": 21203,
+    "isAoE": false
+  },
+  {
+    "timestamp": 7550305,
+    "type": "damage",
+    "sourceID": 160,
+    "targetID": 3,
+    "abilityGameID": 1285998,
+    "fight": 6,
+    "hitType": 1,
+    "amount": 48297,
+    "mitigated": 18989,
+    "unmitigatedAmount": 72652,
+    "absorbed": 5366,
+    "isAoE": true
+  }
+]

@@ -664,9 +664,146 @@ A failed page must not become an empty period.
 
 ---
 
+# Evidence Capability vs Evidence Coverage
+
+These are different questions and must never be represented by one value.
+
+```text
+COVERAGE    did we obtain the evidence we requested for this range?
+CAPABILITY  can the selected WCL source supply this category at all?
+```
+
+COMPLETE / PARTIAL / ABSENT describe coverage of evidence Warcraft Logs is
+CAPABLE of supplying. They say nothing about whether a category is observable.
+
+Capability values:
+
+```text
+OBSERVABLE      verified that the source emits this category
+NOT_OBSERVABLE  verified that the source cannot
+UNVERIFIED      not established either way
+```
+
+Coverage is structurally unreachable unless capability is `OBSERVABLE`.
+
+Failure mode this prevents:
+
+A fully retrieved All stream containing zero targetability events resolves to
+`TARGETABILITY: COMPLETE`, and a category we have never established Warcraft
+Logs emits at all reads as fully observed and problem-free.
+
+## Capability Is Never Inferred At Runtime
+
+Capability comes from a committed registry whose entries cite evidence. It is
+never derived from a fight's contents. Observing zero events of a kind does not
+downgrade capability, and observing one does not upgrade it.
+
+## Capability Evidence Is Directional
+
+A sanitized capture may positively establish `OBSERVABLE`.
+
+Absence of a category from any number of captures establishes NOTHING — we may
+simply have captured fights in which it never occurred.
+
+`NOT_OBSERVABLE` requires authoritative NEGATIVE evidence that the source
+cannot provide the category, such as an exhaustive schema enumeration or
+documented non-support.
+
+Without that, capability remains `UNVERIFIED`.
+
+`NOT_OBSERVABLE` and `UNVERIFIED` must never contribute to an `ACTIONABLE`
+determination, and neither may produce a player-failure finding.
+
+Whether `NOT_OBSERVABLE` maps to `NO_AUTHORITY_AVAILABLE` or to `UNKNOWN` at
+the finding level is a Milestone 5 decision, made by the evaluator that
+consumes it.
+
+---
+
+# Retrieval Completeness vs Fight Finality
+
+Also different questions, also never one value.
+
+```text
+COVERAGE  did we obtain the evidence requested for this range?
+FINALITY  was the fight itself finished?
+```
+
+`ReportFight.inProgress` is recorded as `FightFinality`
+(`COMPLETED` / `IN_PROGRESS` / `UNKNOWN`, with the raw value preserved).
+
+An in-progress fight whose full requested range was retrieved is COMPLETE
+coverage AND IN_PROGRESS finality. Marking it PARTIAL would claim a retrieval
+deficiency that did not happen, and would hide one that did.
+
+What an unfinished fight permits is a later analysis decision.
+
+---
+
+# Coverage Intervals
+
+Covered ranges are half-open: `[fromReportTimeMs, toReportTimeMs)`.
+
+Half-open composes: `[a,b) ∪ [b,c) = [a,c)`, with no gap and no ambiguous
+boundary instant.
+
+Coverage is derived from the REQUEST and the CURSOR, never from event
+timestamps:
+
+```text
+non-terminal page k vouches for  [s_k, c_k)     cursor EXCLUSIVE
+terminal     page k vouches for  [s_k, end]     endTime INCLUSIVE
+```
+
+Both bounds are VERIFIED by live probe, not inferred:
+
+- `startTime` is inclusive. A cursor passed back as `startTime` returns the
+  event at exactly that timestamp.
+- `nextPageTimestamp` is the first timestamp NOT returned by the page, and
+  Warcraft Logs never splits a timestamp group across pages — a page may exceed
+  its own `limit` to finish a millisecond. So a non-terminal page delivered
+  everything below the cursor, and there is no overlap to deduplicate.
+- `events(endTime:)` returns events at exactly that instant. Measured with
+  `startTime: t-1`: `endTime = t-1` returned nothing, `endTime = t` returned
+  four events all at `t`, `endTime = t+1` returned those four plus five more.
+
+The request window is therefore a fully CLOSED interval, while a cursor bound is
+half-open. Since these genuinely differ, the interval type carries an explicit
+`upperBound: INCLUSIVE | EXCLUSIVE` rather than forcing one convention.
+
+That explicitness is the alternative to the three things that would otherwise be
+needed to keep a uniformly half-open model: adding a millisecond, inventing an
+epsilon, or assuming timestamps are integers. Warcraft Logs types timestamps as
+`Float`, so none of those is available, and all three would fabricate precision.
+
+An event at exactly the requested `endTime` is INSIDE the requested range.
+
+A page containing ZERO events still vouches for its full range. A quiet period
+is observed absence of events, not unobserved time. Deriving coverage from "the
+last retrieved event" silently converts the first into the second.
+
+---
+
 # Pagination Safety
 
 Pagination must be treated as correctness-critical.
+
+`nextPageTimestamp` is passed back VERBATIM as the next `startTime`. The schema
+documents it as exactly that, and a live probe confirmed the cursor lands on the
+first event of the next page, so any offset would skip events.
+
+Nothing is deduplicated and nothing is re-sorted. Multiple legitimate combat
+events can share timestamp, type, source, target and ability, so any dedup key
+would be a guess that deletes real evidence. A probe confirmed there is nothing
+to deduplicate anyway: consecutive pages do not overlap.
+
+`limit` is a SOFT cap. Pages were observed returning up to 5,030 events against
+a limit of 5,000, because Warcraft Logs completes a millisecond rather than
+splitting a timestamp group. Nothing may assume a page holds at most `limit`
+events.
+
+There is no page-level retry. The only retry in the system is the bounded
+cached-token 401 refresh inside the WCL transport.
 
 If an event stream requires multiple pages:
 
@@ -1029,42 +1166,47 @@ CombatFight
 Possible fields include:
 
 ```text
-report
-fight
-encounter
-difficulty
+provenance          normalization revision, report/fight ids, plan, streams
+breadth             declared ingestion scope and focus actors
+completeness        per-stream coverage + per-category capability/coverage
 
-startTime
-endTime
-duration
+report              code, revision, wall-clock bounds
+data                logVersion, gameVersion
+fight               id, name, encounter, difficulty, bounds, duration,
+                    finality, raw inProgress
 
-gameVersion
+actors              report actor id -> CombatActor (pets separate)
+abilities           game id -> CombatAbility
+focusActorId
+talentImportCode    factual string, unparsed
 
-actors
-player
+phases              from typed phaseTransitions + phase metadata
 
-talents
-heroTalents
-gear
-
-casts
-auras
-resources
-
-damage
-healing
-absorbs
-deaths
-
-targets
-targetability
-encounterEvents
-
-ingestionScope
-completeness
-
-evidence
+events              ONE ordered union, retrieval order, never re-sorted
+malformedObservations
+                    observations with no establishable envelope
 ```
+
+## One Ordered Event Sequence, Not Per-Category Arrays
+
+Earlier drafts sketched flat `casts` / `auras` / `damage` arrays. That is
+withdrawn: splitting into per-category arrays destroys the single chronological
+ordering the one-stream retrieval strategy exists to preserve, and ordering
+among events sharing a timestamp is not recoverable afterwards.
+
+Per-category views are derived indexes over the ordered sequence.
+
+## Events Always Have a Valid Envelope
+
+`events[]` contains only observations whose timestamp and type were
+established. An observation whose common envelope could NOT be established is
+not an event — it has no position in a chronological sequence — and lives in
+`malformedObservations`, carrying its retrieval position and which fields
+failed, and inventing no timestamp, type, source or target.
+
+A recognised type with a valid envelope but bad family-specific fields remains
+in `events[]` as a malformed-family variant, because its proven timestamp keeps
+the defect localisable.
 
 Do not treat this as a final schema yet.
 
@@ -2973,29 +3115,110 @@ conclusions.
 
 Implement retrieval:
 
-- Event retrieval
-- Pagination
-- Retrieval completeness
-- Ingestion-scope-driven breadth
-- Talents where available
-- Gear
-- Event-coverage validation
-- Raw event fixtures
+- Event retrieval as ONE chronological `dataType: All` stream per fight,
+  unfiltered by actor
+- Pagination with verbatim cursor continuation, no dedup, no re-sort, no retry
+- Retrieval completeness, per stream, projected onto per-category evidence
+- Evidence capability, as a committed registry separate from coverage
+- Ingestion-scope-driven breadth, as a DECLARATION rather than a fetch shape
+- Archive gate before any event request
+- Report-revision recheck after pagination
+- Raw event fixtures from sanitized live captures
 
 Normalize:
 
-- Actors
-- Casts
-- Auras
-- Resources
-- Damage
-- Healing
-- Absorbs
-- Deaths
-- Targets
-- Targetability
-- Encounter events
-- Completeness
+- Actors, including pets as separate actors with `petOwner` preserved
+- Abilities, keyed by game id
+- Fight header and finality
+- Encounter phases and intermissions
+- Event envelopes, with source/target direction preserved and branded
+- Completeness and provenance
+
+## Encounter Phases Come From Typed Fields
+
+`ReportFight.phaseTransitions` and `Report.phases` are typed, frozen GraphQL
+fields carrying report-relative timestamps and an explicit `isIntermission`
+flag. Phase and intermission evidence is taken from there, NOT parsed out of
+the non-frozen events JSON.
+
+`EventDataType` has no targetability, phase or encounter-event member, so no
+narrow data type can supply them — which is a further reason the event stream
+is `All` rather than a curated set of filters.
+
+## Actor Sentinels
+
+Warcraft Logs uses `-1` as a no-actor sentinel on BOTH `sourceID` and
+`targetID`. VERIFIED: a mid-fight capture carried 92 events with `sourceID: -1`
+and 117 with `targetID: -1`.
+
+Read naively it becomes "actor minus one" — a well-formed reference to an actor
+that does not exist and resolves against no master-data entry.
+
+Normalization therefore distinguishes three absences, none of which produces an
+actor:
+
+```text
+NOT_SUPPLIED        the key was absent
+NO_ACTOR_SENTINEL   the verified -1
+UNUSABLE_VALUE      present, but no value an actor could have
+```
+
+Only `-1` carries the sentinel's meaning. Other negative values are unobserved
+and are NOT generalised into it.
+
+---
+
+## Attached Resource Direction
+
+Under `includeResources`, Warcraft Logs attaches ONE resource snapshot per event,
+FLATTENED onto the event's top level, with `resourceActor` saying which side it
+describes: `1` = source, `2` = target.
+
+There is no `sourceResources` / `targetResources` object.
+
+VERIFIED: a `damage` event from a player to the boss carried `resourceActor: 2`
+and the boss's 859M health pool; a `cast` by the same player carried
+`resourceActor: 1` and that player's own health.
+
+Assuming a snapshot belongs to the source would therefore attribute the boss's
+health, position and resources to the player on every damage and heal event —
+the same class of failure as the historical aura-direction inversion.
+
+The snapshot block is read ONLY when `resourceActor` is present. That gating is
+load-bearing: `armor`, `absorb` and `avoidance` also appear as unrelated
+top-level keys on `combatantinfo` and on some aura events.
+
+Attached snapshots stay structurally separate from standalone `resourcechange`
+observations. When a side has no concrete actor, the snapshot is preserved with
+a null actor rather than being bound to the wrong one.
+
+---
+
+## Event Families Are Evidence-Gated
+
+A raw event type string recognised by name is a contract against an upstream
+Warcraft Logs explicitly documents as non-frozen.
+
+No raw event family or field becomes a supported normalization contract until
+current authoritative evidence — a typed schema field, or a sanitized live
+capture — verifies it. This applies to envelope-only handling too: decoding no
+family-specific fields lowers the size of the contract, not the evidence bar.
+
+An unverified family is not implemented. It stays `UNSUPPORTED_TYPE` at runtime
+and `UNVERIFIED` in the capability registry, and its mapping is deferred.
+
+Milestone 3 completes with whatever union the evidence supports. It does not
+require guessed support for every hoped-for family.
+
+## Milestone 3 Does Not Change Live Behavior
+
+Ingestion is built and deliberately not wired. `ENABLED_ANALYSIS_REQUIREMENTS`
+stays empty, so `/v1/analysis` continues to answer `ANALYSIS_NOT_IMPLEMENTED`
+after identity preflight and retrieves no combat events.
+
+`CombatIngestionPort` exists as a type with no production binding. Milestone 5
+injects it at the same time as the first analyzer declares its required inputs,
+so ingestion acquires a caller and a reason together.
 
 A failed page must never become an empty period.
 

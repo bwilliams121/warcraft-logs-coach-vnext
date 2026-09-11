@@ -15,7 +15,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:unit": "vitest run --project node",
-    "test:workers": "vitest run --project workers"
+    "test:workers": "vitest run --project workers",
+    "probe": "vitest run --config vitest.probe.config.ts"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.22.0",
