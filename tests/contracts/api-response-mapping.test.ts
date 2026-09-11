@@ -24,14 +24,37 @@ describe("api response mapping contract", () => {
     expect(statusForErrorCode("ANALYSIS_NOT_IMPLEMENTED")).toBe(501);
   });
 
+  it("no_warcraft_logs_failure_maps_to_a_success_status", () => {
+    // A retrieval or identity failure must never be readable as an analysis
+    // that found nothing to fix.
+    const upstream = API_ERROR_CODES.filter(
+      (code) => code.startsWith("UPSTREAM_") || code.startsWith("SOURCE_") || code.startsWith("REPORT_"),
+    );
+
+    expect(upstream.length).toBeGreaterThan(0);
+    for (const code of upstream) {
+      expect(statusForErrorCode(code), code).toBeGreaterThanOrEqual(400);
+    }
+  });
+
   it("maps_each_code_to_its_documented_status", () => {
     const expected: Record<ApiErrorCode, number> = {
       INVALID_REQUEST: 400,
       NOT_FOUND: 404,
+      REPORT_NOT_ACCESSIBLE: 404,
+      FIGHT_NOT_FOUND: 404,
+      SOURCE_NOT_FOUND: 404,
       METHOD_NOT_ALLOWED: 405,
+      SOURCE_NOT_A_PLAYER: 422,
+      SOURCE_NOT_IN_FIGHT: 422,
+      UPSTREAM_RATE_LIMITED: 429,
       INTERNAL_ERROR: 500,
       ANALYSIS_NOT_IMPLEMENTED: 501,
+      IDENTITY_UNRESOLVED: 502,
+      UPSTREAM_DATA_INVALID: 502,
       CONFIGURATION_ERROR: 503,
+      UPSTREAM_AUTH_FAILED: 503,
+      UPSTREAM_UNAVAILABLE: 503,
     };
 
     for (const code of API_ERROR_CODES) {

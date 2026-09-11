@@ -533,7 +533,8 @@ and separately:
 MCP analyzer
 ```
 
-MCP transport can be deferred.
+MCP transport is scheduled as Milestone 6, after the first complete vertical
+slice. It remains a thin interface over the same application service.
 
 The service boundary should exist before MCP is implemented.
 
@@ -593,6 +594,21 @@ They must never be exposed to:
 - WoW addon code
 - public API responses
 - logs, error messages, or committed fixtures
+
+Report visibility:
+
+- **Public** reports are accessible through the public client endpoint.
+- **Unlisted** reports are accessible through the public client endpoint when
+  the report code is supplied directly. The preflight query therefore requests
+  `report(code:, allowUnlisted: true)` explicitly. The code is itself the
+  capability: the analyzer never enumerates, publishes, or caches report codes,
+  so this grants nobody access they did not already hold by having the link.
+- **Private** reports require user-authorized OAuth and fail explicitly.
+
+Because a missing report and an inaccessible report are not reliably
+distinguishable from the public endpoint, both resolve to one honest outcome
+whose message states the ambiguity rather than asserting the report does not
+exist.
 
 Private-report support is **deferred**.
 
@@ -758,6 +774,27 @@ rather than treating missing actors as nonexistent.
 
 Adding a new analyzer must not silently under-fetch because an older scope
 value was hard-coded somewhere.
+
+## Identity Preflight Is Scope-Independent
+
+Ingestion scope governs how much COMBAT-EVENT breadth is retrieved.
+
+Factual identity preflight — does this report, fight and player exist, and does
+the player's identity resolve — is a prerequisite to selecting an analyzer at
+all. It cannot be derived from the set of enabled analyzers, because choosing
+an analyzer requires knowing the player's specialization first.
+
+Therefore:
+
+- Identity preflight runs before scope-derived retrieval and independently of
+  it.
+- Identity preflight retrieves report/fight/actor metadata only. It retrieves
+  no combat events.
+- Derived scope still governs every later event retrieval.
+
+This is not an exception to the no-blind-fetching rule. That rule exists to
+prevent retrieving full-raid EVENT data no analyzer asked for, which is a
+different and far larger fetch.
 
 ---
 
@@ -2897,35 +2934,53 @@ It does not freeze the specialization-evaluator interface.
 
 ---
 
-# Milestone 2 — WCL Ingestion and Completeness
+# Milestone 2 — WCL Connectivity and Identity Preflight
 
 Implement:
 
-- Authentication
-- Report retrieval
-- Fight retrieval
+- Warcraft Logs OAuth Client Credentials authentication
+- Public GraphQL transport with injected fetch
+- Report retrieval (existence and provenance)
+- Fight retrieval for the requested fight only
 - Actor retrieval
-- Player resolution
-- Pagination
-- Event retrieval
-- Completeness
-- Ingestion scope
-- Raw fixtures
+- Factual source-player identity resolution
+- Deliberate handling of every upstream failure mode
 
 Validate:
 
-- Identity
-- Class
-- Spec
-- Talents where available
-- Gear
-- Event coverage
+- Report exists and is accessible (public or unlisted)
+- Requested fight exists
+- Requested source actor exists
+- Source actor is a player rather than a pet or NPC
+- Source actor participated in the requested fight
+- Name, class and spec resolve together or not at all
 
-No gameplay conclusions yet.
+Public and unlisted reports are in scope. A directly supplied report code is
+itself the capability, and the analyzer never enumerates, publishes or caches
+report codes, so requesting unlisted reports explicitly widens nobody's access.
+
+Private reports require user-authorized OAuth and remain deferred.
+
+Spec is derived from the fight's own participation data, never guessed from
+class and never inferred from observed behavior.
+
+No combat events, no pagination, no completeness reconstruction, no gameplay
+conclusions.
 
 ---
 
-# Milestone 3 — Normalized Combat Model
+# Milestone 3 — Event Ingestion and Normalized Combat Model
+
+Implement retrieval:
+
+- Event retrieval
+- Pagination
+- Retrieval completeness
+- Ingestion-scope-driven breadth
+- Talents where available
+- Gear
+- Event-coverage validation
+- Raw event fixtures
 
 Normalize:
 
@@ -2941,6 +2996,8 @@ Normalize:
 - Targetability
 - Encounter events
 - Completeness
+
+A failed page must never become an empty period.
 
 No advanced coaching.
 
@@ -2991,7 +3048,158 @@ It must also protect against the two fail-open defaults:
 
 ---
 
-# Milestone 6 — Encounter and Comparison Context
+# Milestone 6 — MCP Interface
+
+Expose the existing analysis capability over MCP.
+
+MCP is a thin interface over the same application service. It must not contain
+an analyzer, a second analysis path, or gameplay rules of its own.
+
+Implement:
+
+- MCP server surface
+- Tool definitions mapping to existing application-service use cases
+- Identical structured results to REST
+- Transport-appropriate formatting only
+
+Required contract:
+
+The same analysis request through REST and through MCP must produce the same
+underlying structured analysis result. Transport formatting may differ.
+Gameplay truth may not.
+
+---
+
+# Milestone 7 — Player and Roster Progress Tracking
+
+Future architectural intent. Not implemented before its milestone.
+
+Analysis today is single-fight and stateless. M7 introduces history, so a
+player can be coached across pulls, nights and weeks, and so an officer can
+coach a roster rather than one character at a time.
+
+## Persisted history
+
+Persist STRUCTURED analysis outcomes. Generated prose is presentation only and
+is never the canonical historical record.
+
+Historical records should preserve:
+
+- Stable finding IDs
+- Player, spec and encounter context
+- Evidence and metrics
+- Actionable opportunity counts
+- Severity and confidence
+- Fight context
+- Game build, analyzer rule version and data provenance
+
+## Comparison rules
+
+Progress analysis must compare like with like.
+
+Prefer rates and opportunity-normalized measures over raw counts wherever fight
+duration or opportunity count differs. Ten missed opportunities in a nine-minute
+pull is not the same fact as ten in a three-minute pull.
+
+Longitudinal comparison across incompatible game builds or analyzer rule
+versions must either be avoided or explicitly disclosed.
+
+## Raid-night / roster analysis
+
+A user should eventually submit one Warcraft Logs report for an entire raid
+night and receive one aggregated raid-team report.
+
+Intended flow:
+
+```text
+Warcraft Logs report
+  -> discover fights in the report
+  -> discover participating players/specs
+  -> ingest each fight once at the appropriate FULL_RAID scope
+  -> normalize shared fight/encounter state once
+  -> run the relevant specialization evaluator per participating player
+  -> aggregate player findings across pulls
+  -> persist structured history
+  -> produce one raid-night / roster report
+```
+
+Design intent:
+
+- Do not re-fetch or rebuild the same fight independently for every player.
+- Shared fight/encounter state is constructed once and reused across player
+  evaluations.
+- Raid-night reporting works across kills and wipes.
+- Per-pull participation and spec changes are preserved.
+- One-off mistakes are distinguished from repeated pull-level, nightly and
+  multi-week issues.
+- Raid-wide analysis reuses the same analysis engine and evaluators as
+  single-player analysis. There is no second raid-analysis engine.
+
+Roster-level output should support coaching priorities, recurring issues,
+improvements, regressions, deaths and mechanics, and before/after coaching
+comparisons.
+
+## Eventual query surface
+
+History and MCP services should eventually answer questions such as:
+
+- Who improved most tonight?
+- Who has repeated the same issue over multiple raid nights?
+- Which coaching points from last week improved?
+- What are the highest-priority coaching conversations for the next raid?
+- What recurring coaching issues does this player have?
+- How has this player improved over time?
+
+A possible future product surface is:
+
+```text
+POST /v1/raid-night
+{ reportCode }
+```
+
+The endpoint is illustrative. Do not freeze the API contract yet.
+
+---
+
+# Raid Coaching Platform Capabilities
+
+Future product requirements. Roadmap intent only, not an M2–M5 obligation.
+
+Intended capabilities:
+
+- Assignment-aware analysis that distinguishes player execution failure from
+  plan/assignment effectiveness
+- Progression-aware finding prioritization
+- Pull-to-pull progression analysis
+- First-death and wipe-chain causal analysis
+- Officer coaching workflow with coached / follow-up / improved / unresolved
+  status
+- Stable raider identity across characters, alts and spec swaps
+- Patch-, build- and analyzer-rule-version-aware historical comparison
+- Automatic coaching-priority ranking based on impact, recurrence, confidence
+  and lack of improvement
+- Strengths and "don't change this" tracking
+- Roster-level mechanic heatmaps
+- Officer annotations and strategy-context notes
+- Discord-oriented raid and player summaries
+
+Architectural rules that govern all of the above:
+
+1. Structured findings, evidence, metrics, opportunities, context and version
+   provenance are the historical source of truth. Generated prose is
+   presentation only and is never the canonical historical record.
+2. Longitudinal comparison must not compare incompatible game builds or
+   analyzer rule versions without disclosure.
+3. Raid-wide analysis reuses the same analysis engine and shared fight state.
+   Do not create a second coaching engine.
+4. Assignment-aware analysis must distinguish "player failed the assigned plan"
+   from "player followed the plan but the plan may need review". A player who
+   executed their assignment correctly is not blamed because later analysis
+   suggests a better plan.
+
+---
+
+# Milestone 8 — Encounter and Comparison Context
 
 Expand:
 
@@ -3007,7 +3215,7 @@ Comparison behavior must not become rotational authority.
 
 ---
 
-# Milestone 7 — Regression Corpus
+# Milestone 9 — Regression Corpus
 
 Expand deterministic real-log fixtures.
 
@@ -3025,7 +3233,7 @@ Cover:
 
 ---
 
-# Milestone 8 — Second DPS/Tank Spec
+# Milestone 10 — Protection Paladin / Second-Spec Generalization
 
 Recommended:
 
@@ -3042,7 +3250,7 @@ If it does, revisit the abstraction.
 
 ---
 
-# Milestone 9 — Broader DPS/Tank Expansion
+# Milestone 11 — Broader DPS/Tank Expansion
 
 Add supported specs gradually.
 
@@ -3058,7 +3266,7 @@ Do not batch all specializations before shared architecture proves stable.
 
 ---
 
-# Milestone 10 — Healer Foundation
+# Milestone 12 — Healer Foundation
 
 Implement:
 
@@ -3073,7 +3281,7 @@ Start with evidence-grounded conclusions.
 
 ---
 
-# Milestone 11 — Augmentation Foundation
+# Milestone 13 — Augmentation Foundation
 
 Implement:
 
@@ -3087,7 +3295,7 @@ Return UNKNOWN for target-quality questions that require unavailable models.
 
 ---
 
-# Milestone 12 — Advanced Comparison and Diagnosis
+# Milestone 14 — Advanced Comparison and Root-Cause Diagnosis
 
 Improve:
 
@@ -3100,7 +3308,7 @@ Improve:
 
 ---
 
-# Milestone 13 — Reporting and Scoring Maturity
+# Milestone 15 — Reporting, Scoring and Product Maturity
 
 Improve:
 

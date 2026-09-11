@@ -35,6 +35,15 @@ export default defineConfig({
             // suite must run offline with no credentials — including in CI.
             remoteBindings: false,
             miniflare: {
+              // Hard offline guard. Every outbound request from workerd is
+              // answered locally, so a test that reaches Warcraft Logs by
+              // accident fails deterministically instead of making a real call
+              // — in CI, or on a laptop, with or without credentials.
+              //
+              // This is also what lets an integration test drive the REAL
+              // default export through its real WCL preflight and assert that
+              // an unreachable upstream fails closed.
+              outboundService: () => new Response("outbound network is blocked in tests", { status: 503 }),
               // Represents a correctly CONFIGURED deployment, so SELF-driven
               // tests reach real routing rather than stopping at a
               // configuration error.

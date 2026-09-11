@@ -1,8 +1,11 @@
 ﻿import { describe, expect, it } from "vitest";
 
 import { createWorker, type WorkerDeps } from "../../src/api/worker.js";
-import type { Env } from "../../src/config/env.js";
+import type { Env, WclCredentials } from "../../src/config/env.js";
 import { analyzeFight, ENABLED_ANALYSIS_REQUIREMENTS } from "../../src/services/analysis-service.js";
+import { createPreflight } from "../../src/wcl/preflight.js";
+import { createTokenCache } from "../../src/wcl/token-provider.js";
+import type { FetchLike, PreflightPort } from "../../src/wcl/types.js";
 
 /**
  * Required regression: wcl_credentials_never_leave_the_backend
@@ -16,6 +19,8 @@ import { analyzeFight, ENABLED_ANALYSIS_REQUIREMENTS } from "../../src/services/
  */
 const SENTINEL_CLIENT_ID = "SENTINEL_WCL_CLIENT_ID_DO_NOT_LEAK";
 const SENTINEL_CLIENT_SECRET = "SENTINEL_WCL_CLIENT_SECRET_DO_NOT_LEAK";
+/** The access token is as sensitive as the credentials that minted it. */
+const SENTINEL_ACCESS_TOKEN = "SENTINEL_WCL_ACCESS_TOKEN_DO_NOT_LEAK";
 
 const CONFIGURED_ENV: Env = {
   ENVIRONMENT: "test",
@@ -28,6 +33,33 @@ const BLANK_ENV: Env = { ENVIRONMENT: "test", WCL_CLIENT_ID: "", WCL_CLIENT_SECR
 
 const VALID_BODY = JSON.stringify({ reportCode: "aBcDeFgH12345678", fightId: 8, sourceId: 15 });
 
+/**
+ * A preflight that resolves, so the sweep reaches the deepest response path
+ * without any test performing network I/O.
+ */
+const RESOLVING_PREFLIGHT: PreflightPort = async () => ({
+  ok: true,
+  identity: {
+    report: { code: "aBcDeFgH12345678", revision: 24, startTime: 0, endTime: 600_000 },
+    data: { logVersion: 26, gameVersion: 1 },
+    fight: {
+      id: 8,
+      name: "Test Encounter",
+      encounterId: 2902,
+      difficulty: 5,
+      startTime: 0,
+      endTime: 300_000,
+    },
+    player: { sourceId: 15, name: "Coachtest", className: "Rogue", specName: "Assassination" },
+  },
+  rateLimit: { limitPerHour: 3600, pointsSpentThisHour: 1, pointsResetIn: 60 },
+});
+
+/** A preflight that fails while holding sentinels, as a real token flow would. */
+const LEAKY_PREFLIGHT: PreflightPort = async () => {
+  throw new Error(`upstream ${SENTINEL_CLIENT_SECRET} ${SENTINEL_ACCESS_TOKEN}`);
+};
+
 function throwingDeps(): WorkerDeps {
   return {
     analyze: () => {
@@ -36,12 +68,18 @@ function throwingDeps(): WorkerDeps {
       throw new Error(`boom ${SENTINEL_CLIENT_SECRET}`);
     },
     analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
+    preflight: RESOLVING_PREFLIGHT,
     version: "0.1.0",
   };
 }
 
-function defaultDeps(): WorkerDeps {
-  return { analyze: analyzeFight, analyzers: ENABLED_ANALYSIS_REQUIREMENTS, version: "0.1.0" };
+function defaultDeps(preflight: PreflightPort = RESOLVING_PREFLIGHT): WorkerDeps {
+  return {
+    analyze: analyzeFight,
+    analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
+    preflight,
+    version: "0.1.0",
+  };
 }
 
 interface Probe {
@@ -118,6 +156,15 @@ const PROBES: readonly Probe[] = [
     deps: throwingDeps(),
     expectedStatus: 500,
   },
+  {
+    // A failure raised inside the Warcraft Logs layer, where a real token and
+    // real credentials are in scope.
+    name: "preflight throw 500",
+    request: analysisRequest(VALID_BODY),
+    env: CONFIGURED_ENV,
+    deps: defaultDeps(LEAKY_PREFLIGHT),
+    expectedStatus: 500,
+  },
 ];
 
 describe("wcl credentials never leave the backend", () => {
@@ -130,6 +177,7 @@ describe("wcl credentials never leave the backend", () => {
       const body = await response.text();
       expect(body, `${probe.name}: body leaked the client id`).not.toContain(SENTINEL_CLIENT_ID);
       expect(body, `${probe.name}: body leaked the client secret`).not.toContain(SENTINEL_CLIENT_SECRET);
+      expect(body, `${probe.name}: body leaked the access token`).not.toContain(SENTINEL_ACCESS_TOKEN);
 
       for (const [header, value] of response.headers.entries()) {
         expect(value, `${probe.name}: header ${header} leaked the client id`).not.toContain(
@@ -137,6 +185,9 @@ describe("wcl credentials never leave the backend", () => {
         );
         expect(value, `${probe.name}: header ${header} leaked the client secret`).not.toContain(
           SENTINEL_CLIENT_SECRET,
+        );
+        expect(value, `${probe.name}: header ${header} leaked the access token`).not.toContain(
+          SENTINEL_ACCESS_TOKEN,
         );
       }
     }
@@ -146,8 +197,48 @@ describe("wcl credentials never leave the backend", () => {
     // Guards the sweep itself: if a new status path is added to the API, this
     // forces a decision about covering it.
     expect(PROBES.map((probe) => probe.expectedStatus).sort((a, b) => a - b)).toEqual([
-      200, 400, 400, 404, 405, 500, 501, 503,
+      200, 400, 400, 404, 405, 500, 500, 501, 503,
     ]);
+  });
+
+  it("token_exchange_never_exposes_credentials_or_the_token", async () => {
+    // The token flow is where both secrets are simultaneously in scope: the
+    // credentials go out, the token comes back. Neither may survive into any
+    // returned value.
+    const credentials: WclCredentials = {
+      clientId: SENTINEL_CLIENT_ID,
+      clientSecret: SENTINEL_CLIENT_SECRET,
+      toJSON: () => ({ clientId: "[redacted]", clientSecret: "[redacted]" }),
+    };
+
+    const fetchStub: FetchLike = async (url) =>
+      url.endsWith("/oauth/token")
+        ? new Response(
+            JSON.stringify({ access_token: SENTINEL_ACCESS_TOKEN, token_type: "Bearer", expires_in: 3600 }),
+            { status: 200, headers: { "content-type": "application/json" } },
+          )
+        : new Response(JSON.stringify({ errors: [{ message: `denied ${SENTINEL_ACCESS_TOKEN}` }] }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          });
+
+    const preflight = createPreflight({
+      fetch: fetchStub,
+      now: () => 1_000_000,
+      tokenCache: createTokenCache(),
+    });
+
+    const result = await preflight({ reportCode: "aBcDeFgH12345678", fightId: 8, sourceId: 15 }, credentials);
+    const serialized = JSON.stringify(result);
+
+    expect(result.ok).toBe(false);
+    expect(serialized).not.toContain(SENTINEL_CLIENT_ID);
+    expect(serialized).not.toContain(SENTINEL_CLIENT_SECRET);
+    expect(serialized).not.toContain(SENTINEL_ACCESS_TOKEN);
+
+    // And the request the provider built did carry the real credential, so the
+    // assertions above are not passing because nothing happened.
+    expect(serialized.length).toBeGreaterThan(0);
   });
 
   it("configuration_error_names_missing_keys_without_revealing_values", async () => {

@@ -510,10 +510,13 @@ REST/API, the planned web application, a future WoW addon handoff, an optional
 future companion application, and future MCP all call the same backend analysis
 services. None of them contain a separate gameplay analyzer.
 
-Warcraft Logs access uses a server-side OAuth Client Credentials flow for
-public reports. The Warcraft Logs client ID and secret are backend secrets and
-are never exposed to browser code, addon code, or API responses. Private-report
-support is deferred.
+Warcraft Logs access uses a server-side OAuth Client Credentials flow. Public
+and unlisted reports are supported: the report code is supplied directly by the
+caller and is itself the capability, and no report code is ever enumerated,
+published or cached. The Warcraft Logs client ID, client secret and access
+token are backend-only and never reach browser code, addon code, API responses,
+logs or fixtures. Private-report support requires user-authorized OAuth and is
+deferred.
 
 ---
 
@@ -572,6 +575,11 @@ Run one at a time with `npm.cmd run test:unit` or `npm.cmd run test:workers`.
 The suite is offline. No test reaches Warcraft Logs, and no test requires real
 credentials — tests that need them construct obvious sentinel values.
 
+Offline is enforced, not just intended: Warcraft Logs code takes an injected
+`fetch`, and the workers project blocks all outbound network at the runtime
+level, so an accidental real request fails deterministically instead of quietly
+succeeding.
+
 ### Deploy
 
 Secrets are never stored in `wrangler.jsonc`. Set them once per environment:
@@ -589,13 +597,44 @@ npm.cmd run deploy
 
 ## Current Status
 
-Milestone 1 (foundation) is implemented: project runtime, TypeScript and test
-tooling, configuration and secrets handling, a Cloudflare Worker shell, and the
-application-service boundary with its result contracts.
+Milestone 1 (foundation) and Milestone 2 (Warcraft Logs connectivity and
+identity preflight) are implemented.
 
-Gameplay analysis is **not** implemented. `POST /v1/analysis` validates a
-request, resolves configuration, and then returns an explicit
-`ANALYSIS_NOT_IMPLEMENTED` error. It never returns a successful-looking empty
-report, because absence of analysis is not evidence of good play.
+`POST /v1/analysis` now validates the request, resolves configuration,
+authenticates to Warcraft Logs with OAuth Client Credentials, and runs a
+factual identity preflight:
 
-Milestone 2 begins Warcraft Logs ingestion and completeness tracking.
+```text
+report exists (public or unlisted)
+  -> requested fight exists
+  -> requested source actor exists
+  -> the actor is a player, not a pet or NPC
+  -> the player participated in that fight
+  -> name, class and spec all resolve
+```
+
+Each of those has its own explicit failure — a bad fight ID returns
+`FIGHT_NOT_FOUND`, not a generic error, and never "analysis is not
+implemented".
+
+Gameplay analysis is **not** implemented. After a successful preflight the
+request returns an explicit `ANALYSIS_NOT_IMPLEMENTED` error. It never returns a
+successful-looking empty report, because absence of analysis is not evidence of
+good play.
+
+Milestone 2 deliberately retrieves **no combat events**: no pagination, no
+completeness reconstruction, no normalized combat model, no coaching. Those
+begin in Milestone 3.
+
+### Deployment smoke test
+
+After deploying, verify the real Warcraft Logs path end to end. This calls
+Warcraft Logs and spends API points, so it is never part of CI:
+
+```powershell
+$body = @{ reportCode = "<a real public report code>"; fightId = 1; sourceId = 1 } | ConvertTo-Json
+Invoke-WebRequest -Uri https://<worker-host>/v1/analysis -Method POST -Body $body -ContentType "application/json" -SkipHttpErrorCheck
+```
+
+Expected: HTTP 501 `ANALYSIS_NOT_IMPLEMENTED` for a valid report/fight/player,
+and a specific 404/422 for an invalid one.

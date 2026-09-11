@@ -38,12 +38,44 @@ export const ANALYSIS_RESULT_STATES = [
   "IDENTITY_CONFLICT",
 ] as const satisfies readonly AnalysisResultState[];
 
+/**
+ * Why a request did not produce an analysis.
+ *
+ * The `REPORT_*`/`FIGHT_*`/`SOURCE_*`/`IDENTITY_*` codes are factual preflight
+ * outcomes: the request named something that does not exist, or Warcraft Logs
+ * could not supply a trustworthy identity for it. The `UPSTREAM_*` codes are
+ * retrieval failures. Neither family is a gameplay judgement, and none of them
+ * may be returned as a successful-looking analysis.
+ */
 export type ServiceErrorCode =
-  "INVALID_REQUEST" | "CONFIGURATION_ERROR" | "ANALYSIS_NOT_IMPLEMENTED" | "INTERNAL_ERROR";
+  | "INVALID_REQUEST"
+  | "CONFIGURATION_ERROR"
+  | "REPORT_NOT_ACCESSIBLE"
+  | "FIGHT_NOT_FOUND"
+  | "SOURCE_NOT_FOUND"
+  | "SOURCE_NOT_A_PLAYER"
+  | "SOURCE_NOT_IN_FIGHT"
+  | "IDENTITY_UNRESOLVED"
+  | "UPSTREAM_DATA_INVALID"
+  | "UPSTREAM_AUTH_FAILED"
+  | "UPSTREAM_RATE_LIMITED"
+  | "UPSTREAM_UNAVAILABLE"
+  | "ANALYSIS_NOT_IMPLEMENTED"
+  | "INTERNAL_ERROR";
 
 export const SERVICE_ERROR_CODES = [
   "INVALID_REQUEST",
   "CONFIGURATION_ERROR",
+  "REPORT_NOT_ACCESSIBLE",
+  "FIGHT_NOT_FOUND",
+  "SOURCE_NOT_FOUND",
+  "SOURCE_NOT_A_PLAYER",
+  "SOURCE_NOT_IN_FIGHT",
+  "IDENTITY_UNRESOLVED",
+  "UPSTREAM_DATA_INVALID",
+  "UPSTREAM_AUTH_FAILED",
+  "UPSTREAM_RATE_LIMITED",
+  "UPSTREAM_UNAVAILABLE",
   "ANALYSIS_NOT_IMPLEMENTED",
   "INTERNAL_ERROR",
 ] as const satisfies readonly ServiceErrorCode[];

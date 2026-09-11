@@ -19,6 +19,16 @@ export type ApiErrorCode = ServiceErrorCode | "NOT_FOUND" | "METHOD_NOT_ALLOWED"
 export const API_ERROR_CODES = [
   "INVALID_REQUEST",
   "CONFIGURATION_ERROR",
+  "REPORT_NOT_ACCESSIBLE",
+  "FIGHT_NOT_FOUND",
+  "SOURCE_NOT_FOUND",
+  "SOURCE_NOT_A_PLAYER",
+  "SOURCE_NOT_IN_FIGHT",
+  "IDENTITY_UNRESOLVED",
+  "UPSTREAM_DATA_INVALID",
+  "UPSTREAM_AUTH_FAILED",
+  "UPSTREAM_RATE_LIMITED",
+  "UPSTREAM_UNAVAILABLE",
   "ANALYSIS_NOT_IMPLEMENTED",
   "INTERNAL_ERROR",
   "NOT_FOUND",
@@ -34,14 +44,31 @@ export function statusForErrorCode(code: ApiErrorCode): number {
     case "INVALID_REQUEST":
       return 400;
     case "NOT_FOUND":
+    // The requested report, fight or actor does not exist as specified.
+    case "REPORT_NOT_ACCESSIBLE":
+    case "FIGHT_NOT_FOUND":
+    case "SOURCE_NOT_FOUND":
       return 404;
     case "METHOD_NOT_ALLOWED":
       return 405;
+    // The identifiers exist but do not describe an analyzable player in that
+    // fight. Well-formed, understood, and not processable.
+    case "SOURCE_NOT_A_PLAYER":
+    case "SOURCE_NOT_IN_FIGHT":
+      return 422;
+    case "UPSTREAM_RATE_LIMITED":
+      return 429;
     case "INTERNAL_ERROR":
       return 500;
     case "ANALYSIS_NOT_IMPLEMENTED":
       return 501;
+    // Warcraft Logs answered, but with data we cannot trust or use.
+    case "IDENTITY_UNRESOLVED":
+    case "UPSTREAM_DATA_INVALID":
+      return 502;
     case "CONFIGURATION_ERROR":
+    case "UPSTREAM_AUTH_FAILED":
+    case "UPSTREAM_UNAVAILABLE":
       return 503;
     default:
       return assertNever(code);

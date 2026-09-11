@@ -30,6 +30,16 @@ describe("worker shell", () => {
     }
   });
 
+  it("outbound_network_is_blocked_in_tests", async () => {
+    // Makes the offline guarantee explicit instead of implied. Every outbound
+    // request from this runtime is answered locally, so no test can reach
+    // Warcraft Logs — in CI, or on a developer machine holding real credentials.
+    const response = await fetch("https://www.warcraftlogs.com/api/v2/client", { method: "POST" });
+
+    expect(response.status).toBe(503);
+    expect(await response.text()).toContain("outbound network is blocked");
+  });
+
   it("unknown_route_returns_structured_not_found", async () => {
     const response = await SELF.fetch("https://coach.test/nope");
     const body = await response.json();

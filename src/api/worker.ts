@@ -15,6 +15,8 @@ import {
 } from "../services/analysis-service.js";
 import type { AnalysisServiceResult } from "../services/result.js";
 import type { AnalyzerRequirement } from "../services/ingestion-scope.js";
+import { wclPreflight } from "../wcl/preflight.js";
+import type { PreflightPort } from "../wcl/types.js";
 import { apiErrorResponse, jsonResponse, serviceResultResponse } from "./responses.js";
 
 /** Kept in step with package.json manually; there is no JSON import at the edge. */
@@ -24,8 +26,14 @@ const HEALTH_PATH = "/health";
 const ANALYSIS_PATH = "/v1/analysis";
 
 export interface WorkerDeps {
-  readonly analyze: (input: unknown, deps: AnalysisServiceDeps) => AnalysisServiceResult;
+  readonly analyze: (input: unknown, deps: AnalysisServiceDeps) => Promise<AnalysisServiceResult>;
   readonly analyzers: readonly AnalyzerRequirement[];
+  /**
+   * Passed through to the service untouched. The API layer never calls it: it
+   * holds the port only so tests can substitute one, which is also what proves
+   * the route issues no Warcraft Logs queries of its own.
+   */
+  readonly preflight: PreflightPort;
   readonly version: string;
 }
 
@@ -45,6 +53,7 @@ export interface WorkerHandler {
 const DEFAULT_DEPS: WorkerDeps = {
   analyze: analyzeFight,
   analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
+  preflight: wclPreflight,
   version: SERVICE_VERSION,
 };
 
@@ -62,7 +71,11 @@ async function handleAnalysis(request: Request, env: Env, deps: WorkerDeps): Pro
     return apiErrorResponse("INVALID_REQUEST", "Request body must be valid JSON.");
   }
 
-  const result = deps.analyze(body, { env, analyzers: deps.analyzers });
+  const result = await deps.analyze(body, {
+    env,
+    analyzers: deps.analyzers,
+    preflight: deps.preflight,
+  });
   return serviceResultResponse(result);
 }
 
