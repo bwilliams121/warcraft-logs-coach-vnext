@@ -3,12 +3,55 @@
 ## Project Purpose
 
 Warcraft Logs Coach vNext analyzes World of Warcraft combat logs and produces
-accurate, evidence-based coaching.
+accurate, evidence-based, actionable coaching.
 
 The analyzer must prioritize correctness over producing an answer.
 
-This project is a clean rebuild. Do not copy old implementation patterns into
-the new architecture unless they are explicitly reviewed and approved.
+This project is a clean rebuild.
+
+The old Warcraft Logs Coach may be used for:
+
+- Regression discovery
+- Historical behavior comparison
+- Test-case discovery
+- Public API contract reference
+- Known failure-mode discovery
+
+Do not copy the old architecture into vNext merely because it already exists.
+
+---
+
+# Document Authority
+
+The project documents have different purposes.
+
+## product-intent.md
+
+`agent/product-intent.md` describes what the product owner wants the product to
+do.
+
+Product intent outranks architecture.
+
+If architecture or implementation conflicts with product intent, stop and
+resolve the conflict rather than silently following architecture.
+
+## CLAUDE.md
+
+This file describes development principles and constraints for agents working
+on the project.
+
+## architecture.md
+
+`agent/architecture.md` describes the proposed software architecture.
+
+Architecture may evolve when implementation evidence shows an abstraction is
+wrong.
+
+## testing.md
+
+`agent/testing.md` describes how correctness must be demonstrated.
+
+Tests must protect product intent rather than merely protect an implementation.
 
 ---
 
@@ -27,1285 +70,1865 @@ The analyzer must distinguish between:
 
 1. What ideally should have happened.
 2. What actually happened.
-3. What was realistically possible in the encounter.
+3. What was realistically possible.
 4. Whether the difference was actually a player mistake.
+5. Whether there is enough evidence to coach the player confidently.
 
 ---
 
-# Analysis Authority Hierarchy
+# Core Architectural Principle
 
-Different sources answer different questions.
+Warcraft Logs Coach is:
 
-Do not treat any single source as authoritative for every aspect of analysis.
+**a shared analysis platform with specialization-owned gameplay evaluation.**
+
+It is NOT:
+
+- One universal gameplay evaluator with 40 specs represented only as data.
+- 40 completely independent analyzers that reimplement the same infrastructure.
+
+Shared infrastructure should provide reusable primitives.
+
+Examples:
+
+- Warcraft Logs ingestion
+- Event normalization
+- Evidence
+- Completeness
+- Actor identity
+- Resource primitives
+- Aura primitives
+- Cooldown primitives
+- APL parsing/evaluation primitives
+- Encounter/environment state
+- Actionability primitives
+- Finding schemas
+- Reporting infrastructure
+
+Each specialization owns interpretation of specialization-specific gameplay.
+
+A specialization may contain both:
+
+- Runtime data
+- Evaluator code
+
+Do not force specialization-specific judgment into a generic engine merely to
+avoid specialization code.
+
+Do not duplicate shared infrastructure inside each specialization.
 
 ---
 
-## 1. SimulationCraft APL is the rotational authority for supported DPS and tank analysis
+# Specialization-Owned Evaluation
 
-For supported DPS and tank rotational decisions, the applicable SimulationCraft
-Action Priority List (APL) is the primary authority for determining what action
-should ideally be used.
-
-The analyzer should interpret the APL against reconstructed combat state rather
-than inventing its own rotational priority.
+The specialization evaluator owns gameplay interpretation for that
+specialization.
 
 Examples include:
 
-- Which ability had the highest priority at a decision point
-- Whether a resource spender should have been used
-- Whether a generator should have been used
-- Whether a cooldown should have been activated
-- Whether a proc changed the correct action
-- Whether a buff changed the correct action
-- Whether delaying an ability was rotationally justified
-- Whether resource state affected the correct decision
+- Meaning of specialization resources
+- Spec-specific APL state
+- Ability relationships
+- Buff/debuff interactions
+- Cooldown setup
+- Talent interactions
+- Hero talent interactions
+- Spec-specific actionability
+- Spec-specific rotational conclusions
 
-Do not replace SimulationCraft APL logic with observed popularity from Warcraft
-Logs.
+Shared code may provide primitives such as:
 
-High-performing players are not automatically playing the rotation perfectly.
+- buff uptime calculation
+- cooldown drift calculation
+- resource interval reconstruction
+- action timing
+- evidence attachment
 
-Top-log behavior may provide useful context, but it is not the source of
-rotational truth.
+but the specialization evaluator decides how those primitives apply to the spec.
 
-This rule does not automatically apply to healer analysis.
+Avoid architecture such as:
 
-Support specializations may require additional ally and raid state beyond the
-player's personal APL state.
+    if spec === "assassination"
+    if spec === "protection_paladin"
+    if spec === "blood_death_knight"
 
-Each specialization must explicitly declare which analysis authorities apply.
+inside a supposedly generic gameplay evaluator.
+
+If specialization-specific meaning is required, put it in that specialization's
+evaluator.
 
 ---
 
-## 2. Warcraft Logs is authoritative for observed combat reality
+# Analysis Authority
 
-Warcraft Logs determines what actually happened in the fight.
+Different sources answer different questions.
 
-If Warcraft Logs provides an observed event, treat that event as evidence.
+Do not treat one source as authoritative for every category of analysis.
+
+Authority may depend on:
+
+- Specialization
+- Role
+- Decision category
+- Fight
+- Available inputs
+
+Authority must be resolved for the specific decision being evaluated.
+
+---
+
+# Decision Categories
+
+Analysis authority should be resolvable by decision category.
+
+Important categories include:
+
+- ROTATION
+- RESOURCE
+- COOLDOWN
+- DEFENSIVE
+- ASSIGNMENT
+- HEALING_DECISION
+- SUPPORT_TARGETING
+- SUPPORT_TIMING
+- PREPARATION
+
+Additional categories may be added when justified.
+
+Actionability is deliberately NOT a decision-authority category.
+
+Actionability is a modifier that evaluates whether an authority-backed decision
+was actually possible in the encounter.
+
+It is not itself a specialization gameplay authority.
+
+Authority must not be represented only as one static value for an entire
+specialization when different decisions require different authorities.
+
+Every evaluative finding must record an explicit authority.
+
+For preparation findings:
+
+- Observed usage facts record authority/source as `WCL_OBSERVED_FACT`.
+- Preparation rules derived from game metadata record `RUNTIME_GAME_DATA`.
+
+If no trustworthy authority exists for a requested decision:
+
+    NO_AUTHORITY_AVAILABLE
+
+is a valid result.
+
+`NO_AUTHORITY_AVAILABLE` must not produce a player-failure finding.
+
+---
+
+# UNKNOWN vs NO_AUTHORITY_AVAILABLE
+
+These two states are semantically distinct.
+
+They are never interchangeable.
+
+Use:
+
+    NO_AUTHORITY_AVAILABLE
+
+when no trustworthy authority or model exists for that decision category.
+
+Examples:
+
+- No raid cooldown plan was supplied for an ASSIGNMENT decision.
+- No approved per-cast healer model exists for a HEALING_DECISION.
+- No validated recipient-quality model exists for SUPPORT_TARGETING.
+
+Use:
+
+    UNKNOWN
+
+when a valid authority exists, but the required combat state, evidence,
+completeness, or supported expression is insufficient to evaluate it.
+
+Examples:
+
+- The APL is supported, but reconstructed Energy cannot decide the condition.
+- Talent data is ABSENT, so a talent condition cannot be resolved.
+- Required ally state was not retrieved within the ingestion scope.
+
+Stated simply:
+
+    NO_AUTHORITY_AVAILABLE = we have no trustworthy standard for this question.
+
+    UNKNOWN = we have a standard, but not enough evidence to apply it.
+
+Do not write documentation, code, or tests that offer these as alternatives for
+the same situation.
+
+Neither state may produce a player-failure finding.
+
+---
+
+# SimulationCraft Authority
+
+For supported DPS and tank rotational decisions, the applicable SimulationCraft
+APL is the primary rotational authority when:
+
+- The relevant APL behavior is supported by the analyzer.
+- Required combat state can be reconstructed sufficiently.
+- The APL condition does not depend on unsupported or unknowable state.
+- The decision belongs to a category SimulationCraft can validly model.
+
+SimulationCraft should answer questions such as:
+
+- What action has the highest rotational priority?
+- Should a spender or generator be used?
+- Should a cooldown be used rotationally?
+- How do buffs, debuffs, talents, resources, and cooldowns affect priority?
+
+Do not replace SimulationCraft priority with Warcraft Logs popularity.
+
+A high-performing player is not automatically playing the rotation perfectly.
+
+---
+
+# SimulationCraft Does Not Define Encounter Reality
+
+SimulationCraft describes theoretical gameplay decisions.
+
+It does not prove that an action was physically or reasonably possible in the
+actual encounter.
+
+Warcraft Logs and encounter state determine actual environmental reality.
+
+Example:
+
+SimulationCraft says:
+
+    Cast Deathmark.
+
+Warcraft Logs shows:
+
+    Boss is untargetable because the encounter entered an intermission.
+
+Result:
+
+    The theoretical recommendation is not actionable.
+
+Do not coach the player as though they were fighting an always-available target
+dummy.
+
+---
+
+# Unsupported SimulationCraft State
+
+SimulationCraft APL syntax and state requirements must fail closed.
+
+If an expression is unsupported:
+
+    UNSUPPORTED
+
+must not silently become:
+
+    false
+
+or:
+
+    true
+
+If unsupported state materially controls the APL decision:
+
+    decision = UNKNOWN
+
+or another explicit unsupported result.
+
+Specialization evaluators may register or provide resolvers for
+specialization-specific APL concepts.
+
+Do not add specialization-specific hacks to a generic APL parser when a
+declared specialization resolver is the correct abstraction.
+
+---
+
+# SimulationCraft Priority Short-Circuit
+
+A SimulationCraft APL is an ordered priority list.
+
+Uncertainty on a higher-priority line therefore contaminates every lower-priority
+selection.
+
+If a higher-priority action's condition evaluates:
+
+    UNKNOWN
+
+or:
+
+    UNSUPPORTED
+
+and that uncertainty can affect which action should be selected, the evaluator
+must NOT fall through and confidently select a lower-priority action.
+
+Return:
+
+    decision = UNKNOWN
+
+and preserve the blocking APL line/condition as evidence.
+
+A lower-priority action may be selected only when the evaluator can prove that
+the same resulting action would be selected under every possible resolution of
+the unknown condition.
+
+Example of the failure this prevents:
+
+    Line 1: envenom,if=energy>=50&combo_points>=5
+    Energy interval = [41, 58]
+    Condition = UNKNOWN
+
+    Line 2: mutilate
+
+Incorrect result:
+
+    expected = Mutilate
+    actual   = Envenom
+    status   = INCORRECT
+
+Correct result:
+
+    decision = UNKNOWN
+    blockedBy = line 1 energy condition
+
+An UNKNOWN must never be laundered into a confident player-failure finding by
+falling through a priority list.
+
+---
+
+# Predictive and Hindsight State
+
+SimulationCraft expressions may depend on information the player could not know
+with certainty at the moment of play.
+
+Examples include:
+
+- fight_remains
+- target.time_to_die
+
+Do not use actual future fight results to blame the player for an earlier
+decision.
+
+APL state should be classified using the common classification:
+
+- OBSERVABLE
+- DERIVABLE
+- PREDICTIVE
+- SIM_ONLY
+- UNSUPPORTED
+
+For the initial implementation, if a PREDICTIVE value materially determines
+whether a player should be blamed for an action and no player-knowable estimate
+exists:
+
+    return UNKNOWN
+
+Do not silently substitute the actual future fight end.
+
+Historical outcome may be reported retrospectively, but it must not be treated
+as knowledge the player possessed earlier in the fight.
+
+---
+
+# Warcraft Logs Authority
+
+Warcraft Logs is authoritative for observed combat reality.
 
 Examples include:
 
 - Player identity
-- Player source ID
-- Class
-- Spec
+- Actors
+- Source IDs
+- Encounter
+- Difficulty
+- Casts
+- Buffs
+- Debuffs
+- Resources
+- Damage
+- Healing
+- Absorbs
+- Deaths
+- Targets
+- Timing
+- Targetability
+- Encounter phases where exposed
+- Combat events
+
+Observed Warcraft Logs evidence should not be rewritten because a model expected
+something else.
+
+If Warcraft Logs and another source disagree about what actually happened,
+Warcraft Logs is authoritative for the observed event.
+
+---
+
+# Observed State vs Derived State
+
+Observed state comes directly from evidence.
+
+Derived state is calculated from observed evidence plus authoritative runtime
+rules.
+
+Derived state is allowed.
+
+Fabricated state is not.
+
+Example of valid derived state:
+
+- Known Energy anchor
+- Known authoritative Energy regeneration model
+- Known modifiers
+- Complete intervening event coverage
+
+The analyzer may mathematically derive later Energy state.
+
+Example of invalid fabricated state:
+
+- Ability X normally generates resource.
+- The required event/evidence is missing.
+- Therefore assume the resource was generated.
+
+Do not make that assumption.
+
+---
+
+# Resource Reconstruction Models
+
+Resources may use different reconstruction models.
+
+At minimum support the distinction between:
+
+- DISCRETE_EVENT_OBSERVED
+- CONTINUOUS_REGEN
+
+Examples:
+
+Combo Points and Holy Power commonly rely heavily on discrete observed changes.
+
+Energy, Focus, and Mana may require continuous regeneration modeling.
+
+For continuous resources:
+
+1. Use exact reconstruction when every required input is known.
+2. Use a bounded interval when only safe bounds can be proven.
+3. Use UNKNOWN when reliable bounds cannot be established.
+
+Example:
+
+Energy interval:
+
+    [62, 71]
+
+APL condition:
+
+    energy >= 50
+
+Result:
+
+    TRUE
+
+Energy interval:
+
+    [41, 58]
+
+APL condition:
+
+    energy >= 50
+
+Result:
+
+    UNKNOWN
+
+Do not fabricate a single point estimate when only an interval is defensible.
+
+---
+
+# Resource Waste
+
+Being at resource cap is not automatically resource waste.
+
+Do not equate:
+
+    resourceAtCap == resourceWasted
+
+Example:
+
+A Rogue is at 7 / 7 Combo Points and immediately spends them.
+
+That does not prove resource was wasted.
+
+Waste requires evidence that additional resource generation occurred when
+insufficient capacity existed, or another specialization-specific rule
+establishes actual waste.
+
+Resource evaluation must be owned by the applicable specialization evaluator.
+
+---
+
+# Completeness Is First-Class State
+
+Missing data must not silently become negative evidence.
+
+The normalized combat model must preserve completeness information.
+
+Relevant categories may include:
+
+- Actor metadata
+- Identity
 - Talents
 - Gear
 - Casts
 - Buffs
 - Debuffs
 - Resources
-- Targets
 - Damage
 - Healing
+- Absorbs
 - Deaths
-- Encounter timing
-- Phase changes
-- Target availability
-- Downtime
-- Combat events
-
-Do not invent:
-
-- Casts
-- Buffs
-- Debuffs
-- Resource gains
-- Resource spending
-- Targets
-- Deaths
-- Cooldowns
 - Encounter events
-- Player state
+- Comparison data
+- Ally/raid state
 
-that are not supported by available evidence.
+Completeness should support states such as:
 
----
+- COMPLETE
+- PARTIAL
+- ABSENT
 
-## 3. Top Warcraft Logs provide encounter context and validation
-
-Comparable successful Warcraft Logs parses may be used to establish
-encounter-specific behavior.
-
-Examples include:
-
-- Normal downtime during an intermission
-- Boss untargetable periods
-- Target transitions
-- Typical pauses in casting
-- Mechanic-driven movement
-- Encounter-specific cooldown holds
-- Strategy-dependent timing
-- Common behavior at a particular fight timestamp
-
-Top logs help answer:
-
-"Is this unusual player behavior, or is this normal behavior caused by the
-encounter?"
-
-Top logs must not automatically answer:
-
-"What was the rotationally optimal button?"
-
-SimulationCraft remains the primary rotational authority where applicable.
-
-Do not use rank alone as evidence that a player's decisions were correct.
-
----
-
-# Role-Specific Analysis
-
-DPS, tanks, healers, and support specializations must not be forced through
-identical performance rules.
-
-Each specialization should explicitly declare its analysis model.
-
----
-
-# DPS Analysis
-
-For supported DPS specializations:
-
-- SimulationCraft APL is the primary rotational authority.
-- Warcraft Logs supplies observed state and encounter reality.
-- Class/spec runtime data supplies game-specific semantics.
-- Encounter analysis determines actionability.
-- Comparable successful logs provide contextual validation.
-
-Raw DPS or parse rank must not replace decision-level rotational analysis.
-
----
-
-# Tank Analysis
-
-For supported tank specializations:
-
-SimulationCraft APL may be used for rotational and offensive decision analysis.
-
-Tank analysis must additionally consider:
-
-- Survival
-- Defensive usage
-- Active mitigation
-- Tank mechanics
-- Tank swaps
-- Incoming damage
-- Resource preservation where relevant
-- Encounter-specific defensive timing
-
-A tank should not be coached solely on maximizing DPS.
-
-Defensive availability does not automatically mean a defensive should have
-been used.
-
----
-
-# Healer Analysis
-
-Healer performance must not be evaluated as though healing were a traditional
-DPS rotation.
-
-Maximizing raw HPS is not automatically equivalent to optimal healing.
-
-Healer analysis must account for:
-
-- Available incoming damage
-- Raid damage timing
-- Tank damage timing
-- Assigned healing cooldowns
-- Health deficits
-- Overhealing
-- Triage decisions
-- Emergency healing
-- Absorbs
-- External defensives
-- Dispels
-- Utility
-- Movement
-- Encounter mechanics
-- Player deaths
-- Other healers' cooldowns
-- Raid strategy
-
-A healer should not be penalized for failing to produce healing when there was
-nothing useful to heal.
-
-A high-HPS cast is not automatically correct merely because it produced large
-numbers.
-
----
-
-## Healer Authority Hierarchy
-
-Different categories of healer decisions may have different authorities.
-
-### Assigned Raid Cooldowns
-
-When an explicit raid cooldown plan exists, that plan is authoritative for the
-player's assignment.
-
-Examples may include:
-
-- Wowutils cooldown plans
-- Officer-defined cooldown assignments
-- Explicit raid healing plans
-
-Evaluate whether the healer executed the assigned plan correctly.
-
-Do not blame the healer for following an assigned plan correctly even if later
-analysis suggests the plan itself should change.
-
-Distinguish:
-
-"Player failed the assignment"
-
-from:
-
-"The assignment may need to move."
-
-### Non-Assigned Healing Decisions
-
-Use the healer-specific analysis model explicitly configured for that
-specialization.
-
-Possible approved sources may include:
-
-- Questionably Epic / QE Live
-- Validated healer simulation models
-- Spec-specific runtime rules
-- Other explicitly approved healing models
-
-Do not silently use a DPS-style SimulationCraft APL as the healer authority
-unless the specialization explicitly declares that model appropriate.
-
-Warcraft Logs remains authoritative for observed execution.
-
-Comparable successful healer logs provide context, not absolute healing truth.
-
----
-
-## Healer Damage-Event Model
-
-Healer analysis should be organized around meaningful incoming-damage events
-where practical.
-
-The analyzer should eventually be able to reconstruct:
-
-- Damage-event start
-- Damage-event peak
-- Damage-event duration
-- Players affected
-- Health deficits
-- Healing received
-- Absorbs
-- Defensive mitigation
-- Healing cooldown coverage
-- Associated player deaths
-
-This should support questions such as:
-
-- Was healing actually required?
-- Was the assigned cooldown active?
-- Was the cooldown mistimed?
-- Was useful healing available before a death?
-- Was another healer already covering the event?
-- Was the death actually caused by insufficient healing?
-
----
-
-## Healer Comparison Logs
-
-Raw HPS ranking must not be treated as the healer equivalent of rotational
-correctness.
-
-Healing output depends heavily on:
-
-- Raid damage taken
-- Number of healers
-- Other healers' performance
-- Defensive usage
-- Strategy
-- Kill time
-- Deaths
-- Composition
-- Assignment differences
-
-Prefer event-by-event behavior and cooldown timing over simple HPS comparison.
-
----
-
-# Support Specialization Analysis
-
-Support specializations require analysis that accounts for value created
-through other players.
-
-Do not evaluate support performance solely by personal DPS or healing.
-
-Augmentation Evoker is the primary specialization currently requiring this
-analysis model.
-
----
-
-# Augmentation Evoker
-
-Augmentation analysis must distinguish between:
-
-- Personal rotation
-- Buff maintenance
-- Buff targeting
-- Buff timing
-- Supported-player state
-- Raid/group cooldown alignment
-- Value created through supported players
-- Encounter-specific timing
-
-Raw personal DPS is not a sufficient measure of Augmentation performance.
-
----
-
-## Augmentation Rotational Authority
-
-Where SimulationCraft supports the required Augmentation decision, its APL may
-be used as rotational authority.
-
-However, Augmentation evaluation must receive sufficient ally and buff state.
-
-Do not evaluate an Augmentation decision using only the Evoker's personal state
-when the correct decision depends on another player.
-
-Relevant state may include:
-
-- Active allies
-- Valid buff targets
-- Existing support buffs
-- Buff durations
-- Ally cooldown windows
-- Ally deaths
-- Encounter downtime
-- Target availability
-- Group composition
-
-If required ally state cannot be reconstructed reliably, return UNKNOWN.
-
----
-
-## Augmentation Buff Analysis
-
-Augmentation analysis may evaluate concepts such as:
-
-- Ebon Might usage and uptime
-- Prescience usage
-- Prescience target selection
-- Breath of Eons timing
-- Support-window alignment
-- Buff overlap
-- Buff coverage
-- Whether supported players were alive
-- Whether supported players could benefit
-- Encounter-driven cooldown holds
-
-Specific spell IDs, durations, targeting mechanics, and rotational rules belong
-in runtime spec data.
-
-Do not put required Augmentation game knowledge only in this document.
-
----
-
-## Augmentation Target Selection
-
-Buff target selection is a first-class analysis problem.
-
-Do not assume:
-
-- Any valid ally is equally valuable
-- The highest-DPS player is always the best target
-- A target selected by a rank-1 Augmentation player is universally correct
-
-Target quality may depend on:
-
-- Recipient specialization
-- Recipient cooldown state
-- Recipient burst timing
-- Encounter phase
-- Player survival
-- Group composition
-- Existing buffs
-- Number of available targets
-
-When target quality cannot be established reliably, report the observed choice
-without declaring it wrong.
-
----
-
-# Specialization Analysis Contract
-
-Every specialization should eventually declare an explicit analysis contract.
-
-Conceptually, this may include:
-
-role:
-- DPS
-- TANK
-- HEALER
-- SUPPORT
-
-rotationAuthority:
-- SIMC_APL
-- HEALER_MODEL
-- SPEC_RULES
-- NONE
-
-cooldownAuthority:
-- SIMC_APL
-- RAID_PLAN
-- SPEC_RULES
-- CONTEXTUAL
-
-performanceModel:
-- DAMAGE
-- SURVIVAL
-- HEALING
-- SUPPORT
-- HYBRID
-
-requiresAllyState:
-- true
-- false
-
-requiresRaidDamageModel:
-- true
-- false
-
-requiresEncounterModel:
-- true
-- false
-
-The generic engine should inspect the specialization contract rather than
-hard-coding behavior based on specialization names.
-
-Avoid patterns such as:
-
-if spec == Holy Paladin
-if spec == Restoration Shaman
-if spec == Augmentation
-
-when the behavior can instead be driven by the specialization contract.
-
----
-
-# Class, Spec, and Encounter Boundaries
-
-Analysis must use layered mechanics rather than one universal collection of
-rotational heuristics.
-
-The application should have a generic engine while preserving class-specific,
-spec-specific, and encounter-specific truth.
-
----
-
-## Generic Core
-
-The generic core implements concepts that apply across many or all
-specializations.
+and should preserve relevant actor/time-range scope.
 
 Examples:
 
-- Warcraft Logs event normalization
-- Combat state reconstruction
-- SimulationCraft APL evaluation framework
-- Resource accounting framework
-- Buff tracking
-- Debuff tracking
-- Cooldown tracking
-- Target tracking
-- Actionability
-- Evidence
-- Confidence
-- UNKNOWN state
-- Rule evaluation
-- Reporting interfaces
+Missing talent data does NOT mean:
 
-The generic core must not contain arbitrary spec-specific rotational opinions.
+    talent not selected
 
----
+Partial event retrieval does NOT mean:
 
-## Class Layer
+    player performed no events during the missing interval
 
-Class modules contain mechanics genuinely shared across multiple specs of the
-same class.
+Missing ally state does NOT mean:
 
-Examples may include:
+    ally had no cooldown active
 
-- Shared abilities
-- Shared utility
-- Shared defensive abilities
-- Class-wide mechanics
-- Shared resource behavior where appropriate
+When required data is PARTIAL or ABSENT:
 
-Do not place spec-specific behavior into the class layer merely to reduce code.
+    use UNKNOWN
+
+where that missing data affects the conclusion.
 
 ---
 
-## Spec Layer
+# Identity Safety
 
-Each specialization should have an explicit runtime definition.
+Player identity, class, specialization, and source ID must be validated before
+specialization evaluation.
 
-Spec modules may define:
+Do not allow:
 
-- Analysis contract
-- Applicable SimulationCraft APL
-- Spell mappings
-- Resource semantics
-- Buff relationships
-- Debuff relationships
-- Cooldown relationships
-- Talent interactions
-- Hero talent interactions
-- Spec-specific state
-- Special interpretation required by the APL
-- Spec-specific analysis requirements
+- null player name
+- null class
+- incorrect specialization
+- unresolved source ID
 
-SimulationCraft remains the rotational authority for supported DPS/tank
-specializations.
+to silently flow into specialization gameplay analysis.
 
-Spec-specific code exists to provide the state and semantics required to
-evaluate the chosen authority correctly.
+Observed abilities may be used as corroborating or conflict evidence.
 
-Do not manually rewrite an entire SimC rotation as developer opinion.
+Do not infer specialization solely because a particular signature ability was
+or was not cast.
+
+If authoritative identity metadata and observed behavior strongly conflict:
+
+    IDENTITY_CONFLICT
+
+should stop specialization evaluation rather than guessing.
 
 ---
 
-## Encounter Layer
+# Warcraft Logs Retrieval Completeness
 
-Encounter-specific logic determines whether theoretically correct actions were
-actually reasonable during the real fight.
+A Warcraft Logs request must record whether all requested pages and time ranges
+were successfully retrieved.
 
-Encounter context may include:
+If event retrieval is truncated, incomplete, rate-limited without successful
+recovery, or otherwise partial:
 
-- Intermissions
-- Untargetable periods
-- Forced downtime
-- Target transitions
-- Adds
-- Mechanic-driven movement
-- Strategy-dependent cooldown holds
-- Encounter phases
+    mark the affected scope PARTIAL
 
-Encounter rules must not permanently alter a specialization's general
-rotational logic.
+Do not interpret missing pages as inactivity.
 
-A rule that exists because of one boss belongs at the encounter layer rather
-than being baked into general spec logic.
+A 30-second event gap caused by a failed page must never become:
+
+    "You were idle for 30 seconds."
 
 ---
 
-# Comparable Log Philosophy
+# Ingestion Scope
 
-Do not rely on one rank-1 parse as absolute truth.
+Different analysis types require different amounts of combat data.
 
-When encounter context is inferred from player behavior, prefer multiple
-comparable successful logs where practical.
+Initially support exactly two explicit ingestion scopes:
 
-Comparison may consider:
+- PLAYER_CONTEXT
+- FULL_RAID
 
-- Same encounter
-- Same difficulty
-- Same specialization
-- Similar strategy
-- Similar fight duration where relevant
-- Same encounter phase or timestamp
-- Player survival
-- Relevant talent/build differences
-- Group composition where relevant
+Scope is primarily about how much FRIENDLY RAID state is required.
 
-Consensus across multiple successful logs is stronger environmental evidence
-than behavior from a single parse.
+`PLAYER_CONTEXT` means:
+
+- the selected player's required combat state
+- the required enemy/target state
+- the required encounter/environment events
+
+`PLAYER_CONTEXT` does NOT mean "only events sourced by the player."
+
+Environmental and enemy evidence such as targetability, phases, and boss
+activity is always required, because actionability depends on it.
+
+`FULL_RAID` additionally includes the required state for all friendly raid
+actors.
+
+Do not implement a `ROLE_GROUP` scope until a real analysis use case requires
+it.
+
+The selected scope must be recorded in the normalized fight.
+
+Analysis that requires information outside the retrieved scope must return
+UNKNOWN or INSUFFICIENT_SCOPE rather than reasoning over absence.
+
+Examples:
+
+Ordinary DPS rotation may often use:
+
+    PLAYER_CONTEXT
+
+Healer raid analysis may require:
+
+    FULL_RAID
+
+Augmentation support analysis may require:
+
+    FULL_RAID
 
 ---
 
-# Actionability
+# Ingestion Scope Derivation
 
-A theoretical action should only become a coaching failure when that action was
+The application service must DERIVE the required ingestion scope from the union
+of required inputs declared by all enabled analyzers.
+
+Scope must not be hand-picked per request or guessed.
+
+A client must not arbitrarily choose a smaller scope that causes silent
+under-fetching.
+
+If a client requests a scope smaller than the derived requirement, either:
+
+- widen the scope to the derived requirement, or
+- return INSUFFICIENT_SCOPE for the affected analyses
+
+Do not fetch full-raid data blindly when no enabled analyzer requires it.
+
+Adding a new analyzer must not silently under-fetch simply because an older
+scope value was hard-coded.
+
+---
+
+# Encounter and Actionability
+
+A theoretical recommendation becomes a player coaching failure only if it was
 reasonably actionable.
 
-Before flagging a:
+Actionability must consider evidence such as:
 
-- Missed cast
-- Delayed ability
-- Idle global
-- Cooldown delay
-- Resource mistake
-- Buff maintenance failure
-- Rotational priority error
-
-evaluate encounter context.
-
-Potentially non-actionable situations include:
-
-- Boss untargetable
-- No valid target
-- Encounter intermission
+- Target availability
+- Targetable events
+- Intermission
+- Encounter phase
+- Player death
+- Player incapacitation
 - Forced downtime
-- Target transition
-- Mechanic requiring disengagement
-- Movement preventing the action
-- Player incapacitated
-- Fight effectively ending
-- Other conditions supported by evidence
+- Encounter termination
+- Spec-specific requirements
 
-The analyzer must not evaluate the player as though they were attacking a
-stationary, permanently available target when Warcraft Logs shows otherwise.
+---
+
+# ACTIONABLE Requires Positive Evidence
+
+`ACTIONABLE` must NOT be the default merely because no restriction was
+observed.
+
+Absence of observed restriction is not evidence of availability.
+
+`ACTIONABLE` requires either:
+
+- sufficient positive environmental evidence, or
+- COMPLETE coverage of the environmental state required by that decision
+
+If the required targetability/encounter/environment evidence is PARTIAL or
+ABSENT, and actionability cannot otherwise be established:
+
+    actionability = UNKNOWN
+
+Failure mode this prevents:
+
+An encounter with ABSENT targetability data resolves every decision point to
+ACTIONABLE by default, and a real 30-second intermission becomes a dozen
+confident rotational findings.
+
+`NOT_ACTIONABLE` requires evidence.
+
+`ACTIONABLE` requires evidence too.
+
+---
+
+# Spec-Specific Actionability
+
+Shared actionability infrastructure should represent environmental facts.
+
+The specialization evaluator may refine actionability when specialization
+mechanics matter.
+
+Examples:
+
+- Stealth requirement
+- Valid target type
+- Melee-specific ability requirement
+- Special buff/state requirement
+
+Do not push those specialization meanings into the generic environment engine.
+
+---
+
+# Movement Claims
+
+Do not claim movement prevented an action unless reliable evidence establishes
+that constraint.
+
+Warcraft Logs does not provide a universal authoritative "player was moving"
+stream.
+
+Movement must not become a generic suppression reason merely because no better
+explanation is available.
+
+If movement cannot be established:
+
+    UNKNOWN
+
+rather than:
+
+    NOT_ACTIONABLE_BECAUSE_MOVEMENT
 
 ---
 
 # Encounter-Normalized Analysis
 
-Rotational timing must be normalized against encounter reality.
+The analyzer must not treat every second of a fight as equally actionable.
 
 Example:
 
-The APL says Ability X should be cast.
+The APL recommends Ability X.
 
-The player does not cast Ability X for 30 seconds.
+The boss disappears for a 30-second intermission.
 
-During those same 30 seconds:
+The player does not cast Ability X.
 
-- The encounter enters an intermission.
-- The boss is unavailable.
-- Comparable successful logs show the same inactivity.
+Expected:
 
-Result:
+- No 30-second missed-rotation finding.
+- The first actionable opportunity resumes when the encounter becomes actionable.
 
-Do not report a 30-second rotational failure.
+The analyzer should preserve:
 
-Instead, the first meaningful rotational opportunity begins when combat becomes
-actionable again.
-
-Preserve both facts:
-
-- The APL would theoretically prioritize Ability X.
-- The encounter made Ability X non-actionable during the interval.
+- The theoretical recommendation
+- The environmental restriction
+- The first actionable opportunity
+- The player's actual action
 
 ---
 
-# Environmental Evidence
+# Comparable Logs
 
-Use the strongest available evidence when deciding whether an action was
-possible.
+Comparable successful logs provide contextual evidence.
 
-Prefer evidence approximately in this order:
+They are not the rotational authority.
 
-1. Direct Warcraft Logs encounter/state evidence
-2. Direct target availability evidence
-3. Direct mechanic/phase evidence
-4. Explicit encounter runtime data
-5. Consensus from comparable successful logs
-6. UNKNOWN
+Use them for things such as:
 
-Top logs are not required to prove an intermission when direct Warcraft Logs
-evidence already establishes it.
+- Encounter strategy
+- Common downtime
+- Target transitions
+- Common cooldown holds
+- Phase behavior
+- Corroborating environmental evidence
 
-Top-log consensus may help identify environmental behavior when raw encounter
-state is ambiguous.
-
-If evidence is insufficient, return UNKNOWN rather than assuming the player
-made a mistake.
+Do not use them simply because they are highly ranked.
 
 ---
 
-# UNKNOWN is a Valid Result
+# Comparison Consensus
 
-UNKNOWN is an intentional analyzer state.
+Comparison behavior must not silently become "consensus" from one parse.
 
-If the analyzer cannot reliably determine a value or decision:
+Comparison analysis should support explicit outcomes such as:
 
-- Return UNKNOWN.
-- Preserve available evidence.
-- Do not silently guess.
-- Do not fabricate state.
-- Do not assume defaults merely to produce coaching.
-- Do not penalize the player because analyzer evidence is incomplete.
+- CONSENSUS
+- SPLIT
+- INSUFFICIENT
 
-Uncertainty must not silently become a coaching failure.
+A single parse must not be labeled consensus.
 
----
+SPLIT and INSUFFICIENT must not produce a confident environmental claim.
 
-# Analysis Pipeline
-
-Keep these stages logically separated:
-
-1. Observed Facts
-2. Derived State
-3. Ideal Decision
-4. Actionability
-5. Rule Evaluation
-6. Contextual Validation
-7. Coaching Output
+Exact minimum sample and consensus thresholds should be configurable and
+validated with real logs rather than hidden in ad-hoc code.
 
 ---
 
-## 1. Observed Facts
+# Top Logs Cannot Override Rotational Authority
 
-Observed facts are directly supported by Warcraft Logs or another explicitly
-authoritative source.
+If SimulationCraft selects Ability A and several top logs use Ability B:
 
-Examples:
+Do not automatically change the recommendation to Ability B.
 
-- Player cast Judgment at 12.4 seconds.
-- Player had 4 Holy Power at a resource anchor.
-- Player gained a buff at 30.1 seconds.
-- Target became unavailable.
-- Player died at 185.2 seconds.
-
-Observed facts should preserve source evidence whenever practical.
+Top-log popularity is not rotational truth.
 
 ---
 
-## 2. Derived State
+# Top Logs Cannot Suppress Findings Merely by Similarity
 
-Derived state is reconstructed from observed facts.
-
-Examples:
-
-- Holy Power immediately before a cast
-- Combo Points immediately before a generator
-- Cooldown availability
-- Buff active window
-- Debuff active window
-- Resource deficit
-- Valid targets
-- Actionable combat time
-- Relevant ally state
-
-Derived state must preserve enough evidence to explain how it was calculated.
-
-Do not invent passive generation, hidden state, or unsupported events.
-
-If reconstruction cannot be performed reliably, use UNKNOWN.
-
----
-
-## 3. Ideal Decision
-
-Use the specialization's declared analysis authority.
-
-For supported DPS and tank specs, this will normally be SimulationCraft APL.
-
-For healer or support analysis, another explicitly configured model may apply.
-
-The decision result should be structured rather than immediately converted to
-coaching prose.
-
-Possible fields include:
-
-- Timestamp
-- Recommended action
-- Authority used
-- Relevant rule/APL line
-- Conditions evaluated
-- Conditions satisfied
-- Required state
-- State confidence
-- Alternatives considered
-
----
-
-## 4. Actionability
-
-Determine whether the theoretical recommendation could reasonably have been
-executed.
-
-Consider:
-
-- Target availability
-- Encounter state
-- Intermission state
-- Movement constraints when provable
-- Crowd control
-- Incapacitation
-- Range when reliable evidence exists
-- Fight termination
-- Other environmental constraints
-
-A non-actionable recommendation must not become a player failure.
-
----
-
-## 5. Rule Evaluation
-
-Compare actual behavior against the actionable ideal decision.
-
-Examples:
-
-- Correct action used
-- Lower-priority action used
-- Action delayed
-- Resource wasted
-- Cooldown held
-- Buff dropped
-- Required setup missed
-- Assigned healing cooldown missed
-
-Evaluation must remain structured and evidence-based.
-
----
-
-## 6. Contextual Validation
-
-Use encounter data and comparable successful logs to determine whether an
-apparent deviation is:
-
-- A real player mistake
-- Encounter-driven behavior
-- Strategy-dependent behavior
-- Common successful behavior
-- Uncertain
-
-Contextual validation may:
-
-- Confirm a coaching flag
-- Suppress a coaching flag
-- Reduce confidence
-- Add encounter explanation
-- Return UNKNOWN
-
-Contextual validation must not silently rewrite the underlying authority.
-
----
-
-## 7. Coaching Output
-
-Human-readable coaching is generated from structured evaluations.
-
-Coaching text is not the source of truth.
-
-Tests should verify structured analyzer results rather than exact prose whenever
-possible.
-
-Reporting may explain:
-
-- What happened
-- What ideally should have happened
-- Why the recommendation was actionable
-- What evidence supports the conclusion
-- How important the mistake was
-- How the player can improve
-
----
-
-# Resource Analysis
-
-Resource analysis must distinguish between:
-
-- Being at resource cap
-- Generating resource while insufficient capacity exists
-- Actual resource waste
-- Intentional pooling
-- Resource spending
-- Resource state that cannot be reconstructed
-
-Being at maximum resource is not automatically an error.
+Behavioral similarity alone must not suppress an authority-backed finding.
 
 Example:
 
-A Rogue being at maximum Combo Points before using a spender does not prove
-Combo Points were wasted.
+SimulationCraft says Kingsbane should be used.
 
-Waste requires evidence that generation occurred when insufficient capacity
-existed, or another spec-specific condition establishes actual waste.
+Player does not use it.
 
-Do not equate:
+Six top logs also skip it.
 
-resource_at_cap == resource_wasted
+If there is no evidence establishing an environmental reason:
 
-Resource evaluation must consider spec semantics and the applicable decision
-model.
+- Keep the finding.
+- Comparison behavior may be attached as context.
+- Do not suppress the finding merely because other players did the same thing.
+- Do not lower confidence merely because other players did the same thing.
+
+Comparison-supported suppression is permitted only when the evidence maps to a
+named environmental/actionability reason such as:
+
+- INTERMISSION
+- TARGET_UNAVAILABLE
+- FORCED_DOWNTIME
+- PHASE_TRANSITION
+
+A suppressed finding must remain represented structurally with a
+machine-readable suppression reason.
+
+---
+
+# Comparison Cannot Move Confidence
+
+Confidence represents evidence quality.
+
+Comparison-player behavioral similarity by itself MUST NOT lower confidence.
+
+Top-log behavior may be attached as context only.
+
+Confidence and actionability may change only when actual evidence justifies it,
+such as:
+
+- environmental/encounter evidence
+- data completeness
+- identity or version certainty
+- another legitimate evidence-quality factor
+
+This rule exists because lowering confidence is functionally equivalent to
+suppression once reporting deprioritizes low-confidence findings.
+
+Without it, comparison behavior becomes hidden rotational authority through the
+confidence/TLDR channel.
+
+---
+
+# Healer Analysis
+
+Healers must not be analyzed as DPS with HPS substituted for DPS.
+
+Raw HPS is not an authoritative measure of healing quality.
+
+Healer analysis must consider:
+
+- Available damage to heal
+- Health deficits
+- Raid damage timing
+- Tank damage timing
+- Other healers
+- Absorbs
+- Defensives
+- Overhealing
+- Deaths
+- Raid composition
+- Healer count
+- Encounter mechanics
+- Assigned cooldowns
+- Player actionability
+
+A healer should not be penalized for failing to heal when there was no useful
+healing available.
+
+---
+
+# Healer Cooldown Assignments
+
+When an authoritative raid cooldown plan exists, that plan is authoritative for
+the player's assignment.
+
+The analyzer must distinguish:
+
+    ASSIGNMENT_MET
+
+from:
+
+    PLAN_MAY_NEED_REVIEW
+
+A healer who correctly follows an assigned plan must not be blamed because later
+analysis suggests the plan itself could have been better.
+
+When no authoritative plan exists:
+
+- Do not invent an assignment.
+- Do not infer an assignment merely from what other healers did.
+- Assignment analysis should return NO_AUTHORITY_AVAILABLE.
+
+Other evidence-grounded healer analysis may still proceed independently.
+
+---
+
+# Healer Model Limits
+
+Do not describe QE Live or another healer tool as a per-cast runtime authority
+unless there is actually a machine-usable model capable of supporting that
+analysis.
+
+Healer v1 should prefer evidence-grounded categories that can actually be
+validated, such as:
+
+- Assigned cooldown execution
+- Raid damage-event coverage
+- Healing cooldown coverage
+- Death timelines
+- Relevant absorbs
+- Useful healing/overhealing context
+- Other-healer coverage
+
+Because no approved per-cast healer model currently exists, per-cast
+spell-choice coaching resolves to:
+
+    NO_AUTHORITY_AVAILABLE
+
+This is a missing-authority condition, not a missing-evidence condition.
+
+---
+
+# Role Module Boundary
+
+`src/healing/` and `src/support/` provide factual/shared primitives and
+reconstructed role context.
+
+Examples of legitimate role-module responsibilities:
+
+- raid damage windows
+- health deficits
+- absorbs
+- healing received
+- cooldown coverage observations
+- ally identity and survival
+- buff recipients
+- group composition
+
+Role modules MUST NOT become universal gameplay evaluators.
+
+Healer and support specialization-specific gameplay verdicts live in:
+
+    src/specs/<class>/<spec>/
+
+Do not allow role modules to accumulate:
+
+    if spec === ...
+
+gameplay interpretation.
+
+A universal healer evaluator is the same rejected architecture as a universal
+DPS evaluator, rebuilt one role at a time.
+
+The rule from the core architectural principle applies identically to roles:
+
+Shared modules reconstruct facts.
+
+Specialization evaluators decide what those facts mean.
+
+---
+
+# Augmentation Evoker
+
+Augmentation must not be treated as ordinary DPS.
+
+Relevant state may include:
+
+- Ally identity
+- Ally specialization
+- Buff recipients
+- Recipient survival
+- Recipient cooldowns
+- Group composition
+- Ebon Might state
+- Prescience state
+- Breath of Eons
+- Encounter phase
+
+SimulationCraft may be authoritative for an Augmentation decision only when it
+can validly model that decision and the analyzer has the required state.
+
+Authority is per decision, not globally assumed for the entire specialization.
+
+---
+
+# Augmentation v1
+
+Do not block the entire project on complete modeling of every possible buff
+recipient.
+
+Initial Augmentation analysis may report evidence-grounded facts such as:
+
+- Buff uptime
+- Buff coverage
+- Recipient identity
+- Recipient alive/dead state
+- Observable overlap with recipient cooldowns
+- Support cooldown timing
+
+Target-quality verdicts must distinguish the two failure states correctly.
+
+No validated recipient-quality model currently exists, so SUPPORT_TARGETING
+quality resolves to:
+
+    NO_AUTHORITY_AVAILABLE
+
+If such a model later exists but the required recipient state was not
+retrieved or reconstructed:
+
+    UNKNOWN
+
+Do not confidently report:
+
+    "Wrong Prescience target"
+
+from a missing model or from incomplete recipient state.
+
+---
+
+# Preparation Analysis
+
+Preparation is a shared analysis category, not specialization-owned rotation
+logic.
+
+Preparation findings may include:
+
+- Health potion usage
+- Healthstone usage
+- Normal combat-potion usage
+- Enchants
+- Gems
+- Talent/build context
+- Other explicitly supported preparation checks
+
+Preparation findings do not require an APL decision point.
+
+They should still produce structured findings and flow through the same
+reporting system.
+
+Do not make the reporting layer independently inspect raw data to invent these
+findings.
+
+Preparation authority is `WCL_OBSERVED_FACT` for observed usage, or
+`RUNTIME_GAME_DATA` for rules derived from game metadata.
+
+---
+
+# Preparation Is a Parallel Finding Producer
+
+Preparation analysis runs in parallel with specialization evaluation.
+
+It must NOT depend on a specialization evaluator having run.
+
+Correct conceptual flow:
+
+                         -> Specialization Evaluator --\
+    Normalized Fight ---|                               |-> Structured Findings
+                         -> Preparation Analyzer -------/
+
+Both producers merge into the same structured finding stream.
+
+Preparation analysis must still run when specialization gameplay evaluation is
+unsupported, skipped, or blocked.
+
+---
+
+# Always-Report Consumables
+
+Every analysis report must contain a status for:
+
+- health potion usage
+- healthstone usage
+- normal combat-potion usage
+
+This applies regardless of whether the player died.
+
+This applies regardless of whether gameplay support exists for the
+specialization.
+
+If event completeness prevents a reliable count:
+
+    status = UNKNOWN
+
+Do not omit the category.
+
+Do not report zero when consumable event coverage is PARTIAL or ABSENT.
+
+A zero-use result backed by COMPLETE coverage is a valid observed fact.
+
+Do not qualify this requirement with phrases such as "where supported" or
+"supported reports."
+
+---
+
+# Racial Abilities Excluded
+
+Racial ability analysis is excluded from initial analysis.
+
+Do not add racial abilities to:
+
+- rotation findings
+- cooldown findings
+- preparation findings
+- coaching output
+- scoring
+
+until that scope is intentionally enabled later by the product owner.
+
+---
+
+# Damage Output Diagnosis
+
+Aggregate damage differences are observations, not proof of cause.
+
+Allowed informational observation:
+
+    Rupture damage per minute was lower than comparable logs.
+
+Not automatically allowed:
+
+    You failed to cast enough Ruptures.
+
+A causal coaching finding requires supporting decision-level evidence.
+
+Possible causal evidence may include:
+
+- Cast opportunities
+- APL decisions
+- Uptime
+- Resource state
+- Buff windows
+- Target choice
+- Cooldown alignment
+- Encounter actionability
+
+A numeric comparison delta alone must not generate a confident causal claim.
+
+---
+
+# Tank Analysis
+
+Tank analysis must separate:
+
+- Offensive rotation
+- Defensive decisions
+- Active mitigation
+- Survival
+- Encounter-specific tank mechanics
+
+SimulationCraft may provide offensive/rotational authority where supported.
+
+Tank coaching must not simply maximize DPS.
+
+Important invariant:
+
+    defensiveAvailable != defensiveRequired
+
+A defensive being off cooldown does not prove it should have been used.
 
 ---
 
 # Buff and Debuff Direction
 
-Buff/debuff analysis must preserve:
+Buff and debuff analysis must preserve:
 
 - Source actor
 - Target actor
-- Ability/spell ID
+- Ability ID
 - Application time
-- Removal time where available
+- Refresh time
+- Removal time
+- Stacks where relevant
 
-Do not assume an observed debuff in a player's event stream was applied by that
-player.
-
-Offensive debuffs, incoming debuffs, buffs, and target effects must maintain
-correct source/target direction.
-
-If direction cannot be established reliably, return UNKNOWN.
-
----
-
-# Cooldown Analysis
-
-Cooldown availability and cooldown quality are different concepts.
-
-The analyzer may evaluate:
-
-- Whether a cooldown was available
-- Whether the applicable authority called for it
-- Whether encounter conditions justified holding it
-- Whether important setup occurred beforehand
-- What happened during the cooldown window
-- Whether another cooldown should overlap it
-- Whether fight length affects remaining uses
-
-Top-log timing may provide encounter context.
-
-Top-log timing must not automatically replace the specialization's declared
-authority.
-
----
-
-# Death and Defensive Analysis
-
-Death analysis must be evidence-based.
-
-The analyzer should distinguish:
-
-- What damage caused the death
-- Whether the damage was avoidable
-- Whether a defensive was available
-- Whether that defensive was appropriate
-- Whether the defensive had already been used
-- Whether external mitigation existed
-- Whether encounter mechanics made survival impossible or unlikely
-
-Do not flag a defensive merely because it was off cooldown.
-
-Availability does not prove use was required.
-
----
-
-# Runtime Game Knowledge
-
-Game-specific knowledge required by the deployed analyzer belongs in runtime
-data or runtime code.
-
-Examples:
-
-- Spell IDs
-- Buff IDs
-- Debuff IDs
-- Spell durations
-- Cooldown durations
-- Resource costs
-- Resource generation
-- Talent relationships
-- Hero talent relationships
-- Ability relationships
-- Defensive mappings
-- Encounter mechanics
-- Spec metadata
-
-Do not place required runtime knowledge only in:
-
-- CLAUDE.md
-- Agent instructions
-- Prompts
-- Comments
-- Documentation
-
-If the deployed analyzer needs the information, it must exist in runtime code
-or runtime data.
-
----
-
-# Agent Instructions vs Runtime Data
-
-Agent instructions explain HOW to build and reason about the analyzer.
-
-Runtime data tells the PROGRAM what Warcraft knows.
+Do not infer direction merely because an event appeared in a player's stream.
 
 Example:
 
-Agent instruction:
+Boss applies Debuff X to Player
 
-"Detect cooldown windows using observed cast and buff evidence."
+is not:
 
-Runtime data:
+Player applied Debuff X to Boss.
 
-"Deathmark has spell ID X and duration Y."
+When direction matters and cannot be established:
 
-Never substitute agent/model knowledge for missing runtime implementation.
-
----
-
-# Warcraft Logs Integration Boundary
-
-Warcraft Logs access must remain isolated from analysis logic.
-
-Code that fetches Warcraft Logs data should not contain rotation coaching
-rules.
-
-Analysis code should operate against the normalized combat model rather than
-directly querying Warcraft Logs.
-
-This separation is required so recorded fixtures can reproduce behavior without
-repeatedly calling the Warcraft Logs API.
-
-The analyzer should be testable offline using captured fixtures.
+    UNKNOWN
 
 ---
 
-# Normalized Combat Model
+# Aura State
 
-The first major implementation milestone is a reliable normalized
-representation of a fight.
+Aura modeling must account for real event semantics.
 
-Before advanced coaching is added, the system should reliably represent:
+Potential cases include:
 
-- Report
-- Fight
-- Encounter
-- Difficulty
-- Fight start/end
-- Fight duration
-- Player identity
-- Player source ID
-- Class
-- Spec
-- Role
-- Talents
-- Hero talents where applicable
-- Gear
-- Casts
-- Cast targets
-- Buff applications
-- Buff removals
-- Debuff applications
-- Debuff removals
-- Resource anchors
-- Explicit resource changes
-- Damage dealt
-- Damage taken
-- Healing
-- Absorbs
-- Deaths
-- Relevant allies
-- Encounter phases where available
-- Target availability where available
+- Application
+- Refresh
+- Pandemic/extension behavior where applicable
+- Stack changes
+- Stack decay
+- Removal
+- Missing removal event
+- Fight termination
+- Haste-scaled duration where applicable
 
-The normalized model must preserve enough evidence to trace derived results
-back to observed Warcraft Logs data.
+Do not extend a buff/debuff indefinitely merely because a removal event is
+missing.
 
-Do not begin sophisticated coaching until this model is trustworthy.
+If the active interval cannot be established reliably:
+
+    UNKNOWN
+
+or a bounded interval should be used where appropriate.
 
 ---
 
-# Analyzer Boundaries
+# Cooldown State
 
-Major systems should remain modular.
+Cooldown availability and cooldown quality are different questions.
 
-Expected major areas include:
+The analyzer may need to model:
 
-- API
-- Warcraft Logs ingestion
-- Event normalization
-- Combat state reconstruction
-- SimulationCraft APL handling
-- Resource reconstruction
-- Cooldown tracking
-- Buff/debuff tracking
-- Target tracking
-- Ally-state tracking
-- Actionability
-- Rotation evaluation
-- Healing analysis
-- Support analysis
-- Defensive analysis
-- Death analysis
-- Talent awareness
-- Gear awareness
-- Class mechanics
-- Spec mechanics
-- Encounter mechanics
-- Comparison-log analysis
-- Scoring
-- Reporting
-- Regression testing
+- Base cooldown
+- Charges
+- Recharge
+- Resets
+- Proc-driven resets
+- Talent modification
+- Cooldown reduction
+- Cooldown windows
 
-Do not build one giant analyzer function containing all of these concerns.
+Do not infer:
+
+    cooldown available
+
+therefore:
+
+    cooldown should have been used
+
+The applicable authority, specialization semantics, and encounter actionability
+still determine whether use was correct.
 
 ---
 
-# Structured Evidence
+# Decision Points
 
-Important conclusions should preserve evidence.
+The analyzer should evaluate meaningful decision opportunities rather than every
+millisecond.
 
-Where practical, an evaluation should answer:
+Decision points may include:
 
-- What event was observed?
+- Global cooldown availability
+- Cast completion
+- Channel completion
+- Proc occurrence
+- Important cooldown availability
+- Target-state transition
+- Encounter becoming actionable
+
+Decision-point logic must account for:
+
+- Cast time
+- Channel time
+- GCD overlap
+- Queuing/tolerance
+- Encounter availability
+
+Do not produce hundreds of artificial missed-action findings because a player
+was already casting or channeling.
+
+---
+
+# Timing Tolerance
+
+Human play is not evaluated at exact zero-latency millisecond precision.
+
+Timing tolerance should be configurable by finding category and validated using
+real logs.
+
+Do not hard-code one arbitrary global rule such as:
+
+    0.2 seconds late = mistake
+
+Tiny repeated timing differences should generally be aggregated into a pattern
+rather than emitted as dozens of individual findings.
+
+Prefer a smaller number of high-value, defensible coaching findings.
+
+---
+
+# Findings
+
+All coaching originates from structured findings.
+
+A finding should preserve enough information to answer:
+
+- What category is this?
+- What authority produced it?
+- What evidence supports it?
 - What state was reconstructed?
-- What source supports that state?
-- What decision authority was used?
-- What action was recommended?
+- What was expected?
+- What actually happened?
 - Was the action actionable?
-- What did the player actually do?
-- Was encounter context relevant?
-- Did comparable successful logs show similar behavior?
-- What confidence does the analyzer have?
-- Why was the coaching flag produced or suppressed?
+- What confidence applies?
+- Was the result suppressed?
+- Why was it suppressed?
+- Was required data complete?
 
-A coaching conclusion should be traceable back to evidence.
+Human-readable prose is produced from structured findings.
+
+Reporting must not invent findings.
+
+---
+
+# Shared Finding Primitives
+
+Specialization-owned evaluation must not lead to 40 duplicated implementations
+of common calculations.
+
+Shared primitives may include:
+
+- Aura uptime
+- Cast opportunities
+- Cooldown drift
+- Resource waste math
+- Resource intervals
+- GCD/gap calculation
+- Evidence attachment
+- Timing tolerance
+- Actionability result construction
+
+A specialization evaluator may use these primitives while retaining ownership
+of gameplay interpretation.
+
+If the same low-level calculation is independently implemented in many specs,
+consider whether it belongs in the shared primitive library.
+
+---
+
+# UNKNOWN
+
+UNKNOWN is an intentional result.
+
+UNKNOWN must not silently collapse into:
+
+- false
+- true
+- zero
+- maximum
+- empty list
+- not active
+- no target
+- no cast
+- no talent
+
+When required state is unknown:
+
+- Preserve evidence.
+- Preserve the reason.
+- Do not blame the player.
+- Do not score the result as failure.
+
+---
+
+# Evidence
+
+Important conclusions must be traceable.
+
+Evidence may reference:
+
+- WCL event
+- Raw WCL response
+- Normalized event
+- Resource anchor
+- Resource interval
+- Aura event
+- Cooldown state
+- APL condition
+- Runtime metadata
+- Encounter state
+- Raid assignment
+- Comparison evidence
+
+The analyzer should be debuggable enough to answer:
+
+    Why did it tell me this?
 
 ---
 
 # Confidence
 
-Do not represent uncertain conclusions as certain.
+Confidence describes evidence quality.
 
-Structured evaluations should support confidence where useful.
-
-Possible conceptual levels include:
+Possible conceptual values include:
 
 - HIGH
 - MEDIUM
 - LOW
 - UNKNOWN
 
-Confidence must depend on evidence quality rather than how strongly a coaching
-sentence is worded.
+Confidence must not simply reflect how large a DPS/HPS difference was.
 
-Low-confidence observations should not be presented as definitive mistakes.
+Large difference + poor evidence may still be LOW confidence.
 
 ---
 
-# Public API Contracts
+# Runtime Game Knowledge
 
-Do not change an existing public API response contract without explicit
-approval.
+Game knowledge required by deployed analysis belongs in runtime code/data.
 
-Internal implementation may evolve while public contracts remain stable.
+Examples:
 
-When a contract change appears necessary:
+- Spell IDs
+- Spell properties
+- Cooldowns
+- Charges
+- Resource behavior
+- Talents
+- Hero talents
+- Buff/debuff metadata
+- Item metadata
+- Enchant metadata
+- Gem metadata
+- Consumable metadata
+- Encounter metadata
 
-1. Explain why.
-2. Describe the existing contract.
-3. Describe the proposed contract.
-4. Identify compatibility impact.
-5. Wait for approval before making a breaking change when requested.
+Do not rely on:
+
+- CLAUDE.md
+- model memory
+- comments
+- prompts
+- documentation
+
+as the deployed source of game truth.
+
+---
+
+# Runtime Data Provenance
+
+Runtime data must preserve provenance.
+
+Where practical include:
+
+- Expansion
+- Season
+- Game build
+- Data revision
+- Source
+- Retrieval/generation date
+
+Do not silently use runtime data known to be incompatible with the analyzed log.
+
+Initial policy:
+
+If the analyzer knows the loaded runtime data is incompatible with the log's
+game version:
+
+    fail closed
+
+Do not silently proceed with confident coaching.
+
+The exact source/generation pipeline for runtime game data must be explicitly
+selected before large amounts of game data are entered manually.
+
+---
+
+# Application Services
+
+User-facing interfaces must not contain separate gameplay analyzers.
+
+REST/API and future MCP interfaces should call the same application services.
+
+Conceptually:
+
+    REST
+       \
+        -> Analysis Service -> Analyzer
+       /
+    MCP
+
+MCP may be deferred.
+
+The service boundary should exist early enough that adding MCP later does not
+require creating a second analysis path.
+
+---
+
+# Unsupported Specialization
+
+The product intends to support every specialization eventually.
+
+Until a specialization has an evaluator, gameplay evaluation for that
+specialization is unsupported.
+
+The application service must expose an explicit result:
+
+    SPEC_NOT_SUPPORTED
+
+When specialization gameplay evaluation is unsupported:
+
+- Do not return a normal-looking empty gameplay report.
+- Clearly disclose that specialization gameplay analysis is unsupported.
+- Still run supported specialization-independent analysis such as preparation
+  and other factual observations.
+- Clearly label the resulting report as partial coverage.
+
+Failure mode this prevents:
+
+An unsupported specialization produces a well-formed report containing no
+gameplay findings, which reads to the player as "you played perfectly."
+
+Absence of analysis is not evidence of good play.
+
+---
+
+# Warcraft Logs Authentication
+
+For Milestone 1, Warcraft Logs access uses a server-side OAuth Client
+Credentials flow for public-report access.
+
+The Warcraft Logs client ID and client secret are backend secrets.
+
+They must never be exposed to:
+
+- browser client code
+- WoW addon code
+- public API responses
+- logs, error messages, or fixtures
+
+Private-report support is deferred.
+
+Future private-report support may use user-authorized Warcraft Logs OAuth
+(Authorization Code or PKCE as appropriate).
+
+Adding user-authorized access must not create a second analyzer or a second
+analysis path.
+
+The authentication method affects Warcraft Logs access only.
+
+It does not affect gameplay analysis.
+
+---
+
+# Warcraft Logs Integration Boundary
+
+Warcraft Logs access must remain separated from gameplay evaluation.
+
+WCL modules are responsible for:
+
+- Authentication
+- GraphQL
+- Pagination
+- Retrieval
+- Raw source preservation
+- Completeness reporting
+
+They should not contain specialization coaching logic.
+
+Specialization evaluators should operate against normalized combat data rather
+than independently issuing arbitrary live WCL queries.
+
+---
+
+# Multi-Target Support
+
+Do not silently evaluate unsupported multi-target conditions as single target.
+
+APL concepts such as:
+
+- active_enemies
+- spell_targets
+- target_if
+- cycle_targets
+
+must be explicitly supported or return UNSUPPORTED/UNKNOWN.
+
+For the first vertical slice, it is acceptable to scope support to a documented
+subset of single-target decisions.
+
+Unsupported AoE/multi-target decisions must fail closed.
+
+---
+
+# First Vertical Slice
+
+The first full specialization should exercise the complete architecture.
+
+The first specialization is Assassination Rogue.
+
+Do not plan to switch away from Assassination merely because complete Energy
+modeling is difficult.
+
+If continuous-resource modeling initially prevents adequate coverage:
+
+1. First narrow the supported Assassination decision surface to decisions that
+   can be evaluated honestly.
+2. Unsupported Energy-dependent decisions remain UNKNOWN.
+3. Document the narrowed surface explicitly.
+
+Only reconsider the specialization if implementation evidence demonstrates that
+even a useful honest Assassination vertical slice cannot be achieved.
+
+Narrowing the supported surface is the correct response to difficulty.
+
+Guessing resource state is not.
+
+The slice should prove:
+
+Warcraft Logs
+    ->
+Normalization
+    ->
+Completeness
+    ->
+Combat State
+    ->
+Assassination Evaluator
+    ->
+SimulationCraft APL
+    ->
+Ideal Decision
+    ->
+Encounter Actionability
+    ->
+Structured Finding
+    ->
+Minimal Coaching
+
+It must also prove the non-APL preparation finding path.
+
+Minimum viable actionability belongs inside the first slice.
+
+Do not postpone all encounter awareness until after the first evaluator.
+
+---
+
+# First Slice Supported Decision Surface
+
+The first slice must explicitly document what it supports.
+
+Examples:
+
+- Supported APL expressions
+- Unsupported APL expressions
+- Supported resources
+- Supported target model
+- Supported actionability reasons
+- Supported encounter state
+- Supported cooldown mechanics
+
+Unsupported decisions must return UNKNOWN/UNSUPPORTED.
+
+"Works" is not an acceptable completion criterion without a defined supported
+decision surface.
+
+---
+
+# UNKNOWN Coverage Must Be Measured
+
+UNKNOWN is valid, but a system that returns UNKNOWN for nearly everything is not
+finished.
+
+For the first vertical slice:
+
+- Measure the percentage of meaningful decision points that resolve.
+- Enumerate UNKNOWN reasons.
+- Review whether each unresolved category is justified.
+- Establish an explicit coverage threshold before declaring the slice complete.
+
+Do not game the metric by converting unknown state into guesses.
+
+Coverage measures implementation completeness.
+
+It does not override fail-closed correctness.
+
+---
+
+# Preparation Must Be Included in the First Slice
+
+The first vertical slice must also prove that non-rotational findings can flow
+through the architecture.
+
+At minimum include supported preparation facts such as:
+
+- Health potion usage
+- Healthstone usage
+- Combat potion usage
+
+This proves findings do not need to originate from an APL decision.
+
+---
+
+# Raid First
+
+Initial encounter-focused development should prioritize raid logs.
+
+Mythic+ is a future supported target.
+
+Do not distort the first architecture merely to support both raid and Mythic+
+encounter models simultaneously before the raid model is trustworthy.
+
+The architecture should remain extensible to Mythic+.
 
 ---
 
 # Testing Rules
 
-Every confirmed bug fix requires a regression test.
+Every confirmed bug should eventually receive a regression test.
 
 Do not:
 
-- Delete a failing test merely to make the suite pass.
-- Skip a failing test merely to make the suite pass.
-- Weaken assertions merely to make the suite pass.
-- Rewrite expected output to hide a regression.
+- Delete a failing test just to make CI green.
+- Skip a failing test just to make CI green.
+- Weaken assertions merely to hide a regression.
+- Rewrite expected output merely because implementation changed.
 
-A regression test should reproduce the original failure whenever practical.
-
-Prefer testing structured analyzer state and evaluations over exact
-human-readable coaching strings.
+Tests should prefer structured findings/state over exact prose.
 
 ---
 
-# Historical Regression Categories
+# Mandatory Negative-Test Philosophy
+
+Tests must prove not only that correct findings appear, but that incorrect
+findings do NOT appear.
+
+Important negative cases include:
+
+- Missing talents must not become talent=false.
+- Partial event retrieval must not become inactivity.
+- Wrong/contradictory spec identity must not proceed normally.
+- Resource cap must not automatically become waste.
+- Unsupported APL expressions must not evaluate false.
+- Predictive/hindsight state must not use future knowledge silently.
+- Top-log behavioral similarity must not suppress a finding by itself.
+- Top-log behavioral similarity must not reduce confidence by itself.
+- Numeric damage differences must not become unsupported causal claims.
+- UNKNOWN findings must not contribute negative score.
+- Encounter downtime must not become rotational failure.
+- Missing Aug recipient state must not become wrong-target coaching.
+- Missing healer plan must not become an inferred assignment.
+- Absent targetability/environment data must not default to ACTIONABLE.
+- An UNKNOWN higher-priority APL condition must not fall through to a
+  confident lower-priority recommendation.
+- UNKNOWN must not be substituted for NO_AUTHORITY_AVAILABLE, or vice versa.
+- An unsupported specialization must not produce an empty report that reads as
+  clean play.
+- A low-coverage analysis must not present itself as a complete assessment.
+- Consumable categories must not be omitted when completeness is insufficient.
+- Racial abilities must not appear in findings while excluded.
+
+---
+
+# Historical Failure Categories
 
 Important known failure categories include:
 
-- Missing actor metadata
-- Null player names
+- Null actor metadata
 - Null class metadata
-- Incorrect spec hydration
-- Resource-state ambiguity
-- Invented resource generation
+- Incorrect specialization hydration
+- Partial/truncated WCL retrieval
+- Resource ambiguity
 - Resource cap incorrectly treated as resource waste
+- Invented resource state
+- Continuous-resource reconstruction errors
 - Incorrect buff source/target direction
 - Incorrect debuff source/target direction
-- Defensive mappings failing because class metadata is missing
-- Cooldown-window misinterpretation
-- Healer-specific evaluation errors
-- Augmentation ally-state errors
-- Regression parser failures
+- Aura-window errors
+- Cooldown charge/reset errors
+- Defensive mapping dependent on missing identity
+- Encounter downtime interpreted as rotation failure
+- Fight-duration normalization errors
 - Invalid comparison parses
-- Comparison players dying before the fight ends
-- Fight-duration comparison errors
-- Encounter downtime being mistaken for rotational inactivity
-- Top-log behavior incorrectly treated as rotational authority
+- Dead comparison players
+- Healer HPS misuse
+- Healer assignment misuse
+- Augmentation missing ally state
+- Top-log behavior becoming rotational authority
+- Comparison behavior suppressing findings without environmental evidence
+- Comparison behavior lowering confidence without evidence
+- Unsupported APL syntax silently changing decisions
+- Hindsight state producing unfair coaching
+- Actionability defaulting to ACTIONABLE without evidence
+- UNKNOWN APL conditions falling through to lower-priority actions
+- UNKNOWN and NO_AUTHORITY_AVAILABLE used interchangeably
+- Unsupported specializations producing empty reports that imply clean play
+- Partial analysis presented as a complete assessment
+- Silent under-fetching from an incorrectly narrowed ingestion scope
 
-These are regression categories, not permission to copy old implementation
-patterns.
+These categories should inform regression tests.
 
----
-
-# Regression Fixtures
-
-Important bugs and representative fights should eventually become reproducible
-fixtures.
-
-Fixtures should allow development without repeatedly calling live Warcraft Logs
-APIs.
-
-When a bug is found in a real log:
-
-1. Preserve the minimum evidence required to reproduce it.
-2. Create a regression case.
-3. Make the test fail.
-4. Fix the implementation.
-5. Verify the regression passes.
-6. Verify unrelated regression cases still pass.
-
----
-
-# Comparison Parse Validity
-
-A comparison parse should not automatically be treated as valid merely because
-it ranked highly.
-
-Where relevant, validate:
-
-- Correct encounter
-- Correct difficulty
-- Correct specialization
-- Player survival
-- Sufficient fight participation
-- Fight duration
-- Strategy/build differences
-- Group composition where relevant
-
-A player who died substantially before the encounter ended may be unsuitable
-for behavioral comparison.
-
-Do not silently use invalid comparison data.
+They are not permission to copy old implementation patterns.
 
 ---
 
 # Change Discipline
 
-Prefer small, targeted changes.
+Prefer small coherent changes.
 
-Do not perform broad rewrites when a focused change solves the actual problem.
+If fixing one problem repeatedly breaks unrelated systems:
 
-Before making a major architectural change:
+Stop.
+
+Do not continue an uncontrolled patch chain.
+
+That is evidence the abstraction may be wrong.
+
+Before a major architectural change:
 
 1. Explain the problem.
-2. Identify the current abstraction causing it.
+2. Identify the failing abstraction.
 3. Propose the replacement.
-4. Describe affected tests.
-5. Describe affected contracts.
-6. Identify migration impact.
-7. Wait for approval when requested.
-
-If fixing one bug repeatedly causes unrelated systems to break, stop patching.
-
-The abstraction may be wrong.
-
-Escalate the architecture problem rather than continuing an uncontrolled patch
-chain.
+4. Explain affected contracts.
+5. Explain affected tests.
+6. Wait for approval when requested.
 
 ---
 
@@ -1313,81 +1936,120 @@ chain.
 
 Before implementing a substantial feature:
 
-1. Inspect the relevant existing code.
-2. Explain the proposed approach.
-3. Identify affected modules.
-4. Identify data requirements.
-5. Identify tests that should be created or changed.
-6. Confirm the approach when requested.
-7. Implement the smallest coherent solution.
-8. Run relevant tests.
-9. Report failures accurately.
+1. Read product intent.
+2. Read relevant architecture.
+3. Inspect existing implementation.
+4. Identify the owning specialization/shared layer.
+5. Identify required inputs.
+6. Identify authority.
+7. Identify UNKNOWN behavior.
+8. Identify actionability behavior.
+9. Identify tests.
+10. Implement the smallest coherent solution.
+11. Run focused tests.
+12. Run relevant regressions.
+13. Report actual results accurately.
 
-Do not claim tests passed unless they were actually run successfully.
+Do not claim tests ran when they did not.
 
-Do not claim Warcraft Logs data exists unless it was actually retrieved or is
-present in a fixture.
+Do not claim WCL evidence exists unless it was actually retrieved or exists in a
+fixture.
 
 ---
 
-# Clean-Rebuild Rule
+# Reporting
 
-This repository is vNext.
+Reporting consumes structured findings.
 
-The old Warcraft Logs Coach implementation may be used as:
+Reporting may:
 
-- Historical reference
-- Regression inspiration
-- Expected-output comparison
-- Bug history
-- API-contract reference
+- Rank findings
+- Summarize findings
+- Format markdown
+- Format JSON
+- Produce TLDR
+- Explain evidence
 
-It should not automatically be treated as architecture worth preserving.
+Reporting must not:
 
-Do not copy large portions of the old Worker into vNext and attempt to refactor
-them into correctness.
+- Query WCL to invent new gameplay conclusions
+- Re-evaluate the specialization independently
+- Turn UNKNOWN into certainty
+- Turn SUPPRESSED into failure
+- Convert a numeric difference into unsupported causality
+- Present a partial analysis as a complete assessment
 
-Build the new architecture deliberately.
+Prefer a small number of high-value actionable findings over overwhelming the
+player with trivial timing differences.
+
+---
+
+# Reported Coverage
+
+The report must disclose its own analysis coverage and completeness.
+
+If any of the following are true:
+
+- decision coverage is low
+- important data is PARTIAL
+- specialization gameplay is unsupported
+- important categories are UNKNOWN
+
+then the report must not read as though it were a complete assessment.
+
+All fail-closed machinery in this project is internal.
+
+Coverage disclosure is how that honesty reaches the person reading the output.
+
+A player must be able to tell the difference between:
+
+    "We analyzed this fight and found little to fix."
+
+and:
+
+    "We could only analyze part of this fight."
 
 ---
 
 # Final Development Principle
 
-The analyzer should ultimately answer:
+The analyzer should answer:
 
 "What should this player have done differently, given the specialization they
-were playing, their role, their available state, and the encounter they were
-actually in?"
+were playing, the state they could reasonably be evaluated against, and the
+encounter they were actually in?"
 
 It should not merely answer:
 
 "What did a higher-ranked player do differently?"
 
-For supported DPS and tank rotation:
+Shared infrastructure provides reliable combat primitives.
 
-SimulationCraft describes ideal rotational priority.
+Specialization evaluators own gameplay interpretation.
 
-For healers:
+SimulationCraft provides rotational authority where applicable and supported.
 
-The configured healer model describes healing decisions, while authoritative
-raid cooldown assignments govern assigned cooldown execution.
+Warcraft Logs provides observed reality.
 
-For Augmentation:
+Encounter evidence determines actionability.
 
-SimulationCraft may describe supported rotational decisions, while ally state,
-buff targets, and raid context are required to evaluate support quality.
+Healer assignments govern assignment execution when a real assignment exists.
 
-For everyone:
+Augmentation requires ally context where the decision depends on allies.
 
-Warcraft Logs describes observed reality.
+Comparable logs provide environmental context, not rotational truth.
 
-Class and specialization modules provide game-specific meaning.
-
-Encounter analysis determines actionability.
-
-Comparable successful logs provide environmental context and validation.
+Preparation analysis reports required non-rotational facts.
 
 Structured evidence determines whether the analyzer has enough confidence to
 coach the player.
 
-When those sources cannot establish a conclusion reliably, return UNKNOWN.
+When no trustworthy authority exists for the decision:
+
+return NO_AUTHORITY_AVAILABLE.
+
+When an authority exists but required evidence is insufficient:
+
+return UNKNOWN.
+
+Do not guess.
