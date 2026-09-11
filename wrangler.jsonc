@@ -1,0 +1,28 @@
+{
+  // Warcraft Logs Coach vNext — Cloudflare Worker configuration.
+  //
+  // SECRETS ARE NEVER STORED IN THIS FILE.
+  //
+  // WCL_CLIENT_ID and WCL_CLIENT_SECRET are backend secrets. Set them with:
+  //
+  //     npx wrangler secret put WCL_CLIENT_ID
+  //     npx wrangler secret put WCL_CLIENT_SECRET
+  //
+  // For local development they are read from .dev.vars, which is gitignored.
+  // See .dev.vars.example.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "warcraft-logs-coach-vnext",
+  "main": "src/api/worker.ts",
+  // Capped by the workerd bundled with @cloudflare/vitest-pool-workers, which
+  // currently supports dates up to 2026-08-22. Deliberately a single shared date
+  // rather than a test-only override, so tests exercise the same runtime
+  // semantics as a deploy. Raise it once the pool ships a newer workerd.
+  "compatibility_date": "2026-08-22",
+  "observability": {
+    "enabled": true,
+  },
+  // Non-secret configuration only.
+  "vars": {
+    "ENVIRONMENT": "development",
+  },
+}

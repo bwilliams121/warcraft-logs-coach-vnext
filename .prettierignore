@@ -1,0 +1,10 @@
+# Authored project documents are formatted by hand and are authoritative.
+# Prettier must not rewrap or reflow them.
+*.md
+agent/
+
+node_modules/
+dist/
+coverage/
+.wrangler/
+package-lock.json

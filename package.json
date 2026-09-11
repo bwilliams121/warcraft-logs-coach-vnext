@@ -1,0 +1,33 @@
+{
+  "name": "warcraft-logs-coach-vnext",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Evidence-based World of Warcraft combat log coaching analyzer",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:unit": "vitest run --project node",
+    "test:workers": "vitest run --project workers"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@cloudflare/workers-types": "^5.20260911.1",
+    "prettier": "^3.9.6",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.0",
+    "wrangler": "^4.131.1"
+  },
+  "allowScripts": {
+    "workerd@1.20260815.1": true,
+    "workerd@1.20260911.1": true,
+    "esbuild@0.28.1": true
+  }
+}

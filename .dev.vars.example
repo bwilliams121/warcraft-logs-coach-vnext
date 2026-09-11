@@ -1,0 +1,20 @@
+# Local development secrets for `wrangler dev`.
+#
+# Copy this file to `.dev.vars` and fill in real values:
+#
+#     Copy-Item .dev.vars.example .dev.vars
+#
+# `.dev.vars` is gitignored and must never be committed.
+#
+# These are BACKEND SECRETS. They must never reach browser code, WoW addon code,
+# API responses, logs, error messages, or committed fixtures.
+#
+# Obtain a client ID/secret by creating a Warcraft Logs API client at:
+#     https://www.warcraftlogs.com/api/clients/
+#
+# For Cloudflare deployments, do NOT put these in wrangler.jsonc. Use:
+#     npx wrangler secret put WCL_CLIENT_ID
+#     npx wrangler secret put WCL_CLIENT_SECRET
+
+WCL_CLIENT_ID="replace-me"
+WCL_CLIENT_SECRET="replace-me"

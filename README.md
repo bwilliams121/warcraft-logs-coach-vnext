@@ -517,15 +517,85 @@ support is deferred.
 
 ---
 
+## Development
+
+The project is TypeScript on Cloudflare Workers. Node 24 or newer is required
+for local tooling.
+
+### Install
+
+```powershell
+npm.cmd ci
+```
+
+On Windows, use `npm.cmd` / `npx.cmd`. PowerShell execution policy may block
+`npm.ps1`.
+
+### Local secrets
+
+```powershell
+Copy-Item .dev.vars.example .dev.vars
+```
+
+Then edit `.dev.vars` and fill in a real Warcraft Logs client ID and secret.
+`.dev.vars` is gitignored and must never be committed.
+
+Create an API client at <https://www.warcraftlogs.com/api/clients/>.
+
+### Run locally
+
+```powershell
+npm.cmd run dev
+```
+
+```powershell
+Invoke-RestMethod -Uri http://127.0.0.1:8787/health
+```
+
+### Verify
+
+```powershell
+npm.cmd run format:check
+npm.cmd run typecheck
+npm.cmd test
+```
+
+`npm test` runs two Vitest projects:
+
+```text
+node      tests/unit, tests/contracts        plain Node, no Workers runtime
+workers   tests/integration, tests/regression  real workerd via Miniflare
+```
+
+Run one at a time with `npm.cmd run test:unit` or `npm.cmd run test:workers`.
+
+The suite is offline. No test reaches Warcraft Logs, and no test requires real
+credentials — tests that need them construct obvious sentinel values.
+
+### Deploy
+
+Secrets are never stored in `wrangler.jsonc`. Set them once per environment:
+
+```powershell
+npx.cmd wrangler login
+npx.cmd wrangler secret put WCL_CLIENT_ID
+npx.cmd wrangler secret put WCL_CLIENT_SECRET
+npm.cmd run deploy
+```
+
+`wrangler login` and `wrangler secret put` are interactive.
+
+---
+
 ## Current Status
 
-The project is in architecture and validation design.
+Milestone 1 (foundation) is implemented: project runtime, TypeScript and test
+tooling, configuration and secrets handling, a Cloudflare Worker shell, and the
+application-service boundary with its result contracts.
 
-The design documents have completed an independent architecture audit, and the
-resulting corrections have been applied.
+Gameplay analysis is **not** implemented. `POST /v1/analysis` validates a
+request, resolves configuration, and then returns an explicit
+`ANALYSIS_NOT_IMPLEMENTED` error. It never returns a successful-looking empty
+report, because absence of analysis is not evidence of good play.
 
-Milestone 1 is foundation work only: project runtime, test framework,
-configuration, secrets handling, a Cloudflare Worker shell, and the
-application-service boundary.
-
-No gameplay implementation begins before that foundation exists.
+Milestone 2 begins Warcraft Logs ingestion and completeness tracking.

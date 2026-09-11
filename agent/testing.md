@@ -543,29 +543,44 @@ rotational findings.
 
 Scope must be derived, not chosen.
 
+External callers do not select ingestion scope.
+
+There is no scope field on the analysis request, and no reconciliation of a
+caller-supplied scope. The application service derives the required scope from
+the union of the enabled analyzer requirements.
+
+This makes silent under-fetching structurally impossible rather than something a
+runtime check must catch.
+
 Test:
 
 - Scope derived from a single analyzer's declared inputs
 - Scope derived from the union of several analyzers' declared inputs
 - Adding an analyzer that requires `FULL_RAID` widens the derived scope
-- A client requesting a narrower scope than the derived requirement
+- Derivation is order-independent
+- No enabled analyzers does not default to the narrowest scope
+- The request contract exposes no scope field
 
-Expected for the last case:
+Expected:
 
-The service either widens the scope to the derived requirement, or returns
-`INSUFFICIENT_SCOPE` for the affected analyses.
+Derivation takes analyzer requirements as its only input, so no caller can
+narrow it.
 
-Not:
+Failure mode this prevents:
 
-```text
-silently retrieve less data and analyze over absence
-```
+Silently retrieving less data than the derived requirement and then analyzing
+over absence.
 
 Required regression:
 
 ```text
 scope_derivation_prevents_silent_under_fetch
 ```
+
+`INSUFFICIENT_SCOPE` describes retrieved data that could not satisfy the
+internally derived requirement.
+
+It never originates from a request parameter.
 
 ---
 

@@ -5,6 +5,7 @@ node_modules/
 .wrangler/
 dist/
 coverage/
+*.tsbuildinfo
 .DS_Store
 Thumbs.db
 *.log
