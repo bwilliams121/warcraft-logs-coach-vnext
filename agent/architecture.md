@@ -238,8 +238,9 @@ warcraft-logs-coach-vnext/
 |   |   |-- targeting/
 |   |   |-- actionability/
 |   |   |-- evidence/
-|   |   |-- findings/
 |   |   `-- timing/
+|   |
+|   |-- findings/
 |   |
 |   |-- specs/
 |   |
@@ -1873,8 +1874,24 @@ for rules derived from game metadata, such as an empty enchant slot.
 Location:
 
 ```text
-src/engine/findings/
+src/findings/
 ```
+
+This sits OUTSIDE `src/engine/` deliberately, and the boundary is load-bearing.
+
+`src/engine/` owns factual and derived state: what was observed, what can be
+reconstructed from it, and how certain that reconstruction is. A finding is a
+downstream INTERPRETIVE JUDGMENT — it names an authority, records a verdict, and
+can report `NO_AUTHORITY_AVAILABLE`.
+
+Keeping the two apart is what allows the M4 state-vocabulary contract to ban
+decision-authority vocabulary across the whole of `src/engine/` with no
+exemption. A findings module inside that tree would have required cutting a hole
+in exactly the contract that keeps the state layer honest.
+
+Dependency direction is one-way and enforced by contract test: `src/findings/`
+may read engine types; `src/engine/` may not import findings, SimulationCraft or
+specialization code.
 
 All analysis should emit structured findings.
 

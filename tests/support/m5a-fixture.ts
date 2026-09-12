@@ -1,0 +1,133 @@
+/**
+ * Loads the committed Assassination fixture into a real `CombatState`.
+ *
+ * The fixture is a sanitized slice of report `A7R6kxPJ1hC8YQ4w` fight 7 at
+ * revision 30. Events are driven through the REAL normalizer and the REAL M4
+ * state engine, so tests exercise the same path production would.
+ *
+ * EVENTS ARE LOCATED BY FACT, NEVER BY CANONICAL POSITION. A slice renumbers
+ * everything relative to the full fight, and a re-export renumbers it again, so
+ * a test pinned to an index would be pinned to an artifact of the slicing rather
+ * than to the evidence. `findCast` addresses an event the way the evidence
+ * identifies it: actor, numeric ability id and report timestamp.
+ */
+
+import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
+import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
+import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
+import {
+  indexContracts,
+  SUPPORTED_TYPE_CONTRACTS,
+} from "../../src/engine/normalization/supported-families.js";
+import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
+import { createCombatState, type CombatState } from "../../src/engine/state/combat-state.js";
+import type { EvidenceCategory } from "../../src/wcl/evidence-capability.js";
+import { syntheticFight } from "./synthetic-fight.js";
+import fixture from "../fixtures/wcl/events/wcl-assassination-envenom-combo-points.json";
+
+/** The source capture, recorded so a drifting fixture is traceable. */
+export const M5A_FIXTURE_PROVENANCE = {
+  reportCode: "A7R6kxPJ1hC8YQ4w",
+  fightId: 7,
+  reportRevision: 30,
+  gameVersion: 1,
+  logVersion: 17,
+} as const;
+
+export const ENVENOM_SPELL_ID = 32_645;
+export const ASSASSINATION_ACTOR_A = 19;
+export const ASSASSINATION_ACTOR_B = 13;
+
+/** Report timestamps of the decision points the fixture was built around. */
+export const M5A_EVENTS = {
+  /** Envenom at 3 of 7 combo points. The first exact gameplay judgment. */
+  envenomAtThree: { actorId: ASSASSINATION_ACTOR_B, reportTimeMs: 2_150_252 },
+  envenomAtFive: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_028_273 },
+  envenomAtSix: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_016_360 },
+  envenomAtSeven: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_013_095 },
+  /** A real Envenom whose snapshot omits the combo-point entry entirely. */
+  envenomWithoutComboPointEntry: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_090_898 },
+} as const;
+
+const WINDOW_START = 2_004_589;
+const WINDOW_END = 2_150_253;
+
+export const M5A_RAW_EVENTS = fixture as unknown as readonly Record<string, unknown>[];
+
+function normalizeFixture(): CombatFight {
+  const normalizer = createNormalizer({
+    fightStartTimeMs: WINDOW_START,
+    requestedRange: inclusiveRange(WINDOW_START, WINDOW_END),
+    contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
+    directionFields: VERIFIED_DIRECTION_FIELDS,
+  });
+  normalizer.accept({
+    streamId: "all",
+    pageOrdinal: 0,
+    requestedStartTimeMs: WINDOW_START,
+    nextPageTimestamp: null,
+    events: fixture as Record<string, unknown>[],
+  });
+  const normalized = normalizer.finish();
+
+  return syntheticFight({
+    observedCategories: ["CASTS", "RESOURCES", "COMBATANT_INFO"] as readonly EvidenceCategory[],
+    events: normalized.events,
+    startTimeMs: WINDOW_START,
+    endTimeMs: WINDOW_END,
+  });
+}
+
+export function m5aFight(): CombatFight {
+  return normalizeFixture();
+}
+
+export function m5aState(): CombatState {
+  return createCombatState(normalizeFixture());
+}
+
+/**
+ * A `CombatState` whose compatibility keys have been altered.
+ *
+ * Used to prove the wire contract fails closed. Only `provenance` is replaced;
+ * every observation stays exactly as captured, so the test isolates the version
+ * gate rather than also changing the evidence.
+ */
+export function m5aStateWithVersions(overrides: {
+  readonly gameVersion?: number | null;
+  readonly logVersion?: number;
+}): CombatState {
+  const fight = normalizeFixture();
+  return createCombatState({
+    ...fight,
+    provenance: {
+      ...fight.provenance,
+      gameVersion: overrides.gameVersion === undefined ? fight.provenance.gameVersion : overrides.gameVersion,
+      logVersion: overrides.logVersion ?? fight.provenance.logVersion,
+    },
+  });
+}
+
+/**
+ * The canonical position of one observed cast, addressed by fact.
+ *
+ * Throws when the fixture does not contain it, because a silently absent event
+ * would turn a real assertion into a vacuous one.
+ */
+export function findCast(
+  state: CombatState,
+  criteria: { readonly actorId: number; readonly reportTimeMs: number; readonly abilityGameId?: number },
+): number {
+  const abilityGameId = criteria.abilityGameId ?? ENVENOM_SPELL_ID;
+  for (let position = 0; position < state.fight.events.length; position += 1) {
+    const event = state.fight.events[position];
+    if (event === undefined || event.kind !== "CAST" || event.castPhase !== "COMPLETE") continue;
+    if (event.source?.actorId !== criteria.actorId) continue;
+    if (event.abilityGameId !== abilityGameId) continue;
+    if (event.reportTimeMs !== criteria.reportTimeMs) continue;
+    return position;
+  }
+  throw new Error(
+    `fixture has no COMPLETE cast of ${abilityGameId} by actor ${criteria.actorId} at ${criteria.reportTimeMs}`,
+  );
+}

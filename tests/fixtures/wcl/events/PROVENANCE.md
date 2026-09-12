@@ -277,6 +277,105 @@ trusting the list.
 
 ---
 
+## `wcl-assassination-envenom-combo-points.json`
+
+| | |
+| --- | --- |
+| Report code | `A7R6kxPJ1hC8YQ4w` |
+| Fight ID | 7 |
+| **Report revision** | **30** |
+| Encounter | Entombed Sentinels (`encounterID` 3445), difficulty 5, 20-player, kill |
+| `gameVersion` / `logVersion` | 1 / 17 |
+| Events | 12 |
+| Capture date | 2026-09-12 |
+| Purpose | the M5-A Assassination decision surface, and corroboration for the combo-point wire contract |
+
+**Revision 30 is load-bearing.** A re-export renumbers canonical positions, so
+tests address events by `(actorId, abilityGameID, timestamp)` and never by index.
+
+Assembled from narrow live windows rather than one slice, because the events of
+interest are spread across a 424-second fight. Each was selected by fact, and the
+whole set was passed through `scripts/sanitize-probe.mjs`.
+
+### Specialization provenance
+
+Two `combatantinfo` events, actors 13 and 19, both `specID: 259`. Three
+independent Warcraft Logs facts agree that both are Assassination Rogues:
+
+| Source | Value |
+| --- | --- |
+| `masterData.actors[].subType` | `"Rogue"` (actor type `Player`) |
+| `fights[].friendlySpecs[]`, index-aligned to `friendlyPlayers[]` | `"Assassination"` |
+| `combatantinfo.specID` | `259` |
+
+The index-aligned pairing was cross-checked across all 20 raiders: 17 distinct
+`(friendlySpecs string ↔ specID)` pairs, perfectly 1:1, no string mapping to two
+ids and no id mapping to two strings — including three replicated pairs
+(`Assassination↔259`, `Destruction↔267`, `Elemental↔262`). That is within-capture
+corroboration for this report; it is not a global claim about spec ids.
+
+Neither event carries a player name. The only `name` strings anywhere in this
+fixture are public ability names inside `combatantinfo.auras` (`"Battle Shout"`,
+`"Arcane Intellect"`, …). There is no `server` field and no player-identifying
+key.
+
+### The Envenom decision points
+
+| Actor | Timestamp | Combo points | What it establishes |
+| --- | --- | --- | --- |
+| 13 | 2,150,252 | `3 / 7`, cost 3 | **The first exact M5 gameplay judgment.** The spend gate is false under both Darkest Night resolutions, so the cast is `REJECTED_BY_AUTHORITY`. |
+| 19 | 2,028,273 | `5 / 7`, cost 5 | Darkest Night decides the gate → `UNKNOWN` |
+| 19 | 2,016,360 | `6 / 7`, cost 6 | Darkest Night decides the gate → `UNKNOWN` |
+| 19 | 2,013,095 | `7 / 7`, cost 7 | Gate satisfiable, which must NOT become "correct" |
+| 19 | 2,090,898 | **no type-4 entry at all** | Missing data must never become zero combo points |
+
+The last row is the most important negative evidence in this fixture. It is a
+real Envenom that plainly happened — it carries an Energy cost of 35, and the
+full capture shows Envenom damage 362 ms later — whose `classResources`
+nevertheless omits the combo-point entry entirely. A second Envenom by the same
+actor 1,015 ms later does carry `t4: 6/7 cost 6`.
+
+**Therefore: the absence of a combo-point entry does not establish that no combo
+points were spent.** Reading it as zero would manufacture the sharpest possible
+false rejection, because `0 < 5` fails the gate under both resolutions exactly
+as the genuine 3/7 case does.
+
+### Resource-type corroboration
+
+Five costed discrete-resource casts from five different classes, supporting the
+joint evidence contract in `src/data/wcl-wire/resource-types.ts`:
+
+| Actor | Class | Wire type | Observed |
+| --- | --- | --- | --- |
+| 1 | Feral Druid | 4 | `5 / 5` cost 5 |
+| 13, 19 | Rogue | 4 | `3 / 7`, `7 / 7` … |
+| 6 | Paladin | 9 | `4 / 5` cost 3 |
+| 15 | Warlock | 7 | `30 / 50` cost 20 |
+| 11 | Evoker | 19 | `4 / 5` cost 3 |
+| 14 | Death Knight | 5 | `5 / 6` cost 1 |
+
+Wire type 4 appears on the combo-point classes with class-appropriate maxima
+(Rogue 7, Feral Druid 5) and on no other class. The wider full-fight census
+behind this — 249,516 events, COMPLETE coverage — found type 4 on exactly three
+actors across the whole raid, and every type-4 entry in the fight was costed.
+
+**This corroborates the mapping; it does not prove it.** The game enum supplies
+the meaning, the capture supplies compatible wire behaviour, and the contract
+requires both. See `src/data/wcl-wire/resource-types.ts`.
+
+### What this fixture does NOT establish
+
+- That wire type 4 means combo points **outside** `gameVersion` 1 / `logVersion` 17.
+- Anything about Darkest Night. The buff appears nowhere in this report: zero of
+  the 2,035 abilities in the fight's master data have a name matching
+  `/darkest/i`. That is an observation about one capture and is **not** evidence
+  that the buff was inactive, untalented, or absent from the game.
+- Any generate-side combo-point state. The full-fight census found combo points
+  are reported only on casts that spend them, so a generator's combo-point state
+  is not observable through this field at all.
+
+---
+
 # Still NOT ESTABLISHED
 
 ## `resourcechange` attached snapshot timing

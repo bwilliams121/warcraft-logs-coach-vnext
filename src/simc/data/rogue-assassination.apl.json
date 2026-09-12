@@ -1,0 +1,373 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "rogue",
+    "specName": "assassination"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "2026-09-12",
+    "sourcePath": "engine/class_modules/apl/apl_rogue.cpp",
+    "sourceSha256": "a74e4daa8376197d94f8449555035b3fd67634db450d2f7cb16bf84233939eb3",
+    "sourceByteLength": 26074,
+    "regionStartMarker": "//assassination_apl_start",
+    "regionEndMarker": "//assassination_apl_end",
+    "extractedOn": "2026-09-12",
+    "extractorVersion": 1
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "stealth",
+          "comment": "Restealth if possible (no vulnerable enemies in combat)",
+          "sourceLine": 80
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "kick",
+          "comment": "Interrupt on cooldown to allow simming interactions with that",
+          "sourceLine": 81
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=single_target,value=spell_targets.fan_of_knives=1",
+          "comment": "Helper Variable to check for single target in combat",
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "thistle_tea,if=energy.pct<30|fight_remains<10",
+          "comment": "Edge-case check to dump thistle tea at the end of fights",
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "ambush,if=stealthed.rogue&variable.single_target&talent.blindside&talent.improved_ambush&!talent.shrouded_suffocation",
+          "comment": "Special Ambush condition for the start of fights when applicable",
+          "sourceLine": 84
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=cds,if=variable.single_target|!talent.scent_of_blood|buff.scent_of_blood.stack>=(2*talent.scent_of_blood.rank*spell_targets.fan_of_knives>?20)",
+          "comment": "Cooldown list takes priority",
+          "sourceLine": 85
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "call_action_list,name=core_dot",
+          "comment": "Maintain dots when possible",
+          "sourceLine": 86
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=generate,if=!buff.darkest_night.up&combo_points<5|buff.darkest_night.up&combo_points.deficit>0",
+          "comment": "Build combo points until 5, max with darkest night",
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "call_action_list,name=spend,if=!buff.darkest_night.up&combo_points>=5|buff.darkest_night.up&combo_points.deficit=0",
+          "comment": "If combo point threshold is reached, spend them",
+          "sourceLine": 88
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "apply_poison",
+          "comment": null,
+          "sourceLine": 73
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 74
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=trinket_sync_slot,value=1,if=trinket.1.has_use_buff&(!trinket.2.has_use_buff|trinket.1.cooldown.duration>=trinket.2.cooldown.duration)",
+          "comment": "Check which trinket slots have Stat Values",
+          "sourceLine": 75
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=trinket_sync_slot,value=2,if=trinket.2.has_use_buff&(!trinket.1.has_use_buff|trinket.2.cooldown.duration>trinket.1.cooldown.duration)",
+          "comment": null,
+          "sourceLine": 76
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "stealth",
+          "comment": "Pre-cast Slice and Dice if possible",
+          "sourceLine": 77
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "slice_and_dice,precombat_seconds=1",
+          "comment": null,
+          "sourceLine": 78
+        }
+      ]
+    },
+    {
+      "listName": "cds",
+      "receiverIdentifier": "cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "deathmark,if=dot.garrote.ticking&dot.rupture.ticking&cooldown.kingsbane.remains<=2&buff.envenom.remains>2&(target.time_to_die>10|fight_remains<20)",
+          "comment": "Cooldown list Deathmark if bleeds are active, kingsbane is ready, and we have envenom",
+          "sourceLine": 90
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "invoke_external_buff,name=power_infusion,if=dot.deathmark.ticking",
+          "comment": null,
+          "sourceLine": 91
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=items",
+          "comment": "Check for on-use trinket usage",
+          "sourceLine": 92
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "call_action_list,name=misc_cds",
+          "comment": "Check for Racial abilties, potions, and any other misc cooldowns",
+          "sourceLine": 93
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "kingsbane,if=dot.garrote.ticking&dot.rupture.ticking&(dot.deathmark.ticking|cooldown.deathmark.remains>52)&buff.envenom.up&(target.time_to_die>10|fight_remains<20)",
+          "comment": "Kingsbane if bleeds are active and Deathmark is either on cooldown or active.",
+          "sourceLine": 94
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "call_action_list,name=vanish,if=!stealthed.rogue",
+          "comment": "Vanish conditions for Improved Garrote",
+          "sourceLine": 95
+        }
+      ]
+    },
+    {
+      "listName": "core_dot",
+      "receiverIdentifier": "core_dot",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "garrote,if=(buff.improved_garrote.up|stealthed.rogue)&(pmultiplier<=1|remains<=14+6*talent.razor_wire+4*!variable.single_target)",
+          "comment": "DoT list Garrote for improved garrote when applicable",
+          "sourceLine": 97
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "garrote,if=combo_points.deficit>=1&(pmultiplier<=1|!variable.single_target)&refreshable&target.time_to_die-remains>12",
+          "comment": "Normal Garrote Maintanence",
+          "sourceLine": 98
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "garrote,cycle_targets=1,if=!talent.crimson_tempest&combo_points.deficit>=1&(pmultiplier<=1|!variable.single_target)&refreshable&target.time_to_die-remains>12",
+          "comment": "Cycle",
+          "sourceLine": 99
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "rupture,if=combo_points>=5&refreshable&target.time_to_die-remains>12&(!buff.darkest_night.up|!dot.rupture.ticking)",
+          "comment": "Normal Rupture Maintanence, making sure to not waste Darkest Night",
+          "sourceLine": 100
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "rupture,cycle_targets=1,if=!talent.crimson_tempest&combo_points>=5&refreshable&target.time_to_die-remains>12&(!buff.darkest_night.up|!dot.rupture.ticking)",
+          "comment": null,
+          "sourceLine": 101
+        }
+      ]
+    },
+    {
+      "listName": "generate",
+      "receiverIdentifier": "generate",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "crimson_tempest,target_if=max:dot.rupture.remains,if=!variable.single_target&(active_dot.garrote<spell_targets.fan_of_knives|active_dot.rupture<spell_targets.fan_of_knives)&(dot.rupture.remains>5|energy.regen_combined>40)",
+          "comment": "Generator List Crimson Tempest to spread bleeds to everything in AoE",
+          "sourceLine": 103
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "shiv,if=spell_targets.fan_of_knives<=1&talent.toxic_stiletto&talent.darkest_night",
+          "comment": "Special Edge Case to use Shiv and Fan of Knives in ST as Toxic Stiletto makes it very efficient",
+          "sourceLine": 104
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "fan_of_knives,if=buff.darkest_night.up&combo_points.deficit=1&spell_targets.fan_of_knives<=1",
+          "comment": null,
+          "sourceLine": 105
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "fan_of_knives,if=spell_targets.fan_of_knives>1+(talent.blindside&!talent.clear_the_witnesses)",
+          "comment": "Fan of Knives in AoE",
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "ambush,if=spell_targets.fan_of_knives<=1+(talent.blindside&!talent.clear_the_witnesses)",
+          "comment": "Ambush on low target counts when available",
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "mutilate,if=spell_targets.fan_of_knives<=1+(talent.blindside&!talent.clear_the_witnesses)",
+          "comment": "Mutilate on low target counts",
+          "sourceLine": 108
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fan_of_knives,if=!(main_hand.dagger&off_hand.dagger)",
+          "comment": "Fan of Knives fallback for non-dagger weapon swaps",
+          "sourceLine": 109
+        }
+      ]
+    },
+    {
+      "listName": "items",
+      "receiverIdentifier": "items",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "variable,name=base_trinket_condition,value=dot.rupture.ticking&cooldown.deathmark.remains<2|dot.deathmark.ticking|fight_remains<=22",
+          "comment": "Special Case Trinkets",
+          "sourceLine": 111
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,name=astral_gladiators_badge_of_ferocity,use_off_gcd=1,if=dot.kingsbane.ticking|dot.deathmark.ticking|(cooldown.kingsbane.remains>60|cooldown.deathmark.remains>60)",
+          "comment": null,
+          "sourceLine": 112
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box,use_off_gcd=1,if=variable.base_trinket_condition&buff.envenom.up&(target.time_to_die>10|fight_remains<20)",
+          "comment": null,
+          "sourceLine": 113
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,name=font_of_venomous_rage,use_off_gcd=1,if=buff.lingering_darkness.up|!dot.deathmark.ticking&!cooldown.deathmark.ready&cooldown.deathmark.remains>20",
+          "comment": null,
+          "sourceLine": 114
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_items,slots=trinket1,if=(variable.trinket_sync_slot=1&(debuff.deathmark.up)|(variable.trinket_sync_slot=2&!trinket.2.cooldown.ready&cooldown.deathmark.remains>20))|!variable.trinket_sync_slot|fight_remains<=20",
+          "comment": null,
+          "sourceLine": 115
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_items,slots=trinket2,if=(variable.trinket_sync_slot=2&(debuff.deathmark.up)|(variable.trinket_sync_slot=1&!trinket.1.cooldown.ready&cooldown.deathmark.remains>20))|!variable.trinket_sync_slot|fight_remains<=20",
+          "comment": null,
+          "sourceLine": 116
+        }
+      ]
+    },
+    {
+      "listName": "misc_cds",
+      "receiverIdentifier": "misc_cds",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,if=dot.rupture.ticking&(buff.bloodlust.react|fight_remains<30|debuff.deathmark.up)",
+          "comment": "Miscellaneous Cooldowns Potion",
+          "sourceLine": 118
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "blood_fury,use_off_gcd=1,if=debuff.deathmark.up",
+          "comment": "Various special racials to be synced with cooldowns",
+          "sourceLine": 119
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "berserking,use_off_gcd=1,if=debuff.deathmark.up",
+          "comment": null,
+          "sourceLine": 120
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "fireblood,use_off_gcd=1,if=debuff.deathmark.up",
+          "comment": null,
+          "sourceLine": 121
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "ancestral_call,use_off_gcd=1,if=debuff.deathmark.up",
+          "comment": null,
+          "sourceLine": 122
+        }
+      ]
+    },
+    {
+      "listName": "spend",
+      "receiverIdentifier": "spend",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "envenom,if=buff.envenom.remains<=1|buff.deathmark.up",
+          "comment": "Spend List   Spend with envenom as per normal, clipping the last second to maintain uptime",
+          "sourceLine": 124
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "envenom,if=energy.pct>70|fight_remains<15",
+          "comment": "Envenom if we are going to overcap on energy",
+          "sourceLine": 125
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "envenom,if=energy.pct>30&(target.time_to_die<12|spell_targets.fan_of_knives>=4)",
+          "comment": "In AoE with mob cycles, we want to start envenoming sooner to avoid wasting time/energy",
+          "sourceLine": 126
+        }
+      ]
+    },
+    {
+      "listName": "vanish",
+      "receiverIdentifier": "vanish",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "vanish,if=variable.single_target&talent.improved_garrote&dot.garrote.pmultiplier<=1&(dot.deathmark.ticking|cooldown.deathmark.remains>target.time_to_die-10)&!raid_event.adds.in<=30",
+          "comment": "Vanish list Single Target vanish check to line up improved garrote with Deathmark, making sure there are no adds soon. TODO Check after ImpGar fixes",
+          "sourceLine": 128
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "vanish,if=!variable.single_target&talent.improved_garrote&dot.garrote.pmultiplier<=1&(raid_event.adds.remains>=10|!raid_event.adds.in<=30)",
+          "comment": "AoE vanish check to spread improved garrote in multitarget",
+          "sourceLine": 129
+        }
+      ]
+    }
+  ]
+}
