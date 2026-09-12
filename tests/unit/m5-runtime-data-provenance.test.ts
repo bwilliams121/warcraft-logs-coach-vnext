@@ -23,30 +23,95 @@ import {
  *                     NO fight-derived gate, because no such key exists
  */
 
-describe("the combo-point wire contract", () => {
-  it("declares exactly one resource, scoped to one parser version", () => {
-    expect(RESOURCE_IDS).toEqual(["COMBO_POINTS"]);
-    expect(RESOURCE_WIRE_CONTRACTS).toHaveLength(1);
-    const contract = RESOURCE_WIRE_CONTRACTS[0];
-    expect(contract?.wireType).toBe(4);
-    expect(contract?.scope).toEqual({ gameVersion: 1, logVersion: 17 });
+/**
+ * RE-POINTED for M5-B: looked up by `resourceId`, never by array position.
+ *
+ * These assertions used to read `RESOURCE_WIRE_CONTRACTS[0]`. That was fine
+ * while there was one contract and becomes a silent hazard the moment there are
+ * two — adding a third at the front would leave every assertion below passing
+ * against the wrong row. Looking up by identity cannot drift.
+ */
+function contractFor(resourceId: string) {
+  const contract = RESOURCE_WIRE_CONTRACTS.find((entry) => entry.resourceId === resourceId);
+  if (contract === undefined) throw new Error(`no wire contract declared for ${resourceId}`);
+  return contract;
+}
+
+describe("the declared wire contracts", () => {
+  it("declares exactly the modelled resources, each scoped to one parser version", () => {
+    expect(RESOURCE_IDS).toEqual(["COMBO_POINTS", "ENERGY"]);
+    expect(RESOURCE_WIRE_CONTRACTS).toHaveLength(2);
+    for (const contract of RESOURCE_WIRE_CONTRACTS) {
+      expect(contract.scope).toEqual({ gameVersion: 1, logVersion: 17 });
+    }
+    expect(contractFor("COMBO_POINTS").wireType).toBe(4);
+    expect(contractFor("ENERGY").wireType).toBe(3);
   });
 
-  it("requires BOTH a game enum and a wire corroboration", () => {
+  it("declares one wire type per resource and one resource per wire type", () => {
+    // Two resources sharing a wire type, or one resource claiming two, would
+    // make the mapping ambiguous in a way `resourceWireTypeFor` could not
+    // report.
+    const wireTypes = RESOURCE_WIRE_CONTRACTS.map((entry) => entry.wireType);
+    const resourceIds = RESOURCE_WIRE_CONTRACTS.map((entry) => entry.resourceId);
+    expect(new Set(wireTypes).size).toBe(wireTypes.length);
+    expect(new Set(resourceIds).size).toBe(resourceIds.length);
+  });
+
+  it("requires BOTH a game enum and a wire corroboration, for every contract", () => {
     // A game enum is authoritative for the GAME. It cannot establish what a
     // third-party parser put on the wire, and the type makes declaring one
     // without the other impossible.
-    const contract = RESOURCE_WIRE_CONTRACTS[0];
-    expect(contract?.evidence.gameEnum.enumName).toBe("Enum.PowerType");
-    expect(contract?.evidence.gameEnum.memberName).toBe("ComboPoints");
-    expect(contract?.evidence.gameEnum.value).toBe(4);
-    expect(contract?.evidence.gameEnum.gameBuild.length).toBeGreaterThan(0);
-    expect(contract?.evidence.wireCorroboration.fixtureId).toBe("wcl-assassination-envenom-combo-points");
-    expect(contract?.evidence.wireCorroboration.reportCode).toBe("A7R6kxPJ1hC8YQ4w");
-    expect(contract?.evidence.wireCorroboration.reportRevision).toBe(30);
-    expect(contract?.evidence.wireCorroboration.observation.length).toBeGreaterThan(0);
+    for (const contract of RESOURCE_WIRE_CONTRACTS) {
+      expect(contract.evidence.gameEnum.enumName).toBe("Enum.PowerType");
+      expect(contract.evidence.gameEnum.value).toBe(contract.wireType);
+      expect(contract.evidence.gameEnum.gameBuild.length).toBeGreaterThan(0);
+      expect(contract.evidence.wireCorroboration.fixtureId).toBe("wcl-assassination-envenom-combo-points");
+      expect(contract.evidence.wireCorroboration.reportCode).toBe("A7R6kxPJ1hC8YQ4w");
+      expect(contract.evidence.wireCorroboration.reportRevision).toBe(30);
+      expect(contract.evidence.wireCorroboration.observation.length).toBeGreaterThan(0);
+    }
+    expect(contractFor("COMBO_POINTS").evidence.gameEnum.memberName).toBe("ComboPoints");
+    expect(contractFor("ENERGY").evidence.gameEnum.memberName).toBe("Energy");
   });
 
+  it("records the Hunter discriminator in the Energy corroboration", () => {
+    // Focus is enum 2 and Energy is enum 3. The capture showing the Hunter on 2
+    // and never on 3 is what makes the adjacent-value confusion testable rather
+    // than assumed, so the evidence string has to actually contain it.
+    const observation = contractFor("ENERGY").evidence.wireCorroboration.observation;
+    expect(observation).toContain("Hunter");
+    expect(observation).toContain("type 2");
+  });
+
+  it.each([
+    ["COMBO_POINTS", 4],
+    ["ENERGY", 3],
+  ] as const)("resolves %s inside the declared scope", (resourceId, wireType) => {
+    const resolution = resourceWireTypeFor(resourceId, { gameVersion: 1, logVersion: 17 });
+    expect(resolution.ok).toBe(true);
+    if (!resolution.ok) return;
+    expect(resolution.wireType).toBe(wireType);
+  });
+
+  it.each([
+    ["a later parser version", { gameVersion: 1, logVersion: 18 }, "LOG_VERSION_MISMATCH"],
+    ["an earlier parser version", { gameVersion: 1, logVersion: 16 }, "LOG_VERSION_MISMATCH"],
+    ["a different game", { gameVersion: 2, logVersion: 17 }, "GAME_VERSION_MISMATCH"],
+    ["an unstated game", { gameVersion: null, logVersion: 17 }, "GAME_VERSION_ABSENT"],
+  ])("fails closed for ENERGY under %s", (_label, keys, reason) => {
+    const resolution = resourceWireTypeFor("ENERGY", keys);
+    expect(resolution.ok).toBe(false);
+    if (resolution.ok) return;
+    expect(resolution.reason).toBe("INCOMPATIBLE_VERSION");
+    if (resolution.reason !== "INCOMPATIBLE_VERSION") return;
+    expect(resolution.outcome.compatible).toBe(false);
+    if (resolution.outcome.compatible) return;
+    expect(resolution.outcome.reason).toBe(reason);
+  });
+});
+
+describe("the combo-point wire contract", () => {
   it("resolves inside the declared scope", () => {
     const resolution = resourceWireTypeFor("COMBO_POINTS", { gameVersion: 1, logVersion: 17 });
     expect(resolution.ok).toBe(true);

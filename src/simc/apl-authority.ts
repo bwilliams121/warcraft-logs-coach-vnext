@@ -135,11 +135,38 @@ export type ReachabilityProof =
       readonly detail: string;
     };
 
+/**
+ * The result of looking up one named list.
+ *
+ * A discriminated result rather than a possibly-empty array, because the two
+ * cases mean opposite things once a caller starts reasoning about what a list
+ * selects. An AUTHORITATIVE list holding zero actions selects nothing, exactly
+ * — `call_action_list` enters it and returns. A list that is ABSENT from the
+ * authority is a hole in our model of it, and no selection conclusion follows
+ * at all.
+ *
+ * Returning `[]` for both would make "the authority says nothing fires here"
+ * indistinguishable from "we could not find the list", which is the same class
+ * of failure as reading a missing observation as zero.
+ */
+export type ListLookup =
+  | { readonly found: true; readonly listName: string; readonly actions: readonly AplAction[] }
+  | { readonly found: false; readonly listName: string };
+
 export interface AplAuthority {
   readonly artifact: AuthorityArtifact;
   readonly actions: readonly AplAction[];
   /** Lists in which an action token appears, in artifact order. */
   listsContainingAction(actionToken: string): readonly string[];
+  /**
+   * One named list's actions, in ascending `priorityOrdinal`.
+   *
+   * Priority order is the whole meaning of an APL list, so the sort is explicit
+   * here even though the artifact validator already pins ordinals to array
+   * indices. An invariant a caller depends on and nobody restates is an
+   * invariant a future extractor can break silently.
+   */
+  actionsInList(listName: string): ListLookup;
   /**
    * Proves that every path to `actionToken` passes through one conditional edge.
    *
@@ -168,6 +195,16 @@ export function loadAplAuthority(rawArtifact: unknown): AuthorityLoadResult {
     }
   }
   const listNames = new Set(artifact.lists.map((list) => list.listName));
+
+  function actionsInList(listName: string): ListLookup {
+    if (!listNames.has(listName)) {
+      return { found: false, listName };
+    }
+    const inList = actions
+      .filter((action) => action.listName === listName)
+      .sort((left, right) => left.priorityOrdinal - right.priorityOrdinal);
+    return { found: true, listName, actions: inList };
+  }
 
   function listsContainingAction(actionToken: string): readonly string[] {
     const names: string[] = [];
@@ -261,5 +298,8 @@ export function loadAplAuthority(rawArtifact: unknown): AuthorityLoadResult {
     };
   }
 
-  return { ok: true, authority: { artifact, actions, listsContainingAction, proveSoleGateTo } };
+  return {
+    ok: true,
+    authority: { artifact, actions, listsContainingAction, actionsInList, proveSoleGateTo },
+  };
 }

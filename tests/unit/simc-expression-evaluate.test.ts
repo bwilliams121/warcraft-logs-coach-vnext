@@ -4,20 +4,22 @@ import { parseSimcExpression } from "../../src/simc/expression/parse.js";
 import {
   MAX_UNRESOLVED_ATOMS,
   evaluateSimcExpression,
+  unknownNumber,
   type AtomBindings,
 } from "../../src/simc/expression/evaluate.js";
 
 /**
- * World enumeration over correlated unresolved atoms.
+ * World enumeration over correlated unresolved BOOLEAN atoms.
  *
- * The contract in one line: every occurrence of one atom takes the SAME value
- * within a world, and a value is only reported when every world agrees.
+ * The contract in one line: every occurrence of one boolean atom takes the SAME
+ * value within a world, and a value is only reported when every world agrees.
  *
- * There is no three-valued logic in the evaluator. Inside a world every atom is
- * bound, so each world produces a definite result; uncertainty is expressed by
- * worlds disagreeing, not by an unknown propagating through a short-circuit.
- * That is what makes "unsupported syntax silently becomes false" structurally
- * impossible rather than merely avoided.
+ * Enumeration applies to boolean atoms only. An unavailable MAGNITUDE is
+ * UNKNOWN_NUMBER and is never enumerated — see
+ * `simc-expression-unknown-state.test.ts`, which owns that half of the
+ * contract. Everything in this file uses conditions with no magnitude gaps, so
+ * every world here reaches a definite TRUE or FALSE and the aggregate is
+ * decided by whether the worlds agree.
  */
 
 const GATE = "!buff.darkest_night.up&combo_points>=5|buff.darkest_night.up&combo_points.deficit=0";
@@ -28,8 +30,16 @@ function evaluate(expression: string, bindings: AtomBindings) {
   return evaluateSimcExpression(parsed.ast, expression, bindings);
 }
 
+/** Energy is irrelevant to every condition here, and says so explicitly. */
+const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
+
 function gate(comboPoints: number, max: number) {
-  return evaluate(GATE, { comboPoints, comboPointsDeficit: max - comboPoints, knownBuffs: [] });
+  return evaluate(GATE, {
+    comboPoints,
+    comboPointsDeficit: max - comboPoints,
+    energyPct: NO_ENERGY,
+    knownBuffs: [],
+  });
 }
 
 describe("the pinned gate across real combo-point states", () => {
@@ -52,7 +62,7 @@ describe("the pinned gate across real combo-point states", () => {
     if (result.outcome !== "RESOLVED") return;
     expect(result.value).toBe(false);
     expect(result.trace.aggregateRule).toBe("INVARIANT_ACROSS_WORLDS");
-    expect(result.trace.worlds.map((world) => world.result)).toEqual([false, false]);
+    expect(result.trace.worlds.map((world) => world.result)).toEqual(["FALSE", "FALSE"]);
   });
 
   it("proves TRUE at full resource because the gate is a tautology in the atom", () => {
@@ -74,8 +84,8 @@ describe("the pinned gate across real combo-point states", () => {
       result: world.result,
     }));
     expect(byAssignment).toEqual([
-      { up: false, result: true },
-      { up: true, result: false },
+      { up: false, result: "TRUE" },
+      { up: true, result: "FALSE" },
     ]);
   });
 });
@@ -93,6 +103,7 @@ describe("atom correlation", () => {
     const result = evaluate("buff.a.up&buff.b.up|buff.c.up", {
       comboPoints: 0,
       comboPointsDeficit: 0,
+      energyPct: NO_ENERGY,
       knownBuffs: [],
     });
     if (result.outcome !== "UNRESOLVED") return;
@@ -101,7 +112,12 @@ describe("atom correlation", () => {
 
   it("stops enumerating past the supported limit rather than growing", () => {
     const expression = "buff.a.up|buff.b.up|buff.c.up|buff.d.up|buff.e.up";
-    const result = evaluate(expression, { comboPoints: 0, comboPointsDeficit: 0, knownBuffs: [] });
+    const result = evaluate(expression, {
+      comboPoints: 0,
+      comboPointsDeficit: 0,
+      energyPct: NO_ENERGY,
+      knownBuffs: [],
+    });
     expect(result.outcome).toBe("UNSUPPORTED");
     if (result.outcome !== "UNSUPPORTED") return;
     expect(result.reason).toBe("TOO_MANY_UNRESOLVED_ATOMS");
@@ -113,6 +129,7 @@ describe("atom correlation", () => {
     const result = evaluate(GATE, {
       comboPoints: 6,
       comboPointsDeficit: 1,
+      energyPct: NO_ENERGY,
       knownBuffs: [{ name: "darkest_night", up: false }],
     });
     if (result.outcome !== "RESOLVED") return;
@@ -130,7 +147,12 @@ describe("SimulationCraft numeric semantics", () => {
     ["!combo_points", 0, true],
     ["!combo_points", 3, false],
   ])("%s with combo_points=%i is %s", (expression, comboPoints, expected) => {
-    const result = evaluate(expression, { comboPoints, comboPointsDeficit: 0, knownBuffs: [] });
+    const result = evaluate(expression, {
+      comboPoints,
+      comboPointsDeficit: 0,
+      energyPct: NO_ENERGY,
+      knownBuffs: [],
+    });
     if (result.outcome !== "RESOLVED") return;
     expect(result.value).toBe(expected);
   });
@@ -143,7 +165,12 @@ describe("SimulationCraft numeric semantics", () => {
     ["combo_points=5", 5, true],
     ["combo_points=5", 6, false],
   ])("%s with combo_points=%i is %s", (expression, comboPoints, expected) => {
-    const result = evaluate(expression, { comboPoints, comboPointsDeficit: 0, knownBuffs: [] });
+    const result = evaluate(expression, {
+      comboPoints,
+      comboPointsDeficit: 0,
+      energyPct: NO_ENERGY,
+      knownBuffs: [],
+    });
     if (result.outcome !== "RESOLVED") return;
     expect(result.value).toBe(expected);
   });
@@ -173,9 +200,21 @@ describe("the trace is JSON-safe and self-describing", () => {
     if (result.outcome !== "RESOLVED") return;
     expect(result.trace.expressionRaw).toBe(GATE);
     expect(result.trace.atoms).toEqual([
-      { key: "buff.darkest_night.up", binding: "UNRESOLVED_BOOLEAN", value: null },
-      { key: "combo_points", binding: "KNOWN", value: 3 },
-      { key: "combo_points.deficit", binding: "KNOWN", value: 4 },
+      {
+        key: "buff.darkest_night.up",
+        shape: "BOOLEAN",
+        binding: "UNRESOLVED_BOOLEAN",
+        value: null,
+        unknownNumberReason: null,
+      },
+      { key: "combo_points", shape: "NUMERIC", binding: "KNOWN", value: 3, unknownNumberReason: null },
+      {
+        key: "combo_points.deficit",
+        shape: "NUMERIC",
+        binding: "KNOWN",
+        value: 4,
+        unknownNumberReason: null,
+      },
     ]);
   });
 });

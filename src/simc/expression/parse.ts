@@ -3,18 +3,21 @@
  *
  * SUPPORTED, AND NOTHING ELSE:
  *
- *     operators     !   &   |   >=   =   <   ( )
+ *     operators     !   &   |   >=   >   =   <   <=   ( )
  *     literals      non-negative integers
  *     atoms         combo_points
  *                   combo_points.deficit
+ *                   energy.pct
+ *                   fight_remains
  *                   buff.<name>.up
+ *                   buff.<name>.remains
  *
  * PRECEDENCE, loosest to tightest:
  *
- *     |            or
- *     &            and
- *     >= = <       comparison (non-chaining)
- *     !            unary, tightest
+ *     |                or
+ *     &                and
+ *     >= > = < <=      comparison (non-chaining)
+ *     !                unary, tightest
  *
  * So `!buff.darkest_night.up&combo_points>=5|buff.darkest_night.up&combo_points.deficit=0`
  * parses as:
@@ -27,16 +30,28 @@
  *
  * FAIL CLOSED, WHOLE-EXPRESSION. Every rejection path returns a failure for the
  * ENTIRE expression. There is no partial parse, no skipped fragment and no
- * placeholder node. `>`, `<=`, `!=`, `&&`, `||`, decimals, arithmetic and every
- * unlisted identifier (`energy.pct`, `talent.x`, `spell_targets.y`,
- * `target.time_to_die`, `variable.z`, …) are refusals, not defaults.
+ * placeholder node. `!=`, `&&`, `||`, `>?`, `<?`, `==`, decimals, arithmetic and
+ * every unlisted identifier (`talent.x`, `spell_targets.y`, `target.time_to_die`,
+ * `dot.z.ticking`, `variable.w`, `buff.x.stack`, `energy.regen_combined`, …) are
+ * refusals, not defaults.
  *
- * `>` is deliberately absent even though `<` is present. `<` falls out of the
- * same comparison production at no additional cost; `>` is not needed by the one
- * condition M5-A evaluates, and adding operators nobody needs widens the
- * supported surface without evidence. A consequence worth knowing: the pinned
- * `generate` call condition uses `>` and therefore does NOT parse, which is the
- * correct fail-closed outcome rather than an accident.
+ * WHY `>` AND `<=` ARE HERE AND `>?` / `<?` ARE NOT
+ *
+ * M5-B evaluates the pinned `spend` sub-list, whose first two lines need `<=`
+ * (`buff.envenom.remains<=1`) and `>` (`energy.pct>70`). Adding exactly those
+ * two is the minimum that makes the sub-list evaluable; adding the rest of
+ * SimulationCraft's operator set would widen the supported surface without a
+ * decision that needs it.
+ *
+ * `>?` and `<?` are SimulationCraft's max and min operators. They share a
+ * leading character with `>` and `<`, so every operator match in this file is
+ * LONGEST-FIRST: a `>?` that decayed into `>` followed by a stray `?` would
+ * change an authority condition's meaning silently, which is the exact class of
+ * failure the whole-expression refusal exists to prevent.
+ *
+ * A consequence worth knowing: the pinned `generate` call condition uses `>`
+ * and therefore now PARSES. It does not follow that it is decidable — see
+ * `evaluate.ts` — only that its refusal is no longer a syntax refusal.
  */
 
 import type { ComparisonOperator, ExpressionNode } from "./ast.js";
@@ -95,14 +110,18 @@ function startsWith(cursor: Cursor, token: string): boolean {
 }
 
 /**
- * Operator-shaped tokens outside the subset.
+ * Operator-shaped tokens OUTSIDE the subset.
  *
- * Two characters before one, so `<=` is never read as `<` plus a stray `=`, and
- * `&&` is never read as two `&`s. `>=` is supported and is checked for first
- * wherever a `>` could begin it.
+ * Every entry here is longer than, or disjoint from, any supported operator it
+ * could be confused with. `>?` and `<?` appear so they win against the
+ * supported `>` and `<`; `==` wins against `=`; `!=` wins against `!`; `&&` and
+ * `||` win against `&` and `|`; `%%` wins against `%`.
+ *
+ * `>`, `<`, `>=`, `<=` and `=` are deliberately ABSENT: they are supported, and
+ * a supported operator listed here would be refused wherever an operand was
+ * expected.
  */
 const UNSUPPORTED_OPERATOR_TOKENS = [
-  "<=",
   "!=",
   "&&",
   "||",
@@ -110,7 +129,6 @@ const UNSUPPORTED_OPERATOR_TOKENS = [
   "<?",
   "==",
   "%%",
-  ">",
   "+",
   "-",
   "*",
@@ -121,7 +139,6 @@ const UNSUPPORTED_OPERATOR_TOKENS = [
 ] as const;
 
 function matchUnsupportedOperator(cursor: Cursor): string | null {
-  if (startsWith(cursor, ">=")) return null;
   for (const token of UNSUPPORTED_OPERATOR_TOKENS) {
     if (startsWith(cursor, token)) return token;
   }
@@ -141,7 +158,7 @@ function rejectLookalikeOperators(cursor: Cursor): void {
  *
  * Without this, an unsupported binary operator merely ends the parse early and
  * surfaces as `TRAILING_INPUT` — still fail-closed, but it names the wrong
- * problem. `combo_points>5` is not trailing junk; it is an operator we do not
+ * problem. `combo_points!=5` is not trailing junk; it is an operator we do not
  * support, and a finding that has to disclose why the authority could not be
  * evaluated should say so.
  */
@@ -154,6 +171,9 @@ function rejectUnsupportedContinuation(cursor: Cursor): void {
   }
 }
 
+const BUFF_UP = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.up$/;
+const BUFF_REMAINS = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.remains$/;
+
 function parseIdentifier(cursor: Cursor): ExpressionNode {
   const start = cursor.index;
   while (cursor.index < cursor.text.length) {
@@ -165,15 +185,25 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
 
   if (raw === "combo_points") return { kind: "COMBO_POINTS" };
   if (raw === "combo_points.deficit") return { kind: "COMBO_POINTS_DEFICIT" };
+  if (raw === "energy.pct") return { kind: "ENERGY_PCT" };
+  if (raw === "fight_remains") return { kind: "FIGHT_REMAINS" };
 
-  const buff = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.up$/.exec(raw);
-  if (buff !== null) {
-    const name = buff[1];
+  const up = BUFF_UP.exec(raw);
+  if (up !== null) {
+    const name = up[1];
     if (name !== undefined) return { kind: "BUFF_UP", buffName: name };
   }
 
-  // Everything else is refused. `energy.pct`, `talent.x`, `spell_targets.y`,
-  // `variable.z`, `buff.x.remains` and `dot.y.ticking` all land here.
+  const remains = BUFF_REMAINS.exec(raw);
+  if (remains !== null) {
+    const name = remains[1];
+    if (name !== undefined) return { kind: "BUFF_REMAINS", buffName: name };
+  }
+
+  // Everything else is refused. `talent.x`, `spell_targets.y`, `variable.z`,
+  // `target.time_to_die`, `dot.y.ticking`, `buff.x.stack`, `stealthed.rogue` and
+  // `energy.regen_combined` all land here. Note that `energy.pct` matching
+  // exactly does NOT make `energy.` a supported namespace.
   throw new ParseError("UNSUPPORTED_IDENTIFIER", raw, start);
 }
 
@@ -231,19 +261,41 @@ function parseUnary(cursor: Cursor): ExpressionNode {
   return parsePrimary(cursor);
 }
 
+/**
+ * Reads one comparison operator, LONGEST-MATCH FIRST.
+ *
+ * The order below is the whole correctness argument of this function. `>?` is
+ * tested before `>=` and `>`; `<?` before `<=` and `<`; `==` before `=`. An
+ * unsupported two-character operator must be REFUSED, never silently truncated
+ * to its supported one-character prefix.
+ */
 function readComparisonOperator(cursor: Cursor): ComparisonOperator | null {
+  if (startsWith(cursor, ">?")) {
+    throw new ParseError("UNSUPPORTED_OPERATOR", ">?", cursor.index);
+  }
+  if (startsWith(cursor, "<?")) {
+    throw new ParseError("UNSUPPORTED_OPERATOR", "<?", cursor.index);
+  }
+  if (startsWith(cursor, "==")) {
+    throw new ParseError("UNSUPPORTED_OPERATOR", "==", cursor.index);
+  }
   if (startsWith(cursor, ">=")) {
     cursor.index += 2;
     return ">=";
   }
   if (startsWith(cursor, "<=")) {
-    throw new ParseError("UNSUPPORTED_OPERATOR", "<=", cursor.index);
+    cursor.index += 2;
+    return "<=";
+  }
+  if (startsWith(cursor, ">")) {
+    cursor.index += 1;
+    return ">";
   }
   if (startsWith(cursor, "<")) {
     cursor.index += 1;
     return "<";
   }
-  if (startsWith(cursor, "=") && !startsWith(cursor, "==")) {
+  if (startsWith(cursor, "=")) {
     cursor.index += 1;
     return "=";
   }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { STATE_CERTAINTIES, UNKNOWN_REASONS } from "../../src/engine/state/state-result.js";
 import { NO_AUTHORITY_REASONS, DECISION_AUTHORITY_KINDS } from "../../src/findings/authority.js";
-import { JUDGMENT_BLOCKERS, OBSERVED_ACTION_JUDGMENT_STATUSES } from "../../src/findings/judgment.js";
+import { OBSERVED_ACTION_BLOCKERS, OBSERVED_ACTION_JUDGMENT_STATUSES } from "../../src/findings/judgment.js";
 import { NOT_EVALUATED_REASONS } from "../../src/findings/run-result.js";
 import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassination/evaluator.js";
 import { ASSASSINATION_ACTOR_A, ASSASSINATION_ACTOR_B, m5aState } from "../support/m5a-fixture.js";
@@ -35,7 +35,7 @@ describe("the two vocabularies are disjoint", () => {
 
   it("shares no member between M4 unknown reasons and M5 blockers", () => {
     const overlap = UNKNOWN_REASONS.filter((value) =>
-      (JUDGMENT_BLOCKERS as readonly string[]).includes(value),
+      (OBSERVED_ACTION_BLOCKERS as readonly string[]).includes(value),
     );
     expect(overlap).toEqual([]);
   });
@@ -49,7 +49,7 @@ describe("the two vocabularies are disjoint", () => {
     // "No trustworthy standard exists" and "we could not apply the standard"
     // are different claims. Reporting the second as the first would present the
     // analyzer's incompleteness as a fact about the game.
-    for (const blocker of JUDGMENT_BLOCKERS) {
+    for (const blocker of OBSERVED_ACTION_BLOCKERS) {
       expect([...NO_AUTHORITY_REASONS]).not.toContain(blocker);
     }
     expect(NO_AUTHORITY_REASONS).toEqual(["NO_PINNED_AUTHORITY_FOR_SPEC"]);
@@ -66,7 +66,7 @@ describe("the two vocabularies are disjoint", () => {
 
   it("keeps run-level reasons distinct from per-decision blockers", () => {
     for (const reason of NOT_EVALUATED_REASONS) {
-      expect([...JUDGMENT_BLOCKERS]).not.toContain(reason);
+      expect([...OBSERVED_ACTION_BLOCKERS]).not.toContain(reason);
     }
   });
 });

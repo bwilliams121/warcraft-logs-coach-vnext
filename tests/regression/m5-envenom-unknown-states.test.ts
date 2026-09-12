@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassination/evaluator.js";
 import type { Finding } from "../../src/findings/finding.js";
-import { ASSASSINATION_ACTOR_A, M5A_EVENTS, findCast, m5aState } from "../support/m5a-fixture.js";
+import type { ObservedActionJudgment } from "../../src/findings/judgment.js";
+import {
+  ASSASSINATION_ACTOR_A,
+  M5A_EVENTS,
+  findCast,
+  m5aState,
+  observedActionJudgmentOf,
+} from "../support/m5a-fixture.js";
 
 /**
  * The UNKNOWN states, all on real captured Envenom casts.
@@ -27,6 +34,10 @@ function findingAt(reportTimeMs: number): Finding {
   return finding;
 }
 
+function judgmentAt(reportTimeMs: number): ObservedActionJudgment {
+  return observedActionJudgmentOf(findingAt(reportTimeMs));
+}
+
 describe("every in-scope Envenom cast produces exactly one structured result", () => {
   it("evaluates the run", () => {
     expect(run.outcome).toBe("EVALUATED");
@@ -34,17 +45,18 @@ describe("every in-scope Envenom cast produces exactly one structured result", (
 
   it("emits one finding per observed cast, with no silent skips", () => {
     if (run.outcome !== "EVALUATED") return;
-    // The fixture holds four Envenom casts for this actor: 7/7, 6/7, 5/7 and
-    // one whose snapshot omits combo points entirely.
-    expect(run.findings).toHaveLength(4);
-    expect(run.coverage.observedEnvenomCastsInScope).toBe(4);
+    // The fixture holds six Envenom casts for this actor: four at 7/7 (two of
+    // them added for M5-B), one at 6/7, one at 5/7, and one whose snapshot omits
+    // combo points entirely.
+    expect(run.findings).toHaveLength(6);
+    expect(run.coverage.observedEnvenomCastsInScope).toBe(6);
     const positions = run.findings.map((finding) => finding.decisionPoint.position);
-    expect(new Set(positions).size).toBe(4);
+    expect(new Set(positions).size).toBe(6);
   });
 
   it("counts coverage without overclaiming completeness", () => {
     if (run.outcome !== "EVALUATED") return;
-    expect(run.coverage.withExactPreCostComboPoints).toBe(3);
+    expect(run.coverage.withExactPreCostComboPoints).toBe(5);
     expect(run.coverage.missingExactComboPoints).toBe(1);
     expect(run.coverage.rejectedByAuthority).toBe(0);
     expect(run.coverage.castCoverage).toBe("COMPLETE");
@@ -61,7 +73,7 @@ describe("a mid-range combo-point state stays UNKNOWN", () => {
     ["5 of 7", M5A_EVENTS.envenomAtFive.reportTimeMs, 5, 2],
     ["6 of 7", M5A_EVENTS.envenomAtSix.reportTimeMs, 6, 1],
   ])("%s resolves to UNRESOLVED_AUTHORITY_STATE", (_label, reportTimeMs, amount, deficit) => {
-    const judgment = findingAt(reportTimeMs).judgment;
+    const judgment = judgmentAt(reportTimeMs);
     expect(judgment.status).toBe("UNKNOWN");
     if (judgment.status !== "UNKNOWN") return;
     expect(judgment.blocker).toBe("UNRESOLVED_AUTHORITY_STATE");
@@ -72,24 +84,24 @@ describe("a mid-range combo-point state stays UNKNOWN", () => {
     // exactly why the answer is UNKNOWN rather than a branch we picked.
     expect(judgment.trace?.aggregate).toBe("UNRESOLVED");
     expect(judgment.trace?.aggregateRule).toBe("WORLDS_DISAGREE");
-    expect(judgment.trace?.worlds.map((world) => world.result).sort()).toEqual([false, true]);
+    expect(judgment.trace?.worlds.map((world) => world.result).sort()).toEqual(["FALSE", "TRUE"]);
   });
 
   it("never resolves the disagreement by assuming Darkest Night is absent", () => {
-    const judgment = findingAt(M5A_EVENTS.envenomAtSix.reportTimeMs).judgment;
+    const judgment = judgmentAt(M5A_EVENTS.envenomAtSix.reportTimeMs);
     if (judgment.status !== "UNKNOWN") return;
     // The DN=false world evaluates TRUE at 6/7. Had the evaluator treated an
     // unobserved buff as inactive, this would have become a positive result.
     const withoutDarkestNight = judgment.trace?.worlds.find((world) =>
       world.assignment.some((entry) => entry.atom === "buff.darkest_night.up" && !entry.up),
     );
-    expect(withoutDarkestNight?.result).toBe(true);
+    expect(withoutDarkestNight?.result).toBe("TRUE");
     expect(judgment.blocker).not.toBe("ANALYZER_SURFACE_INCOMPLETE");
   });
 });
 
 describe("a satisfiable gate is never a positive verdict", () => {
-  const judgment = findingAt(M5A_EVENTS.envenomAtSeven.reportTimeMs).judgment;
+  const judgment = judgmentAt(M5A_EVENTS.envenomAtSeven.reportTimeMs);
 
   it("resolves 7/7 to UNKNOWN with ANALYZER_SURFACE_INCOMPLETE", () => {
     expect(judgment.status).toBe("UNKNOWN");
@@ -114,23 +126,24 @@ describe("a satisfiable gate is never a positive verdict", () => {
 
 describe("a missing combo-point observation is never zero", () => {
   const finding = findingAt(M5A_EVENTS.envenomWithoutComboPointEntry.reportTimeMs);
+  const judgment = observedActionJudgmentOf(finding);
 
   it("resolves to UNKNOWN with EXACT_RESOURCE_UNAVAILABLE", () => {
-    expect(finding.judgment.status).toBe("UNKNOWN");
-    if (finding.judgment.status !== "UNKNOWN") return;
-    expect(finding.judgment.blocker).toBe("EXACT_RESOURCE_UNAVAILABLE");
+    expect(judgment.status).toBe("UNKNOWN");
+    if (judgment.status !== "UNKNOWN") return;
+    expect(judgment.blocker).toBe("EXACT_RESOURCE_UNAVAILABLE");
   });
 
   it("asserts no combo-point value at all", () => {
-    if (finding.judgment.status !== "UNKNOWN") return;
+    if (judgment.status !== "UNKNOWN") return;
     // This is a REAL captured Envenom that plainly happened — it carries an
     // Energy cost of 35 — whose snapshot simply omits the combo-point entry.
     // Reading that absence as "0 combo points" would manufacture the sharpest
     // possible false rejection, since 0 < 5 fails the gate under both
     // resolutions exactly like the genuine 3/7 case does.
-    expect(finding.judgment.observedState).toBeNull();
-    expect(finding.judgment.trace).toBeNull();
-    expect(JSON.stringify(finding.judgment)).not.toContain("observedAmount");
+    expect(judgment.observedState).toBeNull();
+    expect(judgment.trace).toBeNull();
+    expect(JSON.stringify(judgment)).not.toContain("observedAmount");
   });
 
   it("is not counted as an exact observation", () => {

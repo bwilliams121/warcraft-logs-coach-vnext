@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseSimcExpression } from "../../src/simc/expression/parse.js";
-import { evaluateSimcExpression } from "../../src/simc/expression/evaluate.js";
+import { evaluateSimcExpression, unknownNumber } from "../../src/simc/expression/evaluate.js";
 import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassination/evaluator.js";
 import { OBSERVED_ACTION_JUDGMENT_STATUSES } from "../../src/findings/judgment.js";
 import { NO_AUTHORITY_REASONS } from "../../src/findings/authority.js";
@@ -33,6 +33,9 @@ import { syntheticAuthority } from "../support/m5a-authority.js";
 const GATE = "!buff.darkest_night.up&combo_points>=5|buff.darkest_night.up&combo_points.deficit=0";
 const state = m5aState();
 
+/** The pinned gate mentions no energy. Stated explicitly rather than omitted. */
+const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
+
 function evaluateGate(
   comboPoints: number,
   comboPointsDeficit: number,
@@ -40,7 +43,12 @@ function evaluateGate(
 ) {
   const parsed = parseSimcExpression(GATE);
   if (!parsed.ok) throw new Error("the pinned gate must parse");
-  return evaluateSimcExpression(parsed.ast, GATE, { comboPoints, comboPointsDeficit, knownBuffs });
+  return evaluateSimcExpression(parsed.ast, GATE, {
+    comboPoints,
+    comboPointsDeficit,
+    energyPct: NO_ENERGY,
+    knownBuffs,
+  });
 }
 
 describe("MUTATION: treating a missing combo-point observation as zero", () => {
@@ -137,6 +145,7 @@ describe("MUTATION: losing correlated-atom identity", () => {
     const mutated = evaluateSimcExpression(parsed.ast, decorrelated, {
       comboPoints: 7,
       comboPointsDeficit: 0,
+      energyPct: NO_ENERGY,
       knownBuffs: [],
     });
     // Four worlds instead of two, and they disagree.
@@ -160,7 +169,10 @@ describe("MUTATION: losing correlated-atom identity", () => {
 });
 
 describe("MUTATION: treating unsupported syntax as false", () => {
-  const condition = "combo_points>=5&energy.pct>70";
+  // RE-POINTED for M5-B. This used to be `combo_points>=5&energy.pct>70`, which
+  // now parses. `talent.darkest_night` is still outside the subset, so the
+  // mutation and the refusal both stay real.
+  const condition = "combo_points>=5&talent.darkest_night";
 
   it("would let a false conjunct short-circuit an unparsed fragment into a rejection", () => {
     // The mutation: parse what we understand, treat the rest as false. At 3
@@ -173,6 +185,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
     const mutated = evaluateSimcExpression(supportedPart.ast, "combo_points>=5", {
       comboPoints: 3,
       comboPointsDeficit: 4,
+      energyPct: NO_ENERGY,
       knownBuffs: [],
     });
     expect(mutated.outcome).toBe("RESOLVED");
@@ -183,9 +196,9 @@ describe("MUTATION: treating unsupported syntax as false", () => {
   it("but the real parser refuses the whole expression", () => {
     const parsed = parseSimcExpression(condition);
     expect(parsed.ok).toBe(false);
-    if (parsed.ok) return;
+    if (parsed.ok) throw new Error("expected a parse failure, not a silent pass");
     expect(parsed.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(parsed.fragment).toBe("energy.pct");
+    expect(parsed.fragment).toBe("talent.darkest_night");
   });
 
   it("and there is no AST node an unsupported fragment could hide in", () => {
@@ -195,6 +208,35 @@ describe("MUTATION: treating unsupported syntax as false", () => {
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
     expect(JSON.stringify(parsed.ast)).not.toContain("UNSUPPORTED");
+  });
+
+  it("and unsupported syntax can never arrive as UNKNOWN_STATE either", () => {
+    // M5-B added a three-valued truth domain. The danger it introduces: if a
+    // parse failure could enter that domain as UNKNOWN_STATE, then
+    // `FALSE & UNKNOWN_STATE = FALSE` would launder an unparsed fragment into a
+    // confident rejection — exactly the mutation above, by a new route.
+    //
+    // It cannot, and the proof is structural rather than behavioural: a parse
+    // failure yields no AST, so there is nothing to evaluate.
+    const parsed = parseSimcExpression(condition);
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok) return;
+    expect(parsed).not.toHaveProperty("ast");
+
+    // And the atoms that DO legitimately produce UNKNOWN_STATE are declared
+    // magnitudes, never a leftover fragment.
+    const supported = parseSimcExpression("fight_remains<15");
+    expect(supported.ok).toBe(true);
+    if (!supported.ok) return;
+    const evaluated = evaluateSimcExpression(supported.ast, "fight_remains<15", {
+      comboPoints: 7,
+      comboPointsDeficit: 0,
+      energyPct: NO_ENERGY,
+      knownBuffs: [],
+    });
+    expect(evaluated.outcome).toBe("UNRESOLVED");
+    if (evaluated.outcome !== "UNRESOLVED") return;
+    expect(evaluated.trace.worlds.map((world) => world.result)).toEqual(["UNKNOWN_STATE"]);
   });
 });
 

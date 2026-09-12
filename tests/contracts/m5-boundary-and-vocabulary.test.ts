@@ -1,6 +1,8 @@
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { ACTIONABILITY_STATUSES } from "../../src/findings/actionability.js";
+
 /**
  * The M5 layer boundary, swept mechanically.
  *
@@ -203,14 +205,62 @@ describe("M5 forms no unearned verdict", () => {
     }
   });
 
-  it("never defaults actionability to available", () => {
+  /**
+   * RE-POINTED for M5-B, and deliberately no longer load-bearing on a substring.
+   *
+   * The previous version asserted that no M5 file contained the literal
+   * `"ACTIONABLE"`. That would have passed for
+   * `"PROVEN_ACTIONABLE_BY_OBSERVED_EXECUTION"` only because the character before
+   * `ACTIONABLE` is an underscore rather than a quote — an accident of spelling,
+   * not a decision. The same accident would have let `"NEVER_ACTIONABLE"` and
+   * `"NOT_YET_ACTIONABLE"` through, which is exactly what the rule exists to
+   * stop.
+   *
+   * So the guarantee is asserted STRUCTURALLY over the exported union, which no
+   * prefix can evade. The substring sweeps are kept underneath as a cheap
+   * backstop against the bare literals, and neither of them needs an exception.
+   */
+  it("permits exactly the authorized actionability statuses", () => {
+    expect([...ACTIONABILITY_STATUSES]).toEqual(["NOT_EVALUATED", "PROVEN_ACTIONABLE_BY_OBSERVED_EXECUTION"]);
+  });
+
+  it("declares no negative actionability state at all", () => {
+    // Absence of an observed restriction is not evidence of availability, and
+    // absence of an observed cast is not evidence of unavailability. This guards
+    // the second: there is no member to infer into.
+    for (const status of ACTIONABILITY_STATUSES) {
+      expect(status, `${status} reads as a negative claim`).not.toMatch(
+        /NOT_ACTIONABLE|UNAVAILABLE|IMPOSSIBLE|UNUSABLE|BLOCKED/,
+      );
+    }
+  });
+
+  it("names the evidence in every positive actionability status", () => {
+    // A positive member must say what proved it, so a future member cannot mean
+    // "we assumed it was actionable".
+    for (const status of ACTIONABILITY_STATUSES) {
+      if (status === "NOT_EVALUATED") continue;
+      expect(status, `${status} claims actionability without naming evidence`).toMatch(
+        /^PROVEN_ACTIONABLE_BY_/,
+      );
+    }
+  });
+
+  it("never declares a bare ACTIONABLE or NOT_ACTIONABLE literal", () => {
     for (const path of M5_FILES) {
       const code = codeOf(path);
       expect(code, `${path} declares ACTIONABLE`).not.toContain('"ACTIONABLE"');
       expect(code, `${path} declares NOT_ACTIONABLE`).not.toContain('"NOT_ACTIONABLE"');
     }
-    // The only value that exists is the explicit one.
-    expect(codeOf("src/findings/finding.ts")).toContain('"NOT_EVALUATED"');
+  });
+
+  it("makes the honest actionability default explicit rather than implied", () => {
+    // `createFinding` requires the field, so "fine by omission" is unreachable.
+    const finding = codeOf("src/findings/finding.ts");
+    expect(finding).toContain("readonly actionability: ActionabilityEvidence");
+    expect(finding).not.toContain('actionability: "NOT_EVALUATED"');
+    // And the M5-A producer states it at the call site.
+    expect(codeOf("src/specs/rogue/assassination/evaluator.ts")).toContain("notEvaluatedActionability()");
   });
 
   it("uses no comparison or top-log input at all", () => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassination/evaluator.js";
 import { parseSimcExpression } from "../../src/simc/expression/parse.js";
-import { evaluateSimcExpression } from "../../src/simc/expression/evaluate.js";
+import { evaluateSimcExpression, unknownNumber } from "../../src/simc/expression/evaluate.js";
 import {
   ASSASSINATION_ACTOR_B,
   ENVENOM_SPELL_ID,
@@ -84,7 +84,7 @@ describe("the real 3/7 Envenom is rejected by the pinned authority", () => {
     expect(judgment.trace.aggregateRule).toBe("INVARIANT_ACROSS_WORLDS");
     // Exactly two worlds: one unresolved boolean atom, enumerated both ways.
     expect(judgment.trace.worlds).toHaveLength(2);
-    expect(judgment.trace.worlds.map((world) => world.result)).toEqual([false, false]);
+    expect(judgment.trace.worlds.map((world) => world.result)).toEqual(["FALSE", "FALSE"]);
     expect(judgment.trace.worlds.map((world) => world.assignment)).toEqual([
       [{ atom: "buff.darkest_night.up", up: false }],
       [{ atom: "buff.darkest_night.up", up: true }],
@@ -100,7 +100,13 @@ describe("the real 3/7 Envenom is rejected by the pinned authority", () => {
     // The condition references buff.darkest_night.up TWICE. One atom.
     expect(judgment.trace.expressionRaw.split("buff.darkest_night.up").length - 1).toBe(2);
     expect(unresolved).toEqual([
-      { key: "buff.darkest_night.up", binding: "UNRESOLVED_BOOLEAN", value: null },
+      {
+        key: "buff.darkest_night.up",
+        shape: "BOOLEAN",
+        binding: "UNRESOLVED_BOOLEAN",
+        value: null,
+        unknownNumberReason: null,
+      },
     ]);
   });
 
@@ -142,7 +148,11 @@ describe("the real 3/7 Envenom is rejected by the pinned authority", () => {
   it("does not present the rejection as a player mistake", () => {
     if (run.outcome !== "EVALUATED") return;
     const finding = run.findings[0];
-    expect(finding?.actionability).toBe("NOT_EVALUATED");
+    // M5-A gathers no environmental evidence, so actionability stays the
+    // explicit NOT_EVALUATED. It is a structured value rather than a bare string
+    // as of M5-B, and it must carry no evidence fields on this branch.
+    expect(finding?.actionability).toEqual({ status: "NOT_EVALUATED" });
+    expect(finding?.actionability).not.toHaveProperty("abilityGameId");
 
     const serialized = JSON.stringify(finding).toLowerCase();
     for (const forbidden of ["mistake", "error", "wrong", "should have", "severity", "score", "penalt"]) {
@@ -170,6 +180,8 @@ describe("both Darkest Night resolutions reject the event independently", () => 
     const evaluation = evaluateSimcExpression(parsed.ast, condition, {
       comboPoints: 3,
       comboPointsDeficit: 4,
+      // The pinned gate mentions no energy; stated explicitly, never omitted.
+      energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
       knownBuffs: [{ name: "darkest_night", up: darkestNightUp }],
     });
 

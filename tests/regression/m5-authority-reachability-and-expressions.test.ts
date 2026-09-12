@@ -4,7 +4,7 @@ import { NO_AUTHORITY_REASONS } from "../../src/findings/authority.js";
 import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassination/evaluator.js";
 import type { ObservedActionJudgment } from "../../src/findings/judgment.js";
 import type { AplAuthority } from "../../src/simc/apl-authority.js";
-import { ASSASSINATION_ACTOR_B, m5aState } from "../support/m5a-fixture.js";
+import { ASSASSINATION_ACTOR_B, m5aState, observedActionJudgmentOf } from "../support/m5a-fixture.js";
 import { authorityWithGateCondition, syntheticAuthority } from "../support/m5a-authority.js";
 
 /**
@@ -30,9 +30,9 @@ const state = m5aState();
 function judge(authority: AplAuthority | null): ObservedActionJudgment {
   const run = evaluateAssassinationEnvenom(state, { actorId: ASSASSINATION_ACTOR_B, authority });
   if (run.outcome !== "EVALUATED") throw new Error(`expected EVALUATED, got ${run.outcome}`);
-  const judgment = run.findings[0]?.judgment;
-  if (judgment === undefined) throw new Error("expected one finding");
-  return judgment;
+  const finding = run.findings[0];
+  if (finding === undefined) throw new Error("expected one finding");
+  return observedActionJudgmentOf(finding);
 }
 
 describe("no pinned authority is NO_AUTHORITY_AVAILABLE", () => {
@@ -146,18 +146,37 @@ describe("an unprovable call graph is UNKNOWN, never NO_AUTHORITY_AVAILABLE", ()
 });
 
 describe("unsupported authority syntax never becomes false", () => {
+  /**
+   * RE-POINTED for M5-B.
+   *
+   * Four rows here previously used constructs that M5-B deliberately added:
+   * `energy.pct`, `>`, `<=`, and the pinned `generate` condition that needed
+   * `>`. Those rows would now parse, so they no longer demonstrate anything
+   * about unsupported syntax. Each has been re-aimed at a construct that is
+   * STILL outside the subset — including three real pinned authority lines —
+   * so the fail-closed invariant keeps being guarded by evidence rather than by
+   * a string nobody uses.
+   *
+   * What must never change: an expression this analyzer cannot parse produces
+   * UNKNOWN with UNSUPPORTED_AUTHORITY_EXPRESSION and NO trace. It must never
+   * become false, and it must never become UNRESOLVED_AUTHORITY_STATE — those
+   * are "we did not understand the question" and "we lack the state", and they
+   * have different remedies.
+   */
   it.each([
-    ["an unsupported identifier", "combo_points>=5&energy.pct>70"],
-    ["the > operator", "combo_points.deficit>0"],
+    ["an unsupported identifier", "combo_points>=5&energy.regen_combined>40"],
+    ["the >? max operator", "combo_points.deficit>?0"],
     [
-      "the real generate condition, which uses >",
-      "!buff.darkest_night.up&combo_points<5|buff.darkest_night.up&combo_points.deficit>0",
+      "the real pinned cds call condition",
+      "variable.single_target|!talent.scent_of_blood|buff.scent_of_blood.stack>=2",
     ],
+    ["the real pinned thistle_tea condition's sibling identifier", "dot.rupture.ticking&combo_points>=5"],
     ["arithmetic", "combo_points>=5-2"],
     ["a talent reference", "talent.darkest_night&combo_points>=5"],
     ["a decimal literal", "combo_points>=5.5"],
     ["!=", "combo_points!=5"],
-    ["<=", "combo_points<=5"],
+    ["<?", "combo_points<?5"],
+    ["a buff stack reference", "buff.darkest_night.stack>=2"],
   ])("%s yields UNSUPPORTED_AUTHORITY_EXPRESSION", (_label, condition) => {
     const judgment = judge(authorityWithGateCondition(condition));
     expect(judgment.status).toBe("UNKNOWN");
@@ -167,13 +186,40 @@ describe("unsupported authority syntax never becomes false", () => {
   });
 
   it("refuses the WHOLE expression even when a supported conjunct is already false", () => {
-    // This is the sharpest form. At 3 combo points `combo_points>=5` is FALSE,
-    // so a three-valued short-circuit would compute `false & unsupported` as
-    // FALSE and emit a confident rejection resting on a fragment nobody parsed.
-    const judgment = judge(authorityWithGateCondition("combo_points>=5&energy.pct>70"));
+    // This is the sharpest form, and it matters MORE after M5-B, not less.
+    //
+    // At 3 combo points `combo_points>=5` is FALSE. M5-B's evaluator implements
+    // Kleene AND, under which `FALSE & UNKNOWN_STATE = FALSE` — a legitimate
+    // rule for state we understand but do not know. If an UNPARSED fragment
+    // could enter that domain, the same rule would emit a confident rejection
+    // resting on syntax nobody understood.
+    //
+    // It cannot, because the refusal happens at parse time and produces no AST.
+    // RE-POINTED to a construct still outside the subset, since `energy.pct` is
+    // now inside it.
+    const judgment = judge(authorityWithGateCondition("combo_points>=5&talent.darkest_night"));
     expect(judgment.status).not.toBe("REJECTED_BY_AUTHORITY");
+    expect(judgment.status).toBe("UNKNOWN");
     if (judgment.status !== "UNKNOWN") return;
     expect(judgment.blocker).toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");
+    // Not UNRESOLVED_AUTHORITY_STATE: nothing was evaluated, so there is no
+    // trace and no world.
+    expect(judgment.trace).toBeNull();
+  });
+
+  it("separates unsupported syntax from a supported expression with unknown state", () => {
+    // The two blockers must stay distinct. `fight_remains<15` is SUPPORTED
+    // syntax whose magnitude is unknowable, so it evaluates and reports
+    // UNRESOLVED_AUTHORITY_STATE with a real trace. The case above reports
+    // UNSUPPORTED_AUTHORITY_EXPRESSION with no trace at all.
+    const judgment = judge(authorityWithGateCondition("fight_remains<15"));
+    expect(judgment.status).toBe("UNKNOWN");
+    if (judgment.status !== "UNKNOWN") return;
+    expect(judgment.blocker).toBe("UNRESOLVED_AUTHORITY_STATE");
+    expect(judgment.trace).not.toBeNull();
+    expect(judgment.trace?.atoms.find((atom) => atom.key === "fight_remains")?.binding).toBe(
+      "UNKNOWN_NUMBER",
+    );
   });
 
   it("still evaluates a fully supported condition", () => {

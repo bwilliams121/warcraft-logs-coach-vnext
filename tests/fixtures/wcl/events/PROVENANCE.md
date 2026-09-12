@@ -376,6 +376,116 @@ requires both. See `src/data/wcl-wire/resource-types.ts`.
 
 ---
 
+## M5-B additions to `wcl-assassination-envenom-combo-points.json`
+
+Two further Envenom casts by actor 19, captured on **2026-09-12** from the same
+report at the same revision. The fixture now holds **14** events.
+
+| | |
+| --- | --- |
+| Report code | `A7R6kxPJ1hC8YQ4w` |
+| Fight ID | 7 |
+| **Report revision** | **30** — unchanged, and still load-bearing |
+| `gameVersion` / `logVersion` | 1 / 17 |
+| Retrieval | one single-timestamp window per event: `startTime = endTime = t`, `limit` 10,000, `includeResources: true`, `dataType: All`, `hostilityType` omitted |
+
+Both timestamps fall inside the fixture's existing window
+`[2,004,589 … 2,150,253]`, so no window constant changed. Each window returned
+exactly ONE `cast` of `abilityGameID` 32645 by `sourceID` 19, so the selection is
+unambiguous. Neither payload contains a `name` key.
+
+Reproduce:
+
+```powershell
+# capture both windows and merge with the committed fixture
+npx.cmd vitest run --config .probe/m5b-fixture.config.ts
+node scripts/sanitize-probe.mjs .probe/m5b-fixture-source.json wcl-assassination-envenom-combo-points.json --indices 0,1,2,3,4,5,6,7,8,9,10,11,12,13
+```
+
+### The two new decision points
+
+| Actor | Timestamp | Combo points | Wire type 3 | `amount / max * 100` | What it establishes |
+| --- | --- | --- | --- | --- | --- |
+| 19 | 2,039,278 | `7 / 7`, cost 7 | `250 / 250`, cost 35 | **100** | **The first exact scoped action selection.** The `spend` gate is TRUE under both Darkest Night resolutions, `energy.pct > 70` is TRUE, and every surviving `spend` line names Envenom. |
+| 19 | 2,019,463 | `7 / 7`, cost 7 | `233 / 250`, cost 35 | **93.2** | The same selection from a NON-CAPPED pool. An implementation that special-cased `amount == max` instead of computing the ratio would pass the row above and fail this one. |
+
+Both entries on both events are `EXACT` / `OBSERVED` / `PRE_COST`, and each is
+independently a cap-bounded falsifier of the post-cost reading on wire type 4
+(`amount == max == cost`). The 2,039,278 event is additionally one for wire type
+3, where `250 / 250` is held while a cost of 35 is paid.
+
+The fixture's existing rows already cover the negative side and are unchanged:
+2,013,095 is full combo points at **58.8 %** (so `energy.pct > 70` is FALSE),
+2,028,273 is 97.2 % Energy at only 5 of 7 combo points, 2,150,252 is the 3/7
+rejection, and 2,090,898 carries no combo-point entry at all.
+
+### Wire-type-3 corroboration
+
+This fixture is also the cited corroboration for the **ENERGY** wire contract in
+`src/data/wcl-wire/resource-types.ts`. As with combo points, the contract
+requires BOTH a versioned game enum and observed wire behaviour compatible with
+it, and the capture is recorded as **corroboration, not proof**.
+
+Measured across the same complete fight (249,516 events, COMPLETE coverage,
+50/50 pages, 0 malformed observations):
+
+- Wire type 3 appeared on **74,224 entries**, and only on energy-using actors:
+  two Rogues (`max` 250), a Feral Druid (`max` 140), two bosses and two NPCs
+  (`max` 100), and five pets (`max` 100 or 200).
+- **No** Priest, Mage, Warlock, Paladin, Warrior, Death Knight, Monk, Shaman,
+  Hunter, Demon Hunter or Evoker carried it.
+- **The Hunter carried wire type 2 and never type 3.** Focus is enum 2 and
+  Energy is enum 3; a renumbering or off-by-one would surface there first. This
+  is the sharpest single discriminator the capture offers.
+- Eleven further types in the same capture line up with the same enumeration:
+  0 mana, 1 rage, 2 focus, 4 combo points, 5 runes, 6 runic power, 7 soul shards,
+  9 holy power, 11 maelstrom, 17 fury, 19 essence.
+- The Feral Druid carried types 0, 3 and 4 **simultaneously**, each with a
+  class-appropriate maximum.
+- Integrity: **zero** type-3 entries with `amount` above `max`, **zero** with a
+  null `max`, and **zero** of the 1,008 costed entries with `amount` below
+  `cost`.
+- Observed type-3 costs were 20, 25, 30, 35, 40, 45, 50 and 60 — discrete, none
+  fractional.
+- Per-actor `max` was stable for the entire fight: `250` across 6,923 and 6,471
+  observations for the two Rogues.
+
+### Why the adapter is a PERCENTAGE, and what that does not require
+
+SimulationCraft's `energy.pct` is a percentage from 0 to 100. Warcraft Logs
+supplies, on ONE `PRE_COST` observation attached to the cast itself, both the
+exact current amount and the actor's contemporaneous maximum. The adapter
+evaluates `observedAmount / observedMax * 100`.
+
+A ratio of two numbers drawn from the SAME encoding is independent of what that
+encoding is. The same capture shows Rage at `max` 1300 and Runic Power at `max`
+1250 — neither of which is the number a player reads off their own bar — so an
+absolute unit scale plainly cannot be assumed to be shared with any other tool.
+The percentage is unaffected, because the scale cancels.
+
+**The adapter therefore does not require, and does not assume, that Warcraft
+Logs' absolute Energy units equal SimulationCraft's.** What it requires is that
+`amount` and `max` describe the same pool at the same instant, which is exactly
+what a single same-event observation provides, and which the integrity
+measurements above support.
+
+No rounding, flooring or clamping is applied. No regeneration is modelled, no
+value is interpolated between observations, no `resourcechange` delta is
+replayed, and no earlier reading is carried forward.
+
+### What these two events do NOT establish
+
+- Anything about wire type 3 **outside** `gameVersion` 1 / `logVersion` 17.
+- That Envenom was the globally ideal action. The selection is scoped to the
+  `spend` sub-list; higher-priority `default` entries remain unevaluated, and
+  several — an unconditional `stealth`, an unconditional `kick`, a `variable`
+  assignment, and an unconditional call to `core_dot` — remain unevaluable.
+- Anything about Darkest Night. The buff still appears nowhere in this report.
+- Anything about `fight_remains`. It is PREDICTIVE and is never bound, so
+  `spend[1]` resolves TRUE on its Energy half alone.
+
+---
+
 # Still NOT ESTABLISHED
 
 ## `resourcechange` attached snapshot timing

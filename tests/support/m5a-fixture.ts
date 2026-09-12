@@ -12,6 +12,9 @@
  * identifies it: actor, numeric ability id and report timestamp.
  */
 
+import type { Finding } from "../../src/findings/finding.js";
+import type { ObservedActionJudgment } from "../../src/findings/judgment.js";
+import type { ScopedActionSelection } from "../../src/findings/scoped-selection.js";
 import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
 import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
 import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
@@ -47,6 +50,19 @@ export const M5A_EVENTS = {
   envenomAtSeven: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_013_095 },
   /** A real Envenom whose snapshot omits the combo-point entry entirely. */
   envenomWithoutComboPointEntry: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_090_898 },
+  /**
+   * M5-B. Full combo points AND Energy at exactly 250/250, so `energy.pct` is
+   * 100. The first exact scoped action selection rests on this event.
+   */
+  envenomAtSevenFullEnergy: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_039_278 },
+  /**
+   * M5-B. Full combo points and Energy at 233/250, so `energy.pct` is 93.2.
+   *
+   * Load-bearing precisely because it is NOT at cap: an implementation that
+   * special-cased `amount == max` instead of computing the ratio would pass the
+   * 100% case and fail here.
+   */
+  envenomAtSevenHighEnergy: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_019_463 },
 } as const;
 
 const WINDOW_START = 2_004_589;
@@ -130,4 +146,29 @@ export function findCast(
   throw new Error(
     `fixture has no COMPLETE cast of ${abilityGameId} by actor ${criteria.actorId} at ${criteria.reportTimeMs}`,
   );
+}
+
+/**
+ * Narrows a finding's judgment to the OBSERVED-ACTION family.
+ *
+ * `Finding.judgment` is a union of two families, and a test asserting about a
+ * `trace` or an `observedState` has to say which family it means. Throwing on a
+ * mismatch keeps that explicit: a scoped result reaching an M5-A assertion is a
+ * real defect, not something to silently skip past.
+ */
+export function observedActionJudgmentOf(finding: Finding): ObservedActionJudgment {
+  const judgment = finding.judgment;
+  if (judgment.kind !== "OBSERVED_ACTION_JUDGMENT") {
+    throw new Error(`expected an observed-action judgment, got ${judgment.kind}`);
+  }
+  return judgment;
+}
+
+/** Narrows a finding's judgment to the SCOPED-SELECTION family. */
+export function scopedSelectionOf(finding: Finding): ScopedActionSelection {
+  const judgment = finding.judgment;
+  if (judgment.kind !== "SCOPED_ACTION_SELECTION") {
+    throw new Error(`expected a scoped action selection, got ${judgment.kind}`);
+  }
+  return judgment;
 }

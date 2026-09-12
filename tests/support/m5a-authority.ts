@@ -75,3 +75,28 @@ export function authorityWithGateCondition(condition: string): AplAuthority {
     ],
   });
 }
+
+/**
+ * An authority shaped like the real one, with a substitutable gate AND sub-list.
+ *
+ * The pinned `spend` list holds three Envenom lines, which is exactly the shape
+ * M5-B was built for and therefore the shape least able to prove the ordered
+ * walk handles anything else. These builders supply the cases the real authority
+ * does not contain — a competing token above a definite winner, an all-false
+ * list, an authoritatively empty list — without doctoring the committed
+ * artifact.
+ */
+export function authorityWithSpendList(options: {
+  readonly gateCondition: string;
+  readonly spendActions: readonly string[];
+}): AplAuthority {
+  return syntheticAuthority({
+    lists: [
+      {
+        listName: "default",
+        actions: [`call_action_list,name=spend,if=${options.gateCondition}`],
+      },
+      { listName: "spend", actions: options.spendActions },
+    ],
+  });
+}

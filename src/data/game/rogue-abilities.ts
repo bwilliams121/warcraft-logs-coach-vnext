@@ -72,3 +72,19 @@ export function abilityIdentityFor(token: SimcAbilityToken): AbilityIdentityReso
   }
   return { ok: true, identity };
 }
+
+/**
+ * Resolves an ARBITRARY SimulationCraft token, or `null` when it is not modelled.
+ *
+ * `abilityIdentityFor` takes the narrow `SimcAbilityToken` union, which is right
+ * for a caller naming an ability it knows about at compile time. A caller walking
+ * an APL list encounters whatever tokens the pinned authority happens to contain
+ * — `mutilate`, `garrote`, `use_item` — and needs to ask about them without
+ * asserting they are modelled.
+ *
+ * `null` means "this project has no numeric identity for that token". It does NOT
+ * mean the ability does not exist, and a caller must not read it as one.
+ */
+export function tryAbilityIdentityFor(token: string): AbilityIdentity | null {
+  return ROGUE_ABILITIES.find((entry) => entry.simcToken === token) ?? null;
+}

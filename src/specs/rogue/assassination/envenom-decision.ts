@@ -40,7 +40,7 @@ import type { StateResult } from "../../../engine/state/state-result.js";
 import type { ResourceAmountObservation } from "../../../engine/resources/resource-observations.js";
 import type { AplAuthority, ReachabilityProof } from "../../../simc/apl-authority.js";
 import { parseSimcExpression } from "../../../simc/expression/parse.js";
-import { evaluateSimcExpression } from "../../../simc/expression/evaluate.js";
+import { evaluateSimcExpression, unknownNumber } from "../../../simc/expression/evaluate.js";
 import type { ResolvedAuthority } from "../../../findings/authority.js";
 import type {
   ObservedActionDecisionPoint,
@@ -151,6 +151,105 @@ export function adaptComboPoints(
 }
 
 // --------------------------------------------------------------------------
+// Energy adapter
+// --------------------------------------------------------------------------
+
+export type EnergyAdaptation =
+  | { readonly ok: true; readonly percent: number; readonly state: ObservedResourceState }
+  | {
+      readonly ok: false;
+      readonly reason: "RESOURCE_MAX_UNKNOWN" | "AMOUNT_UNUSABLE";
+      readonly detail: string;
+    };
+
+/**
+ * Maps one exact WCL resource snapshot onto SimulationCraft's `energy.pct`.
+ *
+ * THE CONTRACT, STATED EXACTLY
+ *
+ * SimulationCraft's `energy.pct` is a PERCENTAGE from 0 to 100 — not a raw
+ * amount. Warcraft Logs supplies, on ONE `PRE_COST` observation attached to the
+ * cast itself, both the exact current amount and the actor's contemporaneous
+ * maximum. The adapter evaluates the ratio of those two numbers:
+ *
+ *     energy.pct = observedAmount / observedMax * 100
+ *
+ * WHY THE ABSOLUTE UNIT SCALE IS NOT AN INPUT
+ *
+ * A ratio of two numbers drawn from the SAME encoding is independent of what
+ * that encoding is. Warcraft Logs is free to report a pool on whatever scale it
+ * likes — the same capture shows Rage at max 1300 and Runic Power at max 1250,
+ * neither of which is what a player reads off their bar — and the percentage is
+ * unaffected, because the scale cancels. So this adapter does NOT require, and
+ * does not assume, that Warcraft Logs' absolute Energy units equal
+ * SimulationCraft's. It requires only that amount and max describe the same pool
+ * at the same instant, which is exactly what a single same-event observation
+ * gives.
+ *
+ * WHAT IS NOT DONE, AND WHY EACH WOULD BE FABRICATION
+ *
+ * No rounding, flooring or clamping: the ratio is reported as computed, because
+ * a rounded percentage compared against a threshold can cross it. No passive
+ * regeneration, no interpolation between observations, no delta replay, and no
+ * carried-forward stale amount — all four would manufacture a number nothing
+ * observed. `acceptExactPreCost` is what keeps every one of those out, and it is
+ * shared with the combo-point path rather than re-implemented here.
+ *
+ * `Number.isFinite` rather than `Number.isSafeInteger`, unlike combo points.
+ * Combo points are a discrete count and integrality is part of what makes an
+ * observation plausible. An energy amount carries no such guarantee across
+ * builds, and rejecting a real fractional amount would fail closed for the wrong
+ * reason.
+ */
+export function adaptEnergyPct(observation: ResourceAmountObservation, resourceId: string): EnergyAdaptation {
+  const { observedAmount, observedMax, resourceType } = observation;
+
+  if (!Number.isFinite(observedAmount) || observedAmount < 0) {
+    return {
+      ok: false,
+      reason: "AMOUNT_UNUSABLE",
+      detail: `observed energy ${observedAmount} is not a usable amount`,
+    };
+  }
+  if (observedMax === null) {
+    return {
+      ok: false,
+      reason: "RESOURCE_MAX_UNKNOWN",
+      detail: "the observation carries no maximum, so no percentage can be derived",
+    };
+  }
+  if (!Number.isFinite(observedMax) || observedMax <= 0) {
+    return {
+      ok: false,
+      reason: "RESOURCE_MAX_UNKNOWN",
+      detail: `observed maximum ${observedMax} is not a usable capacity`,
+    };
+  }
+  if (observedMax < observedAmount) {
+    // An amount above its own maximum means the pair does not describe one pool
+    // at one instant, whatever either number is on its own.
+    return {
+      ok: false,
+      reason: "RESOURCE_MAX_UNKNOWN",
+      detail: `observed maximum ${observedMax} is below the observed amount ${observedAmount}`,
+    };
+  }
+
+  return {
+    ok: true,
+    percent: (observedAmount / observedMax) * 100,
+    state: {
+      resourceId,
+      wireType: resourceType,
+      observedAmount,
+      observedMax,
+      derivedDeficit: observedMax - observedAmount,
+      timing: "PRE_COST",
+    },
+  };
+}
+
+// --------------------------------------------------------------------------
 // Judging one observed cast
 // --------------------------------------------------------------------------
 
@@ -199,6 +298,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
 
   if (authority === null || reachability === null) {
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "NO_AUTHORITY_AVAILABLE",
       reason: "NO_PINNED_AUTHORITY_FOR_SPEC",
       detail: "no pinned SimulationCraft APL is available for this specialization",
@@ -210,6 +310,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
   // never NO_AUTHORITY_AVAILABLE.
   if (reachability.kind !== "PROVEN_SOLE_GATE") {
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "UNKNOWN",
       blocker: "ACTION_REACHABILITY_NOT_PROVABLE",
       authority: null,
@@ -223,6 +324,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
   const resolved = resolvedAuthorityFrom(authority, reachability);
   if (resolved === null) {
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "UNKNOWN",
       blocker: "ACTION_REACHABILITY_NOT_PROVABLE",
       authority: null,
@@ -241,6 +343,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
   const acceptance = acceptExactPreCost(observationResult);
   if (!acceptance.accepted) {
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "UNKNOWN",
       blocker: "EXACT_RESOURCE_UNAVAILABLE",
       authority: resolved,
@@ -255,6 +358,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
   const adapted = adaptComboPoints(acceptance.observation, resourceId);
   if (!adapted.ok) {
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "UNKNOWN",
       blocker: "RESOURCE_MAX_UNKNOWN",
       authority: resolved,
@@ -271,6 +375,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
     // Unsupported syntax fails the WHOLE expression. It never becomes false, and
     // it never disappears through a short-circuit.
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "UNKNOWN",
       blocker: "UNSUPPORTED_AUTHORITY_EXPRESSION",
       authority: resolved,
@@ -284,14 +389,21 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
   // Every buff in the condition is left unresolved: M5-A establishes no aura
   // state, and M4's rule that "no observed transition" is not "inactive" is not
   // weakened here. Unresolved buffs become correlated atoms and are enumerated.
+  //
+  // Energy is stated as unknown rather than omitted. This decision reads combo
+  // points only; if a future authority condition reachable from here mentioned
+  // `energy.pct`, it must resolve to UNKNOWN_STATE, never to a value this
+  // function never established.
   const evaluation = evaluateSimcExpression(parsed.ast, condition, {
     comboPoints: adapted.state.observedAmount,
     comboPointsDeficit: adapted.state.derivedDeficit,
+    energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
     knownBuffs: [],
   });
 
   if (evaluation.outcome === "UNSUPPORTED") {
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "UNKNOWN",
       blocker: "UNSUPPORTED_AUTHORITY_EXPRESSION",
       authority: resolved,
@@ -304,6 +416,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
 
   if (evaluation.outcome === "UNRESOLVED") {
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "UNKNOWN",
       blocker: "UNRESOLVED_AUTHORITY_STATE",
       authority: resolved,
@@ -320,6 +433,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
     // line, nor that Envenom's own conditions hold, nor that Envenom is the
     // action that would be selected. There is no positive verdict to give.
     return {
+      kind: "OBSERVED_ACTION_JUDGMENT",
       status: "UNKNOWN",
       blocker: "ANALYZER_SURFACE_INCOMPLETE",
       authority: resolved,
@@ -336,6 +450,7 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
   // is never entered, whatever the higher-priority lines above it do — so the
   // observed action is unreachable through the authority's only path to it.
   return {
+    kind: "OBSERVED_ACTION_JUDGMENT",
     status: "REJECTED_BY_AUTHORITY",
     authority: resolved,
     trace: evaluation.trace,

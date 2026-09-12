@@ -28,7 +28,8 @@
 
 import type { CoverageState } from "../engine/evidence/coverage.js";
 import type { Finding } from "./finding.js";
-import type { JudgmentBlocker } from "./judgment.js";
+import type { ObservedActionBlocker } from "./judgment.js";
+import type { ScopedSelectionBlocker } from "./scoped-selection.js";
 
 /** Why a run could not begin. Each is a prerequisite for identifying decisions. */
 export type NotEvaluatedReason =
@@ -41,7 +42,19 @@ export const NOT_EVALUATED_REASONS = [
 ] as const satisfies readonly NotEvaluatedReason[];
 
 export interface BlockerCount {
-  readonly blocker: JudgmentBlocker;
+  readonly blocker: ObservedActionBlocker;
+  readonly count: number;
+}
+
+/**
+ * Kept structurally separate from `BlockerCount` rather than made generic.
+ *
+ * The two families have different blocker vocabularies, and a shared generic
+ * count would let a scoped-only blocker be tallied into an observed-action
+ * coverage report where it cannot mean anything.
+ */
+export interface ScopedBlockerCount {
+  readonly blocker: ScopedSelectionBlocker;
   readonly count: number;
 }
 
@@ -74,5 +87,50 @@ export type EvaluationRun =
       readonly outcome: "EVALUATED";
       readonly findings: readonly Finding[];
       readonly coverage: AnalysisCoverage;
+    }
+  | { readonly outcome: "NOT_EVALUATED"; readonly reason: NotEvaluatedReason; readonly detail: string };
+
+// --------------------------------------------------------------------------
+// Scoped selection runs
+// --------------------------------------------------------------------------
+
+/**
+ * What a SCOPED SELECTION run looked at.
+ *
+ * A separate type from `AnalysisCoverage`, not an extension of it. The two runs
+ * answer different questions and count different things: an observed-action run
+ * counts casts it could judge, a scoped-selection run counts decision points at
+ * which it could ask what a sub-list selects. Merging them would produce a
+ * coverage object where half the fields are meaningless for whichever run
+ * produced it, and a consumer could not tell which half.
+ *
+ * `scopedSelectionDecisionPoints` is what our retrieved, in-scope evidence
+ * contains for one actor. It is not a fight total, and it is deliberately not
+ * named as one.
+ */
+export interface ScopedSelectionCoverage {
+  readonly actorId: number;
+  /** The authority sub-list these results are scoped to. */
+  readonly listName: string;
+  /** Decision points examined in the retrieved, in-scope evidence. Not a fight total. */
+  readonly scopedSelectionDecisionPoints: number;
+  readonly selectedByAuthority: number;
+  /** Exact: the list was entered and every line was definitively eliminated. */
+  readonly noActionSelected: number;
+  /** Exact: the entry gate was proven FALSE, so the list was never entered. */
+  readonly notApplicable: number;
+  readonly scopedUnknownByBlocker: readonly ScopedBlockerCount[];
+  /** COMPLETE / PARTIAL / ABSENT for the categories this run depended on. */
+  readonly castCoverage: CoverageState | null;
+  readonly resourceCoverage: CoverageState | null;
+  /** True when either dependency is not COMPLETE, so consumers cannot miss it. */
+  readonly coverageIsIncomplete: boolean;
+}
+
+export type ScopedSelectionRun =
+  | {
+      readonly outcome: "EVALUATED";
+      readonly findings: readonly Finding[];
+      readonly coverage: ScopedSelectionCoverage;
     }
   | { readonly outcome: "NOT_EVALUATED"; readonly reason: NotEvaluatedReason; readonly detail: string };

@@ -33,6 +33,25 @@
  * costed. That is consistent with combo points and is hard to explain otherwise.
  * It is corroboration, not proof, and it is recorded as such.
  *
+ * Type 3 is corroborated the same way in the same capture, and the observation
+ * string on that contract records the measurements verbatim. The sharpest single
+ * discriminator is that the Hunter carries type 2 and never type 3: Focus and
+ * Energy are adjacent enum values, so a renumbering would show up there first.
+ *
+ * WHAT A WIRE CONTRACT DOES NOT CLAIM: AN ABSOLUTE UNIT SCALE
+ *
+ * A contract says which RESOURCE a wire number describes. It does not claim that
+ * Warcraft Logs encodes that resource on the same absolute scale as any other
+ * tool. The same capture shows Rage at `max` 1300 and Runic Power at `max` 1250,
+ * which are plainly not the numbers a player reads off their own bar.
+ *
+ * That is why the Energy adapter is defined as a PERCENTAGE and not as a raw
+ * amount. SimulationCraft's `energy.pct` is itself a percentage from 0 to 100,
+ * Warcraft Logs supplies an exact current amount and a contemporaneous maximum
+ * on the SAME observation, and the ratio of two numbers in one encoding is
+ * independent of what that encoding is. The absolute scale is therefore not an
+ * input to the comparison at all. See `adaptEnergyPct`.
+ *
  * Outside the declared scope, `resourceWireTypeFor` fails closed. It does not
  * fall back, does not widen, and does not guess.
  */
@@ -45,9 +64,9 @@ import {
 } from "../provenance.js";
 
 /** Resource identities this project models. Deliberately not a full database. */
-export type ResourceId = "COMBO_POINTS";
+export type ResourceId = "COMBO_POINTS" | "ENERGY";
 
-export const RESOURCE_IDS = ["COMBO_POINTS"] as const satisfies readonly ResourceId[];
+export const RESOURCE_IDS = ["COMBO_POINTS", "ENERGY"] as const satisfies readonly ResourceId[];
 
 /** Evidence from a versioned game-data enumeration. Necessary, never sufficient. */
 export interface GameEnumEvidence {
@@ -110,6 +129,43 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "occurred on exactly three actors — two Rogues (max 7) and a Feral Druid (max 5) — and " +
           "on no other class. Every type-4 entry carried a positive cost. No other wire type " +
           "appeared on those actors with those maxima.",
+      },
+    },
+  },
+  {
+    wireType: 3,
+    resourceId: "ENERGY",
+    scope: { gameVersion: 1, logVersion: 17 },
+    evidence: {
+      gameEnum: {
+        enumName: "Enum.PowerType",
+        memberName: "Energy",
+        value: 3,
+        expansion: "Midnight",
+        gameBuild: "12.0",
+        source: "World of Warcraft client power-type enumeration",
+        verifiedOn: "2026-09-12",
+      },
+      wireCorroboration: {
+        fixtureId: "wcl-assassination-envenom-combo-points",
+        reportCode: "A7R6kxPJ1hC8YQ4w",
+        reportRevision: 30,
+        capturedOn: "2026-09-12",
+        observation:
+          "Across one complete 20-player fight (249,516 events, COMPLETE coverage, 50/50 pages), " +
+          "wire type 3 occurred on 74,224 entries and only on energy-using actors: two Rogues " +
+          "(max 250), a Feral Druid (max 140), two bosses and two NPCs (max 100) and five pets " +
+          "(max 100 or 200). No Priest, Mage, Warlock, Paladin, Warrior, Death Knight, Monk, " +
+          "Shaman, Hunter, Demon Hunter or Evoker carried it. The Hunter carried wire type 2 and " +
+          "never type 3, which discriminates Focus from Energy despite their adjacent enum " +
+          "values. The same capture placed eleven further types consistently with the same " +
+          "enumeration: 0 mana, 1 rage, 2 focus, 4 combo points, 5 runes, 6 runic power, 7 soul " +
+          "shards, 9 holy power, 11 maelstrom, 17 fury, 19 essence. The Feral Druid carried 0, 3 " +
+          "and 4 simultaneously with class-appropriate maxima on each. Integrity across every " +
+          "type-3 entry: zero with amount above max, zero with a null max, and zero of the 1,008 " +
+          "costed entries with amount below cost. Observed costs were 20, 25, 30, 35, 40, 45, 50 " +
+          "and 60 — discrete values, none fractional. Per-actor max was stable for the whole " +
+          "fight: 250 across 6,923 and 6,471 observations for the two Rogues respectively.",
       },
     },
   },

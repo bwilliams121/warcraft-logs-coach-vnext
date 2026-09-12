@@ -1,0 +1,332 @@
+/**
+ * Ordered action selection WITHIN one named SimulationCraft action list.
+ *
+ * WHAT THIS ANSWERS, AND WHAT IT REFUSES TO ANSWER
+ *
+ * An APL list is an ordered priority list. This module answers:
+ *
+ *     given this state, which action token does THIS LIST select?
+ *
+ * It says nothing about whether the list is entered — that is the caller's gate
+ * — and nothing about the globally ideal action, which would require every
+ * higher-priority list and action in the whole APL.
+ *
+ * A TRUE CONDITION IS NOT A FIRING ACTION.
+ *
+ * SimulationCraft selects an action when its condition holds AND the action is
+ * actually usable: off cooldown, in range, affordable, legal in the current
+ * stance or stealth state. This project models none of that, and pretending a
+ * true condition means the action fires would silently assert every one of those
+ * things. So each line is combined with an `ActionUsability`, and a line becomes
+ * a DEFINITE winner only when both halves are established.
+ *
+ * THE THREE OUTCOMES A LINE CAN HAVE
+ *
+ *     ELIMINATED       condition is definitely FALSE — it cannot win, whatever
+ *                      its usability, so it is discarded soundly
+ *     DEFINITE_WINNER  condition definitely TRUE and the action PROVEN_USABLE —
+ *                      it fires, and every lower line is unreachable
+ *     POSSIBLE         anything else. A true condition whose usability is
+ *                      unknown, or an undecided condition. It MIGHT win.
+ *
+ * `POSSIBLE` is never converted into "did not fire". Absence of usability
+ * evidence is not evidence of unusability, so there is no negative usability
+ * state in this file at all.
+ *
+ * HOW AN EXACT ANSWER SURVIVES UNCERTAINTY
+ *
+ * Uncertainty about WHICH line fires does not have to mean uncertainty about
+ * WHAT fires. If every line that might still win names the same action token,
+ * the token is determined even though the line is not:
+ *
+ *     spend[0]  envenom, condition UNKNOWN_STATE  -> POSSIBLE
+ *     spend[1]  envenom, condition TRUE + usable  -> DEFINITE_WINNER
+ *
+ * Either spend[0] fires or spend[1] does. Both are Envenom. The selected token
+ * is Envenom under every legitimate resolution, so it is exact.
+ *
+ * If a higher POSSIBLE line named a DIFFERENT token, that reasoning collapses
+ * and the result is indeterminate. This is the priority short-circuit rule from
+ * `CLAUDE.md` made structural: an uncertain higher-priority line must never be
+ * fallen through to reach a confident lower-priority answer.
+ *
+ * FAIL-CLOSED ON SYNTAX, ALWAYS.
+ *
+ * An unparseable condition ends the scan immediately. It is not skipped, not
+ * treated as false, and not treated as UNKNOWN_STATE — the whole point of the
+ * parser's whole-expression refusal is that unsupported syntax never reaches a
+ * truth domain where a short-circuit could make it vanish.
+ *
+ * LAYERING
+ *
+ * This module knows nothing about Warcraft Logs, ability ids, findings or
+ * specializations. Usability arrives as a callback over `AplAction`, so a caller
+ * can decide per LINE rather than per token if line-specific semantics ever
+ * matter. Lines are identified by their SimulationCraft-native coordinates —
+ * list name, priority ordinal, verbatim string, source line — and the finding
+ * layer converts those into an `AuthorityRef`. That keeps the dependency
+ * one-way: findings may read SimC, SimC never reads findings.
+ */
+
+import type { AplAction, AplAuthority } from "./apl-authority.js";
+import { parseSimcExpression, type ParseFailureReason } from "./expression/parse.js";
+import {
+  evaluateSimcExpression,
+  type AtomBindings,
+  type ExpressionTrace,
+  type TruthValue,
+} from "./expression/evaluate.js";
+
+/**
+ * Whether an action is known to have been usable at this decision point.
+ *
+ * Two members, and deliberately no third. `UNKNOWN` means we have no usability
+ * evidence; it does NOT mean unusable, and no caller may read it that way.
+ */
+export type ActionUsability = "PROVEN_USABLE" | "UNKNOWN";
+
+export const ACTION_USABILITIES = ["PROVEN_USABLE", "UNKNOWN"] as const satisfies readonly ActionUsability[];
+
+/** Supplies usability for one line. Takes the whole action, not just its token. */
+export type ActionUsabilityResolver = (action: AplAction) => ActionUsability;
+
+/** How a line's condition turned out. An unsupported condition has no truth value. */
+export type LineCondition =
+  | { readonly kind: "UNCONDITIONAL" }
+  | { readonly kind: "EVALUATED"; readonly truth: TruthValue; readonly trace: ExpressionTrace }
+  | {
+      readonly kind: "UNSUPPORTED";
+      readonly reason: ParseFailureReason | "TOO_MANY_UNRESOLVED_ATOMS";
+      readonly fragment: string;
+    };
+
+export type LineOutcome = "ELIMINATED" | "POSSIBLE" | "DEFINITE_WINNER";
+
+/**
+ * One evaluated line, in SimulationCraft-native coordinates.
+ *
+ * Carries no ability id, no locator and no finding evidence. The finding layer
+ * owns all of that; duplicating it here would create a second copy of a fact
+ * that could disagree with the canonical one.
+ */
+export interface LineEvaluation {
+  readonly listName: string;
+  readonly priorityOrdinal: number;
+  readonly actionStringVerbatim: string;
+  readonly sourceLine: number;
+  readonly actionToken: string;
+  readonly condition: LineCondition;
+  readonly usability: ActionUsability;
+  readonly outcome: LineOutcome;
+}
+
+/**
+ * Why a list's selection could not be determined.
+ *
+ * These names are shared verbatim with the scoped-selection blocker vocabulary
+ * in `src/findings`. They are not synonyms of anything there — they are the same
+ * reasons, and duplicating them under different spellings would mean a reader
+ * has to learn that two words mean one thing.
+ */
+export type ListSelectionBlocker =
+  | "UNSUPPORTED_AUTHORITY_EXPRESSION"
+  | "COMPETING_POSSIBLE_ACTION"
+  | "NO_DEFINITE_WINNER"
+  | "NESTED_CALL_NOT_MODELLED"
+  | "UNMODELLED_DISPATCH_IN_LIST";
+
+export const LIST_SELECTION_BLOCKERS = [
+  "UNSUPPORTED_AUTHORITY_EXPRESSION",
+  "COMPETING_POSSIBLE_ACTION",
+  "NO_DEFINITE_WINNER",
+  "NESTED_CALL_NOT_MODELLED",
+  "UNMODELLED_DISPATCH_IN_LIST",
+] as const satisfies readonly ListSelectionBlocker[];
+
+export type ListSelection =
+  | {
+      readonly kind: "SELECTED";
+      readonly actionToken: string;
+      /** The definitely-firing line. */
+      readonly selectingLine: LineEvaluation;
+      /** Every line that might still have won, including the selecting one. */
+      readonly convergedOver: readonly LineEvaluation[];
+      readonly lines: readonly LineEvaluation[];
+    }
+  | {
+      /**
+       * EXACT. Every line was definitively eliminated, so the list selects
+       * nothing and `call_action_list` returns to its caller.
+       *
+       * Also the outcome for an authoritative list holding zero actions: there
+       * is nothing that could have been selected. That is NOT the same as a list
+       * absent from the authority, which is `LIST_ABSENT`.
+       */
+      readonly kind: "NO_ACTION_SELECTED";
+      readonly lines: readonly LineEvaluation[];
+    }
+  | {
+      readonly kind: "INDETERMINATE";
+      readonly blocker: ListSelectionBlocker;
+      /** The line responsible, when one can be named. */
+      readonly blockedBy: LineEvaluation | null;
+      readonly lines: readonly LineEvaluation[];
+    }
+  | {
+      /** No such list in the authority. A hole in our model, not an empty list. */
+      readonly kind: "LIST_ABSENT";
+      readonly listName: string;
+    };
+
+function evaluateCondition(action: AplAction, bindings: AtomBindings): LineCondition {
+  if (action.conditionRaw === null) {
+    return { kind: "UNCONDITIONAL" };
+  }
+  const parsed = parseSimcExpression(action.conditionRaw);
+  if (!parsed.ok) {
+    return { kind: "UNSUPPORTED", reason: parsed.reason, fragment: parsed.fragment };
+  }
+  const evaluation = evaluateSimcExpression(parsed.ast, action.conditionRaw, bindings);
+  if (evaluation.outcome === "UNSUPPORTED") {
+    return { kind: "UNSUPPORTED", reason: evaluation.reason, fragment: action.conditionRaw };
+  }
+  const truth: TruthValue =
+    evaluation.outcome === "RESOLVED" ? (evaluation.value ? "TRUE" : "FALSE") : "UNKNOWN_STATE";
+  return { kind: "EVALUATED", truth, trace: evaluation.trace };
+}
+
+function truthOfCondition(condition: LineCondition): TruthValue {
+  if (condition.kind === "UNCONDITIONAL") return "TRUE";
+  if (condition.kind === "EVALUATED") return condition.truth;
+  // Unreachable: an unsupported condition ends the scan before it is combined.
+  return "UNKNOWN_STATE";
+}
+
+function outcomeOf(truth: TruthValue, usability: ActionUsability): LineOutcome {
+  // A definitely-false condition cannot win whatever its usability, so it is
+  // discarded. This is the one sound elimination available: the asymmetry
+  // between proving a line cannot fire and proving that it does.
+  if (truth === "FALSE") return "ELIMINATED";
+  if (truth === "TRUE" && usability === "PROVEN_USABLE") return "DEFINITE_WINNER";
+  // TRUE with unknown usability, or UNKNOWN_STATE with any usability. Might win.
+  return "POSSIBLE";
+}
+
+/**
+ * Selects within one named list, in strict priority order.
+ *
+ * The scan stops at the first DEFINITE winner: lower lines are unreachable once
+ * a higher line is known to fire, and evaluating them anyway would invite
+ * reporting one of them.
+ */
+export function selectWithinList(
+  authority: AplAuthority,
+  listName: string,
+  bindings: AtomBindings,
+  usabilityFor: ActionUsabilityResolver,
+): ListSelection {
+  const lookup = authority.actionsInList(listName);
+  if (!lookup.found) {
+    return { kind: "LIST_ABSENT", listName };
+  }
+
+  const lines: LineEvaluation[] = [];
+
+  for (const action of lookup.actions) {
+    // Control-flow constructs this project does not model inside a sub-list.
+    // Both fail closed: an unmodelled construct anywhere in the list could
+    // change which action is reached, so no selection conclusion is available.
+    if (action.isUnmodelledDispatch) {
+      return {
+        kind: "INDETERMINATE",
+        blocker: "UNMODELLED_DISPATCH_IN_LIST",
+        blockedBy: null,
+        lines,
+      };
+    }
+    if (action.callsListName !== null) {
+      return {
+        kind: "INDETERMINATE",
+        blocker: "NESTED_CALL_NOT_MODELLED",
+        blockedBy: null,
+        lines,
+      };
+    }
+
+    const condition = evaluateCondition(action, bindings);
+
+    if (condition.kind === "UNSUPPORTED") {
+      // Recorded, then the scan ends. Never skipped, never read as false, and
+      // never allowed to become UNKNOWN_STATE.
+      const line: LineEvaluation = {
+        listName: action.listName,
+        priorityOrdinal: action.priorityOrdinal,
+        actionStringVerbatim: action.actionStringVerbatim,
+        sourceLine: action.sourceLine,
+        actionToken: action.actionToken,
+        condition,
+        usability: usabilityFor(action),
+        outcome: "POSSIBLE",
+      };
+      lines.push(line);
+      return {
+        kind: "INDETERMINATE",
+        blocker: "UNSUPPORTED_AUTHORITY_EXPRESSION",
+        blockedBy: line,
+        lines,
+      };
+    }
+
+    const usability = usabilityFor(action);
+    const outcome = outcomeOf(truthOfCondition(condition), usability);
+    const line: LineEvaluation = {
+      listName: action.listName,
+      priorityOrdinal: action.priorityOrdinal,
+      actionStringVerbatim: action.actionStringVerbatim,
+      sourceLine: action.sourceLine,
+      actionToken: action.actionToken,
+      condition,
+      usability,
+      outcome,
+    };
+    lines.push(line);
+
+    if (outcome === "DEFINITE_WINNER") break;
+  }
+
+  const possible = lines.filter((line) => line.outcome !== "ELIMINATED");
+  const definite = possible.find((line) => line.outcome === "DEFINITE_WINNER");
+
+  if (definite === undefined) {
+    if (possible.length === 0) {
+      // Every line definitively eliminated — including the case of no lines at
+      // all, where an authoritative empty list selects nothing, exactly.
+      return { kind: "NO_ACTION_SELECTED", lines };
+    }
+    const first = possible[0];
+    return {
+      kind: "INDETERMINATE",
+      blocker: "NO_DEFINITE_WINNER",
+      blockedBy: first ?? null,
+      lines,
+    };
+  }
+
+  const competing = possible.find((line) => line.actionToken !== definite.actionToken);
+  if (competing !== undefined) {
+    return {
+      kind: "INDETERMINATE",
+      blocker: "COMPETING_POSSIBLE_ACTION",
+      blockedBy: competing,
+      lines,
+    };
+  }
+
+  return {
+    kind: "SELECTED",
+    actionToken: definite.actionToken,
+    selectingLine: definite,
+    convergedOver: possible,
+    lines,
+  };
+}
