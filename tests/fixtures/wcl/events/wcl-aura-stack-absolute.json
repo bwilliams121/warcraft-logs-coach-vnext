@@ -1,0 +1,129 @@
+[
+  {
+    "timestamp": 7552946,
+    "type": "applybuff",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6
+  },
+  {
+    "timestamp": 7552969,
+    "type": "applybuff",
+    "sourceID": 7,
+    "targetID": 7,
+    "abilityGameID": 1263382,
+    "fight": 6
+  },
+  {
+    "timestamp": 7552998,
+    "type": "applybuffstack",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6,
+    "stack": 2
+  },
+  {
+    "timestamp": 7553735,
+    "type": "applybuffstack",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6,
+    "stack": 3
+  },
+  {
+    "timestamp": 7553735,
+    "type": "refreshbuff",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6
+  },
+  {
+    "timestamp": 7553744,
+    "type": "removebuffstack",
+    "sourceID": 7,
+    "targetID": 7,
+    "abilityGameID": 1263382,
+    "fight": 6,
+    "stack": 2
+  },
+  {
+    "timestamp": 7554509,
+    "type": "applybuffstack",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6,
+    "stack": 4
+  },
+  {
+    "timestamp": 7554509,
+    "type": "refreshbuff",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6
+  },
+  {
+    "timestamp": 7554996,
+    "type": "removebuffstack",
+    "sourceID": 7,
+    "targetID": 7,
+    "abilityGameID": 1263382,
+    "fight": 6,
+    "stack": 1
+  },
+  {
+    "timestamp": 7555276,
+    "type": "applybuffstack",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6,
+    "stack": 5
+  },
+  {
+    "timestamp": 7555276,
+    "type": "refreshbuff",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6
+  },
+  {
+    "timestamp": 7556034,
+    "type": "applybuffstack",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6,
+    "stack": 6
+  },
+  {
+    "timestamp": 7556034,
+    "type": "refreshbuff",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6
+  },
+  {
+    "timestamp": 7556178,
+    "type": "removebuff",
+    "sourceID": 7,
+    "targetID": 7,
+    "abilityGameID": 1263382,
+    "fight": 6
+  },
+  {
+    "timestamp": 7556179,
+    "type": "removebuff",
+    "sourceID": 9,
+    "targetID": 9,
+    "abilityGameID": 1297033,
+    "fight": 6
+  }
+]

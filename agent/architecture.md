@@ -3240,6 +3240,80 @@ Implement enough shared infrastructure for:
 - Encounter state
 - Decision timing
 
+## Milestone 4 exit state
+
+M4 is complete and is NOT wired into `/v1/analysis`. Interpretation begins in M5.
+
+Every query answers with its own certainty — `EXACT` at the instant observed,
+`STALE` with a disclosed age, or `UNKNOWN` with a reason. Silence is never
+evidence of absence.
+
+### Supported
+
+- Deterministic event-relative temporal addressing
+- Evidence/capability/coverage-aware `StateResult`
+- Actor, ability and cast indexing
+- Aura presence from observed transitions. `ACTIVE` anchors: an application, a
+  refresh, or a stack removal reporting a positive resulting count. `INACTIVE`
+  requires an ordinary removal; a stack removal reporting zero proves neither.
+- Source-specific aura ownership, sourceless transitions failing closed
+- Exact absolute stack observations
+- Exact resource observations
+- Explicit `PRE_COST` timing for evidence-backed costed CAST observations
+- `STALE` prior resource observations
+- Standalone `resourcechange` observations without pre/post interpretation
+- Typed encounter phase/intermission state
+- Provenance
+
+### Explicitly unsupported / UNKNOWN
+
+- Arbitrary continuous resource state
+- Resource delta replay
+- Passive regeneration reconstruction
+- `resourcechange` pre/post timing
+- Cooldown readiness
+- Targetability
+- Continuous current target
+- Alive/dead state
+- Aura-duration expiration without authority
+- Gameplay correctness / actionability
+
+Several of those unsupported items were PLANNED for M4 above — cooldowns, target
+state, decision timing. They are unsupported because the evidence to model them
+honestly was not established, not because they were forgotten. Each needs
+either versioned runtime game data or a capability no capture has yet verified.
+Listing them here as `UNKNOWN` is the accurate exit state.
+
+### Settled evidence contracts
+
+Both are scoped to `gameVersion` 1 / `logVersion` 17, with committed fixtures and
+contract tests. A contradictory parser or game version is a STOP condition.
+
+| Contract | Classification | Meaning |
+| --- | --- | --- |
+| Aura `stack` on a stack-change event | `ESTABLISHED_ABSOLUTE_RESULTING` | the absolute resulting count AFTER that event |
+| Costed completed CAST `classResources[].amount` | `ESTABLISHED_PRE_COST` | the amount BEFORE that cost |
+
+Deliberately NOT established: whether a `resourcechange` attachment is pre-change
+or post-change. Evidence strongly favours post-change, but rests on
+same-timestamp retrieval adjacency standing in for causal order, which ingestion
+does not guarantee. The runtime stays agnostic — `EVENT_ASSOCIATED`, with no
+`POST_CHANGE` anywhere.
+
+### The standing prohibition
+
+A settled contract fixes what a value means AT AN INSTANT. It grants nothing
+about the intervals between instants.
+
+Resource arithmetic must NOT be replayed between non-adjacent snapshots. This was
+measured, not assumed: reconstructing state from an anchor plus intervening
+observed deltas does not reconcile against live captures, and two explanations
+survive the evidence — not every resource change emits an event, and
+same-timestamp retrieval order is not guaranteed causal. Either is fatal.
+
+So there is no `resourceAt(time)`, no passive regeneration, no interpolation, no
+synthesized missing change, no running resource ledger, and no `amount - cost`.
+
 ---
 
 # Milestone 5 — First Complete Vertical Slice

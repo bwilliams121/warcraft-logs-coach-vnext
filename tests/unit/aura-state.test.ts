@@ -803,7 +803,7 @@ describe("an unidentifiable aura observation blocks a carried-forward claim", ()
 // Stacks
 // --------------------------------------------------------------------------
 
-describe("stack numbers are preserved and never interpreted", () => {
+describe("stack numbers are preserved and never reconstructed", () => {
   const state = createCombatState(
     syntheticFight({
       observedCategories: ["AURAS"],
@@ -867,9 +867,9 @@ describe("stack numbers are preserved and never interpreted", () => {
     const result = state.auras.latestStackObservation({ ...sliceQuery, at: afterEvent(2) });
 
     if (result.certainty !== "EXACT") return;
-    // 3 then 4 is neither 7 (delta reading) nor anything else derived. Whether
-    // `stack` is absolute or a delta is NOT ESTABLISHED, so no arithmetic on it
-    // is permitted.
+    // 3 then 4 is neither 7 nor anything else derived. `stack` is the absolute
+    // resulting count, so 4 is simply the answer — and summing them would be
+    // the delta reading that live evidence rules out.
     expect(result.value.observedStacks).not.toBe(7);
     expect(result.value.observedStacks).toBe(4);
   });
@@ -899,67 +899,450 @@ describe("stack numbers are preserved and never interpreted", () => {
   });
 });
 
-describe("a stack removal cannot settle presence", () => {
-  const state = createCombatState(
-    syntheticFight({
-      observedCategories: ["AURAS"],
-      events: [
-        auraEvent({
-          ordinal: 0,
-          reportTimeMs: 1200,
-          operation: "APPLIED",
-          auraClass: "BUFF",
-          sourceActorId: PLAYER,
-          targetActorId: PLAYER,
-          abilityGameId: SLICE_AND_DICE,
-        }),
-        auraEvent({
-          ordinal: 1,
-          reportTimeMs: 1400,
-          operation: "REMOVED",
-          auraClass: "BUFF",
-          isStackChange: true,
-          stacks: 1,
-          sourceActorId: PLAYER,
-          targetActorId: PLAYER,
-          abilityGameId: SLICE_AND_DICE,
-        }),
-      ],
-    }),
-  );
+describe("a stack removal with stacks remaining proves the aura is ACTIVE", () => {
+  /**
+   * `stack` is the absolute count REMAINING after its own event, so a stack
+   * removal reporting a positive number is a positive anchor: the aura is
+   * observed still holding stacks.
+   *
+   * Only the positive direction follows. Zero is covered in its own block below.
+   */
+  function fightEndingInStackRemoval(stacks: number, options: SyntheticFightOptions = {}) {
+    return createCombatState(
+      syntheticFight({
+        observedCategories: ["AURAS"],
+        ...options,
+        events: [
+          auraEvent({
+            ordinal: 0,
+            reportTimeMs: 1200,
+            operation: "APPLIED",
+            auraClass: "BUFF",
+            sourceActorId: PLAYER,
+            targetActorId: PLAYER,
+            abilityGameId: SLICE_AND_DICE,
+          }),
+          auraEvent({
+            ordinal: 1,
+            reportTimeMs: 1400,
+            operation: "REMOVED",
+            auraClass: "BUFF",
+            isStackChange: true,
+            stacks,
+            sourceActorId: PLAYER,
+            targetActorId: PLAYER,
+            abilityGameId: SLICE_AND_DICE,
+          }),
+          damageEvent({ ordinal: 2, reportTimeMs: 2000, sourceActorId: PLAYER, targetActorId: BOSS }),
+        ],
+      }),
+    );
+  }
 
-  it("returns UNKNOWN rather than INACTIVE", () => {
-    const result = state.auras.presenceAt({
+  const sliceQuery = {
+    target: ON_PLAYER,
+    abilityGameId: SLICE_AND_DICE,
+    auraClass: "BUFF" as const,
+  };
+
+  it.each([
+    ["two stacks remaining", 2],
+    ["one stack remaining", 1],
+  ])("is EXACT ACTIVE at the observation itself with %s", (_label, stacks) => {
+    const result = fightEndingInStackRemoval(stacks).auras.presenceAt({
+      ...sliceQuery,
+      source: fromSource(BY_PLAYER),
+      at: afterEvent(1),
+    });
+
+    expect(result.certainty).toBe("EXACT");
+    if (result.certainty !== "EXACT") return;
+    expect(result.value.presence).toBe("ACTIVE");
+    // The anchor IS the instant asked about, so this is an OBSERVATION rather
+    // than a derivation carried across an interval.
+    expect(result.derivation).toBe("OBSERVED");
+    expect(result.value.anchorIsQueryPosition).toBe(true);
+    expect(result.value.anchor.observedStacks).toBe(stacks);
+  });
+
+  it("does not read a stack removal as INACTIVE", () => {
+    const result = fightEndingInStackRemoval(2).auras.presenceAt({
+      ...sliceQuery,
+      source: fromSource(BY_PLAYER),
+      at: afterEvent(1),
+    });
+
+    if (result.certainty !== "EXACT") return;
+    // The historical shape of this mistake: treating any `REMOVED` operation as
+    // the end of the aura, when the stack variants report what SURVIVED.
+    expect(result.value.presence).not.toBe("INACTIVE");
+  });
+
+  it("still reports it as an observed transition", () => {
+    const result = fightEndingInStackRemoval(1).auras.lastObservedTransition({
+      ...sliceQuery,
+      source: anySource(),
+      at: afterEvent(1),
+    });
+
+    if (result.certainty !== "EXACT" || result.value === null) return;
+    expect(result.value.isStackChange).toBe(true);
+    expect(result.value.observedStacks).toBe(1);
+  });
+});
+
+describe("ACTIVE from a stack removal carries forward under the ordinary rules", () => {
+  const sliceQuery = {
+    target: ON_PLAYER,
+    abilityGameId: SLICE_AND_DICE,
+    auraClass: "BUFF" as const,
+    source: fromSource(BY_PLAYER),
+  };
+
+  function fightWith(categories: SyntheticFightOptions["categories"]) {
+    return createCombatState(
+      syntheticFight({
+        categories,
+        events: [
+          auraEvent({
+            ordinal: 0,
+            reportTimeMs: 1200,
+            operation: "REMOVED",
+            auraClass: "BUFF",
+            isStackChange: true,
+            stacks: 3,
+            sourceActorId: PLAYER,
+            targetActorId: PLAYER,
+            abilityGameId: SLICE_AND_DICE,
+          }),
+          damageEvent({ ordinal: 1, reportTimeMs: 4000, sourceActorId: PLAYER, targetActorId: BOSS }),
+        ],
+      }),
+    );
+  }
+
+  it("derives ACTIVE later when coverage is complete", () => {
+    const result = createCombatState(
+      syntheticFight({
+        observedCategories: ["AURAS"],
+        events: fightWith({}).fight.events,
+      }),
+    ).auras.presenceAt({ ...sliceQuery, at: afterEvent(1) });
+
+    expect(result.certainty).toBe("EXACT");
+    if (result.certainty !== "EXACT") return;
+    expect(result.value.presence).toBe("ACTIVE");
+    // Carried across an interval rather than observed at it, which is a
+    // different derivation even though the certainty matches.
+    expect(result.derivation).toBe("DERIVED_EXACT");
+    expect(result.value.anchorIsQueryPosition).toBe(false);
+  });
+
+  it("returns UNKNOWN when the interval is not covered", () => {
+    const result = fightWith({
+      AURAS: partialCategory([exclusiveRange(1000, 2000)]),
+    }).auras.presenceAt({ ...sliceQuery, at: afterEvent(1) });
+
+    expect(result.certainty).toBe("UNKNOWN");
+    if (result.certainty !== "UNKNOWN") return;
+    // Carrying the anchor forward is a continuity claim, and a positive stack
+    // anchor earns no exemption from it.
+    expect(result.reason).toBe("INSUFFICIENT_COVERAGE");
+  });
+
+  it("returns UNKNOWN when the category was never verified", () => {
+    const result = fightWith({ AURAS: UNVERIFIED_CATEGORY }).auras.presenceAt({
+      ...sliceQuery,
+      at: afterEvent(1),
+    });
+
+    if (result.certainty !== "UNKNOWN") return;
+    expect(result.reason).toBe("CAPABILITY_UNVERIFIED");
+  });
+
+  it("lets an ordinary removal end it normally", () => {
+    const state = createCombatState(
+      syntheticFight({
+        observedCategories: ["AURAS"],
+        events: [
+          auraEvent({
+            ordinal: 0,
+            reportTimeMs: 1200,
+            operation: "REMOVED",
+            auraClass: "BUFF",
+            isStackChange: true,
+            stacks: 2,
+            sourceActorId: PLAYER,
+            targetActorId: PLAYER,
+            abilityGameId: SLICE_AND_DICE,
+          }),
+          auraEvent({
+            ordinal: 1,
+            reportTimeMs: 1600,
+            operation: "REMOVED",
+            auraClass: "BUFF",
+            sourceActorId: PLAYER,
+            targetActorId: PLAYER,
+            abilityGameId: SLICE_AND_DICE,
+          }),
+        ],
+      }),
+    );
+
+    const atStackRemoval = state.auras.presenceAt({ ...sliceQuery, at: afterEvent(0) });
+    const atFullRemoval = state.auras.presenceAt({ ...sliceQuery, at: afterEvent(1) });
+
+    if (atStackRemoval.certainty !== "EXACT" || atFullRemoval.certainty !== "EXACT") return;
+    // Two stacks remained, then the aura ended. Only the NON-stack removal
+    // proves INACTIVE.
+    expect(atStackRemoval.value.presence).toBe("ACTIVE");
+    expect(atFullRemoval.value.presence).toBe("INACTIVE");
+  });
+});
+
+describe("the new anchor changes nothing about ownership or the union", () => {
+  /**
+   * A positive stack removal is a new kind of ACTIVE anchor. It is NOT a new
+   * kind of exemption: source identity, sourceless ambiguity and the one-way
+   * union all apply to it exactly as they do to an application.
+   */
+  const ruptureOn = (source: ReturnType<typeof anySource>) => ({
+    target: ON_BOSS,
+    abilityGameId: RUPTURE,
+    auraClass: "DEBUFF" as const,
+    source,
+  });
+
+  it("keeps two sources' stack removals independent", () => {
+    // The player's Rupture is still on the boss at two stacks. An ALLY's own
+    // Rupture dropping to one stack is a fact about a different aura.
+    const state = createCombatState(
+      syntheticFight({
+        observedCategories: ["AURAS"],
+        events: [
+          auraEvent({
+            ordinal: 0,
+            reportTimeMs: 1200,
+            operation: "REMOVED",
+            auraClass: "DEBUFF",
+            isStackChange: true,
+            stacks: 2,
+            sourceActorId: PLAYER,
+            targetActorId: BOSS,
+            abilityGameId: RUPTURE,
+          }),
+          auraEvent({
+            ordinal: 1,
+            reportTimeMs: 1400,
+            operation: "REMOVED",
+            auraClass: "DEBUFF",
+            sourceActorId: ALLY,
+            targetActorId: BOSS,
+            abilityGameId: RUPTURE,
+          }),
+        ],
+      }),
+    );
+
+    const mine = state.auras.presenceAt({ ...ruptureOn(fromSource(BY_PLAYER)), at: afterEvent(1) });
+
+    expect(mine.certainty).toBe("EXACT");
+    if (mine.certainty !== "EXACT") return;
+    // The ally's full removal must not end the player's aura.
+    expect(mine.value.presence).toBe("ACTIVE");
+    expect(mine.value.anchor.observedStacks).toBe(2);
+  });
+
+  it("still fails closed through a sourceless transition", () => {
+    const state = createCombatState(
+      syntheticFight({
+        observedCategories: ["AURAS"],
+        events: [
+          auraEvent({
+            ordinal: 0,
+            reportTimeMs: 1200,
+            operation: "REMOVED",
+            auraClass: "DEBUFF",
+            isStackChange: true,
+            stacks: 2,
+            sourceActorId: PLAYER,
+            targetActorId: BOSS,
+            abilityGameId: RUPTURE,
+          }),
+          auraEvent({
+            ordinal: 1,
+            reportTimeMs: 1400,
+            operation: "REMOVED",
+            auraClass: "DEBUFF",
+            sourceActorId: null,
+            sourceAbsence: "NOT_SUPPLIED",
+            targetActorId: BOSS,
+            abilityGameId: RUPTURE,
+          }),
+          damageEvent({ ordinal: 2, reportTimeMs: 1600, sourceActorId: PLAYER, targetActorId: BOSS }),
+        ],
+      }),
+    );
+
+    const mine = state.auras.presenceAt({ ...ruptureOn(fromSource(BY_PLAYER)), at: afterEvent(2) });
+
+    expect(mine.certainty).toBe("UNKNOWN");
+    if (mine.certainty !== "UNKNOWN") return;
+    // The unowned removal might have been the player's own. A positive stack
+    // anchor earns no right to be carried through that ambiguity.
+    expect(mine.reason).toBe("UNSUPPORTED_DERIVATION");
+  });
+
+  it("lets an any-source query prove ACTIVE from a positive stack removal", () => {
+    const state = createCombatState(
+      syntheticFight({
+        observedCategories: ["AURAS"],
+        events: [
+          auraEvent({
+            ordinal: 0,
+            reportTimeMs: 1200,
+            operation: "REMOVED",
+            auraClass: "DEBUFF",
+            sourceActorId: ALLY,
+            targetActorId: BOSS,
+            abilityGameId: RUPTURE,
+          }),
+          auraEvent({
+            ordinal: 1,
+            reportTimeMs: 1400,
+            operation: "REMOVED",
+            auraClass: "DEBUFF",
+            isStackChange: true,
+            stacks: 1,
+            sourceActorId: PLAYER,
+            targetActorId: BOSS,
+            abilityGameId: RUPTURE,
+          }),
+        ],
+      }),
+    );
+
+    const union = state.auras.presenceAt({ ...ruptureOn(anySource()), at: afterEvent(1) });
+
+    expect(union.certainty).toBe("EXACT");
+    if (union.certainty !== "EXACT") return;
+    // One source still holds it at one stack, which settles the union even
+    // though another source's copy is gone.
+    expect(union.value.presence).toBe("ACTIVE");
+    expect(union.value.anchor.observedStacks).toBe(1);
+  });
+
+  it("does not make aggregate INACTIVE newly provable", () => {
+    // Every anchored track resolves INACTIVE, and the union STILL cannot say the
+    // aura is absent: a source with a pre-pull application leaves no track at
+    // all. Adding a new ACTIVE anchor did not change that one-way shape.
+    const state = createCombatState(
+      syntheticFight({
+        observedCategories: ["AURAS"],
+        events: [
+          auraEvent({
+            ordinal: 0,
+            reportTimeMs: 1200,
+            operation: "REMOVED",
+            auraClass: "DEBUFF",
+            sourceActorId: PLAYER,
+            targetActorId: BOSS,
+            abilityGameId: RUPTURE,
+          }),
+          auraEvent({
+            ordinal: 1,
+            reportTimeMs: 1400,
+            operation: "REMOVED",
+            auraClass: "DEBUFF",
+            sourceActorId: ALLY,
+            targetActorId: BOSS,
+            abilityGameId: RUPTURE,
+          }),
+        ],
+      }),
+    );
+
+    const union = state.auras.presenceAt({ ...ruptureOn(anySource()), at: afterEvent(1) });
+
+    expect(union.certainty).toBe("UNKNOWN");
+    if (union.certainty !== "UNKNOWN") return;
+    expect(union.reason).toBe("AMBIGUOUS_INITIAL_STATE");
+  });
+});
+
+describe("a stack removal reporting zero proves nothing", () => {
+  /**
+   * No capture contains a stack removal reading 0 — full removal arrives through
+   * the ordinary `removebuff` / `removedebuff` family instead. So "the stack
+   * removal that ends the aura" has no established form, and a synthetic or
+   * future zero must fail closed rather than invent one.
+   */
+  function fightEndingInZeroStacks(stacks: number | null) {
+    return createCombatState(
+      syntheticFight({
+        observedCategories: ["AURAS"],
+        events: [
+          auraEvent({
+            ordinal: 0,
+            reportTimeMs: 1200,
+            operation: "APPLIED",
+            auraClass: "BUFF",
+            sourceActorId: PLAYER,
+            targetActorId: PLAYER,
+            abilityGameId: SLICE_AND_DICE,
+          }),
+          auraEvent({
+            ordinal: 1,
+            reportTimeMs: 1400,
+            operation: "REMOVED",
+            auraClass: "BUFF",
+            isStackChange: true,
+            stacks,
+            sourceActorId: PLAYER,
+            targetActorId: PLAYER,
+            abilityGameId: SLICE_AND_DICE,
+          }),
+        ],
+      }),
+    );
+  }
+
+  it("does not establish INACTIVE from a zero resulting count", () => {
+    const result = fightEndingInZeroStacks(0).auras.presenceAt({
       target: ON_PLAYER,
       abilityGameId: SLICE_AND_DICE,
       auraClass: "BUFF",
-      source: anySource(),
+      source: fromSource(BY_PLAYER),
       at: afterEvent(1),
     });
 
     expect(result.certainty).toBe("UNKNOWN");
     if (result.certainty !== "UNKNOWN") return;
-    // Whether `removebuffstack` at one remaining stack ends the aura depends on
-    // whether `stack` is absolute or a delta — NOT ESTABLISHED. Either reading
-    // would be a guess, so the layer declines.
     expect(result.reason).toBe("UNSUPPORTED_DERIVATION");
+    // Not INACTIVE, and not ACTIVE either. Reading zero as "the aura ended"
+    // would be a new evidence contract nothing has established.
+    expect(JSON.stringify(result)).not.toContain("INACTIVE");
   });
 
-  it("returns UNKNOWN rather than ACTIVE either", () => {
-    const result = state.auras.presenceAt({
+  it("fails closed on a missing stack count too", () => {
+    // M3 rejects a stack event with no `stack` as a malformed family event, so
+    // this shape cannot arrive from a real capture. The guard is still explicit
+    // rather than relying on that.
+    const result = fightEndingInZeroStacks(null).auras.presenceAt({
       target: ON_PLAYER,
       abilityGameId: SLICE_AND_DICE,
       auraClass: "BUFF",
-      source: anySource(),
+      source: fromSource(BY_PLAYER),
       at: afterEvent(1),
     });
 
-    expect(result.certainty).not.toBe("EXACT");
-    expect(JSON.stringify(result)).not.toContain("ACTIVE");
+    expect(result.certainty).toBe("UNKNOWN");
+    if (result.certainty !== "UNKNOWN") return;
+    expect(result.reason).toBe("UNSUPPORTED_DERIVATION");
   });
 
-  it("still reports it as an observed transition", () => {
-    const result = state.auras.lastObservedTransition({
+  it("still reports the zero observation verbatim", () => {
+    const result = fightEndingInZeroStacks(0).auras.lastObservedTransition({
       target: ON_PLAYER,
       abilityGameId: SLICE_AND_DICE,
       auraClass: "BUFF",
@@ -969,8 +1352,7 @@ describe("a stack removal cannot settle presence", () => {
 
     // Declining to derive presence from it does not un-observe it.
     if (result.certainty !== "EXACT" || result.value === null) return;
-    expect(result.value.isStackChange).toBe(true);
-    expect(result.value.observedStacks).toBe(1);
+    expect(result.value.observedStacks).toBe(0);
   });
 });
 

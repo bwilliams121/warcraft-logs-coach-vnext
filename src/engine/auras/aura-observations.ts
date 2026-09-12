@@ -70,9 +70,14 @@ export interface AuraObservation {
   /**
    * The observed `stack` value, verbatim.
    *
-   * NOT interpreted. Whether this number is an absolute resulting count or a
-   * delta is an UNESTABLISHED evidence contract, so nothing in M4 may read it as
-   * either, and there is no reconstructed stack count anywhere in this layer.
+   * For `gameVersion` 1 / `logVersion` 17 this is the ABSOLUTE RESULTING STACK
+   * COUNT AFTER this transition — established, not assumed, and never a delta.
+   * Evidence: `tests/fixtures/wcl/events/wcl-aura-stack-absolute.json`.
+   *
+   * Verbatim still means verbatim. Nothing here adds, subtracts or reconciles
+   * two stack numbers, because the value is only known AT a transition that
+   * carried one. `null` means this transition carried no `stack` field — an
+   * absence, never zero stacks.
    */
   readonly observedStacks: number | null;
   readonly reportTimeMs: number;

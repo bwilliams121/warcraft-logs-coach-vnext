@@ -26,18 +26,72 @@
  * and whether that 100 is the amount before or after the change is an
  * UNESTABLISHED evidence contract. Merging them would require picking one.
  *
- * WHY NOTHING HERE IS NAMED pre/post
+ * SAMPLING TIMING IS A TAG, NOT A NAME
  *
- * A snapshot attached to a `cast` is an exact observation ASSOCIATED WITH that
- * cast. Whether it was sampled before or after the cast's cost was deducted is
- * NOT ESTABLISHED, so no name in this module may imply either. Hence
- * `observationOnEvent` and `latestObservationAtOrBefore`, and no
- * `resourceBeforeCast` / `resourceAfterSpend` anywhere.
+ * Exactly one sampling order is established: a COMPLETED cast carrying a
+ * positive `cost` reports the amount BEFORE that cost. Every other attachment
+ * — `resourcechange` included — has no established order.
+ *
+ * That distinction is carried as `ResourceObservationTiming` on the observation
+ * rather than baked into accessor names. An accessor called
+ * `resourceBeforeCast` would apply one event's contract to every event that
+ * reaches it, and `EVENT_ASSOCIATED` would have nowhere to live. A tag lets a
+ * consumer branch on what is actually known, and lets the unknown case stay
+ * visibly unknown.
+ *
+ * Knowing that an amount is PRE_COST still does not make the POST-cost amount
+ * knowable. `amount - cost` is arithmetic across an instant nothing observed,
+ * and live captures contain costed casts where the next observation disagrees
+ * with it. See `resource-state.ts`.
  */
 
 import type { EvidenceLocator } from "../evidence/locator.js";
 import type { CombatFight } from "../normalization/combat-fight.js";
-import type { ActorRef, ResourceSide, SourceRef, TargetRef } from "../normalization/normalized-events.js";
+import type {
+  ActorRef,
+  ClassResourceObservation,
+  CombatEvent,
+  ResourceSide,
+  SourceRef,
+  TargetRef,
+} from "../normalization/normalized-events.js";
+
+/**
+ * When an observed amount was sampled, relative to its own event.
+ *
+ * Two members, because exactly two states are honest. There is deliberately no
+ * `POST_COST` and no `POST_CHANGE`:
+ *
+ * - `POST_COST` is not observed anywhere. It could only be computed, and
+ *   computing it is the delta replay this layer refuses.
+ * - `POST_CHANGE` for a `resourcechange` attachment is EMPIRICALLY FAVOURED but
+ *   NOT ESTABLISHED. The supporting evidence relies on same-timestamp retrieval
+ *   adjacency standing in for causal order, which M3/M4-A deliberately do not
+ *   guarantee, and whole-window reconciliation was incomplete. Adding the member
+ *   would let that assumption spread by autocomplete.
+ */
+export type ResourceObservationTiming =
+  /**
+   * The amount BEFORE the event's own cost was paid.
+   *
+   * Established for `gameVersion` 1 / `logVersion` 17 from live captures, and
+   * used for exactly one case: a COMPLETED cast whose entry carries a positive
+   * `cost`. Evidence: `tests/fixtures/wcl/events/wcl-cast-resource-pre-cost.json`.
+   */
+  | "PRE_COST"
+  /**
+   * An exact observation associated with the event, with no established
+   * before/after relationship to anything the event did.
+   *
+   * The conservative default. Every attachment that is not a positively costed
+   * completed cast lands here, including `resourcechange`.
+   */
+  | "EVENT_ASSOCIATED";
+
+export const RESOURCE_OBSERVATION_TIMINGS = [
+  "PRE_COST",
+  "EVENT_ASSOCIATED",
+] as const satisfies readonly ResourceObservationTiming[];
 
 /**
  * One resource amount, as observed on one event.
@@ -55,11 +109,18 @@ export interface ResourceAmountObservation {
   /** The actor the snapshot describes. `null` when that side carried no actor. */
   readonly actor: ActorRef | null;
   readonly resourceType: number;
-  /** `amount`, verbatim. An observation on this event — not pre-cast, not post-cast. */
+  /** `amount`, verbatim. `timing` says what instant it describes. */
   readonly observedAmount: number;
   readonly observedMax: number | null;
   /** `cost`, observed on cast events only. An observed number, not a verdict. */
   readonly observedCost: number | null;
+  /**
+   * What instant `observedAmount` describes, relative to this event.
+   *
+   * Decided once, here, from M3's normalized model — never re-derived downstream
+   * from the raw type string.
+   */
+  readonly timing: ResourceObservationTiming;
   /** The raw type of the event the snapshot rode in on, for context. */
   readonly attachedToRawType: string;
   readonly reportTimeMs: number;
@@ -225,6 +286,38 @@ export function buildResourceIndexes(fight: CombatFight): ResourceIndexes {
 }
 
 /**
+ * Classifies one attached entry's sampling timing.
+ *
+ * PRE_COST requires BOTH halves of the established contract and nothing less:
+ *
+ *     a COMPLETED cast   +   a positive observed cost on THIS resource entry
+ *
+ * `castPhase === "COMPLETE"` is M3's normalized form of the raw type `cast`,
+ * which is the only type the contract was established on. `begincast` shares
+ * `kind: "CAST"` and is deliberately excluded — no capture has shown it carrying
+ * an attachment at all, so extending the contract to it would be an assumption.
+ *
+ * A cast entry with no cost, or a zero cost, is EVENT_ASSOCIATED. Zero is an
+ * observed cost of nothing, which establishes no ordering: there is no deduction
+ * for the amount to precede.
+ *
+ * Everything else — `resourcechange`, `damage`, `heal` — is EVENT_ASSOCIATED,
+ * and that is the DEFAULT rather than a listed set, so a raw type nobody has
+ * considered yet cannot fall into PRE_COST.
+ */
+function timingOf(event: CombatEvent, resource: ClassResourceObservation): ResourceObservationTiming {
+  if (
+    event.kind === "CAST" &&
+    event.castPhase === "COMPLETE" &&
+    resource.cost !== null &&
+    resource.cost > 0
+  ) {
+    return "PRE_COST";
+  }
+  return "EVENT_ASSOCIATED";
+}
+
+/**
  * Reads one resource amount off the snapshot at a canonical position.
  *
  * `null` when that position holds no snapshot for that actor and resource type.
@@ -258,6 +351,7 @@ export function resourceObservationAt(
     observedAmount: resource.amount,
     observedMax: resource.max,
     observedCost: resource.cost,
+    timing: timingOf(event, resource),
     attachedToRawType: event.rawType,
     reportTimeMs: event.reportTimeMs,
     fightTimeMs: event.fightTimeMs,

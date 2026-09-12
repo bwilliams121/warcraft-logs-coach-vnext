@@ -50,6 +50,17 @@
  * and no future removal time, and this module invents none. An aura here does
  * not expire — it stays ACTIVE until an observed transition says otherwise, or
  * until coverage runs out and the answer becomes UNKNOWN.
+ *
+ * WHAT A STACK REMOVAL PROVES
+ *
+ * `stack` is the absolute count REMAINING after its own event, so a stack
+ * removal reporting a positive number proves the aura survived it. A
+ * `removebuffstack` reading 2 is a known-ACTIVE anchor for the same reason an
+ * application is: the aura is observed holding stacks.
+ *
+ * Only the positive direction follows. A resulting count of zero has no observed
+ * form — full removal arrives as `removebuff` / `removedebuff` — so zero fails
+ * closed rather than becoming INACTIVE.
  */
 
 import type { EvidenceCategory } from "../../wcl/evidence-capability.js";
@@ -191,6 +202,10 @@ export interface AuraStateView {
    * An `ANY_SOURCE` query can prove ACTIVE — one source's aura being up means
    * the aura is up — but cannot prove INACTIVE, because the set of sources that
    * might hold it is not observable. See `presenceFromGroup`.
+   *
+   * Anchors that prove ACTIVE: an application, a refresh, and a stack removal
+   * reporting a positive resulting count. Only a NON-stack removal proves
+   * INACTIVE. A stack removal reporting zero proves neither.
    */
   presenceAt(query: AuraStateQuery): StateResult<AuraPresenceState>;
 
@@ -200,9 +215,21 @@ export interface AuraStateView {
    *
    * The value is the OBSERVATION, not a number, and deliberately so: the result
    * describes what was seen and when, and makes no claim about a stack count at
-   * the query position. There is no `stacksAt`, because answering it would
-   * require knowing whether `stack` is an absolute count or a delta — an
-   * evidence contract that is NOT ESTABLISHED.
+   * the query position.
+   *
+   * The observed number IS the absolute resulting count after its own
+   * transition, and `presenceAt` uses a positive one as a known-ACTIVE anchor.
+   * There is still no `stacksAt`, and the reason has simply moved. Answering
+   * "how many stacks at an arbitrary instant" needs three more things this layer
+   * does not have:
+   *
+   *     what count a plain `applybuff` establishes   — carries no `stack` field
+   *     what a `refreshbuff` does to the count       — carries no `stack` field
+   *     when stacks decay or expire unobserved       — no duration authority
+   *
+   * A stack count is therefore EXACT at a transition that reported one, and
+   * UNKNOWN between transitions — the same shape as the resource surface, for
+   * the same reason.
    */
   latestStackObservation(query: AuraStateQuery): StateResult<AuraObservation>;
 }
@@ -380,15 +407,34 @@ export function createAuraState(environment: StateEnvironment): AuraStateView {
       return { kind: "UNKNOWN", reason: "UNSUPPORTED_DERIVATION", locators: [] };
     }
 
-    // A stack REMOVAL cannot settle presence. Whether `removebuffstack` at one
-    // remaining stack ends the aura or leaves it running depends on whether
-    // `stack` is an absolute count or a delta — NOT ESTABLISHED. A stack
-    // APPLICATION is safe in the other direction: adding a stack to an aura
-    // cannot have removed it, so it remains a usable known-active anchor.
-    if (anchor.isStackChange && anchor.operation === "REMOVED") {
+    // What a stack REMOVAL proves, now that `stack` is the absolute resulting
+    // count after its own event.
+    //
+    //     removebuffstack stack=2  ->  exactly two stacks REMAIN  ->  ACTIVE
+    //     removebuffstack stack=1  ->  exactly one stack REMAINS   ->  ACTIVE
+    //
+    // That is an observation, not a gameplay inference: the event reports the
+    // count the aura was left holding, and an aura holding stacks is on the
+    // target. It is a positive anchor exactly like an application.
+    //
+    // A resulting count of ZERO is deliberately NOT read as INACTIVE. No capture
+    // contains one — full removal comes through the ordinary `removebuff` /
+    // `removedebuff` family instead — so "the stack removal that ends the aura"
+    // has no established form. A synthetic or future zero therefore fails closed
+    // rather than inventing a contract nothing has evidenced. Same for a missing
+    // count, which M3 already rejects as a malformed family event.
+    //
+    // A stack APPLICATION needs no such test: adding a stack to an aura cannot
+    // have removed it, whatever the number says.
+    if (
+      anchor.isStackChange &&
+      anchor.operation === "REMOVED" &&
+      !(anchor.observedStacks !== null && anchor.observedStacks > 0)
+    ) {
       return { kind: "UNKNOWN", reason: "UNSUPPORTED_DERIVATION", locators: [anchor.locator] };
     }
-    const presence: AuraPresence = anchor.operation === "REMOVED" ? "INACTIVE" : "ACTIVE";
+    const presence: AuraPresence =
+      anchor.operation === "REMOVED" && !anchor.isStackChange ? "INACTIVE" : "ACTIVE";
 
     // The anchor IS the observation asked about: nothing lies between them, so
     // there is no absence to prove and no coverage to require. This is M4-A's

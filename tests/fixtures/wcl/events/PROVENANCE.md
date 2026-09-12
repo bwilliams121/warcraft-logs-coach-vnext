@@ -1,7 +1,18 @@
 # Warcraft Logs event fixture provenance
 
-Four sanitized slices from one live capture. Together they are the sole evidence
-for every raw event type string and field name that `src/` recognises.
+Six sanitized slices from two public reports.
+
+They serve two different purposes, and the distinction matters when reviewing
+them:
+
+| Purpose | Files | What it gates |
+| --- | --- | --- |
+| **Type recognition** | the four window/edge slices | every raw type string and field name `src/` recognises |
+| **Field semantics** | `wcl-aura-stack-absolute`, `wcl-cast-resource-pre-cost` | what two specific field VALUES mean |
+
+A semantics fixture is not cited by `supported-families.ts`, because it
+establishes no new type. It is cited by the contract tests that read the meaning
+of a value, and it is the reason those tests are evidence rather than assertion.
 
 ## Source capture
 
@@ -63,7 +74,7 @@ never decoded proves nothing.
 string recognised in `src/` appears in one of these files. Adding a contract
 without adding evidence fails the build.
 
-## Verified facts these slices establish
+## Verified facts these four slices establish
 
 - Envelope keys: `timestamp`, `type`, `fight`
 - Direction keys: `sourceID`, `targetID`, `sourceInstance`, `targetInstance`, `abilityGameID`
@@ -101,6 +112,210 @@ evidence exists for any of them.
 1. **An encounter with a real intermission**, to settle `TARGETABILITY`.
 2. **A pull with deaths, interrupts and dispels**, to settle the other three.
 3. **A pull including a pet or guardian class**, to exercise `petOwner` against real data.
+
+---
+
+# Evidence-contract slices
+
+Two further slices establish what a FIELD VALUE means, rather than that a type
+exists. Both were captured on **2026-09-12** during the M4-C1 evidence
+investigation.
+
+**Version scope for both: `gameVersion` 1, `logVersion` 17.** These contracts are
+evidence-backed for that pair and are not generalised beyond it. A parser or game
+version that contradicts either is a STOP condition, not something to patch
+around.
+
+## `wcl-aura-stack-absolute.json`
+
+| | |
+| --- | --- |
+| Report code | `qJ1pgB49ZrRNVmCd` |
+| Fight ID | 6 |
+| Source ID | not applicable — the chains belong to actors 9 and 7, not the analysed player |
+| `gameVersion` / `logVersion` | 1 / 17 |
+| Events | 15 |
+| Capture window | 7,550,000–7,560,000 (terminal page, complete) |
+| Purpose | establish the meaning of the aura `stack` field |
+| Classification | `ESTABLISHED_ABSOLUTE_RESULTING` |
+
+**Establishes:** on a stack-change aura event, `stack` is the ABSOLUTE RESULTING
+STACK COUNT AFTER that event. Not a delta, not the prior count, not an amount to
+add or subtract.
+
+It is also the evidence behind one behaviour: a stack removal reporting a
+positive count proves the aura survived it, so `removebuffstack` reading 2 is a
+known-`ACTIVE` presence anchor. The second chain below carries both real
+observations — `stack: 2` and `stack: 1` — followed by the ordinary `removebuff`
+that does end the aura. A resulting count of ZERO appears nowhere in any capture
+and is deliberately not read as `INACTIVE`.
+
+Two chains, each **complete** — every event Warcraft Logs returned for that
+(ability, source, target) inside the window, nothing dropped. Completeness is
+what makes them evidence; a sliced chain could be made to fit almost any reading.
+
+```text
+ability 1297033, actor 9 on itself
+  applybuff -> stack 2 -> stack 3 -> stack 4 -> stack 5 -> stack 6 -> removebuff
+  (with the four interleaved refreshbuff events retained)
+
+ability 1263382, actor 7 on itself
+  applybuff -> removebuffstack 2 -> removebuffstack 1 -> removebuff (+1182 ms)
+```
+
+Why the alternatives fail:
+
+- **Delta** would need the first stack application to read 1 — the commonest
+  value a delta takes. It never appears. The ascending run would instead mean
+  gaining 2, then 3, then 4 stacks one at a time.
+- **Absolute-before** dies twice: `applybuff` establishes the aura, so a
+  following application claiming a PRIOR count of 2 is impossible; and a removal
+  reading 1 would mean the aura hit zero, yet the second chain runs for another
+  1.18 seconds before its own `removebuff`.
+
+The wider investigation behind this slice covered 1,012 stack applications and
+510 stack removals across two reports: zero applications read 1, zero removals
+read 0, and 131 of 131 plain-application-then-stack-application transitions read
+2.
+
+## `wcl-cast-resource-pre-cost.json`
+
+| | |
+| --- | --- |
+| Report code | `A7R6kxPJ1hC8YQ4w` |
+| Fight ID | 7 |
+| Source ID | 19 (Rogue); actor 12 supplies the independent second example |
+| Encounter | Entombed Sentinels (`encounterID` 3445), difficulty 5, 20-player, kill |
+| Report revision | 30 |
+| `gameVersion` / `logVersion` | 1 / 17 |
+| Events | 5 |
+| Capture window | 2,174,394–2,194,394, `includeResources: true` (truncated at the page limit; the slice is well inside the covered prefix) |
+| Purpose | establish when a CAST-attached `classResources[].amount` was sampled |
+| Classification | `ESTABLISHED_PRE_COST` |
+
+**Establishes:** when a COMPLETED cast carries a `classResources[]` entry with a
+positive `cost`, `amount` is the actor's amount BEFORE that cost was paid.
+
+A second report at a different revision, deliberately — it makes this a genuine
+cross-check rather than a second look at one parse.
+
+The falsifier is structural and decided from ONE event, needing no arithmetic, no
+event ordering and no regeneration model:
+
+```text
+amount == max   while   cost > 0
+```
+
+Under a post-cost reading the actor would have held `max + cost`, above the cap.
+The slice carries the sharpest form — a capped discrete resource spent in full:
+
+```text
+cast 32645   resource type 4   amount 7 / max 7 / cost 7
+```
+
+Post-cost would require holding 14 of a 7-capacity pool.
+
+The five events and what each is for:
+
+| Event | Role |
+| --- | --- |
+| `cast` 116858, actor 12, resource type 7, 50/50 cost 20 | independent actor and resource: the contract is not one class's quirk |
+| `resourcechange` 1298870, actor 19 | a `resourcechange` attachment, which stays `EVENT_ASSOCIATED` |
+| `cast` 32645, actor 19 | two costed entries on one cast, including `amount == max == cost` |
+| `cast` 703, actor 19, 195/250 cost 45 | a costed cast below cap |
+| `cast` 1 (melee), actor 19, 150/250, no cost | an UNcosted cast: `EVENT_ASSOCIATED`, and corroboration that 195 − 45 = 150 |
+
+The last pair shares a timestamp. It is corroboration only — the accepted
+contract rests on the cap-bounded falsifier, because same-timestamp retrieval
+order is not guaranteed to be causal order.
+
+The wider investigation found 126 cap-bounded falsifiers of the post-cost reading
+and zero counterexamples across 423 costed entries, spanning resource types 0, 1,
+3, 4, 5, 7, 11 and 17 in two reports.
+
+Reproduce both from fresh `.probe/` captures:
+
+```powershell
+node scripts/sanitize-probe.mjs .probe/followup-q1-omitted.json wcl-aura-stack-absolute.json --indices 1801,1827,1836,2372,2373,2378,2913,2914,3162,3385,3386,3770,3771,3867,3876
+node scripts/sanitize-probe.mjs .probe/m4c1-rogue-resources.json wcl-cast-resource-pre-cost.json --indices 464,700,704,4713,4715
+```
+
+`--indices` selects exact capture positions, which the property-based modes
+cannot express: an evidence contract about a SEQUENCE needs the actual chain, and
+selecting by ability id would drag in every other actor's copy of the same aura.
+
+### Reproducing the raw captures those indices refer to
+
+An index list is only meaningful against the exact capture it was taken from, and
+neither capture is what `npm run probe` writes by default — the committed probe
+takes a 300-event shape sample, not a mid-fight window. The retrieval parameters
+are recorded here instead, because they are what makes the positions
+deterministic:
+
+| | `followup-q1-omitted.json` | `m4c1-rogue-resources.json` |
+| --- | --- | --- |
+| Report | `qJ1pgB49ZrRNVmCd` | `A7R6kxPJ1hC8YQ4w` |
+| Revision at capture | 1 | 30 |
+| `fightIDs` | `[6]` | `[7]` |
+| `startTime` | 7,550,000 | 2,174,394 |
+| `endTime` | 7,560,000 | 2,194,394 |
+| `limit` | 10,000 | 10,000 |
+| `includeResources` | false | **true** |
+| `dataType` | `All` | `All` |
+| `hostilityType` | omitted | omitted |
+| Events returned | 5,010 | 10,003 |
+| `nextPageTimestamp` | null (terminal page) | 2,191,432 (truncated prefix) |
+
+Everything else matches `EVENTS_QUERY`: `translate: true`, `useActorIDs: true`,
+`useAbilityIDs: true`, no actor or aura filters.
+
+The Rogue window hit the page limit, so its coverage is the contiguous prefix
+`[2174394, 2191432)`. The selected indices sit well inside it. A re-fetch at a
+DIFFERENT revision may renumber positions — the revisions above are recorded for
+exactly that reason, and a mismatch means re-deriving the indices rather than
+trusting the list.
+
+---
+
+# Still NOT ESTABLISHED
+
+## `resourcechange` attached snapshot timing
+
+When a `resourcechange` event carries both a `resourceChange` delta and an
+attached `classResources[].amount`, whether that amount describes the state
+before or after the change is **NOT ESTABLISHED**.
+
+Observed evidence strongly favours POST_CHANGE — 50 discriminating cases across
+two reports matched it and zero matched PRE_CHANGE — but causal ordering is
+insufficiently established to promote this to a runtime contract. The supporting
+evidence relies on same-timestamp retrieval adjacency behaving as causal order,
+which the ingestion layer deliberately does not guarantee, and whole-window
+reconciliation left gaps that could equally be explained by resource changes that
+emit no event.
+
+M4 therefore tags a `resourcechange` attachment `EVENT_ASSOCIATED`. There is no
+`POST_CHANGE` and no `PRE_CHANGE` anywhere in the runtime, and a contract test
+pins that the timing union has exactly two members.
+
+## Do not replay resourcechange deltas between observations
+
+**Do not replay `resourcechange` deltas between observations to manufacture exact
+resource state.**
+
+This is an architectural prohibition, not a temporary gap. M4-C1 measured exactly
+that reconstruction against live captures and it does not reconcile: snapshots
+appear whose value disagrees with an anchor plus the intervening observed deltas.
+Two explanations survive the evidence and neither can be excluded — not every
+resource change emits an event, and same-timestamp retrieval order is not
+guaranteed to be causal. Either one is fatal to replay.
+
+The same prohibition covers passive regeneration, interpolation between
+observations, synthesizing a missing change, and computing `amount - cost` as a
+post-cost amount.
+
+A snapshot is authoritative for its own observational point. Between observations
+the amount is UNKNOWN, and `PRE_COST` does not change that — it makes one more
+INSTANT exactly knowable, not the intervals around it.
 
 ## Never stored here
 

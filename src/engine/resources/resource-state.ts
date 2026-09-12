@@ -23,6 +23,30 @@
  * decision — none of which is knowable here. There is therefore deliberately no
  * staleness threshold in this module.
  *
+ * NO DELTA REPLAY. THIS IS PERMANENT.
+ *
+ * An observation is authoritative for ITS OWN observational point and for
+ * nothing else. Between two observations the amount is UNKNOWN, and it stays
+ * UNKNOWN even though every ingredient for a plausible reconstruction is sitting
+ * right here: an exact anchor, observed `resourceChange` deltas, observed
+ * `cost`s and a `max`.
+ *
+ * This is not a gap waiting to be filled. Live captures were measured against
+ * exactly that reconstruction and it does not reconcile — snapshots appear whose
+ * value disagrees with the anchor plus the intervening observed deltas. Two
+ * explanations survive the evidence, and neither can be ruled out: not every
+ * resource change emits an event, and same-timestamp retrieval order is not
+ * guaranteed to be causal order. Either one is fatal to replay.
+ *
+ * So none of the following exists, and none may be added:
+ *
+ *     amount at an arbitrary instant     delta replay from an anchor
+ *     passive regeneration               synthesized missing changes
+ *     interpolation between observations a running current-resource ledger
+ *
+ * Knowing that a costed cast's amount is PRE_COST does not soften this. It makes
+ * one more INSTANT exactly knowable; it makes nothing BETWEEN instants knowable.
+ *
  * OBSERVATIONAL QUERIES ARE NOT CONTINUITY CLAIMS
  *
  * `latestObservedAtOrBefore` answers a question about OUR EVIDENCE:
@@ -76,9 +100,13 @@ export interface ResourceStateView {
   /**
    * The exact resource observation carried ON the event at a position.
    *
-   * Named for what it is. An observation attached to a cast is associated with
-   * that cast; it is NOT "the resource before the cast" or "after the cast",
-   * because the sampling order relative to the cast's cost is NOT ESTABLISHED.
+   * Named for what it is: an observation carried on this event. WHEN it was
+   * sampled travels with the value, as `timing`, rather than in the accessor's
+   * name — `PRE_COST` on a completed cast with a positive cost, and
+   * `EVENT_ASSOCIATED` everywhere else, including `resourcechange`.
+   *
+   * PRE_COST is the amount before that cost. It is NOT an invitation to compute
+   * the amount after: see the delta-replay prohibition in this module's header.
    *
    * Needs no coverage: the event is in hand. `NO_OBSERVATION` when that event
    * carries no snapshot for this actor and resource.

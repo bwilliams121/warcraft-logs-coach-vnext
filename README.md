@@ -598,7 +598,8 @@ npm.cmd run deploy
 ## Current Status
 
 Milestone 1 (foundation), Milestone 2 (Warcraft Logs connectivity and identity
-preflight) and the Milestone 3 ingestion machinery are implemented.
+preflight), the Milestone 3 ingestion machinery and the Milestone 4 shared state
+primitives are implemented.
 
 `POST /v1/analysis` now validates the request, resolves configuration,
 authenticates to Warcraft Logs with OAuth Client Credentials, and runs a
@@ -686,6 +687,75 @@ Three behaviours were measured against the live API rather than assumed:
   target's health, so it is never attributed to the source.
 
 See `tests/fixtures/wcl/events/PROVENANCE.md` for the full evidence record.
+
+### Milestone 4 — shared state primitives, complete
+
+Milestone 4 turns a normalized `CombatFight` into queryable state. Like
+ingestion, it is **not wired into `/v1/analysis`** — M5 is where interpretation
+begins.
+
+Every answer carries its own certainty. `EXACT` when the observation is the
+instant asked about, `STALE` when it is earlier and the age is disclosed, and
+`UNKNOWN` with a reason otherwise. Nothing is defaulted, and silence is never
+evidence of absence.
+
+**Supported**
+
+- deterministic event-relative temporal addressing
+- evidence/capability/coverage-aware `StateResult`
+- actor, ability and cast indexing
+- aura presence from observed transitions — an application, a refresh, or a
+  stack removal reporting a positive resulting count all prove `ACTIVE`; only an
+  ordinary removal proves `INACTIVE`
+- source-specific aura ownership, with sourceless transitions failing closed
+- exact absolute stack observations
+- exact resource observations
+- explicit `PRE_COST` timing for evidence-backed costed cast observations
+- `STALE` prior resource observations, with their age
+- standalone `resourcechange` observations, with no pre/post interpretation
+- typed encounter phase and intermission state
+- provenance
+
+**Explicitly unsupported, and `UNKNOWN` by construction**
+
+- arbitrary continuous resource state
+- resource delta replay
+- passive regeneration reconstruction
+- `resourcechange` pre/post timing
+- cooldown readiness
+- targetability
+- continuous current target
+- alive/dead state
+- aura expiry without a duration authority
+- gameplay correctness and actionability
+
+Two field-level evidence contracts were settled against live captures for
+`gameVersion` 1 / `logVersion` 17, and both are narrow on purpose:
+
+- **Aura `stack` is the absolute resulting count** after its own stack-change
+  event — not a delta, not the prior count. Across two reports, zero of 1,012
+  stack applications read 1, and 131 of 131 transitions from a plain application
+  read 2.
+- **A costed completed cast's `amount` is `PRE_COST`.** The falsifier is
+  structural and decided from one event: `amount == max` while `cost > 0` would
+  require having held more than the cap. The sharpest case is a capped discrete
+  resource spent in full — `amount == max == cost == 7`.
+
+A third contract was investigated and **deliberately left unsettled**: whether a
+`resourcechange` attachment describes the state before or after its own delta.
+The evidence strongly favours post-change — 50 discriminating cases matched it
+and none matched the alternative — but it relies on same-timestamp retrieval
+adjacency behaving as causal order, which ingestion does not guarantee. It is
+therefore `EVENT_ASSOCIATED`, and no `POST_CHANGE` exists anywhere in the
+runtime.
+
+**Knowing what a number means is not permission to reconstruct one.** Both
+settled contracts fix the meaning of a value AT AN INSTANT. Between observations
+the amount stays `UNKNOWN` — and that is a measured conclusion, not a gap waiting
+to be filled: replaying an anchor plus intervening observed deltas was tried
+against live captures and does not reconcile. Two explanations survive and
+neither can be excluded, so `resourceAt(time)`, delta replay, interpolation,
+synthesized changes and `amount - cost` are all permanently out.
 
 ### Live Warcraft Logs probe
 

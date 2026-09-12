@@ -287,7 +287,7 @@ describe("an observation is exact at itself and stale later", () => {
   });
 });
 
-describe("nothing in the resource surface is named pre-cast or post-cast", () => {
+describe("sampling timing travels with the value, not in the accessor name", () => {
   const state = createCombatState(
     syntheticFight({
       observedCategories: ["RESOURCES"],
@@ -325,15 +325,14 @@ describe("nothing in the resource surface is named pre-cast or post-cast", () =>
     const result = state.resources.observationOnEvent(0, PLAYER, ENERGY);
 
     if (result.certainty !== "EXACT") return;
-    // Whether this 43 was sampled before or after the cost was deducted is NOT
-    // ESTABLISHED. The observation says which event it rode in on, and stops
-    // there.
+    // The accessor is still named for the event it reads. What changed is that
+    // the observation now CARRIES when it was sampled, instead of the accessor
+    // implying it for every event that reaches it.
     expect(result.value.attachedToRawType).toBe("cast");
+    expect(result.value.timing).toBe("PRE_COST");
     const keys = Object.keys(result.value).join(" ").toLowerCase();
     expect(keys).not.toContain("before");
     expect(keys).not.toContain("after");
-    expect(keys).not.toContain("pre");
-    expect(keys).not.toContain("post");
   });
 
   it("preserves the observed cost as a number, not a spend verdict", () => {
@@ -341,10 +340,12 @@ describe("nothing in the resource surface is named pre-cast or post-cast", () =>
 
     if (result.certainty !== "EXACT") return;
     expect(result.value.observedCost).toBe(50);
-    // 43 observed with a cost of 50 is not a claim that 43 was ever reduced to
-    // -7, nor that the cast was free, nor that anything was spent here.
+    // 43 observed PRE_COST with a cost of 50 is not a claim that anything was
+    // reduced to -7 here, and not a verdict that the cast was mis-timed. The
+    // amount AFTER the cost is never computed: see the no-simulation regression.
     expect(result.value.observedAmount).toBe(43);
     expect(result.value).not.toHaveProperty("amountAfterCost");
+    expect(JSON.stringify(result.value)).not.toContain("-7");
   });
 });
 
@@ -393,6 +394,7 @@ describe("standalone changes stay separate from attached snapshots", () => {
     expect(snapshot.value.observedAmount).toBe(100);
     // Never merged into one synthetic event. Whether 100 is the amount before or
     // after the +10 is NOT ESTABLISHED, and merging would require choosing.
+    expect(snapshot.value.timing).toBe("EVENT_ASSOCIATED");
     expect(change.value).not.toHaveProperty("observedAmount");
     expect(snapshot.value).not.toHaveProperty("resourceChange");
   });

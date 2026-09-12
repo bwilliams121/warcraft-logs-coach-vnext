@@ -1,6 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
+import { RESOURCE_OBSERVATION_TIMINGS } from "../../src/engine/resources/resource-observations.js";
 import { UNKNOWN_REASONS } from "../../src/engine/state/state-result.js";
 
 /**
@@ -10,17 +11,30 @@ import { UNKNOWN_REASONS } from "../../src/engine/state/state-result.js";
  * words that would mean the normalizer had started coaching. The state layer
  * needs the same treatment for a different reason. M4 DERIVES, and a derived
  * value is allowed to be exact — so the risk here is not gameplay adjectives but
- * NAMES THAT CLAIM AN UNESTABLISHED CONTRACT.
+ * NAMES THAT CLAIM MORE THAN THE EVIDENCE ESTABLISHES.
  *
- * Three evidence contracts are deliberately open:
+ * Two of the three originally open evidence contracts have since been settled
+ * from live captures, for `gameVersion` 1 / `logVersion` 17:
  *
- * 1. whether an aura `stack` value is an absolute count or a delta
- * 2. when an attached `classResources[].amount` is sampled relative to a cast
- * 3. whether a `resourcechange` snapshot is pre-change or post-change
+ *   SETTLED  an aura `stack` value is the absolute resulting count after its own
+ *            stack-change event
+ *   SETTLED  a COMPLETED cast's attached `amount` with a positive `cost` is the
+ *            amount BEFORE that cost
+ *   OPEN     whether a `resourcechange` attachment is pre-change or post-change.
+ *            POST_CHANGE is empirically favoured and NOT ESTABLISHED: its
+ *            evidence relies on same-timestamp retrieval adjacency standing in
+ *            for causal order, which M3/M4-A do not guarantee.
  *
- * An API named `resourceBeforeCast` or `stacksAt` would settle one of them by
- * fiat. That is much harder to spot in review than a `wasWasted` field, because
- * it reads like ordinary infrastructure — hence a mechanical sweep.
+ * Settling two of them did not shorten this sweep, because most of what it bans
+ * was never about those contracts. Three separate prohibitions survive:
+ *
+ * 1. the OPEN contract must not be decided by fiat — no `postChangeAmount`
+ * 2. a settled INSTANT must not become a reconstruction between instants — no
+ *    `amountAfterCost`, no `stacksAt`, no `resourceAt`
+ * 3. no gameplay or actionability verdict, which is M5's to make
+ *
+ * Each reads like ordinary infrastructure and is much harder to spot in review
+ * than a `wasWasted` field — hence a mechanical sweep.
  *
  * The sweep runs over CODE with comments stripped. The doc comments necessarily
  * name what they forbid.
@@ -41,22 +55,27 @@ function codeOf(path: string): string {
 }
 
 describe("the state layer claims no unestablished evidence contract", () => {
-  /** Names that only make sense once a NOT-ESTABLISHED contract has been decided. */
   const FORBIDDEN = [
-    // Contract 2 and 3: snapshot sampling order.
-    "resourceBeforeCast",
-    "resourceAfterCast",
-    "resourceBeforeSpend",
-    "resourceAfterSpend",
-    "preCastAmount",
-    "postCastAmount",
+    // The OPEN contract. A `resourcechange` attachment has no established
+    // before/after relationship to its own delta, so neither name may exist.
     "preChangeAmount",
     "postChangeAmount",
+    "PRE_CHANGE",
+    "POST_CHANGE",
+    // Settled as PRE_COST, which says nothing about the amount AFTER the cost.
+    // That number is never observed; it could only be computed, and computing it
+    // is the delta replay this layer refuses.
+    "POST_COST",
     "amountAfterCost",
-    // Contract 1: absolute-vs-delta stacks.
+    "postCastAmount",
+    "resourceAfterCast",
+    "resourceAfterSpend",
+    // Settled as the absolute resulting count, which is a fact about one
+    // TRANSITION. A count at an arbitrary instant needs what a plain
+    // application establishes, what a refresh does, and when stacks decay
+    // unobserved — none of which is established.
     "stacksAt",
     "currentStacks",
-    "absoluteStacks",
     "stackDelta",
     "reconstructStacks",
   ];
@@ -72,6 +91,24 @@ describe("the state layer claims no unestablished evidence contract", () => {
     for (const path of ENGINE_FILES) {
       expect(codeOf(path), `${path} declares ${name}`).not.toContain(name);
     }
+  });
+
+  it("carries the settled cast contract as a timing tag rather than an accessor name", () => {
+    const code = codeOf("src/engine/resources/resource-observations.ts");
+
+    // PRE_COST is a VALUE on the observation. As an accessor name it would
+    // apply one event's contract to every event reaching it, and the
+    // still-unestablished case would have nowhere to live.
+    expect(code).toContain("PRE_COST");
+    expect(code).toContain("EVENT_ASSOCIATED");
+    expect(code).not.toContain("resourceBeforeCast");
+    expect(code).not.toContain("preCastAmount");
+  });
+
+  it("admits exactly two resource observation timings", () => {
+    // A type-level guard, so the open contract cannot be settled by adding a
+    // member. `POST_CHANGE` is the one that would look most reasonable.
+    expect([...RESOURCE_OBSERVATION_TIMINGS]).toEqual(["PRE_COST", "EVENT_ASSOCIATED"]);
   });
 });
 

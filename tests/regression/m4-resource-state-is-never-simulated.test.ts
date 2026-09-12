@@ -7,6 +7,7 @@ import {
   indexContracts,
   SUPPORTED_TYPE_CONTRACTS,
 } from "../../src/engine/normalization/supported-families.js";
+import { RESOURCE_OBSERVATION_TIMINGS } from "../../src/engine/resources/resource-observations.js";
 import { createCombatState } from "../../src/engine/state/combat-state.js";
 import { afterEvent, endOfTimestamp } from "../../src/engine/state/temporal.js";
 import {
@@ -33,12 +34,25 @@ import pullWindowFixture from "../fixtures/wcl/events/wcl-pull-window-with-resou
  * computed, aged forward, added, subtracted, or bounded. The only thing M4-B
  * adds to an observation is its AGE.
  *
- * Three evidence contracts remain deliberately NOT ESTABLISHED, and this file
- * pins that none of them has been quietly assumed:
+ * TWO SETTLED CONTRACTS DID NOT WEAKEN THAT
  *
- * 1. whether an aura `stack` value is an absolute count or a delta
- * 2. when an attached `classResources[].amount` is sampled relative to a cast
- * 3. whether a `resourcechange` snapshot is pre-change or post-change
+ * For `gameVersion` 1 / `logVersion` 17 it is now established that an aura
+ * `stack` value is the absolute resulting count, and that a costed completed
+ * cast's `amount` is PRE_COST. Both settle what a number MEANS AT AN INSTANT.
+ * Neither makes any instant BETWEEN observations knowable, and this file exists
+ * to keep that distinction from eroding now that exact anchors are easier to
+ * come by.
+ *
+ * The reconstruction was actually measured against live captures and does not
+ * reconcile: snapshots appear whose value disagrees with an anchor plus the
+ * intervening observed deltas. Two explanations survive and neither can be
+ * excluded — not every resource change emits an event, and same-timestamp
+ * retrieval order is not guaranteed causal. Either is fatal to replay.
+ *
+ * One evidence contract remains deliberately NOT ESTABLISHED, and this file pins
+ * that it has not been quietly assumed:
+ *
+ *     whether a `resourcechange` attachment is pre-change or post-change
  */
 
 const PLAYER = 5;
@@ -303,23 +317,99 @@ describe("Warcraft Logs' waste number stays a number", () => {
   });
 });
 
-describe("the unestablished evidence contracts are not quietly assumed", () => {
-  // The source-vocabulary sweep for these contracts lives in
+describe("a settled instant does not become a reconstruction between instants", () => {
+  // The source-vocabulary sweep lives in
   // `tests/contracts/m4-state-vocabulary.test.ts`, which runs under Node and can
   // read the repository. This block covers the BEHAVIOUR.
-  it("names the cast attachment for the event it rode in on, not for a phase of it", () => {
+  it("reports a costed cast attachment as PRE_COST and stops there", () => {
     const state = createCombatState(silentAfterObservation());
     const result = state.resources.observationOnEvent(0, PLAYER, ENERGY);
 
     if (result.certainty !== "EXACT") return;
-    // The snapshot is an exact observation ASSOCIATED WITH this cast. Calling it
-    // pre-cast or post-cast would decide a contract nobody has established.
     expect(result.value.attachedToRawType).toBe("cast");
+    expect(result.value.timing).toBe("PRE_COST");
     expect(result.value.observedCost).toBe(50);
     expect(result.value.observedAmount).toBe(43);
-    // 43 with a cost of 50 does not resolve to -7, to 93, or to anything.
+    // PRE_COST says the 43 preceded the 50. It does not resolve to -7, and the
+    // post-cost amount is not computed here or anywhere.
     expect(JSON.stringify(result.value)).not.toContain("-7");
     expect(JSON.stringify(result.value)).not.toContain("93");
+  });
+
+  it("does not advance a PRE_COST anchor by its own cost", () => {
+    const state = createCombatState(silentAfterObservation());
+    const later = state.resources.latestObservedAtOrBefore({
+      actorId: PLAYER,
+      resourceType: ENERGY,
+      at: afterEvent(1),
+    });
+
+    expect(later.certainty).toBe("STALE");
+    if (later.certainty !== "STALE") return;
+    // Knowing the 43 preceded a cost of 50 makes a ledger look one subtraction
+    // away. It is not: the value stays 43, aged, and never becomes -7.
+    expect(later.value.observedAmount).toBe(43);
+    expect(later.value.observedAmount).not.toBe(-7);
+  });
+});
+
+describe("the resourcechange timing contract stays unestablished", () => {
+  /**
+   * Live evidence strongly favours POST_CHANGE, and it is still not a contract.
+   *
+   * The favourable evidence depends on same-timestamp retrieval adjacency
+   * behaving as causal order, which M3/M4-A deliberately do not guarantee, and
+   * whole-window reconciliation left unexplained gaps. So the attachment carries
+   * the conservative tag, and the assumption has nowhere to enter from.
+   */
+  const state = createCombatState(
+    syntheticFight({
+      observedCategories: ["RESOURCES"],
+      events: [
+        resourceChangeEvent({
+          ordinal: 0,
+          reportTimeMs: 1200,
+          sourceActorId: PLAYER,
+          targetActorId: PLAYER,
+          resourceType: ENERGY,
+          resourceChange: 10,
+          maxResourceAmount: 100,
+          reportedWasteAmount: 0,
+          attachedResources: attachedResources({
+            side: "SOURCE",
+            actorId: PLAYER,
+            classResources: [classResource(ENERGY, 60, { max: 100 })],
+          }),
+        }),
+      ],
+    }),
+  );
+
+  it("tags the attachment EVENT_ASSOCIATED rather than a change phase", () => {
+    const result = state.resources.observationOnEvent(0, PLAYER, ENERGY);
+
+    if (result.certainty !== "EXACT") return;
+    expect(result.value.timing).toBe("EVENT_ASSOCIATED");
+    expect(result.value.timing).not.toBe("PRE_COST");
+  });
+
+  it("commits to neither 50 nor 70 as the amount on the other side of the change", () => {
+    const snapshot = state.resources.observationOnEvent(0, PLAYER, ENERGY);
+    const change = state.resources.standaloneChangeOnEvent(0);
+
+    if (snapshot.certainty !== "EXACT" || change.certainty !== "EXACT") return;
+    expect(snapshot.value.observedAmount).toBe(60);
+    expect(change.value.resourceChange).toBe(10);
+    // Under POST_CHANGE the prior amount was 50; under PRE_CHANGE the resulting
+    // amount is 70. Choosing either would settle the open contract by fiat, so
+    // neither number is produced.
+    const serialized = JSON.stringify(snapshot.value) + JSON.stringify(change.value);
+    expect(serialized).not.toContain("50");
+    expect(serialized).not.toContain("70");
+  });
+
+  it("admits only the two timings the evidence supports", () => {
+    expect([...RESOURCE_OBSERVATION_TIMINGS]).toEqual(["PRE_COST", "EVENT_ASSOCIATED"]);
   });
 });
 
@@ -403,11 +493,12 @@ describe("captured resource evidence is reported, not reinterpreted", () => {
   });
 
   it("preserves the captured aura stack numbers without reconciling them", () => {
-    // The mid-fight capture carries ability 383414 on the boss with
-    // `applydebuffstack` stacks 10, 11, 12 and then a `removedebuffstack` with
-    // stack 3. Those four numbers do not form a consistent series under EITHER
-    // reading — which is exactly why the absolute-vs-delta contract is NOT
-    // ESTABLISHED, and why nothing may do arithmetic on them.
+    // The capture carries ability 383414 on the boss climbing by one per
+    // `applydebuffstack` and then dropping several at once on a
+    // `removedebuffstack` — coherent as absolute resulting counts, which is the
+    // established reading. Knowing that does not license arithmetic: the count
+    // is known AT a transition that reported one, and this layer hands back
+    // exactly the number it was given.
     const stackEvents = state.fight.events.filter((event) => event.kind === "AURA" && event.stacks !== null);
 
     for (const event of stackEvents) {

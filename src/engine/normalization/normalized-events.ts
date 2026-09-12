@@ -71,9 +71,29 @@ export type ResourceSide = "SOURCE" | "TARGET";
 
 export interface ClassResourceObservation {
   readonly resourceType: number;
+  /**
+   * `amount`, verbatim.
+   *
+   * WHEN this was sampled relative to its own event depends on the event, and
+   * only one case is established. On a COMPLETED cast carrying a positive
+   * `cost`, `amount` is the actor's amount BEFORE that cost was paid. Everywhere
+   * else — including a `resourcechange` attachment — the sampling order is NOT
+   * ESTABLISHED.
+   *
+   * M4 carries that distinction as `ResourceObservationTiming` so no consumer
+   * has to re-derive it from the raw type. See
+   * `src/engine/resources/resource-observations.ts`.
+   */
   readonly amount: number;
   readonly max: number | null;
-  /** Observed on `cast` events only. An observed number, not a gameplay verdict. */
+  /**
+   * Observed on `cast` events only. An observed number, not a gameplay verdict.
+   *
+   * It is not subtracted from `amount` anywhere. `amount - cost` looks like the
+   * post-cost amount and is not one: live captures contain costed casts whose
+   * following observation differs from that arithmetic, so the difference would
+   * be a reconstruction, not an observation.
+   */
   readonly cost: number | null;
 }
 
@@ -162,7 +182,22 @@ export interface AuraEvent extends CombatEventBase {
   readonly auraClass: AuraClass;
   /** True when the raw type was a `*stack` variant. */
   readonly isStackChange: boolean;
-  /** From `stack`. Null when not supplied — never defaulted to 0 or 1. */
+  /**
+   * From `stack`. Null when not supplied — never defaulted to 0 or 1.
+   *
+   * On a stack-change event this is the ABSOLUTE RESULTING STACK COUNT AFTER
+   * that event, established from live captures for `gameVersion` 1 /
+   * `logVersion` 17. It is not a delta, not the prior count, and not an amount
+   * to add or subtract.
+   *
+   * Present ONLY on the `*stack` variants. The non-stack aura types carry no
+   * `stack` at all, so a null here is an absence, never a count of zero.
+   *
+   * Knowing what the number means does not make the count at an arbitrary later
+   * instant knowable: that needs an initial-application count, refresh and
+   * expiry behaviour, none of which is established. See
+   * `src/engine/auras/aura-state.ts`.
+   */
   readonly stacks: number | null;
   /** From the observed `absorb` field on some aura events. */
   readonly absorbAmount: number | null;
