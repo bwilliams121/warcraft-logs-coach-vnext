@@ -32,7 +32,7 @@ import type { HostilitySelector } from "../../src/wcl/retrieval-plan.js";
 import type { IngestionScope } from "../../src/services/ingestion-scope.js";
 import { inclusiveRange, type TimeRangeMs } from "../../src/engine/evidence/coverage.js";
 import type { EvidenceLocator } from "../../src/engine/evidence/locator.js";
-import type { CombatFight, CombatPhase } from "../../src/engine/normalization/combat-fight.js";
+import type { CombatFight, CombatPhase, FightFinality } from "../../src/engine/normalization/combat-fight.js";
 import type { CategoryEvidence, FightCompleteness } from "../../src/engine/normalization/completeness.js";
 import type { CombatActor } from "../../src/engine/normalization/actors.js";
 import type { CombatAbility } from "../../src/engine/normalization/abilities.js";
@@ -40,12 +40,19 @@ import {
   sourceRef,
   targetRef,
   type ActorAbsence,
+  type AttachedResourceObservation,
+  type AuraClass,
+  type AuraEvent,
+  type AuraOperation,
   type CastEvent,
   type CastPhase,
+  type ClassResourceObservation,
   type CombatEvent,
   type CombatEventBase,
   type DamageEvent,
   type MalformedRawObservation,
+  type ResourceChangeEvent,
+  type ResourceSide,
   type UnsupportedEvent,
 } from "../../src/engine/normalization/normalized-events.js";
 
@@ -134,11 +141,14 @@ export interface EventOptions {
   readonly sourceInstanceId?: number | null | undefined;
   readonly sourceAbsence?: ActorAbsence | undefined;
   readonly targetActorId?: number | null | undefined;
+  readonly targetInstanceId?: number | null | undefined;
   readonly targetAbsence?: ActorAbsence | undefined;
   readonly abilityGameId?: number | null | undefined;
   readonly streamId?: string | undefined;
   readonly pageOrdinal?: number | undefined;
   readonly indexInPage?: number | undefined;
+  /** An attached resource snapshot, exactly as M3 would have normalized one. */
+  readonly attachedResources?: AttachedResourceObservation | null | undefined;
 }
 
 export function locatorFor(options: EventOptions, rawType: string): EvidenceLocator {
@@ -163,11 +173,11 @@ function baseEvent(options: EventOptions, defaultRawType: string): CombatEventBa
     fightTimeMs: options.reportTimeMs - FIGHT_START_MS,
     rawType,
     source: sourceActorId === null ? null : sourceRef(sourceActorId, options.sourceInstanceId ?? null),
-    target: targetActorId === null ? null : targetRef(targetActorId, null),
+    target: targetActorId === null ? null : targetRef(targetActorId, options.targetInstanceId ?? null),
     sourceAbsence: sourceActorId === null ? (options.sourceAbsence ?? "NOT_SUPPLIED") : null,
     targetAbsence: targetActorId === null ? (options.targetAbsence ?? "NOT_SUPPLIED") : null,
     abilityGameId: options.abilityGameId ?? null,
-    attachedResources: null,
+    attachedResources: options.attachedResources ?? null,
     outsideRequestedRange: false,
   };
 }
@@ -198,6 +208,102 @@ export function damageEvent(options: EventOptions & { readonly amount?: number |
   };
 }
 
+/**
+ * An aura transition.
+ *
+ * `rawType` defaults to the string Warcraft Logs would actually have sent for
+ * the requested operation/class/stack combination, so a synthetic event's
+ * locator reads like a real one.
+ */
+export function auraEvent(
+  options: EventOptions & {
+    readonly operation: AuraOperation;
+    readonly auraClass: AuraClass;
+    readonly isStackChange?: boolean | undefined;
+    readonly stacks?: number | null | undefined;
+  },
+): AuraEvent {
+  const isStackChange = options.isStackChange ?? false;
+  const verb =
+    options.operation === "APPLIED" ? "apply" : options.operation === "REFRESHED" ? "refresh" : "remove";
+  const noun = options.auraClass === "BUFF" ? "buff" : "debuff";
+  return {
+    ...baseEvent(options, `${verb}${noun}${isStackChange ? "stack" : ""}`),
+    kind: "AURA",
+    operation: options.operation,
+    auraClass: options.auraClass,
+    isStackChange,
+    stacks: options.stacks ?? null,
+    absorbAmount: null,
+  };
+}
+
+export function resourceChangeEvent(
+  options: EventOptions & {
+    readonly resourceType: number;
+    readonly resourceChange: number;
+    readonly otherResourceChange?: number | null | undefined;
+    readonly maxResourceAmount?: number | null | undefined;
+    readonly reportedWasteAmount?: number | null | undefined;
+  },
+): ResourceChangeEvent {
+  return {
+    ...baseEvent(options, "resourcechange"),
+    kind: "RESOURCE_CHANGE",
+    resourceType: options.resourceType,
+    resourceChange: options.resourceChange,
+    otherResourceChange: options.otherResourceChange ?? null,
+    maxResourceAmount: options.maxResourceAmount ?? null,
+    reportedWasteAmount: options.reportedWasteAmount ?? null,
+  };
+}
+
+/**
+ * An attached resource snapshot.
+ *
+ * `side` and `actor` are supplied separately and deliberately: M3 takes the side
+ * from the verified `resourceActor` discriminator and binds the actor on THAT
+ * side, so a test can construct a target-side snapshot on a source-side actor
+ * only by saying so explicitly.
+ */
+export function attachedResources(options: {
+  readonly side: ResourceSide;
+  readonly actorId: number | null;
+  readonly instanceId?: number | null | undefined;
+  readonly classResources?: readonly ClassResourceObservation[] | undefined;
+  readonly hitPoints?: number | null | undefined;
+  readonly maxHitPoints?: number | null | undefined;
+  readonly absorb?: number | null | undefined;
+}): AttachedResourceObservation {
+  return {
+    side: options.side,
+    actor:
+      options.actorId === null ? null : { actorId: options.actorId, instanceId: options.instanceId ?? null },
+    classResources: options.classResources ?? [],
+    hitPoints: options.hitPoints ?? null,
+    maxHitPoints: options.maxHitPoints ?? null,
+    attackPower: null,
+    spellPower: null,
+    armor: null,
+    absorb: options.absorb ?? null,
+    itemLevel: null,
+    position: null,
+  };
+}
+
+export function classResource(
+  resourceType: number,
+  amount: number,
+  extra: { readonly max?: number | null | undefined; readonly cost?: number | null | undefined } = {},
+): ClassResourceObservation {
+  return {
+    resourceType,
+    amount,
+    max: extra.max ?? null,
+    cost: extra.cost ?? null,
+  };
+}
+
 export function unsupportedEvent(options: EventOptions): UnsupportedEvent {
   return {
     ...baseEvent(options, "somethingnew"),
@@ -222,6 +328,30 @@ export function malformedObservation(
   };
 }
 
+/**
+ * One phase transition.
+ *
+ * `isIntermission` must be passed explicitly, including `null`. There is no
+ * default, because a default would be the exact tri-state collapse the phase
+ * layer exists to prevent — a forgotten argument must not silently mean "not an
+ * intermission".
+ */
+export function phase(options: {
+  readonly phaseId: number;
+  readonly startTimeMs: number;
+  readonly isIntermission: boolean | null;
+  readonly name?: string | null | undefined;
+  readonly fightStartTimeMs?: number | undefined;
+}): CombatPhase {
+  return {
+    phaseId: options.phaseId,
+    name: options.name ?? null,
+    isIntermission: options.isIntermission,
+    startTimeMs: options.startTimeMs,
+    fightTimeMs: options.startTimeMs - (options.fightStartTimeMs ?? FIGHT_START_MS),
+  };
+}
+
 // --------------------------------------------------------------------------
 // Fight
 // --------------------------------------------------------------------------
@@ -237,6 +367,8 @@ export interface SyntheticFightOptions {
   readonly actors?: ReadonlyMap<number, CombatActor> | undefined;
   readonly abilities?: ReadonlyMap<number, CombatAbility> | undefined;
   readonly phases?: readonly CombatPhase[] | undefined;
+  /** Whether the FIGHT finished. Entirely separate from whether we retrieved it. */
+  readonly finality?: FightFinality | undefined;
   /**
    * Categories to make OBSERVABLE with COMPLETE coverage over the fight.
    *
@@ -257,6 +389,7 @@ export function syntheticFight(options: SyntheticFightOptions = {}): CombatFight
   const range = inclusiveRange(startTimeMs, endTimeMs);
   const actorScope = options.actorScope === undefined ? null : options.actorScope;
   const hostilityStreams = options.hostilityStreams ?? (["UNSPECIFIED"] as readonly HostilitySelector[]);
+  const finality: FightFinality = options.finality ?? "COMPLETED";
 
   const observed = new Set(options.observedCategories ?? []);
   const categories = {} as Record<EvidenceCategory, CategoryEvidence>;
@@ -339,8 +472,10 @@ export function syntheticFight(options: SyntheticFightOptions = {}): CombatFight
       startTimeMs,
       endTimeMs,
       durationMs: endTimeMs - startTimeMs,
-      finality: "COMPLETED",
-      inProgressRaw: false,
+      finality,
+      // Kept consistent with the mapping M3 uses, so a test cannot construct a
+      // fight whose raw flag contradicts its finality.
+      inProgressRaw: finality === "UNKNOWN" ? null : finality === "IN_PROGRESS",
     },
     actors: options.actors ?? new Map(),
     abilities: options.abilities ?? new Map(),

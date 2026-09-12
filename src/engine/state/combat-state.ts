@@ -25,11 +25,15 @@
  */
 
 import type { EvidenceCategory } from "../../wcl/evidence-capability.js";
+import { createAuraState, type AuraStateView } from "../auras/aura-state.js";
 import { inclusiveRange } from "../evidence/coverage.js";
 import type { EvidenceLocator } from "../evidence/locator.js";
 import type { CombatFight } from "../normalization/combat-fight.js";
 import type { CastEvent, CastPhase, CombatEvent } from "../normalization/normalized-events.js";
+import { createResourceState, type ResourceStateView } from "../resources/resource-state.js";
+import { createEncounterState, type EncounterStateView } from "./encounter-state.js";
 import { buildCombatIndexes, type CombatEventKind, type CombatIndexes } from "./indexes.js";
+import type { StateEnvironment } from "./state-environment.js";
 import { exactObserved, gateAbsenceClaim, unknownState, type StateResult } from "./state-result.js";
 import {
   isMonotonic,
@@ -110,6 +114,19 @@ export interface CombatState {
    *                         it".
    */
   lastObservedCast(query: LastCastQuery): StateResult<ObservedCast | null>;
+
+  /**
+   * Derived aura state. Observed transitions only — never "no event, so
+   * inactive".
+   */
+  readonly auras: AuraStateView;
+  /**
+   * Observed resource facts. An observation layer, not a simulator: no passive
+   * regeneration, no interpolation, no pre/post-cast interpretation.
+   */
+  readonly resources: ResourceStateView;
+  /** Factual phase intervals and retrospective fight timing. No actionability. */
+  readonly encounter: EncounterStateView;
 }
 
 function observedCastFrom(event: CastEvent, position: number, actorId: number): ObservedCast {
@@ -198,6 +215,16 @@ export function createCombatState(fight: CombatFight): CombatState {
     return exactObserved(null, [], CASTS);
   }
 
+  // The narrow seam the M4-B domain views read M4-A through. They get canonical
+  // positions, the observed integrity and M4-A's resolver — and no second way to
+  // address time.
+  const environment: StateEnvironment = {
+    fight,
+    temporalIntegrity: indexes.temporalIntegrity,
+    eventAt,
+    resolveTemporalPosition: resolve,
+  };
+
   return {
     fight,
     indexes,
@@ -220,5 +247,8 @@ export function createCombatState(fight: CombatFight): CombatState {
     positionsByTargetActor: (actorId) => indexes.positionsByTargetActor.get(actorId) ?? NO_POSITIONS,
     positionsByAbility: (abilityGameId) => indexes.positionsByAbility.get(abilityGameId) ?? NO_POSITIONS,
     lastObservedCast,
+    auras: createAuraState(environment),
+    resources: createResourceState(environment),
+    encounter: createEncounterState(environment),
   };
 }
