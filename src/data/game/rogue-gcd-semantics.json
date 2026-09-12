@@ -1,0 +1,179 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_ROGUE_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_rogue.cpp",
+        "sha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "byteLength": 436673
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-09-12",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 1766,
+      "baseGcdMs": 0,
+      "displayNameEn": "Kick"
+    },
+    {
+      "abilityGameId": 1784,
+      "baseGcdMs": 0,
+      "displayNameEn": "Stealth"
+    },
+    {
+      "abilityGameId": 1856,
+      "baseGcdMs": 0,
+      "displayNameEn": "Vanish"
+    },
+    {
+      "abilityGameId": 8676,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Ambush"
+    },
+    {
+      "abilityGameId": 32645,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Envenom"
+    },
+    {
+      "abilityGameId": 360194,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Deathmark"
+    },
+    {
+      "abilityGameId": 381623,
+      "baseGcdMs": 0,
+      "displayNameEn": "Thistle Tea"
+    },
+    {
+      "abilityGameId": 385627,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Kingsbane"
+    },
+    {
+      "abilityGameId": 469779,
+      "baseGcdMs": 0,
+      "displayNameEn": "Thistle Tea"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "kick",
+      "candidateAbilityGameIds": [1766],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::init_spells",
+        "startLine": 9915,
+        "endLine": 9915,
+        "sourceNote": "spell.kick = find_class_spell( \"Kick\" );",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "stealth",
+      "candidateAbilityGameIds": [1784],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::init_spells",
+        "startLine": 9919,
+        "endLine": 9919,
+        "sourceNote": "spell.stealth = find_class_spell( \"Stealth\" );",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "vanish",
+      "candidateAbilityGameIds": [1856],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::init_spells",
+        "startLine": 9920,
+        "endLine": 9920,
+        "sourceNote": "spell.vanish = find_class_spell( \"Vanish\" );",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "ambush",
+      "candidateAbilityGameIds": [8676],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::init_spells",
+        "startLine": 9908,
+        "endLine": 9908,
+        "sourceNote": "spell.ambush = find_class_spell( \"Ambush\" );",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "envenom",
+      "candidateAbilityGameIds": [32645],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action",
+        "startLine": 9453,
+        "endLine": 9500,
+        "sourceNote": "create_action dispatches \"envenom\" to envenom_t; class_spells.inc row { 4, 259, 32645 } confirms the id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "thistle_tea",
+      "candidateAbilityGameIds": [381623, 469779],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::init_spells",
+        "startLine": 10237,
+        "endLine": 10238,
+        "sourceNote": "spell.thistle_tea = talent.rogue.thistle_tea_auto->ok() ? talent.rogue.thistle_tea_auto->effectN( 1 ).trigger() : ( talent.rogue.thistle_tea_ability->ok() ? talent.rogue.thistle_tea_ability : not_found() ). Both reachable records are recorded because the branch depends on talent state this build does not resolve.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    }
+  ]
+}

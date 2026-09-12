@@ -153,7 +153,12 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
 }
 
 /** Field names that must NOT appear on an action: they are derived, not stored. */
-export const FORBIDDEN_DERIVED_ACTION_KEYS = ["actionToken", "conditionRaw", "callsListName"] as const;
+export const FORBIDDEN_DERIVED_ACTION_KEYS = [
+  "actionToken",
+  "conditionRaw",
+  "callsListName",
+  "entryKind",
+] as const;
 
 export function validateAuthorityArtifact(value: unknown): ArtifactValidation {
   if (!isRecord(value)) return invalid("NOT_AN_OBJECT", "artifact root is not an object");

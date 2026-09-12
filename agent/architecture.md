@@ -3360,6 +3360,103 @@ It must also protect against the two fail-open defaults:
 - an `UNKNOWN` higher-priority APL condition falling through to a confident
   lower-priority recommendation
 
+## Execution Lane
+
+An APL entry either consumes the player's rotational global cooldown or it does
+not. SimulationCraft decides this with one predicate, and the analyzer uses the
+same one:
+
+    trigger_gcd > 0   ->  GCD_CONSUMING
+    trigger_gcd == 0  ->  NON_GCD
+
+For a spell-backed action `trigger_gcd` is the spell's base GCD in milliseconds.
+The runtime table therefore stores **base GCD only**. The lane is **derived**;
+storing it would create a second source of truth that could drift from the
+number it summarises.
+
+Haste and other modifiers change the GCD DURATION, never the lane. For the
+supported Rogue slice the zero / non-zero split is invariant under runtime state,
+which is what makes a static table sound. The analyzer models no haste-adjusted
+duration at all.
+
+An ability with no record resolves to `UNKNOWN_LANE`. That is a refusal, not a
+lane, and must never collapse into either real value.
+
+## Token Binding Is a Separate Concern
+
+A SimulationCraft action token is not always one spell id. Token binding and
+numeric ability semantics are kept apart:
+
+    simcToken  ->  candidate spell ids     (may be several; may be unknown)
+    spellId    ->  base GCD                (one number, one record)
+
+A token's lane is established only when every reachable candidate agrees. The
+pinned `thistle_tea` binding branches on talent state, so it carries two
+candidate records; both are zero, so the lane holds under either resolution
+without anyone deciding which talent was taken. Candidates that disagreed would
+yield `UNKNOWN_LANE`.
+
+The two relations also have different PROVENANCE, and the runtime data records
+which is which:
+
+    token    -> candidate spell ids   HAND_REVIEWED_CPP_CONTROL_FLOW
+    spell id -> base GCD              MACHINE_EXTRACTED_DBC_RECORD
+
+The analyzer does not parse C++. The token relation is a human reading pinned
+SimulationCraft source, recorded with that file's measured hash and a line range
+so the reading can be re-checked. The generator verifies only that every id the
+reading names is a real record in the machine-extracted table. A binding may not
+claim to be machine-extracted.
+
+## Structural Entry Kind Is Not an Ability Claim
+
+`PLAYER_ACTION` means exactly one thing: an ordinary selectable/returnable APL
+entry, as opposed to an APL control-flow entry. It is a statement about control
+flow.
+
+It does NOT imply that the entry is spell-backed, that a numeric ability id is
+known, that an execution lane is known, that it deals damage, or that it is
+coached. `potion`, `use_item` and `invoke_external_buff` are all `PLAYER_ACTION`
+and none of them is a spell.
+
+An unrecognised token falls back to `PLAYER_ACTION`. That is the safe direction:
+classified as control flow it would be stepped over silently, whereas as a player
+action it has no established lane, so rotational-slot narrowing stops at it and
+names it.
+
+## Zero-GCD Actions Still End the Scan
+
+SimulationCraft's foreground scan returns the FIRST ready action and stops,
+whatever its GCD. `variable` is the only construct that executes and lets the
+scan continue.
+
+So a zero-GCD action is not a passenger on someone else's decision:
+
+1. the scan returns it and stops — lower entries are never reached
+2. it executes, and may change combat state
+3. `gcd_ready` is not advanced
+4. the actor is scheduled ready again
+5. a NEW scan begins from the top, against POST-EXECUTION state
+
+A zero-GCD action and the GCD action that follows it are therefore **two
+decision points**, not one decision with a rider. They must never be merged.
+
+## Rotational-Slot Eligibility Is Not Selection
+
+Execution lane supports one narrow structural question:
+
+    which entries are CAPABLE of occupying the next rotational GCD slot?
+
+That is decidable from pinned APL text plus pinned game data, with no combat
+state and no readiness proof. For the pinned Assassination `default` list it
+establishes that entries 0..3 cannot themselves occupy the rotational slot and
+that entry 4 is the first that can.
+
+It does **not** establish what fires, and it does **not** license evaluating a
+later entry against the state that preceded an earlier one. An earlier zero-GCD
+entry can execute and change that state first. Eligibility narrows where a
+rotational answer may come from; it is not the answer.
+
 ---
 
 # Milestone 6 — MCP Interface

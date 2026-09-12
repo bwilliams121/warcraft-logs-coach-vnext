@@ -44,6 +44,53 @@ import {
   type AuthorityArtifactAction,
 } from "./authority-artifact.js";
 
+/**
+ * What KIND of entry an APL line is, structurally.
+ *
+ * SimulationCraft's foreground scan treats three families differently, and the
+ * difference is not cosmetic — it decides whether the scan stops:
+ *
+ *     player.cpp:14238  ACTION_VARIABLE -> execute(), then CONTINUE scanning
+ *     player.cpp:14245  ACTION_CALL     -> recurse into the called list
+ *     player.cpp:14266  anything else   -> return it; the scan STOPS
+ *
+ * So `variable` is not a player action that happens to do nothing visible; it is
+ * the single construct that executes without ending the scan. Giving it the same
+ * kind as `envenom` would make "the list selected `variable`" expressible, and it
+ * is not a thing that can happen.
+ *
+ * `swap_action_list` is classified as `LIST_DISPATCH` rather than as a player
+ * action for the same reason: SimulationCraft's own `is_real_action`
+ * (player.cpp:4312) excludes it alongside `call_action_list`, `run_action_list`
+ * and `variable`. It does not appear in the pinned Assassination APL, and
+ * calling it a player action would be the more dangerous error.
+ *
+ * WHAT `PLAYER_ACTION` MEANS, AND THE FIVE THINGS IT DOES NOT
+ *
+ * `PLAYER_ACTION` means exactly one thing:
+ *
+ *     an ordinary selectable/returnable APL entry, as opposed to an APL
+ *     control-flow entry
+ *
+ * It is a statement about CONTROL FLOW and nothing else. It does NOT imply that
+ * the entry is spell-backed, that a numeric `abilityGameId` is known for it,
+ * that an execution lane is known, that it deals damage, or that it is coached.
+ *
+ * `potion`, `use_item`, `use_items` and `invoke_external_buff` are all
+ * `PLAYER_ACTION` under this three-member vocabulary. None of them is a spell,
+ * and none of them acquires a spell id by being classified. They resolve to
+ * `UNKNOWN_LANE`, which makes rotational-slot narrowing stop at them rather than
+ * step over them — the safe direction, and the reason this deliberately small
+ * vocabulary is sufficient.
+ */
+export type AplEntryKind = "PLAYER_ACTION" | "VARIABLE_ASSIGNMENT" | "LIST_DISPATCH";
+
+export const APL_ENTRY_KINDS = [
+  "PLAYER_ACTION",
+  "VARIABLE_ASSIGNMENT",
+  "LIST_DISPATCH",
+] as const satisfies readonly AplEntryKind[];
+
 /** One action, with the fields derived from its verbatim string. */
 export interface AplAction {
   readonly listName: string;
@@ -59,9 +106,19 @@ export interface AplAction {
   readonly callsListName: string | null;
   /** True for `run_action_list`, whose control flow this project does not model. */
   readonly isUnmodelledDispatch: boolean;
+  /**
+   * Structural family, derived from the verbatim string.
+   *
+   * Derived here rather than stored in the artifact, like every other derived
+   * field, so it cannot drift from the string it summarises.
+   */
+  readonly entryKind: AplEntryKind;
 }
 
 const CALL_TOKENS = new Set(["call_action_list", "run_action_list"]);
+/** Tokens SimulationCraft's `is_real_action` excludes as list-control constructs. */
+const LIST_CONTROL_TOKENS = new Set(["call_action_list", "run_action_list", "swap_action_list"]);
+const VARIABLE_TOKEN = "variable";
 const CONDITION_MARKER = ",if=";
 
 export function deriveActionToken(actionStringVerbatim: string): string {
@@ -91,6 +148,30 @@ export function deriveCallsListName(actionStringVerbatim: string): string | null
   return match === null ? null : (match[1] ?? null);
 }
 
+/**
+ * The structural family of an APL line.
+ *
+ * Keyed on the action token alone, which is all SimulationCraft itself uses to
+ * build the corresponding action object.
+ *
+ * Everything that is not a recognised control construct falls back to
+ * `PLAYER_ACTION`. That is a claim about control flow only — an unrecognised
+ * token would be RETURNED by the scan and would END it, which is precisely what
+ * separates it from `variable` and the dispatch constructs. It is emphatically
+ * NOT a claim that the token is a spell, and the fallback confers no ability id
+ * and no execution lane.
+ *
+ * The fallback is the safe direction. An unrecognised entry classified as
+ * control flow would be stepped over silently; classified as a player action it
+ * has no known lane, so rotational-slot narrowing stops at it and says so.
+ */
+export function deriveEntryKind(actionStringVerbatim: string): AplEntryKind {
+  const token = deriveActionToken(actionStringVerbatim);
+  if (token === VARIABLE_TOKEN) return "VARIABLE_ASSIGNMENT";
+  if (LIST_CONTROL_TOKENS.has(token)) return "LIST_DISPATCH";
+  return "PLAYER_ACTION";
+}
+
 function deriveAction(listName: string, action: AuthorityArtifactAction): AplAction {
   const token = deriveActionToken(action.actionStringVerbatim);
   return {
@@ -103,6 +184,7 @@ function deriveAction(listName: string, action: AuthorityArtifactAction): AplAct
     conditionRaw: deriveConditionRaw(action.actionStringVerbatim),
     callsListName: deriveCallsListName(action.actionStringVerbatim),
     isUnmodelledDispatch: token === "run_action_list",
+    entryKind: deriveEntryKind(action.actionStringVerbatim),
   };
 }
 
