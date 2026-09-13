@@ -459,12 +459,43 @@ describe("the spell ids stay out of TypeScript", () => {
 describe("M5-A and M5-B are untouched by execution lane", () => {
   it("adds no execution lane to any finding, judgment or selection type", () => {
     // Lane information exists; it is deliberately not plumbed into a committed
-    // M5-B result shape in this milestone.
+    // M5-A/M5-B result shape.
+    //
+    // NARROWED AT M5-C3c3b by exactly one file. The first-GCD rescan engine's
+    // whole terminal test is "is the selected action GCD-consuming", so it
+    // necessarily handles the lane — but it takes it as an INPUT from a
+    // caller-supplied resolver and stores it in no result, which is asserted
+    // directly below. Every other module in both trees is still forbidden it.
+    const exempt = "src/simc/first-gcd-selection.ts";
     for (const path of [...filesUnder("src/findings"), ...filesUnder("src/simc")]) {
+      if (path === exempt) continue;
       const code = codeOf(path);
       expect(code, `${path} mentions executionLane`).not.toContain("executionLane");
       expect(code, `${path} mentions ExecutionLane`).not.toContain("ExecutionLane");
     }
+  });
+
+  it("keeps the lane an INPUT to the rescan engine, never a field of its results", () => {
+    // The claim the narrowing above rests on. A lane stored in a result would be
+    // a committed shape carrying derived GCD semantics, which is the thing the
+    // original rule exists to prevent; a lane consumed and discarded is not.
+    const code = codeOf("src/simc/first-gcd-selection.ts");
+    expect(code).toContain("laneFor");
+    // Declared once, as the resolver's return type, and nowhere else.
+    expect(code.match(/ExecutionLane/g) ?? []).toHaveLength(2);
+    expect(code).not.toContain("executionLane");
+    // A field literally named `lane`. `readonly laneFor:` is the RESOLVER and is
+    // exactly what this test is confirming, so the check is anchored rather than
+    // a substring that would trip over it.
+    expect(/readonly lane\s*[?:]/.test(code)).toBe(false);
+  });
+
+  it("keeps the lane out of every traversal result shape", () => {
+    // Positive form of the same rule: C3b's committed step and result types are
+    // what M5-B consumers see, and neither gained a lane.
+    const code = codeOf("src/simc/nested-selection.ts");
+    expect(code).not.toContain("Lane");
+    expect(code).not.toContain("ability-gcd-semantics");
   });
 
   it("keeps the scoped-selection producer free of GCD semantics", () => {

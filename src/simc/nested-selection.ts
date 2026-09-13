@@ -352,13 +352,16 @@ export interface NestedSelectionInput {
  * here. Representing the first needs a result model that can carry several
  * convergent paths, which C3b does not add.
  */
-interface Candidate {
+export interface ScanCandidate {
   /** The action token. Never a display name — the engine has none. */
   readonly identity: string;
   readonly step: TraversalStep;
   /** True when this is PROVEN to fire, so nothing below it is reachable. */
   readonly definite: boolean;
 }
+
+/** Internal alias, kept so the existing body reads unchanged. */
+type Candidate = ScanCandidate;
 
 /**
  * Whether two candidates are the same supported selection.
@@ -378,8 +381,32 @@ function sameSelectionIdentity(left: Candidate, right: Candidate): boolean {
   );
 }
 
-/** What a completed scan of one list offers its caller. */
-type ScanResolution =
+/**
+ * What a completed scan of one list offers its caller.
+ *
+ * WHAT `candidates` IS, AND WHY THE "NOTHING FIRES" WORLD NEEDS NO EXTRA FIELD
+ *
+ * `scanList` only STOPS early on a candidate proven to fire. An entry that
+ * merely MIGHT fire is recorded and the walk CONTINUES to the next ordinal. So
+ * by the time a scan completes, `candidates` holds every entry that could be
+ * what this scan returns, in literal APL priority order, and everything below
+ * each of them has already been visited.
+ *
+ * That is what makes the two multi-candidate members mean different things:
+ *
+ *     MAY_SELECT [c0..cn]   world_i: c_i is the first whose conditions hold
+ *                           world_none: none of them holds, and the scan
+ *                             genuinely returns NOTHING — the walk already
+ *                             reached the end of the list in that world, so
+ *                             there is no "resume here" to record
+ *
+ *     AMBIGUOUS  [c0..cn]   one of them definitely fires, so world_none does
+ *                           NOT exist
+ *
+ * A consumer exploring worlds therefore adds a no-selection branch for
+ * `MAY_SELECT` and must not add one for `AMBIGUOUS`.
+ */
+export type ScanResolution =
   /** Proven to return no action. The caller continues at its next ordinal. */
   | { readonly kind: "NO_ACTION" }
   /** Proven to return this one action. */
@@ -822,7 +849,97 @@ function scanList(
 // --------------------------------------------------------------------------
 
 /**
+ * The result of ONE foreground scan, before it is collapsed into a verdict.
+ *
+ * `selectAcrossLists` flattens a resolution into a single `TraversalResult`,
+ * which answers "what does this scan select" and is the right shape for every
+ * caller that asks only that. A caller exploring WORLDS needs the resolution
+ * itself — the ordered candidates and whether one of them is guaranteed — and
+ * that information is destroyed by the flattening.
+ *
+ * So this is additive: same scan, same internals, one step earlier.
+ */
+export type OneForegroundScanResult =
+  | {
+      readonly kind: "RESOLVED";
+      readonly resolution: ScanResolution;
+      readonly steps: readonly TraversalStep[];
+    }
+  | {
+      readonly kind: "BLOCKED";
+      readonly blocker: TraversalBlocker;
+      readonly blockedAt: TraversalStep | null;
+      readonly detail: string;
+      readonly steps: readonly TraversalStep[];
+    };
+
+/**
+ * Runs one foreground scan and returns its resolution unflattened.
+ *
+ * EXACTLY the scan `selectAcrossLists` runs — the same `scanList`, the same
+ * boundary check, the same context. Nothing here re-implements traversal, and
+ * nothing here changes it: the two entry points share every line that decides
+ * control flow, so they cannot drift.
+ */
+export function resolveOneForegroundScan(input: NestedSelectionInput): OneForegroundScanResult {
+  const boundary = input.startBoundary ?? fromListStart();
+  const steps: TraversalStep[] = [];
+
+  const invalid = invalidBoundaryDetail(boundary);
+  if (invalid !== null) {
+    return { kind: "BLOCKED", blocker: "INVALID_START_BOUNDARY", blockedAt: null, detail: invalid, steps };
+  }
+
+  const context: ScanContext = {
+    authority: input.authority,
+    bindings: input.bindings,
+    usabilityFor: input.usabilityFor,
+    applicabilityFor: input.applicabilityFor ?? allApplicable(),
+    steps,
+  };
+
+  const outcome = scanList(context, input.entryListName, boundary.startOrdinal, [], []);
+  if (outcome.kind === "BLOCKED") {
+    return {
+      kind: "BLOCKED",
+      blocker: outcome.blocker,
+      blockedAt: outcome.blockedAt,
+      detail: outcome.detail,
+      steps,
+    };
+  }
+  return { kind: "RESOLVED", resolution: resolveScan(outcome.candidates), steps };
+}
+
+/**
+ * Why a starting boundary is unusable, or `null` when it is fine.
+ *
+ * The boundary's proof must cover exactly what it skips. This is the one part of
+ * a domain-specific narrowing argument that can be checked structurally, and
+ * checking it is what stops a start ordinal from quietly asserting that the
+ * entries above it do not fire.
+ */
+function invalidBoundaryDetail(boundary: ScanStartBoundary): string | null {
+  const required = Array.from({ length: Math.max(0, boundary.startOrdinal) }, (_, index) => index);
+  const proven = new Set(boundary.provenExcludedOrdinals);
+  const uncovered = required.filter((ordinal) => !proven.has(ordinal));
+  if (boundary.startOrdinal < 0 || uncovered.length > 0) {
+    return (
+      "the starting boundary skips ordinals its structural proof does not cover, which would assert that " +
+      "they do not fire rather than that they cannot be the answer"
+    );
+  }
+  return null;
+}
+
+/**
  * Selects across nested action lists, starting in one named list.
+ *
+ * ONE FOREGROUND SCAN, and deliberately only that. It answers SimulationCraft's
+ * own `select_action` question — which action does this scan return — and it
+ * does NOT rescan, execute anything, or model what happens after a zero-GCD
+ * action fires. The query that does is `firstGcdSelectionAcrossRescans`, which
+ * is built ON this one rather than replacing it.
  *
  * Returns exactly one structured result. There is no path that returns nothing:
  * a silently skipped decision point is indistinguishable from one that was fine.
@@ -831,23 +948,9 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
   const boundary = input.startBoundary ?? fromListStart();
   const steps: TraversalStep[] = [];
 
-  // The boundary's proof must cover exactly what it skips. This is the one part
-  // of a domain-specific narrowing argument that can be checked structurally,
-  // and checking it is what stops a start ordinal from quietly asserting that
-  // the entries above it do not fire.
-  const required = Array.from({ length: Math.max(0, boundary.startOrdinal) }, (_, index) => index);
-  const proven = new Set(boundary.provenExcludedOrdinals);
-  const uncovered = required.filter((ordinal) => !proven.has(ordinal));
-  if (boundary.startOrdinal < 0 || uncovered.length > 0) {
-    return {
-      kind: "UNKNOWN",
-      blocker: "INVALID_START_BOUNDARY",
-      blockedAt: null,
-      steps,
-      detail:
-        "the starting boundary skips ordinals its structural proof does not cover, which would assert that " +
-        "they do not fire rather than that they cannot be the answer",
-    };
+  const invalid = invalidBoundaryDetail(boundary);
+  if (invalid !== null) {
+    return { kind: "UNKNOWN", blocker: "INVALID_START_BOUNDARY", blockedAt: null, steps, detail: invalid };
   }
 
   const context: ScanContext = {

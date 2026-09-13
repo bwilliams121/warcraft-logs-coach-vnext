@@ -4017,6 +4017,146 @@ Without a profile the traversal makes no applicability claim at all and blocks
 exactly where M5-C3c1 blocked. The profile is what licenses the new verdicts, and
 its absence removes them rather than defaulting them.
 
+## One Scan Is Not the First-GCD Query
+
+Two questions, two engines, and conflating them is the failure this section
+exists to prevent.
+
+    selectAcrossLists                 which action does THIS foreground scan
+                                      return?
+
+    firstGcdSelectionAcrossRescans    allowing zero or more NON_GCD actions to
+                                      be selected, executed, and followed by a
+                                      fresh scan from the ROOT, which
+                                      GCD-consuming action is selected first?
+
+The second is built ON the first. M5-C3c3b added it without touching the first:
+`selectAcrossLists` keeps its exact query, its exact result type and its exact
+behaviour, and did NOT become a rescan query.
+
+### The additive one-scan primitive
+
+`selectAcrossLists` flattens a scan into one verdict, which is the right shape
+for a caller asking only what this scan selects. A caller exploring WORLDS needs
+what the flattening destroys, so `resolveOneForegroundScan` returns the same
+scan one step earlier:
+
+    NO_ACTION              proven to return nothing
+    DEFINITE               proven to return this one entry
+    MAY_SELECT [c0..cn]    one of these, or nothing
+    AMBIGUOUS  [c0..cn]    one of these, definitely
+
+Both entry points run the identical `scanList`, so they cannot drift.
+
+### Why MAY_SELECT needs no "resume here" field
+
+`scanList` stops early only on a candidate proven to fire. An entry that merely
+MIGHT fire is recorded and the walk CONTINUES. So a completed scan's candidate
+list already holds every entry that could be the answer, in literal APL priority
+order, and everything below each of them has already been visited.
+
+That is what makes the no-selection world representable without inventing it: in
+the world where no candidate's conditions hold, the walk genuinely reached the
+end of the list and the scan genuinely returns nothing. `AMBIGUOUS` carries a
+candidate proven to fire, so that world does not exist and the engine must not
+add one.
+
+### The root restart
+
+    player_t::execute_action  ->  visited_apls_ = 0
+                                  select_action( *active_action_list, FOREGROUND )
+
+Not the child list the action was found in, not the next ordinal, not the call
+stack. An action selected three lists deep is followed by a scan that begins
+again at the top of the root — so an entry ABOVE the previous selection can
+become the next one, and the engine reproduces exactly that.
+
+### Only Δt = 0, and unsupported is refused rather than ignored
+
+A NON_GCD foreground action schedules its next ready event with zero delay:
+`start_gcd()` early-returns when `gcd()` is zero so `gcd_ready` is untouched, and
+`schedule_ready` takes the `gcd() == 0 && !add_queue_lag` branch to `lag = 0`
+(player.cpp:6963). The rescan is at the same simulation timestamp.
+
+The transition contract can EXPRESS a non-zero advance, and the engine refuses
+it with `UNSUPPORTED_TIME_ADVANCE`. Silently ignoring it would mean every
+cooldown, resource and aura in the caller's state had quietly stopped being
+true.
+
+### Caller-owned state, caller-owned transitions
+
+The engine reads no resource, no cooldown, no aura, no talent and no spell id.
+State is opaque; the caller supplies `scanFor`, `laneFor`, `transitionFor` and
+`stateKey`. Progress is STATE CHANGE, not a counter: with Δt = 0 the only thing
+that can differ on the next scan is the abstract state.
+
+A transition answers `APPLIED`, `UNSUPPORTED` or `UNKNOWN`. The last two are
+kept apart because they tell a reader different things — "this project does not
+model the action" versus "it does, and the evidence here is insufficient".
+
+### Cycle detection is on state, never on depth
+
+The cycle key is `rootListName + stateKey(state)`, checked against the states
+already on the current branch. A transition that applies, reports zero time and
+changes nothing is caught on its first repeat; so is an A -> B -> A alternation.
+There is no depth cap anywhere, and a contract test asserts there is none —
+truncating a search and calling the result an answer is the failure mode that
+guard exists to prevent.
+
+Completed states are memoized by the same key, so a state reached by several
+prefixes is explored once. The prefix is path-dependent and the terminal is not,
+so a memo hit reuses the verdict and re-bases the prefix.
+
+### Convergence, and what exactness requires
+
+Unanimity on the authority ENTRY — list, ordinal, verbatim string, source line —
+which is C3b's identity rule unchanged. Two worlds that answer the same TOKEN
+through different entries have not agreed about what was selected.
+
+    all SELECTED, same entry          -> exact
+    two different entries             -> DIVERGENT_GCD_OUTCOMES
+    SELECTED mixed with NO_ACTION     -> DIVERGENT_GCD_OUTCOMES
+    any refusal                       -> that refusal, in preference to
+                                         divergence
+    all NO_ACTION                     -> NO_ROTATIONAL_GCD_SELECTED
+
+A refusal outranks a divergence deliberately: a blocked world is evidence we did
+not gather, and reporting "these worlds disagree" when one of them was never
+explored would overstate what is known.
+
+### The prefix is a union, never a sequence
+
+Different worlds reach the same first GCD through different prefixes.
+`possibleActions` is the union across worlds; `exactSequenceKnown` is true only
+when every converging world took the identical path, and `sequence` is populated
+only then. Reporting one path as though it were the prefix would invent a
+history no evidence supports.
+
+### What ROTATIONAL_GCD_SELECTED means
+
+> Across every supported finite world from this initial state, after zero or
+> more NON_GCD executions and root rescans, the first GCD-consuming selection is
+> the same authority entry.
+
+It does NOT mean "this is the literal next action". Actions may fire before it.
+
+### The OFF_GCD pass is out of scope, structurally
+
+`use_off_gcd=1` adds an action to a second list polled through
+`execute_type::OFF_GCD`, which is set in exactly one place: when a GCD is already
+running (action.cpp:301-306). This query BEGINS at a ready foreground selection
+point, where that pass is unreachable, and TERMINATES at the first GCD-consuming
+selection, which is the moment it first becomes reachable. The entire pass falls
+outside the query by construction.
+
+### Still unapplied
+
+M5-C3c3b is the engine and nothing else. No Rogue transition exists, the engine
+is wired into no specialization, and no global Garrote result is claimed —
+Kick, Thistle Tea, potion and racial transitions are all M5-C3c3c, and the three
+deferred Assassination expressions remain unsupported. Contract tests assert all
+of this rather than leaving it to intent.
+
 ### Still deferred
 
 To M5-C3c3 — the rotational NON_GCD sequence problem:
