@@ -382,9 +382,32 @@ describe("M5-A and M5-B are untouched by execution lane", () => {
     }
   });
 
-  it("introduces no negative actionability state", () => {
+  it("introduces no negative ACTIONABILITY state", () => {
+    // UNCHANGED IN SUBSTANCE, NARROWED IN WORDING, at M5-C3c2.
+    //
+    // The claim this test has always made is in its title: ACTIONABILITY — the
+    // finding-layer judgment about whether a decision was possible in the
+    // encounter — admits no negative member. It still does not. The two-member
+    // vocabulary is asserted at its source in m5b-scope-and-actionability.
+    //
+    // It USED to enforce that by banning the string "PROVEN_UNUSABLE" from all
+    // of src/. That was a proxy, and M5-C3c2 legitimately breaks the proxy:
+    // negative USABILITY is now a real, evidence-backed verdict about whether
+    // SimulationCraft's ready() could have succeeded. Usability is not
+    // actionability, and C3c1's own regression test records the handover
+    // ("That is C3c2's job").
+    //
+    // The proxy is replaced by the invariant that actually protects the
+    // distinction: a negative usability verdict cannot be produced ANYWHERE
+    // except through a constructor that demands evidence.
+    const declaring = filesUnder("src").filter((path) => codeOf(path).includes('kind: "PROVEN_UNUSABLE"'));
+    expect(declaring).toEqual(["src/simc/action-applicability.ts"]);
+
+    // Nowhere in src/ does actionability vocabulary acquire a negative member.
     for (const path of filesUnder("src")) {
-      expect(codeOf(path), `${path} declares PROVEN_UNUSABLE`).not.toContain("PROVEN_UNUSABLE");
+      const code = codeOf(path);
+      expect(code, `${path} declares NOT_ACTIONABLE`).not.toContain("NOT_ACTIONABLE");
+      expect(code, `${path} declares PROVEN_NOT_ACTIONABLE`).not.toContain("PROVEN_NOT_ACTIONABLE");
     }
   });
 

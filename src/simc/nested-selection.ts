@@ -85,9 +85,15 @@ import {
   outcomeOf,
   truthOfCondition,
   type ActionUsability,
-  type ActionUsabilityResolver,
   type LineCondition,
 } from "./list-selection.js";
+import {
+  allApplicable,
+  type ActionApplicability,
+  type ActionApplicabilityResolver,
+  type ActionUsabilityVerdict,
+  type ActionUsabilityVerdictResolver,
+} from "./action-applicability.js";
 import type { AtomBindings } from "./expression/evaluate.js";
 
 // --------------------------------------------------------------------------
@@ -125,6 +131,20 @@ export type TraversalStepOutcome =
   | "CALL_MAY_SELECT"
   /** A call whose callee definitely returns an action, under a certain gate. */
   | "CALL_SELECTED"
+  /**
+   * The entry is not a selectable action for this player at all.
+   *
+   * Mirrors `if (a->background) continue;`. Its condition was NEVER evaluated.
+   */
+  | "NOT_APPLICABLE_CONTINUE"
+  /**
+   * The entry applies but is proven unable to fire. Its condition was NEVER
+   * evaluated, because SimulationCraft checks readiness before `if_expr`.
+   *
+   * Distinct from `ELIMINATED_CONTINUE`, which means the CONDITION was proven
+   * false. Both continue the scan; they are not the same fact.
+   */
+  | "PROVEN_UNUSABLE_CONTINUE"
   /** A player action that might fire: true condition with unknown usability, or an undecided condition. */
   | "MAY_SELECT"
   /** A player action proven to fire. The scan is over. */
@@ -153,6 +173,15 @@ export interface TraversalStep {
    */
   readonly gate: LineCondition;
   readonly usability: ActionUsability;
+  /**
+   * Whether the entry is a selectable action for this player.
+   *
+   * `APPLICABLE` for every entry when the caller models no applicability, which
+   * is the default and preserves pre-M5-C3c2 behaviour exactly.
+   */
+  readonly applicability: ActionApplicability;
+  /** The evidence behind a negative usability verdict. `null` when there is none. */
+  readonly usabilityVerdict: ActionUsabilityVerdict | null;
   readonly outcome: TraversalStepOutcome;
 }
 
@@ -190,7 +219,9 @@ export type TraversalBlocker =
   | "CALLED_LIST_ABSENT"
   | "CONTROL_FLOW_CYCLE"
   | "UNSUPPORTED_ENTRY_KIND"
-  | "INVALID_START_BOUNDARY";
+  | "INVALID_START_BOUNDARY"
+  /** Whether an entry applies to this player could not be established. */
+  | "APPLICABILITY_NOT_ESTABLISHED";
 
 export const TRAVERSAL_BLOCKERS = [
   "UNSUPPORTED_AUTHORITY_EXPRESSION",
@@ -201,6 +232,7 @@ export const TRAVERSAL_BLOCKERS = [
   "CONTROL_FLOW_CYCLE",
   "UNSUPPORTED_ENTRY_KIND",
   "INVALID_START_BOUNDARY",
+  "APPLICABILITY_NOT_ESTABLISHED",
 ] as const satisfies readonly TraversalBlocker[];
 
 export type TraversalResult =
@@ -276,7 +308,14 @@ export interface NestedSelectionInput {
   /** The list the scan begins in. */
   readonly entryListName: string;
   readonly bindings: AtomBindings;
-  readonly usabilityFor: ActionUsabilityResolver;
+  readonly usabilityFor: ActionUsabilityVerdictResolver;
+  /**
+   * Whether each entry is a selectable action for this player.
+   *
+   * OPTIONAL, defaulting to "everything applies". A caller that models no
+   * profile gets exactly the pre-M5-C3c2 behaviour.
+   */
+  readonly applicabilityFor?: ActionApplicabilityResolver;
   /** Defaults to the top of the entry list. */
   readonly startBoundary?: ScanStartBoundary;
 }
@@ -399,8 +438,14 @@ function stepOf(
   gate: LineCondition,
   usability: ActionUsability,
   outcome: TraversalStepOutcome,
+  verdicts: {
+    readonly applicability?: ActionApplicability;
+    readonly usabilityVerdict?: ActionUsabilityVerdict | null;
+  } = {},
 ): TraversalStep {
   return {
+    applicability: verdicts.applicability ?? { kind: "APPLICABLE" },
+    usabilityVerdict: verdicts.usabilityVerdict ?? null,
     path: [...path, pathEntryOf(action)],
     listName: action.listName,
     priorityOrdinal: action.priorityOrdinal,
@@ -438,7 +483,8 @@ function gateIsCertainlyNotEntered(gate: LineCondition): boolean {
 interface ScanContext {
   readonly authority: AplAuthority;
   readonly bindings: AtomBindings;
-  readonly usabilityFor: ActionUsabilityResolver;
+  readonly usabilityFor: ActionUsabilityVerdictResolver;
+  readonly applicabilityFor: ActionApplicabilityResolver;
   /** Every step visited anywhere, in visit order. Accumulated across recursion. */
   readonly steps: TraversalStep[];
 }
@@ -646,10 +692,86 @@ function scanList(
       });
     }
 
+    // ---- applicability, then usability, then the condition ----
+    //
+    // This ORDER is the pinned one, not a convenience. `select_action` skips a
+    // background action before anything else, and `action_ready()` checks
+    // readiness before `if_expr`. So an entry decided by either never reaches
+    // its condition — which is why several pinned `items` and `misc_cds` lines
+    // can carry unsupported syntax without blocking the scan.
+
+    const applicability = context.applicabilityFor(action);
+
+    if (applicability.kind === "NOT_APPLICABLE") {
+      // Mirrors `if (a->background) continue;`. The condition is NOT evaluated,
+      // and usability is not even asked for: there is no action to be ready.
+      context.steps.push(
+        stepOf(
+          action,
+          path,
+          { kind: "NOT_EVALUATED", why: "NOT_APPLICABLE" },
+          "UNKNOWN",
+          "NOT_APPLICABLE_CONTINUE",
+          {
+            applicability,
+          },
+        ),
+      );
+      continue;
+    }
+
+    if (applicability.kind === "UNKNOWN") {
+      // There is a world in which this action exists and fires, so it cannot be
+      // stepped over. Conservative by construction: UNKNOWN applicability is
+      // never read as NOT_APPLICABLE.
+      const step = stepOf(
+        action,
+        path,
+        { kind: "NOT_EVALUATED", why: "NOT_APPLICABLE" },
+        "UNKNOWN",
+        "BLOCKED",
+        {
+          applicability,
+        },
+      );
+      context.steps.push(step);
+      return earliestObstacle(candidates, {
+        kind: "BLOCKED",
+        blocker: "APPLICABILITY_NOT_ESTABLISHED",
+        blockedAt: step,
+        detail: "whether this entry is a selectable action for this player could not be established",
+      });
+    }
+
+    const verdict = context.usabilityFor(action);
+
+    if (verdict.kind === "PROVEN_UNUSABLE") {
+      // Positive evidence that `ready()` could not have succeeded. The condition
+      // is irrelevant and is NOT evaluated — which is exactly what SimulationCraft
+      // does, and is recorded as a readiness elimination rather than a false
+      // condition so the two stay distinguishable in the trace.
+      context.steps.push(
+        stepOf(
+          action,
+          path,
+          { kind: "NOT_EVALUATED", why: "PROVEN_UNUSABLE" },
+          "PROVEN_UNUSABLE",
+          "PROVEN_UNUSABLE_CONTINUE",
+          { applicability, usabilityVerdict: verdict },
+        ),
+      );
+      continue;
+    }
+
+    const usability: ActionUsability = verdict.kind === "PROVEN_USABLE" ? "PROVEN_USABLE" : "UNKNOWN";
+
     if (gate.kind === "UNSUPPORTED") {
       // Never skipped, never read as false. We cannot tell whether it fires, so
       // nothing below it can be reached soundly.
-      const step = stepOf(action, path, gate, context.usabilityFor(action), "BLOCKED");
+      const step = stepOf(action, path, gate, usability, "BLOCKED", {
+        applicability,
+        usabilityVerdict: verdict,
+      });
       context.steps.push(step);
       return earliestObstacle(candidates, {
         kind: "BLOCKED",
@@ -659,11 +781,15 @@ function scanList(
       });
     }
 
-    const usability = context.usabilityFor(action);
     const outcome = outcomeOf(truthOfCondition(gate), usability);
 
     if (outcome === "ELIMINATED") {
-      context.steps.push(stepOf(action, path, gate, usability, "ELIMINATED_CONTINUE"));
+      context.steps.push(
+        stepOf(action, path, gate, usability, "ELIMINATED_CONTINUE", {
+          applicability,
+          usabilityVerdict: verdict,
+        }),
+      );
       continue;
     }
 
@@ -671,13 +797,19 @@ function scanList(
       // Returned whatever its GCD lane. The pinned loop has no `trigger_gcd`
       // branch: a zero-GCD action ends this scan exactly like any other, and
       // merely begins a new one afterwards.
-      const step = stepOf(action, path, gate, usability, "SELECTED");
+      const step = stepOf(action, path, gate, usability, "SELECTED", {
+        applicability,
+        usabilityVerdict: verdict,
+      });
       context.steps.push(step);
       candidates.push({ identity: action.actionToken, step, definite: true });
       break;
     }
 
-    const step = stepOf(action, path, gate, usability, "MAY_SELECT");
+    const step = stepOf(action, path, gate, usability, "MAY_SELECT", {
+      applicability,
+      usabilityVerdict: verdict,
+    });
     context.steps.push(step);
     candidates.push({ identity: action.actionToken, step, definite: false });
   }
@@ -722,6 +854,7 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
     authority: input.authority,
     bindings: input.bindings,
     usabilityFor: input.usabilityFor,
+    applicabilityFor: input.applicabilityFor ?? allApplicable(),
     steps,
   };
 

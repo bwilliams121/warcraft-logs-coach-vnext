@@ -19,7 +19,11 @@ import {
   type ScanStartBoundary,
   type TraversalResult,
 } from "../../src/simc/nested-selection.js";
-import type { ActionUsability } from "../../src/simc/list-selection.js";
+import {
+  provenUsable,
+  unknownUsability,
+  type ActionUsabilityVerdict,
+} from "../../src/simc/action-applicability.js";
 import { knownNumber, unknownNumber, type AtomBindings } from "../../src/simc/expression/evaluate.js";
 import type { AplAction } from "../../src/simc/apl-authority.js";
 import { syntheticAuthority, type SyntheticListSpec } from "../support/m5a-authority.js";
@@ -48,8 +52,8 @@ const UNKNOWN_COND = "fight_remains<15";
 const UNSUPPORTED_COND = "refreshable";
 
 function usabilityByToken(usable: readonly string[]) {
-  return (action: AplAction): ActionUsability =>
-    usable.includes(action.actionToken) ? "PROVEN_USABLE" : "UNKNOWN";
+  return (action: AplAction): ActionUsabilityVerdict =>
+    usable.includes(action.actionToken) ? provenUsable() : unknownUsability();
 }
 
 function traverse(

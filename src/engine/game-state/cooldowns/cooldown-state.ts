@@ -70,9 +70,9 @@
  * WHAT THIS MODULE REFUSES TO DO
  *
  * It models no charges, no resets, no reduction and no haste scaling. Each is a
- * real mechanic; none is guessed at. An ability with charges, or whose modifier
- * policy is not proven absent, returns UNKNOWN rather than a number derived from
- * rules that do not apply to it.
+ * real mechanic; none is guessed at. An ability with a CHARGE COOLDOWN, or whose
+ * modifier policy is not proven absent, returns UNKNOWN rather than a number
+ * derived from rules that do not apply to it.
  *
  * It also produces no gameplay verdict. "Remaining cooldown" is a fact; whether
  * that means an action was unusable is a decision for a layer that owns
@@ -174,8 +174,21 @@ export interface CooldownQuery {
   readonly abilityGameId: number;
   /** MILLISECONDS. `null` when the pinned dataset carries no entry. */
   readonly baseCooldownMs: number | null;
-  /** `_charges`. Anything other than 0 yields UNKNOWN. */
-  readonly charges: number;
+  /**
+   * `spell_data_t::_charge_cooldown`, in MILLISECONDS. THE charge discriminator.
+   *
+   * SimulationCraft decides whether an ability uses the charge system by testing
+   * the CHARGE COOLDOWN, not the charge count (action.cpp:710-724):
+   *
+   *     if ( spell_data.charge_cooldown() > 0 ) { cooldown->charges = spell_data.charges(); … }
+   *     else if ( spell_data.cooldown() > 0 )   { cooldown->duration = spell_data.cooldown(); }
+   *
+   * A DBC `_charges` of 0 therefore means "no charge system", NOT "zero charges
+   * available" — `cooldown_t` constructs with `charges( 1 )` and stays there for
+   * an ordinary cooldown. Guarding on `_charges` would read a perfectly normal
+   * ability as one the player can never cast.
+   */
+  readonly chargeCooldownMs: number;
   readonly modifierPolicy: CooldownModifierPolicy;
   /** Canonical index of the decision point. Never an ingestion ordinal. */
   readonly position: number;
@@ -215,14 +228,18 @@ function anchorFrom(cast: ObservedCast): CooldownAnchor {
  * `action_t::execute()`, and only a COMPLETE cast evidences execution.
  */
 export function cooldownRemainingAt(query: CooldownQuery): CooldownState {
-  const { state, actorId, abilityGameId, baseCooldownMs, charges, modifierPolicy, position } = query;
+  const { state, actorId, abilityGameId, baseCooldownMs, chargeCooldownMs, modifierPolicy, position } = query;
 
   if (baseCooldownMs === null || !(baseCooldownMs > 0)) {
     return unknown("BASE_COOLDOWN_NOT_MODELLED");
   }
   // Charges change what "remaining" even means: an ability at 1 of 2 charges is
   // usable now AND recharging. Rather than pick one reading, refuse.
-  if (charges !== 0) {
+  //
+  // Keyed on the CHARGE COOLDOWN, which is what SimulationCraft branches on. See
+  // the field comment: a zero charge COUNT is the ordinary case, not a charge
+  // system with nothing left in it.
+  if (chargeCooldownMs > 0) {
     return unknown("CHARGES_NOT_MODELLED");
   }
   if (modifierPolicy.kind !== "NO_MODIFIERS_PROVEN_ABSENT") {

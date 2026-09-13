@@ -69,7 +69,7 @@ function derive(state: CombatState, position: number, overrides: Record<string, 
     actorId: ACTOR,
     abilityGameId: ABILITY,
     baseCooldownMs: BASE_MS,
-    charges: 0,
+    chargeCooldownMs: 0,
     modifierPolicy: PROVEN_ABSENT,
     position,
     ...overrides,
@@ -239,10 +239,24 @@ describe("the derivation refuses rather than approximating", () => {
   it("returns UNKNOWN for an ability with charges", () => {
     // An ability at 1 of 2 charges is usable now AND recharging. Rather than
     // pick a reading, refuse.
-    const result = derive(state, 1, { charges: 2 });
+    //
+    // The discriminator is the CHARGE COOLDOWN, not a charge count. SimulationCraft
+    // builds the charge system on `if ( spell_data.charge_cooldown() > 0 )`
+    // (action.cpp:710), and DBC `_charges = 0` means "no charge system at all"
+    // rather than "zero charges available" — so a count-based guard read the
+    // wrong fact out of the record.
+    const result = derive(state, 1, { chargeCooldownMs: 20_000 });
     expect(result.state).toBe("UNKNOWN");
     if (result.state !== "UNKNOWN") return;
     expect(result.reason).toBe("CHARGES_NOT_MODELLED");
+  });
+
+  it("does NOT refuse an ability whose DBC charge count is zero", () => {
+    // The regression the line above protects: `_charges = 0` with no charge
+    // cooldown is an ORDINARY ability, and refusing it would have silently
+    // removed every modelled cooldown from the analysis.
+    const result = derive(state, 1, { chargeCooldownMs: 0 });
+    expect(result.state).not.toBe("UNKNOWN");
   });
 
   it("returns UNKNOWN when modifiers are not proven absent", () => {

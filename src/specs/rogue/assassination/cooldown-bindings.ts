@@ -111,7 +111,10 @@ export function deriveCooldown(input: CooldownBindingInput, simcToken: string): 
     actorId: input.actorId,
     abilityGameId: identity.abilityGameId,
     baseCooldownMs: identity.baseCooldownMs,
-    charges: identity.charges,
+    // The CHARGE COOLDOWN, not the charge count. `_charges = 0` in DBC means
+    // there is no charge system at all, so a count-based guard would have read
+    // "zero charges" out of a record that says "not a charge ability".
+    chargeCooldownMs: identity.chargeCooldownMs,
     modifierPolicy: policyFrom(identity),
     position: input.position,
   });

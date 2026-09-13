@@ -58,12 +58,19 @@
 import type { CombatState } from "../../../engine/state/combat-state.js";
 import type { AplAction, AplAuthority } from "../../../simc/apl-authority.js";
 import { knownNumber, unknownNumber, type AtomBindings } from "../../../simc/expression/evaluate.js";
-import type { ActionUsability } from "../../../simc/list-selection.js";
+import {
+  applicable,
+  unknownUsability,
+  type ActionApplicability,
+  type ActionUsabilityVerdict,
+} from "../../../simc/action-applicability.js";
+import type { AuthorityPlayerProfile } from "../../../simc/authority-profile.js";
 import {
   selectAcrossLists,
   type ScanStartBoundary,
   type TraversalResult,
 } from "../../../simc/nested-selection.js";
+import { resolveApplicability, resolveUsability } from "./action-profile.js";
 import { narrowToRotationalSlot } from "./rotational-slot.js";
 import { acceptExactPreCost, adaptComboPoints, adaptEnergyPct } from "./envenom-decision.js";
 import { bindStealthedRogue } from "./stealth-state.js";
@@ -98,6 +105,17 @@ export interface RotationalTraversalInput {
   readonly energyResourceId: string;
   /** Talent selections already resolved by the caller. UNKNOWN ones are omitted. */
   readonly knownTalents: readonly { readonly name: string; readonly taken: boolean }[];
+  /**
+   * The player and simulation profile (M5-C3c2). OPTIONAL, and its absence is a
+   * real state rather than a default to fill in.
+   *
+   * Omitted, the traversal makes NO applicability claim about any entry and no
+   * negative usability claim beyond the observed cast — which is exactly the
+   * pre-C3c2 behaviour. A profile is what licenses "this item is not equipped"
+   * and "this cooldown exceeds the queueing tolerance"; without one, neither
+   * sentence has anything behind it, so neither is said.
+   */
+  readonly profile?: AuthorityPlayerProfile;
 }
 
 export type RotationalTraversal =
@@ -223,22 +241,42 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
     ...(stealthedRogue.value === "TRUE" ? { stealthedRogue: true as const } : {}),
   };
 
-  // ---- usability: positive evidence only ----
+  // ---- applicability and usability ----
   //
   // The observed cast proves ONE action was usable here. It proves nothing about
   // any other action, and in particular observing a lower-priority cast is not
   // evidence that a higher-priority one was unavailable.
-  const usabilityFor = (action: AplAction): ActionUsability => {
-    const identity = tryAbilityIdentityFor(action.actionToken);
-    if (identity === null) return "UNKNOWN";
-    return identity.spellId === input.observedAbilityGameId ? "PROVEN_USABLE" : "UNKNOWN";
+  //
+  // With a profile, the spec adapter may additionally prove the NEGATIVE
+  // direction — an unequipped item, an on-use item still on cooldown, an
+  // external buff with no configured source. Without one, every entry stays
+  // APPLICABLE and nothing is proven unusable.
+  const profile = input.profile;
+
+  const abilityIdFor = (token: string): number | null => tryAbilityIdentityFor(token)?.spellId ?? null;
+
+  const observedCastVerdict = (action: AplAction): ActionUsabilityVerdict => {
+    const spellId = abilityIdFor(action.actionToken);
+    if (spellId !== null && spellId === input.observedAbilityGameId) return { kind: "PROVEN_USABLE" };
+    return unknownUsability();
   };
+
+  const profileInput = profile === undefined ? null : { state, actorId, position, profile };
+
+  const usabilityFor = (action: AplAction): ActionUsabilityVerdict =>
+    profileInput === null
+      ? observedCastVerdict(action)
+      : resolveUsability(profileInput, action, input.observedAbilityGameId, abilityIdFor);
+
+  const applicabilityFor = (action: AplAction): ActionApplicability =>
+    profileInput === null ? applicable() : resolveApplicability(profileInput, action);
 
   const result = selectAcrossLists({
     authority,
     entryListName: ROTATIONAL_ENTRY_LIST,
     bindings,
     usabilityFor,
+    applicabilityFor,
     startBoundary: boundary,
   });
 

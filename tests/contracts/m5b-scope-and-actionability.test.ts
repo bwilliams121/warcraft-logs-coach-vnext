@@ -202,9 +202,48 @@ describe("actionability admits exactly the authorized members", () => {
       const code = codeOf(path);
       expect(code, `${path} imports findings`).not.toContain("/findings/");
       expect(code, `${path} declares actionability`).not.toContain("ActionabilityEvidence");
-      expect(code, `${path} declares an ability id`).not.toContain("abilityGameId");
     }
-    expect([...ACTION_USABILITIES]).toEqual(["PROVEN_USABLE", "UNKNOWN"]);
+    // WIDENED at M5-C3c2 from two members to three. `PROVEN_UNUSABLE` is
+    // evidence-backed negative usability — a claim that SimulationCraft's
+    // `ready()` could not have succeeded — and is NOT negative actionability,
+    // which still admits no negative member (asserted immediately above).
+    expect([...ACTION_USABILITIES]).toEqual(["PROVEN_USABLE", "PROVEN_UNUSABLE", "UNKNOWN"]);
+  });
+
+  it("keeps game identity out of SELECTION control flow, not merely out of the layer", () => {
+    // TIGHTENED at M5-C3c2, and the tightening is the point.
+    //
+    // The original sweep banned the string `abilityGameId` anywhere under
+    // src/simc. C3c2's negative-usability verdict carries numeric identities as
+    // EVIDENCE — which ability, which item the refusal is about — because a
+    // finding that cannot say what it refused is not traceable.
+    //
+    // Banning the declaration would have forced that identity out of the
+    // evidence record while proving nothing about behaviour. What actually
+    // matters is that the SELECTOR never READS one: identity is payload it
+    // carries, never input it branches on. That is asserted directly below, and
+    // it is a STRONGER claim than the string ban it replaces — `itemId` and
+    // evidence member access are now covered too, and neither was before.
+    for (const path of ["src/simc/list-selection.ts", "src/simc/nested-selection.ts"]) {
+      const code = codeOf(path);
+      expect(code, `${path} names an ability id`).not.toContain("abilityGameId");
+      expect(code, `${path} names an item id`).not.toContain("itemId");
+      expect(code, `${path} reads a verdict's evidence`).not.toContain(".evidence");
+      // Nor the named reasons. (`parsed.reason` in list-selection is a PARSER
+      // refusal reason, which predates C3c2 and is not evidence.)
+      expect(code, `${path} branches on an applicability reason`).not.toContain("ITEM_NOT_EQUIPPED");
+      expect(code, `${path} branches on a usability reason`).not.toContain("ACTIVE_COOLDOWN");
+      expect(code, `${path} branches on a usability reason`).not.toContain("STATIC_READY_FALSE");
+    }
+
+    // And nowhere in the layer is an identity read off a value at all. The
+    // profile module is the one legitimate exception: answering "is this item
+    // equipped" IS its job, and it is not part of selection.
+    for (const path of filesUnder("src/simc")) {
+      if (path === "src/simc/authority-profile.ts") continue;
+      expect(codeOf(path), `${path} reads an ability id`).not.toContain(".abilityGameId");
+      expect(codeOf(path), `${path} reads an item id`).not.toContain(".itemId");
+    }
   });
 
   it("keeps the SimC layer free of Warcraft Logs and specialization imports", () => {

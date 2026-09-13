@@ -80,12 +80,27 @@ import {
 /**
  * Whether an action is known to have been usable at this decision point.
  *
- * Two members, and deliberately no third. `UNKNOWN` means we have no usability
- * evidence; it does NOT mean unusable, and no caller may read it that way.
+ * `UNKNOWN` means we have no usability evidence; it does NOT mean unusable, and
+ * no caller may read it that way.
+ *
+ * `PROVEN_UNUSABLE` was added in M5-C3c2 and means the opposite of UNKNOWN:
+ * POSITIVE evidence that SimulationCraft's `ready()` could not have succeeded —
+ * a cooldown proven to exceed the queueing tolerance, or an action whose
+ * `ready()` is statically false. It is produced only by callers that model
+ * readiness; `selectWithinList`'s existing callers never return it, so M5-B
+ * behaviour is unchanged.
+ *
+ * The evidence behind a negative verdict lives in `ActionUsabilityVerdict`
+ * (`action-applicability.ts`). This string is the decision input; that union is
+ * the audit trail.
  */
-export type ActionUsability = "PROVEN_USABLE" | "UNKNOWN";
+export type ActionUsability = "PROVEN_USABLE" | "PROVEN_UNUSABLE" | "UNKNOWN";
 
-export const ACTION_USABILITIES = ["PROVEN_USABLE", "UNKNOWN"] as const satisfies readonly ActionUsability[];
+export const ACTION_USABILITIES = [
+  "PROVEN_USABLE",
+  "PROVEN_UNUSABLE",
+  "UNKNOWN",
+] as const satisfies readonly ActionUsability[];
 
 /** Supplies usability for one line. Takes the whole action, not just its token. */
 export type ActionUsabilityResolver = (action: AplAction) => ActionUsability;
@@ -98,6 +113,24 @@ export type LineCondition =
       readonly kind: "UNSUPPORTED";
       readonly reason: ParseFailureReason | "TOO_MANY_UNRESOLVED_ATOMS";
       readonly fragment: string;
+    }
+  | {
+      /**
+       * The condition was never looked at, and SimulationCraft would not have
+       * looked at it either.
+       *
+       * Added in M5-C3c2. `select_action` skips a background action before any
+       * readiness check, and `action_ready()` checks readiness before `if_expr`
+       * — so an inapplicable or proven-unusable entry never reaches its
+       * condition. Recording that as UNCONDITIONAL would claim the line has no
+       * condition; recording it as UNSUPPORTED would blame the parser for
+       * something it was never asked to do.
+       *
+       * `selectWithinList` never produces this: it models no applicability and
+       * no negative usability.
+       */
+      readonly kind: "NOT_EVALUATED";
+      readonly why: "NOT_APPLICABLE" | "PROVEN_UNUSABLE";
     };
 
 export type LineOutcome = "ELIMINATED" | "POSSIBLE" | "DEFINITE_WINNER";
@@ -208,7 +241,9 @@ export function evaluateCondition(action: AplAction, bindings: AtomBindings): Li
 export function truthOfCondition(condition: LineCondition): TruthValue {
   if (condition.kind === "UNCONDITIONAL") return "TRUE";
   if (condition.kind === "EVALUATED") return condition.truth;
-  // Unreachable: an unsupported condition ends the scan before it is combined.
+  // UNSUPPORTED is unreachable here: it ends the scan before being combined.
+  // NOT_EVALUATED is reachable only for entries already decided by applicability
+  // or usability, whose outcome does not depend on this value.
   return "UNKNOWN_STATE";
 }
 
@@ -223,8 +258,12 @@ export function outcomeOf(truth: TruthValue, usability: ActionUsability): LineOu
   // discarded. This is the one sound elimination available: the asymmetry
   // between proving a line cannot fire and proving that it does.
   if (truth === "FALSE") return "ELIMINATED";
+  // A proven-unusable action cannot win whatever its condition says — which is
+  // why the condition need not be known. Added in M5-C3c2; no M5-B caller
+  // produces this usability, so their behaviour is unchanged.
+  if (usability === "PROVEN_UNUSABLE") return "ELIMINATED";
   if (truth === "TRUE" && usability === "PROVEN_USABLE") return "DEFINITE_WINNER";
-  // TRUE with unknown usability, or UNKNOWN_STATE with any usability. Might win.
+  // TRUE with unknown usability, or UNKNOWN_STATE with unknown usability. Might win.
   return "POSSIBLE";
 }
 

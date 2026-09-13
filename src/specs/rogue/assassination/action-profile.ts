@@ -1,0 +1,251 @@
+/**
+ * The Assassination reading of applicability and negative usability.
+ *
+ * WHAT THIS COMPOSES
+ *
+ *     src/simc/authority-profile      the two profiles and their provenance
+ *     src/simc/action-applicability   the generic verdict vocabulary
+ *     src/data/game/rogue-item-effects the pinned ON_USE facts
+ *     engine/game-state/cooldowns     the derivation and the readiness bridge
+ *
+ * None of those knows what `use_items,slots=trinket2` means. This module is
+ * where the specialization says which pinned SimulationCraft behaviour each APL
+ * entry shape corresponds to.
+ *
+ * THE THREE ENTRY SHAPES C3c2 CLASSIFIES
+ *
+ *     use_item,name=<token>        applicable iff the actor equips that item id
+ *     use_items,slots=<slot>       applicable iff the slot's item has an ON_USE
+ *                                  effect — an ON_EQUIP-only trinket yields no
+ *                                  selectable action at all
+ *     invoke_external_buff         always applicable; never ready under an empty
+ *                                  external-buff pool
+ *
+ * Everything else is APPLICABLE, which is the honest default: this module models
+ * no race, so it makes no claim about racials, and an entry it does not
+ * recognise is not one it has grounds to skip.
+ *
+ * WHY UNEQUIPPED IS NOT "ON COOLDOWN"
+ *
+ * A named item the actor never equipped produces `background = true` in
+ * SimulationCraft's `use_item_t` constructor, and the scan skips background
+ * actions before any readiness check. Reporting that as a cooldown would turn a
+ * fact about the player's gear into a fact about timing, and would invite a
+ * later reader to ask when it "comes off cooldown".
+ */
+
+import type { AplAction } from "../../../simc/apl-authority.js";
+import {
+  applicable,
+  notApplicable,
+  provenUnusable,
+  unknownApplicability,
+  unknownUsability,
+  type ActionApplicability,
+  type ActionUsabilityVerdict,
+} from "../../../simc/action-applicability.js";
+import {
+  isItemEquipped,
+  slotOccupancy,
+  type AuthorityPlayerProfile,
+} from "../../../simc/authority-profile.js";
+import { itemEffectForItemId, itemEffectForToken } from "../../../data/game/rogue-item-effects.js";
+import { cooldownReadinessAt } from "../../../engine/game-state/cooldowns/cooldown-usability.js";
+import {
+  cooldownRemainingAt,
+  type CooldownModifierPolicy,
+  type CooldownState,
+} from "../../../engine/game-state/cooldowns/cooldown-state.js";
+import type { CombatState } from "../../../engine/state/combat-state.js";
+import { EXTERNAL_BUFF_AUTHORITY } from "../../../data/game/external-buff-authority.js";
+
+/** The APL tokens whose applicability this module decides. */
+const USE_ITEM_TOKEN = "use_item";
+const USE_ITEMS_TOKEN = "use_items";
+const INVOKE_EXTERNAL_BUFF_TOKEN = "invoke_external_buff";
+
+/** `name=` and `slots=` parameters, read from the verbatim action string. */
+function namedParameter(actionStringVerbatim: string, key: string): string | null {
+  const match = new RegExp(`(?:^|,)${key}=([A-Za-z0-9_]+)`).exec(actionStringVerbatim);
+  return match?.[1] ?? null;
+}
+
+export interface ActionProfileInput {
+  readonly state: CombatState;
+  readonly actorId: number;
+  /** Canonical index of the decision point. Never an ingestion ordinal. */
+  readonly position: number;
+  readonly profile: AuthorityPlayerProfile;
+}
+
+/**
+ * Whether an APL entry is a selectable foreground action for this player.
+ *
+ * Returns APPLICABLE for anything this module has no grounds to exclude. That
+ * default is deliberate: a missing rule must not become a negative claim.
+ */
+export function resolveApplicability(input: ActionProfileInput, action: AplAction): ActionApplicability {
+  if (action.actionToken === USE_ITEM_TOKEN) {
+    const token = namedParameter(action.actionStringVerbatim, "name");
+    if (token === null) return applicable();
+    const identity = itemEffectForToken(token);
+    // An item the pinned dataset does not carry cannot be resolved to a number,
+    // so whether the actor equips it is unknowable — not false.
+    if (identity === null) return applicable();
+    if (isItemEquipped(input.profile.observed, identity.itemId)) return applicable();
+    return notApplicable("ITEM_NOT_EQUIPPED", {
+      itemId: identity.itemId,
+      slot: null,
+      pinnedBehaviour:
+        "use_item_t constructor: find_item_by_name returned null, so background = true " +
+        "(player.cpp:9874-9884) and select_action skips it before any readiness check",
+    });
+  }
+
+  if (action.actionToken === USE_ITEMS_TOKEN) {
+    const slot = namedParameter(action.actionStringVerbatim, "slots");
+    if (slot === null) return applicable();
+    const occupancy = slotOccupancy(input.profile.observed, slot);
+    if (occupancy.state === "NOT_RESOLVED") {
+      // The profile cannot read this slot. That is NOT an empty slot, and the
+      // difference is the whole reason `slotOccupancy` has three states: an
+      // unreadable slot might hold a usable trinket, so the entry stays live.
+      return unknownApplicability(
+        `the slot '${slot}' is not resolved by the observed profile, so whether this entry is a ` +
+          "selectable action cannot be established",
+      );
+    }
+    if (occupancy.state === "EMPTY") {
+      return notApplicable("NO_ON_USE_EFFECT", {
+        itemId: null,
+        slot,
+        pinnedBehaviour:
+          "use_items_t::init: no sub-actions created for an empty slot, so background = true " +
+          "(player.cpp:10285-10290)",
+      });
+    }
+    const equipped = occupancy.item;
+    const identity = itemEffectForItemId(equipped.itemId);
+    // An equipped item the dataset does not carry: we cannot tell whether it has
+    // an on-use effect, so we do not claim it has none.
+    if (identity === null) return applicable();
+    if (identity.onUseEffect !== null) return applicable();
+    return notApplicable("NO_ON_USE_EFFECT", {
+      itemId: equipped.itemId,
+      slot,
+      pinnedBehaviour:
+        "use_item_t::init found no SPECIAL_EFFECT_USE, so background = true and the entry is erased " +
+        "from the foreground action list (player.cpp:10024-10029)",
+    });
+  }
+
+  return applicable();
+}
+
+/**
+ * Whether an applicable entry is proven unable to fire.
+ *
+ * Only two claims are made, each from positive evidence. Everything else is
+ * UNKNOWN, including every action this module has no readiness model for.
+ */
+export function resolveUsability(
+  input: ActionProfileInput,
+  action: AplAction,
+  observedAbilityGameId: number,
+  abilityIdFor: (token: string) => number | null,
+): ActionUsabilityVerdict {
+  // ---- the external buff: statically unready under an empty pool ----
+  if (action.actionToken === INVOKE_EXTERNAL_BUFF_TOKEN) {
+    const buffName = namedParameter(action.actionStringVerbatim, "name");
+    const pool = input.profile.simulation.externalBuffPool;
+    const configured = buffName !== null && pool.some((entry) => entry.buffName === buffName);
+    if (configured) {
+      // A pool that names this buff gives the action real invocation cooldowns,
+      // which this milestone does not model. UNKNOWN, not usable and not unusable.
+      return unknownUsability();
+    }
+    return provenUnusable("STATIC_READY_FALSE", {
+      abilityGameId: null,
+      itemId: null,
+      provenRemainingAtLeastMs: null,
+      cooldownToleranceMs: null,
+      detail:
+        `the authority simulation profile configures no external-buff source for ` +
+        `'${buffName ?? "(unnamed)"}', so ${EXTERNAL_BUFF_AUTHORITY.readyBehaviour}`,
+    });
+  }
+
+  // ---- an equipped on-use item, still on its individual cooldown ----
+  if (action.actionToken === USE_ITEMS_TOKEN) {
+    const slot = namedParameter(action.actionStringVerbatim, "slots");
+    const occupancy = slot === null ? null : slotOccupancy(input.profile.observed, slot);
+    const equipped = occupancy !== null && occupancy.state === "OCCUPIED" ? occupancy.item : null;
+    const identity = equipped === null ? null : itemEffectForItemId(equipped.itemId);
+    const onUse = identity?.onUseEffect ?? null;
+    if (identity === null || onUse === null) return unknownUsability();
+
+    const cooldown = deriveItemCooldown(input, onUse.effectSpellId, onUse.baseCooldownMs);
+    const readiness = cooldownReadinessAt({
+      cooldown,
+      cooldownToleranceMs: input.profile.simulation.cooldownToleranceMs,
+    });
+    if (readiness.state !== "PROVEN_NOT_READY") return unknownUsability();
+    return provenUnusable("ACTIVE_COOLDOWN", {
+      abilityGameId: onUse.effectSpellId,
+      itemId: identity.itemId,
+      provenRemainingAtLeastMs: readiness.provenRemainingAtLeastMs,
+      cooldownToleranceMs: readiness.cooldownToleranceMs,
+      detail:
+        "the item's own use cooldown is proven to exceed the queueing tolerance, so use_item_t::ready " +
+        "cannot succeed. The shared category cooldown was not consulted and is not needed.",
+    });
+  }
+
+  // ---- an ordinary ability whose cooldown we derived ----
+  const abilityGameId = abilityIdFor(action.actionToken);
+  if (abilityGameId !== null && abilityGameId === observedAbilityGameId) {
+    // The observed cast proves this one WAS usable. Positive evidence wins.
+    return { kind: "PROVEN_USABLE" };
+  }
+
+  return unknownUsability();
+}
+
+/**
+ * The modifier policy for an ITEM-use cooldown.
+ *
+ * Deliberately NOT the Kingsbane policy. That proof is about one named rogue
+ * cooldown object; an item-use cooldown is a different object entirely, obtained
+ * through `player->get_cooldown( e->cooldown_name() )`. The claims below are
+ * recorded in the item artifact's `actionSemantics` and re-stated here so the
+ * derivation carries them.
+ */
+function itemCooldownPolicy(): CooldownModifierPolicy {
+  return {
+    kind: "NO_MODIFIERS_PROVEN_ABSENT",
+    sourcePath: "engine/class_modules/sc_rogue.cpp",
+    sourceSha256: EXTERNAL_BUFF_AUTHORITY.rogueModuleSha256,
+    claims: ["NO_ROGUE_MODIFIER_APPLIES_TO_AN_ITEM_USE_COOLDOWN"],
+  };
+}
+
+/** Derives an item-use cooldown from the observed cast of its effect spell. */
+export function deriveItemCooldown(
+  input: ActionProfileInput,
+  effectSpellId: number,
+  baseCooldownMs: number,
+): CooldownState {
+  return cooldownRemainingAt({
+    state: input.state,
+    actorId: input.actorId,
+    // The observed anchor is a cast of the EFFECT spell, which is what Warcraft
+    // Logs records when an on-use item fires.
+    abilityGameId: effectSpellId,
+    baseCooldownMs,
+    // An item-use effect has no charge cooldown in the pinned data; a future one
+    // that does would refuse here rather than be modelled wrongly.
+    chargeCooldownMs: 0,
+    modifierPolicy: itemCooldownPolicy(),
+    position: input.position,
+  });
+}

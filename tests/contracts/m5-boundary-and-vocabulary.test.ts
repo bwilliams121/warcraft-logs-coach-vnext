@@ -103,7 +103,10 @@ describe("ability identity is numeric, never a name", () => {
       for (const forbidden of [
         "ability.name ===",
         '.name === "Envenom"',
-        "displayNameEn ===",
+        // Compared against a STRING LITERAL. `displayNameEn === null` is a
+        // validator null-check, not a name lookup, and banning it would have
+        // pushed artifact validation into accepting an unvalidated field.
+        'displayNameEn === "',
         "abilities.get(",
         "nameToAbility",
       ]) {

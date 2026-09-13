@@ -3899,22 +3899,138 @@ so a derivation about Kingsbane cannot answer a question about Deathmark.
 Opening one property did not open a namespace: `dot.<name>.remains`,
 `cooldown.<name>.ready` and `cooldown.<name>.duration` are all still refused.
 
+## Applicability, Usability and Condition — In That Order
+
+M5-C3c2 added the two verdicts the traversal had no way to express, and the
+order they are asked in is pinned rather than chosen.
+
+`player_t::select_action` skips background actions before anything else
+(player.cpp:14229-14230), and inside `action_ready()` (action.cpp:2567) the
+readiness check precedes `if_expr` (action.cpp:2607, 2634). So:
+
+    APPLICABILITY  is this entry a selectable foreground action for this player?
+    USABILITY      it exists — could `ready()` have succeeded?
+    CONDITION      the APL `if=` expression
+
+An entry decided by either of the first two **never has its condition
+evaluated**. That is not an optimisation; it is what makes the pinned `items`
+list traversable at all, because `items[4]` and `items[5]` are gated on
+`variable.trinket_sync_slot`, which the pinned APL never assigns. Implemented
+condition-first, the scan would have blocked on syntax that cannot affect the
+answer.
+
+### Both negatives require positive evidence
+
+`NOT_APPLICABLE` and `PROVEN_UNUSABLE` are claims. `UNKNOWN` is the absence of
+one, and no caller may read it as either negative. Only four reasons are
+produced, each mirroring a specific pinned behaviour:
+
+    ITEM_NOT_EQUIPPED    `use_item,name=<x>` and the actor wears no `<x>`
+                         (use_item_t constructor, player.cpp:9874-9884)
+    NO_ON_USE_EFFECT     the slot's item has no SPECIAL_EFFECT_USE, so no
+                         action is constructed (player.cpp:10024-10029)
+    ACTIVE_COOLDOWN      a derived cooldown provably exceeds the tolerance
+    STATIC_READY_FALSE   `invoke_external_buff` under an empty pool
+
+An unequipped trinket is **not on cooldown**, and the two are kept apart
+deliberately: the remedy for one is gear and for the other is waiting.
+
+### The readiness rule is not `remains > 0`
+
+`cooldown_t::is_ready()` returns true once `queueable() <= now`, where
+`queueable() = ready - player->cooldown_tolerance()` (cooldown.cpp:655-703). The
+default tolerance is 250 ms (sim.cpp:1426) and **both** the per-sim and
+per-player values are configurable options. A bridge built on a positive
+remainder would call ready actions unusable and silently delete real candidates.
+
+    provenRemaining > cooldownTolerance   ->  PROVEN_NOT_READY
+    otherwise                             ->  UNKNOWN
+
+Equality is UNKNOWN, because `queueable() <= now` admits it. The tolerance is an
+INPUT from the simulation profile, never a constant inside the bridge; a profile
+that cannot establish it gets UNKNOWN rather than a baked-in guess.
+
+### Two profiles, because two authorities
+
+    ObservedPlayerProfile       what the LOG says      (equipped gear)
+    AuthoritySimulationProfile  what the AUTHORITY says (external-buff pool,
+                                                        cooldown tolerance)
+
+Kept apart because they fail independently. Gear is a real per-fight Warcraft
+Logs fact; the external-buff pool is not a log fact in any form — it is a
+SimulationCraft option whose default is empty. That emptiness is a **value, not a
+gap**, which is precisely what licenses the negative verdict on
+`invoke_external_buff`: the Priest module registers the Power Infusion buff on
+every player, so `init_finished` finds it, consults the empty pool, nulls the
+pointer and `ready()` is false for the rest of the simulation. The action is
+never marked background, so the honest classification is APPLICABLE with a
+proven-false readiness.
+
+Race is **UNKNOWN for every log-derived profile**, and that is a finding rather
+than a gap to fill later. Warcraft Logs exposes race on no queried field: not
+`ReportActor`, not `Character`, not `playerDetails`, not `combatantinfo`.
+
+### Slots are resolved by checking, not by position
+
+Warcraft Logs supplies no slot key on `combatantinfo.gear`; the slot is the array
+index and nothing else. Turning index 13 into `trinket2` therefore needs
+evidence, so the pinned item artifact carries each item's DBC `inventory_type`
+and a gear entry is a trinket because its own row says so. Position supplies only
+the ORDER between the two.
+
+The extractor made that checkable rather than asserted: `item_data.inc` has no
+field header, so the inventory-type column is IDENTIFIED as the one column
+agreeing with sixteen anchors spanning fourteen distinct values, and the
+extractor refuses to write if that is not exactly one column.
+
+Slot resolution fails closed in every direction. Exactly two trinkets, or no
+slots resolve at all — and `slotOccupancy` then answers `NOT_RESOLVED` rather
+than `EMPTY`, so an unreadable slot becomes UNKNOWN applicability instead of an
+unequipped one. Equipped item IDs are carried regardless, so
+`use_item,name=<token>` does not depend on slot resolution having succeeded.
+
+### What M5-C3c2 proved, and what moved
+
+At the same decision point, with the actor's real gear:
+
+    cds[1] invoke_external_buff  PROVEN_UNUSABLE   empty external-buff pool
+    items[1..3] use_item         NOT_APPLICABLE    none of the three is equipped
+    items[4] use_items trinket1  NOT_APPLICABLE    Zul'jin's Guillotine
+                                                   Technique has no ON_USE effect
+    items[5] use_items trinket2  PROVEN_UNUSABLE   Vile Vial used 3.854 s
+                                                   earlier against a 120 s
+                                                   cooldown: >= 116.146 s left,
+                                                   against a 250 ms tolerance
+
+The earliest blocker therefore moves:
+
+    before   default[5] -> cds[1] invoke_external_buff
+    after    default[5] -> cds[3] -> misc_cds[0] potion
+
+and the new resting place is an honest refusal — `potion` is gated on
+`buff.bloodlust.react`, outside the supported expression subset. The result is
+still UNKNOWN. Nothing here claims Garrote was correct, that the potion should
+have been used, or that the player erred; what improved is how far the evidence
+carries.
+
+Without a profile the traversal makes no applicability claim at all and blocks
+exactly where M5-C3c1 blocked. The profile is what licenses the new verdicts, and
+its absence removes them rather than defaulting them.
+
 ### Still deferred
-
-To M5-C3c2 — evidence-backed NEGATIVE usability, and profile applicability:
-
-    proven-unusable from an active cooldown (which would eliminate cds[4])
-    race, gear and item applicability
-    the external-buff pool, and potion choice
-    AuthorityPlayerProfile
 
 To M5-C3c3 — the rotational NON_GCD sequence problem:
 
     whether an off-GCD action that fires changes the eventual GCD selection
     global Garrote selection
+    potion readiness, and racial resolution (which needs a race Warcraft Logs
+      does not supply, so it may never be resolvable from a log alone)
 
 Still unmodelled anywhere:
 
+    the shared item CATEGORY cooldown, which obeys a DIFFERENT rule — a strict
+      `remains() > 0` with no tolerance (`use_item_t::ready`). Recorded in the
+      artifact so its omission is visible; never routed through the bridge.
     cooldown resets, CDR and charges for abilities that have them
     Deathmark, Rupture and Envenom aura state
     buff stacks, Scent of Blood, spell target counts
