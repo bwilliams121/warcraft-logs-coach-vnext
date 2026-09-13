@@ -4026,6 +4026,121 @@ To M5-C3c3 — the rotational NON_GCD sequence problem:
     potion readiness, and racial resolution (which needs a race Warcraft Logs
       does not supply, so it may never be resolvable from a log alone)
 
+## Execution Lane Has Two Uses, Not One
+
+M5-C1 established lane data to answer one question. M5-C3c3a made it complete
+enough to answer a second, and the two must not be confused.
+
+    1. ROTATIONAL-SUFFIX BOUNDARY (M5-C1, unchanged)
+
+       Which entries are structurally incapable of occupying the next rotational
+       GCD slot? `default[0..3]` are, so a question about that slot may begin at
+       `default[4]`. M5-C3b, C3c1 and C3c2 all start there and still do.
+
+    2. FIRST-GCD TERMINAL TEST (future M5-C3c3b)
+
+       Given an action the scan actually SELECTED, is it the answer or a step on
+       the way to it? `GCD_CONSUMING` terminates; `NON_GCD` executes and a new
+       scan begins.
+
+### The distinction C1's boundary does NOT license
+
+    default[0..3] cannot OCCUPY the rotational GCD slot
+
+does not imply
+
+    default[0..3] cannot EXECUTE before that slot is filled
+
+Three of those four entries are real foreground actions that can fire, end the
+current scan, change state, and be followed by a fresh scan from the root.
+`thistle_tea` grants Energy; `kick` breaks stealth. Starting at ordinal 4 is
+sound for "what fills the slot" and would be unsound for "what happens first".
+
+M5-C3c3a does not execute them. It classifies them, so that C3c3b can begin at
+the root — ordinal 0, nothing skipped — and use the lane as a stopping rule
+rather than a starting one.
+
+## `use_off_gcd` Is Not the Execution Lane
+
+The lane is `trigger_gcd > 0`. That is all it has ever been, and
+`use_off_gcd=1` is a different fact entirely:
+
+    off_gcd_actions.push_back( action );        // player.cpp:4340-4342
+
+A `push_back` that erases nothing. The action stays in `foreground_action_list`
+and remains an ordinary foreground candidate; the option merely ADDS it to a
+second list, polled through `execute_type::OFF_GCD`, which is set in exactly one
+place — when a GCD is already running (action.cpp:301-306).
+
+So an entry carrying the option has an EXTRA scheduling opportunity, never a
+different lane. For the first-GCD query this is doubly out of scope: the query
+starts at a ready moment, where the off-GCD pass is unreachable, and terminates
+at the first GCD-consuming action, which is where that pass first becomes
+reachable.
+
+## Lane Data Has Three Provenance Grades
+
+    token    -> candidate spell ids   HAND_REVIEWED_CPP_CONTROL_FLOW
+    spell id -> baseGcdMs             MACHINE_EXTRACTED_DBC_RECORD
+    token    -> trigger_gcd           HAND_REVIEWED_CPP_TRIGGER_GCD
+
+The third arrived with M5-C3c3a. `potion`, `use_item`, `use_items` and
+`invoke_external_buff` have no DBC row at all, so `_gcd` cannot answer for them
+even in principle — their `trigger_gcd` is assigned literally in a C++
+constructor. Writing a fake DBC record would have been the dishonest
+alternative; the artifact validator refuses any token carrying two grades at
+once, because there would be no rule for which wins.
+
+The potion lane is deliberately read off `dbc_consumable_base_t`, the shared base
+class, rather than off any particular potion. The pinned default potion is chosen
+by player level (apl_rogue.cpp:6-15) and Warcraft Logs supplies no level, so an
+identity-based reading would have been unresolvable. A base-class reading holds
+for every potion identity and makes the missing level irrelevant.
+
+`blood_fury` resolves to THREE spell rows, selected by a class mask this build
+does not evaluate. All three are recorded and all three agree on the lane, so the
+token is classifiable without anyone deciding which row a Rogue gets — the same
+device `thistle_tea` already used for its talent branch.
+
+### What M5-C3c3a established, and what it refused to
+
+Every PLAYER_ACTION on the real root -> Garrote authority graph now has a lane,
+including Garrote itself, which the eventual answer depends on. Two more entries
+are proven unusable:
+
+    default[0] stealth   PROVEN_UNUSABLE(ALREADY_STEALTHED)
+    cds[4]     kingsbane PROVEN_UNUSABLE(ACTIVE_COOLDOWN)
+
+The Stealth verdict is the cheapest in the milestone and costs no new evidence:
+`stealth_t::ready()` is guarded on `stealthed( STEALTH_BASIC | STEALTH_ROGUE )`
+(sc_rogue.cpp:6086) and the APL expression `stealthed.rogue` passes the identical
+mask to the identical function (sc_rogue.cpp:9661). They are the same query, so
+M5-C2's existing TRUE is already a readiness proof. Only TRUE proves anything —
+`ready()` has further guards below the mask test, so an UNKNOWN stealth state
+stays UNKNOWN. Stealth cannot fire here, so no transition is modelled for it.
+
+The Kingsbane verdict reuses C3c2's cooldown bridge unchanged, now wired for
+ordinary abilities as well as items. The derivation stays BOUNDED: the bridge
+consumes a LOWER BOUND (>= 57.198 s) against an established tolerance (250 ms)
+and never promotes the bound to an exact time. The wiring is generic — the
+supported set is data, no token appears in the actionability layer — and a
+positive observation always beats a derivation, so a cooldown anchored on an
+earlier cast can never contradict an action seen firing.
+
+Two root-prefix entries remain honestly unresolved and belong to C3c3c:
+
+    default[1] kick        readiness depends on enemy interruptible-cast state
+    default[3] thistle_tea condition depends on predictive `fight_remains`
+
+Neither is inferred unready from the log showing no such cast. Absence is not
+evidence.
+
+Finally, and most importantly: **no first-GCD claim is made.** The literal
+traversal still comes to rest at `default[5] -> cds[3] -> misc_cds[0] potion` and
+still returns UNKNOWN. The rescan engine that would consume all of the above is
+M5-C3c3b, and until it exists an improvement in what can be classified must not
+become an improvement in what is claimed.
+
 Still unmodelled anywhere:
 
     the shared item CATEGORY cooldown, which obeys a DIFFERENT rule — a strict

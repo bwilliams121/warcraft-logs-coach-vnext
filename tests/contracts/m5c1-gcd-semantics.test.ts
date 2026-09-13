@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import {
   baseGcdMsForAbility,
   executionLaneForAbility,
+  executionLaneForToken,
   pinnedRogueGcdSemantics,
 } from "../../src/data/game/ability-gcd-semantics.js";
 import {
@@ -32,6 +33,10 @@ const SIMC_COMMIT = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 const CLIENT_BUILD = "12.1.0.69587";
 const ROGUE_MODULE_PATH = "engine/class_modules/sc_rogue.cpp";
 const ROGUE_MODULE_SHA256 = "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e";
+const PLAYER_MODULE_PATH = "engine/player/player.cpp";
+const PLAYER_MODULE_SHA256 = "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c";
+const CONSUMABLE_MODULE_PATH = "engine/player/consumable.cpp";
+const CONSUMABLE_MODULE_SHA256 = "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941";
 
 const EXPECTED_SOURCE_HASHES: Readonly<Record<string, string>> = {
   "engine/dbc/generated/sc_spell_data.inc":
@@ -40,17 +45,36 @@ const EXPECTED_SOURCE_HASHES: Readonly<Record<string, string>> = {
   "engine/dbc/generated/client_data_version.inc":
     "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
   "engine/dbc/spell_data.hpp": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
-  // Hashed so the hand-reviewed token bindings are auditable. Never parsed.
+  // Hashed so the hand-reviewed readings are auditable. None of these is parsed.
   [ROGUE_MODULE_PATH]: ROGUE_MODULE_SHA256,
+  // Added at M5-C3c3a: the racial token bindings and the meta-action lanes.
+  [PLAYER_MODULE_PATH]: PLAYER_MODULE_SHA256,
+  [CONSUMABLE_MODULE_PATH]: CONSUMABLE_MODULE_SHA256,
 };
 
-/** The nine records the supported slice needs, with the values read from source. */
+/**
+ * The records the supported slice needs, with the values read from source.
+ *
+ * Widened from nine to seventeen at M5-C3c3a, which added the rest of the real
+ * root -> Garrote authority path. Blood Fury contributes THREE rows, not one:
+ * the row a Rogue resolves to depends on a class mask this build does not
+ * evaluate, and all three agree on the lane, so recording all three lets the
+ * token's lane hold under every branch without anyone picking one.
+ */
 const EXPECTED_ABILITIES: readonly (readonly [number, string, number, string])[] = [
+  [703, "Garrote", 1000, "GCD_CONSUMING"],
   [1766, "Kick", 0, "NON_GCD"],
   [1784, "Stealth", 0, "NON_GCD"],
   [1856, "Vanish", 0, "NON_GCD"],
+  [1943, "Rupture", 1000, "GCD_CONSUMING"],
   [8676, "Ambush", 1000, "GCD_CONSUMING"],
+  [20572, "Blood Fury", 0, "NON_GCD"],
+  [26297, "Berserking", 0, "NON_GCD"],
   [32645, "Envenom", 1000, "GCD_CONSUMING"],
+  [33697, "Blood Fury", 0, "NON_GCD"],
+  [33702, "Blood Fury", 0, "NON_GCD"],
+  [265221, "Fireblood", 0, "NON_GCD"],
+  [274738, "Ancestral Call", 0, "NON_GCD"],
   [360194, "Deathmark", 1000, "GCD_CONSUMING"],
   [381623, "Thistle Tea", 0, "NON_GCD"],
   [385627, "Kingsbane", 1000, "GCD_CONSUMING"],
@@ -144,8 +168,8 @@ describe("provenance identifies exactly one commit and one client build", () => 
   });
 });
 
-describe("the nine extracted ability records", () => {
-  it("carries exactly nine, and no more", () => {
+describe("the extracted ability records", () => {
+  it("carries exactly the declared slice, and no more", () => {
     if (!loaded.ok) return;
     expect(loaded.artifact.abilities).toHaveLength(EXPECTED_ABILITIES.length);
   });
@@ -179,13 +203,24 @@ describe("the nine extracted ability records", () => {
   });
 });
 
-describe("the six token bindings", () => {
+describe("the token bindings", () => {
   it("binds exactly the tokens the supported slice needs", () => {
     if (!loaded.ok) return;
+    // Widened from six to fourteen at M5-C3c3a. The list stays EXHAUSTIVE on
+    // purpose: a new player action appearing in the supported lists must force a
+    // human to review its lane rather than being silently ignored.
     expect(loaded.artifact.tokenBindings.map((binding) => binding.simcToken).sort()).toEqual([
       "ambush",
+      "ancestral_call",
+      "berserking",
+      "blood_fury",
+      "deathmark",
       "envenom",
+      "fireblood",
+      "garrote",
       "kick",
+      "kingsbane",
+      "rupture",
       "stealth",
       "thistle_tea",
       "vanish",
@@ -195,14 +230,39 @@ describe("the six token bindings", () => {
   it("cites a pinned source location for every binding", () => {
     if (!loaded.ok) return;
     for (const { simcToken, binding, candidateAbilityGameIds } of loaded.artifact.tokenBindings) {
-      expect(binding.sourcePath, simcToken).toBe(ROGUE_MODULE_PATH);
-      expect(binding.sourceSha256, simcToken).toBe(ROGUE_MODULE_SHA256);
+      // A binding may cite player.cpp rather than the Rogue module - the four
+      // racials are created there. Whichever file it cites, the hash must be the
+      // measured hash OF THAT FILE.
+      expect(Object.keys(EXPECTED_SOURCE_HASHES), simcToken).toContain(binding.sourcePath);
+      expect(binding.sourceSha256, simcToken).toBe(EXPECTED_SOURCE_HASHES[binding.sourcePath]);
       expect(binding.symbol.length, simcToken).toBeGreaterThan(0);
       expect(binding.sourceNote.length, simcToken).toBeGreaterThan(0);
       expect(binding.startLine, simcToken).toBeGreaterThan(0);
       expect(binding.endLine, simcToken).toBeGreaterThanOrEqual(binding.startLine);
       expect(candidateAbilityGameIds.length, simcToken).toBeGreaterThan(0);
     }
+  });
+
+  it("reads the four racials out of player.cpp, not the Rogue module", () => {
+    if (!loaded.ok) return;
+    for (const simcToken of ["blood_fury", "berserking", "fireblood", "ancestral_call"]) {
+      const entry = loaded.artifact.tokenBindings.find((record) => record.simcToken === simcToken);
+      expect(entry?.binding.sourcePath, simcToken).toBe(PLAYER_MODULE_PATH);
+      expect(entry?.binding.sourceSha256, simcToken).toBe(PLAYER_MODULE_SHA256);
+      // Racials are race-gated, so no class-ability table can corroborate them.
+      expect(entry?.binding.crossCheck, simcToken).toBe("NONE_RACE_BOUND");
+    }
+  });
+
+  it("records blood_fury as a THREE-candidate binding whose lane still holds", () => {
+    // racial_spells.inc carries three Blood Fury rows selected by a class mask
+    // this build does not evaluate. Recording all three and requiring agreement
+    // is how the token gets a lane without anyone resolving the mask.
+    if (!loaded.ok) return;
+    const entry = loaded.artifact.tokenBindings.find((record) => record.simcToken === "blood_fury");
+    expect(entry?.candidateAbilityGameIds).toEqual([20572, 33697, 33702]);
+    expect(entry?.binding.sourceNote).toContain("class mask");
+    expect(executionLaneForToken("blood_fury")).toBe("NON_GCD");
   });
 
   it("records thistle_tea as a TWO-candidate binding", () => {
@@ -224,8 +284,64 @@ describe("the six token bindings", () => {
   it("records every other binding as a single candidate", () => {
     if (!loaded.ok) return;
     for (const binding of loaded.artifact.tokenBindings) {
-      if (binding.simcToken === "thistle_tea") continue;
+      // The two multi-candidate bindings, each for a reason recorded in its own
+      // sourceNote: a talent branch, and a class mask.
+      if (binding.simcToken === "thistle_tea" || binding.simcToken === "blood_fury") continue;
       expect(binding.candidateAbilityGameIds, binding.simcToken).toHaveLength(1);
+    }
+  });
+});
+
+describe("the meta-action lanes, which have no DBC row at all", () => {
+  it("covers exactly the four non-spell tokens on the supported path", () => {
+    if (!loaded.ok) return;
+    expect(loaded.artifact.metaActionLanes.map((entry) => entry.simcToken).sort()).toEqual([
+      "invoke_external_buff",
+      "potion",
+      "use_item",
+      "use_items",
+    ]);
+  });
+
+  it("labels them with a THIRD method, never either of the other two", () => {
+    if (!loaded.ok) return;
+    for (const entry of loaded.artifact.metaActionLanes) {
+      expect(entry.binding.method, entry.simcToken).toBe("HAND_REVIEWED_CPP_TRIGGER_GCD");
+      expect(entry.binding.method, entry.simcToken).not.toBe(MACHINE_EXTRACTED_METHOD);
+      expect(TOKEN_BINDING_METHODS as readonly string[], entry.simcToken).not.toContain(entry.binding.method);
+    }
+  });
+
+  it("cites a measured hash and a line for each reading", () => {
+    if (!loaded.ok) return;
+    for (const entry of loaded.artifact.metaActionLanes) {
+      expect(Object.keys(EXPECTED_SOURCE_HASHES), entry.simcToken).toContain(entry.binding.sourcePath);
+      expect(entry.binding.sourceSha256, entry.simcToken).toBe(
+        EXPECTED_SOURCE_HASHES[entry.binding.sourcePath],
+      );
+      expect(entry.binding.line, entry.simcToken).toBeGreaterThan(0);
+      expect(entry.binding.sourceNote, entry.simcToken).toContain("trigger_gcd");
+      expect(entry.triggerGcdMs, entry.simcToken).toBe(0);
+    }
+  });
+
+  it("reads the potion lane out of consumable.cpp, where every potion inherits it", () => {
+    // The identity of the default potion depends on player level, which Warcraft
+    // Logs does not supply. Reading the lane off the shared base class makes the
+    // answer hold for every potion identity, so the missing level cannot matter.
+    if (!loaded.ok) return;
+    const potion = loaded.artifact.metaActionLanes.find((entry) => entry.simcToken === "potion");
+    expect(potion?.binding.sourcePath).toBe(CONSUMABLE_MODULE_PATH);
+    expect(potion?.binding.symbol).toBe("dbc_consumable_base_t::dbc_consumable_base_t");
+    expect(potion?.binding.sourceNote).toContain("EVERY potion identity");
+  });
+
+  it("gives no meta action a spell-id binding", () => {
+    // The rule that keeps the grades separate: one token, one kind of evidence.
+    if (!loaded.ok) return;
+    const bound = new Set(loaded.artifact.tokenBindings.map((entry) => entry.simcToken));
+    for (const entry of loaded.artifact.metaActionLanes) {
+      expect(bound.has(entry.simcToken), entry.simcToken).toBe(false);
     }
   });
 });

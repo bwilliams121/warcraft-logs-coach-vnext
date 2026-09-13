@@ -143,11 +143,25 @@ export type UnusableReason =
    * needs: its buff pointer is nulled at initialization and `ready()` returns
    * false for the rest of the simulation.
    */
-  | "STATIC_READY_FALSE";
+  | "STATIC_READY_FALSE"
+  /**
+   * The action re-enters a state the player is already in (M5-C3c3a).
+   *
+   * Narrow by construction, and named after the state rather than after the
+   * action: it means a readiness guard tested a state that is PROVEN to hold.
+   * The one case C3c3a produces is Stealth under a proven `stealthed.rogue`,
+   * where SimulationCraft's guard and the APL expression pass the identical
+   * mask to the identical function.
+   *
+   * NOT a timing fact. Nothing here is waiting to come off cooldown, and a
+   * report that said so would describe the wrong remedy.
+   */
+  | "ALREADY_STEALTHED";
 
 export const UNUSABLE_REASONS = [
   "ACTIVE_COOLDOWN",
   "STATIC_READY_FALSE",
+  "ALREADY_STEALTHED",
 ] as const satisfies readonly UnusableReason[];
 
 /**

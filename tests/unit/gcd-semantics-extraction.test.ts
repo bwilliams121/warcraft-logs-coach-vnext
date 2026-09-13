@@ -104,25 +104,37 @@ const CLIENT_DATA = [
 
 const CLASS_SPELLS = [
   "// Active class spells, wow build 12.1.0.69587",
-  "static constexpr std::array<active_class_spell_t, 5> __active_spells_data { {",
+  "static constexpr std::array<active_class_spell_t, 7> __active_spells_data { {",
   '  {  4,    0,    1766,       0, "Kick"    },',
   '  {  4,    0,    1784,       0, "Stealth" },',
   '  {  4,    0,    1856,       0, "Vanish"  },',
   '  {  4,    0,    8676,       0, "Ambush"  },',
   '  {  4,  259,   32645,  196819, "Envenom" },',
+  // Added at M5-C3c3a, because `garrote` and `rupture` now declare
+  // crossCheck: "CLASS_SPELLS" and the verifier looks them up here.
+  '  {  4,  259,     703,       0, "Garrote" },',
+  '  {  4,  259,    1943,       0, "Rupture" },',
   "} };",
 ].join("\n");
 
-/** The nine runtime records plus the three sanity anchors, at their real values. */
+/** The seventeen runtime records plus the three sanity anchors, at their real values. */
 const REQUIRED_ROWS: readonly (readonly [number, string, number])[] = [
   [17, "Power Word: Shield", 1500],
   [53, "Backstab", 1000],
   [116, "Frostbolt", 1500],
+  [703, "Garrote", 1000],
   [1766, "Kick", 0],
   [1784, "Stealth", 0],
   [1856, "Vanish", 0],
+  [1943, "Rupture", 1000],
   [8676, "Ambush", 1000],
+  [20572, "Blood Fury", 0],
+  [26297, "Berserking", 0],
   [32645, "Envenom", 1000],
+  [33697, "Blood Fury", 0],
+  [33702, "Blood Fury", 0],
+  [265221, "Fireblood", 0],
+  [274738, "Ancestral Call", 0],
   [360194, "Deathmark", 1000],
   [381623, "Thistle Tea", 0],
   [385627, "Kingsbane", 1000],
@@ -277,7 +289,7 @@ describe("spell rows are read by number", () => {
 
 describe("class spell rows cross-check the class-ability bindings", () => {
   it("parses classId, specId, spellId, replacement and name", () => {
-    expect(CLASS_ROWS).toHaveLength(5);
+    expect(CLASS_ROWS).toHaveLength(7);
     expect(CLASS_ROWS.find((row) => row.spellId === 8676)).toEqual({
       classId: 4,
       specId: 0,
@@ -347,9 +359,16 @@ describe("required facts are verified against the data, not assumed", () => {
 
 describe("the artifact body is deterministic", () => {
   const ROGUE_MODULE_HASH = "c".repeat(64);
+  const PLAYER_MODULE_HASH = "d".repeat(64);
+  const CONSUMABLE_MODULE_HASH = "e".repeat(64);
   const sources = [
     { path: "engine/dbc/generated/sc_spell_data.inc", sha256: "a".repeat(64), byteLength: 10 },
     { path: "engine/class_modules/sc_rogue.cpp", sha256: ROGUE_MODULE_HASH, byteLength: 20 },
+    // Added at M5-C3c3a. The racial token bindings are read out of player.cpp,
+    // and the meta-action lanes out of player.cpp and consumable.cpp, so both
+    // must be measured before any reading of them can be recorded.
+    { path: "engine/player/player.cpp", sha256: PLAYER_MODULE_HASH, byteLength: 30 },
+    { path: "engine/player/consumable.cpp", sha256: CONSUMABLE_MODULE_HASH, byteLength: 40 },
   ];
 
   function build(): unknown {
@@ -387,12 +406,67 @@ describe("the artifact body is deterministic", () => {
       tokenBindings: { binding: { method: string; sourceSha256: string; sourcePath: string } }[];
     };
     expect(artifact.provenance.abilityDataMethod).toBe("MACHINE_EXTRACTED_DBC_RECORD");
+    const hashByPath: Readonly<Record<string, string>> = {
+      "engine/class_modules/sc_rogue.cpp": ROGUE_MODULE_HASH,
+      "engine/player/player.cpp": PLAYER_MODULE_HASH,
+      "engine/player/consumable.cpp": CONSUMABLE_MODULE_HASH,
+    };
     for (const entry of artifact.tokenBindings) {
       expect(entry.binding.method).toBe("HAND_REVIEWED_CPP_CONTROL_FLOW");
-      expect(entry.binding.sourcePath).toBe("engine/class_modules/sc_rogue.cpp");
-      // MEASURED, not transcribed: it comes from the hashed source list.
-      expect(entry.binding.sourceSha256).toBe(ROGUE_MODULE_HASH);
+      // A binding may cite a file other than the Rogue module - the racials are
+      // read out of player.cpp. Whichever it cites, the hash must be the MEASURED
+      // one for THAT file, not a transcription and not another file's.
+      expect(Object.keys(hashByPath)).toContain(entry.binding.sourcePath);
+      expect(entry.binding.sourceSha256).toBe(hashByPath[entry.binding.sourcePath]);
     }
+  });
+
+  it("labels the THIRD half differently again, and never as machine-extracted", () => {
+    // Meta actions have no DBC row at all, so their lane is a hand-reviewed
+    // `trigger_gcd` rather than a hand-reviewed token -> spell-id relation.
+    // Three kinds of knowledge, three method markers, none interchangeable.
+    const artifact = build() as {
+      metaActionLanes: {
+        simcToken: string;
+        triggerGcdMs: number;
+        binding: { method: string; sourceSha256: string; sourcePath: string; line: number };
+      }[];
+    };
+    const hashByPath: Readonly<Record<string, string>> = {
+      "engine/player/player.cpp": PLAYER_MODULE_HASH,
+      "engine/player/consumable.cpp": CONSUMABLE_MODULE_HASH,
+    };
+    expect(artifact.metaActionLanes.map((entry) => entry.simcToken).sort()).toEqual([
+      "invoke_external_buff",
+      "potion",
+      "use_item",
+      "use_items",
+    ]);
+    for (const entry of artifact.metaActionLanes) {
+      expect(entry.binding.method).toBe("HAND_REVIEWED_CPP_TRIGGER_GCD");
+      expect(entry.binding.method).not.toBe("MACHINE_EXTRACTED_DBC_RECORD");
+      expect(entry.binding.method).not.toBe("HAND_REVIEWED_CPP_CONTROL_FLOW");
+      expect(entry.binding.sourceSha256).toBe(hashByPath[entry.binding.sourcePath]);
+      expect(entry.binding.line).toBeGreaterThan(0);
+      expect(entry.triggerGcdMs).toBe(0);
+    }
+  });
+
+  it("REFUSES to build a meta-action lane without the file it was read from", () => {
+    // Same rule as the token bindings: a reading nobody can re-check is not
+    // provenance. consumable.cpp backs the potion lane, so dropping it must fail
+    // loudly rather than emit an unverifiable record.
+    const anchors = new Set([17, 53, 116]);
+    const records = new Map([...recordsFrom(completeTable())].filter(([id]) => !anchors.has(id)));
+    expect(() =>
+      buildArtifact({
+        commitSha: "0".repeat(40),
+        sources: sources.filter((source) => source.path !== "engine/player/consumable.cpp"),
+        build: BUILD,
+        records,
+        extractedOn: "2026-09-12",
+      }),
+    ).toThrow(/consumable\.cpp/);
   });
 
   it("produces byte-identical output for identical inputs", () => {
@@ -403,7 +477,8 @@ describe("the artifact body is deterministic", () => {
     const artifact = build() as { abilities: { abilityGameId: number }[] };
     const ids = artifact.abilities.map((entry) => entry.abilityGameId);
     expect(ids).toEqual([...ids].sort((left, right) => left - right));
-    expect(ids).toHaveLength(9);
+    // Widened from 9 to 17 at M5-C3c3a.
+    expect(ids).toHaveLength(17);
   });
 
   it("excludes the sanity anchors from the runtime slice", () => {
@@ -495,7 +570,7 @@ describe("the committed artifact is the one this extractor describes", () => {
     expect(formatArtifactJson(JSON.parse(onDisk) as unknown)).toBe(onDisk);
   });
 
-  it("records the four pinned sources with their hashes", () => {
+  it("records every pinned source with its hash", () => {
     const committed = JSON.parse(readFileSync("src/data/game/rogue-gcd-semantics.json", "utf8")) as {
       provenance: { sources: { path: string; sha256: string }[] };
     };
@@ -504,9 +579,11 @@ describe("the committed artifact is the one this extractor describes", () => {
       "engine/dbc/generated/class_spells.inc",
       "engine/dbc/generated/client_data_version.inc",
       "engine/dbc/spell_data.hpp",
-      // Hashed only, so the hand-reviewed token bindings can be re-checked
-      // against the exact bytes they were read from. Never parsed.
+      // Hashed only, so the hand-reviewed readings can be re-checked against the
+      // exact bytes they were read from. None of the three is ever parsed.
       "engine/class_modules/sc_rogue.cpp",
+      "engine/player/player.cpp",
+      "engine/player/consumable.cpp",
     ]);
     for (const source of committed.provenance.sources) {
       expect(source.sha256).toMatch(/^[0-9a-f]{64}$/);

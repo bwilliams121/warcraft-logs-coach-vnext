@@ -6,6 +6,7 @@ import {
   classifyListEntries,
   narrowToRotationalSlot,
 } from "../../src/specs/rogue/assassination/rotational-slot.js";
+import { syntheticAuthority } from "../support/m5a-authority.js";
 
 /**
  * M5-C1's headline claim, pinned against the real Assassination default list.
@@ -173,35 +174,82 @@ describe("THE PROOF: default[0..3] cannot occupy the rotational GCD slot", () =>
 
 describe("narrowing refuses to step over an unresolved entry", () => {
   it("stops at a LIST_DISPATCH, because the callee may return a GCD action", () => {
-    // `cds` and `core_dot` are not traversed in C1, so a dispatch entry's
-    // eligibility is genuinely unknown. Proved against a list that reaches one:
-    // `cds[2]` calls `items` before any GCD-consuming entry is established.
-    if (!loaded.ok) return;
-    const narrowing = narrowToRotationalSlot(loaded.authority, "cds");
+    // MOVED TO A SYNTHETIC LIST AT M5-C3c3a, and the reason is worth stating.
+    //
+    // This used to be proved against the real `cds`, which blocked at `cds[0]
+    // deathmark` because `deathmark` had no GCD record. That was a KNOWLEDGE GAP
+    // standing in for the property, and C3c3a closed the gap — every action on
+    // the root path now has a lane, so no pinned list reaches a dispatch before
+    // a GCD-consuming entry any more.
+    //
+    // The property itself is unchanged and still load-bearing, so it is now
+    // tested where it can be exhibited on purpose: a list whose first entry is a
+    // call. The callee might return a GCD action, so eligibility is genuinely
+    // unknown and narrowing must refuse rather than step over it.
+    const authority = syntheticAuthority({
+      lists: [
+        { listName: "default", actions: ["call_action_list,name=child", "envenom"] },
+        { listName: "child", actions: ["envenom"] },
+      ],
+    });
+    const narrowing = narrowToRotationalSlot(authority, "default");
     expect(narrowing.kind).toBe("NOT_NARROWED");
     if (narrowing.kind !== "NOT_NARROWED") return;
     expect(narrowing.blocker).toBe("UNRESOLVED_ELIGIBILITY_ABOVE");
+    expect(narrowing.blockedAtOrdinal).toBe(0);
     const blocked = narrowing.entries.find((entry) => entry.priorityOrdinal === narrowing.blockedAtOrdinal);
+    expect(blocked?.entryKind).toBe("LIST_DISPATCH");
     expect(blocked?.eligibility).toBe("UNKNOWN");
   });
 
+  it("narrows `cds` to deathmark now that deathmark's lane is known", () => {
+    // The other half of the change above, asserted rather than left implicit.
+    // Nothing about C1's RULE changed; the dataset simply stopped being silent
+    // about `deathmark`, and the rule then produces an answer where it used to
+    // produce a refusal. A refusal that becomes an answer when evidence arrives
+    // is the intended behaviour, not a regression.
+    if (!loaded.ok) return;
+    const narrowing = narrowToRotationalSlot(loaded.authority, "cds");
+    expect(narrowing.kind).toBe("NARROWED");
+    if (narrowing.kind !== "NARROWED") return;
+    expect(narrowing.firstEligibleOrdinal).toBe(0);
+    expect([...narrowing.provenIneligibleOrdinals]).toEqual([]);
+    expect(executionLaneForToken("deathmark")).toBe("GCD_CONSUMING");
+  });
+
   it("treats an unmodelled ability as UNKNOWN, never as skippable", () => {
-    // `core_dot` is all garrote/rupture, neither of which has a GCD record. The
-    // right answer is "we do not know", and it must block rather than pass.
+    // RETARGETED AT M5-C3c3a. `core_dot` used to serve here because garrote and
+    // rupture had no GCD records; both now do. `generate` supplies the same
+    // property from genuinely unmodelled tokens — `crimson_tempest` is not in
+    // the supported slice and has no record — so the refusal is still exercised
+    // against real pinned data rather than being dropped.
+    if (!loaded.ok) return;
+    const entries = classifyListEntries(loaded.authority, "generate") ?? [];
+    expect(entries.length).toBeGreaterThan(0);
+    const first = entries[0];
+    expect(first?.entryKind).toBe("PLAYER_ACTION");
+    expect(first?.actionToken).toBe("crimson_tempest");
+    expect(first?.executionLane).toBe("UNKNOWN_LANE");
+    expect(first?.eligibility).toBe("UNKNOWN");
+
+    const narrowing = narrowToRotationalSlot(loaded.authority, "generate");
+    expect(narrowing.kind).toBe("NOT_NARROWED");
+    if (narrowing.kind !== "NOT_NARROWED") return;
+    expect(narrowing.blocker).toBe("UNRESOLVED_ELIGIBILITY_ABOVE");
+    expect(narrowing.blockedAtOrdinal).toBe(0);
+  });
+
+  it("still classifies core_dot's entries, now that they have lanes", () => {
+    // Same list, opposite direction: what used to be four UNKNOWN_LANE entries
+    // is now four GCD_CONSUMING ones, which is exactly what C3c3b will need in
+    // order to recognise Garrote as a terminal rotational-GCD candidate.
     if (!loaded.ok) return;
     const entries = classifyListEntries(loaded.authority, "core_dot") ?? [];
     expect(entries.length).toBeGreaterThan(0);
     for (const entry of entries) {
       expect(entry.entryKind).toBe("PLAYER_ACTION");
-      expect(entry.executionLane, entry.actionToken).toBe("UNKNOWN_LANE");
-      expect(entry.eligibility, entry.actionToken).toBe("UNKNOWN");
+      expect(entry.executionLane, entry.actionToken).toBe("GCD_CONSUMING");
     }
-
-    const narrowing = narrowToRotationalSlot(loaded.authority, "core_dot");
-    expect(narrowing.kind).toBe("NOT_NARROWED");
-    if (narrowing.kind !== "NOT_NARROWED") return;
-    expect(narrowing.blocker).toBe("UNRESOLVED_ELIGIBILITY_ABOVE");
-    expect(narrowing.blockedAtOrdinal).toBe(0);
   });
 
   it("narrows the spend list to its first entry, which is Envenom", () => {

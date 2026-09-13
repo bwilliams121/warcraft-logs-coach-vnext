@@ -50,10 +50,34 @@
  * reading can be re-checked; the generator verifies only that each id the
  * reading names is a real record in the machine-extracted table.
  *
+ * SOME TOKENS ARE NOT SPELLS AT ALL
+ *
+ * `potion`, `use_item`, `use_items` and `invoke_external_buff` have no DBC row,
+ * so `_gcd` cannot answer the question for them even in principle. Their
+ * `trigger_gcd` is assigned literally in a C++ constructor, and M5-C3c3a records
+ * those four readings in a THIRD artifact section with its own method:
+ *
+ *     token    -> candidate spell ids   HAND_REVIEWED_CPP_CONTROL_FLOW
+ *     spell id -> baseGcdMs             MACHINE_EXTRACTED_DBC_RECORD
+ *     token    -> trigger_gcd           HAND_REVIEWED_CPP_TRIGGER_GCD
+ *
+ * The predicate is the same in both cases — milliseconds, `> 0` — so there is
+ * still exactly one lane rule. What differs is the evidence behind the number,
+ * and the validator refuses any token that carries both kinds.
+ *
+ * `use_off_gcd=1` IS NOT THE LANE, AND MUST NEVER BE READ AS IT
+ *
+ * That option ADDS an action to a list — `off_gcd_actions.push_back( action )`
+ * (player.cpp:4340-4342), a push_back that erases nothing — for a separate
+ * polling pass that `select_action` reaches only through
+ * `execute_type::OFF_GCD`, which is set solely while a GCD is already running
+ * (action.cpp:301-306). The action stays in `foreground_action_list` either way.
+ * So `use_off_gcd` describes an EXTRA scheduling opportunity, never the lane,
+ * and nothing in this module reads it.
+ *
  * A TOKEN WITH NO BINDING HAS NO LANE
  *
- * Most SimulationCraft tokens are absent from this dataset, including ones that
- * are not spells at all — `potion`, `use_item`, `invoke_external_buff`. They
+ * Most SimulationCraft tokens are absent from this dataset entirely. They
  * resolve to `UNKNOWN`, and therefore to `UNKNOWN_LANE`. Being a structurally
  * ordinary APL entry confers nothing here.
  *
@@ -69,6 +93,8 @@ import {
   validateGcdSemanticsArtifact,
   type AbilityGcdRecord,
   type GcdSemanticsArtifact,
+  type MetaActionLaneProvenance,
+  type MetaActionLaneRecord,
   type TokenBindingProvenance,
   type TokenBindingRecord,
 } from "./gcd-semantics-artifact.js";
@@ -128,6 +154,7 @@ interface LoadedIndex {
   readonly artifact: GcdSemanticsArtifact;
   readonly byAbilityId: ReadonlyMap<number, AbilityGcdRecord>;
   readonly byToken: ReadonlyMap<string, TokenBindingRecord>;
+  readonly byMetaToken: ReadonlyMap<string, MetaActionLaneRecord>;
 }
 
 let cached: { readonly load: GcdSemanticsLoad; readonly index: LoadedIndex | null } | null = null;
@@ -149,10 +176,14 @@ function load(): { readonly load: GcdSemanticsLoad; readonly index: LoadedIndex 
   for (const binding of validation.artifact.tokenBindings) {
     byToken.set(binding.simcToken, binding);
   }
+  const byMetaToken = new Map<string, MetaActionLaneRecord>();
+  for (const meta of validation.artifact.metaActionLanes) {
+    byMetaToken.set(meta.simcToken, meta);
+  }
 
   cached = {
     load: { ok: true, artifact: validation.artifact },
-    index: { artifact: validation.artifact, byAbilityId, byToken },
+    index: { artifact: validation.artifact, byAbilityId, byToken, byMetaToken },
   };
   return cached;
 }
@@ -202,6 +233,22 @@ export function resolveTokenBinding(simcToken: string): TokenBinding {
 }
 
 /**
+ * The hand-reviewed `trigger_gcd` reading for a token with no DBC row.
+ *
+ * `null` for every ordinary spell-backed token, which is the common case. A
+ * caller must not read `null` as "no meta record, therefore NON_GCD" — it means
+ * this section has nothing to say, and the spell-id path answers instead.
+ */
+export function metaActionLaneRecordFor(simcToken: string): MetaActionLaneRecord | null {
+  return load().index?.byMetaToken.get(simcToken) ?? null;
+}
+
+/** The provenance behind a meta-action lane, or `null` when there is none. */
+export function metaActionLaneProvenanceFor(simcToken: string): MetaActionLaneProvenance | null {
+  return metaActionLaneRecordFor(simcToken)?.binding ?? null;
+}
+
+/**
  * The execution lane of a TOKEN, proven only when every candidate agrees.
  *
  * This is the invariance rule that lets `thistle_tea` have a lane at all without
@@ -212,7 +259,14 @@ export function resolveTokenBinding(simcToken: string): TokenBinding {
  */
 export function executionLaneForToken(simcToken: string): ExecutionLane {
   const binding = resolveTokenBinding(simcToken);
-  if (binding.kind === "UNKNOWN") return "UNKNOWN_LANE";
+  if (binding.kind === "UNKNOWN") {
+    // No spell-id binding. The token may still be a META ACTION, whose lane is a
+    // hand-reviewed `trigger_gcd` rather than a DBC `_gcd`. Same field semantics,
+    // same units, same `> 0` predicate — different evidence, and the artifact
+    // validator guarantees a token cannot be in both places.
+    const meta = metaActionLaneRecordFor(simcToken);
+    return meta === null ? "UNKNOWN_LANE" : laneForBaseGcdMs(meta.triggerGcdMs);
+  }
 
   const ids = binding.kind === "KNOWN_ONE" ? [binding.abilityGameId] : binding.abilityGameIds;
   let settled: ExecutionLane | null = null;

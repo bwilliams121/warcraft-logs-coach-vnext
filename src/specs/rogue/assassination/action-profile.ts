@@ -50,6 +50,9 @@ import {
   type AuthorityPlayerProfile,
 } from "../../../simc/authority-profile.js";
 import { itemEffectForItemId, itemEffectForToken } from "../../../data/game/rogue-item-effects.js";
+import { STEALTH_READINESS_AUTHORITY } from "../../../data/game/stealth-readiness-authority.js";
+import { bindStealthedRogue } from "./stealth-state.js";
+import { deriveCooldown } from "./cooldown-bindings.js";
 import { cooldownReadinessAt } from "../../../engine/game-state/cooldowns/cooldown-usability.js";
 import {
   cooldownRemainingAt,
@@ -63,6 +66,7 @@ import { EXTERNAL_BUFF_AUTHORITY } from "../../../data/game/external-buff-author
 const USE_ITEM_TOKEN = "use_item";
 const USE_ITEMS_TOKEN = "use_items";
 const INVOKE_EXTERNAL_BUFF_TOKEN = "invoke_external_buff";
+const STEALTH_TOKEN = "stealth";
 
 /** `name=` and `slots=` parameters, read from the verbatim action string. */
 function namedParameter(actionStringVerbatim: string, key: string): string | null {
@@ -142,11 +146,49 @@ export function resolveApplicability(input: ActionProfileInput, action: AplActio
   return applicable();
 }
 
+/** What a cooldown-based refusal is ABOUT. Identity only; the rule reads none of it. */
+interface CooldownSubject {
+  readonly abilityGameId: number | null;
+  readonly itemId: number | null;
+  readonly detail: string;
+}
+
+/**
+ * The ONE cooldown -> negative-usability translation, shared by every caller.
+ *
+ * Deliberately takes a `CooldownState` and a tolerance and nothing else. It does
+ * not know whether the cooldown belongs to a trinket, a class ability or
+ * anything else, and it must not learn: a bridge that branched on a token would
+ * mean each new supported ability needed a new rule, and the rule is the same
+ * one every time.
+ *
+ * `subject` is carried into the evidence and never read by the comparison.
+ */
+function usabilityFromCooldown(
+  cooldown: CooldownState,
+  cooldownToleranceMs: number | null,
+  reason: "ACTIVE_COOLDOWN",
+  subject: CooldownSubject,
+): ActionUsabilityVerdict {
+  const readiness = cooldownReadinessAt({ cooldown, cooldownToleranceMs });
+  // Every UNKNOWN reason lands here: unestablished tolerance, underivable
+  // cooldown, a remainder inside the queueing tolerance, and a charge system
+  // this project does not model. None of them is a readiness claim.
+  if (readiness.state !== "PROVEN_NOT_READY") return unknownUsability();
+  return provenUnusable(reason, {
+    abilityGameId: subject.abilityGameId,
+    itemId: subject.itemId,
+    provenRemainingAtLeastMs: readiness.provenRemainingAtLeastMs,
+    cooldownToleranceMs: readiness.cooldownToleranceMs,
+    detail: subject.detail,
+  });
+}
+
 /**
  * Whether an applicable entry is proven unable to fire.
  *
- * Only two claims are made, each from positive evidence. Everything else is
- * UNKNOWN, including every action this module has no readiness model for.
+ * Each claim comes from positive evidence. Everything else is UNKNOWN, including
+ * every action this module has no readiness model for.
  */
 export function resolveUsability(
   input: ActionProfileInput,
@@ -154,6 +196,37 @@ export function resolveUsability(
   observedAbilityGameId: number,
   abilityIdFor: (token: string) => number | null,
 ): ActionUsabilityVerdict {
+  // ---- Stealth: unready precisely because the player is already stealthed ----
+  //
+  // The cheapest proof in the milestone. `stealth_t::ready()` opens by testing
+  // `stealthed( STEALTH_BASIC | STEALTH_ROGUE )`, and the APL expression
+  // `stealthed.rogue` passes the IDENTICAL mask to the IDENTICAL function. So
+  // M5-C2's existing TRUE is already a readiness proof and no new state is read.
+  //
+  // The asymmetry matters: only TRUE proves anything. An UNKNOWN stealth state
+  // leaves the verdict UNKNOWN, because `ready()` has further guards below this
+  // one that this module does not model.
+  if (action.actionToken === STEALTH_TOKEN) {
+    const stealthed = bindStealthedRogue({
+      state: input.state,
+      actorId: input.actorId,
+      position: input.position,
+    });
+    if (stealthed.value !== "TRUE") return unknownUsability();
+    return provenUnusable("ALREADY_STEALTHED", {
+      abilityGameId: stealthed.provenBy.abilityGameId,
+      itemId: null,
+      // NOT a timing claim. Nothing is waiting to recharge, so there is no
+      // remainder and no tolerance to compare it against.
+      provenRemainingAtLeastMs: null,
+      cooldownToleranceMs: null,
+      detail:
+        "stealthed.rogue is proven TRUE, and stealth_t::ready() is guarded on the same " +
+        `'${STEALTH_READINESS_AUTHORITY.sharedMaskExpression}' mask passed to the same function, so the ` +
+        "guard returns false before any other condition is reached",
+    });
+  }
+
   // ---- the external buff: statically unready under an empty pool ----
   if (action.actionToken === INVOKE_EXTERNAL_BUFF_TOKEN) {
     const buffName = namedParameter(action.actionStringVerbatim, "name");
@@ -185,16 +258,9 @@ export function resolveUsability(
     if (identity === null || onUse === null) return unknownUsability();
 
     const cooldown = deriveItemCooldown(input, onUse.effectSpellId, onUse.baseCooldownMs);
-    const readiness = cooldownReadinessAt({
-      cooldown,
-      cooldownToleranceMs: input.profile.simulation.cooldownToleranceMs,
-    });
-    if (readiness.state !== "PROVEN_NOT_READY") return unknownUsability();
-    return provenUnusable("ACTIVE_COOLDOWN", {
+    return usabilityFromCooldown(cooldown, input.profile.simulation.cooldownToleranceMs, "ACTIVE_COOLDOWN", {
       abilityGameId: onUse.effectSpellId,
       itemId: identity.itemId,
-      provenRemainingAtLeastMs: readiness.provenRemainingAtLeastMs,
-      cooldownToleranceMs: readiness.cooldownToleranceMs,
       detail:
         "the item's own use cooldown is proven to exceed the queueing tolerance, so use_item_t::ready " +
         "cannot succeed. The shared category cooldown was not consulted and is not needed.",
@@ -204,8 +270,42 @@ export function resolveUsability(
   // ---- an ordinary ability whose cooldown we derived ----
   const abilityGameId = abilityIdFor(action.actionToken);
   if (abilityGameId !== null && abilityGameId === observedAbilityGameId) {
-    // The observed cast proves this one WAS usable. Positive evidence wins.
+    // The observed cast proves this one WAS usable. Positive evidence wins, and
+    // it is checked BEFORE the cooldown so a derivation can never contradict an
+    // observation.
     return { kind: "PROVEN_USABLE" };
+  }
+
+  // Any token the pinned cooldown dataset carries, with no token named here.
+  // `deriveCooldown` returns null for everything else, so widening the supported
+  // set is a data change rather than a code change.
+  const derived = deriveCooldown(
+    { state: input.state, actorId: input.actorId, position: input.position },
+    action.actionToken,
+  );
+  if (derived !== null) {
+    // A DERIVATION MUST NEVER CONTRADICT AN OBSERVATION.
+    //
+    // The short-circuit above only fires for tokens the ability dataset can
+    // resolve, and most cannot. The cooldown dataset resolves its own token to a
+    // number, so check that one too: if the action observed at this decision
+    // point IS this ability, it demonstrably fired, whatever a cooldown anchored
+    // on an EARLIER cast would say about it.
+    if (derived.abilityGameId === observedAbilityGameId) return { kind: "PROVEN_USABLE" };
+
+    return usabilityFromCooldown(
+      derived.cooldown,
+      input.profile.simulation.cooldownToleranceMs,
+      "ACTIVE_COOLDOWN",
+      {
+        abilityGameId: derived.abilityGameId,
+        itemId: null,
+        detail:
+          "the ability's own cooldown is proven to exceed the queueing tolerance, so action_t::ready " +
+          "cannot succeed. The bound is a LOWER bound and is compared as one; nothing here claims the " +
+          "exact remaining time.",
+      },
+    );
   }
 
   return unknownUsability();

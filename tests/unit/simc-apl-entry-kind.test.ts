@@ -143,8 +143,24 @@ describe("PLAYER_ACTION does not imply spell-backed", () => {
   );
 
   it.each(["potion", "use_item", "use_items", "invoke_external_buff"])(
-    "gives '%s' no ability id and no execution lane",
+    "gives '%s' no ability id, and a lane that came from C++ rather than DBC",
     (token) => {
+      // UPDATED AT M5-C3c3a. The claim this block makes — PLAYER_ACTION does not
+      // imply spell-backed — is now demonstrated MORE sharply, not less: these
+      // four still have no spell id at all, and yet they do have a lane, because
+      // their `trigger_gcd` is assigned in a C++ constructor. Id and lane came
+      // apart, which is exactly the point.
+      expect(resolveTokenBinding(token).kind).toBe("UNKNOWN");
+      expect(executionLaneForToken(token)).toBe("NON_GCD");
+    },
+  );
+
+  it.each(["apply_poison", "snapshot_stats"])(
+    "still gives the unmodelled pseudo-action '%s' no id and no lane",
+    (token) => {
+      // Not everything acquired a lane. These two are outside the supported
+      // slice and remain UNKNOWN_LANE, so "structurally ordinary" still confers
+      // nothing on its own.
       expect(resolveTokenBinding(token).kind).toBe("UNKNOWN");
       expect(executionLaneForToken(token)).toBe("UNKNOWN_LANE");
     },
@@ -161,38 +177,52 @@ describe("PLAYER_ACTION does not imply spell-backed", () => {
     expect(nonSpell.length).toBeGreaterThan(0);
     for (const action of nonSpell) {
       expect(action.entryKind, action.actionStringVerbatim).toBe("PLAYER_ACTION");
-      expect(executionLaneForToken(action.actionToken), action.actionToken).toBe("UNKNOWN_LANE");
+      // NONE of them resolves to a spell id, whatever its lane now says.
+      expect(resolveTokenBinding(action.actionToken).kind, action.actionToken).toBe("UNKNOWN");
     }
   });
 
-  it("BLOCKS rotational narrowing at such an entry rather than skipping it", () => {
+  it("BLOCKS rotational narrowing at an entry whose lane is unknown", () => {
     // The whole reason the three-member vocabulary is sufficient. An entry with
     // no known lane stops the narrowing and names itself; it is never stepped
     // over, and it never acquires a lane by being structurally ordinary.
+    //
+    // RETARGETED AT M5-C3c3a from `misc_cds`, whose entries all have lanes now.
+    // `generate` supplies the property from real pinned data: `crimson_tempest`
+    // is outside the supported slice and has no record.
     if (!loaded.ok) return;
 
-    const narrowing = narrowToRotationalSlot(loaded.authority, "misc_cds");
+    const narrowing = narrowToRotationalSlot(loaded.authority, "generate");
     expect(narrowing.kind).toBe("NOT_NARROWED");
     if (narrowing.kind !== "NOT_NARROWED") return;
     expect(narrowing.blocker).toBe("UNRESOLVED_ELIGIBILITY_ABOVE");
     expect(narrowing.blockedAtOrdinal).toBe(0);
 
     const blocked = narrowing.entries[0];
-    expect(blocked?.actionToken).toBe("potion");
+    expect(blocked?.actionToken).toBe("crimson_tempest");
     expect(blocked?.entryKind).toBe("PLAYER_ACTION");
     expect(blocked?.executionLane).toBe("UNKNOWN_LANE");
     expect(blocked?.eligibility).toBe("UNKNOWN");
   });
 
-  it("blocks on the items list too, where use_item entries are unmodelled", () => {
+  it("reports an all-NON_GCD list as having no rotational-GCD candidate", () => {
+    // The answer `misc_cds` gives now, and it is a REAL answer rather than the
+    // refusal it used to give. Every entry has a lane and every lane is NON_GCD,
+    // so the list cannot supply the rotational GCD slot at all — which is not
+    // the same as "these entries do not fire", and C3c3b will need the
+    // distinction.
     if (!loaded.ok) return;
-    const entries = classifyListEntries(loaded.authority, "items") ?? [];
-    const useItems = entries.filter((entry) => entry.actionToken.startsWith("use_item"));
-    expect(useItems.length).toBeGreaterThan(0);
-    for (const entry of useItems) {
-      expect(entry.entryKind).toBe("PLAYER_ACTION");
-      expect(entry.executionLane).toBe("UNKNOWN_LANE");
-      expect(entry.eligibility).toBe("UNKNOWN");
+    for (const listName of ["misc_cds", "items"]) {
+      const entries = classifyListEntries(loaded.authority, listName) ?? [];
+      expect(entries.length).toBeGreaterThan(0);
+      for (const entry of entries) {
+        if (entry.entryKind !== "PLAYER_ACTION") continue;
+        expect(entry.executionLane, `${listName} ${entry.actionToken}`).toBe("NON_GCD");
+      }
     }
+    const narrowing = narrowToRotationalSlot(loaded.authority, "misc_cds");
+    expect(narrowing.kind).toBe("NOT_NARROWED");
+    if (narrowing.kind !== "NOT_NARROWED") return;
+    expect(narrowing.blocker).toBe("NO_ELIGIBLE_ENTRY");
   });
 });

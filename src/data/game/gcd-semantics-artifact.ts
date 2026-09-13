@@ -123,6 +123,49 @@ export interface TokenBindingProvenance {
 }
 
 /**
+ * How a META-ACTION's lane was established.
+ *
+ * A THIRD kind of knowledge, and it needs its own name because it is neither of
+ * the other two:
+ *
+ *     token    -> candidate spell ids   HAND_REVIEWED_CPP_CONTROL_FLOW
+ *     spell id -> baseGcdMs             MACHINE_EXTRACTED_DBC_RECORD
+ *     token    -> trigger_gcd           HAND_REVIEWED_CPP_TRIGGER_GCD    <- this
+ *
+ * `potion`, `use_item`, `use_items` and `invoke_external_buff` are not
+ * spell-backed. No DBC row exists for them, so `_gcd` cannot answer the
+ * question at all; their `trigger_gcd` is assigned literally in a C++
+ * constructor and a human read it there. Fabricating a DBC record for them
+ * would be the dishonest alternative, and this method exists so nobody has to.
+ */
+export type MetaActionLaneMethod = "HAND_REVIEWED_CPP_TRIGGER_GCD";
+
+export const META_ACTION_LANE_METHOD: MetaActionLaneMethod = "HAND_REVIEWED_CPP_TRIGGER_GCD";
+
+/** Where a hand-reviewed `trigger_gcd` reading came from, precisely enough to re-read. */
+export interface MetaActionLaneProvenance {
+  readonly method: MetaActionLaneMethod;
+  readonly sourcePath: string;
+  readonly sourceSha256: string;
+  readonly symbol: string;
+  readonly line: number;
+  readonly sourceNote: string;
+}
+
+/**
+ * One token whose lane comes from a C++ constructor rather than a DBC row.
+ *
+ * `triggerGcdMs` is `action_t::trigger_gcd` in MILLISECONDS, the same field and
+ * the same units the machine-extracted half stores as `baseGcdMs` - so the lane
+ * predicate is identical and there is still exactly one rule.
+ */
+export interface MetaActionLaneRecord {
+  readonly simcToken: string;
+  readonly triggerGcdMs: number;
+  readonly binding: MetaActionLaneProvenance;
+}
+
+/**
  * One SimulationCraft action token and every spell id it can resolve to.
  *
  * A LIST, not a single id, because a token is not always one spell. The pinned
@@ -142,6 +185,8 @@ export interface GcdSemanticsArtifact {
   readonly provenance: GcdArtifactProvenance;
   readonly abilities: readonly AbilityGcdRecord[];
   readonly tokenBindings: readonly TokenBindingRecord[];
+  /** Tokens with no DBC row at all. Kept in their own field, never merged. */
+  readonly metaActionLanes: readonly MetaActionLaneRecord[];
 }
 
 /** Field names that must NOT appear on a record: they are derived, not stored. */
@@ -158,7 +203,12 @@ export type GcdArtifactValidationReason =
   | "MALFORMED_TOKEN_BINDING"
   | "MALFORMED_BINDING_PROVENANCE"
   | "DUPLICATE_TOKEN"
-  | "UNKNOWN_CANDIDATE_ABILITY";
+  | "UNKNOWN_CANDIDATE_ABILITY"
+  | "MALFORMED_META_ACTION_LANES"
+  | "MALFORMED_META_ACTION_LANE"
+  | "MALFORMED_META_ACTION_PROVENANCE"
+  /** One token claiming a lane from two different kinds of evidence. */
+  | "TOKEN_HAS_TWO_LANE_SOURCES";
 
 export type GcdArtifactValidation =
   | { readonly ok: true; readonly artifact: GcdSemanticsArtifact }
@@ -246,6 +296,42 @@ function validateBindingProvenance(value: unknown): TokenBindingProvenance | nul
     sourceNote,
     crossCheck,
   };
+}
+
+/**
+ * Validates one meta-action lane's provenance.
+ *
+ * Every field is required, for the same reason the token-binding provenance
+ * requires all of its own: a reading that could omit its method, file or hash
+ * would be indistinguishable from an extracted fact.
+ */
+function validateMetaProvenance(value: unknown): MetaActionLaneProvenance | null {
+  if (!isRecord(value)) return null;
+  const method = str(value, "method");
+  const sourcePath = str(value, "sourcePath");
+  const sourceSha256 = str(value, "sourceSha256");
+  const symbol = str(value, "symbol");
+  const sourceNote = str(value, "sourceNote");
+  const line = int(value, "line");
+
+  if (
+    method === null ||
+    sourcePath === null ||
+    sourceSha256 === null ||
+    symbol === null ||
+    sourceNote === null ||
+    line === null
+  ) {
+    return null;
+  }
+  // Only the hand-reviewed trigger_gcd method is expressible here. A meta action
+  // claiming MACHINE_EXTRACTED_DBC_RECORD would be asserting a DBC row exists
+  // for a token that has none.
+  if (method !== META_ACTION_LANE_METHOD) return null;
+  if (!/^[0-9a-f]{64}$/.test(sourceSha256)) return null;
+  if (line <= 0) return null;
+
+  return { method: META_ACTION_LANE_METHOD, sourcePath, sourceSha256, symbol, line, sourceNote };
 }
 
 function validateProvenance(value: unknown): GcdArtifactProvenance | null {
@@ -426,8 +512,68 @@ export function validateGcdSemanticsArtifact(value: unknown): GcdArtifactValidat
     tokenBindings.push({ simcToken, candidateAbilityGameIds, binding });
   }
 
+  const metaRaw = value["metaActionLanes"];
+  if (!Array.isArray(metaRaw) || metaRaw.length === 0) {
+    return invalid("MALFORMED_META_ACTION_LANES", "metaActionLanes is not a non-empty array");
+  }
+
+  const metaActionLanes: MetaActionLaneRecord[] = [];
+  const seenMetaTokens = new Set<string>();
+  for (let index = 0; index < metaRaw.length; index += 1) {
+    const raw = metaRaw[index];
+    if (!isRecord(raw)) {
+      return invalid("MALFORMED_META_ACTION_LANE", `metaActionLanes[${index}] is not an object`);
+    }
+    for (const forbidden of FORBIDDEN_DERIVED_GCD_KEYS) {
+      if (forbidden in raw) {
+        return invalid(
+          "MALFORMED_META_ACTION_LANE",
+          `metaActionLanes[${index}] stores derived field '${forbidden}'; the lane must be derived from triggerGcdMs`,
+        );
+      }
+    }
+    const simcToken = str(raw, "simcToken");
+    const triggerGcdMs = int(raw, "triggerGcdMs");
+    if (simcToken === null || triggerGcdMs === null) {
+      return invalid("MALFORMED_META_ACTION_LANE", `metaActionLanes[${index}] is missing required fields`);
+    }
+    // `trigger_gcd` is a timespan upstream and is never negative. A negative here
+    // would mean the reading was transcribed wrongly, and the lane derived from
+    // it would be meaningless.
+    if (triggerGcdMs < 0) {
+      return invalid("MALFORMED_META_ACTION_LANE", `metaActionLanes[${index}] has a negative triggerGcdMs`);
+    }
+    const binding = validateMetaProvenance(raw["binding"]);
+    if (binding === null) {
+      return invalid(
+        "MALFORMED_META_ACTION_PROVENANCE",
+        `metaActionLanes[${index}] ('${simcToken}') does not carry a complete hand-reviewed trigger_gcd provenance`,
+      );
+    }
+    if (seenMetaTokens.has(simcToken)) return invalid("DUPLICATE_TOKEN", simcToken);
+    // THE RULE THAT KEEPS THE GRADES SEPARATE. One token, one kind of evidence.
+    // Two would let the same lane be claimed from a DBC row and from a C++
+    // constructor at once, with no rule for which wins.
+    if (seenTokens.has(simcToken)) {
+      return invalid(
+        "TOKEN_HAS_TWO_LANE_SOURCES",
+        `'${simcToken}' has both a spell-id token binding and a meta-action lane`,
+      );
+    }
+    seenMetaTokens.add(simcToken);
+    metaActionLanes.push({ simcToken, triggerGcdMs, binding });
+  }
+
   return {
     ok: true,
-    artifact: { artifactVersion, datasetId, artifactRevision, provenance, abilities, tokenBindings },
+    artifact: {
+      artifactVersion,
+      datasetId,
+      artifactRevision,
+      provenance,
+      abilities,
+      tokenBindings,
+      metaActionLanes,
+    },
   };
 }

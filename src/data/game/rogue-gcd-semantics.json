@@ -30,6 +30,16 @@
         "path": "engine/class_modules/sc_rogue.cpp",
         "sha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
         "byteLength": 436673
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
       }
     ],
     "clientDataWowVersion": "12.1.0.69587",
@@ -39,11 +49,16 @@
     "gcdFieldName": "_gcd",
     "gcdFieldUnits": "MILLISECONDS",
     "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
-    "extractedOn": "2026-09-12",
+    "extractedOn": "2026-09-13",
     "extractorVersion": 1,
     "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
   },
   "abilities": [
+    {
+      "abilityGameId": 703,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Garrote"
+    },
     {
       "abilityGameId": 1766,
       "baseGcdMs": 0,
@@ -60,14 +75,49 @@
       "displayNameEn": "Vanish"
     },
     {
+      "abilityGameId": 1943,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Rupture"
+    },
+    {
       "abilityGameId": 8676,
       "baseGcdMs": 1000,
       "displayNameEn": "Ambush"
     },
     {
+      "abilityGameId": 20572,
+      "baseGcdMs": 0,
+      "displayNameEn": "Blood Fury"
+    },
+    {
+      "abilityGameId": 26297,
+      "baseGcdMs": 0,
+      "displayNameEn": "Berserking"
+    },
+    {
       "abilityGameId": 32645,
       "baseGcdMs": 1000,
       "displayNameEn": "Envenom"
+    },
+    {
+      "abilityGameId": 33697,
+      "baseGcdMs": 0,
+      "displayNameEn": "Blood Fury"
+    },
+    {
+      "abilityGameId": 33702,
+      "baseGcdMs": 0,
+      "displayNameEn": "Blood Fury"
+    },
+    {
+      "abilityGameId": 265221,
+      "baseGcdMs": 0,
+      "displayNameEn": "Fireblood"
+    },
+    {
+      "abilityGameId": 274738,
+      "baseGcdMs": 0,
+      "displayNameEn": "Ancestral Call"
     },
     {
       "abilityGameId": 360194,
@@ -173,6 +223,168 @@
         "endLine": 10238,
         "sourceNote": "spell.thistle_tea = talent.rogue.thistle_tea_auto->ok() ? talent.rogue.thistle_tea_auto->effectN( 1 ).trigger() : ( talent.rogue.thistle_tea_ability->ok() ? talent.rogue.thistle_tea_ability : not_found() ). Both reachable records are recorded because the branch depends on talent state this build does not resolve.",
         "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "garrote",
+      "candidateAbilityGameIds": [703],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / rogue_t::init_spells",
+        "startLine": 9472,
+        "endLine": 9472,
+        "sourceNote": "create_action dispatches \"garrote\" to garrote_t( name, this, spec.garrote, options_str ); spec.garrote = find_specialization_spell( \"Garrote\" ) at sc_rogue.cpp:9934. class_spells.inc row { 4, 259, 703 } confirms the id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "rupture",
+      "candidateAbilityGameIds": [1943],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / rogue_t::init_spells",
+        "startLine": 9486,
+        "endLine": 9486,
+        "sourceNote": "create_action dispatches \"rupture\" to rupture_t( name, this, spec.rupture, options_str ); spec.rupture = find_specialization_spell( \"Rupture\" ) at sc_rogue.cpp:9937. class_spells.inc row { 4, 259, 1943 } confirms the id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "deathmark",
+      "candidateAbilityGameIds": [360194],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / deathmark_t",
+        "startLine": 9464,
+        "endLine": 9464,
+        "sourceNote": "create_action dispatches \"deathmark\" to deathmark_t, whose base is rogue_attack_t( name, p, p->talent.assassination.deathmark, options_str ) at sc_rogue.cpp:4127. talent.assassination.deathmark = find_talent_spell( SPECIALIZATION, \"Deathmark\" ) at sc_rogue.cpp:10033. Talent-granted, so class_spells.inc carries no row and no cross-check is available.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "kingsbane",
+      "candidateAbilityGameIds": [385627],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "symbol": "rogue_t::create_action / kingsbane_t",
+        "startLine": 9480,
+        "endLine": 9480,
+        "sourceNote": "create_action dispatches \"kingsbane\" to kingsbane_t, whose base is rogue_attack_t( name, p, p->talent.assassination.kingsbane, options_str ) at sc_rogue.cpp:4835. talent.assassination.kingsbane = find_talent_spell( SPECIALIZATION, \"Kingsbane\" ) at sc_rogue.cpp:10045. Talent-granted, so class_spells.inc carries no row and no cross-check is available.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "blood_fury",
+      "candidateAbilityGameIds": [20572, 33697, 33702],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / blood_fury_t",
+        "startLine": 11060,
+        "endLine": 11061,
+        "sourceNote": "player_t::create_action dispatches \"blood_fury\" to blood_fury_t, whose base is racial_spell_t( p, \"blood_fury\", p->find_racial_spell( \"Blood Fury\" ) ) at player.cpp:9131-9132. racial_spells.inc carries THREE Blood Fury rows selected by a class mask (33697/0x240, 33702/0x190, 20572/0x2d). All three are recorded rather than one being chosen, because the lane is invariant across them and the mask is not evaluated here.",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    },
+    {
+      "simcToken": "berserking",
+      "candidateAbilityGameIds": [26297],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / berserking_t",
+        "startLine": 11058,
+        "endLine": 11059,
+        "sourceNote": "player_t::create_action dispatches \"berserking\" to berserking_t, whose base is racial_spell_t( p, \"berserking\", p->find_racial_spell( \"Berserking\" ) ) at player.cpp:9104-9105. racial_spells.inc: { 0x0080 (Troll), 0x3fff, 26297, \"Berserking\" }.",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    },
+    {
+      "simcToken": "fireblood",
+      "candidateAbilityGameIds": [265221],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / fireblood_t",
+        "startLine": 11064,
+        "endLine": 11065,
+        "sourceNote": "player_t::create_action dispatches \"fireblood\" to fireblood_t, whose base is racial_spell_t( p, \"fireblood\", p->find_racial_spell( \"Fireblood\" ) ) at player.cpp:9400-9401. racial_spells.inc: { 0x0800 (Dark Iron Dwarf), 0x3fff, 265221, \"Fireblood\" }.",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    },
+    {
+      "simcToken": "ancestral_call",
+      "candidateAbilityGameIds": [274738],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / ancestral_call_t",
+        "startLine": 11052,
+        "endLine": 11053,
+        "sourceNote": "player_t::create_action dispatches \"ancestral_call\" to ancestral_call_t, whose base is racial_spell_t( p, \"ancestral_call\", p->find_racial_spell( \"Ancestral Call\" ) ) at player.cpp:9359-9360. racial_spells.inc: { 0x2000 (Maghar Orc), 0x3fff, 274738, \"Ancestral Call\" }.",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "use_item",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "use_item_t::use_item_t",
+        "line": 9999,
+        "sourceNote": "use_item_t's constructor (struct opens at player.cpp:9847) assigns trigger_gcd = timespan_t::zero(). No spell record backs the APL token."
+      }
+    },
+    {
+      "simcToken": "use_items",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "use_items_t::use_items_t",
+        "line": 10232,
+        "sourceNote": "use_items_t's constructor (struct opens at player.cpp:10216) assigns trigger_gcd = timespan_t::zero(). It is the foreground entry; its per-slot sub-actions are internal."
+      }
+    },
+    {
+      "simcToken": "invoke_external_buff",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "invoke_external_buff_t::invoke_external_buff_t",
+        "line": 10915,
+        "sourceNote": "invoke_external_buff_t's constructor (struct opens at player.cpp:10889) assigns trigger_gcd = timespan_t::zero(). Its action type is ACTION_OTHER, not a spell."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). The lane therefore holds for EVERY potion identity, which matters because the pinned default potion is chosen by player level (apl_rogue.cpp:6-15) and Warcraft Logs supplies no level."
       }
     }
   ]

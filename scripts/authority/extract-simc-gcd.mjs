@@ -82,6 +82,11 @@ const SOURCES = {
   clientDataVersion: "engine/dbc/generated/client_data_version.inc",
   spellDataLayout: "engine/dbc/spell_data.hpp",
   rogueModule: "engine/class_modules/sc_rogue.cpp",
+  // HASHED, NEVER PARSED. The meta-action lanes and the racial token bindings
+  // are hand-reviewed readings of these two files; the hashes exist so a reader
+  // can confirm they are reading the same bytes the readings rest on.
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
 };
 
 /**
@@ -98,6 +103,22 @@ const SOURCES = {
  */
 const HAND_REVIEWED_BINDING_METHOD = "HAND_REVIEWED_CPP_CONTROL_FLOW";
 const MACHINE_EXTRACTED_METHOD = "MACHINE_EXTRACTED_DBC_RECORD";
+
+/**
+ * How a META-ACTION's lane was established.
+ *
+ * A THIRD kind of knowledge, and it needs its own name. `potion`, `use_item`,
+ * `use_items` and `invoke_external_buff` are not spell-backed: no DBC row exists
+ * for them, so `_gcd` cannot answer the question. Their `trigger_gcd` is
+ * assigned literally in a C++ constructor, and a human read it there.
+ *
+ * Kept separate from HAND_REVIEWED_CPP_CONTROL_FLOW because that method records
+ * a token -> SPELL ID relation, whose lane still comes from machine-extracted
+ * DBC. This one records a token -> TRIGGER_GCD value directly, with no DBC row
+ * behind it at all. Writing a fake DBC record for these would be the dishonest
+ * alternative.
+ */
+const HAND_REVIEWED_TRIGGER_GCD_METHOD = "HAND_REVIEWED_CPP_TRIGGER_GCD";
 
 /**
  * Facts this extractor REQUIRES the pinned data to exhibit.
@@ -133,6 +154,20 @@ const REQUIRED_FACTS = {
     { abilityGameId: 381623, displayNameEn: "Thistle Tea", baseGcdMs: 0 },
     { abilityGameId: 385627, displayNameEn: "Kingsbane", baseGcdMs: 1000 },
     { abilityGameId: 469779, displayNameEn: "Thistle Tea", baseGcdMs: 0 },
+    // ---- added at M5-C3c3a: the rest of the root -> Garrote authority path ----
+    // Garrote is the eventual first-GCD answer, so its own lane is load-bearing.
+    { abilityGameId: 703, displayNameEn: "Garrote", baseGcdMs: 1000 },
+    { abilityGameId: 1943, displayNameEn: "Rupture", baseGcdMs: 1000 },
+    // The four racials in `misc_cds`. All THREE Blood Fury rows are recorded
+    // because the row a Rogue resolves to depends on a class mask this build
+    // does not evaluate - and all three agree on the lane, so the token's lane
+    // holds under every branch without anyone picking one.
+    { abilityGameId: 20572, displayNameEn: "Blood Fury", baseGcdMs: 0 },
+    { abilityGameId: 33697, displayNameEn: "Blood Fury", baseGcdMs: 0 },
+    { abilityGameId: 33702, displayNameEn: "Blood Fury", baseGcdMs: 0 },
+    { abilityGameId: 26297, displayNameEn: "Berserking", baseGcdMs: 0 },
+    { abilityGameId: 265221, displayNameEn: "Fireblood", baseGcdMs: 0 },
+    { abilityGameId: 274738, displayNameEn: "Ancestral Call", baseGcdMs: 0 },
   ],
   /**
    * SimulationCraft APL token -> the numeric spell ids that token can resolve to.
@@ -209,6 +244,171 @@ const REQUIRED_FACTS = {
         "? talent.rogue.thistle_tea_auto->effectN( 1 ).trigger() " +
         ": ( talent.rogue.thistle_tea_ability->ok() ? talent.rogue.thistle_tea_ability : not_found() ). " +
         "Both reachable records are recorded because the branch depends on talent state this build does not resolve.",
+    },
+    // ---- added at M5-C3c3a ----
+    {
+      simcToken: "garrote",
+      candidateAbilityGameIds: [703],
+      crossCheck: "CLASS_SPELLS",
+      symbol: "rogue_t::create_action / rogue_t::init_spells",
+      startLine: 9472,
+      endLine: 9472,
+      sourceNote:
+        'create_action dispatches "garrote" to garrote_t( name, this, spec.garrote, options_str ); ' +
+        'spec.garrote = find_specialization_spell( "Garrote" ) at sc_rogue.cpp:9934. ' +
+        "class_spells.inc row { 4, 259, 703 } confirms the id.",
+    },
+    {
+      simcToken: "rupture",
+      candidateAbilityGameIds: [1943],
+      crossCheck: "CLASS_SPELLS",
+      symbol: "rogue_t::create_action / rogue_t::init_spells",
+      startLine: 9486,
+      endLine: 9486,
+      sourceNote:
+        'create_action dispatches "rupture" to rupture_t( name, this, spec.rupture, options_str ); ' +
+        'spec.rupture = find_specialization_spell( "Rupture" ) at sc_rogue.cpp:9937. ' +
+        "class_spells.inc row { 4, 259, 1943 } confirms the id.",
+    },
+    {
+      simcToken: "deathmark",
+      candidateAbilityGameIds: [360194],
+      crossCheck: "NONE_TALENT_BOUND",
+      symbol: "rogue_t::create_action / deathmark_t",
+      startLine: 9464,
+      endLine: 9464,
+      sourceNote:
+        'create_action dispatches "deathmark" to deathmark_t, whose base is ' +
+        "rogue_attack_t( name, p, p->talent.assassination.deathmark, options_str ) at sc_rogue.cpp:4127. " +
+        'talent.assassination.deathmark = find_talent_spell( SPECIALIZATION, "Deathmark" ) at sc_rogue.cpp:10033. ' +
+        "Talent-granted, so class_spells.inc carries no row and no cross-check is available.",
+    },
+    {
+      simcToken: "kingsbane",
+      candidateAbilityGameIds: [385627],
+      crossCheck: "NONE_TALENT_BOUND",
+      symbol: "rogue_t::create_action / kingsbane_t",
+      startLine: 9480,
+      endLine: 9480,
+      sourceNote:
+        'create_action dispatches "kingsbane" to kingsbane_t, whose base is ' +
+        "rogue_attack_t( name, p, p->talent.assassination.kingsbane, options_str ) at sc_rogue.cpp:4835. " +
+        'talent.assassination.kingsbane = find_talent_spell( SPECIALIZATION, "Kingsbane" ) at sc_rogue.cpp:10045. ' +
+        "Talent-granted, so class_spells.inc carries no row and no cross-check is available.",
+    },
+    {
+      simcToken: "blood_fury",
+      candidateAbilityGameIds: [20572, 33697, 33702],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / blood_fury_t",
+      startLine: 11060,
+      endLine: 11061,
+      sourceNote:
+        'player_t::create_action dispatches "blood_fury" to blood_fury_t, whose base is ' +
+        'racial_spell_t( p, "blood_fury", p->find_racial_spell( "Blood Fury" ) ) at player.cpp:9131-9132. ' +
+        "racial_spells.inc carries THREE Blood Fury rows selected by a class mask " +
+        "(33697/0x240, 33702/0x190, 20572/0x2d). All three are recorded rather than one being chosen, " +
+        "because the lane is invariant across them and the mask is not evaluated here.",
+    },
+    {
+      simcToken: "berserking",
+      candidateAbilityGameIds: [26297],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / berserking_t",
+      startLine: 11058,
+      endLine: 11059,
+      sourceNote:
+        'player_t::create_action dispatches "berserking" to berserking_t, whose base is ' +
+        'racial_spell_t( p, "berserking", p->find_racial_spell( "Berserking" ) ) at player.cpp:9104-9105. ' +
+        'racial_spells.inc: { 0x0080 (Troll), 0x3fff, 26297, "Berserking" }.',
+    },
+    {
+      simcToken: "fireblood",
+      candidateAbilityGameIds: [265221],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / fireblood_t",
+      startLine: 11064,
+      endLine: 11065,
+      sourceNote:
+        'player_t::create_action dispatches "fireblood" to fireblood_t, whose base is ' +
+        'racial_spell_t( p, "fireblood", p->find_racial_spell( "Fireblood" ) ) at player.cpp:9400-9401. ' +
+        'racial_spells.inc: { 0x0800 (Dark Iron Dwarf), 0x3fff, 265221, "Fireblood" }.',
+    },
+    {
+      simcToken: "ancestral_call",
+      candidateAbilityGameIds: [274738],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / ancestral_call_t",
+      startLine: 11052,
+      endLine: 11053,
+      sourceNote:
+        'player_t::create_action dispatches "ancestral_call" to ancestral_call_t, whose base is ' +
+        'racial_spell_t( p, "ancestral_call", p->find_racial_spell( "Ancestral Call" ) ) at player.cpp:9359-9360. ' +
+        'racial_spells.inc: { 0x2000 (Maghar Orc), 0x3fff, 274738, "Ancestral Call" }.',
+    },
+  ],
+
+  /**
+   * META-ACTION LANES - tokens with NO DBC spell behind them.
+   *
+   * Each of these is an `action_t` subclass whose constructor assigns
+   * `trigger_gcd` literally. There is no `_gcd` column to read, so the value is
+   * a hand-reviewed reading of a C++ constructor, recorded with the file's
+   * measured hash and a line so the reading can be re-checked.
+   *
+   * `use_off_gcd=1` IS NOT WHY THESE ARE NON_GCD, and must never be read as
+   * though it were. That option ADDS an action to `off_gcd_actions`
+   * (player.cpp:4340-4342, a push_back that erases nothing) for a separate
+   * polling pass that runs only while a GCD is already active. The lane is
+   * `trigger_gcd > 0` and nothing else.
+   */
+  metaActionLanes: [
+    {
+      simcToken: "use_item",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/player.cpp",
+      symbol: "use_item_t::use_item_t",
+      line: 9999,
+      sourceNote:
+        "use_item_t's constructor (struct opens at player.cpp:9847) assigns " +
+        "trigger_gcd = timespan_t::zero(). No spell record backs the APL token.",
+    },
+    {
+      simcToken: "use_items",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/player.cpp",
+      symbol: "use_items_t::use_items_t",
+      line: 10232,
+      sourceNote:
+        "use_items_t's constructor (struct opens at player.cpp:10216) assigns " +
+        "trigger_gcd = timespan_t::zero(). It is the foreground entry; its per-slot " +
+        "sub-actions are internal.",
+    },
+    {
+      simcToken: "invoke_external_buff",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/player.cpp",
+      symbol: "invoke_external_buff_t::invoke_external_buff_t",
+      line: 10915,
+      sourceNote:
+        "invoke_external_buff_t's constructor (struct opens at player.cpp:10889) assigns " +
+        "trigger_gcd = timespan_t::zero(). Its action type is ACTION_OTHER, not a spell.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). The lane therefore holds " +
+        "for EVERY potion identity, which matters because the pinned default potion is chosen by " +
+        "player level (apl_rogue.cpp:6-15) and Warcraft Logs supplies no level.",
     },
   ],
 };
@@ -449,8 +649,16 @@ export function parseClassSpells(text) {
  * Returns a list of problems. An empty list is the only thing that licenses
  * writing the artifact.
  */
-export function verifyRequiredFacts({ build, records, classSpells, gcdFieldIndex, expectedGcdFieldIndex }) {
+export function verifyRequiredFacts({
+  build,
+  records,
+  classSpells,
+  gcdFieldIndex,
+  expectedGcdFieldIndex,
+  measuredSourcePaths,
+}) {
   const problems = [];
+  const knownPaths = new Set(measuredSourcePaths ?? Object.values(SOURCES));
 
   if (gcdFieldIndex !== expectedGcdFieldIndex) {
     problems.push(
@@ -545,6 +753,16 @@ export function verifyRequiredFacts({ build, records, classSpells, gcdFieldIndex
         );
       }
     }
+    // A binding may name a file other than the Rogue module - the racials are
+    // read out of player.cpp. Whichever file it names must be one this run
+    // actually hashed, or the recorded hash would belong to a different file.
+    const bindingPath = binding.sourcePath ?? SOURCES.rogueModule;
+    if (!knownPaths.has(bindingPath)) {
+      problems.push(
+        `token '${binding.simcToken}' cites '${bindingPath}', which this extractor does not hash`,
+      );
+    }
+
     if (binding.crossCheck !== "CLASS_SPELLS") continue;
 
     for (const candidate of binding.candidateAbilityGameIds) {
@@ -556,6 +774,46 @@ export function verifyRequiredFacts({ build, records, classSpells, gcdFieldIndex
           `token '${binding.simcToken}' claims spell ${candidate} is a Rogue class ability, but class_spells.inc has no such row`,
         );
       }
+    }
+  }
+
+  // ---- meta-action lanes ----
+  //
+  // Nothing here can be cross-checked against DBC, by construction: these tokens
+  // have no spell record. So the checks are structural, and the one that matters
+  // most is the LAST one - a token must not be able to get a lane from two
+  // different kinds of evidence at once.
+  const boundTokens = new Set(REQUIRED_FACTS.tokenBindings.map((binding) => binding.simcToken));
+  const seenMetaTokens = new Set();
+  for (const meta of REQUIRED_FACTS.metaActionLanes) {
+    if (typeof meta.simcToken !== "string" || meta.simcToken.length === 0) {
+      problems.push("a meta-action lane has no token");
+      continue;
+    }
+    if (!Number.isInteger(meta.triggerGcdMs) || meta.triggerGcdMs < 0) {
+      problems.push(`meta-action '${meta.simcToken}' has a non-integer or negative triggerGcdMs`);
+    }
+    if (!knownPaths.has(meta.sourcePath)) {
+      problems.push(
+        `meta-action '${meta.simcToken}' cites '${meta.sourcePath}', which this extractor does not hash`,
+      );
+    }
+    if (!Number.isInteger(meta.line) || meta.line <= 0) {
+      problems.push(`meta-action '${meta.simcToken}' has no usable source line`);
+    }
+    if (typeof meta.sourceNote !== "string" || meta.sourceNote.length === 0) {
+      problems.push(`meta-action '${meta.simcToken}' carries no sourceNote`);
+    }
+    if (seenMetaTokens.has(meta.simcToken)) {
+      problems.push(`meta-action '${meta.simcToken}' is declared more than once`);
+    }
+    seenMetaTokens.add(meta.simcToken);
+    if (boundTokens.has(meta.simcToken)) {
+      problems.push(
+        `token '${meta.simcToken}' has BOTH a spell-id binding and a meta-action lane. One token, one ` +
+          "kind of evidence: two would let the same lane be claimed from a DBC row and from a C++ " +
+          "constructor at once, with no rule for which wins.",
+      );
     }
   }
 
@@ -629,13 +887,19 @@ export function formatArtifactJson(artifact) {
 }
 
 export function buildArtifact({ commitSha, sources, build, records, extractedOn, rogueModuleSha256 }) {
-  const rogueModuleSource = sources.find((source) => source.path === SOURCES.rogueModule);
-  const bindingSourceSha256 = rogueModuleSha256 ?? rogueModuleSource?.sha256 ?? null;
-  if (bindingSourceSha256 === null) {
-    throw new Error(
-      `cannot record hand-reviewed token bindings without a measured hash of ${SOURCES.rogueModule}`,
-    );
+  const byPath = new Map(sources.map((source) => [source.path, source.sha256]));
+  if (rogueModuleSha256 !== undefined && rogueModuleSha256 !== null) {
+    byPath.set(SOURCES.rogueModule, rogueModuleSha256);
   }
+
+  /** The measured hash of the file a hand-reviewed reading cites. Never invented. */
+  const hashFor = (path) => {
+    const sha256 = byPath.get(path);
+    if (sha256 === undefined) {
+      throw new Error(`cannot record a hand-reviewed reading of ${path} without a measured hash of it`);
+    }
+    return sha256;
+  };
 
   return {
     artifactVersion: ARTIFACT_VERSION,
@@ -680,13 +944,27 @@ export function buildArtifact({ commitSha, sources, build, records, extractedOn,
       // never machine-parsed and this record must not imply that it was.
       binding: {
         method: HAND_REVIEWED_BINDING_METHOD,
-        sourcePath: SOURCES.rogueModule,
-        sourceSha256: bindingSourceSha256,
+        sourcePath: binding.sourcePath ?? SOURCES.rogueModule,
+        sourceSha256: hashFor(binding.sourcePath ?? SOURCES.rogueModule),
         symbol: binding.symbol,
         startLine: binding.startLine,
         endLine: binding.endLine,
         sourceNote: binding.sourceNote,
         crossCheck: binding.crossCheck,
+      },
+    })),
+    // A THIRD kind of knowledge, in its own field so it cannot be mistaken for
+    // either of the other two. These tokens have no DBC row at all.
+    metaActionLanes: REQUIRED_FACTS.metaActionLanes.map((meta) => ({
+      simcToken: meta.simcToken,
+      triggerGcdMs: meta.triggerGcdMs,
+      binding: {
+        method: HAND_REVIEWED_TRIGGER_GCD_METHOD,
+        sourcePath: meta.sourcePath,
+        sourceSha256: hashFor(meta.sourcePath),
+        symbol: meta.symbol,
+        line: meta.line,
+        sourceNote: meta.sourceNote,
       },
     })),
   };
@@ -746,6 +1024,7 @@ async function main() {
     classSpells,
     gcdFieldIndex: fieldIndex.index,
     expectedGcdFieldIndex: GCD_FIELD_INDEX,
+    measuredSourcePaths: new Set(sources.map((source) => source.path)),
   });
   if (problems.length > 0) {
     console.error("EXTRACTION FAILED: the pinned data does not exhibit the required facts.\n");
@@ -778,8 +1057,11 @@ async function main() {
   console.log(`  rows scanned  ${parsed.rowsScanned}`);
   console.log(`  abilities     ${artifact.abilities.length} (${artifact.provenance.abilityDataMethod})`);
   console.log(`  tokens        ${artifact.tokenBindings.length} (${HAND_REVIEWED_BINDING_METHOD})`);
+  console.log(`  meta actions  ${artifact.metaActionLanes.length} (${HAND_REVIEWED_TRIGGER_GCD_METHOD})`);
   console.log("  required facts: VERIFIED");
-  console.log(`  NOTE: ${SOURCES.rogueModule} was hashed, NOT parsed. Token bindings are hand-reviewed.`);
+  for (const path of [SOURCES.rogueModule, SOURCES.playerModule, SOURCES.consumableModule]) {
+    console.log(`  NOTE: ${path} was hashed, NOT parsed. Readings of it are hand-reviewed.`);
+  }
 }
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {

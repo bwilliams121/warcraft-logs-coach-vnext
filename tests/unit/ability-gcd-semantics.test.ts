@@ -7,6 +7,8 @@ import {
   executionLaneForToken,
   invariantLaneAcross,
   laneForBaseGcdMs,
+  metaActionLaneProvenanceFor,
+  metaActionLaneRecordFor,
   pinnedRogueGcdSemantics,
   resolveTokenBinding,
 } from "../../src/data/game/ability-gcd-semantics.js";
@@ -41,7 +43,11 @@ describe("the pinned dataset loads", () => {
     expect(loaded.ok).toBe(true);
     if (!loaded.ok) return;
     expect(loaded.artifact.datasetId).toBe("SIMC_DBC_ROGUE_GCD_SEMANTICS");
-    expect(loaded.artifact.abilities).toHaveLength(9);
+    // Widened from 9 to 17 at M5-C3c3a, which added the rest of the root ->
+    // Garrote authority path: Garrote, Rupture and the four racials (Blood Fury
+    // contributing three class-mask rows rather than one).
+    expect(loaded.artifact.abilities).toHaveLength(17);
+    expect(loaded.artifact.metaActionLanes).toHaveLength(4);
   });
 
   it("permits exactly three execution lanes", () => {
@@ -89,7 +95,10 @@ describe("the lane is derived from the base GCD", () => {
 describe("an unknown ability is UNKNOWN_LANE, never a default", () => {
   it.each([
     ["an ability this dataset does not carry", 1329],
-    ["a plausible but absent Rogue spell", 703],
+    // Crimson Tempest. Retargeted at M5-C3c3a from Garrote (703), which the
+    // supported slice now carries — the refusal still needs a Rogue spell that
+    // is genuinely outside it.
+    ["a plausible but absent Rogue spell", 121_411],
     ["an id that is not a spell at all", 999_999_999],
     ["zero", 0],
     ["a negative id", -1],
@@ -199,23 +208,55 @@ describe("a token binds to a SET of spell ids", () => {
   });
 
   it.each(["potion", "use_item", "use_items", "invoke_external_buff"])(
-    "gives the non-spell pseudo-action '%s' no id and no lane",
+    "gives the non-spell pseudo-action '%s' no spell id, but a hand-reviewed lane",
     (simcToken) => {
-      // These are ordinary selectable APL entries — `PLAYER_ACTION` structurally
-      // — and none of them is a spell. Being structurally ordinary confers
-      // nothing here: no binding, no id, no lane.
+      // UPDATED AT M5-C3c3a, and the split is the point.
+      //
+      // These are ordinary selectable APL entries — `PLAYER_ACTION`
+      // structurally — and none of them is a spell. They still have NO spell-id
+      // binding, and `resolveTokenBinding` still says so. What changed is that
+      // their `trigger_gcd` is assigned literally in a C++ constructor, and
+      // C3c3a records those four readings under their own method. So the lane
+      // is known while the id remains genuinely absent.
       expect(resolveTokenBinding(simcToken).kind).toBe("UNKNOWN");
+      expect(executionLaneForToken(simcToken)).toBe("NON_GCD");
+
+      const provenance = metaActionLaneProvenanceFor(simcToken);
+      expect(provenance?.method).toBe("HAND_REVIEWED_CPP_TRIGGER_GCD");
+      // NOT the machine-extraction marker. A meta action has no DBC row, and a
+      // record claiming otherwise would be inventing one.
+      expect(provenance?.method).not.toBe("MACHINE_EXTRACTED_DBC_RECORD");
+      expect(provenance?.sourceSha256).toMatch(/^[0-9a-f]{64}$/);
+      expect(provenance?.sourceNote ?? "").toContain("trigger_gcd");
+      expect(metaActionLaneRecordFor(simcToken)?.triggerGcdMs).toBe(0);
+    },
+  );
+
+  it.each(["mutilate", "crimson_tempest", "shiv", "variable", "call_action_list", ""])(
+    "reports an unbound token '%s' as UNKNOWN",
+    (simcToken) => {
+      // Retargeted at M5-C3c3a: `garrote` and `rupture` moved into the supported
+      // slice, so the refusal is now exercised with tokens that are still
+      // genuinely outside it.
+      expect(resolveTokenBinding(simcToken).kind).toBe("UNKNOWN");
+      expect(metaActionLaneRecordFor(simcToken)).toBeNull();
       expect(executionLaneForToken(simcToken)).toBe("UNKNOWN_LANE");
     },
   );
 
-  it.each(["mutilate", "garrote", "rupture", "variable", "call_action_list", ""])(
-    "reports an unbound token '%s' as UNKNOWN",
-    (simcToken) => {
-      expect(resolveTokenBinding(simcToken).kind).toBe("UNKNOWN");
-      expect(executionLaneForToken(simcToken)).toBe("UNKNOWN_LANE");
-    },
-  );
+  it("never lets one token carry both kinds of lane evidence", () => {
+    // The rule that keeps the grades separate: a token with a spell-id binding
+    // must not also have a meta-action lane, because there would be no rule for
+    // which one wins. Asserted over the whole committed artifact.
+    const loadedArtifact = pinnedRogueGcdSemantics();
+    expect(loadedArtifact.ok).toBe(true);
+    if (!loadedArtifact.ok) return;
+    const bound = new Set(loadedArtifact.artifact.tokenBindings.map((entry) => entry.simcToken));
+    for (const meta of loadedArtifact.artifact.metaActionLanes) {
+      expect(bound.has(meta.simcToken), `${meta.simcToken} is in both sections`).toBe(false);
+      expect(resolveTokenBinding(meta.simcToken).kind).toBe("UNKNOWN");
+    }
+  });
 });
 
 describe("a token's lane holds only when every candidate agrees", () => {
