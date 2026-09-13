@@ -141,43 +141,25 @@ export type RotationalTraversal =
     };
 
 /**
- * Traverses the pinned authority from the rotational boundary.
+ * The bindings one decision point evaluates against, and the two facts that come
+ * with them.
  *
- * Never returns nothing: every decision point gets an explicit structured
- * result, because a silently skipped point is indistinguishable from one that
- * was fine.
+ * SPLIT OUT AT M5-C3c3c, verbatim and with no semantic change. Two queries now
+ * evaluate the same decision — the rotational-suffix traversal and the first-GCD
+ * rescan query — and they must evaluate against the SAME state. Copying this
+ * construction into the second one would let the two drift, and a divergence
+ * between them would be invisible: both would still return a well-formed answer.
  */
-export function traverseRotationalAuthority(input: RotationalTraversalInput): RotationalTraversal {
-  const { state, actorId, targetActorId, position, authority } = input;
+export interface RotationalBindings {
+  readonly bindings: AtomBindings;
+  /** Cooldown derivations, including any that came back UNKNOWN. */
+  readonly derivedCooldowns: readonly DerivedCooldown[];
+  /** False when combo points could not be observed. Never silently true. */
+  readonly comboPointsEstablished: boolean;
+}
 
-  if (authority === null) {
-    return {
-      kind: "ROTATIONAL_TRAVERSAL",
-      status: "UNAVAILABLE",
-      blocker: "NO_AUTHORITY_AVAILABLE",
-      detail: "no pinned SimulationCraft APL is available for this specialization",
-    };
-  }
-
-  // ---- the boundary, from M5-C1's structural proof ----
-  const narrowing = narrowToRotationalSlot(authority, ROTATIONAL_ENTRY_LIST);
-  if (narrowing.kind !== "NARROWED") {
-    return {
-      kind: "ROTATIONAL_TRAVERSAL",
-      status: "UNAVAILABLE",
-      blocker: "ROTATIONAL_BOUNDARY_NOT_PROVEN",
-      detail:
-        "the entry list could not be narrowed to a first rotational-slot candidate, so there is no " +
-        "proven boundary to start from and starting anywhere else would assert entries do not fire",
-    };
-  }
-  const boundary: ScanStartBoundary = {
-    startOrdinal: narrowing.firstEligibleOrdinal,
-    provenExcludedOrdinals: narrowing.provenIneligibleOrdinals,
-    justification:
-      "M5-C1 rotational-slot narrowing: every ordinal below the start is structurally incapable of " +
-      "occupying the rotational GCD slot. This is NOT a claim that those entries do not fire.",
-  };
+export function rotationalBindingsAt(input: RotationalTraversalInput): RotationalBindings {
+  const { state, actorId, targetActorId, position } = input;
 
   // ---- resource state, bound only where it was observed ----
   // An adaptation can fail even when the observation was exact — an unknown
@@ -241,6 +223,50 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
     ...(stealthedRogue.value === "TRUE" ? { stealthedRogue: true as const } : {}),
   };
 
+  return { bindings, derivedCooldowns, comboPointsEstablished: combo !== null };
+}
+
+/**
+ * Traverses the pinned authority from the rotational boundary.
+ *
+ * Never returns nothing: every decision point gets an explicit structured
+ * result, because a silently skipped point is indistinguishable from one that
+ * was fine.
+ */
+export function traverseRotationalAuthority(input: RotationalTraversalInput): RotationalTraversal {
+  const { state, actorId, position, authority } = input;
+
+  if (authority === null) {
+    return {
+      kind: "ROTATIONAL_TRAVERSAL",
+      status: "UNAVAILABLE",
+      blocker: "NO_AUTHORITY_AVAILABLE",
+      detail: "no pinned SimulationCraft APL is available for this specialization",
+    };
+  }
+
+  // ---- the boundary, from M5-C1's structural proof ----
+  const narrowing = narrowToRotationalSlot(authority, ROTATIONAL_ENTRY_LIST);
+  if (narrowing.kind !== "NARROWED") {
+    return {
+      kind: "ROTATIONAL_TRAVERSAL",
+      status: "UNAVAILABLE",
+      blocker: "ROTATIONAL_BOUNDARY_NOT_PROVEN",
+      detail:
+        "the entry list could not be narrowed to a first rotational-slot candidate, so there is no " +
+        "proven boundary to start from and starting anywhere else would assert entries do not fire",
+    };
+  }
+  const boundary: ScanStartBoundary = {
+    startOrdinal: narrowing.firstEligibleOrdinal,
+    provenExcludedOrdinals: narrowing.provenIneligibleOrdinals,
+    justification:
+      "M5-C1 rotational-slot narrowing: every ordinal below the start is structurally incapable of " +
+      "occupying the rotational GCD slot. This is NOT a claim that those entries do not fire.",
+  };
+
+  const { bindings, derivedCooldowns, comboPointsEstablished } = rotationalBindingsAt(input);
+
   // ---- applicability and usability ----
   //
   // The observed cast proves ONE action was usable here. It proves nothing about
@@ -287,6 +313,6 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
     boundary,
     bindings,
     derivedCooldowns,
-    comboPointsEstablished: combo !== null,
+    comboPointsEstablished,
   };
 }

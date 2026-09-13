@@ -137,9 +137,15 @@ describe("everything outside the subset is refused whole", () => {
     ["stealthed.all", "UNSUPPORTED_IDENTIFIER"],
     ["stealthed.basic", "UNSUPPORTED_IDENTIFIER"],
     ["stealthed.improved_garrote", "UNSUPPORTED_IDENTIFIER"],
-    // RE-POINTED for M5-B. `buff.x.remains` became supported; `buff.x.stack`
-    // (pinned `cds` line 5) did not, and proves `buff.<name>.` is not a namespace.
-    ["buff.scent_of_blood.stack>=2", "UNSUPPORTED_IDENTIFIER"],
+    // RE-POINTED for M5-C3c3c. `buff.x.remains` (M5-B), then `buff.x.stack` and
+    // `buff.x.react` (C3c3c) became supported. These neighbours did not, and are
+    // what still shows `buff.<name>.` is not an open namespace.
+    ["buff.scent_of_blood.duration>=2", "UNSUPPORTED_IDENTIFIER"],
+    ["buff.scent_of_blood.value>=2", "UNSUPPORTED_IDENTIFIER"],
+    // `debuff.<name>.up` became supported at C3c3c; its siblings did not.
+    ["debuff.deathmark.remains>=2", "UNSUPPORTED_IDENTIFIER"],
+    ["debuff.deathmark.stack>=2", "UNSUPPORTED_IDENTIFIER"],
+    ["debuff.deathmark.react", "UNSUPPORTED_IDENTIFIER"],
     // RE-POINTED for M5-C3c1. `dot.<name>.ticking` is recognised; the other
     // `dot.` properties are not, which is what shows the namespace did not open.
     ["dot.rupture.remains", "UNSUPPORTED_IDENTIFIER"],

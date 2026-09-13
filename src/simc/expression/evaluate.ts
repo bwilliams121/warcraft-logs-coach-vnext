@@ -570,6 +570,20 @@ function evaluateInWorld(
     case "BUFF_REMAINS":
       // Understood syntax; this build reconstructs no aura duration.
       return UNKNOWN;
+    case "BUFF_STACK":
+      // Understood syntax; this build reconstructs no aura stack count. NEVER
+      // zero: an unobserved aura is not an aura observed at zero stacks.
+      return UNKNOWN;
+    case "BUFF_REACT": {
+      // Its own key, so it never reads a `buff.<name>.up` assignment. There is
+      // no binding field, so it is always enumerated.
+      const assigned = world.get(`buff.${node.buffName}.react`);
+      return assigned === true ? 1 : 0;
+    }
+    case "DEBUFF_UP": {
+      const assigned = world.get(`debuff.${node.debuffName}.up`);
+      return assigned === true ? 1 : 0;
+    }
     case "BUFF_UP": {
       const known = bindings.knownBuffs.find((entry) => entry.name === node.buffName);
       if (known !== undefined) return known.up ? 1 : 0;
@@ -721,7 +735,8 @@ function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): Res
   }
 
   if (shape === "NUMERIC") {
-    // `buff.<name>.remains` and anything numeric added later without a binding.
+    // `buff.<name>.remains`, `buff.<name>.stack`, and anything numeric added
+    // later without a binding. STATE_NOT_MODELLED, and emphatically not zero.
     return unknownNumeric("STATE_NOT_MODELLED");
   }
 

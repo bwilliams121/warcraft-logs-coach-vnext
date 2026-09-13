@@ -61,6 +61,38 @@ export type ExpressionNode =
   /** `buff.<name>.remains` — understood syntax, no state model in M5-B. */
   | { readonly kind: "BUFF_REMAINS"; readonly buffName: string }
   /**
+   * `buff.<name>.stack` — MAGNITUDE-shaped. Added at M5-C3c3c.
+   *
+   * A COUNT, and that is why it cannot share `BUFF_UP`'s shape. Recognising it
+   * lets an expression containing it parse whole; it has no binding field, so
+   * it resolves UNKNOWN_NUMBER and is never enumerated. An absent aura must not
+   * become `0 stacks` — absence of an observation is not an observation of zero.
+   */
+  | { readonly kind: "BUFF_STACK"; readonly buffName: string }
+  /**
+   * `buff.<name>.react` — TRUTH-shaped. Added at M5-C3c3c.
+   *
+   * NOT `buff.<name>.up`, and the distinction is deliberate rather than
+   * pedantic. SimulationCraft's `.react` gates on whether the actor has had time
+   * to REACT to the aura, which `.up` does not; equating them would let a
+   * reaction-delay model this project does not have collapse into a plain
+   * presence check. It therefore gets its OWN atom key, so no world assignment
+   * correlates the two, and no binding field, so it is always enumerated.
+   */
+  | { readonly kind: "BUFF_REACT"; readonly buffName: string }
+  /**
+   * `debuff.<name>.up` — TRUTH-shaped, and on the TARGET. Added at M5-C3c3c.
+   *
+   * A separate node from `BUFF_UP` because it addresses a different actor.
+   * `buff.deathmark.up` is an aura on the player; `debuff.deathmark.up` is one
+   * the player applied to the enemy. Folding them together would be exactly the
+   * buff/debuff direction error this project keeps a rule about.
+   *
+   * No binding field: reconstructing enemy debuff presence needs source-aware
+   * target aura state that this milestone does not wire in, so it enumerates.
+   */
+  | { readonly kind: "DEBUFF_UP"; readonly debuffName: string }
+  /**
    * `stealthed.rogue` — TRUTH-shaped.
    *
    * ONE scope, and the name is a trap worth spelling out. The pinned expression
@@ -211,6 +243,15 @@ export function atomOf(node: ExpressionNode): AtomDescriptor | null {
       return { key: `buff.${node.buffName}.up`, shape: "BOOLEAN" };
     case "BUFF_REMAINS":
       return { key: `buff.${node.buffName}.remains`, shape: "NUMERIC" };
+    case "BUFF_STACK":
+      return { key: `buff.${node.buffName}.stack`, shape: "NUMERIC" };
+    case "BUFF_REACT":
+      // A DIFFERENT key from `buff.<name>.up`. Two atoms, never correlated.
+      return { key: `buff.${node.buffName}.react`, shape: "BOOLEAN" };
+    case "DEBUFF_UP":
+      // `debuff.` and `buff.` are different namespaces addressing different
+      // actors, so their keys can never collide.
+      return { key: `debuff.${node.debuffName}.up`, shape: "BOOLEAN" };
     case "STEALTHED_ROGUE":
       return { key: "stealthed.rogue", shape: "BOOLEAN" };
     case "TALENT":

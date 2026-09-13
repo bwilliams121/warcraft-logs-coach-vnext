@@ -4157,6 +4157,139 @@ Kick, Thistle Tea, potion and racial transitions are all M5-C3c3c, and the three
 deferred Assassination expressions remain unsupported. Contract tests assert all
 of this rather than leaving it to intent.
 
+## The First Rotational GCD at the Real Decision Point
+
+M5-C3c3c applied C3c3a's lane and usability facts and C3c3b's generic rescan
+engine to the pinned Assassination authority, and the query converges.
+
+    Under the pinned SimulationCraft Assassination authority and the supported
+    factual and profile state at Q, every modelled foreground world - INCLUDING
+    worlds where supported optional NON_GCD actions execute first - converges to
+    the same first GCD-consuming action: Garrote, from the same authority entry,
+    `default[6] -> core_dot[0]`.
+
+It does NOT mean "Garrote was the next action". A Kick, up to three Thistle Teas,
+a potion and one racial may each have fired first, in some order, and the result
+refuses to say which. Nor is it a coaching verdict: it says what the AUTHORITY
+selects, not that the player was right.
+
+### The two queries both remain true
+
+    one literal scan   UNKNOWN at default[5] -> cds[3] -> misc_cds[0] potion
+    first-GCD query    Garrote at default[6] -> core_dot[0]
+
+Both correct, because they ask different questions. The literal scan asks what
+THIS scan returns and cannot tell whether five higher-priority entries fire
+first. The first-GCD query lets them fire and asks again.
+
+### Three atoms recognised, none of them known
+
+`buff.<name>.stack`, `buff.<name>.react` and `debuff.<name>.up` now parse. All
+three resolve UNKNOWN. Recognition is what lets the scan BRANCH over the entries
+carrying them; it supplies no value for any of them.
+
+`.react` gets its own atom key and is NOT folded into `.up` — SimulationCraft's
+`.react` gates on reaction time, which this project does not model, and equating
+them would collapse a model we lack into a presence check we have.
+`debuff.<name>.up` is likewise separate from `buff.<name>.up`: one addresses the
+enemy and the other the player.
+
+Recognising `buff.<name>.stack` does NOT unblock the `default[5]` gate, which
+also carries a talent rank, a spell-target count and the `>?` operator. It does
+not need to: an unsupported gate on a `call_action_list` already branches over
+both worlds, which is what the design pass predicted and a test now pins.
+
+### Hypothetical prefix state is not observed state
+
+    OBSERVED       actor 19 cast Kingsbane 2.802 s before Q
+    DERIVED        therefore at least 57.198 s of its cooldown remain
+    HYPOTHETICAL   in one explored world, a potion fired before Garrote
+
+The third never enters M3/M4/C3c1. It lives in the C3c3c abstract state and
+reaches the scan through its own usability reason,
+`SIMULATED_PREFIX_EXECUTION`, whose evidence says in words that it is
+counterfactual. Representing it as `ACTIVE_COOLDOWN` would put a hypothetical
+cooldown in the same field as a derived one. `OBSERVED_UNUSABLE_REASONS` is
+exported so a consumer that must not mix them can check rather than remember.
+
+### Why the search is finite
+
+Every supported NON_GCD action has a named progress mechanism and advances zero
+simulated time:
+
+    kick        15 s cooldown
+    potion      shared named potion cooldown, minutes
+    racials     120-180 s cooldowns
+    thistle_tea THREE CHARGES, 60 s recharge
+
+Thistle Tea is the one that needed real work. Its APL action binds through a
+talent branch, and the auto-talent branch appeared to reach spell 469779 - which
+has no charges and no cooldown, and would have been unboundedly repeatable at
+zero elapsed time. The generated EFFECT table settles it: 469779's effect index 0
+carries `_trigger_spell_id = 381623`, so `effectN( 1 ).trigger()` resolves to the
+3-charge record and BOTH talent branches reach it. In the neither-talent world
+the spell is `not_found()` and the action is background.
+
+No depth cap exists anywhere, and a contract test asserts there is none.
+
+### Race is one unknown with five settings
+
+Warcraft Logs exposes no race. Four independent racial booleans would admit a
+player who is simultaneously an Orc, a Troll, a Dark Iron Dwarf and a Mag'har Orc
+and can fire four racials in one prefix. The racial spell masks are pairwise
+disjoint, so the query runs once per correlated world - ORC, TROLL,
+DARK_IRON_DWARF, MAGHAR_ORC, OTHER - with at most one applicable racial in each,
+and converges them with the same authority-identity rule the engine uses
+internally. A profile that ever establishes a race explores that world alone.
+
+### The Kick ordering proof
+
+Kick is the only prefix action that reaches the Rogue stealth-break path, and it
+is the most delicate claim in the milestone:
+
+    Kick executes at t             rogue_action_t::execute -> break_stealth()
+    stealth/vanish expire at t+1ms  expire( 1_ms ), sc_rogue.cpp:11640,11645
+    root rescan at t+0              schedule_ready( 0 ), lag = 0_ms
+
+0 < 1, so the scan that follows a Kick still observes `stealthed.rogue = TRUE`,
+and the query terminates at the first GCD selection - which happens at t+0, before
+the expiry is ever reached. The claim is recorded with measured source hashes and
+explicitly scoped to zero-elapsed-time queries; generalising it to a query where
+time passes would be false.
+
+The racials and the potion are established from the CALL GRAPH rather than from
+the DBC stealth-break flag: `break_stealth()` is reachable only from
+`rogue_action_t::execute`, and a `racial_spell_t` or a `dbc_consumable_base_t` is
+not one. Berserking's flag is clear and it still cannot break stealth, which is
+exactly why the flag would have been the wrong evidence.
+
+### Why stat buffs do not matter here, for a stated reason
+
+Not "they are only stats". A stat change moves haste, regeneration and future
+snapshots - all quantities over ELAPSED TIME, and every supported transition
+advances none. The one snapshot the path could read, `pmultiplier`, is already
+UNKNOWN and is not what proves `core_dot[0]`: that comes from `remains <= 14`,
+the MINIMUM threshold, which no stat can move.
+
+Fireblood gets its own treatment rather than being lumped in. Its dispel is a
+real write, recorded as one, and shown irrelevant because it clears effects FROM
+THE PLAYER while `debuff.deathmark.up` addresses the ENEMY.
+
+### Garrote's forward usability
+
+Not inherited from "it was observed". Garrote costs 45 Energy, the decision point
+starts at 250/250, every supported transition spends zero and Thistle Tea only
+grants - so the minimum possible Energy after any prefix is the starting Energy.
+Zero elapsed time leaves its own cooldown, the Garrote DoT, the Kingsbane bound
+and `cds[5]`'s `!stealthed.rogue` gate all unchanged.
+
+### What remains unproven
+
+`fight_remains` and `target.time_to_die` are still predictive and still unbound;
+the convergence holds ACROSS their unknown values rather than resolving them. No
+route is wired, no coaching language is emitted, and the milestone claims
+authority selection only.
+
 ### Still deferred
 
 To M5-C3c3 — the rotational NON_GCD sequence problem:

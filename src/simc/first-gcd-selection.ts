@@ -209,6 +209,97 @@ export type RotationalGcdResult =
       readonly trace: RotationalTraceNode;
     };
 
+/**
+ * Converges several completed first-GCD results into one.
+ *
+ * ADDITIVE, and exported so a caller exploring worlds the engine cannot see —
+ * correlated profile worlds, for instance — converges them with the SAME rule
+ * the engine uses internally rather than a second one that drifts.
+ *
+ * The rule is C3b's identity rule: unanimity on the authority ENTRY, not on the
+ * token. Any refusal, any disagreement, and any mixture of "fires" with "returns
+ * nothing" collapses to UNKNOWN. A refusal is reported in preference to a
+ * divergence, because a world that was never explored is not a world that
+ * disagreed.
+ */
+export function convergeRotationalResults(results: readonly RotationalGcdResult[]): RotationalGcdResult {
+  const first = results[0];
+  if (first === undefined) {
+    throw new Error("convergeRotationalResults needs at least one result");
+  }
+  if (results.length === 1) return first;
+
+  const refused = results.find((result) => result.kind === "ROTATIONAL_GCD_UNKNOWN");
+  if (refused !== undefined) return refused;
+
+  const selected = results.filter((result) => result.kind === "ROTATIONAL_GCD_SELECTED");
+  if (selected.length === 0) {
+    // Every world proves the scan returns nothing at all.
+    return first;
+  }
+  if (selected.length !== results.length) {
+    const head = selected[0];
+    return {
+      kind: "ROTATIONAL_GCD_UNKNOWN",
+      blocker: "DIVERGENT_GCD_OUTCOMES",
+      scanBlocker: null,
+      blockedAt: head?.kind === "ROTATIONAL_GCD_SELECTED" ? head.selectingStep : null,
+      detail:
+        "some explored worlds select a first GCD action and others prove the scan returns nothing, so " +
+        "there is no action every world agrees fires first",
+      trace: first.trace,
+    };
+  }
+
+  const head = selected[0];
+  if (head?.kind !== "ROTATIONAL_GCD_SELECTED") return first;
+  let prefix = head.nonGcdPrefix;
+
+  for (const candidate of selected.slice(1)) {
+    if (candidate.kind !== "ROTATIONAL_GCD_SELECTED") continue;
+    if (
+      !sameTerminalIdentity(
+        head.selectingStep,
+        candidate.selectingStep,
+        head.actionToken,
+        candidate.actionToken,
+      )
+    ) {
+      return {
+        kind: "ROTATIONAL_GCD_UNKNOWN",
+        blocker: "DIVERGENT_GCD_OUTCOMES",
+        scanBlocker: null,
+        blockedAt: head.selectingStep,
+        detail:
+          "explored worlds select different first GCD entries: " +
+          `${entryKey(candidateEntryOfStep(head.selectingStep, head.actionToken))} and ` +
+          `${entryKey(candidateEntryOfStep(candidate.selectingStep, candidate.actionToken))}`,
+        trace: head.trace,
+      };
+    }
+    prefix = mergeSummaries(prefix, candidate.nonGcdPrefix);
+  }
+
+  return { ...head, nonGcdPrefix: prefix };
+}
+
+function candidateEntryOfStep(step: TraversalStep, actionToken: string): TraversalPathEntry {
+  return { listName: step.listName, priorityOrdinal: step.priorityOrdinal, actionToken };
+}
+
+/** Merges two prefix summaries. Uniqueness survives only if both agree. */
+function mergeSummaries(left: NonGcdPrefixSummary, right: NonGcdPrefixSummary): NonGcdPrefixSummary {
+  const merged = mergePrefixes(
+    { actions: left.possibleActions, uniqueSequence: left.sequence },
+    { actions: right.possibleActions, uniqueSequence: right.sequence },
+  );
+  return {
+    possibleActions: merged.actions,
+    exactSequenceKnown: merged.uniqueSequence !== null,
+    sequence: merged.uniqueSequence,
+  };
+}
+
 export interface FirstGcdSelectionInput<TState> {
   /** Named for the cycle key and the trace. The scan itself is the caller's. */
   readonly rootListName: string;

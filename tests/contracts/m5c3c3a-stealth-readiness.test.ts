@@ -35,7 +35,7 @@ import {
 import { resolveUsability } from "../../src/specs/rogue/assassination/action-profile.js";
 import { authorityProfileFor } from "../../src/specs/rogue/assassination/observed-profile.js";
 import { pinnedAssassinationAuthority } from "../../src/simc/pinned-authority.js";
-import { UNUSABLE_REASONS } from "../../src/simc/action-applicability.js";
+import { OBSERVED_UNUSABLE_REASONS, UNUSABLE_REASONS } from "../../src/simc/action-applicability.js";
 import { tryAbilityIdentityFor } from "../../src/data/game/rogue-abilities.js";
 import { M5C3C1_ACTOR, M5C3C1_IDS, garroteDecisionPosition, m5c3c1State } from "../support/m5c3c1-fixture.js";
 import type { AplAction } from "../../src/simc/apl-authority.js";
@@ -168,8 +168,23 @@ describe("a proven TRUE makes Stealth unusable, and nothing else does", () => {
     expect(code).not.toContain("cooldowns.stealth");
   });
 
-  it("adds exactly one new reason to the vocabulary", () => {
-    expect([...UNUSABLE_REASONS]).toEqual(["ACTIVE_COOLDOWN", "STATIC_READY_FALSE", "ALREADY_STEALTHED"]);
+  it("keeps ALREADY_STEALTHED in a vocabulary of OBSERVED reasons", () => {
+    // WIDENED AGAIN AT M5-C3c3c, which added a fourth member — and the fourth is
+    // a different KIND of claim. `SIMULATED_PREFIX_EXECUTION` describes a branch
+    // of a simulation, not the fight that happened.
+    //
+    // So the assertion that matters here is not the count. It is that
+    // ALREADY_STEALTHED is in the OBSERVED set: it rests on an aura M5-C2 proved
+    // from real events, and a consumer filtering for claims about the log must
+    // still find it.
+    expect([...UNUSABLE_REASONS]).toEqual([
+      "ACTIVE_COOLDOWN",
+      "STATIC_READY_FALSE",
+      "ALREADY_STEALTHED",
+      "SIMULATED_PREFIX_EXECUTION",
+    ]);
+    expect([...OBSERVED_UNUSABLE_REASONS]).toContain("ALREADY_STEALTHED");
+    expect([...OBSERVED_UNUSABLE_REASONS]).not.toContain("SIMULATED_PREFIX_EXECUTION");
   });
 
   it("keeps the state reason free of any timing evidence", () => {

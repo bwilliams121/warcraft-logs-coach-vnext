@@ -58,11 +58,21 @@ export type NotApplicableReason =
   /** `use_item,name=<x>` where the actor does not equip `<x>` (player.cpp:9874-9884). */
   | "ITEM_NOT_EQUIPPED"
   /** A slot whose equipped item has no `SPECIAL_EFFECT_USE` (player.cpp:10024-10029, 10285-10290). */
-  | "NO_ON_USE_EFFECT";
+  | "NO_ON_USE_EFFECT"
+  /**
+   * A racial the player's race does not have (M5-C3c3c).
+   *
+   * `racial_spell_t::init` sets `background = true` when `find_racial_spell`
+   * returns `not_found()` (player.cpp:8995-9001), and the scan skips background
+   * actions before any readiness check. Structurally identical to an unequipped
+   * item: the action is not there, rather than being there and unready.
+   */
+  | "RACIAL_NOT_AVAILABLE_TO_RACE";
 
 export const NOT_APPLICABLE_REASONS = [
   "ITEM_NOT_EQUIPPED",
   "NO_ON_USE_EFFECT",
+  "RACIAL_NOT_AVAILABLE_TO_RACE",
 ] as const satisfies readonly NotApplicableReason[];
 
 /** Numeric evidence behind an applicability verdict. Never a display name. */
@@ -156,9 +166,39 @@ export type UnusableReason =
    * NOT a timing fact. Nothing here is waiting to come off cooldown, and a
    * report that said so would describe the wrong remedy.
    */
-  | "ALREADY_STEALTHED";
+  | "ALREADY_STEALTHED"
+  /**
+   * The action already fired earlier in a HYPOTHETICAL prefix (M5-C3c3c).
+   *
+   * THE ONLY COUNTERFACTUAL MEMBER OF THIS UNION, and it is named so that can
+   * never be missed. Every other reason states something about the fight that
+   * happened: an item was not equipped, a cooldown was observed running, the
+   * player was observed stealthed. This one states something about a branch of a
+   * simulation — "in the world being explored, this entry has already been
+   * selected once" — and it must never be read as evidence about the log.
+   *
+   * It exists because the first-GCD query lets actions fire and asks the
+   * authority again. Representing that as `ACTIVE_COOLDOWN` would put a
+   * hypothetical cooldown into the same field as a derived one, and a reader
+   * could not then tell which kind of claim they were looking at.
+   */
+  | "SIMULATED_PREFIX_EXECUTION";
 
 export const UNUSABLE_REASONS = [
+  "ACTIVE_COOLDOWN",
+  "STATIC_READY_FALSE",
+  "ALREADY_STEALTHED",
+  "SIMULATED_PREFIX_EXECUTION",
+] as const satisfies readonly UnusableReason[];
+
+/**
+ * The reasons that describe the OBSERVED fight rather than a simulated branch.
+ *
+ * Exported so a consumer that must not mix the two can check rather than
+ * remember. A finding built from `SIMULATED_PREFIX_EXECUTION` would be a claim
+ * about a world nobody observed.
+ */
+export const OBSERVED_UNUSABLE_REASONS = [
   "ACTIVE_COOLDOWN",
   "STATIC_READY_FALSE",
   "ALREADY_STEALTHED",

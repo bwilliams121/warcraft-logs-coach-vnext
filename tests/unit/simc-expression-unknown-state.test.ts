@@ -293,7 +293,10 @@ describe("unsupported syntax never enters the truth domain", () => {
     // another action's DoT and stay refused, so `dot.` is not an open namespace
     // either.
     "dot.garrote.pmultiplier<=1",
-    "buff.darkest_night.stack>=2",
+    // RE-POINTED for M5-C3c3c, which recognised `buff.<name>.stack`. The
+    // neighbouring properties of the same namespace are still refused.
+    "buff.darkest_night.duration>=2",
+    "debuff.deathmark.remains>=2",
     "energy.regen_combined>40",
     "combo_points>?5",
     "combo_points<?5",

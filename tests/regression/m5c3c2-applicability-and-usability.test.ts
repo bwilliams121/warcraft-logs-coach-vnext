@@ -205,13 +205,25 @@ describe("the blocker moves from cds[1] to misc_cds[0]", () => {
   });
 
   it("walks the whole items list on the way", () => {
+    // UPDATED AT M5-C3c3c, and the CHANGE OF REASON is the point — the same
+    // pattern C3c1 applied to C3b's blocker.
+    //
+    // C3c3c taught the parser three forms the pinned `misc_cds` lines carry:
+    // `buff.<name>.react`, `debuff.<name>.up` and `buff.<name>.stack`. None of
+    // them became KNOWN; they became RECOGNISED. So the scan no longer stops at
+    // `misc_cds[0]` unable to read it — it evaluates it to UNKNOWN_STATE and
+    // carries on, which is how it now reaches `cds[4]`, `cds[5]` and
+    // `core_dot[0]` for the first time.
+    //
+    // THE RESULT IS UNCHANGED: still UNKNOWN, still blocked at
+    // `default[5] -> cds[3] -> misc_cds[0] potion`. Only the evidence improved.
     const traversal = traverseWithProfile();
     const labels = traversal.result.steps.map(
       (step) => `${step.listName}[${String(step.priorityOrdinal)}] ${step.actionToken} ${step.outcome}`,
     );
     expect(labels).toEqual([
       "default[4] ambush ELIMINATED_CONTINUE",
-      "default[5] call_action_list BLOCKED",
+      "default[5] call_action_list CALL_MAY_SELECT",
       "cds[0] deathmark ELIMINATED_CONTINUE",
       "cds[1] invoke_external_buff PROVEN_UNUSABLE_CONTINUE",
       // The items list ran to the end without producing an action, so the scan
@@ -224,29 +236,75 @@ describe("the blocker moves from cds[1] to misc_cds[0]", () => {
       "items[3] use_item NOT_APPLICABLE_CONTINUE",
       "items[4] use_items NOT_APPLICABLE_CONTINUE",
       "items[5] use_items PROVEN_UNUSABLE_CONTINUE",
-      "cds[3] call_action_list BLOCKED",
-      "misc_cds[0] potion BLOCKED",
+      "cds[3] call_action_list CALL_MAY_SELECT",
+      // Five entries that MIGHT fire. None is proven to, and none is refused.
+      "misc_cds[0] potion MAY_SELECT",
+      "misc_cds[1] blood_fury MAY_SELECT",
+      "misc_cds[2] berserking MAY_SELECT",
+      "misc_cds[3] fireblood MAY_SELECT",
+      "misc_cds[4] ancestral_call MAY_SELECT",
+      // C3c3a's verdict, reached by the scan for the first time.
+      "cds[4] kingsbane PROVEN_UNUSABLE_CONTINUE",
+      // `!stealthed.rogue` is FALSE, so the callee is never entered.
+      "cds[5] call_action_list CALL_GATE_FALSE_SKIPPED",
+      "default[6] call_action_list CALL_SELECTED",
+      "core_dot[0] garrote SELECTED",
     ]);
   });
 
-  it("stops on a condition it cannot evaluate, not on a missing profile", () => {
-    // The new resting place is an HONEST refusal: `potion` is gated on
-    // `buff.bloodlust.react`, which is outside the supported expression subset.
-    // Worth asserting, because "we ran out of profile" and "we ran out of
-    // supported syntax" are different kinds of incompleteness and only the
-    // second is a coverage gap this milestone did not set out to close.
+  it("still comes to rest at misc_cds[0], now for a better reason", () => {
+    // BOTH halves matter.
+    //
+    // The RESULT is unchanged: UNKNOWN, at `misc_cds[0] potion`. The REASON
+    // moved from "this condition is outside the supported subset" to "an earlier
+    // entry might fire and we cannot tell which" — a refusal backed by an
+    // evaluated condition rather than by a parser that could not read it.
+    //
+    // That is strictly better evidence for the same conclusion, and it is what a
+    // widened parser is supposed to buy: recognition, not knowledge.
     const traversal = traverseWithProfile();
     if (traversal.result.kind !== "UNKNOWN") throw new Error("expected UNKNOWN");
-    expect(traversal.result.blocker).toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");
+    expect(traversal.result.blocker).toBe("COMPETING_POSSIBLE_ACTION");
+    expect(traversal.result.blockedAt?.listName).toBe("misc_cds");
+    expect(traversal.result.blockedAt?.priorityOrdinal).toBe(0);
+
     const potion = stepAt(traversal, "misc_cds", 0);
     expect(potion.applicability.kind).toBe("APPLICABLE");
-    expect(potion.gate.kind).toBe("UNSUPPORTED");
+    // EVALUATED now, not UNSUPPORTED — and evaluated to UNKNOWN_STATE, which is
+    // the honest answer for a condition whose atoms are all unestablished.
+    expect(potion.gate.kind).toBe("EVALUATED");
+    if (potion.gate.kind !== "EVALUATED") return;
+    expect(potion.gate.truth).toBe("UNKNOWN_STATE");
   });
 
-  it("still never reaches core_dot, and still selects nothing", () => {
+  it("recognises the three new atoms without knowing any of them", () => {
+    // The distinction the whole change rests on. Each is parsed, each resolves
+    // UNKNOWN, and not one of them acquired a value.
+    const traversal = traverseWithProfile();
+    const potion = stepAt(traversal, "misc_cds", 0);
+    if (potion.gate.kind !== "EVALUATED") throw new Error("expected an evaluated gate");
+    const byKey = new Map(potion.gate.trace.atoms.map((atom) => [atom.key, atom]));
+    expect(byKey.get("buff.bloodlust.react")?.binding).toBe("UNRESOLVED_BOOLEAN");
+    expect(byKey.get("debuff.deathmark.up")?.binding).toBe("UNRESOLVED_BOOLEAN");
+    expect(byKey.get("dot.rupture.ticking")?.binding).toBe("UNRESOLVED_BOOLEAN");
+    // And `fight_remains` is still predictive, so widening the parser did not
+    // quietly admit hindsight.
+    expect(byKey.get("fight_remains")?.unknownNumberReason).toBe("PREDICTIVE_NOT_PLAYER_KNOWABLE");
+  });
+
+  it("still selects nothing, even though it now reaches core_dot", () => {
+    // UPDATED AT M5-C3c3c. The scan reaches `core_dot[0]` now and finds Garrote
+    // PROVEN to fire there — and the literal one-scan answer is STILL UNKNOWN,
+    // because five higher-priority entries might fire first and this query
+    // cannot tell whether they do.
+    //
+    // That is the whole distinction between the two queries. Resolving it needs
+    // the first-GCD rescan query, which asks a different question.
     const traversal = traverseWithProfile();
     expect(traversal.result.kind).not.toBe("SELECTED");
-    expect(traversal.result.steps.some((step) => step.listName === "core_dot")).toBe(false);
+    const garrote = stepAt(traversal, "core_dot", 0);
+    expect(garrote.outcome).toBe("SELECTED");
+    expect(garrote.usability).toBe("PROVEN_USABLE");
   });
 });
 

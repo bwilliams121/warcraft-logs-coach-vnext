@@ -98,30 +98,41 @@ describe("the engine knows nothing about the game", () => {
   });
 });
 
-describe("no Rogue transition adapter exists yet", () => {
-  it("wires the engine into no specialization", () => {
-    for (const path of filesUnder("src/specs")) {
-      const code = codeOf(path);
-      expect(code, `${path} imports the rescan engine`).not.toContain("first-gcd-selection");
-      expect(code, `${path} calls the rescan engine`).not.toContain("firstGcdSelectionAcrossRescans");
-    }
+describe("the Rogue adapter lives in the spec layer, and only there", () => {
+  // UPDATED AT M5-C3c3c. This block used to assert that NO adapter existed,
+  // which was the right claim while the engine was unapplied. C3c3c supplies
+  // one, so the claim becomes the one that outlives it: the adapter adapts
+  // Rogue state TO the engine, and the direction of that dependency never
+  // reverses.
+  const ADAPTER_PATH = "src/specs/rogue/assassination/first-gcd-adapter.ts";
+
+  it("wires the engine into exactly one specialization module", () => {
+    const wiring = filesUnder("src/specs").filter((path) =>
+      codeOf(path).includes("firstGcdSelectionAcrossRescans"),
+    );
+    expect(wiring).toEqual([ADAPTER_PATH]);
   });
 
-  it("declares no NON_GCD transition for any Rogue action", () => {
-    for (const path of filesUnder("src/specs")) {
-      const code = codeOf(path);
-      expect(code, `${path} declares a transition`).not.toContain("NonGcdTransition");
-      expect(code, `${path} declares a transition resolver`).not.toContain("transitionFor");
-    }
+  it("keeps the dependency pointing one way", () => {
+    // The engine must not learn the spec. Re-asserted here because an adapter is
+    // exactly the change that would make a back-import look convenient.
+    const engine = codeOf(ENGINE_PATH);
+    expect(engine).not.toContain("/specs/");
+    expect(engine).not.toContain("assassination");
+    expect(engine).not.toContain("rogue");
   });
 
-  it("claims no global first-GCD result anywhere in src/", () => {
-    for (const path of filesUnder("src")) {
-      if (path === ENGINE_PATH) continue;
-      expect(codeOf(path), `${path} produces a rotational-GCD result`).not.toContain(
-        "ROTATIONAL_GCD_SELECTED",
-      );
-    }
+  it("declares every Rogue transition in the spec layer, never in the engine", () => {
+    expect(codeOf(ENGINE_PATH)).not.toContain("transitionContractFor");
+    const declaring = filesUnder("src").filter((path) =>
+      codeOf(path).includes("ASSASSINATION_NON_GCD_TRANSITIONS"),
+    );
+    expect(declaring).toEqual(["src/data/game/assassination-transition-authority.ts"]);
+  });
+
+  it("produces a rotational-GCD result in the engine and the adapter only", () => {
+    const producing = filesUnder("src").filter((path) => codeOf(path).includes("ROTATIONAL_GCD_SELECTED"));
+    expect(producing.sort()).toEqual([ADAPTER_PATH, ENGINE_PATH].sort());
   });
 });
 

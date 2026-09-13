@@ -166,9 +166,15 @@ describe("unsupported authority syntax never becomes false", () => {
   it.each([
     ["an unsupported identifier", "combo_points>=5&energy.regen_combined>40"],
     ["the >? max operator", "combo_points.deficit>?0"],
+    // RE-POINTED for M5-C3c3c: `buff.<name>.stack` is recognised now, so the
+    // abridged form above would parse. The REAL pinned `cds` gate is still
+    // refused, on three OTHER fragments it also contains - a talent rank, a
+    // spell-target count, and the `>?` max operator - so the verbatim line is
+    // used here rather than a paraphrase of it.
     [
-      "the real pinned cds call condition",
-      "variable.single_target|!talent.scent_of_blood|buff.scent_of_blood.stack>=2",
+      "the real pinned cds call condition, verbatim",
+      "variable.single_target|!talent.scent_of_blood|buff.scent_of_blood.stack>=" +
+        "(2*talent.scent_of_blood.rank*spell_targets.fan_of_knives>?20)",
     ],
     // RE-POINTED for M5-C3c1: `dot.<name>.ticking` is recognised now, so the
     // still-unsupported neighbour is another property of the same namespace.
@@ -185,7 +191,14 @@ describe("unsupported authority syntax never becomes false", () => {
     ["a decimal literal", "combo_points>=5.5"],
     ["!=", "combo_points!=5"],
     ["<?", "combo_points<?5"],
-    ["a buff stack reference", "buff.darkest_night.stack>=2"],
+    // RE-POINTED for M5-C3c3c: `buff.<name>.stack`, `buff.<name>.react` and
+    // `debuff.<name>.up` are recognised now. The still-unsupported neighbours
+    // are other properties of the same two namespaces, which recognising three
+    // forms deliberately did NOT open.
+    ["a buff duration reference", "buff.darkest_night.duration>=2"],
+    ["a debuff remaining reference", "debuff.deathmark.remains>=2"],
+    ["a debuff stack reference", "debuff.deathmark.stack>=2"],
+    ["a debuff react reference", "debuff.deathmark.react"],
   ])("%s yields UNSUPPORTED_AUTHORITY_EXPRESSION", (_label, condition) => {
     const judgment = judge(authorityWithGateCondition(condition));
     expect(judgment.status).toBe("UNKNOWN");

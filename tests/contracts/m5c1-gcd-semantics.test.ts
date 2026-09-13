@@ -104,6 +104,21 @@ function codeOf(path: string): string {
     .replace(/^\s*\/\/.*$/gm, "");
 }
 
+/**
+ * Source with comments AND string literals stripped.
+ *
+ * What is left is code that DOES something. Used where the prohibition is on
+ * USING a value rather than on mentioning one: an identity number quoted inside
+ * a `finding:` string is a human saying which DBC row they read, and removing it
+ * would make the reading unverifiable.
+ */
+function codeWithoutStrings(path: string): string {
+  return codeOf(path)
+    .replace(/"(?:[^"\\\n]|\\.)*"/g, '""')
+    .replace(/'(?:[^'\\\n]|\\.)*'/g, "''")
+    .replace(/`(?:[^`\\]|\\.)*`/g, "``");
+}
+
 describe("provenance identifies exactly one commit and one client build", () => {
   it("loads", () => {
     expect(loaded.ok).toBe(true);
@@ -444,8 +459,27 @@ describe("the spell ids stay out of TypeScript", () => {
     // hand-typed literal in a module would be a second source of truth with no
     // extraction behind it — and would defeat the existing contract that pins
     // the Envenom id to exactly one module.
-    const declaring = filesUnder("src").filter((path) => /\b8676\b|\b381623\b|\b469779\b/.test(codeOf(path)));
+    //
+    // TIGHTENED AT M5-C3c3c: string literals are stripped as well as comments.
+    // An id quoted inside a `finding:` string is a human recording WHICH DBC row
+    // they read, and deleting it would make the reading unverifiable. An id in
+    // CODE is a lookup key, and that is what this forbids. The rule is now
+    // "identity numbers may be quoted, never used" — narrower in what it permits
+    // and broader in what it inspects.
+    const declaring = filesUnder("src").filter((path) =>
+      /\b8676\b|\b381623\b|\b469779\b/.test(codeWithoutStrings(path)),
+    );
     expect(declaring).toEqual([]);
+  });
+
+  it("lets the transition authority cite ids in prose while deriving them in code", () => {
+    // The concrete case the tightening admits, asserted from both sides so the
+    // exemption cannot widen: the file DOES name the row it read, and NOTHING in
+    // its code uses the number.
+    const path = "src/data/game/assassination-transition-authority.ts";
+    expect(/\b381623\b/.test(codeOf(path)), "the reading names the row").toBe(true);
+    expect(/\b381623\b/.test(codeWithoutStrings(path)), "but no code uses it").toBe(false);
+    expect(codeOf(path)).toContain("resolveTokenBinding");
   });
 
   it("still declares the Envenom identity in exactly one module", () => {

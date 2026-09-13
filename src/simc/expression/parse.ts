@@ -177,6 +177,23 @@ function rejectUnsupportedContinuation(cursor: Cursor): void {
 const BUFF_UP = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.up$/;
 const BUFF_REMAINS = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.remains$/;
 /**
+ * `buff.<name>.stack`, `buff.<name>.react` and `debuff.<name>.up`, added at
+ * M5-C3c3c.
+ *
+ * EXACTLY three more properties, for exactly the reason the earlier additions
+ * were made: the pinned `misc_cds` lines carry them, and an expression
+ * containing an unrecognised fragment is refused WHOLE. Recognising them is what
+ * lets the scan branch over those entries instead of stopping at them.
+ *
+ * None of them opens a namespace. `buff.<name>.duration`, `buff.<name>.value`,
+ * `debuff.<name>.remains`, `debuff.<name>.stack` and `debuff.<name>.react` are
+ * all still refused, and recognition still confers no knowledge: all three
+ * resolve UNKNOWN.
+ */
+const BUFF_STACK = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.stack$/;
+const BUFF_REACT = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.react$/;
+const DEBUFF_UP = /^debuff\.([A-Za-z_][A-Za-z0-9_]*)\.up$/;
+/**
  * `dot.<name>.ticking` and `cooldown.<name>.remains`, added in M5-C3c1.
  *
  * Both name ANOTHER action's state, unlike the bare `remains` / `pmultiplier`
@@ -248,6 +265,24 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
     if (name !== undefined) return { kind: "BUFF_REMAINS", buffName: name };
   }
 
+  const stack = BUFF_STACK.exec(raw);
+  if (stack !== null) {
+    const name = stack[1];
+    if (name !== undefined) return { kind: "BUFF_STACK", buffName: name };
+  }
+
+  const react = BUFF_REACT.exec(raw);
+  if (react !== null) {
+    const name = react[1];
+    if (name !== undefined) return { kind: "BUFF_REACT", buffName: name };
+  }
+
+  const debuffUp = DEBUFF_UP.exec(raw);
+  if (debuffUp !== null) {
+    const name = debuffUp[1];
+    if (name !== undefined) return { kind: "DEBUFF_UP", debuffName: name };
+  }
+
   const ticking = DOT_TICKING.exec(raw);
   if (ticking !== null) {
     const name = ticking[1];
@@ -260,7 +295,8 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
     if (name !== undefined) return { kind: "COOLDOWN_REMAINS", cooldownName: name };
   }
 
-  // Everything else is refused. `spell_targets.y`, `buff.x.stack`,
+  // Everything else is refused. `spell_targets.y`, `buff.x.duration`,
+  // `debuff.x.remains`, `debuff.x.react`,
   // `energy.regen_combined`, `talent.x.rank`, `variable.trinket_sync_slot`,
   // `stealthed.all`, `dot.y.remains`, `dot.y.pmultiplier`, `cooldown.y.ready`
   // and `cooldown.y.duration` all land here. Note that `energy.pct` matching
