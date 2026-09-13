@@ -3617,6 +3617,129 @@ true, and it has no expression to trace. M5-B's `ScopedActionSelection` requires
 Unifying the two finding types needs a gate-proof union and is deliberately left
 for the milestone that widens the contract.
 
+## Nested `call_action_list` Traversal
+
+`list-selection.ts` answers "which action does THIS list select" and refuses when
+it meets a call. `nested-selection.ts` follows the call. It is generic: no spell
+ids, no list names, no specialization vocabulary, no Warcraft Logs.
+
+The pinned loop (`player_t::select_action`, player.cpp:14180-14271) does exactly
+one of three things per ready entry:
+
+    ACTION_VARIABLE   execute, then CONTINUE the same scan
+    ACTION_CALL       recurse; if the callee returns an action, RETURN it;
+                      otherwise fall through and CONTINUE the same scan
+    anything else     RETURN it — the scan is over
+
+### Call semantics
+
+    gate FALSE          do not recurse; continue the caller
+    gate TRUE, callee selects X      return X; caller's lower entries unreachable
+    gate TRUE, callee returns none   continue the caller at the next ordinal
+    gate TRUE, callee unresolved     BLOCK
+    gate UNKNOWN, callee returns none    continue the caller (see below)
+    gate UNKNOWN, callee may select X    X becomes POSSIBLE; keep scanning
+    gate UNKNOWN, callee unresolved      BLOCK
+
+A child's action outranks every LATER entry of the caller, because the call
+returns before those entries are reached. So an unresolved callee blocks the
+entries below its call site; it cannot be stepped over to reach something
+decidable lower down.
+
+### The empty-callee convergence rule
+
+An undecided gate has two worlds. If the callee is PROVEN to return nothing, both
+worlds continue the caller at the same next ordinal — so the gate cannot affect
+control flow and is not a blocker at all.
+
+This holds for an UNPARSEABLE gate too, which is what stops unsupported syntax
+from poisoning everything beneath it. The callee's emptiness is independent of
+the gate, so no reading of the gate changes where control goes.
+
+### Variable is the execute-and-continue exception
+
+`variable` is never what a scan returns, so neither it nor its own gate can
+change control flow. Its VALUE is handled a layer down rather than ignored: a
+later condition reading `variable.single_target` sees an unresolved BOOLEAN atom
+and enumerates both worlds, and a condition reading a variable with no atom at
+all fails the whole expression at the parser. Either way the value is accounted
+for conservatively, so a scan is never blocked merely because an assignment's
+value could not be reconstructed. `default[2]` is exactly this case.
+
+### The GCD lane does not decide whether the scan stops
+
+There is no `trigger_gcd` branch in the selection loop. A zero-GCD action is
+RETURNED and ends the scan like any other; it simply does not advance
+`gcd_ready`, so a new scan follows. "Zero GCD" and "executes and continues" are
+different things and only `variable` is the second.
+
+### Fail-closed control flow
+
+    cycle                   a list re-entered while still ON THE CALL STACK
+    missing called list     a hole in the model, never an empty list
+    run_action_list         different fall-through semantics; not modelled
+    swap_action_list        not modelled
+    call with no name=      nowhere to follow
+
+The cycle guard is the ACTIVE call stack, not every list ever visited:
+`visited_apls_` is restored at the top of each loop iteration, so two sibling
+calls to the same list are legal and only re-entry is the infinite loop.
+
+`NO_ACTION_SELECTED` means every reachable entry was PROVEN not to fire. It is
+never "we found nothing we support".
+
+### Rotational boundary vs the literal start of the list
+
+The traversal begins at M5-C1's `firstEligibleOrdinal`, not at `default[0]`. The
+real list starts with `stealth` and `kick`, whose readiness is unmodelled, so an
+absolute scan would block at entry 0 and say nothing.
+
+This is NOT a claim that `default[0..3]` are false, unusable, or did not fire —
+any of them might have. The claim is structural: `stealth`, `kick` and
+`thistle_tea` are NON_GCD and `variable` executes-and-continues, so none can be
+the action that FILLS the rotational GCD slot, and a question about that slot may
+begin below them. A zero-GCD action that fires ends its own scan and is followed
+by a NEW scan; that later scan is what this traversal is about.
+
+The engine enforces this rather than trusting it. `ScanStartBoundary` carries the
+proven-excluded ordinals and the traversal refuses any boundary whose proof does
+not cover exactly what it skips, so a start ordinal cannot be asserted without
+the narrowing that justifies it.
+
+### The C3b result, and why it is an UNKNOWN
+
+At the verified decision point:
+
+    default[4] ambush            condition FALSE (M5-C2) -> continue
+    default[5] call cds          gate UNPARSEABLE        -> must consider callee
+    cds[0]     deathmark         condition UNPARSEABLE   -> BLOCK
+
+    RESULT: UNKNOWN, earliest blocker `default[5] -> cds[0]`
+
+`cds[0]` reads DoT, cooldown and time-to-die state this project does not model.
+It sits above everything else, so nothing below it can be reported.
+
+Meanwhile M5-C3a's scoped result is unchanged and still exact: within `core_dot`,
+the authority selects Garrote. Both are true at once and neither overrides the
+other. `core_dot` is reached only through `default[6]`, BELOW the `cds` call, so
+its exactness cannot decide the global question while something above might fire.
+The forbidden inference — "cds is unknown but core_dot is exactly Garrote,
+therefore Garrote" — is blocked by priority, and structurally the traversal never
+visits `core_dot` at all.
+
+### Deferred to M5-C3c
+
+Control flow is complete; gameplay state is not. Still unmodelled, and each is
+why the traversal stops where it does:
+
+    cooldown remaining, resets, CDR and charges
+    Deathmark state, Kingsbane state, Rupture state
+    Envenom remains, buff stacks, Scent of Blood
+    items and trinkets, external buffs, racials policy
+    target time-to-die, fight remains
+    spell target counts
+    global Garrote selection
+
 ## Zero-GCD Actions Still End the Scan
 
 SimulationCraft's foreground scan returns the FIRST ready action and stops,

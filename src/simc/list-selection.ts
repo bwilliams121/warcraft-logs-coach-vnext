@@ -178,7 +178,16 @@ export type ListSelection =
       readonly listName: string;
     };
 
-function evaluateCondition(action: AplAction, bindings: AtomBindings): LineCondition {
+/**
+ * Evaluates one entry's `,if=` condition.
+ *
+ * EXPORTED so `nested-selection.ts` uses the SAME notion of a condition rather
+ * than a second implementation of it. Two walkers with independently-written
+ * ideas of when a condition is FALSE is a correctness hazard, not a style one:
+ * they would disagree about which lines are soundly eliminated. Behaviour is
+ * unchanged — this is the `export` keyword and nothing else.
+ */
+export function evaluateCondition(action: AplAction, bindings: AtomBindings): LineCondition {
   if (action.conditionRaw === null) {
     return { kind: "UNCONDITIONAL" };
   }
@@ -195,14 +204,21 @@ function evaluateCondition(action: AplAction, bindings: AtomBindings): LineCondi
   return { kind: "EVALUATED", truth, trace: evaluation.trace };
 }
 
-function truthOfCondition(condition: LineCondition): TruthValue {
+/** The truth an evaluated condition carries. Exported alongside `evaluateCondition`. */
+export function truthOfCondition(condition: LineCondition): TruthValue {
   if (condition.kind === "UNCONDITIONAL") return "TRUE";
   if (condition.kind === "EVALUATED") return condition.truth;
   // Unreachable: an unsupported condition ends the scan before it is combined.
   return "UNKNOWN_STATE";
 }
 
-function outcomeOf(truth: TruthValue, usability: ActionUsability): LineOutcome {
+/**
+ * Combines a condition's truth with usability into a line outcome.
+ *
+ * Exported for the same reason as `evaluateCondition`: the nested walker must
+ * eliminate exactly the lines this one eliminates, and no others.
+ */
+export function outcomeOf(truth: TruthValue, usability: ActionUsability): LineOutcome {
   // A definitely-false condition cannot win whatever its usability, so it is
   // discarded. This is the one sound elimination available: the asymmetry
   // between proving a line cannot fire and proving that it does.

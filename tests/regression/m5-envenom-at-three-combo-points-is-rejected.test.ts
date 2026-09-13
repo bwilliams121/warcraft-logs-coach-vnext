@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassination/evaluator.js";
 import { parseSimcExpression } from "../../src/simc/expression/parse.js";
-import { evaluateSimcExpression, unknownNumber } from "../../src/simc/expression/evaluate.js";
+import { evaluateSimcExpression, knownNumber, unknownNumber } from "../../src/simc/expression/evaluate.js";
 import {
   ASSASSINATION_ACTOR_B,
   ENVENOM_SPELL_ID,
@@ -178,8 +178,8 @@ describe("both Darkest Night resolutions reject the event independently", () => 
     if (!parsed.ok) return;
 
     const evaluation = evaluateSimcExpression(parsed.ast, condition, {
-      comboPoints: 3,
-      comboPointsDeficit: 4,
+      comboPoints: knownNumber(3),
+      comboPointsDeficit: knownNumber(4),
       // The pinned gate mentions no energy or DoT duration; both are stated
       // explicitly, never omitted.
       energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),

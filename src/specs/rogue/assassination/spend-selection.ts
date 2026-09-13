@@ -237,8 +237,10 @@ export function selectSpendActionAt(input: SpendSelectionInput): ScopedActionSel
   // Buffs are left unresolved: this module establishes no aura state, and M4's
   // rule that "no observed transition" is not "inactive" is not weakened here.
   const bindings: AtomBindings = {
-    comboPoints: combo.state.observedAmount,
-    comboPointsDeficit: combo.state.derivedDeficit,
+    // Real observed state, so these are KNOWN. The binding shape changed in
+    // M5-C3b; the values and the semantics did not.
+    comboPoints: knownNumber(combo.state.observedAmount),
+    comboPointsDeficit: knownNumber(combo.state.derivedDeficit),
     energyPct: knownNumber(energy.percent),
     // The `spend` list names no DoT atom. Stated unknown rather than omitted, so
     // a condition that later reached `remains` from here would resolve UNKNOWN

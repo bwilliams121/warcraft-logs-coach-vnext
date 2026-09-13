@@ -205,6 +205,44 @@ describe("M5 invents no combat state", () => {
     }
   });
 
+  it("constructs no placeholder magnitude for an unestablished resource", () => {
+    // M5-C3b's hardening rule, swept across every M5 source.
+    //
+    // `AtomBindings` carries every magnitude as a `NumericBinding`, so an
+    // unavailable one has an honest representation and nothing needs to invent a
+    // number. The prohibition is on the two shapes that would put one back: a
+    // bare zero bound to a resource field, and a `?? 0` fallback behind one.
+    //
+    // The rule this enforces is stronger than "the result is discarded if the
+    // fake value mattered". An unestablished fact must never ENTER authority
+    // evaluation as a magnitude at all, because by the time a post-hoc check
+    // runs it has already participated in control flow.
+    for (const path of M5_FILES) {
+      const code = codeOf(path);
+      for (const forbidden of [
+        "comboPoints: 0",
+        "comboPointsDeficit: 0",
+        "comboPoints: 5",
+        "comboPoints: 7",
+        "UNESTABLISHED_COMBO_POINTS",
+      ]) {
+        expect(code, `${path} binds a placeholder magnitude (${forbidden})`).not.toContain(forbidden);
+      }
+    }
+  });
+
+  it("keeps every magnitude binding a NumericBinding, so unknown is always sayable", () => {
+    // Structural: if a magnitude field were a plain number again, a caller with
+    // no observation would be forced to invent one. This is what makes the
+    // prohibition above enforceable rather than merely stated.
+    const evaluate = codeOf("src/simc/expression/evaluate.ts");
+    for (const field of ["comboPoints", "comboPointsDeficit", "energyPct", "dotRemainsSeconds"]) {
+      expect(evaluate, `${field} is not a NumericBinding`).toContain(`readonly ${field}: NumericBinding;`);
+    }
+    expect(evaluate).not.toContain("readonly comboPoints: number;");
+    expect(evaluate).not.toContain("readonly comboPointsDeficit: number;");
+  });
+
   it("still lets no absence become a duration: the DoT reader cannot invent a number", () => {
     // The magnitude counterpart to the stealth test below. `presenceAt` can
     // return INACTIVE and can return UNKNOWN, and NEITHER may become a

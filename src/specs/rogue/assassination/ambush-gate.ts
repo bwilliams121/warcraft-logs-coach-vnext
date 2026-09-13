@@ -231,10 +231,12 @@ export function evaluateDefaultAmbushGate(input: AmbushGateInput): AmbushGateRes
     .map((talent) => ({ name: talent.simcName, taken: talent.selection === "SELECTED" }));
 
   const bindings: AtomBindings = {
-    // The gate names no resource atom. These are required by the shared type and
-    // are unreachable for this expression; zero is not a claim about the actor.
-    comboPoints: 0,
-    comboPointsDeficit: 0,
+    // The gate names no resource atom, and this module establishes none. Stated
+    // unknown rather than given a placeholder: until M5-C3b these were a literal
+    // zero on the reasoning that the expression could not reach them, which was
+    // true and still put an invented magnitude where a fact belongs.
+    comboPoints: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
+    comboPointsDeficit: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
     energyPct: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
     // This gate reconstructs no DoT state. Stated unknown rather than omitted:
     // the binding is required precisely so a module that never established a

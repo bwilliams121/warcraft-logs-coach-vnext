@@ -128,17 +128,32 @@ export const TRUTH_VALUES = ["TRUE", "FALSE", "UNKNOWN_STATE"] as const satisfie
 /**
  * Exact numeric state, plus any buff values that are actually known.
  *
- * Both combo-point values are REQUIRED plain numbers: a caller that cannot
- * establish one must fail closed before evaluating rather than passing a
- * placeholder. `energyPct` is a REQUIRED `NumericBinding` for the same reason
- * pointed the other way — a caller with no energy observation has to say so
- * explicitly, and cannot reach UNKNOWN by forgetting.
+ * EVERY magnitude is a REQUIRED `NumericBinding`. Required, so a caller cannot
+ * reach UNKNOWN by forgetting; a binding rather than a number, so a caller that
+ * genuinely has no observation can say exactly that.
+ *
+ * The combo-point fields were plain numbers until M5-C3b, on the reasoning that
+ * a caller unable to establish one should fail closed BEFORE evaluating. The
+ * real post-Vanish decision point broke that: Warcraft Logs reports Energy on
+ * the cast and no combo-point resource at all, while the conditions the
+ * traversal actually reaches never mention combo points. Failing closed up front
+ * would have refused a question the evidence can answer, and the only other
+ * option a plain number allows is inventing a magnitude — which would have
+ * entered control flow before anything could discard it.
+ *
+ * So the shape now matches what the engine already does everywhere else: an
+ * unavailable magnitude resolves to UNKNOWN_NUMBER, is never enumerated, and is
+ * carried through Kleene evaluation exactly like `pmultiplier` — so
+ * `FALSE & combo_points>=5` still resolves FALSE, and an expression whose answer
+ * does not depend on the unknown still gets one.
  *
  * There is no `fightRemains` and no `buffRemains`. See the module header.
  */
 export interface AtomBindings {
-  readonly comboPoints: number;
-  readonly comboPointsDeficit: number;
+  /** `combo_points`. Must be stated, even when it is unknown. */
+  readonly comboPoints: NumericBinding;
+  /** `combo_points.deficit`. Must be stated, even when it is unknown. */
+  readonly comboPointsDeficit: NumericBinding;
   /** `energy.pct`, 0-100. Must be stated, even when it is unknown. */
   readonly energyPct: NumericBinding;
   /** Buffs whose state IS established. Everything else becomes an unresolved atom. */
@@ -348,9 +363,11 @@ function evaluateInWorld(
     case "NUMBER":
       return node.value;
     case "COMBO_POINTS":
-      return bindings.comboPoints;
+      return bindings.comboPoints.state === "KNOWN_NUMBER" ? bindings.comboPoints.value : UNKNOWN;
     case "COMBO_POINTS_DEFICIT":
-      return bindings.comboPointsDeficit;
+      return bindings.comboPointsDeficit.state === "KNOWN_NUMBER"
+        ? bindings.comboPointsDeficit.value
+        : UNKNOWN;
     case "ENERGY_PCT":
       return bindings.energyPct.state === "KNOWN_NUMBER" ? bindings.energyPct.value : UNKNOWN;
     case "FIGHT_REMAINS":
@@ -450,8 +467,16 @@ function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): Res
     enumerate: false,
   });
 
-  if (key === "combo_points") return known(bindings.comboPoints);
-  if (key === "combo_points.deficit") return known(bindings.comboPointsDeficit);
+  if (key === "combo_points") {
+    return bindings.comboPoints.state === "KNOWN_NUMBER"
+      ? known(bindings.comboPoints.value)
+      : unknownNumeric(bindings.comboPoints.reason);
+  }
+  if (key === "combo_points.deficit") {
+    return bindings.comboPointsDeficit.state === "KNOWN_NUMBER"
+      ? known(bindings.comboPointsDeficit.value)
+      : unknownNumeric(bindings.comboPointsDeficit.reason);
+  }
   if (key === "energy.pct") {
     return bindings.energyPct.state === "KNOWN_NUMBER"
       ? known(bindings.energyPct.value)

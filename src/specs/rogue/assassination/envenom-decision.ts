@@ -40,7 +40,7 @@ import type { StateResult } from "../../../engine/state/state-result.js";
 import type { ResourceAmountObservation } from "../../../engine/resources/resource-observations.js";
 import type { AplAuthority, ReachabilityProof } from "../../../simc/apl-authority.js";
 import { parseSimcExpression } from "../../../simc/expression/parse.js";
-import { evaluateSimcExpression, unknownNumber } from "../../../simc/expression/evaluate.js";
+import { evaluateSimcExpression, knownNumber, unknownNumber } from "../../../simc/expression/evaluate.js";
 import type { ResolvedAuthority } from "../../../findings/authority.js";
 import type {
   ObservedActionDecisionPoint,
@@ -395,8 +395,10 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
   // `energy.pct`, it must resolve to UNKNOWN_STATE, never to a value this
   // function never established.
   const evaluation = evaluateSimcExpression(parsed.ast, condition, {
-    comboPoints: adapted.state.observedAmount,
-    comboPointsDeficit: adapted.state.derivedDeficit,
+    // Real observed state, so these are KNOWN. The binding shape changed in
+    // M5-C3b; the values and the semantics did not.
+    comboPoints: knownNumber(adapted.state.observedAmount),
+    comboPointsDeficit: knownNumber(adapted.state.derivedDeficit),
     energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
     // Same discipline as energy: this decision reads combo points only, and a
     // DoT duration it never reconstructed must resolve UNKNOWN, not a value.

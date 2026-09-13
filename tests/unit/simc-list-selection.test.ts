@@ -18,8 +18,8 @@ import { syntheticAuthority } from "../support/m5a-authority.js";
  */
 
 const BINDINGS: AtomBindings = {
-  comboPoints: 7,
-  comboPointsDeficit: 0,
+  comboPoints: knownNumber(7),
+  comboPointsDeficit: knownNumber(0),
   energyPct: knownNumber(100),
   dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
   knownBuffs: [],

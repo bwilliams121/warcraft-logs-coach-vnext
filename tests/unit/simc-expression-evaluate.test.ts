@@ -4,6 +4,7 @@ import { parseSimcExpression } from "../../src/simc/expression/parse.js";
 import {
   MAX_UNRESOLVED_ATOMS,
   evaluateSimcExpression,
+  knownNumber,
   unknownNumber,
   type AtomBindings,
 } from "../../src/simc/expression/evaluate.js";
@@ -37,8 +38,8 @@ const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function gate(comboPoints: number, max: number) {
   return evaluate(GATE, {
-    comboPoints,
-    comboPointsDeficit: max - comboPoints,
+    comboPoints: knownNumber(comboPoints),
+    comboPointsDeficit: knownNumber(max - comboPoints),
     energyPct: NO_ENERGY,
     dotRemainsSeconds: NO_DOT,
     knownBuffs: [],
@@ -104,8 +105,8 @@ describe("atom correlation", () => {
 
   it("enumerates 2^k worlds for k distinct atoms", () => {
     const result = evaluate("buff.a.up&buff.b.up|buff.c.up", {
-      comboPoints: 0,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(0),
+      comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
@@ -117,8 +118,8 @@ describe("atom correlation", () => {
   it("stops enumerating past the supported limit rather than growing", () => {
     const expression = "buff.a.up|buff.b.up|buff.c.up|buff.d.up|buff.e.up";
     const result = evaluate(expression, {
-      comboPoints: 0,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(0),
+      comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
@@ -132,8 +133,8 @@ describe("atom correlation", () => {
 
   it("treats a known buff as known, with no world to enumerate", () => {
     const result = evaluate(GATE, {
-      comboPoints: 6,
-      comboPointsDeficit: 1,
+      comboPoints: knownNumber(6),
+      comboPointsDeficit: knownNumber(1),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [{ name: "darkest_night", up: false }],
@@ -154,8 +155,8 @@ describe("SimulationCraft numeric semantics", () => {
     ["!combo_points", 3, false],
   ])("%s with combo_points=%i is %s", (expression, comboPoints, expected) => {
     const result = evaluate(expression, {
-      comboPoints,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(comboPoints),
+      comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
@@ -173,8 +174,8 @@ describe("SimulationCraft numeric semantics", () => {
     ["combo_points=5", 6, false],
   ])("%s with combo_points=%i is %s", (expression, comboPoints, expected) => {
     const result = evaluate(expression, {
-      comboPoints,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(comboPoints),
+      comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [],

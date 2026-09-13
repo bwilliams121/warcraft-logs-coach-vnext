@@ -32,8 +32,8 @@ function evaluate(expression: string, bindings?: Partial<AtomBindings>) {
   const parsed = parseSimcExpression(expression);
   if (!parsed.ok) throw new Error(`expected ${expression} to parse, got ${parsed.reason}`);
   return evaluateSimcExpression(parsed.ast, expression, {
-    comboPoints: 7,
-    comboPointsDeficit: 0,
+    comboPoints: knownNumber(7),
+    comboPointsDeficit: knownNumber(0),
     energyPct: NO_ENERGY,
     dotRemainsSeconds: NO_DOT,
     knownBuffs: [],
@@ -199,8 +199,8 @@ describe("fight_remains is predictive, and has no binding path at all", () => {
     // fails and the person adding it has to justify admitting hindsight into a
     // judgment about a decision the player made earlier.
     const bindings: AtomBindings = {
-      comboPoints: 7,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(7),
+      comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
@@ -258,8 +258,8 @@ describe("atom shape is declared by syntax, not by what happened to be bound", (
 
     // And the boolean one alone is enumerated.
     const result = evaluateSimcExpression(parsed.ast, "buff.envenom.up|buff.envenom.remains<=1", {
-      comboPoints: 7,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(7),
+      comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
       // `buff.envenom.remains` is a DIFFERENT atom from bare `remains`. Binding
       // the latter must not resolve the former.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { parseSimcExpression } from "../../src/simc/expression/parse.js";
-import { evaluateSimcExpression, unknownNumber } from "../../src/simc/expression/evaluate.js";
+import { evaluateSimcExpression, knownNumber, unknownNumber } from "../../src/simc/expression/evaluate.js";
 import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassination/evaluator.js";
 import { OBSERVED_ACTION_JUDGMENT_STATUSES } from "../../src/findings/judgment.js";
 import { NO_AUTHORITY_REASONS } from "../../src/findings/authority.js";
@@ -45,8 +45,10 @@ function evaluateGate(
   const parsed = parseSimcExpression(GATE);
   if (!parsed.ok) throw new Error("the pinned gate must parse");
   return evaluateSimcExpression(parsed.ast, GATE, {
-    comboPoints,
-    comboPointsDeficit,
+    // These cases all supply EXACT combo points, which is the point: the
+    // mutations below are about what a WRONG exact value would do.
+    comboPoints: knownNumber(comboPoints),
+    comboPointsDeficit: knownNumber(comboPointsDeficit),
     energyPct: NO_ENERGY,
     dotRemainsSeconds: NO_DOT,
     knownBuffs,
@@ -145,8 +147,8 @@ describe("MUTATION: losing correlated-atom identity", () => {
     if (!parsed.ok) return;
 
     const mutated = evaluateSimcExpression(parsed.ast, decorrelated, {
-      comboPoints: 7,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(7),
+      comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
@@ -190,8 +192,8 @@ describe("MUTATION: treating unsupported syntax as false", () => {
     expect(supportedPart.ok).toBe(true);
     if (!supportedPart.ok) return;
     const mutated = evaluateSimcExpression(supportedPart.ast, "combo_points>=5", {
-      comboPoints: 3,
-      comboPointsDeficit: 4,
+      comboPoints: knownNumber(3),
+      comboPointsDeficit: knownNumber(4),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
@@ -237,8 +239,8 @@ describe("MUTATION: treating unsupported syntax as false", () => {
     expect(supported.ok).toBe(true);
     if (!supported.ok) return;
     const evaluated = evaluateSimcExpression(supported.ast, "fight_remains<15", {
-      comboPoints: 7,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(7),
+      comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
       dotRemainsSeconds: NO_DOT,
       knownBuffs: [],

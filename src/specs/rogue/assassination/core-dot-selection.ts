@@ -331,12 +331,15 @@ export function selectCoreDotActionAt(input: CoreDotSelectionInput): CoreDotSele
   // NUMERIC atom becomes UNKNOWN_NUMBER and is never enumerated. Both are stated
   // rather than omitted.
   const bindings: AtomBindings = {
-    // `core_dot[0]` names no resource atom. These are required by the shared type
-    // and are unreachable for this expression; zero is not a claim about the
-    // actor. `core_dot[1]` DOES read `combo_points.deficit` — and is refused at
-    // the parser, so it never reaches these values.
-    comboPoints: 0,
-    comboPointsDeficit: 0,
+    // `core_dot[0]` names no resource atom, and this module establishes none.
+    // Stated unknown rather than given a placeholder: until M5-C3b these were a
+    // literal zero, justified by being unreachable. `core_dot[1]` DOES read
+    // `combo_points.deficit`, so "unreachable" rested on that line staying
+    // refused at the parser — which is a guarantee about a neighbouring line
+    // rather than about this value, and is not the kind of thing a magnitude
+    // should depend on.
+    comboPoints: unknownNumber("STATE_NOT_ESTABLISHED"),
+    comboPointsDeficit: unknownNumber("STATE_NOT_ESTABLISHED"),
     energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
     dotRemainsSeconds:
       garroteRemains.state === "KNOWN"

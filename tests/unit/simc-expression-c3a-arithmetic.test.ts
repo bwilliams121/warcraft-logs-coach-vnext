@@ -36,8 +36,8 @@ const NO_STATE = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function bindings(overrides: Partial<AtomBindings> = {}): AtomBindings {
   return {
-    comboPoints: 0,
-    comboPointsDeficit: 7,
+    comboPoints: knownNumber(0),
+    comboPointsDeficit: knownNumber(7),
     energyPct: NO_STATE,
     dotRemainsSeconds: NO_STATE,
     knownBuffs: [],

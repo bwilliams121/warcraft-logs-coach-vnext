@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { atomOf, collectAtoms, collectAtomKeys } from "../../src/simc/expression/ast.js";
 import { parseSimcExpression } from "../../src/simc/expression/parse.js";
-import { evaluateSimcExpression, unknownNumber } from "../../src/simc/expression/evaluate.js";
+import { evaluateSimcExpression, knownNumber, unknownNumber } from "../../src/simc/expression/evaluate.js";
 import type { AtomBindings } from "../../src/simc/expression/evaluate.js";
 import { pinnedAssassinationAuthority } from "../../src/simc/pinned-authority.js";
 
@@ -22,8 +22,8 @@ const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function bindings(overrides: Partial<AtomBindings> = {}): AtomBindings {
   return {
-    comboPoints: 0,
-    comboPointsDeficit: 7,
+    comboPoints: knownNumber(0),
+    comboPointsDeficit: knownNumber(7),
     energyPct: NO_ENERGY,
     dotRemainsSeconds: NO_DOT,
     knownBuffs: [],

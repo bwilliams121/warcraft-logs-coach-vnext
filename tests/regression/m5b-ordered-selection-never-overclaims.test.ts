@@ -310,8 +310,8 @@ describe("the global-selection non-goal, pinned against the real default list", 
     expect(parsed.ok).toBe(true);
     if (!parsed.ok) return;
     const evaluated = evaluateSimcExpression(parsed.ast, condition, {
-      comboPoints: 7,
-      comboPointsDeficit: 0,
+      comboPoints: knownNumber(7),
+      comboPointsDeficit: knownNumber(0),
       energyPct: knownNumber(100),
       dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
       knownBuffs: [],
@@ -342,8 +342,8 @@ describe("the global-selection non-goal, pinned against the real default list", 
     expect(thistleTea.ok).toBe(true);
     if (thistleTea.ok) {
       const evaluated = evaluateSimcExpression(thistleTea.ast, defaultLine(3).conditionRaw ?? "", {
-        comboPoints: 7,
-        comboPointsDeficit: 0,
+        comboPoints: knownNumber(7),
+        comboPointsDeficit: knownNumber(0),
         energyPct: knownNumber(100),
         dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
         knownBuffs: [],
