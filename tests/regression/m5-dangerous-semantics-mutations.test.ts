@@ -35,6 +35,7 @@ const state = m5aState();
 
 /** The pinned gate mentions no energy. Stated explicitly rather than omitted. */
 const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
+const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function evaluateGate(
   comboPoints: number,
@@ -47,6 +48,7 @@ function evaluateGate(
     comboPoints,
     comboPointsDeficit,
     energyPct: NO_ENERGY,
+    dotRemainsSeconds: NO_DOT,
     knownBuffs,
   });
 }
@@ -146,6 +148,7 @@ describe("MUTATION: losing correlated-atom identity", () => {
       comboPoints: 7,
       comboPointsDeficit: 0,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     });
     // Four worlds instead of two, and they disagree.
@@ -169,12 +172,14 @@ describe("MUTATION: losing correlated-atom identity", () => {
 });
 
 describe("MUTATION: treating unsupported syntax as false", () => {
-  // RE-POINTED twice. It was `combo_points>=5&energy.pct>70` until M5-B made
-  // `energy.pct` supported, then `combo_points>=5&talent.darkest_night` until
-  // M5-C2 made `talent.<name>` supported. `pmultiplier` is a real identifier
-  // from the pinned `core_dot` list that remains outside the subset, so the
-  // mutation and the refusal both stay real.
-  const condition = "combo_points>=5&pmultiplier<=1";
+  // RE-POINTED three times. It was `combo_points>=5&energy.pct>70` until M5-B
+  // made `energy.pct` supported, then `combo_points>=5&talent.darkest_night`
+  // until M5-C2 made `talent.<name>` supported, then
+  // `combo_points>=5&pmultiplier<=1` until M5-C3a made bare `pmultiplier`
+  // recognised. `refreshable` is a real identifier from the pinned `core_dot`
+  // list that remains outside the subset, so the mutation and the refusal both
+  // stay real.
+  const condition = "combo_points>=5&refreshable";
 
   it("would let a false conjunct short-circuit an unparsed fragment into a rejection", () => {
     // The mutation: parse what we understand, treat the rest as false. At 3
@@ -188,6 +193,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
       comboPoints: 3,
       comboPointsDeficit: 4,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     });
     expect(mutated.outcome).toBe("RESOLVED");
@@ -200,7 +206,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
     expect(parsed.ok).toBe(false);
     if (parsed.ok) throw new Error("expected a parse failure, not a silent pass");
     expect(parsed.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(parsed.fragment).toBe("pmultiplier");
+    expect(parsed.fragment).toBe("refreshable");
   });
 
   it("and there is no AST node an unsupported fragment could hide in", () => {
@@ -234,6 +240,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
       comboPoints: 7,
       comboPointsDeficit: 0,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     });
     expect(evaluated.outcome).toBe("UNRESOLVED");

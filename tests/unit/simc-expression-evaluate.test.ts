@@ -32,12 +32,15 @@ function evaluate(expression: string, bindings: AtomBindings) {
 
 /** Energy is irrelevant to every condition here, and says so explicitly. */
 const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
+/** So is DoT remaining duration. Same discipline: stated, not omitted. */
+const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function gate(comboPoints: number, max: number) {
   return evaluate(GATE, {
     comboPoints,
     comboPointsDeficit: max - comboPoints,
     energyPct: NO_ENERGY,
+    dotRemainsSeconds: NO_DOT,
     knownBuffs: [],
   });
 }
@@ -104,6 +107,7 @@ describe("atom correlation", () => {
       comboPoints: 0,
       comboPointsDeficit: 0,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     });
     if (result.outcome !== "UNRESOLVED") return;
@@ -116,6 +120,7 @@ describe("atom correlation", () => {
       comboPoints: 0,
       comboPointsDeficit: 0,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     });
     expect(result.outcome).toBe("UNSUPPORTED");
@@ -130,6 +135,7 @@ describe("atom correlation", () => {
       comboPoints: 6,
       comboPointsDeficit: 1,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [{ name: "darkest_night", up: false }],
     });
     if (result.outcome !== "RESOLVED") return;
@@ -151,6 +157,7 @@ describe("SimulationCraft numeric semantics", () => {
       comboPoints,
       comboPointsDeficit: 0,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     });
     if (result.outcome !== "RESOLVED") return;
@@ -169,6 +176,7 @@ describe("SimulationCraft numeric semantics", () => {
       comboPoints,
       comboPointsDeficit: 0,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     });
     if (result.outcome !== "RESOLVED") return;

@@ -1,0 +1,66 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_ROGUE_DOT_DURATIONS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/specialization_spells.inc",
+        "sha256": "514d7a509a3b95f130aadccb6a6f1a28c6f5f2568f211cd5139bb567b712e4fc",
+        "byteLength": 45852
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_rogue.cpp",
+        "sha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "byteLength": 436673
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "durationFieldName": "_duration",
+    "durationFieldUnits": "MILLISECONDS",
+    "dotDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-09-13",
+    "extractorVersion": 1,
+    "durationSemanticsNote": "Base values only. NOT haste-scaled, NOT pandemic-extended, NOT talent-modified and NOT snapshotted. A consumer needing any of those must model it explicitly, so that a missing model presents as a missing model.",
+    "applicabilityNote": "Not version-gated at runtime, for the same reason as the GCD artifact: CombatFight exposes no client-build key, so comparing anything against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human."
+  },
+  "dots": [
+    {
+      "simcToken": "garrote",
+      "abilityGameId": 703,
+      "displayNameEn": "Garrote",
+      "baseDurationMs": 18000,
+      "baseCooldownMs": 6000,
+      "binding": {
+        "method": "SPECIALIZATION_SPELL_TABLE",
+        "classId": 4,
+        "specId": 259,
+        "sourcePath": "engine/dbc/generated/specialization_spells.inc",
+        "createAction": "sc_rogue.cpp:9472 if ( name == \"garrote\" ) return new garrote_t( name, this, spec.garrote, options_str )",
+        "specBinding": "sc_rogue.cpp:9934 spec.garrote = find_specialization_spell( \"Garrote\" )",
+        "bindingSourcePath": "engine/class_modules/sc_rogue.cpp",
+        "bindingSourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e"
+      }
+    }
+  ]
+}

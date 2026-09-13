@@ -3486,8 +3486,136 @@ does not imply Ambush; the build condition still decides.
 Knives' live target list, and Warcraft Logs supplies no enemy positional state,
 so it is not historically reconstructible. It has no binding field at all.
 
-M5-C2 does NOT establish that Garrote was globally selected. Reaching `core_dot`
-requires passing `default[5] cds`, which remains outside the supported subset.
+M5-C2 does NOT establish that Garrote was globally selected. That remains true
+after M5-C3a, which establishes a selection *within* `core_dot` rather than a
+global one.
+
+## Evidence Actor Scope Is Not the Focus Actor
+
+Two ideas were conflated until M5-C3a:
+
+    FOCUS ACTOR            who we are analysing
+    EVIDENCE ACTOR SCOPE   who we hold complete evidence for, and may reason about
+
+Under `PLAYER_CONTEXT` the coverage declared `[focusActorId]` — the analysed
+player and nobody else. That understated what the capture holds. The retrieval
+plan has no `sourceID`/`targetID` field and requests one `dataType: All` stream
+unfiltered by actor, so enemy and target events are genuinely present. Every
+absence or continuity claim about an ENEMY returned `INSUFFICIENT_SCOPE` for a
+reason that was never true.
+
+This was a DECLARATION fix. M3 and M4 semantics are untouched, and the fence that
+defines the scope did not move: ingestion scope is primarily about how much
+FRIENDLY RAID state is required, so an ALLY remains out of scope under
+`PLAYER_CONTEXT` even though the bytes are present. `FULL_RAID` is what widens
+it. Pets of friendly players are excluded with their owners; a pet whose owner
+Warcraft Logs did not state is treated as non-friendly, which is the same
+treatment an unowned NPC gets.
+
+The scope is an explicit LIST, not `null`. `null` means "every actor in the
+stream" and would also vouch for ids the capture never contained. Coverage RANGES
+and coverage STATE are untouched and are still checked independently, so a
+partial capture fails closed on the range test regardless.
+
+## DoT Remaining Duration Is Derived, Not Observed
+
+Warcraft Logs does not report a remaining duration. It reports that a debuff was
+APPLIED at a time. `remains` is derived from exactly two facts:
+
+    an observed application       WCL, authoritative for what happened
+    the DoT's base duration       pinned DBC, `rogue-dot-durations.json`
+
+    remains = (applicationTime + baseDuration) - queryTime
+
+That is derived state, not fabricated state. What makes it honest is what it
+refuses when either input is weaker than the derivation needs:
+
+- **A REFRESH IS NOT AN ANCHOR.** `refreshdebuff` proves the DoT existed, not
+  what duration resulted. Pandemic carries up to 30% of the REMAINING duration
+  forward, so the result depends on the quantity being derived. Treating a
+  refresh as a fresh application would understate a pandemic-refreshed Garrote by
+  up to 5.4 s, and the error points in the direction that makes `remains<=14`
+  spuriously TRUE. This project has no pandemic model, so a refresh anchor
+  returns UNKNOWN — chosen over a bounded interval, which would need the same
+  missing model to be trustworthy.
+- **An intervening removal blocks it.** The query requires ACTIVE presence from
+  M4 rather than merely finding an earlier application, so a removal — or an
+  ambiguous unowned one — fails closed instead of being stepped over.
+- **A negative remainder is a contradiction, not a duration.** An expired DoT
+  produces a `removedebuff`, so a still-ACTIVE aura whose computed remainder is
+  negative means the two inputs disagree. It is reported as unknown rather than
+  clamped to zero, because clamping would present a model disagreement as "the
+  DoT is about to expire".
+- **Source is part of the identity.** Two rogues can each hold a Garrote on one
+  boss. The verified capture contains exactly that, and anchoring on the other
+  rogue's application yields 13.652 s instead of 5.746 s.
+
+Units convert exactly once. Evidence and DBC are MILLISECONDS; SimulationCraft
+expressions are SECONDS. A milliseconds value read as seconds turns an 18-second
+Garrote into five hours, which satisfies every `remains<=` threshold in the
+pinned APL and never looks wrong — so the unit is part of every field name, the
+artifact declares `durationFieldUnits`, and the validator refuses any other value.
+
+Base duration is sufficient only because `exsanguinated_rate` cannot move at the
+pinned commit: `do_exsanguinate` is `[[maybe_unused]]` with no call site, and the
+only `set_exsanguinated_rate` call is inside it.
+
+## A Decision Is Never Justified By Its Own Consequences
+
+At the verified decision point the Garrote cast shares a timestamp with eight
+other events, including the `removedebuff` + `applydebuff` the cast itself
+causes. Warcraft Logs returns the cast FIRST, and `BEFORE_EVENT` at the cast
+excludes everything after it.
+
+Had the consequences sorted first, the same query would have found the DoT the
+cast applied and derived 18.000 s instead of 5.746 s. Event ORDER within a shared
+timestamp is therefore evidence, and a fixture that reorders it — for example by
+concatenating separately-filtered lists and sorting on timestamp alone — silently
+produces a different answer. Temporal queries must key on canonical position,
+never on timestamp.
+
+## Scoped Selection Within `core_dot`
+
+M5-C3a establishes: *within the pinned `core_dot` sub-list, at this decision
+point, the authority selects Garrote.*
+
+It is NOT a global verdict, NOT a claim that `cds` selects nothing, and NOT a
+`default -> cds -> core_dot` traversal. There is no nested traversal at all; the
+walk enters `core_dot` directly, exactly as M5-B did for `spend`.
+
+What makes it answerable is CONVERGENCE rather than added state. `core_dot[0]` is:
+
+    (buff.improved_garrote.up|stealthed.rogue)
+    &(pmultiplier<=1|remains<=14+6*talent.razor_wire+4*!variable.single_target)
+
+Three atoms are never resolved and the answer is exact anyway. The left conjunct
+is TRUE because `stealthed.rogue` is proven. The threshold
+`14+6*razor_wire+4*!single_target` has a MINIMUM of 14 across all four
+talent/variable worlds, and the derived `remains` is below it — so the comparison
+holds in every world and `pmultiplier`, a snapshot this project does not
+reconstruct, never has to be known. Eight worlds, all TRUE.
+
+The exactness depends on the walk STOPPING at entry 0. Entries 1–4 need
+`refreshable` and `target.time_to_die` and remain refused, so the answer cannot
+be coming from lines that were skipped or treated as false. Remove the usability
+proof and the walk immediately reaches entry 1 and blocks with
+`UNSUPPORTED_AUTHORITY_EXPRESSION`.
+
+`*` and `+` were added at SimulationCraft's own precedence, read from
+`engine/sim/expressions.cpp`: MULT 7, ADD 6, comparison 4, AND 3, OR 1, unary NOT
+8. Getting this wrong is not a parse error but a wrong number. Subtraction and
+division stayed unsupported — arithmetic was opened by the operator, not
+wholesale — which is why `target.time_to_die-remains` still fails closed twice
+over.
+
+`core_dot` is entered by `default[6]`, which is `call_action_list,name=core_dot`
+with NO `if=`. An unconditional gate is a STRONGER fact than a condition proven
+true, and it has no expression to trace. M5-B's `ScopedActionSelection` requires
+`gateTrace: ExpressionTrace` on every exact outcome, so the C3a result carries an
+`EntryProof` instead and reuses the M5-B vocabulary — `DecisionScope`,
+`SelectedAction`, `ScopedSelectionStatus`, `ScopedSelectionBlocker` — verbatim.
+Unifying the two finding types needs a gate-proof union and is deliberately left
+for the milestone that widens the contract.
 
 ## Zero-GCD Actions Still End the Scan
 

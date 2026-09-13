@@ -92,7 +92,40 @@ export type ExpressionNode =
    * rest stay refused.
    */
   | { readonly kind: "VARIABLE_SINGLE_TARGET" }
+  /**
+   * `pmultiplier` — MAGNITUDE-shaped, and permanently unbindable.
+   *
+   * SimulationCraft's `dot.<x>.pmultiplier` returns
+   * `dot->state->persistent_multiplier` (dot.cpp:568-573): the damage multiplier
+   * SNAPSHOTTED when the DoT was applied. Reconstructing it from Warcraft Logs
+   * would mean inferring a snapshot from damage numbers, which this project does
+   * not do. It is recognised so an expression containing it can parse whole, and
+   * it has no binding field — see `evaluate.ts`.
+   *
+   * Written bare in the pinned `core_dot` lines, where it refers to the acting
+   * action's own DoT on its own target.
+   */
+  | { readonly kind: "DOT_PMULTIPLIER" }
+  /**
+   * `remains` — MAGNITUDE-shaped, in SECONDS.
+   *
+   * The acting action's own DoT remaining duration (`dot->remains()`,
+   * dot.cpp:480-486). NOT `fight_remains`, NOT `target.time_to_die`, NOT a
+   * cooldown. Those are different atoms with different keys and, in two cases,
+   * different answers about whether they may be known at all.
+   */
+  | { readonly kind: "DOT_REMAINS" }
   | { readonly kind: "NOT"; readonly operand: ExpressionNode }
+  /**
+   * `*` and `+`, at pinned SimulationCraft precedence.
+   *
+   * Verified against `engine/sim/expressions.cpp` `precedence()`: MULT is 7, ADD
+   * is 6, comparisons are 4, AND is 3, OR is 1, and unary NOT is 8. So
+   * `4*!variable.single_target` binds the `!` tighter than the `*`, and
+   * `14+6*x+4*y` is `14 + (6*x) + (4*y)`.
+   */
+  | { readonly kind: "MULTIPLY"; readonly left: ExpressionNode; readonly right: ExpressionNode }
+  | { readonly kind: "ADD"; readonly left: ExpressionNode; readonly right: ExpressionNode }
   | {
       readonly kind: "COMPARISON";
       readonly operator: ComparisonOperator;
@@ -158,6 +191,10 @@ export function atomOf(node: ExpressionNode): AtomDescriptor | null {
       return { key: `talent.${node.talentName}`, shape: "BOOLEAN" };
     case "VARIABLE_SINGLE_TARGET":
       return { key: "variable.single_target", shape: "BOOLEAN" };
+    case "DOT_PMULTIPLIER":
+      return { key: "pmultiplier", shape: "NUMERIC" };
+    case "DOT_REMAINS":
+      return { key: "remains", shape: "NUMERIC" };
     default:
       return null;
   }
@@ -179,6 +216,8 @@ export function collectAtoms(node: ExpressionNode): readonly AtomDescriptor[] {
       case "COMPARISON":
       case "AND":
       case "OR":
+      case "MULTIPLY":
+      case "ADD":
         walk(current.left);
         walk(current.right);
         return;

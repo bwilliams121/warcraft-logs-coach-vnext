@@ -236,6 +236,10 @@ export function evaluateDefaultAmbushGate(input: AmbushGateInput): AmbushGateRes
     comboPoints: 0,
     comboPointsDeficit: 0,
     energyPct: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
+    // This gate reconstructs no DoT state. Stated unknown rather than omitted:
+    // the binding is required precisely so a module that never established a
+    // remaining duration cannot silently present one.
+    dotRemainsSeconds: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
     knownBuffs: [],
     knownTalents,
     ...(stealthedRogue.value === "TRUE" ? { stealthedRogue: true } : {}),

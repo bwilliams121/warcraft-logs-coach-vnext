@@ -1,8 +1,10 @@
 /**
- * Minimal ability identity for the M5-A supported surface.
+ * Minimal ability identity for the supported surface.
  *
- * ONE entry. This is not a spell database and must not become one: entries are
+ * TWO entries. This is not a spell database and must not become one: entries are
  * added when a supported decision actually needs them, never speculatively.
+ * `envenom` arrived with M5-A's `spend` selection; `garrote` arrived with
+ * M5-C3a's `core_dot` selection, which cannot name what it selected without it.
  *
  * IDENTITY IS THE NUMBER, NEVER THE NAME.
  *
@@ -26,7 +28,7 @@
 import type { GameDataProvenance } from "../provenance.js";
 
 /** SimulationCraft action tokens this project can resolve to a spell id. */
-export type SimcAbilityToken = "envenom";
+export type SimcAbilityToken = "envenom" | "garrote";
 
 export interface AbilityIdentity {
   /** The token as it appears in a SimulationCraft APL action string. */
@@ -52,8 +54,19 @@ export const ROGUE_ABILITY_DATA_PROVENANCE: GameDataProvenance = {
     "for a human, not a runtime condition.",
 };
 
+/**
+ * The identities, keyed by SimulationCraft token.
+ *
+ * `garrote`'s 703 is ALSO carried by `rogue-dot-durations.json`, where it was
+ * machine-extracted from the pinned specialization-spell table. Two records of
+ * one fact can drift, so a contract test asserts these agree. The duplication is
+ * deliberate rather than accidental: this module must stay a plain synchronous
+ * lookup that cannot fail, and sourcing it from a validated artifact would make
+ * an ability identity disappear whenever that artifact did.
+ */
 export const ROGUE_ABILITIES: readonly AbilityIdentity[] = [
   { simcToken: "envenom", spellId: 32645, className: "rogue", displayNameEn: "Envenom" },
+  { simcToken: "garrote", spellId: 703, className: "rogue", displayNameEn: "Garrote" },
 ];
 
 export type AbilityIdentityResolution =

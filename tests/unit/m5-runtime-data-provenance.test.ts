@@ -11,6 +11,7 @@ import {
   ROGUE_ABILITY_DATA_PROVENANCE,
   abilityIdentityFor,
 } from "../../src/data/game/rogue-abilities.js";
+import { pinnedRogueDotDurations } from "../../src/data/game/rogue-dot-durations.js";
 
 /**
  * Versioned static data and its provenance.
@@ -147,10 +148,28 @@ describe("the combo-point wire contract", () => {
 });
 
 describe("ability identity data", () => {
-  it("holds only the mapping M5-A actually needs", () => {
-    expect(ROGUE_ABILITIES).toHaveLength(1);
-    expect(ROGUE_ABILITIES[0]?.simcToken).toBe("envenom");
-    expect(ROGUE_ABILITIES[0]?.spellId).toBe(32_645);
+  it("holds only the mappings a supported decision actually needs", () => {
+    // Enumerated rather than counted, and each entry names the decision that
+    // required it. A new row has to be justified here, which is the point — the
+    // guard is against a spell database, not against the number two.
+    //
+    //   envenom  M5-A   the `spend` sub-list selects it
+    //   garrote  M5-C3a the `core_dot` sub-list selects it
+    expect(ROGUE_ABILITIES.map((ability) => ability.simcToken)).toEqual(["envenom", "garrote"]);
+    expect(ROGUE_ABILITIES.map((ability) => ability.spellId)).toEqual([32_645, 703]);
+  });
+
+  it("agrees with the machine-extracted Garrote identity, which is the other record of it", () => {
+    // 703 appears here AND in `rogue-dot-durations.json`, where it was extracted
+    // from the pinned specialization-spell table rather than typed. Two records
+    // of one fact can drift; this is what stops them.
+    const loaded = pinnedRogueDotDurations();
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+    const extracted = loaded.artifact.dots.find((dot) => dot.simcToken === "garrote");
+    const handWritten = ROGUE_ABILITIES.find((ability) => ability.simcToken === "garrote");
+    expect(extracted?.abilityGameId).toBe(handWritten?.spellId);
+    expect(extracted?.displayNameEn).toBe(handWritten?.displayNameEn);
   });
 
   it("resolves a SimulationCraft token to a number", () => {

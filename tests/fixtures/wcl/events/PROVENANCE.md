@@ -562,6 +562,123 @@ npx prettier --write tests/fixtures/wcl/events/wcl-assassination-vanish-ambush-g
 
 ---
 
+## `wcl-assassination-garrote-dot-remains.json`
+
+270 events from the same report and revision, captured on **2026-09-13** for
+M5-C3a. A third separate slice, covering the window a remaining-duration
+derivation actually needs.
+
+| | |
+| --- | --- |
+| Report code | `A7R6kxPJ1hC8YQ4w` |
+| Fight ID | 7 |
+| **Report revision** | **30** — unchanged, and still load-bearing |
+| `gameVersion` / `logVersion` | 1 / 17 |
+| Actor | 19 (`Saruxoxo`, Assassination Rogue, `specID` 259) |
+| Target | 21 (the enemy the DoT is on) |
+| Window | `[2,164,325 .. 2,176,581]`, plus the pull `combatantinfo` at 2,004,589 |
+| Retrieval | paged ranges, `limit` 10,000, `includeResources: true`, `dataType: All`, `hostilityType` omitted |
+
+### Why it is 270 events and not five
+
+The derivation makes a CONTINUITY claim across `[2,164,326 .. 2,176,580]`:
+actor 19's Garrote was applied at the start and nothing removed it before the
+end. A slice may only support that claim if it contains **every aura observation
+M4 consults for that identity over the interval**.
+
+M4 indexes aura observations by TARGET, and a from-source query additionally
+consults unidentified-ability observations on that target and sourceless
+transitions of the same aura. So the honest predicate is *every aura event in the
+interval whose target is 19 or 21* — nothing filtered by ability or by source —
+plus the casts the decision point needs.
+
+Filtering by ability would have been far smaller and **wrong**: it would have
+removed exactly the events capable of contradicting the continuity claim, leaving
+a fixture that proves continuity by construction. Measured before capture: 0
+unidentified-ability aura events on target 21, so nothing ambiguous is present.
+
+### The three Garrote transitions
+
+| `timestamp` | `type` | source → target | Why it matters |
+| --- | --- | --- | --- |
+| 2,164,326 | `applydebuff` | 19 → 21 | **the anchor** |
+| 2,172,232 | `applydebuff` | 13 → 21 | a DIFFERENT rogue's independent DoT |
+| 2,176,580 | `removedebuff` + `applydebuff` | 19 → 21 | the cast's own consequence |
+
+The middle row is the slice's sharpest asset. Actor 13 lands an independent
+Garrote on the same target between the anchor and Q. It is a different aura
+identity, so it must not become actor 19's anchor — and because it is an
+APPLICATION, mistaking it yields **13.652 s** instead of 5.746 s. Both are
+plausible; only one is right.
+
+### Event order at Q is EVIDENCE, and this slice was re-captured to get it right
+
+At 2,176,580 the Garrote cast shares a timestamp with eight other events,
+including the `removedebuff` + `applydebuff` the cast itself causes. **Warcraft
+Logs returns the cast FIRST**, and the fixture preserves that order verbatim:
+
+| # | `type` | `abilityGameID` |
+| --- | --- | --- |
+| 1 | `cast` | 703 |
+| 2 | `removebuff` | 11327 |
+| 3 | `applybuff` | 392401 |
+| 4 | `refreshdebuff` | 1305711 |
+| 5 | `removedebuff` | 703 |
+| 6 | `applydebuff` | 703 |
+| 7–8 | `refreshdebuff` | 392388, 3409 |
+
+`BEFORE_EVENT` at the cast excludes everything after it, so the anchor is the
+2,164,326 application and `remains` is 5.746 s. Had the consequences sorted
+first, the same query would have found the DoT the cast itself applied and
+derived **18.000 s** — justifying the decision by its own result.
+
+**The first capture got this wrong.** It assembled the slice as
+`[...combatantInfo, ...auraEvents, ...casts]` and sorted on `timestamp` alone;
+`Array.prototype.sort` is stable, so every aura event landed before the cast. The
+slice was re-captured with a single in-place filter that preserves the API's own
+interleaving. The event multiset is identical between the two captures — only the
+order differs, and the order is the part that decides the answer.
+
+### Verified facts this slice establishes
+
+- Garrote `remains` at Q = **5.746 s**, from `(2,164,326 + 18,000) − 2,176,580`,
+  where 18,000 ms is the pinned `_duration` for spell 703.
+- The anchor is actor 19's own application, not actor 13's, and not the
+  post-decision re-application.
+- `stealthed.rogue` is still TRUE at Q, anchored on the Vanish buff (11327) — the
+  M5-C2 fact, re-proved against this larger slice.
+- Within `core_dot`, the pinned authority selects **Garrote** at ordinal 0, TRUE
+  across all eight enumerated worlds.
+
+### What it does NOT establish
+
+- That Garrote was GLOBALLY selected. `default[0]` stealth and `default[1]` kick
+  sit above the `core_dot` call, unconditional, with action readiness and
+  interruptibility unmodelled.
+- Anything about the `cds` list. It is never evaluated.
+- Anything about `talent.razor_wire` or `variable.single_target`. Both remain
+  UNKNOWN; the verdict holds because it converges across every resolution.
+- Anything about `pmultiplier`. It is a snapshot this project does not
+  reconstruct and is never resolved.
+- That `core_dot` is evaluable in general. Entries 1–4 remain outside the
+  supported subset; the walk stops at entry 0 and never reaches them.
+
+Reproduce:
+
+```powershell
+# .probe/m5c3a-order.probe.ts captures the interval and filters IN PLACE,
+# preserving the order Warcraft Logs returned. Then:
+node scripts/sanitize-probe.mjs `
+  .probe/m5c3a-ordered-source.json `
+  wcl-assassination-garrote-dot-remains.json
+
+# then Prettier, which reflows short numeric arrays in the combatantinfo gear
+# entries. Whitespace only — the parsed payload is byte-identical to the capture.
+npx prettier --write tests/fixtures/wcl/events/wcl-assassination-garrote-dot-remains.json
+```
+
+---
+
 # Still NOT ESTABLISHED
 
 ## `resourcechange` attached snapshot timing

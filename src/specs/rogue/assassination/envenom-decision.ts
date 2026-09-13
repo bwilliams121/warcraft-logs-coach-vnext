@@ -398,6 +398,9 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
     comboPoints: adapted.state.observedAmount,
     comboPointsDeficit: adapted.state.derivedDeficit,
     energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
+    // Same discipline as energy: this decision reads combo points only, and a
+    // DoT duration it never reconstructed must resolve UNKNOWN, not a value.
+    dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
     knownBuffs: [],
   });
 

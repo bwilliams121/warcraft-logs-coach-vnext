@@ -26,6 +26,7 @@ import {
  */
 
 const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
+const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function evaluate(expression: string, bindings?: Partial<AtomBindings>) {
   const parsed = parseSimcExpression(expression);
@@ -34,6 +35,7 @@ function evaluate(expression: string, bindings?: Partial<AtomBindings>) {
     comboPoints: 7,
     comboPointsDeficit: 0,
     energyPct: NO_ENERGY,
+    dotRemainsSeconds: NO_DOT,
     knownBuffs: [],
     ...bindings,
   });
@@ -200,16 +202,26 @@ describe("fight_remains is predictive, and has no binding path at all", () => {
       comboPoints: 7,
       comboPointsDeficit: 0,
       energyPct: NO_ENERGY,
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     };
+    // Exhaustive on purpose: a new binding field cannot be added without this
+    // list being updated, which is what forces the justification.
     expect(Object.keys(bindings).sort()).toEqual([
       "comboPoints",
       "comboPointsDeficit",
+      "dotRemainsSeconds",
       "energyPct",
       "knownBuffs",
     ]);
     expect(bindings).not.toHaveProperty("fightRemains");
     expect(bindings).not.toHaveProperty("observedFightEndDelta");
+    // `pmultiplier` is recognised syntax with NO binding field, for a different
+    // reason than fight_remains: it is a snapshot this project does not
+    // reconstruct rather than knowledge the player lacked. Same structural
+    // guarantee either way — there is nothing to set.
+    expect(bindings).not.toHaveProperty("dotPmultiplier");
+    expect(bindings).not.toHaveProperty("persistentMultiplier");
   });
 
   it("stays unknown even when every other atom is supplied", () => {
@@ -249,6 +261,9 @@ describe("atom shape is declared by syntax, not by what happened to be bound", (
       comboPoints: 7,
       comboPointsDeficit: 0,
       energyPct: NO_ENERGY,
+      // `buff.envenom.remains` is a DIFFERENT atom from bare `remains`. Binding
+      // the latter must not resolve the former.
+      dotRemainsSeconds: NO_DOT,
       knownBuffs: [],
     });
     if (result.outcome === "UNSUPPORTED") throw new Error("expected an evaluation");
@@ -267,7 +282,11 @@ describe("unsupported syntax never enters the truth domain", () => {
     "talent.scent_of_blood.rank>=2",
     "variable.trinket_sync_slot=1",
     "stealthed.all",
-    "pmultiplier<=1",
+    // RE-POINTED for M5-C3a. BARE `pmultiplier` and BARE `remains` became
+    // recognised atoms — the acting action's own DoT. The DOTTED forms name
+    // another action's DoT and stay refused, so `dot.` is not an open namespace
+    // either.
+    "dot.garrote.pmultiplier<=1",
     "buff.darkest_night.stack>=2",
     "energy.regen_combined>40",
     "combo_points>?5",

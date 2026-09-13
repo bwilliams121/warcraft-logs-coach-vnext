@@ -177,6 +177,23 @@ export interface AtomBindings {
    * different facts with different spell ids and different atom keys.
    */
   readonly knownTalents?: readonly { readonly name: string; readonly taken: boolean }[];
+  /**
+   * `remains` — the acting action's own DoT remaining duration, IN SECONDS.
+   *
+   * UNITS ARE LOAD-BEARING. SimulationCraft expression literals are seconds:
+   * `remains<=14` means fourteen seconds. Warcraft Logs timestamps and DBC
+   * durations are MILLISECONDS. A caller that passed 5746 here instead of 5.746
+   * would compare milliseconds against a seconds literal and silently answer the
+   * wrong question — so the field name says the unit and the adapter that fills
+   * it converts explicitly.
+   *
+   * A REQUIRED `NumericBinding`, not an optional number, for the same reason
+   * `energyPct` is: a forgotten magnitude must be stated as unknown rather than
+   * defaulting to a value.
+   *
+   * There is deliberately NO `pmultiplier` field. See `evaluateInWorld`.
+   */
+  readonly dotRemainsSeconds: NumericBinding;
 }
 
 export type TraceAtomBinding = "KNOWN" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
@@ -370,6 +387,25 @@ function evaluateInWorld(
       // so that count is not historically reconstructible. Leaving out the field
       // means no future caller can supply a guess without editing this type.
       return world.get("variable.single_target") === true ? 1 : 0;
+    case "DOT_PMULTIPLIER":
+      // NO BINDING FIELD EXISTS, permanently. Reconstructing a snapshot
+      // multiplier from Warcraft Logs would mean inferring it from damage
+      // numbers. Leaving out the field means no caller can supply one without
+      // editing `AtomBindings`.
+      return UNKNOWN;
+    case "DOT_REMAINS":
+      return bindings.dotRemainsSeconds.state === "KNOWN_NUMBER" ? bindings.dotRemainsSeconds.value : UNKNOWN;
+    case "MULTIPLY":
+    case "ADD": {
+      const left = evaluateInWorld(node.left, bindings, world);
+      const right = evaluateInWorld(node.right, bindings, world);
+      // Arithmetic on a magnitude nobody established is undecided. It is not
+      // zero, and it is not an excuse to pick a bound.
+      if (isUnknownValue(left) || isUnknownValue(right)) return UNKNOWN;
+      // SimulationCraft has no boolean type: a truth operand is already 1 or 0
+      // here, so `6*talent.razor_wire` needs no coercion rule of its own.
+      return node.kind === "MULTIPLY" ? left * right : left + right;
+    }
     case "NOT":
       return valueOf(notTruth(truthOf(evaluateInWorld(node.operand, bindings, world))));
     case "COMPARISON": {
@@ -422,6 +458,15 @@ function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): Res
       : unknownNumeric(bindings.energyPct.reason);
   }
   if (key === "fight_remains") return unknownNumeric("PREDICTIVE_NOT_PLAYER_KNOWABLE");
+  if (key === "remains") {
+    return bindings.dotRemainsSeconds.state === "KNOWN_NUMBER"
+      ? known(bindings.dotRemainsSeconds.value)
+      : unknownNumeric(bindings.dotRemainsSeconds.reason);
+  }
+  // `pmultiplier` is a snapshot this project does not reconstruct. It reports
+  // STATE_NOT_MODELLED rather than STATE_NOT_ESTABLISHED: the remedy is not a
+  // better capture, it is a model we have decided not to build.
+  if (key === "pmultiplier") return unknownNumeric("STATE_NOT_MODELLED");
 
   if (shape === "NUMERIC") {
     // `buff.<name>.remains` and anything numeric added later without a binding.

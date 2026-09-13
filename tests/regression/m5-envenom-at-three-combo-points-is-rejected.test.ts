@@ -180,8 +180,10 @@ describe("both Darkest Night resolutions reject the event independently", () => 
     const evaluation = evaluateSimcExpression(parsed.ast, condition, {
       comboPoints: 3,
       comboPointsDeficit: 4,
-      // The pinned gate mentions no energy; stated explicitly, never omitted.
+      // The pinned gate mentions no energy or DoT duration; both are stated
+      // explicitly, never omitted.
       energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
+      dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
       knownBuffs: [{ name: "darkest_night", up: darkestNightUp }],
     });
 

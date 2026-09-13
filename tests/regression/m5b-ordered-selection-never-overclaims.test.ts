@@ -5,7 +5,7 @@ import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassinatio
 import { ACTIONABILITY_STATUSES } from "../../src/findings/actionability.js";
 import { pinnedAssassinationAuthority } from "../../src/simc/pinned-authority.js";
 import { parseSimcExpression } from "../../src/simc/expression/parse.js";
-import { evaluateSimcExpression, knownNumber } from "../../src/simc/expression/evaluate.js";
+import { evaluateSimcExpression, knownNumber, unknownNumber } from "../../src/simc/expression/evaluate.js";
 import { DECISION_SCOPE_KINDS } from "../../src/findings/scoped-selection.js";
 import type { Finding } from "../../src/findings/finding.js";
 import {
@@ -313,6 +313,7 @@ describe("the global-selection non-goal, pinned against the real default list", 
       comboPoints: 7,
       comboPointsDeficit: 0,
       energyPct: knownNumber(100),
+      dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
       knownBuffs: [],
     });
     expect(evaluated.outcome).toBe("RESOLVED");
@@ -344,6 +345,7 @@ describe("the global-selection non-goal, pinned against the real default list", 
         comboPoints: 7,
         comboPointsDeficit: 0,
         energyPct: knownNumber(100),
+        dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
         knownBuffs: [],
       });
       // energy.pct<30 is FALSE at 100%, and FALSE | UNKNOWN_STATE stays unknown.
@@ -381,15 +383,38 @@ describe("the global-selection non-goal, pinned against the real default list", 
     expect(nested.length).toBeGreaterThan(0);
   });
 
-  it("cannot evaluate the core_dot list that is unconditionally entered above spend", () => {
+  it("still reaches no global verdict even though M5-C3a opened core_dot[0]", () => {
+    // UPDATED for M5-C3a, and the update is the point rather than an exemption.
+    //
+    // This test used to assert that EVERY `core_dot` entry was unparseable,
+    // which was true and was one reason no global verdict existed. C3a makes
+    // `core_dot[0]` — the Garrote line — evaluable. That is the milestone's
+    // headline, and it is a SCOPED result: a selection WITHIN `core_dot`.
+    //
+    // The non-goal this file protects is unchanged, and is re-proved below from
+    // the two facts that actually establish it.
     if (!loaded.ok) return;
     const coreDot = loaded.authority.actionsInList("core_dot");
     expect(coreDot.found).toBe(true);
     if (!coreDot.found) return;
     expect(coreDot.actions.length).toBeGreaterThan(0);
-    for (const action of coreDot.actions) {
-      const parsed = parseSimcExpression(action.conditionRaw ?? "");
-      expect(parsed.ok, `core_dot[${String(action.priorityOrdinal)}] became evaluable`).toBe(false);
+
+    // FACT 1. Exactly one entry opened. `core_dot[0]` parses; [1] through [4]
+    // still do not, because each needs `refreshable` (a pandemic window this
+    // project does not model) and `target.time_to_die` (predictive).
+    const parseableOrdinals = coreDot.actions
+      .filter((action) => parseSimcExpression(action.conditionRaw ?? "").ok)
+      .map((action) => action.priorityOrdinal);
+    expect(parseableOrdinals).toEqual([0]);
+
+    // FACT 2. The entries ABOVE the `core_dot` call in `default` are untouched,
+    // and they are what keeps a global verdict out of reach. `default[0]`
+    // stealth and `default[1]` kick are unconditional with action readiness and
+    // interruptibility unmodelled; no amount of `core_dot` resolution reaches
+    // past them. Opening a list does not open the traversal into it.
+    for (const ordinal of [0, 1, 2, 6]) {
+      expect(defaultLine(ordinal).conditionRaw, `default[${String(ordinal)}] gained a condition`).toBeNull();
     }
+    expect(defaultLine(6).callsListName).toBe("core_dot");
   });
 });

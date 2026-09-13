@@ -146,8 +146,13 @@ describe("everything outside the subset is refused whole", () => {
     ["combo_points!=5", "UNSUPPORTED_OPERATOR"],
     ["combo_points>=5&&buff.x.up", "UNSUPPORTED_OPERATOR"],
     ["combo_points>=5||buff.x.up", "UNSUPPORTED_OPERATOR"],
+    // RE-POINTED for M5-C3a. `*` and `+` became supported at pinned SimC
+    // precedence because `core_dot[0]` needs them. Subtraction and division did
+    // NOT, and prove arithmetic was opened by the operator rather than wholesale
+    // — which matters because `target.time_to_die-remains` (core_dot[1..4]) must
+    // keep failing closed on BOTH its identifier and its operator.
     ["combo_points>=5-2", "UNSUPPORTED_OPERATOR"],
-    ["combo_points>=2*3", "UNSUPPORTED_OPERATOR"],
+    ["combo_points>=6/2", "UNSUPPORTED_OPERATOR"],
     ["combo_points>=5.5", "UNSUPPORTED_NUMERIC_LITERAL"],
     ["(combo_points>=5", "UNBALANCED_PARENTHESIS"],
     ["", "EMPTY_EXPRESSION"],
@@ -171,16 +176,31 @@ describe("everything outside the subset is refused whole", () => {
     expect(parsed.ok).toBe(true);
   });
 
-  it("still refuses a real pinned line outside the subset", () => {
-    // `core_dot[0]`, verbatim. Keeps a REAL authority string guarding the
-    // whole-expression refusal now that `default[4]` parses.
+  it("PARSES the real pinned core_dot[0] line, which M5-C3a added the atoms for", () => {
+    // RE-POINTED for M5-C3a. This slot held `core_dot[0]` as the last real
+    // pinned line that was still refused. C3a adds bare `pmultiplier`, bare
+    // `remains`, `*` and `+`, so it now parses — which is the milestone's whole
+    // point. Parsing is NOT deciding: `pmultiplier` is permanently unbindable
+    // and `talent.razor_wire` is unresolved, so the verdict still comes from
+    // convergence across worlds. See the evaluator tests.
     const coreDot =
       "(buff.improved_garrote.up|stealthed.rogue)&(pmultiplier<=1|remains<=14+6*talent.razor_wire+4*!variable.single_target)";
+    const parsed = parseSimcExpression(coreDot);
+    expect(parsed.ok).toBe(true);
+  });
+
+  it("still refuses a real pinned line outside the subset", () => {
+    // `core_dot[1]`, verbatim. The fail-closed invariant moves one line down the
+    // SAME list: opening `core_dot[0]` did not open `core_dot`. `refreshable`
+    // needs a pandemic-window model this project does not have, and the line
+    // also contains `-`, which C3a deliberately left unsupported.
+    const coreDot =
+      "combo_points.deficit>=1&(pmultiplier<=1|!variable.single_target)&refreshable&target.time_to_die-remains>12";
     const parsed = parseSimcExpression(coreDot);
     expect(parsed.ok).toBe(false);
     if (parsed.ok) return;
     expect(parsed.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(parsed.fragment).toBe("pmultiplier");
+    expect(parsed.fragment).toBe("refreshable");
   });
 
   it("reports the offending fragment so a finding can disclose it", () => {

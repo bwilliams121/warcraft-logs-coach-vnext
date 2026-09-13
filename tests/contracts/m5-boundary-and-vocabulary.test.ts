@@ -158,7 +158,7 @@ describe("M5 invents no combat state", () => {
   });
 
   /**
-   * NARROWED for M5-C2, and the invariant is unchanged.
+   * NARROWED for M5-C2, WIDENED BY ONE MODULE for M5-C3a, invariant unchanged.
    *
    * M5-B banned every aura read outright, with the stated purpose "so no absence
    * can become inactivity". M5-C2 has to read aura state — `stealthed.rogue` is
@@ -168,27 +168,60 @@ describe("M5 invents no combat state", () => {
    *
    * So the ban is narrowed to its purpose instead:
    *
-   *   1. exactly ONE declared module may query aura state
-   *   2. that module must be structurally incapable of a negative claim
+   *   1. only DECLARED modules may query aura state
+   *   2. each declared module must be structurally incapable of converting an
+   *      absence into the claim its own expression makes
    *
-   * `presenceAt` can return INACTIVE, and that is precisely the value a stealth
-   * binding must never surface — a removal of one contributor says nothing about
-   * the other three, and silence says nothing at all. Test 2 is what stops it.
+   * M5-C3a adds the second declared module. `remains` is a MAGNITUDE, so its
+   * failure mode is different in kind from stealth's: the danger is not a false
+   * FALSE but a fabricated NUMBER. Each module therefore gets its own structural
+   * test below, matched to what it could actually get wrong.
+   *
+   * Adding a module here is meant to be deliberate. The list is short, every
+   * entry must still read aura state, and each needs a companion test — so
+   * growing it is work rather than a one-line exemption.
    */
-  const AURA_READING_MODULE = "src/specs/rogue/assassination/stealth-state.ts";
+  const AURA_READING_MODULES = [
+    "src/specs/rogue/assassination/stealth-state.ts",
+    "src/specs/rogue/assassination/garrote-dot-state.ts",
+  ] as const;
 
-  it("reads aura state in exactly one declared module", () => {
+  const AURA_READING_MODULE = AURA_READING_MODULES[0];
+
+  it("reads aura state only in declared modules", () => {
+    const declared = new Set<string>(AURA_READING_MODULES);
     for (const path of M5_FILES) {
+      if (declared.has(path)) continue;
       const code = codeOf(path);
       for (const forbidden of ["presenceAt", "lastObservedTransition", "anySource(", "fromSource("]) {
-        if (path === AURA_READING_MODULE) continue;
         expect(code, `${path} queries aura state`).not.toContain(forbidden);
       }
     }
-    // The exemption must be load-bearing, not stale: if the declared module ever
-    // stops reading aura state, the exemption should be removed rather than left
+    // Every exemption must be load-bearing, not stale: a declared module that
+    // stops reading aura state should be removed from the list rather than left
     // as a hole someone else can grow into.
-    expect(codeOf(AURA_READING_MODULE)).toContain("presenceAt");
+    for (const path of AURA_READING_MODULES) {
+      expect(codeOf(path), `${path} no longer reads aura state`).toContain("presenceAt");
+    }
+  });
+
+  it("still lets no absence become a duration: the DoT reader cannot invent a number", () => {
+    // The magnitude counterpart to the stealth test below. `presenceAt` can
+    // return INACTIVE and can return UNKNOWN, and NEITHER may become a
+    // remaining duration — a DoT that is absent has no remainder, and clamping
+    // one to zero would satisfy every `remains<=` threshold in the pinned APL.
+    const code = codeOf("src/specs/rogue/assassination/garrote-dot-state.ts");
+
+    // The number lives on the KNOWN variant alone. The UNKNOWN variant has no
+    // field that could carry one.
+    expect(code).toContain('readonly state: "KNOWN"');
+    expect(code).toContain('readonly state: "UNKNOWN"');
+    expect(code).toContain("readonly remainsSeconds: number;");
+    // No default, no clamp, no fallback.
+    expect(code).not.toContain("remainsSeconds: 0");
+    expect(code).not.toContain("remainsMs: 0");
+    expect(code).not.toContain("Math.max(0");
+    expect(code).not.toContain("?? 0");
   });
 
   it("still lets no absence become inactivity: the aura reader cannot say FALSE", () => {

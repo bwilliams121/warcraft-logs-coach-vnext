@@ -208,6 +208,13 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
   // is refused — see the AST node comment for why a generic rule would be wrong.
   if (raw === "variable.single_target") return { kind: "VARIABLE_SINGLE_TARGET" };
 
+  // BARE dot properties of the acting action, as written in the pinned
+  // `core_dot` lines. The `dot.<name>.<property>` namespace stays refused: it
+  // addresses a DIFFERENT action's DoT and would need a per-ability binding
+  // nothing supplies.
+  if (raw === "pmultiplier") return { kind: "DOT_PMULTIPLIER" };
+  if (raw === "remains") return { kind: "DOT_REMAINS" };
+
   const talent = TALENT.exec(raw);
   if (talent !== null) {
     const name = talent[1];
@@ -331,11 +338,50 @@ function readComparisonOperator(cursor: Cursor): ComparisonOperator | null {
 }
 
 /** Comparisons bind tighter than `&`, and do not chain. */
+/**
+ * Multiplication. Precedence 7 in pinned SimulationCraft, tighter than addition.
+ *
+ * `*` only. `/` and `%` share the same level upstream but are not needed by any
+ * supported line, and adding an operator nothing evaluates would widen the
+ * surface without a decision behind it. `/` in particular must NOT be added
+ * casually: it is the one that makes division-by-zero reachable.
+ */
+function parseMultiplicative(cursor: Cursor): ExpressionNode {
+  let left = parseUnary(cursor);
+  for (;;) {
+    // `*` is unambiguous: SimulationCraft has no `*=`, `**` or `*?`.
+    if (!startsWith(cursor, "*")) return left;
+    cursor.index += 1;
+    const right = parseUnary(cursor);
+    left = { kind: "MULTIPLY", left, right };
+  }
+}
+
+/**
+ * Addition. Precedence 6 in pinned SimulationCraft, looser than multiplication
+ * and tighter than comparison.
+ *
+ * `+` only, and BINARY only. Unary `+`/`-` are precedence 8 upstream and are not
+ * supported here; `-` is absent entirely, so `14-6` is still refused rather than
+ * silently parsed. `rejectLookalikeOperators` already refuses `-` where a
+ * primary is expected, which is what keeps subtraction from sneaking in through
+ * a negative literal.
+ */
+function parseAdditive(cursor: Cursor): ExpressionNode {
+  let left = parseMultiplicative(cursor);
+  for (;;) {
+    if (!startsWith(cursor, "+")) return left;
+    cursor.index += 1;
+    const right = parseMultiplicative(cursor);
+    left = { kind: "ADD", left, right };
+  }
+}
+
 function parseComparison(cursor: Cursor): ExpressionNode {
-  const left = parseUnary(cursor);
+  const left = parseAdditive(cursor);
   const operator = readComparisonOperator(cursor);
   if (operator === null) return left;
-  const right = parseUnary(cursor);
+  const right = parseAdditive(cursor);
   if (readComparisonOperator(cursor) !== null) {
     throw new ParseError("CHAINED_COMPARISON", cursor.text, cursor.index);
   }

@@ -43,7 +43,12 @@ import type { CombatState } from "../../../engine/state/combat-state.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type { AplAction, AplAuthority, ReachabilityProof } from "../../../simc/apl-authority.js";
 import { parseSimcExpression } from "../../../simc/expression/parse.js";
-import { evaluateSimcExpression, knownNumber, type AtomBindings } from "../../../simc/expression/evaluate.js";
+import {
+  evaluateSimcExpression,
+  knownNumber,
+  unknownNumber,
+  type AtomBindings,
+} from "../../../simc/expression/evaluate.js";
 import { selectWithinList, type ActionUsability, type LineEvaluation } from "../../../simc/list-selection.js";
 import { tryAbilityIdentityFor } from "../../../data/game/rogue-abilities.js";
 import type { AuthorityRef, ResolvedAuthority } from "../../../findings/authority.js";
@@ -235,6 +240,10 @@ export function selectSpendActionAt(input: SpendSelectionInput): ScopedActionSel
     comboPoints: combo.state.observedAmount,
     comboPointsDeficit: combo.state.derivedDeficit,
     energyPct: knownNumber(energy.percent),
+    // The `spend` list names no DoT atom. Stated unknown rather than omitted, so
+    // a condition that later reached `remains` from here would resolve UNKNOWN
+    // instead of reading a duration this module never established.
+    dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
     knownBuffs: [],
   };
 

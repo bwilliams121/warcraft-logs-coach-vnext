@@ -37,6 +37,7 @@ import {
   type DirectionFieldNames,
 } from "../engine/normalization/raw-event-fields.js";
 import type { TimeRangeMs } from "../engine/evidence/coverage.js";
+import { deriveEvidenceActorScope } from "./evidence-actor-scope.js";
 import { EVIDENCE_CAPABILITY_REGISTRY, type RetrievalSource } from "./evidence-capability.js";
 import {
   decodeFightContext,
@@ -278,7 +279,16 @@ export async function ingestFight(
           streamIdsBySource,
           degradedCategories: normalized.degradedCategories,
           streamsWithUntypedDefects: normalized.streamsWithUntypedDefects,
-          actorScope: request.scope === "FULL_RAID" ? null : [request.sourceId],
+          // Which actors the evidence VOUCHES for — not who we are analysing.
+          // See `evidence-actor-scope.ts`: the capture is unfiltered by actor,
+          // so enemy/target state is genuinely held under PLAYER_CONTEXT, while
+          // ally state stays fenced off until FULL_RAID.
+          actorScope: deriveEvidenceActorScope({
+            scope: request.scope,
+            focusActorId: request.sourceId,
+            friendlyPlayerActorIds: fight.friendlyPlayers,
+            actors: actors.actors,
+          }),
         }),
       },
       report: {

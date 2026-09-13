@@ -18,9 +18,17 @@ import { pinnedAssassinationAuthority } from "../../src/simc/pinned-authority.js
  */
 
 const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
+const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function bindings(overrides: Partial<AtomBindings> = {}): AtomBindings {
-  return { comboPoints: 0, comboPointsDeficit: 7, energyPct: NO_ENERGY, knownBuffs: [], ...overrides };
+  return {
+    comboPoints: 0,
+    comboPointsDeficit: 7,
+    energyPct: NO_ENERGY,
+    dotRemainsSeconds: NO_DOT,
+    knownBuffs: [],
+    ...overrides,
+  };
 }
 
 function parse(source: string) {
@@ -82,7 +90,11 @@ describe("the namespaces did NOT open", () => {
     "stealthed.improved_garrote",
     // Adjacent identifiers that must stay refused.
     "spell_targets.fan_of_knives",
-    "pmultiplier",
+    // M5-C3a made BARE `pmultiplier` and BARE `remains` recognised — the acting
+    // action's own DoT. The DOTTED forms name some OTHER action's DoT, which is
+    // a different fact with no adapter behind it, and stay refused.
+    "dot.garrote.pmultiplier",
+    "dot.rupture.remains",
     "talent.",
     "variable.",
     "stealthed.",
