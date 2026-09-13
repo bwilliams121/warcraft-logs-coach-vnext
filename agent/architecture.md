@@ -3729,16 +3729,196 @@ visits `core_dot` at all.
 
 ### Deferred to M5-C3c
 
-Control flow is complete; gameplay state is not. Still unmodelled, and each is
-why the traversal stops where it does:
+Control flow is complete; gameplay state is not. M5-C3c1 has since supplied the
+first piece — see below — and the rest remain unmodelled.
 
-    cooldown remaining, resets, CDR and charges
-    Deathmark state, Kingsbane state, Rupture state
-    Envenom remains, buff stacks, Scent of Blood
-    items and trinkets, external buffs, racials policy
-    target time-to-die, fight remains
-    spell target counts
+## Cooldown State Is Derived, Not Observed
+
+Warcraft Logs reports no cooldown state at all: there is no "cooldown started"
+event and no "cooldown ready" event. A remaining cooldown is DERIVED by combining
+one observed cast with a pinned game rule.
+
+That is why it lives in `src/engine/game-state/cooldowns` rather than in M4. M4
+owns OBSERVED state and reconstructs what Warcraft Logs saw; a cooldown is a
+different kind of claim. M4's vocabulary and semantics are untouched.
+
+### Three epistemic outcomes
+
+    EXACT     every input established, and nothing can have changed it
+    BOUNDED   a rigorous LOWER bound on the remaining time, and no more
+    UNKNOWN   we cannot say
+
+`BOUNDED` exists because a lower bound is usually all a decision needs:
+`cooldown.x.remains<=2` is answerable from "at least 57 seconds remain" without
+committing to an exact figure. Offering it stops a caller reaching for EXACT when
+only a bound is defensible.
+
+### The modifier policy is an INPUT, not an assumption
+
+`base - elapsed` silently assumes nothing reset or reduced the cooldown in
+between — and nothing in the event stream could have told us otherwise, because
+no such event exists. So the caller must supply a positive proof, and a caller
+who cannot gets UNKNOWN. Absence of evidence is not the proof; absence of a
+MECHANISM is.
+
+### Where a cooldown starts, and why the answer is BOUNDED
+
+    action.cpp:1914   action_t::execute() calls update_ready()
+    action.cpp:2350   delay = rng().gauss( player->world_lag )
+    action.cpp:2351   if ( delay > 400_ms ) delay -= 400_ms; else delay = 0_ms
+    action.cpp:2360   cooldown->start( this, cd_duration, delay )
+
+The anchor is EXECUTION, and for an instant ability execution coincides with the
+observed COMPLETE cast. A BEGIN cast is not accepted: it evidences an attempt,
+not an execution.
+
+But the cooldown does not start AT that instant. It starts after a delay that is
+SAMPLED rather than computed, from a distribution that is CONFIGURABLE per sim
+(`default_world_lag`, sim.cpp:3847) and per player (player.cpp:719). The default
+is a gaussian with mean 100 ms and stddev 10 ms (sim.cpp:1430, sim.cpp:2660), so
+under defaults the delay is zero with overwhelming probability — and
+"overwhelmingly probable" is not "proven". The `!background && !proc` guard means
+the path applies to every player-cast action.
+
+The delay is non-negative, so it can only move the ready time LATER:
+
+    ready     = cast + base + delay,  delay >= 0
+    remaining = ready - query        >= base - elapsed
+
+So an observed cast proves a LOWER BOUND and does not prove equality. There is a
+second, independent reason for the same conclusion: we derive from a real
+server-side log, and nothing proves the real cooldown began at exactly the
+millisecond the cast event carries.
+
+The derivation therefore returns BOUNDED. EXACT stays in the vocabulary for a
+future derivation that can prove a zero-delay start; nothing produces it today.
+
+Once elapsed exceeds the base duration the bound degrades to "at least 0", which
+is true and decides nothing — so comparisons against it return UNKNOWN. That is
+the honest outcome rather than a weakness.
+
+An ability with a cast time or a channel would need its own anchor and is not
+covered by this contract.
+
+### A bound is carried as a bound
+
+`NumericBinding` gained a third state for this:
+
+    KNOWN_NUMBER     an exact value
+    BOUNDED_NUMBER   a PROVEN lower bound, in `atLeast`
+    UNKNOWN_NUMBER   nothing
+
+Flattening a bound into a known value would state a figure nobody established,
+and would do it invisibly — the comparison it feeds comes out the same either
+way. So the bound survives the ms-to-seconds conversion, reaches the evaluator as
+a bound, and appears in the trace with `value: null` and the bound in its own
+`atLeast` field.
+
+Only the deductions that follow from a lower bound are made. With `x >= L`:
+
+    x <= C   FALSE when L > C
+    x <  C   FALSE when L >= C
+    x >  C   TRUE  when L > C
+    x >= C   TRUE  when L >= C
+    x =  C   FALSE when L > C
+
+Everything else is UNKNOWN — including `x <= C` when `L <= C`, where the true
+value could be anywhere above `L`. Arithmetic on a bound is refused outright
+(`L * k` is not a lower bound for negative `k`, and no pinned expression needs
+it), and a bound is never read as a bare truth. This is not an interval algebra
+and must not grow into one.
+
+### Kingsbane, and the two grades of provenance
+
+    baseCooldownMs 60000, charges 0      MACHINE_EXTRACTED_DBC_RECORD
+    "nothing modifies this cooldown"     HAND_REVIEWED_CPP_ABSENCE_PROOF
+
+The second is the weaker claim and is labelled as such. A DBC value that changes
+shows up as a different number in a hashed table; a newly-added cooldown reset
+changes no DBC row at all. So the absence proof carries the SHA-256 of the module
+it was reviewed against and records the searches that were run:
+
+    exactly one occurrence of `cooldowns.kingsbane` (the constructor assignment)
+    ZERO occurrences of `cooldowns.kingsbane->`, the form every mutation takes
+    `_charges` is 0
+    Restless Blades and Deadly Pursuit are both Outlaw-only
+    base/dynamic recharge multipliers initialise to 1.0
+    `kingsbane_t` overrides neither `update_ready` nor `cooldown`
+
+The extractor re-runs the two decisive greps on every run and refuses to emit an
+artifact whose absence proof has gone stale.
+
+### Milliseconds and seconds
+
+DBC and the derivation are MILLISECONDS; SimulationCraft expressions are SECONDS.
+The conversion happens exactly once, in the specialization's cooldown adapter,
+and the field it produces is named `remainsSeconds`. Reading 57198 as seconds
+would satisfy every `remains<=` threshold in the pinned APL and never look wrong.
+
+### What M5-C3c1 proved, and what moved
+
+At the verified decision point, Kingsbane was cast 2.802 s earlier against a 60 s
+cooldown, so `cooldown.kingsbane.remains` is **at least** 57.198 s and
+`cooldown.kingsbane.remains<=2` is FALSE — a bound that clears the threshold
+settles the comparison exactly, without ever naming the magnitude. One FALSE operand collapses the whole
+`cds[0]` Deathmark conjunction — `FALSE & anything` is FALSE — so the other four
+operands never had to be established:
+
+    dot.garrote.ticking         UNRESOLVED, enumerated
+    dot.rupture.ticking         UNRESOLVED, enumerated
+    cooldown.kingsbane.remains  BOUNDED >= 57.198     <- the only new fact
+    buff.envenom.remains        UNKNOWN_NUMBER
+    target.time_to_die          PREDICTIVE
+    fight_remains               PREDICTIVE
+
+Four worlds, all FALSE, `INVARIANT_ACROSS_WORLDS`. No predictive value was used.
+
+The traversal's earliest blocker therefore moves:
+
+    before   default[5] -> cds[0] deathmark
+    after    default[5] -> cds[1] invoke_external_buff
+
+The result is still UNKNOWN, and that is the correct C3c1 outcome.
+
+### Recognition is not knowledge
+
+Three atoms were added so the pinned line could parse WHOLE — the fail-closed
+parser refuses an expression containing any unsupported fragment, so one
+unrecognised identifier would have blocked the milestone:
+
+    dot.<name>.ticking        TRUTH, enumerable, bindable
+    cooldown.<name>.remains   MAGNITUDE, bindable from a derivation
+    target.time_to_die        MAGNITUDE, PREDICTIVE, never bindable
+
+Parsing them gives them no value. An unbound `dot.x.ticking` is enumerated, not
+`false`. An unbound `cooldown.x.remains` is UNKNOWN_NUMBER, never `0` — zero is
+the dangerous default, because it reads as "ready now" to every `remains<=`
+comparison. The cooldown binding is a list keyed by NAME rather than one scalar,
+so a derivation about Kingsbane cannot answer a question about Deathmark.
+
+Opening one property did not open a namespace: `dot.<name>.remains`,
+`cooldown.<name>.ready` and `cooldown.<name>.duration` are all still refused.
+
+### Still deferred
+
+To M5-C3c2 — evidence-backed NEGATIVE usability, and profile applicability:
+
+    proven-unusable from an active cooldown (which would eliminate cds[4])
+    race, gear and item applicability
+    the external-buff pool, and potion choice
+    AuthorityPlayerProfile
+
+To M5-C3c3 — the rotational NON_GCD sequence problem:
+
+    whether an off-GCD action that fires changes the eventual GCD selection
     global Garrote selection
+
+Still unmodelled anywhere:
+
+    cooldown resets, CDR and charges for abilities that have them
+    Deathmark, Rupture and Envenom aura state
+    buff stacks, Scent of Blood, spell target counts
+    target time-to-die and fight remains, which stay predictive
 
 ## Zero-GCD Actions Still End the Scan
 

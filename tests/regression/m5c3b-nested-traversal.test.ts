@@ -173,11 +173,22 @@ describe("the rotational boundary is C1's proof, not a convenience", () => {
 
 describe("the real traversal reaches cds[0] and stops", () => {
   it("is UNKNOWN, blocked at cds[0] deathmark", () => {
+    // UPDATED for M5-C3c1, and the CHANGE OF REASON is the point.
+    //
+    // This fixture carries no Kingsbane cast, so `cooldown.kingsbane.remains`
+    // has no binding. Before C3c1 the line did not parse at all and the blocker
+    // was UNSUPPORTED_AUTHORITY_EXPRESSION — "we did not understand the
+    // question". C3c1 added the atoms, so the line is now understood and merely
+    // undecided: NO_DEFINITE_WINNER — "we understand it and lack the state".
+    //
+    // Those are different failures with different remedies, and the milestone
+    // that moved one to the other should be visible here. The blocker LOCATION
+    // is unchanged, because this fixture still cannot decide the line.
     const traversal = resultAtQ();
     expect(traversal.result.kind).toBe("UNKNOWN");
     if (traversal.result.kind !== "UNKNOWN") return;
 
-    expect(traversal.result.blocker).toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");
+    expect(traversal.result.blocker).toBe("NO_DEFINITE_WINNER");
     expect(traversal.result.blockedAt?.listName).toBe("cds");
     expect(traversal.result.blockedAt?.priorityOrdinal).toBe(0);
     expect(traversal.result.blockedAt?.actionToken).toBe("deathmark");
@@ -191,13 +202,24 @@ describe("the real traversal reaches cds[0] and stops", () => {
     ).toEqual(["default[5]", "cds[0]"]);
   });
 
-  it("walks exactly default[4] -> default[5] -> cds[0]", () => {
+  it("walks past cds[0] now that the line is understood, and stops below it", () => {
+    // UPDATED for M5-C3c1. `cds[0]` parses now, so it is a POSSIBLE candidate
+    // rather than an abort, and the scan continues collecting candidates until
+    // it meets syntax it still cannot parse. The reported blocker remains
+    // `cds[0]` because that is the EARLIEST unresolved entry — see the test
+    // above.
     const traversal = resultAtQ();
-    expect(stepLabels(traversal)).toEqual([
+    const labels = stepLabels(traversal);
+    expect(labels.slice(0, 4)).toEqual([
       "default[4] ambush",
       "default[5] call_action_list",
       "cds[0] deathmark",
+      "cds[1] invoke_external_buff",
     ]);
+    // Whatever is walked below, nothing later may be REPORTED as the blocker.
+    if (traversal.result.kind !== "UNKNOWN") throw new Error("expected UNKNOWN");
+    expect(traversal.result.blockedAt?.priorityOrdinal).toBe(0);
+    expect(traversal.result.blockedAt?.listName).toBe("cds");
   });
 
   it("eliminates default[4] Ambush from the M5-C2 verdict, and continues", () => {
@@ -234,8 +256,14 @@ describe("the real traversal reaches cds[0] and stops", () => {
   });
 
   it("never reaches the generate or spend lists either", () => {
+    // UPDATED for M5-C3c1. `items` IS now walked: `cds[2]` calls it
+    // unconditionally and `cds[0]`/`cds[1]` no longer abort the scan. Walking a
+    // list is not selecting from it, and the reported blocker is still above.
+    //
+    // `generate` and `spend` sit below `default[6] core_dot` and remain
+    // unreached, which is what this test is actually for.
     const traversal = resultAtQ();
-    for (const listName of ["generate", "spend", "items", "misc_cds", "vanish"]) {
+    for (const listName of ["generate", "spend", "misc_cds", "vanish"]) {
       expect(traversal.result.steps.some((step) => step.listName === listName)).toBe(false);
     }
   });
@@ -271,17 +299,24 @@ describe("the earliest blocker is cds[0], derived rather than assumed", () => {
     expect(traversal.result.blockedAt?.actionStringVerbatim).toBe(cds.actions[0]?.actionStringVerbatim);
   });
 
-  it("blocks on syntax C3b deliberately does not implement", () => {
-    // `dot.garrote.ticking`, `cooldown.kingsbane.remains`, `buff.envenom.remains`
-    // and `target.time_to_die`. C3b is control flow only; none of these atoms is
-    // added here, and the traversal says so rather than guessing.
+  it("blocks on STATE it does not have, not on syntax it cannot parse", () => {
+    // UPDATED for M5-C3c1. The atoms exist now, so the gate EVALUATES; what it
+    // evaluates to is UNKNOWN_STATE, because this fixture supplies no Kingsbane
+    // cast and therefore no cooldown binding.
+    //
+    // Recognition is not knowledge: parsing `cooldown.kingsbane.remains` gives
+    // it no value, and the atom reports UNKNOWN_NUMBER rather than a zero that
+    // would read as "ready now".
     const traversal = resultAtQ();
     if (traversal.result.kind !== "UNKNOWN") throw new Error("expected UNKNOWN");
     const gate = traversal.result.blockedAt?.gate;
-    expect(gate?.kind).toBe("UNSUPPORTED");
-    if (gate?.kind !== "UNSUPPORTED") return;
-    expect(gate.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(gate.fragment).toBe("dot.garrote.ticking");
+    expect(gate?.kind).toBe("EVALUATED");
+    if (gate?.kind !== "EVALUATED") return;
+    expect(gate.truth).toBe("UNKNOWN_STATE");
+
+    const cooldownAtom = gate.trace.atoms.find((atom) => atom.key === "cooldown.kingsbane.remains");
+    expect(cooldownAtom?.binding).toBe("UNKNOWN_NUMBER");
+    expect(cooldownAtom?.value).toBeNull();
   });
 
   it("outranks the exact core_dot result below it", () => {
@@ -394,8 +429,10 @@ describe("NO combo-point magnitude is fabricated at the real Q", () => {
   it("still reaches default[4], default[5] and cds[0], which need no combo points", () => {
     // The unknown is not a dead end: none of the conditions the traversal
     // actually consults mentions combo points, so the answer is unaffected.
+    // UPDATED for M5-C3c1: the walk now continues past cds[0], and still never
+    // consults a combo-point atom — asserted independently below.
     const traversal = resultAtQ();
-    expect(stepLabels(traversal)).toEqual([
+    expect(stepLabels(traversal).slice(0, 3)).toEqual([
       "default[4] ambush",
       "default[5] call_action_list",
       "cds[0] deathmark",
@@ -504,16 +541,23 @@ describe("an unavailable combo-point count fails closed AT the atom", () => {
 });
 
 describe("C3b added no gameplay state", () => {
-  it("still refuses every cds condition, because no cooldown or DoT model exists", () => {
-    // A regression guard on scope: if any of these starts parsing, C3c has
-    // landed and this milestone's claim needs re-examining.
-    const authority = authorityOrThrow();
-    const cds = authority.actionsInList("cds");
-    expect(cds.found).toBe(true);
-    if (!cds.found) return;
-
+  it("adds no DoT, buff-duration or predictive state of its own", () => {
+    // UPDATED for M5-C3c1. `cds[0]` parses now, so "every cds condition is
+    // refused" is no longer the guard. The scope guard that still holds is about
+    // the STATE: of the five atoms in that line, only the cooldown may ever be
+    // bound by this milestone. The rest stay unknown.
     const traversal = resultAtQ();
     if (traversal.result.kind !== "UNKNOWN") throw new Error("expected UNKNOWN");
-    expect(traversal.result.blockedAt?.gate.kind).toBe("UNSUPPORTED");
+    const gate = traversal.result.blockedAt?.gate;
+    if (gate?.kind !== "EVALUATED") throw new Error("expected an evaluated gate");
+
+    const byKey = new Map(gate.trace.atoms.map((atom) => [atom.key, atom]));
+    // DoT ticking is enumerated, never bound: C3c1 models no DoT state.
+    expect(byKey.get("dot.garrote.ticking")?.binding).toBe("UNRESOLVED_BOOLEAN");
+    expect(byKey.get("dot.rupture.ticking")?.binding).toBe("UNRESOLVED_BOOLEAN");
+    // Buff duration and predictive values have no binding path at all.
+    expect(byKey.get("buff.envenom.remains")?.binding).toBe("UNKNOWN_NUMBER");
+    expect(byKey.get("target.time_to_die")?.unknownNumberReason).toBe("PREDICTIVE_NOT_PLAYER_KNOWABLE");
+    expect(byKey.get("fight_remains")?.unknownNumberReason).toBe("PREDICTIVE_NOT_PLAYER_KNOWABLE");
   });
 });

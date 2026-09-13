@@ -679,6 +679,84 @@ npx prettier --write tests/fixtures/wcl/events/wcl-assassination-garrote-dot-rem
 
 ---
 
+## `wcl-assassination-kingsbane-cooldown.json`
+
+310 events from the same report and revision, captured on **2026-09-13** for
+M5-C3c1.
+
+| | |
+| --- | --- |
+| Report code | `A7R6kxPJ1hC8YQ4w` |
+| Fight ID | 7 |
+| **Report revision** | **30** — unchanged, and still load-bearing |
+| `gameVersion` / `logVersion` | 1 / 17 |
+| Actor | 19 (`Saruxoxo`, Assassination Rogue, `specID` 259) |
+| Window | `[2,164,325 .. 2,176,581]`, plus the pull `combatantinfo` at 2,004,589 |
+| Retrieval | paged ranges, `limit` 10,000, `includeResources: true`, `dataType: All`, `hostilityType` omitted |
+
+### How it differs from the C3a slice
+
+Same window. The AURA predicate is identical — every aura event targeting actor
+19 or 21. The CAST predicate is **widened** from "the two decision casts" to
+**every actor-19 cast**: 42 instead of 2.
+
+That widening is what makes the cooldown derivation sound. It asks
+`lastObservedCast(kingsbane, COMPLETE, before Q)`, and "most recent" is only
+meaningful if the slice contains every candidate. A fixture filtered to the
+abilities the test cares about would have proved "the most recent Kingsbane cast
+among the ones we kept" — a different and much weaker claim.
+
+### The cast sequence
+
+| `timestamp` | rel Q | `abilityGameID` | |
+| --- | --- | --- | --- |
+| 2,172,777 | −3,803 | 360194 | Deathmark |
+| 2,173,778 | −2,802 | 385627 | **Kingsbane — the cooldown anchor** |
+| 2,175,585 | −995 | 32645 | Envenom |
+| 2,176,120 | −460 | 1856 | Vanish |
+| 2,176,580 | 0 | 703 | Garrote — the decision point Q |
+
+The remaining 37 casts are 24 melee autos (ability 1) and assorted abilities.
+They are not noise: they are what demonstrates, on real data, that an unrelated
+cast does not anchor a cooldown.
+
+### Event order is preserved verbatim
+
+Filtered IN PLACE rather than re-sorted, for the reason the C3a entry records at
+length: at Q the cast shares a timestamp with its own consequences, and Warcraft
+Logs returns the cast FIRST.
+
+### Verified facts this slice establishes
+
+- Kingsbane cooldown at Q = **EXACT 57.198 s**, from `60000 − 2802`.
+- `cooldown.kingsbane.remains<=2` = **FALSE**, so `cds[0]` Deathmark is FALSE in
+  all four enumerated worlds.
+- The traversal's earliest blocker moves from `cds[0]` to `cds[1]`.
+
+### What it does NOT establish
+
+- Nothing about DoT ticking, Envenom duration, or any predictive value. Those
+  atoms parse and stay unknown.
+- No global Garrote selection.
+- No negative usability for Kingsbane itself; `cds[4]` is never reached.
+- The 60 s base cooldown is pinned DBC, not derived from this capture. The
+  observed next Kingsbane cast at Q+57,665 (60,467 ms after the anchor)
+  corroborates it but is not the source.
+
+Reproduce:
+
+```powershell
+# .probe/c3c1-fixture.probe.ts captures the interval and filters IN PLACE.
+node scripts/sanitize-probe.mjs `
+  .probe/m5c3c1-source.json `
+  wcl-assassination-kingsbane-cooldown.json `
+  --head 310
+
+npx prettier --write tests/fixtures/wcl/events/wcl-assassination-kingsbane-cooldown.json
+```
+
+---
+
 # Still NOT ESTABLISHED
 
 ## `resourcechange` attached snapshot timing

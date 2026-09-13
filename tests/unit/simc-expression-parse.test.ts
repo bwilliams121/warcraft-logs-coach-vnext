@@ -116,7 +116,11 @@ describe("everything outside the subset is refused whole", () => {
     // (pinned `generate` line 0) did not, and proves `energy.` is not a namespace.
     ["energy.regen_combined>40", "UNSUPPORTED_IDENTIFIER"],
     ["spell_targets.fan_of_knives>1", "UNSUPPORTED_IDENTIFIER"],
-    ["target.time_to_die<12", "UNSUPPORTED_IDENTIFIER"],
+    // RE-POINTED for M5-C3c1. `target.time_to_die` is RECOGNISED now — and
+    // permanently unbindable, exactly like `fight_remains`. `cooldown.<name>.ready`
+    // is a different property of the namespace C3c1 opened by one property, and
+    // stays refused.
+    ["cooldown.deathmark.ready", "UNSUPPORTED_IDENTIFIER"],
     // RE-POINTED for M5-C2. `talent.<name>` became supported; a talent RANK did
     // not. `talent.x` is truth-shaped and `talent.x.rank` is a magnitude, so the
     // dot-free name in the pattern is what keeps a rank out of the boolean
@@ -136,7 +140,10 @@ describe("everything outside the subset is refused whole", () => {
     // RE-POINTED for M5-B. `buff.x.remains` became supported; `buff.x.stack`
     // (pinned `cds` line 5) did not, and proves `buff.<name>.` is not a namespace.
     ["buff.scent_of_blood.stack>=2", "UNSUPPORTED_IDENTIFIER"],
-    ["dot.rupture.ticking", "UNSUPPORTED_IDENTIFIER"],
+    // RE-POINTED for M5-C3c1. `dot.<name>.ticking` is recognised; the other
+    // `dot.` properties are not, which is what shows the namespace did not open.
+    ["dot.rupture.remains", "UNSUPPORTED_IDENTIFIER"],
+    ["dot.garrote.pmultiplier", "UNSUPPORTED_IDENTIFIER"],
     // RE-POINTED for M5-B. `>` became supported; SimulationCraft's max operator
     // `>?` did not, and must never decay into its supported one-char prefix.
     ["combo_points>?5", "UNSUPPORTED_OPERATOR"],
@@ -261,7 +268,7 @@ describe("the M5-B additions, against the pinned authority text", () => {
     expect(parsed.ok, `${condition} must parse`).toBe(true);
   });
 
-  it("still refuses spend[2], which needs target.time_to_die", () => {
+  it("still refuses spend[2], now on its target-count half", () => {
     // M5-B deliberately stops short of the third line. It is refused for an
     // identifier the subset does not contain, NOT for `energy.pct` or `>`.
     const parsed = parseSimcExpression(
@@ -270,7 +277,10 @@ describe("the M5-B additions, against the pinned authority text", () => {
     expect(parsed.ok).toBe(false);
     if (parsed.ok) return;
     expect(parsed.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(parsed.fragment).toBe("target.time_to_die");
+    // RE-POINTED for M5-C3c1. `target.time_to_die` is recognised now, so what
+    // still refuses this real pinned line is the enemy count — which Warcraft
+    // Logs supplies no positional state for and which stays out of the subset.
+    expect(parsed.fragment).toBe("spell_targets.fan_of_knives");
   });
 
   it.each([

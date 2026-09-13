@@ -115,6 +115,37 @@ export type ExpressionNode =
    * different answers about whether they may be known at all.
    */
   | { readonly kind: "DOT_REMAINS" }
+  /**
+   * `dot.<name>.ticking` — TRUTH-shaped. Another action's DoT, on this target.
+   *
+   * Distinct from the bare `remains` above, which is the ACTING action's own
+   * DoT. This one names an ability, so it needs a per-ability binding; with
+   * none supplied it becomes an unresolved atom and is enumerated.
+   *
+   * Recognising it does NOT make `dot.` a namespace: `dot.<name>.remains` and
+   * `dot.<name>.pmultiplier` are still refused whole.
+   */
+  | { readonly kind: "DOT_TICKING"; readonly dotName: string }
+  /**
+   * `cooldown.<name>.remains` — MAGNITUDE-shaped, in SECONDS.
+   *
+   * Warcraft Logs reports no cooldown state at all, so this is always derived:
+   * an observed cast plus a pinned base cooldown plus a proof that nothing
+   * modified it. See `src/engine/game-state/cooldowns`.
+   *
+   * `cooldown.<name>.ready` is a DIFFERENT expression with a different shape and
+   * stays refused, as does `cooldown.<name>.duration`.
+   */
+  | { readonly kind: "COOLDOWN_REMAINS"; readonly cooldownName: string }
+  /**
+   * `target.time_to_die` — MAGNITUDE-shaped, and PREDICTIVE.
+   *
+   * Never bindable, for exactly the reason `fight_remains` is not: it is
+   * knowledge of how the fight turned out, and using it to judge an earlier
+   * decision would blame a player for not knowing the future. Recognised so an
+   * expression containing it can parse whole; it has no binding field.
+   */
+  | { readonly kind: "TARGET_TIME_TO_DIE" }
   | { readonly kind: "NOT"; readonly operand: ExpressionNode }
   /**
    * `*` and `+`, at pinned SimulationCraft precedence.
@@ -195,6 +226,14 @@ export function atomOf(node: ExpressionNode): AtomDescriptor | null {
       return { key: "pmultiplier", shape: "NUMERIC" };
     case "DOT_REMAINS":
       return { key: "remains", shape: "NUMERIC" };
+    case "DOT_TICKING":
+      // Keyed by name, so every occurrence of `dot.garrote.ticking` correlates
+      // and `dot.rupture.ticking` stays independent of it.
+      return { key: `dot.${node.dotName}.ticking`, shape: "BOOLEAN" };
+    case "COOLDOWN_REMAINS":
+      return { key: `cooldown.${node.cooldownName}.remains`, shape: "NUMERIC" };
+    case "TARGET_TIME_TO_DIE":
+      return { key: "target.time_to_die", shape: "NUMERIC" };
     default:
       return null;
   }

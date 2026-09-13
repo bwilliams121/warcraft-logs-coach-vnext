@@ -170,7 +170,9 @@ describe("unsupported authority syntax never becomes false", () => {
       "the real pinned cds call condition",
       "variable.single_target|!talent.scent_of_blood|buff.scent_of_blood.stack>=2",
     ],
-    ["the real pinned thistle_tea condition's sibling identifier", "dot.rupture.ticking&combo_points>=5"],
+    // RE-POINTED for M5-C3c1: `dot.<name>.ticking` is recognised now, so the
+    // still-unsupported neighbour is another property of the same namespace.
+    ["another dot property", "dot.rupture.remains>4&combo_points>=5"],
     ["arithmetic", "combo_points>=5-2"],
     // RE-POINTED for M5-C2: `talent.<name>` is a supported atom now, so the
     // still-unsupported neighbours are a talent RANK and a snapshot multiplier.

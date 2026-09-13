@@ -105,6 +105,7 @@ describe("the real 3/7 Envenom is rejected by the pinned authority", () => {
         shape: "BOOLEAN",
         binding: "UNRESOLVED_BOOLEAN",
         value: null,
+        atLeast: null,
         unknownNumberReason: null,
       },
     ]);

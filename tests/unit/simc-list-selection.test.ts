@@ -164,7 +164,7 @@ describe("unsupported syntax stops the walk immediately", () => {
   it("blocks even when every remaining line names the same token", () => {
     // Convergence must not rescue an unparsed line. We do not know what the
     // unparsed condition says, so we do not know it names this token either.
-    const result = selectIn(["envenom,if=target.time_to_die<12", "envenom,if=energy.pct>70"], ["envenom"]);
+    const result = selectIn(["envenom,if=dot.rupture.remains>4", "envenom,if=energy.pct>70"], ["envenom"]);
     expect(result.kind).toBe("INDETERMINATE");
     if (result.kind !== "INDETERMINATE") return;
     expect(result.blocker).toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");

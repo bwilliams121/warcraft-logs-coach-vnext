@@ -68,6 +68,7 @@ import { narrowToRotationalSlot } from "./rotational-slot.js";
 import { acceptExactPreCost, adaptComboPoints, adaptEnergyPct } from "./envenom-decision.js";
 import { bindStealthedRogue } from "./stealth-state.js";
 import { bindGarroteRemains } from "./garrote-dot-state.js";
+import { cooldownBindingsFrom, deriveSupportedCooldowns, type DerivedCooldown } from "./cooldown-bindings.js";
 import { tryAbilityIdentityFor } from "../../../data/game/rogue-abilities.js";
 
 /** The list the rotational query begins in. */
@@ -108,6 +109,8 @@ export type RotationalTraversal =
       readonly boundary: ScanStartBoundary;
       /** The bindings the traversal ran against, kept so a reader can audit them. */
       readonly bindings: AtomBindings;
+      /** Cooldown derivations, including any that came back UNKNOWN. */
+      readonly derivedCooldowns: readonly DerivedCooldown[];
       /** False when combo points could not be observed. Never silently true. */
       readonly comboPointsEstablished: boolean;
     }
@@ -179,6 +182,13 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
     : null;
   const combo = comboAdapted !== null && comboAdapted.ok ? comboAdapted : null;
 
+  // ---- derived cooldown state (M5-C3c1) ----
+  //
+  // Only cooldowns that were actually derived are bound. An UNKNOWN one is
+  // omitted, so its expression atom stays UNKNOWN_NUMBER rather than becoming a
+  // zero that reads as "ready now".
+  const derivedCooldowns = deriveSupportedCooldowns({ state, actorId, position });
+
   // ---- the two derived facts M5-C2 and M5-C3a established ----
   const stealthedRogue = bindStealthedRogue({ state, actorId, position });
   const garroteRemains = bindGarroteRemains({
@@ -207,6 +217,7 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
         : unknownNumber("STATE_NOT_ESTABLISHED"),
     knownBuffs: [],
     knownTalents: input.knownTalents,
+    knownCooldownRemainsSeconds: cooldownBindingsFrom(derivedCooldowns),
     // Positive-only. A stealth binding that is not TRUE is left OUT entirely, so
     // the atom is enumerated rather than bound to a `false` nobody proved.
     ...(stealthedRogue.value === "TRUE" ? { stealthedRogue: true as const } : {}),
@@ -237,6 +248,7 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
     result,
     boundary,
     bindings,
+    derivedCooldowns,
     comboPointsEstablished: combo !== null,
   };
 }

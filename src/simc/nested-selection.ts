@@ -443,6 +443,40 @@ interface ScanContext {
   readonly steps: TraversalStep[];
 }
 
+/**
+ * Chooses which obstacle to report when a scan aborts with candidates already
+ * collected.
+ *
+ * A scan can stop for two different reasons at two different priorities. Suppose
+ * `cds[1]` MIGHT fire and we cannot tell, and then `items[2]` carries syntax we
+ * cannot parse at all. Both stop us. But `cds[1]` is EARLIER, and in the pinned
+ * loop an entry that might fire is reached first — so `items[2]` only matters in
+ * the world where `cds[1]` did not fire.
+ *
+ * Reporting the later one would tell a reader to widen the parser, when widening
+ * it would not produce an answer: `cds[1]` would still be unresolved. So when a
+ * scan aborts and it has already collected candidates, the EARLIEST candidate is
+ * the earliest obstacle and is what gets reported.
+ *
+ * Nothing is lost: the abort is still in `steps` with its own BLOCKED outcome,
+ * so a reader can see both.
+ *
+ * This is `list-selection`'s earliest-blocker rule applied across an abort
+ * boundary rather than only within a completed scan.
+ */
+function earliestObstacle(candidates: readonly Candidate[], blocked: ScanOutcome): ScanOutcome {
+  const earliest = candidates[0];
+  if (earliest === undefined) return blocked;
+  return {
+    kind: "BLOCKED",
+    blocker: "NO_DEFINITE_WINNER",
+    blockedAt: earliest.step,
+    detail:
+      "an earlier entry might fire and could not be resolved; a later entry also could not be " +
+      "evaluated, but it is only reachable in the world where the earlier one did not fire",
+  };
+}
+
 function scanList(
   context: ScanContext,
   listName: string,
@@ -484,12 +518,12 @@ function scanList(
     if (action.isUnmodelledDispatch) {
       const step = stepOf(action, path, { kind: "UNCONDITIONAL" }, "UNKNOWN", "BLOCKED");
       context.steps.push(step);
-      return {
+      return earliestObstacle(candidates, {
         kind: "BLOCKED",
         blocker: "UNMODELLED_DISPATCH_IN_LIST",
         blockedAt: step,
         detail: "run_action_list does not return to its caller the way call_action_list does",
-      };
+      });
     }
 
     const gate = evaluateCondition(action, context.bindings);
@@ -520,12 +554,12 @@ function scanList(
         // way this module cannot say where control went.
         const step = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
         context.steps.push(step);
-        return {
+        return earliestObstacle(candidates, {
           kind: "BLOCKED",
           blocker: "UNSUPPORTED_ENTRY_KIND",
           blockedAt: step,
           detail: "a list-dispatch entry names no callable list this module can follow",
-        };
+        });
       }
 
       if (gateIsCertainlyNotEntered(gate)) {
@@ -553,7 +587,7 @@ function scanList(
         // over it to reach something decidable lower down is precisely the
         // priority short-circuit this project forbids.
         finishCall("BLOCKED");
-        return child;
+        return earliestObstacle(candidates, child);
       }
 
       const childResolution = resolveScan(child.candidates);
@@ -571,12 +605,12 @@ function scanList(
       if (childResolution.kind === "AMBIGUOUS") {
         const blockedAt = childResolution.candidates[0]?.step ?? null;
         finishCall("BLOCKED");
-        return {
+        return earliestObstacle(candidates, {
           kind: "BLOCKED",
           blocker: "COMPETING_POSSIBLE_ACTION",
           blockedAt,
           detail: "the called list definitely selects an action, but which one is undecided",
-        };
+        });
       }
 
       if (childResolution.kind === "DEFINITE" && gateIsCertainlyEntered(gate)) {
@@ -604,12 +638,12 @@ function scanList(
     if (action.entryKind !== "PLAYER_ACTION") {
       const step = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
       context.steps.push(step);
-      return {
+      return earliestObstacle(candidates, {
         kind: "BLOCKED",
         blocker: "UNSUPPORTED_ENTRY_KIND",
         blockedAt: step,
         detail: "an entry kind this module does not model appeared in the scan",
-      };
+      });
     }
 
     if (gate.kind === "UNSUPPORTED") {
@@ -617,12 +651,12 @@ function scanList(
       // nothing below it can be reached soundly.
       const step = stepOf(action, path, gate, context.usabilityFor(action), "BLOCKED");
       context.steps.push(step);
-      return {
+      return earliestObstacle(candidates, {
         kind: "BLOCKED",
         blocker: "UNSUPPORTED_AUTHORITY_EXPRESSION",
         blockedAt: step,
         detail: "a player action's condition is outside the supported expression subset",
-      };
+      });
     }
 
     const usability = context.usabilityFor(action);

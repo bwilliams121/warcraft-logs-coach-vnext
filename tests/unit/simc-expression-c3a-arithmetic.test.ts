@@ -242,14 +242,18 @@ describe("arithmetic was opened by the operator, not wholesale", () => {
     }
   });
 
-  it("still refuses target.time_to_die-remains, on BOTH counts", () => {
-    // `core_dot[1..4]` contain this. Subtraction stayed unsupported and
-    // `target.time_to_die` was never supported, so the line fails closed twice
-    // over — which is why opening `core_dot[0]` did not open `core_dot`.
+  it("still refuses target.time_to_die-remains, now on the OPERATOR", () => {
+    // `core_dot[1..4]` contain this, and it still fails closed — but M5-C3c1
+    // moved WHICH half stops it. `target.time_to_die` is a recognised (and
+    // permanently unbindable) atom now, so the refusal is the subtraction.
+    //
+    // That the reason CHANGED while the verdict did not is the point: recognising
+    // an identifier is not the same as being able to evaluate the line, and
+    // arithmetic is still opened operator by operator rather than wholesale.
     const parsed = parseSimcExpression("target.time_to_die-remains>12");
     expect(parsed.ok).toBe(false);
     if (parsed.ok) return;
-    expect(parsed.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(parsed.fragment).toBe("target.time_to_die");
+    expect(parsed.reason).toBe("UNSUPPORTED_OPERATOR");
+    expect(parsed.fragment).toBe("-");
   });
 });

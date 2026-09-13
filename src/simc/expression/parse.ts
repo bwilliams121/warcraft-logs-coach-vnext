@@ -177,6 +177,19 @@ function rejectUnsupportedContinuation(cursor: Cursor): void {
 const BUFF_UP = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.up$/;
 const BUFF_REMAINS = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.remains$/;
 /**
+ * `dot.<name>.ticking` and `cooldown.<name>.remains`, added in M5-C3c1.
+ *
+ * Both name ANOTHER action's state, unlike the bare `remains` / `pmultiplier`
+ * added in C3a which address the acting action's own DoT. That is why they need
+ * a name: the binding is per-ability.
+ *
+ * Recognising them does NOT open the `dot.` or `cooldown.` namespaces.
+ * `dot.<name>.remains`, `dot.<name>.pmultiplier`, `cooldown.<name>.ready` and
+ * `cooldown.<name>.duration` all still fail the whole expression.
+ */
+const DOT_TICKING = /^dot\.([A-Za-z_][A-Za-z0-9_]*)\.ticking$/;
+const COOLDOWN_REMAINS = /^cooldown\.([A-Za-z_][A-Za-z0-9_]*)\.remains$/;
+/**
  * `talent.<name>`, where the name contains NO dot.
  *
  * The anchored, dot-free name is the whole safety property. `talent.x` is a
@@ -199,6 +212,8 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
   if (raw === "combo_points.deficit") return { kind: "COMBO_POINTS_DEFICIT" };
   if (raw === "energy.pct") return { kind: "ENERGY_PCT" };
   if (raw === "fight_remains") return { kind: "FIGHT_REMAINS" };
+  // PREDICTIVE, like `fight_remains`, and never bindable for the same reason.
+  if (raw === "target.time_to_die") return { kind: "TARGET_TIME_TO_DIE" };
 
   // EXACT matches only. `stealthed.basic`, `stealthed.all`,
   // `stealthed.mantle` and `stealthed.improved_garrote` denote DIFFERENT masks
@@ -233,12 +248,25 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
     if (name !== undefined) return { kind: "BUFF_REMAINS", buffName: name };
   }
 
-  // Everything else is refused. `spell_targets.y`, `target.time_to_die`,
-  // `dot.y.ticking`, `buff.x.stack`, `energy.regen_combined`,
-  // `talent.x.rank`, `variable.trinket_sync_slot`, `stealthed.all` and
-  // `pmultiplier` all land here. Note that `energy.pct` matching exactly does
-  // NOT make `energy.` a supported namespace, and the same holds for the
-  // `stealthed.`, `talent.` and `variable.` namespaces added in M5-C2.
+  const ticking = DOT_TICKING.exec(raw);
+  if (ticking !== null) {
+    const name = ticking[1];
+    if (name !== undefined) return { kind: "DOT_TICKING", dotName: name };
+  }
+
+  const cooldownRemains = COOLDOWN_REMAINS.exec(raw);
+  if (cooldownRemains !== null) {
+    const name = cooldownRemains[1];
+    if (name !== undefined) return { kind: "COOLDOWN_REMAINS", cooldownName: name };
+  }
+
+  // Everything else is refused. `spell_targets.y`, `buff.x.stack`,
+  // `energy.regen_combined`, `talent.x.rank`, `variable.trinket_sync_slot`,
+  // `stealthed.all`, `dot.y.remains`, `dot.y.pmultiplier`, `cooldown.y.ready`
+  // and `cooldown.y.duration` all land here. Note that `energy.pct` matching
+  // exactly does NOT make `energy.` a supported namespace; the same holds for
+  // `stealthed.`, `talent.` and `variable.` (M5-C2) and for the `dot.` and
+  // `cooldown.` namespaces opened by ONE property each in M5-C3c1.
   throw new ParseError("UNSUPPORTED_IDENTIFIER", raw, start);
 }
 

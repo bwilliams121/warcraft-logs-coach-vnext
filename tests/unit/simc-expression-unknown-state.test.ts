@@ -273,9 +273,15 @@ describe("atom shape is declared by syntax, not by what happened to be bound", (
 
 describe("unsupported syntax never enters the truth domain", () => {
   it.each([
-    "target.time_to_die<12",
+    // RE-POINTED for M5-C3c1. `target.time_to_die` became RECOGNISED (and
+    // permanently unbindable, like `fight_remains`). `cooldown.<name>.ready` is
+    // a different property of the newly-opened `cooldown.` namespace and stays
+    // refused, which is what proves one property did not open the namespace.
+    "cooldown.deathmark.ready",
     "spell_targets.fan_of_knives>=4",
-    "dot.rupture.ticking",
+    // RE-POINTED for M5-C3c1. `dot.<name>.ticking` became recognised; the other
+    // `dot.` properties did not.
+    "dot.rupture.remains",
     // RE-POINTED for M5-C2. `talent.<name>` and `variable.single_target` became
     // supported atoms; a talent RANK and every other variable did not, and they
     // keep proving that neither `talent.` nor `variable.` is an open namespace.

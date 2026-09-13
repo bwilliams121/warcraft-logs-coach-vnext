@@ -107,13 +107,48 @@ export const UNKNOWN_NUMBER_REASONS = [
  * A discriminated union rather than `number | null`, so "we do not know the
  * energy" is a statement a caller has to write down rather than an omission
  * that reads as zero.
+ *
+ * THREE STATES, AND THE MIDDLE ONE EARNS ITS PLACE.
+ *
+ * `BOUNDED_NUMBER` carries a proven LOWER bound and nothing else. It exists
+ * because M5-C3c1's cooldown derivation genuinely produces one: SimulationCraft
+ * starts a cooldown with a non-negative, SAMPLED lag delay
+ * (action.cpp:2350-2360), so an observed cast proves `remains >= base - elapsed`
+ * and does not prove equality.
+ *
+ * Collapsing that into `KNOWN_NUMBER` would state a value nobody established.
+ * Collapsing it into `UNKNOWN_NUMBER` would throw away a bound that decides real
+ * comparisons — `remains <= 2` is definitively FALSE once at least 57 seconds
+ * remain, whatever the exact figure.
+ *
+ * THERE IS NO UPPER BOUND FIELD, deliberately. Nothing in the pinned model
+ * supplies one — the lag delay is drawn from an unbounded gaussian — and an
+ * unused field would invite inventing it. That also stops a reader mistaking
+ * this for a two-sided interval.
  */
 export type NumericBinding =
   | { readonly state: "KNOWN_NUMBER"; readonly value: number }
+  | {
+      readonly state: "BOUNDED_NUMBER";
+      /** A PROVEN lower bound. The true value is this or larger, never smaller. */
+      readonly atLeast: number;
+      /** Why an exact value was unavailable. */
+      readonly reason: UnknownNumberReason;
+    }
   | { readonly state: "UNKNOWN_NUMBER"; readonly reason: UnknownNumberReason };
 
 export function knownNumber(value: number): NumericBinding {
   return { state: "KNOWN_NUMBER", value };
+}
+
+/**
+ * A magnitude proven to be at least `atLeast`.
+ *
+ * The caller must have PROVED the bound. A guess dressed as a bound is worse
+ * than an unknown, because comparisons will act on it.
+ */
+export function boundedBelowNumber(atLeast: number, reason: UnknownNumberReason): NumericBinding {
+  return { state: "BOUNDED_NUMBER", atLeast, reason };
 }
 
 export function unknownNumber(reason: UnknownNumberReason): NumericBinding {
@@ -193,6 +228,37 @@ export interface AtomBindings {
    */
   readonly knownTalents?: readonly { readonly name: string; readonly taken: boolean }[];
   /**
+   * DoTs whose ticking state IS established, keyed by SimulationCraft name.
+   *
+   * Same shape and same rule as `knownBuffs`: anything absent becomes an
+   * unresolved BOOLEAN atom and is enumerated, never `false`.
+   */
+  readonly knownDotsTicking?: readonly { readonly name: string; readonly ticking: boolean }[];
+  /**
+   * Cooldowns whose REMAINING time is established, in SECONDS, keyed by name.
+   *
+   * A LIST rather than a single `cooldownRemains` field, and that is
+   * deliberate: one scalar would bind whichever cooldown the expression happened
+   * to name, so a derivation about Kingsbane would silently answer a question
+   * about Deathmark. Keying by name makes the wrong-ability answer
+   * unrepresentable.
+   *
+   * An absent cooldown is UNKNOWN_NUMBER, never 0 — zero reads as "ready now",
+   * which is the most dangerous possible default for a `remains<=` comparison.
+   */
+  readonly knownCooldownRemainsSeconds?: readonly {
+    readonly name: string;
+    /**
+     * SECONDS, as a full `NumericBinding`.
+     *
+     * A binding rather than a bare number because a cooldown derived from an
+     * observed cast is usually BOUNDED, not exact — SimulationCraft starts a
+     * cooldown with a non-negative sampled lag delay. A bare number here would
+     * have forced that bound to be flattened into a value nobody proved.
+     */
+    readonly remainsSeconds: NumericBinding;
+  }[];
+  /**
    * `remains` — the acting action's own DoT remaining duration, IN SECONDS.
    *
    * UNITS ARE LOAD-BEARING. SimulationCraft expression literals are seconds:
@@ -211,16 +277,24 @@ export interface AtomBindings {
   readonly dotRemainsSeconds: NumericBinding;
 }
 
-export type TraceAtomBinding = "KNOWN" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
+export type TraceAtomBinding = "KNOWN" | "BOUNDED" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
 
 /** JSON-safe: arrays and records only, no Map, no undefined. */
 export interface TraceAtom {
   readonly key: string;
   readonly shape: AtomShape;
   readonly binding: TraceAtomBinding;
-  /** The exact value when KNOWN; `null` when the atom is unresolved. */
+  /**
+   * The exact value when KNOWN; `null` otherwise — INCLUDING when BOUNDED.
+   *
+   * A bound is reported in `atLeast`, never here. Putting it in `value` would
+   * let a reader treat a proven minimum as the magnitude itself, which is the
+   * exact overstatement this binding state exists to prevent.
+   */
   readonly value: number | null;
-  /** Present only for UNKNOWN_NUMBER, so a finding can say which gap this was. */
+  /** The proven lower bound when BOUNDED; `null` otherwise. */
+  readonly atLeast: number | null;
+  /** Present for BOUNDED and UNKNOWN_NUMBER, so a finding can say which gap this was. */
   readonly unknownNumberReason: UnknownNumberReason | null;
 }
 
@@ -282,15 +356,53 @@ export type ExpressionEvaluation =
  */
 const UNKNOWN: unique symbol = Symbol("UNKNOWN_NUMBER");
 
-type WorldValue = number | typeof UNKNOWN;
+/**
+ * A magnitude known only to be at least `atLeast`, inside one world.
+ *
+ * Kept structurally distinct from `number` so every operator has to decide what
+ * to do with it. Arithmetic refuses; comparisons decide only when the bound
+ * settles them. See `compareWithBounds`.
+ */
+interface BoundedValue {
+  readonly atLeastValue: number;
+}
+
+type WorldValue = number | BoundedValue | typeof UNKNOWN;
 
 function isUnknownValue(value: WorldValue): value is typeof UNKNOWN {
   return value === UNKNOWN;
 }
 
+function isBoundedValue(value: WorldValue): value is BoundedValue {
+  return typeof value === "object" && value !== null && "atLeastValue" in value;
+}
+
+function isExactValue(value: WorldValue): value is number {
+  return typeof value === "number";
+}
+
+/**
+ * A binding as this world sees it.
+ *
+ * One function so no case forgets the BOUNDED state and silently drops a proven
+ * bound to UNKNOWN — or, worse, promotes it to an exact value.
+ */
+function worldValueOf(binding: NumericBinding): WorldValue {
+  if (binding.state === "KNOWN_NUMBER") return binding.value;
+  if (binding.state === "BOUNDED_NUMBER") return { atLeastValue: binding.atLeast };
+  return UNKNOWN;
+}
+
 /** SimulationCraft has no boolean type: zero is false, everything else is true. */
 function truthOf(value: WorldValue): TruthValue {
   if (isUnknownValue(value)) return "UNKNOWN_STATE";
+  if (isBoundedValue(value)) {
+    // A bound could be used as a truth — "at least 57, so non-zero, so TRUE" —
+    // and deliberately is not. SimulationCraft's zero-is-false coercion applies
+    // to a VALUE, and a bound is not one. No pinned expression uses a magnitude
+    // as a bare truth, so nothing is lost by refusing.
+    return "UNKNOWN_STATE";
+  }
   return value !== 0 ? "TRUE" : "FALSE";
 }
 
@@ -331,6 +443,75 @@ function notTruth(operand: TruthValue): TruthValue {
   return "UNKNOWN_STATE";
 }
 
+/**
+ * Comparison where either side may be a proven LOWER bound.
+ *
+ * Only the deductions that follow from a lower bound alone are made. With
+ * `x >= L` and a constant `C`:
+ *
+ *     x <= C   FALSE when L > C        (x is at least L, and L already exceeds C)
+ *     x <  C   FALSE when L >= C
+ *     x >  C   TRUE  when L > C
+ *     x >= C   TRUE  when L >= C
+ *     x =  C   FALSE when L > C
+ *
+ * Everything else is UNKNOWN, including every case where the bound falls on the
+ * undecided side of the threshold. `x <= C` with `L <= C` is NOT true — the real
+ * value could be anywhere above `L`.
+ *
+ * Two bounded operands decide almost nothing and are not special-cased beyond
+ * the one sound rule: `left >= L` and `right >= R` gives `left > right` only if
+ * we knew an upper bound for `right`, which we never do. So they yield UNKNOWN.
+ *
+ * This is NOT an interval algebra and must not grow into one. Each rule above
+ * exists because a pinned expression needs it.
+ */
+function compareWithBounds(operator: ComparisonOperator, left: WorldValue, right: WorldValue): WorldValue {
+  if (isUnknownValue(left) || isUnknownValue(right)) return UNKNOWN;
+
+  if (isExactValue(left) && isExactValue(right)) {
+    return compare(operator, left, right);
+  }
+
+  // Only a bounded LEFT against an exact RIGHT is decidable, which is the shape
+  // every pinned `cooldown.x.remains <= C` line takes.
+  if (isBoundedValue(left) && isExactValue(right)) {
+    const lower = left.atLeastValue;
+    switch (operator) {
+      case "<=":
+        return lower > right ? 0 : UNKNOWN;
+      case "<":
+        return lower >= right ? 0 : UNKNOWN;
+      case ">":
+        return lower > right ? 1 : UNKNOWN;
+      case ">=":
+        return lower >= right ? 1 : UNKNOWN;
+      case "=":
+        return lower > right ? 0 : UNKNOWN;
+    }
+  }
+
+  // An exact LEFT against a bounded RIGHT is the mirror, and is included because
+  // the operand order in an authority line is not ours to choose.
+  if (isExactValue(left) && isBoundedValue(right)) {
+    const lower = right.atLeastValue;
+    switch (operator) {
+      case ">=":
+        return left < lower ? 0 : UNKNOWN;
+      case ">":
+        return left <= lower ? 0 : UNKNOWN;
+      case "<":
+        return left < lower ? 1 : UNKNOWN;
+      case "<=":
+        return left <= lower ? 1 : UNKNOWN;
+      case "=":
+        return left < lower ? 0 : UNKNOWN;
+    }
+  }
+
+  return UNKNOWN;
+}
+
 function compare(operator: ComparisonOperator, left: number, right: number): number {
   switch (operator) {
     case ">=":
@@ -363,17 +544,29 @@ function evaluateInWorld(
     case "NUMBER":
       return node.value;
     case "COMBO_POINTS":
-      return bindings.comboPoints.state === "KNOWN_NUMBER" ? bindings.comboPoints.value : UNKNOWN;
+      return worldValueOf(bindings.comboPoints);
     case "COMBO_POINTS_DEFICIT":
-      return bindings.comboPointsDeficit.state === "KNOWN_NUMBER"
-        ? bindings.comboPointsDeficit.value
-        : UNKNOWN;
+      return worldValueOf(bindings.comboPointsDeficit);
     case "ENERGY_PCT":
-      return bindings.energyPct.state === "KNOWN_NUMBER" ? bindings.energyPct.value : UNKNOWN;
+      return worldValueOf(bindings.energyPct);
     case "FIGHT_REMAINS":
       // No binding field exists, and none may be added without deciding that
       // hindsight is admissible. See the module header.
       return UNKNOWN;
+    case "TARGET_TIME_TO_DIE":
+      // Predictive, exactly like `fight_remains`, and unbindable for the same
+      // reason. There is no binding field to read.
+      return UNKNOWN;
+    case "DOT_TICKING": {
+      const known = bindings.knownDotsTicking?.find((entry) => entry.name === node.dotName);
+      if (known !== undefined) return known.ticking ? 1 : 0;
+      const assigned = world.get(`dot.${node.dotName}.ticking`);
+      return assigned === undefined ? UNKNOWN : assigned ? 1 : 0;
+    }
+    case "COOLDOWN_REMAINS": {
+      const entry = bindings.knownCooldownRemainsSeconds?.find((item) => item.name === node.cooldownName);
+      return entry === undefined ? UNKNOWN : worldValueOf(entry.remainsSeconds);
+    }
     case "BUFF_REMAINS":
       // Understood syntax; this build reconstructs no aura duration.
       return UNKNOWN;
@@ -411,14 +604,20 @@ function evaluateInWorld(
       // editing `AtomBindings`.
       return UNKNOWN;
     case "DOT_REMAINS":
-      return bindings.dotRemainsSeconds.state === "KNOWN_NUMBER" ? bindings.dotRemainsSeconds.value : UNKNOWN;
+      return worldValueOf(bindings.dotRemainsSeconds);
     case "MULTIPLY":
     case "ADD": {
       const left = evaluateInWorld(node.left, bindings, world);
       const right = evaluateInWorld(node.right, bindings, world);
       // Arithmetic on a magnitude nobody established is undecided. It is not
       // zero, and it is not an excuse to pick a bound.
+      //
+      // A PROVEN bound is refused here too. `L + k` would be a valid lower bound
+      // and `L * k` would not be for negative `k`, so propagating bounds through
+      // arithmetic needs sign reasoning this evaluator does not do. No pinned
+      // expression does arithmetic on a bounded magnitude, so it fails closed.
       if (isUnknownValue(left) || isUnknownValue(right)) return UNKNOWN;
+      if (isBoundedValue(left) || isBoundedValue(right)) return UNKNOWN;
       // SimulationCraft has no boolean type: a truth operand is already 1 or 0
       // here, so `6*talent.razor_wire` needs no coercion rule of its own.
       return node.kind === "MULTIPLY" ? left * right : left + right;
@@ -429,9 +628,9 @@ function evaluateInWorld(
       const left = evaluateInWorld(node.left, bindings, world);
       const right = evaluateInWorld(node.right, bindings, world);
       // A comparison against a magnitude nobody established is undecided. It is
-      // NOT false, and it is NOT an excuse to pick a bound.
-      if (isUnknownValue(left) || isUnknownValue(right)) return UNKNOWN;
-      return compare(node.operator, left, right);
+      // NOT false, and it is NOT an excuse to pick a bound. A PROVEN bound is a
+      // different matter and may settle the comparison; see `compareWithBounds`.
+      return compareWithBounds(node.operator, left, right);
     }
     case "AND":
       return valueOf(
@@ -459,39 +658,67 @@ interface ResolvedAtom {
 
 function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): ResolvedAtom {
   const known = (value: number): ResolvedAtom => ({
-    trace: { key, shape, binding: "KNOWN", value, unknownNumberReason: null },
+    trace: { key, shape, binding: "KNOWN", value, atLeast: null, unknownNumberReason: null },
+    enumerate: false,
+  });
+  const boundedNumeric = (atLeast: number, reason: UnknownNumberReason): ResolvedAtom => ({
+    // `value` stays null. The bound lives in its own field so it cannot be read
+    // as the magnitude.
+    trace: { key, shape, binding: "BOUNDED", value: null, atLeast, unknownNumberReason: reason },
     enumerate: false,
   });
   const unknownNumeric = (reason: UnknownNumberReason): ResolvedAtom => ({
-    trace: { key, shape, binding: "UNKNOWN_NUMBER", value: null, unknownNumberReason: reason },
+    trace: {
+      key,
+      shape,
+      binding: "UNKNOWN_NUMBER",
+      value: null,
+      atLeast: null,
+      unknownNumberReason: reason,
+    },
     enumerate: false,
   });
+  /** Routes any binding state to the right trace shape, so no site forgets one. */
+  const fromBinding = (binding: NumericBinding): ResolvedAtom => {
+    if (binding.state === "KNOWN_NUMBER") return known(binding.value);
+    if (binding.state === "BOUNDED_NUMBER") return boundedNumeric(binding.atLeast, binding.reason);
+    return unknownNumeric(binding.reason);
+  };
 
   if (key === "combo_points") {
-    return bindings.comboPoints.state === "KNOWN_NUMBER"
-      ? known(bindings.comboPoints.value)
-      : unknownNumeric(bindings.comboPoints.reason);
+    return fromBinding(bindings.comboPoints);
   }
   if (key === "combo_points.deficit") {
-    return bindings.comboPointsDeficit.state === "KNOWN_NUMBER"
-      ? known(bindings.comboPointsDeficit.value)
-      : unknownNumeric(bindings.comboPointsDeficit.reason);
+    return fromBinding(bindings.comboPointsDeficit);
   }
   if (key === "energy.pct") {
-    return bindings.energyPct.state === "KNOWN_NUMBER"
-      ? known(bindings.energyPct.value)
-      : unknownNumeric(bindings.energyPct.reason);
+    return fromBinding(bindings.energyPct);
   }
   if (key === "fight_remains") return unknownNumeric("PREDICTIVE_NOT_PLAYER_KNOWABLE");
   if (key === "remains") {
-    return bindings.dotRemainsSeconds.state === "KNOWN_NUMBER"
-      ? known(bindings.dotRemainsSeconds.value)
-      : unknownNumeric(bindings.dotRemainsSeconds.reason);
+    return fromBinding(bindings.dotRemainsSeconds);
   }
   // `pmultiplier` is a snapshot this project does not reconstruct. It reports
   // STATE_NOT_MODELLED rather than STATE_NOT_ESTABLISHED: the remedy is not a
   // better capture, it is a model we have decided not to build.
   if (key === "pmultiplier") return unknownNumeric("STATE_NOT_MODELLED");
+  // Predictive, exactly like `fight_remains`. The remedy is not a better
+  // capture: the player did not know how long the target had left either.
+  if (key === "target.time_to_die") return unknownNumeric("PREDICTIVE_NOT_PLAYER_KNOWABLE");
+
+  const cooldown = /^cooldown\.(.+)\.remains$/.exec(key);
+  const cooldownName = cooldown?.[1];
+  if (cooldownName !== undefined) {
+    const knownCooldown = (bindings.knownCooldownRemainsSeconds ?? []).find(
+      (entry) => entry.name === cooldownName,
+    );
+    // Absent is UNKNOWN_NUMBER, never zero. STATE_NOT_ESTABLISHED rather than
+    // STATE_NOT_MODELLED: a cooldown model DOES exist, and the remedy for a
+    // missing one is evidence — an observed cast and a pinned base cooldown.
+    return knownCooldown === undefined
+      ? unknownNumeric("STATE_NOT_ESTABLISHED")
+      : fromBinding(knownCooldown.remainsSeconds);
+  }
 
   if (shape === "NUMERIC") {
     // `buff.<name>.remains` and anything numeric added later without a binding.
@@ -515,6 +742,14 @@ function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): Res
   if (key === "stealthed.rogue" && bindings.stealthedRogue === true) {
     return known(1);
   }
+  const dot = /^dot\.(.+)\.ticking$/.exec(key);
+  const dotName = dot?.[1];
+  const knownDot =
+    dotName === undefined
+      ? undefined
+      : (bindings.knownDotsTicking ?? []).find((entry) => entry.name === dotName);
+  if (knownDot !== undefined) return known(knownDot.ticking ? 1 : 0);
+
   const talent = /^talent\.(.+)$/.exec(key);
   const talentName = talent?.[1];
   const knownTalent =
@@ -527,7 +762,14 @@ function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): Res
   // binding field, so it always enumerates.
 
   return {
-    trace: { key, shape, binding: "UNRESOLVED_BOOLEAN", value: null, unknownNumberReason: null },
+    trace: {
+      key,
+      shape,
+      binding: "UNRESOLVED_BOOLEAN",
+      value: null,
+      atLeast: null,
+      unknownNumberReason: null,
+    },
     enumerate: true,
   };
 }
