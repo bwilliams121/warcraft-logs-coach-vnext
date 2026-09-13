@@ -60,6 +60,38 @@ export type ExpressionNode =
   | { readonly kind: "BUFF_UP"; readonly buffName: string }
   /** `buff.<name>.remains` — understood syntax, no state model in M5-B. */
   | { readonly kind: "BUFF_REMAINS"; readonly buffName: string }
+  /**
+   * `stealthed.rogue` — TRUTH-shaped.
+   *
+   * ONE scope, and the name is a trap worth spelling out. The pinned expression
+   * `stealthed.rogue` binds to the mask `STEALTH_BASIC | STEALTH_ROGUE`
+   * (sc_rogue.cpp:9658-9662) — Stealth, Vanish, Subterfuge and Shadow Dance. The
+   * ENUM CONSTANT named `STEALTH_ROGUE` is only Subterfuge + Shadow Dance
+   * (sc_rogue.cpp:44). They are different sets, and `stealthed.basic`,
+   * `stealthed.all` and `stealthed.improved_garrote` are different sets again —
+   * so only the one scope this project has evidence for is representable.
+   */
+  | { readonly kind: "STEALTHED_ROGUE" }
+  /**
+   * `talent.<name>` — TRUTH-shaped. A static build fact, `->ok()` in SimC.
+   *
+   * The name never contains a dot. `talent.scent_of_blood.rank` is a MAGNITUDE
+   * and is a different expression; refusing it at the parser is what stops a rank
+   * from being read as a boolean.
+   */
+  | { readonly kind: "TALENT"; readonly talentName: string }
+  /**
+   * `variable.single_target` — TRUTH-shaped, and deliberately the only variable.
+   *
+   * A generic `variable.<name>` node would be WRONG. The pinned APL also contains
+   * `variable.trinket_sync_slot`, which is compared against `1` and `2` and is
+   * therefore a magnitude. One node kind cannot be both shapes, and guessing
+   * per-name is exactly the inference this layer must not make. The one variable
+   * whose shape is established by its own assignment
+   * (`value=spell_targets.fan_of_knives=1`, a comparison) is representable; the
+   * rest stay refused.
+   */
+  | { readonly kind: "VARIABLE_SINGLE_TARGET" }
   | { readonly kind: "NOT"; readonly operand: ExpressionNode }
   | {
       readonly kind: "COMPARISON";
@@ -115,6 +147,17 @@ export function atomOf(node: ExpressionNode): AtomDescriptor | null {
       return { key: `buff.${node.buffName}.up`, shape: "BOOLEAN" };
     case "BUFF_REMAINS":
       return { key: `buff.${node.buffName}.remains`, shape: "NUMERIC" };
+    case "STEALTHED_ROGUE":
+      return { key: "stealthed.rogue", shape: "BOOLEAN" };
+    case "TALENT":
+      // Keyed by name, so every occurrence of `talent.blindside` correlates and
+      // `talent.improved_ambush` stays independent of it. The key namespace is
+      // `talent.` and cannot collide with a buff key — which matters because the
+      // Blindside TALENT (328085) and the Blindside PROC BUFF (121153) are
+      // different facts and must never share a world assignment.
+      return { key: `talent.${node.talentName}`, shape: "BOOLEAN" };
+    case "VARIABLE_SINGLE_TARGET":
+      return { key: "variable.single_target", shape: "BOOLEAN" };
     default:
       return null;
   }

@@ -258,11 +258,16 @@ describe("atom shape is declared by syntax, not by what happened to be bound", (
 
 describe("unsupported syntax never enters the truth domain", () => {
   it.each([
-    "talent.darkest_night",
     "target.time_to_die<12",
     "spell_targets.fan_of_knives>=4",
     "dot.rupture.ticking",
-    "variable.single_target",
+    // RE-POINTED for M5-C2. `talent.<name>` and `variable.single_target` became
+    // supported atoms; a talent RANK and every other variable did not, and they
+    // keep proving that neither `talent.` nor `variable.` is an open namespace.
+    "talent.scent_of_blood.rank>=2",
+    "variable.trinket_sync_slot=1",
+    "stealthed.all",
+    "pmultiplier<=1",
     "buff.darkest_night.stack>=2",
     "energy.regen_combined>40",
     "combo_points>?5",
@@ -287,7 +292,8 @@ describe("unsupported syntax never enters the truth domain", () => {
     expect(supported.trace.atoms).toHaveLength(1);
 
     // Unsupported syntax: no evaluation happens at all.
-    const refused = parseSimcExpression("talent.darkest_night");
+    // RE-POINTED for M5-C2 — `talent.darkest_night` parses now; a rank does not.
+    const refused = parseSimcExpression("talent.scent_of_blood.rank");
     expect(refused.ok).toBe(false);
   });
 });

@@ -11,6 +11,9 @@
  *                   fight_remains
  *                   buff.<name>.up
  *                   buff.<name>.remains
+ *                   stealthed.rogue            (M5-C2)
+ *                   talent.<name>              (M5-C2, dot-free name)
+ *                   variable.single_target     (M5-C2, that one variable only)
  *
  * PRECEDENCE, loosest to tightest:
  *
@@ -173,6 +176,15 @@ function rejectUnsupportedContinuation(cursor: Cursor): void {
 
 const BUFF_UP = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.up$/;
 const BUFF_REMAINS = /^buff\.([A-Za-z_][A-Za-z0-9_]*)\.remains$/;
+/**
+ * `talent.<name>`, where the name contains NO dot.
+ *
+ * The anchored, dot-free name is the whole safety property. `talent.x` is a
+ * truth-shaped `->ok()` check, but `talent.scent_of_blood.rank` is a MAGNITUDE.
+ * A pattern that allowed dots would parse the rank as a boolean atom and let a
+ * world assignment stand in for a number.
+ */
+const TALENT = /^talent\.([A-Za-z_][A-Za-z0-9_]*)$/;
 
 function parseIdentifier(cursor: Cursor): ExpressionNode {
   const start = cursor.index;
@@ -188,6 +200,20 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
   if (raw === "energy.pct") return { kind: "ENERGY_PCT" };
   if (raw === "fight_remains") return { kind: "FIGHT_REMAINS" };
 
+  // EXACT matches only. `stealthed.basic`, `stealthed.all`,
+  // `stealthed.mantle` and `stealthed.improved_garrote` denote DIFFERENT masks
+  // and are refused rather than folded into this one.
+  if (raw === "stealthed.rogue") return { kind: "STEALTHED_ROGUE" };
+  // The one variable whose shape is established. Every other `variable.<name>`
+  // is refused — see the AST node comment for why a generic rule would be wrong.
+  if (raw === "variable.single_target") return { kind: "VARIABLE_SINGLE_TARGET" };
+
+  const talent = TALENT.exec(raw);
+  if (talent !== null) {
+    const name = talent[1];
+    if (name !== undefined) return { kind: "TALENT", talentName: name };
+  }
+
   const up = BUFF_UP.exec(raw);
   if (up !== null) {
     const name = up[1];
@@ -200,10 +226,12 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
     if (name !== undefined) return { kind: "BUFF_REMAINS", buffName: name };
   }
 
-  // Everything else is refused. `talent.x`, `spell_targets.y`, `variable.z`,
-  // `target.time_to_die`, `dot.y.ticking`, `buff.x.stack`, `stealthed.rogue` and
-  // `energy.regen_combined` all land here. Note that `energy.pct` matching
-  // exactly does NOT make `energy.` a supported namespace.
+  // Everything else is refused. `spell_targets.y`, `target.time_to_die`,
+  // `dot.y.ticking`, `buff.x.stack`, `energy.regen_combined`,
+  // `talent.x.rank`, `variable.trinket_sync_slot`, `stealthed.all` and
+  // `pmultiplier` all land here. Note that `energy.pct` matching exactly does
+  // NOT make `energy.` a supported namespace, and the same holds for the
+  // `stealthed.`, `talent.` and `variable.` namespaces added in M5-C2.
   throw new ParseError("UNSUPPORTED_IDENTIFIER", raw, start);
 }
 

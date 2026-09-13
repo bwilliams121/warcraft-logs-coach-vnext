@@ -169,10 +169,12 @@ describe("MUTATION: losing correlated-atom identity", () => {
 });
 
 describe("MUTATION: treating unsupported syntax as false", () => {
-  // RE-POINTED for M5-B. This used to be `combo_points>=5&energy.pct>70`, which
-  // now parses. `talent.darkest_night` is still outside the subset, so the
+  // RE-POINTED twice. It was `combo_points>=5&energy.pct>70` until M5-B made
+  // `energy.pct` supported, then `combo_points>=5&talent.darkest_night` until
+  // M5-C2 made `talent.<name>` supported. `pmultiplier` is a real identifier
+  // from the pinned `core_dot` list that remains outside the subset, so the
   // mutation and the refusal both stay real.
-  const condition = "combo_points>=5&talent.darkest_night";
+  const condition = "combo_points>=5&pmultiplier<=1";
 
   it("would let a false conjunct short-circuit an unparsed fragment into a rejection", () => {
     // The mutation: parse what we understand, treat the rest as false. At 3
@@ -198,7 +200,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
     expect(parsed.ok).toBe(false);
     if (parsed.ok) throw new Error("expected a parse failure, not a silent pass");
     expect(parsed.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(parsed.fragment).toBe("talent.darkest_night");
+    expect(parsed.fragment).toBe("pmultiplier");
   });
 
   it("and there is no AST node an unsupported fragment could hide in", () => {

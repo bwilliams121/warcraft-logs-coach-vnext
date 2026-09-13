@@ -486,6 +486,82 @@ replayed, and no earlier reading is carried forward.
 
 ---
 
+## `wcl-assassination-vanish-ambush-gate.json`
+
+Five events from the same report and revision, captured on **2026-09-12** for
+M5-C2. This is a SEPARATE slice, not an addition to the Envenom fixture: it
+covers a different window and establishes different facts.
+
+| | |
+| --- | --- |
+| Report code | `A7R6kxPJ1hC8YQ4w` |
+| Fight ID | 7 |
+| **Report revision** | **30** — unchanged, and still load-bearing |
+| `gameVersion` / `logVersion` | 1 / 17 |
+| Actor | 19 (`Saruxoxo`, Assassination Rogue, `specID` 259) |
+| Retrieval | two ranges, `limit` 10,000, `includeResources: true`, `dataType: All`, `hostilityType` omitted |
+
+The five events, in captured order:
+
+| `timestamp` | `type` | `abilityGameID` | Why it is here |
+| --- | --- | --- | --- |
+| 2,004,589 | `combatantinfo` | — | carries `talentTree`, 76 entries |
+| 2,176,120 | `applybuff` | 11327 | the Vanish BUFF, source 19 → target 19 |
+| 2,176,120 | `cast` | 1856 | the Vanish ACTION — decision point P |
+| 2,176,580 | `cast` | 703 | Garrote — decision point Q |
+| 2,176,580 | `removebuff` | 11327 | the Vanish buff being consumed |
+
+### What makes this slice load-bearing
+
+**The last two events share a timestamp, and their ORDER is the evidence.** The
+`removebuff` sits AFTER the Garrote cast in canonical order, so the Vanish buff
+is observably up at Q and observably gone immediately after. That is what lets
+M4's `presenceAt` prove ACTIVE at Q from an observed APPLICATION, with no
+duration invented anywhere. A slice holding only the cast could not establish it,
+and a query keyed on timestamp rather than canonical position would get it wrong.
+
+**1856 and 11327 are different identities.** The action the player pressed and
+the buff it applied. `stealthed.rogue` is satisfied by the BUFF only.
+
+### Verified facts this slice establishes
+
+- `stealthed.rogue` resolves TRUE at the Garrote decision point, anchored on the
+  observed `applybuff` of 11327.
+- Actor 19's real build, read through the normalizer's `talentTree`:
+  - `improved_ambush` **NOT_SELECTED** — node 90692 carries entry 117152
+    (Tight Spender), not 112580. A node-presence rule would invert this.
+  - `shrouded_suffocation` **SELECTED** — entry 112669 at node 90776.
+  - `blindside` **UNKNOWN** — the node is absent, which M5-C2 refuses to read as
+    "not taken".
+- The pinned `default[4]` Ambush gate therefore resolves **FALSE** here, while
+  `stealthed.rogue` is TRUE. Stealth does not imply Ambush.
+
+### What it does NOT establish
+
+- That Garrote was globally selected. Reaching `core_dot` requires passing
+  `default[5] cds`, whose condition is still outside the supported subset.
+- That Ambush was unusable. That is action readiness, a different question with a
+  different stealth mask.
+- Anything about `variable.single_target`. It remains UNKNOWN.
+- Anything about ability 8676. It appears **zero** times in this fight, for both
+  Rogues, which is expected for this build and is not an error.
+
+Reproduce:
+
+```powershell
+# .probe/m5c2-fixture.probe.ts captures both ranges, then:
+node scripts/sanitize-probe.mjs `
+  .probe/m5c2-fixture-source.json `
+  wcl-assassination-vanish-ambush-gate.json `
+  --indices 0,1,2,3,4
+
+# then Prettier, which reflows short numeric arrays in the combatantinfo gear
+# entries. Whitespace only — the parsed payload is byte-identical to the capture.
+npx prettier --write tests/fixtures/wcl/events/wcl-assassination-vanish-ambush-gate.json
+```
+
+---
+
 # Still NOT ESTABLISHED
 
 ## `resourcechange` attached snapshot timing

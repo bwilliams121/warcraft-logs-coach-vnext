@@ -1,0 +1,467 @@
+#!/usr/bin/env node
+/**
+ * Deterministic SimulationCraft talent-identity extractor.
+ *
+ * Reads the generated trait table from ONE pinned SimulationCraft commit and
+ * emits the narrow Assassination talent slice M5-C2 needs. Run manually; never
+ * at runtime.
+ *
+ * WHY THIS EXISTS, AND WHY IT IS NOT A TALENT DATABASE
+ *
+ * The pinned `default[4]` Ambush condition asks three `talent.<name>` questions.
+ * Answering them needs a mapping from SimulationCraft's talent NAME to the
+ * numeric ids a Warcraft Logs `combatantinfo` actually carries. That mapping is
+ * machine-readable at the pinned commit, so it is extracted rather than typed.
+ *
+ * Only the talents a supported decision needs are emitted. This is the same rule
+ * `rogue-abilities.ts` follows: entries appear when a decision requires them,
+ * never speculatively.
+ *
+ * THE LOAD-BEARING PART IS THE CHOICE NODE
+ *
+ * A WCL talent entry is `{ id, rank, nodeId }`. A talent is NOT selected merely
+ * because its NODE appears: a choice node offers several entries and the player
+ * picked one of them. Actor 19's tree contains node 90692 — the Improved Ambush
+ * node — with entry 117152, which is Tight Spender. Reading node presence as
+ * selection would have resolved `talent.improved_ambush` TRUE when it is FALSE.
+ *
+ * So every emitted talent carries its sibling entries at the same node, and the
+ * extractor FAILS if a talent it was asked for turns out to share a node with
+ * entries it did not enumerate.
+ *
+ *   node scripts/authority/extract-simc-talents.mjs \
+ *     --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+ *     --out src/data/game/rogue-talents.json
+ */
+
+import { createHash } from "node:crypto";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { dirname } from "node:path";
+import { pathToFileURL } from "node:url";
+
+const REPOSITORY = "https://github.com/simulationcraft/simc";
+const EXTRACTOR_VERSION = 1;
+const ARTIFACT_VERSION = 1;
+const DATASET_ID = "SIMC_TRAIT_ROGUE_ASSASSINATION_TALENTS";
+
+const ROGUE_CLASS_ID = 4;
+const ASSASSINATION_SPEC_ID = 259;
+
+const SOURCES = {
+  traitData: "engine/dbc/generated/trait_data.inc",
+  traitLayout: "engine/dbc/trait_data.hpp",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+};
+
+/** `trait_data_t::tree_index` values. */
+const TREE_INDEX = { CLASS: 1, SPECIALIZATION: 2, HERO: 3 };
+
+/** `trait_data_t::node_type` values, from the declaration comment. */
+const NODE_TYPE = { NORMAL: 0, TIERED: 1, CHOICE: 2, SUB_TREE_SELECTION: 3 };
+
+/**
+ * The talents M5-C2 requires, and the SimulationCraft binding for each.
+ *
+ * `simcName` is the token as it appears after `talent.` in the pinned APL.
+ * `displayNameEn` is the trait-table name `find_talent_spell` looks up.
+ */
+const REQUIRED_TALENTS = [
+  {
+    simcName: "improved_ambush",
+    displayNameEn: "Improved Ambush",
+    tree: "CLASS",
+    binding:
+      'sc_rogue.cpp:9993 talent.rogue.improved_ambush = find_talent_spell( talent_tree::CLASS, "Improved Ambush" )',
+  },
+  {
+    simcName: "shrouded_suffocation",
+    displayNameEn: "Shrouded Suffocation",
+    tree: "SPECIALIZATION",
+    binding:
+      'sc_rogue.cpp:10059 talent.assassination.shrouded_suffocation = find_talent_spell( talent_tree::SPECIALIZATION, "Shrouded Suffocation" )',
+  },
+  {
+    simcName: "blindside",
+    displayNameEn: "Blindside",
+    tree: "SPECIALIZATION",
+    binding:
+      'sc_rogue.cpp:10026 talent.assassination.blindside = find_talent_spell( talent_tree::SPECIALIZATION, "Blindside" )',
+  },
+  {
+    simcName: "improved_garrote",
+    displayNameEn: "Improved Garrote",
+    tree: "SPECIALIZATION",
+    binding:
+      'sc_rogue.cpp:10039 talent.assassination.improved_garrote = find_talent_spell( talent_tree::SPECIALIZATION, "Improved Garrote" )',
+  },
+];
+
+function fail(message) {
+  console.error(`EXTRACTION FAILED: ${message}`);
+  process.exit(1);
+}
+
+export function parseArgs(argv) {
+  const args = {};
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (!token.startsWith("--")) continue;
+    const key = token.slice(2);
+    const next = argv[i + 1];
+    args[key] = next === undefined || next.startsWith("--") ? true : next;
+    if (args[key] !== true) i += 1;
+  }
+  return args;
+}
+
+export function sourceHashProblem(path, expectedSha256, actualSha256) {
+  if (typeof expectedSha256 !== "string") return null;
+  if (expectedSha256 === actualSha256) return null;
+  return `${path} SHA-256 mismatch\n  expected ${expectedSha256}\n  actual   ${actualSha256}`;
+}
+
+/**
+ * Verifies the `trait_data_t` field order the row parser assumes.
+ *
+ * Same guard as the GCD extractor's `_gcd` index check: an upstream field
+ * inserted before `id_node` would shift every column silently.
+ */
+export function verifyTraitFieldOrder(headerText) {
+  const expected = [
+    "tree_index",
+    "id_class",
+    "id_trait_node_entry",
+    "id_node",
+    "max_ranks",
+    "req_points",
+    "id_trait_definition",
+    "id_spell",
+    "id_replace_spell",
+    "id_override_spell",
+    "row",
+    "col",
+    "selection_index",
+    "name",
+  ];
+
+  const lines = headerText.split(/\r?\n/);
+  let bodyStart = -1;
+  for (let i = 0; i < lines.length - 1; i += 1) {
+    if (lines[i]?.trim() !== "struct trait_data_t") continue;
+    if (lines[i + 1]?.trim() === "{") {
+      bodyStart = i + 2;
+      break;
+    }
+  }
+  if (bodyStart < 0) return { ok: false, error: "trait_data.hpp does not define struct trait_data_t" };
+
+  const member =
+    /^\s*(?:const\s+)?[A-Za-z_][A-Za-z0-9_:<>,\s]*?\*?\s+([A-Za-z_][A-Za-z0-9_]*)\s*(\[[^\]]*\])?\s*;/;
+  const fields = [];
+  for (let i = bodyStart; i < lines.length; i += 1) {
+    const line = (lines[i] ?? "").replace(/\/\/.*$/, "");
+    const trimmed = line.trim();
+    if (trimmed.length === 0) continue;
+    if (trimmed.includes("(")) break;
+    const match = member.exec(line);
+    if (match === null) continue;
+    fields.push(match[1]);
+    if (fields.length === expected.length) break;
+  }
+
+  for (let i = 0; i < expected.length; i += 1) {
+    if (fields[i] !== expected[i]) {
+      return {
+        ok: false,
+        error:
+          `trait_data_t field ${i} is '${String(fields[i])}', expected '${String(expected[i])}'. ` +
+          "The struct layout moved; do not adjust the row parser without re-verifying every value.",
+      };
+    }
+  }
+  return { ok: true, fields };
+}
+
+/**
+ * Parses the generated `__trait_data_data` rows.
+ *
+ * Anchored on the two brace-delimited spec arrays, which is what separates the
+ * leading scalars and the name from the trailing `id_sub_tree` / `node_type`.
+ */
+export function parseTraitRows(text) {
+  const rows = [];
+  const pattern =
+    /^\s*\{\s*(.+?),\s*"((?:[^"\\]|\\.)*)"\s*,\s*\{([^}]*)\}\s*,\s*\{([^}]*)\}\s*,\s*(\d+)\s*,\s*(\d+)\s*\}\s*,?\s*$/;
+
+  for (const line of text.split(/\r?\n/)) {
+    const match = pattern.exec(line);
+    if (match === null) continue;
+    const scalars = match[1].split(",").map((part) => part.trim());
+    if (scalars.length !== 13) continue;
+    const [treeIndex, classId, entryId, nodeId, maxRanks, , definitionId, spellId] = scalars.map((v) =>
+      Number.parseInt(v, 10),
+    );
+    if (!Number.isSafeInteger(entryId) || !Number.isSafeInteger(nodeId)) continue;
+
+    rows.push({
+      treeIndex,
+      classId,
+      traitEntryId: entryId,
+      traitNodeId: nodeId,
+      maxRanks,
+      traitDefinitionId: definitionId,
+      talentSpellId: spellId,
+      displayNameEn: match[2],
+      specIds: match[3]
+        .split(",")
+        .map((v) => Number.parseInt(v.trim(), 10))
+        .filter((v) => Number.isSafeInteger(v) && v > 0),
+      idSubTree: Number.parseInt(match[5], 10),
+      nodeType: Number.parseInt(match[6], 10),
+    });
+  }
+  return rows;
+}
+
+/**
+ * Resolves one required talent to a full record, including its node siblings.
+ *
+ * Fails loudly on anything ambiguous: a missing talent, a duplicate name in the
+ * same tree, or a node whose siblings cannot be enumerated.
+ */
+export function resolveTalent(rows, required) {
+  const treeIndex = TREE_INDEX[required.tree];
+  if (treeIndex === undefined) return { ok: false, error: `unknown tree '${required.tree}'` };
+
+  const matches = rows.filter(
+    (row) =>
+      row.classId === ROGUE_CLASS_ID &&
+      row.treeIndex === treeIndex &&
+      row.displayNameEn === required.displayNameEn,
+  );
+  if (matches.length === 0) {
+    return { ok: false, error: `talent '${required.displayNameEn}' not found in the ${required.tree} tree` };
+  }
+  if (matches.length > 1) {
+    return {
+      ok: false,
+      error: `talent '${required.displayNameEn}' matches ${String(matches.length)} rows and is ambiguous`,
+    };
+  }
+  const talent = matches[0];
+
+  // Spec-tree talents must be available to Assassination. A row scoped to other
+  // specs would mean this binding does not apply to the analyzed player.
+  if (treeIndex === TREE_INDEX.SPECIALIZATION && !talent.specIds.includes(ASSASSINATION_SPEC_ID)) {
+    return {
+      ok: false,
+      error: `talent '${required.displayNameEn}' is not available to spec ${String(ASSASSINATION_SPEC_ID)}`,
+    };
+  }
+
+  const siblings = rows.filter(
+    (row) =>
+      row.classId === ROGUE_CLASS_ID &&
+      row.traitNodeId === talent.traitNodeId &&
+      row.traitEntryId !== talent.traitEntryId,
+  );
+
+  // A choice node MUST have siblings, and a normal node must not. If that ever
+  // stops holding, the selection rule this artifact feeds is not the right one.
+  const isChoice = talent.nodeType === NODE_TYPE.CHOICE;
+  if (isChoice && siblings.length === 0) {
+    return { ok: false, error: `'${required.displayNameEn}' is a choice node with no alternative entries` };
+  }
+  if (!isChoice && siblings.length > 0) {
+    return {
+      ok: false,
+      error: `'${required.displayNameEn}' is node_type ${String(talent.nodeType)} but shares its node with ${String(siblings.length)} other entries`,
+    };
+  }
+
+  return {
+    ok: true,
+    talent: {
+      simcName: required.simcName,
+      displayNameEn: talent.displayNameEn,
+      tree: required.tree,
+      traitNodeId: talent.traitNodeId,
+      traitEntryId: talent.traitEntryId,
+      talentSpellId: talent.talentSpellId,
+      nodeType: isChoice ? "CHOICE" : "NORMAL",
+      alternativeEntries: siblings
+        .map((row) => ({
+          traitEntryId: row.traitEntryId,
+          displayNameEn: row.displayNameEn,
+          talentSpellId: row.talentSpellId,
+        }))
+        .sort((left, right) => left.traitEntryId - right.traitEntryId),
+      binding: required.binding,
+    },
+  };
+}
+
+export function parseClientDataVersion(text) {
+  const match = /^#define\s+CLIENT_DATA_WOW_VERSION\s+"([^"]+)"\s*$/m.exec(text);
+  return match === null ? null : match[1];
+}
+
+/** Prettier's `printWidth` for this repository. */
+const PRINT_WIDTH = 110;
+
+/** Serialises the artifact the way Prettier would. Shared rule with the GCD extractor. */
+export function formatArtifactJson(artifact) {
+  const lines = JSON.stringify(artifact, null, 2).split("\n");
+  const out = [];
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index] ?? "";
+    const opening = /^(\s*(?:"[^"]+":\s*)?)\[$/.exec(line);
+    if (opening === null) {
+      out.push(line);
+      continue;
+    }
+    const numbers = [];
+    let cursor = index + 1;
+    let allIntegers = true;
+    for (; cursor < lines.length; cursor += 1) {
+      const inner = (lines[cursor] ?? "").trim();
+      if (inner === "]" || inner === "],") break;
+      const element = /^(-?\d+),?$/.exec(inner);
+      if (element === null) {
+        allIntegers = false;
+        break;
+      }
+      numbers.push(element[1]);
+    }
+    const closing = (lines[cursor] ?? "").trim();
+    if (!allIntegers || numbers.length === 0 || (closing !== "]" && closing !== "],")) {
+      out.push(line);
+      continue;
+    }
+    const collapsed = `${opening[1]}[${numbers.join(", ")}${closing}`;
+    if (collapsed.length > PRINT_WIDTH) {
+      out.push(line);
+      continue;
+    }
+    out.push(collapsed);
+    index = cursor;
+  }
+  return `${out.join("\n")}\n`;
+}
+
+export function buildArtifact({ commitSha, sources, clientDataWowVersion, talents, extractedOn }) {
+  return {
+    artifactVersion: ARTIFACT_VERSION,
+    datasetId: DATASET_ID,
+    artifactRevision: `simc-${commitSha.slice(0, 8)}-${EXTRACTOR_VERSION}`,
+    provenance: {
+      repository: REPOSITORY,
+      commitSha,
+      sources,
+      clientDataWowVersion,
+      talentDataMethod: "MACHINE_EXTRACTED_TRAIT_RECORD",
+      extractedOn,
+      extractorVersion: EXTRACTOR_VERSION,
+      wclIdSpaceNote:
+        "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeId }. In the supported capture " +
+        "(report A7R6kxPJ1hC8YQ4w revision 30, logVersion 17, gameVersion 1) `id` equals " +
+        "trait_data_t::id_trait_node_entry and `nodeId` equals trait_data_t::id_node. Corroborated by three " +
+        "independent selected entries for two actors: Improved Garrote 112510/90625, Shrouded Suffocation " +
+        "112669/90776, and Tight Spender 117152/90692 at the Improved Ambush choice node. This equivalence " +
+        "is recorded for that capture and parser version; it is not claimed for Warcraft Logs in general.",
+      applicabilityNote:
+        "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against " +
+        "12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision " +
+        "moving is a regeneration trigger for a human, not a runtime condition.",
+    },
+    talents: [...talents].sort((left, right) => left.simcName.localeCompare(right.simcName)),
+  };
+}
+
+// --------------------------------------------------------------------------
+// CLI
+// --------------------------------------------------------------------------
+
+async function loadSource(args, key, path) {
+  const localFlag = `file-${key}`;
+  if (typeof args[localFlag] === "string") return readFileSync(args[localFlag]);
+  if (typeof args.sha !== "string" || !/^[0-9a-f]{40}$/.test(args.sha)) {
+    fail(`--sha must be a full 40-character commit SHA (or pass --${localFlag} for a local copy)`);
+  }
+  const url = `${REPOSITORY.replace("https://github.com", "https://raw.githubusercontent.com")}/${args.sha}/${path}`;
+  const response = await fetch(url, { headers: { "User-Agent": "wlc-vnext-extractor" } });
+  if (!response.ok) fail(`could not fetch pinned source (HTTP ${response.status}) from ${url}`);
+  return Buffer.from(await response.arrayBuffer());
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+
+  const loaded = {};
+  const sources = [];
+  for (const [key, path] of Object.entries(SOURCES)) {
+    const buffer = await loadSource(args, key, path);
+    const sha256 = createHash("sha256").update(buffer).digest("hex");
+    const problem = sourceHashProblem(path, args[`expect-${key}-sha256`], sha256);
+    if (problem !== null) fail(problem);
+    loaded[key] = buffer.toString("utf8");
+    sources.push({ path, sha256, byteLength: buffer.length });
+  }
+
+  const layout = verifyTraitFieldOrder(loaded.traitLayout);
+  if (!layout.ok) fail(layout.error);
+
+  const clientDataWowVersion = parseClientDataVersion(loaded.clientDataVersion);
+  if (clientDataWowVersion === null) fail("client_data_version.inc has no CLIENT_DATA_WOW_VERSION");
+
+  const rows = parseTraitRows(loaded.traitData);
+  if (rows.length === 0) fail("trait_data.inc yielded no rows; the table format changed");
+
+  const talents = [];
+  const problems = [];
+  for (const required of REQUIRED_TALENTS) {
+    const resolved = resolveTalent(rows, required);
+    if (!resolved.ok) {
+      problems.push(resolved.error);
+      continue;
+    }
+    talents.push(resolved.talent);
+  }
+  if (problems.length > 0) {
+    console.error("EXTRACTION FAILED: the pinned trait data does not exhibit the required facts.\n");
+    for (const problem of problems) console.error(`  - ${problem}`);
+    console.error("\nDo not rewrite expectations to match. Report the discrepancy.");
+    process.exit(1);
+  }
+
+  const artifact = buildArtifact({
+    commitSha: typeof args.sha === "string" ? args.sha : "UNKNOWN",
+    sources,
+    clientDataWowVersion,
+    talents,
+    extractedOn:
+      typeof args["extracted-on"] === "string" ? args["extracted-on"] : new Date().toISOString().slice(0, 10),
+  });
+
+  const outPath = typeof args.out === "string" ? args.out : "src/data/game/rogue-talents.json";
+  mkdirSync(dirname(outPath), { recursive: true });
+  writeFileSync(outPath, formatArtifactJson(artifact), "utf8");
+
+  console.log(`Wrote ${outPath}`);
+  console.log(`  commit        ${artifact.provenance.commitSha}`);
+  console.log(`  client build  ${artifact.provenance.clientDataWowVersion}`);
+  console.log(`  trait rows    ${rows.length}`);
+  console.log(`  talents       ${artifact.talents.length}`);
+  for (const talent of artifact.talents) {
+    const alts = talent.alternativeEntries.map((a) => `${a.displayNameEn}(${a.traitEntryId})`).join(", ");
+    console.log(
+      `    ${talent.simcName.padEnd(22)} node ${talent.traitNodeId} entry ${talent.traitEntryId} ` +
+        `${talent.nodeType}${alts.length > 0 ? ` alt: ${alts}` : ""}`,
+    );
+  }
+  console.log("  required facts: VERIFIED");
+}
+
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  await main();
+}

@@ -3424,6 +3424,71 @@ classified as control flow it would be stepped over silently, whereas as a playe
 action it has no established lane, so rotational-slot narrowing stops at it and
 names it.
 
+## Stealth State Is Read Positively
+
+`stealthed.rogue` is the pinned expression, and it is NOT the similarly-named
+enum constant. It binds to `STEALTH_BASIC | STEALTH_ROGUE`, which is:
+
+    Stealth        1784
+    Vanish buff   11327
+    Subterfuge   115192
+    Shadow Dance  (Subtlety)
+
+It EXCLUDES Shadowmeld and Improved Garrote. Improved Garrote matters in
+practice, because the real Vanish → Garrote sequence applies it at the same
+instant the Vanish buff drops — a mask including it would keep reporting
+"stealthed" after the window closed.
+
+The Vanish ACTION (1856) and the Vanish BUFF (11327) are different identities.
+Only the buff satisfies the expression.
+
+The binding is asymmetric on purpose: **TRUE when a contributor is proven ACTIVE,
+UNKNOWN otherwise.** There is no FALSE. Proving FALSE would require proving four
+auras inactive, and silence across them establishes nothing — a pre-pull
+application, an unverified capability and a failed page all look identical.
+Nothing needs FALSE, so nothing manufactures it.
+
+M4 is not extended for this. The specialization owns the interpretation that
+these particular aura identities mean `stealthed.rogue`; M4 stays factual.
+
+## Talent State and Choice Nodes
+
+A Warcraft Logs `combatantinfo` talent entry is `{ id, rank, nodeId }`.
+Selection is decided by ENTRY, never by node presence:
+
+    the talent's own entry is selected       -> SELECTED
+    a KNOWN sibling entry at that node       -> NOT_SELECTED
+    anything else                            -> UNKNOWN
+
+A choice node offers several entries. Reading node presence as selection is a
+real error, not a hypothetical one: the verified build has the Improved Ambush
+NODE carrying the Tight Spender ENTRY.
+
+Absence is UNKNOWN, not NOT_SELECTED. That stronger rule would need a contract
+that `talentTree` enumerates unselected nodes, which this build does not have and
+does not need — the decisive facts are positive ones.
+
+## The Ambush Gate Is Not Action Selection
+
+M5-C2 answers one narrow question: does the pinned `default[4]` CONDITION hold at
+this decision point?
+
+It is not "should Ambush be cast" — that needs global traversal — and it is not
+"is Ambush executable", which is action readiness. The two genuinely differ: the
+APL condition reads `stealthed.rogue`, while `rogue_action_t::ready` reads
+`STEALTH_STANCE`, which also includes Shadowmeld, and a Blindside proc waives the
+readiness requirement without touching the condition.
+
+For the verified build the gate is FALSE while `stealthed.rogue` is TRUE. Stealth
+does not imply Ambush; the build condition still decides.
+
+`variable.single_target` remains UNKNOWN. Its value is a per-scan count of Fan of
+Knives' live target list, and Warcraft Logs supplies no enemy positional state,
+so it is not historically reconstructible. It has no binding field at all.
+
+M5-C2 does NOT establish that Garrote was globally selected. Reaching `core_dot`
+requires passing `default[5] cds`, which remains outside the supported subset.
+
 ## Zero-GCD Actions Still End the Scan
 
 SimulationCraft's foreground scan returns the FIRST ready action and stops,

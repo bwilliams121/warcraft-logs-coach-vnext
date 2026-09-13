@@ -10,6 +10,7 @@ Two artifacts, two different questions:
 | --- | --- | --- |
 | `src/simc/data/rogue-assassination.apl.json` | what should be done | `extract-simc-apl.mjs` |
 | `src/data/game/rogue-gcd-semantics.json` | does doing it consume the rotational GCD | `extract-simc-gcd.mjs` |
+| `src/data/game/rogue-talents.json` | which talent did the player actually take | `extract-simc-talents.mjs` |
 
 They are pinned to the same commit and must be re-pinned together.
 
@@ -211,6 +212,79 @@ if they disagreed the answer would be `UNKNOWN_LANE`.
 additionally confirmed against `class_spells.inc`. That corroborates that an id
 IS a Rogue class ability; it never establishes that a given APL token uses it.
 Only the C++ reading does that.
+
+---
+
+# Talent extraction
+
+`extract-simc-talents.mjs` produces `src/data/game/rogue-talents.json`: the
+numeric trait identities for the talents the pinned `default[4]` Ambush condition
+names.
+
+## Why the alternatives travel with the talent
+
+A Warcraft Logs `combatantinfo` talent entry is `{ id, rank, nodeId }`. A CHOICE
+node offers several entries and the player picked one, so **node presence is not
+selection**. The real build this was verified against carries node 90692 — the
+Improved Ambush node — with entry 117152, which is Tight Spender. Matching on
+`nodeId` would have resolved `talent.improved_ambush` TRUE when it is FALSE.
+
+So every talent carries its sibling entries, and selection is decided by ENTRY id:
+
+| Observed | Result |
+| --- | --- |
+| the talent's own entry | `SELECTED` |
+| a known sibling at that node | `NOT_SELECTED` |
+| node present, entry unknown | `UNKNOWN` |
+| node absent | `UNKNOWN` — **not** `NOT_SELECTED` |
+
+## Currently pinned
+
+| | |
+| --- | --- |
+| **Commit** | `33622e9d1662ff0e451691edf85a6b49cc9d11d9` |
+| Client build | `12.1.0.69587` |
+| Artifact | `src/data/game/rogue-talents.json` |
+| Extracted | 2026-09-12 |
+
+| Source | SHA-256 |
+| --- | --- |
+| `engine/dbc/generated/trait_data.inc` | `7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2` |
+| `engine/dbc/trait_data.hpp` | `87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b` |
+| `engine/dbc/generated/client_data_version.inc` | `226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293` |
+
+```bash
+node scripts/authority/extract-simc-talents.mjs \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+  --extracted-on 2026-09-12 \
+  --expect-traitData-sha256 7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2 \
+  --expect-traitLayout-sha256 87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b \
+  --expect-clientDataVersion-sha256 226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293 \
+  --out src/data/game/rogue-talents.json
+```
+
+## What this extractor guarantees
+
+**The `trait_data_t` field order is verified, not assumed** — the first fourteen
+members are checked against the pinned declaration before any row is read.
+
+**Choice-node structure is verified both ways.** A `CHOICE` node with no siblings
+is a hard failure, and so is a `NORMAL` node that shares its node with other
+entries. Either would silently degrade selection into a node-presence rule.
+
+**A spec-tree talent must be available to Assassination**, or extraction aborts —
+a row scoped to other specs would not apply to the analyzed player.
+
+**A duplicate or missing talent name is a hard failure**, never a pick.
+
+## The Warcraft Logs id-space claim is scoped
+
+The equivalence `WCL id == id_trait_node_entry` and `WCL nodeId == id_node` was
+corroborated against **three independent selected entries for two actors** in one
+report (Improved Garrote 112510/90625, Shrouded Suffocation 112669/90776, Tight
+Spender 117152/90692). The artifact records that scope explicitly and does **not**
+claim the mapping holds for Warcraft Logs in general. Widening the claim needs a
+second independent report.
 
 ## Re-pinning either artifact
 

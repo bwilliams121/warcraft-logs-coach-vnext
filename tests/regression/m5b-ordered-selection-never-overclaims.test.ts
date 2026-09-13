@@ -350,11 +350,35 @@ describe("the global-selection non-goal, pinned against the real default list", 
       expect(evaluated.outcome).toBe("UNRESOLVED");
     }
 
-    //   default[4] ambush, default[5] cds   still outside the supported subset
-    for (const ordinal of [4, 5]) {
-      const parsed = parseSimcExpression(defaultLine(ordinal).conditionRaw ?? "");
-      expect(parsed.ok, `default[${String(ordinal)}] became evaluable`).toBe(false);
-    }
+    //   default[4] ambush   PARSES since M5-C2, but is not a global verdict
+    //
+    // RE-POINTED for M5-C2. `stealthed.rogue`, `talent.<name>` and
+    // `variable.single_target` became supported atoms, so this line parses now.
+    // That is the milestone's point and it does NOT weaken this test's claim:
+    // parsing one higher-priority line is not a global selection, and M5-C2
+    // still evaluates none of the other blockers below.
+    const ambush = parseSimcExpression(defaultLine(4).conditionRaw ?? "");
+    expect(ambush.ok, "default[4] should parse since M5-C2").toBe(true);
+
+    //   default[5] cds     still outside the supported subset
+    // `buff.scent_of_blood.stack` is a stack reference, which remains refused
+    // even though the `variable.` and `talent.` conjuncts around it now parse.
+    const cds = parseSimcExpression(defaultLine(5).conditionRaw ?? "");
+    expect(cds.ok, "default[5] became evaluable").toBe(false);
+  });
+
+  it("does not turn a parsed default[4] into a global Ambush claim", () => {
+    // The specific overclaim M5-C2 could invite. `default[4]` parsing means the
+    // Ambush GATE is evaluable at a decision point; it does not mean the APL
+    // selects Ambush, and nothing in M5-B or M5-C2 produces a global selection.
+    if (!loaded.ok) return;
+    const lookup = loaded.authority.actionsInList("default");
+    if (!lookup.found) return;
+
+    // Still no global traversal exists to be fooled: the scoped walk refuses to
+    // leave its own list, and `default` is not a list M5-B ever selects within.
+    const nested = lookup.actions.filter((action) => action.callsListName !== null);
+    expect(nested.length).toBeGreaterThan(0);
   });
 
   it("cannot evaluate the core_dot list that is unconditionally entered above spend", () => {

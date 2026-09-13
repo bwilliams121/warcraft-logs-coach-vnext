@@ -143,6 +143,40 @@ export interface AtomBindings {
   readonly energyPct: NumericBinding;
   /** Buffs whose state IS established. Everything else becomes an unresolved atom. */
   readonly knownBuffs: readonly { readonly name: string; readonly up: boolean }[];
+  /**
+   * `stealthed.rogue`, and ONLY when it is positively proven.
+   *
+   * THE TYPE IS `true`, NOT `boolean`, AND THAT IS THE POINT.
+   *
+   * Stealth is provable in one direction only. A contributor observed ACTIVE
+   * proves TRUE; nothing proves FALSE, because "not stealthed" would require
+   * every contributor proven inactive, and silence across four auras establishes
+   * nothing — a pre-pull application, an unverified capability and a failed page
+   * all look identical.
+   *
+   * A `boolean` here would let a caller write `{ stealthedRogue: false }` and
+   * have it treated as a KNOWN FALSE, which is a claim no evidence in this
+   * project can support. Narrowing the type to the single literal makes that
+   * unspellable rather than merely discouraged — the same device
+   * `ActionabilityEvidence` uses to keep a negative actionability claim out of
+   * the vocabulary.
+   *
+   * Omission is the ONLY other option, and it is safe: an unbound BOOLEAN atom is
+   * enumerated across correlated worlds, so a caller who omits it gets UNKNOWN or
+   * an answer that holds under both assignments. That is why this is optional
+   * where a magnitude is required — a forgotten magnitude would silently become a
+   * value, a forgotten truth cannot.
+   */
+  readonly stealthedRogue?: true;
+  /**
+   * Talents whose selection IS established. Same shape and same rule as
+   * `knownBuffs`: anything absent becomes an unresolved atom, never `false`.
+   *
+   * `taken` is the static build fact behind SimulationCraft's `talent.x->ok()`.
+   * It is NOT a proc buff — the Blindside talent and the Blindside proc are
+   * different facts with different spell ids and different atom keys.
+   */
+  readonly knownTalents?: readonly { readonly name: string; readonly taken: boolean }[];
 }
 
 export type TraceAtomBinding = "KNOWN" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
@@ -316,6 +350,26 @@ function evaluateInWorld(
       // Unreachable: every unresolved boolean atom is assigned in every world.
       return assigned === true ? 1 : 0;
     }
+    case "STEALTHED_ROGUE": {
+      // `=== true`, not `!== undefined`. The type already forbids `false`, and
+      // this is the second lock: a value forced through an unsafe cast falls to
+      // the enumerated world rather than becoming an authoritative FALSE.
+      if (bindings.stealthedRogue === true) return 1;
+      return world.get("stealthed.rogue") === true ? 1 : 0;
+    }
+    case "TALENT": {
+      const known = (bindings.knownTalents ?? []).find((entry) => entry.name === node.talentName);
+      if (known !== undefined) return known.taken ? 1 : 0;
+      return world.get(`talent.${node.talentName}`) === true ? 1 : 0;
+    }
+    case "VARIABLE_SINGLE_TARGET":
+      // NO BINDING FIELD EXISTS, deliberately — the same device that keeps
+      // `fight_remains` unbindable. Its value is `spell_targets.fan_of_knives=1`,
+      // a per-scan count of Fan of Knives' actual target list
+      // (action.cpp:3832-3842). Warcraft Logs supplies no enemy positional state,
+      // so that count is not historically reconstructible. Leaving out the field
+      // means no future caller can supply a guess without editing this type.
+      return world.get("variable.single_target") === true ? 1 : 0;
     case "NOT":
       return valueOf(notTruth(truthOf(evaluateInWorld(node.operand, bindings, world))));
     case "COMPARISON": {
@@ -378,6 +432,29 @@ function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): Res
   const name = buff?.[1];
   const knownBuff = name === undefined ? undefined : bindings.knownBuffs.find((e) => e.name === name);
   if (knownBuff !== undefined) return known(knownBuff.up ? 1 : 0);
+
+  // An ESTABLISHED truth is not enumerated. Beyond producing the right trace,
+  // this is what keeps the world count down: `default[4]` carries five boolean
+  // atoms, and enumerating all of them would be 32 worlds — past the cap, so a
+  // fully-bound gate would have come back UNSUPPORTED instead of decided.
+  //
+  // `=== true` for `stealthed.rogue`, matching `evaluateInWorld`. The two sites
+  // must agree: if this one accepted a cast-in `false` as KNOWN while the world
+  // evaluator treated it as unbound, the atom would be reported KNOWN in the
+  // trace and then enumerated anyway — a trace that disagrees with the answer.
+  if (key === "stealthed.rogue" && bindings.stealthedRogue === true) {
+    return known(1);
+  }
+  const talent = /^talent\.(.+)$/.exec(key);
+  const talentName = talent?.[1];
+  const knownTalent =
+    talentName === undefined
+      ? undefined
+      : (bindings.knownTalents ?? []).find((entry) => entry.name === talentName);
+  if (knownTalent !== undefined) return known(knownTalent.taken ? 1 : 0);
+
+  // `variable.single_target` deliberately never lands here as KNOWN: it has no
+  // binding field, so it always enumerates.
 
   return {
     trace: { key, shape, binding: "UNRESOLVED_BOOLEAN", value: null, unknownNumberReason: null },

@@ -157,13 +157,78 @@ describe("M5 invents no combat state", () => {
     }
   });
 
-  it("never reads aura state, so no absence can become inactivity", () => {
+  /**
+   * NARROWED for M5-C2, and the invariant is unchanged.
+   *
+   * M5-B banned every aura read outright, with the stated purpose "so no absence
+   * can become inactivity". M5-C2 has to read aura state — `stealthed.rogue` is
+   * a positive fact about four specific buffs — so a blanket ban would have had
+   * to be deleted. Deleting it would have thrown away the guarantee along with
+   * the mechanism.
+   *
+   * So the ban is narrowed to its purpose instead:
+   *
+   *   1. exactly ONE declared module may query aura state
+   *   2. that module must be structurally incapable of a negative claim
+   *
+   * `presenceAt` can return INACTIVE, and that is precisely the value a stealth
+   * binding must never surface — a removal of one contributor says nothing about
+   * the other three, and silence says nothing at all. Test 2 is what stops it.
+   */
+  const AURA_READING_MODULE = "src/specs/rogue/assassination/stealth-state.ts";
+
+  it("reads aura state in exactly one declared module", () => {
     for (const path of M5_FILES) {
       const code = codeOf(path);
       for (const forbidden of ["presenceAt", "lastObservedTransition", "anySource(", "fromSource("]) {
+        if (path === AURA_READING_MODULE) continue;
         expect(code, `${path} queries aura state`).not.toContain(forbidden);
       }
     }
+    // The exemption must be load-bearing, not stale: if the declared module ever
+    // stops reading aura state, the exemption should be removed rather than left
+    // as a hole someone else can grow into.
+    expect(codeOf(AURA_READING_MODULE)).toContain("presenceAt");
+  });
+
+  it("still lets no absence become inactivity: the aura reader cannot say FALSE", () => {
+    const code = codeOf(AURA_READING_MODULE);
+    // The binding union has TRUE and UNKNOWN and no third member. A negative
+    // stealth claim is unspellable rather than merely discouraged.
+    expect(code).toContain('readonly value: "TRUE"');
+    expect(code).toContain('readonly value: "UNKNOWN"');
+    expect(code).not.toContain('value: "FALSE"');
+    expect(code).not.toContain('"NOT_STEALTHED"');
+    // And it never binds the expression atom from a non-proof.
+    expect(code).not.toContain("stealthedRogue: false");
+  });
+
+  it("types the stealth binding as `true`, so FALSE is unrepresentable downstream", () => {
+    // The reader above cannot PRODUCE a negative claim. This is the other half:
+    // the expression binding surface cannot ACCEPT one either, from any caller.
+    //
+    // `stealthedRogue?: boolean` would compile and would be honoured as a KNOWN
+    // FALSE — a claim nothing in this project can evidence. The single-literal
+    // type makes it a compile error instead.
+    const evaluate = codeOf("src/simc/expression/evaluate.ts");
+    expect(evaluate).toContain("readonly stealthedRogue?: true;");
+    expect(evaluate).not.toContain("readonly stealthedRogue?: boolean");
+
+    // Defense in depth: both runtime sites test `=== true` rather than
+    // `!== undefined`, so a value forced through an unsafe cast falls through to
+    // the enumerated world instead of becoming authoritative.
+    expect(evaluate).not.toContain("bindings.stealthedRogue !== undefined");
+    expect(evaluate.match(/bindings\.stealthedRogue === true/g) ?? []).toHaveLength(2);
+  });
+
+  it("never lets an INACTIVE aura reading escape as a bound expression atom", () => {
+    // `presenceAt` CAN return INACTIVE. The binder must treat that exactly like
+    // UNKNOWN — one contributor being off proves nothing about the other three.
+    const code = codeOf(AURA_READING_MODULE);
+    expect(code).toContain('outcome: "INACTIVE"');
+    // INACTIVE appears only as a recorded observation in the UNKNOWN branch,
+    // never as a value the binding resolves to.
+    expect(code).not.toMatch(/value:\s*"INACTIVE"/);
   });
 
   it("never indexes the canonical event array by an ingestion ordinal", () => {

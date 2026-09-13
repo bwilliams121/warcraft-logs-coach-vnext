@@ -137,9 +137,16 @@ describe("convergence: an uncertain higher line does not block an identical toke
   });
 });
 
+/**
+ * RE-POINTED for M5-C2. These cases used `talent.darkest_night` as their
+ * unsupported example; `talent.<name>` is a supported atom now. They use
+ * `pmultiplier` instead — a real identifier from the pinned `core_dot` list that
+ * remains outside the subset — so the fail-closed guarantee is still exercised
+ * against something genuinely unparseable rather than deleted.
+ */
 describe("unsupported syntax stops the walk immediately", () => {
   it("blocks rather than skipping the line", () => {
-    const result = selectIn(["envenom,if=talent.darkest_night", "envenom,if=energy.pct>70"], ["envenom"]);
+    const result = selectIn(["envenom,if=pmultiplier<=1", "envenom,if=energy.pct>70"], ["envenom"]);
     expect(result.kind).toBe("INDETERMINATE");
     if (result.kind !== "INDETERMINATE") return;
     expect(result.blocker).toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");
@@ -159,7 +166,7 @@ describe("unsupported syntax stops the walk immediately", () => {
   });
 
   it("records the refused line with no truth value", () => {
-    const result = selectIn(["envenom,if=talent.darkest_night"], ["envenom"]);
+    const result = selectIn(["envenom,if=pmultiplier<=1"], ["envenom"]);
     if (result.kind !== "INDETERMINATE") return;
     expect(result.lines[0]?.condition.kind).toBe("UNSUPPORTED");
     expect(result.lines[0]?.condition).not.toHaveProperty("truth");
@@ -197,7 +204,7 @@ describe("NO_ACTION_SELECTED is exact, and hard to reach", () => {
   });
 
   it("is NOT produced when the only surviving line was unparseable", () => {
-    const result = selectIn(["envenom,if=talent.darkest_night"], ["envenom"]);
+    const result = selectIn(["envenom,if=pmultiplier<=1"], ["envenom"]);
     expect(result.kind).not.toBe("NO_ACTION_SELECTED");
   });
 });
