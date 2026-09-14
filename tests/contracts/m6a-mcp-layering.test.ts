@@ -161,6 +161,133 @@ describe("MCP cannot reach gameplay machinery", () => {
   });
 });
 
+/**
+ * The public contract (M6-C) sits above the application service and below every
+ * transport. It publishes a shape; it does not fetch, route, authenticate or
+ * evaluate.
+ *
+ * The most valuable property here is what it CANNOT do. The projection receives
+ * an analysis result and returns data — it never sees `Env`, so there is no path
+ * by which a Warcraft Logs credential or the MCP token could reach a public
+ * payload. That is worth enforcing structurally rather than trusting.
+ */
+describe("the public contract stays transport-neutral and secret-free", () => {
+  const CONTRACT_FILES = filesUnder("src/contracts");
+
+  it("finds the contract source files", () => {
+    expect(CONTRACT_FILES).toContain("src/contracts/analysis-contract.ts");
+    expect(CONTRACT_FILES).toContain("src/contracts/analysis-projection.ts");
+  });
+
+  it("imports no transport", () => {
+    for (const file of CONTRACT_FILES) {
+      for (const specifier of importSpecifiersOf(file)) {
+        const resolved = resolveSpecifier(file, specifier);
+        for (const forbidden of [
+          "src/mcp",
+          "src/api",
+          "@modelcontextprotocol",
+          "cloudflare:",
+          "@cloudflare/",
+        ]) {
+          expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain(forbidden);
+        }
+      }
+    }
+  });
+
+  it("cannot read configuration or secrets", () => {
+    // `src/config/env.ts` is the only door to WCL_CLIENT_ID, WCL_CLIENT_SECRET
+    // and MCP_AUTH_TOKEN. A projection that cannot import it cannot leak them,
+    // whatever a future field is called.
+    for (const file of CONTRACT_FILES) {
+      for (const specifier of importSpecifiersOf(file)) {
+        const resolved = resolveSpecifier(file, specifier);
+        expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain("src/config");
+      }
+    }
+  });
+
+  it("names no Cloudflare or HTTP runtime type", () => {
+    const banned = ["ExecutionContext", "ExportedHandler", "new Response", "new Request", "Headers("];
+    for (const file of CONTRACT_FILES) {
+      const code = sourceOf(file)
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "");
+      for (const token of banned) {
+        expect(`${file}:${code.includes(token) ? token : "clean"}`).toBe(`${file}:clean`);
+      }
+    }
+  });
+
+  it("reads no clock and generates no identifier", () => {
+    // Determinism is a contract property: the same analysis must project to the
+    // same bytes. A timestamp or a random id would make two identical analyses
+    // differ, and would put transport metadata into an analysis-truth payload.
+    const banned = ["Date.now", "new Date", "Math.random", "randomUUID", "crypto."];
+    for (const file of CONTRACT_FILES) {
+      const code = sourceOf(file)
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "");
+      for (const token of banned) {
+        expect(`${file}:${code.includes(token) ? token : "clean"}`).toBe(`${file}:clean`);
+      }
+    }
+  });
+
+  it("declares the schema without importing any internal analysis type", () => {
+    // `export type PublicDecision = ObservedActionComparison` would couple every
+    // consumer to M5's object layout and make an internal refactor a breaking
+    // wire change. The schema is declared from scratch and its types inferred,
+    // so the contract cannot re-export an internal shape — it never imports one.
+    //
+    // Asserted on the IMPORT LIST rather than on raw text, because the public
+    // names deliberately echo the internal concepts they describe.
+    const specifiers = importSpecifiersOf("src/contracts/analysis-contract.ts");
+
+    expect([...specifiers].sort()).toEqual(["../findings/finding.js", "zod"]);
+  });
+
+  it("keeps the projection's reach narrow and explicit", () => {
+    // The projection legitimately reads domain types. Pinning the exact list
+    // means a new dependency is a decision rather than a drift.
+    const specifiers = importSpecifiersOf("src/contracts/analysis-projection.ts");
+
+    expect([...specifiers].sort()).toEqual([
+      "../engine/evidence/locator.js",
+      "../services/analyzer-registry.js",
+      "../services/result.js",
+      "./analysis-contract.js",
+    ]);
+  });
+});
+
+describe("nothing below the contract may import it", () => {
+  const LOWER_ROOTS = ["src/specs", "src/engine", "src/simc", "src/findings", "src/services", "src/wcl"];
+
+  for (const root of LOWER_ROOTS) {
+    it(`${root} imports nothing from src/contracts`, () => {
+      for (const file of filesUnder(root)) {
+        for (const specifier of importSpecifiersOf(file)) {
+          const resolved = resolveSpecifier(file, specifier);
+          expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain("src/contracts");
+        }
+      }
+    });
+  }
+
+  it("keeps zod out of every layer below the contract", () => {
+    // Zod is a wire-shape tool. Below the contract there is no wire.
+    for (const root of LOWER_ROOTS) {
+      for (const file of filesUnder(root)) {
+        for (const specifier of importSpecifiersOf(file)) {
+          expect(`${file} -> ${specifier}`).not.toContain("zod");
+        }
+      }
+    }
+  });
+});
+
 describe("gameplay cannot reach MCP", () => {
   const GAMEPLAY_ROOTS = ["src/specs", "src/engine", "src/simc", "src/findings", "src/services", "src/wcl"];
 
@@ -215,6 +342,19 @@ describe("the application service stays transport-neutral", () => {
         for (const forbidden of ["src/mcp", "src/api", "@modelcontextprotocol"]) {
           expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain(forbidden);
         }
+      }
+    }
+  });
+
+  it("imports no public contract", () => {
+    // The direction that must not invert. `src/contracts` sits ABOVE the
+    // service and reads its types; a service that imported the wire contract
+    // back would acquire a public shape it is supposed to be free of, and
+    // changing the contract would start meaning changing the analyzer's caller.
+    for (const file of SERVICE_FILES) {
+      for (const specifier of importSpecifiersOf(file)) {
+        const resolved = resolveSpecifier(file, specifier);
+        expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain("src/contracts");
       }
     }
   });
