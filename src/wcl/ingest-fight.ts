@@ -1,30 +1,41 @@
 /**
  * Fight ingestion — the composition root for Milestone 3.
  *
- * Order:
+ * TWO FUNCTIONS, SPLIT ALONG THE LINE BETWEEN COST AND CLAIM.
  *
- *     context query
- *       -> archive gate        (before spending any event request)
- *       -> fight/phase/catalog normalization
- *       -> paginate, normalizing each page as it arrives
- *       -> revision recheck
- *       -> project category evidence
+ *     ingestFightCore    retrieves and normalizes — no analysed player
+ *       context query
+ *         -> archive gate      (before spending any event request)
+ *         -> fight/phase/catalog normalization
+ *         -> paginate, normalizing each page as it arrives
+ *         -> revision recheck
+ *       -> NormalizedFightCore
+ *
+ *     ingestFight        the core, plus the view for ONE player
+ *       -> focusedFightFor(core, sourceId, scope)
+ *       -> CombatFight
+ *
+ * Every expensive step is in the first function and none of it is per player:
+ * the plan carries no `sourceID`/`targetID` and requests one unfiltered
+ * `dataType: All` stream, so the same bytes serve every raider in the fight. The
+ * second function adds only the evidence projection — whose absence claims this
+ * evidence supports — which is a property of an analysis rather than of a fetch.
+ * See `../engine/normalization/fight-core.ts`.
+ *
+ * `ingestFight` is unchanged for callers. Same request, same result, same
+ * failures.
  *
  * The archive gate comes first on purpose. The schema documents
  * `ReportArchiveStatus.isAccessible` as always false without user
  * authentication, and this deployment uses client credentials, so an archived
  * report's events are unreachable. Without the gate we would spend points
  * producing empty or erroring pages that must never be read as an empty fight.
- *
- * This module is NOT wired into `/v1/analysis`. Nothing calls it in production
- * yet, which is the point: an ingestion path with no caller cannot make the
- * live route lie or spend points on evidence no analyzer asked for.
  */
 
 import type { IngestionScope } from "../services/ingestion-scope.js";
 import type { WclCredentials } from "../config/env.js";
 import { NORMALIZATION_REVISION, type CombatFight } from "../engine/normalization/combat-fight.js";
-import { projectCategoryEvidence } from "../engine/normalization/completeness.js";
+import { focusedFightFor, type NormalizedFightCore } from "../engine/normalization/fight-core.js";
 import { createNormalizer } from "../engine/normalization/event-normalizer.js";
 import { normalizeFightContext } from "../engine/normalization/fight-context.js";
 import {
@@ -37,8 +48,7 @@ import {
   type DirectionFieldNames,
 } from "../engine/normalization/raw-event-fields.js";
 import type { TimeRangeMs } from "../engine/evidence/coverage.js";
-import { deriveEvidenceActorScope } from "./evidence-actor-scope.js";
-import { EVIDENCE_CAPABILITY_REGISTRY, type RetrievalSource } from "./evidence-capability.js";
+import type { RetrievalSource } from "./evidence-capability.js";
 import {
   decodeFightContext,
   decodeReportRevision,
@@ -90,6 +100,44 @@ export type FightIngestionResult =
   | { readonly ok: true; readonly fight: CombatFight; readonly rateLimit: RateLimitSnapshot | undefined }
   | { readonly ok: false; readonly failure: IngestionFailure };
 
+/** The same outcomes, carrying the actor-independent core instead of one view. */
+export type FightCoreIngestionResult =
+  | {
+      readonly ok: true;
+      readonly core: NormalizedFightCore;
+      readonly rateLimit: RateLimitSnapshot | undefined;
+    }
+  | { readonly ok: false; readonly failure: IngestionFailure };
+
+/**
+ * What retrieving one fight needs, with no analysed player in it.
+ *
+ * NOTE WHAT IS ABSENT: `scope`. Ingestion scope declares how much FRIENDLY RAID
+ * state an analysis is permitted to reason about, which is a property of the
+ * analysis, not of the fetch — the plan requests one unfiltered stream either
+ * way. It belongs to `focusedFightFor`, and putting it here would invite a
+ * shared retrieval to decide it once on everybody's behalf.
+ */
+export interface FightCoreIngestionRequest {
+  readonly reportCode: string;
+  readonly fightId: number;
+  /**
+   * The one actor `ReportFight.talentImportCode(actorID:)` is requested for.
+   *
+   * It is NOT a focus actor and it does not narrow anything. The context query
+   * takes an `actorID` because that single field is per-actor; no event, actor,
+   * ability, phase or completeness fact in the result depends on it. The name
+   * says so, so a reader cannot mistake it for a retrieval filter.
+   *
+   * The retrieved code is returned paired with this id, and a focused view hands
+   * it only to the player it actually describes.
+   */
+  readonly talentImportActorId: number;
+  readonly includeResources: boolean;
+  readonly hostility?: readonly HostilitySelector[];
+  readonly limit?: number;
+}
+
 export interface FightIngestionRequest {
   readonly reportCode: string;
   readonly fightId: number;
@@ -124,6 +172,15 @@ function mapUpstreamFailure(reason: WclFailureReason): IngestionFailureReason {
 
 const CONTEXT_TYPED_STREAM = "context:typed";
 const CONTEXT_MASTER_DATA_STREAM = "context:masterData";
+/**
+ * The typed evidence obtained for ONE actor.
+ *
+ * Separate from `context:typed` because it vouches for one player rather than
+ * for the fight. Both arrive on the same round trip, so splitting them costs
+ * nothing and buys the ability to say which player a per-actor answer describes
+ * — see `TYPED_GRAPHQL_FIELD_PER_ACTOR` in `evidence-capability.ts`.
+ */
+const CONTEXT_TALENT_IMPORT_STREAM = "context:typed:actor";
 
 /**
  * The context query succeeded, so typed evidence covers the whole fight.
@@ -144,13 +201,28 @@ function contextStream(streamId: string, range: TimeRangeMs, degraded: boolean):
   };
 }
 
-export async function ingestFight(
-  request: FightIngestionRequest,
+/**
+ * Retrieves and normalizes one fight, with no analysed player.
+ *
+ * THIS IS WHERE EVERY EXPENSIVE THING HAPPENS, AND NONE OF IT IS PER PLAYER.
+ * The context query, the archive gate, the whole `dataType: All` pagination, the
+ * normalization pass and the revision recheck all produce identical results
+ * regardless of who is later analysed — because the plan is not parameterised by
+ * actor and never was. Splitting the function is what lets a caller SPEND that
+ * cost once and then ask `focusedFightFor` for as many player views as it needs.
+ *
+ * Nothing about retrieval changed. Same query, same plan, same cursor handling,
+ * same ordering, same safety limits, same failure mapping. The only thing lifted
+ * out is the projection at the end that decided whose absence claims the
+ * evidence supports.
+ */
+export async function ingestFightCore(
+  request: FightCoreIngestionRequest,
   deps: IngestFightDeps,
-): Promise<FightIngestionResult> {
+): Promise<FightCoreIngestionResult> {
   const context = await deps.client.execute({
     query: FIGHT_CONTEXT_QUERY,
-    variables: fightContextVariables(request.reportCode, request.fightId, request.sourceId),
+    variables: fightContextVariables(request.reportCode, request.fightId, request.talentImportActorId),
     decode: decodeFightContext,
   });
 
@@ -230,6 +302,11 @@ export async function ingestFight(
   const streams: StreamCompleteness[] = [
     ...eventStreams,
     contextStream(CONTEXT_TYPED_STREAM, requestedRange, false),
+    // Retrieved, and retrieved for exactly one actor. It stays in the shared
+    // stream list because it is a real retrieval fact; which players it VOUCHES
+    // for is decided per view, by whether the view's focus actor is the one it
+    // was requested for.
+    contextStream(CONTEXT_TALENT_IMPORT_STREAM, requestedRange, false),
     contextStream(
       CONTEXT_MASTER_DATA_STREAM,
       requestedRange,
@@ -240,15 +317,14 @@ export async function ingestFight(
   const streamIdsBySource: Record<RetrievalSource, readonly string[]> = {
     EVENTS_ALL_STREAM: plan.hostility.map(streamIdFor),
     TYPED_GRAPHQL_FIELD: [CONTEXT_TYPED_STREAM],
+    TYPED_GRAPHQL_FIELD_PER_ACTOR: [CONTEXT_TALENT_IMPORT_STREAM],
     REPORT_MASTER_DATA: [CONTEXT_MASTER_DATA_STREAM],
   };
-
-  const friendlyActorsInScope = request.scope === "FULL_RAID" ? fight.friendlyPlayers : [];
 
   return {
     ok: true,
     rateLimit: context.rateLimit,
-    fight: {
+    core: {
       provenance: {
         normalizationRevision: NORMALIZATION_REVISION,
         reportCode: report.code,
@@ -266,31 +342,14 @@ export async function ingestFight(
         malformedEnvelopeCount: normalized.malformedEnvelopeCount,
         hostilityStreams: plan.hostility,
       },
-      breadth: {
-        scope: request.scope,
-        focusActorIds: [request.sourceId],
-        friendlyActorsInScope,
-      },
-      completeness: {
-        streams,
-        categories: projectCategoryEvidence({
-          registry: EVIDENCE_CAPABILITY_REGISTRY,
-          streams,
-          streamIdsBySource,
-          degradedCategories: normalized.degradedCategories,
-          streamsWithUntypedDefects: normalized.streamsWithUntypedDefects,
-          // Which actors the evidence VOUCHES for — not who we are analysing.
-          // See `evidence-actor-scope.ts`: the capture is unfiltered by actor,
-          // so enemy/target state is genuinely held under PLAYER_CONTEXT, while
-          // ally state stays fenced off until FULL_RAID.
-          actorScope: deriveEvidenceActorScope({
-            scope: request.scope,
-            focusActorId: request.sourceId,
-            friendlyPlayerActorIds: fight.friendlyPlayers,
-            actors: actors.actors,
-          }),
-        }),
-      },
+      // Retrieval evidence only. Which actors it VOUCHES for is decided per
+      // analysed player by `focusedFightFor`, not once here on everybody's
+      // behalf — see `fight-core.ts`.
+      streams,
+      streamIdsBySource,
+      degradedCategories: normalized.degradedCategories,
+      streamsWithUntypedDefects: normalized.streamsWithUntypedDefects,
+      friendlyPlayers: fight.friendlyPlayers,
       report: {
         code: report.code,
         revision: report.revision,
@@ -313,12 +372,50 @@ export async function ingestFight(
       },
       actors: actors.actors,
       abilities: abilities.abilities,
-      focusActorId: request.sourceId,
-      talentImportCode: fight.talentImportCode,
+      talentImport: { actorId: request.talentImportActorId, code: fight.talentImportCode },
       phases,
       events: normalized.events,
       malformedObservations: normalized.malformedObservations,
     },
+  };
+}
+
+/**
+ * Retrieves one fight and returns the view for one analysed player.
+ *
+ * UNCHANGED FOR EVERY EXISTING CALLER. Same request, same result, same failure
+ * reasons, same `CombatFight`. It is now composed from the two halves rather
+ * than being one function, which is the only difference a reader should be able
+ * to find — the single-player path retrieves exactly what it always did, and the
+ * evidence scope it ends up with is derived from `sourceId` exactly as before.
+ *
+ * `sourceId` therefore plays both roles here, and legitimately: it is the actor
+ * the talent import code is requested for AND the analysed player. A raid-night
+ * caller that wants several players calls `ingestFightCore` once and
+ * `focusedFightFor` per player instead.
+ */
+export async function ingestFight(
+  request: FightIngestionRequest,
+  deps: IngestFightDeps,
+): Promise<FightIngestionResult> {
+  const outcome = await ingestFightCore(
+    {
+      reportCode: request.reportCode,
+      fightId: request.fightId,
+      talentImportActorId: request.sourceId,
+      includeResources: request.includeResources,
+      ...(request.hostility === undefined ? {} : { hostility: request.hostility }),
+      ...(request.limit === undefined ? {} : { limit: request.limit }),
+    },
+    deps,
+  );
+  if (!outcome.ok) {
+    return { ok: false, failure: outcome.failure };
+  }
+  return {
+    ok: true,
+    rateLimit: outcome.rateLimit,
+    fight: focusedFightFor(outcome.core, request.sourceId, request.scope),
   };
 }
 
@@ -329,10 +426,15 @@ export interface CreateIngestorDeps {
 }
 
 /**
- * Builds an ingestor over the real transport.
+ * Builds a single-player ingestor over the real transport.
  *
- * Deliberately NOT bound at any production composition root. Milestone 5 wires
- * it in when an analyzer actually declares requirements.
+ * Bound at the production composition root in `runtime/analysis-composition.ts`,
+ * where it shares one OAuth token cache with preflight.
+ *
+ * It returns one player's view, because that is what `CombatIngestionPort` and
+ * the single-fight application service ask for. A caller wanting several players
+ * from one retrieval uses `ingestFightCore` and `focusedFightFor` directly
+ * rather than calling this repeatedly.
  */
 export function createFightIngestor(deps: CreateIngestorDeps) {
   return async (

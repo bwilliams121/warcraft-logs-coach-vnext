@@ -26,8 +26,13 @@ import type { CombatEvent, MalformedRawObservation } from "./normalized-events.j
  *
  * Recorded on every fight so a stored result can eventually be traced to the
  * model revision that produced it, without building any history storage now.
+ *
+ * `m3.2` removed `focusActorId`. The field was written by ingestion and read
+ * nowhere, and a single canonical player is not a property a fight retrieved
+ * once for several players can honestly claim — `breadth.focusActorIds` already
+ * carries the same fact in a form that stays true per view.
  */
-export const NORMALIZATION_REVISION = "m3.1";
+export const NORMALIZATION_REVISION = "m3.2";
 
 /**
  * Was the FIGHT finished? Entirely separate from whether we RETRIEVED it.
@@ -122,8 +127,15 @@ export interface CombatFight {
 
   readonly actors: ReadonlyMap<number, CombatActor>;
   readonly abilities: ReadonlyMap<number, CombatAbility>;
-  readonly focusActorId: number;
-  /** Factual string from `ReportFight.talentImportCode`. NOT parsed in M3. */
+  /**
+   * Factual string from `ReportFight.talentImportCode`. NOT parsed in M3.
+   *
+   * It describes the ONE actor in `breadth.focusActorIds`, because
+   * `talentImportCode(actorID:)` is per-actor. A fight retrieved once and viewed
+   * for several players therefore carries the code only in the view of the
+   * player it was requested for; every other view holds `null`, which is this
+   * field's existing "Warcraft Logs supplied none". See `fight-core.ts`.
+   */
   readonly talentImportCode: string | null;
 
   readonly phases: readonly CombatPhase[];

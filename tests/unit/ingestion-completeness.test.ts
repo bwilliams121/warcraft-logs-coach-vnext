@@ -42,6 +42,7 @@ function registryWith(overrides: Partial<Record<EvidenceCategory, CapabilityReco
 const STREAM_IDS: Record<RetrievalSource, readonly string[]> = {
   EVENTS_ALL_STREAM: ["all"],
   TYPED_GRAPHQL_FIELD: ["context:typed"],
+  TYPED_GRAPHQL_FIELD_PER_ACTOR: ["context:typed:actor"],
   REPORT_MASTER_DATA: ["context:masterData"],
 };
 

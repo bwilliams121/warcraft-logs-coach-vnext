@@ -72,8 +72,29 @@ export const EVIDENCE_CATEGORIES = [
 
 export type EvidenceCapability = "OBSERVABLE" | "NOT_OBSERVABLE" | "UNVERIFIED";
 
-/** Which Warcraft Logs surface a category would come from. */
-export type RetrievalSource = "EVENTS_ALL_STREAM" | "TYPED_GRAPHQL_FIELD" | "REPORT_MASTER_DATA";
+/**
+ * Which Warcraft Logs surface a category would come from.
+ *
+ * `TYPED_GRAPHQL_FIELD_PER_ACTOR` IS NOT A SUBTYPE OF `TYPED_GRAPHQL_FIELD`.
+ * It is the one surface whose result depends on an actor argument, and keeping
+ * it separate is what lets retrieval say WHO a typed answer was obtained for.
+ *
+ * The distinction is load-bearing rather than tidy. A fight is retrieved once
+ * and viewed per player; every other typed field on that round trip —
+ * `phaseTransitions`, `Report.phases` — is the same answer for everyone, so one
+ * retrieval vouches for everyone. `talentImportCode(actorID:)` is not: it was
+ * asked about exactly one actor, and for every other player it was not asked at
+ * all.
+ *
+ * Without the split, a category sourced from a per-actor field would inherit the
+ * coverage of the round trip that happened to carry it, and a player it was
+ * never requested for would be reported as having complete typed evidence. That
+ * is a well-formed false statement, which is the kind this project fails closed
+ * against. See `focusedFightFor` in
+ * `../engine/normalization/fight-core.ts`.
+ */
+export type RetrievalSource =
+  "EVENTS_ALL_STREAM" | "TYPED_GRAPHQL_FIELD" | "TYPED_GRAPHQL_FIELD_PER_ACTOR" | "REPORT_MASTER_DATA";
 
 /**
  * Evidence that a category IS obtainable.
@@ -201,8 +222,13 @@ export const EVIDENCE_CAPABILITY_REGISTRY: Readonly<Record<EvidenceCategory, Cap
     "ReportFight.phaseTransitions + Report.phases",
     SCHEMA_VERIFIED_ON,
   ),
+  // PER-ACTOR, and that is the whole point of the source it cites. The field
+  // takes an `actorID` argument, so one retrieval answers for one player. The
+  // capability claim — "Warcraft Logs can supply this" — is unchanged and still
+  // rests on the frozen schema; what the source records is that COVERAGE of it
+  // has to be established per player rather than per round trip.
   TALENTS: observableFromSchema(
-    "TYPED_GRAPHQL_FIELD",
+    "TYPED_GRAPHQL_FIELD_PER_ACTOR",
     "ReportFight.talentImportCode(actorID:)",
     SCHEMA_VERIFIED_ON,
   ),

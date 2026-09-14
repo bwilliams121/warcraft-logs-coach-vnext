@@ -32,8 +32,18 @@ import type { HostilitySelector } from "../../src/wcl/retrieval-plan.js";
 import type { IngestionScope } from "../../src/services/ingestion-scope.js";
 import { inclusiveRange, type TimeRangeMs } from "../../src/engine/evidence/coverage.js";
 import type { EvidenceLocator } from "../../src/engine/evidence/locator.js";
-import type { CombatFight, CombatPhase, FightFinality } from "../../src/engine/normalization/combat-fight.js";
+import {
+  NORMALIZATION_REVISION,
+  type CombatFight,
+  type CombatPhase,
+  type FightFinality,
+} from "../../src/engine/normalization/combat-fight.js";
 import type { CategoryEvidence, FightCompleteness } from "../../src/engine/normalization/completeness.js";
+import type {
+  NormalizedFightCore,
+  TalentImportObservation,
+} from "../../src/engine/normalization/fight-core.js";
+import type { StreamCompleteness } from "../../src/wcl/retrieval-types.js";
 import type { CombatActor } from "../../src/engine/normalization/actors.js";
 import type { CombatAbility } from "../../src/engine/normalization/abilities.js";
 import {
@@ -423,7 +433,10 @@ export function syntheticFight(options: SyntheticFightOptions = {}): CombatFight
 
   return {
     provenance: {
-      normalizationRevision: "m3.1",
+      // The real constant, not a copy. A synthetic fight stands in for a
+      // retrieved one, and a hand-written revision here would keep claiming an
+      // old model shape after the model changed.
+      normalizationRevision: NORMALIZATION_REVISION,
       reportCode: "aBcDeFgH12345678",
       reportRevision: 1,
       reportStartTimeUnixMs: 1_700_000_000_000,
@@ -479,11 +492,137 @@ export function syntheticFight(options: SyntheticFightOptions = {}): CombatFight
     },
     actors: options.actors ?? new Map(),
     abilities: options.abilities ?? new Map(),
-    focusActorId: options.focusActorId ?? 5,
     talentImportCode: null,
     phases: options.phases ?? [],
     events: options.events ?? [],
     malformedObservations: options.malformedObservations ?? [],
+  };
+}
+
+// --------------------------------------------------------------------------
+// Actor-independent core
+// --------------------------------------------------------------------------
+
+export interface SyntheticCoreOptions {
+  readonly events?: readonly CombatEvent[] | undefined;
+  readonly malformedObservations?: readonly MalformedRawObservation[] | undefined;
+  readonly startTimeMs?: number | undefined;
+  readonly endTimeMs?: number | undefined;
+  readonly actors?: ReadonlyMap<number, CombatActor> | undefined;
+  readonly abilities?: ReadonlyMap<number, CombatAbility> | undefined;
+  readonly phases?: readonly CombatPhase[] | undefined;
+  /** `ReportFight.friendlyPlayers`. Drives which actors count as ally raid state. */
+  readonly friendlyPlayers?: readonly number[] | undefined;
+  /** The one actor `talentImportCode(actorID:)` was requested for. */
+  readonly talentImport?: TalentImportObservation | undefined;
+}
+
+/**
+ * A synthetic `NormalizedFightCore`.
+ *
+ * NOTE WHAT IT CANNOT TAKE: `scope`, `focusActorId`, `actorScope`, `categories`.
+ * None of those are retrieval facts, so a core has nowhere to put them — which
+ * is the property this builder exists to make visible at the call site. Evidence
+ * categories are DERIVED by `focusedFightFor` from the real capability registry
+ * and the streams below, exactly as production does it, so a test cannot hand
+ * itself a capability the registry does not actually grant.
+ *
+ * Two streams, both COMPLETE over the fight. `all` serves the fight-wide
+ * sources; `context:typed:actor` serves the PER-ACTOR typed source and models
+ * the one round trip that answered about a single player. That second stream is
+ * what lets a test tell "queried this actor and got null" apart from "never
+ * queried this actor" — `focusedFightFor` withholds it from every view whose
+ * focus actor is not `talentImport.actorId`.
+ *
+ * This models a fully retrieved fight; tests about partial retrieval belong on
+ * `syntheticFight`, which can state a coverage state directly.
+ */
+export function syntheticFightCore(options: SyntheticCoreOptions = {}): NormalizedFightCore {
+  const startTimeMs = options.startTimeMs ?? FIGHT_START_MS;
+  const endTimeMs = options.endTimeMs ?? FIGHT_END_MS;
+  const range = inclusiveRange(startTimeMs, endTimeMs);
+  const hostilityStreams: readonly HostilitySelector[] = ["UNSPECIFIED"];
+
+  const completeStream = (streamId: string, eventsRetrieved: number): StreamCompleteness => ({
+    streamId,
+    state: "COMPLETE",
+    reason: "COMPLETED_NORMALLY",
+    requestedRange: range,
+    coveredRanges: [range],
+    pagesRequested: 1,
+    pagesRetrieved: 1,
+    eventsRetrieved,
+  });
+
+  const streams: readonly StreamCompleteness[] = [
+    completeStream("all", options.events?.length ?? 0),
+    completeStream("context:typed:actor", 0),
+  ];
+
+  return {
+    provenance: {
+      normalizationRevision: NORMALIZATION_REVISION,
+      reportCode: "aBcDeFgH12345678",
+      reportRevision: 1,
+      reportStartTimeUnixMs: 1_700_000_000_000,
+      fightId: 6,
+      logVersion: 17,
+      gameVersion: 1,
+      retrievedAtUnixMs: 1_700_000_900_000,
+      plan: {
+        dataType: "All",
+        limit: 5000,
+        includeResources: false,
+        hostility: hostilityStreams,
+        translate: true,
+        useActorIDs: true,
+        useAbilityIDs: true,
+        requestedStartTimeMs: startTimeMs,
+        requestedEndTimeMs: endTimeMs,
+      },
+      streams: [],
+      source: "WARCRAFT_LOGS_V2_CLIENT",
+      unsupportedEventTypes: new Map(),
+      malformedEventTypes: new Map(),
+      malformedEnvelopeCount: options.malformedObservations?.length ?? 0,
+      hostilityStreams,
+    },
+    report: {
+      code: "aBcDeFgH12345678",
+      revision: 1,
+      startTimeUnixMs: 1_700_000_000_000,
+      endTimeUnixMs: 1_700_000_900_000,
+    },
+    data: { logVersion: 17, gameVersion: 1 },
+    fight: {
+      id: 6,
+      name: "Test Boss",
+      encounterId: 2900,
+      difficulty: 5,
+      size: 20,
+      kill: true,
+      startTimeMs,
+      endTimeMs,
+      durationMs: endTimeMs - startTimeMs,
+      finality: "COMPLETED",
+      inProgressRaw: false,
+    },
+    actors: options.actors ?? new Map(),
+    abilities: options.abilities ?? new Map(),
+    phases: options.phases ?? [],
+    events: options.events ?? [],
+    malformedObservations: options.malformedObservations ?? [],
+    streams,
+    streamIdsBySource: {
+      EVENTS_ALL_STREAM: ["all"],
+      TYPED_GRAPHQL_FIELD: ["all"],
+      TYPED_GRAPHQL_FIELD_PER_ACTOR: ["context:typed:actor"],
+      REPORT_MASTER_DATA: ["all"],
+    },
+    degradedCategories: new Set(),
+    streamsWithUntypedDefects: new Set(),
+    friendlyPlayers: options.friendlyPlayers ?? [],
+    talentImport: options.talentImport ?? { actorId: 5, code: null },
   };
 }
 
