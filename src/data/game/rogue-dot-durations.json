@@ -39,7 +39,7 @@
     "durationFieldName": "_duration",
     "durationFieldUnits": "MILLISECONDS",
     "dotDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
-    "extractedOn": "2026-09-13",
+    "extractedOn": "2026-09-14",
     "extractorVersion": 1,
     "durationSemanticsNote": "Base values only. NOT haste-scaled, NOT pandemic-extended, NOT talent-modified and NOT snapshotted. A consumer needing any of those must model it explicitly, so that a missing model presents as a missing model.",
     "applicabilityNote": "Not version-gated at runtime, for the same reason as the GCD artifact: CombatFight exposes no client-build key, so comparing anything against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human."
@@ -51,6 +51,21 @@
       "displayNameEn": "Garrote",
       "baseDurationMs": 18000,
       "baseCooldownMs": 6000,
+      "baseTickPeriodMs": 2000,
+      "tickPeriodBinding": {
+        "effectIndex": 0,
+        "effectType": 6,
+        "effectSubtype": 3,
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc"
+      },
+      "durationModel": {
+        "kind": "FIXED",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "startLine": 4501,
+        "endLine": 4506,
+        "finding": "garrote_t::composite_dot_duration returns rogue_attack_t::composite_dot_duration( s ) scaled only by 1 / get_exsanguinated_rate(). That rate never leaves 1.0 at this commit — do_exsanguinate is [[maybe_unused]] with no call site (sc_rogue.cpp:7759) and the field is constructed and reset to 1.0 (sc_rogue.cpp:1479) — so the applied duration is the base _duration unchanged."
+      },
       "binding": {
         "method": "SPECIALIZATION_SPELL_TABLE",
         "classId": 4,
@@ -58,6 +73,38 @@
         "sourcePath": "engine/dbc/generated/specialization_spells.inc",
         "createAction": "sc_rogue.cpp:9472 if ( name == \"garrote\" ) return new garrote_t( name, this, spec.garrote, options_str )",
         "specBinding": "sc_rogue.cpp:9934 spec.garrote = find_specialization_spell( \"Garrote\" )",
+        "bindingSourcePath": "engine/class_modules/sc_rogue.cpp",
+        "bindingSourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e"
+      }
+    },
+    {
+      "simcToken": "rupture",
+      "abilityGameId": 1943,
+      "displayNameEn": "Rupture",
+      "baseDurationMs": 4000,
+      "baseCooldownMs": 0,
+      "baseTickPeriodMs": 2000,
+      "tickPeriodBinding": {
+        "effectIndex": 0,
+        "effectType": 6,
+        "effectSubtype": 3,
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc"
+      },
+      "durationModel": {
+        "kind": "COMBO_POINT_SCALED",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "startLine": 5161,
+        "endLine": 5167,
+        "finding": "rupture_t::composite_dot_duration computes data().duration() * ( 1 + rs->get_combo_points() ), then divides by get_exsanguinated_rate(), which never leaves 1.0 at this commit. The applied duration is therefore baseDurationMs * ( 1 + combo points spent by the applying cast )."
+      },
+      "binding": {
+        "method": "SPECIALIZATION_SPELL_TABLE",
+        "classId": 4,
+        "specId": 259,
+        "sourcePath": "engine/dbc/generated/specialization_spells.inc",
+        "createAction": "sc_rogue.cpp:9486 if ( name == \"rupture\" ) return new rupture_t( name, this, spec.rupture, options_str )",
+        "specBinding": "sc_rogue.cpp:9937 spec.rupture = find_specialization_spell( \"Rupture\" )",
         "bindingSourcePath": "engine/class_modules/sc_rogue.cpp",
         "bindingSourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e"
       }

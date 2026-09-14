@@ -224,7 +224,12 @@ describe("the blocker moves from cds[1] to misc_cds[0]", () => {
     expect(labels).toEqual([
       "default[4] ambush ELIMINATED_CONTINUE",
       "default[5] call_action_list CALL_MAY_SELECT",
-      "cds[0] deathmark ELIMINATED_CONTINUE",
+      // CHANGED AT M5-D1: Deathmark joined the cooldown dataset, so the entry is
+      // now eliminated by READINESS — an observed cast 3803 ms before Q with a
+      // 120 s cooldown — rather than by its condition. Readiness is checked
+      // first in the pinned order, so the condition is no longer evaluated at
+      // all. Same control flow, stronger and earlier evidence.
+      "cds[0] deathmark PROVEN_UNUSABLE_CONTINUE",
       "cds[1] invoke_external_buff PROVEN_UNUSABLE_CONTINUE",
       // The items list ran to the end without producing an action, so the scan
       // RESUMES in `cds` rather than stopping. Every one of its six entries was
@@ -397,15 +402,29 @@ describe("a decided entry never has its condition evaluated", () => {
   });
 
   it("keeps a readiness elimination distinguishable from a false condition", () => {
-    // `cds[0] deathmark` was ELIMINATED because its CONDITION is false.
-    // `cds[1]` was eliminated because it could not FIRE. Same effect on the
-    // scan, different facts, and a report that conflated them would tell the
-    // player the wrong thing about both.
+    // `default[4] ambush` is ELIMINATED because its CONDITION is false — the
+    // build does not have Improved Ambush. `cds[1]` is eliminated because it
+    // could not FIRE. Same effect on the scan, different facts, and a report
+    // that conflated them would tell the player the wrong thing about both.
+    //
+    // RE-POINTED at M5-D1. This case used `cds[0] deathmark` as the false-
+    // condition half, and Deathmark is now eliminated by READINESS instead, so
+    // it would have proved the two are the same rather than that they differ.
     const traversal = traverseWithProfile();
-    expect(stepAt(traversal, "cds", 0).outcome).toBe("ELIMINATED_CONTINUE");
-    expect(stepAt(traversal, "cds", 0).gate.kind).toBe("EVALUATED");
+    expect(stepAt(traversal, "default", 4).outcome).toBe("ELIMINATED_CONTINUE");
+    expect(stepAt(traversal, "default", 4).gate.kind).toBe("EVALUATED");
     expect(stepAt(traversal, "cds", 1).outcome).toBe("PROVEN_UNUSABLE_CONTINUE");
     expect(stepAt(traversal, "cds", 1).gate.kind).toBe("NOT_EVALUATED");
+
+    // And the entry that MOVED between the two categories is pinned explicitly,
+    // so a future change back is a visible one.
+    expect(stepAt(traversal, "cds", 0).outcome).toBe("PROVEN_UNUSABLE_CONTINUE");
+    expect(stepAt(traversal, "cds", 0).gate).toEqual({ kind: "NOT_EVALUATED", why: "PROVEN_UNUSABLE" });
+    const verdict = stepAt(traversal, "cds", 0).usabilityVerdict;
+    expect(verdict?.kind).toBe("PROVEN_UNUSABLE");
+    if (verdict?.kind !== "PROVEN_UNUSABLE") return;
+    expect(verdict.reason).toBe("ACTIVE_COOLDOWN");
+    expect(verdict.evidence.provenRemainingAtLeastMs).toBe(116_197);
   });
 });
 

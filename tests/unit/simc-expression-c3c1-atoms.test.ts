@@ -35,7 +35,9 @@ function bindings(overrides: Partial<AtomBindings> = {}): AtomBindings {
     comboPoints: NO_STATE,
     comboPointsDeficit: NO_STATE,
     energyPct: NO_STATE,
-    dotRemainsSeconds: NO_STATE,
+    // No action's own DoT is established here. An empty per-action map is the
+    // M5-D1 shape of that, and an unkeyed `remains` resolves UNKNOWN_NUMBER.
+    dotRemainsSecondsByAction: [],
     knownBuffs: [],
     ...overrides,
   };

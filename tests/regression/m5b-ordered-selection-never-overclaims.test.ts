@@ -5,7 +5,7 @@ import { evaluateAssassinationEnvenom } from "../../src/specs/rogue/assassinatio
 import { ACTIONABILITY_STATUSES } from "../../src/findings/actionability.js";
 import { pinnedAssassinationAuthority } from "../../src/simc/pinned-authority.js";
 import { parseSimcExpression } from "../../src/simc/expression/parse.js";
-import { evaluateSimcExpression, knownNumber, unknownNumber } from "../../src/simc/expression/evaluate.js";
+import { evaluateSimcExpression, knownNumber } from "../../src/simc/expression/evaluate.js";
 import { DECISION_SCOPE_KINDS } from "../../src/findings/scoped-selection.js";
 import type { Finding } from "../../src/findings/finding.js";
 import {
@@ -313,7 +313,7 @@ describe("the global-selection non-goal, pinned against the real default list", 
       comboPoints: knownNumber(7),
       comboPointsDeficit: knownNumber(0),
       energyPct: knownNumber(100),
-      dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+      dotRemainsSecondsByAction: [],
       knownBuffs: [],
     });
     expect(evaluated.outcome).toBe("RESOLVED");
@@ -345,7 +345,7 @@ describe("the global-selection non-goal, pinned against the real default list", 
         comboPoints: knownNumber(7),
         comboPointsDeficit: knownNumber(0),
         energyPct: knownNumber(100),
-        dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+        dotRemainsSecondsByAction: [],
         knownBuffs: [],
       });
       // energy.pct<30 is FALSE at 100%, and FALSE | UNKNOWN_STATE stays unknown.
@@ -399,13 +399,27 @@ describe("the global-selection non-goal, pinned against the real default list", 
     if (!coreDot.found) return;
     expect(coreDot.actions.length).toBeGreaterThan(0);
 
-    // FACT 1. Exactly one entry opened. `core_dot[0]` parses; [1] through [4]
-    // still do not, because each needs `refreshable` (a pandemic window this
-    // project does not model) and `target.time_to_die` (predictive).
+    // FACT 1. RE-BASELINED AT M5-D1: every `core_dot` entry now PARSES, because
+    // `refreshable` and binary `-` joined the subset. Parsing is not deciding,
+    // and it is emphatically not selecting — `target.time_to_die` is PREDICTIVE
+    // and permanently unbindable, so the last conjunct of entries 1 through 4
+    // can never be TRUE and none of them can be proven to fire.
+    //
+    // The non-goal this file protects does not rest on parseability at all. It
+    // rests on FACT 2 below, which is unchanged.
     const parseableOrdinals = coreDot.actions
       .filter((action) => parseSimcExpression(action.conditionRaw ?? "").ok)
       .map((action) => action.priorityOrdinal);
-    expect(parseableOrdinals).toEqual([0]);
+    expect(parseableOrdinals).toEqual([0, 1, 2, 3, 4]);
+
+    // FACT 1b. Two of those entries carry `cycle_targets=1`, and parsing them is
+    // NOT permission to evaluate them: they address targets this project does
+    // not enumerate, so the walker refuses them as a targeting refusal rather
+    // than reading them against the one implicit target.
+    const cyclingOrdinals = coreDot.actions
+      .filter((action) => action.unsupportedOptions.some((o) => o.optionKey === "cycle_targets"))
+      .map((action) => action.priorityOrdinal);
+    expect(cyclingOrdinals).toEqual([2, 4]);
 
     // FACT 2. The entries ABOVE the `core_dot` call in `default` are untouched,
     // and they are what keeps a global verdict out of reach. `default[0]`

@@ -115,6 +115,11 @@ export const NOT_APPLICABLE_REASONS = ["ENTRY_GATE_FALSE"] as const satisfies re
  *   project has no numeric spell id for. The authority answered; we cannot name
  *   what it named, and a token string is not an ability identity. Remedy: a
  *   runtime game-data entry for that token.
+ * - `UNSUPPORTED_ACTION_OPTION` (M5-D1) — the line carries `cycle_targets=` or
+ *   `target_if=`, so its condition is about targets this project does not
+ *   enumerate, and no target-independent conjunct proved it cannot select.
+ *   Deliberately NOT `UNSUPPORTED_AUTHORITY_EXPRESSION`: the syntax was fine, so
+ *   widening the parser would not help.
  */
 export type ScopedSelectionBlocker =
   | CommonEvaluationBlocker
@@ -122,7 +127,8 @@ export type ScopedSelectionBlocker =
   | "NO_DEFINITE_WINNER"
   | "NESTED_CALL_NOT_MODELLED"
   | "UNMODELLED_DISPATCH_IN_LIST"
-  | "SELECTED_ACTION_IDENTITY_UNAVAILABLE";
+  | "SELECTED_ACTION_IDENTITY_UNAVAILABLE"
+  | "UNSUPPORTED_ACTION_OPTION";
 
 export const SCOPED_SELECTION_BLOCKERS = [
   "EXACT_RESOURCE_UNAVAILABLE",
@@ -135,6 +141,7 @@ export const SCOPED_SELECTION_BLOCKERS = [
   "NESTED_CALL_NOT_MODELLED",
   "UNMODELLED_DISPATCH_IN_LIST",
   "SELECTED_ACTION_IDENTITY_UNAVAILABLE",
+  "UNSUPPORTED_ACTION_OPTION",
 ] as const satisfies readonly ScopedSelectionBlocker[];
 
 export type ScopedSelectionStatus =

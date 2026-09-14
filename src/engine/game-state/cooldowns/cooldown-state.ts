@@ -67,12 +67,41 @@
  * derivation that can prove a zero-delay start; nothing produces it today, and
  * claiming it would be the overstatement the three states exist to prevent.
  *
+ * ONE CHARGE IS THE ORDINARY CASE WEARING A DIFFERENT HAT (M5-D1)
+ *
+ * SimulationCraft branches on the CHARGE COOLDOWN, not the charge count
+ * (action.cpp:710-724):
+ *
+ *     if ( spell_data.charge_cooldown() > 0 )
+ *     {
+ *       cooldown->category = true;
+ *       cooldown->duration = spell_data.charge_cooldown();
+ *       cooldown->charges  = spell_data.charges();
+ *       ...internal_cooldown->duration = spell_data.cooldown();
+ *     }
+ *     else if ( spell_data.cooldown() > 0 )
+ *       cooldown->duration = spell_data.cooldown();
+ *
+ * and `cooldown_t` is CONSTRUCTED with `charges( 1 )` and `current_charge( 1 )`
+ * (cooldown_impl.cpp:101,110). So a charge system with `charges == 1` sets the
+ * charge count to the value it already had: it is arithmetically identical to an
+ * ordinary cooldown whose duration is the CHARGE cooldown.
+ *
+ * That equivalence — and only that one — is supported. `charges >= 2` genuinely
+ * needs a charge model, because "remaining" stops being one number: an ability at
+ * one of two charges is usable NOW and recharging at the same time.
+ *
+ * NOTE WHICH FIELD BECOMES THE DURATION. For a charge ability the ordinary
+ * `_cooldown` is NOT the recharge; it becomes the internal cooldown. Vanish
+ * carries `_cooldown` 1000 and `_charge_cooldown` 120000, so reading the nominal
+ * field would claim a one-second recharge for a two-minute ability.
+ *
  * WHAT THIS MODULE REFUSES TO DO
  *
- * It models no charges, no resets, no reduction and no haste scaling. Each is a
- * real mechanic; none is guessed at. An ability with a CHARGE COOLDOWN, or whose
- * modifier policy is not proven absent, returns UNKNOWN rather than a number
- * derived from rules that do not apply to it.
+ * It models no multi-charge system, no resets, no reduction and no haste
+ * scaling. Each is a real mechanic; none is guessed at. An ability with two or
+ * more charges, or whose modifier policy is not proven absent, returns UNKNOWN
+ * rather than a number derived from rules that do not apply to it.
  *
  * It also produces no gameplay verdict. "Remaining cooldown" is a fact; whether
  * that means an action was unusable is a decision for a layer that owns
@@ -112,7 +141,13 @@ export type CooldownUnknownReason =
   | "CAST_STATE_UNKNOWN"
   /** The caller supplied no base cooldown. */
   | "BASE_COOLDOWN_NOT_MODELLED"
-  /** The ability has charges, which this module does not model. */
+  /**
+   * The ability has TWO OR MORE charges, which this module does not model.
+   *
+   * Narrowed at M5-D1 from "has charges". A one-charge system is the ordinary
+   * case and IS supported; see the module header. The name is unchanged because
+   * the meaning a caller acts on — "we do not model this charge system" — is.
+   */
   | "CHARGES_NOT_MODELLED"
   /** The caller could not prove modifiers absent. */
   | "MODIFIERS_NOT_PROVEN_ABSENT"
@@ -189,6 +224,20 @@ export interface CooldownQuery {
    * ability as one the player can never cast.
    */
   readonly chargeCooldownMs: number;
+  /**
+   * `spell_data_t::_charges`. Read ONLY when `chargeCooldownMs > 0` (M5-D1).
+   *
+   * A DBC `_charges` of 0 on a non-charge ability means "no charge system", NOT
+   * "zero charges available", which is why this is never consulted on the
+   * ordinary path. On the charge path it is the discriminator between the one
+   * case that is provably equivalent to an ordinary cooldown and every case that
+   * is not.
+   *
+   * OPTIONAL, defaulting to a value that REFUSES. A caller that supplies a charge
+   * cooldown but forgets the count gets `CHARGES_NOT_MODELLED`, never the
+   * supported one-charge path.
+   */
+  readonly charges?: number;
   readonly modifierPolicy: CooldownModifierPolicy;
   /** Canonical index of the decision point. Never an ingestion ordinal. */
   readonly position: number;
@@ -228,19 +277,28 @@ function anchorFrom(cast: ObservedCast): CooldownAnchor {
  * `action_t::execute()`, and only a COMPLETE cast evidences execution.
  */
 export function cooldownRemainingAt(query: CooldownQuery): CooldownState {
-  const { state, actorId, abilityGameId, baseCooldownMs, chargeCooldownMs, modifierPolicy, position } = query;
+  const { state, actorId, abilityGameId, chargeCooldownMs, modifierPolicy, position } = query;
+
+  // WHICH FIELD IS THE RECHARGE, decided the way SimulationCraft decides it.
+  //
+  // On the charge path the ordinary `_cooldown` is demoted to an internal
+  // cooldown and the CHARGE cooldown becomes `cooldown->duration`. Reading the
+  // nominal field there would claim Vanish recharges in one second.
+  const isChargeSystem = chargeCooldownMs > 0;
+  const baseCooldownMs = isChargeSystem ? chargeCooldownMs : query.baseCooldownMs;
+
+  if (isChargeSystem) {
+    // Two or more charges changes what "remaining" even MEANS: an ability at one
+    // of two charges is usable now AND recharging. Rather than pick a reading,
+    // refuse. One charge is the ordinary case — see the module header — and a
+    // caller that omits the count lands here rather than in it.
+    if (query.charges !== 1) {
+      return unknown("CHARGES_NOT_MODELLED");
+    }
+  }
 
   if (baseCooldownMs === null || !(baseCooldownMs > 0)) {
     return unknown("BASE_COOLDOWN_NOT_MODELLED");
-  }
-  // Charges change what "remaining" even means: an ability at 1 of 2 charges is
-  // usable now AND recharging. Rather than pick one reading, refuse.
-  //
-  // Keyed on the CHARGE COOLDOWN, which is what SimulationCraft branches on. See
-  // the field comment: a zero charge COUNT is the ordinary case, not a charge
-  // system with nothing left in it.
-  if (chargeCooldownMs > 0) {
-    return unknown("CHARGES_NOT_MODELLED");
   }
   if (modifierPolicy.kind !== "NO_MODIFIERS_PROVEN_ABSENT") {
     return unknown("MODIFIERS_NOT_PROVEN_ABSENT");

@@ -416,6 +416,99 @@ const FIREBLOOD_DISPEL: CppClaim = {
     "change it. No other atom on the supported path reads a player debuff at all.",
 };
 
+/**
+ * An equipped on-use item, as a transition (M5-D1).
+ *
+ * NOT A TRINKET SIMULATOR, and the shape is what keeps it from becoming one.
+ * There is no per-item table here: the contract is BUILT from two
+ * machine-extracted facts about whichever driver the entry resolves to — its
+ * `_gcd` and its effect classification — and a caller that cannot establish
+ * both gets no contract at all.
+ *
+ * `writes` is `PLAYER_STAT_BUFF` and `OWN_PREFIX_AVAILABILITY`, exactly as the
+ * potion's is, and for the same reason: the driver's every APPLY_AURA effect is
+ * `A_MOD_RATING`, its remaining effects are `E_DUMMY`, and neither appears in
+ * `PROJECTION_RELEVANT_WRITES`.
+ *
+ * The token is the APL token (`use_item` or `use_items`) rather than the item,
+ * because that is what the scan names — but the FACTS come from the resolved
+ * driver, so two different trinkets never share one claim.
+ */
+export function itemUseTransition(input: {
+  readonly simcToken: string;
+  readonly effectSpellId: number;
+  readonly baseCooldownMs: number;
+}): NonGcdTransitionContract {
+  return {
+    simcToken: input.simcToken,
+    baseGcdMs: 0,
+    timeAdvanceMs: 0,
+    progress: { kind: "COOLDOWN", baseCooldownMs: input.baseCooldownMs },
+    energySpent: 0,
+    energyGranted: 0,
+    writes: ["OWN_PREFIX_AVAILABILITY", "PLAYER_STAT_BUFF"],
+    breaksStealthImmediately: false,
+    claims: [
+      {
+        claim: "IT_CANNOT_REACH_THE_ROGUE_STEALTH_BREAK_PATH",
+        method: CPP_SEMANTICS_METHOD,
+        sourcePath: "engine/class_modules/sc_rogue.cpp",
+        startLine: 2725,
+        endLine: 2729,
+        finding:
+          "break_stealth() is called from exactly one place: rogue_action_t<Base>::execute. use_item_t is an " +
+          "action_t, not a rogue_action_t, so that code is unreachable for it regardless of any DBC flag. " +
+          "The same argument the potion and racial contracts rest on.",
+      },
+      {
+        claim: "IT_NEITHER_SPENDS_NOR_GRANTS_A_ROGUE_RESOURCE",
+        method: CPP_SEMANTICS_METHOD,
+        sourcePath: "engine/player/player.cpp",
+        startLine: 9874,
+        endLine: 10_029,
+        finding:
+          "use_item_t is constructed from an item's special effect and drives that effect's buff or action. " +
+          "It is not a rogue_action_t and has no energize path into a Rogue resource; nothing in " +
+          "use_item_t::execute touches Energy or combo points.",
+      },
+      {
+        claim: "ITS_EFFECTS_ARE_STAT_RATINGS_AND_NOTHING_ELSE",
+        method: DBC_FACT_METHOD,
+        sourcePath: "engine/dbc/generated/sc_spell_data.inc",
+        startLine: 0,
+        endLine: 0,
+        finding:
+          `Driver spell ${String(input.effectSpellId)} was admitted only because every APPLY_AURA effect on ` +
+          "it is A_MOD_RATING (189) and every remaining effect is E_DUMMY (3), which SimulationCraft " +
+          "implements as nothing. The classification is derived by the item-effect extractor from the " +
+          "pinned effect table, not typed here; a driver of any other shape is classified OTHER and gets " +
+          "no contract.",
+      },
+      {
+        claim: "A_STAT_RATING_CANNOT_MOVE_THE_DECISION_PROJECTION",
+        method: CPP_SEMANTICS_METHOD,
+        sourcePath: "engine/player/player.cpp",
+        startLine: 9874,
+        endLine: 10_029,
+        finding:
+          "Every quantity a stat rating changes — regeneration, tick period, cooldown recovery, future " +
+          "snapshots — is a rate over ELAPSED TIME, and this query advances none. PLAYER_STAT_BUFF is " +
+          "therefore absent from PROJECTION_RELEVANT_WRITES, and this contract writes nothing else.",
+      },
+      {
+        claim: "IT_STARTS_ITS_OWN_COOLDOWN",
+        method: DBC_FACT_METHOD,
+        sourcePath: "engine/dbc/generated/sc_spell_data.inc",
+        startLine: 0,
+        endLine: 0,
+        finding:
+          `The driver spell's own cooldown is ${String(input.baseCooldownMs)}ms, far longer than the ` +
+          "queueing tolerance, so the entry cannot fire twice inside one zero-elapsed-time query.",
+      },
+    ],
+  };
+}
+
 export const ASSASSINATION_NON_GCD_TRANSITIONS: readonly NonGcdTransitionContract[] = [
   KICK,
   THISTLE_TEA,

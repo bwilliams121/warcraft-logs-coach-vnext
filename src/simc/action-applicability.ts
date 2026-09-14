@@ -168,6 +168,30 @@ export type UnusableReason =
    */
   | "ALREADY_STEALTHED"
   /**
+   * Re-stealthing is not permitted while a living enemy is engaged (M5-D1).
+   *
+   * The COMPLEMENT of `ALREADY_STEALTHED`, and kept separate because the two
+   * describe opposite situations and have opposite remedies. That one says the
+   * player is already in the state the action produces; this one says the player
+   * is not, and the game will not let them re-enter it mid-fight.
+   *
+   * `stealth_t::ready()` reaches its final `return ready()` only when every enemy
+   * is asleep or dead — `restealth_allowed` is enabled nowhere else. So in combat
+   * with one living enemy the guard is false whatever the cooldown says. NOT a
+   * timing fact: nothing is waiting to recharge.
+   */
+  | "RESTEALTH_NOT_PERMITTED_IN_COMBAT"
+  /**
+   * The action re-enters a state the player already holds (M5-D1).
+   *
+   * `vanish_t::ready()` opens with `if ( p()->buffs.vanish->check() ) return
+   * false;` (sc_rogue.cpp:6046-6052). Distinct from `ALREADY_STEALTHED`, which is
+   * about the four-aura `stealthed.rogue` MASK and a different function: this one
+   * tests ONE named buff, and the two sets are not the same — a player under
+   * Subterfuge satisfies the mask and does not satisfy this.
+   */
+  | "VANISH_BUFF_ALREADY_ACTIVE"
+  /**
    * The action already fired earlier in a HYPOTHETICAL prefix (M5-C3c3c).
    *
    * THE ONLY COUNTERFACTUAL MEMBER OF THIS UNION, and it is named so that can
@@ -188,6 +212,8 @@ export const UNUSABLE_REASONS = [
   "ACTIVE_COOLDOWN",
   "STATIC_READY_FALSE",
   "ALREADY_STEALTHED",
+  "RESTEALTH_NOT_PERMITTED_IN_COMBAT",
+  "VANISH_BUFF_ALREADY_ACTIVE",
   "SIMULATED_PREFIX_EXECUTION",
 ] as const satisfies readonly UnusableReason[];
 
@@ -202,6 +228,8 @@ export const OBSERVED_UNUSABLE_REASONS = [
   "ACTIVE_COOLDOWN",
   "STATIC_READY_FALSE",
   "ALREADY_STEALTHED",
+  "RESTEALTH_NOT_PERMITTED_IN_COMBAT",
+  "VANISH_BUFF_ALREADY_ACTIVE",
 ] as const satisfies readonly UnusableReason[];
 
 /**
@@ -253,3 +281,106 @@ export function unknownUsability(): ActionUsabilityVerdict {
 
 /** Supplies a usability verdict for one entry. */
 export type ActionUsabilityVerdictResolver = (action: AplAction) => ActionUsabilityVerdict;
+
+// --------------------------------------------------------------------------
+// Gate irrelevance
+// --------------------------------------------------------------------------
+
+/**
+ * WHEN AN UNREADABLE CONDITION DOES NOT MATTER (M5-D1).
+ *
+ * THE HIGHEST-RISK RULE IN THE MILESTONE, so it is also the most constrained.
+ *
+ * The default for an unparseable player-action condition is to BLOCK the scan,
+ * and that is right almost always: we cannot tell whether the entry fires, so
+ * nothing below it is reachable soundly. But a measured census of 42 real
+ * actor-19 decision points found the deepest blocker at `items[5] use_items` in
+ * 28 of them — an entry that is NON_GCD, has a reviewed execution contract, and
+ * whose only effect is a stat buff nothing on the path to the answer reads.
+ *
+ * In that situation both worlds converge:
+ *
+ *     gate FALSE  ->  the entry does not fire, the scan continues
+ *     gate TRUE   ->  the entry fires, executes, and a NEW scan begins at the
+ *                     root with the same relevant state
+ *
+ * so refusing to explore either is refusing to answer a question the evidence
+ * settles. This resolver is how a specialization says, with evidence, that a
+ * specific entry is in that situation.
+ *
+ * WHAT IT IS NOT, AND THE DISTINCTION IS LOAD-BEARING
+ *
+ * It does NOT say the gate is TRUE. It says the gate is UNREAD and the entry
+ * MAY fire. The step keeps its `UNSUPPORTED` condition verbatim, and the
+ * candidate it contributes is never `definite`, so no path exists by which an
+ * unread condition becomes a confident selection.
+ *
+ * IT CAN NEVER APPLY TO A GCD-CONSUMING ACTION. For those the two worlds do not
+ * converge at all — "it fires" IS the answer to the first-GCD query — so a
+ * GCD entry with an unread gate would be exactly the laundering this project
+ * forbids. `lane` is typed as the single literal `"NON_GCD"` so a GCD action is
+ * undescribable here, and `firstGcdSelectionAcrossRescans` refuses one
+ * structurally as well, because a type is not a runtime guard.
+ */
+export interface GateIrrelevanceEvidence {
+  /**
+   * The execution lane, and the type has exactly one member on purpose.
+   *
+   * A resolver must have ESTABLISHED the lane from pinned data to write this.
+   * `GCD_CONSUMING` and `UNKNOWN_LANE` are unspellable rather than merely wrong.
+   */
+  readonly lane: "NON_GCD";
+  /** The reviewed transition contract this rests on. Author-written provenance. */
+  readonly transitionProvenance: string;
+  /** MILLISECONDS. Only zero is admissible; a non-zero value is refused. */
+  readonly timeAdvanceMs: 0;
+  /**
+   * How the action stops being selectable, so the branch cannot re-fire forever.
+   *
+   * A string rather than a boolean: an author has to name the mechanism, which
+   * is harder to write carelessly than a `true`.
+   */
+  readonly progressMechanism: string;
+  /**
+   * Every state the execution writes has been reviewed AND none of it is read on
+   * the path to the answer.
+   *
+   * Two literal `true`s rather than one, because they are two different claims
+   * and a reviewer who checked one may not have checked the other.
+   */
+  readonly writesReviewed: true;
+  readonly writesOutsideDecisionProjection: true;
+  /** What was reviewed, in words, so the claim can be checked rather than trusted. */
+  readonly detail: string;
+}
+
+export type GateIrrelevance =
+  | { readonly kind: "GATE_IRRELEVANT"; readonly evidence: GateIrrelevanceEvidence }
+  /** The default. No claim, so the scan blocks on the unreadable condition. */
+  | { readonly kind: "NOT_ESTABLISHED" };
+
+export const GATE_IRRELEVANCE_KINDS = [
+  "GATE_IRRELEVANT",
+  "NOT_ESTABLISHED",
+] as const satisfies readonly GateIrrelevance["kind"][];
+
+export function gateIrrelevant(evidence: GateIrrelevanceEvidence): GateIrrelevance {
+  return { kind: "GATE_IRRELEVANT", evidence };
+}
+
+export function gateIrrelevanceNotEstablished(): GateIrrelevance {
+  return { kind: "NOT_ESTABLISHED" };
+}
+
+/**
+ * Supplies a gate-irrelevance claim for one entry.
+ *
+ * OPTIONAL everywhere it is accepted, and its absence means every unreadable
+ * condition blocks — exactly the pre-M5-D1 behaviour.
+ */
+export type GateIrrelevanceResolver = (action: AplAction) => GateIrrelevance;
+
+/** The default resolver: no entry is ever gate-irrelevant. */
+export function noGateIrrelevance(): GateIrrelevanceResolver {
+  return () => gateIrrelevanceNotEstablished();
+}

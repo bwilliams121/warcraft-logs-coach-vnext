@@ -89,12 +89,20 @@ import {
 } from "./list-selection.js";
 import {
   allApplicable,
+  noGateIrrelevance,
   type ActionApplicability,
   type ActionApplicabilityResolver,
   type ActionUsabilityVerdict,
   type ActionUsabilityVerdictResolver,
+  type GateIrrelevance,
+  type GateIrrelevanceResolver,
 } from "./action-applicability.js";
 import type { AtomBindings } from "./expression/evaluate.js";
+import {
+  proveTargetIndependentFalsehood,
+  type TargetIndependenceFailure,
+  type TargetIndependentElimination,
+} from "./target-independence.js";
 
 // --------------------------------------------------------------------------
 // Path and trace
@@ -145,6 +153,17 @@ export type TraversalStepOutcome =
    * false. Both continue the scan; they are not the same fact.
    */
   | "PROVEN_UNUSABLE_CONTINUE"
+  /**
+   * The entry cycles or retargets, and a TARGET-INDEPENDENT conjunct of its
+   * condition is proven FALSE (M5-D1).
+   *
+   * A distinct outcome from `ELIMINATED_CONTINUE`, because the claim is
+   * different: that one says "this condition is false here", and this one says
+   * "this condition is false for every candidate target, so the cycle loop finds
+   * none ready". Same control flow, different evidence, and a reader auditing a
+   * multi-target refusal needs to be able to tell them apart.
+   */
+  | "TARGET_INDEPENDENT_ELIMINATION_CONTINUE"
   /** A player action that might fire: true condition with unknown usability, or an undecided condition. */
   | "MAY_SELECT"
   /** A player action proven to fire. The scan is over. */
@@ -182,8 +201,46 @@ export interface TraversalStep {
   readonly applicability: ActionApplicability;
   /** The evidence behind a negative usability verdict. `null` when there is none. */
   readonly usabilityVerdict: ActionUsabilityVerdict | null;
+  /**
+   * What was decided about an entry carrying unsupported targeting options.
+   *
+   * `null` for the overwhelming majority of entries, which carry none. Non-null
+   * says the entry cycles or retargets, and records whether a target-independent
+   * conjunct settled it.
+   */
+  readonly targetingRefusal: TargetingRefusal | null;
+  /**
+   * The gate-irrelevance claim, when one carried this entry past an unreadable
+   * condition (M5-D1).
+   *
+   * `null` for every other entry. Non-null is the ONLY way a step can have an
+   * `UNSUPPORTED` gate and still be a candidate, so a reader auditing such a step
+   * always finds the evidence that licensed it.
+   */
+  readonly gateIrrelevance: GateIrrelevance | null;
   readonly outcome: TraversalStepOutcome;
 }
+
+/**
+ * The verdict on an entry whose options redirect its condition to targets this
+ * project does not enumerate.
+ *
+ * Both members carry the option keys, so a reader always learns WHY the entry was
+ * treated specially rather than having to re-derive it from the verbatim string.
+ */
+export type TargetingRefusal =
+  | {
+      /** A target-independent conjunct is FALSE, so no candidate can be ready. */
+      readonly kind: "ELIMINATED_FOR_EVERY_TARGET";
+      readonly optionKeys: readonly string[];
+      readonly elimination: TargetIndependentElimination & { readonly kind: "ELIMINATED_FOR_EVERY_TARGET" };
+    }
+  | {
+      /** Not eliminated, so the scan cannot get past it. */
+      readonly kind: "REFUSED";
+      readonly optionKeys: readonly string[];
+      readonly failure: TargetIndependenceFailure;
+    };
 
 // --------------------------------------------------------------------------
 // Result
@@ -221,7 +278,17 @@ export type TraversalBlocker =
   | "UNSUPPORTED_ENTRY_KIND"
   | "INVALID_START_BOUNDARY"
   /** Whether an entry applies to this player could not be established. */
-  | "APPLICABILITY_NOT_ESTABLISHED";
+  | "APPLICABILITY_NOT_ESTABLISHED"
+  /**
+   * The entry carries an action option this project does not model (M5-D1).
+   *
+   * DISTINCT FROM `UNSUPPORTED_AUTHORITY_EXPRESSION`, and the distinction is the
+   * remedy. That one says the condition's SYNTAX was refused and points at the
+   * parser. This one says the syntax was fine and the entry addresses targets we
+   * cannot enumerate — widening the parser would not help, and a reader told to
+   * widen it would be sent the wrong way.
+   */
+  | "UNSUPPORTED_ACTION_OPTION";
 
 export const TRAVERSAL_BLOCKERS = [
   "UNSUPPORTED_AUTHORITY_EXPRESSION",
@@ -233,6 +300,7 @@ export const TRAVERSAL_BLOCKERS = [
   "UNSUPPORTED_ENTRY_KIND",
   "INVALID_START_BOUNDARY",
   "APPLICABILITY_NOT_ESTABLISHED",
+  "UNSUPPORTED_ACTION_OPTION",
 ] as const satisfies readonly TraversalBlocker[];
 
 export type TraversalResult =
@@ -256,6 +324,24 @@ export type TraversalResult =
        * "we found nothing we support".
        */
       readonly kind: "NO_ACTION_SELECTED";
+      readonly steps: readonly TraversalStep[];
+    }
+  | {
+      /**
+       * EVERY candidate names the same TOKEN, from DIFFERENT authority entries
+       * (M5-D1).
+       *
+       * A DISTINCT MEMBER, never a variant of `SELECTED`, and the distinction is
+       * the whole reason it exists. `SELECTED` names one concrete entry — list,
+       * ordinal, verbatim string, source line — and a consumer is entitled to
+       * quote it. Here the entry is genuinely unresolved and only the ACTION is
+       * established, so there is no `selectingStep` to read and no way to
+       * mistake one for the other.
+       */
+      readonly kind: "TOKEN_CONVERGED";
+      readonly actionToken: string;
+      /** Every entry that might be the one, in literal priority order. */
+      readonly candidateEntries: readonly TraversalStep[];
       readonly steps: readonly TraversalStep[];
     }
   | {
@@ -316,6 +402,14 @@ export interface NestedSelectionInput {
    * profile gets exactly the pre-M5-C3c2 behaviour.
    */
   readonly applicabilityFor?: ActionApplicabilityResolver;
+  /**
+   * Whether an entry's unreadable condition can be stepped past (M5-D1).
+   *
+   * OPTIONAL, defaulting to "never". A caller that models no gate irrelevance
+   * gets exactly the pre-M5-D1 behaviour: every unparseable player-action
+   * condition blocks the scan.
+   */
+  readonly gateIrrelevanceFor?: GateIrrelevanceResolver;
   /** Defaults to the top of the entry list. */
   readonly startBoundary?: ScanStartBoundary;
 }
@@ -413,7 +507,29 @@ export type ScanResolution =
   | { readonly kind: "DEFINITE"; readonly identity: string; readonly step: TraversalStep }
   /** Might return one of these, or might return nothing. */
   | { readonly kind: "MAY_SELECT"; readonly candidates: readonly Candidate[] }
-  /** Definitely returns something, but which is undecided. */
+  /**
+   * Definitely returns an action, and every candidate names the SAME TOKEN —
+   * but from different authority entries (M5-D1).
+   *
+   * WEAKER THAN `DEFINITE` AND STRONGER THAN `AMBIGUOUS`, and it exists because
+   * the pinned `spend` list makes that distinction real: at maximum combo points
+   * `spend[0]` might fire and `spend[1]` definitely does, and both are Envenom.
+   * "The authority selects Envenom" is true and useful; "the authority selects
+   * spend[1]" is not established, because spend[0] may have fired first.
+   *
+   * M5-B's scoped walk has always converged on the token — `selectWithinList`
+   * compares `actionToken` — so this is not a new epistemic standard. It is that
+   * standard finally becoming expressible in the nested engine, which until now
+   * had to collapse it into `AMBIGUOUS`.
+   */
+  | {
+      readonly kind: "TOKEN_CONVERGED";
+      /** The token every candidate names. */
+      readonly identity: string;
+      /** Every entry that might be the one. The exact one is NOT established. */
+      readonly candidates: readonly Candidate[];
+    }
+  /** Definitely returns something, but which ACTION is undecided. */
   | { readonly kind: "AMBIGUOUS"; readonly candidates: readonly Candidate[] };
 
 type ScanOutcome =
@@ -446,8 +562,14 @@ function resolveScan(candidates: readonly Candidate[]): ScanResolution {
   if (candidates.every((candidate) => sameSelectionIdentity(candidate, definite))) {
     return { kind: "DEFINITE", identity: definite.identity, step: definite.step };
   }
-  // Something fires — the definite candidate guarantees that much — but a higher
-  // possible candidate is a different entry, so which one is undecided.
+  // Something fires — the definite candidate guarantees that much — and if every
+  // candidate names the same TOKEN then which action fires IS established even
+  // though which entry selects it is not. That is a real, weaker answer, and
+  // collapsing it into AMBIGUOUS would throw away the useful half.
+  if (candidates.every((candidate) => candidate.identity === definite.identity)) {
+    return { kind: "TOKEN_CONVERGED", identity: definite.identity, candidates };
+  }
+  // Different tokens. Nothing is established beyond "something fires".
   return { kind: "AMBIGUOUS", candidates };
 }
 
@@ -468,11 +590,15 @@ function stepOf(
   verdicts: {
     readonly applicability?: ActionApplicability;
     readonly usabilityVerdict?: ActionUsabilityVerdict | null;
+    readonly targetingRefusal?: TargetingRefusal | null;
+    readonly gateIrrelevance?: GateIrrelevance | null;
   } = {},
 ): TraversalStep {
   return {
     applicability: verdicts.applicability ?? { kind: "APPLICABLE" },
     usabilityVerdict: verdicts.usabilityVerdict ?? null,
+    targetingRefusal: verdicts.targetingRefusal ?? null,
+    gateIrrelevance: verdicts.gateIrrelevance ?? null,
     path: [...path, pathEntryOf(action)],
     listName: action.listName,
     priorityOrdinal: action.priorityOrdinal,
@@ -512,6 +638,7 @@ interface ScanContext {
   readonly bindings: AtomBindings;
   readonly usabilityFor: ActionUsabilityVerdictResolver;
   readonly applicabilityFor: ActionApplicabilityResolver;
+  readonly gateIrrelevanceFor: GateIrrelevanceResolver;
   /** Every step visited anywhere, in visit order. Accumulated across recursion. */
   readonly steps: TraversalStep[];
 }
@@ -686,6 +813,21 @@ function scanList(
         });
       }
 
+      if (childResolution.kind === "TOKEN_CONVERGED" && gateIsCertainlyEntered(gate)) {
+        // Entered for certain, and the callee definitely returns THIS TOKEN. The
+        // call returns an action, so every later entry of this list is
+        // unreachable — the same conclusion the DEFINITE branch reaches, from a
+        // weaker premise.
+        //
+        // The candidates are carried through VERBATIM, `definite` flags included,
+        // so the parent's own resolution sees exactly what the callee saw and
+        // reaches the same token-convergent answer rather than a fabricated
+        // single entry.
+        finishCall("CALL_SELECTED");
+        candidates.push(...childResolution.candidates);
+        break;
+      }
+
       if (childResolution.kind === "DEFINITE" && gateIsCertainlyEntered(gate)) {
         // Entered for certain, and the callee fires for certain. The call
         // returns that action and the scan is over — every later entry of this
@@ -702,6 +844,8 @@ function scanList(
         childResolution.kind === "DEFINITE"
           ? [{ identity: childResolution.identity, step: childResolution.step, definite: false }]
           : childResolution.candidates.map((candidate) => ({ ...candidate, definite: false }));
+      // An uncertain gate means the callee might not be entered at all, so
+      // nothing it offers is definite — including a token-convergent set.
       finishCall("CALL_MAY_SELECT");
       candidates.push(...contributed);
       continue;
@@ -770,6 +914,70 @@ function scanList(
       });
     }
 
+    // ---- unsupported targeting options, checked BEFORE the condition ----
+    //
+    // Placed here, after applicability and before usability, for a reason that
+    // matches the pinned order rather than fighting it. Applicability is about
+    // whether the action EXISTS, which no targeting option changes. Everything
+    // below — readiness and the condition — is evaluated PER CANDIDATE TARGET
+    // inside the cycle loop, so this project cannot answer any of it, and asking
+    // would produce a single-target answer to a multi-target question.
+    if (action.unsupportedOptions.length > 0) {
+      const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
+      // `target_if` is refused OUTRIGHT and is never routed through the
+      // target-independent rule. Cycling re-runs the SAME condition per
+      // candidate, so a conjunct that is false for all of them settles it;
+      // `target_if` instead SCORES candidates and RETARGETS the action
+      // (action.cpp:2429-2461), which changes what every later atom in the scan
+      // reads. One conjunct cannot settle that, and pretending otherwise would
+      // be modelling target scoring by the back door.
+      const retargets = optionKeys.includes("target_if");
+      const elimination = retargets
+        ? ({ kind: "NOT_PROVEN", failure: "NO_TARGET_INDEPENDENT_CONJUNCT" } as const)
+        : proveTargetIndependentFalsehood(action, context.bindings);
+
+      if (elimination.kind === "ELIMINATED_FOR_EVERY_TARGET") {
+        // A conjunct reading only PLAYER state is FALSE. `FALSE & anything` is
+        // FALSE for every candidate, so the loop finds none ready. No target was
+        // enumerated to establish this.
+        context.steps.push(
+          stepOf(
+            action,
+            path,
+            { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+            "UNKNOWN",
+            "TARGET_INDEPENDENT_ELIMINATION_CONTINUE",
+            {
+              applicability,
+              targetingRefusal: { kind: "ELIMINATED_FOR_EVERY_TARGET", optionKeys, elimination },
+            },
+          ),
+        );
+        continue;
+      }
+
+      const step = stepOf(
+        action,
+        path,
+        { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+        "UNKNOWN",
+        "BLOCKED",
+        {
+          applicability,
+          targetingRefusal: { kind: "REFUSED", optionKeys, failure: elimination.failure },
+        },
+      );
+      context.steps.push(step);
+      return earliestObstacle(candidates, {
+        kind: "BLOCKED",
+        blocker: "UNSUPPORTED_ACTION_OPTION",
+        blockedAt: step,
+        detail:
+          "the entry carries an action option that redirects its condition onto targets this project " +
+          "does not enumerate, and no target-independent conjunct proves it cannot select",
+      });
+    }
+
     const verdict = context.usabilityFor(action);
 
     if (verdict.kind === "PROVEN_UNUSABLE") {
@@ -794,10 +1002,27 @@ function scanList(
 
     if (gate.kind === "UNSUPPORTED") {
       // Never skipped, never read as false. We cannot tell whether it fires, so
-      // nothing below it can be reached soundly.
+      // nothing below it can be reached soundly — UNLESS the caller can prove
+      // that both worlds converge. See `GateIrrelevanceEvidence`.
+      const irrelevance = context.gateIrrelevanceFor(action);
+      if (irrelevance.kind === "GATE_IRRELEVANT") {
+        // A POSSIBLE candidate, never a definite one. The gate stays UNSUPPORTED
+        // on the step, so nothing downstream can read this as "the condition was
+        // true" — only as "the condition was not read, and this entry may fire".
+        const step = stepOf(action, path, gate, usability, "MAY_SELECT", {
+          applicability,
+          usabilityVerdict: verdict,
+          gateIrrelevance: irrelevance,
+        });
+        context.steps.push(step);
+        candidates.push({ identity: action.actionToken, step, definite: false });
+        continue;
+      }
+
       const step = stepOf(action, path, gate, usability, "BLOCKED", {
         applicability,
         usabilityVerdict: verdict,
+        gateIrrelevance: irrelevance,
       });
       context.steps.push(step);
       return earliestObstacle(candidates, {
@@ -895,6 +1120,7 @@ export function resolveOneForegroundScan(input: NestedSelectionInput): OneForegr
     bindings: input.bindings,
     usabilityFor: input.usabilityFor,
     applicabilityFor: input.applicabilityFor ?? allApplicable(),
+    gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
     steps,
   };
 
@@ -958,6 +1184,7 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
     bindings: input.bindings,
     usabilityFor: input.usabilityFor,
     applicabilityFor: input.applicabilityFor ?? allApplicable(),
+    gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
     steps,
   };
 
@@ -995,6 +1222,13 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
         blockedAt: resolution.candidates[0]?.step ?? null,
         steps,
         detail: "entries might fire, none is proven to, and the scan might equally have returned nothing",
+      };
+    case "TOKEN_CONVERGED":
+      return {
+        kind: "TOKEN_CONVERGED",
+        actionToken: resolution.identity,
+        candidateEntries: resolution.candidates.map((candidate) => candidate.step),
+        steps,
       };
     case "AMBIGUOUS":
       return {

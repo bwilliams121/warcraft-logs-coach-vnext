@@ -33,12 +33,18 @@ const ACTOR_19_ENTRIES: readonly ObservedTalentEntry[] = [
 ];
 
 describe("the pinned talent dataset", () => {
-  it("loads and carries only the narrow slice M5-C2 needs", () => {
+  it("loads and carries only the narrow slice the supported decisions need", () => {
+    // `crimson_tempest` arrived at M5-D1, and only as a TALENT. It is what makes
+    // `!talent.crimson_tempest` — the leading, target-INDEPENDENT conjunct of the
+    // two `cycle_targets` entries — decidable, so a Crimson Tempest build
+    // eliminates both without this project enumerating an enemy. The Crimson
+    // Tempest ACTION is still unmodelled; its own entry is target-count gated.
     const loaded = pinnedRogueTalents();
     expect(loaded.ok).toBe(true);
     if (!loaded.ok) return;
     expect(loaded.artifact.talents.map((t) => t.simcName).sort()).toEqual([
       "blindside",
+      "crimson_tempest",
       "improved_ambush",
       "improved_garrote",
       "shrouded_suffocation",

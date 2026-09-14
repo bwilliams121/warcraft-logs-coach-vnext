@@ -401,8 +401,9 @@ export function judgeEnvenomCast(input: EnvenomJudgmentInput): ObservedActionJud
     comboPointsDeficit: knownNumber(adapted.state.derivedDeficit),
     energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
     // Same discipline as energy: this decision reads combo points only, and a
-    // DoT duration it never reconstructed must resolve UNKNOWN, not a value.
-    dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+    // DoT duration it never reconstructed must resolve UNKNOWN, not a value. An
+    // empty per-action map is how that is stated since M5-D1.
+    dotRemainsSecondsByAction: [],
     knownBuffs: [],
   });
 

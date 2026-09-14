@@ -66,31 +66,109 @@ const SOURCES = {
 };
 
 /**
- * The cooldowns M5-C3c1 requires.
+ * The cooldowns the supported decisions require.
  *
- * ONE entry. Entries appear when a supported decision needs them, never
- * speculatively — the same rule the ability, talent and DoT-duration datasets
- * follow. `cds[0]` is the only line that reads a cooldown this milestone
- * answers, and it reads exactly one.
+ * Entries appear when a supported decision needs them, never speculatively —
+ * the same rule the ability, talent and DoT-duration datasets follow.
  *
- * Kingsbane is a TALENT spell, so the binding runs through the trait table's
- * spell rather than a class or specialization spell. `talentSpellId` is checked
- * against the DBC row and against the pinned `init_spells` line below.
+ *   kingsbane  M5-C3c1  `cds[0]` reads `cooldown.kingsbane.remains`
+ *   deathmark  M5-D1    `cds[4]` and four `items` lines read
+ *                       `cooldown.deathmark.remains`, and its own entry can be
+ *                       eliminated by readiness
+ *   vanish     M5-D1    the `vanish` list is the deepest blocker at 12 of 42
+ *                       real actor-19 decision points, and only a readiness
+ *                       proof can eliminate it — its conditions never can,
+ *                       because they rest on `dot.garrote.pmultiplier`
+ *
+ * `chargeModel` says which shape the entry is, and the verifier holds the DBC to
+ * it. `PLAIN` requires `_charges == 0`; `ONE_CHARGE` requires `_charges == 1`
+ * with a positive `_charge_cooldown`, which is the one charge system provably
+ * equivalent to an ordinary cooldown (action.cpp:710-724, cooldown_impl.cpp:101).
+ * A DBC that stops matching fails the extraction rather than being absorbed.
  */
 const REQUIRED_COOLDOWNS = [
   {
     simcToken: "kingsbane",
     displayNameEn: "Kingsbane",
     abilityGameId: 385_627,
+    chargeModel: "PLAIN",
     createAction:
       'sc_rogue.cpp:9480 if ( name == "kingsbane" ) return new kingsbane_t( name, this, options_str )',
     specBinding:
       'sc_rogue.cpp:10045 talent.assassination.kingsbane = find_talent_spell( talent_tree::SPECIALIZATION, "Kingsbane" )',
+    actionBodyCheck: {
+      claim: "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+      search: "kingsbane_t body (sc_rogue.cpp:4783-4910) for update_ready / cooldown overrides",
+      finding:
+        "kingsbane_t declares neither. The base rogue_action_t::update_ready (line 2287) zeroes the " +
+        "cooldown only when secondary_trigger_type != NONE, which is false for a player-cast action.",
+    },
+  },
+  {
+    simcToken: "deathmark",
+    displayNameEn: "Deathmark",
+    abilityGameId: 360_194,
+    chargeModel: "PLAIN",
+    createAction:
+      'sc_rogue.cpp:9464 if ( name == "deathmark" ) return new deathmark_t( name, this, options_str )',
+    specBinding:
+      'sc_rogue.cpp:10033 talent.assassination.deathmark = find_talent_spell( talent_tree::SPECIALIZATION, "Deathmark" )',
+    actionBodyCheck: {
+      claim: "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+      search: "deathmark_t body (sc_rogue.cpp:4124-4153) for update_ready / cooldown overrides",
+      finding:
+        "deathmark_t declares tick, impact and last_tick only. It overrides neither update_ready nor any " +
+        "cooldown field, so the base rogue_action_t path applies unchanged.",
+    },
+  },
+  {
+    simcToken: "vanish",
+    displayNameEn: "Vanish",
+    abilityGameId: 1_856,
+    chargeModel: "ONE_CHARGE",
+    createAction: 'sc_rogue.cpp:9500 if ( name == "vanish" ) return new vanish_t( name, this, options_str )',
+    specBinding: 'sc_rogue.cpp:9920 spell.vanish = find_class_spell( "Vanish" )',
+    actionBodyCheck: {
+      claim: "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+      search: "vanish_t body (sc_rogue.cpp:6029-6053) for update_ready / cooldown overrides",
+      finding:
+        "vanish_t declares execute and ready only. `ready()` adds a guard — false while buffs.vanish is up " +
+        "— which makes the action LESS available and never more, so it cannot invalidate a lower bound on " +
+        "the recharge. It touches no cooldown field.",
+    },
   },
 ];
 
 /**
- * The hand-reviewed absence proof, recorded check by check.
+ * The one talent that could add a Vanish charge, and the evidence it is not
+ * implemented at this commit.
+ *
+ * Checked mechanically below. `Without a Trace` grants a second charge in the
+ * live game; if SimulationCraft ever implements it, `_charges` stops being the
+ * whole story and the ONE_CHARGE equivalence breaks.
+ */
+const UNIMPLEMENTED_CHARGE_TALENTS = [
+  {
+    appliesTo: "vanish",
+    identifier: "without_a_trace",
+    claim: "EXTRA_CHARGE_TALENT_IS_NOT_IMPLEMENTED",
+    search: "grep 'without_a_trace' in engine/class_modules/sc_rogue.cpp",
+    finding:
+      "Exactly TWO occurrences: the player_talent_t member declaration (line 790) and the find_talent_spell " +
+      "assignment (line 10021). The talent handle is never READ, so nothing in the module adds a Vanish " +
+      "charge and the DBC _charges of 1 is the whole charge model at this commit.",
+    // Declaration + assignment, and nothing else.
+    expectedOccurrences: 2,
+  },
+];
+
+/**
+ * The hand-reviewed absence proof SHARED by every entry, recorded check by check.
+ *
+ * These are the module-wide searches — the bulk-adjustment sites and the
+ * recharge multiplier — and they say the same thing for every Assassination
+ * cooldown. Per-ability checks live on each `REQUIRED_COOLDOWNS` entry, because
+ * "kingsbane_t declares no update_ready" is not a claim about Vanish.
  *
  * Each entry is something a human looked for and did not find, with the search
  * that was performed. Listing the SEARCH rather than only the conclusion is the
@@ -102,26 +180,11 @@ const REQUIRED_COOLDOWNS = [
  */
 const MODIFIER_POLICY_CHECKS = [
   {
-    claim: "NO_DIRECT_COOLDOWN_ADJUSTMENT",
-    search: "grep 'cooldowns.kingsbane' and 'cooldowns.kingsbane->' in engine/class_modules/sc_rogue.cpp",
-    finding:
-      "Exactly ONE occurrence of 'cooldowns.kingsbane' (line 1169, the assignment in the constructor) and " +
-      "ZERO occurrences of 'cooldowns.kingsbane->'. The member declaration at line 475 reads " +
-      "'cooldown_t* kingsbane;' inside the cooldowns_t struct and so does not contain the qualified name. " +
-      "Every mutation — adjust(), reset(), duration assignment, charge change — would have to go through " +
-      "the arrow form, and none exists.",
-  },
-  {
-    claim: "NO_CHARGES",
-    search: "spell_data.inc row for 385627, _charges column",
-    finding: "_charges is 0, so there is no charge system and no recharge behaviour to model.",
-  },
-  {
     claim: "NO_ROGUE_WIDE_CDR_APPLIES",
     search: "grep for the rogue module's bulk cooldown-adjustment sites",
     finding:
-      "Restless Blades (sc_rogue.cpp:8246-8254) adjusts nine Outlaw cooldowns and does not include " +
-      "kingsbane. Deadly Pursuit (sc_rogue.cpp:10826-10832) calls adjust_recharge_multiplier over " +
+      "Restless Blades (sc_rogue.cpp:8246-8254) adjusts nine Outlaw cooldowns and includes none of the " +
+      "abilities in this dataset. Deadly Pursuit (sc_rogue.cpp:10826-10832) calls adjust_recharge_multiplier over " +
       "deadly_pursuit_cooldowns and is gated on talent.outlaw.deadly_pursuit. Both are Outlaw-only; " +
       "the analysed specialization is Assassination.",
   },
@@ -131,13 +194,6 @@ const MODIFIER_POLICY_CHECKS = [
     finding:
       "Both initialise to 1.0 (action.cpp:456,458) and the only rogue-module call to " +
       "adjust_recharge_multiplier is the Outlaw Deadly Pursuit site above.",
-  },
-  {
-    claim: "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
-    search: "kingsbane_t body (sc_rogue.cpp:4783-4910) for update_ready / cooldown overrides",
-    finding:
-      "kingsbane_t declares neither. The base rogue_action_t::update_ready (line 2287) zeroes the " +
-      "cooldown only when secondary_trigger_type != NONE, which is false for a player-cast action.",
   },
 ];
 
@@ -159,6 +215,51 @@ const COOLDOWN_START_CONTRACT = {
     "For an instant, non-channelled ability, execution coincides with the observed cast. A cast with a " +
     "cast time or a channel would need its own anchor and is not covered by this contract.",
 };
+
+/**
+ * The decisive per-ability absence check, written from the token.
+ *
+ * Every mutation of a cooldown object goes through the ARROW form
+ * `cooldowns.<token>->something(...)`. This claim is re-verified mechanically in
+ * `verifyRequiredFacts`, so it cannot age into a false statement.
+ */
+function directAdjustmentCheck(simcToken) {
+  const qualified = `cooldowns.${simcToken}`;
+  return {
+    claim: "NO_DIRECT_COOLDOWN_ADJUSTMENT",
+    search: `grep '${qualified}' and '${qualified}->' in ${SOURCES.rogueModule}`,
+    finding:
+      `Exactly ONE occurrence of '${qualified}' — the assignment in rogue_t's constructor — and ZERO ` +
+      `occurrences of '${qualified}->'. The member declaration inside the cooldowns_t struct is unqualified ` +
+      "and so does not match. Every mutation — adjust(), reset(), duration assignment, charge change — " +
+      "would have to go through the arrow form, and none exists. Re-checked mechanically on every run.",
+  };
+}
+
+/** Which charge shape the DBC row exhibits, recorded as a claim rather than assumed. */
+function chargeModelCheck(required, record) {
+  if (required.chargeModel === "PLAIN") {
+    return {
+      claim: "NO_CHARGE_SYSTEM",
+      search: `spell_data.inc row for ${String(required.abilityGameId)}, _charge_cooldown and _charges columns`,
+      finding:
+        `_charge_cooldown is ${String(record.chargeCooldownMs)}, so action_t::init takes the ordinary ` +
+        `else-branch (action.cpp:721-724) and cooldown->duration is _cooldown = ${String(record.baseCooldownMs)}ms. ` +
+        `_charges is ${String(record.charges)}: there is no charge system and no recharge behaviour to model.`,
+    };
+  }
+  return {
+    claim: "ONE_CHARGE_IS_AN_ORDINARY_COOLDOWN",
+    search: `spell_data.inc row for ${String(required.abilityGameId)}, _charge_cooldown and _charges columns`,
+    finding:
+      `_charge_cooldown is ${String(record.chargeCooldownMs)}ms and _charges is ${String(record.charges)}, so ` +
+      "action_t::init takes the charge branch (action.cpp:710-720) and sets cooldown->duration to the CHARGE " +
+      `cooldown while demoting _cooldown (${String(record.baseCooldownMs)}ms) to the internal cooldown. ` +
+      "cooldown_t is constructed with charges(1) and current_charge(1) (cooldown_impl.cpp:101,110), so setting " +
+      "charges to 1 changes nothing: the object behaves exactly as an ordinary cooldown of " +
+      `${String(record.chargeCooldownMs)}ms. The EFFECTIVE recharge is the charge cooldown, never the nominal one.`,
+  };
+}
 
 function fail(message) {
   console.error(`EXTRACTION FAILED: ${message}`);
@@ -393,20 +494,31 @@ export function verifyRequiredFacts({ build, records, fieldIndices, expectedFiel
         `spell ${String(required.abilityGameId)} is named '${record.displayNameEn}', expected '${required.displayNameEn}'`,
       );
     }
-    // A cooldown of zero cannot anchor a remaining-duration derivation, and
-    // would make `cooldown.x.remains` meaningless rather than merely unknown.
-    if (!(record.baseCooldownMs > 0)) {
+    // The EFFECTIVE recharge, chosen the way action_t::init chooses it: the
+    // charge cooldown when there is one, the nominal cooldown otherwise.
+    // Reading the nominal field for a charge ability would claim Vanish
+    // recharges in one second.
+    const effectiveMs = record.chargeCooldownMs > 0 ? record.chargeCooldownMs : record.baseCooldownMs;
+    if (!(effectiveMs > 0)) {
       problems.push(
-        `spell ${String(required.abilityGameId)} has _cooldown ${String(record.baseCooldownMs)}ms, which cannot ` +
-          "anchor a remaining-cooldown derivation",
+        `spell ${String(required.abilityGameId)} has an effective recharge of ${String(effectiveMs)}ms, which ` +
+          "cannot anchor a remaining-cooldown derivation",
       );
     }
-    // The absence proof recorded below is written for a chargeless cooldown. If
-    // charges ever appear, the proof no longer describes the ability.
-    if (record.charges !== 0) {
+    // The recorded absence proof is written for ONE charge shape. If the DBC
+    // stops matching the declared model, the proof no longer describes the
+    // ability and the extraction fails rather than absorbing the change.
+    if (required.chargeModel === "PLAIN" && (record.charges !== 0 || record.chargeCooldownMs !== 0)) {
       problems.push(
-        `spell ${String(required.abilityGameId)} now has ${String(record.charges)} charges; the recorded ` +
-          "modifier policy was reviewed for a chargeless cooldown and must be re-reviewed",
+        `spell ${String(required.abilityGameId)} is declared PLAIN but reads _charges ${String(record.charges)} / ` +
+          `_charge_cooldown ${String(record.chargeCooldownMs)}ms. A charge system appeared and must be re-reviewed.`,
+      );
+    }
+    if (required.chargeModel === "ONE_CHARGE" && (record.charges !== 1 || !(record.chargeCooldownMs > 0))) {
+      problems.push(
+        `spell ${String(required.abilityGameId)} is declared ONE_CHARGE but reads _charges ` +
+          `${String(record.charges)} / _charge_cooldown ${String(record.chargeCooldownMs)}ms. Only a single ` +
+          "charge is provably equivalent to an ordinary cooldown; anything else needs a real charge model.",
       );
     }
   }
@@ -432,6 +544,21 @@ export function verifyRequiredFacts({ build, records, fieldIndices, expectedFiel
         `sc_rogue.cpp contains ${String(mutations)} '${qualified}->' call(s). Something now mutates this ` +
           "cooldown, so the recorded absence proof is false and the cooldown can no longer be derived from " +
           "a base duration alone.",
+      );
+    }
+  }
+
+  // A talent that would ADD a charge is only harmless while it is unimplemented,
+  // and "unimplemented" is a fact about the pinned module that can change. The
+  // handle appears exactly twice — declared and assigned — and is never read; a
+  // third occurrence means something now uses it.
+  for (const talent of UNIMPLEMENTED_CHARGE_TALENTS) {
+    const occurrences = rogueModuleText.split(talent.identifier).length - 1;
+    if (occurrences !== talent.expectedOccurrences) {
+      problems.push(
+        `sc_rogue.cpp mentions '${talent.identifier}' ${String(occurrences)} times, expected exactly ` +
+          `${String(talent.expectedOccurrences)} (the declaration and the find_talent_spell assignment). It may ` +
+          `now be implemented, in which case ${talent.appliesTo}'s charge count is no longer the DBC value.`,
       );
     }
   }
@@ -528,7 +655,15 @@ export function buildArtifact({ commitSha, sources, build, records, extractedOn 
         sourcePath: SOURCES.rogueModule,
         sourceSha256: rogueModuleSource.sha256,
         reviewedOn: extractedOn,
-        checks: MODIFIER_POLICY_CHECKS,
+        checks: [
+          directAdjustmentCheck(required.simcToken),
+          chargeModelCheck(required, record),
+          ...MODIFIER_POLICY_CHECKS,
+          required.actionBodyCheck,
+          ...UNIMPLEMENTED_CHARGE_TALENTS.filter((entry) => entry.appliesTo === required.simcToken).map(
+            ({ claim, search, finding }) => ({ claim, search, finding }),
+          ),
+        ],
       },
       cooldownStart: COOLDOWN_START_CONTRACT,
     };
@@ -630,8 +765,10 @@ async function main() {
   console.log(`  field indices ${JSON.stringify(layout.indices)} (derived from spell_data.hpp)`);
   for (const entry of artifact.cooldowns) {
     console.log(
-      `  ${entry.simcToken} -> ${String(entry.abilityGameId)} cooldown ${String(entry.baseCooldownMs)}ms ` +
-        `charges ${String(entry.charges)}`,
+      `  ${entry.simcToken} -> ${String(entry.abilityGameId)} effective recharge ` +
+        `${String(entry.chargeCooldownMs > 0 ? entry.chargeCooldownMs : entry.baseCooldownMs)}ms ` +
+        `(_cooldown ${String(entry.baseCooldownMs)}ms, _charges ${String(entry.charges)}, ` +
+        `_charge_cooldown ${String(entry.chargeCooldownMs)}ms)`,
     );
   }
   console.log(`  NOTE: the modifier policy is HAND REVIEWED against ${SOURCES.rogueModule}, not parsed.`);

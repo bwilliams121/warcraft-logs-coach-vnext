@@ -181,8 +181,18 @@ describe("a proven TRUE makes Stealth unusable, and nothing else does", () => {
       "ACTIVE_COOLDOWN",
       "STATIC_READY_FALSE",
       "ALREADY_STEALTHED",
+      // M5-D1. The COMPLEMENT of ALREADY_STEALTHED — the player is NOT in the
+      // state, and the game will not let them re-enter it while an enemy lives.
+      "RESTEALTH_NOT_PERMITTED_IN_COMBAT",
+      // M5-D1. A different function guarding a different set: vanish_t::ready()
+      // tests ONE named buff, not the four-aura stealthed.rogue mask.
+      "VANISH_BUFF_ALREADY_ACTIVE",
       "SIMULATED_PREFIX_EXECUTION",
     ]);
+    // Both new reasons describe the OBSERVED fight, so both belong to the
+    // observed set. Only the counterfactual one is excluded from it.
+    expect([...OBSERVED_UNUSABLE_REASONS]).toContain("RESTEALTH_NOT_PERMITTED_IN_COMBAT");
+    expect([...OBSERVED_UNUSABLE_REASONS]).toContain("VANISH_BUFF_ALREADY_ACTIVE");
     expect([...OBSERVED_UNUSABLE_REASONS]).toContain("ALREADY_STEALTHED");
     expect([...OBSERVED_UNUSABLE_REASONS]).not.toContain("SIMULATED_PREFIX_EXECUTION");
   });

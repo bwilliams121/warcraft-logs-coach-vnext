@@ -86,7 +86,8 @@ import { knownNumber, unknownNumber, type AtomBindings } from "../../../simc/exp
 import { tryAbilityIdentityFor } from "../../../data/game/rogue-abilities.js";
 import type { CombatState } from "../../../engine/state/combat-state.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
-import { bindGarroteRemains, type GarroteRemainsBinding } from "./garrote-dot-state.js";
+import { bindGarroteRemains, GARROTE_SIMC_TOKEN, type DotRemainsBinding } from "./dot-remains-state.js";
+import { bindRefreshable, type RefreshableBinding } from "./dot-refreshable.js";
 import { bindStealthedRogue, type StealthedRogueBinding } from "./stealth-state.js";
 
 /** The list this module selects within. One name, not a parameter. */
@@ -130,7 +131,9 @@ export interface CoreDotSelectionInput {
 /** The state this selection rests on, kept so a finding can show its work. */
 export interface CoreDotSelectionState {
   readonly stealthedRogue: StealthedRogueBinding;
-  readonly garroteRemains: GarroteRemainsBinding;
+  readonly garroteRemains: DotRemainsBinding;
+  /** M5-D1's one-sided `refreshable` verdict for Garrote. UNKNOWN in the middle. */
+  readonly garroteRefreshable: RefreshableBinding;
 }
 
 export type CoreDotSelection =
@@ -319,7 +322,8 @@ export function selectCoreDotActionAt(input: CoreDotSelectionInput): CoreDotSele
     targetInstance: input.targetInstance ?? null,
     position,
   });
-  const derivedState: CoreDotSelectionState = { stealthedRogue, garroteRemains };
+  const garroteRefreshable = bindRefreshable(GARROTE_SIMC_TOKEN, garroteRemains);
+  const derivedState: CoreDotSelectionState = { stealthedRogue, garroteRemains, garroteRefreshable };
 
   const stateEvidence: EvidenceLocator[] = [];
   if (stealthedRogue.value === "TRUE") stateEvidence.push(stealthedRogue.provenBy.locator);
@@ -341,10 +345,21 @@ export function selectCoreDotActionAt(input: CoreDotSelectionInput): CoreDotSele
     comboPoints: unknownNumber("STATE_NOT_ESTABLISHED"),
     comboPointsDeficit: unknownNumber("STATE_NOT_ESTABLISHED"),
     energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
-    dotRemainsSeconds:
+    // KEYED BY ACTION TOKEN since M5-D1. Garrote's remainder answers Garrote's
+    // `remains` and nothing else — `core_dot[3]` is Rupture, and before the
+    // keying it would have read this very number.
+    dotRemainsSecondsByAction:
       garroteRemains.state === "KNOWN"
-        ? knownNumber(garroteRemains.remainsSeconds)
-        : unknownNumber("STATE_NOT_ESTABLISHED"),
+        ? [{ actionToken: GARROTE_SIMC_TOKEN, remainsSeconds: knownNumber(garroteRemains.remainsSeconds) }]
+        : [],
+    // `refreshable` for Garrote alone, and only when M5-D1's one-sided proof
+    // decides it. This module derives no Rupture state, so `core_dot[3]`'s
+    // `refreshable` and `remains` both stay unbound — which is the anti-
+    // contamination property working, not a gap.
+    dotRefreshableByAction:
+      garroteRefreshable.state === "KNOWN"
+        ? [{ actionToken: GARROTE_SIMC_TOKEN, refreshable: garroteRefreshable.refreshable }]
+        : [],
     knownBuffs: [],
     knownTalents: input.knownTalents,
     // Positive-only. A stealth binding that is not TRUE is left OUT entirely, so

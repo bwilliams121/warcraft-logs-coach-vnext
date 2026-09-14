@@ -66,11 +66,55 @@
  * explicitly not `fight_remains`. Leaving out the field means the hindsight
  * shortcut cannot be taken by a future caller without editing this type.
  *
+ * 3. SELF-ADDRESSING ATOMS NEED TO KNOW WHOSE THEY ARE (M5-D1).
+ *
+ * `remains`, `refreshable` and `pmultiplier` are written bare and mean "the
+ * ACTING action's own DoT". Their bindings are therefore KEYED BY ACTION TOKEN
+ * and read through an `ExpressionContext`. A scalar would answer Rupture's
+ * question with Garrote's number; see `ExpressionContext`.
+ *
  * SimulationCraft semantics: expressions are numeric, zero is false, logical
  * operators and comparisons yield 1 or 0.
  */
 
 import { collectAtoms, type AtomShape, type ComparisonOperator, type ExpressionNode } from "./ast.js";
+
+/**
+ * WHICH ACTION a bare, self-addressing atom belongs to.
+ *
+ * ADDED AT M5-D1 TO CLOSE A LATENT WRONG-ANSWER.
+ *
+ * `remains`, `refreshable` and `pmultiplier` are written bare in the pinned
+ * `core_dot` lines and mean "the ACTING action's own DoT". Until M5-D1 the
+ * bindings carried ONE scalar `dotRemainsSeconds`, filled from Garrote, and the
+ * evaluator returned it for every entry — so the moment `core_dot[3]` (Rupture)
+ * became evaluable it would have read Garrote's remaining time and answered a
+ * question about the wrong bleed. Nothing would have looked wrong: both are
+ * plausible numbers of seconds.
+ *
+ * The fix is two halves that must travel together. The bindings became KEYED by
+ * action token, and this context says which key to read. A caller that supplies
+ * no context gets UNKNOWN for every self-addressing atom — never another
+ * action's value, and never a default.
+ */
+export interface ExpressionContext {
+  /**
+   * The SimulationCraft action token of the entry being evaluated.
+   *
+   * `null` means the caller is evaluating an expression that belongs to no
+   * action, which is a real situation — a `call_action_list` gate, or a unit test
+   * about arithmetic. Every self-addressing atom then resolves UNKNOWN.
+   */
+  readonly currentActionToken: string | null;
+}
+
+/** No acting action. Every self-addressing atom resolves UNKNOWN. */
+export const NO_ACTING_ACTION: ExpressionContext = { currentActionToken: null };
+
+/** The evaluation context for one named action's own entry. */
+export function actingAction(actionToken: string): ExpressionContext {
+  return { currentActionToken: actionToken };
+}
 
 /**
  * The most unresolved BOOLEAN atoms this evaluator will enumerate.
@@ -259,7 +303,14 @@ export interface AtomBindings {
     readonly remainsSeconds: NumericBinding;
   }[];
   /**
-   * `remains` — the acting action's own DoT remaining duration, IN SECONDS.
+   * `remains` — the ACTING action's own DoT remaining duration, IN SECONDS,
+   * KEYED BY ACTION TOKEN.
+   *
+   * A LIST RATHER THAN A SCALAR, and that is the M5-D1 correctness fix. One
+   * scalar meant `remains` answered with whatever the caller had derived,
+   * regardless of which entry was asking. Keying it makes the wrong-DoT answer
+   * unrepresentable: Rupture's entry looks up `"rupture"`, and if nobody bound
+   * that key the answer is UNKNOWN. It can no longer be Garrote's.
    *
    * UNITS ARE LOAD-BEARING. SimulationCraft expression literals are seconds:
    * `remains<=14` means fourteen seconds. Warcraft Logs timestamps and DBC
@@ -268,13 +319,33 @@ export interface AtomBindings {
    * wrong question — so the field name says the unit and the adapter that fills
    * it converts explicitly.
    *
-   * A REQUIRED `NumericBinding`, not an optional number, for the same reason
-   * `energyPct` is: a forgotten magnitude must be stated as unknown rather than
-   * defaulting to a value.
+   * OPTIONAL, unlike the scalar it replaces, and that is now the safe shape. An
+   * absent key resolves UNKNOWN_NUMBER and is never enumerated, so a caller that
+   * forgets one gets a refusal rather than a value — the same rule
+   * `knownCooldownRemainsSeconds` follows.
    *
    * There is deliberately NO `pmultiplier` field. See `evaluateInWorld`.
    */
-  readonly dotRemainsSeconds: NumericBinding;
+  readonly dotRemainsSecondsByAction?: readonly {
+    /** The SimulationCraft action token whose OWN DoT this describes. */
+    readonly actionToken: string;
+    readonly remainsSeconds: NumericBinding;
+  }[];
+  /**
+   * `refreshable` — the ACTING action's own DoT, KEYED BY ACTION TOKEN.
+   *
+   * Same keying rule and same reason. TRUTH-shaped, so an absent key is
+   * ENUMERATED rather than resolved — which is safe, because a verdict then
+   * survives only if it holds under both assignments.
+   *
+   * Only a POSITIVELY PROVEN value belongs here. See
+   * `src/specs/rogue/assassination/dot-refreshable.ts` for the two directions
+   * that can be proven and the middle that cannot.
+   */
+  readonly dotRefreshableByAction?: readonly {
+    readonly actionToken: string;
+    readonly refreshable: boolean;
+  }[];
 }
 
 export type TraceAtomBinding = "KNOWN" | "BOUNDED" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
@@ -535,11 +606,34 @@ function compare(operator: ComparisonOperator, left: number, right: number): num
  * and that unknown propagates through comparisons into the three-valued logic
  * rather than short-circuiting into a number.
  */
+/**
+ * The acting action's own DoT remainder, or UNKNOWN.
+ *
+ * ONE function, so no site can forget the context and read some other action's
+ * binding. A null context and an unbound token are the SAME answer here, because
+ * they are the same epistemic situation: nobody established this action's DoT.
+ */
+function actingDotRemains(bindings: AtomBindings, context: ExpressionContext): NumericBinding {
+  const token = context.currentActionToken;
+  if (token === null) return unknownNumber("STATE_NOT_ESTABLISHED");
+  const entry = (bindings.dotRemainsSecondsByAction ?? []).find((item) => item.actionToken === token);
+  return entry?.remainsSeconds ?? unknownNumber("STATE_NOT_ESTABLISHED");
+}
+
+/** The acting action's proven `refreshable`, or `undefined` when unestablished. */
+function actingDotRefreshable(bindings: AtomBindings, context: ExpressionContext): boolean | undefined {
+  const token = context.currentActionToken;
+  if (token === null) return undefined;
+  return (bindings.dotRefreshableByAction ?? []).find((item) => item.actionToken === token)?.refreshable;
+}
+
 function evaluateInWorld(
   node: ExpressionNode,
   bindings: AtomBindings,
   world: ReadonlyMap<string, boolean>,
+  context: ExpressionContext,
 ): WorldValue {
+  const recurse = (child: ExpressionNode): WorldValue => evaluateInWorld(child, bindings, world, context);
   switch (node.kind) {
     case "NUMBER":
       return node.value;
@@ -618,11 +712,20 @@ function evaluateInWorld(
       // editing `AtomBindings`.
       return UNKNOWN;
     case "DOT_REMAINS":
-      return worldValueOf(bindings.dotRemainsSeconds);
+      // KEYED BY THE ACTING ACTION. Never a scalar shared across entries.
+      return worldValueOf(actingDotRemains(bindings, context));
+    case "DOT_REFRESHABLE": {
+      const proven = actingDotRefreshable(bindings, context);
+      if (proven !== undefined) return proven ? 1 : 0;
+      // Unbound, so enumerated. `refreshable` is one atom per expression, and the
+      // key is bare because the atom is: it addresses whichever action is acting.
+      return world.get("refreshable") === true ? 1 : 0;
+    }
     case "MULTIPLY":
-    case "ADD": {
-      const left = evaluateInWorld(node.left, bindings, world);
-      const right = evaluateInWorld(node.right, bindings, world);
+    case "ADD":
+    case "SUBTRACT": {
+      const left = recurse(node.left);
+      const right = recurse(node.right);
       // Arithmetic on a magnitude nobody established is undecided. It is not
       // zero, and it is not an excuse to pick a bound.
       //
@@ -634,32 +737,23 @@ function evaluateInWorld(
       if (isBoundedValue(left) || isBoundedValue(right)) return UNKNOWN;
       // SimulationCraft has no boolean type: a truth operand is already 1 or 0
       // here, so `6*talent.razor_wire` needs no coercion rule of its own.
-      return node.kind === "MULTIPLY" ? left * right : left + right;
+      if (node.kind === "MULTIPLY") return left * right;
+      return node.kind === "ADD" ? left + right : left - right;
     }
     case "NOT":
-      return valueOf(notTruth(truthOf(evaluateInWorld(node.operand, bindings, world))));
+      return valueOf(notTruth(truthOf(recurse(node.operand))));
     case "COMPARISON": {
-      const left = evaluateInWorld(node.left, bindings, world);
-      const right = evaluateInWorld(node.right, bindings, world);
+      const left = recurse(node.left);
+      const right = recurse(node.right);
       // A comparison against a magnitude nobody established is undecided. It is
       // NOT false, and it is NOT an excuse to pick a bound. A PROVEN bound is a
       // different matter and may settle the comparison; see `compareWithBounds`.
       return compareWithBounds(node.operator, left, right);
     }
     case "AND":
-      return valueOf(
-        andTruth(
-          truthOf(evaluateInWorld(node.left, bindings, world)),
-          truthOf(evaluateInWorld(node.right, bindings, world)),
-        ),
-      );
+      return valueOf(andTruth(truthOf(recurse(node.left)), truthOf(recurse(node.right))));
     case "OR":
-      return valueOf(
-        orTruth(
-          truthOf(evaluateInWorld(node.left, bindings, world)),
-          truthOf(evaluateInWorld(node.right, bindings, world)),
-        ),
-      );
+      return valueOf(orTruth(truthOf(recurse(node.left)), truthOf(recurse(node.right))));
   }
 }
 
@@ -670,7 +764,12 @@ interface ResolvedAtom {
   readonly enumerate: boolean;
 }
 
-function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): ResolvedAtom {
+function resolveAtom(
+  key: string,
+  shape: AtomShape,
+  bindings: AtomBindings,
+  context: ExpressionContext,
+): ResolvedAtom {
   const known = (value: number): ResolvedAtom => ({
     trace: { key, shape, binding: "KNOWN", value, atLeast: null, unknownNumberReason: null },
     enumerate: false,
@@ -710,7 +809,9 @@ function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): Res
   }
   if (key === "fight_remains") return unknownNumeric("PREDICTIVE_NOT_PLAYER_KNOWABLE");
   if (key === "remains") {
-    return fromBinding(bindings.dotRemainsSeconds);
+    // Through the SAME helper `evaluateInWorld` uses, so the trace and the answer
+    // can never disagree about which action's DoT was read.
+    return fromBinding(actingDotRemains(bindings, context));
   }
   // `pmultiplier` is a snapshot this project does not reconstruct. It reports
   // STATE_NOT_MODELLED rather than STATE_NOT_ESTABLISHED: the remedy is not a
@@ -756,6 +857,12 @@ function resolveAtom(key: string, shape: AtomShape, bindings: AtomBindings): Res
   // trace and then enumerated anyway — a trace that disagrees with the answer.
   if (key === "stealthed.rogue" && bindings.stealthedRogue === true) {
     return known(1);
+  }
+  if (key === "refreshable") {
+    // Same helper as `evaluateInWorld`, same reason. `undefined` falls through to
+    // the enumerated case below rather than becoming a value.
+    const proven = actingDotRefreshable(bindings, context);
+    if (proven !== undefined) return known(proven ? 1 : 0);
   }
   const dot = /^dot\.(.+)\.ticking$/.exec(key);
   const dotName = dot?.[1];
@@ -822,13 +929,21 @@ export function evaluateSimcExpression(
   ast: ExpressionNode,
   expressionRaw: string,
   bindings: AtomBindings,
+  /**
+   * Which action's own DoT the bare self-addressing atoms belong to.
+   *
+   * DEFAULTS TO NO ACTING ACTION, which is the safe default rather than a
+   * convenient one: a caller that forgets it gets UNKNOWN for `remains` and an
+   * enumerated `refreshable`, never another action's binding.
+   */
+  context: ExpressionContext = NO_ACTING_ACTION,
 ): ExpressionEvaluation {
   const atoms: TraceAtom[] = [];
   const enumerated: string[] = [];
   let hasUnknownNumber = false;
 
   for (const atom of collectAtoms(ast)) {
-    const resolved = resolveAtom(atom.key, atom.shape, bindings);
+    const resolved = resolveAtom(atom.key, atom.shape, bindings, context);
     atoms.push(resolved.trace);
     if (resolved.enumerate) enumerated.push(atom.key);
     if (resolved.trace.binding === "UNKNOWN_NUMBER") hasUnknownNumber = true;
@@ -855,7 +970,7 @@ export function evaluateSimcExpression(
       assignmentMap.set(key, up);
       assignment.push({ atom: key, up });
     }
-    worlds.push({ assignment, result: truthOf(evaluateInWorld(ast, bindings, assignmentMap)) });
+    worlds.push({ assignment, result: truthOf(evaluateInWorld(ast, bindings, assignmentMap, context)) });
   }
 
   const allTrue = worlds.every((world) => world.result === "TRUE");

@@ -87,6 +87,56 @@ export interface DotBinding {
   readonly bindingSourceSha256: string;
 }
 
+/**
+ * How a DoT's applied duration is computed from its base (M5-D1).
+ *
+ * TWO MODELS, BECAUSE THE PINNED SOURCE HAS TWO. Garrote's
+ * `composite_dot_duration` returns the base unchanged; Rupture's is
+ * `data().duration() * ( 1 + rs->get_combo_points() )`. A single stored number
+ * would be right for one and wrong for the other at every combo-point count
+ * below maximum — and wrong in the direction that understates a remainder, which
+ * is what makes a refresh look due when it is not.
+ *
+ * `COMBO_POINT_SCALED` carries no coefficient: the formula is fixed in C++ and
+ * recording a multiplier here would create a second place for it to be wrong.
+ * What is recorded is WHERE the formula lives, so the reading can be re-checked.
+ */
+export type DotDurationModelKind = "FIXED" | "COMBO_POINT_SCALED";
+
+export const DOT_DURATION_MODEL_KINDS = [
+  "FIXED",
+  "COMBO_POINT_SCALED",
+] as const satisfies readonly DotDurationModelKind[];
+
+export interface DotDurationModel {
+  readonly kind: DotDurationModelKind;
+  /** The pinned file the reading came from. */
+  readonly sourcePath: string;
+  readonly sourceSha256: string;
+  readonly startLine: number;
+  readonly endLine: number;
+  /** What was read, in words, so the claim can be re-checked rather than trusted. */
+  readonly finding: string;
+}
+
+/**
+ * The periodic-damage effect a tick period was read from (M5-D1).
+ *
+ * Recorded rather than merely used, because `_amplitude` appears on EVERY effect
+ * and only the periodic-damage one means "tick period". Naming the effect index,
+ * type and subtype is what lets a reader confirm the right column of the right
+ * row was taken.
+ */
+export interface DotTickPeriodBinding {
+  /** `spelleffect_data_t::_index` of the effect the period came from. */
+  readonly effectIndex: number;
+  /** `_type`. 6 is `E_APPLY_AURA`. */
+  readonly effectType: number;
+  /** `_subtype`. 3 is `A_PERIODIC_DAMAGE`. */
+  readonly effectSubtype: number;
+  readonly sourcePath: string;
+}
+
 export interface DotDurationIdentity {
   /** The action token as it appears in a SimulationCraft APL line. */
   readonly simcToken: string;
@@ -98,6 +148,19 @@ export interface DotDurationIdentity {
   readonly baseDurationMs: number;
   /** `spell_data_t::_cooldown`, in MILLISECONDS. Recorded for traceability. */
   readonly baseCooldownMs: number;
+  /**
+   * `spelleffect_data_t::_amplitude` of the periodic-damage effect, in
+   * MILLISECONDS. The BASE tick period (M5-D1).
+   *
+   * NOT the tick period at runtime. Haste shortens it, and so does
+   * `1 / exsanguinated_rate` (sc_rogue.cpp:2619-2626). Both only ever SHORTEN
+   * it, which is precisely what makes this number usable as an UPPER BOUND — and
+   * an upper bound on the tick period is what the one-sided `refreshable` proof
+   * needs. See `src/specs/rogue/assassination/dot-refreshable.ts`.
+   */
+  readonly baseTickPeriodMs: number;
+  readonly tickPeriodBinding: DotTickPeriodBinding;
+  readonly durationModel: DotDurationModel;
   readonly binding: DotBinding;
 }
 
@@ -134,6 +197,8 @@ export type DotDurationArtifactValidationReason =
   | "MALFORMED_DOTS"
   | "MALFORMED_DOT"
   | "MALFORMED_BINDING"
+  | "MALFORMED_DURATION_MODEL"
+  | "MALFORMED_TICK_PERIOD"
   | "DUPLICATE_TOKEN"
   | "DUPLICATE_ABILITY_ID";
 
@@ -273,6 +338,42 @@ function validateBinding(value: unknown): DotBinding | null {
   };
 }
 
+function validateDurationModel(value: unknown): DotDurationModel | null {
+  if (!isRecord(value)) return null;
+  const kind = str(value, "kind");
+  const sourcePath = str(value, "sourcePath");
+  const sourceSha256 = str(value, "sourceSha256");
+  const finding = str(value, "finding");
+  const startLine = positiveInt(value, "startLine");
+  const endLine = positiveInt(value, "endLine");
+  if (
+    kind === null ||
+    !(DOT_DURATION_MODEL_KINDS as readonly string[]).includes(kind) ||
+    sourcePath === null ||
+    sourceSha256 === null ||
+    finding === null ||
+    startLine === null ||
+    endLine === null
+  ) {
+    return null;
+  }
+  if (!/^[0-9a-f]{64}$/.test(sourceSha256)) return null;
+  if (endLine < startLine) return null;
+  return { kind: kind as DotDurationModelKind, sourcePath, sourceSha256, startLine, endLine, finding };
+}
+
+function validateTickPeriodBinding(value: unknown): DotTickPeriodBinding | null {
+  if (!isRecord(value)) return null;
+  const sourcePath = str(value, "sourcePath");
+  const effectIndex = nonNegativeInt(value, "effectIndex");
+  const effectType = nonNegativeInt(value, "effectType");
+  const effectSubtype = nonNegativeInt(value, "effectSubtype");
+  if (sourcePath === null || effectIndex === null || effectType === null || effectSubtype === null) {
+    return null;
+  }
+  return { effectIndex, effectType, effectSubtype, sourcePath };
+}
+
 export function validateDotDurationArtifact(value: unknown): DotDurationArtifactValidation {
   if (!isRecord(value)) return invalid("NOT_AN_OBJECT", "artifact root is not an object");
 
@@ -348,6 +449,26 @@ export function validateDotDurationArtifact(value: unknown): DotDurationArtifact
       return invalid("MALFORMED_BINDING", `dots[${index}] has an unusable binding record`);
     }
 
+    const durationModel = validateDurationModel(raw["durationModel"]);
+    if (durationModel === null) {
+      return invalid(
+        "MALFORMED_DURATION_MODEL",
+        `dots[${index}] has no usable durationModel; a DoT whose scaling is unstated cannot be derived`,
+      );
+    }
+
+    // A POSITIVE tick period. Zero would mean "no periodic effect", which cannot
+    // be a DoT, and it would make the `refreshable` bound `remains > 0` — true
+    // for every live DoT, which would prove `refreshable` FALSE always.
+    const baseTickPeriodMs = positiveInt(raw, "baseTickPeriodMs");
+    const tickPeriodBinding = validateTickPeriodBinding(raw["tickPeriodBinding"]);
+    if (baseTickPeriodMs === null || tickPeriodBinding === null) {
+      return invalid(
+        "MALFORMED_TICK_PERIOD",
+        `dots[${index}] has no positive baseTickPeriodMs with a binding naming the effect it came from`,
+      );
+    }
+
     if (seenTokens.has(simcToken)) return invalid("DUPLICATE_TOKEN", simcToken);
     if (seenIds.has(abilityGameId)) return invalid("DUPLICATE_ABILITY_ID", String(abilityGameId));
     seenTokens.add(simcToken);
@@ -359,6 +480,9 @@ export function validateDotDurationArtifact(value: unknown): DotDurationArtifact
       displayNameEn: nameEn,
       baseDurationMs,
       baseCooldownMs,
+      baseTickPeriodMs,
+      tickPeriodBinding,
+      durationModel,
       binding,
     });
   }

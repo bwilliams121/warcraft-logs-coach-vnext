@@ -86,8 +86,56 @@ const REQUIRED_DOTS = [
     createAction:
       'sc_rogue.cpp:9472 if ( name == "garrote" ) return new garrote_t( name, this, spec.garrote, options_str )',
     specBinding: 'sc_rogue.cpp:9934 spec.garrote = find_specialization_spell( "Garrote" )',
+    durationModel: {
+      kind: "FIXED",
+      startLine: 4501,
+      endLine: 4506,
+      finding:
+        "garrote_t::composite_dot_duration returns rogue_attack_t::composite_dot_duration( s ) scaled only by " +
+        "1 / get_exsanguinated_rate(). That rate never leaves 1.0 at this commit — do_exsanguinate is " +
+        "[[maybe_unused]] with no call site (sc_rogue.cpp:7759) and the field is constructed and reset to 1.0 " +
+        "(sc_rogue.cpp:1479) — so the applied duration is the base _duration unchanged.",
+    },
+  },
+  {
+    simcToken: "rupture",
+    displayNameEn: "Rupture",
+    createAction:
+      'sc_rogue.cpp:9486 if ( name == "rupture" ) return new rupture_t( name, this, spec.rupture, options_str )',
+    specBinding: 'sc_rogue.cpp:9937 spec.rupture = find_specialization_spell( "Rupture" )',
+    durationModel: {
+      kind: "COMBO_POINT_SCALED",
+      startLine: 5161,
+      endLine: 5167,
+      finding:
+        "rupture_t::composite_dot_duration computes data().duration() * ( 1 + rs->get_combo_points() ), then " +
+        "divides by get_exsanguinated_rate(), which never leaves 1.0 at this commit. The applied duration is " +
+        "therefore baseDurationMs * ( 1 + combo points spent by the applying cast ).",
+    },
   },
 ];
+
+/**
+ * The effect that carries a DoT's tick period.
+ *
+ * `_amplitude` appears on every effect and means different things on each; only
+ * a PERIODIC DAMAGE aura's amplitude is the tick period. So the search is by
+ * `_type` and `_subtype`, and a spell with no such effect — or with more than one
+ * — is refused rather than resolved to whichever came first.
+ *
+ *     data_enums.hh:685   E_APPLY_AURA        = 6
+ *     data_enums.hh:1043  A_PERIODIC_DAMAGE   = 3
+ */
+const PERIODIC_DAMAGE_EFFECT_TYPE = 6;
+const PERIODIC_DAMAGE_EFFECT_SUBTYPE = 3;
+
+/**
+ * The flat effect-row indices this parser reads, counted from `_id`.
+ *
+ * Re-derived from `struct spelleffect_data_t` on every run and compared against
+ * these, exactly like the spell-row indices.
+ */
+const EXPECTED_EFFECT_FIELD_INDICES = { _spell_id: 1, _index: 2, _type: 3, _subtype: 4, _amplitude: 12 };
 
 /**
  * Cross-artifact anchors: `_gcd` values M5-C1 already pinned from these same
@@ -179,12 +227,12 @@ export function parseClientDataVersion(text) {
  * Counting stops at the first ARRAY member, which is where a generated row stops
  * being flat comma-separated scalars.
  */
-export function deriveScalarFieldIndices(headerText, wantedNames) {
+export function deriveScalarFieldIndices(headerText, wantedNames, structName = "spell_data_t") {
   const lines = headerText.split(/\r?\n/);
 
   let bodyStart = -1;
   for (let i = 0; i < lines.length - 1; i += 1) {
-    if (lines[i]?.trim() !== "struct spell_data_t") continue;
+    if (lines[i]?.trim() !== `struct ${structName}`) continue;
     if (lines[i + 1]?.trim() === "{") {
       bodyStart = i + 2;
       break;
@@ -193,7 +241,7 @@ export function deriveScalarFieldIndices(headerText, wantedNames) {
   if (bodyStart < 0) {
     return {
       ok: false,
-      error: "spell_data.hpp does not define struct spell_data_t (only a forward declaration?)",
+      error: `spell_data.hpp does not define struct ${structName} (only a forward declaration?)`,
     };
   }
 
@@ -347,6 +395,91 @@ export function parseSpellRecords(text, wantedIds, fieldIndices) {
 }
 
 /**
+ * Extracts the PERIODIC DAMAGE effect's `_amplitude` for each wanted spell.
+ *
+ * SCOPED TO ONE TABLE, DELIMITED BY ITS OWN DECLARATION. The generated file
+ * holds several arrays whose rows begin with a bare integer — the power table's
+ * rows are the dangerous neighbour, since they also start `{ <id>, <spell_id>,`
+ * and would parse into plausible nonsense. So the scan starts at
+ * `__spelleffect_data[` and stops at that array's closing brace, rather than
+ * trying to tell rows apart by shape.
+ *
+ * A spell with NO periodic-damage effect, or with MORE THAN ONE, is refused
+ * rather than resolved. `_amplitude` means "tick period" only on this effect
+ * type, and picking one of two would be a guess about which aura is the DoT.
+ */
+export function parseEffectTickPeriods(text, wantedSpellIds, fieldIndices) {
+  const wanted = new Set([...wantedSpellIds].map(Number));
+  const found = new Map();
+  const ambiguous = [];
+
+  const start = text.indexOf("__spelleffect_data[");
+  if (start < 0) {
+    return { ok: false, error: "sc_spell_data.inc declares no __spelleffect_data table" };
+  }
+  const bodyStart = text.indexOf("{", start);
+  const bodyEnd = text.indexOf("\n};", bodyStart);
+  if (bodyStart < 0 || bodyEnd < 0) {
+    return { ok: false, error: "the __spelleffect_data table has no readable body" };
+  }
+
+  let rowsScanned = 0;
+  for (const line of text.slice(bodyStart, bodyEnd).split(/\r?\n/)) {
+    const open = line.indexOf("{");
+    if (open < 0) continue;
+    const afterOpen = line.slice(open + 1);
+    const firstNested = afterOpen.indexOf("{");
+    // Every effect row carries the `_class_flags` array, so a row with no nested
+    // brace is not one and is skipped rather than half-read.
+    if (firstNested < 0) continue;
+    const flat = afterOpen
+      .slice(0, firstNested)
+      .split(",")
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
+    rowsScanned += 1;
+
+    const spellIdRaw = flat[fieldIndices._spell_id];
+    if (spellIdRaw === undefined || !/^\d+$/.test(spellIdRaw)) continue;
+    const spellId = Number.parseInt(spellIdRaw, 10);
+    if (!wanted.has(spellId)) continue;
+
+    const typeRaw = flat[fieldIndices._type];
+    const subtypeRaw = flat[fieldIndices._subtype];
+    if (typeRaw === undefined || subtypeRaw === undefined) continue;
+    if (Number.parseInt(typeRaw, 10) !== PERIODIC_DAMAGE_EFFECT_TYPE) continue;
+    if (Number.parseInt(subtypeRaw, 10) !== PERIODIC_DAMAGE_EFFECT_SUBTYPE) continue;
+
+    const amplitude = readMillisecondColumn(flat[fieldIndices._amplitude], "_amplitude", spellId);
+    if (!amplitude.ok) return amplitude;
+    const indexRaw = flat[fieldIndices._index];
+    if (indexRaw === undefined || !/^\d+$/.test(indexRaw)) continue;
+
+    if (found.has(spellId)) {
+      ambiguous.push(spellId);
+      continue;
+    }
+    found.set(spellId, {
+      spellId,
+      effectIndex: Number.parseInt(indexRaw, 10),
+      effectType: PERIODIC_DAMAGE_EFFECT_TYPE,
+      effectSubtype: PERIODIC_DAMAGE_EFFECT_SUBTYPE,
+      baseTickPeriodMs: amplitude.value,
+    });
+  }
+
+  if (ambiguous.length > 0) {
+    return {
+      ok: false,
+      error:
+        `spell ids carry more than one periodic-damage effect and their tick period is ambiguous: ` +
+        ambiguous.join(", "),
+    };
+  }
+  return { ok: true, effects: found, rowsScanned };
+}
+
+/**
  * Parses `specialization_spells.inc` rows:
  * `{ classId, specId, spellId, replacesSpellId, "Name", flags }`.
  *
@@ -400,7 +533,15 @@ export function resolveSpecializationSpell(rows, displayNameEn) {
 }
 
 /** Checks every required fact. An empty list is the only thing that licenses writing. */
-export function verifyRequiredFacts({ build, records, bindings, fieldIndices, gcdAnchorRecords }) {
+export function verifyRequiredFacts({
+  build,
+  records,
+  bindings,
+  fieldIndices,
+  gcdAnchorRecords,
+  effectFieldIndices,
+  effects,
+}) {
   const problems = [];
 
   for (const [fieldName, expected] of Object.entries(EXPECTED_FIELD_INDICES)) {
@@ -409,6 +550,16 @@ export function verifyRequiredFacts({ build, records, bindings, fieldIndices, gc
       problems.push(
         `${fieldName} is at flat field index ${String(actual)} in the pinned spell_data.hpp, but this parser was ` +
           `written against index ${String(expected)}. The struct layout moved; re-verify every value before changing this.`,
+      );
+    }
+  }
+
+  for (const [fieldName, expected] of Object.entries(EXPECTED_EFFECT_FIELD_INDICES)) {
+    const actual = effectFieldIndices?.[fieldName];
+    if (actual !== expected) {
+      problems.push(
+        `spelleffect_data_t.${fieldName} is at flat field index ${String(actual)} in the pinned spell_data.hpp, but ` +
+          `this parser was written against index ${String(expected)}. The effect row layout moved.`,
       );
     }
   }
@@ -460,6 +611,23 @@ export function verifyRequiredFacts({ build, records, bindings, fieldIndices, gc
       problems.push(
         `spell ${String(binding.spellId)} (${required.displayNameEn}) has _duration ${String(record.baseDurationMs)}ms, ` +
           "which cannot anchor a remaining-duration derivation",
+      );
+    }
+
+    // A DoT with no periodic-damage effect has no tick period, and the one-sided
+    // `refreshable` proof has nothing to bound. Refused rather than defaulted:
+    // a zero period would make `remains > 0` the test, which is true for every
+    // live DoT and would prove `refreshable` FALSE always.
+    const effect = effects?.get(binding.spellId);
+    if (effect === undefined) {
+      problems.push(
+        `spell ${String(binding.spellId)} (${required.displayNameEn}) has no E_APPLY_AURA/A_PERIODIC_DAMAGE ` +
+          "effect, so it carries no tick period",
+      );
+    } else if (!(effect.baseTickPeriodMs > 0)) {
+      problems.push(
+        `spell ${String(binding.spellId)} (${required.displayNameEn}) has _amplitude ` +
+          `${String(effect.baseTickPeriodMs)}ms on its periodic-damage effect, which cannot bound refreshable`,
       );
     }
   }
@@ -530,6 +698,7 @@ export function buildArtifact({
   build,
   records,
   bindings,
+  effects,
   extractedOn,
   rogueModuleSha256,
 }) {
@@ -546,12 +715,31 @@ export function buildArtifact({
     if (binding === undefined) throw new Error(`'${required.simcToken}' has no binding to emit`);
     const record = records.get(binding.spellId);
     if (record === undefined) throw new Error(`spell ${String(binding.spellId)} has no record to emit`);
+    const effect = effects.get(binding.spellId);
+    if (effect === undefined) {
+      throw new Error(`spell ${String(binding.spellId)} has no periodic-damage effect to emit`);
+    }
     return {
       simcToken: required.simcToken,
       abilityGameId: record.abilityGameId,
       displayNameEn: record.displayNameEn,
       baseDurationMs: record.baseDurationMs,
       baseCooldownMs: record.baseCooldownMs,
+      baseTickPeriodMs: effect.baseTickPeriodMs,
+      tickPeriodBinding: {
+        effectIndex: effect.effectIndex,
+        effectType: effect.effectType,
+        effectSubtype: effect.effectSubtype,
+        sourcePath: SOURCES.spellData,
+      },
+      durationModel: {
+        kind: required.durationModel.kind,
+        sourcePath: SOURCES.rogueModule,
+        sourceSha256: bindingSourceSha256,
+        startLine: required.durationModel.startLine,
+        endLine: required.durationModel.endLine,
+        finding: required.durationModel.finding,
+      },
       binding: {
         method: "SPECIALIZATION_SPELL_TABLE",
         classId: ROGUE_CLASS_ID,
@@ -631,6 +819,13 @@ async function main() {
   const layout = deriveScalarFieldIndices(loaded.spellDataLayout, ["_duration", "_cooldown", "_gcd"]);
   if (!layout.ok) fail(layout.error);
 
+  const effectLayout = deriveScalarFieldIndices(
+    loaded.spellDataLayout,
+    Object.keys(EXPECTED_EFFECT_FIELD_INDICES),
+    "spelleffect_data_t",
+  );
+  if (!effectLayout.ok) fail(effectLayout.error);
+
   const specSpells = parseSpecializationSpells(loaded.specializationSpells);
   const bindings = new Map();
   for (const required of REQUIRED_DOTS) {
@@ -646,12 +841,18 @@ async function main() {
   const parsed = parseSpellRecords(loaded.spellData, wantedIds, layout.indices);
   if (!parsed.ok) fail(parsed.error);
 
+  const dotSpellIds = [...bindings.values()].map((row) => row.spellId);
+  const parsedEffects = parseEffectTickPeriods(loaded.spellData, dotSpellIds, effectLayout.indices);
+  if (!parsedEffects.ok) fail(parsedEffects.error);
+
   const problems = verifyRequiredFacts({
     build: build.value,
     records: parsed.records,
     bindings,
     fieldIndices: layout.indices,
     gcdAnchorRecords: parsed.records,
+    effectFieldIndices: effectLayout.indices,
+    effects: parsedEffects.effects,
   });
   if (problems.length > 0) fail(`\n  - ${problems.join("\n  - ")}`);
 
@@ -661,6 +862,7 @@ async function main() {
     build: build.value,
     records: parsed.records,
     bindings,
+    effects: parsedEffects.effects,
     extractedOn: new Date().toISOString().slice(0, 10),
     rogueModuleSha256: sources.find((source) => source.path === SOURCES.rogueModule)?.sha256,
   });
@@ -671,9 +873,12 @@ async function main() {
   console.log(`Wrote ${outPath}`);
   console.log(`  rows scanned  ${String(parsed.rowsScanned)}`);
   console.log(`  field indices ${JSON.stringify(layout.indices)} (derived from spell_data.hpp)`);
+  console.log(`  effect field indices ${JSON.stringify(effectLayout.indices)}`);
+  console.log(`  effect rows scanned ${String(parsedEffects.rowsScanned)}`);
   for (const dot of artifact.dots) {
     console.log(
-      `  ${dot.simcToken} -> ${String(dot.abilityGameId)} duration ${String(dot.baseDurationMs)}ms`,
+      `  ${dot.simcToken} -> ${String(dot.abilityGameId)} duration ${String(dot.baseDurationMs)}ms ` +
+        `tick ${String(dot.baseTickPeriodMs)}ms model ${dot.durationModel.kind}`,
     );
   }
   console.log(

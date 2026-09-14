@@ -184,7 +184,7 @@ describe("both Darkest Night resolutions reject the event independently", () => 
       // The pinned gate mentions no energy or DoT duration; both are stated
       // explicitly, never omitted.
       energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
-      dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+      dotRemainsSecondsByAction: [],
       knownBuffs: [{ name: "darkest_night", up: darkestNightUp }],
     });
 

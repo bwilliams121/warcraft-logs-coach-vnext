@@ -95,8 +95,9 @@ describe("the observed ability is matched by numeric game id", () => {
   it("keeps the dataset minimal rather than becoming a spell database", () => {
     // Enumerated, not counted: each entry exists because a supported sub-list
     // selection has to NAME what it selected. `envenom` for M5-A's `spend`,
-    // `garrote` for M5-C3a's `core_dot`. A third requires a third decision.
-    expect(ROGUE_ABILITIES.map((ability) => ability.simcToken)).toEqual(["envenom", "garrote"]);
+    // `garrote` for M5-C3a's `core_dot`, `rupture` for the `core_dot[3]` line
+    // M5-D1 made evaluable. A fourth requires a fourth decision.
+    expect(ROGUE_ABILITIES.map((ability) => ability.simcToken)).toEqual(["envenom", "garrote", "rupture"]);
   });
 
   it("ignores a different ability that Warcraft Logs happens to name 'Envenom'", () => {

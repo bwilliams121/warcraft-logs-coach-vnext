@@ -159,7 +159,10 @@ describe("the observed Kingsbane cast anchors a proven lower bound", () => {
     expect(policy.sourcePath).toBe("engine/class_modules/sc_rogue.cpp");
     expect(policy.sourceSha256).toMatch(/^[0-9a-f]{64}$/);
     expect(policy.claims).toContain("NO_DIRECT_COOLDOWN_ADJUSTMENT");
-    expect(policy.claims).toContain("NO_CHARGES");
+    // Renamed at M5-D1 when the charge claim became per-entry and had to say
+    // WHICH shape the row exhibits. Kingsbane's is still "no charge system".
+    expect(policy.claims).toContain("NO_CHARGE_SYSTEM");
+    expect(policy.claims).not.toContain("ONE_CHARGE_IS_AN_ORDINARY_COOLDOWN");
   });
 
   it("is not disturbed by the 41 other casts in the window", () => {
@@ -350,9 +353,13 @@ describe("recognition is not knowledge", () => {
   });
 
   it("binds only the cooldowns it derived, omitting the rest", () => {
+    // Grown at M5-D1. All three supported cooldowns have an observed anchor in
+    // this window — Deathmark 3803 ms before Q, Vanish 460 ms — so all three
+    // derive. The property under test is unchanged: only DERIVED cooldowns are
+    // bound, and each is carried as the bound it is.
     const traversal = traverseAtQ();
     const bound = traversal.bindings.knownCooldownRemainsSeconds ?? [];
-    expect(bound.map((entry) => entry.name)).toEqual(["kingsbane"]);
+    expect(bound.map((entry) => entry.name)).toEqual(["kingsbane", "deathmark", "vanish"]);
     for (const entry of bound) {
       // A bound, carried as a bound.
       expect(entry.remainsSeconds.state).toBe("BOUNDED_NUMBER");
@@ -361,9 +368,40 @@ describe("recognition is not knowledge", () => {
     }
   });
 
+  it("derives Vanish from its CHARGE cooldown, never from its nominal one", () => {
+    // THE M5-D1 ONE-CHARGE CASE, on real data. Vanish's DBC row carries
+    // `_cooldown` 1000 and `_charge_cooldown` 120000. Reading the nominal field
+    // would claim a one-second recharge for a two-minute ability — and at 460 ms
+    // elapsed it would report the cooldown as good as over.
+    const traversal = traverseAtQ();
+    const vanish = traversal.derivedCooldowns.find((entry) => entry.simcToken === "vanish");
+    expect(vanish).toBeDefined();
+    if (vanish?.cooldown.state !== "BOUNDED") throw new Error("expected a bounded Vanish cooldown");
+    expect(vanish.cooldown.baseCooldownMs).toBe(120_000);
+    expect(vanish.cooldown.elapsedMs).toBe(460);
+    expect(vanish.cooldown.atLeastRemainingMs).toBe(119_540);
+    // The nominal field, had it been used, would have given a bound of zero.
+    expect(vanish.cooldown.baseCooldownMs).not.toBe(1_000);
+  });
+
+  it("derives Deathmark from its ordinary 120s cooldown", () => {
+    const traversal = traverseAtQ();
+    const deathmark = traversal.derivedCooldowns.find((entry) => entry.simcToken === "deathmark");
+    if (deathmark?.cooldown.state !== "BOUNDED") throw new Error("expected a bounded Deathmark cooldown");
+    expect(deathmark.cooldown.baseCooldownMs).toBe(120_000);
+    expect(deathmark.cooldown.elapsedMs).toBe(3_803);
+    expect(deathmark.cooldown.atLeastRemainingMs).toBe(116_197);
+  });
+
   it("reports every derivation attempt, including ones that failed", () => {
     const traversal = traverseAtQ();
-    expect(traversal.derivedCooldowns.map((entry) => entry.simcToken)).toEqual(["kingsbane"]);
-    expect(traversal.derivedCooldowns[0]?.cooldown.state).toBe("BOUNDED");
+    expect(traversal.derivedCooldowns.map((entry) => entry.simcToken)).toEqual([
+      "kingsbane",
+      "deathmark",
+      "vanish",
+    ]);
+    for (const entry of traversal.derivedCooldowns) {
+      expect(entry.cooldown.state, entry.simcToken).toBe("BOUNDED");
+    }
   });
 });

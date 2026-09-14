@@ -124,16 +124,18 @@ describe("an ordinary non-charge cooldown can prove an action unusable", () => {
   });
 
   it("is UNKNOWN for an ability whose cooldown could not be derived", () => {
-    // `deathmark` is in the pinned APL and is NOT in the supported cooldown
-    // dataset, so no cooldown exists to compare. Absence of a derivation is not
-    // a readiness claim in either direction.
+    // RE-POINTED for M5-D1, which added `deathmark` to the cooldown dataset. The
+    // stand-in is `shiv`: a real Assassination action in the pinned `generate`
+    // list that the dataset deliberately does not carry, because no supported
+    // decision reads its cooldown. Absence of a derivation is not a readiness
+    // claim in either direction.
     const state = m5c3c1State();
     const profile = authorityProfileFor(state, M5C3C1_ACTOR);
     if (profile === null) throw new Error("expected a profile");
-    expect(deriveCooldown({ state, actorId: M5C3C1_ACTOR, position: 0 }, "deathmark")).toBeNull();
+    expect(deriveCooldown({ state, actorId: M5C3C1_ACTOR, position: 0 }, "shiv")).toBeNull();
     const verdict = resolveUsability(
       { state, actorId: M5C3C1_ACTOR, position: garroteDecisionPosition(state), profile },
-      entryAt("cds", 0),
+      entryAt("generate", 1),
       M5C3C1_IDS.garrote,
       abilityIdFor,
     );
@@ -185,7 +187,10 @@ describe("the bridge is generic, not written around one ability", () => {
   });
 
   it("drives the supported set from the pinned dataset", () => {
-    expect([...SUPPORTED_COOLDOWN_TOKENS]).toEqual(["kingsbane"]);
+    // Grown at M5-D1: `deathmark` because five reachable lines read
+    // `cooldown.deathmark.remains`, and `vanish` because a readiness proof is
+    // the only way to eliminate the `vanish` list — its conditions never can.
+    expect([...SUPPORTED_COOLDOWN_TOKENS]).toEqual(["kingsbane", "deathmark", "vanish"]);
     for (const token of SUPPORTED_COOLDOWN_TOKENS) {
       expect(cooldownForToken(token)).not.toBeNull();
     }

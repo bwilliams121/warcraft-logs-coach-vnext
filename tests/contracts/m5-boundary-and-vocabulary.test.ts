@@ -186,7 +186,13 @@ describe("M5 invents no combat state", () => {
    */
   const AURA_READING_MODULES = [
     "src/specs/rogue/assassination/stealth-state.ts",
-    "src/specs/rogue/assassination/garrote-dot-state.ts",
+    // Renamed at M5-D1 from `garrote-dot-state.ts` when the derivation became
+    // per-action. Same module, same exemption, same companion test below.
+    "src/specs/rogue/assassination/dot-remains-state.ts",
+    // M5-D1. Reads ONE aura fact — is a debuff this player applied ACTIVE on the
+    // enemy right now — to establish that a living enemy is engaged. It cannot
+    // produce a duration or a count; its companion test below pins that.
+    "src/specs/rogue/assassination/combat-engagement.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];
@@ -239,9 +245,17 @@ describe("M5 invents no combat state", () => {
     // no observation would be forced to invent one. This is what makes the
     // prohibition above enforceable rather than merely stated.
     const evaluate = codeOf("src/simc/expression/evaluate.ts");
-    for (const field of ["comboPoints", "comboPointsDeficit", "energyPct", "dotRemainsSeconds"]) {
+    for (const field of ["comboPoints", "comboPointsDeficit", "energyPct"]) {
       expect(evaluate, `${field} is not a NumericBinding`).toContain(`readonly ${field}: NumericBinding;`);
     }
+    // M5-D1 replaced the scalar `dotRemainsSeconds` with a per-action map, so the
+    // magnitude now sits one level in. The guarantee is unchanged and the shape
+    // is checked in its new place: still a `NumericBinding`, never a number.
+    expect(evaluate).toContain("readonly remainsSeconds: NumericBinding;");
+    expect(evaluate).not.toContain("readonly remainsSeconds: number;");
+    // And the scalar must not come back: one shared remainder is what let
+    // Rupture's `remains` read Garrote's.
+    expect(evaluate).not.toContain("readonly dotRemainsSeconds:");
     expect(evaluate).not.toContain("readonly comboPoints: number;");
     expect(evaluate).not.toContain("readonly comboPointsDeficit: number;");
   });
@@ -251,7 +265,7 @@ describe("M5 invents no combat state", () => {
     // return INACTIVE and can return UNKNOWN, and NEITHER may become a
     // remaining duration — a DoT that is absent has no remainder, and clamping
     // one to zero would satisfy every `remains<=` threshold in the pinned APL.
-    const code = codeOf("src/specs/rogue/assassination/garrote-dot-state.ts");
+    const code = codeOf("src/specs/rogue/assassination/dot-remains-state.ts");
 
     // The number lives on the KNOWN variant alone. The UNKNOWN variant has no
     // field that could carry one.
@@ -263,6 +277,29 @@ describe("M5 invents no combat state", () => {
     expect(code).not.toContain("remainsMs: 0");
     expect(code).not.toContain("Math.max(0");
     expect(code).not.toContain("?? 0");
+  });
+
+  it("still lets no absence become an enemy claim: the engagement reader proves only presence", () => {
+    // M5-D1's companion test for the third declared aura reader. The danger here
+    // is neither a false FALSE nor a fabricated number — it is a COUNT. An
+    // engagement proof that could say "there are N enemies" would be
+    // `spell_targets.fan_of_knives` by another name, which M5-D deliberately
+    // does not support.
+    const code = codeOf("src/specs/rogue/assassination/combat-engagement.ts");
+
+    // It reports ONE enemy id, and only from a PROVEN ACTIVE presence.
+    expect(code).toContain('presence.value.presence !== "ACTIVE"');
+    expect(code).toContain("readonly enemyActorId: number;");
+    // No count, no list, no target enumeration.
+    expect(code).not.toContain("enemyCount");
+    expect(code).not.toContain("activeEnemies");
+    expect(code).not.toContain("spell_targets");
+    // And the negative direction is unspellable: the union has ENGAGED and
+    // UNKNOWN, and no member that asserts an absence of enemies.
+    expect(code).toContain('readonly state: "ENGAGED"');
+    expect(code).toContain('readonly state: "UNKNOWN"');
+    expect(code).not.toContain('"NO_ENEMY"');
+    expect(code).not.toContain('state: "DISENGAGED"');
   });
 
   it("still lets no absence become inactivity: the aura reader cannot say FALSE", () => {

@@ -38,7 +38,7 @@
     "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
     "cooldownFieldName": "_cooldown",
     "cooldownFieldUnits": "MILLISECONDS",
-    "extractedOn": "2026-09-13",
+    "extractedOn": "2026-09-14",
     "extractorVersion": 1,
     "applicabilityNote": "Not version-gated at runtime, for the same reason as the GCD and DoT-duration artifacts: CombatFight exposes no client-build key, so comparing anything against a recorded build would be a gate that always passes while appearing rigorous. The build is recorded for traceability."
   },
@@ -65,22 +65,22 @@
         "appliesTo": "kingsbane",
         "sourcePath": "engine/class_modules/sc_rogue.cpp",
         "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
-        "reviewedOn": "2026-09-13",
+        "reviewedOn": "2026-09-14",
         "checks": [
           {
             "claim": "NO_DIRECT_COOLDOWN_ADJUSTMENT",
             "search": "grep 'cooldowns.kingsbane' and 'cooldowns.kingsbane->' in engine/class_modules/sc_rogue.cpp",
-            "finding": "Exactly ONE occurrence of 'cooldowns.kingsbane' (line 1169, the assignment in the constructor) and ZERO occurrences of 'cooldowns.kingsbane->'. The member declaration at line 475 reads 'cooldown_t* kingsbane;' inside the cooldowns_t struct and so does not contain the qualified name. Every mutation — adjust(), reset(), duration assignment, charge change — would have to go through the arrow form, and none exists."
+            "finding": "Exactly ONE occurrence of 'cooldowns.kingsbane' — the assignment in rogue_t's constructor — and ZERO occurrences of 'cooldowns.kingsbane->'. The member declaration inside the cooldowns_t struct is unqualified and so does not match. Every mutation — adjust(), reset(), duration assignment, charge change — would have to go through the arrow form, and none exists. Re-checked mechanically on every run."
           },
           {
-            "claim": "NO_CHARGES",
-            "search": "spell_data.inc row for 385627, _charges column",
-            "finding": "_charges is 0, so there is no charge system and no recharge behaviour to model."
+            "claim": "NO_CHARGE_SYSTEM",
+            "search": "spell_data.inc row for 385627, _charge_cooldown and _charges columns",
+            "finding": "_charge_cooldown is 0, so action_t::init takes the ordinary else-branch (action.cpp:721-724) and cooldown->duration is _cooldown = 60000ms. _charges is 0: there is no charge system and no recharge behaviour to model."
           },
           {
             "claim": "NO_ROGUE_WIDE_CDR_APPLIES",
             "search": "grep for the rogue module's bulk cooldown-adjustment sites",
-            "finding": "Restless Blades (sc_rogue.cpp:8246-8254) adjusts nine Outlaw cooldowns and does not include kingsbane. Deadly Pursuit (sc_rogue.cpp:10826-10832) calls adjust_recharge_multiplier over deadly_pursuit_cooldowns and is gated on talent.outlaw.deadly_pursuit. Both are Outlaw-only; the analysed specialization is Assassination."
+            "finding": "Restless Blades (sc_rogue.cpp:8246-8254) adjusts nine Outlaw cooldowns and includes none of the abilities in this dataset. Deadly Pursuit (sc_rogue.cpp:10826-10832) calls adjust_recharge_multiplier over deadly_pursuit_cooldowns and is gated on talent.outlaw.deadly_pursuit. Both are Outlaw-only; the analysed specialization is Assassination."
           },
           {
             "claim": "NO_RECHARGE_MULTIPLIER_CHANGE",
@@ -91,6 +91,133 @@
             "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
             "search": "kingsbane_t body (sc_rogue.cpp:4783-4910) for update_ready / cooldown overrides",
             "finding": "kingsbane_t declares neither. The base rogue_action_t::update_ready (line 2287) zeroes the cooldown only when secondary_trigger_type != NONE, which is false for a player-cast action."
+          }
+        ]
+      },
+      "cooldownStart": {
+        "anchor": "ACTION_EXECUTE",
+        "evidence": [
+          "action.cpp:1914 action_t::execute() calls update_ready()",
+          "action.cpp:2360 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
+          "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier"
+        ],
+        "note": "For an instant, non-channelled ability, execution coincides with the observed cast. A cast with a cast time or a channel would need its own anchor and is not covered by this contract."
+      }
+    },
+    {
+      "simcToken": "deathmark",
+      "abilityGameId": 360194,
+      "displayNameEn": "Deathmark",
+      "baseCooldownMs": 120000,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "categoryCooldownMs": 0,
+      "baseGcdMs": 1000,
+      "classId": 4,
+      "specId": 259,
+      "binding": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+        "createAction": "sc_rogue.cpp:9464 if ( name == \"deathmark\" ) return new deathmark_t( name, this, options_str )",
+        "specBinding": "sc_rogue.cpp:10033 talent.assassination.deathmark = find_talent_spell( talent_tree::SPECIALIZATION, \"Deathmark\" )"
+      },
+      "modifierPolicy": {
+        "method": "HAND_REVIEWED_CPP_ABSENCE_PROOF",
+        "appliesTo": "deathmark",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "reviewedOn": "2026-09-14",
+        "checks": [
+          {
+            "claim": "NO_DIRECT_COOLDOWN_ADJUSTMENT",
+            "search": "grep 'cooldowns.deathmark' and 'cooldowns.deathmark->' in engine/class_modules/sc_rogue.cpp",
+            "finding": "Exactly ONE occurrence of 'cooldowns.deathmark' — the assignment in rogue_t's constructor — and ZERO occurrences of 'cooldowns.deathmark->'. The member declaration inside the cooldowns_t struct is unqualified and so does not match. Every mutation — adjust(), reset(), duration assignment, charge change — would have to go through the arrow form, and none exists. Re-checked mechanically on every run."
+          },
+          {
+            "claim": "NO_CHARGE_SYSTEM",
+            "search": "spell_data.inc row for 360194, _charge_cooldown and _charges columns",
+            "finding": "_charge_cooldown is 0, so action_t::init takes the ordinary else-branch (action.cpp:721-724) and cooldown->duration is _cooldown = 120000ms. _charges is 0: there is no charge system and no recharge behaviour to model."
+          },
+          {
+            "claim": "NO_ROGUE_WIDE_CDR_APPLIES",
+            "search": "grep for the rogue module's bulk cooldown-adjustment sites",
+            "finding": "Restless Blades (sc_rogue.cpp:8246-8254) adjusts nine Outlaw cooldowns and includes none of the abilities in this dataset. Deadly Pursuit (sc_rogue.cpp:10826-10832) calls adjust_recharge_multiplier over deadly_pursuit_cooldowns and is gated on talent.outlaw.deadly_pursuit. Both are Outlaw-only; the analysed specialization is Assassination."
+          },
+          {
+            "claim": "NO_RECHARGE_MULTIPLIER_CHANGE",
+            "search": "action_t base_recharge_multiplier / dynamic_recharge_multiplier initialisation",
+            "finding": "Both initialise to 1.0 (action.cpp:456,458) and the only rogue-module call to adjust_recharge_multiplier is the Outlaw Deadly Pursuit site above."
+          },
+          {
+            "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+            "search": "deathmark_t body (sc_rogue.cpp:4124-4153) for update_ready / cooldown overrides",
+            "finding": "deathmark_t declares tick, impact and last_tick only. It overrides neither update_ready nor any cooldown field, so the base rogue_action_t path applies unchanged."
+          }
+        ]
+      },
+      "cooldownStart": {
+        "anchor": "ACTION_EXECUTE",
+        "evidence": [
+          "action.cpp:1914 action_t::execute() calls update_ready()",
+          "action.cpp:2360 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
+          "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier"
+        ],
+        "note": "For an instant, non-channelled ability, execution coincides with the observed cast. A cast with a cast time or a channel would need its own anchor and is not covered by this contract."
+      }
+    },
+    {
+      "simcToken": "vanish",
+      "abilityGameId": 1856,
+      "displayNameEn": "Vanish",
+      "baseCooldownMs": 1000,
+      "charges": 1,
+      "chargeCooldownMs": 120000,
+      "categoryCooldownMs": 0,
+      "baseGcdMs": 0,
+      "classId": 4,
+      "specId": 259,
+      "binding": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+        "createAction": "sc_rogue.cpp:9500 if ( name == \"vanish\" ) return new vanish_t( name, this, options_str )",
+        "specBinding": "sc_rogue.cpp:9920 spell.vanish = find_class_spell( \"Vanish\" )"
+      },
+      "modifierPolicy": {
+        "method": "HAND_REVIEWED_CPP_ABSENCE_PROOF",
+        "appliesTo": "vanish",
+        "sourcePath": "engine/class_modules/sc_rogue.cpp",
+        "sourceSha256": "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+        "reviewedOn": "2026-09-14",
+        "checks": [
+          {
+            "claim": "NO_DIRECT_COOLDOWN_ADJUSTMENT",
+            "search": "grep 'cooldowns.vanish' and 'cooldowns.vanish->' in engine/class_modules/sc_rogue.cpp",
+            "finding": "Exactly ONE occurrence of 'cooldowns.vanish' — the assignment in rogue_t's constructor — and ZERO occurrences of 'cooldowns.vanish->'. The member declaration inside the cooldowns_t struct is unqualified and so does not match. Every mutation — adjust(), reset(), duration assignment, charge change — would have to go through the arrow form, and none exists. Re-checked mechanically on every run."
+          },
+          {
+            "claim": "ONE_CHARGE_IS_AN_ORDINARY_COOLDOWN",
+            "search": "spell_data.inc row for 1856, _charge_cooldown and _charges columns",
+            "finding": "_charge_cooldown is 120000ms and _charges is 1, so action_t::init takes the charge branch (action.cpp:710-720) and sets cooldown->duration to the CHARGE cooldown while demoting _cooldown (1000ms) to the internal cooldown. cooldown_t is constructed with charges(1) and current_charge(1) (cooldown_impl.cpp:101,110), so setting charges to 1 changes nothing: the object behaves exactly as an ordinary cooldown of 120000ms. The EFFECTIVE recharge is the charge cooldown, never the nominal one."
+          },
+          {
+            "claim": "NO_ROGUE_WIDE_CDR_APPLIES",
+            "search": "grep for the rogue module's bulk cooldown-adjustment sites",
+            "finding": "Restless Blades (sc_rogue.cpp:8246-8254) adjusts nine Outlaw cooldowns and includes none of the abilities in this dataset. Deadly Pursuit (sc_rogue.cpp:10826-10832) calls adjust_recharge_multiplier over deadly_pursuit_cooldowns and is gated on talent.outlaw.deadly_pursuit. Both are Outlaw-only; the analysed specialization is Assassination."
+          },
+          {
+            "claim": "NO_RECHARGE_MULTIPLIER_CHANGE",
+            "search": "action_t base_recharge_multiplier / dynamic_recharge_multiplier initialisation",
+            "finding": "Both initialise to 1.0 (action.cpp:456,458) and the only rogue-module call to adjust_recharge_multiplier is the Outlaw Deadly Pursuit site above."
+          },
+          {
+            "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+            "search": "vanish_t body (sc_rogue.cpp:6029-6053) for update_ready / cooldown overrides",
+            "finding": "vanish_t declares execute and ready only. `ready()` adds a guard — false while buffs.vanish is up — which makes the action LESS available and never more, so it cannot invalidate a lower bound on the recharge. It touches no cooldown field."
+          },
+          {
+            "claim": "EXTRA_CHARGE_TALENT_IS_NOT_IMPLEMENTED",
+            "search": "grep 'without_a_trace' in engine/class_modules/sc_rogue.cpp",
+            "finding": "Exactly TWO occurrences: the player_talent_t member declaration (line 790) and the find_talent_spell assignment (line 10021). The talent handle is never READ, so nothing in the module adds a Vanish charge and the DBC _charges of 1 is the whole charge model at this commit."
           }
         ]
       },

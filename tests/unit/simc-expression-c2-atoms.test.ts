@@ -18,14 +18,15 @@ import { pinnedAssassinationAuthority } from "../../src/simc/pinned-authority.js
  */
 
 const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
-const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function bindings(overrides: Partial<AtomBindings> = {}): AtomBindings {
   return {
     comboPoints: knownNumber(0),
     comboPointsDeficit: knownNumber(7),
     energyPct: NO_ENERGY,
-    dotRemainsSeconds: NO_DOT,
+    // No action's own DoT is established here. An empty per-action map is the
+    // M5-D1 shape of that, and an unkeyed `remains` resolves UNKNOWN_NUMBER.
+    dotRemainsSecondsByAction: [],
     knownBuffs: [],
     ...overrides,
   };

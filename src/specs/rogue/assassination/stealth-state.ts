@@ -62,13 +62,22 @@ import type { UnknownReason } from "../../../engine/state/state-result.js";
  * would be speculative data. Its absence cannot cause a false TRUE, and the
  * asymmetric answer means it cannot cause a false FALSE either.
  */
+/**
+ * The Vanish BUFF's ability id, named once.
+ *
+ * 11327, never 1856. The action the player presses and the aura it applies are
+ * different identities, and `vanish_t::ready()` tests the AURA. Exported so the
+ * usability rule that reads it cannot re-type the number.
+ */
+export const VANISH_BUFF_ABILITY_ID = 11_327;
+
 export const STEALTHED_ROGUE_CONTRIBUTORS: readonly {
   readonly abilityGameId: number;
   readonly displayNameEn: string;
   readonly simcMaskBit: string;
 }[] = [
   { abilityGameId: 1_784, displayNameEn: "Stealth", simcMaskBit: "STEALTH_NORMAL" },
-  { abilityGameId: 11_327, displayNameEn: "Vanish", simcMaskBit: "STEALTH_VANISH" },
+  { abilityGameId: VANISH_BUFF_ABILITY_ID, displayNameEn: "Vanish", simcMaskBit: "STEALTH_VANISH" },
   { abilityGameId: 115_192, displayNameEn: "Subterfuge", simcMaskBit: "STEALTH_SUBTERFUGE" },
 ];
 

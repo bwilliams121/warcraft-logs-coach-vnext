@@ -128,7 +128,7 @@
       }
     ],
     "cooldownFieldUnits": "MILLISECONDS",
-    "extractedOn": "2026-09-13",
+    "extractedOn": "2026-09-14",
     "extractorVersion": 1,
     "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned artifacts: CombatFight exposes no client-build key, so a gate against one would always pass while appearing rigorous."
   },
@@ -136,7 +136,7 @@
     "method": "HAND_REVIEWED_CPP_ACTION_SEMANTICS",
     "sourcePath": "engine/player/player.cpp",
     "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
-    "reviewedOn": "2026-09-13",
+    "reviewedOn": "2026-09-14",
     "checks": [
       {
         "claim": "NAMED_ITEM_NOT_EQUIPPED_IS_BACKGROUND",
@@ -193,7 +193,14 @@
         "displayNameEn": "Gladiator's Badge",
         "baseCooldownMs": 60000,
         "categoryCooldownMs": 20000,
-        "baseGcdMs": 0
+        "baseGcdMs": 0,
+        "writeClassification": "OTHER",
+        "effectShape": [
+          {
+            "type": 6,
+            "subtype": 29
+          }
+        ]
       }
     },
     {
@@ -218,7 +225,14 @@
         "displayNameEn": "Algeth'ar Puzzle",
         "baseCooldownMs": 120000,
         "categoryCooldownMs": 20000,
-        "baseGcdMs": 1000
+        "baseGcdMs": 1000,
+        "writeClassification": "PLAYER_STAT_BUFF_ONLY",
+        "effectShape": [
+          {
+            "type": 6,
+            "subtype": 189
+          }
+        ]
       }
     },
     {
@@ -252,7 +266,14 @@
         "displayNameEn": "Font of Venomous Rage",
         "baseCooldownMs": 240000,
         "categoryCooldownMs": 20000,
-        "baseGcdMs": 1000
+        "baseGcdMs": 1000,
+        "writeClassification": "OTHER",
+        "effectShape": [
+          {
+            "type": 6,
+            "subtype": 3
+          }
+        ]
       }
     },
     {
@@ -305,7 +326,34 @@
         "displayNameEn": "Empowering Venom",
         "baseCooldownMs": 120000,
         "categoryCooldownMs": 20000,
-        "baseGcdMs": 0
+        "baseGcdMs": 0,
+        "writeClassification": "PLAYER_STAT_BUFF_ONLY",
+        "effectShape": [
+          {
+            "type": 6,
+            "subtype": 189
+          },
+          {
+            "type": 6,
+            "subtype": 189
+          },
+          {
+            "type": 6,
+            "subtype": 189
+          },
+          {
+            "type": 6,
+            "subtype": 189
+          },
+          {
+            "type": 3,
+            "subtype": 0
+          },
+          {
+            "type": 3,
+            "subtype": 0
+          }
+        ]
       }
     }
   ]

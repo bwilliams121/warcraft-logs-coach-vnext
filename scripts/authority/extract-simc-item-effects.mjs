@@ -416,18 +416,18 @@ export function findInventoryTypes(text, wantedItemIds, column) {
  *
  * Same rules as the cooldown and DoT-duration extractors.
  */
-export function deriveScalarFieldIndices(headerText, wantedNames) {
+export function deriveScalarFieldIndices(headerText, wantedNames, structName = "spell_data_t") {
   const lines = headerText.split(/\r?\n/);
   let bodyStart = -1;
   for (let i = 0; i < lines.length - 1; i += 1) {
-    if (lines[i]?.trim() !== "struct spell_data_t") continue;
+    if (lines[i]?.trim() !== `struct ${structName}`) continue;
     if (lines[i + 1]?.trim() === "{") {
       bodyStart = i + 2;
       break;
     }
   }
   if (bodyStart < 0) {
-    return { ok: false, error: "spell_data.hpp does not define struct spell_data_t" };
+    return { ok: false, error: `spell_data.hpp does not define struct ${structName}` };
   }
 
   const member = /^\s*(?:const\s+)?[A-Za-z_][A-Za-z0-9_:<>]*\s*\*?\s+(_[A-Za-z0-9_]+)\s*(\[[^\]]*\])?\s*;/;
@@ -509,6 +509,74 @@ export function parseEffectSpells(text, wantedSpellIds, fieldIndices) {
     found.set(spellId, { spellId, displayNameEn: name.value, cooldownMs, categoryCooldownMs, gcdMs });
   }
   return found;
+}
+
+/**
+ * What an on-use driver's EFFECTS write, classified from the pinned effect table.
+ *
+ * ONE question, answered conservatively: does this effect do nothing but put
+ * stat ratings on the player?
+ *
+ *     data_enums.hh:685   E_APPLY_AURA  = 6
+ *     data_enums.hh:682   E_DUMMY       = 3
+ *     data_enums.hh:1229  A_MOD_RATING  = 189
+ *
+ * `PLAYER_STAT_BUFF_ONLY` requires every APPLY_AURA effect to be A_MOD_RATING
+ * and every remaining effect to be E_DUMMY, which SimulationCraft implements as
+ * nothing at all. Anything else — a periodic effect, a triggered aura, a
+ * resource change, an unrecognised type — is `OTHER`, and `OTHER` is what a
+ * consumer must fail closed on.
+ *
+ * This is NOT a trinket simulator and must not grow into one. It answers whether
+ * the effect is INERT with respect to rotational state, and nothing about what it
+ * is worth.
+ */
+const EFFECT_TYPE_APPLY_AURA = 6;
+const EFFECT_TYPE_DUMMY = 3;
+const EFFECT_SUBTYPE_MOD_RATING = 189;
+
+export function classifyEffectWrites(text, driverSpellId, effectFieldIndices) {
+  const start = text.indexOf("__spelleffect_data[");
+  if (start < 0) return { ok: false, error: "sc_spell_data.inc declares no __spelleffect_data table" };
+  const bodyStart = text.indexOf("{", start);
+  const bodyEnd = text.indexOf("\n};", bodyStart);
+  if (bodyStart < 0 || bodyEnd < 0) {
+    return { ok: false, error: "the __spelleffect_data table has no readable body" };
+  }
+
+  const effects = [];
+  for (const line of text.slice(bodyStart, bodyEnd).split(/\r?\n/)) {
+    const open = line.indexOf("{");
+    if (open < 0) continue;
+    const afterOpen = line.slice(open + 1);
+    const nested = afterOpen.indexOf("{");
+    if (nested < 0) continue;
+    const flat = afterOpen
+      .slice(0, nested)
+      .split(",")
+      .map((part) => part.trim())
+      .filter((part) => part.length > 0);
+    const spellIdRaw = flat[effectFieldIndices._spell_id];
+    if (spellIdRaw === undefined || !/^\d+$/.test(spellIdRaw)) continue;
+    if (Number.parseInt(spellIdRaw, 10) !== Number(driverSpellId)) continue;
+    const typeRaw = flat[effectFieldIndices._type];
+    const subtypeRaw = flat[effectFieldIndices._subtype];
+    if (typeRaw === undefined || subtypeRaw === undefined) continue;
+    effects.push({
+      type: Number.parseInt(typeRaw, 10),
+      subtype: Number.parseInt(subtypeRaw, 10),
+    });
+  }
+
+  // No effects at all is not "inert" — it is a driver we failed to read.
+  if (effects.length === 0) return { ok: true, classification: "OTHER", effects };
+
+  const inert = effects.every(
+    (effect) =>
+      (effect.type === EFFECT_TYPE_APPLY_AURA && effect.subtype === EFFECT_SUBTYPE_MOD_RATING) ||
+      effect.type === EFFECT_TYPE_DUMMY,
+  );
+  return { ok: true, classification: inert ? "PLAYER_STAT_BUFF_ONLY" : "OTHER", effects };
 }
 
 /** Checks every required fact. An empty list is the only thing that licenses writing. */
@@ -666,6 +734,11 @@ export function buildArtifact({
               baseCooldownMs: driver.cooldownMs,
               categoryCooldownMs: driver.categoryCooldownMs,
               baseGcdMs: driver.gcdMs,
+              // M5-D1. What the driver's effects WRITE, derived from the pinned
+              // effect table rather than asserted. `OTHER` is the fail-closed
+              // value and every consumer must treat it as "unreviewed".
+              writeClassification: driver.writeClassification,
+              effectShape: driver.effectShape,
             },
     };
   });
@@ -766,6 +839,23 @@ async function main() {
     }
   }
   const effectSpells = parseEffectSpells(loaded.spellData, onUseSpellIds, layout.indices);
+
+  // M5-D1. What each on-use driver WRITES, classified from the effect table.
+  const effectLayout = deriveScalarFieldIndices(
+    loaded.spellDataLayout,
+    ["_spell_id", "_type", "_subtype"],
+    "spelleffect_data_t",
+  );
+  if (!effectLayout.ok) fail(effectLayout.error);
+  for (const [spellId, driver] of effectSpells) {
+    const classified = classifyEffectWrites(loaded.spellData, spellId, effectLayout.indices);
+    if (!classified.ok) fail(classified.error);
+    effectSpells.set(spellId, {
+      ...driver,
+      writeClassification: classified.classification,
+      effectShape: classified.effects.map((effect) => ({ type: effect.type, subtype: effect.subtype })),
+    });
+  }
 
   const problems = verifyRequiredFacts({ names, duplicates, inventoryTypes, effectsByItem, effectSpells });
   if (problems.length > 0) fail(`\n  - ${problems.join("\n  - ")}`);

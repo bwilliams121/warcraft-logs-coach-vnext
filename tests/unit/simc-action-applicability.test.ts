@@ -39,14 +39,20 @@ const BINDINGS: AtomBindings = {
   comboPoints: knownNumber(7),
   comboPointsDeficit: unknownNumber("STATE_NOT_ESTABLISHED"),
   energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
-  dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+  // No action's own DoT is established here. An empty per-action map is the
+  // M5-D1 shape of that, and an unkeyed `remains` resolves UNKNOWN_NUMBER.
+  dotRemainsSecondsByAction: [],
   knownBuffs: [],
 };
 
 const TRUE_COND = "combo_points>=5";
 const FALSE_COND = "combo_points<5";
 /** Real pinned syntax outside the supported subset. Parsing it REFUSES. */
-const UNSUPPORTED_COND = "refreshable";
+// RE-POINTED for M5-D1, which made `refreshable` a recognised atom. The new
+// stand-in is `active_dot.<name>` from the pinned `generate[0]` line: it counts
+// DoTs across the whole enemy list, so it belongs to the target-count family
+// M5-D deliberately does not support and will stay refused.
+const UNSUPPORTED_COND = "active_dot.garrote>1";
 
 const NOT_EQUIPPED = notApplicable("ITEM_NOT_EQUIPPED", {
   itemId: 193_701,

@@ -124,6 +124,35 @@ export interface ItemEffectRow {
  * `baseCooldownMs` is the DRIVER SPELL's cooldown, reached because the effect
  * row's own `cooldown_duration` is -1 — see the recorded action-semantics check.
  */
+/**
+ * What an on-use driver's effects WRITE, derived from the pinned effect table
+ * (M5-D1).
+ *
+ * `PLAYER_STAT_BUFF_ONLY` means every APPLY_AURA effect is `A_MOD_RATING` and
+ * every other effect is `E_DUMMY`, which SimulationCraft implements as nothing.
+ * Such an effect cannot touch a resource, an aura the APL reads, a cooldown or
+ * stealth, so executing it cannot change which action the authority selects.
+ *
+ * `OTHER` is the FAIL-CLOSED value and covers everything else, including a
+ * driver whose effect rows could not be read. A consumer must treat it as
+ * unreviewed rather than as "probably fine".
+ *
+ * This is NOT a trinket model. It answers one yes/no question about inertness
+ * and says nothing about what the effect is worth.
+ */
+export type ItemEffectWriteClassification = "PLAYER_STAT_BUFF_ONLY" | "OTHER";
+
+export const ITEM_EFFECT_WRITE_CLASSIFICATIONS = [
+  "PLAYER_STAT_BUFF_ONLY",
+  "OTHER",
+] as const satisfies readonly ItemEffectWriteClassification[];
+
+/** One effect row's type/subtype pair, kept so a classification can be re-checked. */
+export interface ItemEffectShapeEntry {
+  readonly type: number;
+  readonly subtype: number;
+}
+
 export interface ItemOnUseEffect {
   readonly effectSpellId: number;
   readonly displayNameEn: string;
@@ -131,6 +160,10 @@ export interface ItemOnUseEffect {
   /** Recorded for traceability. The category cooldown obeys a DIFFERENT readiness rule. */
   readonly categoryCooldownMs: number;
   readonly baseGcdMs: number;
+  /** M5-D1. Derived from the effect table, never asserted. `OTHER` fails closed. */
+  readonly writeClassification: ItemEffectWriteClassification;
+  /** The rows the classification was derived from, so it can be re-checked. */
+  readonly effectShape: readonly ItemEffectShapeEntry[];
 }
 
 export interface ItemEffectIdentity {
@@ -380,19 +413,40 @@ function validateOnUse(value: unknown, effects: readonly ItemEffectRow[]): ItemO
   const baseCooldownMs = positiveInt(value, "baseCooldownMs");
   const categoryCooldownMs = anyInt(value, "categoryCooldownMs");
   const baseGcdMs = anyInt(value, "baseGcdMs");
+  const writeClassification = str(value, "writeClassification");
   if (
     effectSpellId === null ||
     displayNameEn === null ||
     baseCooldownMs === null ||
     categoryCooldownMs === null ||
-    baseGcdMs === null
+    baseGcdMs === null ||
+    writeClassification === null ||
+    !(ITEM_EFFECT_WRITE_CLASSIFICATIONS as readonly string[]).includes(writeClassification)
   ) {
     return "BAD";
+  }
+  const shapeRaw = value["effectShape"];
+  if (!Array.isArray(shapeRaw)) return "BAD";
+  const effectShape: ItemEffectShapeEntry[] = [];
+  for (const entry of shapeRaw) {
+    if (!isRecord(entry)) return "BAD";
+    const type = anyInt(entry, "type");
+    const subtype = anyInt(entry, "subtype");
+    if (type === null || subtype === null) return "BAD";
+    effectShape.push({ type, subtype });
   }
   // The named effect must be one of the rows, and must actually be ON_USE.
   const row = effects.find((effect) => effect.spellId === effectSpellId);
   if (row === undefined || row.triggerType !== TRIGGER_ON_USE) return "BAD";
-  return { effectSpellId, displayNameEn, baseCooldownMs, categoryCooldownMs, baseGcdMs };
+  return {
+    effectSpellId,
+    displayNameEn,
+    baseCooldownMs,
+    categoryCooldownMs,
+    baseGcdMs,
+    writeClassification: writeClassification as ItemEffectWriteClassification,
+    effectShape,
+  };
 }
 
 export function validateItemEffectArtifact(value: unknown): ItemEffectArtifactValidation {

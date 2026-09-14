@@ -179,7 +179,7 @@ describe("unsupported authority syntax never becomes false", () => {
     // RE-POINTED for M5-C3c1: `dot.<name>.ticking` is recognised now, so the
     // still-unsupported neighbour is another property of the same namespace.
     ["another dot property", "dot.rupture.remains>4&combo_points>=5"],
-    ["arithmetic", "combo_points>=5-2"],
+    ["division", "combo_points>=6/2"],
     // RE-POINTED for M5-C2: `talent.<name>` is a supported atom now, so the
     // still-unsupported neighbours are a talent RANK and a snapshot multiplier.
     ["a talent rank reference", "talent.scent_of_blood.rank>=2&combo_points>=5"],
@@ -187,7 +187,7 @@ describe("unsupported authority syntax never becomes false", () => {
     // still-unsupported neighbour is the DOTTED form, which names another
     // action's DoT — real pinned syntax, from `vanish[0]` verbatim.
     ["another action's snapshot multiplier", "dot.garrote.pmultiplier<=1&combo_points>=5"],
-    ["a pandemic-window reference", "refreshable&combo_points>=5"],
+    ["an active-DoT count", "active_dot.garrote>1&combo_points>=5"],
     ["a decimal literal", "combo_points>=5.5"],
     ["!=", "combo_points!=5"],
     ["<?", "combo_points<?5"],
@@ -221,7 +221,7 @@ describe("unsupported authority syntax never becomes false", () => {
     // `talent.<name>` in M5-C2, and bare `pmultiplier` in M5-C3a. `refreshable`
     // is a real identifier from the pinned `core_dot` list (entries 1 through 4)
     // that remains outside the subset.
-    const judgment = judge(authorityWithGateCondition("combo_points>=5&refreshable"));
+    const judgment = judge(authorityWithGateCondition("combo_points>=5&active_dot.garrote>1"));
     expect(judgment.status).not.toBe("REJECTED_BY_AUTHORITY");
     expect(judgment.status).toBe("UNKNOWN");
     if (judgment.status !== "UNKNOWN") return;

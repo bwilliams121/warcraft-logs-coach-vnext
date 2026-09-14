@@ -155,8 +155,13 @@ describe("ability identity data", () => {
     //
     //   envenom  M5-A   the `spend` sub-list selects it
     //   garrote  M5-C3a the `core_dot` sub-list selects it
-    expect(ROGUE_ABILITIES.map((ability) => ability.simcToken)).toEqual(["envenom", "garrote"]);
-    expect(ROGUE_ABILITIES.map((ability) => ability.spellId)).toEqual([32_645, 703]);
+    //   rupture  M5-D1  `core_dot[3]` became evaluable and can select it
+    //
+    // `mutilate` and `fan_of_knives` are cast hundreds of times in the verified
+    // capture and are deliberately ABSENT: every builder entry is gated on
+    // `spell_targets.fan_of_knives`, so no supported decision can select them.
+    expect(ROGUE_ABILITIES.map((ability) => ability.simcToken)).toEqual(["envenom", "garrote", "rupture"]);
+    expect(ROGUE_ABILITIES.map((ability) => ability.spellId)).toEqual([32_645, 703, 1_943]);
   });
 
   it("agrees with the machine-extracted Garrote identity, which is the other record of it", () => {

@@ -51,11 +51,20 @@ import { cooldownForToken } from "../../../data/game/rogue-cooldowns.js";
 /**
  * The cooldowns this specialization can currently establish.
  *
- * ONE token. `cds[0]` is the only supported authority line that reads a
- * cooldown, and it reads exactly this one. Entries appear when a decision needs
- * them, never speculatively.
+ * Entries appear when a decision needs them, never speculatively.
+ *
+ *   kingsbane  M5-C3c1  `cds[0]` reads `cooldown.kingsbane.remains`
+ *   deathmark  M5-D1    `cds[4]` and four `items` lines read
+ *                       `cooldown.deathmark.remains`
+ *   vanish     M5-D1    nothing reads `cooldown.vanish.remains` — this one is
+ *                       here for USABILITY, not for an expression. The `vanish`
+ *                       list is the deepest blocker at 12 of 42 real actor-19
+ *                       decision points, and its conditions can never eliminate
+ *                       it because they rest on `dot.garrote.pmultiplier`, which
+ *                       this project permanently does not model. A readiness
+ *                       proof is the only route, and it needs the recharge.
  */
-export const SUPPORTED_COOLDOWN_TOKENS = ["kingsbane"] as const;
+export const SUPPORTED_COOLDOWN_TOKENS = ["kingsbane", "deathmark", "vanish"] as const;
 
 export interface CooldownBindingInput {
   readonly state: CombatState;
@@ -115,6 +124,10 @@ export function deriveCooldown(input: CooldownBindingInput, simcToken: string): 
     // there is no charge system at all, so a count-based guard would have read
     // "zero charges" out of a record that says "not a charge ability".
     chargeCooldownMs: identity.chargeCooldownMs,
+    // Consulted ONLY on the charge path, where it is the discriminator between
+    // the one charge system provably equivalent to an ordinary cooldown and
+    // every one that is not. Vanish is `_charges = 1`; anything higher refuses.
+    charges: identity.charges,
     modifierPolicy: policyFrom(identity),
     position: input.position,
   });

@@ -26,7 +26,6 @@ import {
  */
 
 const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
-const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function evaluate(expression: string, bindings?: Partial<AtomBindings>) {
   const parsed = parseSimcExpression(expression);
@@ -35,7 +34,7 @@ function evaluate(expression: string, bindings?: Partial<AtomBindings>) {
     comboPoints: knownNumber(7),
     comboPointsDeficit: knownNumber(0),
     energyPct: NO_ENERGY,
-    dotRemainsSeconds: NO_DOT,
+    dotRemainsSecondsByAction: [],
     knownBuffs: [],
     ...bindings,
   });
@@ -202,7 +201,7 @@ describe("fight_remains is predictive, and has no binding path at all", () => {
       comboPoints: knownNumber(7),
       comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
-      dotRemainsSeconds: NO_DOT,
+      dotRemainsSecondsByAction: [],
       knownBuffs: [],
     };
     // Exhaustive on purpose: a new binding field cannot be added without this
@@ -210,7 +209,7 @@ describe("fight_remains is predictive, and has no binding path at all", () => {
     expect(Object.keys(bindings).sort()).toEqual([
       "comboPoints",
       "comboPointsDeficit",
-      "dotRemainsSeconds",
+      "dotRemainsSecondsByAction",
       "energyPct",
       "knownBuffs",
     ]);
@@ -236,24 +235,30 @@ describe("fight_remains is predictive, and has no binding path at all", () => {
 
 describe("atom shape is declared by syntax, not by what happened to be bound", () => {
   it.each([
-    ["combo_points", "NUMERIC"],
-    ["combo_points.deficit", "NUMERIC"],
-    ["energy.pct", "NUMERIC"],
-    ["fight_remains", "NUMERIC"],
-    ["buff.envenom.remains", "NUMERIC"],
-    ["buff.envenom.up", "BOOLEAN"],
-  ])("classifies %s as %s", (source, shape) => {
+    ["combo_points", "NUMERIC", "PLAYER_SCOPED"],
+    ["combo_points.deficit", "NUMERIC", "PLAYER_SCOPED"],
+    ["energy.pct", "NUMERIC", "PLAYER_SCOPED"],
+    ["fight_remains", "NUMERIC", "PLAYER_SCOPED"],
+    ["buff.envenom.remains", "NUMERIC", "PLAYER_SCOPED"],
+    ["buff.envenom.up", "BOOLEAN", "PLAYER_SCOPED"],
+    // M5-D1 added SCOPE alongside shape. These four read the action's current
+    // target, so a cycling entry cannot be settled by them.
+    ["remains", "NUMERIC", "TARGET_SCOPED"],
+    ["refreshable", "BOOLEAN", "TARGET_SCOPED"],
+    ["dot.rupture.ticking", "BOOLEAN", "TARGET_SCOPED"],
+    ["target.time_to_die", "NUMERIC", "TARGET_SCOPED"],
+  ])("classifies %s as %s / %s", (source, shape, scope) => {
     const parsed = parseSimcExpression(source);
     if (!parsed.ok) throw new Error(`expected ${source} to parse`);
-    expect(collectAtoms(parsed.ast)).toEqual([{ key: source, shape }]);
+    expect(collectAtoms(parsed.ast)).toEqual([{ key: source, shape, scope }]);
   });
 
   it("keeps .up and .remains on the same aura as separate atoms", () => {
     const parsed = parseSimcExpression("buff.envenom.up|buff.envenom.remains<=1");
     if (!parsed.ok) throw new Error("expected the expression to parse");
     expect(collectAtoms(parsed.ast)).toEqual([
-      { key: "buff.envenom.up", shape: "BOOLEAN" },
-      { key: "buff.envenom.remains", shape: "NUMERIC" },
+      { key: "buff.envenom.up", shape: "BOOLEAN", scope: "PLAYER_SCOPED" },
+      { key: "buff.envenom.remains", shape: "NUMERIC", scope: "PLAYER_SCOPED" },
     ]);
 
     // And the boolean one alone is enumerated.
@@ -263,7 +268,7 @@ describe("atom shape is declared by syntax, not by what happened to be bound", (
       energyPct: NO_ENERGY,
       // `buff.envenom.remains` is a DIFFERENT atom from bare `remains`. Binding
       // the latter must not resolve the former.
-      dotRemainsSeconds: NO_DOT,
+      dotRemainsSecondsByAction: [],
       knownBuffs: [],
     });
     if (result.outcome === "UNSUPPORTED") throw new Error("expected an evaluation");
@@ -301,7 +306,10 @@ describe("unsupported syntax never enters the truth domain", () => {
     "combo_points>?5",
     "combo_points<?5",
     "combo_points!=5",
-    "combo_points>=5-2",
+    // RE-POINTED for M5-D1, which added BINARY `-`. Division stays refused, and
+    // so does UNARY minus — `>=-2` is a negative literal, not a subtraction.
+    "combo_points>=6/2",
+    "combo_points>=-2",
     "combo_points>=5.5",
   ])("%s produces no AST, so it cannot become UNKNOWN_STATE", (source) => {
     const parsed = parseSimcExpression(source);

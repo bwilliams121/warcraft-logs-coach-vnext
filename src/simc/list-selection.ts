@@ -70,7 +70,9 @@
 
 import type { AplAction, AplAuthority } from "./apl-authority.js";
 import { parseSimcExpression, type ParseFailureReason } from "./expression/parse.js";
+import { proveTargetIndependentFalsehood } from "./target-independence.js";
 import {
+  actingAction,
   evaluateSimcExpression,
   type AtomBindings,
   type ExpressionTrace,
@@ -130,7 +132,18 @@ export type LineCondition =
        * no negative usability.
        */
       readonly kind: "NOT_EVALUATED";
-      readonly why: "NOT_APPLICABLE" | "PROVEN_UNUSABLE";
+      /**
+       * `UNSUPPORTED_TARGETING` was added in M5-D1 and is a THIRD reason a
+       * condition goes unevaluated, distinct from the two readiness ones.
+       *
+       * The entry carries `cycle_targets=` or `target_if=`, so its condition is
+       * about a target this project does not enumerate. Evaluating it against the
+       * implicit target would answer a different question, so the whole condition
+       * is left alone. A target-INDEPENDENT conjunct may still have been proven
+       * false; that proof lives in `TraversalStep.targetingRefusal`, not here,
+       * because it is a claim about one fragment rather than about the line.
+       */
+      readonly why: "NOT_APPLICABLE" | "PROVEN_UNUSABLE" | "UNSUPPORTED_TARGETING";
     };
 
 export type LineOutcome = "ELIMINATED" | "POSSIBLE" | "DEFINITE_WINNER";
@@ -166,7 +179,14 @@ export type ListSelectionBlocker =
   | "COMPETING_POSSIBLE_ACTION"
   | "NO_DEFINITE_WINNER"
   | "NESTED_CALL_NOT_MODELLED"
-  | "UNMODELLED_DISPATCH_IN_LIST";
+  | "UNMODELLED_DISPATCH_IN_LIST"
+  /**
+   * The entry carries a targeting option this project does not model (M5-D1).
+   *
+   * Shares its name with `TraversalBlocker`'s member deliberately: it is the same
+   * reason, and the two walkers must not spell one fact two ways.
+   */
+  | "UNSUPPORTED_ACTION_OPTION";
 
 export const LIST_SELECTION_BLOCKERS = [
   "UNSUPPORTED_AUTHORITY_EXPRESSION",
@@ -174,6 +194,7 @@ export const LIST_SELECTION_BLOCKERS = [
   "NO_DEFINITE_WINNER",
   "NESTED_CALL_NOT_MODELLED",
   "UNMODELLED_DISPATCH_IN_LIST",
+  "UNSUPPORTED_ACTION_OPTION",
 ] as const satisfies readonly ListSelectionBlocker[];
 
 export type ListSelection =
@@ -228,7 +249,16 @@ export function evaluateCondition(action: AplAction, bindings: AtomBindings): Li
   if (!parsed.ok) {
     return { kind: "UNSUPPORTED", reason: parsed.reason, fragment: parsed.fragment };
   }
-  const evaluation = evaluateSimcExpression(parsed.ast, action.conditionRaw, bindings);
+  // THE ACTING ACTION IS THIS ENTRY'S OWN TOKEN, and supplying it here is what
+  // makes `remains` and `refreshable` mean what SimulationCraft means by them.
+  // Both walkers route through this function, so neither can drift into reading
+  // another action's DoT.
+  const evaluation = evaluateSimcExpression(
+    parsed.ast,
+    action.conditionRaw,
+    bindings,
+    actingAction(action.actionToken),
+  );
   if (evaluation.outcome === "UNSUPPORTED") {
     return { kind: "UNSUPPORTED", reason: evaluation.reason, fragment: action.conditionRaw };
   }
@@ -304,6 +334,40 @@ export function selectWithinList(
         kind: "INDETERMINATE",
         blocker: "NESTED_CALL_NOT_MODELLED",
         blockedBy: null,
+        lines,
+      };
+    }
+
+    // ---- unsupported targeting options (M5-D1) ----
+    //
+    // The same rule the nested walker applies, and it must be here too: `core_dot`
+    // is walked by BOTH, and its entries 2 and 4 carry `cycle_targets=1`. Before
+    // M5-D1 those lines were unreachable because `refreshable` failed the parser;
+    // now that it parses, an unguarded walk here would evaluate a cycling entry
+    // against the one implicit target.
+    if (action.unsupportedOptions.length > 0) {
+      // `target_if` refuses outright; only `cycle_targets` can be settled by a
+      // target-independent conjunct. See the same guard in `nested-selection.ts`.
+      const elimination = action.unsupportedOptions.some((option) => option.optionKey === "target_if")
+        ? ({ kind: "NOT_PROVEN", failure: "NO_TARGET_INDEPENDENT_CONJUNCT" } as const)
+        : proveTargetIndependentFalsehood(action, bindings);
+      const condition: LineCondition = { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" };
+      const line: LineEvaluation = {
+        listName: action.listName,
+        priorityOrdinal: action.priorityOrdinal,
+        actionStringVerbatim: action.actionStringVerbatim,
+        sourceLine: action.sourceLine,
+        actionToken: action.actionToken,
+        condition,
+        usability: usabilityFor(action),
+        outcome: elimination.kind === "ELIMINATED_FOR_EVERY_TARGET" ? "ELIMINATED" : "POSSIBLE",
+      };
+      lines.push(line);
+      if (elimination.kind === "ELIMINATED_FOR_EVERY_TARGET") continue;
+      return {
+        kind: "INDETERMINATE",
+        blocker: "UNSUPPORTED_ACTION_OPTION",
+        blockedBy: line,
         lines,
       };
     }

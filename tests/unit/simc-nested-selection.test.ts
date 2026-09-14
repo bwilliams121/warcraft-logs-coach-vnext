@@ -24,7 +24,7 @@ import {
   unknownUsability,
   type ActionUsabilityVerdict,
 } from "../../src/simc/action-applicability.js";
-import { knownNumber, unknownNumber, type AtomBindings } from "../../src/simc/expression/evaluate.js";
+import { knownNumber, type AtomBindings } from "../../src/simc/expression/evaluate.js";
 import type { AplAction } from "../../src/simc/apl-authority.js";
 import { syntheticAuthority, type SyntheticListSpec } from "../support/m5a-authority.js";
 
@@ -39,7 +39,9 @@ const BINDINGS: AtomBindings = {
   comboPoints: knownNumber(7),
   comboPointsDeficit: knownNumber(0),
   energyPct: knownNumber(100),
-  dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+  // No action's own DoT is established here. An empty per-action map is the
+  // M5-D1 shape of that, and an unkeyed `remains` resolves UNKNOWN_NUMBER.
+  dotRemainsSecondsByAction: [],
   knownBuffs: [],
 };
 
@@ -49,7 +51,11 @@ const FALSE_COND = "combo_points<5";
 /** Supported syntax whose VALUE is unknown — an undecided condition, not a refused one. */
 const UNKNOWN_COND = "fight_remains<15";
 /** Real pinned syntax that remains outside the supported subset. */
-const UNSUPPORTED_COND = "refreshable";
+// RE-POINTED for M5-D1, which made `refreshable` a recognised atom. The new
+// stand-in is `active_dot.<name>` from the pinned `generate[0]` line: it counts
+// DoTs across the whole enemy list, so it belongs to the target-count family
+// M5-D deliberately does not support and will stay refused.
+const UNSUPPORTED_COND = "active_dot.garrote>1";
 
 function usabilityByToken(usable: readonly string[]) {
   return (action: AplAction): ActionUsabilityVerdict =>
@@ -299,18 +305,21 @@ describe("an undecided gate above a callee that MIGHT fire", () => {
     expect(blockedPath(result)).toEqual(["default[0]", "child[0]"]);
   });
 
-  it("does NOT converge on the same token reached at a DIFFERENT entry", () => {
+  it("reports the same token at a DIFFERENT entry as TOKEN_CONVERGED, never as SELECTED", () => {
     // World TRUE  -> child[0] fires envenom
     // World FALSE -> caller continues and default[1] fires envenom
     //
-    // Both worlds name the same SPELL, and this still is not a `SELECTED`
-    // result. A selection reports a concrete list, ordinal, verbatim string and
-    // control-flow path, and the two worlds disagree about every one of those.
-    // Reporting either path would fabricate provenance only one world supports.
+    // RE-BASELINED AT M5-D1. Before it, this collapsed to UNKNOWN, because the
+    // only positive member available reported a concrete list, ordinal, verbatim
+    // string and control-flow path — and the two worlds disagree about every one
+    // of those. That reasoning is unchanged and is exactly why this must NOT be
+    // `SELECTED`.
     //
-    // "Every authority path recommends envenom" is a true and useful statement.
-    // It is a DIFFERENT statement from "this authority entry was selected", and
-    // only the second is what this result type means.
+    // What changed is that "every authority path recommends envenom" is now
+    // SAYABLE. It was always a true and useful statement, and M5-B's scoped walk
+    // has always made it; the nested engine simply had nowhere to put it. It is
+    // a DIFFERENT statement from "this authority entry was selected", so it gets
+    // a different member with no `selectingStep` at all.
     const result = traverse(
       [
         {
@@ -321,9 +330,17 @@ describe("an undecided gate above a callee that MIGHT fire", () => {
       ],
       ["envenom"],
     );
-    expect(result.kind).toBe("UNKNOWN");
-    if (result.kind !== "UNKNOWN") return;
-    expect(result.blocker).toBe("COMPETING_POSSIBLE_ACTION");
+    expect(result.kind).toBe("TOKEN_CONVERGED");
+    if (result.kind !== "TOKEN_CONVERGED") return;
+    expect(result.actionToken).toBe("envenom");
+    // Both entries are carried, and neither is singled out.
+    expect(
+      result.candidateEntries.map((step) => `${step.listName}[${String(step.priorityOrdinal)}]`).sort(),
+    ).toEqual(["child[0]", "default[1]"]);
+    // THE CONSUMER GUARD: there is no field a caller could read as the entry.
+    expect(result).not.toHaveProperty("selectingStep");
+    expect(result).not.toHaveProperty("selectingLine");
+    expect(result).not.toHaveProperty("convergedOver");
   });
 
   it("DOES converge when both gate worlds reach the SAME entry", () => {
@@ -352,14 +369,16 @@ describe("an undecided gate above a callee that MIGHT fire", () => {
     expect(result.convergedOver).toHaveLength(1);
   });
 
-  it("does NOT converge two DIFFERENT entries of one list that share a token", () => {
-    // Two envenom lines, one undecided and one definite. `selectWithinList`
-    // converges these — M5-B's result names a sub-list rather than a single
-    // entry, so the distinction does not arise there, and that behaviour is
-    // unchanged. A nested traversal result DOES name one entry, so it cannot.
+  it("converges two DIFFERENT entries of one list that share a token, on the TOKEN only", () => {
+    // Two envenom lines, one undecided and one definite. This is the pinned
+    // `spend` shape exactly, and `selectWithinList` has always converged it —
+    // M5-B's result names a sub-list rather than a single entry, so the
+    // distinction never arose there.
     //
-    // This is the deliberate conservatism of M5-C3b's hardening pass, not an
-    // inconsistency between the two walkers.
+    // M5-C3b's hardening pass made the nested walker refuse this outright,
+    // because its only positive member named ONE entry. M5-D1 gives it the
+    // weaker member instead, which is what the two walkers were always saying
+    // in different words. `SELECTED` still requires entry unanimity.
     const result = traverse(
       [
         {
@@ -369,9 +388,10 @@ describe("an undecided gate above a callee that MIGHT fire", () => {
       ],
       ["envenom"],
     );
-    expect(result.kind).toBe("UNKNOWN");
-    if (result.kind !== "UNKNOWN") return;
-    expect(result.blocker).toBe("COMPETING_POSSIBLE_ACTION");
+    expect(result.kind).toBe("TOKEN_CONVERGED");
+    if (result.kind !== "TOKEN_CONVERGED") return;
+    expect(result.actionToken).toBe("envenom");
+    expect(result.candidateEntries.map((step) => step.priorityOrdinal)).toEqual([0, 1]);
   });
 
   it("does NOT converge when the undecided entry names a different action", () => {
@@ -402,7 +422,9 @@ describe("an undecided gate above a callee that MIGHT fire", () => {
       ],
       ["envenom"],
     );
-    if (result.kind !== "UNKNOWN") throw new Error("expected UNKNOWN");
+    // TOKEN_CONVERGED since M5-D1; the property under test — that coordinates
+    // rather than names are what convergence compares — is unchanged.
+    if (result.kind !== "TOKEN_CONVERGED") throw new Error("expected TOKEN_CONVERGED");
     for (const step of result.steps) {
       expect(step).not.toHaveProperty("displayName");
       expect(step).not.toHaveProperty("displayNameEn");

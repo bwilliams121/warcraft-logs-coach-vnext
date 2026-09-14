@@ -33,10 +33,13 @@
  *
  * FAIL CLOSED, WHOLE-EXPRESSION. Every rejection path returns a failure for the
  * ENTIRE expression. There is no partial parse, no skipped fragment and no
- * placeholder node. `!=`, `&&`, `||`, `>?`, `<?`, `==`, decimals, arithmetic and
- * every unlisted identifier (`talent.x`, `spell_targets.y`, `target.time_to_die`,
- * `dot.z.ticking`, `variable.w`, `buff.x.stack`, `energy.regen_combined`, …) are
+ * placeholder node. `!=`, `&&`, `||`, `>?`, `<?`, `==`, decimals, UNARY minus and
+ * every unlisted identifier (`spell_targets.y`, `active_dot.z`,
+ * `energy.regen_combined`, `main_hand.dagger`, `talent.x.rank`,
+ * `variable.trinket_sync_slot`, `dot.z.pmultiplier`, `cooldown.y.ready`, …) are
  * refusals, not defaults.
+ *
+ * BINARY `-` IS SUPPORTED FROM M5-D1; unary `-` is not. See `parseAdditive`.
  *
  * WHY `>` AND `<=` ARE HERE AND `>?` / `<?` ARE NOT
  *
@@ -133,6 +136,11 @@ const UNSUPPORTED_OPERATOR_TOKENS = [
   "==",
   "%%",
   "+",
+  // `-` STAYS IN THIS LIST even though binary subtraction is supported from
+  // M5-D1, and the distinction is the whole point. This list is consulted where
+  // an OPERAND is expected, so it is what refuses UNARY minus — `remains<=-1`
+  // must not quietly become a negative literal. `parseAdditive` reads the binary
+  // form directly and never consults this list.
   "-",
   "*",
   "/",
@@ -246,6 +254,9 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
   // nothing supplies.
   if (raw === "pmultiplier") return { kind: "DOT_PMULTIPLIER" };
   if (raw === "remains") return { kind: "DOT_REMAINS" };
+  // Also bare, and also about the ACTING action's own DoT. `dot.<name>.refreshable`
+  // addresses a different action's DoT and stays refused.
+  if (raw === "refreshable") return { kind: "DOT_REFRESHABLE" };
 
   const talent = TALENT.exec(raw);
   if (talent !== null) {
@@ -422,22 +433,39 @@ function parseMultiplicative(cursor: Cursor): ExpressionNode {
 }
 
 /**
- * Addition. Precedence 6 in pinned SimulationCraft, looser than multiplication
- * and tighter than comparison.
+ * Addition and subtraction. Precedence 6 in pinned SimulationCraft — the same
+ * level for both, looser than multiplication and tighter than comparison — and
+ * LEFT-ASSOCIATIVE, so `a-b-c` is `(a-b)-c`.
  *
- * `+` only, and BINARY only. Unary `+`/`-` are precedence 8 upstream and are not
- * supported here; `-` is absent entirely, so `14-6` is still refused rather than
- * silently parsed. `rejectLookalikeOperators` already refuses `-` where a
- * primary is expected, which is what keeps subtraction from sneaking in through
- * a negative literal.
+ * BINARY ONLY, for both operators. Unary `+`/`-` are precedence 8 upstream and
+ * stay unsupported: `parsePrimary` calls `rejectLookalikeOperators`, which still
+ * refuses a `-` appearing where an operand belongs. So `14-6` parses and
+ * `remains<=-1` does not, which is exactly the split we want — a negative
+ * literal is far more likely to be a mistake than an authored value.
+ *
+ * `-` arrived at M5-D1 for the pinned `core_dot[1..4]` lines, every one of which
+ * ends in `target.time_to_die-remains>12`. The whole-expression refusal means
+ * those four entries could not be evaluated AT ALL without it, so the four other
+ * conjuncts on each line — one of which can prove the line FALSE — were
+ * unreachable.
  */
 function parseAdditive(cursor: Cursor): ExpressionNode {
   let left = parseMultiplicative(cursor);
   for (;;) {
-    if (!startsWith(cursor, "+")) return left;
-    cursor.index += 1;
-    const right = parseMultiplicative(cursor);
-    left = { kind: "ADD", left, right };
+    // `+` and `-` are unambiguous here: SimulationCraft has no `+=`, `-=`, `++`
+    // or `--`, and the two-character lookalikes that DO exist (`->`, say) are not
+    // operators in this grammar at all.
+    if (startsWith(cursor, "+")) {
+      cursor.index += 1;
+      left = { kind: "ADD", left, right: parseMultiplicative(cursor) };
+      continue;
+    }
+    if (startsWith(cursor, "-")) {
+      cursor.index += 1;
+      left = { kind: "SUBTRACT", left, right: parseMultiplicative(cursor) };
+      continue;
+    }
+    return left;
   }
 }
 

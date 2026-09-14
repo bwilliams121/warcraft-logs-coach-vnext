@@ -54,7 +54,9 @@ const BINDINGS: AtomBindings = {
   comboPoints: knownNumber(7),
   comboPointsDeficit: unknownNumber("STATE_NOT_ESTABLISHED"),
   energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
-  dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+  // No action's own DoT is established here. An empty per-action map is the
+  // M5-D1 shape of that, and an unkeyed `remains` resolves UNKNOWN_NUMBER.
+  dotRemainsSecondsByAction: [],
   knownBuffs: [],
 };
 
@@ -441,12 +443,18 @@ describe("different prefixes may still converge on one entry", () => {
   });
 });
 
-describe("the same token at different authority entries does not converge", () => {
-  it("refuses rather than reporting one of the two entries", () => {
+describe("the same token at different authority entries converges on the TOKEN only", () => {
+  it("reports both entries and names neither as the one", () => {
     // TWO entries, one token. The skip world answers `default[1] gcd_x`; the
     // execute world disables that ENTRY and answers `default[2] gcd_x`. Both
-    // worlds say "gcd_x" and they are not the same claim, because a SELECTED
-    // result names a concrete list, ordinal, verbatim string and source line.
+    // worlds say "gcd_x" and that is NOT the same claim as an entry-exact
+    // selection, which names a concrete list, ordinal, verbatim string and
+    // source line.
+    //
+    // RE-BASELINED AT M5-D1. This refused outright before, because the only
+    // positive member available was the entry-exact one. It now returns the
+    // weaker member — which says the true thing rather than nothing — and
+    // `ROTATIONAL_GCD_SELECTED` still means exactly what it meant.
     const result = runEngine({
       lists: [
         {
@@ -470,10 +478,47 @@ describe("the same token at different authority entries does not converge", () =
         }),
       },
     });
+    expect(result.kind).toBe("ROTATIONAL_GCD_TOKEN_CONVERGED");
+    if (result.kind !== "ROTATIONAL_GCD_TOKEN_CONVERGED") return;
+    expect(result.actionToken).toBe("gcd_x");
+    // BOTH entries are carried rather than one being picked.
+    expect(
+      result.candidateSteps.map((step) => `${step.listName}[${String(step.priorityOrdinal)}]`).sort(),
+    ).toEqual(["default[1]", "default[2]"]);
+    // THE CONSUMER GUARD: no field a caller could mistake for the exact entry.
+    expect(result).not.toHaveProperty("selectingStep");
+    expect(result).not.toHaveProperty("selectingEntry");
+  });
+
+  it("still refuses when the two worlds name DIFFERENT tokens", () => {
+    // The control. Token agreement is the whole premise of the weaker member, so
+    // without it the result must still be a refusal.
+    const result = runEngine({
+      lists: [
+        {
+          listName: "default",
+          actions: ["non_gcd_a", `gcd_x,if=${TRUE_COND}`, `gcd_y,if=${TRUE_COND}`],
+        },
+      ],
+      gcdTokens: ["gcd_x", "gcd_y"],
+      usableTokens: ["gcd_x", "gcd_y"],
+      transitions: {
+        non_gcd_a: (state) => ({
+          kind: "APPLIED",
+          nextState: { disabled: [...state.disabled, "non_gcd_a", "gcd_x@1"], flag: true },
+          timeAdvanceMs: 0,
+          evidence: {
+            kind: "SYNTHETIC_SHIFT_ENTRY",
+            provenance: "synthetic test",
+            stateKeyBefore: stateKey(state),
+            stateKeyAfter: "shifted",
+          },
+        }),
+      },
+    });
     expect(result.kind).toBe("ROTATIONAL_GCD_UNKNOWN");
     if (result.kind !== "ROTATIONAL_GCD_UNKNOWN") return;
     expect(result.blocker).toBe("DIVERGENT_GCD_OUTCOMES");
-    // The refusal NAMES both entries rather than picking the more common one.
     expect(result.detail).toContain("default[1]");
     expect(result.detail).toContain("default[2]");
   });
@@ -584,8 +629,8 @@ describe("a refusal is never resolved into an answer", () => {
 
   it("carries the underlying scan's own blocker when the scan refuses", () => {
     const result = runEngine({
-      // `refreshable` is real pinned syntax outside the supported subset.
-      lists: [{ listName: "default", actions: ["gcd_x,if=refreshable"] }],
+      // `active_dot.<name>` is real pinned syntax outside the supported subset.
+      lists: [{ listName: "default", actions: ["gcd_x,if=active_dot.garrote>1"] }],
       gcdTokens: ["gcd_x"],
     });
     expect(result.kind).toBe("ROTATIONAL_GCD_UNKNOWN");

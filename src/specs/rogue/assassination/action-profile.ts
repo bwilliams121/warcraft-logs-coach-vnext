@@ -51,7 +51,8 @@ import {
 } from "../../../simc/authority-profile.js";
 import { itemEffectForItemId, itemEffectForToken } from "../../../data/game/rogue-item-effects.js";
 import { STEALTH_READINESS_AUTHORITY } from "../../../data/game/stealth-readiness-authority.js";
-import { bindStealthedRogue } from "./stealth-state.js";
+import { bindStealthedRogue, VANISH_BUFF_ABILITY_ID } from "./stealth-state.js";
+import { bindCombatEngagement, STEALTH_IN_COMBAT_AUTHORITY } from "./combat-engagement.js";
 import { deriveCooldown } from "./cooldown-bindings.js";
 import { cooldownReadinessAt } from "../../../engine/game-state/cooldowns/cooldown-usability.js";
 import {
@@ -67,6 +68,65 @@ const USE_ITEM_TOKEN = "use_item";
 const USE_ITEMS_TOKEN = "use_items";
 const INVOKE_EXTERNAL_BUFF_TOKEN = "invoke_external_buff";
 const STEALTH_TOKEN = "stealth";
+const VANISH_TOKEN = "vanish";
+
+/** The pinned guard the Vanish claim rests on. Author-written, never interpolated. */
+const VANISH_READY_GUARD = "sc_rogue.cpp:6046-6052";
+
+/**
+ * `stealth` usability when the player is NOT proven stealthed (M5-D1).
+ *
+ * The second half of `stealth_t::ready()`. See `combat-engagement.ts` for the
+ * pinned control flow and for why both facts are established positively rather
+ * than inferred from the absence of a restriction.
+ *
+ * `targetActorId` is not on `ActionProfileInput`, and adding it would widen a
+ * type five other rules do not need. The enemy proof therefore searches the
+ * DEBUFF the analysed player holds on the enemy the decision is about, which the
+ * caller already supplies to the DoT derivation — see `resolveUsability`'s
+ * `engagementTargetActorId`.
+ */
+function restealthUsability(input: ActionProfileInput): ActionUsabilityVerdict {
+  const targetActorId = input.engagementTargetActorId;
+  if (targetActorId === undefined) return unknownUsability();
+
+  const engagement = bindCombatEngagement({
+    state: input.state,
+    actorId: input.actorId,
+    targetActorId,
+    position: input.position,
+  });
+  if (engagement.state !== "ENGAGED") return unknownUsability();
+
+  return provenUnusable("RESTEALTH_NOT_PERMITTED_IN_COMBAT", {
+    abilityGameId: engagement.enemy.abilityGameId,
+    itemId: null,
+    // NOT a timing claim. Stealth's own cooldown is irrelevant here: the guard
+    // returns false before `action_t::ready()` is ever consulted.
+    provenRemainingAtLeastMs: null,
+    cooldownToleranceMs: null,
+    detail:
+      "the player is in combat with at least one living enemy — proven by a debuff this player holds on " +
+      `actor ${String(engagement.enemy.enemyActorId)} at this instant — and ` +
+      `${STEALTH_IN_COMBAT_AUTHORITY.readyGuard} enables re-stealth only when every enemy is asleep or ` +
+      "dead, because that is the sole place restealth_allowed is ever set",
+  });
+}
+
+/** The Vanish BUFF, when M4 proves it active. `null` otherwise — never a false. */
+function bindVanishBuffActive(input: ActionProfileInput): { readonly abilityGameId: number } | null {
+  const stealthed = bindStealthedRogue({
+    state: input.state,
+    actorId: input.actorId,
+    position: input.position,
+  });
+  // The stealth binding names WHICH contributor proved TRUE, so the Vanish buff
+  // can be identified without a second aura query. Any other contributor — plain
+  // Stealth, Subterfuge — satisfies the MASK and does not satisfy this guard.
+  if (stealthed.value !== "TRUE") return null;
+  if (stealthed.provenBy.abilityGameId !== VANISH_BUFF_ABILITY_ID) return null;
+  return { abilityGameId: stealthed.provenBy.abilityGameId };
+}
 
 /** `name=` and `slots=` parameters, read from the verbatim action string. */
 function namedParameter(actionStringVerbatim: string, key: string): string | null {
@@ -80,6 +140,15 @@ export interface ActionProfileInput {
   /** Canonical index of the decision point. Never an ingestion ordinal. */
   readonly position: number;
   readonly profile: AuthorityPlayerProfile;
+  /**
+   * The enemy the decision is about, for M5-D1's in-combat stealth proof.
+   *
+   * OPTIONAL, and its absence is a real state: without it the engagement proof
+   * has no target to look for a debuff on, so `stealth` stays UNKNOWN rather
+   * than being claimed unusable. Every pre-M5-D1 caller omits it and gets
+   * exactly its previous behaviour.
+   */
+  readonly engagementTargetActorId?: number;
 }
 
 /**
@@ -212,7 +281,16 @@ export function resolveUsability(
       actorId: input.actorId,
       position: input.position,
     });
-    if (stealthed.value !== "TRUE") return unknownUsability();
+    if (stealthed.value !== "TRUE") {
+      // NOT STEALTHED, OR UNKNOWN. The first guard says nothing, so fall to the
+      // in-combat one (M5-D1) — which is what makes `default[0]` decidable at
+      // the 40 of 42 real actor-19 decision points where stealth is not proven.
+      //
+      // Both guards return false, so their ORDER is a reporting choice rather
+      // than a correctness one, and the stealthed proof stays first because it
+      // is the more specific claim.
+      return restealthUsability(input);
+    }
     return provenUnusable("ALREADY_STEALTHED", {
       abilityGameId: stealthed.provenBy.abilityGameId,
       itemId: null,
@@ -225,6 +303,30 @@ export function resolveUsability(
         `'${STEALTH_READINESS_AUTHORITY.sharedMaskExpression}' mask passed to the same function, so the ` +
         "guard returns false before any other condition is reached",
     });
+  }
+
+  // ---- Vanish: unready while its own buff is already up (M5-D1) ----
+  //
+  // `vanish_t::ready()` opens with `if ( p()->buffs.vanish->check() ) return
+  // false;`. M4 already proves that buff ACTIVE at the C3c2-era decision point,
+  // so this costs no new state — and it is a DIFFERENT claim from
+  // `ALREADY_STEALTHED`, which tests a four-aura mask in a different function.
+  if (action.actionToken === VANISH_TOKEN) {
+    const active = bindVanishBuffActive(input);
+    if (active !== null) {
+      return provenUnusable("VANISH_BUFF_ALREADY_ACTIVE", {
+        abilityGameId: active.abilityGameId,
+        itemId: null,
+        // NOT a timing claim. The buff is up; nothing is recharging.
+        provenRemainingAtLeastMs: null,
+        cooldownToleranceMs: null,
+        detail:
+          "the Vanish buff is proven ACTIVE from an observed application, and vanish_t::ready() " +
+          `(${VANISH_READY_GUARD}) returns false before any other condition is reached`,
+      });
+    }
+    // Not proven active. Fall through to the ordinary cooldown path below, which
+    // is what M5-D1's one-charge recharge model makes answerable.
   }
 
   // ---- the external buff: statically unready under an empty pool ----

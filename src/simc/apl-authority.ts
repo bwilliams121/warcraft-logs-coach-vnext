@@ -91,6 +91,114 @@ export const APL_ENTRY_KINDS = [
   "LIST_DISPATCH",
 ] as const satisfies readonly AplEntryKind[];
 
+/**
+ * ACTION OPTIONS — the `key=value` segments after the token, and why they are
+ * first-class from M5-D1.
+ *
+ * An APL line is `token,key=value,key=value,…`. Until M5-D1 this module read the
+ * token and the `,if=` value and IGNORED everything else, which was fine only
+ * because every option in the pinned Assassination APL happened not to change
+ * selection semantics. That stopped being true the moment `refreshable` became
+ * parseable: `core_dot[2]` is
+ *
+ *     garrote,cycle_targets=1,if=…refreshable…
+ *
+ * and `cycle_targets=1` makes SimulationCraft re-run `action_ready()` once per
+ * candidate target (action.cpp:2463-2488). Evaluating that line against the one
+ * implicit target would silently answer a multi-target question as a
+ * single-target one — the exact failure `CLAUDE.md`'s multi-target rule forbids.
+ *
+ * So options are now DERIVED and CLASSIFIED, and an unrecognised one fails
+ * closed. This is deliberately NOT a general option interpreter: it is a
+ * three-way partition of option KEYS, with no attempt to read their values.
+ *
+ *     SUPPORTED               modelled, or provably irrelevant to selection
+ *     UNSUPPORTED_TARGETING   changes WHICH target the condition is about
+ *     UNRECOGNISED            never seen at this pinned commit; fails closed
+ */
+export type ActionOptionSupport = "SUPPORTED" | "UNSUPPORTED_TARGETING" | "UNRECOGNISED";
+
+export const ACTION_OPTION_SUPPORTS = [
+  "SUPPORTED",
+  "UNSUPPORTED_TARGETING",
+  "UNRECOGNISED",
+] as const satisfies readonly ActionOptionSupport[];
+
+/**
+ * Option keys this project understands well enough not to be stopped by.
+ *
+ * Each entry is a claim, so each carries its reason:
+ *
+ *   `if`        the condition itself. Read by `deriveConditionRaw`.
+ *   `name`      the dispatch target, the item name, or the variable name. Read
+ *               by `deriveCallsListName` and by the spec's applicability rules.
+ *   `value`     a `variable` assignment's value. `variable` never ends a scan,
+ *               and any later read of the variable is resolved — or refused — at
+ *               the expression layer, so the value text changes no control flow
+ *               here.
+ *   `slots`     the `use_items` slot token. Read by the spec's applicability.
+ *   `use_off_gcd`  an EXTRA scheduling opportunity during an already-running
+ *               GCD, not an execution lane (player.cpp:4340-4342,
+ *               action.cpp:301-306). The first-GCD query terminates before that
+ *               pass is reachable, so it cannot affect the answer.
+ *   `precombat_seconds`  only meaningful outside combat, and only on `precombat`
+ *               entries, which are unreachable from the entry list.
+ */
+export const SUPPORTED_ACTION_OPTION_KEYS = [
+  "if",
+  "name",
+  "value",
+  "slots",
+  "use_off_gcd",
+  "precombat_seconds",
+] as const;
+
+/**
+ * Option keys that redirect the condition onto a target this project cannot
+ * enumerate.
+ *
+ *   `cycle_targets`  `action_t::ready()` loops the candidate target list and
+ *                    re-runs `action_ready()` for each (action.cpp:2463-2488).
+ *   `target_if`      `select_target_if_target()` SCORES every candidate and
+ *                    retargets to the winner (action.cpp:2429-2461).
+ *
+ * Both are recognised and REFUSED. Recognising them is what turns a silent
+ * misreading into an explicit UNKNOWN.
+ */
+export const UNSUPPORTED_TARGETING_OPTION_KEYS = ["cycle_targets", "target_if", "max_cycle_targets"] as const;
+
+/** Classifies one option key. Never reads its value. */
+export function actionOptionSupport(optionKey: string): ActionOptionSupport {
+  if ((SUPPORTED_ACTION_OPTION_KEYS as readonly string[]).includes(optionKey)) return "SUPPORTED";
+  if ((UNSUPPORTED_TARGETING_OPTION_KEYS as readonly string[]).includes(optionKey)) {
+    return "UNSUPPORTED_TARGETING";
+  }
+  return "UNRECOGNISED";
+}
+
+/**
+ * The option keys of one action string, in written order.
+ *
+ * Splits on commas and keeps segments shaped like `key=`. That is coarse, and it
+ * is coarse in the SAFE direction: a value containing a comma would produce an
+ * extra fragment, and a fragment that does not look like `key=` is skipped while
+ * one that does is classified — so an unfamiliar shape becomes UNRECOGNISED
+ * rather than invisible.
+ *
+ * The leading token is never an option, so the first segment is always dropped.
+ */
+export function deriveActionOptionKeys(actionStringVerbatim: string): readonly string[] {
+  const keys: string[] = [];
+  for (const segment of actionStringVerbatim.split(",").slice(1)) {
+    const equals = segment.indexOf("=");
+    if (equals <= 0) continue;
+    const key = segment.slice(0, equals);
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+    if (!keys.includes(key)) keys.push(key);
+  }
+  return keys;
+}
+
 /** One action, with the fields derived from its verbatim string. */
 export interface AplAction {
   readonly listName: string;
@@ -113,6 +221,19 @@ export interface AplAction {
    * field, so it cannot drift from the string it summarises.
    */
   readonly entryKind: AplEntryKind;
+  /** Every option key on the line, in written order. Values are never read. */
+  readonly actionOptionKeys: readonly string[];
+  /**
+   * The option keys that are NOT `SUPPORTED`, with their classification.
+   *
+   * EMPTY IS THE CLAIM WORTH NOTICING: it says every option on this line was
+   * recognised and none of them redirects the condition. A non-empty list is what
+   * makes the traversal refuse.
+   */
+  readonly unsupportedOptions: readonly {
+    readonly optionKey: string;
+    readonly support: Exclude<ActionOptionSupport, "SUPPORTED">;
+  }[];
 }
 
 const CALL_TOKENS = new Set(["call_action_list", "run_action_list"]);
@@ -174,6 +295,12 @@ export function deriveEntryKind(actionStringVerbatim: string): AplEntryKind {
 
 function deriveAction(listName: string, action: AuthorityArtifactAction): AplAction {
   const token = deriveActionToken(action.actionStringVerbatim);
+  const actionOptionKeys = deriveActionOptionKeys(action.actionStringVerbatim);
+  const unsupportedOptions: { optionKey: string; support: Exclude<ActionOptionSupport, "SUPPORTED"> }[] = [];
+  for (const optionKey of actionOptionKeys) {
+    const support = actionOptionSupport(optionKey);
+    if (support !== "SUPPORTED") unsupportedOptions.push({ optionKey, support });
+  }
   return {
     listName,
     priorityOrdinal: action.priorityOrdinal,
@@ -185,6 +312,8 @@ function deriveAction(listName: string, action: AuthorityArtifactAction): AplAct
     callsListName: deriveCallsListName(action.actionStringVerbatim),
     isUnmodelledDispatch: token === "run_action_list",
     entryKind: deriveEntryKind(action.actionStringVerbatim),
+    actionOptionKeys,
+    unsupportedOptions,
   };
 }
 

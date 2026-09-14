@@ -148,6 +148,22 @@ export type ExpressionNode =
    */
   | { readonly kind: "DOT_REMAINS" }
   /**
+   * `refreshable` — TRUTH-shaped. The acting action's own DoT, on its own target.
+   *
+   * Added at M5-D1. `dot_t::create_expression` (dot.cpp:458-479) routes it to
+   * `action->dot_refreshable( dot, new_duration )`, and the Rogue module NEVER
+   * sets `dot_behavior`, so every Rogue DoT keeps `action_t`'s default
+   * `DOT_REFRESH_DURATION` (action.cpp:419). That branch is
+   * `dot->ticks_left() <= 1` (action.cpp:4627-4628) — NOT the 30 % pandemic rule
+   * a reader who knows the game would expect. Getting that wrong would move the
+   * threshold on Garrote from ~2 s to 5.4 s.
+   *
+   * Like `remains` and `pmultiplier` this is written BARE and addresses the
+   * ACTING action, so it is resolved through the evaluation context rather than
+   * by name. Unbound, it is enumerated across both worlds.
+   */
+  | { readonly kind: "DOT_REFRESHABLE" }
+  /**
    * `dot.<name>.ticking` — TRUTH-shaped. Another action's DoT, on this target.
    *
    * Distinct from the bare `remains` above, which is the ACTING action's own
@@ -189,6 +205,23 @@ export type ExpressionNode =
    */
   | { readonly kind: "MULTIPLY"; readonly left: ExpressionNode; readonly right: ExpressionNode }
   | { readonly kind: "ADD"; readonly left: ExpressionNode; readonly right: ExpressionNode }
+  /**
+   * Binary `-`, at pinned SimulationCraft precedence 6 — the same level as `+`,
+   * and left-associative, so `a-b-c` is `(a-b)-c`.
+   *
+   * Added at M5-D1 because the pinned `core_dot[1..4]` lines all end in
+   * `target.time_to_die-remains>12`, and the whole-expression refusal means those
+   * four entries cannot be evaluated at all until `-` parses. Note what that does
+   * and does not buy: `target.time_to_die` is PREDICTIVE and stays unbindable, so
+   * the subtraction always yields UNKNOWN. What changes is that the OTHER
+   * conjuncts on those lines become reachable, and one of them can prove the line
+   * FALSE.
+   *
+   * BINARY ONLY. Unary minus is precedence 8 upstream and is deliberately still
+   * refused, so `remains<=-1` remains a parse error rather than a negative
+   * literal nobody meant.
+   */
+  | { readonly kind: "SUBTRACT"; readonly left: ExpressionNode; readonly right: ExpressionNode }
   | {
       readonly kind: "COMPARISON";
       readonly operator: ComparisonOperator;
@@ -207,10 +240,36 @@ export type AtomShape = "BOOLEAN" | "NUMERIC";
 
 export const ATOM_SHAPES = ["BOOLEAN", "NUMERIC"] as const satisfies readonly AtomShape[];
 
-/** One atom occurrence, identified by key and classified by shape. */
+/**
+ * WHOSE state an atom describes — the player, or the action's current target.
+ *
+ * ADDED AT M5-D1, AND IT EXISTS FOR EXACTLY ONE PROOF.
+ *
+ * SimulationCraft's `cycle_targets=1` re-runs `action_ready()` once per candidate
+ * target (action.cpp:2463-2488), so a condition's value is generally different for
+ * each of them. This project models no target list, so a cycling entry is
+ * REFUSED — see `nested-selection.ts`.
+ *
+ * The one exception that can be proven rather than assumed: a conjunct built
+ * entirely from PLAYER_SCOPED atoms has the SAME value for every candidate
+ * target. If such a conjunct is FALSE, then `FALSE & anything` is FALSE for every
+ * target, the cycle loop finds no ready target, and the entry cannot be selected
+ * — without anyone enumerating a target.
+ *
+ * The classification is therefore load-bearing and conservative: anything that
+ * reads the target, the target's auras, the acting action's DoT ON that target,
+ * or how long that target has left is TARGET_SCOPED. When in doubt, TARGET_SCOPED
+ * is the safe answer, because it only ever withholds an elimination.
+ */
+export type AtomScope = "PLAYER_SCOPED" | "TARGET_SCOPED";
+
+export const ATOM_SCOPES = ["PLAYER_SCOPED", "TARGET_SCOPED"] as const satisfies readonly AtomScope[];
+
+/** One atom occurrence, identified by key and classified by shape and scope. */
 export interface AtomDescriptor {
   readonly key: string;
   readonly shape: AtomShape;
+  readonly scope: AtomScope;
 }
 
 /**
@@ -232,49 +291,58 @@ export function atomKey(node: ExpressionNode): string | null {
 export function atomOf(node: ExpressionNode): AtomDescriptor | null {
   switch (node.kind) {
     case "COMBO_POINTS":
-      return { key: "combo_points", shape: "NUMERIC" };
+      return { key: "combo_points", shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "COMBO_POINTS_DEFICIT":
-      return { key: "combo_points.deficit", shape: "NUMERIC" };
+      return { key: "combo_points.deficit", shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "ENERGY_PCT":
-      return { key: "energy.pct", shape: "NUMERIC" };
+      return { key: "energy.pct", shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "FIGHT_REMAINS":
-      return { key: "fight_remains", shape: "NUMERIC" };
+      // The FIGHT, not a target. Unchanged by which enemy an action cycles to.
+      return { key: "fight_remains", shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "BUFF_UP":
-      return { key: `buff.${node.buffName}.up`, shape: "BOOLEAN" };
+      return { key: `buff.${node.buffName}.up`, shape: "BOOLEAN", scope: "PLAYER_SCOPED" };
     case "BUFF_REMAINS":
-      return { key: `buff.${node.buffName}.remains`, shape: "NUMERIC" };
+      return { key: `buff.${node.buffName}.remains`, shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "BUFF_STACK":
-      return { key: `buff.${node.buffName}.stack`, shape: "NUMERIC" };
+      return { key: `buff.${node.buffName}.stack`, shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "BUFF_REACT":
       // A DIFFERENT key from `buff.<name>.up`. Two atoms, never correlated.
-      return { key: `buff.${node.buffName}.react`, shape: "BOOLEAN" };
+      return { key: `buff.${node.buffName}.react`, shape: "BOOLEAN", scope: "PLAYER_SCOPED" };
     case "DEBUFF_UP":
       // `debuff.` and `buff.` are different namespaces addressing different
-      // actors, so their keys can never collide.
-      return { key: `debuff.${node.debuffName}.up`, shape: "BOOLEAN" };
+      // actors, so their keys can never collide. TARGET_SCOPED: it is an aura on
+      // whichever enemy the action is currently pointed at.
+      return { key: `debuff.${node.debuffName}.up`, shape: "BOOLEAN", scope: "TARGET_SCOPED" };
     case "STEALTHED_ROGUE":
-      return { key: "stealthed.rogue", shape: "BOOLEAN" };
+      return { key: "stealthed.rogue", shape: "BOOLEAN", scope: "PLAYER_SCOPED" };
     case "TALENT":
       // Keyed by name, so every occurrence of `talent.blindside` correlates and
       // `talent.improved_ambush` stays independent of it. The key namespace is
       // `talent.` and cannot collide with a buff key — which matters because the
       // Blindside TALENT (328085) and the Blindside PROC BUFF (121153) are
       // different facts and must never share a world assignment.
-      return { key: `talent.${node.talentName}`, shape: "BOOLEAN" };
+      //
+      // A static build fact, so it is the same for every candidate target. That
+      // is what makes `!talent.crimson_tempest` usable as a target-independent
+      // elimination.
+      return { key: `talent.${node.talentName}`, shape: "BOOLEAN", scope: "PLAYER_SCOPED" };
     case "VARIABLE_SINGLE_TARGET":
-      return { key: "variable.single_target", shape: "BOOLEAN" };
+      // A count of the whole enemy list, not a property of one enemy.
+      return { key: "variable.single_target", shape: "BOOLEAN", scope: "PLAYER_SCOPED" };
     case "DOT_PMULTIPLIER":
-      return { key: "pmultiplier", shape: "NUMERIC" };
+      return { key: "pmultiplier", shape: "NUMERIC", scope: "TARGET_SCOPED" };
     case "DOT_REMAINS":
-      return { key: "remains", shape: "NUMERIC" };
+      return { key: "remains", shape: "NUMERIC", scope: "TARGET_SCOPED" };
+    case "DOT_REFRESHABLE":
+      return { key: "refreshable", shape: "BOOLEAN", scope: "TARGET_SCOPED" };
     case "DOT_TICKING":
       // Keyed by name, so every occurrence of `dot.garrote.ticking` correlates
       // and `dot.rupture.ticking` stays independent of it.
-      return { key: `dot.${node.dotName}.ticking`, shape: "BOOLEAN" };
+      return { key: `dot.${node.dotName}.ticking`, shape: "BOOLEAN", scope: "TARGET_SCOPED" };
     case "COOLDOWN_REMAINS":
-      return { key: `cooldown.${node.cooldownName}.remains`, shape: "NUMERIC" };
+      return { key: `cooldown.${node.cooldownName}.remains`, shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "TARGET_TIME_TO_DIE":
-      return { key: "target.time_to_die", shape: "NUMERIC" };
+      return { key: "target.time_to_die", shape: "NUMERIC", scope: "TARGET_SCOPED" };
     default:
       return null;
   }
@@ -298,6 +366,7 @@ export function collectAtoms(node: ExpressionNode): readonly AtomDescriptor[] {
       case "OR":
       case "MULTIPLY":
       case "ADD":
+      case "SUBTRACT":
         walk(current.left);
         walk(current.right);
         return;
@@ -312,4 +381,36 @@ export function collectAtoms(node: ExpressionNode): readonly AtomDescriptor[] {
 /** Every distinct atom key in an expression, in first-seen order. */
 export function collectAtomKeys(node: ExpressionNode): readonly string[] {
   return collectAtoms(node).map((atom) => atom.key);
+}
+
+/**
+ * Whether every atom in an expression describes the PLAYER rather than a target.
+ *
+ * The predicate behind M5-D1's target-independent elimination. An expression that
+ * satisfies it has the same value for every candidate target, so a FALSE verdict
+ * on it holds for all of them.
+ *
+ * An expression with NO atoms at all — a pure literal comparison — is
+ * player-scoped by this definition, and correctly so: `1>2` is FALSE whoever the
+ * action is pointed at.
+ */
+export function isPlayerScoped(node: ExpressionNode): boolean {
+  return collectAtoms(node).every((atom) => atom.scope === "PLAYER_SCOPED");
+}
+
+/**
+ * The top-level AND-spine of an expression, as its individual conjuncts.
+ *
+ * `a & b & c` yields `[a, b, c]`. Anything that is not an AND at the top yields
+ * the whole node as a single conjunct, which is the honest reading: there is one
+ * thing to prove.
+ *
+ * ONLY the AND spine, and that matters. Descending into an OR would produce
+ * fragments whose falsehood proves nothing about the whole — `FALSE | x` is `x`,
+ * not FALSE. Every conjunct returned here, by contrast, is sufficient on its own:
+ * `FALSE & anything` is FALSE.
+ */
+export function topLevelConjuncts(node: ExpressionNode): readonly ExpressionNode[] {
+  if (node.kind !== "AND") return [node];
+  return [...topLevelConjuncts(node.left), ...topLevelConjuncts(node.right)];
 }

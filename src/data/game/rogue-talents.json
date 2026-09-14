@@ -24,7 +24,7 @@
     ],
     "clientDataWowVersion": "12.1.0.69587",
     "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
-    "extractedOn": "2026-09-12",
+    "extractedOn": "2026-09-14",
     "extractorVersion": 1,
     "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeId }. In the supported capture (report A7R6kxPJ1hC8YQ4w revision 30, logVersion 17, gameVersion 1) `id` equals trait_data_t::id_trait_node_entry and `nodeId` equals trait_data_t::id_node. Corroborated by three independent selected entries for two actors: Improved Garrote 112510/90625, Shrouded Suffocation 112669/90776, and Tight Spender 117152/90692 at the Improved Ambush choice node. This equivalence is recorded for that capture and parser version; it is not claimed for Warcraft Logs in general.",
     "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
@@ -40,6 +40,17 @@
       "nodeType": "NORMAL",
       "alternativeEntries": [],
       "binding": "sc_rogue.cpp:10026 talent.assassination.blindside = find_talent_spell( talent_tree::SPECIALIZATION, \"Blindside\" )"
+    },
+    {
+      "simcName": "crimson_tempest",
+      "displayNameEn": "Crimson Tempest",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 94557,
+      "traitEntryId": 117139,
+      "talentSpellId": 1247227,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_rogue.cpp:10030 talent.assassination.crimson_tempest = find_talent_spell( talent_tree::SPECIALIZATION, \"Crimson Tempest\" )"
     },
     {
       "simcName": "improved_ambush",

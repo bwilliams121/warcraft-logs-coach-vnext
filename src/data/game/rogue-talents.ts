@@ -132,6 +132,39 @@ export function talentIdentityFor(simcName: string): TalentIdentity | null {
   return load().index?.byName.get(simcName) ?? null;
 }
 
+/** Every talent name this dataset can resolve, in artifact order. */
+export function modelledTalentNames(): readonly string[] {
+  return load().index?.artifact.talents.map((talent) => talent.simcName) ?? [];
+}
+
+/**
+ * Every modelled talent that RESOLVED against an observed tree, in the binding
+ * shape `AtomBindings.knownTalents` wants.
+ *
+ * ADDED AT M5-D1, and the reason is a real hazard rather than convenience. Call
+ * sites used to hand-list the talent names they cared about, so adding
+ * `crimson_tempest` to the artifact would have changed nothing until every one of
+ * those lists was found and edited — and a call site that missed it would
+ * silently keep enumerating a talent the log actually establishes, quietly
+ * withholding an elimination the evidence supports.
+ *
+ * UNKNOWN talents are OMITTED, not reported as `taken: false`. An omitted atom is
+ * enumerated across both worlds; a `false` would be a claim the tree does not
+ * support. That is the same rule `resolveTalentSelection` follows, carried
+ * through rather than re-decided here.
+ */
+export function resolveModelledTalents(
+  observedEntries: readonly ObservedTalentEntry[],
+): readonly { readonly name: string; readonly taken: boolean }[] {
+  const resolved: { name: string; taken: boolean }[] = [];
+  for (const simcName of modelledTalentNames()) {
+    const resolution = resolveTalentSelection(observedEntries, simcName);
+    if (resolution.selection === "UNKNOWN") continue;
+    resolved.push({ name: resolution.simcName, taken: resolution.selection === "SELECTED" });
+  }
+  return resolved;
+}
+
 /**
  * Resolves one talent against an observed tree.
  *

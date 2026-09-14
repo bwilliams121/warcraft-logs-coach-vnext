@@ -68,7 +68,13 @@ import {
 } from "../../../simc/action-applicability.js";
 import type { AuthorityPlayerProfile } from "../../../simc/authority-profile.js";
 import { executionLaneForToken, type ExecutionLane } from "../../../data/game/ability-gcd-semantics.js";
-import { transitionContractFor } from "../../../data/game/assassination-transition-authority.js";
+import {
+  itemUseTransition,
+  transitionContractFor,
+} from "../../../data/game/assassination-transition-authority.js";
+import { resolveItemGateIrrelevance } from "./item-gate-irrelevance.js";
+import { itemEffectForItemId, itemEffectForToken } from "../../../data/game/rogue-item-effects.js";
+import { slotOccupancy } from "../../../simc/authority-profile.js";
 import { tryAbilityIdentityFor } from "../../../data/game/rogue-abilities.js";
 import type { CombatState } from "../../../engine/state/combat-state.js";
 import type { AtomBindings } from "../../../simc/expression/evaluate.js";
@@ -102,6 +108,14 @@ export interface FirstGcdQueryInput {
   readonly bindings: AtomBindings;
   /** The spell id observed cast here. Positive usability evidence only. */
   readonly observedAbilityGameId: number;
+  /**
+   * The enemy the decision is about (M5-D1).
+   *
+   * OPTIONAL. Supplied, it lets `default[0] stealth` be proven unusable outside
+   * stealth; omitted, that entry stays an unresolved candidate exactly as it was
+   * before M5-D1.
+   */
+  readonly engagementTargetActorId?: number;
   /**
    * The race worlds to explore.
    *
@@ -167,12 +181,61 @@ export function firstGcdSelectionAt(input: FirstGcdQueryInput): FirstGcdQueryOut
   };
 }
 
+/**
+ * The transition contract for an equipped on-use item entry, or `null`.
+ *
+ * Built from the resolved driver rather than looked up by token, so two
+ * different trinkets never share one claim. Returns `null` — and therefore
+ * refuses the branch — for any driver the gate-irrelevance rule would also have
+ * refused, so the two cannot disagree about which entries are steppable.
+ */
+function itemContractFor(
+  observed: AuthorityPlayerProfile["observed"],
+  action: SelectedNonGcdAction,
+): ReturnType<typeof itemUseTransition> | null {
+  const verbatim = action.step.actionStringVerbatim;
+  const named = (key: string): string | null =>
+    new RegExp(`(?:^|,)${key}=([A-Za-z0-9_]+)`).exec(verbatim)?.[1] ?? null;
+
+  let onUse = null;
+  if (action.actionToken === "use_item") {
+    const token = named("name");
+    onUse = token === null ? null : (itemEffectForToken(token)?.onUseEffect ?? null);
+  } else if (action.actionToken === "use_items") {
+    const slot = named("slots");
+    const occupancy = slot === null ? null : slotOccupancy(observed, slot);
+    onUse =
+      occupancy?.state === "OCCUPIED"
+        ? (itemEffectForItemId(occupancy.item.itemId)?.onUseEffect ?? null)
+        : null;
+  }
+  if (onUse === null) return null;
+  // The SAME four gates the irrelevance rule applies. Stated again rather than
+  // shared, because a contract that admitted an entry the irrelevance rule
+  // refused would let an unreviewed driver execute in an explored branch.
+  if (onUse.baseGcdMs !== 0) return null;
+  if (onUse.writeClassification !== "PLAYER_STAT_BUFF_ONLY") return null;
+  if (!(onUse.baseCooldownMs > 0)) return null;
+
+  return itemUseTransition({
+    simcToken: action.actionToken,
+    effectSpellId: onUse.effectSpellId,
+    baseCooldownMs: onUse.baseCooldownMs,
+  });
+}
+
 function runOneRaceWorld(input: FirstGcdQueryInput, race: RaceWorld): RotationalGcdResult {
   const profileInput = {
     state: input.state,
     actorId: input.actorId,
     position: input.position,
     profile: input.profile,
+    // The enemy the decision is about, so M5-D1's in-combat stealth proof has a
+    // target to look for this player's debuff on. Optional on the query input:
+    // without it `default[0]` stays UNKNOWN rather than being claimed unusable.
+    ...(input.engagementTargetActorId === undefined
+      ? {}
+      : { engagementTargetActorId: input.engagementTargetActorId }),
   };
 
   /**
@@ -248,6 +311,11 @@ function runOneRaceWorld(input: FirstGcdQueryInput, race: RaceWorld): Rotational
       bindings: input.bindings,
       usabilityFor: (action) => usabilityFor(state, action),
       applicabilityFor: (action) => applicabilityFor(state, action),
+      // M5-D1. The ONLY claim that an unreadable condition can be stepped past,
+      // and it is confined to equipped on-use items whose driver is provably
+      // inert. Everything else keeps blocking.
+      gateIrrelevanceFor: (action) =>
+        resolveItemGateIrrelevance({ observed: input.profile.observed }, action),
     });
 
   const laneFor = (step: TraversalStep): ExecutionLane => executionLaneForToken(step.actionToken);
@@ -263,7 +331,8 @@ function runOneRaceWorld(input: FirstGcdQueryInput, race: RaceWorld): Rotational
     action: SelectedNonGcdAction,
     state: AssassinationFirstGcdState,
   ): NonGcdTransitionOutcome<AssassinationFirstGcdState> => {
-    const contract = transitionContractFor(action.actionToken);
+    const contract =
+      transitionContractFor(action.actionToken) ?? itemContractFor(input.profile.observed, action);
     if (contract === null) {
       return {
         kind: "UNSUPPORTED",

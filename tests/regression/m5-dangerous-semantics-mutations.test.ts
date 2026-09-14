@@ -35,7 +35,6 @@ const state = m5aState();
 
 /** The pinned gate mentions no energy. Stated explicitly rather than omitted. */
 const NO_ENERGY = unknownNumber("STATE_NOT_ESTABLISHED");
-const NO_DOT = unknownNumber("STATE_NOT_ESTABLISHED");
 
 function evaluateGate(
   comboPoints: number,
@@ -50,7 +49,7 @@ function evaluateGate(
     comboPoints: knownNumber(comboPoints),
     comboPointsDeficit: knownNumber(comboPointsDeficit),
     energyPct: NO_ENERGY,
-    dotRemainsSeconds: NO_DOT,
+    dotRemainsSecondsByAction: [],
     knownBuffs,
   });
 }
@@ -150,7 +149,7 @@ describe("MUTATION: losing correlated-atom identity", () => {
       comboPoints: knownNumber(7),
       comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
-      dotRemainsSeconds: NO_DOT,
+      dotRemainsSecondsByAction: [],
       knownBuffs: [],
     });
     // Four worlds instead of two, and they disagree.
@@ -181,7 +180,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
   // recognised. `refreshable` is a real identifier from the pinned `core_dot`
   // list that remains outside the subset, so the mutation and the refusal both
   // stay real.
-  const condition = "combo_points>=5&refreshable";
+  const condition = "combo_points>=5&active_dot.garrote>1";
 
   it("would let a false conjunct short-circuit an unparsed fragment into a rejection", () => {
     // The mutation: parse what we understand, treat the rest as false. At 3
@@ -195,7 +194,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
       comboPoints: knownNumber(3),
       comboPointsDeficit: knownNumber(4),
       energyPct: NO_ENERGY,
-      dotRemainsSeconds: NO_DOT,
+      dotRemainsSecondsByAction: [],
       knownBuffs: [],
     });
     expect(mutated.outcome).toBe("RESOLVED");
@@ -208,7 +207,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
     expect(parsed.ok).toBe(false);
     if (parsed.ok) throw new Error("expected a parse failure, not a silent pass");
     expect(parsed.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(parsed.fragment).toBe("refreshable");
+    expect(parsed.fragment).toBe("active_dot.garrote");
   });
 
   it("and there is no AST node an unsupported fragment could hide in", () => {
@@ -242,7 +241,7 @@ describe("MUTATION: treating unsupported syntax as false", () => {
       comboPoints: knownNumber(7),
       comboPointsDeficit: knownNumber(0),
       energyPct: NO_ENERGY,
-      dotRemainsSeconds: NO_DOT,
+      dotRemainsSecondsByAction: [],
       knownBuffs: [],
     });
     expect(evaluated.outcome).toBe("UNRESOLVED");

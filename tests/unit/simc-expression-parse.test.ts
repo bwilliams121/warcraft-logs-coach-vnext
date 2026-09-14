@@ -159,13 +159,16 @@ describe("everything outside the subset is refused whole", () => {
     ["combo_points!=5", "UNSUPPORTED_OPERATOR"],
     ["combo_points>=5&&buff.x.up", "UNSUPPORTED_OPERATOR"],
     ["combo_points>=5||buff.x.up", "UNSUPPORTED_OPERATOR"],
-    // RE-POINTED for M5-C3a. `*` and `+` became supported at pinned SimC
-    // precedence because `core_dot[0]` needs them. Subtraction and division did
-    // NOT, and prove arithmetic was opened by the operator rather than wholesale
-    // — which matters because `target.time_to_die-remains` (core_dot[1..4]) must
-    // keep failing closed on BOTH its identifier and its operator.
-    ["combo_points>=5-2", "UNSUPPORTED_OPERATOR"],
+    // RE-POINTED for M5-D1. `*`, `+` and now binary `-` are supported at pinned
+    // SimC precedence, because `core_dot[0]` needs the first two and
+    // `core_dot[1..4]` need the third. Division and modulo did NOT become
+    // supported, and prove arithmetic is still opened one operator at a time
+    // rather than wholesale.
     ["combo_points>=6/2", "UNSUPPORTED_OPERATOR"],
+    ["combo_points>=6%2", "UNSUPPORTED_OPERATOR"],
+    // UNARY minus stays refused even though the binary form is supported. A
+    // negative literal is a mistake far more often than an authored threshold.
+    ["combo_points>=-2", "UNSUPPORTED_OPERATOR"],
     ["combo_points>=5.5", "UNSUPPORTED_NUMERIC_LITERAL"],
     ["(combo_points>=5", "UNBALANCED_PARENTHESIS"],
     ["", "EMPTY_EXPRESSION"],
@@ -202,18 +205,32 @@ describe("everything outside the subset is refused whole", () => {
     expect(parsed.ok).toBe(true);
   });
 
-  it("still refuses a real pinned line outside the subset", () => {
-    // `core_dot[1]`, verbatim. The fail-closed invariant moves one line down the
-    // SAME list: opening `core_dot[0]` did not open `core_dot`. `refreshable`
-    // needs a pandemic-window model this project does not have, and the line
-    // also contains `-`, which C3a deliberately left unsupported.
+  it("PARSES the real pinned core_dot[1] line, which M5-D1 added the atoms for", () => {
+    // RE-POINTED for M5-D1. This slot held `core_dot[1]` as the last real pinned
+    // line still refused; `refreshable` and binary `-` now make it parse.
+    //
+    // Parsing is NOT deciding, and this line is the sharpest example in the
+    // authority: `pmultiplier` is permanently unbindable and
+    // `target.time_to_die` is PREDICTIVE, so its last conjunct can never be
+    // TRUE. What the addition buys is reaching `combo_points.deficit>=1` and
+    // `refreshable`, either of which can prove the LINE false.
     const coreDot =
       "combo_points.deficit>=1&(pmultiplier<=1|!variable.single_target)&refreshable&target.time_to_die-remains>12";
     const parsed = parseSimcExpression(coreDot);
+    expect(parsed.ok).toBe(true);
+  });
+
+  it("still refuses a real pinned line outside the subset", () => {
+    // `spend[2]`, verbatim. The fail-closed invariant moves to the family M5-D
+    // deliberately does NOT support: `spell_targets.fan_of_knives` counts the
+    // simulation's whole enemy roster (action.cpp:1729-1755, 3832-3842), which
+    // Warcraft Logs cannot reconstruct, so every target-count line stays refused.
+    const spend = "energy.pct>30&(target.time_to_die<12|spell_targets.fan_of_knives>=4)";
+    const parsed = parseSimcExpression(spend);
     expect(parsed.ok).toBe(false);
     if (parsed.ok) return;
     expect(parsed.reason).toBe("UNSUPPORTED_IDENTIFIER");
-    expect(parsed.fragment).toBe("refreshable");
+    expect(parsed.fragment).toBe("spell_targets.fan_of_knives");
   });
 
   it("reports the offending fragment so a finding can disclose it", () => {

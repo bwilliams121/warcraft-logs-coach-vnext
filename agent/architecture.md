@@ -4459,6 +4459,190 @@ rotational answer may come from; it is not the answer.
 
 ---
 
+# Milestone 5-D — Broader Single-Target Assassination Coverage
+
+M5-C proved ONE real end-to-end decision. M5-D asks how much of the rest of the
+pinned Assassination APL this architecture can analyse exactly.
+
+## M5-D Is SINGLE-TARGET Breadth
+
+The boundary is explicit and is not a temporary shortfall.
+
+`spell_targets.fan_of_knives` is the most-used unsupported atom in the reachable
+authority — nine entries across four lists — and it is not reconstructible in
+principle. It counts the SIMULATION's whole enemy roster
+(`action.cpp:3832-3842` via `available_targets`, `action.cpp:1729-1755`), which
+is a sim configuration rather than a spatial fact. Warcraft Logs supplies no
+equivalent, and only a LOWER bound would ever be derivable — which decides
+`spell_targets>1` and never `spell_targets=1`, so every single-target gate in
+the APL would stay unknown anyway.
+
+Therefore, deferred out of M5-D entirely:
+
+- exact or bounded target counts
+- `variable.single_target` resolution
+- builder selection — EVERY builder entry in the pinned APL is target-count gated
+- multi-target enumeration, target scoring and `target_if`
+- general `cycle_targets` support
+
+## Action Options Are a Syntax Surface, Not Noise
+
+An APL line is `token,key=value,…`. Reading only the token and the `,if=` value
+was safe only while the conditions on option-bearing lines happened to fail the
+parser. From M5-D1 option keys are DERIVED and CLASSIFIED, and an unrecognised
+one fails closed:
+
+    SUPPORTED               modelled, or provably irrelevant to selection
+    UNSUPPORTED_TARGETING   changes WHICH target the condition is about
+    UNRECOGNISED            never seen at this pinned commit; fails closed
+
+`cycle_targets` and `target_if` are recognised and REFUSED. Recognising them is
+what turns a silent misreading into an explicit UNKNOWN.
+
+### The one target-independent exception
+
+`action_t::ready()` re-runs `action_ready()` per candidate target
+(`action.cpp:2463-2488`). A top-level conjunct built entirely from PLAYER_SCOPED
+atoms therefore has the same value for every candidate — so a FALSE one makes the
+whole condition FALSE for all of them, the cycle loop finds none ready, and the
+entry cannot select. No target is enumerated to establish that.
+
+This is why atoms carry a SCOPE alongside their shape. `target_if` is NOT routed
+through the rule: it SCORES candidates and retargets the action, which changes
+what every later atom in the scan reads, and one conjunct cannot settle that.
+
+## Self-Addressing Atoms Need an Acting Action
+
+`remains`, `refreshable` and `pmultiplier` are written bare and mean "the ACTING
+action's own DoT". Until M5-D1 the bindings carried ONE scalar remainder, so the
+moment `core_dot[3]` — which is Rupture — became parseable it would have been
+answered with Garrote's remaining time. Both are plausible numbers of seconds and
+nothing would have looked wrong.
+
+Those bindings are now KEYED BY ACTION TOKEN and read through an
+`ExpressionContext`. A caller that supplies no context, or an action nobody
+bound, gets UNKNOWN — never another action's value.
+
+## One Charge Is the Ordinary Case Wearing a Different Hat
+
+SimulationCraft branches on the CHARGE COOLDOWN, not the charge count
+(`action.cpp:710-724`), and `cooldown_t` is constructed with `charges( 1 )`
+(`cooldown_impl.cpp:101`). A charge system with `charges == 1` therefore sets the
+count to the value it already had: it is arithmetically identical to an ordinary
+cooldown whose duration is the CHARGE cooldown.
+
+That equivalence — and only that one — is supported. `charges >= 2` still returns
+UNKNOWN, because "remaining" stops being one number when an ability is usable NOW
+and recharging at the same time.
+
+Note WHICH field becomes the duration. For a charge ability the nominal
+`_cooldown` is demoted to an internal cooldown; Vanish carries `_cooldown` 1000
+and `_charge_cooldown` 120000, so reading the nominal field would claim a
+one-second recharge for a two-minute ability.
+
+## NON_GCD Gate Irrelevance
+
+The highest-risk primitive in M5-D1, and the most constrained.
+
+The default for an unparseable player-action condition is to BLOCK. For a NON_GCD
+entry whose execution is provably inert, both worlds converge — it fires and the
+scan restarts, or it does not and the scan continues — so refusing to explore
+either is refusing to answer a question the evidence settles.
+
+A caller may claim gate irrelevance only with evidence establishing ALL of:
+
+1. the action is NON_GCD
+2. applicability is known
+3. a reviewed transition contract exists
+4. `timeAdvanceMs === 0`
+5. a named progress mechanism prevents infinite re-fire
+6. every state the execution writes is reviewed
+7. none of those writes is read on the path to the answer
+
+It claims the gate is UNREAD, never that the gate is TRUE. The step keeps its
+`UNSUPPORTED` condition verbatim and the candidate it contributes is never
+`definite`.
+
+**It can never apply to a GCD-consuming action.** For those the two worlds do not
+converge at all, because "it fires" IS the answer. That is guarded twice:
+`GateIrrelevanceEvidence` types its lane as the single literal `"NON_GCD"`, and
+`firstGcdSelectionAcrossRescans` refuses a GCD candidate whose recorded gate is
+`UNSUPPORTED` with its own blocker.
+
+## `refreshable` Is One-Sided
+
+A reader who knows the game will expect the 30 % pandemic rule. That is NOT what
+pinned SimulationCraft evaluates for a Rogue DoT. The Rogue module never assigns
+`dot_behavior`, so every Rogue DoT keeps `action_t`'s default
+`DOT_REFRESH_DURATION` (`action.cpp:419`), whose predicate is
+`dot->ticks_left() <= 1` (`action.cpp:4627-4628`, `dot.hpp:88`).
+
+    TRUE     the DoT is proven NOT ticking (dot.cpp:462-466)
+    FALSE    remains > baseTickPeriod, so at least two ticks remain
+    UNKNOWN  ticking, and within one base tick
+
+The FALSE direction is sound because haste and `1 / exsanguinated_rate` only ever
+SHORTEN the tick period, making the base period an upper bound. Proving TRUE for
+a ticking DoT would need a LOWER bound, which needs haste — so the middle stays
+UNKNOWN rather than being guessed.
+
+## Exact Entry Versus Converged Token
+
+Two claims, kept apart:
+
+    SELECTED         this authority ENTRY was selected. A consumer may quote its
+                     list, ordinal, verbatim string and control-flow path.
+    TOKEN_CONVERGED  this ACTION was selected, from one of these entries. The
+                     entry is unresolved and there is NO field a consumer could
+                     read as one.
+
+The pinned `spend` list makes the distinction real: at maximum combo points
+`spend[0]` might fire and `spend[1]` definitely does, and both are Envenom.
+M5-B's scoped walk has always converged on the token, so this is not a new
+epistemic standard — it is that standard becoming expressible in the nested and
+first-GCD engines, which previously had to collapse it into a refusal.
+
+`SELECTED` and `ROTATIONAL_GCD_SELECTED` still require entry unanimity. Token
+convergence additionally requires that every terminal genuinely selects an
+action: a world that returns nothing, or one that refuses, collapses the claim.
+
+## A Ready Major Cooldown Is Still Not Selectable
+
+M5-D1 adds Deathmark and Vanish cooldown authority, which lets those entries be
+ELIMINATED on readiness far more often. It does not make them SELECTABLE.
+
+`cds[0]` and `cds[4]` both end in `(target.time_to_die>10|fight_remains<20)`.
+Both atoms are PREDICTIVE and permanently unbindable, so that disjunction is
+UNKNOWN on every branch and neither entry can ever resolve TRUE. A ready-Deathmark
+world therefore still returns UNKNOWN, and that is the desired outcome rather
+than a gap to close.
+
+## Analyzer Coverage Is Not Report Coverage
+
+`tests/contracts/m5d1-authority-coverage.test.ts` pins how much of the AUTHORITY
+this build supports: the reachable lists, the player-action tokens, the execution
+lanes, the supported and refused expression families, the action-option
+classification, and the transition-contracted actions. Every set is exhaustive,
+so a pinned APL that gains a list, an action, an expression family or an option
+FAILS THE BUILD rather than being silently ignored.
+
+That is deliberately NOT the coverage of an analysed report — how much of one
+player's fight was evaluable, and how confident the result was. That is a
+player-facing disclosure and belongs to M5-E.
+
+## M5-D1 Versus M5-D2
+
+M5-D1 is INFRASTRUCTURE. It adds primitives and proves each one in isolation and
+against the existing committed fixtures. It deliberately does NOT capture the
+wider actor-19 slice or add the representative decision corpus.
+
+M5-D2 owns the corpus: a small set of real decisions — stealth Garrote without
+the observed-cast crutch, DoT maintenance, a spender, a major-cooldown refusal,
+and at least one deliberate UNKNOWN — captured from a window wide enough to carry
+the cooldown anchors those decisions need.
+
+---
+
 # Milestone 6 — MCP Interface
 
 Expose the existing analysis capability over MCP.

@@ -74,7 +74,16 @@ import { resolveApplicability, resolveUsability } from "./action-profile.js";
 import { narrowToRotationalSlot } from "./rotational-slot.js";
 import { acceptExactPreCost, adaptComboPoints, adaptEnergyPct } from "./envenom-decision.js";
 import { bindStealthedRogue } from "./stealth-state.js";
-import { bindGarroteRemains } from "./garrote-dot-state.js";
+import {
+  deriveSupportedDotStates,
+  dotRemainsBindingsFrom,
+  type DerivedDotState,
+} from "./dot-remains-state.js";
+import {
+  deriveRefreshableStates,
+  refreshableBindingsFrom,
+  type DerivedRefreshableState,
+} from "./dot-refreshable.js";
 import { cooldownBindingsFrom, deriveSupportedCooldowns, type DerivedCooldown } from "./cooldown-bindings.js";
 import { tryAbilityIdentityFor } from "../../../data/game/rogue-abilities.js";
 
@@ -129,6 +138,10 @@ export type RotationalTraversal =
       readonly bindings: AtomBindings;
       /** Cooldown derivations, including any that came back UNKNOWN. */
       readonly derivedCooldowns: readonly DerivedCooldown[];
+      /** Per-action DoT derivations, including any that came back UNKNOWN. */
+      readonly derivedDotStates: readonly DerivedDotState[];
+      /** Per-action `refreshable` verdicts, including any that came back UNKNOWN. */
+      readonly derivedRefreshableStates: readonly DerivedRefreshableState[];
       /** False when combo points could not be observed. Never silently true. */
       readonly comboPointsEstablished: boolean;
     }
@@ -154,6 +167,10 @@ export interface RotationalBindings {
   readonly bindings: AtomBindings;
   /** Cooldown derivations, including any that came back UNKNOWN. */
   readonly derivedCooldowns: readonly DerivedCooldown[];
+  /** Per-action DoT derivations, including any that came back UNKNOWN. */
+  readonly derivedDotStates: readonly DerivedDotState[];
+  /** Per-action `refreshable` verdicts, including any that came back UNKNOWN. */
+  readonly derivedRefreshableStates: readonly DerivedRefreshableState[];
   /** False when combo points could not be observed. Never silently true. */
   readonly comboPointsEstablished: boolean;
 }
@@ -189,15 +206,17 @@ export function rotationalBindingsAt(input: RotationalTraversalInput): Rotationa
   // zero that reads as "ready now".
   const derivedCooldowns = deriveSupportedCooldowns({ state, actorId, position });
 
-  // ---- the two derived facts M5-C2 and M5-C3a established ----
+  // ---- the derived facts M5-C2, M5-C3a and M5-D1 established ----
   const stealthedRogue = bindStealthedRogue({ state, actorId, position });
-  const garroteRemains = bindGarroteRemains({
+  const dotStates = deriveSupportedDotStates({
     state,
     actorId,
     targetActorId,
     targetInstance: input.targetInstance ?? null,
     position,
+    comboPointWireType: input.comboPointWireType,
   });
+  const refreshableStates = deriveRefreshableStates(dotStates);
 
   // ---- bindings: only what is POSITIVELY established ----
   //
@@ -211,10 +230,13 @@ export function rotationalBindingsAt(input: RotationalTraversalInput): Rotationa
     comboPointsDeficit:
       combo === null ? unknownNumber("STATE_NOT_ESTABLISHED") : knownNumber(combo.state.derivedDeficit),
     energyPct,
-    dotRemainsSeconds:
-      garroteRemains.state === "KNOWN"
-        ? knownNumber(garroteRemains.remainsSeconds)
-        : unknownNumber("STATE_NOT_ESTABLISHED"),
+    // KEYED BY ACTION TOKEN since M5-D1, and this is the site the keying was
+    // introduced for. One scalar here meant `core_dot[3]`'s Rupture `remains`
+    // would have read Garrote's number the moment that line became parseable.
+    dotRemainsSecondsByAction: dotRemainsBindingsFrom(dotStates),
+    // Also keyed by action, and also one-sided: only a PROVEN `refreshable`
+    // appears here. An undecided one is omitted so its atom is enumerated.
+    dotRefreshableByAction: refreshableBindingsFrom(refreshableStates),
     knownBuffs: [],
     knownTalents: input.knownTalents,
     knownCooldownRemainsSeconds: cooldownBindingsFrom(derivedCooldowns),
@@ -223,7 +245,13 @@ export function rotationalBindingsAt(input: RotationalTraversalInput): Rotationa
     ...(stealthedRogue.value === "TRUE" ? { stealthedRogue: true as const } : {}),
   };
 
-  return { bindings, derivedCooldowns, comboPointsEstablished: combo !== null };
+  return {
+    bindings,
+    derivedCooldowns,
+    derivedDotStates: dotStates,
+    derivedRefreshableStates: refreshableStates,
+    comboPointsEstablished: combo !== null,
+  };
 }
 
 /**
@@ -234,7 +262,7 @@ export function rotationalBindingsAt(input: RotationalTraversalInput): Rotationa
  * was fine.
  */
 export function traverseRotationalAuthority(input: RotationalTraversalInput): RotationalTraversal {
-  const { state, actorId, position, authority } = input;
+  const { state, actorId, targetActorId, position, authority } = input;
 
   if (authority === null) {
     return {
@@ -265,7 +293,8 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
       "occupying the rotational GCD slot. This is NOT a claim that those entries do not fire.",
   };
 
-  const { bindings, derivedCooldowns, comboPointsEstablished } = rotationalBindingsAt(input);
+  const { bindings, derivedCooldowns, derivedDotStates, derivedRefreshableStates, comboPointsEstablished } =
+    rotationalBindingsAt(input);
 
   // ---- applicability and usability ----
   //
@@ -287,7 +316,12 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
     return unknownUsability();
   };
 
-  const profileInput = profile === undefined ? null : { state, actorId, position, profile };
+  const profileInput =
+    profile === undefined
+      ? null
+      : // The enemy the decision is about, so M5-D1's in-combat stealth proof has a
+        // target to look for this player's debuff on.
+        { state, actorId, position, profile, engagementTargetActorId: targetActorId };
 
   const usabilityFor = (action: AplAction): ActionUsabilityVerdict =>
     profileInput === null
@@ -313,6 +347,8 @@ export function traverseRotationalAuthority(input: RotationalTraversalInput): Ro
     boundary,
     bindings,
     derivedCooldowns,
+    derivedDotStates,
+    derivedRefreshableStates,
     comboPointsEstablished,
   };
 }

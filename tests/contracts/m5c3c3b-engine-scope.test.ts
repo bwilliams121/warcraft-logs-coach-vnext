@@ -147,7 +147,7 @@ describe("the two queries keep separate vocabularies", () => {
     expect(overlap).toEqual([]);
   });
 
-  it("admits exactly the seven rescan blockers", () => {
+  it("admits exactly the eight rescan blockers", () => {
     expect([...ROTATIONAL_GCD_BLOCKERS]).toEqual([
       "ONE_SCAN_BLOCKED",
       "UNKNOWN_EXECUTION_LANE",
@@ -156,6 +156,10 @@ describe("the two queries keep separate vocabularies", () => {
       "UNSUPPORTED_TIME_ADVANCE",
       "NO_PROGRESS_CYCLE",
       "DIVERGENT_GCD_OUTCOMES",
+      // M5-D1. The structural half of the gate-irrelevance guard: a
+      // GCD-consuming candidate whose condition was never read can never be the
+      // answer, whatever a resolver claims about it.
+      "UNREAD_CONDITION_ON_GCD_ACTION",
     ]);
   });
 

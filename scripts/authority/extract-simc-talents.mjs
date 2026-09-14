@@ -94,6 +94,22 @@ const REQUIRED_TALENTS = [
     binding:
       'sc_rogue.cpp:10039 talent.assassination.improved_garrote = find_talent_spell( talent_tree::SPECIALIZATION, "Improved Garrote" )',
   },
+  {
+    // M5-D1. Needed by `core_dot[2]` and `core_dot[4]`, the two `cycle_targets`
+    // entries, which both open with `!talent.crimson_tempest`. That conjunct is
+    // a static build fact and therefore has the same value for every candidate
+    // target — which is what lets a Crimson Tempest build eliminate both cycling
+    // entries without this project enumerating a single enemy.
+    //
+    // The talent is resolved; the ACTION is not. Crimson Tempest's own rotational
+    // entry sits in `generate`, is gated on `spell_targets.fan_of_knives`, and
+    // stays out of scope.
+    simcName: "crimson_tempest",
+    displayNameEn: "Crimson Tempest",
+    tree: "SPECIALIZATION",
+    binding:
+      'sc_rogue.cpp:10030 talent.assassination.crimson_tempest = find_talent_spell( talent_tree::SPECIALIZATION, "Crimson Tempest" )',
+  },
 ];
 
 function fail(message) {

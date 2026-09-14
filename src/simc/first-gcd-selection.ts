@@ -130,7 +130,22 @@ export type RotationalGcdBlocker =
   /** The same abstract state was reached again before any GCD was selected. */
   | "NO_PROGRESS_CYCLE"
   /** Supported worlds disagree about which authority entry fires first. */
-  | "DIVERGENT_GCD_OUTCOMES";
+  | "DIVERGENT_GCD_OUTCOMES"
+  /**
+   * A GCD-consuming candidate arrived with a condition nobody read (M5-D1).
+   *
+   * THE STRUCTURAL HALF OF THE GATE-IRRELEVANCE GUARD. `GateIrrelevanceEvidence`
+   * types its lane as the single literal `"NON_GCD"`, so a GCD action cannot be
+   * DESCRIBED as gate-irrelevant — but a type is a compile-time promise, and the
+   * failure it prevents is severe enough to be worth a runtime one too.
+   *
+   * For a NON_GCD entry the two worlds converge: it fires and the scan restarts,
+   * or it does not and the scan continues. For a GCD entry they do not converge
+   * at all, because "it fires" IS the answer this query returns. Reporting one
+   * would be a confident first-GCD selection resting on a condition that was
+   * never evaluated.
+   */
+  | "UNREAD_CONDITION_ON_GCD_ACTION";
 
 export const ROTATIONAL_GCD_BLOCKERS = [
   "ONE_SCAN_BLOCKED",
@@ -140,6 +155,7 @@ export const ROTATIONAL_GCD_BLOCKERS = [
   "UNSUPPORTED_TIME_ADVANCE",
   "NO_PROGRESS_CYCLE",
   "DIVERGENT_GCD_OUTCOMES",
+  "UNREAD_CONDITION_ON_GCD_ACTION",
 ] as const satisfies readonly RotationalGcdBlocker[];
 
 /**
@@ -204,6 +220,28 @@ export type RotationalGcdResult =
       readonly trace: RotationalTraceNode;
     }
   | {
+      /**
+       * Every supported world reaches the same first GCD-consuming ACTION, from
+       * DIFFERENT authority entries (M5-D1).
+       *
+       * THE WEAKER SIBLING OF `ROTATIONAL_GCD_SELECTED`, and a separate member so
+       * it can never be read as the stronger one. That result names a concrete
+       * entry and a consumer may quote its path; this one establishes only the
+       * token, because the pinned `spend` list genuinely can select Envenom from
+       * either of two lines and nothing here decides which.
+       *
+       * `selectingEntry` and `selectingStep` are ABSENT rather than filled with
+       * a representative, because a representative would be a provenance only
+       * one world supports.
+       */
+      readonly kind: "ROTATIONAL_GCD_TOKEN_CONVERGED";
+      readonly actionToken: string;
+      /** Every entry that might be the one. The exact one is NOT established. */
+      readonly candidateSteps: readonly TraversalStep[];
+      readonly nonGcdPrefix: NonGcdPrefixSummary;
+      readonly trace: RotationalTraceNode;
+    }
+  | {
       /** Every world proves the foreground scan returns nothing at all. */
       readonly kind: "NO_ROTATIONAL_GCD_SELECTED";
       readonly trace: RotationalTraceNode;
@@ -231,6 +269,34 @@ export function convergeRotationalResults(results: readonly RotationalGcdResult[
 
   const refused = results.find((result) => result.kind === "ROTATIONAL_GCD_UNKNOWN");
   if (refused !== undefined) return refused;
+
+  // THE SAME RULE `convergeBranches` applies inside one world, applied across
+  // worlds: entry unanimity gives the exact answer, token unanimity gives the
+  // weaker one, and anything less is a refusal.
+  //
+  // Two cases route here. A world that is ALREADY token-convergent can never be
+  // strengthened by its neighbours, and two entry-exact worlds that name the
+  // same action from different entries are exactly the situation the weaker
+  // member exists for.
+  const anyTokenConverged = results.some((result) => result.kind === "ROTATIONAL_GCD_TOKEN_CONVERGED");
+  const entrySelected = results.filter((result) => result.kind === "ROTATIONAL_GCD_SELECTED");
+  const entriesDisagree =
+    entrySelected.length === results.length &&
+    entrySelected.length > 1 &&
+    !entrySelected.every(
+      (result) =>
+        result.kind === "ROTATIONAL_GCD_SELECTED" &&
+        entrySelected[0]?.kind === "ROTATIONAL_GCD_SELECTED" &&
+        sameTerminalIdentity(
+          entrySelected[0].selectingStep,
+          result.selectingStep,
+          entrySelected[0].actionToken,
+          result.actionToken,
+        ),
+    );
+  if (anyTokenConverged || entriesDisagree) {
+    return convergeAcrossTokenWorlds(results, first);
+  }
 
   const selected = results.filter((result) => result.kind === "ROTATIONAL_GCD_SELECTED");
   if (selected.length === 0) {
@@ -281,6 +347,81 @@ export function convergeRotationalResults(results: readonly RotationalGcdResult[
   }
 
   return { ...head, nonGcdPrefix: prefix };
+}
+
+/**
+ * Converges worlds when at least one is only token-convergent.
+ *
+ * The result can never be stronger than the weakest world, so this returns the
+ * TOKEN_CONVERGED member whenever every world agrees on the token, and UNKNOWN
+ * otherwise. A world that returns nothing at all still contradicts the claim
+ * outright and collapses it.
+ */
+function convergeAcrossTokenWorlds(
+  results: readonly RotationalGcdResult[],
+  first: RotationalGcdResult,
+): RotationalGcdResult {
+  const tokens = new Set<string>();
+  const steps: TraversalStep[] = [];
+  let prefix: NonGcdPrefixSummary | null = null;
+
+  for (const result of results) {
+    if (result.kind === "ROTATIONAL_GCD_SELECTED") {
+      tokens.add(result.actionToken);
+      steps.push(result.selectingStep);
+      prefix = prefix === null ? result.nonGcdPrefix : mergeSummaries(prefix, result.nonGcdPrefix);
+      continue;
+    }
+    if (result.kind === "ROTATIONAL_GCD_TOKEN_CONVERGED") {
+      tokens.add(result.actionToken);
+      steps.push(...result.candidateSteps);
+      prefix = prefix === null ? result.nonGcdPrefix : mergeSummaries(prefix, result.nonGcdPrefix);
+      continue;
+    }
+    // NO_ROTATIONAL_GCD_SELECTED. A world where nothing fires is a world where
+    // the claimed action did not fire first, which contradicts the claim.
+    return {
+      kind: "ROTATIONAL_GCD_UNKNOWN",
+      blocker: "DIVERGENT_GCD_OUTCOMES",
+      scanBlocker: null,
+      blockedAt: null,
+      detail:
+        "some explored worlds select a first GCD action and others prove the scan returns nothing, so " +
+        "there is no action every world agrees fires first",
+      trace: first.trace,
+    };
+  }
+
+  const token = [...tokens][0];
+  if (tokens.size !== 1 || token === undefined || prefix === null) {
+    return {
+      kind: "ROTATIONAL_GCD_UNKNOWN",
+      blocker: "DIVERGENT_GCD_OUTCOMES",
+      scanBlocker: null,
+      blockedAt: steps[0] ?? null,
+      detail: `explored worlds select different first GCD actions: ${[...tokens].join(", ")}`,
+      trace: first.trace,
+    };
+  }
+
+  // Duplicate entries across worlds are collapsed: the same line reached in two
+  // race worlds is one candidate, not two.
+  const unique: TraversalStep[] = [];
+  for (const step of steps) {
+    const key = `${step.listName}[${String(step.priorityOrdinal)}]@${String(step.sourceLine)}`;
+    if (unique.some((s) => `${s.listName}[${String(s.priorityOrdinal)}]@${String(s.sourceLine)}` === key)) {
+      continue;
+    }
+    unique.push(step);
+  }
+
+  return {
+    kind: "ROTATIONAL_GCD_TOKEN_CONVERGED",
+    actionToken: token,
+    candidateSteps: unique,
+    nonGcdPrefix: prefix,
+    trace: first.trace,
+  };
 }
 
 function candidateEntryOfStep(step: TraversalStep, actionToken: string): TraversalPathEntry {
@@ -379,6 +520,14 @@ type BranchResult =
       readonly prefix: PrefixFacts;
       readonly trace: RotationalTraceNode;
     }
+  | {
+      /** Same token, different entries. See `ROTATIONAL_GCD_TOKEN_CONVERGED`. */
+      readonly kind: "TOKEN_CONVERGED";
+      readonly actionToken: string;
+      readonly steps: readonly TraversalStep[];
+      readonly prefix: PrefixFacts;
+      readonly trace: RotationalTraceNode;
+    }
   | { readonly kind: "NO_ACTION"; readonly trace: RotationalTraceNode }
   | {
       readonly kind: "UNKNOWN";
@@ -417,6 +566,8 @@ function shortOutcome(result: BranchResult): string {
   switch (result.kind) {
     case "SELECTED":
       return `SELECTED ${entryKey({ listName: result.step.listName, priorityOrdinal: result.step.priorityOrdinal, actionToken: result.actionToken })}`;
+    case "TOKEN_CONVERGED":
+      return `TOKEN_CONVERGED ${result.actionToken} over ${String(result.steps.length)} entries`;
     case "NO_ACTION":
       return "NO_ACTION";
     case "UNKNOWN":
@@ -444,18 +595,27 @@ function convergeBranches(results: readonly BranchResult[], trace: RotationalTra
     return { ...firstUnknown, trace };
   }
 
-  const selected = results.filter((result) => result.kind === "SELECTED");
-  if (selected.length === 0) {
+  // BOTH terminal kinds count as "an action fires". A branch that is already
+  // token-convergent is a weaker answer, not a refusal, and mixing it with an
+  // entry-exact one can only ever produce the weaker of the two.
+  const terminals = results.filter(
+    (result) => result.kind === "SELECTED" || result.kind === "TOKEN_CONVERGED",
+  );
+  if (terminals.length === 0) {
     // Every world proves the scan returns nothing. That is an answer, not a gap.
     return { kind: "NO_ACTION", trace };
   }
 
-  if (selected.length !== results.length) {
+  const firstTerminal = terminals[0];
+  if (firstTerminal === undefined) return { kind: "NO_ACTION", trace };
+  const anchorStep = firstTerminal.kind === "SELECTED" ? firstTerminal.step : firstTerminal.steps[0];
+
+  if (terminals.length !== results.length) {
     return {
       kind: "UNKNOWN",
       blocker: "DIVERGENT_GCD_OUTCOMES",
       scanBlocker: null,
-      blockedAt: selected[0]?.kind === "SELECTED" ? selected[0].step : null,
+      blockedAt: anchorStep ?? null,
       detail:
         "some supported worlds select a first GCD action and others prove the scan returns nothing, so " +
         "there is no action every world agrees fires first",
@@ -463,27 +623,61 @@ function convergeBranches(results: readonly BranchResult[], trace: RotationalTra
     };
   }
 
-  const first = selected[0];
-  if (first?.kind !== "SELECTED") return { kind: "NO_ACTION", trace };
-  for (const candidate of selected) {
-    if (candidate.kind !== "SELECTED") continue;
-    if (sameTerminalIdentity(first.step, candidate.step, first.actionToken, candidate.actionToken)) continue;
+  // A DIFFERENT TOKEN establishes nothing at all, and is checked before the
+  // weaker claim is even considered.
+  for (const candidate of terminals) {
+    if (candidate.actionToken === firstTerminal.actionToken) continue;
     return {
       kind: "UNKNOWN",
       blocker: "DIVERGENT_GCD_OUTCOMES",
       scanBlocker: null,
-      blockedAt: first.step,
-      detail: `supported worlds select different first GCD entries: ${shortOutcome(first)} and ${shortOutcome(candidate)}`,
+      blockedAt: anchorStep ?? null,
+      detail: `supported worlds select different first GCD entries: ${shortOutcome(firstTerminal)} and ${shortOutcome(candidate)}`,
       trace,
     };
   }
 
-  let prefix = first.prefix;
-  for (const candidate of selected.slice(1)) {
-    if (candidate.kind !== "SELECTED") continue;
-    prefix = mergePrefixes(prefix, candidate.prefix);
+  let prefix = firstTerminal.prefix;
+  for (const candidate of terminals.slice(1)) prefix = mergePrefixes(prefix, candidate.prefix);
+
+  // Entry unanimity gives the exact answer. Every world must be entry-exact AND
+  // name the same entry; one token-convergent world is enough to weaken the lot.
+  const entriesAgree = terminals.every(
+    (candidate) =>
+      candidate.kind === "SELECTED" &&
+      firstTerminal.kind === "SELECTED" &&
+      sameTerminalIdentity(
+        firstTerminal.step,
+        candidate.step,
+        firstTerminal.actionToken,
+        candidate.actionToken,
+      ),
+  );
+  if (entriesAgree && firstTerminal.kind === "SELECTED") {
+    return {
+      kind: "SELECTED",
+      actionToken: firstTerminal.actionToken,
+      step: firstTerminal.step,
+      prefix,
+      trace,
+    };
   }
-  return { kind: "SELECTED", actionToken: first.actionToken, step: first.step, prefix, trace };
+
+  // Same ACTION from different ENTRIES (M5-D1). Every terminal here is a
+  // GCD-consuming selection by construction — that is the only way
+  // `takeCandidate` produces one — so the lane requirement is satisfied without
+  // being re-checked. Duplicate entries reached in several branches collapse.
+  const steps: TraversalStep[] = [];
+  for (const candidate of terminals) {
+    for (const step of candidate.kind === "SELECTED" ? [candidate.step] : candidate.steps) {
+      const key = `${step.listName}[${String(step.priorityOrdinal)}]@${String(step.sourceLine)}`;
+      if (steps.some((s) => `${s.listName}[${String(s.priorityOrdinal)}]@${String(s.sourceLine)}` === key)) {
+        continue;
+      }
+      steps.push(step);
+    }
+  }
+  return { kind: "TOKEN_CONVERGED", actionToken: firstTerminal.actionToken, steps, prefix, trace };
 }
 
 function candidateEntry(candidate: ScanCandidate): TraversalPathEntry {
@@ -606,12 +800,18 @@ export function firstGcdSelectionAcrossRescans<TState>(
       return result;
     }
 
-    // ---- MAY_SELECT and AMBIGUOUS: several worlds ----
+    // ---- MAY_SELECT, TOKEN_CONVERGED and AMBIGUOUS: several worlds ----
     //
     // Candidates arrive in literal APL priority order and are explored in it.
-    // The ONLY difference between the two is whether a world exists in which
-    // nothing fires: `AMBIGUOUS` carries a candidate proven to fire, so it does
-    // not, and inventing one would manufacture a world the scan disproved.
+    // The ONLY difference between them is whether a world exists in which
+    // nothing fires: `AMBIGUOUS` and `TOKEN_CONVERGED` each carry a candidate
+    // proven to fire, so they do not, and inventing one would manufacture a
+    // world the scan disproved.
+    //
+    // `TOKEN_CONVERGED` needs no special handling HERE. Its candidates are
+    // explored exactly like any others, and the branch convergence below is
+    // where "same token, different entries" becomes an answer rather than a
+    // divergence.
     const branches: RotationalTraceBranch[] = [];
     const results: BranchResult[] = [];
 
@@ -692,6 +892,26 @@ export function firstGcdSelectionAcrossRescans<TState>(
     }
 
     if (lane === "GCD_CONSUMING") {
+      // THE STRUCTURAL GATE-IRRELEVANCE GUARD (M5-D1).
+      //
+      // A candidate whose condition was never read may only ever be a STEP
+      // towards the answer, never the answer. This engine is the only place that
+      // knows the lane, so it is the only place the check can be made — and it
+      // is made on the STEP's own recorded gate rather than on anything the
+      // caller passes, so no resolver can talk its way past it.
+      if (candidate.step.gate.kind === "UNSUPPORTED") {
+        return {
+          kind: "UNKNOWN",
+          blocker: "UNREAD_CONDITION_ON_GCD_ACTION",
+          scanBlocker: null,
+          blockedAt: candidate.step,
+          detail:
+            "a GCD-consuming candidate reached this query with a condition outside the supported subset. " +
+            "Selecting it would report a first rotational GCD resting on an expression nobody evaluated.",
+          trace: { ...emptyTrace, outcome: "UNKNOWN UNREAD_CONDITION_ON_GCD_ACTION" },
+        };
+      }
+
       // TERMINAL. The action is NOT executed and no transition is asked for: the
       // query ends at the SELECTION of the first GCD action, and everything
       // after it — including the OFF_GCD pass during its GCD — is out of scope.
@@ -760,11 +980,14 @@ export function firstGcdSelectionAcrossRescans<TState>(
 
   /** A memo entry holds the verdict; the prefix belongs to the path that asked. */
   function stripPrefix(result: BranchResult): BranchResult {
-    return result.kind === "SELECTED" ? { ...result, prefix: EMPTY_PREFIX } : result;
+    if (result.kind === "SELECTED" || result.kind === "TOKEN_CONVERGED") {
+      return { ...result, prefix: EMPTY_PREFIX };
+    }
+    return result;
   }
 
   function rebase(result: BranchResult, prefix: PrefixFacts): BranchResult {
-    if (result.kind !== "SELECTED") return result;
+    if (result.kind !== "SELECTED" && result.kind !== "TOKEN_CONVERGED") return result;
     return { ...result, prefix: mergePrefixes(prefix, result.prefix) };
   }
 
@@ -777,6 +1000,18 @@ export function firstGcdSelectionAcrossRescans<TState>(
         actionToken: explored.actionToken,
         selectingEntry: explored.step.path,
         selectingStep: explored.step,
+        nonGcdPrefix: {
+          possibleActions: explored.prefix.actions,
+          exactSequenceKnown: explored.prefix.uniqueSequence !== null,
+          sequence: explored.prefix.uniqueSequence,
+        },
+        trace: explored.trace,
+      };
+    case "TOKEN_CONVERGED":
+      return {
+        kind: "ROTATIONAL_GCD_TOKEN_CONVERGED",
+        actionToken: explored.actionToken,
+        candidateSteps: explored.steps,
         nonGcdPrefix: {
           possibleActions: explored.prefix.actions,
           exactSequenceKnown: explored.prefix.uniqueSequence !== null,

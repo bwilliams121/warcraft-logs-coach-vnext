@@ -238,10 +238,13 @@ export function evaluateDefaultAmbushGate(input: AmbushGateInput): AmbushGateRes
     comboPoints: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
     comboPointsDeficit: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
     energyPct: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
-    // This gate reconstructs no DoT state. Stated unknown rather than omitted:
-    // the binding is required precisely so a module that never established a
-    // remaining duration cannot silently present one.
-    dotRemainsSeconds: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
+    // This gate reconstructs no DoT state, so no action is keyed. Since M5-D1 the
+    // per-action map is what states that: an absent key resolves UNKNOWN_NUMBER,
+    // so a module that never established a remaining duration still cannot
+    // present one. An EMPTY LIST is the explicit form of "nothing established" —
+    // omitting the field entirely would mean the same thing, and writing it makes
+    // the claim visible.
+    dotRemainsSecondsByAction: [],
     knownBuffs: [],
     knownTalents,
     ...(stealthedRogue.value === "TRUE" ? { stealthedRogue: true } : {}),

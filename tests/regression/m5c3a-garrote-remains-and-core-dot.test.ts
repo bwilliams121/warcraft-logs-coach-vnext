@@ -26,14 +26,14 @@ import {
   M5C3A_EXPECTED_REMAINS_MS,
   M5C3A_EXPECTED_REMAINS_SECONDS,
 } from "../support/m5c3a-fixture.js";
-import { bindGarroteRemains } from "../../src/specs/rogue/assassination/garrote-dot-state.js";
+import { bindGarroteRemains } from "../../src/specs/rogue/assassination/dot-remains-state.js";
 import { bindStealthedRogue } from "../../src/specs/rogue/assassination/stealth-state.js";
 import {
   selectCoreDotActionAt,
   CORE_DOT_LIST_NAME,
 } from "../../src/specs/rogue/assassination/core-dot-selection.js";
 import { pinnedAssassinationAuthority } from "../../src/simc/pinned-authority.js";
-import { resolveTalentSelection } from "../../src/data/game/rogue-talents.js";
+import { resolveModelledTalents } from "../../src/data/game/rogue-talents.js";
 import { dotDurationForToken, pinnedRogueDotDurations } from "../../src/data/game/rogue-dot-durations.js";
 
 function authorityOrThrow() {
@@ -50,15 +50,16 @@ function pinnedRogueDotDurationsOrThrow() {
 }
 
 /** Talents resolved from the fixture's own `combatantinfo`. UNKNOWN ones are omitted. */
+/**
+ * Every MODELLED talent this actor's tree resolves, not a hand-picked list.
+ *
+ * Changed at M5-D1. A hand-listed set silently withholds a talent the artifact
+ * gained — `crimson_tempest` here — and withholding one is not neutral: it turns
+ * a decidable `!talent.crimson_tempest` back into an enumerated unknown and
+ * costs an elimination the log actually supports.
+ */
 function knownTalentsFrom(state: ReturnType<typeof m5c3aState>) {
-  const entries = observedTalentEntries(state);
-  return ["improved_garrote", "shrouded_suffocation", "blindside", "improved_ambush"]
-    .map((name) => resolveTalentSelection(entries, name))
-    .filter((resolution) => resolution.selection !== "UNKNOWN")
-    .map((resolution) => ({
-      name: resolution.simcName,
-      taken: resolution.selection === "SELECTED",
-    }));
+  return resolveModelledTalents(observedTalentEntries(state));
 }
 
 function selectAtQ() {
@@ -251,7 +252,10 @@ describe("the derivation refuses rather than approximating", () => {
     // The token must be the one the artifact carries. Nothing here falls back to
     // a default duration.
     expect(dotDurationForToken("garrote")).not.toBeNull();
-    expect(dotDurationForToken("rupture")).toBeNull();
+    // `rupture` joined the artifact at M5-D1, so the stand-in for "a real Rogue
+    // DoT this dataset deliberately does not carry" moves to Crimson Tempest —
+    // whose only rotational entry is target-count gated and out of scope.
+    expect(dotDurationForToken("crimson_tempest")).toBeNull();
     expect(dotDurationForToken("not_an_action")).toBeNull();
   });
 });
@@ -443,17 +447,30 @@ describe("negative: the selection is not manufactured", () => {
     expect(result.derivedState?.garroteRemains.state).toBe("UNKNOWN");
   });
 
-  it("does not select when usability is not proven, and hits the unsupported wall below", () => {
+  it("does not select when usability is not proven, and the walk continues below", () => {
     // A true condition alone would assert the ability was off cooldown, in
     // range, affordable and legal — none of which this project models. So with
-    // usability unproven, `core_dot[0]` is only POSSIBLE, the walk does NOT stop
-    // there, and it immediately reaches `core_dot[1]` — which needs `refreshable`
-    // and is refused whole.
+    // usability unproven, `core_dot[0]` is only POSSIBLE and the walk does NOT
+    // stop there.
     //
-    // That blocker is the sharper result, and it is worth stating plainly: the
-    // headline verdict exists ONLY because line 0 definitely fires. Everything
-    // below it is still unevaluable, so the exact answer cannot be coming from
-    // lines that were skipped or quietly treated as false.
+    // RE-BASELINED AT M5-D1, and what changed is worth stating precisely. Before
+    // D1 the walk hit `core_dot[1]` and was refused WHOLE, because `refreshable`
+    // and binary `-` were outside the subset. All four lines below entry 0 are
+    // now REACHED and three of them are ELIMINATED on real evidence:
+    //
+    //   [1] garrote            FALSE   `refreshable` is proven false: the
+    //                                  remainder is 5.746 s and one base tick is
+    //                                  2 s, so at least two ticks remain
+    //   [2] garrote cycle      FALSE   `!talent.crimson_tempest` is target-
+    //                                  INDEPENDENT and false for this build
+    //   [3] rupture            POSSIBLE Rupture's own state is unestablished
+    //   [4] rupture cycle      FALSE   same target-independent conjunct
+    //
+    // The headline verdict still exists ONLY because line 0 definitely fires
+    // when usability IS proven. What this case now shows is that the lines below
+    // are decided on evidence rather than stepped over — and that the one which
+    // cannot be decided is honestly POSSIBLE, which is what keeps the result
+    // UNKNOWN here.
     const state = m5c3aState();
     const result = selectCoreDotActionAt({
       state,
@@ -467,9 +484,29 @@ describe("negative: the selection is not manufactured", () => {
     });
     expect(result.status).toBe("UNKNOWN");
     if (result.status !== "UNKNOWN") return;
-    expect(result.blocker).toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");
-    expect(result.blockedBy?.priorityOrdinal).toBe(1);
+    // Two entries might fire — Garrote at 0 and Rupture at 3 — and neither is
+    // proven to, so there is no definite winner. Reporting a SELECTION here
+    // would be the overclaim this file exists to prevent.
+    expect(result.blocker).toBe("NO_DEFINITE_WINNER");
+    expect(result.blockedBy?.priorityOrdinal).toBe(0);
     expect(result.blockedBy?.listName).toBe(CORE_DOT_LIST_NAME);
+
+    const byOrdinal = new Map(result.lines.map((line) => [line.priorityOrdinal, line]));
+    expect(byOrdinal.get(0)?.outcome).toBe("POSSIBLE");
+    expect(byOrdinal.get(1)?.outcome).toBe("ELIMINATED");
+    expect(byOrdinal.get(2)?.outcome).toBe("ELIMINATED");
+    expect(byOrdinal.get(3)?.outcome).toBe("POSSIBLE");
+    expect(byOrdinal.get(4)?.outcome).toBe("ELIMINATED");
+
+    // The two cycling entries were eliminated WITHOUT their conditions being
+    // evaluated against the implicit target. That distinction is the whole point
+    // of the M5-D1 targeting refusal.
+    expect(byOrdinal.get(2)?.condition.kind).toBe("NOT_EVALUATED");
+    expect(byOrdinal.get(4)?.condition.kind).toBe("NOT_EVALUATED");
+
+    // And Rupture's line is POSSIBLE because ITS OWN state is unknown — never
+    // because it borrowed Garrote's 5.746 s remainder.
+    expect(byOrdinal.get(3)?.condition.kind).toBe("EVALUATED");
   });
 
   it("reports NO_AUTHORITY_AVAILABLE rather than UNKNOWN when there is no APL", () => {

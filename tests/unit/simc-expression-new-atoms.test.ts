@@ -36,7 +36,9 @@ const BINDINGS: AtomBindings = {
   comboPoints: knownNumber(7),
   comboPointsDeficit: unknownNumber("STATE_NOT_ESTABLISHED"),
   energyPct: unknownNumber("STATE_NOT_ESTABLISHED"),
-  dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+  // No action's own DoT is established here. An empty per-action map is the
+  // M5-D1 shape of that, and an unkeyed `remains` resolves UNKNOWN_NUMBER.
+  dotRemainsSecondsByAction: [],
   knownBuffs: [],
 };
 

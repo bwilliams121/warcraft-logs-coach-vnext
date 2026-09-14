@@ -21,7 +21,9 @@ const BINDINGS: AtomBindings = {
   comboPoints: knownNumber(7),
   comboPointsDeficit: knownNumber(0),
   energyPct: knownNumber(100),
-  dotRemainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED"),
+  // No action's own DoT is established here. An empty per-action map is the
+  // M5-D1 shape of that, and an unkeyed `remains` resolves UNKNOWN_NUMBER.
+  dotRemainsSecondsByAction: [],
   knownBuffs: [],
 };
 
@@ -139,11 +141,12 @@ describe("convergence: an uncertain higher line does not block an identical toke
 });
 
 /**
- * RE-POINTED for M5-C3a. These cases used `pmultiplier`, which C2 had in turn
- * taken over from `talent.darkest_night`. Bare `pmultiplier` is recognised
- * syntax now, so they use `refreshable` instead — a real identifier from the
- * pinned `core_dot` list (entries 1 through 4, verbatim) that remains outside
- * the subset because this project has no pandemic-window model.
+ * RE-POINTED for M5-D1. These cases used `refreshable`, which C3a had in turn
+ * taken over from `pmultiplier` and C2 from `talent.darkest_night`. M5-D1 makes
+ * `refreshable` a recognised atom, so they now use `active_dot.<name>` — a real
+ * identifier from the pinned `generate[0]` line, verbatim, which counts DoTs
+ * across the whole enemy list and is therefore part of the target-count family
+ * M5-D deliberately does not support.
  *
  * The point of re-pointing rather than deleting: the fail-closed guarantee is
  * about what the walk does with an UNPARSEABLE line, and that guarantee is
@@ -151,7 +154,7 @@ describe("convergence: an uncertain higher line does not block an identical toke
  */
 describe("unsupported syntax stops the walk immediately", () => {
   it("blocks rather than skipping the line", () => {
-    const result = selectIn(["envenom,if=refreshable", "envenom,if=energy.pct>70"], ["envenom"]);
+    const result = selectIn(["envenom,if=active_dot.garrote>1", "envenom,if=energy.pct>70"], ["envenom"]);
     expect(result.kind).toBe("INDETERMINATE");
     if (result.kind !== "INDETERMINATE") return;
     expect(result.blocker).toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");
@@ -171,7 +174,7 @@ describe("unsupported syntax stops the walk immediately", () => {
   });
 
   it("records the refused line with no truth value", () => {
-    const result = selectIn(["envenom,if=refreshable"], ["envenom"]);
+    const result = selectIn(["envenom,if=active_dot.garrote>1"], ["envenom"]);
     if (result.kind !== "INDETERMINATE") return;
     expect(result.lines[0]?.condition.kind).toBe("UNSUPPORTED");
     expect(result.lines[0]?.condition).not.toHaveProperty("truth");
@@ -209,7 +212,7 @@ describe("NO_ACTION_SELECTED is exact, and hard to reach", () => {
   });
 
   it("is NOT produced when the only surviving line was unparseable", () => {
-    const result = selectIn(["envenom,if=refreshable"], ["envenom"]);
+    const result = selectIn(["envenom,if=active_dot.garrote>1"], ["envenom"]);
     expect(result.kind).not.toBe("NO_ACTION_SELECTED");
   });
 });
