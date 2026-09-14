@@ -4636,10 +4636,123 @@ M5-D1 is INFRASTRUCTURE. It adds primitives and proves each one in isolation and
 against the existing committed fixtures. It deliberately does NOT capture the
 wider actor-19 slice or add the representative decision corpus.
 
-M5-D2 owns the corpus: a small set of real decisions — stealth Garrote without
-the observed-cast crutch, DoT maintenance, a spender, a major-cooldown refusal,
-and at least one deliberate UNKNOWN — captured from a window wide enough to carry
-the cooldown anchors those decisions need.
+M5-D2 owns the corpus: seven real decisions from one real pull, on a committed
+slice wide enough to carry the cooldown and DoT anchors they need.
+
+---
+
+# Milestone 5-D2 — What M5 Actually Does
+
+## The Capability Is Authority VERIFICATION, Not Next-Action Prediction
+
+State this before anything else, because the two are easy to confuse and only
+one of them is true.
+
+    M5 can answer:      the player cast X here. What does the pinned
+                        SimulationCraft authority select at this moment, and can
+                        we name the exact entry?
+
+    M5 cannot answer:   it is 14:32 into the fight. What should the player press
+                        next?
+
+The difference is USABILITY. `action_t::ready()` guards every selection with
+`cooldown->is_ready()`, `cost_affordable()` and `player->is_moving() &&
+!usable_moving()`. This project has exactly ONE positive proof that all three
+held — the observed execution. An action that demonstrably fired demonstrably
+was ready, affordable and not movement-blocked.
+
+At a position where the action was NOT cast there is nothing to prove it with,
+and each guard is independently out of reach:
+
+- **Cooldown.** `cooldown_t::start` adds a delay sampled from
+  `player->world_lag`, a `truncated_gauss_t` whose `max` is left at the
+  no-maximum sentinel and never assigned (`sim.cpp:1430`, `rng.hpp:50`). The
+  delay is unbounded above, so elapsed time never proves a cooldown finished.
+  `CooldownState` says so in its own comment: there is deliberately no upper
+  bound field.
+- **Cost.** Energy is exact only ON an observation, and M4-C1 forbids replaying
+  regeneration between observations.
+- **Movement.** Garrote's `_max_range` is 5.0 (`sc_spell_data.inc`), so
+  `usable_moving()` returns false (`action.cpp:2389`) and the guard reduces to
+  bare `is_moving()` — which CLAUDE.md records has no Warcraft Logs stream.
+
+So `resolveUsability` has two `PROVEN_USABLE` return sites and both are the
+observed cast; `usabilityFromCooldown` returns `PROVEN_UNUSABLE` or UNKNOWN and
+never the positive. That is a deliberate M5-C3c1 design decision, not a gap.
+
+**Corpus case 2 measures exactly this boundary** and is the reason it is written
+down. At a real position between a real Vanish and a real Garrote, with the
+observation suppressed, `core_dot[0]`'s condition resolves TRUE on real state —
+every D1 primitive does its work — and the decision still cannot be named.
+
+Closing this would need a positive cooldown-readiness member, bounded Energy
+carry-forward AND a movement policy. Three separate epistemic decisions, one of
+which contradicts a standing rule. None is in M5.
+
+## Measured Coverage of the Real Corpus
+
+Seven real decisions, chosen mechanically from the full-fight cast census:
+
+    EXACT_ENTRY       1     case 1, the observed Garrote at Q
+    TOKEN_CONVERGED   0
+    NO_ACTION         0
+    UNKNOWN           6
+
+The six refusals are not one problem. `src/specs/rogue/assassination/
+decision-coverage.ts` classifies them, and the split matters because it tells a
+reader which gaps can ever close:
+
+    OBSERVED_STATE_MISSING   4   an evidence gap; a binding or capture may close it
+    DIVERGENT_WORLDS         2   real ambiguity, not missing data
+
+Two of the seven cases are decisions the player DID make and the analyzer still
+declines to evaluate — a Deathmark gated on `target.time_to_die|fight_remains`,
+and a Fan of Knives gated on `spell_targets.fan_of_knives`. Observing a cast
+proves the action was usable. It never reveals a target count and never reveals
+the future.
+
+Cases 3, 4 and 5 are worth reading closely, because they show the priority rule
+doing unglamorous work. In cases 3 and 4 the one-scan reaches `spend[1] envenom
+SELECTED` — the spender question is fully resolved — and the answer is still
+UNKNOWN, because `core_dot[0]` Garrote sits AHEAD of it unresolved. Returning
+Envenom there would be precisely the short-circuit CLAUDE.md forbids.
+
+## Analyzer Coverage Is Still Not Report Coverage
+
+One decision in seven is committed as a number in
+`tests/contracts/m5d2-decision-coverage.test.ts`, alongside the blocker census.
+The census is pinned WITH the total on purpose: coverage may rise when a real
+primitive lands, and must never rise because a refusal was weakened. Pinning
+only the total would not tell those apart.
+
+Turning this into the disclosure a player reads is M5-E.
+
+## A Narrower Window Must Say Less, Never Invent
+
+Every cooldown and DoT claim is anchored on an observed event, so a window cut
+too late looks exactly like an effect that was not there. The corpus fixture's
+start is justified by measurement rather than assertion: cutting past
+`2,164,326` — the Garrote `applydebuff` — degrades case 1 from an exact entry to
+UNKNOWN, and `tests/regression/m5d2-truncated-window.test.ts` re-runs that
+degradation, including a sweep asserting no cut ever produces a STRONGER claim.
+
+Related, and learned the hard way: fixture events are addressed by TIMESTAMP,
+never by index. Widening the capture predicate moved an index-addressed query
+point by 43 ms and silently changed a derived DoT remainder.
+
+## The M5-D2 → M5-E Handoff
+
+M5-E owns player-facing coverage disclosure. It inherits:
+
+- `classifyDecision` / `censusOf`, a closed vocabulary of four outcomes and
+  seven blocker classes, already counted over real decisions.
+- The distinction M5-E must NOT flatten: `EXACT_ENTRY` is a stronger CLAIM than
+  `UNKNOWN`, not a better outcome. A refusal that is correct is the analyzer
+  working, and a disclosure that reads as a score will invite exactly the
+  guessing this milestone spent its budget preventing.
+- One hard constraint on wording. A report may say the authority's selection was
+  identified for a decision the player made. It may not say what the player
+  should have pressed at a moment they pressed nothing, because M5 cannot know.
 
 ---
 

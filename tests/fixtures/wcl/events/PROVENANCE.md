@@ -757,6 +757,131 @@ npx prettier --write tests/fixtures/wcl/events/wcl-assassination-kingsbane-coold
 
 ---
 
+## `wcl-assassination-d2-decision-corpus.json`
+
+1083 events from the same report and revision, captured on **2026-09-13** for
+M5-D2.
+
+| | |
+| --- | --- |
+| Report code | `A7R6kxPJ1hC8YQ4w` |
+| Fight ID | 7 |
+| **Report revision** | **30** — unchanged, and still load-bearing |
+| `gameVersion` / `logVersion` | 1 / 17 |
+| Actor | 19 (`Saruxoxo`, Assassination Rogue, `specID` 259) |
+| Window | `[2,164,325 .. 2,194,928]`, plus the pull `combatantinfo` at 2,004,589 |
+| Retrieval | paged ranges, `limit` 10,000, `includeResources: true`, `dataType: All`, `hostilityType` omitted |
+
+### A strict forward extension of the C3c1 slice
+
+Same start, same predicate — every actor-19 cast, plus every aura event
+targeting actor 19 or 21 — with the end moved from `2,176,581` out to
+`2,194,928`. 1083 events instead of 310, 131 casts instead of 42.
+
+Nothing about the C3c1 window was relaxed, so every fact that slice established
+is still established by this one, and case 1 of the corpus asserts the M5-C3c3c
+result verbatim on the wider data.
+
+### The window start is MEASURED, not inherited
+
+A wider capture `[2,136,000 .. 2,195,000]`, 2777 events, was taken first and
+kept only in gitignored `.probe/`. The committed start was then chosen by
+cutting progressively later and re-running all seven corpus decisions:
+
+| cut | case 1 | Garrote remains |
+| --- | --- | --- |
+| 2,136,000 | SELECTED garrote @ `core_dot[0]` | 5.746 s |
+| 2,158,000 | SELECTED garrote @ `core_dot[0]` | 5.746 s |
+| **2,164,325** | **SELECTED garrote @ `core_dot[0]`** | **5.746 s** |
+| 2,168,000 | UNKNOWN | not established |
+
+`2,164,326` is the `applydebuff` anchoring actor 19's Garrote on target 21.
+Without it the DoT remainder is not derivable and the exact answer correctly
+withdraws. Every other case is unchanged across all four cuts.
+
+`tests/regression/m5d2-truncated-window.test.ts` re-runs that degradation
+against the committed fixture, so the justification is executable rather than
+recorded prose.
+
+### Why the end is 2,194,928
+
+The last corpus decision is the Rupture cast at `2,194,927`; `2,194,928` is its
+own `applydebuff`. No case reads anything later.
+
+### Deliberately EXCLUDED: enemy 22
+
+The capture also collected aura events targeting actor 22 — the fight's other
+enemy, which actor 19 was attacking until `2,171,770`. Including them changed no
+corpus outcome, so they are not committed.
+
+They did expose a real defect in the corpus, worth recording because the fix is
+a rule and not a one-off. The case-2 query point was originally addressed as
+"one index before the Garrote cast". Adding enemy-22 events shifted what that
+index referred to by 43 ms, silently moving a derived DoT remainder from 5.835 s
+to 5.792 s. Every locator now matches on a TIMESTAMP and asserts the match is
+unique. Index-relative addressing is not safe against a change of capture
+predicate.
+
+### The decisions this slice carries
+
+| `timestamp` | rel Q | ability | corpus case |
+| --- | --- | --- | --- |
+| 2,164,326 | −12,254 | Garrote `applydebuff` | anchor for case 1 |
+| 2,172,777 | −3,803 | Deathmark 360194 | case 6 |
+| 2,173,778 | −2,802 | Kingsbane 385627 | cooldown anchor |
+| 2,175,585 | −995 | Envenom 32645 | — |
+| 2,176,120 | −460 | Vanish 1856 | cooldown anchor, cases 2/3/4/5/7 |
+| 2,176,491 | −89 | (aura) | **case 2 query point** |
+| 2,176,580 | 0 | Garrote 703 | **case 1** |
+| 2,178,582 | +2,002 | Envenom 32645 | case 3 |
+| 2,190,902 | +14,322 | Envenom 32645 | case 4 |
+| 2,191,906 | +15,326 | Fan of Knives 51723 | case 7 |
+| 2,194,927 | +18,347 | Rupture 1943 | case 5 |
+
+Each was chosen by a mechanical rule over the full-fight cast census, recorded
+on the case itself in `tests/support/m5d2-corpus.ts`.
+
+### Event order is preserved verbatim
+
+Filtered IN PLACE rather than re-sorted, for the reason the C3a entry records at
+length.
+
+### Verified facts this slice establishes
+
+- Case 1 resolves to **`ROTATIONAL_GCD_SELECTED garrote @ core_dot[0]`** via
+  `default[6]`, matching M5-C3c3c on 3.5× the events.
+- Case 2 resolves `core_dot[0]`'s CONDITION to **TRUE** at a position where
+  Garrote was not cast, and still returns UNKNOWN — on usability alone.
+- The Vanish CHARGE cooldown (120,000 ms) eliminates `vanish[0]` and `vanish[1]`
+  14,782 ms after the anchor. The nominal `_cooldown` of 1,000 ms would not have.
+- Measured decision coverage over the corpus: **1 exact, 0 token-converged,
+  0 no-action, 6 UNKNOWN.**
+
+### What it does NOT establish
+
+- No Rupture DoT remainder. Its nearest anchor on target 21 is a REFRESH, so
+  `refreshable` stays UNKNOWN and `core_dot[3]` is never decided.
+- Nothing about movement, Energy between observations, or any cooldown upper
+  bound. None of those is derivable and none is attempted.
+- No coaching verdict of any kind. Case 6 and case 7 are decisions the player
+  actually made, and the corpus declines to evaluate both.
+
+Reproduce:
+
+```powershell
+# .probe/m5d2-fixture.probe.ts captures [2,136,000 .. 2,195,000] wide, then the
+# committed slice is cut to [2,164,325 .. 2,194,928] with the C3c1 predicate:
+#   auras targeting actor 19 or 21, every actor-19 cast, pull combatantinfo.
+node scripts/sanitize-probe.mjs `
+  .probe/m5d2-source.json `
+  wcl-assassination-d2-decision-corpus.json `
+  --head 1083
+
+npx prettier --write tests/fixtures/wcl/events/wcl-assassination-d2-decision-corpus.json
+```
+
+---
+
 # Still NOT ESTABLISHED
 
 ## `resourcechange` attached snapshot timing

@@ -130,9 +130,26 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
     expect(declaring).toEqual(["src/data/game/assassination-transition-authority.ts"]);
   });
 
-  it("produces a rotational-GCD result in the engine and the adapter only", () => {
-    const producing = filesUnder("src").filter((path) => codeOf(path).includes("ROTATIONAL_GCD_SELECTED"));
-    expect(producing.sort()).toEqual([ADAPTER_PATH, ENGINE_PATH].sort());
+  it("CONSTRUCTS a rotational-GCD result in the engine and nowhere else", () => {
+    // TIGHTENED AT M5-D2. This used to match any MENTION of the member name,
+    // which conflated building one of these results with reading one. That was
+    // weaker than it looked: the adapter it named never constructed a result
+    // either, so the real claim was only "two files say the words".
+    //
+    // Constructing means writing the discriminant. Only the engine may.
+    const constructing = filesUnder("src").filter((path) =>
+      codeOf(path).includes('kind: "ROTATIONAL_GCD_SELECTED"'),
+    );
+    expect(constructing).toEqual([ENGINE_PATH]);
+  });
+
+  it("keeps the set of modules that READ the result vocabulary small and declared", () => {
+    // Reading is legitimate — an adapter must inspect what it forwards, and
+    // M5-D2's coverage classifier must inspect what it counts. But the set is
+    // enumerated, so a new reader is a deliberate change rather than a drift.
+    const COVERAGE_PATH = "src/specs/rogue/assassination/decision-coverage.ts";
+    const reading = filesUnder("src").filter((path) => codeOf(path).includes("ROTATIONAL_GCD_SELECTED"));
+    expect(reading.sort()).toEqual([ADAPTER_PATH, COVERAGE_PATH, ENGINE_PATH].sort());
   });
 });
 
