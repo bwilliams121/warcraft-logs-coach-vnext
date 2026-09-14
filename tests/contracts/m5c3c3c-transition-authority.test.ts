@@ -385,7 +385,10 @@ describe("potion identity is not required, and is not claimed", () => {
 describe("identity numbers are derived, never transcribed", () => {
   it("resolves every spell-backed token through the pinned binding", () => {
     expect(transitionAbilityIdsFor("kick")).toEqual([1766]);
-    expect(transitionAbilityIdsFor("thistle_tea")).toEqual([381_623, 469_779]);
+    // CORRECTED AT M5-E: 469779 is a talent record that triggers 381623 and is
+    // never itself executed, so the transition contract now addresses exactly
+    // the spell that can fire.
+    expect(transitionAbilityIdsFor("thistle_tea")).toEqual([381_623]);
     expect(transitionAbilityIdsFor("blood_fury")).toEqual([20_572, 33_697, 33_702]);
     expect(transitionAbilityIdsFor("berserking")).toEqual([26_297]);
   });

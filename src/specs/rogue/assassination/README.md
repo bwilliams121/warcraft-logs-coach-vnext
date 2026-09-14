@@ -86,7 +86,69 @@ entry at all despite plainly happening. So:
 - `observedEnvenomCastsInScope` is a lower bound on Envenom casts, not a fight
   total.
 
+---
+
+# Milestone 5-E — the observed-decision comparison layer
+
+M5-A above answers ONE question about ONE action. M5-E composes it with the
+first-GCD authority selection into the surface a caller actually uses.
+
+## `analyzeObservedAssassinationDecisions`
+
+The stable internal facade (`observed-analysis.ts`). It takes an
+ALREADY-INGESTED normalized fight and returns comparisons plus a coverage
+disclosure. It performs no retrieval and knows nothing about HTTP.
+
+Statuses are kept distinct rather than flattened: `ANALYZED`,
+`SPEC_NOT_SUPPORTED`, `AUTHORITY_NOT_AVAILABLE`, `PROFILE_NOT_RESOLVED`,
+`INSUFFICIENT_EVIDENCE`.
+
+## The three comparison outcomes
+
+| | |
+| --- | --- |
+| `MATCH` | the authority selection resolved to the SAME token that was observed |
+| `REJECTED` | M5-A proved the observed action unselectable, OR the authority resolved a different token |
+| `UNKNOWN` | the authority selection did not resolve, the two layers contradicted, or the model said "nothing" while a cast was observed |
+
+**`MATCH` is `authority-compatible` and nothing more.** Not correct, not optimal,
+not best play, not recommended, not what the player should have pressed. The
+authority is one model of one simulated encounter.
+
+Two things every MATCH carries, because both limit what it means:
+
+- `selectionPrecision` — `EXACT_ENTRY` or `TOKEN_CONVERGED`. Only the first lets
+  a consumer quote an authority entry.
+- `usabilityProvenance` — normally `OBSERVED_EXECUTION`, because this build's
+  only positive usability proof is that the cast fired. A MATCH usually depends
+  on the very cast it is comparing against, and that is stated rather than
+  implied.
+
+## Eligibility, and why the denominator is small
+
+A decision is eligible when it is an observed COMPLETE cast by the analysed
+actor, its execution lane is proven `GCD_CONSUMING`, and it binds to a pinned
+authority token. Everything else is EXCLUDED and COUNTED:
+
+| reason | what lands there |
+| --- | --- |
+| `NON_GCD_ACTION` | proven off-GCD, so not a rotational decision at all |
+| `EXECUTION_LANE_NOT_ESTABLISHED` | no pinned GCD record — melee autos, and the deferred builders |
+| `NO_AUTHORITY_TOKEN_BINDING` | has a lane, binds to no authority token |
+
+The exclusions are where M5's deferred debt is visible. Counting a builder as
+UNKNOWN would claim it is a rotational decision we failed on; dropping it
+silently would flatter the denominator.
+
+## Coverage is not a score
+
+`resolvedComparisons / eligibleDecisions` is RESOLVED COVERAGE — how often the
+comparison reached any conclusion. There is deliberately no percentage field and
+no field whose name could be printed as "percent correct".
+
 ## Production status
 
-Not wired. `/v1/analysis` still returns `ANALYSIS_NOT_IMPLEMENTED`, no analyzer
-is registered, and nothing is deployed.
+Not wired, by decision. `/v1/analysis` still returns `ANALYSIS_NOT_IMPLEMENTED`
+and nothing is deployed — but the message no longer claims that no analyzer
+exists, because one does. See the Milestone 5 closeout in
+`agent/architecture.md` for the reasoning and the M6 handoff.

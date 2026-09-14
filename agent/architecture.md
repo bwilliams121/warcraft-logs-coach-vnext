@@ -4756,6 +4756,151 @@ M5-E owns player-facing coverage disclosure. It inherits:
 
 ---
 
+---
+
+# Milestone 5 — Closeout
+
+## The Capability, In One Line
+
+    Observed-action authority verification for Assassination Rogue.
+
+Given a rotational decision a player ACTUALLY MADE, Milestone 5 can say what the
+pinned SimulationCraft Assassination APL selects at that moment, how precisely it
+can name it, and whether that agrees with what was cast.
+
+It is not a rotation recommendation engine, a next-action predictor, or a source
+of optimal play. Those phrases do not describe anything this milestone built.
+
+## What M5 Supports
+
+- Assassination Rogue, and only Assassination Rogue.
+- One pinned SimulationCraft APL, committed as a JSON artifact with provenance
+  and a measured source hash.
+- Observed-decision authority verification: `MATCH`, `REJECTED`, `UNKNOWN`.
+- Two levels of selection precision, kept apart: `EXACT_ENTRY` names a specific
+  authority entry, `TOKEN_CONVERGED` names only the action.
+- Partial coverage disclosure over a denominator of ELIGIBLE OBSERVED ROTATIONAL
+  GCD DECISIONS, with excluded casts counted and named.
+- Structured refusal: every UNKNOWN carries a blocker family that says whether
+  the gap is an evidence gap or a permanent one.
+
+## What M5 Does Not Support
+
+- Arbitrary-position next-action prediction.
+- AoE and builder selection.
+- Exact SimulationCraft target counts (`spell_targets.fan_of_knives`).
+- Predictive state: `fight_remains`, `target.time_to_die`.
+- Movement state.
+- Continuous Energy simulation between observations.
+- General charge simulation beyond the one-charge equivalence.
+- General `target_if` and `cycle_targets` execution semantics.
+- Any other specialization.
+- Coaching, optimality or severity language of any kind.
+
+## The Observed-Usability Limitation
+
+The most important thing M5 learned about itself, and the reason the capability
+statement is worded the way it is.
+
+**Positive action usability is established by observed execution.** An action
+that demonstrably fired demonstrably passed every `action_t::ready()` guard —
+cooldown, cost, movement. That is sound, and it is the ONLY positive usability
+proof this build has.
+
+At a position where the action was not cast, none of the three guards can be
+established independently: the cooldown start delay is unbounded above in the
+pinned model, Energy is exact only on an observation, and Warcraft Logs carries
+no movement stream. The full derivation is in the M5-D2 section above.
+
+D2 corpus case 2 is the measurement. At a real position between a real Vanish and
+a real Garrote, `core_dot[0]`'s CONDITION resolves TRUE on real state — every D1
+primitive does its work — and the decision still cannot be named, because Garrote
+is not proven usable. The condition was never the hard part.
+
+## M5-C3c3c, Stated Correctly
+
+C3c3c is valid and remains so. It proves:
+
+    exact first-GCD authority selection AT THE OBSERVED GARROTE DECISION POINT
+
+It does NOT prove, and was never able to prove:
+
+    a free-standing prediction that Garrote would be next, before it was observed
+
+Both sentences describe the same passing test. Only the first one is true.
+
+## Two Coverage Numbers, Deliberately Separate
+
+    D2 corpus       1 exact of 7 cases      TEST TOOLING
+    real decisions  1 MATCH of 11 eligible  RUNTIME DISCLOSURE
+
+The corpus is a reviewed set that deliberately includes non-observed and
+prediction-boundary cases; it measures the analyzer. The runtime coverage counts
+only eligible observed rotational decisions; it measures one report. Neither is a
+correctness rate, and the two must never be merged or reported as one figure.
+
+## Technical Debt Ledger
+
+### Fixed in M5-E
+
+- **Thistle Tea execution binding.** The token bound to two candidate ability
+  ids, one of which (469779) is a TALENT record that is never cast. Both C++
+  branches resolve to 381623, one of them through
+  `thistle_tea_auto->effectN( 1 ).trigger()`. The extractor now parses
+  `__spelleffect_data`, derives the `_trigger_spell_id` column from the struct
+  declaration, verifies the relation against the pinned table, and records the
+  resolution in the artifact. The id was resolved, not deleted. Lane semantics
+  are unchanged: both records were always off-GCD.
+
+### Deferred beyond M5
+
+- Mutilate dual ids 1329 / 27576.
+- Garrote's modifier-bearing cooldown, correctly refused today.
+- `spell_targets` lower-bound support.
+- AoE and builder selection.
+- `target_if` / `cycle_targets` execution semantics.
+- Arbitrary-position positive usability (cooldown upper bound, Energy carry
+  forward, movement policy — three separate epistemic decisions).
+- Continuous resource carry between observations.
+
+The first five surface in the runtime output as `EXECUTION_LANE_NOT_ESTABLISHED`
+exclusions rather than as silence.
+
+## The `/v1/analysis` Wiring Decision
+
+**The endpoint stays at HTTP 501 `ANALYSIS_NOT_IMPLEMENTED`.**
+
+Wiring it needs the M2 → M3 → M5 composition that does not exist yet: retrieval
+at the derived scope, normalization, actor and specialization resolution carried
+from preflight into the analyzer, and a deliberately small public projection of
+the result. That is an integration milestone. Shipping a hasty version would
+expose internal trace types as a public contract, and a public contract is the
+hardest thing to take back.
+
+What DID change is the message. It used to say no analyzer existed, which stopped
+being true — so it now states that the analyzer is implemented internally and
+regression-tested but not wired here. Claiming less capability than exists is
+still a false statement about the system.
+
+## Handoff to M6 — MCP Interface
+
+M6 receives:
+
+- `analyzeObservedAssassinationDecisions` — a pure function over an
+  already-ingested normalized fight. No HTTP, no retrieval, no network.
+- A stable comparison output: three outcomes, six bases, two precision levels,
+  a locator per decision.
+- A coverage disclosure with an honest denominator and a named exclusion census.
+- A hard supported-spec gate that returns `SPEC_NOT_SUPPORTED` rather than
+  applying Rogue rules to another specialization.
+- Authority provenance read from the artifact, never hand-maintained.
+- This limitations list.
+
+One constraint travels with it. A surface may report that the authority's
+selection was identified for a decision the player made. It may not report what
+the player should have pressed at a moment they pressed nothing — M5 cannot know
+that, and no amount of exposure changes what the evidence supports.
+
 # Milestone 6 — MCP Interface
 
 Expose the existing analysis capability over MCP.

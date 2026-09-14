@@ -119,10 +119,28 @@ function describePreflightFailure(reason: WclFailureReason): {
  * bad report, fight or source ID is reported as such rather than as "analysis
  * is not implemented".
  *
- * Preflight deliberately runs even though no analyzer is enabled. Identity
- * metadata is a prerequisite to selecting an analyzer at all, and it is
+ * Preflight deliberately runs even though the route invokes no analyzer.
+ * Identity metadata is a prerequisite to selecting an analyzer at all, and it is
  * scope-independent: derived ingestion scope governs how much combat-event
  * breadth is retrieved, which is a later milestone's concern.
+ *
+ * THE M5-E WIRING DECISION, AND WHY IT WENT THIS WAY
+ *
+ * Milestone 5 finished an internal Assassination authority analyzer:
+ * `analyzeObservedAssassinationDecisions` compares observed rotational decisions
+ * against the pinned SimulationCraft APL and discloses its own coverage. It is
+ * regression-tested against real Warcraft Logs evidence.
+ *
+ * This route still does not invoke it. Doing so needs the M2 -> M3 -> M5
+ * composition that does not exist yet — event retrieval at the derived scope,
+ * normalization, actor and specialization resolution carried from preflight into
+ * the analyzer, and a deliberately small public projection of the result. That
+ * is an integration milestone, not a line of glue, and shipping a hasty version
+ * of it would expose internal trace types as a public contract.
+ *
+ * So the endpoint keeps returning 501 — but the MESSAGE no longer says no
+ * analyzer exists, because that stopped being true. Claiming less capability
+ * than exists is a smaller error than claiming more, and both are avoidable.
  */
 export async function analyzeFight(
   input: unknown,
@@ -156,14 +174,16 @@ export async function analyzeFight(
   if (!scope.ok) {
     return serviceFailure(
       "ANALYSIS_NOT_IMPLEMENTED",
-      "Warcraft Logs connectivity and player identity were verified for this request, but gameplay analysis is not implemented yet. This deployment is a Milestone 2 foundation: no analyzer is enabled, so no combat events are retrieved and no coaching is produced.",
+      "Warcraft Logs connectivity and player identity were verified for this request, but no combat events were retrieved because no analyzer is registered to declare an ingestion scope. A Milestone 5 rotational authority analyzer is implemented internally and regression-tested; this endpoint is not yet wired to invoke it, so analysis is not implemented here and nothing is produced.",
     );
   }
 
-  // Milestone 3 onwards: retrieve combat events at `scope.scope`, normalize,
-  // evaluate.
+  // The remaining wiring: retrieve combat events at `scope.scope`, normalize
+  // them, resolve the actor and specialization from preflight, and call
+  // `analyzeObservedAssassinationDecisions`. Deliberately not done here — see
+  // the M5-E wiring decision above.
   return serviceFailure(
     "ANALYSIS_NOT_IMPLEMENTED",
-    "Warcraft Logs connectivity and player identity were verified for this request, but gameplay analysis is not implemented yet. This deployment is a Milestone 2 foundation.",
+    "Warcraft Logs connectivity and player identity were verified for this request. A Milestone 5 rotational authority analyzer is implemented internally and regression-tested, but this endpoint is not yet wired to invoke it, so analysis is not implemented here. External exposure is owned by a later integration milestone.",
   );
 }

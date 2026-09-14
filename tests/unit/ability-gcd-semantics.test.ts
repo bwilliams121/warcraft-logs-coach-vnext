@@ -167,21 +167,30 @@ describe("a token binds to a SET of spell ids", () => {
     expect(binding.abilityGameId).toBe(8676);
   });
 
-  it("resolves thistle_tea to BOTH reachable records", () => {
+  it("resolves thistle_tea to the ONE spell that can execute", () => {
+    // CORRECTED AT M5-E. Both C++ branches end at 381623 — one directly, one
+    // through `thistle_tea_auto->effectN( 1 ).trigger()`. The talent record
+    // 469779 triggers it and is never cast, so it is not an execution identity.
     const binding = resolveTokenBinding("thistle_tea");
-    expect(binding.kind).toBe("KNOWN_SET");
-    if (binding.kind !== "KNOWN_SET") return;
-    expect([...binding.abilityGameIds].sort((left, right) => left - right)).toEqual([
-      THISTLE_TEA,
-      THISTLE_TEA_ALTERNATE,
-    ]);
+    expect(binding.kind).toBe("KNOWN_ONE");
+    if (binding.kind !== "KNOWN_ONE") return;
+    expect(binding.abilityGameId).toBe(THISTLE_TEA);
     expect(binding.provenance.sourceNote).toContain("thistle_tea_auto");
   });
 
-  it("records WHY thistle_tea has two candidates", () => {
+  it("records WHY the talent branch does not add a second execution identity", () => {
     const binding = resolveTokenBinding("thistle_tea");
-    if (binding.kind !== "KNOWN_SET") return;
-    expect(binding.provenance.sourceNote).toContain("talent");
+    if (binding.kind !== "KNOWN_ONE") return;
+    expect(binding.provenance.sourceNote).toContain("BOTH branches resolve to 381623");
+  });
+
+  it("keeps the lane NON_GCD, exactly as it was with two candidates", () => {
+    // THE INVARIANT THIS CLEANUP MUST NOT DISTURB. Both old candidates were
+    // off-GCD, so correcting the execution identity is a provenance fix and not
+    // a behaviour change. If this ever flips, the cleanup did something else.
+    expect(executionLaneForToken("thistle_tea")).toBe("NON_GCD");
+    expect(executionLaneForAbility(THISTLE_TEA)).toBe("NON_GCD");
+    expect(executionLaneForAbility(THISTLE_TEA_ALTERNATE)).toBe("NON_GCD");
   });
 
   it("labels EVERY binding as hand-reviewed C++, never as machine-extracted", () => {
@@ -198,7 +207,7 @@ describe("a token binds to a SET of spell ids", () => {
 
   it("cites pinned sc_rogue.cpp bytes and a line range for thistle_tea", () => {
     const binding = resolveTokenBinding("thistle_tea");
-    if (binding.kind !== "KNOWN_SET") return;
+    if (binding.kind !== "KNOWN_ONE") return;
     const { provenance } = binding;
     expect(provenance.sourcePath).toBe("engine/class_modules/sc_rogue.cpp");
     expect(provenance.sourceSha256).toBe("209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e");

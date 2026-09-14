@@ -162,6 +162,77 @@ const BUILD: ClientDataVersion = {
 
 const CLASS_ROWS: readonly ClassSpellRow[] = parseClassSpells(CLASS_SPELLS);
 
+/**
+ * The minimum `spelleffect_data_t` layout and rows the resolution check needs.
+ *
+ * Only the fields the parser derives are declared, in the pinned order, plus the
+ * `_class_flags` array that sits between `_misc_value_2` and the trigger id —
+ * the whole reason effect indices cannot be derived the way `_gcd` is.
+ */
+const EFFECT_LAYOUT_HEADER = [
+  "struct spelleffect_data_t",
+  "{",
+  "  unsigned         _id;",
+  "  unsigned         _spell_id;",
+  "  unsigned         _index;",
+  "  unsigned         _type;",
+  "  unsigned         _subtype;",
+  "  int              _scaling_type;",
+  "  unsigned         _attribute;",
+  "  double           _m_coeff;",
+  "  double           _m_delta;",
+  "  double           _m_unk;",
+  "  double           _sp_coeff;",
+  "  double           _ap_coeff;",
+  "  double           _amplitude;",
+  "  double           _radius;",
+  "  double           _radius_max;",
+  "  double           _base_value;",
+  "  int              _misc_value;",
+  "  int              _misc_value_2;",
+  "  unsigned         _class_flags[NUM_CLASS_FAMILY_FLAGS];",
+  "  unsigned         _trigger_spell_id;",
+  "  double           _m_chain;",
+  "  const spell_data_t* spell() const;",
+  "};",
+].join("\n");
+
+/** One row per declared resolution, with the trigger the pinned data exhibits. */
+function effectRow(spellId: number, effectIndex: number, triggerSpellId: number): string {
+  const slots = [
+    "1",
+    String(spellId),
+    String(effectIndex),
+    "6",
+    "396",
+    "0",
+    "0x00000000",
+    "0.000000",
+    "0.000000",
+    "0.000000",
+    "0.000000",
+    "0.000000",
+    "0",
+    "0.000000",
+    "0.000000",
+    "0.0000",
+    "0",
+    "0",
+    "{ 0, 0, 0, 0 }",
+    String(triggerSpellId),
+    "1.000000",
+  ];
+  return `  { ${slots.join(", ")} },`;
+}
+
+const EFFECT_TABLE = [
+  "static spelleffect_data_t __spelleffect_data[3] = {",
+  effectRow(469_779, 0, 381_623),
+  effectRow(469_779, 1, 0),
+  effectRow(381_623, 0, 0),
+  "};",
+].join("\n");
+
 function verify(overrides: Partial<Parameters<typeof verifyRequiredFacts>[0]> = {}): readonly string[] {
   return verifyRequiredFacts({
     build: BUILD,
@@ -169,6 +240,11 @@ function verify(overrides: Partial<Parameters<typeof verifyRequiredFacts>[0]> = 
     classSpells: CLASS_ROWS,
     gcdFieldIndex: 16,
     expectedGcdFieldIndex: 16,
+    // ADDED AT M5-E. Execution-identity resolution reads the generated effect
+    // table and the struct layout, so the harness has to supply both or the
+    // verifier correctly reports that it cannot find the layout.
+    spellDataText: EFFECT_TABLE,
+    spellDataLayoutText: EFFECT_LAYOUT_HEADER,
     ...overrides,
   });
 }

@@ -105,6 +105,22 @@ const HAND_REVIEWED_BINDING_METHOD = "HAND_REVIEWED_CPP_CONTROL_FLOW";
 const MACHINE_EXTRACTED_METHOD = "MACHINE_EXTRACTED_DBC_RECORD";
 
 /**
+ * How a declared spell was resolved to the spell that actually EXECUTES.
+ *
+ * A FOURTH kind of knowledge, and the one M5-E added. A token can bind to a
+ * spell that is never executed: `thistle_tea_auto` (469779) is a TALENT record
+ * whose effect TRIGGERS the executed ability (381623). Recording 469779 as an
+ * execution candidate claims the player casts a talent, which is wrong even
+ * though both records happen to agree on the lane.
+ *
+ * The trigger relation is MACHINE-EXTRACTED from the generated effect table, so
+ * this is not a hand-deletion of an inconvenient id: the resolution is derived,
+ * verified against the pinned data, and recorded with the effect index it came
+ * from. A future pin that stops exhibiting the relation fails extraction.
+ */
+const MACHINE_EXTRACTED_TRIGGER_METHOD = "MACHINE_EXTRACTED_EFFECT_TRIGGER";
+
+/**
  * How a META-ACTION's lane was established.
  *
  * A THIRD kind of knowledge, and it needs its own name. `potion`, `use_item`,
@@ -234,7 +250,24 @@ const REQUIRED_FACTS = {
     },
     {
       simcToken: "thistle_tea",
-      candidateAbilityGameIds: [381623, 469779],
+      // CORRECTED AT M5-E. Both C++ branches resolve to 381623, so that is the
+      // only spell that can execute. The talent record 469779 is not deleted —
+      // it is declared below as a spell that RESOLVES THROUGH its own effect
+      // trigger, and the extractor verifies that against the pinned table.
+      candidateAbilityGameIds: [381623],
+      triggerResolutions: [
+        {
+          declaredSpellId: 469779,
+          // `effectN( 1 )` is 1-based; the generated table indexes from 0.
+          effectIndex: 0,
+          expectedTriggerSpellId: 381623,
+          note:
+            "talent.rogue.thistle_tea_auto is spell 469779. The taken branch calls " +
+            "effectN( 1 ).trigger(), so the executed action is the TRIGGERED spell, " +
+            "not 469779 itself. The other branch is thistle_tea_ability = 381623 " +
+            "directly, so both branches execute 381623.",
+        },
+      ],
       crossCheck: "NONE_TALENT_BOUND",
       symbol: "rogue_t::init_spells",
       startLine: 10237,
@@ -243,7 +276,9 @@ const REQUIRED_FACTS = {
         "spell.thistle_tea = talent.rogue.thistle_tea_auto->ok() " +
         "? talent.rogue.thistle_tea_auto->effectN( 1 ).trigger() " +
         ": ( talent.rogue.thistle_tea_ability->ok() ? talent.rogue.thistle_tea_ability : not_found() ). " +
-        "Both reachable records are recorded because the branch depends on talent state this build does not resolve.",
+        "BOTH branches resolve to 381623: the first through the effect trigger of " +
+        "469779, the second directly. The talent branch is therefore irrelevant to " +
+        "execution identity, and no branch needs to be chosen.",
     },
     // ---- added at M5-C3c3a ----
     {
@@ -539,6 +574,130 @@ export function deriveGcdFieldIndex(headerText) {
   return { ok: true, index: gcdAt - idAt, fields };
 }
 
+/**
+ * Derives the flat field indices this script needs from `spelleffect_data_t`.
+ *
+ * DIFFERENT FROM `deriveGcdFieldIndex` IN ONE IMPORTANT WAY. That function stops
+ * at the first array member, because `_gcd` sits before any. `_trigger_spell_id`
+ * sits AFTER `_class_flags[...]`, so the array cannot be a stopping point — the
+ * generated row writes it as a single braced group, which the row parser reads
+ * as ONE comma-separated slot. This counts it the same way.
+ *
+ * Derived rather than hard-coded for the same reason as the GCD index: an
+ * upstream field insertion must fail loudly, not silently read a neighbour.
+ */
+export function deriveEffectFieldIndices(headerText) {
+  const lines = headerText.split(/\r?\n/);
+
+  let bodyStart = -1;
+  for (let i = 0; i < lines.length - 1; i += 1) {
+    if (lines[i]?.trim() !== "struct spelleffect_data_t") continue;
+    if (lines[i + 1]?.trim() === "{") {
+      bodyStart = i + 2;
+      break;
+    }
+  }
+  if (bodyStart < 0) {
+    return { ok: false, error: "spell_data.hpp does not define struct spelleffect_data_t" };
+  }
+
+  const member = /^\s*(?:const\s+)?[A-Za-z_][A-Za-z0-9_:<>]*\s*\*?\s+(_[A-Za-z0-9_]+)\s*(\[[^\]]*\])?\s*;/;
+  const fields = [];
+  for (let i = bodyStart; i < lines.length; i += 1) {
+    const line = (lines[i] ?? "").replace(/\/\/.*$/, "");
+    const trimmed = line.trim();
+    if (trimmed.length === 0) continue;
+    if (trimmed.includes("(")) break;
+    const match = member.exec(line);
+    if (match === null) continue;
+    // An array member occupies exactly one braced slot in the generated row.
+    fields.push(match[1]);
+  }
+
+  const idAt = fields.indexOf("_id");
+  const spellAt = fields.indexOf("_spell_id");
+  const indexAt = fields.indexOf("_index");
+  const triggerAt = fields.indexOf("_trigger_spell_id");
+  if (idAt < 0) return { ok: false, error: "spelleffect_data_t declares no _id member" };
+  for (const [name, at] of [
+    ["_spell_id", spellAt],
+    ["_index", indexAt],
+    ["_trigger_spell_id", triggerAt],
+  ]) {
+    if (at < 0) return { ok: false, error: `spelleffect_data_t declares no ${name} member` };
+    if (at < idAt) return { ok: false, error: `${name} is declared before _id` };
+  }
+  return {
+    ok: true,
+    fields,
+    spellIdIndex: spellAt - idAt,
+    effectIndexIndex: indexAt - idAt,
+    triggerSpellIdIndex: triggerAt - idAt,
+  };
+}
+
+/** Splits one generated row into its comma-separated slots, braces kept whole. */
+function rowSlots(inner) {
+  const slots = [];
+  let depth = 0;
+  let current = "";
+  for (const char of inner) {
+    if (char === "{") {
+      depth += 1;
+      current += char;
+      continue;
+    }
+    if (char === "}") {
+      depth -= 1;
+      current += char;
+      continue;
+    }
+    if (char === "," && depth === 0) {
+      slots.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  if (current.trim() !== "") slots.push(current.trim());
+  return slots;
+}
+
+/**
+ * Reads `spellId -> effectIndex -> triggerSpellId` from `__spelleffect_data`.
+ *
+ * Only the wanted spell ids are retained; the table has tens of thousands of
+ * rows and nothing else here needs them.
+ */
+export function parseEffectTriggers(text, wantedSpellIds, indices) {
+  const wanted = new Set([...wantedSpellIds].map(Number));
+  const bySpell = new Map();
+  let rowsScanned = 0;
+
+  const tableAt = text.indexOf("static spelleffect_data_t __spelleffect_data[");
+  if (tableAt < 0) return { ok: false, error: "no __spelleffect_data table in the generated spell data" };
+
+  for (const line of text.slice(tableAt).split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("{")) continue;
+    const close = trimmed.lastIndexOf("}");
+    if (close < 0) continue;
+    const slots = rowSlots(trimmed.slice(1, close));
+    if (slots.length <= indices.triggerSpellIdIndex) continue;
+    rowsScanned += 1;
+    const spellId = Number(slots[indices.spellIdIndex]);
+    if (!wanted.has(spellId)) continue;
+    const effectIndex = Number(slots[indices.effectIndexIndex]);
+    const triggerSpellId = Number(slots[indices.triggerSpellIdIndex]);
+    if (!Number.isSafeInteger(effectIndex) || !Number.isSafeInteger(triggerSpellId)) continue;
+    const forSpell = bySpell.get(spellId) ?? new Map();
+    forSpell.set(effectIndex, triggerSpellId);
+    bySpell.set(spellId, forSpell);
+  }
+  if (rowsScanned === 0) return { ok: false, error: "the __spelleffect_data table parsed to zero rows" };
+  return { ok: true, bySpell, rowsScanned };
+}
+
 /** Reads one C string literal starting at `start`, honouring `\"` and `\\`. */
 function readStringLiteral(line, start) {
   if (line[start] !== '"') return null;
@@ -656,6 +815,8 @@ export function verifyRequiredFacts({
   gcdFieldIndex,
   expectedGcdFieldIndex,
   measuredSourcePaths,
+  spellDataText,
+  spellDataLayoutText,
 }) {
   const problems = [];
   const knownPaths = new Set(measuredSourcePaths ?? Object.values(SOURCES));
@@ -710,6 +871,66 @@ export function verifyRequiredFacts({
         `spell ${expected.abilityGameId} (${expected.displayNameEn}) has _gcd ${record.baseGcdMs}ms, ` +
           `expected ${expected.baseGcdMs}ms`,
       );
+    }
+  }
+
+  // ---- execution identity: resolve declared spells through effect triggers ----
+  //
+  // MACHINE-VERIFIED. Every declared resolution is checked against the pinned
+  // effect table, so "469779 executes as 381623" is derived here rather than
+  // asserted in a comment and hand-applied to the candidate list.
+  const effectLayout = deriveEffectFieldIndices(spellDataLayoutText ?? "");
+  if (!effectLayout.ok) {
+    problems.push(`effect field layout: ${effectLayout.error}`);
+  }
+  const declaredResolutions = REQUIRED_FACTS.tokenBindings.flatMap((binding) =>
+    (binding.triggerResolutions ?? []).map((resolution) => ({ binding, resolution })),
+  );
+  let effectTriggers = null;
+  if (effectLayout.ok && declaredResolutions.length > 0) {
+    const parsed = parseEffectTriggers(
+      spellDataText ?? "",
+      declaredResolutions.map((entry) => entry.resolution.declaredSpellId),
+      effectLayout,
+    );
+    if (!parsed.ok) {
+      problems.push(`effect trigger table: ${parsed.error}`);
+    } else {
+      effectTriggers = parsed;
+      for (const { binding, resolution } of declaredResolutions) {
+        const forSpell = parsed.bySpell.get(resolution.declaredSpellId);
+        const actual = forSpell?.get(resolution.effectIndex);
+        if (actual === undefined) {
+          problems.push(
+            `token '${binding.simcToken}': spell ${resolution.declaredSpellId} has no effect at index ` +
+              `${resolution.effectIndex} in the pinned effect table`,
+          );
+          continue;
+        }
+        if (actual !== resolution.expectedTriggerSpellId) {
+          problems.push(
+            `token '${binding.simcToken}': spell ${resolution.declaredSpellId} effect ${resolution.effectIndex} ` +
+              `triggers ${actual}, expected ${resolution.expectedTriggerSpellId}`,
+          );
+          continue;
+        }
+        // The resolved spell must be the one the token actually binds to, or the
+        // resolution would be recorded next to a candidate list it disagrees with.
+        if (!binding.candidateAbilityGameIds.includes(actual)) {
+          problems.push(
+            `token '${binding.simcToken}': spell ${resolution.declaredSpellId} resolves to ${actual}, ` +
+              `which is not among its execution candidates`,
+          );
+        }
+        // And the resolved spell must never ALSO be listed as a candidate in its
+        // unresolved form, which would reintroduce the ambiguity being removed.
+        if (binding.candidateAbilityGameIds.includes(resolution.declaredSpellId)) {
+          problems.push(
+            `token '${binding.simcToken}': spell ${resolution.declaredSpellId} is both resolved through a ` +
+              `trigger and listed as an execution candidate`,
+          );
+        }
+      }
     }
   }
 
@@ -952,6 +1173,22 @@ export function buildArtifact({ commitSha, sources, build, records, extractedOn,
         sourceNote: binding.sourceNote,
         crossCheck: binding.crossCheck,
       },
+      // Present only where a declared spell is NOT the executing one. Records
+      // the derivation instead of quietly dropping the id, so a reader can see
+      // that 469779 was resolved rather than forgotten.
+      ...((binding.triggerResolutions ?? []).length === 0
+        ? {}
+        : {
+            executionResolutions: (binding.triggerResolutions ?? []).map((resolution) => ({
+              declaredSpellId: resolution.declaredSpellId,
+              effectIndex: resolution.effectIndex,
+              resolvedAbilityGameId: resolution.expectedTriggerSpellId,
+              method: MACHINE_EXTRACTED_TRIGGER_METHOD,
+              sourcePath: SOURCES.spellData,
+              sourceSha256: hashFor(SOURCES.spellData),
+              note: resolution.note,
+            })),
+          }),
     })),
     // A THIRD kind of knowledge, in its own field so it cannot be mistaken for
     // either of the other two. These tokens have no DBC row at all.
@@ -1025,6 +1262,8 @@ async function main() {
     gcdFieldIndex: fieldIndex.index,
     expectedGcdFieldIndex: GCD_FIELD_INDEX,
     measuredSourcePaths: new Set(sources.map((source) => source.path)),
+    spellDataText: loaded.spellData,
+    spellDataLayoutText: loaded.spellDataLayout,
   });
   if (problems.length > 0) {
     console.error("EXTRACTION FAILED: the pinned data does not exhibit the required facts.\n");

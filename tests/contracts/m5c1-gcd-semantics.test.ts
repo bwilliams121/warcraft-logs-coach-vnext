@@ -280,10 +280,33 @@ describe("the token bindings", () => {
     expect(executionLaneForToken("blood_fury")).toBe("NON_GCD");
   });
 
-  it("records thistle_tea as a TWO-candidate binding", () => {
+  it("records thistle_tea as ONE execution candidate, with 469779 resolved through its trigger", () => {
+    // CORRECTED AT M5-E. This used to expect two candidates, which claimed the
+    // player could cast 469779 — a TALENT record that is never executed. Both
+    // C++ branches resolve to 381623: one directly, one through
+    // `effectN( 1 ).trigger()`. The talent id is not deleted; it is recorded as
+    // a resolution, and the extractor verifies the trigger against pinned DBC.
     if (!loaded.ok) return;
     const binding = loaded.artifact.tokenBindings.find((entry) => entry.simcToken === "thistle_tea");
-    expect(binding?.candidateAbilityGameIds).toEqual([381623, 469779]);
+    expect(binding?.candidateAbilityGameIds).toEqual([381623]);
+    expect(binding?.executionResolutions).toEqual([
+      {
+        declaredSpellId: 469779,
+        effectIndex: 0,
+        resolvedAbilityGameId: 381623,
+        method: "MACHINE_EXTRACTED_EFFECT_TRIGGER",
+        sourcePath: "engine/dbc/generated/sc_spell_data.inc",
+        sourceSha256: "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        note: expect.stringContaining("effectN( 1 ).trigger()") as unknown as string,
+      },
+    ]);
+  });
+
+  it("keeps the resolved id out of the execution candidates in its unresolved form", () => {
+    // The ambiguity is removed, not relocated.
+    if (!loaded.ok) return;
+    const binding = loaded.artifact.tokenBindings.find((entry) => entry.simcToken === "thistle_tea");
+    expect(binding?.candidateAbilityGameIds).not.toContain(469779);
   });
 
   it("cites the exact pinned sc_rogue.cpp lines for thistle_tea", () => {

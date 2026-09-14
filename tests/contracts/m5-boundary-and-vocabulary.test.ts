@@ -355,21 +355,46 @@ describe("M5 invents no combat state", () => {
 
 describe("M5 forms no unearned verdict", () => {
   it("declares no positive gameplay status", () => {
+    // NARROWED AT M5-E, and narrowed in exactly one place. `"MATCH"` is now a
+    // legitimate member of the OBSERVED-ACTION COMPARISON vocabulary, which is a
+    // different claim from a gameplay verdict: it says the authority selection
+    // agreed with the observed token, and it is defined and tested as carrying
+    // no correctness meaning.
+    //
+    // Everything else stays absolute everywhere, and `"MATCH"` stays banned
+    // outside the two comparison modules — including in the judgment layer,
+    // which the block below re-asserts on its own terms.
+    const COMPARISON_LAYER = [
+      "src/specs/rogue/assassination/observed-comparison.ts",
+      "src/specs/rogue/assassination/observed-analysis.ts",
+    ];
     for (const path of M5_FILES) {
       const code = codeOf(path);
-      for (const forbidden of [
+      const forbidden = [
         '"CORRECT"',
-        '"MATCH"',
         '"OPTIMAL"',
         '"APPROVED"',
         "wasCorrect",
         "isOptimal",
         "expectedAction",
         "idealAction",
-      ]) {
-        expect(code, `${path} declares ${forbidden}`).not.toContain(forbidden);
+      ];
+      if (!COMPARISON_LAYER.includes(path)) forbidden.push('"MATCH"');
+      for (const word of forbidden) {
+        expect(code, `${path} declares ${word}`).not.toContain(word);
       }
     }
+  });
+
+  it("keeps the observed-action JUDGMENT free of any positive verdict", () => {
+    // The rule M5-A rests on, restated so narrowing the sweep above cannot
+    // erode it. A false gate proves unreachability; a satisfiable one proves
+    // almost nothing, so this layer has no positive status to offer.
+    const judgment = codeOf("src/findings/judgment.ts");
+    for (const forbidden of ['"MATCH"', '"CORRECT"', '"OPTIMAL"', '"APPROVED"', '"COMPATIBLE"']) {
+      expect(judgment, `judgment.ts declares ${forbidden}`).not.toContain(forbidden);
+    }
+    expect(judgment).toContain('"REJECTED_BY_AUTHORITY" | "UNKNOWN" | "NO_AUTHORITY_AVAILABLE"');
   });
 
   it("introduces no subjective confidence scale", () => {
@@ -439,10 +464,27 @@ describe("M5 forms no unearned verdict", () => {
     expect(codeOf("src/specs/rogue/assassination/evaluator.ts")).toContain("notEvaluatedActionability()");
   });
 
-  it("uses no comparison or top-log input at all", () => {
+  it("uses no comparable-log or top-log input at all", () => {
+    // RETARGETED AT M5-E. The rule is about COMPARABLE LOGS — other players'
+    // parses becoming rotational authority or moving confidence. It was written
+    // as a ban on the bare substring "comparison", which M5-E's observed-action
+    // comparison collides with by name while being the opposite thing: a
+    // comparison against the PINNED AUTHORITY, using no other player's data.
+    //
+    // The terms below name the actual concept, so the guard still catches a real
+    // comparable-log input and no longer catches an unrelated word.
     for (const path of M5_FILES) {
       const code = codeOf(path);
-      for (const forbidden of ["topLog", "comparison", "consensus", "percentile", "ranking"]) {
+      for (const forbidden of [
+        "topLog",
+        "comparisonLog",
+        "comparableLog",
+        "comparisonParse",
+        "topParse",
+        "consensus",
+        "percentile",
+        "ranking",
+      ]) {
         expect(code, `${path} mentions ${forbidden}`).not.toContain(forbidden);
       }
     }

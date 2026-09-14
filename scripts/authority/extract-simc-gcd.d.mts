@@ -82,7 +82,44 @@ export function verifyRequiredFacts(input: {
   readonly classSpells: readonly ClassSpellRow[];
   readonly gcdFieldIndex: number;
   readonly expectedGcdFieldIndex: number;
+  readonly measuredSourcePaths?: ReadonlySet<string>;
+  /** The generated spell data, for the `__spelleffect_data` trigger table. */
+  readonly spellDataText?: string;
+  /** `spell_data.hpp`, for deriving the effect struct's field indices. */
+  readonly spellDataLayoutText?: string;
 }): readonly string[];
+
+/** Field indices of `spelleffect_data_t`, derived from the pinned header. */
+export type EffectFieldIndices =
+  | {
+      readonly ok: true;
+      readonly fields: readonly string[];
+      readonly spellIdIndex: number;
+      readonly effectIndexIndex: number;
+      readonly triggerSpellIdIndex: number;
+    }
+  | { readonly ok: false; readonly error: string };
+
+export function deriveEffectFieldIndices(headerText: string): EffectFieldIndices;
+
+/** `spellId -> effectIndex -> triggerSpellId`, read from `__spelleffect_data`. */
+export type EffectTriggerResult =
+  | {
+      readonly ok: true;
+      readonly bySpell: ReadonlyMap<number, ReadonlyMap<number, number>>;
+      readonly rowsScanned: number;
+    }
+  | { readonly ok: false; readonly error: string };
+
+export function parseEffectTriggers(
+  text: string,
+  wantedSpellIds: Iterable<number>,
+  indices: {
+    readonly spellIdIndex: number;
+    readonly effectIndexIndex: number;
+    readonly triggerSpellIdIndex: number;
+  },
+): EffectTriggerResult;
 
 /**
  * Serialises the artifact the way Prettier would, so the generated file passes

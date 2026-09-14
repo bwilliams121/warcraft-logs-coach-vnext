@@ -172,10 +172,47 @@ export interface MetaActionLaneRecord {
  * `thistle_tea` binding branches on talent state this build does not resolve, so
  * both reachable records are recorded and neither branch is chosen.
  */
+/**
+ * How a DECLARED spell id was resolved to the spell that actually executes.
+ *
+ * A FOURTH kind of knowledge (M5-E), and the only machine-extracted one that
+ * concerns identity rather than a value.
+ *
+ * Some SimulationCraft bindings name a spell that is never cast. The
+ * `thistle_tea` talent branch reads
+ * `talent.rogue.thistle_tea_auto->effectN( 1 ).trigger()` — so 469779 is a
+ * TALENT record whose effect triggers the executable ability 381623. Listing
+ * 469779 as an execution candidate would claim the player casts a talent.
+ *
+ * The relation is read from the generated effect table, so removing the id is a
+ * DERIVATION rather than a hand-deletion, and the derivation stays in the
+ * artifact where a reviewer can check it.
+ */
+export interface TokenExecutionResolution {
+  /** The id the C++ names, which does not execute. */
+  readonly declaredSpellId: number;
+  /** The effect index carrying the trigger. `effectN( n )` is 1-based; this is 0-based. */
+  readonly effectIndex: number;
+  /** The spell that actually executes. Always one of the candidates. */
+  readonly resolvedAbilityGameId: number;
+  readonly method: "MACHINE_EXTRACTED_EFFECT_TRIGGER";
+  readonly sourcePath: string;
+  readonly sourceSha256: string;
+  readonly note: string;
+}
+
 export interface TokenBindingRecord {
   readonly simcToken: string;
+  /**
+   * The spells that can EXECUTE for this token.
+   *
+   * Execution identities only. A declared spell that merely triggers one of
+   * these appears in `executionResolutions`, never here.
+   */
   readonly candidateAbilityGameIds: readonly number[];
   readonly binding: TokenBindingProvenance;
+  /** Present only where a declared id had to be resolved. Usually absent. */
+  readonly executionResolutions?: readonly TokenExecutionResolution[];
 }
 
 export interface GcdSemanticsArtifact {
@@ -257,6 +294,59 @@ function validateSources(value: unknown): readonly GcdArtifactSource[] | null {
  * its hash would be indistinguishable from a machine-extracted fact, which is
  * the exact confusion this record exists to prevent.
  */
+/**
+ * Validates the execution resolutions, or `null` if any is malformed.
+ *
+ * Two rules beyond shape, and both matter:
+ *
+ *   - the resolved id must BE one of the execution candidates, or the record
+ *     would document a resolution the binding does not actually use
+ *   - the declared id must NOT also be a candidate, which would reintroduce the
+ *     ambiguity the resolution exists to remove
+ */
+function validateExecutionResolutions(
+  value: unknown,
+  candidateAbilityGameIds: readonly number[],
+): readonly TokenExecutionResolution[] | null {
+  if (value === undefined) return [];
+  if (!Array.isArray(value)) return null;
+  const resolutions: TokenExecutionResolution[] = [];
+  for (const raw of value) {
+    if (!isRecord(raw)) return null;
+    const declaredSpellId = int(raw, "declaredSpellId");
+    const effectIndex = int(raw, "effectIndex");
+    const resolvedAbilityGameId = int(raw, "resolvedAbilityGameId");
+    const method = str(raw, "method");
+    const sourcePath = str(raw, "sourcePath");
+    const sourceSha256 = str(raw, "sourceSha256");
+    const note = str(raw, "note");
+    if (
+      declaredSpellId === null ||
+      effectIndex === null ||
+      resolvedAbilityGameId === null ||
+      method !== "MACHINE_EXTRACTED_EFFECT_TRIGGER" ||
+      sourcePath === null ||
+      sourceSha256 === null ||
+      note === null
+    ) {
+      return null;
+    }
+    if (declaredSpellId <= 0 || effectIndex < 0 || resolvedAbilityGameId <= 0) return null;
+    if (!candidateAbilityGameIds.includes(resolvedAbilityGameId)) return null;
+    if (candidateAbilityGameIds.includes(declaredSpellId)) return null;
+    resolutions.push({
+      declaredSpellId,
+      effectIndex,
+      resolvedAbilityGameId,
+      method,
+      sourcePath,
+      sourceSha256,
+      note,
+    });
+  }
+  return resolutions;
+}
+
 function validateBindingProvenance(value: unknown): TokenBindingProvenance | null {
   if (!isRecord(value)) return null;
   const method = str(value, "method");
@@ -509,7 +599,19 @@ export function validateGcdSemanticsArtifact(value: unknown): GcdArtifactValidat
       return invalid("DUPLICATE_TOKEN", simcToken);
     }
     seenTokens.add(simcToken);
-    tokenBindings.push({ simcToken, candidateAbilityGameIds, binding });
+    const resolutions = validateExecutionResolutions(raw["executionResolutions"], candidateAbilityGameIds);
+    if (resolutions === null) {
+      return invalid(
+        "MALFORMED_TOKEN_BINDING",
+        `tokenBindings[${index}] ('${simcToken}') carries a malformed execution resolution`,
+      );
+    }
+    tokenBindings.push({
+      simcToken,
+      candidateAbilityGameIds,
+      binding,
+      ...(resolutions.length === 0 ? {} : { executionResolutions: resolutions }),
+    });
   }
 
   const metaRaw = value["metaActionLanes"];

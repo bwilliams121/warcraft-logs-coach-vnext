@@ -49,7 +49,7 @@
     "gcdFieldName": "_gcd",
     "gcdFieldUnits": "MILLISECONDS",
     "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
-    "extractedOn": "2026-09-13",
+    "extractedOn": "2026-09-14",
     "extractorVersion": 1,
     "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
   },
@@ -213,7 +213,7 @@
     },
     {
       "simcToken": "thistle_tea",
-      "candidateAbilityGameIds": [381623, 469779],
+      "candidateAbilityGameIds": [381623],
       "binding": {
         "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
         "sourcePath": "engine/class_modules/sc_rogue.cpp",
@@ -221,9 +221,20 @@
         "symbol": "rogue_t::init_spells",
         "startLine": 10237,
         "endLine": 10238,
-        "sourceNote": "spell.thistle_tea = talent.rogue.thistle_tea_auto->ok() ? talent.rogue.thistle_tea_auto->effectN( 1 ).trigger() : ( talent.rogue.thistle_tea_ability->ok() ? talent.rogue.thistle_tea_ability : not_found() ). Both reachable records are recorded because the branch depends on talent state this build does not resolve.",
+        "sourceNote": "spell.thistle_tea = talent.rogue.thistle_tea_auto->ok() ? talent.rogue.thistle_tea_auto->effectN( 1 ).trigger() : ( talent.rogue.thistle_tea_ability->ok() ? talent.rogue.thistle_tea_ability : not_found() ). BOTH branches resolve to 381623: the first through the effect trigger of 469779, the second directly. The talent branch is therefore irrelevant to execution identity, and no branch needs to be chosen.",
         "crossCheck": "NONE_TALENT_BOUND"
-      }
+      },
+      "executionResolutions": [
+        {
+          "declaredSpellId": 469779,
+          "effectIndex": 0,
+          "resolvedAbilityGameId": 381623,
+          "method": "MACHINE_EXTRACTED_EFFECT_TRIGGER",
+          "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+          "sourceSha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+          "note": "talent.rogue.thistle_tea_auto is spell 469779. The taken branch calls effectN( 1 ).trigger(), so the executed action is the TRIGGERED spell, not 469779 itself. The other branch is thistle_tea_ability = 381623 directly, so both branches execute 381623."
+        }
+      ]
     },
     {
       "simcToken": "garrote",
