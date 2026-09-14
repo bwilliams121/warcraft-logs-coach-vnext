@@ -18,10 +18,33 @@ export type IngestionScope = "PLAYER_CONTEXT" | "FULL_RAID";
 
 export const INGESTION_SCOPES = ["PLAYER_CONTEXT", "FULL_RAID"] as const satisfies readonly IngestionScope[];
 
-/** What an analyzer declares it needs. The service unions these. */
+/**
+ * What an analyzer declares it needs in order to run.
+ *
+ * THE WHOLE POINT IS OWNERSHIP. Every analyzer-specific evidence choice the
+ * ingestion request depends on belongs on this object, because the alternative
+ * is the application service deciding it — and the service has no business
+ * knowing WHY an analyzer wants a fact. Which resources a specialization spends,
+ * and what they mean, is gameplay knowledge; a generic orchestrator holding it
+ * works precisely until a second analyzer with different needs arrives, and then
+ * silently retrieves the wrong evidence for it.
+ *
+ * So the rule is: the registration declares, the service consumes. A field
+ * belongs here when a request cannot be built without it AND the answer differs
+ * per analyzer.
+ */
 export interface AnalyzerRequirement {
   readonly analyzerId: string;
   readonly requiredScope: IngestionScope;
+  /**
+   * Whether this analyzer needs resource observations retrieved.
+   *
+   * Resources are a real retrieval cost, not a free extra, so an analyzer that
+   * reads none should not pay for them. Which resources matter, and what they
+   * mean, stays entirely behind the analyzer — this is only "yes, retrieve
+   * them".
+   */
+  readonly includeResources: boolean;
 }
 
 export type ScopeDerivation =

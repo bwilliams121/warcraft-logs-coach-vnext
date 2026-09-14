@@ -65,7 +65,6 @@ async function callRoute() {
   const fetch = createWclFetch({ graphql: () => preflightResponse() });
   const worker = createWorker({
     analyze: analyzeFight,
-    analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight: createPreflight({ fetch: fetch.fetch, now: () => 1_000_000 }),
     // The analysis route must not dispatch to MCP. A thrower makes that a
     // failure rather than something this test would quietly tolerate.
@@ -124,10 +123,23 @@ describe("the live analysis route retrieves no combat events", () => {
     expect(body.error?.code).toBe("ANALYSIS_NOT_IMPLEMENTED");
   });
 
-  it("keeps the enabled analyzer registry empty", async () => {
-    // Scope derivation reads this. While it is empty there is nothing to
-    // analyze, so there is nothing to ingest for — and ingestion acquires a
-    // caller and a reason on the same commit, in Milestone 5.
-    expect(ENABLED_ANALYSIS_REQUIREMENTS).toHaveLength(0);
+  it("retrieves nothing even though an analyzer is now registered", async () => {
+    // Superseded "keeps the enabled analyzer registry empty". An analyzer IS
+    // registered now and it does declare a scope — so the reason this route
+    // retrieves no events has moved, and the new reason is the stronger one.
+    //
+    // It is no longer "there is nothing to analyze for". It is that the Worker
+    // binds no ingestion port, so the route has no way to retrieve anything at
+    // all. A registry that grows can no longer switch retrieval on by accident;
+    // only binding the port can, and that is M6-E's deliberate act.
+    expect(ENABLED_ANALYSIS_REQUIREMENTS).toHaveLength(1);
+
+    const { fetch, response } = await callRoute();
+
+    expect(response.status).toBe(501);
+    expect(fetch.graphqlCalls().length).toBeGreaterThan(0);
+    for (const call of fetch.graphqlCalls()) {
+      expect(queryOf(call.body)).not.toContain("nextPageTimestamp");
+    }
   });
 });

@@ -6,6 +6,11 @@
  * is exactly one result shape.
  */
 
+import type { SpecId } from "../findings/finding.js";
+import type { FightIdentity } from "../wcl/types.js";
+import type { SpecAnalysis } from "./analyzer-registry.js";
+import type { IngestionScope } from "./ingestion-scope.js";
+
 /**
  * Outcome states of a completed analysis.
  *
@@ -51,6 +56,24 @@ export type ServiceErrorCode =
   | "INVALID_REQUEST"
   | "CONFIGURATION_ERROR"
   | "REPORT_NOT_ACCESSIBLE"
+  /**
+   * The report exists but its combat events are archived out of reach.
+   *
+   * Kept apart from `REPORT_NOT_ACCESSIBLE` because the two need different
+   * things from the reader: a missing or private report is a wrong link, while
+   * an archived one is a real report this deployment cannot read with
+   * client-credentials access.
+   */
+  | "REPORT_ARCHIVED_INACCESSIBLE"
+  /**
+   * The report was re-uploaded while we were reading it.
+   *
+   * Its own code because it is the one retrieval failure that is neither the
+   * caller's fault nor ours, and the one whose correct response is simply to
+   * try again. Folding it into `UPSTREAM_DATA_INVALID` would tell a caller the
+   * data cannot be trusted when in fact a later attempt is expected to succeed.
+   */
+  | "REPORT_REVISION_CHANGED"
   | "FIGHT_NOT_FOUND"
   | "SOURCE_NOT_FOUND"
   | "SOURCE_NOT_A_PLAYER"
@@ -67,6 +90,8 @@ export const SERVICE_ERROR_CODES = [
   "INVALID_REQUEST",
   "CONFIGURATION_ERROR",
   "REPORT_NOT_ACCESSIBLE",
+  "REPORT_ARCHIVED_INACCESSIBLE",
+  "REPORT_REVISION_CHANGED",
   "FIGHT_NOT_FOUND",
   "SOURCE_NOT_FOUND",
   "SOURCE_NOT_A_PLAYER",
@@ -114,8 +139,43 @@ export interface ServiceError {
   readonly issues?: readonly RequestIssue[];
 }
 
+/**
+ * A completed analysis, as the application layer holds it.
+ *
+ * A THIN WRAPPER, DELIBERATELY. It carries the analyzer's own result unchanged
+ * plus the identity the analysis was run against. It does not reshape, rank,
+ * summarise or reinterpret anything the analyzer said — an application layer
+ * that edited a gameplay result would be a second analyzer with a smaller
+ * vocabulary.
+ *
+ * THIS IS NOT A WIRE CONTRACT. `analysis` is the analyzer's internal type, and
+ * it may contain more structure than any interface should publish. Projecting a
+ * stable public shape is a later milestone's job; nothing here is frozen.
+ */
+export interface FightAnalysis {
+  /** Warcraft Logs identity, exactly as preflight established it. */
+  readonly identity: FightIdentity;
+  /**
+   * The internal specialization an analyzer was selected for.
+   *
+   * `null` when the player's specialization maps to no registered analyzer. Null
+   * rather than a placeholder id, so "we did not analyze this" cannot be read as
+   * "we analyzed it as something".
+   */
+  readonly specId: SpecId | null;
+  /** Which registered analyzer ran, or `null` when none did. Disclosure, not dispatch. */
+  readonly analyzerId: string | null;
+  /**
+   * The evidence breadth actually retrieved, derived from the analyzer's
+   * requirement — or `null` when no analyzer ran and nothing was retrieved.
+   */
+  readonly scope: IngestionScope | null;
+  /** The analyzer's own result, unmodified. */
+  readonly analysis: SpecAnalysis;
+}
+
 export type AnalysisServiceResult =
-  | { readonly ok: true; readonly state: AnalysisResultState }
+  | { readonly ok: true; readonly state: AnalysisResultState; readonly analysis: FightAnalysis }
   | { readonly ok: false; readonly error: ServiceError };
 
 export function serviceFailure(

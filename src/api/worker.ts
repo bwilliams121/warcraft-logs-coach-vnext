@@ -9,13 +9,8 @@
 
 import type { Env } from "../config/env.js";
 import { handleMcpRequest } from "../mcp/server.js";
-import {
-  analyzeFight,
-  ENABLED_ANALYSIS_REQUIREMENTS,
-  type AnalysisServiceDeps,
-} from "../services/analysis-service.js";
+import { analyzeFight, type AnalysisServiceDeps } from "../services/analysis-service.js";
 import type { AnalysisServiceResult } from "../services/result.js";
-import type { AnalyzerRequirement } from "../services/ingestion-scope.js";
 import { wclPreflight } from "../wcl/preflight.js";
 import type { PreflightPort } from "../wcl/types.js";
 import { apiErrorResponse, jsonResponse, serviceResultResponse } from "./responses.js";
@@ -29,7 +24,6 @@ const MCP_PATH = "/mcp";
 
 export interface WorkerDeps {
   readonly analyze: (input: unknown, deps: AnalysisServiceDeps) => Promise<AnalysisServiceResult>;
-  readonly analyzers: readonly AnalyzerRequirement[];
   /**
    * Passed through to the service untouched. The API layer never calls it: it
    * holds the port only so tests can substitute one, which is also what proves
@@ -62,7 +56,6 @@ export interface WorkerHandler {
 
 const DEFAULT_DEPS: WorkerDeps = {
   analyze: analyzeFight,
-  analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
   preflight: wclPreflight,
   mcp: handleMcpRequest,
   version: SERVICE_VERSION,
@@ -84,7 +77,6 @@ async function handleAnalysis(request: Request, env: Env, deps: WorkerDeps): Pro
 
   const result = await deps.analyze(body, {
     env,
-    analyzers: deps.analyzers,
     preflight: deps.preflight,
   });
   return serviceResultResponse(result);

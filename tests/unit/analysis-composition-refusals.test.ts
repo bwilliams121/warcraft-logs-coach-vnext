@@ -1,0 +1,387 @@
+/**
+ * M6-B — what the composed path refuses, and what it refuses to spend.
+ *
+ * TWO KINDS OF ASSERTION LIVE HERE AND THEY ARE NOT THE SAME CLAIM.
+ *
+ *   1. The ANSWER is right — an unsupported spec reports that it is unsupported
+ *      rather than being analyzed as a Rogue.
+ *   2. The WORK is not done — nothing downstream of the refusal ran.
+ *
+ * The second matters on its own. Every stage past identity costs Warcraft Logs
+ * API points from a finite shared quota, so "we returned the right answer" is
+ * only half of correct if we paginated an entire combat log to reach it. Each
+ * stage is therefore a spy, and the tests assert call counts of zero.
+ *
+ * NONE OF THIS EVALUATES GAMEPLAY. A refusal is a statement about this build's
+ * coverage, never about how anyone played.
+ */
+
+import { describe, expect, it, vi } from "vitest";
+
+import { analyzeFight, type AnalysisServiceDeps } from "../../src/services/analysis-service.js";
+import { analyzerForSpec } from "../../src/services/analyzer-registry.js";
+import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
+import type { Env } from "../../src/config/env.js";
+import { wclFailure, type FightIdentity, type PreflightPort } from "../../src/wcl/types.js";
+import { M5D2_ACTOR, m5d2Fight } from "../support/m5d2-fixture.js";
+
+const ENV: Env = {
+  ENVIRONMENT: "test",
+  WCL_CLIENT_ID: "fake-client-id-not-real",
+  WCL_CLIENT_SECRET: "fake-client-secret-not-real",
+};
+
+const FIXTURE_FIGHT = m5d2Fight();
+
+const REQUEST = {
+  reportCode: FIXTURE_FIGHT.report.code,
+  fightId: FIXTURE_FIGHT.fight.id,
+  sourceId: M5D2_ACTOR,
+};
+
+function identityFor(className: string, specName: string): FightIdentity {
+  return {
+    report: {
+      code: FIXTURE_FIGHT.report.code,
+      revision: FIXTURE_FIGHT.report.revision,
+      startTime: FIXTURE_FIGHT.report.startTimeUnixMs,
+      endTime: FIXTURE_FIGHT.report.endTimeUnixMs,
+    },
+    data: FIXTURE_FIGHT.data,
+    fight: {
+      id: FIXTURE_FIGHT.fight.id,
+      name: FIXTURE_FIGHT.fight.name,
+      encounterId: FIXTURE_FIGHT.fight.encounterId,
+      difficulty: FIXTURE_FIGHT.fight.difficulty,
+      startTime: FIXTURE_FIGHT.fight.startTimeMs,
+      endTime: FIXTURE_FIGHT.fight.endTimeMs,
+    },
+    player: { sourceId: M5D2_ACTOR, name: "Fixtureplayer", className, specName },
+  };
+}
+
+const FIXTURE_INGEST: CombatIngestionPort = async () => ({
+  ok: true,
+  fight: m5d2Fight(),
+  rateLimit: undefined,
+});
+
+/** A preflight, an ingestor and an analyzer, each individually observable. */
+function spies(className = "Rogue", specName = "Assassination") {
+  const real = analyzerForSpec("rogue/assassination");
+  if (real === null) throw new Error("the Assassination analyzer is not registered");
+
+  const preflight = vi.fn<PreflightPort>(async () => ({
+    ok: true,
+    identity: identityFor(className, specName),
+    rateLimit: undefined,
+  }));
+  const ingest = vi.fn(FIXTURE_INGEST);
+  const analyze = vi.fn(real.analyze);
+
+  const deps: AnalysisServiceDeps = {
+    env: ENV,
+    preflight,
+    ingest,
+    registry: [{ ...real, analyze }],
+  };
+  return { preflight, ingest, analyze, deps };
+}
+
+describe("an unsupported specialization", () => {
+  it("reports SPEC_NOT_SUPPORTED as a successful result", async () => {
+    // Success, not an error. The service did its job and answered truthfully.
+    // Returning a failure would push callers toward retrying a correct answer.
+    const { deps } = spies("Paladin", "Protection");
+    const result = await analyzeFight(REQUEST, deps);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state).toBe("SPEC_NOT_SUPPORTED");
+    expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
+  });
+
+  it("never runs the Assassination analyzer", async () => {
+    // THE failure this guards: Rogue rules applied to someone else's fight,
+    // producing a confident, well-formed report about the wrong game.
+    const { analyze, deps } = spies("Paladin", "Protection");
+    await analyzeFight(REQUEST, deps);
+
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it("retrieves no combat events at all", async () => {
+    // The spec is fully determined by M2 identity, so paginating a whole log to
+    // report that we were never going to analyze it would be pure waste.
+    const { ingest, deps } = spies("Paladin", "Protection");
+    await analyzeFight(REQUEST, deps);
+
+    expect(ingest).not.toHaveBeenCalled();
+  });
+
+  it("names no supported spec and claims no analyzer", async () => {
+    const { deps } = spies("Paladin", "Protection");
+    const result = await analyzeFight(REQUEST, deps);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.analysis.specId).toBeNull();
+    expect(result.analysis.analyzerId).toBeNull();
+    expect(result.analysis.scope).toBeNull();
+  });
+
+  it("says out loud that no analysis was attempted", async () => {
+    // An empty result that reads as clean play is the disclosure failure this
+    // detail exists to prevent.
+    const { deps } = spies("Paladin", "Protection");
+    const result = await analyzeFight(REQUEST, deps);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    const analysis = result.analysis.analysis;
+    if (analysis.status === "ANALYZED") throw new Error("an unsupported spec was analyzed");
+    expect(analysis.detail).toContain("no gameplay analysis was attempted");
+    expect(analysis.detail).toContain("not a");
+  });
+
+  it("carries no comparisons or coverage a reader could mistake for findings", async () => {
+    const { deps } = spies("Paladin", "Protection");
+    const result = await analyzeFight(REQUEST, deps);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect("comparisons" in result.analysis.analysis).toBe(false);
+    expect("coverage" in result.analysis.analysis).toBe(false);
+  });
+
+  it("refuses every non-Assassination specialization the same way", async () => {
+    for (const [className, specName] of [
+      ["Rogue", "Outlaw"],
+      ["Rogue", "Subtlety"],
+      ["Evoker", "Augmentation"],
+      ["Paladin", "Protection"],
+      ["Priest", "Discipline"],
+    ]) {
+      const { analyze, ingest, deps } = spies(className, specName);
+      const result = await analyzeFight(REQUEST, deps);
+
+      expect(`${className}/${specName}=${result.ok ? result.state : "FAILED"}`).toBe(
+        `${className}/${specName}=SPEC_NOT_SUPPORTED`,
+      );
+      expect(analyze, `${className}/${specName} reached the Rogue analyzer`).not.toHaveBeenCalled();
+      expect(ingest, `${className}/${specName} spent ingestion`).not.toHaveBeenCalled();
+    }
+  });
+
+  it("does not treat another Rogue specialization as Assassination", async () => {
+    // Sharing a class is the nearest miss, and the one a fuzzy mapper would get
+    // wrong. Outlaw is not Assassination.
+    const { analyze, deps } = spies("Rogue", "Outlaw");
+    const result = await analyzeFight(REQUEST, deps);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.state).toBe("SPEC_NOT_SUPPORTED");
+    expect(analyze).not.toHaveBeenCalled();
+  });
+});
+
+describe("an unusable identity", () => {
+  it("fails closed rather than defaulting to a specialization", async () => {
+    // Preflight will not resolve an identity without a usable class and spec, so
+    // arriving here means the identity cannot be trusted — and an untrustworthy
+    // identity must never pick an analyzer.
+    const { analyze, ingest, deps } = spies("", "");
+    const result = await analyzeFight(REQUEST, deps);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("IDENTITY_UNRESOLVED");
+    expect(analyze).not.toHaveBeenCalled();
+    expect(ingest).not.toHaveBeenCalled();
+  });
+
+  it("distinguishes an unusable identity from an unsupported specialization", async () => {
+    // Different conditions with different remedies: one is a data problem, the
+    // other is a coverage limit. Collapsing them would hide a broken upstream
+    // behind a routine "we don't support that spec".
+    const blank = await analyzeFight(REQUEST, spies("   ", "Assassination").deps);
+    const unsupported = await analyzeFight(REQUEST, spies("Paladin", "Protection").deps);
+
+    expect(blank.ok).toBe(false);
+    expect(unsupported.ok).toBe(true);
+  });
+});
+
+describe("failures stop the pipeline where they occur", () => {
+  it("an invalid request reaches neither preflight nor ingestion", async () => {
+    const { preflight, ingest, deps } = spies();
+    const result = await analyzeFight({ reportCode: "too-short" }, deps);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("INVALID_REQUEST");
+    expect(preflight).not.toHaveBeenCalled();
+    expect(ingest).not.toHaveBeenCalled();
+  });
+
+  it("a missing configuration reaches neither preflight nor ingestion", async () => {
+    const { preflight, ingest, deps } = spies();
+    const result = await analyzeFight(REQUEST, { ...deps, env: { ENVIRONMENT: "test" } });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("CONFIGURATION_ERROR");
+    expect(preflight).not.toHaveBeenCalled();
+    expect(ingest).not.toHaveBeenCalled();
+  });
+
+  it("a preflight failure never reaches ingestion", async () => {
+    const { ingest, analyze, deps } = spies();
+    const result = await analyzeFight(REQUEST, {
+      ...deps,
+      preflight: async () => ({ ok: false, failure: wclFailure("REPORT_NOT_ACCESSIBLE", "DECODE") }),
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("REPORT_NOT_ACCESSIBLE");
+    expect(ingest).not.toHaveBeenCalled();
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it("an ingestion failure never reaches the analyzer", async () => {
+    const { analyze, deps } = spies();
+    const result = await analyzeFight(REQUEST, {
+      ...deps,
+      ingest: async () => ({ ok: false, failure: { reason: "UPSTREAM_RATE_LIMITED" } }),
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("UPSTREAM_RATE_LIMITED");
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it("maps every ingestion failure to its own service code", async () => {
+    // Deliberately NOT flattened into one upstream error. The distinctions M3
+    // draws are the ones a reader can act on.
+    const expected: Record<string, string> = {
+      REPORT_NOT_ACCESSIBLE: "REPORT_NOT_ACCESSIBLE",
+      REPORT_ARCHIVED_INACCESSIBLE: "REPORT_ARCHIVED_INACCESSIBLE",
+      REPORT_REVISION_CHANGED: "REPORT_REVISION_CHANGED",
+      FIGHT_NOT_FOUND: "FIGHT_NOT_FOUND",
+      FIGHT_RANGE_INVALID: "UPSTREAM_DATA_INVALID",
+      EVENT_RETRIEVAL_ABSENT: "UPSTREAM_DATA_INVALID",
+      UPSTREAM_DATA_INVALID: "UPSTREAM_DATA_INVALID",
+      UPSTREAM_AUTH_FAILED: "UPSTREAM_AUTH_FAILED",
+      UPSTREAM_RATE_LIMITED: "UPSTREAM_RATE_LIMITED",
+      UPSTREAM_UNAVAILABLE: "UPSTREAM_UNAVAILABLE",
+    };
+
+    for (const [reason, code] of Object.entries(expected)) {
+      const { deps } = spies();
+      const result = await analyzeFight(REQUEST, {
+        ...deps,
+        ingest: async () => ({
+          ok: false,
+          failure: { reason: reason as "UPSTREAM_UNAVAILABLE" },
+        }),
+      });
+
+      expect(`${reason}=${result.ok ? "OK" : result.error.code}`).toBe(`${reason}=${code}`);
+    }
+  });
+
+  it("never describes a failed retrieval as an inactive player", async () => {
+    // A retrieval that returned nothing is not a fight in which nothing
+    // happened, and the message must not let those be confused.
+    const { deps } = spies();
+    const result = await analyzeFight(REQUEST, {
+      ...deps,
+      ingest: async () => ({ ok: false, failure: { reason: "EVENT_RETRIEVAL_ABSENT" } }),
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.message).toContain("retrieval failure");
+    expect(result.error.message).not.toContain("idle");
+  });
+
+  it("interpolates nothing upstream into a failure message", async () => {
+    const { deps } = spies();
+    const result = await analyzeFight(REQUEST, {
+      ...deps,
+      ingest: async () => ({ ok: false, failure: { reason: "UPSTREAM_AUTH_FAILED" } }),
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    for (const secret of ["fake-client-id-not-real", "fake-client-secret-not-real"]) {
+      expect(result.error.message).not.toContain(secret);
+    }
+  });
+});
+
+describe("identity must still describe the fight that was retrieved", () => {
+  it("refuses a fight whose report revision changed after preflight", async () => {
+    // Preflight and ingestion are two round trips, and a report can be
+    // re-uploaded between them. Analyzing the new revision against the old
+    // identity would be analyzing one fight while believing it was another.
+    const { analyze, deps } = spies();
+    const changed = m5d2Fight();
+    const result = await analyzeFight(REQUEST, {
+      ...deps,
+      ingest: async () => ({
+        ok: true,
+        fight: { ...changed, report: { ...changed.report, revision: changed.report.revision + 1 } },
+        rateLimit: undefined,
+      }),
+    });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("REPORT_REVISION_CHANGED");
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it("accepts a fight whose revision still matches", async () => {
+    const { analyze, deps } = spies();
+    const result = await analyzeFight(REQUEST, deps);
+
+    expect(result.ok).toBe(true);
+    expect(analyze).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("the M6-B/M6-E boundary", () => {
+  it("performs no retrieval when no ingestion port is supplied", async () => {
+    // How the REST route holds its pre-M6-E behaviour: without the port the
+    // service cannot retrieve anything, so the guarantee is structural rather
+    // than a promise not to use what it was given.
+    const { preflight, analyze, deps } = spies();
+    const { ingest: _omitted, ...withoutIngest } = deps;
+    const result = await analyzeFight(REQUEST, withoutIngest);
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe("ANALYSIS_NOT_IMPLEMENTED");
+    // Identity is still established — that behaviour is unchanged from M2.
+    expect(preflight).toHaveBeenCalledTimes(1);
+    expect(analyze).not.toHaveBeenCalled();
+  });
+
+  it("changes nothing about gameplay semantics", async () => {
+    // The port governs whether retrieval is POSSIBLE, never what an analysis
+    // means. Supplying it does not alter a single coverage number.
+    const { deps } = spies();
+    const withPort = await analyzeFight(REQUEST, deps);
+
+    expect(withPort.ok).toBe(true);
+    if (!withPort.ok) return;
+    const analysis = withPort.analysis.analysis;
+    if (analysis.status !== "ANALYZED") throw new Error("expected ANALYZED");
+    expect(analysis.coverage.eligibleDecisions).toBe(11);
+    expect(analysis.coverage.match).toBe(1);
+  });
+});

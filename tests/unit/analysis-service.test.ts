@@ -6,7 +6,6 @@ import {
   ENABLED_ANALYSIS_REQUIREMENTS,
   type AnalysisServiceDeps,
 } from "../../src/services/analysis-service.js";
-import type { AnalyzerRequirement } from "../../src/services/ingestion-scope.js";
 import type { ServiceErrorCode } from "../../src/services/result.js";
 import { wclFailure, type PreflightPort, type WclFailureReason } from "../../src/wcl/types.js";
 import { REQUEST } from "../fixtures/wcl/preflight-payloads.js";
@@ -65,7 +64,6 @@ const unreachablePreflight: PreflightPort = async () => {
 function deps(overrides: Partial<AnalysisServiceDeps> = {}): AnalysisServiceDeps {
   return {
     env: configuredEnv,
-    analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight: resolvingPreflight,
     ...overrides,
   };
@@ -208,15 +206,26 @@ describe("analyzeFight", () => {
     }
   });
 
-  it("milestone_2_enables_no_analyzers", () => {
-    expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([]);
+  it("enables_exactly_the_assassination_analyzer", () => {
+    // Superseded `milestone_2_enables_no_analyzers`. The registry was empty
+    // until an evaluator existed to fill it; M6-B registers the one that does.
+    // Pinned exactly, because this list is what scope derivation reads and a
+    // silent addition would widen retrieval for every request.
+    expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
+      {
+        analyzerId: "rogue-assassination-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
+      },
+    ]);
   });
 
-  it("an_enabled_analyzer_does_not_make_analysis_available", async () => {
-    // Even with a requirement declared, no evaluator exists. The service must
-    // still refuse rather than invent a result.
-    const analyzers: readonly AnalyzerRequirement[] = [{ analyzerId: "example", requiredScope: "FULL_RAID" }];
-    const result = await analyzeFight(validInput, deps({ analyzers }));
+  it("a_registered_analyzer_does_not_make_analysis_available_without_ingestion", async () => {
+    // A registered analyzer is not a capability. The Assassination analyzer IS
+    // registered and the request resolves to it, but without an ingestion port
+    // the service cannot retrieve evidence — so it refuses rather than
+    // inventing a result, and refuses having spent nothing.
+    const result = await analyzeFight(validInput, deps());
 
     expect(result.ok).toBe(false);
     if (!result.ok) {

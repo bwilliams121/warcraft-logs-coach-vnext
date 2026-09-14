@@ -1,11 +1,29 @@
 import { describe, expect, it } from "vitest";
 
+import { specNotSupported } from "../../src/services/analyzer-registry.js";
 import {
   ANALYSIS_RESULT_STATES,
   SERVICE_ERROR_CODES,
   serviceFailure,
   type AnalysisServiceResult,
+  type FightAnalysis,
 } from "../../src/services/result.js";
+import type { FightIdentity } from "../../src/wcl/types.js";
+
+const IDENTITY: FightIdentity = {
+  report: { code: "aBcDeFgH12345678", revision: 24, startTime: 0, endTime: 600_000 },
+  data: { logVersion: 26, gameVersion: 1 },
+  fight: { id: 8, name: "Test Encounter", encounterId: 2902, difficulty: 5, startTime: 0, endTime: 300_000 },
+  player: { sourceId: 15, name: "Coachtest", className: "Rogue", specName: "Assassination" },
+};
+
+const ANALYSIS: FightAnalysis = {
+  identity: IDENTITY,
+  specId: null,
+  analyzerId: null,
+  scope: null,
+  analysis: specNotSupported("paladin/protection"),
+};
 
 /**
  * Contract tests for the application-service envelope. Every later milestone and
@@ -13,7 +31,7 @@ import {
  */
 describe("analysis service result contract", () => {
   it("result_envelope_discriminates_on_ok", () => {
-    const success: AnalysisServiceResult = { ok: true, state: "COMPLETE" };
+    const success: AnalysisServiceResult = { ok: true, state: "COMPLETE", analysis: ANALYSIS };
     const failure = serviceFailure("INVALID_REQUEST", "nope");
 
     expect(success.ok).toBe(true);
@@ -22,6 +40,27 @@ describe("analysis service result contract", () => {
     expect("state" in success).toBe(true);
     expect("error" in failure).toBe(true);
     expect("state" in failure).toBe(false);
+  });
+
+  it("a_successful_result_always_carries_an_analysis", () => {
+    // Structural, not conventional: the success arm requires `analysis`, so a
+    // service cannot report success while producing nothing. The specific way
+    // this used to be possible — `{ ok: true, state }` with no payload — is now
+    // a type error rather than an empty report that reads as clean play.
+    const success: AnalysisServiceResult = { ok: true, state: "PARTIAL", analysis: ANALYSIS };
+
+    expect(success.ok).toBe(true);
+    if (!success.ok) return;
+    expect(success.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
+    expect(success.analysis.identity.player.name).toBe("Coachtest");
+  });
+
+  it("an_unanalyzed_specialization_reports_no_analyzer_rather_than_a_placeholder", () => {
+    // `null` says no analyzer ran. A placeholder spec id would let "we did not
+    // analyze this" be read as "we analyzed it as something".
+    expect(ANALYSIS.specId).toBeNull();
+    expect(ANALYSIS.analyzerId).toBeNull();
+    expect(ANALYSIS.scope).toBeNull();
   });
 
   it("analysis_result_states_include_spec_not_supported", () => {

@@ -3,7 +3,7 @@
 import { createWorker, type WorkerDeps } from "../../src/api/worker.js";
 import type { Env, WclCredentials } from "../../src/config/env.js";
 import { handleMcpRequest, PRODUCTION_MCP_HOSTNAME } from "../../src/mcp/server.js";
-import { analyzeFight, ENABLED_ANALYSIS_REQUIREMENTS } from "../../src/services/analysis-service.js";
+import { analyzeFight } from "../../src/services/analysis-service.js";
 import { createPreflight } from "../../src/wcl/preflight.js";
 import { createTokenCache } from "../../src/wcl/token-provider.js";
 import type { FetchLike, PreflightPort } from "../../src/wcl/types.js";
@@ -82,7 +82,6 @@ function throwingDeps(): WorkerDeps {
       // surface any of it.
       throw new Error(`boom ${SENTINEL_CLIENT_SECRET}`);
     },
-    analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight: RESOLVING_PREFLIGHT,
     mcp: handleMcpRequest,
     version: "0.1.0",
@@ -92,7 +91,6 @@ function throwingDeps(): WorkerDeps {
 function defaultDeps(preflight: PreflightPort = RESOLVING_PREFLIGHT): WorkerDeps {
   return {
     analyze: analyzeFight,
-    analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight,
     // The REAL handler, not a stub. /mcp is a new way for bytes to leave the
     // backend, so the sweep has to actually traverse it.

@@ -189,6 +189,85 @@ describe("gameplay cannot reach MCP", () => {
   });
 });
 
+/**
+ * The application service composes M2 -> M3 -> M4 -> M5 (M6-B). Its value is
+ * that BOTH transports can call it and get identical gameplay truth, and that
+ * property only survives while the service cannot see a transport.
+ *
+ * Enforced structurally rather than by convention: the `node` Vitest project
+ * already runs these modules with no Workers runtime present, so an accidental
+ * transport import shows up as a broken test rather than as a service that
+ * quietly only works in one place.
+ */
+describe("the application service stays transport-neutral", () => {
+  const SERVICE_FILES = filesUnder("src/services");
+
+  it("finds the service source files", () => {
+    expect(SERVICE_FILES).toContain("src/services/analysis-service.ts");
+    expect(SERVICE_FILES).toContain("src/services/analyzer-registry.ts");
+    expect(SERVICE_FILES).toContain("src/services/spec-identity.ts");
+  });
+
+  it("imports no transport layer", () => {
+    for (const file of SERVICE_FILES) {
+      for (const specifier of importSpecifiersOf(file)) {
+        const resolved = resolveSpecifier(file, specifier);
+        for (const forbidden of ["src/mcp", "src/api", "@modelcontextprotocol"]) {
+          expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain(forbidden);
+        }
+      }
+    }
+  });
+
+  it("imports no schema library", () => {
+    // Zod belongs to the PUBLIC wire contract, which is a later milestone and a
+    // separate boundary. A validation library inside the service would pull a
+    // wire shape into the layer whose whole job is not to have one.
+    for (const file of SERVICE_FILES) {
+      for (const specifier of importSpecifiersOf(file)) {
+        expect(`${file} -> ${specifier}`).not.toContain("zod");
+      }
+    }
+  });
+
+  it("names no Cloudflare runtime type", () => {
+    // `Request`/`Response`/`ExecutionContext` are the transport's vocabulary.
+    // The service speaks in requests it parsed and results it produced.
+    const banned = ["cloudflare:", "@cloudflare/", "ExecutionContext", "ExportedHandler"];
+    for (const file of SERVICE_FILES) {
+      const code = sourceOf(file)
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "");
+      for (const token of banned) {
+        expect(`${file}:${code.includes(token) ? token : "clean"}`).toBe(`${file}:clean`);
+      }
+    }
+  });
+
+  it("reaches gameplay only through the analyzer registry", () => {
+    // One file names a specialization evaluator. Everything else asks the
+    // registry — which is what keeps `if (spec === ...)` from spreading through
+    // the service as more analyzers land.
+    const importers = SERVICE_FILES.filter((file) =>
+      importSpecifiersOf(file).some((specifier) => resolveSpecifier(file, specifier).includes("src/specs")),
+    );
+
+    expect(importers).toEqual(["src/services/analyzer-registry.ts"]);
+  });
+
+  it("branches on no specialization by name", () => {
+    // Dispatch is a registry lookup. A hard-coded spec comparison in the
+    // service would be the first of the forty.
+    for (const file of SERVICE_FILES) {
+      if (file === "src/services/spec-identity.ts" || file === "src/services/analyzer-registry.ts") continue;
+      const code = sourceOf(file)
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "");
+      expect(`${file}:${code.includes("rogue/assassination") ? "hardcoded" : "clean"}`).toBe(`${file}:clean`);
+    }
+  });
+});
+
 describe("the temporary probe is marked for removal", () => {
   it("says in the file that M6-D deletes it", () => {
     // The realistic failure is not that someone ships `ping` on purpose — it is

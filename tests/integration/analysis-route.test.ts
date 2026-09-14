@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { createWorker, type WorkerDeps } from "../../src/api/worker.js";
 import type { Env } from "../../src/config/env.js";
-import { analyzeFight, ENABLED_ANALYSIS_REQUIREMENTS } from "../../src/services/analysis-service.js";
+import { analyzeFight } from "../../src/services/analysis-service.js";
 import { serviceFailure, type AnalysisServiceResult } from "../../src/services/result.js";
 import { wclFailure, type PreflightPort } from "../../src/wcl/types.js";
 
@@ -67,7 +67,6 @@ const UNREACHABLE_MCP: WorkerDeps["mcp"] = () => {
 function worker(deps: Partial<WorkerDeps> = {}) {
   return createWorker({
     analyze: deps.analyze ?? analyzeFight,
-    analyzers: deps.analyzers ?? ENABLED_ANALYSIS_REQUIREMENTS,
     preflight: deps.preflight ?? RESOLVING_PREFLIGHT,
     mcp: deps.mcp ?? UNREACHABLE_MCP,
     version: deps.version ?? "0.1.0",
@@ -160,7 +159,6 @@ describe("POST /v1/analysis", () => {
     expect(analyze.mock.calls[0]?.[0]).toEqual(VALID_BODY);
     expect(analyze.mock.calls[0]?.[1]).toEqual({
       env: FAKE_ENV,
-      analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
       preflight: RESOLVING_PREFLIGHT,
     });
 

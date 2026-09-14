@@ -1,19 +1,20 @@
 /**
  * The combat ingestion port.
  *
- * A TYPE ONLY. There is no production implementation bound to it, and
- * `AnalysisServiceDeps` does not carry it.
+ * `AnalysisServiceDeps` now carries this, and the composed path calls it: an
+ * analyzer is registered, it declares what evidence it needs, and retrieval
+ * finally has a caller and a reason. That was always the condition — ingestion
+ * was built in Milestone 3 and deliberately left unbound until something asked
+ * for it.
  *
- * That is deliberate. Milestone 3 builds the ingestion capability; it does not
- * switch it on. No feature flag, no environment toggle, no conditional in
- * `analyzeFight` — anything of that shape is a path that can be enabled by
- * accident, and enabling it today would make `/v1/analysis` spend Warcraft Logs
- * points retrieving evidence that no analyzer has asked for and nothing would
- * read.
+ * WHAT HAS NOT CHANGED IS WHERE THE REAL IMPLEMENTATION IS BOUND.
  *
- * Milestone 5 adds this to the service dependencies at the same time as the
- * first analyzer declares its required inputs, so ingestion acquires a caller
- * and a reason on the same commit.
+ * Nothing binds it at a production composition root yet. `/v1/analysis` supplies
+ * no ingestion port, so the live route still cannot retrieve a single event —
+ * and because the capability is a missing DEPENDENCY rather than a disabled
+ * flag, that is structural rather than a promise. There is no toggle to flip by
+ * accident, and no path that spends Warcraft Logs points on evidence nothing
+ * reads. M6-E binds the real ingestor when the public contract is ready for it.
  *
  * Note what does NOT appear here: no GraphQL shape, no page type, no
  * `RawEventPage`, no `unknown`. The service layer depends on the normalized

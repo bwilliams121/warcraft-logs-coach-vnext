@@ -5,11 +5,13 @@ import { deriveIngestionScope, type AnalyzerRequirement } from "../../src/servic
 const playerContextAnalyzer: AnalyzerRequirement = {
   analyzerId: "example-rotation",
   requiredScope: "PLAYER_CONTEXT",
+  includeResources: true,
 };
 
 const fullRaidAnalyzer: AnalyzerRequirement = {
   analyzerId: "example-healer-coverage",
   requiredScope: "FULL_RAID",
+  includeResources: false,
 };
 
 describe("deriveIngestionScope", () => {

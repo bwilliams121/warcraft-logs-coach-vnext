@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createWorker, type WorkerDeps } from "../../src/api/worker.js";
 import type { Env } from "../../src/config/env.js";
-import { analyzeFight, ENABLED_ANALYSIS_REQUIREMENTS } from "../../src/services/analysis-service.js";
+import { analyzeFight } from "../../src/services/analysis-service.js";
 import { wclFailure, type PreflightPort, type WclFailureReason } from "../../src/wcl/types.js";
 import { WCL_FAILURE_REASONS } from "../../src/wcl/types.js";
 import { REQUEST } from "../fixtures/wcl/preflight-payloads.js";
@@ -46,7 +46,6 @@ function failingPreflight(reason: WclFailureReason): PreflightPort {
 function workerWith(preflight: PreflightPort): WorkerDeps {
   return {
     analyze: analyzeFight,
-    analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight,
     // Every probe here posts to /v1/analysis. Reaching MCP would mean the
     // router sent an analysis request somewhere it does not belong.

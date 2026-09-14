@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { Env } from "../../src/config/env.js";
-import { analyzeFight, ENABLED_ANALYSIS_REQUIREMENTS } from "../../src/services/analysis-service.js";
+import { analyzeFight } from "../../src/services/analysis-service.js";
 import { WCL_FAILURE_REASONS, type PreflightPort } from "../../src/wcl/types.js";
 import { SERVICE_ERROR_CODES } from "../../src/services/result.js";
 import { REQUEST } from "../fixtures/wcl/preflight-payloads.js";
@@ -32,7 +32,7 @@ describe("wcl preflight port contract", () => {
       },
     }));
 
-    await analyzeFight(input, { env, analyzers: ENABLED_ANALYSIS_REQUIREMENTS, preflight });
+    await analyzeFight(input, { env, preflight });
 
     expect(preflight).toHaveBeenCalledTimes(1);
   });
@@ -55,7 +55,7 @@ describe("wcl preflight port contract", () => {
         },
       });
 
-      const result = await analyzeFight(input, { env, analyzers: ENABLED_ANALYSIS_REQUIREMENTS, preflight });
+      const result = await analyzeFight(input, { env, preflight });
 
       expect(result.ok).toBe(false);
       expect(forbidden).not.toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe("wcl preflight port contract", () => {
         },
       });
 
-      const result = await analyzeFight(input, { env, analyzers: ENABLED_ANALYSIS_REQUIREMENTS, preflight });
+      const result = await analyzeFight(input, { env, preflight });
 
       expect(result.ok, reason).toBe(false);
       if (!result.ok) {

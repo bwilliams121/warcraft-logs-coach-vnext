@@ -1,0 +1,213 @@
+/**
+ * The class/spec mapper, and the one mistake it must never make.
+ *
+ * Returning an error is cheap and recoverable. Returning `rogue/assassination`
+ * for a player who was not an Assassination Rogue is neither: it runs Rogue
+ * rules over someone else's fight and produces a confident, well-formed report
+ * about the wrong game, with nothing downstream able to notice.
+ *
+ * So most of this file is about what does NOT resolve. Every near-miss a
+ * forgiving mapper would "helpfully" repair — a typo, a prefix, an extra word,
+ * the right spec under the wrong class — is written down and pinned as a
+ * refusal, because each one is a way the dangerous outcome could arrive later
+ * disguised as a convenience.
+ */
+
+import { describe, expect, it } from "vitest";
+
+import {
+  SUPPORTED_SPEC_IDENTITIES,
+  resolveSpecIdentity,
+  type SpecIdentityResolution,
+} from "../../src/services/spec-identity.js";
+
+function resolve(className: string, specName: string): SpecIdentityResolution {
+  return resolveSpecIdentity({ className, specName });
+}
+
+/** Compact assertion helper, so a failure names the input that produced it. */
+function outcome(className: string, specName: string): string {
+  const result = resolve(className, specName);
+  return result.ok ? result.specId : result.reason;
+}
+
+describe("the supported identity", () => {
+  it("maps Rogue/Assassination to the Assassination spec id", () => {
+    expect(outcome("Rogue", "Assassination")).toBe("rogue/assassination");
+  });
+
+  it("recognizes exactly one specialization", () => {
+    // Pinned. This table is the entire definition of "which specializations this
+    // build recognizes", and it should be impossible to grow by accident.
+    expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual(["rogue/assassination"]);
+  });
+
+  it("maps the id to itself, never to a different spec", () => {
+    for (const [key, specId] of Object.entries(SUPPORTED_SPEC_IDENTITIES)) {
+      expect(`${key}->${specId}`).toBe(`${key}->${key}`);
+    }
+  });
+});
+
+describe("casing is normalized, and only casing", () => {
+  it("accepts Warcraft Logs' own capitalization", () => {
+    expect(outcome("Rogue", "Assassination")).toBe("rogue/assassination");
+  });
+
+  it("accepts any casing of the same words", () => {
+    // Capitalization of these fields is a presentation choice upstream, not a
+    // contract, and `rogue` and `Rogue` are the same class by any reading.
+    for (const [className, specName] of [
+      ["rogue", "assassination"],
+      ["ROGUE", "ASSASSINATION"],
+      ["RoGuE", "aSsAsSiNaTiOn"],
+    ]) {
+      expect(`${className}/${specName}`).toBe(`${className}/${specName}`);
+      expect(outcome(className as string, specName as string)).toBe("rogue/assassination");
+    }
+  });
+});
+
+describe("surrounding whitespace is trimmed, and only surrounding whitespace", () => {
+  it("accepts padded values", () => {
+    expect(outcome("  Rogue  ", "\tAssassination\n")).toBe("rogue/assassination");
+  });
+
+  it("does not collapse interior whitespace", () => {
+    // Trimming removes something that carries no meaning. Rewriting the inside
+    // of a word is repair, and repair is how a typo becomes a supported spec.
+    expect(outcome("Rogue", "Assassin ation")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Ro gue", "Assassination")).toBe("UNSUPPORTED_SPECIALIZATION");
+  });
+
+  it("treats a whitespace-only value as unusable rather than unsupported", () => {
+    expect(outcome("   ", "Assassination")).toBe("IDENTITY_NOT_USABLE");
+    expect(outcome("Rogue", "\t\n ")).toBe("IDENTITY_NOT_USABLE");
+  });
+});
+
+describe("nothing missing resolves", () => {
+  it("refuses an empty class", () => {
+    expect(outcome("", "Assassination")).toBe("IDENTITY_NOT_USABLE");
+  });
+
+  it("refuses an empty spec", () => {
+    expect(outcome("Rogue", "")).toBe("IDENTITY_NOT_USABLE");
+  });
+
+  it("refuses both empty", () => {
+    expect(outcome("", "")).toBe("IDENTITY_NOT_USABLE");
+  });
+
+  it("keeps an unusable identity distinct from an unsupported one", () => {
+    // One is a data problem, the other a coverage limit. They need different
+    // remedies, so they must not share a reason.
+    expect(outcome("", "Assassination")).not.toBe(outcome("Paladin", "Protection"));
+  });
+});
+
+describe("no unsupported identity falls through to Assassination", () => {
+  const unsupported: readonly (readonly [string, string])[] = [
+    // The other two Rogue specs — the nearest misses, sharing a class.
+    ["Rogue", "Outlaw"],
+    ["Rogue", "Subtlety"],
+    // The spec named for a later milestone. It must not work early.
+    ["Paladin", "Protection"],
+    // Other real specs.
+    ["Evoker", "Augmentation"],
+    ["Priest", "Discipline"],
+    ["Death Knight", "Blood"],
+    ["Warrior", "Fury"],
+    // Right spec, wrong class.
+    ["Paladin", "Assassination"],
+    ["Mage", "Assassination"],
+    // Right class, no spec that exists.
+    ["Rogue", "Assassinationn"],
+    ["Rogue", "Assassin"],
+    // Neither exists.
+    ["Bard", "Jazz"],
+  ];
+
+  for (const [className, specName] of unsupported) {
+    it(`refuses ${className}/${specName}`, () => {
+      expect(outcome(className, specName)).toBe("UNSUPPORTED_SPECIALIZATION");
+    });
+  }
+
+  it("never returns the supported id for any of them", () => {
+    for (const [className, specName] of unsupported) {
+      const result = resolve(className, specName);
+      expect(`${className}/${specName}:${result.ok}`).toBe(`${className}/${specName}:false`);
+    }
+  });
+});
+
+describe("no fuzzy, prefix or substring matching exists", () => {
+  const nearMisses: readonly (readonly [string, string])[] = [
+    // Misspellings. A forgiving mapper would "fix" these.
+    ["Rouge", "Assassination"],
+    ["Rogue", "Assasination"],
+    ["Rogue", "Assassinaton"],
+    // Prefixes and extensions of the real words.
+    ["Rog", "Assassination"],
+    ["Rogue", "Assass"],
+    ["Rogues", "Assassination"],
+    ["Rogue", "Assassinations"],
+    // The combined display name, which is how a UI would render it.
+    ["Rogue", "Assassination Rogue"],
+    ["Assassination", "Rogue"],
+    // The internal id arriving where display strings belong.
+    ["rogue/assassination", "rogue/assassination"],
+    // Punctuation and separators.
+    ["Rogue-", "Assassination"],
+    ["Rogue", "Assassination."],
+  ];
+
+  for (const [className, specName] of nearMisses) {
+    it(`does not repair "${className}" / "${specName}"`, () => {
+      const result = resolve(className, specName);
+      expect(`${className}|${specName}:${result.ok ? result.specId : "refused"}`).toBe(
+        `${className}|${specName}:refused`,
+      );
+    });
+  }
+
+  it("does not accept the key format as a class name", () => {
+    // The lookup key is an internal detail. A caller supplying it would be
+    // bypassing the translation this module exists to perform.
+    expect(outcome("rogue/assassination", "")).toBe("IDENTITY_NOT_USABLE");
+  });
+});
+
+describe("prototype keys cannot masquerade as a specialization", () => {
+  // A plain-object lookup finds inherited members. `constructor` and
+  // `toString` would otherwise "resolve" to something that is not a SpecId.
+  for (const [className, specName] of [
+    ["constructor", "constructor"],
+    ["toString", "toString"],
+    ["__proto__", "__proto__"],
+    ["hasOwnProperty", "hasOwnProperty"],
+  ]) {
+    it(`refuses ${className}/${specName}`, () => {
+      expect(outcome(className as string, specName as string)).toBe("UNSUPPORTED_SPECIALIZATION");
+    });
+  }
+});
+
+describe("a refusal discloses what it saw", () => {
+  it("reports the normalized pair that failed", () => {
+    const result = resolve("  Paladin ", "Protection");
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.observed).toEqual({ className: "paladin", specName: "protection" });
+  });
+
+  it("carries no spec id on the failure branch", () => {
+    // Structural: there is no variant returning a usable id alongside a
+    // failure, so a caller cannot read one out of a refusal.
+    const result = resolve("Paladin", "Protection");
+
+    expect("specId" in result).toBe(false);
+  });
+});

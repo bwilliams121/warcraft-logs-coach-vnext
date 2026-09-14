@@ -45,6 +45,11 @@ describe("api response mapping contract", () => {
       FIGHT_NOT_FOUND: 404,
       SOURCE_NOT_FOUND: 404,
       METHOD_NOT_ALLOWED: 405,
+      // The report changed under us. A conflict between two versions of one
+      // resource, and the only retrieval failure a caller should simply retry.
+      REPORT_REVISION_CHANGED: 409,
+      // The report exists and is understood; its events are out of reach.
+      REPORT_ARCHIVED_INACCESSIBLE: 422,
       SOURCE_NOT_A_PLAYER: 422,
       SOURCE_NOT_IN_FIGHT: 422,
       UPSTREAM_RATE_LIMITED: 429,

@@ -20,6 +20,8 @@ export const API_ERROR_CODES = [
   "INVALID_REQUEST",
   "CONFIGURATION_ERROR",
   "REPORT_NOT_ACCESSIBLE",
+  "REPORT_ARCHIVED_INACCESSIBLE",
+  "REPORT_REVISION_CHANGED",
   "FIGHT_NOT_FOUND",
   "SOURCE_NOT_FOUND",
   "SOURCE_NOT_A_PLAYER",
@@ -51,8 +53,15 @@ export function statusForErrorCode(code: ApiErrorCode): number {
       return 404;
     case "METHOD_NOT_ALLOWED":
       return 405;
+    // The report was replaced while we were reading it. A conflict between two
+    // versions of the same resource, and the one retrieval failure whose correct
+    // response is simply to retry.
+    case "REPORT_REVISION_CHANGED":
+      return 409;
     // The identifiers exist but do not describe an analyzable player in that
-    // fight. Well-formed, understood, and not processable.
+    // fight, or name a report whose events cannot be reached. Well-formed,
+    // understood, and not processable.
+    case "REPORT_ARCHIVED_INACCESSIBLE":
     case "SOURCE_NOT_A_PLAYER":
     case "SOURCE_NOT_IN_FIGHT":
       return 422;

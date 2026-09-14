@@ -26,7 +26,7 @@ import { createWorker } from "../../src/api/worker.js";
 import type { Env } from "../../src/config/env.js";
 import { handleMcpRequest, PRODUCTION_MCP_HOSTNAME } from "../../src/mcp/server.js";
 import { PING_OUTPUT_SCHEMA, PING_SERVICE_ID } from "../../src/mcp/tools/ping.js";
-import { analyzeFight, ENABLED_ANALYSIS_REQUIREMENTS } from "../../src/services/analysis-service.js";
+import { analyzeFight } from "../../src/services/analysis-service.js";
 import type { PreflightPort } from "../../src/wcl/types.js";
 
 /** Matches the binding in vitest.config.ts. An obvious sentinel, never a real token. */
@@ -182,7 +182,6 @@ describe("inbound bearer authorization fails closed", () => {
     const unconfigured: Env = { ENVIRONMENT: "test" };
     const worker = createWorker({
       analyze: analyzeFight,
-      analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
       preflight: (async () => {
         throw new Error("preflight must not run for an MCP request");
       }) as unknown as PreflightPort,
@@ -206,7 +205,6 @@ describe("inbound bearer authorization fails closed", () => {
 
     const configuredWorker = createWorker({
       analyze: analyzeFight,
-      analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
       preflight: (async () => {
         throw new Error("unused");
       }) as unknown as PreflightPort,
@@ -557,7 +555,6 @@ describe("the existing routes are untouched", () => {
     // not-implemented boundary this assertion is about.
     const worker = createWorker({
       analyze: analyzeFight,
-      analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
       preflight: RESOLVING_PREFLIGHT,
       mcp: handleMcpRequest,
       version: "0.1.0",
