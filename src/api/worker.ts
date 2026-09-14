@@ -54,10 +54,28 @@ export interface WorkerHandler {
   readonly fetch: (request: Request, env: Env) => Promise<Response>;
 }
 
+/**
+ * Serves `/mcp`, with the application runner bound here.
+ *
+ * THE COMPOSITION HAPPENS AT THE COMPOSITION ROOT, not inside `src/mcp/`. That
+ * is what lets the MCP layer reach exactly one shared analysis path while
+ * importing no Warcraft Logs client and no analyzer — it receives a function,
+ * not the machinery behind it.
+ *
+ * No ingestion port is supplied, so this runner reports the application's own
+ * not-implemented code rather than retrieving anything. M6-E binds the single
+ * production composition for REST and MCP together; until then both transports
+ * are fail-closed for the same reason, in the same place.
+ */
+const defaultMcp: WorkerDeps["mcp"] = async (request, env) =>
+  await handleMcpRequest(request, env, {
+    analyze: async (input) => await analyzeFight(input, { env, preflight: wclPreflight }),
+  });
+
 const DEFAULT_DEPS: WorkerDeps = {
   analyze: analyzeFight,
   preflight: wclPreflight,
-  mcp: handleMcpRequest,
+  mcp: defaultMcp,
   version: SERVICE_VERSION,
 };
 

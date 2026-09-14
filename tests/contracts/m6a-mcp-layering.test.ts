@@ -136,27 +136,44 @@ describe("MCP cannot reach gameplay machinery", () => {
     });
   }
 
-  it("imports only the environment type from outside src/mcp", () => {
-    // Stated as an allowlist rather than only a denylist: a new cross-layer
-    // dependency has to be added here deliberately, whatever layer it is from.
-    const allowedOutside = new Set(["src/config/env"]);
+  it("reaches outside src/mcp only through an explicit allowlist", () => {
+    // An allowlist rather than only a denylist: a new cross-layer dependency has
+    // to be added here deliberately, whatever layer it is from.
+    //
+    // The MCP tool legitimately needs the public contract (it is the tool's
+    // output schema and projection) and the service RESULT type (to branch on
+    // ok/error). Note what is NOT here: the service's `analyzeFight` itself.
+    // MCP receives a runner function from the composition root, so it can reach
+    // exactly one analysis path without importing the machinery behind it.
+    const allowedOutside = new Set([
+      "src/config/env",
+      "src/contracts/analysis-contract",
+      "src/contracts/analysis-projection",
+      "src/services/result",
+    ]);
     for (const file of MCP_FILES) {
       for (const specifier of importSpecifiersOf(file)) {
         if (!specifier.startsWith(".")) continue;
         const resolved = resolveSpecifier(file, specifier).replace(/\.js$/, "");
         if (resolved.startsWith("src/mcp/")) continue;
-        expect(`${file} -> ${resolved}`).toBe(`${file} -> ${[...allowedOutside].join("|")}`);
+        expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).toBe(
+          `${file} -> ${allowedOutside.has(resolved) ? resolved : [...allowedOutside].join("|")}`,
+        );
       }
     }
   });
 
-  it("does not invoke the analysis service in M6-A", () => {
-    // M6-A proves transport only. The service is composed in M6-B and reached
-    // from the real tool in M6-D; until then MCP must not call it at all.
+  it("composes no analysis of its own", () => {
+    // MCP calls an injected runner. If it imported the service entry point it
+    // could assemble M2 -> M3 -> M4 -> M5 itself, which is the second analysis
+    // path this whole layering exists to prevent.
     for (const file of MCP_FILES) {
-      const source = sourceOf(file);
-      const code = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
-      expect(`${file}:${code.includes("analyzeFight") ? "calls" : "clean"}`).toBe(`${file}:clean`);
+      const code = sourceOf(file)
+        .replace(/\/\*[\s\S]*?\*\//g, "")
+        .replace(/\/\/.*$/gm, "");
+      for (const banned of ["analyzeFight", "createCombatState", "ingestFight", "createFightIngestor"]) {
+        expect(`${file}:${code.includes(banned) ? banned : "clean"}`).toBe(`${file}:clean`);
+      }
     }
   });
 });
@@ -408,21 +425,32 @@ describe("the application service stays transport-neutral", () => {
   });
 });
 
-describe("the temporary probe is marked for removal", () => {
-  it("says in the file that M6-D deletes it", () => {
-    // The realistic failure is not that someone ships `ping` on purpose — it is
-    // that nobody remembers it was temporary. The file has to say so itself.
-    const source = sourceOf("src/mcp/tools/ping.ts");
-
-    expect(source).toContain("M6-D");
-    expect(source).toContain("TEMPORARY");
-  });
-
-  it("is the only tool registered", () => {
+describe("the MCP tool surface is exactly one real tool", () => {
+  it("registers one tool, and it is the analysis tool", () => {
     const server = sourceOf("src/mcp/server.ts");
     const registrations = [...server.matchAll(/register\w*Tool\w*\(/g)];
 
     expect(registrations).toHaveLength(1);
-    expect(server).toContain("registerPingTool");
+    expect(server).toContain("registerAnalyzeWarcraftLogTool");
+  });
+
+  it("no longer carries the M6-A probe", () => {
+    // Deleted with its file. A probe left registered would be a second tool a
+    // model could call, and an unmetered one.
+    expect(MCP_FILES).not.toContain("src/mcp/tools/ping.ts");
+    for (const file of MCP_FILES) {
+      expect(`${file}:${sourceOf(file).includes("registerPingTool") ? "present" : "clean"}`).toBe(
+        `${file}:clean`,
+      );
+    }
+  });
+
+  it("exposes no low-level gameplay primitive as a tool", () => {
+    // The composed analysis is the product. A tool that returned aura state or
+    // evaluated an APL expression would hand a model the materials to assemble
+    // its own verdict.
+    const tools = MCP_FILES.filter((file) => file.startsWith("src/mcp/tools/"));
+
+    expect(tools).toEqual(["src/mcp/tools/analyze-warcraft-log.ts"]);
   });
 });

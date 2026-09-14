@@ -24,6 +24,23 @@ export interface Env {
    * absence closes `/mcp` and nothing else. See `src/mcp/auth.ts`.
    */
   readonly MCP_AUTH_TOKEN?: string;
+  /**
+   * Cloudflare Rate Limiting binding for the MCP analysis tool.
+   *
+   * Typed STRUCTURALLY rather than as Cloudflare's `RateLimit` global, so this
+   * module stays free of Workers types and the application service can still be
+   * constructed under a plain Node test project. The real binding satisfies this
+   * exactly — `RateLimitOptions` is `{ key: string }` and `RateLimitOutcome` is
+   * `{ success: boolean }`.
+   *
+   * Deliberately absent from `ConfigKey` and `loadConfig()`. Metering the MCP
+   * tool and authenticating to Warcraft Logs are different concerns, and a
+   * deployment missing this binding must close the MCP analysis path without
+   * affecting `/health` or `/v1/analysis`.
+   */
+  readonly MCP_ANALYSIS_RATE_LIMITER?: {
+    limit(options: { readonly key: string }): Promise<{ readonly success: boolean }>;
+  };
 }
 
 /** Placeholder substituted for credential values during serialization. */

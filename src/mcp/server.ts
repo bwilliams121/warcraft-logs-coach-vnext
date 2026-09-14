@@ -10,39 +10,29 @@
  * the Warcraft Logs client. A regression test asserts that, because "MCP must
  * not become a second analyzer" is only a guarantee if something checks it.
  *
- * M6-A SCOPE
+ * THE TOOL SURFACE IS ONE TOOL
  *
- * The only tool registered is the temporary `ping` probe. The analysis service
- * is NOT wired here — M6-A proves the transport works, and M6-D introduces
- * `analyze_warcraft_log`. Nothing in this file reaches an analyzer today.
+ * `analyze_warcraft_log`, and nothing else. No aura lookup, no resource query,
+ * no APL evaluator, no state inspector. Those would hand a model the raw
+ * materials to assemble its own verdict, which is exactly the free-form
+ * gameplay interpretation this milestone exists to replace. The composed,
+ * coverage-disclosed analysis is the product.
  *
  * STATELESS, DELIBERATELY
  *
  * MCP 2026-07-28 is a stateless protocol: requests are self-contained and
  * capabilities are negotiated per request. So there is no session store, no
- * Durable Object, no KV, no event replay and no server-to-client push. The
- * handler is created once at module scope because it holds no request state and
- * no environment — only the FACTORY, which the SDK invokes to build a fresh
- * `McpServer` for every single request. That is the shape the SDK documents for
- * Workers (`export default handler`), and it is why a module-level handler is
- * safe here while a module-level `env` or server instance would not be.
+ * Durable Object, no KV, no event replay and no server-to-client push.
  *
- * OUTSTANDING BEFORE THE REAL TOOL SHIPS — RATE LIMITING
+ * WHY THE HANDLER IS NOW BUILT PER REQUEST
  *
- * The MCP 2026-07-28 tools security requirements state that servers MUST rate
- * limit tool invocations. This endpoint does NOT rate limit today, and M6-A is
- * not deployed, so nothing is currently exposed.
- *
- * That is acceptable only for as long as the sole tool is a constant-returning
- * probe. `analyze_warcraft_log` is a different proposition: each call spends
- * finite Warcraft Logs API points and real Worker CPU, so an unmetered caller
- * can exhaust a shared quota this deployment cannot replenish on demand.
- *
- * THEREFORE: a real rate-limit mechanism is a REQUIRED part of M6-D/M6-E and a
- * precondition for deploying the analysis tool. The leading candidate is
- * Cloudflare's native Worker Rate Limiting binding, which would add the first
- * binding this Worker has needed — so the M6 definition of done must NOT claim
- * that no additional binding can ever be required.
+ * M6-A could hold one module-level handler because its probe read nothing. The
+ * real tool needs request-scoped dependencies — the application runner and the
+ * rate limiter binding both come from `env` — and putting `env` in module scope
+ * would share one request's environment with every later request. So the
+ * handler is constructed per request over an explicitly injected dependency
+ * object. The SDK still builds a fresh `McpServer` per request from the factory,
+ * and nothing is cached between calls.
  */
 
 import {
@@ -55,7 +45,12 @@ import {
 
 import type { Env } from "../config/env.js";
 import { mcpAuthChallenge } from "./auth.js";
-import { registerPingTool } from "./tools/ping.js";
+import type { RateLimiterPort } from "./rate-limit.js";
+import {
+  registerAnalyzeWarcraftLogTool,
+  type AnalysisRunner,
+  type AnalyzeToolDeps,
+} from "./tools/analyze-warcraft-log.js";
 
 /** Advertised in `initialize`. Kept in step with package.json by hand, as the Worker version is. */
 export const MCP_SERVER_NAME = "warcraft-logs-coach-vnext";
@@ -77,33 +72,66 @@ export function mcpAllowedHostnames(): readonly string[] {
 }
 
 /**
+ * The runner used when no composition has been supplied.
+ *
+ * THE M6-D/M6-E BOUNDARY. M6-E establishes the single production composition
+ * root that binds real ingestion for both REST and MCP. Until it does, a
+ * deployment that reaches this default has no way to retrieve combat events —
+ * and the honest answer is to say so, not to invent one. Failing closed here
+ * also means no Warcraft Logs points are spent by a half-wired deployment.
+ *
+ * It reports the application layer's own not-implemented code, so the message a
+ * caller sees is the same one the service would have produced. There is no
+ * second analysis path hiding behind this.
+ */
+const UNBOUND_ANALYSIS_RUNNER: AnalysisRunner = async () => ({
+  ok: false,
+  error: {
+    code: "ANALYSIS_NOT_IMPLEMENTED",
+    message:
+      "This deployment is not wired to retrieve combat events, so no analysis was produced. External exposure is owned by a later integration milestone.",
+  },
+});
+
+export interface McpRequestOptions {
+  /** Overridable so a test can prove rejection without weakening the real list. */
+  readonly allowedHostnames?: readonly string[];
+  /**
+   * The application entry point.
+   *
+   * Injected by the composition root rather than imported here, which is what
+   * keeps this layer free of the Warcraft Logs client and the analyzer while
+   * still reaching exactly one shared analysis path.
+   */
+  readonly analyze?: AnalysisRunner | undefined;
+  /** Overridable so a test can drive allow/deny/throw deterministically. */
+  readonly rateLimiter?: RateLimiterPort | undefined;
+}
+
+/**
  * Builds one server instance for one request.
  *
  * Exported so a test can inspect the registered surface without driving HTTP.
  * Every call returns a new instance; there is no shared singleton to leak
  * between requests.
  */
-export function createMcpServerInstance(): McpServer {
+export function createMcpServerInstance(deps: AnalyzeToolDeps): McpServer {
   const server = new McpServer({ name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION });
-  // M6-A only. Removed in M6-D together with `./tools/ping.ts`.
-  registerPingTool(server);
+  registerAnalyzeWarcraftLogTool(server, deps);
   return server;
 }
 
-const handler = createMcpHandler(() => createMcpServerInstance(), {
-  // 2025-era clients are served statelessly from the same factory rather than
-  // rejected. Stated explicitly even though it is the default, because "which
-  // clients can talk to us" is a deployment fact and should not be implied.
-  legacy: "stateless",
-  // Never stream. This tool emits no progress and no logging notifications
-  // before its result, so `auto` could only ever pick JSON anyway — pinning it
-  // keeps the response shape one thing instead of two.
-  responseMode: "json",
-});
-
-export interface McpRequestOptions {
-  /** Overridable so a test can prove rejection without weakening the real list. */
-  readonly allowedHostnames?: readonly string[];
+function createHandler(deps: AnalyzeToolDeps) {
+  return createMcpHandler(() => createMcpServerInstance(deps), {
+    // 2025-era clients are served statelessly from the same factory rather than
+    // rejected. Stated explicitly even though it is the default, because "which
+    // clients can talk to us" is a deployment fact and should not be implied.
+    legacy: "stateless",
+    // Never stream. This tool emits no progress and no logging notifications
+    // before its result, so `auto` could only ever pick JSON anyway — pinning it
+    // keeps the response shape one thing instead of two.
+    responseMode: "json",
+  });
 }
 
 /**
@@ -121,6 +149,12 @@ export interface McpRequestOptions {
  *                checked, and an unparseable or opaque `null` origin is refused.
  *   3. Bearer  — who may call at all.
  *
+ * THE RATE LIMITER IS NOT IN THIS LIST, ON PURPOSE. It guards the expensive
+ * tool, not the endpoint, so it runs inside the tool call after the SDK has
+ * validated arguments. Metering here instead would spend analysis quota on
+ * `tools/list`, on discovery, and on calls the SDK is about to reject — none of
+ * which cost a Warcraft Logs API point.
+ *
  * Each guard answers with its own `Response` or yields. Nothing downstream runs
  * until all three have passed.
  */
@@ -135,8 +169,16 @@ export async function handleMcpRequest(
     hostHeaderValidationResponse(request, allowed) ??
     originValidationResponse(request, allowed) ??
     (await mcpAuthChallenge(request, env.MCP_AUTH_TOKEN));
+  if (rejected !== undefined) return rejected;
+
+  const handler = createHandler({
+    analyze: options.analyze ?? UNBOUND_ANALYSIS_RUNNER,
+    // A deployment missing the binding is unmetered, and the tool treats that
+    // as a refusal rather than as permission.
+    rateLimiter: options.rateLimiter ?? env.MCP_ANALYSIS_RATE_LIMITER,
+  });
 
   // `fetch` is called with no `authInfo`: see `./auth.ts` for why the static
   // token is deliberately not surfaced to tools.
-  return rejected ?? (await handler.fetch(request));
+  return await handler.fetch(request);
 }

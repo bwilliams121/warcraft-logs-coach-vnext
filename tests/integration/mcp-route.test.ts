@@ -1,19 +1,19 @@
 /**
- * M6-A — the MCP transport proof.
+ * The MCP transport, ingress guards and protocol eras.
  *
  * WHAT THIS FILE IS FOR
  *
- * M6-A adds a dependency and a route, and claims that together they serve MCP
- * correctly inside this Worker without disturbing anything already here. That is
- * a claim about a runtime, not about types, so every assertion below drives the
- * REAL default export through workerd via `SELF` wherever it can.
+ * The claim is about a runtime, not about types, so these assertions drive the
+ * REAL default export through workerd via `SELF` wherever they can. Where a test
+ * needs the analysis tool actually wired, it calls the same handler with
+ * dependencies injected — the deployed Worker is fail-closed until M6-E.
  *
  * WHAT IT IS NOT
  *
- * Not a test of any analysis. The only tool registered in M6-A is the temporary
- * `ping` probe, and this file goes away with it in M6-D — apart from the guards
- * that outlive it (auth, Host/Origin, route isolation), which move to the
- * `analyze_warcraft_log` suite rather than being deleted.
+ * Transport, ingress protection and protocol-era behaviour. The tool surface is
+ * asserted here only at the level this file owns: that exactly one tool exists
+ * and that it is reachable. Deep tool behaviour — input validation, error
+ * mapping, rate limiting, coverage fidelity — lives in `mcp-analyze-tool.test.ts`.
  *
  * EVERYTHING HERE IS OFFLINE. The pool answers every outbound request locally,
  * and no MCP client, Warcraft Logs endpoint or deployed Worker is contacted.
@@ -25,7 +25,13 @@ import { describe, expect, it } from "vitest";
 import { createWorker } from "../../src/api/worker.js";
 import type { Env } from "../../src/config/env.js";
 import { handleMcpRequest, PRODUCTION_MCP_HOSTNAME } from "../../src/mcp/server.js";
-import { PING_OUTPUT_SCHEMA, PING_SERVICE_ID } from "../../src/mcp/tools/ping.js";
+import { ANALYZE_TOOL_NAME } from "../../src/mcp/tools/analyze-warcraft-log.js";
+import {
+  ALLOWING_LIMITER,
+  D2_REQUEST,
+  MCP_TEST_ENV,
+  fixtureAnalysisRunner,
+} from "../support/mcp-analysis.js";
 import { analyzeFight } from "../../src/services/analysis-service.js";
 import type { PreflightPort } from "../../src/wcl/types.js";
 
@@ -110,6 +116,26 @@ function legacy(method: string, params: Record<string, unknown> = {}, id = 1): M
 
 async function callSelf(post: McpPost): Promise<Response> {
   return await SELF.fetch(mcpRequest(post));
+}
+
+/**
+ * Drives `/mcp` with the analysis tool actually wired.
+ *
+ * The deployed Worker binds no ingestion port and no rate limiter, so a
+ * SELF-driven tool call is fail-closed by design. Tool BEHAVIOUR is therefore
+ * exercised through the same handler with dependencies supplied — the real
+ * schema, projection and guards, over the trusted fixture.
+ */
+async function callWired(post: McpPost): Promise<Response> {
+  return await handleMcpRequest(mcpRequest(post), MCP_TEST_ENV, {
+    analyze: fixtureAnalysisRunner(),
+    rateLimiter: ALLOWING_LIMITER,
+  });
+}
+
+/** A tools/call for the real analysis tool, by explicit identifiers. */
+function analyzeCall(id: number): McpPost {
+  return modern("tools/call", { name: ANALYZE_TOOL_NAME, arguments: { source: "ids", ...D2_REQUEST } }, id);
 }
 
 /** Reads a JSON-RPC payload from either a JSON body or an SSE-framed one. */
@@ -298,21 +324,25 @@ describe("Host and Origin validation", () => {
   });
 });
 
-describe("tools/list exposes exactly the temporary probe", () => {
-  it("lists ping and nothing else", async () => {
+describe("tools/list exposes exactly the real analysis tool", () => {
+  it("lists analyze_warcraft_log and nothing else", async () => {
     const result = resultOf(await rpcPayload(await callSelf(modern("tools/list"))));
     const tools = result["tools"] as readonly { readonly name: string }[];
 
-    expect(tools.map((tool) => tool.name)).toEqual(["ping"]);
+    expect(tools.map((tool) => tool.name)).toEqual([ANALYZE_TOOL_NAME]);
   });
 
-  it("exposes no analysis tool yet", async () => {
-    // M6-A must not ship the real tool early. Naming it here means the day it
-    // appears, it appears deliberately.
-    const body = await (await callSelf(modern("tools/list"))).text();
+  it("exposes no probe or primitive tool", async () => {
+    // The M6-A probe is gone, and no low-level tool replaced it. Exposing aura,
+    // resource or APL primitives would hand a model the materials to assemble
+    // its own verdict, which is the interpretation this engine exists to replace.
+    const result = resultOf(await rpcPayload(await callSelf(modern("tools/list"))));
+    const names = (result["tools"] as readonly { readonly name: string }[]).map((tool) => tool.name);
 
-    expect(body).not.toContain("analyze_warcraft_log");
-    expect(body).not.toContain("warcraftlogs.com");
+    expect(names).toHaveLength(1);
+    for (const banned of ["ping", "aura", "resource", "apl", "simc", "combat_state", "debug"]) {
+      expect(names).not.toContain(banned);
+    }
   });
 
   it("advertises an input schema and an output schema", async () => {
@@ -320,89 +350,90 @@ describe("tools/list exposes exactly the temporary probe", () => {
     const tool = (result["tools"] as readonly Record<string, unknown>[])[0];
 
     expect(tool?.["inputSchema"]).toMatchObject({ type: "object" });
-    expect(tool?.["outputSchema"]).toMatchObject({ type: "object" });
+    expect(tool?.["outputSchema"]).toBeDefined();
   });
 
-  it("declares read-only, closed-world annotations", async () => {
+  it("declares read-only, open-world annotations", async () => {
+    // Open-world because it reaches Warcraft Logs. Read-only because it mutates
+    // nothing, anywhere.
     const result = resultOf(await rpcPayload(await callSelf(modern("tools/list"))));
     const tool = (result["tools"] as readonly Record<string, unknown>[])[0];
 
-    expect(tool?.["annotations"]).toMatchObject({
-      readOnlyHint: true,
-      // The probe contacts nothing. The real analysis tool will set this true.
-      openWorldHint: false,
-      idempotentHint: true,
-    });
+    expect(tool?.["annotations"]).toMatchObject({ readOnlyHint: true, openWorldHint: true });
   });
 
-  it("describes the probe as temporary and non-analytical", async () => {
+  it("states the epistemic boundary in its description", async () => {
+    // The description is the only documentation a model reads before deciding
+    // what a result means. These phrases are pinned so a future wording tidy-up
+    // cannot quietly soften the boundary.
     const result = resultOf(await rpcPayload(await callSelf(modern("tools/list"))));
-    const tool = (result["tools"] as readonly Record<string, unknown>[])[0];
-    const description = String(tool?.["description"]);
+    const description = String((result["tools"] as readonly Record<string, unknown>[])[0]?.["description"]);
 
-    expect(description).toContain("Temporary");
-    expect(description).toContain("no Warcraft Logs analysis");
+    for (const phrase of [
+      "ACTUALLY MADE",
+      "Assassination Rogue",
+      "MATCH means authority-compatible only",
+      "does NOT mean correct, optimal, ideal, best, recommended or mistake-free",
+      "UNKNOWN is a",
+      "does NOT predict an arbitrary next action",
+      "does NOT score performance",
+      "Partial coverage is expected",
+    ]) {
+      expect(description).toContain(phrase);
+    }
   });
 });
 
-describe("tools/call invokes the probe", () => {
-  it("returns the fixed structured payload", async () => {
-    const response = await callSelf(modern("tools/call", { name: "ping", arguments: {} }, 2));
-    const result = resultOf(await rpcPayload(response));
+describe("tools/call invokes the real analysis tool", () => {
+  it("returns a successful analysis result", async () => {
+    const result = resultOf(await rpcPayload(await callWired(analyzeCall(2))));
+    const structured = result["structuredContent"] as Record<string, unknown>;
 
-    expect(response.status).toBe(200);
-    expect(result["structuredContent"]).toEqual({ ok: true, service: PING_SERVICE_ID });
-  });
-
-  it("produces structured content that satisfies the advertised output schema", async () => {
-    const result = resultOf(await rpcPayload(await callSelf(modern("tools/call", { name: "ping" }, 3))));
-
-    // Validated against the SAME schema the tool advertises, so the two cannot
-    // drift apart without this failing.
-    expect(() => PING_OUTPUT_SCHEMA.parse(result["structuredContent"])).not.toThrow();
-  });
-
-  it("also returns the serialized JSON as a text block", async () => {
-    // The specification says a tool returning structured content SHOULD do
-    // this, for clients that read only `content`.
-    const result = resultOf(await rpcPayload(await callSelf(modern("tools/call", { name: "ping" }, 4))));
-    const content = result["content"] as readonly { readonly type: string; readonly text: string }[];
-
-    expect(content[0]?.type).toBe("text");
-    expect(JSON.parse(content[0]?.text ?? "{}")).toEqual({ ok: true, service: PING_SERVICE_ID });
-  });
-
-  it("does not report an error", async () => {
-    const result = resultOf(await rpcPayload(await callSelf(modern("tools/call", { name: "ping" }, 5))));
-
+    expect(structured["status"]).toBe("ANALYZED");
     expect(result["isError"]).toBeUndefined();
   });
 
+  it("returns the identical payload as structuredContent and as text", async () => {
+    // Gameplay truth must not differ between the two representations a client
+    // may read.
+    const result = resultOf(await rpcPayload(await callWired(analyzeCall(3))));
+    const content = result["content"] as readonly { readonly type: string; readonly text: string }[];
+
+    expect(content[0]?.type).toBe("text");
+    expect(JSON.parse(content[0]?.text ?? "{}")).toEqual(result["structuredContent"]);
+  });
+
   it("reports an unknown tool as a protocol error rather than a result", async () => {
-    const payload = await rpcPayload(
-      await callSelf(modern("tools/call", { name: "analyze_warcraft_log" }, 6)),
-    );
+    const payload = await rpcPayload(await callWired(modern("tools/call", { name: "ping" }, 4)));
 
     expect(payload["error"]).toBeDefined();
     expect(payload["result"]).toBeUndefined();
+  });
+
+  it("fails closed through the deployed Worker, which binds no ingestion yet", async () => {
+    // The real production path: the tool exists, is authenticated and metered,
+    // and truthfully reports that this deployment cannot retrieve events. M6-E
+    // binds the single shared composition for REST and MCP together.
+    const result = resultOf(await rpcPayload(await callSelf(analyzeCall(5))));
+
+    expect(result["isError"]).toBe(true);
+    expect(result["structuredContent"]).toBeUndefined();
   });
 });
 
 describe("both protocol eras are served", () => {
   it("serves modern 2026-07-28 traffic", async () => {
-    const response = await callSelf(modern("tools/call", { name: "ping" }, 7));
+    const response = await callWired(analyzeCall(7));
 
     expect(response.status).toBe(200);
     // `responseMode: 'json'` shapes the modern leg: a plain JSON body, no stream.
     expect(response.headers.get("content-type")).toContain("application/json");
-    expect(resultOf(await rpcPayload(response))["structuredContent"]).toEqual({
-      ok: true,
-      service: PING_SERVICE_ID,
-    });
+    const structured = resultOf(await rpcPayload(response))["structuredContent"] as Record<string, unknown>;
+    expect(structured["status"]).toBe("ANALYZED");
   });
 
   it("serves a 2025-era initialize through the stateless legacy fallback", async () => {
-    const response = await callSelf(
+    const response = await callWired(
       legacy("initialize", {
         protocolVersion: "2025-06-18",
         capabilities: {},
@@ -413,15 +444,17 @@ describe("both protocol eras are served", () => {
 
     expect(response.status).toBe(200);
     expect(result["protocolVersion"]).toBe("2025-06-18");
-    expect(result["serverInfo"]).toMatchObject({ name: PING_SERVICE_ID });
+    expect(result["serverInfo"]).toMatchObject({ name: "warcraft-logs-coach-vnext" });
   });
 
-  it("serves a 2025-era tools/call", async () => {
-    const response = await callSelf(legacy("tools/call", { name: "ping", arguments: {} }, 8));
-    const result = resultOf(await rpcPayload(response));
+  it("serves a 2025-era analysis call", async () => {
+    const response = await callWired(
+      legacy("tools/call", { name: ANALYZE_TOOL_NAME, arguments: { source: "ids", ...D2_REQUEST } }, 8),
+    );
+    const structured = resultOf(await rpcPayload(response))["structuredContent"] as Record<string, unknown>;
 
     expect(response.status).toBe(200);
-    expect(result["structuredContent"]).toEqual({ ok: true, service: PING_SERVICE_ID });
+    expect(structured["status"]).toBe("ANALYZED");
   });
 
   it("gives both eras the same tool", async () => {
@@ -439,13 +472,15 @@ describe("both protocol eras are served", () => {
     ).map((tool) => tool.name);
 
     expect(modernTools).toEqual(legacyTools);
-    expect(modernTools).toEqual(["ping"]);
+    expect(modernTools).toEqual([ANALYZE_TOOL_NAME]);
   });
 
-  it("requires no session for a legacy tools/call", async () => {
+  it("requires no session for a legacy analysis call", async () => {
     // The legacy leg is stateless: a call succeeds with no prior initialize and
     // no session id, which is what "no Durable Object" actually rests on.
-    const response = await callSelf(legacy("tools/call", { name: "ping", arguments: {} }, 11));
+    const response = await callWired(
+      legacy("tools/call", { name: ANALYZE_TOOL_NAME, arguments: { source: "ids", ...D2_REQUEST } }, 11),
+    );
 
     expect(response.status).toBe(200);
     expect(response.headers.get("mcp-session-id")).toBeNull();
@@ -468,8 +503,8 @@ describe("the endpoint is stateless", () => {
   it("answers repeated identical calls identically", async () => {
     // Nothing accumulates between requests. A response that drifted would mean
     // state had leaked into module scope.
-    const first = resultOf(await rpcPayload(await callSelf(modern("tools/call", { name: "ping" }, 14))));
-    const second = resultOf(await rpcPayload(await callSelf(modern("tools/call", { name: "ping" }, 14))));
+    const first = resultOf(await rpcPayload(await callWired(analyzeCall(14))));
+    const second = resultOf(await rpcPayload(await callWired(analyzeCall(14))));
 
     expect(first["structuredContent"]).toEqual(second["structuredContent"]);
   });
@@ -486,7 +521,7 @@ describe("no secret leaves through /mcp", () => {
     { name: "authorized tools/list", run: async () => await callSelf(modern("tools/list", {}, 15)) },
     {
       name: "authorized tools/call",
-      run: async () => await callSelf(modern("tools/call", { name: "ping" }, 16)),
+      run: async () => await callWired(analyzeCall(16)),
     },
     {
       name: "unauthorized",
