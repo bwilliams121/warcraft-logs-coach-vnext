@@ -55,11 +55,21 @@ const RESOLVING_PREFLIGHT: PreflightPort = async () => ({
   rateLimit: undefined,
 });
 
+/**
+ * `/v1/analysis` must never reach the MCP transport. Substituting a thrower
+ * rather than the real handler turns "these routes are independent" from an
+ * assumption into something this suite would fail on.
+ */
+const UNREACHABLE_MCP: WorkerDeps["mcp"] = () => {
+  throw new Error("the analysis route must not dispatch to MCP");
+};
+
 function worker(deps: Partial<WorkerDeps> = {}) {
   return createWorker({
     analyze: deps.analyze ?? analyzeFight,
     analyzers: deps.analyzers ?? ENABLED_ANALYSIS_REQUIREMENTS,
     preflight: deps.preflight ?? RESOLVING_PREFLIGHT,
+    mcp: deps.mcp ?? UNREACHABLE_MCP,
     version: deps.version ?? "0.1.0",
   });
 }

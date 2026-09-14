@@ -8,6 +8,7 @@
  */
 
 import type { Env } from "../config/env.js";
+import { handleMcpRequest } from "../mcp/server.js";
 import {
   analyzeFight,
   ENABLED_ANALYSIS_REQUIREMENTS,
@@ -24,6 +25,7 @@ const SERVICE_VERSION = "0.1.0";
 
 const HEALTH_PATH = "/health";
 const ANALYSIS_PATH = "/v1/analysis";
+const MCP_PATH = "/mcp";
 
 export interface WorkerDeps {
   readonly analyze: (input: unknown, deps: AnalysisServiceDeps) => Promise<AnalysisServiceResult>;
@@ -34,6 +36,14 @@ export interface WorkerDeps {
    * the route issues no Warcraft Logs queries of its own.
    */
   readonly preflight: PreflightPort;
+  /**
+   * Serves `/mcp`.
+   *
+   * Injected like every other dependency so a test can substitute it, which is
+   * also what proves this layer only dispatches: the API holds no MCP types, no
+   * tool definitions and no JSON-RPC knowledge of its own.
+   */
+  readonly mcp: (request: Request, env: Env) => Promise<Response>;
   readonly version: string;
 }
 
@@ -54,6 +64,7 @@ const DEFAULT_DEPS: WorkerDeps = {
   analyze: analyzeFight,
   analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
   preflight: wclPreflight,
+  mcp: handleMcpRequest,
   version: SERVICE_VERSION,
 };
 
@@ -106,6 +117,14 @@ export function createWorker(deps: WorkerDeps = DEFAULT_DEPS): WorkerHandler {
             return methodNotAllowed("POST");
           }
           return await handleAnalysis(request, env, deps);
+        }
+
+        if (pathname === MCP_PATH) {
+          // No method gate here on purpose. Streamable HTTP assigns its own
+          // meaning to GET and DELETE, and the MCP handler answers them
+          // correctly for a stateless endpoint. A gate of ours would either
+          // duplicate that or contradict it.
+          return await deps.mcp(request, env);
         }
 
         return apiErrorResponse("NOT_FOUND", "No such endpoint.");

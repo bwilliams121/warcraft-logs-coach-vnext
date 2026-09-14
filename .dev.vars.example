@@ -18,3 +18,25 @@
 
 WCL_CLIENT_ID="replace-me"
 WCL_CLIENT_SECRET="replace-me"
+
+# INBOUND authorization for the MCP endpoint at /mcp.
+#
+# This is a DIFFERENT concern from the two values above. Those are OUTBOUND:
+# how this service authenticates to Warcraft Logs. This one is INBOUND: who is
+# allowed to call this service's MCP endpoint at all.
+#
+# /mcp fails closed. If this value is unset, every MCP request is rejected with
+# 401 — an unset token never means "no token required". /health and
+# /v1/analysis are unaffected either way.
+#
+# Generate a high-entropy value, for example:
+#     python -c "import secrets; print(secrets.token_urlsafe(32))"
+#
+# For Cloudflare deployments, do NOT put this in wrangler.jsonc. Use:
+#     npx wrangler secret put MCP_AUTH_TOKEN
+#
+# This is the private-development protection mechanism for Milestone 6. It is
+# not the final ChatGPT-facing authentication design; Cloudflare Access or
+# OAuth remain open for production exposure.
+
+MCP_AUTH_TOKEN="replace-me"

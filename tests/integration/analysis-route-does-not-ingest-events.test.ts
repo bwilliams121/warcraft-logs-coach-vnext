@@ -67,6 +67,11 @@ async function callRoute() {
     analyze: analyzeFight,
     analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight: createPreflight({ fetch: fetch.fetch, now: () => 1_000_000 }),
+    // The analysis route must not dispatch to MCP. A thrower makes that a
+    // failure rather than something this test would quietly tolerate.
+    mcp: () => {
+      throw new Error("the analysis route must not dispatch to MCP");
+    },
     // Not the real constant: this test asserts routing behaviour, not the
     // version string, and worker.ts keeps SERVICE_VERSION private.
     version: "test",

@@ -2,6 +2,7 @@
 
 import { createWorker, type WorkerDeps } from "../../src/api/worker.js";
 import type { Env, WclCredentials } from "../../src/config/env.js";
+import { handleMcpRequest, PRODUCTION_MCP_HOSTNAME } from "../../src/mcp/server.js";
 import { analyzeFight, ENABLED_ANALYSIS_REQUIREMENTS } from "../../src/services/analysis-service.js";
 import { createPreflight } from "../../src/wcl/preflight.js";
 import { createTokenCache } from "../../src/wcl/token-provider.js";
@@ -21,15 +22,29 @@ const SENTINEL_CLIENT_ID = "SENTINEL_WCL_CLIENT_ID_DO_NOT_LEAK";
 const SENTINEL_CLIENT_SECRET = "SENTINEL_WCL_CLIENT_SECRET_DO_NOT_LEAK";
 /** The access token is as sensitive as the credentials that minted it. */
 const SENTINEL_ACCESS_TOKEN = "SENTINEL_WCL_ACCESS_TOKEN_DO_NOT_LEAK";
+/**
+ * The INBOUND MCP token. A different secret from the three above — those are
+ * outbound Warcraft Logs credentials — but it leaves the backend through the
+ * same responses, so it is swept by the same pass.
+ */
+const SENTINEL_MCP_TOKEN = "SENTINEL_MCP_AUTH_TOKEN_DO_NOT_LEAK";
 
 const CONFIGURED_ENV: Env = {
   ENVIRONMENT: "test",
   WCL_CLIENT_ID: SENTINEL_CLIENT_ID,
   WCL_CLIENT_SECRET: SENTINEL_CLIENT_SECRET,
+  MCP_AUTH_TOKEN: SENTINEL_MCP_TOKEN,
 };
 
 /** Credentials present but blank, so the configuration-error path is also covered. */
 const BLANK_ENV: Env = { ENVIRONMENT: "test", WCL_CLIENT_ID: "", WCL_CLIENT_SECRET: "" };
+
+const SENTINELS: readonly { readonly name: string; readonly value: string }[] = [
+  { name: "client id", value: SENTINEL_CLIENT_ID },
+  { name: "client secret", value: SENTINEL_CLIENT_SECRET },
+  { name: "access token", value: SENTINEL_ACCESS_TOKEN },
+  { name: "MCP auth token", value: SENTINEL_MCP_TOKEN },
+];
 
 const VALID_BODY = JSON.stringify({ reportCode: "aBcDeFgH12345678", fightId: 8, sourceId: 15 });
 
@@ -69,6 +84,7 @@ function throwingDeps(): WorkerDeps {
     },
     analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight: RESOLVING_PREFLIGHT,
+    mcp: handleMcpRequest,
     version: "0.1.0",
   };
 }
@@ -78,6 +94,9 @@ function defaultDeps(preflight: PreflightPort = RESOLVING_PREFLIGHT): WorkerDeps
     analyze: analyzeFight,
     analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight,
+    // The REAL handler, not a stub. /mcp is a new way for bytes to leave the
+    // backend, so the sweep has to actually traverse it.
+    mcp: handleMcpRequest,
     version: "0.1.0",
   };
 }
@@ -165,6 +184,39 @@ const PROBES: readonly Probe[] = [
     deps: defaultDeps(LEAKY_PREFLIGHT),
     expectedStatus: 500,
   },
+  {
+    // The MCP rejection path runs while the configured MCP token is in scope.
+    // A challenge that echoed it, or that varied with the presented value,
+    // would be a disclosure.
+    name: "mcp unauthorized 401",
+    request: () =>
+      new Request(`https://${PRODUCTION_MCP_HOSTNAME}/mcp`, {
+        method: "POST",
+        headers: { host: PRODUCTION_MCP_HOSTNAME, "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
+      }),
+    env: CONFIGURED_ENV,
+    deps: defaultDeps(),
+    expectedStatus: 401,
+  },
+  {
+    // Rejected on Host before authorization is even attempted, so a wrong
+    // token and a wrong host cannot be told apart by the response body.
+    name: "mcp forbidden host 403",
+    request: () =>
+      new Request("https://coach.test/mcp", {
+        method: "POST",
+        headers: {
+          host: "coach.test",
+          "content-type": "application/json",
+          authorization: `Bearer ${SENTINEL_MCP_TOKEN}`,
+        },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
+      }),
+    env: CONFIGURED_ENV,
+    deps: defaultDeps(),
+    expectedStatus: 403,
+  },
 ];
 
 describe("wcl credentials never leave the backend", () => {
@@ -175,29 +227,25 @@ describe("wcl credentials never leave the backend", () => {
       expect(response.status, `${probe.name}: unexpected status`).toBe(probe.expectedStatus);
 
       const body = await response.text();
-      expect(body, `${probe.name}: body leaked the client id`).not.toContain(SENTINEL_CLIENT_ID);
-      expect(body, `${probe.name}: body leaked the client secret`).not.toContain(SENTINEL_CLIENT_SECRET);
-      expect(body, `${probe.name}: body leaked the access token`).not.toContain(SENTINEL_ACCESS_TOKEN);
+      for (const sentinel of SENTINELS) {
+        expect(body, `${probe.name}: body leaked the ${sentinel.name}`).not.toContain(sentinel.value);
+      }
 
       for (const [header, value] of response.headers.entries()) {
-        expect(value, `${probe.name}: header ${header} leaked the client id`).not.toContain(
-          SENTINEL_CLIENT_ID,
-        );
-        expect(value, `${probe.name}: header ${header} leaked the client secret`).not.toContain(
-          SENTINEL_CLIENT_SECRET,
-        );
-        expect(value, `${probe.name}: header ${header} leaked the access token`).not.toContain(
-          SENTINEL_ACCESS_TOKEN,
-        );
+        for (const sentinel of SENTINELS) {
+          expect(value, `${probe.name}: header ${header} leaked the ${sentinel.name}`).not.toContain(
+            sentinel.value,
+          );
+        }
       }
     }
   });
 
   it("every_response_path_is_covered_by_the_sweep", () => {
     // Guards the sweep itself: if a new status path is added to the API, this
-    // forces a decision about covering it.
+    // forces a decision about covering it. The 401 and 403 arrived with /mcp.
     expect(PROBES.map((probe) => probe.expectedStatus).sort((a, b) => a - b)).toEqual([
-      200, 400, 400, 404, 405, 500, 500, 501, 503,
+      200, 400, 400, 401, 403, 404, 405, 500, 500, 501, 503,
     ]);
   });
 

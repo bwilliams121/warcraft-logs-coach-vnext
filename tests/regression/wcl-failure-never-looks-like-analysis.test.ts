@@ -48,6 +48,11 @@ function workerWith(preflight: PreflightPort): WorkerDeps {
     analyze: analyzeFight,
     analyzers: ENABLED_ANALYSIS_REQUIREMENTS,
     preflight,
+    // Every probe here posts to /v1/analysis. Reaching MCP would mean the
+    // router sent an analysis request somewhere it does not belong.
+    mcp: () => {
+      throw new Error("the analysis route must not dispatch to MCP");
+    },
     version: "0.1.0",
   };
 }

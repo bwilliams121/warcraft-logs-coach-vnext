@@ -13,6 +13,17 @@ export interface Env {
   readonly ENVIRONMENT?: string;
   readonly WCL_CLIENT_ID?: string;
   readonly WCL_CLIENT_SECRET?: string;
+  /**
+   * INBOUND MCP authorization. A different concern from the two above.
+   *
+   * `WCL_*` are OUTBOUND: how this service authenticates to Warcraft Logs.
+   * `MCP_AUTH_TOKEN` is INBOUND: who may call this service's MCP endpoint.
+   *
+   * Deliberately absent from `ConfigKey` and from `loadConfig()`. A deployment
+   * without it must still serve `/health` and `/v1/analysis` normally — the
+   * absence closes `/mcp` and nothing else. See `src/mcp/auth.ts`.
+   */
+  readonly MCP_AUTH_TOKEN?: string;
 }
 
 /** Placeholder substituted for credential values during serialization. */

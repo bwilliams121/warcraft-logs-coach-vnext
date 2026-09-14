@@ -30,5 +30,9 @@
     "workerd@1.20260815.1": true,
     "workerd@1.20260911.1": true,
     "esbuild@0.28.1": true
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.0.0",
+    "zod": "4.6.5"
   }
 }
