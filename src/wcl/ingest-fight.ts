@@ -49,14 +49,8 @@ import {
 } from "../engine/normalization/raw-event-fields.js";
 import type { TimeRangeMs } from "../engine/evidence/coverage.js";
 import type { RetrievalSource } from "./evidence-capability.js";
-import {
-  decodeFightContext,
-  decodeReportRevision,
-  FIGHT_CONTEXT_QUERY,
-  fightContextVariables,
-  REPORT_REVISION_QUERY,
-  reportRevisionVariables,
-} from "./fight-context-query.js";
+import { decodeFightContext, FIGHT_CONTEXT_QUERY, fightContextVariables } from "./fight-context-query.js";
+import { decodeReportRevision, REPORT_REVISION_QUERY, reportRevisionVariables } from "./report-revision.js";
 import { createGraphqlClient, type WclGraphqlClient } from "./graphql-client.js";
 import { paginateEventStream } from "./paginator.js";
 import {
@@ -134,6 +128,25 @@ export interface FightCoreIngestionRequest {
    */
   readonly talentImportActorId: number;
   readonly includeResources: boolean;
+  /**
+   * The report revision every fight in a batch must belong to.
+   *
+   * OPTIONAL, AND ABSENT MEANS "NO EXPECTATION" — never "expect zero". The
+   * single-player path supplies nothing and behaves exactly as it always has:
+   * M3's own post-pagination recheck still guards one fight against a report
+   * that moved underneath it.
+   *
+   * A raid-night batch supplies the revision its roster discovery established.
+   * The check then runs on the CONTEXT RESPONSE, before the retrieval plan is
+   * built and before a single event page is requested — so a report that was
+   * re-exported between roster discovery and this fight costs one cheap query
+   * rather than a full pagination whose result would have to be thrown away.
+   *
+   * It does not replace the post-pagination recheck. This one catches a report
+   * that had already moved; that one catches a report that moves mid-flight.
+   * Both are needed, and neither implies the other.
+   */
+  readonly expectedReportRevision?: number;
   readonly hostility?: readonly HostilitySelector[];
   readonly limit?: number;
 }
@@ -241,6 +254,16 @@ export async function ingestFightCore(
     !report.archiveStatus.isAccessible
   ) {
     return { ok: false, failure: { reason: "REPORT_ARCHIVED_INACCESSIBLE" } };
+  }
+
+  // Batch revision gate, also before any event request is issued.
+  //
+  // Only a caller that stated an expectation is checked, so the single-player
+  // path is untouched. `undefined` is compared explicitly rather than by
+  // truthiness — revision 0 is a number like any other, and a truthiness test
+  // would silently skip the check for it.
+  if (request.expectedReportRevision !== undefined && report.revision !== request.expectedReportRevision) {
+    return { ok: false, failure: { reason: "REPORT_REVISION_CHANGED" } };
   }
 
   const normalizedContext = normalizeFightContext(report, request.fightId);

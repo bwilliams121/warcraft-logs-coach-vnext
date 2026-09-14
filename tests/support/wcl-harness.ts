@@ -168,3 +168,86 @@ export function rawEvent(
 ): Record<string, unknown> {
   return { timestamp, type, ...extra };
 }
+
+// --------------------------------------------------------------------------
+// Roster discovery (M7-C)
+// --------------------------------------------------------------------------
+
+/** One `masterData.actors` entry, shaped as Warcraft Logs returns it. */
+export function rosterActor(options: {
+  readonly id: number;
+  readonly name?: string;
+  readonly type?: string;
+  readonly subType?: string;
+  readonly server?: string | null;
+}): Record<string, unknown> {
+  return {
+    id: options.id,
+    name: options.name ?? `Actor${String(options.id)}`,
+    server: options.server === undefined ? "Testrealm" : options.server,
+    type: options.type ?? "Player",
+    subType: options.subType ?? "Rogue",
+  };
+}
+
+/** One `fights` entry for the roster query. */
+export function rosterFight(options: {
+  readonly id: number;
+  readonly friendlyPlayers: readonly number[];
+  readonly friendlySpecs: readonly unknown[];
+  readonly name?: string;
+  readonly encounterID?: number;
+  readonly difficulty?: number | null;
+  readonly size?: number | null;
+  readonly kill?: boolean | null;
+  readonly startTime?: number;
+  readonly endTime?: number;
+}): Record<string, unknown> {
+  return {
+    id: options.id,
+    name: options.name ?? `Fight ${String(options.id)}`,
+    encounterID: options.encounterID ?? 2900,
+    difficulty: options.difficulty === undefined ? 5 : options.difficulty,
+    size: options.size === undefined ? 20 : options.size,
+    kill: options.kill === undefined ? true : options.kill,
+    startTime: options.startTime ?? 1000,
+    endTime: options.endTime ?? 5000,
+    friendlyPlayers: [...options.friendlyPlayers],
+    friendlySpecs: [...options.friendlySpecs],
+  };
+}
+
+/** A well-formed `CoachReportRoster` response. */
+export function rosterResponse(options: {
+  readonly actors: readonly unknown[];
+  readonly fights: readonly unknown[];
+  readonly revision?: number;
+  readonly code?: string;
+  readonly logVersion?: number;
+  readonly gameVersion?: number | null;
+}): Response {
+  return jsonResponse(200, {
+    data: {
+      rateLimitData: { limitPerHour: 3600, pointsSpentThisHour: 10, pointsResetIn: 600 },
+      reportData: {
+        report: {
+          code: options.code ?? "aBcDeFgH12345678",
+          revision: options.revision ?? 30,
+          startTime: 1_700_000_000_000,
+          endTime: 1_700_000_900_000,
+          masterData: {
+            logVersion: options.logVersion ?? 17,
+            gameVersion: options.gameVersion === undefined ? 1 : options.gameVersion,
+            actors: [...options.actors],
+          },
+          fights: [...options.fights],
+        },
+      },
+    },
+  });
+}
+
+/** A 200 response wrapping a decoded GraphQL `data` payload. */
+export function jsonResponseFor(data: unknown): Response {
+  return jsonResponse(200, { data });
+}

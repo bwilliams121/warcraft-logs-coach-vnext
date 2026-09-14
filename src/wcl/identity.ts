@@ -12,14 +12,13 @@
  * fact's clothing.
  */
 
+import { isRecord, readInteger, readNullableInteger, readString } from "./decode.js";
 import {
-  isRecord,
-  isSafeInteger,
-  isUsableString,
-  readInteger,
-  readNullableInteger,
-  readString,
-} from "./decode.js";
+  isUsableSpecName,
+  readFriendlyRoster,
+  resolvePlayerActor,
+  type ActorResolutionFailure,
+} from "./report-roster-facts.js";
 import type { PreflightPayload, PreflightReport } from "./preflight-query.js";
 import type { FightIdentity, PreflightRequest } from "./types.js";
 
@@ -35,11 +34,6 @@ export type IdentityFailureReason =
 export type IdentityResolution =
   | { readonly ok: true; readonly identity: FightIdentity }
   | { readonly ok: false; readonly reason: IdentityFailureReason };
-
-const PLAYER_ACTOR_TYPE = "Player";
-
-/** WCL reports an unresolved spec as this rather than omitting it. */
-const UNKNOWN_SPEC = "unknown";
 
 function failure(reason: IdentityFailureReason): IdentityResolution {
   return { ok: false, reason };
@@ -93,15 +87,11 @@ function resolveFight(report: PreflightReport, fightId: number): FightOutcome {
     return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
   }
 
-  const friendlyPlayers = raw["friendlyPlayers"];
-  const friendlySpecs = raw["friendlySpecs"];
-  if (!Array.isArray(friendlyPlayers) || !friendlyPlayers.every(isSafeInteger)) {
-    return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
-  }
-  if (!Array.isArray(friendlySpecs) || friendlySpecs.length !== friendlyPlayers.length) {
-    // The two arrays are index-aligned by contract. A length mismatch means the
-    // alignment cannot be trusted, and a misaligned spec would silently coach
-    // the right player as the wrong specialization.
+  // The alignment rule is shared with roster discovery rather than restated —
+  // see `report-roster-facts.ts`. Two definitions of "aligned" is how a player
+  // eventually gets coached as the wrong specialization.
+  const roster = readFriendlyRoster(raw);
+  if (roster === undefined) {
     return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
   }
 
@@ -114,8 +104,8 @@ function resolveFight(report: PreflightReport, fightId: number): FightOutcome {
       difficulty,
       startTime,
       endTime,
-      friendlyPlayers,
-      friendlySpecs,
+      friendlyPlayers: roster.friendlyPlayers,
+      friendlySpecs: roster.friendlySpecs,
     },
   };
 }
@@ -138,45 +128,30 @@ type ActorOutcome =
  * failing the whole request over it would be a fail-closed rule firing on
  * irrelevant evidence.
  */
+/** M2's failure vocabulary for each shared actor-resolution outcome. */
+function identityReasonFor(reason: ActorResolutionFailure): IdentityFailureReason {
+  switch (reason) {
+    case "NOT_IN_CATALOG":
+      return "SOURCE_NOT_FOUND";
+    case "AMBIGUOUS_ACTOR_ID":
+      // Two actors claiming one ID makes every later source/target reference
+      // ambiguous. There is no safe way to pick one.
+      return "UPSTREAM_DATA_INVALID";
+    case "ACTOR_RECORD_MALFORMED":
+      return "UPSTREAM_DATA_INVALID";
+    case "NOT_A_PLAYER":
+      return "SOURCE_NOT_A_PLAYER";
+    case "IDENTITY_UNUSABLE":
+      return "IDENTITY_UNRESOLVED";
+  }
+}
+
 function resolveActor(report: PreflightReport, sourceId: number): ActorOutcome {
-  const matches = report.actors.filter(
-    (candidate) => isRecord(candidate) && readInteger(candidate, "id") === sourceId,
-  );
-
-  if (matches.length === 0) {
-    return { ok: false, reason: "SOURCE_NOT_FOUND" };
+  const resolution = resolvePlayerActor(report.actors, sourceId);
+  if (!resolution.ok) {
+    return { ok: false, reason: identityReasonFor(resolution.reason) };
   }
-  if (matches.length > 1) {
-    // Two actors claiming one ID makes every later source/target reference
-    // ambiguous. There is no safe way to pick one.
-    return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
-  }
-
-  const matched = matches[0];
-  if (!isRecord(matched)) {
-    return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
-  }
-
-  // Type is read before any player-only field: a pet ID must be reported as a
-  // pet, not as a player with a missing class.
-  const type = readString(matched, "type");
-  if (type === undefined) {
-    return { ok: false, reason: "UPSTREAM_DATA_INVALID" };
-  }
-  if (type !== PLAYER_ACTOR_TYPE) {
-    return { ok: false, reason: "SOURCE_NOT_A_PLAYER" };
-  }
-
-  const name = readString(matched, "name");
-  const className = readString(matched, "subType");
-  if (name === undefined || className === undefined) {
-    // The regression this exists for: WCL supplied a player, but not a usable
-    // name or class. The old analyzer carried that forward as nulls alongside a
-    // resolved spec. Here it stops.
-    return { ok: false, reason: "IDENTITY_UNRESOLVED" };
-  }
-
-  return { ok: true, actor: { name, className } };
+  return { ok: true, actor: { name: resolution.actor.name, className: resolution.actor.className } };
 }
 
 export function resolveFightIdentity(
@@ -213,7 +188,7 @@ export function resolveFightIdentity(
   // Only the selected player's spec entry has to be usable. Another raider's
   // null or odd entry says nothing about this player.
   const specName = fight.friendlySpecs[index];
-  if (!isUsableString(specName) || specName.trim().toLowerCase() === UNKNOWN_SPEC) {
+  if (!isUsableSpecName(specName)) {
     return failure("IDENTITY_UNRESOLVED");
   }
 

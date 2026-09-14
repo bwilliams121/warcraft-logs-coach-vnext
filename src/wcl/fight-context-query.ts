@@ -97,48 +97,19 @@ export function fightContextVariables(
 }
 
 /**
- * The post-pagination revision check.
+ * The post-pagination revision check lives in `report-revision.ts`.
  *
- * `revision` increases when a report is re-exported. If it changed while a
- * multi-page fight was being ingested, the pages may straddle two exports and
- * the dataset mixes revisions — which is NOT representable as PARTIAL, because
- * PARTIAL means "less evidence than requested", not "evidence from two
- * different worlds".
+ * It was defined here while ingestion was its only caller. Roster discovery and
+ * a future raid-night batch now ask the same question, and three copies of
+ * "read the revision" would eventually disagree about what an inaccessible
+ * report means — so the query, its variables and its decoder moved to one home.
  *
- * Checked once at the end rather than per page: a mid-pagination change fails
- * the whole ingestion either way, so detecting it at the end is equally correct
- * and costs one request instead of doubling them.
+ * Why M3 still checks after pagination is unchanged and worth restating: if the
+ * revision moved while a multi-page fight was being retrieved, the pages may
+ * straddle two exports and the dataset mixes revisions. That is NOT representable
+ * as PARTIAL, because PARTIAL means "less evidence than requested", not "evidence
+ * from two different worlds".
  */
-export const REPORT_REVISION_QUERY = `query CoachReportRevision($code: String!) {
-  reportData {
-    report(code: $code, allowUnlisted: true) {
-      revision
-    }
-  }
-}`;
-
-export function reportRevisionVariables(reportCode: string): Record<string, unknown> {
-  return { code: reportCode };
-}
-
-export function decodeReportRevision(data: unknown): DecodeOutcome<number | null> {
-  if (!isRecord(data)) {
-    return { ok: false };
-  }
-  const reportData = readRecord(data, "reportData");
-  if (reportData === undefined || !("report" in reportData)) {
-    return { ok: false };
-  }
-  const report = reportData["report"];
-  if (report === null) {
-    return { ok: true, value: null };
-  }
-  if (!isRecord(report)) {
-    return { ok: false };
-  }
-  const revision = readInteger(report, "revision");
-  return revision === undefined ? { ok: false } : { ok: true, value: revision };
-}
 
 export interface RawArchiveStatus {
   readonly isArchived: boolean;

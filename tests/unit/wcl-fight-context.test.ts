@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { normalizeFightContext } from "../../src/engine/normalization/fight-context.js";
-import { decodeFightContext, decodeReportRevision } from "../../src/wcl/fight-context-query.js";
+import { decodeFightContext } from "../../src/wcl/fight-context-query.js";
+// Moved to its own module in M7-C so roster discovery and a future raid-night
+// batch share ONE definition of "read the revision". The assertions below are
+// unchanged, which is what proves the move was behaviour-preserving.
+import { decodeReportRevision } from "../../src/wcl/report-revision.js";
 import type { RawFightContextReport } from "../../src/wcl/fight-context-query.js";
 
 function report(overrides: Partial<RawFightContextReport> = {}): RawFightContextReport {
