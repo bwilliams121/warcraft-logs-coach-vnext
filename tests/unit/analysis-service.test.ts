@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { Env } from "../../src/config/env.js";
+import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import {
   analyzeFight,
   ENABLED_ANALYSIS_REQUIREMENTS,
@@ -61,10 +62,29 @@ const unreachablePreflight: PreflightPort = async () => {
   throw new Error("preflight must not run for this input");
 };
 
+/**
+ * Retrieval that fails.
+ *
+ * This file is about the stages BEFORE analysis — validation, configuration,
+ * identity — so the default ingestion stops the pipeline right after them with
+ * a plain upstream failure. Tests that care about real analysis live in
+ * `analysis-composition.test.ts`, over a real fixture.
+ */
+const failingIngest: CombatIngestionPort = async () => ({
+  ok: false,
+  failure: { reason: "UPSTREAM_UNAVAILABLE" },
+});
+
+/** Fails the test if reached: proves an earlier step short-circuited. */
+const unreachableIngest: CombatIngestionPort = () => {
+  throw new Error("ingestion must not run for this input");
+};
+
 function deps(overrides: Partial<AnalysisServiceDeps> = {}): AnalysisServiceDeps {
   return {
     env: configuredEnv,
     preflight: resolvingPreflight,
+    ingest: failingIngest,
     ...overrides,
   };
 }
@@ -78,18 +98,23 @@ describe("analyzeFight", () => {
     expect((await analyzeFight(validInput, deps())).ok).toBe(false);
   });
 
-  it("analysis_is_not_implemented_after_a_successful_preflight", async () => {
-    const result = await analyzeFight(validInput, deps());
+  it("proceeds_past_preflight_into_real_retrieval", async () => {
+    // Superseded `analysis_is_not_implemented_after_a_successful_preflight`.
+    // M6-E bound real ingestion, so a resolved identity now continues into M3
+    // rather than stopping at a placeholder. The failure below is the stubbed
+    // retrieval failing, which is the proof it was reached at all.
+    const ingest = vi.fn(failingIngest);
+    const result = await analyzeFight(validInput, deps({ ingest }));
 
+    expect(ingest).toHaveBeenCalledTimes(1);
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.code).toBe("ANALYSIS_NOT_IMPLEMENTED");
+      expect(result.error.code).toBe("UPSTREAM_UNAVAILABLE");
     }
   });
 
-  it("does_not_return_a_successful_analysis", async () => {
-    // Nothing in Milestone 2 may produce ok: true. Absence of analysis must never
-    // be presentable as analysis.
+  it("never_presents_a_retrieval_failure_as_an_analysis", async () => {
+    // A failed retrieval is not an empty fight. It must never become ok: true.
     const inputs: unknown[] = [
       validInput,
       { reportUrl: `https://www.warcraftlogs.com/reports/${REQUEST.reportCode}#fight=8&source=15` },
@@ -102,8 +127,8 @@ describe("analyzeFight", () => {
     }
   });
 
-  it("invalid_request_is_rejected_before_not_implemented", async () => {
-    // Proves validation is real rather than bypassed by the placeholder.
+  it("invalid_request_is_rejected_before_any_warcraft_logs_work", async () => {
+    // Proves validation is real rather than bypassed on the way to retrieval.
     const result = await analyzeFight({ reportCode: REQUEST.reportCode, fightId: 8 }, deps());
 
     expect(result.ok).toBe(false);
@@ -114,7 +139,10 @@ describe("analyzeFight", () => {
   });
 
   it("invalid_request_fails_before_any_wcl_call", async () => {
-    const result = await analyzeFight({ reportCode: "nope" }, deps({ preflight: unreachablePreflight }));
+    const result = await analyzeFight(
+      { reportCode: "nope" },
+      deps({ preflight: unreachablePreflight, ingest: unreachableIngest }),
+    );
 
     expect(result.ok === false && result.error.code).toBe("INVALID_REQUEST");
   });
@@ -136,9 +164,9 @@ describe("analyzeFight", () => {
     expect(result.ok === false && result.error.code).toBe("CONFIGURATION_ERROR");
   });
 
-  it("preflight_runs_before_the_not_implemented_boundary", async () => {
+  it("preflight_failure_is_diagnosed_for_its_own_reason", async () => {
     // The ordering that makes a bad report code diagnosable: it must not be
-    // masked by "analysis is not implemented".
+    // masked by a later retrieval failure.
     const preflight = vi.fn<PreflightPort>(failingPreflight("REPORT_NOT_ACCESSIBLE"));
 
     const result = await analyzeFight(validInput, deps({ preflight }));
@@ -185,9 +213,6 @@ describe("analyzeFight", () => {
       expect(result.ok, reason).toBe(false);
       if (!result.ok) {
         expect(result.error.code, reason).toBe(code);
-        // Never "not implemented": a retrieval or identity failure is its own
-        // answer, not a milestone excuse.
-        expect(result.error.code, reason).not.toBe("ANALYSIS_NOT_IMPLEMENTED");
       }
     }
   });
@@ -220,16 +245,15 @@ describe("analyzeFight", () => {
     ]);
   });
 
-  it("a_registered_analyzer_does_not_make_analysis_available_without_ingestion", async () => {
-    // A registered analyzer is not a capability. The Assassination analyzer IS
-    // registered and the request resolves to it, but without an ingestion port
-    // the service cannot retrieve evidence — so it refuses rather than
-    // inventing a result, and refuses having spent nothing.
+  it("requires_ingestion_rather_than_reporting_it_missing", async () => {
+    // Superseded the M6-B/M6-D seam. `ingest` is a required dependency now, so
+    // "nobody wired retrieval" cannot be a runtime status — it does not compile.
+    // What remains is that a retrieval FAILURE is reported as itself.
     const result = await analyzeFight(validInput, deps());
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.error.code).toBe("ANALYSIS_NOT_IMPLEMENTED");
+      expect(result.error.code).toBe("UPSTREAM_UNAVAILABLE");
     }
   });
 

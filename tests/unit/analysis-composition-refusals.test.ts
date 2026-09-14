@@ -354,21 +354,20 @@ describe("identity must still describe the fight that was retrieved", () => {
   });
 });
 
-describe("the M6-B/M6-E boundary", () => {
-  it("performs no retrieval when no ingestion port is supplied", async () => {
-    // How the REST route holds its pre-M6-E behaviour: without the port the
-    // service cannot retrieve anything, so the guarantee is structural rather
-    // than a promise not to use what it was given.
-    const { preflight, analyze, deps } = spies();
-    const { ingest: _omitted, ...withoutIngest } = deps;
-    const result = await analyzeFight(REQUEST, withoutIngest);
+describe("ingestion is a required dependency", () => {
+  it("cannot be omitted, so the old not-implemented status is unreachable", () => {
+    // M6-B/M6-D made `ingest` optional only so REST could hold its 501. M6-E
+    // binds the real ingestor and makes the dependency required, which turns
+    // "somebody forgot to wire retrieval" from a runtime status into a compile
+    // error. Asserted structurally, because a type-level guarantee has no
+    // runtime behaviour to observe.
+    const { deps } = spies();
+    const withoutIngest: Record<string, unknown> = { ...deps };
+    delete withoutIngest["ingest"];
 
-    expect(result.ok).toBe(false);
-    if (result.ok) return;
-    expect(result.error.code).toBe("ANALYSIS_NOT_IMPLEMENTED");
-    // Identity is still established — that behaviour is unchanged from M2.
-    expect(preflight).toHaveBeenCalledTimes(1);
-    expect(analyze).not.toHaveBeenCalled();
+    // @ts-expect-error `ingest` is required: omitting it must not type-check.
+    void (withoutIngest as AnalysisServiceDeps satisfies AnalysisServiceDeps);
+    expect("ingest" in deps).toBe(true);
   });
 
   it("changes nothing about gameplay semantics", async () => {

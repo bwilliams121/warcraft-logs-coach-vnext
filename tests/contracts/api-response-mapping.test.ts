@@ -20,8 +20,12 @@ describe("api response mapping contract", () => {
     }
   });
 
-  it("not_implemented_does_not_map_to_a_success_status", () => {
-    expect(statusForErrorCode("ANALYSIS_NOT_IMPLEMENTED")).toBe(501);
+  it("no_longer_carries_the_retired_not_implemented_code", () => {
+    // M6-E bound real ingestion, so "analysis exists but nobody wired it" is a
+    // compile error rather than a status. The code is gone from the union, and
+    // this asserts the HTTP layer cannot resurrect it.
+    expect(API_ERROR_CODES).not.toContain("ANALYSIS_NOT_IMPLEMENTED" as ApiErrorCode);
+    expect(() => statusForErrorCode("ANALYSIS_NOT_IMPLEMENTED" as ApiErrorCode)).toThrow();
   });
 
   it("no_warcraft_logs_failure_maps_to_a_success_status", () => {
@@ -40,6 +44,9 @@ describe("api response mapping contract", () => {
   it("maps_each_code_to_its_documented_status", () => {
     const expected: Record<ApiErrorCode, number> = {
       INVALID_REQUEST: 400,
+      // Analysis spends a paid Warcraft Logs quota and is not publicly
+      // callable. The rate limiter is a brake, not a door.
+      UNAUTHORIZED: 401,
       NOT_FOUND: 404,
       REPORT_NOT_ACCESSIBLE: 404,
       FIGHT_NOT_FOUND: 404,
@@ -53,8 +60,12 @@ describe("api response mapping contract", () => {
       SOURCE_NOT_A_PLAYER: 422,
       SOURCE_NOT_IN_FIGHT: 422,
       UPSTREAM_RATE_LIMITED: 429,
+      // Us refusing the caller, rather than Warcraft Logs refusing us. Both
+      // ask a client to slow down.
+      RATE_LIMITED: 429,
+      // The limiter could not decide, so the expensive path was refused.
+      RATE_LIMITER_UNAVAILABLE: 503,
       INTERNAL_ERROR: 500,
-      ANALYSIS_NOT_IMPLEMENTED: 501,
       IDENTITY_UNRESOLVED: 502,
       UPSTREAM_DATA_INVALID: 502,
       CONFIGURATION_ERROR: 503,

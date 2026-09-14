@@ -45,7 +45,7 @@ import {
 
 import type { Env } from "../config/env.js";
 import { mcpAuthChallenge } from "./auth.js";
-import type { RateLimiterPort } from "./rate-limit.js";
+import type { RateLimiterPort } from "../runtime/rate-limit.js";
 import {
   registerAnalyzeWarcraftLogTool,
   type AnalysisRunner,
@@ -74,22 +74,17 @@ export function mcpAllowedHostnames(): readonly string[] {
 /**
  * The runner used when no composition has been supplied.
  *
- * THE M6-D/M6-E BOUNDARY. M6-E establishes the single production composition
- * root that binds real ingestion for both REST and MCP. Until it does, a
- * deployment that reaches this default has no way to retrieve combat events —
- * and the honest answer is to say so, not to invent one. Failing closed here
- * also means no Warcraft Logs points are spent by a half-wired deployment.
- *
- * It reports the application layer's own not-implemented code, so the message a
- * caller sees is the same one the service would have produced. There is no
- * second analysis path hiding behind this.
+ * FAIL-CLOSED, AND NOW UNREACHABLE IN PRODUCTION. The Worker binds the shared
+ * production runner at its composition root, so this exists only for a caller
+ * that constructs the handler without one. It reports an internal error rather
+ * than analysing, because a handler with no analysis path is a wiring defect —
+ * not a condition a user should be asked to interpret.
  */
 const UNBOUND_ANALYSIS_RUNNER: AnalysisRunner = async () => ({
   ok: false,
   error: {
-    code: "ANALYSIS_NOT_IMPLEMENTED",
-    message:
-      "This deployment is not wired to retrieve combat events, so no analysis was produced. External exposure is owned by a later integration milestone.",
+    code: "INTERNAL_ERROR",
+    message: "No analysis runner is bound to this MCP handler.",
   },
 });
 
@@ -168,14 +163,14 @@ export async function handleMcpRequest(
   const rejected =
     hostHeaderValidationResponse(request, allowed) ??
     originValidationResponse(request, allowed) ??
-    (await mcpAuthChallenge(request, env.MCP_AUTH_TOKEN));
+    (await mcpAuthChallenge(request, env.ANALYSIS_AUTH_TOKEN));
   if (rejected !== undefined) return rejected;
 
   const handler = createHandler({
     analyze: options.analyze ?? UNBOUND_ANALYSIS_RUNNER,
     // A deployment missing the binding is unmetered, and the tool treats that
     // as a refusal rather than as permission.
-    rateLimiter: options.rateLimiter ?? env.MCP_ANALYSIS_RATE_LIMITER,
+    rateLimiter: options.rateLimiter ?? env.ANALYSIS_RATE_LIMITER,
   });
 
   // `fetch` is called with no `authInfo`: see `./auth.ts` for why the static

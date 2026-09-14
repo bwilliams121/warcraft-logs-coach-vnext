@@ -520,6 +520,141 @@ deferred.
 
 ---
 
+## Analysis interfaces
+
+Two surfaces expose the same engine. They share one application composition, one
+public projection and one rate-limit budget, so a result cannot differ by
+transport — a test asserts the two payloads are deeply equal.
+
+### What the analysis actually is
+
+**Assassination Rogue observed-decision authority verification.**
+
+It takes the rotational decisions a player *already made* and checks each one
+against a pinned SimulationCraft action priority list. Each observed decision
+resolves to one of three outcomes:
+
+| Outcome | Meaning |
+| --- | --- |
+| `MATCH` | The supported analysis resolved the same action that was observed. **Authority-compatible only.** |
+| `REJECTED` | The authority can positively establish the observed action was not selectable in the proven state. It does not name what should have been done instead. |
+| `UNKNOWN` | The evidence or the authority could not prove the comparison. A legitimate, successful result. |
+
+It does **not** provide:
+
+- arbitrary next-action prediction
+- "what should I have pressed here?"
+- generalized all-specialization coaching
+- a correctness percentage
+- a performance score, grade or rating
+
+`MATCH` does not mean correct, optimal, ideal, best, recommended or
+mistake-free. `UNKNOWN` is first-class and is never a fault. Partial coverage is
+expected — most decisions typically resolve to `UNKNOWN`, and casts whose
+execution lane is not established are excluded from the denominator entirely.
+Read the `coverage` block before characterizing a fight.
+
+Any specialization other than Assassination Rogue returns
+`status: "SPEC_NOT_SUPPORTED"` with no decisions and no coverage. That is a
+complete, truthful answer — not evidence of clean play.
+
+### REST — `POST /v1/analysis`
+
+Accepts either form:
+
+```json
+{ "reportUrl": "https://www.warcraftlogs.com/reports/<code>#fight=8&source=15" }
+```
+
+```json
+{ "reportCode": "<code>", "fightId": 8, "sourceId": 15 }
+```
+
+Callers cannot select ingestion scope; it is derived from the selected
+analyzer's declared requirement.
+
+**On success the body IS the public analysis result**, with no wrapper — the
+same object MCP returns as `structuredContent`. All five analysis statuses
+(`ANALYZED`, `SPEC_NOT_SUPPORTED`, `AUTHORITY_NOT_AVAILABLE`,
+`PROFILE_NOT_RESOLVED`, `INSUFFICIENT_EVIDENCE`) return **HTTP 200**: the
+request was successfully analyzed to a truthful domain status.
+
+Failures keep the `{ "ok": false, "error": { "code", "message" } }` envelope and
+a non-2xx status — 400 invalid request, 404 missing report/fight/source, 409
+report revision changed, 422 archived or not-analyzable, 429 rate limited, 502
+untrusted upstream data, 503 unavailable or misconfigured.
+
+**Requires bearer authentication.** Send
+`Authorization: Bearer <ANALYSIS_AUTH_TOKEN>`. A missing or invalid credential
+returns `401` with `WWW-Authenticate: Bearer`, consuming no rate-limit budget
+and performing no Warcraft Logs work. `/mcp` requires the *same* credential —
+one private principal, two surfaces, so neither is the cheap way in.
+
+`/health` remains public: it discloses nothing and costs nothing.
+
+### MCP — `POST /mcp`
+
+A stateless Streamable HTTP MCP server (protocol `2026-07-28`, with stateless
+compatibility for 2025-era clients). It exposes exactly one tool:
+
+**`analyze_warcraft_log`**, taking a tagged input union so the two forms cannot
+be mixed:
+
+```json
+{ "source": "url", "reportUrl": "https://www.warcraftlogs.com/reports/<code>#fight=8&source=15" }
+```
+
+```json
+{ "source": "ids", "reportCode": "<code>", "fightId": 8, "sourceId": 15 }
+```
+
+It returns the public analysis result as both `structuredContent` and a JSON
+text block. Analysis-domain statuses are successful tool results; transport and
+service failures are `isError: true` with no `structuredContent`, so an outage
+can never be parsed as a finding.
+
+`/mcp` is protected by, in order: Host validation (DNS-rebinding), Origin
+validation, and the same `ANALYSIS_AUTH_TOKEN` bearer credential `/v1/analysis`
+requires.
+
+That bearer token is the current **private/development** protection mechanism.
+It is not OAuth, not multi-user identity, and not a final public
+ChatGPT-facing authorization architecture. Cloudflare Access or full OAuth
+remain open for production exposure.
+
+### Analysis rate limit
+
+**10 analysis attempts per 60 seconds, shared by REST and MCP.**
+
+One analysis spends Warcraft Logs API points from a finite, paid, account-wide
+quota. Both transports charge the same Cloudflare rate-limit binding under the
+same key, so a caller cannot double their budget by switching protocols.
+
+The limiter runs immediately before the shared analysis runner. Cheap traffic —
+`tools/list`, rejected authentication, rejected Origin, malformed tool
+arguments, unparseable REST bodies, `/health` — does not consume it.
+
+If the limiter denies, REST answers 429 and MCP returns a `RATE_LIMITED` tool
+error. If the limiter is unavailable or throws, both **fail closed** (REST 503,
+MCP `RATE_LIMITER_UNAVAILABLE`) rather than running unmetered. Neither is ever
+reported as gameplay `UNKNOWN`.
+
+**The limiter is defence-in-depth, not the security boundary.** Cloudflare's
+Worker Rate Limiting counters are local to each Cloudflare location and
+intentionally eventually consistent, so `10 / 60s` is a per-location brake, not
+an exact global accounting of Warcraft Logs quota. Bearer authentication is what
+decides *who* may spend capacity; the limiter decides *how fast* an authorized
+caller may spend it. Neither substitutes for the other.
+
+Operator note: the binding is `ANALYSIS_RATE_LIMITER` in `wrangler.jsonc`. It
+needs no dashboard resource. Cloudflare's rate-limit binding is not exercised by
+local `wrangler dev` or by the offline test suite; tests drive an injected
+limiter port that reproduces allow, deny and outage deterministically. After
+deployment, watch for unexpected analysis volume rather than assuming the
+limiter caps it globally.
+
+---
+
 ## Development
 
 The project is TypeScript on Cloudflare Workers. Node 24 or newer is required
@@ -618,27 +753,27 @@ Each of those has its own explicit failure — a bad fight ID returns
 `FIGHT_NOT_FOUND`, not a generic error, and never "analysis is not
 implemented".
 
-Gameplay analysis is **not** implemented. After a successful preflight the
-request returns an explicit `ANALYSIS_NOT_IMPLEMENTED` error. It never returns a
-successful-looking empty report, because absence of analysis is not evidence of
-good play.
+Analysis now runs. After a successful preflight the request retrieves and
+normalizes the fight, derives state, and evaluates the player's observed
+rotational decisions against the pinned SimulationCraft authority. It never
+returns a successful-looking empty report, because absence of analysis is not
+evidence of good play.
 
-### Milestone 3 — ingestion, built and deliberately not wired
+See [Analysis interfaces](#analysis-interfaces) for what the two endpoints
+return and what the results do and do not mean.
+
+### Milestone 3 — ingestion, built and now bound
 
 Milestone 3 adds the event ingestion capability: a reusable paginator, a
 declared retrieval plan, evidence capability and coverage, and a normalized
 `CombatFight`.
 
-It is **not connected to `/v1/analysis`**, and that is the design rather than an
-oversight. No analyzer is enabled, so no analyzer declares required inputs, so
-there is nothing to ingest for. Wiring it now would make the route spend
-Warcraft Logs API points retrieving evidence nothing reads, while still
-answering `ANALYSIS_NOT_IMPLEMENTED` — the route lying about what it did. An
-integration test asserts a valid request issues exactly one GraphQL call and
-never an events query.
-
-`CombatIngestionPort` exists as a type with no production binding. Milestone 5
-injects it at the same time as the first analyzer declares its inputs.
+It stayed deliberately unwired until an analyzer existed to consume it — wiring
+it earlier would have spent Warcraft Logs API points retrieving evidence nothing
+read. Milestone 6-E bound it at the single production composition root, where it
+is handed to the application service alongside preflight. `CombatIngestionPort`
+is now a **required** dependency, so "the engine works but nobody connected it"
+is a compile error rather than a runtime status.
 
 What ingestion establishes when it is called:
 
@@ -793,5 +928,11 @@ $body = @{ reportCode = "<a real public report code>"; fightId = 1; sourceId = 1
 Invoke-WebRequest -Uri https://<worker-host>/v1/analysis -Method POST -Body $body -ContentType "application/json" -SkipHttpErrorCheck
 ```
 
-Expected: HTTP 501 `ANALYSIS_NOT_IMPLEMENTED` for a valid report/fight/player,
-and a specific 404/422 for an invalid one.
+Expected: HTTP 200 with a `warcraft-logs-coach.analysis/1` result for a valid
+report/fight/player, and a specific 404/422 for an invalid one. For an
+Assassination Rogue the `status` should be `ANALYZED`; for any other
+specialization it should be `SPEC_NOT_SUPPORTED`, which is a truthful result and
+not a failure.
+
+The full post-deploy checklist is in
+[`agent/deployment-smoke.md`](agent/deployment-smoke.md).

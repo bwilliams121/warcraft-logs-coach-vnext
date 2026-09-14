@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { createWorker, type WorkerDeps } from "../../src/api/worker.js";
 import type { Env } from "../../src/config/env.js";
 import { analyzeFight } from "../../src/services/analysis-service.js";
+import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import { wclFailure, type PreflightPort, type WclFailureReason } from "../../src/wcl/types.js";
 import { WCL_FAILURE_REASONS } from "../../src/wcl/types.js";
 import { REQUEST } from "../fixtures/wcl/preflight-payloads.js";
@@ -19,6 +20,7 @@ const ENV: Env = {
   ENVIRONMENT: "test",
   WCL_CLIENT_ID: "fake-client-id-not-real",
   WCL_CLIENT_SECRET: "fake-client-secret-not-real",
+  ANALYSIS_AUTH_TOKEN: "fake-analysis-token-not-real",
 };
 
 const VALID_BODY = {
@@ -43,10 +45,16 @@ function failingPreflight(reason: WclFailureReason): PreflightPort {
   return async () => ({ ok: false, failure: wclFailure(reason, "TRANSPORT", { httpStatus: 500 }) });
 }
 
+/** Retrieval that must never run: every probe here fails at preflight. */
+const UNREACHABLE_INGEST: CombatIngestionPort = () => {
+  throw new Error("ingestion must not run after a preflight failure");
+};
+
 function workerWith(preflight: PreflightPort): WorkerDeps {
   return {
-    analyze: analyzeFight,
-    preflight,
+    analysisRunner: (env) => async (input) =>
+      await analyzeFight(input, { env, preflight, ingest: UNREACHABLE_INGEST }),
+    rateLimiter: () => ({ limit: async () => ({ success: true }) }),
     // Every probe here posts to /v1/analysis. Reaching MCP would mean the
     // router sent an analysis request somewhere it does not belong.
     mcp: () => {
@@ -59,7 +67,10 @@ function workerWith(preflight: PreflightPort): WorkerDeps {
 function post(body: unknown): Request {
   return new Request("https://coach.test/v1/analysis", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: {
+      "content-type": "application/json",
+      authorization: "Bearer fake-analysis-token-not-real",
+    },
     body: JSON.stringify(body),
   });
 }

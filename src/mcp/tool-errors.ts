@@ -135,12 +135,6 @@ const SERVICE_ERRORS = {
     message: "Warcraft Logs could not be reached, so no analysis was produced.",
     retryable: true,
   },
-  ANALYSIS_NOT_IMPLEMENTED: {
-    message:
-      "This deployment verified Warcraft Logs connectivity and player identity but is not yet wired to retrieve combat events, so no analysis was produced.",
-    // A deployment state, not a transient one. Retrying changes nothing.
-    retryable: false,
-  },
   INTERNAL_ERROR: {
     message: "An unexpected internal error occurred.",
     retryable: false,

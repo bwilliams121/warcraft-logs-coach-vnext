@@ -29,8 +29,8 @@ import type { McpServer } from "@modelcontextprotocol/server";
 
 import { projectAnalysisResult } from "../../contracts/analysis-projection.js";
 import { PublicAnalysisResultSchema } from "../../contracts/analysis-contract.js";
-import type { AnalysisServiceResult } from "../../services/result.js";
-import { checkAnalysisRateLimit, type RateLimiterPort } from "../rate-limit.js";
+import type { AnalysisRunner } from "../../services/analysis-runner.js";
+import { checkAnalysisRateLimit, type RateLimiterPort } from "../../runtime/rate-limit.js";
 import { toolErrorBody, toolErrorForServiceCode, transportToolError } from "../tool-errors.js";
 
 export const ANALYZE_TOOL_NAME = "analyze_warcraft_log";
@@ -130,11 +130,11 @@ export type AnalyzeWarcraftLogInput = z.infer<typeof AnalyzeWarcraftLogInputSche
 /**
  * The application entry point this tool is allowed to reach.
  *
- * One function, injected. The tool cannot widen it, cannot reach around it, and
- * cannot substitute its own composition — which is what keeps a single analysis
- * path across every transport.
+ * Re-exported from the transport-neutral home so existing MCP consumers keep
+ * one import, while the TYPE is owned by the application layer both transports
+ * share. MCP must not own an abstraction REST also depends on.
  */
-export type AnalysisRunner = (input: unknown) => Promise<AnalysisServiceResult>;
+export type { AnalysisRunner };
 
 export interface AnalyzeToolDeps {
   readonly analyze: AnalysisRunner;

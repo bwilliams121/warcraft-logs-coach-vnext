@@ -19,8 +19,9 @@ import type { IngestionScope } from "./ingestion-scope.js";
  *
  * - `UNKNOWN` and `NO_AUTHORITY_AVAILABLE` are finding-level and decision-level
  *   states. They are not service-result states, and must not be added here.
- * - There is no "not implemented yet" state. Milestone 1's placeholder is a
- *   `ServiceError`, so a scaffold can never masquerade as an analysis outcome.
+ * - There is no "not implemented yet" state, and as of M6-E no such error code
+ *   either. Ingestion is a required dependency, so an unwired composition is a
+ *   compile error rather than a status a caller has to interpret.
  *
  * `INSUFFICIENT_SCOPE` means retrieved data could not satisfy the internally
  * derived ingestion requirement. External callers do not select scope, so it can
@@ -83,7 +84,6 @@ export type ServiceErrorCode =
   | "UPSTREAM_AUTH_FAILED"
   | "UPSTREAM_RATE_LIMITED"
   | "UPSTREAM_UNAVAILABLE"
-  | "ANALYSIS_NOT_IMPLEMENTED"
   | "INTERNAL_ERROR";
 
 export const SERVICE_ERROR_CODES = [
@@ -101,7 +101,6 @@ export const SERVICE_ERROR_CODES = [
   "UPSTREAM_AUTH_FAILED",
   "UPSTREAM_RATE_LIMITED",
   "UPSTREAM_UNAVAILABLE",
-  "ANALYSIS_NOT_IMPLEMENTED",
   "INTERNAL_ERROR",
 ] as const satisfies readonly ServiceErrorCode[];
 

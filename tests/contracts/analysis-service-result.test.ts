@@ -88,9 +88,12 @@ describe("analysis service result contract", () => {
     expect(ANALYSIS_RESULT_STATES).not.toContain("NO_AUTHORITY_AVAILABLE");
   });
 
-  it("foundation_placeholder_is_an_error_not_an_analysis_state", () => {
-    // The Milestone 1 placeholder must be unable to masquerade as an outcome.
-    expect(SERVICE_ERROR_CODES).toContain("ANALYSIS_NOT_IMPLEMENTED");
+  it("the_retired_placeholder_exists_in_neither_vocabulary", () => {
+    // Through M6-D a placeholder error meant "the engine works but nobody
+    // connected it". M6-E bound real ingestion and made the dependency
+    // required, so that state is a compile error rather than a code — and it
+    // must not reappear as either an error or an outcome.
+    expect(SERVICE_ERROR_CODES).not.toContain("ANALYSIS_NOT_IMPLEMENTED");
     expect(ANALYSIS_RESULT_STATES).not.toContain("ANALYSIS_NOT_IMPLEMENTED");
     expect(ANALYSIS_RESULT_STATES).not.toContain("NOT_IMPLEMENTED");
     expect(ANALYSIS_RESULT_STATES).not.toContain("FOUNDATION_ONLY");

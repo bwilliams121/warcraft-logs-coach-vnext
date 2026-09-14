@@ -26,7 +26,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { handleMcpRequest } from "../../src/mcp/server.js";
 import { ANALYZE_TOOL_NAME } from "../../src/mcp/tools/analyze-warcraft-log.js";
-import { ANALYSIS_RATE_LIMIT_KEY, type RateLimiterPort } from "../../src/mcp/rate-limit.js";
+import { ANALYSIS_RATE_LIMIT_KEY, type RateLimiterPort } from "../../src/runtime/rate-limit.js";
 import { SERVICE_ERROR_CODES, type ServiceErrorCode } from "../../src/services/result.js";
 import type { AnalysisRunner } from "../../src/mcp/tools/analyze-warcraft-log.js";
 import {
@@ -38,10 +38,10 @@ import {
   countingLimiter,
   fixtureAnalysisRunner,
   m5aRequest,
-} from "../support/mcp-analysis.js";
+} from "../support/analysis-transports.js";
 
 const HOST = "warcraft-logs-coach-vnext.brandon-williams-323.workers.dev";
-const TOKEN = "fake-mcp-token-not-real";
+const TOKEN = "fake-analysis-token-not-real";
 
 const MODERN_META = {
   "io.modelcontextprotocol/protocolVersion": "2026-07-28",
@@ -246,7 +246,6 @@ describe("service failures are tool errors, never analysis", () => {
     UPSTREAM_AUTH_FAILED: false,
     UPSTREAM_RATE_LIMITED: true,
     UPSTREAM_UNAVAILABLE: true,
-    ANALYSIS_NOT_IMPLEMENTED: false,
     INTERNAL_ERROR: false,
   } as const satisfies Record<ServiceErrorCode, boolean>;
 
@@ -331,11 +330,13 @@ describe("the analysis tool is metered", () => {
 
   it("meters under a stable non-secret key", async () => {
     // Not the bearer token, not a WCL credential, not the report code, not an
-    // IP address. One shared analysis budget for one principal.
+    // IP address — and not transport-prefixed either, because REST charges the
+    // same key. Separate keys would let a caller double their spend by
+    // alternating protocols.
     const limiter = countingLimiter(10);
     await callTool(IDS_ARGS, { rateLimiter: limiter });
 
-    expect(limiter.keys[0]).toBe("mcp:analyze_warcraft_log");
+    expect(limiter.keys[0]).toBe("analysis:warcraft_log");
     expect(limiter.keys[0]).not.toContain(TOKEN);
     expect(limiter.keys[0]).not.toContain(D2_REQUEST.reportCode);
   });
@@ -605,7 +606,7 @@ describe("no secret leaves through the analysis tool", () => {
   const SENTINELS = [
     "fake-client-id-not-real",
     "fake-client-secret-not-real",
-    "fake-mcp-token-not-real",
+    "fake-analysis-token-not-real",
   ] as const;
 
   const probes: readonly { readonly name: string; readonly run: () => Promise<ToolResult> }[] = [

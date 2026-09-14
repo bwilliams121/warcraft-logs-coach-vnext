@@ -193,20 +193,21 @@ describe("the M4 state vocabulary is untouched by everything above", () => {
 describe("the /v1/analysis wiring decision is what the code does", () => {
   const service = readFileSync("src/services/analysis-service.ts", "utf8");
 
-  it("keeps the endpoint unwired, by decision", () => {
-    // M5-E chose to preserve 501 rather than rush the M2 -> M3 -> M5
-    // composition. If that changes, this contract and the route tests change
-    // together — the decision is not allowed to drift in silently.
-    expect(service).toContain("ANALYSIS_NOT_IMPLEMENTED");
-    expect(service).not.toContain("analyzeObservedAssassinationDecisions(");
-  });
-
-  it("no longer claims that no analyzer exists", () => {
-    // The old wording became false when M5 finished. Claiming less capability
-    // than exists is still a false statement about the system.
+  it("is wired now, and says nothing to the contrary", () => {
+    // M5-E deliberately kept 501 rather than rush the composition; M6-E built
+    // it. What survives from that decision is the rule it protected: the
+    // service must never claim less capability than it has, and never more.
+    expect(service).not.toContain("ANALYSIS_NOT_IMPLEMENTED");
     expect(service).not.toContain("no analyzer is enabled, so no combat events are retrieved");
     expect(service).not.toContain("This deployment is a Milestone 2 foundation.");
-    expect(service).toContain("implemented internally and regression-tested");
+    expect(service).not.toContain("not yet wired");
+  });
+
+  it("reaches the analyzer only through the registry", () => {
+    // Composed, but still not by naming a specialization evaluator here. The
+    // service selects a registration and calls its facade.
+    expect(service).toContain("analyzer.analyze(");
+    expect(service).not.toContain("analyzeObservedAssassinationDecisions(");
   });
 });
 

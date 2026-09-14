@@ -17,15 +17,19 @@ export interface Env {
    * INBOUND MCP authorization. A different concern from the two above.
    *
    * `WCL_*` are OUTBOUND: how this service authenticates to Warcraft Logs.
-   * `MCP_AUTH_TOKEN` is INBOUND: who may call this service's MCP endpoint.
+   * `ANALYSIS_AUTH_TOKEN` is INBOUND: who may call the analysis surfaces.
+   *
+   * ONE CREDENTIAL FOR BOTH TRANSPORTS. `/v1/analysis` and `/mcp` require the
+   * same bearer token, so there is one private principal rather than two
+   * independently-guarded doors — and no transport can be the cheap way in.
    *
    * Deliberately absent from `ConfigKey` and from `loadConfig()`. A deployment
-   * without it must still serve `/health` and `/v1/analysis` normally — the
-   * absence closes `/mcp` and nothing else. See `src/mcp/auth.ts`.
+   * without it must still serve `/health`; the absence closes the analysis
+   * surfaces and nothing else. See `src/runtime/bearer-auth.ts`.
    */
-  readonly MCP_AUTH_TOKEN?: string;
+  readonly ANALYSIS_AUTH_TOKEN?: string;
   /**
-   * Cloudflare Rate Limiting binding for the MCP analysis tool.
+   * Cloudflare Rate Limiting binding for analysis, shared by every transport.
    *
    * Typed STRUCTURALLY rather than as Cloudflare's `RateLimit` global, so this
    * module stays free of Workers types and the application service can still be
@@ -33,12 +37,16 @@ export interface Env {
    * exactly — `RateLimitOptions` is `{ key: string }` and `RateLimitOutcome` is
    * `{ success: boolean }`.
    *
-   * Deliberately absent from `ConfigKey` and `loadConfig()`. Metering the MCP
-   * tool and authenticating to Warcraft Logs are different concerns, and a
-   * deployment missing this binding must close the MCP analysis path without
-   * affecting `/health` or `/v1/analysis`.
+   * Named without a transport prefix on purpose: REST and MCP charge the same
+   * resource under the same key, so a caller cannot double the expensive-analysis
+   * budget by switching protocols.
+   *
+   * Deliberately absent from `ConfigKey` and `loadConfig()`. Metering analysis
+   * and authenticating to Warcraft Logs are different concerns, and a deployment
+   * missing this binding must close the analysis paths without affecting
+   * `/health`.
    */
-  readonly MCP_ANALYSIS_RATE_LIMITER?: {
+  readonly ANALYSIS_RATE_LIMITER?: {
     limit(options: { readonly key: string }): Promise<{ readonly success: boolean }>;
   };
 }

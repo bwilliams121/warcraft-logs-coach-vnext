@@ -1,10 +1,14 @@
 /**
- * Offline dependencies for driving the real MCP analysis tool.
+ * Offline dependencies for driving real analysis through EITHER transport.
  *
- * The tool takes an application runner and a rate limiter as injected ports, so
- * a test can exercise the genuine tool — real schema, real projection, real
- * error mapping — without a network, a Cloudflare limiter, or a live Warcraft
- * Logs call.
+ * REST and MCP both take an application runner and a rate limiter as injected
+ * ports, so a test can exercise the genuine path on both — real schema, real
+ * projection, real error mapping — without a network, a Cloudflare limiter, or
+ * a live Warcraft Logs call.
+ *
+ * Shared between the two transports on purpose: a consistency test that built
+ * its REST and MCP inputs separately could pass while the two transports
+ * disagreed about which fixture they were analysing.
  *
  * The runner here is NOT a stub analysis. It is the actual M6-B service
  * composing M2 -> M3 -> M4 -> M5 over the trusted M5-D2 fixture, with only the
@@ -15,18 +19,33 @@
 import { analyzeFight, type AnalysisServiceDeps } from "../../src/services/analysis-service.js";
 import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import type { AnalysisServiceResult } from "../../src/services/result.js";
-import type { RateLimiterPort } from "../../src/mcp/rate-limit.js";
-import type { AnalysisRunner } from "../../src/mcp/tools/analyze-warcraft-log.js";
+import type { RateLimiterPort } from "../../src/runtime/rate-limit.js";
+import type { AnalysisRunner } from "../../src/services/analysis-runner.js";
 import type { Env } from "../../src/config/env.js";
+import type { WorkerDeps } from "../../src/api/worker.js";
+import { handleMcpRequest } from "../../src/mcp/server.js";
 import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
 import { M5D2_ACTOR, m5d2Fight } from "./m5d2-fixture.js";
 import { ASSASSINATION_ACTOR_B, m5aFight } from "./m5a-fixture.js";
+
+/**
+ * The one credential both analysis surfaces require.
+ *
+ * Matches the pool binding in `vitest.config.ts`. An obvious sentinel — no real
+ * token appears anywhere in this repository.
+ */
+export const ANALYSIS_TEST_TOKEN = "fake-analysis-token-not-real";
+
+/** Authorization for either transport. One principal, two surfaces. */
+export function authHeaders(token: string = ANALYSIS_TEST_TOKEN): Record<string, string> {
+  return { authorization: `Bearer ${token}` };
+}
 
 export const MCP_TEST_ENV: Env = {
   ENVIRONMENT: "test",
   WCL_CLIENT_ID: "fake-client-id-not-real",
   WCL_CLIENT_SECRET: "fake-client-secret-not-real",
-  MCP_AUTH_TOKEN: "fake-mcp-token-not-real",
+  ANALYSIS_AUTH_TOKEN: "fake-analysis-token-not-real",
 };
 
 const D2_FIGHT = m5d2Fight();
@@ -134,3 +153,29 @@ export function countingLimiter(limit: number): RateLimiterPort & { readonly key
     },
   };
 }
+
+/**
+ * Worker dependencies wired to one runner and one limiter.
+ *
+ * The SAME limiter instance reaches REST and MCP, which is what lets a test
+ * prove the two transports share a budget rather than each having their own.
+ */
+export function workerDepsFor(options: {
+  readonly analyze: AnalysisRunner;
+  readonly rateLimiter?: RateLimiterPort | undefined;
+  readonly mcp?: WorkerDeps["mcp"];
+}): WorkerDeps {
+  return {
+    analysisRunner: () => options.analyze,
+    rateLimiter: () => options.rateLimiter ?? ALLOWING_LIMITER,
+    mcp: options.mcp ?? defaultTestMcp,
+    version: "0.1.0",
+  };
+}
+
+/** Routes `/mcp` through the same runner and limiter the Worker holds. */
+const defaultTestMcp: WorkerDeps["mcp"] = async (request, env, deps) =>
+  await handleMcpRequest(request, env, {
+    analyze: deps.analysisRunner(env),
+    rateLimiter: deps.rateLimiter(env),
+  });

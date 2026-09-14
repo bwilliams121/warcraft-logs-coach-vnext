@@ -31,33 +31,12 @@ import {
   D2_REQUEST,
   MCP_TEST_ENV,
   fixtureAnalysisRunner,
-} from "../support/mcp-analysis.js";
-import { analyzeFight } from "../../src/services/analysis-service.js";
-import type { PreflightPort } from "../../src/wcl/types.js";
+} from "../support/analysis-transports.js";
 
 /** Matches the binding in vitest.config.ts. An obvious sentinel, never a real token. */
-const TEST_TOKEN = "fake-mcp-token-not-real";
+const TEST_TOKEN = "fake-analysis-token-not-real";
 
 const MCP_URL = `https://${PRODUCTION_MCP_HOSTNAME}/mcp`;
-
-/** Resolves without network I/O, standing in for a successful Warcraft Logs preflight. */
-const RESOLVING_PREFLIGHT: PreflightPort = async () => ({
-  ok: true,
-  identity: {
-    report: { code: "aBcDeFgH12345678", revision: 24, startTime: 0, endTime: 600_000 },
-    data: { logVersion: 26, gameVersion: 1 },
-    fight: {
-      id: 8,
-      name: "Test Encounter",
-      encounterId: 2902,
-      difficulty: 5,
-      startTime: 0,
-      endTime: 300_000,
-    },
-    player: { sourceId: 15, name: "Coachtest", className: "Rogue", specName: "Assassination" },
-  },
-  rateLimit: undefined,
-});
 
 /**
  * The 2026-07-28 per-request envelope.
@@ -207,11 +186,15 @@ describe("inbound bearer authorization fails closed", () => {
     // silently becomes public. An unset token must close the door, not remove it.
     const unconfigured: Env = { ENVIRONMENT: "test" };
     const worker = createWorker({
-      analyze: analyzeFight,
-      preflight: (async () => {
-        throw new Error("preflight must not run for an MCP request");
-      }) as unknown as PreflightPort,
-      mcp: handleMcpRequest,
+      analysisRunner: () => async () => {
+        throw new Error("the analysis runner must not run for an unauthorized MCP request");
+      },
+      rateLimiter: () => ({ limit: async () => ({ success: true }) }),
+      mcp: async (request, env, workerDeps) =>
+        await handleMcpRequest(request, env, {
+          analyze: workerDeps.analysisRunner(env),
+          rateLimiter: workerDeps.rateLimiter(env),
+        }),
       version: "0.1.0",
     });
 
@@ -230,17 +213,21 @@ describe("inbound bearer authorization fails closed", () => {
     wrongToken.headers.set("authorization", "Bearer definitely-not-the-token");
 
     const configuredWorker = createWorker({
-      analyze: analyzeFight,
-      preflight: (async () => {
-        throw new Error("unused");
-      }) as unknown as PreflightPort,
-      mcp: handleMcpRequest,
+      analysisRunner: () => async () => {
+        throw new Error("the analysis runner must not run for an unauthorized MCP request");
+      },
+      rateLimiter: () => ({ limit: async () => ({ success: true }) }),
+      mcp: async (request, env, workerDeps) =>
+        await handleMcpRequest(request, env, {
+          analyze: workerDeps.analysisRunner(env),
+          rateLimiter: workerDeps.rateLimiter(env),
+        }),
       version: "0.1.0",
     });
 
     const withToken = await configuredWorker.fetch(wrongToken.clone(), {
       ENVIRONMENT: "test",
-      MCP_AUTH_TOKEN: TEST_TOKEN,
+      ANALYSIS_AUTH_TOKEN: TEST_TOKEN,
     });
     const withoutToken = await configuredWorker.fetch(wrongToken.clone(), { ENVIRONMENT: "test" });
 
@@ -580,33 +567,37 @@ describe("the existing routes are untouched", () => {
     expect(body.toLowerCase()).not.toContain("mcp_auth_token");
   });
 
-  it("keeps /v1/analysis on its M5-closeout 501", async () => {
-    // M6-A is not permission to wire the analysis service. If this ever stops
-    // being 501, it must be because M6-E did it deliberately.
-    //
-    // Driven through `createWorker` with a resolving preflight rather than
-    // `SELF`, because the pool blocks outbound traffic: a SELF-driven request
-    // would fail at the real Warcraft Logs call with 503 and never reach the
-    // not-implemented boundary this assertion is about.
+  it("serves /v1/analysis through the same shared runner", async () => {
+    // Superseded "keeps /v1/analysis on its M5-closeout 501". M6-E wired REST
+    // to the shared composition, so the route now analyses. Driven through
+    // `createWorker` rather than `SELF` because the pool blocks outbound
+    // traffic and the deployed path would stop at an unreachable upstream.
     const worker = createWorker({
-      analyze: analyzeFight,
-      preflight: RESOLVING_PREFLIGHT,
-      mcp: handleMcpRequest,
+      analysisRunner: () => fixtureAnalysisRunner(),
+      rateLimiter: () => ALLOWING_LIMITER,
+      mcp: async (request, env, workerDeps) =>
+        await handleMcpRequest(request, env, {
+          analyze: workerDeps.analysisRunner(env),
+          rateLimiter: workerDeps.rateLimiter(env),
+        }),
       version: "0.1.0",
     });
 
     const response = await worker.fetch(
       new Request("https://coach.test/v1/analysis", {
         method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ reportCode: "aBcDeFgH12345678", fightId: 8, sourceId: 15 }),
+        headers: {
+          "content-type": "application/json",
+          authorization: "Bearer fake-analysis-token-not-real",
+        },
+        body: JSON.stringify(D2_REQUEST),
       }),
-      { ENVIRONMENT: "test", WCL_CLIENT_ID: "id", WCL_CLIENT_SECRET: "secret" },
+      MCP_TEST_ENV,
     );
-    const body = (await response.json()) as { readonly error?: { readonly code?: string } };
+    const body = (await response.json()) as { readonly status?: string };
 
-    expect(response.status).toBe(501);
-    expect(body.error?.code).toBe("ANALYSIS_NOT_IMPLEMENTED");
+    expect(response.status).toBe(200);
+    expect(body.status).toBe("ANALYZED");
   });
 
   it("still returns a structured 404 for an unknown route", async () => {
@@ -619,19 +610,24 @@ describe("the existing routes are untouched", () => {
     });
   });
 
-  it("does not require an MCP token for /health or /v1/analysis", async () => {
-    // The inbound MCP gate must not become an accidental gate on the JSON API.
+  it("leaves /health open while gating /v1/analysis", async () => {
+    // Superseded "does not require an MCP token for /health or /v1/analysis".
+    // The analysis route now requires the SAME credential /mcp does — it spends
+    // a paid Warcraft Logs quota and must not be anonymously callable.
+    //
+    // Liveness still is open: /health discloses nothing and costs nothing, and
+    // an unreachable health check helps no one. The gate went around the
+    // expensive surfaces, not around the Worker.
     expect((await SELF.fetch("https://coach.test/health")).status).toBe(200);
-    expect(
-      (
-        await SELF.fetch(
-          new Request("https://coach.test/v1/analysis", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: "{ not json",
-          }),
-        )
-      ).status,
-    ).toBe(400);
+
+    const unauthenticated = await SELF.fetch(
+      new Request("https://coach.test/v1/analysis", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(D2_REQUEST),
+      }),
+    );
+
+    expect(unauthenticated.status).toBe(401);
   });
 });

@@ -4,7 +4,17 @@ import type { Env } from "../../src/config/env.js";
 import { analyzeFight } from "../../src/services/analysis-service.js";
 import { WCL_FAILURE_REASONS, type PreflightPort } from "../../src/wcl/types.js";
 import { SERVICE_ERROR_CODES } from "../../src/services/result.js";
+import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import { REQUEST } from "../fixtures/wcl/preflight-payloads.js";
+
+/**
+ * Ingestion is a required dependency as of M6-E, but this file is about
+ * preflight. A thrower documents that these cases never get past identity —
+ * and fails loudly if one ever does.
+ */
+const UNREACHABLE_INGEST: CombatIngestionPort = () => {
+  throw new Error("ingestion must not run for a preflight-port test");
+};
 
 /**
  * Contract between the application service and the Warcraft Logs boundary.
@@ -32,7 +42,7 @@ describe("wcl preflight port contract", () => {
       },
     }));
 
-    await analyzeFight(input, { env, preflight });
+    await analyzeFight(input, { env, preflight, ingest: UNREACHABLE_INGEST });
 
     expect(preflight).toHaveBeenCalledTimes(1);
   });
@@ -55,7 +65,7 @@ describe("wcl preflight port contract", () => {
         },
       });
 
-      const result = await analyzeFight(input, { env, preflight });
+      const result = await analyzeFight(input, { env, preflight, ingest: UNREACHABLE_INGEST });
 
       expect(result.ok).toBe(false);
       expect(forbidden).not.toHaveBeenCalled();
@@ -76,7 +86,7 @@ describe("wcl preflight port contract", () => {
         },
       });
 
-      const result = await analyzeFight(input, { env, preflight });
+      const result = await analyzeFight(input, { env, preflight, ingest: UNREACHABLE_INGEST });
 
       expect(result.ok, reason).toBe(false);
       if (!result.ok) {

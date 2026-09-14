@@ -59,11 +59,12 @@ export default defineConfig({
                 ENVIRONMENT: "test",
                 WCL_CLIENT_ID: "fake-client-id-not-real",
                 WCL_CLIENT_SECRET: "fake-client-secret-not-real",
-                // INBOUND MCP authorization, unrelated to the two above. Another
-                // obvious sentinel: tests that drive SELF through /mcp present
-                // this value, and the credential-leak sweeps assert it never
-                // appears in any response body or header.
-                MCP_AUTH_TOKEN: "fake-mcp-token-not-real",
+                // INBOUND authorization for BOTH analysis surfaces, unrelated
+                // to the two above. Another obvious sentinel: tests that drive
+                // SELF through /mcp or /v1/analysis present this value, and the
+                // credential-leak sweeps assert it never appears in any
+                // response body or header.
+                ANALYSIS_AUTH_TOKEN: "fake-analysis-token-not-real",
               },
             },
           }),

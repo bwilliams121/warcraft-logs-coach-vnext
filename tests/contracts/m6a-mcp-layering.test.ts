@@ -149,7 +149,10 @@ describe("MCP cannot reach gameplay machinery", () => {
       "src/config/env",
       "src/contracts/analysis-contract",
       "src/contracts/analysis-projection",
+      "src/services/analysis-runner",
       "src/services/result",
+      "src/runtime/rate-limit",
+      "src/runtime/bearer-auth",
     ]);
     for (const file of MCP_FILES) {
       for (const specifier of importSpecifiersOf(file)) {
@@ -171,7 +174,13 @@ describe("MCP cannot reach gameplay machinery", () => {
       const code = sourceOf(file)
         .replace(/\/\*[\s\S]*?\*\//g, "")
         .replace(/\/\/.*$/gm, "");
-      for (const banned of ["analyzeFight", "createCombatState", "ingestFight", "createFightIngestor"]) {
+      for (const banned of [
+        "analyzeFight",
+        "createCombatState",
+        "ingestFight",
+        "createFightIngestor",
+        "createPreflight",
+      ]) {
         expect(`${file}:${code.includes(banned) ? banned : "clean"}`).toBe(`${file}:clean`);
       }
     }
@@ -213,9 +222,18 @@ describe("the public contract stays transport-neutral and secret-free", () => {
     }
   });
 
+  it("imports no composition root or limiter", () => {
+    for (const file of CONTRACT_FILES) {
+      for (const specifier of importSpecifiersOf(file)) {
+        const resolved = resolveSpecifier(file, specifier);
+        expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain("src/runtime");
+      }
+    }
+  });
+
   it("cannot read configuration or secrets", () => {
     // `src/config/env.ts` is the only door to WCL_CLIENT_ID, WCL_CLIENT_SECRET
-    // and MCP_AUTH_TOKEN. A projection that cannot import it cannot leak them,
+    // and ANALYSIS_AUTH_TOKEN. A projection that cannot import it cannot leak them,
     // whatever a future field is called.
     for (const file of CONTRACT_FILES) {
       for (const specifier of importSpecifiersOf(file)) {
@@ -293,6 +311,18 @@ describe("nothing below the contract may import it", () => {
     });
   }
 
+  it("imports nothing from src/runtime", () => {
+    // The composition root knows about deployments. Nothing it composes may.
+    for (const root of LOWER_ROOTS) {
+      for (const file of filesUnder(root)) {
+        for (const specifier of importSpecifiersOf(file)) {
+          const resolved = resolveSpecifier(file, specifier);
+          expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain("src/runtime");
+        }
+      }
+    }
+  });
+
   it("keeps zod out of every layer below the contract", () => {
     // Zod is a wire-shape tool. Below the contract there is no wire.
     for (const root of LOWER_ROOTS) {
@@ -359,6 +389,18 @@ describe("the application service stays transport-neutral", () => {
         for (const forbidden of ["src/mcp", "src/api", "@modelcontextprotocol"]) {
           expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain(forbidden);
         }
+      }
+    }
+  });
+
+  it("imports no exposure layer", () => {
+    // `src/runtime/**` is the composition root and the rate limiter. Both sit
+    // ABOVE the service: one binds infrastructure to it, the other decides who
+    // may reach it. A service that imported either would acquire a deployment.
+    for (const file of SERVICE_FILES) {
+      for (const specifier of importSpecifiersOf(file)) {
+        const resolved = resolveSpecifier(file, specifier);
+        expect(`${file} -> ${resolved}`, `${file} imports ${specifier}`).not.toContain("src/runtime");
       }
     }
   });

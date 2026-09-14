@@ -552,7 +552,7 @@ describe("no internal machinery reaches the wire", () => {
         "fake-client-secret-not-real",
         "WCL_CLIENT_ID",
         "WCL_CLIENT_SECRET",
-        "MCP_AUTH_TOKEN",
+        "ANALYSIS_AUTH_TOKEN",
         "Bearer",
       ]) {
         expect(json).not.toContain(secret);

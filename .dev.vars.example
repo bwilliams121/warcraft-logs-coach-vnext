@@ -19,24 +19,38 @@
 WCL_CLIENT_ID="replace-me"
 WCL_CLIENT_SECRET="replace-me"
 
-# INBOUND authorization for the MCP endpoint at /mcp.
+# INBOUND authorization for BOTH analysis surfaces: /v1/analysis and /mcp.
 #
 # This is a DIFFERENT concern from the two values above. Those are OUTBOUND:
 # how this service authenticates to Warcraft Logs. This one is INBOUND: who is
 # allowed to call this service's MCP endpoint at all.
 #
-# /mcp fails closed. If this value is unset, every MCP request is rejected with
-# 401 — an unset token never means "no token required". /health and
-# /v1/analysis are unaffected either way.
+# One credential, two surfaces. Both fail closed: if this value is unset, every
+# analysis request is rejected with 401 — an unset token never means "no token
+# required". /health is unaffected and stays public.
+#
+# Authentication is not the same thing as the rate limiter. Cloudflare's Worker
+# Rate Limiting counters are location-local and eventually consistent, so they
+# are a brake on an authorized caller, never a door.
 #
 # Generate a high-entropy value, for example:
 #     python -c "import secrets; print(secrets.token_urlsafe(32))"
 #
 # For Cloudflare deployments, do NOT put this in wrangler.jsonc. Use:
-#     npx wrangler secret put MCP_AUTH_TOKEN
+#     npx wrangler secret put ANALYSIS_AUTH_TOKEN
 #
 # This is the private-development protection mechanism for Milestone 6. It is
-# not the final ChatGPT-facing authentication design; Cloudflare Access or
-# OAuth remain open for production exposure.
+# not OAuth, not multi-user identity, and not the final ChatGPT-facing
+# authentication design; Cloudflare Access or OAuth remain open for production
+# exposure.
 
-MCP_AUTH_TOKEN="replace-me"
+ANALYSIS_AUTH_TOKEN="replace-me"
+
+# The analysis rate limiter is a Cloudflare binding, not a secret. It is
+# declared in wrangler.jsonc as ANALYSIS_RATE_LIMITER (10 requests / 60s) and
+# needs no value here and no dashboard resource.
+#
+# Cloudflare's rate-limit binding is not exercised by local `wrangler dev` or by
+# the offline test suite. Both analysis paths FAIL CLOSED when the limiter is
+# unavailable, so a local run without it will refuse analysis rather than run
+# unmetered. Tests inject a limiter port instead.

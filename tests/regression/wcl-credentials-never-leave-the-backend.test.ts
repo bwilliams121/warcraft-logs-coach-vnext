@@ -3,6 +3,7 @@
 import { createWorker, type WorkerDeps } from "../../src/api/worker.js";
 import type { Env, WclCredentials } from "../../src/config/env.js";
 import { handleMcpRequest, PRODUCTION_MCP_HOSTNAME } from "../../src/mcp/server.js";
+import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import { analyzeFight } from "../../src/services/analysis-service.js";
 import { createPreflight } from "../../src/wcl/preflight.js";
 import { createTokenCache } from "../../src/wcl/token-provider.js";
@@ -27,24 +28,43 @@ const SENTINEL_ACCESS_TOKEN = "SENTINEL_WCL_ACCESS_TOKEN_DO_NOT_LEAK";
  * outbound Warcraft Logs credentials — but it leaves the backend through the
  * same responses, so it is swept by the same pass.
  */
-const SENTINEL_MCP_TOKEN = "SENTINEL_MCP_AUTH_TOKEN_DO_NOT_LEAK";
+const SENTINEL_ANALYSIS_TOKEN = "SENTINEL_ANALYSIS_AUTH_TOKEN_DO_NOT_LEAK";
 
 const CONFIGURED_ENV: Env = {
   ENVIRONMENT: "test",
   WCL_CLIENT_ID: SENTINEL_CLIENT_ID,
   WCL_CLIENT_SECRET: SENTINEL_CLIENT_SECRET,
-  MCP_AUTH_TOKEN: SENTINEL_MCP_TOKEN,
+  ANALYSIS_AUTH_TOKEN: SENTINEL_ANALYSIS_TOKEN,
 };
 
 /** Credentials present but blank, so the configuration-error path is also covered. */
-const BLANK_ENV: Env = { ENVIRONMENT: "test", WCL_CLIENT_ID: "", WCL_CLIENT_SECRET: "" };
+const BLANK_ENV: Env = {
+  ENVIRONMENT: "test",
+  WCL_CLIENT_ID: "",
+  WCL_CLIENT_SECRET: "",
+  ANALYSIS_AUTH_TOKEN: SENTINEL_ANALYSIS_TOKEN,
+};
 
 const SENTINELS: readonly { readonly name: string; readonly value: string }[] = [
   { name: "client id", value: SENTINEL_CLIENT_ID },
   { name: "client secret", value: SENTINEL_CLIENT_SECRET },
   { name: "access token", value: SENTINEL_ACCESS_TOKEN },
-  { name: "MCP auth token", value: SENTINEL_MCP_TOKEN },
+  { name: "analysis auth token", value: SENTINEL_ANALYSIS_TOKEN },
 ];
+
+/** Allows every probe through, so the sweep reaches the deepest response paths. */
+const ALLOWING = { limit: async () => ({ success: true }) };
+
+/**
+ * Retrieval that fails while holding sentinels, as a real transport would.
+ *
+ * The sweep must traverse the now-live analysis path, and a failing retrieval
+ * reaches the error-rendering code without needing a fixture.
+ */
+const FAILING_INGEST: CombatIngestionPort = async () => ({
+  ok: false,
+  failure: { reason: "UPSTREAM_UNAVAILABLE" },
+});
 
 const VALID_BODY = JSON.stringify({ reportCode: "aBcDeFgH12345678", fightId: 8, sourceId: 15 });
 
@@ -77,24 +97,33 @@ const LEAKY_PREFLIGHT: PreflightPort = async () => {
 
 function throwingDeps(): WorkerDeps {
   return {
-    analyze: () => {
-      // A thrown value can close over configuration. The error boundary must not
-      // surface any of it.
+    analysisRunner: () => () => {
+      // A thrown value can close over configuration. The error boundary must
+      // not surface any of it.
       throw new Error(`boom ${SENTINEL_CLIENT_SECRET}`);
     },
-    preflight: RESOLVING_PREFLIGHT,
-    mcp: handleMcpRequest,
+    rateLimiter: () => ALLOWING,
+    mcp: async (request, env, workerDeps) =>
+      await handleMcpRequest(request, env, {
+        analyze: workerDeps.analysisRunner(env),
+        rateLimiter: workerDeps.rateLimiter(env),
+      }),
     version: "0.1.0",
   };
 }
 
 function defaultDeps(preflight: PreflightPort = RESOLVING_PREFLIGHT): WorkerDeps {
   return {
-    analyze: analyzeFight,
-    preflight,
+    analysisRunner: (env) => async (input) =>
+      await analyzeFight(input, { env, preflight, ingest: FAILING_INGEST }),
+    rateLimiter: () => ALLOWING,
     // The REAL handler, not a stub. /mcp is a new way for bytes to leave the
     // backend, so the sweep has to actually traverse it.
-    mcp: handleMcpRequest,
+    mcp: async (request, env, workerDeps) =>
+      await handleMcpRequest(request, env, {
+        analyze: workerDeps.analysisRunner(env),
+        rateLimiter: workerDeps.rateLimiter(env),
+      }),
     version: "0.1.0",
   };
 }
@@ -111,7 +140,12 @@ function analysisRequest(body: string): () => Request {
   return () =>
     new Request("https://coach.test/v1/analysis", {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        // The credential the gate now requires. Presenting it is what lets the
+        // sweep reach the deeper response paths at all.
+        authorization: `Bearer ${SENTINEL_ANALYSIS_TOKEN}`,
+      },
       body,
     });
 }
@@ -153,11 +187,14 @@ const PROBES: readonly Probe[] = [
     expectedStatus: 400,
   },
   {
-    name: "not implemented 501",
+    // Was a 501 placeholder through M6-D. The route analyses now, so the
+    // deepest sweepable path is a retrieval failure — which still exercises the
+    // error-rendering code while both secrets are in scope.
+    name: "retrieval failure 503",
     request: analysisRequest(VALID_BODY),
     env: CONFIGURED_ENV,
     deps: defaultDeps(),
-    expectedStatus: 501,
+    expectedStatus: 503,
   },
   {
     name: "configuration error 503",
@@ -207,7 +244,7 @@ const PROBES: readonly Probe[] = [
         headers: {
           host: "coach.test",
           "content-type": "application/json",
-          authorization: `Bearer ${SENTINEL_MCP_TOKEN}`,
+          authorization: `Bearer ${SENTINEL_ANALYSIS_TOKEN}`,
         },
         body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list", params: {} }),
       }),
@@ -241,9 +278,10 @@ describe("wcl credentials never leave the backend", () => {
 
   it("every_response_path_is_covered_by_the_sweep", () => {
     // Guards the sweep itself: if a new status path is added to the API, this
-    // forces a decision about covering it. The 401 and 403 arrived with /mcp.
+    // forces a decision about covering it. The 401 and 403 arrived with /mcp;
+    // the second 503 replaced the retired 501 when M6-E wired the route.
     expect(PROBES.map((probe) => probe.expectedStatus).sort((a, b) => a - b)).toEqual([
-      200, 400, 400, 401, 403, 404, 405, 500, 500, 501, 503,
+      200, 400, 400, 401, 403, 404, 405, 500, 500, 503, 503,
     ]);
   });
 

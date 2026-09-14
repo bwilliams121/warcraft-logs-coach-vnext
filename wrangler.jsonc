@@ -25,17 +25,21 @@
   "vars": {
     "ENVIRONMENT": "development",
   },
-  // Metering for the MCP analysis tool.
+  // Metering for analysis, shared by REST and MCP.
   //
   // The MCP specification requires servers to rate limit tool invocations, and
   // here that matters in money: one analyze_warcraft_log call spends Warcraft
   // Logs API points from a finite, paid, account-wide quota. An agent loop can
   // exhaust it in seconds, and no amount of retrying gets it back.
   //
+  // ONE BUDGET FOR BOTH TRANSPORTS. /v1/analysis and the MCP tool charge this
+  // binding under the same key, so a caller cannot double their spend by
+  // switching protocols.
+  //
   // 10 calls / 60s is far above interactive human use — nobody reads ten fight
   // analyses a minute — while still bounding a runaway client. The limiter is
-  // checked inside the tool call, so tools/list and rejected requests do not
-  // consume it.
+  // checked immediately before the shared analysis runner on each transport, so
+  // tools/list, rejected requests and unparseable bodies do not consume it.
   //
   // namespace_id must be a positive integer string unique within the Cloudflare
   // account. No other rate-limit binding exists in this repository; Cloudflare
@@ -46,7 +50,7 @@
   // Period must be 10 or 60. This binding needs no dashboard resource.
   "ratelimits": [
     {
-      "name": "MCP_ANALYSIS_RATE_LIMITER",
+      "name": "ANALYSIS_RATE_LIMITER",
       "namespace_id": "6401",
       "simple": {
         "limit": 10,

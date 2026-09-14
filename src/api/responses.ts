@@ -7,6 +7,7 @@
  * environment — because either can carry a credential.
  */
 
+import { projectAnalysisResult } from "../contracts/analysis-projection.js";
 import {
   assertNever,
   type AnalysisServiceResult,
@@ -14,7 +15,21 @@ import {
   type ServiceErrorCode,
 } from "../services/result.js";
 
-export type ApiErrorCode = ServiceErrorCode | "NOT_FOUND" | "METHOD_NOT_ALLOWED";
+/**
+ * Every code the HTTP layer can emit.
+ *
+ * The service's own codes, plus routing faults and the three the exposure layer
+ * owns. `UNAUTHORIZED`, `RATE_LIMITED` and `RATE_LIMITER_UNAVAILABLE` are NOT
+ * service errors: the application never learns a request was refused, because
+ * refusing it is what stops the application from running.
+ */
+export type ApiErrorCode =
+  | ServiceErrorCode
+  | "NOT_FOUND"
+  | "METHOD_NOT_ALLOWED"
+  | "UNAUTHORIZED"
+  | "RATE_LIMITED"
+  | "RATE_LIMITER_UNAVAILABLE";
 
 export const API_ERROR_CODES = [
   "INVALID_REQUEST",
@@ -31,10 +46,12 @@ export const API_ERROR_CODES = [
   "UPSTREAM_AUTH_FAILED",
   "UPSTREAM_RATE_LIMITED",
   "UPSTREAM_UNAVAILABLE",
-  "ANALYSIS_NOT_IMPLEMENTED",
   "INTERNAL_ERROR",
   "NOT_FOUND",
   "METHOD_NOT_ALLOWED",
+  "UNAUTHORIZED",
+  "RATE_LIMITED",
+  "RATE_LIMITER_UNAVAILABLE",
 ] as const satisfies readonly ApiErrorCode[];
 
 /**
@@ -45,6 +62,10 @@ export function statusForErrorCode(code: ApiErrorCode): number {
   switch (code) {
     case "INVALID_REQUEST":
       return 400;
+    // No credential, or the wrong one. Analysis spends a paid quota and is not
+    // publicly callable; the rate limiter is a brake, not a door.
+    case "UNAUTHORIZED":
+      return 401;
     case "NOT_FOUND":
     // The requested report, fight or actor does not exist as specified.
     case "REPORT_NOT_ACCESSIBLE":
@@ -65,12 +86,14 @@ export function statusForErrorCode(code: ApiErrorCode): number {
     case "SOURCE_NOT_A_PLAYER":
     case "SOURCE_NOT_IN_FIGHT":
       return 422;
+    // Both rate-limit families are 429: one is Warcraft Logs refusing us, the
+    // other is us refusing the caller, and a client's correct response to
+    // either is to slow down.
     case "UPSTREAM_RATE_LIMITED":
+    case "RATE_LIMITED":
       return 429;
     case "INTERNAL_ERROR":
       return 500;
-    case "ANALYSIS_NOT_IMPLEMENTED":
-      return 501;
     // Warcraft Logs answered, but with data we cannot trust or use.
     case "IDENTITY_UNRESOLVED":
     case "UPSTREAM_DATA_INVALID":
@@ -78,6 +101,9 @@ export function statusForErrorCode(code: ApiErrorCode): number {
     case "CONFIGURATION_ERROR":
     case "UPSTREAM_AUTH_FAILED":
     case "UPSTREAM_UNAVAILABLE":
+    // The limiter could not decide, so the expensive path was refused rather
+    // than run unmetered. A temporary unavailability, not a caller fault.
+    case "RATE_LIMITER_UNAVAILABLE":
       return 503;
     default:
       return assertNever(code);
@@ -103,12 +129,28 @@ export function apiErrorResponse(
 /**
  * Renders an application-service result.
  *
- * A failure is never rendered as 2xx, so the Milestone 1 placeholder cannot read
- * as a successful analysis.
+ * A SUCCESSFUL BODY IS THE PUBLIC ANALYSIS RESULT ITSELF, with no wrapper.
+ *
+ * That is a deliberate choice over `{ ok: true, analysis: ... }`. The invariant
+ * M6 has to guarantee is that gameplay truth cannot differ by transport, and
+ * the sharpest form of it is that the REST body and MCP's `structuredContent`
+ * are the same object. A wrapper would add a field that exists on one transport
+ * and not the other, for no information — the result already carries `status`
+ * and `schemaVersion`, and HTTP already carries success.
+ *
+ * Failures keep the established `{ ok: false, error }` envelope and their
+ * non-2xx statuses. A transport failure is not an analysis and must never be
+ * parseable as one.
+ *
+ * ALL FIVE ANALYSIS STATUSES ARE 200. `SPEC_NOT_SUPPORTED` and the three
+ * evidence statuses are truthful answers to a question that was successfully
+ * asked. Returning 404 for an unsupported spec, or 422 for an analysis that
+ * resolved nothing, would tell a client the request failed when the engine
+ * worked exactly as designed.
  */
 export function serviceResultResponse(result: AnalysisServiceResult): Response {
   if (result.ok) {
-    return jsonResponse(200, { ok: true, state: result.state });
+    return jsonResponse(200, projectAnalysisResult(result.analysis));
   }
   const { code, message, issues } = result.error;
   return apiErrorResponse(code, message, issues === undefined ? undefined : { issues });

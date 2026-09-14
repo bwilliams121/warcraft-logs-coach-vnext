@@ -77,27 +77,17 @@ export interface AnalysisServiceDeps {
   /**
    * Combat event retrieval and normalization.
    *
-   * TEMPORARY OPTIONALITY — THE M6-B/M6-E BOUNDARY. READ BEFORE CHANGING.
+   * REQUIRED. It was optional through M6-B/M6-D only so the REST route could
+   * hold its pre-M6-E behaviour without spending Warcraft Logs points; M6-E
+   * binds the real ingestor at the single production composition root, and the
+   * temporary seam is gone.
    *
-   * The composition below is complete: given this port it performs real
-   * analysis. What is NOT yet decided is how `/v1/analysis` should PUBLISH that
-   * analysis, and publishing it is a public-contract decision that belongs to
-   * M6-E.
-   *
-   * Leaving the port absent is how the REST route holds its existing behaviour
-   * in the meantime, and the reason it is expressed as a missing DEPENDENCY
-   * rather than a flag is cost. A boolean that ran the composition and discarded
-   * the result would spend Warcraft Logs API points — a finite, shared, paid
-   * quota — on evidence nothing reads. Without the port the service cannot
-   * retrieve anything, so the guarantee is structural rather than a promise.
-   *
-   * This is not a feature switch over gameplay. Nothing about what the analyzer
-   * MEANS changes with its presence; only whether retrieval is possible at all.
-   *
-   * M6-E makes it required and binds the real ingestor at the Worker. There is
-   * one composition either way — this file — and no second analysis path.
+   * Requiring it makes "somebody forgot to wire ingestion" a compile error
+   * rather than a runtime status a caller has to interpret. There is no longer
+   * any way for a deployed Worker to report that analysis exists but was not
+   * connected — the composition either type-checks or it does not.
    */
-  readonly ingest?: CombatIngestionPort | undefined;
+  readonly ingest: CombatIngestionPort;
   /**
    * The registered analyzers. Injected so a test can prove dispatch and
    * invocation counts without reaching into module state.
@@ -382,18 +372,6 @@ export async function analyzeFight(
 
   const identity = preflight.identity;
 
-  // ---- the M6-B/M6-E boundary ----
-  //
-  // Checked HERE: after identity, before anything is spent. A caller without an
-  // ingestion port gets exactly the pre-M6-B answer — request validated,
-  // identity established, no analysis — having retrieved no combat events.
-  if (deps.ingest === undefined) {
-    return serviceFailure(
-      "ANALYSIS_NOT_IMPLEMENTED",
-      "Warcraft Logs connectivity and player identity were verified for this request. A Milestone 5 rotational authority analyzer is implemented internally and regression-tested, but this endpoint is not yet wired to invoke it, so analysis is not implemented here. External exposure is owned by a later integration milestone.",
-    );
-  }
-
   // ---- specialization identity, resolved before any evidence is retrieved ----
   //
   // Ordering is deliberate and it is about cost as much as correctness. An
@@ -448,8 +426,8 @@ export async function analyzeFight(
     // thrown error here would surface as an opaque 500, and this is the honest
     // thing to say if the invariant ever stops holding.
     return serviceFailure(
-      "ANALYSIS_NOT_IMPLEMENTED",
-      "Warcraft Logs connectivity and player identity were verified for this request, but no ingestion scope could be derived for the selected analyzer, so no combat events were retrieved.",
+      "INTERNAL_ERROR",
+      "No ingestion scope could be derived for the selected analyzer, so no combat events were retrieved.",
     );
   }
 

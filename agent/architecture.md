@@ -3229,6 +3229,11 @@ require guessed support for every hoped-for family.
 
 ## Milestone 3 Does Not Change Live Behavior
 
+> **Superseded by Milestone 6-E.** Ingestion is now bound at the single
+> production composition root and `CombatIngestionPort` is a required service
+> dependency. `ANALYSIS_NOT_IMPLEMENTED` no longer exists. The reasoning below
+> is the M3-era record of why wiring waited for a consumer.
+
 Ingestion is built and deliberately not wired. `ENABLED_ANALYSIS_REQUIREMENTS`
 stays empty, so `/v1/analysis` continues to answer `ANALYSIS_NOT_IMPLEMENTED`
 after identity preflight and retrieves no combat events.
@@ -4867,6 +4872,12 @@ The first five surface in the runtime output as `EXECUTION_LANE_NOT_ESTABLISHED`
 exclusions rather than as silence.
 
 ## The `/v1/analysis` Wiring Decision
+
+> **Superseded by Milestone 6-E.** The composition described below as missing
+> was built across M6-B (application composition), M6-C (public contract) and
+> M6-E (production binding). `/v1/analysis` now returns a
+> `warcraft-logs-coach.analysis/1` result, identical to what MCP returns. The
+> reasoning below is the M5-E-era record of why it waited.
 
 **The endpoint stays at HTTP 501 `ANALYSIS_NOT_IMPLEMENTED`.**
 
