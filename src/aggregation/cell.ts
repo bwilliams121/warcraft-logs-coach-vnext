@@ -143,6 +143,16 @@ export const NON_ANALYZED_STATUSES = [
 export type AnalysisUnavailableReason = "FIGHT_INGESTION_FAILED";
 
 /**
+ * The canonical list.
+ *
+ * Exists so a public contract can assert parity against THIS array rather than
+ * maintaining a second copy of the vocabulary that could silently drift.
+ */
+export const ANALYSIS_UNAVAILABLE_REASONS = [
+  "FIGHT_INGESTION_FAILED",
+] as const satisfies readonly AnalysisUnavailableReason[];
+
+/**
  * One (fight, player) cell.
  *
  * `playerKey` is M7-C's within-report key. `sourceId` is carried alongside it
@@ -196,3 +206,13 @@ export type PlayerFightResult =
       readonly specName: string | null;
       readonly reason: AnalysisUnavailableReason;
     } & CellIdentity);
+
+/** The discriminants of `PlayerFightResult`. Canonical, for parity assertions. */
+export type PlayerFightResultKind = PlayerFightResult["kind"];
+
+export const PLAYER_FIGHT_RESULT_KINDS = [
+  "ABSENT",
+  "ANALYZED",
+  "NOT_ANALYZED",
+  "ANALYSIS_UNAVAILABLE",
+] as const satisfies readonly PlayerFightResultKind[];

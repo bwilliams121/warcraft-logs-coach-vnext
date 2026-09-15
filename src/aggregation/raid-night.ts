@@ -60,6 +60,12 @@ import type { PlayerFightResult } from "./cell.js";
  */
 export type FightProcessingOutcome = "INGESTED" | "INGESTION_FAILED";
 
+/** The canonical list, for parity assertions against a public vocabulary. */
+export const FIGHT_PROCESSING_OUTCOMES = [
+  "INGESTED",
+  "INGESTION_FAILED",
+] as const satisfies readonly FightProcessingOutcome[];
+
 export interface FightProcessingRecord {
   readonly fightId: number;
   readonly outcome: FightProcessingOutcome;
@@ -210,6 +216,13 @@ export interface RecurrenceSummary {
  * not knowable, which is the truth.
  */
 export type Comparability = "SAME" | "DIFFERENT" | "UNKNOWN";
+
+/** The canonical list, for parity assertions against a public vocabulary. */
+export const COMPARABILITY_VALUES = [
+  "SAME",
+  "DIFFERENT",
+  "UNKNOWN",
+] as const satisfies readonly Comparability[];
 
 /**
  * How two adjacent points in a player's series relate.
