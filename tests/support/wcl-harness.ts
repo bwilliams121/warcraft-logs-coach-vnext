@@ -83,6 +83,16 @@ export interface ContextOverrides {
   readonly fight?: Record<string, unknown>;
   readonly archiveStatus?: unknown;
   readonly revision?: number;
+  /**
+   * `Report.zone`. Omitted entirely by default.
+   *
+   * Absent rather than `null` by default so the ordinary harness response keeps
+   * modelling a report WITHOUT the M8-C selection, which is what proves the
+   * normalizer treats a missing zone as a fact rather than a decode failure. A
+   * test that wants a zone states one; a test that wants an explicit upstream
+   * null passes `null`.
+   */
+  readonly zone?: unknown;
 }
 
 /** A well-formed `CoachFightContext` response. */
@@ -120,6 +130,9 @@ export function contextResponse(overrides: ContextOverrides = {}): Response {
   };
   if (overrides.archiveStatus !== undefined) {
     report["archiveStatus"] = overrides.archiveStatus;
+  }
+  if (overrides.zone !== undefined) {
+    report["zone"] = overrides.zone;
   }
   return jsonResponse(200, {
     data: {

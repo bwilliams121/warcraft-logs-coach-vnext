@@ -43,6 +43,7 @@ import type {
   NormalizedFightCore,
   TalentImportObservation,
 } from "../../src/engine/normalization/fight-core.js";
+import type { EncounterOutcomeFacts, ZoneMetadata } from "../../src/engine/normalization/encounter-facts.js";
 import type { StreamCompleteness } from "../../src/wcl/retrieval-types.js";
 import type { CombatActor } from "../../src/engine/normalization/actors.js";
 import type { CombatAbility } from "../../src/engine/normalization/abilities.js";
@@ -515,7 +516,28 @@ export interface SyntheticCoreOptions {
   readonly friendlyPlayers?: readonly number[] | undefined;
   /** The one actor `talentImportCode(actorID:)` was requested for. */
   readonly talentImport?: TalentImportObservation | undefined;
+  /** M8-C pull-level context. Defaults to "Warcraft Logs supplied nothing". */
+  readonly encounterOutcome?: EncounterOutcomeFacts | undefined;
+  /** M8-C report-level context. Defaults to no zone. */
+  readonly zone?: ZoneMetadata | undefined;
 }
+
+/**
+ * Every outcome fact unresolved.
+ *
+ * The honest default for a synthetic core: a test that has not said what
+ * Warcraft Logs reported is a test where Warcraft Logs reported nothing. Note
+ * that no production code path can produce this by defaulting — `normalizeEncounterOutcome`
+ * always reads the payload.
+ */
+export const NO_ENCOUNTER_OUTCOME_FACTS: EncounterOutcomeFacts = {
+  lastPhase: null,
+  lastPhaseAsAbsoluteIndex: null,
+  lastPhaseIsIntermission: null,
+  bossPercentageRaw: null,
+  fightPercentageRaw: null,
+  wipeCalledReportTimeMs: null,
+};
 
 /**
  * A synthetic `NormalizedFightCore`.
@@ -622,6 +644,8 @@ export function syntheticFightCore(options: SyntheticCoreOptions = {}): Normaliz
     degradedCategories: new Set(),
     streamsWithUntypedDefects: new Set(),
     friendlyPlayers: options.friendlyPlayers ?? [],
+    encounterOutcome: options.encounterOutcome ?? NO_ENCOUNTER_OUTCOME_FACTS,
+    zone: options.zone ?? null,
     talentImport: options.talentImport ?? { actorId: 5, code: null },
   };
 }

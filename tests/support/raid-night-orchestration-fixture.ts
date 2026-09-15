@@ -17,6 +17,7 @@ import type { RaidNightRunResult } from "../../src/services/raid-night-runner.js
 import type { Env } from "../../src/config/env.js";
 import type { FightCoreIngestionResult, IngestionFailureReason } from "../../src/wcl/ingest-fight.js";
 import type { NormalizedFightCore } from "../../src/engine/normalization/fight-core.js";
+import { NO_ENCOUNTER_OUTCOME_FACTS } from "./synthetic-fight.js";
 import type { RevisionCheck } from "../../src/wcl/report-revision.js";
 import type { ReportRosterResult } from "../../src/wcl/report-roster.js";
 import type { ReportRosterSnapshot, RosterFight, RosterPlayer } from "../../src/wcl/roster-snapshot.js";
@@ -128,6 +129,11 @@ export function corpusCore(
     friendlyPlayers: [...participants],
     // Queried for one actor and genuinely absent, which is M7-B's
     // queried-but-null case rather than never-queried.
+    // M8-C context. This fixture carries the real M5-D2 corpus, and its purpose
+    // is authority output; the encounter facts are deliberately unresolved so
+    // nothing here can depend on them.
+    encounterOutcome: NO_ENCOUNTER_OUTCOME_FACTS,
+    zone: null,
     talentImport: { actorId: participants[0] ?? 0, code: null },
   };
 }

@@ -39,6 +39,15 @@ export const FIGHT_CONTEXT_QUERY = `query CoachFightContext($code: String!, $fig
         isAccessible
         archiveDate
       }
+      zone {
+        id
+        name
+        frozen
+        expansion {
+          id
+          name
+        }
+      }
       masterData {
         logVersion
         gameVersion
@@ -79,6 +88,12 @@ export const FIGHT_CONTEXT_QUERY = `query CoachFightContext($code: String!, $fig
         friendlyPlayers
         friendlySpecs
         talentImportCode(actorID: $actorID)
+        lastPhase
+        lastPhaseAsAbsoluteIndex
+        lastPhaseIsIntermission
+        bossPercentage
+        fightPercentage
+        wipeCalledTime
         phaseTransitions {
           id
           startTime
@@ -129,6 +144,15 @@ export interface RawFightContextReport {
   readonly abilities: readonly unknown[];
   readonly phases: readonly unknown[];
   readonly fights: readonly unknown[];
+  /**
+   * `Report.zone`, carried raw.
+   *
+   * Interpreted by `normalizeZone`, alongside every other per-element rule. The
+   * schema documents the null case — "null if no supported zone exists" — so an
+   * absent zone is a fact about the report rather than a decode failure, and it
+   * must never fail an otherwise sound ingestion.
+   */
+  readonly zone: unknown;
   /**
    * `null` when Warcraft Logs did not supply it.
    *
@@ -221,6 +245,8 @@ export function decodeFightContext(data: unknown): DecodeOutcome<FightContextPay
         phases: readArray(report, "phases") ?? [],
         fights,
         archiveStatus: decodeArchiveStatus(report),
+        // Passed through untouched. A report with no supported zone is normal.
+        zone: report["zone"],
       },
     },
   };

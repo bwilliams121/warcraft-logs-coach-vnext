@@ -396,6 +396,12 @@ export async function ingestFightCore(
       actors: actors.actors,
       abilities: abilities.abilities,
       talentImport: { actorId: request.talentImportActorId, code: fight.talentImportCode },
+      // M8 context, from the SAME context response as everything above — no
+      // second round trip, and therefore the same report snapshot and the same
+      // revision gate. Carried on the core only; `focusedFightFor` does not put
+      // either on a `CombatFight`, so gameplay analysis never sees them.
+      encounterOutcome: fight.outcome,
+      zone: normalizedContext.zone,
       phases,
       events: normalized.events,
       malformedObservations: normalized.malformedObservations,

@@ -11,6 +11,12 @@ import type { RawFightContextReport } from "../../wcl/fight-context-query.js";
 import { normalizeAbilities, type AbilityCatalog } from "./abilities.js";
 import { normalizeActors, type ActorCatalog } from "./actors.js";
 import { mapFinality, type CombatPhase, type FightFinality } from "./combat-fight.js";
+import {
+  normalizeEncounterOutcome,
+  normalizeZone,
+  type EncounterOutcomeFacts,
+  type ZoneMetadata,
+} from "./encounter-facts.js";
 
 export interface NormalizedFightHeader {
   readonly id: number;
@@ -26,6 +32,15 @@ export interface NormalizedFightHeader {
   readonly inProgressRaw: boolean | null;
   readonly friendlyPlayers: readonly number[];
   readonly talentImportCode: string | null;
+  /**
+   * Pull-level outcome metadata, verbatim.
+   *
+   * Held as one nested object rather than six loose fields so it can be carried
+   * onto the core WITHOUT entering `CombatFight.fight` — that object is shared
+   * by reference with every analysis, and these facts are context that no
+   * analyzer may read. See `encounter-facts.ts`.
+   */
+  readonly outcome: EncounterOutcomeFacts;
 }
 
 export type FightContextOutcome =
@@ -35,6 +50,8 @@ export type FightContextOutcome =
       readonly phases: readonly CombatPhase[];
       readonly actors: ActorCatalog;
       readonly abilities: AbilityCatalog;
+      /** `Report.zone`, a REPORT-level fact. `null` when WCL supplied none. */
+      readonly zone: ZoneMetadata | null;
     }
   | {
       readonly ok: false;
@@ -178,9 +195,14 @@ export function normalizeFightContext(report: RawFightContextReport, fightId: nu
       // Documented null for Classic and pre-Dragonflight fights. Recorded
       // unparsed: decoding it into talent ids needs runtime game data.
       talentImportCode: readString(rawFight, "talentImportCode") ?? null,
+      // Total and failure-free by construction: every field resolves to a value
+      // or to null, so malformed context metadata can never fail an ingestion
+      // whose combat evidence is sound.
+      outcome: normalizeEncounterOutcome(rawFight),
     },
     phases: normalizePhases(rawFight, report.phases, encounterId, startTimeMs),
     actors: normalizeActors(report.actors),
     abilities: normalizeAbilities(report.abilities),
+    zone: normalizeZone(report.zone),
   };
 }

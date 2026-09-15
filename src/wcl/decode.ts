@@ -56,6 +56,30 @@ export function readNullableInteger(source: Record<string, unknown>, key: string
   return isSafeInteger(value) ? value : undefined;
 }
 
+/**
+ * A finite number or an explicit `null`.
+ *
+ * The `Float` counterpart of `readNullableInteger`, and separate from it for a
+ * reason that matters: `bossPercentage`, `fightPercentage` and `wipeCalledTime`
+ * are declared `Float` in the frozen schema, and reading them through the
+ * integer reader would turn every fractional value into `undefined` — silently
+ * discarding real evidence. M8-A measured `bossPercentage: 0.04` on a live
+ * fight, so the fractional case is the ordinary one, not an edge case.
+ *
+ * `undefined` still means absent or malformed, which stays distinct from an
+ * explicit "no value".
+ */
+export function readNullableNumber(source: Record<string, unknown>, key: string): number | null | undefined {
+  if (!(key in source)) {
+    return undefined;
+  }
+  const value = source[key];
+  if (value === null) {
+    return null;
+  }
+  return isFiniteNumber(value) ? value : undefined;
+}
+
 export function readRecord(
   source: Record<string, unknown>,
   key: string,

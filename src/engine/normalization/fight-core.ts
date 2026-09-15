@@ -71,6 +71,7 @@ import type { IngestionScope } from "../../services/ingestion-scope.js";
 import type { CombatAbility } from "./abilities.js";
 import type { CombatActor } from "./actors.js";
 import type { CombatFight, CombatPhase, IngestionProvenance } from "./combat-fight.js";
+import type { EncounterOutcomeFacts, ZoneMetadata } from "./encounter-facts.js";
 import { projectCategoryEvidence } from "./completeness.js";
 import type { CombatEvent, MalformedRawObservation } from "./normalized-events.js";
 
@@ -153,6 +154,29 @@ export interface NormalizedFightCore {
   readonly friendlyPlayers: readonly number[];
 
   readonly talentImport: TalentImportObservation;
+
+  /**
+   * Pull-level outcome metadata from the typed context query. CONTEXT ONLY.
+   *
+   * ON THE CORE AND DELIBERATELY NOT ON THE VIEW. `focusedFightFor` does not
+   * carry this across, so no `CombatFight` has it and no analyzer can read it.
+   * That is the isolation M8-C owes: these facts must never reach the M5
+   * authority comparison, and the cheapest way to guarantee that is for the type
+   * it receives not to have the field.
+   *
+   * It is a sibling of `fight` rather than a part of it for the same reason.
+   * `CombatFight.fight` IS this object — passed by reference, not copied — so a
+   * field added there would have been handed to every analysis for free.
+   */
+  readonly encounterOutcome: EncounterOutcomeFacts;
+
+  /**
+   * `Report.zone`. A REPORT-level fact, `null` when Warcraft Logs supplied none.
+   *
+   * Context only, on the same terms as `encounterOutcome`, and likewise absent
+   * from every `CombatFight`. Not an identity key: see `ZoneMetadata`.
+   */
+  readonly zone: ZoneMetadata | null;
 }
 
 /**
@@ -164,6 +188,14 @@ export interface NormalizedFightCore {
  * this": `breadth`, the per-category `coverage.actorScope`, and whether the
  * talent import code belongs to this player. Everything else is handed across by
  * reference.
+ *
+ * WHAT IT DELIBERATELY LEAVES BEHIND
+ *
+ * `encounterOutcome` and `zone`. Both are M8 context, and neither is gameplay
+ * input, so the view an analyzer receives simply does not have them. This is an
+ * omission with a purpose and not an oversight: a later edit that "helpfully"
+ * carries them across would silently hand boss percentages and phase summaries
+ * to the M5 authority comparison, and a test asserts they stay off.
  *
  * NOTHING LARGE IS COPIED. `events`, `actors`, `abilities`, `phases`,
  * `provenance`, `malformedObservations` and the stream list are the SAME objects

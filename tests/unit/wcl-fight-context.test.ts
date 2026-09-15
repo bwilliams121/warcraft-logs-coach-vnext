@@ -19,6 +19,7 @@ function report(overrides: Partial<RawFightContextReport> = {}): RawFightContext
     actors: [],
     abilities: [],
     phases: [],
+    zone: null,
     fights: [
       {
         id: 6,
