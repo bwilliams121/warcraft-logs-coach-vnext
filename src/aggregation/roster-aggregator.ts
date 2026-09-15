@@ -119,7 +119,19 @@ function collectPatterns(
   );
 }
 
-function summarizeRecurrence(cells: readonly PlayerFightResult[]): RecurrenceSummary {
+/**
+ * The three recurrence collections over whatever cells it is given.
+ *
+ * EXPORTED IN M8-D, AND ONLY BECAUSE IT IS ALREADY A PURE FUNCTION OF `cells`.
+ * Encounter-scoped progression needs the same three collections over a SUBSET of
+ * the night — the pulls of one encounter — and the honest way to get that is to
+ * call this with a filtered list rather than to write a second tally that could
+ * drift in its ordering, its key handling or its treatment of non-analyzed cells.
+ *
+ * Nothing about the night-level behaviour changes: `aggregateRaidNight` still
+ * calls it with every cell, and the output for that call is identical.
+ */
+export function summarizeRecurrence(cells: readonly PlayerFightResult[]): RecurrenceSummary {
   return {
     rejectedPatterns: collectPatterns(cells, (cell) => cell.recurrence.rejectedPatterns),
     evidenceLimitations: collectPatterns(cells, (cell) => cell.recurrence.evidenceLimitations),
