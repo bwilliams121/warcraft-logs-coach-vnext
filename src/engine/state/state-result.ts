@@ -296,7 +296,43 @@ export interface AbsenceGateInput {
  * asking `classifyCoverage` whether the result still equals the interval. That
  * keeps inclusive/exclusive bound handling in exactly one place.
  */
-export function gateAbsenceClaim(input: AbsenceGateInput): AbsenceGate {
+/**
+ * Which actors a claim ranges over.
+ *
+ * THREE CASES, AND THE THIRD IS WHY THIS TYPE EXISTS. `actorId: null` used to
+ * carry two unrelated meanings, and they need opposite scope treatment:
+ *
+ *     NOT_ACTOR_SPECIFIC   the claim is not about actors at all. Phase
+ *                          transitions are the case: they come from typed
+ *                          per-fight fields, so no actor scope could bear on
+ *                          them and the scope test is correctly skipped.
+ *
+ *     ONE_ACTOR            the claim is about one actor, who must be vouched
+ *                          for.
+ *
+ *     EVERY_ACTOR          the claim RANGES OVER the whole actor universe — "no
+ *                          matching event occurred anywhere in this window".
+ *                          Scope is maximally relevant here, and skipping the
+ *                          test would let a bounded capture answer a question
+ *                          about actors it never vouched for.
+ */
+export type AbsenceClaimActors =
+  | { readonly kind: "NOT_ACTOR_SPECIFIC" }
+  | { readonly kind: "ONE_ACTOR"; readonly actorId: number }
+  | { readonly kind: "EVERY_ACTOR" };
+
+/**
+ * The shared gate. Checked in order of specificity:
+ *
+ *   1. capability — is this category obtainable at all?
+ *   2. actor scope — does the evidence vouch for the actors claimed over?
+ *   3. coverage — did we retrieve the whole interval?
+ *
+ * SCOPE PRECEDES COVERAGE, unchanged. A bounded capture that is also truncated
+ * reports INSUFFICIENT_SCOPE, because the narrower fact is the more useful one
+ * and widening the scope is what the caller must do first.
+ */
+function gateClaim(input: Omit<AbsenceGateInput, "actorId">, actors: AbsenceClaimActors): AbsenceGate {
   const evidence = input.completeness.categories[input.category];
 
   // UNVERIFIED carries no coverage field at all, so there is nothing here to
@@ -313,11 +349,15 @@ export function gateAbsenceClaim(input: AbsenceGateInput): AbsenceGate {
   // `null` scope means the coverage vouches for every actor in the stream. A
   // listed scope vouches for those actors and no others — an ally under
   // PLAYER_CONTEXT is out of scope even though the bytes may be present.
-  if (
-    input.actorId !== null &&
-    coverage.actorScope !== null &&
-    !coverage.actorScope.includes(input.actorId)
-  ) {
+  if (actors.kind === "ONE_ACTOR" && coverage.actorScope !== null) {
+    if (!coverage.actorScope.includes(actors.actorId)) {
+      return { ok: false, reason: "INSUFFICIENT_SCOPE" };
+    }
+  }
+  if (actors.kind === "EVERY_ACTOR" && coverage.actorScope !== null) {
+    // A listed scope is by definition not every actor. Only `null` — which
+    // `deriveEvidenceActorScope` returns for FULL_RAID and nothing else — can
+    // support a claim that ranges over the whole actor universe.
     return { ok: false, reason: "INSUFFICIENT_SCOPE" };
   }
 
@@ -327,4 +367,26 @@ export function gateAbsenceClaim(input: AbsenceGateInput): AbsenceGate {
   }
 
   return { ok: true };
+}
+
+export function gateAbsenceClaim(input: AbsenceGateInput): AbsenceGate {
+  const { actorId, ...rest } = input;
+  return gateClaim(rest, actorId === null ? { kind: "NOT_ACTOR_SPECIFIC" } : { kind: "ONE_ACTOR", actorId });
+}
+
+/**
+ * Gates a claim that ranges over EVERY actor in the fight.
+ *
+ * Separate from `gateAbsenceClaim` because the two answer different questions
+ * and a shared `actorId: null` cannot express both. "No phase transition is
+ * recorded here" needs no actor scope; "no enemy cast occurred here" needs all
+ * of it.
+ *
+ * The actor-scope semantics themselves are NOT restated: this reads the same
+ * `coverage.actorScope` that `deriveEvidenceActorScope` populates, and asks only
+ * whether it is the actor-global `null`. No PLAYER_CONTEXT membership rule,
+ * friendly/enemy calculation or roster test lives here or in any caller.
+ */
+export function gateActorGlobalClaim(input: Omit<AbsenceGateInput, "actorId">): AbsenceGate {
+  return gateClaim(input, { kind: "EVERY_ACTOR" });
 }

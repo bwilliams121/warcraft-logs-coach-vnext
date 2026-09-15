@@ -64,6 +64,7 @@ import {
   type MalformedRawObservation,
   type ResourceChangeEvent,
   type ResourceSide,
+  type SummonEvent,
   type UnsupportedEvent,
 } from "../../src/engine/normalization/normalized-events.js";
 
@@ -247,6 +248,11 @@ export function auraEvent(
     stacks: options.stacks ?? null,
     absorbAmount: null,
   };
+}
+
+/** `summon`. Source summoned target; no attribution is implied by M3 or here. */
+export function summonEvent(options: EventOptions): SummonEvent {
+  return { ...baseEvent(options, "summon"), kind: "SUMMON" };
 }
 
 export function resourceChangeEvent(
