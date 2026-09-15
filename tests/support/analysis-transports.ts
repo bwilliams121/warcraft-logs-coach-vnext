@@ -65,6 +65,7 @@ function identityFrom(
   sourceId: number,
   className: string,
   specName: string,
+  playerName = "Fixtureplayer",
 ): FightIdentity {
   return {
     report: {
@@ -82,7 +83,7 @@ function identityFrom(
       startTime: fight.fight.startTimeMs,
       endTime: fight.fight.endTimeMs,
     },
-    player: { sourceId, name: "Fixtureplayer", className, specName },
+    player: { sourceId, name: playerName, className, specName },
   };
 }
 
@@ -91,6 +92,15 @@ export interface RunnerOptions {
   readonly specName?: string;
   /** Swap the fixture so a test can reach the M5-A rejection corpus. */
   readonly fixture?: "d2" | "m5a";
+  /**
+   * The name Warcraft Logs reported for the player.
+   *
+   * Overridable so a transport test can carry real non-ASCII text end to end.
+   * The analysis itself never reads a name — identity flows through `sourceId` —
+   * which is precisely why a name is the right probe for an ENCODING defect: it
+   * is carried, never interpreted.
+   */
+  readonly playerName?: string;
 }
 
 /**
@@ -108,6 +118,7 @@ export function fixtureAnalysisRunner(options: RunnerOptions = {}): AnalysisRunn
     sourceId,
     options.className ?? "Rogue",
     options.specName ?? "Assassination",
+    options.playerName ?? "Fixtureplayer",
   );
 
   const preflight: PreflightPort = async () => ({ ok: true, identity, rateLimit: undefined });

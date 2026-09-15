@@ -156,6 +156,59 @@ function createHandler(deps: McpToolDeps) {
 }
 
 /**
+ * Media types this transport always emits as UTF-8.
+ *
+ * JSON is UTF-8 by definition (RFC 8259 §8.1) and Server-Sent Events are UTF-8
+ * by definition too. Matching on the media type alone — never on the body —
+ * because this function may only describe bytes, never change them.
+ */
+const UTF8_MEDIA_TYPES = /^(?:text\/|application\/json\b|application\/[\w.+-]+\+json\b)/i;
+
+/**
+ * Declares `charset=utf-8` on the way out, when the response has not already.
+ *
+ * WHY THIS EXISTS — A REAL PRODUCTION DEFECT, NOT A TIDY-UP
+ *
+ * The M7-F production smoke found the roster name `Dìssar` arriving through MCP
+ * as `DÃ¬ssar`, while REST delivered it intact. The Worker was never at fault for
+ * the bytes: both transports emit the same correct UTF-8 (`44 c3 ac …`). The
+ * difference was one header. REST answers `application/json; charset=utf-8`; the
+ * MCP SDK answers `application/json` with no charset parameter.
+ *
+ * JSON without a charset parameter IS UTF-8, but HTTP's own legacy default for a
+ * text response is ISO-8859-1, and real clients still apply it — PowerShell 5.1's
+ * `Invoke-WebRequest`/`Invoke-RestMethod` among them. Such a client decodes
+ * `c3 ac` as two Latin-1 characters and renders `Ã¬`. That is classic mojibake,
+ * and the server is what failed to prevent it: we knew the encoding and did not
+ * say so.
+ *
+ * WHAT THIS FUNCTION IS CAREFUL NOT TO DO
+ *
+ * It does not touch the body. `response.body` is passed through by reference, so
+ * no re-encoding, no buffering and no decode/encode round trip happens here —
+ * which is important, because a round trip is exactly the kind of operation that
+ * CAUSES this class of bug. It adds no charset to a media type it has no business
+ * claiming is UTF-8, and it never overwrites a charset the SDK chose.
+ *
+ * Applied at the one exit from this module, so tool results, protocol errors,
+ * host/origin rejections and auth challenges are all covered by one rule.
+ */
+function withDeclaredCharset(response: Response): Response {
+  const contentType = response.headers.get("content-type");
+  if (contentType === null) return response;
+  if (!UTF8_MEDIA_TYPES.test(contentType.trim())) return response;
+  if (/;\s*charset=/i.test(contentType)) return response;
+
+  const headers = new Headers(response.headers);
+  headers.set("content-type", `${contentType}; charset=utf-8`);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+/**
  * Serves one `/mcp` request.
  *
  * ORDER IS LOAD-BEARING.
@@ -178,6 +231,9 @@ function createHandler(deps: McpToolDeps) {
  *
  * Each guard answers with its own `Response` or yields. Nothing downstream runs
  * until all three have passed.
+ *
+ * Every response leaving here — guard or tool result — passes through
+ * `withDeclaredCharset`, so the encoding is declared exactly once, in one place.
  */
 export async function handleMcpRequest(
   request: Request,
@@ -190,7 +246,7 @@ export async function handleMcpRequest(
     hostHeaderValidationResponse(request, allowed) ??
     originValidationResponse(request, allowed) ??
     (await mcpAuthChallenge(request, env.ANALYSIS_AUTH_TOKEN));
-  if (rejected !== undefined) return rejected;
+  if (rejected !== undefined) return withDeclaredCharset(rejected);
 
   const handler = createHandler({
     analyze: options.analyze ?? UNBOUND_ANALYSIS_RUNNER,
@@ -202,5 +258,5 @@ export async function handleMcpRequest(
 
   // `fetch` is called with no `authInfo`: see `./auth.ts` for why the static
   // token is deliberately not surfaced to tools.
-  return await handler.fetch(request);
+  return withDeclaredCharset(await handler.fetch(request));
 }
