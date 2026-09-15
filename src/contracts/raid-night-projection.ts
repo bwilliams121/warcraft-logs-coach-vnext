@@ -113,7 +113,15 @@ function analysisRefFor(reportCode: string, cell: PlayerFightResult): PublicAnal
  * ANALYSIS_UNAVAILABLE has none because nothing was ever analyzed — publishing
  * one would imply a document that does not exist.
  */
-function projectCell(reportCode: string, cell: PlayerFightResult): PublicCell {
+/**
+ * One cell, projected.
+ *
+ * EXPORTED IN M8-G so the encounter-context document can reuse M7's compact cell
+ * rather than restate its four-variant union. The behaviour is unchanged and the
+ * raid-night document still calls it identically; a second implementation would
+ * be a second place for a variant to drift.
+ */
+export function projectCell(reportCode: string, cell: PlayerFightResult): PublicCell {
   switch (cell.kind) {
     case "ABSENT":
       // Identity only. No spec, no status, no counts, no reference.
@@ -233,7 +241,8 @@ function projectRecurrenceGroup(group: RecurrenceGroup): PublicRecurrenceGroup {
  * because the separation is the contract: only `rejectedPatterns` carries
  * evidence about a player.
  */
-function projectRecurrence(recurrence: RecurrenceSummary) {
+/** The three recurrence collections, projected. Exported for M8-G's reuse. */
+export function projectRecurrence(recurrence: RecurrenceSummary) {
   return {
     rejectedPatterns: recurrence.rejectedPatterns.map(projectRecurrenceGroup),
     evidenceLimitations: recurrence.evidenceLimitations.map(projectRecurrenceGroup),

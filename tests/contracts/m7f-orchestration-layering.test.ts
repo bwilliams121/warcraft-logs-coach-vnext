@@ -115,6 +115,10 @@ describe("orchestration holds no wire contract and no transport", () => {
       "../wcl/retrieval-plan.js",
       "../wcl/roster-snapshot.js",
       "../findings/finding.js",
+      // M8-C fact TYPES, for the optional observer M8-G reads them through.
+      // Types only: the seam hands out two values the loop already holds, and
+      // never the core they live on.
+      "../engine/normalization/encounter-facts.js",
       "./",
     ];
     for (const path of ORCHESTRATION_MODULES) {
@@ -359,13 +363,23 @@ describe("the production raid-night runner is composed in exactly one place", ()
     expect(declaring.map(([path]) => path)).toEqual(["../../src/runtime/analysis-composition.ts"]);
   });
 
-  it("the composition root is the only module that calls the service", () => {
-    // A second composition could disagree with the first about the same night
-    // while both looked correct.
+  it("the raid-night service has exactly two sanctioned callers", () => {
+    // A second ORCHESTRATION could disagree with the first about the same night
+    // while both looked correct. That is still forbidden.
+    //
+    // WIDENED IN M8-G, AND ONLY BY ONE NAMED MODULE. The encounter-context
+    // service COMPOSES this one rather than reimplementing it — which is the
+    // property that keeps a request to one ingestion per needed fight. Copying
+    // M7's loop to avoid appearing in this list would have been the actual
+    // violation.
     const callers = Object.entries(SOURCES)
       .filter(([path]) => !path.includes("raid-night-service"))
       .filter(([, source]) => /from "[^"]*raid-night-service\.js"/.test(source))
-      .map(([path]) => path);
-    expect(callers).toEqual(["../../src/runtime/analysis-composition.ts"]);
+      .map(([path]) => path)
+      .sort();
+    expect(callers).toEqual([
+      "../../src/runtime/analysis-composition.ts",
+      "../../src/services/encounter-context-service.ts",
+    ]);
   });
 });

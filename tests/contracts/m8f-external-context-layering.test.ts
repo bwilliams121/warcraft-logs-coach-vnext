@@ -350,13 +350,48 @@ describe("the domain is deterministic and carries no wall clock", () => {
 });
 
 describe("the frozen public contracts are untouched", () => {
-  it("no public contract imports external context", () => {
-    for (const path of allPaths().filter((candidate) => candidate.startsWith("src/contracts/"))) {
-      for (const specifier of importsOf(sourceOf(path))) {
-        expect(specifier, `${path} imports ${specifier}`).not.toContain("/external-context/");
-        expect(specifier, `${path} imports ${specifier}`).not.toContain("/rankings/");
-      }
+  /**
+   * The two contracts frozen before M8-F existed.
+   *
+   * NARROWED IN M8-G, DELIBERATELY. The original rule said NO contract may
+   * import external context, which was right while no contract published it.
+   * M8-G's whole purpose is a NEW document that does — so the rule now names the
+   * documents it was actually protecting, rather than being deleted to make room.
+   *
+   * `encounter-context/1` is the sanctioned home for external references. These
+   * two must never acquire them: a consumer of `analysis/1` or `raid-night/1`
+   * must see the same document after M8 as before it.
+   */
+  const FROZEN_CONTRACT_MODULES = [
+    "src/contracts/analysis-contract.ts",
+    "src/contracts/analysis-projection.ts",
+    "src/contracts/raid-night-contract.ts",
+    "src/contracts/raid-night-projection.ts",
+  ];
+
+  it("the frozen contract modules all still exist", () => {
+    // Guards the rule below against passing vacuously after a rename.
+    for (const path of FROZEN_CONTRACT_MODULES) {
+      expect(allPaths(), `missing ${path}`).toContain(path);
     }
+  });
+
+  it.each(FROZEN_CONTRACT_MODULES)("%s imports no external context or ranking transport", (path) => {
+    for (const specifier of importsOf(sourceOf(path))) {
+      expect(specifier, `${path} imports ${specifier}`).not.toContain("/external-context/");
+      expect(specifier, `${path} imports ${specifier}`).not.toContain("/rankings/");
+    }
+  });
+
+  it("only the encounter-context projection may read external context", () => {
+    // The one sanctioned exception, named explicitly so a second one has to be
+    // added here in a diff rather than appearing quietly.
+    const readers = allPaths()
+      .filter((candidate) => candidate.startsWith("src/contracts/"))
+      .filter((candidate) =>
+        importsOf(sourceOf(candidate)).some((specifier) => specifier.includes("/external-context/")),
+      );
+    expect(readers).toEqual(["src/contracts/encounter-context-projection.ts"]);
   });
 
   it("M8-F declares no public schema or transport surface", () => {

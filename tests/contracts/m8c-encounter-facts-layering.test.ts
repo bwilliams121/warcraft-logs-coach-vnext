@@ -80,15 +80,49 @@ describe("the frozen wire contracts are unchanged", () => {
     expect(PUBLIC_RAID_NIGHT_SCHEMA_VERSION).toBe("warcraft-logs-coach.raid-night/1");
   });
 
-  const CONTRACT_MODULES = allPaths().filter((path) => path.startsWith("src/contracts/"));
+  /**
+   * The contracts frozen before M8-C existed.
+   *
+   * NARROWED IN M8-G. The rule was "no contract may name an M8-C fact", which
+   * was right while no contract published one. `encounter-context/1` publishes
+   * the phase-summary integers deliberately — separately, and with no derived
+   * direction — so the rule now names the documents it was protecting.
+   *
+   * These two must never acquire them: a consumer of `analysis/1` or
+   * `raid-night/1` sees the same document after M8 as before it.
+   */
+  const CONTRACT_MODULES = [
+    "src/contracts/analysis-contract.ts",
+    "src/contracts/analysis-projection.ts",
+    "src/contracts/raid-night-contract.ts",
+    "src/contracts/raid-night-projection.ts",
+  ];
 
-  it("captured the contract modules", () => {
-    expect(CONTRACT_MODULES).toEqual([
-      "src/contracts/analysis-contract.ts",
-      "src/contracts/analysis-projection.ts",
-      "src/contracts/raid-night-contract.ts",
-      "src/contracts/raid-night-projection.ts",
-    ]);
+  it("captured the frozen contract modules", () => {
+    // Guards against the rule passing vacuously after a rename.
+    for (const path of CONTRACT_MODULES) {
+      expect(allPaths(), `missing ${path}`).toContain(path);
+    }
+  });
+
+  it("only the encounter-context projection may read the M8-C facts", () => {
+    // The one sanctioned exception, named so a second one needs a diff here.
+    const readers = allPaths()
+      .filter((candidate) => candidate.startsWith("src/contracts/"))
+      .filter((candidate) =>
+        importsOf(sourceOf(candidate)).some((specifier) => specifier.includes(FACT_MODULE)),
+      );
+    expect(readers).toEqual(["src/contracts/encounter-context-projection.ts"]);
+  });
+
+  it("the encounter-context contract publishes the two phase fields SEPARATELY", () => {
+    // Publishing them is allowed; conflating them is not.
+    const code = codeOf("src/contracts/encounter-context-contract.ts");
+    expect(code).toContain("lastPhase:");
+    expect(code).toContain("lastPhaseAsAbsoluteIndex:");
+    for (const banned of ["furthestPhase", "phaseProgress", "phaseReached"]) {
+      expect(code, `the contract declares ${banned}`).not.toContain(banned);
+    }
   });
 
   it.each(CONTRACT_MODULES)("%s does not import the encounter-facts module", (path) => {

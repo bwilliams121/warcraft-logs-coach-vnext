@@ -61,6 +61,7 @@ import {
 } from "../aggregation/raid-night.js";
 import { loadConfig, type Env } from "../config/env.js";
 import { focusedFightFor } from "../engine/normalization/fight-core.js";
+import type { EncounterOutcomeFacts, ZoneMetadata } from "../engine/normalization/encounter-facts.js";
 import type { IngestionFailureReason } from "../wcl/ingest-fight.js";
 import type { RevisionCheck } from "../wcl/report-revision.js";
 import type { ReportRosterFailureReason } from "../wcl/report-roster.js";
@@ -88,7 +89,39 @@ export interface RaidNightServiceDeps {
   readonly checkRevision: ReportRevisionPort;
   /** Injected so a test can prove dispatch without reaching into module state. */
   readonly registry?: readonly RegisteredAnalyzer[] | undefined;
+  /**
+   * Optional notification of one ingested fight's M8-C context facts.
+   *
+   * THE SEAM M8-G USES INSTEAD OF A SECOND INGESTION. Encounter-context
+   * progression needs each pull's outcome facts and zone, and this loop already
+   * holds the core they live on. Re-fetching the fight to read two fields would
+   * double the metered cost of a raid night for metadata that was already paid
+   * for.
+   *
+   * It receives the FACTS, not the core. Handing over the core would let a
+   * consumer retain the whole event array, which is exactly the memory cost the
+   * cell projection exists to avoid — twenty players share one core precisely so
+   * nothing outlives this loop holding it.
+   *
+   * Absent by default, so every existing caller is unaffected and the raid-night
+   * result is unchanged.
+   */
+  readonly observeEncounterFacts?: EncounterFactsObserver | undefined;
 }
+
+/**
+ * Receives one ingested fight's context facts.
+ *
+ * Called once per SUCCESSFULLY ingested fight, after the revision recheck that
+ * vouches for it. A fight whose evidence never arrived produces no call, which
+ * is what keeps "we hold no facts for this pull" distinct from "the facts were
+ * all null".
+ */
+export type EncounterFactsObserver = (facts: {
+  readonly fightId: number;
+  readonly outcome: EncounterOutcomeFacts;
+  readonly zone: ZoneMetadata | null;
+}) => void;
 
 function failure(code: ServiceErrorCode, message: string): RaidNightRunResult {
   const result = serviceFailure(code, message);
@@ -468,6 +501,14 @@ export async function analyzeRaidNight(
       return failure(code, message);
     }
     fightOutcomes.push({ fightId, outcome: "INGESTED" });
+
+    // The one place M8 context facts are read. Carried out of the loop by value
+    // so the core itself stays local and releasable.
+    deps.observeEncounterFacts?.({
+      fightId,
+      outcome: core.encounterOutcome,
+      zone: core.zone,
+    });
 
     // ---- one player at a time, over the ONE shared core ----
     for (const entry of planned) {
