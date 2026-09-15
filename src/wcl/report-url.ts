@@ -71,6 +71,79 @@ function extractReportCode(url: URL): string | undefined {
   return segments[reportsIndex + 1];
 }
 
+/** Just the report, with no fight or actor selector required. */
+export type ReportCodeParseResult =
+  | { readonly ok: true; readonly reportCode: string }
+  | { readonly ok: false; readonly issues: readonly RequestIssue[] };
+
+/**
+ * Extracts only the report code from a Warcraft Logs URL.
+ *
+ * WHY THIS EXISTS ALONGSIDE `parseReportUrl`
+ *
+ * A raid-night request names a report and its own explicit fight list, so the
+ * `#fight=` and `#source=` selectors a single-fight link must carry are simply
+ * not part of the question. Reusing `parseReportUrl` would reject a perfectly
+ * good report link for lacking selectors the caller supplied separately.
+ *
+ * It shares the host check, the path extraction and the code pattern with
+ * `parseReportUrl` rather than restating them. That matters more than the few
+ * lines saved: two definitions of "is this a Warcraft Logs report URL" would
+ * eventually disagree about a real link, and one of them would be wrong.
+ */
+export function parseReportCodeFromUrl(raw: string): ReportCodeParseResult {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    return {
+      ok: false,
+      issues: [{ code: "INVALID_REPORT_URL", field: "reportUrl", message: "reportUrl is not a valid URL." }],
+    };
+  }
+
+  if (!isWarcraftLogsHost(url.hostname)) {
+    return {
+      ok: false,
+      issues: [
+        {
+          code: "NOT_A_WARCRAFT_LOGS_URL",
+          field: "reportUrl",
+          message: "reportUrl must be a warcraftlogs.com report URL.",
+        },
+      ],
+    };
+  }
+
+  const reportCode = extractReportCode(url);
+  if (reportCode === undefined) {
+    return {
+      ok: false,
+      issues: [
+        {
+          code: "MISSING_REPORT_CODE",
+          field: "reportUrl",
+          message: "reportUrl does not contain a report code (expected /reports/<code>).",
+        },
+      ],
+    };
+  }
+  if (!REPORT_CODE_PATTERN.test(reportCode)) {
+    return {
+      ok: false,
+      issues: [
+        {
+          code: "INVALID_REPORT_CODE",
+          field: "reportUrl",
+          message: "The report code in reportUrl is not a valid Warcraft Logs report code.",
+        },
+      ],
+    };
+  }
+
+  return { ok: true, reportCode };
+}
+
 export function parseReportUrl(raw: string): ReportUrlParseResult {
   let url: URL;
   try {

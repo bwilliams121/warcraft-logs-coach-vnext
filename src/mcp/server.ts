@@ -51,6 +51,8 @@ import {
   type AnalysisRunner,
   type AnalyzeToolDeps,
 } from "./tools/analyze-warcraft-log.js";
+import { registerAnalyzeRaidNightTool, type RaidNightToolDeps } from "./tools/analyze-raid-night.js";
+import type { RaidNightRunner } from "../services/raid-night-runner.js";
 
 /** Advertised in `initialize`. Kept in step with package.json by hand, as the Worker version is. */
 export const MCP_SERVER_NAME = "warcraft-logs-coach-vnext";
@@ -88,6 +90,15 @@ const UNBOUND_ANALYSIS_RUNNER: AnalysisRunner = async () => ({
   },
 });
 
+/** The same fail-closed sentinel for the raid-night path, for the same reason. */
+const UNBOUND_RAID_NIGHT_RUNNER: RaidNightRunner = async () => ({
+  ok: false,
+  error: {
+    code: "INTERNAL_ERROR",
+    message: "No raid-night runner is bound to this MCP handler.",
+  },
+});
+
 export interface McpRequestOptions {
   /** Overridable so a test can prove rejection without weakening the real list. */
   readonly allowedHostnames?: readonly string[];
@@ -99,9 +110,20 @@ export interface McpRequestOptions {
    * still reaching exactly one shared analysis path.
    */
   readonly analyze?: AnalysisRunner | undefined;
+  /**
+   * The raid-night entry point.
+   *
+   * Injected the same way and for the same reason. REST receives this identical
+   * function from the same composition root, which is what makes the REST/MCP
+   * equality proof meaningful.
+   */
+  readonly analyzeRaidNight?: RaidNightRunner | undefined;
   /** Overridable so a test can drive allow/deny/throw deterministically. */
   readonly rateLimiter?: RateLimiterPort | undefined;
 }
+
+/** Everything the registered tools need. One object, both tools. */
+export type McpToolDeps = AnalyzeToolDeps & RaidNightToolDeps;
 
 /**
  * Builds one server instance for one request.
@@ -110,13 +132,17 @@ export interface McpRequestOptions {
  * Every call returns a new instance; there is no shared singleton to leak
  * between requests.
  */
-export function createMcpServerInstance(deps: AnalyzeToolDeps): McpServer {
+export function createMcpServerInstance(deps: McpToolDeps): McpServer {
   const server = new McpServer({ name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION });
+  // Exactly two real analysis tools. No ping, no primitive state queries: a tool
+  // that exposed an M4 query would invite a client to assemble its own analysis
+  // from parts, which is a second analyzer wearing a client's clothes.
   registerAnalyzeWarcraftLogTool(server, deps);
+  registerAnalyzeRaidNightTool(server, deps);
   return server;
 }
 
-function createHandler(deps: AnalyzeToolDeps) {
+function createHandler(deps: McpToolDeps) {
   return createMcpHandler(() => createMcpServerInstance(deps), {
     // 2025-era clients are served statelessly from the same factory rather than
     // rejected. Stated explicitly even though it is the default, because "which
@@ -168,6 +194,7 @@ export async function handleMcpRequest(
 
   const handler = createHandler({
     analyze: options.analyze ?? UNBOUND_ANALYSIS_RUNNER,
+    analyzeRaidNight: options.analyzeRaidNight ?? UNBOUND_RAID_NIGHT_RUNNER,
     // A deployment missing the binding is unmetered, and the tool treats that
     // as a refusal rather than as permission.
     rateLimiter: options.rateLimiter ?? env.ANALYSIS_RATE_LIMITER,

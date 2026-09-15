@@ -31,8 +31,12 @@ import type { Env } from "../config/env.js";
 import { analyzeFight } from "../services/analysis-service.js";
 import type { AnalysisRunner } from "../services/analysis-runner.js";
 import { createPreflight } from "../wcl/preflight.js";
-import { createFightIngestor } from "../wcl/ingest-fight.js";
+import { createFightCoreIngestor, createFightIngestor } from "../wcl/ingest-fight.js";
+import { createReportRevisionReader } from "../wcl/report-revision.js";
+import { createReportRoster } from "../wcl/report-roster.js";
 import { createTokenCache } from "../wcl/token-provider.js";
+import { analyzeRaidNight } from "../services/raid-night-service.js";
+import type { RaidNightRunner } from "../services/raid-night-runner.js";
 
 /**
  * Binds the real Warcraft Logs infrastructure to the application service.
@@ -62,4 +66,39 @@ export function createProductionAnalysisRunner(env: Env): AnalysisRunner {
   const ingest = createFightIngestor({ fetch: boundFetch, tokenCache });
 
   return async (input: unknown) => await analyzeFight(input, { env, preflight, ingest });
+}
+
+/**
+ * Binds the real Warcraft Logs infrastructure to the raid-night service.
+ *
+ * ONE TOKEN CACHE, SHARED ACROSS EVERY STEP. A raid night performs roster
+ * discovery, up to four fight retrievals and a final revision confirmation —
+ * all against the same API with the same credentials. One cache means one OAuth
+ * exchange for the whole request instead of six, and token requests count against
+ * the same finite quota the rate limiter exists to protect.
+ *
+ * NO SECOND WCL ARCHITECTURE. `createReportRoster`, `createFightCoreIngestor` and
+ * `createReportRevisionReader` all bind the same global `fetch` the same way the
+ * single-fight path already does, so there is no second GraphQL client, no second
+ * retry policy and no second rate-limit interpretation. M2's and M3's transport
+ * behaviour is what a raid night gets.
+ *
+ * WHY THIS LIVES BESIDE `createProductionAnalysisRunner` RATHER THAN IN ITS OWN
+ * ROOT
+ *
+ * Both are the same kind of thing: the one place infrastructure is chosen. A
+ * second composition tree would be a second place a credential could be bound
+ * differently, and the REST/MCP equality proofs rest on both transports receiving
+ * a runner built exactly once.
+ */
+export function createProductionRaidNightRunner(env: Env): RaidNightRunner {
+  const boundFetch = (input: string, init: RequestInit): Promise<Response> => fetch(input, init);
+  const tokenCache = createTokenCache();
+
+  const discoverRoster = createReportRoster({ fetch: boundFetch, tokenCache });
+  const ingestFightCore = createFightCoreIngestor({ fetch: boundFetch, tokenCache });
+  const checkRevision = createReportRevisionReader({ fetch: boundFetch, tokenCache });
+
+  return async (request) =>
+    await analyzeRaidNight(request, { env, discoverRoster, ingestFightCore, checkRevision });
 }

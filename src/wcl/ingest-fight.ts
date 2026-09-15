@@ -477,3 +477,25 @@ export function createFightIngestor(deps: CreateIngestorDeps) {
     });
   };
 }
+
+/**
+ * Builds an actor-independent fight-core ingestor over the real transport.
+ *
+ * The raid-night counterpart to `createFightIngestor`. It returns the CORE rather
+ * than one player's view, because a raid night reuses the same retrieval across
+ * every analyzed player in the fight — which is the whole reason M7-B split the
+ * two. Same transport, same token cache, same failure mapping.
+ */
+export function createFightCoreIngestor(deps: CreateIngestorDeps) {
+  return async (
+    request: FightCoreIngestionRequest,
+    credentials: WclCredentials,
+  ): Promise<FightCoreIngestionResult> => {
+    const now = deps.now ?? Date.now;
+    const tokens = createTokenProvider({ credentials, fetch: deps.fetch, now, cache: deps.tokenCache });
+    return await ingestFightCore(request, {
+      client: createGraphqlClient({ tokens, fetch: deps.fetch }),
+      now,
+    });
+  };
+}

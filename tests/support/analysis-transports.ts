@@ -21,6 +21,9 @@ import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import type { AnalysisServiceResult } from "../../src/services/result.js";
 import type { RateLimiterPort } from "../../src/runtime/rate-limit.js";
 import type { AnalysisRunner } from "../../src/services/analysis-runner.js";
+import type { RaidNightRunner, RaidNightRunResult } from "../../src/services/raid-night-runner.js";
+import type { RaidNightRequest } from "../../src/services/raid-night-request.js";
+import type { RaidNightAnalysis } from "../../src/aggregation/raid-night.js";
 import type { Env } from "../../src/config/env.js";
 import type { WorkerDeps } from "../../src/api/worker.js";
 import { handleMcpRequest } from "../../src/mcp/server.js";
@@ -141,7 +144,11 @@ export const THROWING_LIMITER: RateLimiterPort = {
  * A limiter that genuinely counts, so a test can exhaust it.
  *
  * Deliberately simple: this is a test double for Cloudflare's distributed
- * counter, not a reimplementation of it. Production uses the real binding.
+ * counter, not a reimplementation of it. The real binding is permissive and
+ * eventually consistent, with per-location counters and no globally serialized
+ * accounting — so what a test built on this may assert is OUR call behaviour
+ * (how many, under which key, and what we do with a refusal), never an exact
+ * global admission count. Production uses the real binding.
  */
 export function countingLimiter(limit: number): RateLimiterPort & { readonly keys: string[] } {
   const keys: string[] = [];
@@ -155,27 +162,84 @@ export function countingLimiter(limit: number): RateLimiterPort & { readonly key
 }
 
 /**
+ * A raid-night runner that returns ONE prepared aggregate, and counts.
+ *
+ * The count is the point. Two transports sharing one runner is an architectural
+ * claim, and the only way to prove the claim rather than restate it is to hand
+ * both adapters the SAME instance and check it was entered twice.
+ *
+ * It records the requests it received too, so a test can prove a transport passed
+ * the caller's selection through unchanged rather than substituting its own.
+ */
+export interface CountingRaidNightRunner {
+  readonly runner: RaidNightRunner;
+  calls(): number;
+  requests(): readonly RaidNightRequest[];
+}
+
+export function fixedRaidNightRunner(
+  result: RaidNightAnalysis | RaidNightRunResult,
+): CountingRaidNightRunner {
+  const outcome: RaidNightRunResult = "ok" in result ? result : { ok: true, aggregate: result };
+  const requests: RaidNightRequest[] = [];
+  return {
+    runner: async (request) => {
+      requests.push(request);
+      return outcome;
+    },
+    calls: () => requests.length,
+    requests: () => [...requests],
+  };
+}
+
+/** A raid-night runner that must never be entered. Fails the test if it is. */
+export const FORBIDDEN_RAID_NIGHT_RUNNER: RaidNightRunner = async () => {
+  throw new Error("the raid-night runner was entered when the request should have been refused");
+};
+
+/**
  * Worker dependencies wired to one runner and one limiter.
  *
  * The SAME limiter instance reaches REST and MCP, which is what lets a test
  * prove the two transports share a budget rather than each having their own.
  */
 export function workerDepsFor(options: {
-  readonly analyze: AnalysisRunner;
+  readonly analyze?: AnalysisRunner;
+  readonly raidNight?: RaidNightRunner;
   readonly rateLimiter?: RateLimiterPort | undefined;
   readonly mcp?: WorkerDeps["mcp"];
 }): WorkerDeps {
   return {
-    analysisRunner: () => options.analyze,
+    analysisRunner: () => options.analyze ?? UNBOUND_ANALYSIS,
+    // Stubbed fail-closed rather than omitted, so a test that forgot to bind it
+    // cannot silently reach a runner it did not choose.
+    raidNightRunner: () => options.raidNight ?? UNBOUND_RAID_NIGHT,
     rateLimiter: () => options.rateLimiter ?? ALLOWING_LIMITER,
     mcp: options.mcp ?? defaultTestMcp,
     version: "0.1.0",
   };
 }
 
-/** Routes `/mcp` through the same runner and limiter the Worker holds. */
+const UNBOUND_ANALYSIS: AnalysisRunner = async () => ({
+  ok: false as const,
+  error: { code: "INTERNAL_ERROR" as const, message: "analysis runner not bound here" },
+});
+
+const UNBOUND_RAID_NIGHT: RaidNightRunner = async () => ({
+  ok: false as const,
+  error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+});
+
+/**
+ * Routes `/mcp` through the same runners and limiter the Worker holds.
+ *
+ * Reads them off `deps` rather than closing over the test's own values, because
+ * that is exactly what the production wiring does — so a test driving SELF
+ * through /mcp exercises the real sharing rather than a parallel arrangement.
+ */
 const defaultTestMcp: WorkerDeps["mcp"] = async (request, env, deps) =>
   await handleMcpRequest(request, env, {
     analyze: deps.analysisRunner(env),
+    analyzeRaidNight: deps.raidNightRunner(env),
     rateLimiter: deps.rateLimiter(env),
   });

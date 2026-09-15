@@ -211,6 +211,7 @@ function projectCoverage(coverage: CoverageSummary): PublicCoverageSummary {
     fightsIncluded: coverage.fightsIncluded,
     fightsMissing: coverage.fightsMissing,
     fightsIngested: coverage.fightsIngested,
+    fightsNotIngested: coverage.fightsNotIngested,
     fightsFailed: coverage.fightsFailed,
   };
 }

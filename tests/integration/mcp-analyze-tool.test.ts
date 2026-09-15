@@ -237,6 +237,7 @@ describe("service failures are tool errors, never analysis", () => {
     REPORT_NOT_ACCESSIBLE: false,
     REPORT_ARCHIVED_INACCESSIBLE: false,
     REPORT_REVISION_CHANGED: true,
+    REPORT_REVISION_UNVERIFIED: true,
     FIGHT_NOT_FOUND: false,
     SOURCE_NOT_FOUND: false,
     SOURCE_NOT_A_PLAYER: false,

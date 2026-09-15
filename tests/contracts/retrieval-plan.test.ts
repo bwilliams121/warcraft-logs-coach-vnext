@@ -142,9 +142,12 @@ describe("page limit and safety ceilings", () => {
     expect(EVENT_PAGE_LIMIT).not.toBe(300);
   });
 
-  it("keeps the page ceiling inside the paid Workers subrequest allowance", () => {
-    // Paid plan allows 1000 subrequests per request; 200 pages plus the token
-    // and context requests leaves ample headroom.
+  it("keeps the page ceiling inside the 1000-subrequest working budget", () => {
+    // 1000 is THIS PROJECT'S conservative budget, not the platform maximum —
+    // Cloudflare Workers Paid currently documents 10,000 subrequests per
+    // invocation. See RAID_NIGHT_SUBREQUEST_SAFETY_BUDGET for why the stricter
+    // number is kept. The assertion is unchanged, and so is MAX_PAGES: 200 pages
+    // plus the token and context requests leave ample headroom either way.
     expect(MAX_PAGES).toBeLessThan(1000);
     expect(MAX_EVENTS).toBeGreaterThan(MAX_PAGES * EVENT_PAGE_LIMIT - 1);
   });

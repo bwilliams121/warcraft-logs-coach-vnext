@@ -57,12 +57,24 @@ import type { PlayerFightResult } from "./cell.js";
  * A fight the report does NOT contain has no outcome here, because it has no
  * metadata to describe — it appears only as a batch failure. Inventing a summary
  * for it would create a pull that never happened.
+ *
+ * `NOT_INGESTED` WAS ADDED IN M7-F, AND WHY MATTERS
+ *
+ * Orchestration must not retrieve a fight no selected player needs analyzed —
+ * everybody absent, or every present player's specialization unsupported. That
+ * is the single largest cost saving in a mixed roster, and M7-A requires it.
+ *
+ * But it left the vocabulary unable to state what happened. `INGESTED` would be
+ * a plain lie: no event request was issued. `INGESTION_FAILED` would be worse,
+ * inventing an outage to explain a deliberate decision. So the third value says
+ * what occurred and nothing about why — the cells themselves carry the reason.
  */
-export type FightProcessingOutcome = "INGESTED" | "INGESTION_FAILED";
+export type FightProcessingOutcome = "INGESTED" | "NOT_INGESTED" | "INGESTION_FAILED";
 
 /** The canonical list, for parity assertions against a public vocabulary. */
 export const FIGHT_PROCESSING_OUTCOMES = [
   "INGESTED",
+  "NOT_INGESTED",
   "INGESTION_FAILED",
 ] as const satisfies readonly FightProcessingOutcome[];
 
@@ -148,6 +160,14 @@ export interface CoverageSummary {
   readonly cellsAuthorityNotAvailable: number;
   readonly cellsProfileNotResolved: number;
   readonly cellsInsufficientEvidence: number;
+  /**
+   * Present players for whom no analyzer ran at all.
+   *
+   * Both reasons land here — the fight's evidence could not be obtained, and no
+   * usable specialization identity was available — because from a coverage
+   * standpoint they say the same thing: this participant contributed no gameplay
+   * analysis, for a reason that is not about how they played.
+   */
   readonly cellsAnalysisUnavailable: number;
 
   /** Summed over ANALYZED cells only. Never padded with zeroes from other kinds. */
@@ -162,6 +182,15 @@ export interface CoverageSummary {
   readonly fightsIncluded: number;
   readonly fightsMissing: number;
   readonly fightsIngested: number;
+  /**
+   * Included fights no selected player required event evidence for.
+   *
+   * Its own count rather than folded into either neighbour, so the identity
+   * `fightsIncluded === fightsIngested + fightsNotIngested + fightsFailed`
+   * holds and a reader can see that a small `fightsIngested` was a deliberate
+   * saving rather than a retrieval problem.
+   */
+  readonly fightsNotIngested: number;
   readonly fightsFailed: number;
 }
 
@@ -525,22 +554,42 @@ function checkAgainstProcessing(
     return "PROCESSING_RECORD_MISSING";
   }
 
-  if (outcome === "INGESTION_FAILED") {
-    return cell.kind === "ANALYSIS_UNAVAILABLE" && cell.reason === "FIGHT_INGESTION_FAILED"
-      ? null
-      : "PROCESSING_CELL_MISMATCH";
+  // A cell whose analysis was unavailable for a reason UNRELATED to the fight is
+  // consistent with any outcome. `SPECIALIZATION_UNRESOLVED` is a fact about the
+  // participant's own identity data, and it is true whether or not events were
+  // retrieved — so it is judged on its own meaning rather than against the fight.
+  if (cell.kind === "ANALYSIS_UNAVAILABLE" && cell.reason === "SPECIALIZATION_UNRESOLVED") {
+    return null;
   }
 
-  // INGESTED. Each unavailable reason is judged on its own factual meaning
-  // rather than every unavailable cell being assumed to mean ingestion failure,
-  // so adding a reason later forces a decision here instead of defaulting.
-  if (cell.kind === "ANALYSIS_UNAVAILABLE") {
-    switch (cell.reason) {
-      case "FIGHT_INGESTION_FAILED":
-        return "PROCESSING_CELL_MISMATCH";
-    }
+  switch (outcome) {
+    case "INGESTION_FAILED":
+      // Nothing was retrieved, so nothing could have been analyzed. The only
+      // truthful cell for a present player is the matching unavailability.
+      return cell.kind === "ANALYSIS_UNAVAILABLE" && cell.reason === "FIGHT_INGESTION_FAILED"
+        ? null
+        : "PROCESSING_CELL_MISMATCH";
+
+    case "NOT_INGESTED":
+      // Retrieval was deliberately skipped because no selected player needed it.
+      // That is only coherent when every present player is one who could not
+      // have been analyzed anyway: a specialization with no registered analyzer.
+      //
+      // An ANALYZED cell here would claim decisions from evidence that was never
+      // fetched, and FIGHT_INGESTION_FAILED would invent an outage to explain a
+      // decision — so both are refused.
+      return cell.kind === "NOT_ANALYZED" && cell.status === "SPEC_NOT_SUPPORTED"
+        ? null
+        : "PROCESSING_CELL_MISMATCH";
+
+    case "INGESTED":
+      // Evidence was retrieved, so claiming it never arrived contradicts the
+      // fight fact and would hide a real analysis behind an infrastructure
+      // excuse. Every other kind is legitimate here.
+      return cell.kind === "ANALYSIS_UNAVAILABLE" && cell.reason === "FIGHT_INGESTION_FAILED"
+        ? "PROCESSING_CELL_MISMATCH"
+        : null;
   }
-  return null;
 }
 
 /**

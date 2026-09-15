@@ -22,7 +22,7 @@ import {
   type FightProcessingRecord,
   type RaidNightAnalysis,
 } from "../../src/aggregation/raid-night.js";
-import type { PlayerFightResult } from "../../src/aggregation/cell.js";
+import type { AnalysisUnavailableReason, PlayerFightResult } from "../../src/aggregation/cell.js";
 import type { ObservedActionComparison } from "../../src/specs/rogue/assassination/observed-comparison.js";
 import type { ExcludedObservedCast } from "../../src/specs/rogue/assassination/observed-analysis.js";
 import type { RosterFight, RosterPlayer } from "../../src/wcl/roster-snapshot.js";
@@ -98,14 +98,15 @@ export function absent(fightId: number, sourceId: number): PlayerFightResult {
 export function unavailable(
   fightId: number,
   sourceId: number,
-  specName = "Assassination",
+  specName: string | null = "Assassination",
+  reason: AnalysisUnavailableReason = "FIGHT_INGESTION_FAILED",
 ): PlayerFightResult {
   return analysisUnavailableCell({
     fightId,
     reportCode: REPORT_CODE,
     sourceId,
     specName,
-    reason: "FIGHT_INGESTION_FAILED",
+    reason,
   });
 }
 

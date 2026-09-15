@@ -209,6 +209,10 @@ function summarizeCoverage(
     fightsIncluded: snapshot.identity.includedFightIds.length,
     fightsMissing: snapshot.missingRequestedFightIds.length,
     fightsIngested: outcomes.filter((record) => record.outcome === "INGESTED").length,
+    // Its own count, so `fightsIncluded === ingested + notIngested + failed`
+    // holds and a small `fightsIngested` reads as a deliberate saving rather
+    // than a retrieval problem.
+    fightsNotIngested: outcomes.filter((record) => record.outcome === "NOT_INGESTED").length,
     fightsFailed: outcomes.filter((record) => record.outcome === "INGESTION_FAILED").length,
   };
 }
@@ -335,6 +339,9 @@ export function aggregateRaidNight(input: VerifiedRaidNightInput): RaidNightAnal
       durationMs: fight.endTimeMs - fight.startTimeMs,
       participantCount: fight.participants.length,
       analyzedCount: fightCells.filter((cell) => cell.kind === "ANALYZED").length,
+      // Unreachable: the input gate proves one record per included fight. Kept
+      // as INGESTION_FAILED rather than INGESTED so a hypothetical gap fails
+      // conservatively instead of claiming evidence that was never retrieved.
       processingOutcome: outcomeByFightId.get(fight.fightId) ?? "INGESTION_FAILED",
     };
   });

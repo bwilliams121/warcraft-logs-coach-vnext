@@ -117,6 +117,13 @@ const SERVICE_ERRORS = {
     // A property of the uploaded log, not a transient condition.
     retryable: false,
   },
+  REPORT_REVISION_UNVERIFIED: {
+    message:
+      "The Warcraft Logs report revision could not be confirmed, so the result was refused rather than assembled from evidence that might span two versions of the report. Try again later.",
+    // A later attempt can complete the check. Distinct from a revision that
+    // demonstrably CHANGED, which also clears but for a different reason.
+    retryable: true,
+  },
   UPSTREAM_DATA_INVALID: {
     message: "Warcraft Logs returned data that could not be trusted, so no analysis was produced.",
     retryable: false,

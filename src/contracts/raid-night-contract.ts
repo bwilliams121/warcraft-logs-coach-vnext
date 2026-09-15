@@ -34,8 +34,17 @@
  *                         performance, not missing evidence.
  *   SPEC_NOT_SUPPORTED    this build has no analyzer for that specialization.
  *                         A coverage limit, not a statement about play.
- *   ANALYSIS_UNAVAILABLE  the fight's evidence never arrived, so nothing was
- *                         attempted. Infrastructure, not gameplay.
+ *   ANALYSIS_UNAVAILABLE  participation is known, and analysis could not be
+ *                         performed for that player at all. `reason` says which
+ *                         precondition was missing: FIGHT_INGESTION_FAILED (the
+ *                         required fight evidence could not be obtained) or
+ *                         SPECIALIZATION_UNRESOLVED (no usable specialization
+ *                         identity, so no analyzer could truthfully be selected).
+ *                         Not infrastructure-only, never poor performance, and
+ *                         carrying no counts and no UNKNOWN decisions.
+ *   NOT_INGESTED          an included fight whose events were deliberately not
+ *                         retrieved, because no selected player needed them.
+ *                         A saving, not an outage.
  *   evidenceLimitations   why the ANALYZER could not conclude. Says nothing
  *                         about the player.
  *   exclusionPatterns     casts the analyzer did not evaluate. Coverage, not
@@ -302,13 +311,29 @@ export const NotAnalyzedCellSchema = z
   .strict();
 
 /**
- * A present player whose fight evidence never arrived.
+ * A present player for whom analysis could not be performed at all.
  *
- * INFRASTRUCTURE, KEPT APART FROM EVERY GAMEPLAY STATUS. No analyzer ran, so
- * there are no counts and — crucially — no UNKNOWN decisions: UNKNOWN means the
- * authority could not prove a specific comparison, and manufacturing one per
- * cast to represent a retrieval failure would put an infrastructure problem into
- * the gameplay vocabulary.
+ * PARTICIPATION IS KNOWN; ANALYSIS WAS NOT POSSIBLE. `reason` says which
+ * precondition was missing, and the two are genuinely different kinds of fact:
+ *
+ *     FIGHT_INGESTION_FAILED       the required fight evidence could not be
+ *                                  obtained.
+ *     SPECIALIZATION_UNRESOLVED    participation is known, but no usable
+ *                                  specialization identity was available, so no
+ *                                  gameplay analyzer could truthfully be
+ *                                  selected.
+ *
+ * This cell kind is therefore NOT infrastructure-only — it was while
+ * `FIGHT_INGESTION_FAILED` stood alone, and saying so now would misdescribe a
+ * missing-identity fact as an outage.
+ *
+ * KEPT APART FROM EVERY GAMEPLAY STATUS, whichever reason applies. No analyzer
+ * ran, so there are no counts and — crucially — no UNKNOWN decisions: UNKNOWN
+ * means the authority could not prove a specific comparison, and manufacturing
+ * one per cast to represent an unrun analysis would put a non-gameplay problem
+ * into the gameplay vocabulary.
+ *
+ * It is never poor performance, and never a statement about play.
  *
  * No `analysisRef` either: there is no completed single-fight analysis to point
  * at, and publishing one would imply a document that does not exist.
@@ -409,6 +434,15 @@ export const PublicCoverageSummarySchema = z
     fightsIncluded: z.number().int().nonnegative(),
     fightsMissing: z.number().int().nonnegative(),
     fightsIngested: z.number().int().nonnegative(),
+    /**
+     * Included fights no selected player required event evidence for.
+     *
+     * `fightsIncluded === fightsIngested + fightsNotIngested + fightsFailed`.
+     * Published separately so a small `fightsIngested` reads as a deliberate
+     * saving — every present player's specialization was unsupported — rather
+     * than as a retrieval problem.
+     */
+    fightsNotIngested: z.number().int().nonnegative(),
     fightsFailed: z.number().int().nonnegative(),
   })
   .strict();

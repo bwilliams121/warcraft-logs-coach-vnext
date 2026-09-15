@@ -67,6 +67,42 @@ import {
  * Read from the source at the checkpoint that froze `/1`. Every value here is
  * part of the published contract, and order is included because these arrays are
  * exported and a consumer may index them.
+ *
+ * ---------------------------------------------------------------------------
+ * REVIEWED CHANGE LOG
+ *
+ * This literal changes only through a recorded decision. Each entry below is a
+ * time the tripwire fired and somebody chose option B — change `/1` — rather
+ * than option A.
+ *
+ * M7-F, BEFORE `/1` WAS EVER DEPLOYED OR EXPOSED.
+ *
+ *   + fightProcessingOutcomes: "NOT_INGESTED"
+ *
+ *     M7-A requires that a fight no selected player needs analyzed is not
+ *     retrieved at all. The two existing values could not state that: `INGESTED`
+ *     would claim an event request that was never issued, and
+ *     `INGESTION_FAILED` would invent an outage to explain a deliberate saving.
+ *     Neither is true, so the vocabulary was the thing that had to give.
+ *
+ *   + analysisUnavailableReasons: "SPECIALIZATION_UNRESOLVED"
+ *
+ *     M7-C preserves an unusable `friendlySpecs` entry as `specName: null`
+ *     rather than guessing, and a raid night still owes that participant a cell.
+ *     `SPEC_NOT_SUPPORTED` would assert we identified a specialization and lack
+ *     an analyzer for it; we never identified one. This states the fact instead.
+ *
+ *   + coverage.fightsNotIngested
+ *
+ *     The denominator has to keep adding up. `fightsIncluded` must equal
+ *     `fightsIngested + fightsNotIngested + fightsFailed`, and without this field
+ *     a deliberately unretrieved fight would have had to be counted as one of the
+ *     other two — which is the same lie in arithmetic form.
+ *
+ * `schemaVersion` stays `/1` because no consumer has ever received the previous
+ * vocabulary — the contract had no caller until M7-F. A change with the same
+ * shape AFTER deployment is a different decision and would need versioning.
+ * ---------------------------------------------------------------------------
  */
 const FROZEN_V1 = {
   raidNightStatuses: ["ANALYZED", "NO_ANALYZED_CELLS"],
@@ -77,8 +113,10 @@ const FROZEN_V1 = {
     "PROFILE_NOT_RESOLVED",
     "INSUFFICIENT_EVIDENCE",
   ],
-  analysisUnavailableReasons: ["FIGHT_INGESTION_FAILED"],
-  fightProcessingOutcomes: ["INGESTED", "INGESTION_FAILED"],
+  // M7-F reviewed addition: SPECIALIZATION_UNRESOLVED. See the log above.
+  analysisUnavailableReasons: ["FIGHT_INGESTION_FAILED", "SPECIALIZATION_UNRESOLVED"],
+  // M7-F reviewed addition: NOT_INGESTED. See the log above.
+  fightProcessingOutcomes: ["INGESTED", "NOT_INGESTED", "INGESTION_FAILED"],
   batchFailureReasons: ["FIGHT_NOT_FOUND", "FIGHT_INGESTION_FAILED"],
   comparabilityValues: ["SAME", "DIFFERENT", "UNKNOWN"],
 } as const;
@@ -144,6 +182,9 @@ describe("the /1 schemas accept exactly the frozen vocabulary and nothing else",
     const base = { kind: "ANALYSIS_UNAVAILABLE" as const, ...CELL_IDENTITY, specName: "Assassination" };
     expect(() =>
       AnalysisUnavailableCellSchema.parse({ ...base, reason: "FIGHT_INGESTION_FAILED" }),
+    ).not.toThrow();
+    expect(() =>
+      AnalysisUnavailableCellSchema.parse({ ...base, reason: "SPECIALIZATION_UNRESOLVED" }),
     ).not.toThrow();
     // Exactly the M10-shaped change this file exists to notice.
     expect(() =>
@@ -235,6 +276,7 @@ describe("the /1 schemas accept exactly the frozen vocabulary and nothing else",
         fightsIncluded: 0,
         fightsMissing: 0,
         fightsIngested: 0,
+        fightsNotIngested: 0,
         fightsFailed: 0,
       },
       recurrence: { rejectedPatterns: [], evidenceLimitations: [], exclusionPatterns: [] },

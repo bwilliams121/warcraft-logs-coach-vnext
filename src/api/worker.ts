@@ -9,17 +9,29 @@
 
 import type { Env } from "../config/env.js";
 import { handleMcpRequest } from "../mcp/server.js";
-import { createProductionAnalysisRunner } from "../runtime/analysis-composition.js";
+import {
+  createProductionAnalysisRunner,
+  createProductionRaidNightRunner,
+} from "../runtime/analysis-composition.js";
 import { UNAUTHORIZED_MESSAGE, verifyAnalysisBearer } from "../runtime/bearer-auth.js";
 import { checkAnalysisRateLimit, type RateLimiterPort } from "../runtime/rate-limit.js";
 import type { AnalysisRunner } from "../services/analysis-runner.js";
-import { apiErrorResponse, jsonResponse, serviceResultResponse } from "./responses.js";
+import type { RaidNightRunner } from "../services/raid-night-runner.js";
+import { parseRaidNightRequest } from "../services/raid-night-request.js";
+import { checkAnalysisRateLimitCost } from "../runtime/rate-limit.js";
+import {
+  apiErrorResponse,
+  jsonResponse,
+  raidNightResultResponse,
+  serviceResultResponse,
+} from "./responses.js";
 
 /** Kept in step with package.json manually; there is no JSON import at the edge. */
 const SERVICE_VERSION = "0.1.0";
 
 const HEALTH_PATH = "/health";
 const ANALYSIS_PATH = "/v1/analysis";
+const RAID_NIGHT_PATH = "/v1/raid-night";
 const MCP_PATH = "/mcp";
 
 export interface WorkerDeps {
@@ -35,6 +47,15 @@ export interface WorkerDeps {
    * per-request OAuth token cache.
    */
   readonly analysisRunner: (env: Env) => AnalysisRunner;
+  /**
+   * The one shared raid-night path.
+   *
+   * Same invariant as `analysisRunner`, for the same reason: REST and MCP receive
+   * THIS function, so a difference between their outputs can only come from the
+   * adapters. Built per request from `env` because the production runner binds a
+   * per-request OAuth token cache shared across every step of the night.
+   */
+  readonly raidNightRunner: (env: Env) => RaidNightRunner;
   /**
    * The shared analysis budget.
    *
@@ -77,11 +98,13 @@ export interface WorkerHandler {
 const defaultMcp: WorkerDeps["mcp"] = async (request, env, deps) =>
   await handleMcpRequest(request, env, {
     analyze: deps.analysisRunner(env),
+    analyzeRaidNight: deps.raidNightRunner(env),
     rateLimiter: deps.rateLimiter(env),
   });
 
 const DEFAULT_DEPS: WorkerDeps = {
   analysisRunner: createProductionAnalysisRunner,
+  raidNightRunner: createProductionRaidNightRunner,
   rateLimiter: (env) => env.ANALYSIS_RATE_LIMITER,
   mcp: defaultMcp,
   version: SERVICE_VERSION,
@@ -160,6 +183,71 @@ async function handleAnalysis(request: Request, env: Env, deps: WorkerDeps): Pro
 }
 
 /**
+ * Serves `POST /v1/raid-night`.
+ *
+ * SAME ORDER AS `/v1/analysis`, WITH ONE ADDITION.
+ *
+ *   1. Bearer  — who may spend analysis capacity at all.
+ *   2. Body    — is this even a request.
+ *   3. PARSE   — because the METER depends on it.
+ *   4. Meter   — F units, one per requested fight.
+ *   5. Runner  — the one shared raid-night path.
+ *
+ * STEP 3 IS WHY THIS DIFFERS FROM THE SINGLE-FIGHT ROUTE. A raid night's cost
+ * scales with its fight count, so the limiter cannot charge correctly until the
+ * request has been parsed. Parsing first is therefore not an optimisation — it is
+ * what makes a four-fight request cost four units instead of one, which is the
+ * bypass the shared key exists to close.
+ *
+ * Parsing is done by the SAME function MCP uses, so moving it earlier introduces
+ * no second authority on what a valid request is. An invalid request is refused
+ * here without charging anything: it will spend no Warcraft Logs quota, so
+ * metering it would charge for work that cannot happen.
+ */
+async function handleRaidNight(request: Request, env: Env, deps: WorkerDeps): Promise<Response> {
+  if ((await verifyAnalysisBearer(request, env.ANALYSIS_AUTH_TOKEN)) === "UNAUTHORIZED") {
+    return apiErrorResponse("UNAUTHORIZED", UNAUTHORIZED_MESSAGE, {
+      headers: { "www-authenticate": "Bearer" },
+    });
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return apiErrorResponse("INVALID_REQUEST", "Request body must be valid JSON.");
+  }
+
+  const parsed = parseRaidNightRequest(body);
+  if (!parsed.ok) {
+    return apiErrorResponse("INVALID_REQUEST", "The raid-night request was not valid.", {
+      issues: parsed.issues,
+    });
+  }
+
+  // One unit per requested fight, against the SAME budget and key the
+  // single-fight route charges. A caller cannot buy extra Warcraft Logs capacity
+  // by bundling fights into one call.
+  const decision = await checkAnalysisRateLimitCost(deps.rateLimiter(env), parsed.request.fightIds.length);
+  if (decision === "DENIED") {
+    return apiErrorResponse(
+      "RATE_LIMITED",
+      "Too many analysis requests. Retry later. This limit protects a shared Warcraft Logs API quota. A raid-night request costs one unit per requested fight.",
+    );
+  }
+  if (decision === "UNAVAILABLE") {
+    // Fail closed: an undecided limiter must not become unmetered access to a
+    // paid, finite quota.
+    return apiErrorResponse(
+      "RATE_LIMITER_UNAVAILABLE",
+      "The analysis rate limiter is unavailable, so this request was refused rather than run unmetered. Try again later.",
+    );
+  }
+
+  return raidNightResultResponse(await deps.raidNightRunner(env)(parsed.request));
+}
+
+/**
  * Builds a Worker handler. Dependencies are injected as one plain object, which
  * is what lets a test prove the API delegates rather than computes.
  */
@@ -186,6 +274,13 @@ export function createWorker(deps: WorkerDeps = DEFAULT_DEPS): WorkerHandler {
             return methodNotAllowed("POST");
           }
           return await handleAnalysis(request, env, deps);
+        }
+
+        if (pathname === RAID_NIGHT_PATH) {
+          if (request.method !== "POST") {
+            return methodNotAllowed("POST");
+          }
+          return await handleRaidNight(request, env, deps);
         }
 
         if (pathname === MCP_PATH) {

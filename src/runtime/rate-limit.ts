@@ -21,6 +21,25 @@
  * One analysis spends Warcraft Logs API points from a finite, paid,
  * account-wide quota that no amount of retrying replenishes. The cost is not
  * CPU — it is a shared resource the deployment cannot buy back mid-incident.
+ *
+ * WHAT THIS IS AND IS NOT: A BRAKE, NOT A LEDGER
+ *
+ * Cloudflare's Worker Rate Limiting API is deliberately permissive and
+ * eventually consistent — its counters are local to each Cloudflare location and
+ * make no promise of globally serialized accounting. So nothing in this module
+ * may be described as exact quota accounting, and nothing downstream should be
+ * built on the assumption that N charges means exactly N requests got through
+ * worldwide.
+ *
+ * What IS deterministic is our own behaviour, and that is what the tests pin:
+ *
+ *     we ATTEMPT one call per unit, on the shared key, before execution
+ *     a returned `success: false` denies the request
+ *     a denied request does not reach the runner
+ *     REST and MCP use the same binding, key and call-count policy
+ *
+ * Those are properties of this code. The global effect is best-effort, and
+ * `agent/deployment-smoke.md` records the same caveat for operators.
  */
 
 /**
@@ -93,4 +112,59 @@ export async function checkAnalysisRateLimit(
     // and anything derived from it could reach a client.
     return "UNAVAILABLE";
   }
+}
+
+/**
+ * Charges several units of the SAME analysis budget.
+ *
+ * WHY A RAID NIGHT COSTS MORE THAN ONE UNIT
+ *
+ * The budget exists to bound Warcraft Logs spend, and a four-fight raid night
+ * performs roughly four fights' worth of it. Charging it one unit — the same as a
+ * single-fight analysis — would let a caller get four times the quota by asking
+ * for four fights in one call, which is exactly the bypass one shared key exists
+ * to close.
+ *
+ * So the cost is the canonical fight count: one unit per fight.
+ *
+ * WHY SEQUENTIAL CALLS ON ONE KEY
+ *
+ * Cloudflare's binding takes no numeric cost — `limit()` accepts `{ key }` and
+ * nothing else. Charging N units therefore means N ATTEMPTED calls against the
+ * same key. What the distributed counter does with them is its own business and
+ * is not exact; what this function guarantees is the attempt.
+ *
+ * PARTIAL CHARGES ARE NOT REVERSED, AND THAT IS CORRECT
+ *
+ * If the third of four calls is refused, the first two calls were already made
+ * and the request is denied. There is no rollback, and inventing one would be
+ * worse than the imprecision it tried to fix: a "refund" would have to credit a
+ * shared, eventually-consistent counter, letting a denied caller restore capacity
+ * for everyone. Having made the calls you made is the honest state.
+ *
+ * FAILS CLOSED, like the single-unit check. One `UNAVAILABLE` anywhere in the
+ * sequence refuses the whole request rather than proceeding unmetered.
+ *
+ * The invariant this function offers a caller is therefore precisely: it attempts
+ * `units` charges on the shared key before returning `ALLOWED`, and returns
+ * anything else without attempting the rest. It is NOT a promise about how many
+ * requests any Cloudflare location will ultimately admit.
+ */
+export async function checkAnalysisRateLimitCost(
+  limiter: RateLimiterPort | undefined,
+  units: number,
+): Promise<RateLimitDecision> {
+  if (limiter === undefined) return "UNAVAILABLE";
+  // A non-positive cost would charge nothing and read as permission. No caller
+  // should reach here with one, and silently allowing it is the fail-open case.
+  if (!Number.isSafeInteger(units) || units < 1) return "UNAVAILABLE";
+
+  for (let charged = 0; charged < units; charged += 1) {
+    const decision = await checkAnalysisRateLimit(limiter);
+    if (decision !== "ALLOWED") {
+      // Units already charged stay charged. See above.
+      return decision;
+    }
+  }
+  return "ALLOWED";
 }

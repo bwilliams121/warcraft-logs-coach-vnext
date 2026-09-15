@@ -131,6 +131,19 @@ export function m5d2Fight(): CombatFight {
   return normalizeFixture();
 }
 
+/**
+ * The same real pipeline over caller-supplied raw events.
+ *
+ * Exists for the raid-night orchestration fixture, which needs ONE fight whose
+ * corpus describes SEVERAL actors — that is the only way to prove a single
+ * ingestion serves many analyzed players rather than one. The events are still
+ * normalized by the real normalizer under the real contracts; only which raw
+ * events go in is the caller's choice.
+ */
+export function m5d2FightFrom(events: readonly Record<string, unknown>[]): CombatFight {
+  return normalizeFixture(events);
+}
+
 export function m5d2State(): CombatState {
   return createCombatState(normalizeFixture());
 }

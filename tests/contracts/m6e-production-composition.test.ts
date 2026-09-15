@@ -85,13 +85,22 @@ describe("the production composition root binds the real pieces", () => {
     expect(code).toContain("ingest");
   });
 
-  it("shares one OAuth token cache between preflight and ingestion", () => {
-    // Two caches would mean two token exchanges per analysis, against the same
-    // finite quota the rate limiter exists to protect.
+  it("gives each production runner exactly one shared OAuth token cache", () => {
+    // Two caches WITHIN one runner would mean two token exchanges per request,
+    // against the same finite quota the rate limiter exists to protect. The
+    // single-fight runner shares one across preflight and ingestion; the
+    // raid-night runner shares one across roster discovery, every fight
+    // retrieval and the final revision check.
+    //
+    // Counted per runner factory rather than per file, so adding a third runner
+    // without its own single cache still fails — and so does giving an existing
+    // runner a second one.
     const code = codeOf(composition);
+    const runnerFactories = code.match(/export function createProduction\w+Runner\(/g) ?? [];
+    const caches = code.match(/createTokenCache\(\)/g) ?? [];
 
-    expect(code).toContain("createTokenCache");
-    expect(code.match(/createTokenCache\(\)/g)).toHaveLength(1);
+    expect(runnerFactories).toHaveLength(2);
+    expect(caches).toHaveLength(runnerFactories.length);
   });
 
   it("adds no second GraphQL client, OAuth flow or retry policy", () => {

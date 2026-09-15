@@ -31,8 +31,11 @@
  * judgements, and folding either into this module would make the other wrong.
  */
 
+import type { WclCredentials } from "../config/env.js";
 import { isRecord, readInteger, readRecord } from "./decode.js";
-import type { DecodeOutcome, WclGraphqlClient } from "./graphql-client.js";
+import { createGraphqlClient, type DecodeOutcome, type WclGraphqlClient } from "./graphql-client.js";
+import { createTokenProvider, type TokenCache } from "./token-provider.js";
+import type { FetchLike } from "./types.js";
 
 /**
  * The revision-only read.
@@ -121,4 +124,39 @@ export async function checkReportRevision(
   return outcome.data === expectedRevision
     ? { outcome: "MATCHES", revision: outcome.data }
     : { outcome: "CHANGED", expected: expectedRevision, observed: outcome.data };
+}
+
+/**
+ * Builds a report-revision reader over the real transport.
+ *
+ * The final batch guard needs one cheap query, and it needs the same OAuth token
+ * the rest of the request already minted — so it takes the shared cache like
+ * every other production factory here.
+ *
+ * It returns what the check established and decides nothing. A raid night treats
+ * `UNVERIFIED` as fatal; M3's per-fight recheck does not. Putting that judgement
+ * in the reader would make one of the two callers wrong.
+ */
+export function createReportRevisionReader(deps: {
+  readonly fetch: FetchLike;
+  readonly now?: (() => number) | undefined;
+  readonly tokenCache?: TokenCache | undefined;
+}) {
+  return async (
+    reportCode: string,
+    expectedRevision: number,
+    credentials: WclCredentials,
+  ): Promise<RevisionCheck> => {
+    const tokens = createTokenProvider({
+      credentials,
+      fetch: deps.fetch,
+      now: deps.now ?? Date.now,
+      cache: deps.tokenCache,
+    });
+    return await checkReportRevision(
+      createGraphqlClient({ tokens, fetch: deps.fetch }),
+      reportCode,
+      expectedRevision,
+    );
+  };
 }

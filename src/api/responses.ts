@@ -8,6 +8,8 @@
  */
 
 import { projectAnalysisResult } from "../contracts/analysis-projection.js";
+import { projectRaidNightResult } from "../contracts/raid-night-projection.js";
+import type { RaidNightRunResult } from "../services/raid-night-runner.js";
 import {
   assertNever,
   type AnalysisServiceResult,
@@ -37,6 +39,7 @@ export const API_ERROR_CODES = [
   "REPORT_NOT_ACCESSIBLE",
   "REPORT_ARCHIVED_INACCESSIBLE",
   "REPORT_REVISION_CHANGED",
+  "REPORT_REVISION_UNVERIFIED",
   "FIGHT_NOT_FOUND",
   "SOURCE_NOT_FOUND",
   "SOURCE_NOT_A_PLAYER",
@@ -101,6 +104,11 @@ export function statusForErrorCode(code: ApiErrorCode): number {
     case "CONFIGURATION_ERROR":
     case "UPSTREAM_AUTH_FAILED":
     case "UPSTREAM_UNAVAILABLE":
+    // The report-revision check could not be completed, so report integrity was
+    // never established and the aggregate was refused rather than published on
+    // an assumption. Temporary, and not the caller's fault — so 503 rather than
+    // the 409 a demonstrated revision CHANGE gets.
+    case "REPORT_REVISION_UNVERIFIED":
     // The limiter could not decide, so the expensive path was refused rather
     // than run unmetered. A temporary unavailability, not a caller fault.
     case "RATE_LIMITER_UNAVAILABLE":
@@ -154,4 +162,23 @@ export function serviceResultResponse(result: AnalysisServiceResult): Response {
   }
   const { code, message, issues } = result.error;
   return apiErrorResponse(code, message, issues === undefined ? undefined : { issues });
+}
+
+/**
+ * Renders one raid-night run result.
+ *
+ * SUCCESS IS THE PUBLIC DOCUMENT, UNWRAPPED. The single-fight route returns its
+ * projected result directly, and a raid night gets the same treatment — wrapping
+ * it in an envelope merely because it is an aggregate would give two operations in
+ * the same product two response shapes for no reason a consumer benefits from.
+ *
+ * Every valid domain outcome is 200, including `NO_ANALYZED_CELLS`, a night of
+ * unsupported specializations, and one whose fights partly failed. Those are
+ * complete, truthful answers; returning 5xx for them would teach a client to retry
+ * or discard a correct result.
+ */
+export function raidNightResultResponse(result: RaidNightRunResult): Response {
+  return result.ok
+    ? jsonResponse(200, projectRaidNightResult(result.aggregate))
+    : apiErrorResponse(result.error.code, result.error.message);
 }

@@ -145,11 +145,21 @@ describe("MCP cannot reach gameplay machinery", () => {
     // ok/error). Note what is NOT here: the service's `analyzeFight` itself.
     // MCP receives a runner function from the composition root, so it can reach
     // exactly one analysis path without importing the machinery behind it.
+    //
+    // The raid-night tool needs the same three kinds of thing for the same
+    // reasons: its public contract and projection, its runner TYPE, and the
+    // request parser — which is shared with REST precisely so there is one
+    // authority on what a valid raid-night request is. Still absent:
+    // `analyzeRaidNight` itself.
     const allowedOutside = new Set([
       "src/config/env",
       "src/contracts/analysis-contract",
       "src/contracts/analysis-projection",
+      "src/contracts/raid-night-contract",
+      "src/contracts/raid-night-projection",
       "src/services/analysis-runner",
+      "src/services/raid-night-runner",
+      "src/services/raid-night-request",
       "src/services/result",
       "src/runtime/rate-limit",
       "src/runtime/bearer-auth",
@@ -468,12 +478,16 @@ describe("the application service stays transport-neutral", () => {
 });
 
 describe("the MCP tool surface is exactly one real tool", () => {
-  it("registers one tool, and it is the analysis tool", () => {
+  it("registers exactly the two analysis tools", () => {
+    // M7-F froze the surface at two. The count still matters: a third
+    // registration is the shape a primitive or a probe would arrive in, and a
+    // bare "at least these two" assertion would not notice one.
     const server = sourceOf("src/mcp/server.ts");
     const registrations = [...server.matchAll(/register\w*Tool\w*\(/g)];
 
-    expect(registrations).toHaveLength(1);
+    expect(registrations).toHaveLength(2);
     expect(server).toContain("registerAnalyzeWarcraftLogTool");
+    expect(server).toContain("registerAnalyzeRaidNightTool");
   });
 
   it("no longer carries the M6-A probe", () => {
@@ -493,6 +507,8 @@ describe("the MCP tool surface is exactly one real tool", () => {
     // its own verdict.
     const tools = MCP_FILES.filter((file) => file.startsWith("src/mcp/tools/"));
 
-    expect(tools).toEqual(["src/mcp/tools/analyze-warcraft-log.ts"]);
+    // Exactly the two composed analysis operations. Player-specific focus is a
+    // filter on the raid-night tool, not a third tool.
+    expect(tools).toEqual(["src/mcp/tools/analyze-raid-night.ts", "src/mcp/tools/analyze-warcraft-log.ts"]);
   });
 });

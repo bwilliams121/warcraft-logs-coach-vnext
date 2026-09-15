@@ -277,6 +277,12 @@ describe("the REST route is metered", () => {
     const response = await createWorker({
       analysisRunner: () => run,
       rateLimiter: () => undefined,
+      // Not exercised here. Stubbed fail-closed rather than omitted, so a
+      // single-fight fixture cannot silently reach the raid-night path.
+      raidNightRunner: () => async () => ({
+        ok: false as const,
+        error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+      }),
       mcp: async () => new Response(null, { status: 404 }),
       version: "0.1.0",
     }).fetch(post(D2_REQUEST), MCP_TEST_ENV);

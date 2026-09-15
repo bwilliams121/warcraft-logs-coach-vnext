@@ -103,6 +103,12 @@ function throwingDeps(): WorkerDeps {
       throw new Error(`boom ${SENTINEL_CLIENT_SECRET}`);
     },
     rateLimiter: () => ALLOWING,
+    // Not exercised here. Stubbed fail-closed rather than omitted, so a
+    // single-fight fixture cannot silently reach the raid-night path.
+    raidNightRunner: () => async () => ({
+      ok: false as const,
+      error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+    }),
     mcp: async (request, env, workerDeps) =>
       await handleMcpRequest(request, env, {
         analyze: workerDeps.analysisRunner(env),
@@ -119,6 +125,12 @@ function defaultDeps(preflight: PreflightPort = RESOLVING_PREFLIGHT): WorkerDeps
     rateLimiter: () => ALLOWING,
     // The REAL handler, not a stub. /mcp is a new way for bytes to leave the
     // backend, so the sweep has to actually traverse it.
+    // Not exercised here. Stubbed fail-closed rather than omitted, so a
+    // single-fight fixture cannot silently reach the raid-night path.
+    raidNightRunner: () => async () => ({
+      ok: false as const,
+      error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+    }),
     mcp: async (request, env, workerDeps) =>
       await handleMcpRequest(request, env, {
         analyze: workerDeps.analysisRunner(env),

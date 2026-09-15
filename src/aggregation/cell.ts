@@ -135,12 +135,47 @@ export const NON_ANALYZED_STATUSES = [
  * Why no gameplay analysis exists for a player who WAS in the fight.
  *
  * KEPT APART FROM `NonAnalyzedStatus` ON PURPOSE. Those four are gameplay-domain
- * answers — the analyzer looked and could not conclude. This one is
- * infrastructure: the fight's evidence never arrived, so no analyzer ran at all.
- * Folding them together would let a retrieval outage be read as a statement
- * about a specialization, or about a player.
+ * answers — an analyzer was selected, it looked, and it truthfully concluded
+ * nothing. These are the cases where NO ANALYZER EVER RAN, so there is no
+ * gameplay judgement of any kind to report. Folding them together would let
+ * "nothing was attempted" be read as a statement about a specialization, or about
+ * a player.
+ *
+ * NOT AN INFRASTRUCTURE-ONLY CATEGORY. It was, when `FIGHT_INGESTION_FAILED` was
+ * the only member, and describing it that way is now wrong:
+ * `SPECIALIZATION_UNRESOLVED` is missing upstream IDENTITY data, not an outage.
+ * What the two share is narrower and is the actual definition —
+ *
+ *     participation is known, and analysis could not be performed anyway,
+ *     because a precondition for selecting an analyzer was never met.
+ *
+ * Whatever the reason, the guarantees are identical and structural: no gameplay
+ * counts, no fabricated UNKNOWN decisions, and never a statement about how the
+ * player performed.
  */
-export type AnalysisUnavailableReason = "FIGHT_INGESTION_FAILED";
+export type AnalysisUnavailableReason =
+  /**
+   * The required fight evidence could not be obtained.
+   *
+   * A retrieval failure, and the only member of this union that is one.
+   */
+  | "FIGHT_INGESTION_FAILED"
+  /**
+   * Warcraft Logs supplied no usable specialization for this participant.
+   *
+   * ADDED IN M7-F. NOT A GAMEPLAY STATUS, AND NOT AN OUTAGE EITHER. M7-C
+   * preserves an unusable `friendlySpecs` entry as `specName: null` rather than
+   * guessing, and a raid night must produce a cell for that player anyway.
+   * Participation is known; what is missing is a usable specialization identity,
+   * so no analyzer could truthfully be selected.
+   *
+   * `SPEC_NOT_SUPPORTED` would be the lie to avoid: it asserts we identified a
+   * specialization and have no analyzer for it. Here we never identified one, so
+   * whether an analyzer exists is a question that was never reached. This states
+   * the actual fact — the specialization could not be resolved — and leaves
+   * coverage to say so.
+   */
+  | "SPECIALIZATION_UNRESOLVED";
 
 /**
  * The canonical list.
@@ -150,6 +185,7 @@ export type AnalysisUnavailableReason = "FIGHT_INGESTION_FAILED";
  */
 export const ANALYSIS_UNAVAILABLE_REASONS = [
   "FIGHT_INGESTION_FAILED",
+  "SPECIALIZATION_UNRESOLVED",
 ] as const satisfies readonly AnalysisUnavailableReason[];
 
 /**
@@ -199,7 +235,11 @@ export type PlayerFightResult =
       /** The author-written explanation the analysis produced. */
       readonly detail: string;
     } & CellIdentity)
-  /** Present; the fight's evidence never arrived, so nothing was attempted. */
+  /**
+   * Present, participation known, and no analyzer ran — see
+   * `AnalysisUnavailableReason` for the two ways that happens. Carries no counts
+   * and no decisions, because none were ever produced.
+   */
   | ({
       readonly kind: "ANALYSIS_UNAVAILABLE";
       /** M7-C's per-fight fact. `null` when Warcraft Logs supplied none. */

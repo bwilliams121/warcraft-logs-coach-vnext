@@ -190,6 +190,12 @@ describe("inbound bearer authorization fails closed", () => {
         throw new Error("the analysis runner must not run for an unauthorized MCP request");
       },
       rateLimiter: () => ({ limit: async () => ({ success: true }) }),
+      // Not exercised here. Stubbed fail-closed rather than omitted, so a
+      // single-fight fixture cannot silently reach the raid-night path.
+      raidNightRunner: () => async () => ({
+        ok: false as const,
+        error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+      }),
       mcp: async (request, env, workerDeps) =>
         await handleMcpRequest(request, env, {
           analyze: workerDeps.analysisRunner(env),
@@ -217,6 +223,12 @@ describe("inbound bearer authorization fails closed", () => {
         throw new Error("the analysis runner must not run for an unauthorized MCP request");
       },
       rateLimiter: () => ({ limit: async () => ({ success: true }) }),
+      // Not exercised here. Stubbed fail-closed rather than omitted, so a
+      // single-fight fixture cannot silently reach the raid-night path.
+      raidNightRunner: () => async () => ({
+        ok: false as const,
+        error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+      }),
       mcp: async (request, env, workerDeps) =>
         await handleMcpRequest(request, env, {
           analyze: workerDeps.analysisRunner(env),
@@ -311,12 +323,14 @@ describe("Host and Origin validation", () => {
   });
 });
 
-describe("tools/list exposes exactly the real analysis tool", () => {
-  it("lists analyze_warcraft_log and nothing else", async () => {
+describe("tools/list exposes exactly the real analysis tools", () => {
+  it("lists exactly the two analysis tools", async () => {
     const result = resultOf(await rpcPayload(await callSelf(modern("tools/list"))));
     const tools = result["tools"] as readonly { readonly name: string }[];
 
-    expect(tools.map((tool) => tool.name)).toEqual([ANALYZE_TOOL_NAME]);
+    // Sorted: MCP makes no ordering promise for `tools/list`, so pinning
+    // registration order would assert something the protocol does not guarantee.
+    expect(tools.map((tool) => tool.name).sort()).toEqual(["analyze_raid_night", ANALYZE_TOOL_NAME].sort());
   });
 
   it("exposes no probe or primitive tool", async () => {
@@ -326,7 +340,7 @@ describe("tools/list exposes exactly the real analysis tool", () => {
     const result = resultOf(await rpcPayload(await callSelf(modern("tools/list"))));
     const names = (result["tools"] as readonly { readonly name: string }[]).map((tool) => tool.name);
 
-    expect(names).toHaveLength(1);
+    expect(names).toHaveLength(2);
     for (const banned of ["ping", "aura", "resource", "apl", "simc", "combat_state", "debug"]) {
       expect(names).not.toContain(banned);
     }
@@ -444,7 +458,7 @@ describe("both protocol eras are served", () => {
     expect(structured["status"]).toBe("ANALYZED");
   });
 
-  it("gives both eras the same tool", async () => {
+  it("gives both eras the same tools", async () => {
     // One factory serves both. A surface that differed by era would mean two
     // definitions, which is the duplication M6 exists to avoid.
     const modernTools = (
@@ -459,7 +473,7 @@ describe("both protocol eras are served", () => {
     ).map((tool) => tool.name);
 
     expect(modernTools).toEqual(legacyTools);
-    expect(modernTools).toEqual([ANALYZE_TOOL_NAME]);
+    expect([...modernTools].sort()).toEqual(["analyze_raid_night", ANALYZE_TOOL_NAME].sort());
   });
 
   it("requires no session for a legacy analysis call", async () => {
@@ -575,6 +589,12 @@ describe("the existing routes are untouched", () => {
     const worker = createWorker({
       analysisRunner: () => fixtureAnalysisRunner(),
       rateLimiter: () => ALLOWING_LIMITER,
+      // Not exercised here. Stubbed fail-closed rather than omitted, so a
+      // single-fight fixture cannot silently reach the raid-night path.
+      raidNightRunner: () => async () => ({
+        ok: false as const,
+        error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+      }),
       mcp: async (request, env, workerDeps) =>
         await handleMcpRequest(request, env, {
           analyze: workerDeps.analysisRunner(env),

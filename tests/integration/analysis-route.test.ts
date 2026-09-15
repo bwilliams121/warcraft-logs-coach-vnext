@@ -85,6 +85,12 @@ function worker(deps: Partial<WorkerDeps> = {}) {
       ((env) => async (input) =>
         await analyzeFight(input, { env, preflight: RESOLVING_PREFLIGHT, ingest: FAILING_INGEST })),
     rateLimiter: deps.rateLimiter ?? (() => ALLOWING_LIMITER),
+    // Not exercised here. Stubbed fail-closed rather than omitted, so a
+    // single-fight fixture cannot silently reach the raid-night path.
+    raidNightRunner: () => async () => ({
+      ok: false as const,
+      error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+    }),
     mcp: deps.mcp ?? UNREACHABLE_MCP,
     version: deps.version ?? "0.1.0",
   });

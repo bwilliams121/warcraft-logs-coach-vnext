@@ -263,13 +263,17 @@ export function absentCell(options: {
 }
 
 /**
- * The cell for a player who WAS in a pull whose evidence never arrived.
+ * The cell for a present player no analyzer ran for.
+ *
+ * Covers BOTH reasons, which are different kinds of fact: the fight's evidence
+ * could not be obtained, or no usable specialization identity was available. The
+ * caller supplies which; this function never decides.
  *
  * Distinct from ABSENT — they were there — and distinct from every gameplay
  * status, because no analyzer ran. It carries no counts and, in particular, no
  * UNKNOWN decisions: UNKNOWN is a real M5 outcome meaning the authority could
- * not prove a specific comparison, and manufacturing one per cast to represent
- * a retrieval failure would put an infrastructure problem into the gameplay
+ * not prove a specific comparison, and manufacturing one per cast to represent an
+ * analysis that never happened would put a non-gameplay problem into the gameplay
  * vocabulary.
  */
 export function analysisUnavailableCell(options: {

@@ -57,6 +57,12 @@ function workerWith(preflight: PreflightPort): WorkerDeps {
     rateLimiter: () => ({ limit: async () => ({ success: true }) }),
     // Every probe here posts to /v1/analysis. Reaching MCP would mean the
     // router sent an analysis request somewhere it does not belong.
+    // Not exercised here. Stubbed fail-closed rather than omitted, so a
+    // single-fight fixture cannot silently reach the raid-night path.
+    raidNightRunner: () => async () => ({
+      ok: false as const,
+      error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+    }),
     mcp: () => {
       throw new Error("the analysis route must not dispatch to MCP");
     },

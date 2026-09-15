@@ -19,6 +19,17 @@
  * Node's JIT. A Workers isolate has different memory accounting, a different CPU
  * budget and different limits, and nothing here establishes any of them.
  *
+ * For reference, the platform documents (September 2026):
+ *
+ *     memory per isolate            128 MB
+ *     Workers Paid CPU, default     30 seconds
+ *     Workers Paid CPU, max         5 minutes (configurable)
+ *
+ * `wrangler.jsonc` requests no CPU override, so the default applies. Those are
+ * PLATFORM numbers sitting beside a NODE measurement; comparing them directly
+ * would be the error this comment exists to prevent. A heap delta measured here
+ * does not prove anything fits there.
+ *
  * Treat the output as an ORDER OF MAGNITUDE and a SHAPE — specifically, whether
  * the twentieth state costs roughly what the first did, or dramatically more.
  *
@@ -28,7 +39,11 @@
  * team to ignore it. `npm test` includes only `tests/`; this file has its own
  * offline config and runs only when someone asks:
  *
- *     npm run probe
+ *     npx vitest run --config scripts/bench/vitest.config.ts
+ *
+ * NOT `npm run probe`, which is the credential-loading Warcraft Logs config and
+ * spends real API points. An earlier draft of this comment named that command by
+ * mistake, which is precisely the accident the split config exists to prevent.
  *
  * It makes no network request, reads no credential, and needs no Warcraft Logs
  * access — unlike its neighbour, which does all three.

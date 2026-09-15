@@ -299,7 +299,7 @@ describe("cells stay discriminated on the wire", () => {
     expect(cell).not.toHaveProperty("analysisRef");
   });
 
-  it("publishes ANALYSIS_UNAVAILABLE with its infrastructure reason and nothing else", () => {
+  it("publishes ANALYSIS_UNAVAILABLE for a failed pull with its reason and nothing else", () => {
     const cell = cellFor(MIXED, 2, ROGUE);
     expect(cell.kind).toBe("ANALYSIS_UNAVAILABLE");
     if (cell.kind !== "ANALYSIS_UNAVAILABLE") return;
@@ -313,6 +313,60 @@ describe("cells stay discriminated on the wire", () => {
     // And never mapped onto a gameplay word.
     expect(JSON.stringify(cell)).not.toContain("UNKNOWN");
     expect(JSON.stringify(cell)).not.toContain("INSUFFICIENT_EVIDENCE");
+  });
+
+  it("publishes ANALYSIS_UNAVAILABLE for an unresolved specialization the same way", () => {
+    // THE POINT OF THIS TEST. The two reasons are different kinds of fact — one
+    // is a retrieval failure, the other is missing upstream identity — and the
+    // cell kind is deliberately NOT infrastructure-only. What must be identical
+    // is the STRUCTURE: whichever reason applies, no analyzer ran, so there is
+    // nothing to say about gameplay.
+    const result = projectRaidNightResult(
+      aggregateOf({
+        players: [rosterPlayerFor({ sourceId: ROGUE })],
+        fights: [rosterFightFor({ fightId: 1, participants: [{ sourceId: ROGUE, specName: null }] })],
+        cells: [unavailable(1, ROGUE, null, "SPECIALIZATION_UNRESOLVED")],
+      }),
+    );
+
+    const cell = cellFor(result, 1, ROGUE);
+    expect(cell.kind).toBe("ANALYSIS_UNAVAILABLE");
+    if (cell.kind !== "ANALYSIS_UNAVAILABLE") return;
+
+    expect(cell.reason).toBe("SPECIALIZATION_UNRESOLVED");
+    // Null, faithfully. A specialization that was never identified must not be
+    // invented here, and must not become SPEC_NOT_SUPPORTED — that would assert
+    // we knew what they played and lacked an analyzer for it.
+    expect(cell.specName).toBeNull();
+    expect(cell).not.toHaveProperty("counts");
+    expect(cell).not.toHaveProperty("provenance");
+    expect(cell).not.toHaveProperty("status");
+    expect(cell).not.toHaveProperty("analysisRef");
+    expect(JSON.stringify(cell)).not.toContain("UNKNOWN");
+    expect(JSON.stringify(cell)).not.toContain("SPEC_NOT_SUPPORTED");
+  });
+
+  it("contributes no gameplay counts for an unresolved specialization", () => {
+    const result = projectRaidNightResult(
+      aggregateOf({
+        players: [rosterPlayerFor({ sourceId: ROGUE })],
+        fights: [rosterFightFor({ fightId: 1, participants: [{ sourceId: ROGUE, specName: null }] })],
+        cells: [unavailable(1, ROGUE, null, "SPECIALIZATION_UNRESOLVED")],
+      }),
+    );
+
+    // Counted as what it is, and as nothing else. In particular it does not
+    // become a SPEC_NOT_SUPPORTED coverage number, and it adds no denominator a
+    // reader could compute a rate against.
+    expect(result.coverage.cellsAnalysisUnavailable).toBe(1);
+    expect(result.coverage.cellsSpecNotSupported).toBe(0);
+    expect(result.coverage.cellsAbsent).toBe(0);
+    expect(result.coverage.cellsAnalyzed).toBe(0);
+    expect(result.coverage.eligibleDecisionsTotal).toBe(0);
+    expect(result.coverage.unknownTotal).toBe(0);
+    expect(result.coverage.matchTotal).toBe(0);
+    expect(result.coverage.rejectedTotal).toBe(0);
+    expect(result.status).toBe("NO_ANALYZED_CELLS");
   });
 });
 

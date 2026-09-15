@@ -75,6 +75,18 @@ export type ServiceErrorCode =
    * data cannot be trusted when in fact a later attempt is expected to succeed.
    */
   | "REPORT_REVISION_CHANGED"
+  /**
+   * The report revision could not be confirmed.
+   *
+   * NOT a softer `REPORT_REVISION_CHANGED`. That one means the report demonstrably
+   * moved; this means the check itself could not be completed, so nothing was
+   * established. Accepting a raid night on "probably unchanged" is precisely how
+   * a mixed-revision aggregate gets built, so the two stay apart.
+   *
+   * Reachable only from the raid-night path: a single-fight analysis is pinned by
+   * M3's own recheck and never needs a separate confirmation.
+   */
+  | "REPORT_REVISION_UNVERIFIED"
   | "FIGHT_NOT_FOUND"
   | "SOURCE_NOT_FOUND"
   | "SOURCE_NOT_A_PLAYER"
@@ -92,6 +104,7 @@ export const SERVICE_ERROR_CODES = [
   "REPORT_NOT_ACCESSIBLE",
   "REPORT_ARCHIVED_INACCESSIBLE",
   "REPORT_REVISION_CHANGED",
+  "REPORT_REVISION_UNVERIFIED",
   "FIGHT_NOT_FOUND",
   "SOURCE_NOT_FOUND",
   "SOURCE_NOT_A_PLAYER",
@@ -118,7 +131,11 @@ export type RequestIssueCode =
   | "INVALID_FIGHT_ID"
   | "UNSUPPORTED_FIGHT_SELECTOR"
   | "MISSING_SOURCE_ID"
-  | "INVALID_SOURCE_ID";
+  | "INVALID_SOURCE_ID"
+  /** A list field was not an array, or held a value no id could be. */
+  | "INVALID_REQUEST_SHAPE"
+  /** A bounded request field exceeded its documented maximum. */
+  | "REQUEST_LIMIT_EXCEEDED";
 
 export interface RequestIssue {
   readonly code: RequestIssueCode;

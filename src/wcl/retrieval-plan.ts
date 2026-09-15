@@ -85,10 +85,21 @@ export const EVENT_PAGE_LIMIT = 5000;
  * Hitting any of them produces PARTIAL completeness with reason
  * SAFETY_LIMIT_REACHED, and can never produce COMPLETE.
  *
- * MAX_PAGES is sized against the Cloudflare Workers PAID subrequest allowance
- * of 1000 per request, which this deployment is on; 200 pages plus the token
- * request leaves ample headroom. At EVENT_PAGE_LIMIT that is up to a million
- * events, comfortably above a large mythic pull.
+ * MAX_PAGES was sized against a 1000-subrequest working budget, and 200 pages
+ * plus the token request sits well inside it. At EVENT_PAGE_LIMIT that is up to a
+ * million events, comfortably above a large mythic pull.
+ *
+ * THE 1000 IS OURS, NOT CLOUDFLARE'S. An earlier revision of this comment called
+ * it the current paid platform allowance; that is stale. Cloudflare Workers Paid
+ * currently documents 10,000 subrequests per invocation, and M7 keeps the
+ * stricter 1000 deliberately — see `RAID_NIGHT_SUBREQUEST_SAFETY_BUDGET` in
+ * `src/services/raid-night-request.ts`, which records the reasoning and is what
+ * the raid-night fight cap is derived from.
+ *
+ * This is a comment correction only. `MAX_PAGES` and every retrieval, pagination
+ * and completeness semantic below are unchanged: the ceiling is still a guardrail
+ * against an unbounded loop, still produces PARTIAL with SAFETY_LIMIT_REACHED,
+ * and still never produces COMPLETE.
  *
  * MAX_ELAPSED_MS bounds wall clock so a slow upstream degrades into honest
  * PARTIAL evidence rather than a Worker timeout that yields nothing at all.

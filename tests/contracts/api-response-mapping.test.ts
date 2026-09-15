@@ -55,6 +55,7 @@ describe("api response mapping contract", () => {
       // The report changed under us. A conflict between two versions of one
       // resource, and the only retrieval failure a caller should simply retry.
       REPORT_REVISION_CHANGED: 409,
+      REPORT_REVISION_UNVERIFIED: 503,
       // The report exists and is understood; its events are out of reach.
       REPORT_ARCHIVED_INACCESSIBLE: 422,
       SOURCE_NOT_A_PLAYER: 422,
