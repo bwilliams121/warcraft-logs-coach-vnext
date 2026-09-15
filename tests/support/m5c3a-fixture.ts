@@ -52,18 +52,13 @@
  * as the M5-A and M5-C2 fixtures: a re-slice renumbers everything.
  */
 
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
 import { createCombatState, type CombatState } from "../../src/engine/state/combat-state.js";
-import type { EvidenceCategory } from "../../src/wcl/evidence-capability.js";
-import { syntheticFight } from "./synthetic-fight.js";
-import fixture from "../fixtures/wcl/events/wcl-assassination-garrote-dot-remains.json";
+import { committedEventArray } from "./corpus/artifacts.js";
+import { corpusFight } from "./corpus/fight.js";
+
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const fixture = committedEventArray("wcl-assassination-garrote-dot-remains");
 
 export const M5C3A_FIXTURE_PROVENANCE = {
   reportCode: "A7R6kxPJ1hC8YQ4w",
@@ -116,33 +111,19 @@ export const M5C3A_EVENTS = {
 export const M5C3A_EXPECTED_REMAINS_MS = 5_746;
 export const M5C3A_EXPECTED_REMAINS_SECONDS = 5.746;
 
-const WINDOW_START = 2_004_589;
-const WINDOW_END = 2_176_581;
-
 export const M5C3A_RAW_EVENTS = fixture as unknown as readonly Record<string, unknown>[];
 
+/**
+ * The fight, through the shared corpus coverage interpreter.
+ *
+ * The artifact's recorded predicate — every aura event targeting 19 or 21 in
+ * [2,164,325 .. 2,176,581], order preserved — grants AURAS coverage for those
+ * two targets and nothing else. Only two of actor 19's casts were kept, so
+ * CASTS is deliberately NOT granted: a cooldown anchor query on this slice is
+ * UNKNOWN / INSUFFICIENT_COVERAGE, and the C3c1 slice exists to answer it.
+ */
 function normalizeFixture(): CombatFight {
-  const normalizer = createNormalizer({
-    fightStartTimeMs: WINDOW_START,
-    requestedRange: inclusiveRange(WINDOW_START, WINDOW_END),
-    contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-    directionFields: VERIFIED_DIRECTION_FIELDS,
-  });
-  normalizer.accept({
-    streamId: "all",
-    pageOrdinal: 0,
-    requestedStartTimeMs: WINDOW_START,
-    nextPageTimestamp: null,
-    events: fixture as Record<string, unknown>[],
-  });
-  const normalized = normalizer.finish();
-
-  return syntheticFight({
-    observedCategories: ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO"] as readonly EvidenceCategory[],
-    events: normalized.events,
-    startTimeMs: WINDOW_START,
-    endTimeMs: WINDOW_END,
-  });
+  return corpusFight("wcl-assassination-garrote-dot-remains");
 }
 
 export function m5c3aFight(): CombatFight {

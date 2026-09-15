@@ -86,7 +86,14 @@ export function corpusCore(
   participants: readonly number[],
   eventActorIds: readonly number[],
 ): NormalizedFightCore {
-  const fixture = m5d2FightFrom(fannedRawEvents(eventActorIds));
+  // The fan-out is a TEST PREMISE, and the corpus interpreter applies it to the
+  // D2 grants: every grant that vouches for actor 19 vouches for each clone,
+  // because a clone set is complete exactly where the original's events are.
+  const fixture = m5d2FightFrom(fannedRawEvents(eventActorIds), {
+    kind: "FANNED_ACTORS",
+    sourceActorId: M5D2_ACTOR,
+    actorIds: eventActorIds,
+  });
   const enemies = [21, 22];
   const actors = new Map(
     [...participants, ...enemies].map((actorId) => {

@@ -76,7 +76,7 @@ export type ResourceObservationTiming =
    *
    * Established for `gameVersion` 1 / `logVersion` 17 from live captures, and
    * used for exactly one case: a COMPLETED cast whose entry carries a positive
-   * `cost`. Evidence: `tests/fixtures/wcl/events/wcl-cast-resource-pre-cost.json`.
+   * `cost`. Evidence: corpus artifact `wcl-cast-resource-pre-cost` (tests/corpus/manifest.json).
    */
   | "PRE_COST"
   /**

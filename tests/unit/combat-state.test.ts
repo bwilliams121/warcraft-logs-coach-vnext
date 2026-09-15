@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import { createCombatState } from "../../src/engine/state/combat-state.js";
 import {
   afterEvent,
@@ -21,7 +14,7 @@ import {
   syntheticFight,
   unsupportedEvent,
 } from "../support/synthetic-fight.js";
-import pullWindowFixture from "../fixtures/wcl/events/wcl-pull-window-with-resources.json";
+import { corpusState } from "../support/corpus/fight.js";
 
 const PLAYER = 5;
 const BOSS = 160;
@@ -601,31 +594,10 @@ describe("last observed cast respects the temporal position", () => {
 // --------------------------------------------------------------------------
 
 describe("indexes built over a committed capture", () => {
-  const CAPTURE_START = 7_381_097;
-  const CAPTURE_END = 7_383_000;
-
   function stateFromCapture() {
-    const normalizer = createNormalizer({
-      fightStartTimeMs: CAPTURE_START,
-      requestedRange: inclusiveRange(CAPTURE_START, CAPTURE_END),
-      contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-      directionFields: VERIFIED_DIRECTION_FIELDS,
-    });
-    normalizer.accept({
-      streamId: "all",
-      pageOrdinal: 0,
-      requestedStartTimeMs: CAPTURE_START,
-      nextPageTimestamp: null,
-      events: pullWindowFixture as Record<string, unknown>[],
-    });
-    const normalized = normalizer.finish();
-    return createCombatState(
-      syntheticFight({
-        events: normalized.events,
-        startTimeMs: CAPTURE_START,
-        endTimeMs: CAPTURE_END,
-      }),
-    );
+    // Through the shared corpus coverage interpreter: the artifact retains no
+    // coverage grant, so nothing below may rest on an absence or a carry-forward.
+    return corpusState("wcl-pull-window-with-resources");
   }
 
   const state = stateFromCapture();

@@ -33,6 +33,14 @@
  * pinning — that the raid-night-shaped composition, assembled from the pieces
  * M7-C will assemble them from, produces every field the single-fight service
  * produces.
+ *
+ * EVIDENCE PREMISE. Both paths ingest the D2 corpus artifact through a FAKE
+ * Warcraft Logs transport that serves its 1,083 events as one terminal page of
+ * a fabricated report context. The completeness the real ingestor derives from
+ * that page is a property of the fake transport, not of the capture: it is a
+ * test premise shared by both sides, never a claim about what the artifact
+ * retains. The artifact's own coverage lives in tests/corpus/manifest.json and
+ * is what `m5d2Fight()` applies.
  */
 
 import { describe, expect, it } from "vitest";

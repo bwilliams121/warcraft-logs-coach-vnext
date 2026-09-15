@@ -66,3 +66,30 @@ can spend Warcraft Logs points.
 
 This is not an invitation to redesign the test runner, the two-project split, or
 the Miniflare bindings while doing it.
+
+---
+
+## M9-C: corpus follow-through
+
+**Raised:** M9-B closeout (2026-09-15). **Do in:** M9-C.
+
+- Wire `tests/regression/m9b-corpus-gate.test.ts` behind a dedicated CI
+  command and decide runtime/sharding. Until then the gate runs inside
+  `npm test`.
+- Deliberate-defect proof at the CI level: `m9b-corpus-failure-demonstration`
+  proves wrong EXPECTATIONS fail; M9-C proves a wrong IMPLEMENTATION fails
+  the gate.
+- `tests/fixtures/wcl/preflight-payloads.ts` (synthetic TypeScript) is the
+  only evidence outside the corpus contract. Decide whether preflight payloads
+  become corpus artifact kinds or stay as typed fixtures with a pointer.
+- `tests/support/raid-night-orchestration-fixture.ts` normalizes the D2
+  artifact under its own window and fans it per participant; the raid-night
+  and encounter-context parity executors therefore accept only the D2
+  artifact and say so. Generalising them needs the fixture to take the
+  artifact's window from the corpus rather than its own constants.
+- (Resolved in the M9-B correction pass, not M9-C work.) Every M5 support
+  harness now builds its fight through the shared corpus interpreter; there is
+  one coverage policy for captured evidence, and a guard enforces it.
+- Every evidence gap in `tests/support/corpus/report.ts`
+  (`KNOWN_EVIDENCE_GAPS`) names the capture that would close it. None is
+  closable offline.

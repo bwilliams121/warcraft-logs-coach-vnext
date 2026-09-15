@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import { RESOURCE_OBSERVATION_TIMINGS } from "../../src/engine/resources/resource-observations.js";
 import { createCombatState } from "../../src/engine/state/combat-state.js";
 import { afterEvent } from "../../src/engine/state/temporal.js";
@@ -17,7 +10,7 @@ import {
   resourceChangeEvent,
   syntheticFight,
 } from "../support/synthetic-fight.js";
-import preCostFixture from "../fixtures/wcl/events/wcl-cast-resource-pre-cost.json";
+import { corpusState, normalizationFactsOf } from "../support/corpus/fight.js";
 
 /**
  * EVIDENCE CONTRACT B — a costed CAST's attached `classResources[].amount`.
@@ -50,9 +43,6 @@ import preCostFixture from "../fixtures/wcl/events/wcl-cast-resource-pre-cost.js
  * ingestion layer does not guarantee.
  */
 
-const WINDOW_START = 2_174_394;
-const WINDOW_END = 2_194_394;
-
 const CAPPED_DISCRETE = 4;
 const ENERGY = 3;
 const SOUL_SHARDS = 7;
@@ -63,28 +53,10 @@ const FINISHER = 32_645;
 const COSTED_CAST = 703;
 const MELEE = 1;
 
-const normalizer = createNormalizer({
-  fightStartTimeMs: WINDOW_START,
-  requestedRange: inclusiveRange(WINDOW_START, WINDOW_END),
-  contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-  directionFields: VERIFIED_DIRECTION_FIELDS,
-});
-normalizer.accept({
-  streamId: "all",
-  pageOrdinal: 0,
-  requestedStartTimeMs: WINDOW_START,
-  nextPageTimestamp: null,
-  events: preCostFixture as Record<string, unknown>[],
-});
-const normalized = normalizer.finish();
-const state = createCombatState(
-  syntheticFight({
-    observedCategories: ["RESOURCES", "CASTS"],
-    events: normalized.events,
-    startTimeMs: WINDOW_START,
-    endTimeMs: WINDOW_END,
-  }),
-);
+// Through the shared corpus coverage interpreter: the artifact retains no
+// coverage grant, so nothing below may rest on an absence or a carry-forward.
+const normalized = normalizationFactsOf("wcl-cast-resource-pre-cost");
+const state = corpusState("wcl-cast-resource-pre-cost");
 
 /** The canonical position of the fixture's cast of one ability. */
 function positionOf(abilityGameId: number): number {
@@ -95,10 +67,10 @@ function positionOf(abilityGameId: number): number {
 
 describe("the fixture carries the evidence the contract rests on", () => {
   it("normalizes every fixture event without a malformed family", () => {
-    expect(normalized.events.length).toBe(preCostFixture.length);
-    expect(normalized.events.some((event) => event.kind === "MALFORMED_FAMILY")).toBe(false);
-    expect(normalized.malformedObservations.length).toBe(0);
-    expect(normalized.malformedEnvelopeCount).toBe(0);
+    expect(normalized.normalizedEventCount).toBe(normalized.rawEventCount);
+    expect(normalized.malformedFamilyEvents).toBe(0);
+    expect(normalized.malformedObservations).toBe(0);
+    expect(normalized.malformedEnvelopes).toBe(0);
   });
 
   it("holds a capped discrete resource spent in full", () => {

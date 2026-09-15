@@ -12,14 +12,18 @@ import {
   STEALTHED_ROGUE_CONTRIBUTORS,
   STEALTHED_ROGUE_EXCLUSIONS,
 } from "../../src/specs/rogue/assassination/stealth-state.js";
+import type { CombatState } from "../../src/engine/state/combat-state.js";
 import {
   M5C2_ACTOR,
   M5C2_EVENTS,
   M5C2_IDS,
   findCastAt,
   m5c2State,
+  m5c2StateWithRetainedCoverage,
   observedTalentEntries,
 } from "../support/m5c2-fixture.js";
+import { auraEvent, castEvent, syntheticFight } from "../support/synthetic-fight.js";
+import { createCombatState } from "../../src/engine/state/combat-state.js";
 
 /**
  * M5-C2's headline, on the real Vanish #2 -> Garrote sequence.
@@ -27,7 +31,8 @@ import {
  * THE TWO CAPABILITIES, AND WHY THEY ARE TESTED TOGETHER
  *
  *   1. `stealthed.rogue` is PROVEN TRUE at the post-Vanish decision point, from
- *      M4's existing aura facts and no invented duration.
+ *      M4's existing aura facts and no invented duration — WHERE THE EVIDENCE
+ *      RETAINS THE COVERAGE THAT CARRY-FORWARD NEEDS.
  *   2. The pinned `default[4]` Ambush gate resolves FALSE there anyway, from the
  *      player's real talents.
  *
@@ -38,24 +43,84 @@ import {
  * A build without Improved Ambush does not want Ambush however stealthed it is,
  * and the FALSE is reached through ordinary Kleene AND on talent operands rather
  * than through any rule written about Ambush.
+ *
+ * THREE EVIDENCE BASES, KEPT APART
+ *
+ *   THE CAPTURE      `wcl-assassination-vanish-ambush-gate`: five real events
+ *                    whose probe never recorded a predicate, so the corpus
+ *                    retains NO coverage for it. On this artifact carrying the
+ *                    Vanish application forward 460 ms to the Garrote cast is
+ *                    UNKNOWN / INSUFFICIENT_COVERAGE, and that is what the
+ *                    capture-backed regression pins. Nothing here declares
+ *                    coverage the capture does not have.
+ *
+ *   THE WIDER SLICE  `wcl-assassination-kingsbane-cooldown` holds the same real
+ *                    events under a recorded predicate that retains AURAS
+ *                    coverage for target 19. There, and only there, the
+ *                    proven-TRUE claim is capture-backed.
+ *
+ *   THE PREMISE      a synthetic Vanish -> Garrote sequence with complete
+ *                    coverage BY CONSTRUCTION, for the carry-forward rule
+ *                    itself. Explicitly not the capture, and never attributed
+ *                    to it.
  */
 
 const state = m5c2State();
+const retained = m5c2StateWithRetainedCoverage();
 const loaded = pinnedAssassinationAuthority();
 
 const vanishPosition = findCastAt(state, M5C2_EVENTS.vanishCast);
 const garrotePosition = findCastAt(state, M5C2_EVENTS.garroteCast);
+const retainedGarrotePosition = findCastAt(retained, M5C2_EVENTS.garroteCast);
 const talentEntries = observedTalentEntries(state);
 
-function gateAt(position: number) {
+function gateAt(position: number, on: CombatState = state) {
   if (!loaded.ok) throw new Error("the pinned authority must load");
   return evaluateDefaultAmbushGate({
-    state,
+    state: on,
     authority: loaded.authority,
     actorId: M5C2_ACTOR,
     position,
     observedTalentEntries: talentEntries,
   });
+}
+
+/**
+ * THE PREMISE. Vanish buff applied at 1,000, Garrote cast at 1,460, the buff
+ * removed on the same millisecond AFTER the cast — the captured shape, rebuilt
+ * from synthetic events over a synthetic fight whose AURAS coverage is COMPLETE
+ * by construction. That completeness is a test premise, not evidence.
+ */
+function premiseState(): CombatState {
+  const events = [
+    auraEvent({
+      ordinal: 0,
+      reportTimeMs: 1000,
+      operation: "APPLIED",
+      auraClass: "BUFF",
+      sourceActorId: M5C2_ACTOR,
+      targetActorId: M5C2_ACTOR,
+      abilityGameId: M5C2_IDS.vanishBuff,
+    }),
+    castEvent({
+      ordinal: 1,
+      reportTimeMs: 1460,
+      castPhase: "COMPLETE",
+      sourceActorId: M5C2_ACTOR,
+      targetActorId: 21,
+      abilityGameId: M5C2_IDS.garrote,
+    }),
+    auraEvent({
+      ordinal: 2,
+      reportTimeMs: 1460,
+      operation: "REMOVED",
+      auraClass: "BUFF",
+      sourceActorId: M5C2_ACTOR,
+      targetActorId: M5C2_ACTOR,
+      abilityGameId: M5C2_IDS.vanishBuff,
+    }),
+  ];
+  return createCombatState(syntheticFight({ observedCategories: ["AURAS", "CASTS"], events }));
 }
 
 describe("Vanish and Garrote are two decision points, not one", () => {
@@ -98,23 +163,24 @@ describe("the Vanish ACTION and the Vanish BUFF are different identities", () =>
   });
 });
 
-describe("stealthed.rogue is PROVEN TRUE at the post-Vanish decision point", () => {
-  it("resolves TRUE, anchored on the observed Vanish application", () => {
+describe("on the five-event capture, stealthed.rogue at the decision point is UNKNOWN", () => {
+  it("refuses to carry the Vanish application forward without retained coverage", () => {
+    // The artifact retains no coverage grant (tests/corpus/manifest.json), so
+    // M4 cannot assert that nothing removed the buff in the 460 ms between the
+    // application and the cast. The honest answer is UNKNOWN, for exactly the
+    // coverage reason — never FALSE, and never TRUE by declaration.
     const binding = bindStealthedRogue({ state, actorId: M5C2_ACTOR, position: garrotePosition });
-    expect(binding.value).toBe("TRUE");
-    if (binding.value !== "TRUE") return;
-    expect(binding.provenBy.abilityGameId).toBe(M5C2_IDS.vanishBuff);
-    expect(binding.provenBy.simcMaskBit).toBe("STEALTH_VANISH");
-    // The anchor is an APPLICATION that was actually observed — not a duration.
-    expect(binding.provenBy.anchorOperation).toBe("APPLIED");
-    expect(binding.provenBy.anchorPosition).toBeLessThan(garrotePosition);
-    expect(binding.provenBy.locator.rawType).toBe("applybuff");
+    expect(binding.value).toBe("UNKNOWN");
+    if (binding.value !== "UNKNOWN") return;
+    const vanish = binding.checked.find((entry) => entry.abilityGameId === M5C2_IDS.vanishBuff);
+    expect(vanish?.outcome).toBe("UNKNOWN");
+    expect(vanish?.reason).toBe("INSUFFICIENT_COVERAGE");
+    expect(Object.values(binding)).not.toContain("FALSE");
   });
 
-  it("reads the removal that shares the Garrote timestamp as AFTER the decision", () => {
-    // The subtle part. `removebuff 11327` has the same reportTimeMs as the
-    // Garrote cast but a LATER canonical position. Querying BEFORE_EVENT at the
-    // cast must see the aura still up; a timestamp-based query would not.
+  it("still holds the ordering evidence: the removal shares the Garrote timestamp and follows it", () => {
+    // The order within the millisecond is a fact about the bytes and survives
+    // regardless of coverage. It is what makes the wider slice's proof possible.
     const removal = state.fight.events.findIndex(
       (event) =>
         event.kind === "AURA" && event.abilityGameId === M5C2_IDS.vanishBuff && event.operation === "REMOVED",
@@ -122,11 +188,62 @@ describe("stealthed.rogue is PROVEN TRUE at the post-Vanish decision point", () 
     expect(removal).toBeGreaterThan(garrotePosition);
     expect(state.eventAt(removal)?.reportTimeMs).toBe(state.eventAt(garrotePosition)?.reportTimeMs);
 
-    // And immediately after the removal the binding no longer proves TRUE.
     const after = bindStealthedRogue({ state, actorId: M5C2_ACTOR, position: removal + 1 });
     expect(after.value).toBe("UNKNOWN");
   });
+});
 
+describe("on the C3c1 slice, whose recorded predicate retains AURAS coverage, stealthed.rogue is PROVEN TRUE", () => {
+  it("resolves TRUE, anchored on the observed Vanish application", () => {
+    const binding = bindStealthedRogue({
+      state: retained,
+      actorId: M5C2_ACTOR,
+      position: retainedGarrotePosition,
+    });
+    expect(binding.value).toBe("TRUE");
+    if (binding.value !== "TRUE") return;
+    expect(binding.provenBy.abilityGameId).toBe(M5C2_IDS.vanishBuff);
+    expect(binding.provenBy.simcMaskBit).toBe("STEALTH_VANISH");
+    // The anchor is an APPLICATION that was actually observed — not a duration.
+    expect(binding.provenBy.anchorOperation).toBe("APPLIED");
+    expect(binding.provenBy.anchorPosition).toBeLessThan(retainedGarrotePosition);
+    expect(binding.provenBy.locator.rawType).toBe("applybuff");
+    expect(binding.provenBy.locator.reportTimeMs).toBe(M5C2_EVENTS.vanishCast.reportTimeMs);
+  });
+
+  it("reads the removal that shares the Garrote timestamp as AFTER the decision", () => {
+    // The subtle part. `removebuff 11327` has the same reportTimeMs as the
+    // Garrote cast but a LATER canonical position. Querying BEFORE_EVENT at the
+    // cast must see the aura still up; a timestamp-based query would not.
+    const removal = retained.fight.events.findIndex(
+      (event) =>
+        event.kind === "AURA" && event.abilityGameId === M5C2_IDS.vanishBuff && event.operation === "REMOVED",
+    );
+    expect(removal).toBeGreaterThan(retainedGarrotePosition);
+    expect(retained.eventAt(removal)?.reportTimeMs).toBe(
+      retained.eventAt(retainedGarrotePosition)?.reportTimeMs,
+    );
+
+    // And immediately after the removal the binding no longer proves TRUE.
+    const after = bindStealthedRogue({ state: retained, actorId: M5C2_ACTOR, position: removal + 1 });
+    expect(after.value).toBe("UNKNOWN");
+  });
+});
+
+describe("the carry-forward rule itself, on a synthetic premise (not the capture)", () => {
+  it("proves TRUE before the cast and UNKNOWN after the removal, given complete coverage", () => {
+    const premise = premiseState();
+    const cast = premise.fight.events.findIndex((event) => event.kind === "CAST");
+    const before = bindStealthedRogue({ state: premise, actorId: M5C2_ACTOR, position: cast });
+    expect(before.value).toBe("TRUE");
+    if (before.value === "TRUE") expect(before.provenBy.anchorOperation).toBe("APPLIED");
+
+    const after = bindStealthedRogue({ state: premise, actorId: M5C2_ACTOR, position: cast + 2 });
+    expect(after.value).toBe("UNKNOWN");
+  });
+});
+
+describe("stealthed.rogue's contributor mask", () => {
   it("excludes Shadowmeld and Improved Garrote from the mask", () => {
     const contributorIds = STEALTHED_ROGUE_CONTRIBUTORS.map((c) => c.abilityGameId);
     for (const excluded of STEALTHED_ROGUE_EXCLUSIONS) {
@@ -179,9 +296,18 @@ describe("THE VERDICT: default[4] Ambush gate is FALSE at the post-Vanish point"
     expect(gate.status).toBe("RESOLVED_FALSE");
   });
 
-  it("resolves FALSE even though stealthed.rogue is TRUE", () => {
-    // The point of the whole milestone.
+  it("resolves FALSE with stealthed.rogue UNKNOWN on the capture — the talents decide", () => {
+    // On the five-event capture stealth cannot be carried forward, and the
+    // gate is FALSE anyway: improved_ambush is NOT_SELECTED, so the AND is
+    // FALSE in every world whatever stealth resolves to.
     const gate = gateAt(garrotePosition);
+    if (gate.status !== "RESOLVED_FALSE") throw new Error("expected a false gate");
+    expect(gate.evidence.stealthedRogue.value).toBe("UNKNOWN");
+  });
+
+  it("resolves FALSE even though stealthed.rogue is TRUE, on the slice that proves it", () => {
+    // The point of the whole milestone, on capture-backed coverage.
+    const gate = gateAt(retainedGarrotePosition, retained);
     if (gate.status !== "RESOLVED_FALSE") throw new Error("expected a false gate");
     expect(gate.evidence.stealthedRogue.value).toBe("TRUE");
   });
@@ -267,14 +393,16 @@ describe("what M5-C2 deliberately does NOT claim", () => {
 
   it("returns UNKNOWN rather than a verdict when talents are unavailable", () => {
     if (!loaded.ok) return;
+    // On the slice that proves stealth (the capture itself would leave FIVE
+    // atoms unresolved and hit the enumeration cap, a different refusal).
     const gate = evaluateDefaultAmbushGate({
-      state,
+      state: retained,
       authority: loaded.authority,
       actorId: M5C2_ACTOR,
-      position: garrotePosition,
+      position: retainedGarrotePosition,
       observedTalentEntries: [],
     });
-    // `stealthed.rogue` is still TRUE, so four boolean atoms remain — exactly at
+    // `stealthed.rogue` is TRUE there, so four boolean atoms remain — exactly at
     // the enumeration cap. Sixteen worlds are built and they disagree, so the
     // gate is UNDECIDED rather than decided. Missing talents can never produce a
     // verdict.

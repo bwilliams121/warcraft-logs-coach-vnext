@@ -72,7 +72,7 @@ export interface AuraObservation {
    *
    * For `gameVersion` 1 / `logVersion` 17 this is the ABSOLUTE RESULTING STACK
    * COUNT AFTER this transition — established, not assumed, and never a delta.
-   * Evidence: `tests/fixtures/wcl/events/wcl-aura-stack-absolute.json`.
+   * Evidence: corpus artifact `wcl-aura-stack-absolute` (tests/corpus/manifest.json).
    *
    * Verbatim still means verbatim. Nothing here adds, subtracts or reconciles
    * two stack numbers, because the value is only known AT a transition that

@@ -33,6 +33,7 @@ import {
   CORPUS_CONTRACT_VERSION,
   MAX_ARTIFACT_BYTES,
   MAX_CORPUS_BYTES,
+  OBSOLETE_CONTRACT_VERSIONS,
   PINNED_AUTHORITY_REVISIONS,
   isDerivingTransformation,
   isSanitizingTransformation,
@@ -87,6 +88,8 @@ export const CORPUS_ERROR_CODES = [
   "PROVENANCE_DERIVED_WITHOUT_MUTATION",
   "PROVENANCE_DERIVATION_MUST_INVALIDATE_OBSERVED_BEHAVIOUR",
   "PROVENANCE_RETAINED_COVERAGE_EXCEEDS_SOURCE",
+  "PROVENANCE_COVERAGE_GRANT_OVERLAP",
+  "PROVENANCE_COVERAGE_WITHOUT_SOURCE",
   "CASE_ID_DUPLICATE",
   "CASE_ARTIFACT_UNKNOWN",
   "CASE_ASSERTION_KIND_UNKNOWN",
@@ -221,6 +224,11 @@ function payloadKindViolation(kind: PayloadKind, json: unknown): string | null {
       return typeof json === "object" && json !== null && !Array.isArray(json)
         ? null
         : "WCL_GRAPHQL_DATA must parse to a JSON object";
+    case "WCL_GRAPHQL_PAGE_SEQUENCE":
+      return Array.isArray(json) &&
+        json.every((page) => typeof page === "object" && page !== null && !Array.isArray(page))
+        ? null
+        : "WCL_GRAPHQL_PAGE_SEQUENCE must parse to a JSON array of objects";
     case "JSON_VALUE":
       return null;
     case "RAW_TEXT":
@@ -326,25 +334,46 @@ function provenanceErrors(
     }
   }
 
-  // Retained coverage can only shrink from the source window.
-  if (source !== null) {
-    const start = source.query.startTimeMs;
-    const end = source.query.endTimeMs;
-    for (const range of artifact.provenance.retainedCoverage.ranges) {
+  // Retained coverage can only shrink from the source window, and a category
+  // may be granted once: two grants naming the same category would make the
+  // fight builder pick one, which is a decision the manifest must make.
+  const grantedCategories = new Set<string>();
+  for (const [ordinal, grant] of artifact.provenance.retainedCoverage.grants.entries()) {
+    for (const category of grant.categories) {
+      if (grantedCategories.has(category)) {
+        fail(
+          "PROVENANCE_COVERAGE_GRANT_OVERLAP",
+          `grant ${String(ordinal)} names ${category}, which an earlier grant already covers`,
+        );
+      }
+      grantedCategories.add(category);
+    }
+    if (source === null && kind !== "DERIVED_FROM_CAPTURE") {
+      fail(
+        "PROVENANCE_COVERAGE_WITHOUT_SOURCE",
+        `grant ${String(ordinal)} claims coverage, but the artifact has no capture lineage to retain it from`,
+      );
+    }
+    const start = source?.query.startTimeMs;
+    const end = source?.query.endTimeMs;
+    for (const range of grant.ranges) {
       if (typeof start === "number" && range.fromReportTimeMs < start) {
         fail(
           "PROVENANCE_RETAINED_COVERAGE_EXCEEDS_SOURCE",
-          `retained range starts at ${String(range.fromReportTimeMs)}, before the source window start ${String(start)}`,
+          `grant ${String(ordinal)} starts at ${String(range.fromReportTimeMs)}, before the source window start ${String(start)}`,
         );
       }
       if (typeof end === "number" && range.toReportTimeMs > end) {
         fail(
           "PROVENANCE_RETAINED_COVERAGE_EXCEEDS_SOURCE",
-          `retained range ends at ${String(range.toReportTimeMs)}, after the source window end ${String(end)}`,
+          `grant ${String(ordinal)} ends at ${String(range.toReportTimeMs)}, after the source window end ${String(end)}`,
         );
       }
       if (range.toReportTimeMs < range.fromReportTimeMs) {
-        fail("PROVENANCE_RETAINED_COVERAGE_EXCEEDS_SOURCE", "retained range ends before it starts");
+        fail(
+          "PROVENANCE_RETAINED_COVERAGE_EXCEEDS_SOURCE",
+          `grant ${String(ordinal)} has a range that ends before it starts`,
+        );
       }
     }
   }
@@ -472,13 +501,17 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
       ? (manifestJson.value as { contractVersion?: unknown }).contractVersion
       : undefined;
   if (versionField !== CORPUS_CONTRACT_VERSION) {
+    const obsolete = typeof versionField === "number" ? OBSOLETE_CONTRACT_VERSIONS[versionField] : undefined;
     return {
       ok: false,
       errors: [
         {
           code: "CONTRACT_VERSION_UNSUPPORTED",
           subject: null,
-          message: `manifest contractVersion ${JSON.stringify(versionField)} is not supported; this loader reads version ${String(CORPUS_CONTRACT_VERSION)} only`,
+          message:
+            obsolete === undefined
+              ? `manifest contractVersion ${JSON.stringify(versionField)} is not supported; this loader reads version ${String(CORPUS_CONTRACT_VERSION)} only`
+              : `manifest contractVersion ${String(versionField)} is obsolete: ${obsolete} This loader reads version ${String(CORPUS_CONTRACT_VERSION)} only and does not reinterpret older manifests.`,
         },
       ],
     };

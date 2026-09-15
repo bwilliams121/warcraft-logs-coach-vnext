@@ -225,9 +225,13 @@ describe("the run discloses what it looked at", () => {
     expect(run.coverage.selectedByAuthority).toBe(2);
     expect(run.coverage.noActionSelected).toBe(0);
     expect(run.coverage.notApplicable).toBe(0);
-    expect(run.coverage.castCoverage).toBe("COMPLETE");
-    expect(run.coverage.resourceCoverage).toBe("COMPLETE");
-    expect(run.coverage.coverageIsIncomplete).toBe(false);
+    // The artifact was assembled from non-adjacent narrow windows and retains
+    // no coverage grant, so the run must disclose ABSENT coverage rather than
+    // claim completeness it never had. Every finding above rests on the casts'
+    // own attached snapshots, which need no coverage.
+    expect(run.coverage.castCoverage).toBe("ABSENT");
+    expect(run.coverage.resourceCoverage).toBe("ABSENT");
+    expect(run.coverage.coverageIsIncomplete).toBe(true);
   });
 
   it("emits one finding per decision point, with no silent skips", () => {

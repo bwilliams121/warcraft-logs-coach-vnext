@@ -19,6 +19,12 @@
  * proves it twice — once by checking the view has no such property, and once by
  * running the real M5-D2 corpus through the real analyzer under two wildly
  * different sets of encounter metadata and deep-comparing the authority output.
+ *
+ * EVIDENCE PREMISE. The corpus artifact is served by a FAKE Warcraft Logs
+ * transport as one terminal page of a fabricated report; the completeness the
+ * real ingestor derives from that is a property of the fake, shared by both
+ * sides of the comparison, and is never a claim about what the artifact
+ * retains (that lives in tests/corpus/manifest.json).
  */
 
 import { describe, expect, it } from "vitest";

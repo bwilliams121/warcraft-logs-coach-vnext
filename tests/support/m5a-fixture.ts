@@ -15,18 +15,13 @@
 import type { Finding } from "../../src/findings/finding.js";
 import type { ObservedActionJudgment } from "../../src/findings/judgment.js";
 import type { ScopedActionSelection } from "../../src/findings/scoped-selection.js";
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
 import { createCombatState, type CombatState } from "../../src/engine/state/combat-state.js";
-import type { EvidenceCategory } from "../../src/wcl/evidence-capability.js";
-import { syntheticFight } from "./synthetic-fight.js";
-import fixture from "../fixtures/wcl/events/wcl-assassination-envenom-combo-points.json";
+import { committedEventArray } from "./corpus/artifacts.js";
+import { corpusFight } from "./corpus/fight.js";
+
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const fixture = committedEventArray("wcl-assassination-envenom-combo-points");
 
 /** The source capture, recorded so a drifting fixture is traceable. */
 export const M5A_FIXTURE_PROVENANCE = {
@@ -65,33 +60,19 @@ export const M5A_EVENTS = {
   envenomAtSevenHighEnergy: { actorId: ASSASSINATION_ACTOR_A, reportTimeMs: 2_019_463 },
 } as const;
 
-const WINDOW_START = 2_004_589;
-const WINDOW_END = 2_150_253;
-
 export const M5A_RAW_EVENTS = fixture as unknown as readonly Record<string, unknown>[];
 
+/**
+ * The fight, through the shared corpus coverage interpreter.
+ *
+ * This artifact was assembled from narrow, non-adjacent windows and retains
+ * NO coverage grant, so every category is OBSERVABLE with nothing covered.
+ * Every M5-A/B claim rests on the cast's own attached PRE_COST snapshot and on
+ * the observed combatantinfo, neither of which needs coverage; anything that
+ * would need an absence or a carry-forward is UNKNOWN here, honestly.
+ */
 function normalizeFixture(): CombatFight {
-  const normalizer = createNormalizer({
-    fightStartTimeMs: WINDOW_START,
-    requestedRange: inclusiveRange(WINDOW_START, WINDOW_END),
-    contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-    directionFields: VERIFIED_DIRECTION_FIELDS,
-  });
-  normalizer.accept({
-    streamId: "all",
-    pageOrdinal: 0,
-    requestedStartTimeMs: WINDOW_START,
-    nextPageTimestamp: null,
-    events: fixture as Record<string, unknown>[],
-  });
-  const normalized = normalizer.finish();
-
-  return syntheticFight({
-    observedCategories: ["CASTS", "RESOURCES", "COMBATANT_INFO"] as readonly EvidenceCategory[],
-    events: normalized.events,
-    startTimeMs: WINDOW_START,
-    endTimeMs: WINDOW_END,
-  });
+  return corpusFight("wcl-assassination-envenom-combo-points");
 }
 
 export function m5aFight(): CombatFight {

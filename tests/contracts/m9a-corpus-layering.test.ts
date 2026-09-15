@@ -25,7 +25,7 @@ import {
   OWNING_LAYERS,
   type AssertionKind,
 } from "../support/corpus/contract.js";
-import { EXECUTABLE_KINDS, executeAssertion } from "../support/corpus/executors.js";
+import { EXECUTABLE_KINDS } from "../support/corpus/executors.js";
 import { committedCorpusFiles, loadCorpusOrThrow } from "../support/corpus/loader.js";
 
 const SRC_SOURCES: Record<string, string> = import.meta.glob("../../src/**/*.ts", {
@@ -34,7 +34,21 @@ const SRC_SOURCES: Record<string, string> = import.meta.glob("../../src/**/*.ts"
   import: "default",
 });
 
-const CORPUS_SUPPORT_SOURCES: Record<string, string> = import.meta.glob("../support/corpus/*.ts", {
+const CORPUS_SUPPORT_SOURCES: Record<string, string> = import.meta.glob("../support/corpus/**/*.ts", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+
+/** Any JSON left under the pre-M9-B fixture tree. Expected to be nothing. */
+const LEGACY_FIXTURE_JSON: Record<string, string> = import.meta.glob("../fixtures/wcl/events/*.json", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+
+/** Every test and support module, for the coverage-policy guard. */
+const TEST_SOURCES: Record<string, string> = import.meta.glob("../**/*.ts", {
   eager: true,
   query: "?raw",
   import: "default",
@@ -113,39 +127,107 @@ const CORPUS_SUPPORT_PATHS = Object.keys(CORPUS_SUPPORT_SOURCES)
   .map((key) => normalizeKey(key, /^\.\.\//))
   .sort();
 
+/**
+ * Two rings. The PURE ring — contract, loader, artifacts, fight, harness,
+ * dispatcher — reaches no transport, service or interface and could run
+ * anywhere. The EXECUTOR ring reaches exactly the production path its layer
+ * owns, and for WCL_TRANSPORT and PUBLIC_CONTRACT that means the repository's
+ * offline doubles: a recording fake fetch, faked Warcraft Logs ports. Neither
+ * ring may reach the production composition root that binds the real client.
+ */
+const PURE_RING = [
+  "support/corpus/artifacts.ts",
+  "support/corpus/contract.ts",
+  "support/corpus/executors.ts",
+  "support/corpus/fight.ts",
+  "support/corpus/harness.ts",
+  "support/corpus/loader.ts",
+  "support/corpus/report.ts",
+];
+const EXECUTOR_RING = [
+  "support/corpus/executors/combat-state.ts",
+  "support/corpus/executors/normalization.ts",
+  "support/corpus/executors/outcome.ts",
+  "support/corpus/executors/params.ts",
+  "support/corpus/executors/public-contract.ts",
+  "support/corpus/executors/spec-assassination.ts",
+  "support/corpus/executors/wcl-transport.ts",
+];
+
+/** Never, from anywhere in the corpus machinery. */
+const BANNED_EVERYWHERE = [
+  "analysis-composition",
+  "token-provider",
+  "graphql-client",
+  "ingest-fight",
+  "preflight",
+  "report-roster",
+  "report-revision",
+  "node:fs",
+  "node:child_process",
+  "node:net",
+  "node:http",
+];
+
+/** Additionally banned from the pure ring: any transport, service or interface. */
+const BANNED_IN_PURE_RING = [
+  "paginator",
+  "/runtime/",
+  "/services/",
+  "/api/",
+  "/mcp/",
+  "config/env",
+  "wcl-harness",
+  "fake-fetch",
+  "analysis-transports",
+  "orchestration-fixture",
+];
+
 describe("the corpus machinery is offline, deterministic and read-only", () => {
-  it("consists of the contract, the loader and the executors", () => {
-    expect(CORPUS_SUPPORT_PATHS).toEqual([
-      "support/corpus/contract.ts",
-      "support/corpus/executors.ts",
-      "support/corpus/loader.ts",
-    ]);
+  it("consists of exactly the pure ring and the executor ring", () => {
+    expect(CORPUS_SUPPORT_PATHS).toEqual([...PURE_RING, ...EXECUTOR_RING].sort());
   });
 
-  it.each(CORPUS_SUPPORT_PATHS)("%s imports no transport, runtime, service or interface module", (path) => {
-    // The corpus may drive decoders and the engine. It may never drive the
-    // client that could fetch a fresh copy of what it is supposed to pin.
+  it.each(CORPUS_SUPPORT_PATHS)(
+    "%s never imports the live Warcraft Logs client or its composition",
+    (path) => {
+      for (const specifier of importsOf(CORPUS_SUPPORT_SOURCES[`../${path}`] ?? "")) {
+        for (const forbidden of BANNED_EVERYWHERE) {
+          expect(specifier, `${path} imports ${specifier}`).not.toContain(forbidden);
+        }
+      }
+    },
+  );
+
+  it.each(PURE_RING)("%s imports no transport, runtime, service or interface module", (path) => {
     for (const specifier of importsOf(CORPUS_SUPPORT_SOURCES[`../${path}`] ?? "")) {
-      for (const forbidden of [
-        "graphql-client",
-        "token-provider",
-        "paginator",
-        "ingest-fight",
-        "preflight",
-        "report-roster",
-        "report-revision",
-        "/runtime/",
-        "/services/",
-        "/api/",
-        "/mcp/",
-        "config/env",
-        "node:fs",
-        "node:child_process",
-        "wcl-harness",
-        "fake-fetch",
-      ]) {
+      for (const forbidden of BANNED_IN_PURE_RING) {
         expect(specifier, `${path} imports ${specifier}`).not.toContain(forbidden);
       }
+    }
+  });
+
+  it("lets only the transport executor reach the paginator, and only through the offline fake fetch", () => {
+    for (const path of EXECUTOR_RING) {
+      const specifiers = importsOf(CORPUS_SUPPORT_SOURCES[`../${path}`] ?? "");
+      const reachesPaginator = specifiers.some((specifier) => specifier.includes("paginator"));
+      if (path !== "support/corpus/executors/wcl-transport.ts") {
+        expect(reachesPaginator, `${path} reaches the paginator`).toBe(false);
+        continue;
+      }
+      expect(reachesPaginator).toBe(true);
+      expect(specifiers.some((specifier) => specifier.includes("wcl-harness"))).toBe(true);
+    }
+  });
+
+  it("lets only the public-contract executor reach the Worker, MCP and services", () => {
+    for (const path of EXECUTOR_RING) {
+      const specifiers = importsOf(CORPUS_SUPPORT_SOURCES[`../${path}`] ?? "");
+      const reachesInterfaces = specifiers.some(
+        (specifier) =>
+          specifier.includes("/api/") || specifier.includes("/mcp/") || specifier.includes("/services/"),
+      );
+      expect(reachesInterfaces, path).toBe(path === "support/corpus/executors/public-contract.ts");
     }
   });
 
@@ -159,7 +241,6 @@ describe("the corpus machinery is offline, deterministic and read-only", () => {
         "Math.random",
         "randomUUID",
         "performance.now",
-        "fetch(",
         "process.",
         "readFileSync",
         "writeFileSync",
@@ -168,6 +249,10 @@ describe("the corpus machinery is offline, deterministic and read-only", () => {
       ]) {
         expect(code, `${path} uses ${banned}`).not.toContain(banned);
       }
+      // A bare `fetch(` would be the global network primitive. `.fetch(` on a
+      // Worker instance is the handler entry point and takes a Request, not a
+      // socket; that one is what the parity executor legitimately calls.
+      expect(code, `${path} calls the global fetch`).not.toMatch(/(?<![\w.])fetch\(/);
     },
   );
 
@@ -177,7 +262,7 @@ describe("the corpus machinery is offline, deterministic and read-only", () => {
     const loader = CORPUS_SUPPORT_SOURCES["../support/corpus/loader.ts"] ?? "";
     expect(loader).toContain('"../../corpus/manifest.json"');
     expect(loader).toContain('"../../corpus/artifacts/**"');
-    // Not the legacy fixture tree, and not the whole tests directory.
+    // Not a legacy fixture tree, and not the whole tests directory.
     expect(loader).not.toContain("../fixtures");
     expect(loader).not.toMatch(/glob\(\s*\[?\s*"\.\.\/\.\.\/\*\*/);
   });
@@ -188,6 +273,118 @@ describe("the corpus machinery is offline, deterministic and read-only", () => {
 
     await expect(loadCorpusOrThrow(frozen)).resolves.toBeDefined();
     expect(Object.keys(frozen).sort()).toEqual(Object.keys(files).sort());
+  });
+
+  it("no legacy fixture tree remains beside the corpus", () => {
+    // The corpus copies are canonical. A second tree of event JSON would be a
+    // second authoritative version of the same evidence.
+    expect(Object.keys(LEGACY_FIXTURE_JSON)).toEqual([]);
+  });
+});
+
+/**
+ * ONE COVERAGE POLICY FOR CAPTURED EVIDENCE.
+ *
+ * A test can only grant coverage to captured events by hand if it (a) obtains
+ * the raw events, (b) normalizes them itself, and (c) hands the result to a
+ * fight builder with coverage of its own choosing. The shared interpreter in
+ * `tests/support/corpus/fight.ts` is the only place all three may meet. Every
+ * other module may do at most two of them: a normalization test may normalize
+ * raw captured events and inspect the output (no fight), and a state test may
+ * build synthetic fights from synthetic events (no captured raw events).
+ *
+ * Reading captured raw events for facts about the bytes — amounts present,
+ * type strings present — is not coverage and is not restricted.
+ */
+describe("captured evidence receives coverage only through the shared corpus interpreter", () => {
+  const CORPUS_DIR = "support/corpus/";
+  const testPaths = Object.keys(TEST_SOURCES)
+    .map((key) => normalizeKey(key, /^\.\.\//))
+    .filter((path) => !path.startsWith(CORPUS_DIR))
+    .sort();
+
+  function sourceAt(path: string): string {
+    return TEST_SOURCES[`../${path}`] ?? "";
+  }
+
+  /** Raw captured events, however obtained. */
+  function readsCapturedRawEvents(source: string): boolean {
+    return /\bcommittedEventArray\b/.test(source) || /\b[A-Z0-9_]+_RAW_EVENTS\b/.test(source);
+  }
+
+  function normalizesItself(source: string): boolean {
+    return importsOf(source).some((specifier) => specifier.includes("event-normalizer"));
+  }
+
+  function buildsFights(source: string): boolean {
+    return importsOf(source).some(
+      (specifier) => specifier.includes("synthetic-fight") || specifier.includes("state/combat-state"),
+    );
+  }
+
+  it("found the test tree", () => {
+    expect(testPaths.length).toBeGreaterThan(100);
+  });
+
+  it.each(testPaths)("%s does not read, normalize and build a fight over captured events itself", (path) => {
+    const source = sourceAt(path);
+    const doesAllThree = readsCapturedRawEvents(source) && normalizesItself(source) && buildsFights(source);
+    expect(doesAllThree, `${path} grants its own coverage to captured events`).toBe(false);
+  });
+
+  it("is not vacuous: each of the three predicates matches real modules, and one matches two of them", () => {
+    const sources = testPaths.map(sourceAt);
+    expect(sources.some(readsCapturedRawEvents)).toBe(true);
+    expect(sources.some(normalizesItself)).toBe(true);
+    expect(sources.some(buildsFights)).toBe(true);
+    // A normalization test legitimately reads raw captured events and
+    // normalizes them (no fight): the rule forbids the triple, not the pair.
+    expect(sources.some((source) => readsCapturedRawEvents(source) && normalizesItself(source))).toBe(true);
+  });
+
+  it("keeps normalized captured events inside the interpreter", () => {
+    // `normalizeEvents` is not exported: outside `fight.ts` there is no way to
+    // obtain normalized captured events except inside a fight the interpreter
+    // built. Facts about normalization leave as counts only.
+    const fight = CORPUS_SUPPORT_SOURCES["../support/corpus/fight.ts"] ?? "";
+    expect(fight).toMatch(/\nfunction normalizeEvents\(/);
+    expect(fight).not.toMatch(/\nexport function normalizeEvents\(/);
+    expect(fight).toMatch(/\nexport function normalizationFactsOf\(/);
+  });
+
+  it("exposes only the sanctioned entry points to modules outside the corpus machinery", () => {
+    const allowed = new Set([
+      "corpusFight",
+      "corpusState",
+      "corpusFightFrom",
+      "corpusStateFrom",
+      "normalizationFactsOf",
+      "positionOfCast",
+      "FightPremise",
+    ]);
+    for (const path of testPaths) {
+      const source = sourceAt(path);
+      const imports = [
+        ...source.matchAll(/import\s+(?:type\s+)?\{([^}]*)\}\s+from\s+["'][^"']*corpus\/fight\.js["']/g),
+      ];
+      for (const match of imports) {
+        for (const name of (match[1] ?? "").split(",")) {
+          const bare =
+            name
+              .replace(/^\s*type\s+/, "")
+              .trim()
+              .split(/\s+as\s+/)[0] ?? "";
+          if (bare.length === 0) continue;
+          expect(allowed.has(bare), `${path} imports ${bare} from the corpus fight interpreter`).toBe(true);
+        }
+      }
+    }
+  });
+
+  it("names every premise the interpreter accepts, so a new one is a reviewed addition", () => {
+    const fight = CORPUS_SUPPORT_SOURCES["../support/corpus/fight.ts"] ?? "";
+    const kinds = [...fight.matchAll(/readonly kind: "([A-Z_]+)"/g)].map((m) => m[1]);
+    expect(kinds).toEqual(["TRUNCATED_BEFORE", "EVENT_REMOVED_AT", "FANNED_ACTORS"]);
   });
 });
 
@@ -202,16 +399,14 @@ describe("assertion execution matches the registry exactly", () => {
     expect([...EXECUTABLE_KINDS].sort()).toEqual([...executable].sort());
   });
 
-  it("answers DECLARED, not pass, for a DECLARED kind", async () => {
-    // A DECLARED kind that returned `ok: true` would be silent fake coverage.
+  it("has no DECLARED kind left after M9-B", async () => {
+    // M9-A shipped two DECLARED kinds; both are executable now. The harness
+    // path for a future DECLARED kind (NOT_EXECUTED, never a pass) is pinned in
+    // the loader tests; here the registry is asserted fully executable so the
+    // gate's `declaredInCorpus: 0` is a fact about the registry too.
+    expect(registered.filter(([, def]) => (def.execution as string) === "DECLARED")).toEqual([]);
     const corpus = await loadCorpusOrThrow(committedCorpusFiles());
-    const kase = corpus.cases[0];
-    if (kase === undefined) throw new Error("the seed corpus has no cases");
-    for (const [kind, def] of registered) {
-      if (def.execution !== "DECLARED") continue;
-      const outcome = executeAssertion(corpus, kase, { kind, params: {}, execution: "DECLARED" });
-      expect(outcome.ok, kind).toBe("DECLARED");
-    }
+    expect(corpus.coverage.declared).toBe(0);
   });
 
   it("owns every kind with a layer whose source roots exist", () => {
@@ -292,14 +487,21 @@ describe("no committed corpus byte is credential-shaped", () => {
     }
   });
 
-  it("holds no player name field in any event artifact", async () => {
-    // Event payloads reference actors by numeric id. A `name` key on an event
-    // would be personal data the sanitizer is supposed to have kept out.
+  it("holds no player name or server field in any event artifact", async () => {
+    // Event payloads reference actors by numeric id. The ONE permitted `name`
+    // is the public encounter name on an encounter boundary event; a `name`
+    // anywhere else, or a `server` anywhere, would be personal data the
+    // sanitizer is supposed to have kept out.
     const corpus = await loadCorpusOrThrow(committedCorpusFiles());
     for (const artifact of corpus.artifacts) {
       if (artifact.record.payloadKind !== "WCL_EVENT_ARRAY") continue;
       for (const event of artifact.json as readonly Record<string, unknown>[]) {
-        expect(Object.keys(event), artifact.record.artifactId).not.toContain("name");
+        const type = String(event["type"]);
+        if ("name" in event) {
+          expect(type, `${artifact.record.artifactId} carries a name on a ${type} event`).toMatch(
+            /^encounter(start|end)$/,
+          );
+        }
         expect(Object.keys(event), artifact.record.artifactId).not.toContain("server");
       }
     }

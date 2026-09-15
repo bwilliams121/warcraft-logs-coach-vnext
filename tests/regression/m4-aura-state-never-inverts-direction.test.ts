@@ -2,18 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { anySource, fromSource } from "../../src/engine/auras/aura-state.js";
 import { buildAuraIndexes } from "../../src/engine/auras/aura-observations.js";
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import { sourceRef, targetRef } from "../../src/engine/normalization/normalized-events.js";
 import { createCombatState } from "../../src/engine/state/combat-state.js";
 import { afterEvent, endOfTimestamp } from "../../src/engine/state/temporal.js";
 import { auraEvent, syntheticFight } from "../support/synthetic-fight.js";
-import midfightFixture from "../fixtures/wcl/events/wcl-midfight-window.json";
+import { corpusState } from "../support/corpus/fight.js";
 
 /**
  * Historical failure this protects against:
@@ -339,30 +332,10 @@ describe("pets are not rolled into their owners", () => {
 });
 
 describe("direction survives over a committed capture", () => {
-  const CAPTURE_START = 7_550_000;
-  const CAPTURE_END = 7_560_000;
-
-  const normalizer = createNormalizer({
-    fightStartTimeMs: CAPTURE_START,
-    requestedRange: inclusiveRange(CAPTURE_START, CAPTURE_END),
-    contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-    directionFields: VERIFIED_DIRECTION_FIELDS,
-  });
-  normalizer.accept({
-    streamId: "all",
-    pageOrdinal: 0,
-    requestedStartTimeMs: CAPTURE_START,
-    nextPageTimestamp: null,
-    events: midfightFixture as Record<string, unknown>[],
-  });
-  const state = createCombatState(
-    syntheticFight({
-      observedCategories: ["AURAS"],
-      events: normalizer.finish().events,
-      startTimeMs: CAPTURE_START,
-      endTimeMs: CAPTURE_END,
-    }),
-  );
+  // Through the shared corpus coverage interpreter: the artifact retains no
+  // coverage grant, so nothing below may rest on an absence or a carry-forward.
+  // Every assertion here is about indexes and on-event observations.
+  const state = corpusState("wcl-midfight-window");
 
   it("has real captured aura evidence with both directions present", () => {
     const auras = state
@@ -408,20 +381,30 @@ describe("direction survives over a committed capture", () => {
   });
 
   it("answers a captured player-on-boss debuff on the boss, not on the player", () => {
-    // `refreshdebuff` from actor 20 onto actor 160 at 7550085.
+    // `refreshdebuff` from actor 20 onto actor 160 at 7550085. Asked AT that
+    // observation — the slice retains no coverage, so nothing may be carried
+    // forward past it — the answer rests on the observation alone.
+    const refresh = state.fight.events.findIndex(
+      (event) =>
+        event.kind === "AURA" &&
+        event.abilityGameId === 12_654 &&
+        event.operation === "REFRESHED" &&
+        event.target?.actorId === 160,
+    );
+    expect(refresh).toBeGreaterThanOrEqual(0);
     const onBoss = state.auras.presenceAt({
       target: targetRef(160, null),
       abilityGameId: 12_654,
       auraClass: "DEBUFF",
       source: anySource(),
-      at: endOfTimestamp(7_550_200),
+      at: afterEvent(refresh),
     });
     const onApplier = state.auras.presenceAt({
       target: targetRef(20, null),
       abilityGameId: 12_654,
       auraClass: "DEBUFF",
       source: anySource(),
-      at: endOfTimestamp(7_550_200),
+      at: afterEvent(refresh),
     });
 
     expect(onBoss.certainty).toBe("EXACT");

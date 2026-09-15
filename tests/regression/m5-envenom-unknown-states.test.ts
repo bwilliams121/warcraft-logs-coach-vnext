@@ -59,9 +59,13 @@ describe("every in-scope Envenom cast produces exactly one structured result", (
     expect(run.coverage.withExactPreCostComboPoints).toBe(5);
     expect(run.coverage.missingExactComboPoints).toBe(1);
     expect(run.coverage.rejectedByAuthority).toBe(0);
-    expect(run.coverage.castCoverage).toBe("COMPLETE");
-    expect(run.coverage.resourceCoverage).toBe("COMPLETE");
-    expect(run.coverage.coverageIsIncomplete).toBe(false);
+    // The artifact was assembled from non-adjacent narrow windows and retains
+    // no coverage grant, so the run must disclose ABSENT coverage rather than
+    // claim completeness it never had. Every finding above rests on the casts'
+    // own attached snapshots, which need no coverage.
+    expect(run.coverage.castCoverage).toBe("ABSENT");
+    expect(run.coverage.resourceCoverage).toBe("ABSENT");
+    expect(run.coverage.coverageIsIncomplete).toBe(true);
     // JSON-safe: an array of entries, never a Map.
     expect(Array.isArray(run.coverage.unknownByBlocker)).toBe(true);
     expect(JSON.parse(JSON.stringify(run.coverage))).toEqual(run.coverage);

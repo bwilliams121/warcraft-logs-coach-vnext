@@ -1,0 +1,58 @@
+[
+  {
+    "reportData": {
+      "report": {
+        "events": {
+          "data": [
+            {
+              "timestamp": 1000,
+              "type": "cast",
+              "sourceID": 5,
+              "targetID": 9,
+              "abilityGameID": 100,
+              "fight": 1
+            },
+            {
+              "timestamp": 1500,
+              "type": "damage",
+              "sourceID": 5,
+              "targetID": 9,
+              "abilityGameID": 100,
+              "fight": 1,
+              "amount": 10
+            }
+          ],
+          "nextPageTimestamp": 1500
+        }
+      }
+    }
+  },
+  {
+    "reportData": {
+      "report": {
+        "events": {
+          "data": [
+            {
+              "timestamp": 1500,
+              "type": "damage",
+              "sourceID": 5,
+              "targetID": 9,
+              "abilityGameID": 100,
+              "fight": 1,
+              "amount": 10
+            },
+            {
+              "timestamp": 2000,
+              "type": "cast",
+              "sourceID": 5,
+              "targetID": 9,
+              "abilityGameID": 101,
+              "fight": 1
+            }
+          ],
+          "nextPageTimestamp": null
+        }
+      }
+    }
+  }
+]

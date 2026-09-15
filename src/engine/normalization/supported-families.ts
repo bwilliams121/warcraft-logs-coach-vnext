@@ -15,7 +15,7 @@
  * where it is preserved and counted.
  *
  * Every entry below cites a sanitized capture committed under
- * `tests/fixtures/wcl/events/`. A contract test asserts that each entry carries
+ * `tests/corpus/artifacts/wcl-events/`. A contract test asserts that each entry carries
  * evidence and that each cited fixture actually exists.
  */
 

@@ -11,7 +11,10 @@ import {
   indexContracts,
   SUPPORTED_TYPE_CONTRACTS,
 } from "../../src/engine/normalization/supported-families.js";
-import pullWindowFixture from "../fixtures/wcl/events/wcl-pull-window-with-resources.json";
+import { committedEventArray } from "../support/corpus/artifacts.js";
+
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const pullWindowFixture = committedEventArray("wcl-pull-window-with-resources");
 
 /**
  * Warcraft Logs attaches ONE resource snapshot per event under

@@ -1,4 +1,20 @@
-# Warcraft Logs event fixture provenance
+# Warcraft Logs event fixture provenance (legacy prose, preserved)
+
+> **Read this first.** This document is the M2–M8 provenance prose for the
+> eleven sanitized event slices, preserved verbatim from
+> `tests/fixtures/wcl/events/PROVENANCE.md` when M9-B migrated the slices into
+> the regression corpus. The slices now live under
+> `tests/corpus/artifacts/wcl-events/` with the same file names and the same
+> bytes, and every fact below that a test depends on is recorded as structured
+> metadata in `tests/corpus/manifest.json`. The manifest is authoritative for
+> what an artifact is and what it may prove; this file is the investigation
+> record behind it — the measurements, the falsifiers, the captures that were
+> re-taken and why — and is kept because structuring a fact does not preserve
+> the reasoning that established it.
+>
+> Paths below that say `tests/fixtures/wcl/events/` refer to the pre-M9-B
+> location. `scripts/sanitize-probe.mjs` now writes to the corpus artifact tree.
+
 
 Six sanitized slices from two public reports.
 

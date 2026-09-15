@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import { RESOURCE_OBSERVATION_TIMINGS } from "../../src/engine/resources/resource-observations.js";
 import { createCombatState } from "../../src/engine/state/combat-state.js";
 import { afterEvent, endOfTimestamp } from "../../src/engine/state/temporal.js";
@@ -18,7 +11,11 @@ import {
   resourceChangeEvent,
   syntheticFight,
 } from "../support/synthetic-fight.js";
-import pullWindowFixture from "../fixtures/wcl/events/wcl-pull-window-with-resources.json";
+import { committedEventArray } from "../support/corpus/artifacts.js";
+import { corpusState } from "../support/corpus/fight.js";
+
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const pullWindowFixture = committedEventArray("wcl-pull-window-with-resources");
 
 /**
  * Historical failure categories this protects against:
@@ -414,30 +411,10 @@ describe("the resourcechange timing contract stays unestablished", () => {
 });
 
 describe("captured resource evidence is reported, not reinterpreted", () => {
-  const CAPTURE_START = 7_381_097;
-  const CAPTURE_END = 7_383_000;
-
-  const normalizer = createNormalizer({
-    fightStartTimeMs: CAPTURE_START,
-    requestedRange: inclusiveRange(CAPTURE_START, CAPTURE_END),
-    contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-    directionFields: VERIFIED_DIRECTION_FIELDS,
-  });
-  normalizer.accept({
-    streamId: "all",
-    pageOrdinal: 0,
-    requestedStartTimeMs: CAPTURE_START,
-    nextPageTimestamp: null,
-    events: pullWindowFixture as Record<string, unknown>[],
-  });
-  const state = createCombatState(
-    syntheticFight({
-      observedCategories: ["RESOURCES"],
-      events: normalizer.finish().events,
-      startTimeMs: CAPTURE_START,
-      endTimeMs: CAPTURE_END,
-    }),
-  );
+  // Through the shared corpus coverage interpreter: the artifact retains no
+  // coverage grant, so nothing below may rest on an absence or a carry-forward.
+  // Every assertion here is about indexes and on-event observations.
+  const state = corpusState("wcl-pull-window-with-resources");
 
   it("returns only amounts that appear verbatim in the capture", () => {
     const capturedAmounts = new Set<number>();
@@ -478,7 +455,7 @@ describe("captured resource evidence is reported, not reinterpreted", () => {
     const later = state.resources.latestObservedAtOrBefore({
       actorId,
       resourceType,
-      at: endOfTimestamp(CAPTURE_END),
+      at: endOfTimestamp(state.fight.fight.endTimeMs),
     });
 
     if (atObservation.certainty !== "EXACT") return;

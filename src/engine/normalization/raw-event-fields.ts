@@ -6,7 +6,8 @@
  * not write a contract it cannot cite evidence for.
  *
  * Every name below is now VERIFIED against sanitized live captures committed
- * under `tests/fixtures/wcl/events/`. See that directory's PROVENANCE.md.
+ * in the regression corpus under `tests/corpus/artifacts/wcl-events/`. See
+ * `tests/corpus/manifest.json` and `tests/corpus/PROVENANCE-legacy.md`.
  */
 
 /**

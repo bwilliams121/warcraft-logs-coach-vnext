@@ -40,18 +40,13 @@
  * below matches on a timestamp and asserts the match is unique.
  */
 
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
 import { createCombatState, type CombatState } from "../../src/engine/state/combat-state.js";
-import type { EvidenceCategory } from "../../src/wcl/evidence-capability.js";
-import { syntheticFight } from "./synthetic-fight.js";
-import fixture from "../fixtures/wcl/events/wcl-assassination-d2-decision-corpus.json";
+import { committedEventArray } from "./corpus/artifacts.js";
+import { corpusFight, corpusFightFrom, type FightPremise } from "./corpus/fight.js";
+
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const fixture = committedEventArray("wcl-assassination-d2-decision-corpus");
 
 export const M5D2_FIXTURE_PROVENANCE = {
   reportCode: "A7R6kxPJ1hC8YQ4w",
@@ -98,33 +93,26 @@ export const M5D2_ANCHORS = {
   garroteApplication: 2_164_326,
 } as const;
 
-const WINDOW_START = 2_004_589;
-const WINDOW_END = 2_195_001;
-
 export const M5D2_RAW_EVENTS = fixture as unknown as readonly Record<string, unknown>[];
 
-function normalizeFixture(events: readonly Record<string, unknown>[] = M5D2_RAW_EVENTS): CombatFight {
-  const normalizer = createNormalizer({
-    fightStartTimeMs: WINDOW_START,
-    requestedRange: inclusiveRange(WINDOW_START, WINDOW_END),
-    contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-    directionFields: VERIFIED_DIRECTION_FIELDS,
-  });
-  normalizer.accept({
-    streamId: "all",
-    pageOrdinal: 0,
-    requestedStartTimeMs: WINDOW_START,
-    nextPageTimestamp: null,
-    events: events as Record<string, unknown>[],
-  });
-  const normalized = normalizer.finish();
+const M5D2_ARTIFACT = "wcl-assassination-d2-decision-corpus";
 
-  return syntheticFight({
-    observedCategories: ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO"] as readonly EvidenceCategory[],
-    events: normalized.events,
-    startTimeMs: WINDOW_START,
-    endTimeMs: WINDOW_END,
-  });
+/**
+ * The fight, through the shared corpus coverage interpreter.
+ *
+ * The artifact's recorded predicate grants CASTS and RESOURCES for actor 19
+ * and AURAS for targets 19 and 21 over [2,164,325 .. 2,194,928]. Nothing is
+ * declared here. A caller that changes the events must say how, as a named
+ * premise the interpreter applies to those grants — never wider than the
+ * change justifies.
+ */
+function normalizeFixture(
+  events: readonly Record<string, unknown>[] = M5D2_RAW_EVENTS,
+  premise: FightPremise | null = null,
+): CombatFight {
+  if (events === M5D2_RAW_EVENTS && premise === null) return corpusFight(M5D2_ARTIFACT);
+  if (premise === null) throw new Error("events that are not the artifact's own need a stated premise");
+  return corpusFightFrom(M5D2_ARTIFACT, events, premise);
 }
 
 export function m5d2Fight(): CombatFight {
@@ -132,16 +120,22 @@ export function m5d2Fight(): CombatFight {
 }
 
 /**
- * The same real pipeline over caller-supplied raw events.
+ * The same real pipeline over caller-supplied raw events, under a stated
+ * premise.
  *
  * Exists for the raid-night orchestration fixture, which needs ONE fight whose
  * corpus describes SEVERAL actors — that is the only way to prove a single
  * ingestion serves many analyzed players rather than one. The events are still
- * normalized by the real normalizer under the real contracts; only which raw
- * events go in is the caller's choice.
+ * normalized by the real normalizer under the real contracts, and the corpus
+ * grants are applied under the premise the caller names (`FANNED_ACTORS`: the
+ * clones are complete exactly where actor 19 is). A TEST PREMISE — the clones
+ * never happened, and nothing here attributes their coverage to the capture.
  */
-export function m5d2FightFrom(events: readonly Record<string, unknown>[]): CombatFight {
-  return normalizeFixture(events);
+export function m5d2FightFrom(
+  events: readonly Record<string, unknown>[],
+  premise: FightPremise,
+): CombatFight {
+  return normalizeFixture(events, premise);
 }
 
 export function m5d2State(): CombatState {
@@ -159,7 +153,9 @@ export function m5d2TruncatedState(cutMs: number): CombatState {
   const kept = M5D2_RAW_EVENTS.filter(
     (event) => event["type"] === "combatantinfo" || Number(event["timestamp"]) >= cutMs,
   );
-  return createCombatState(normalizeFixture(kept));
+  // The premise clips every grant to start at the cut: what was removed is
+  // no longer covered, so a cut past an anchor cannot be repaired by coverage.
+  return createCombatState(normalizeFixture(kept, { kind: "TRUNCATED_BEFORE", cutMs }));
 }
 
 /**
@@ -191,7 +187,12 @@ export function m5d2StateWithoutEvent(criteria: {
       `expected to remove exactly one event; removed ${String(M5D2_RAW_EVENTS.length - kept.length)}`,
     );
   }
-  return createCombatState(normalizeFixture(kept));
+  // The premise clips every grant to end before the removed instant: nothing
+  // at or after it is complete any more. A query strictly before it sees the
+  // same coverage it always did, which is what the hindsight regression needs.
+  return createCombatState(
+    normalizeFixture(kept, { kind: "EVENT_REMOVED_AT", reportTimeMs: criteria.reportTimeMs }),
+  );
 }
 
 /** The canonical position of one observed COMPLETE cast, addressed by fact. */

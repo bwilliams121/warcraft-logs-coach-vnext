@@ -10,8 +10,12 @@ import {
   indexContracts,
   SUPPORTED_TYPE_CONTRACTS,
 } from "../../src/engine/normalization/supported-families.js";
-import sentinelSourceFixture from "../fixtures/wcl/events/wcl-no-actor-sentinel-source.json";
-import midfightFixture from "../fixtures/wcl/events/wcl-midfight-window.json";
+import { committedEventArray } from "../support/corpus/artifacts.js";
+
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const sentinelSourceFixture = committedEventArray("wcl-no-actor-sentinel-source");
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const midfightFixture = committedEventArray("wcl-midfight-window");
 
 /**
  * Warcraft Logs uses `-1` as a no-actor sentinel on BOTH `sourceID` and

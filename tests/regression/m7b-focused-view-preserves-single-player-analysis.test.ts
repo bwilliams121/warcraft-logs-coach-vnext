@@ -6,8 +6,8 @@
  * The M5-D2 corpus is 1083 real events from a real Assassination pull, and five
  * existing test files assert concrete outcomes over it — a MATCH on Garrote, a
  * REJECTED Envenom, an UNKNOWN Deathmark blocked on predictive state, and the
- * exclusion census. Those assertions stand on a fight whose evidence vouches for
- * EVERY actor, because the corpus fixture predates any notion of focus.
+ * exclusion census. Those assertions stand on the corpus artifact under its
+ * recorded coverage grants.
  *
  * M7-B analyses that same player through a `PLAYER_CONTEXT` view of a fight
  * retrieved once for a whole raid. The evidence scope is genuinely narrower: the
@@ -24,6 +24,15 @@
  * It runs the real analyzer over real evidence through the real state engine.
  * The only thing that differs between the two sides is the evidence projection
  * under test.
+ *
+ * WHAT EACH SIDE VOUCHES FOR
+ *
+ * The baseline is the corpus artifact under its recorded coverage grants:
+ * CASTS and RESOURCES for actor 19, AURAS for targets 19 and 21, and nobody
+ * else. The focused view is a SYNTHETIC core (complete streams by construction,
+ * a test premise) projected to PLAYER_CONTEXT, which vouches for the player and
+ * the enemies. The two scopes differ, which is what makes agreement between the
+ * two results a finding rather than a tautology.
  */
 
 import { describe, expect, it } from "vitest";
@@ -153,10 +162,15 @@ describe("the narrowing is real, not an absence of narrowing", () => {
     expect(casts.coverage.actorScope).toEqual([M5D2_ACTOR, M5D2_TARGET, SECOND_ENEMY]);
   });
 
-  it("was compared against a fixture that vouches for every actor", () => {
+  it("was compared against the corpus artifact's own grant, which vouches for the player only", () => {
+    // The baseline's scope comes from tests/corpus/manifest.json, not from a
+    // declaration here: CASTS for actor 19 and nobody else. It is narrower than
+    // the focused view on allies and enemies and identical on the analysed
+    // player — so the two sides genuinely differ, and still agree.
     const fixtureCasts = m5d2Fight().completeness.categories.CASTS;
     expect(fixtureCasts.capability).toBe("OBSERVABLE");
     if (fixtureCasts.capability !== "OBSERVABLE") return;
-    expect(fixtureCasts.coverage.actorScope).toBeNull();
+    expect(fixtureCasts.coverage.actorScope).toEqual([M5D2_ACTOR]);
+    expect(fixtureCasts.coverage.actorScope).not.toEqual([M5D2_ACTOR, M5D2_TARGET, SECOND_ENEMY]);
   });
 });

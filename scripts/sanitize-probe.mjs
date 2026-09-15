@@ -2,9 +2,11 @@
  * Turns raw probe output into a reviewable fixture slice.
  *
  * Two steps exist on purpose. Raw capture under `.probe/` is disposable and
- * gitignored; only a small, reviewed slice enters `tests/fixtures/`. That keeps
- * the repository free of a large raw-log corpus while preserving the exact
- * structures under test.
+ * gitignored; only a small, reviewed slice enters the regression corpus under
+ * `tests/corpus/artifacts/`. That keeps the repository free of a large raw-log
+ * corpus while preserving the exact structures under test. The slice is not
+ * evidence until `tests/corpus/manifest.json` records its provenance, digest
+ * and retained coverage — see `scripts/corpus/build-manifest.mjs`.
  *
  * Usage:
  *
@@ -44,11 +46,24 @@
  * or tokens in the first place.
  */
 
+import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const FORBIDDEN = ["client_secret", "access_token", "authorization", "bearer ", "wcl_client_secret"];
+
+/**
+ * The slicer's own revision, for a corpus artifact's `tooling.revision`.
+ *
+ * Bump it when the selection semantics change. Every slice committed before
+ * M9-B predates this field, and their manifest entries record UNAVAILABLE —
+ * a fact about those captures, not something to backfill.
+ */
+export const SANITIZER_REVISION = "sanitize-probe-2";
+
+/** Where a reviewed slice lands: the regression corpus, never a loose fixture directory. */
+export const OUTPUT_ROOT = "tests/corpus/artifacts/wcl-events";
 
 /**
  * Parses an `--indices` argument against a capture of `eventCount` events.
@@ -167,14 +182,27 @@ function main() {
     process.exit(1);
   }
 
-  const outputPath = `tests/fixtures/wcl/events/${outputName}`;
+  const outputPath = `${OUTPUT_ROOT}/${outputName}`;
   mkdirSync(dirname(outputPath), { recursive: true });
-  writeFileSync(outputPath, `${serialized}\n`, "utf8");
+  const bytes = `${serialized}\n`;
+  writeFileSync(outputPath, bytes, "utf8");
 
+  // The corpus digest policy: SHA-256 over the bytes with CRLF folded to LF.
+  const canonical = Buffer.from(bytes.replaceAll("\r\n", "\n"), "utf8");
   console.log(`wrote ${outputPath}`);
-  console.log(`  events: ${sliced.length} of ${events.length}`);
-  console.log(`  types:  ${JSON.stringify(typeCounts)}`);
-  console.log("Review it, then record its provenance in tests/fixtures/wcl/events/PROVENANCE.md.");
+  console.log(`  events:     ${sliced.length} of ${events.length}`);
+  console.log(`  types:      ${JSON.stringify(typeCounts)}`);
+  console.log(`  sha256:     ${createHash("sha256").update(canonical).digest("hex")}`);
+  console.log(`  byteLength: ${canonical.length}`);
+  console.log(
+    `  tooling:    { name: "scripts/sanitize-probe.mjs", revision: "${SANITIZER_REVISION}", invocation: "${process.argv.slice(2).join(" ")}" }`,
+  );
+  console.log(
+    "Review it, then add an artifact record to scripts/corpus/build-manifest.mjs with its source capture,",
+  );
+  console.log(
+    "transformations and retained coverage, regenerate tests/corpus/manifest.json, and run the corpus tests.",
+  );
   console.log(
     "Only after that may a raw type string from this slice be cited as evidence in supported-families.ts.",
   );

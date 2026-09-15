@@ -1,17 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { anySource } from "../../src/engine/auras/aura-state.js";
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
-import { createCombatState } from "../../src/engine/state/combat-state.js";
 import { afterEvent } from "../../src/engine/state/temporal.js";
-import { syntheticFight } from "../support/synthetic-fight.js";
-import stackFixture from "../fixtures/wcl/events/wcl-aura-stack-absolute.json";
+import { corpusState, normalizationFactsOf } from "../support/corpus/fight.js";
 
 /**
  * EVIDENCE CONTRACT A — the aura `stack` field.
@@ -48,34 +39,13 @@ import stackFixture from "../fixtures/wcl/events/wcl-aura-stack-absolute.json";
  * known at a transition that reported one, and nowhere else.
  */
 
-const WINDOW_START = 7_550_000;
-const WINDOW_END = 7_560_000;
-
 const ASCENDING_CHAIN = 1_297_033;
 const DESCENDING_CHAIN = 1_263_382;
 
-const normalizer = createNormalizer({
-  fightStartTimeMs: WINDOW_START,
-  requestedRange: inclusiveRange(WINDOW_START, WINDOW_END),
-  contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-  directionFields: VERIFIED_DIRECTION_FIELDS,
-});
-normalizer.accept({
-  streamId: "all",
-  pageOrdinal: 0,
-  requestedStartTimeMs: WINDOW_START,
-  nextPageTimestamp: null,
-  events: stackFixture as Record<string, unknown>[],
-});
-const normalized = normalizer.finish();
-const state = createCombatState(
-  syntheticFight({
-    observedCategories: ["AURAS"],
-    events: normalized.events,
-    startTimeMs: WINDOW_START,
-    endTimeMs: WINDOW_END,
-  }),
-);
+// Through the shared corpus coverage interpreter: the artifact retains no
+// coverage grant, so nothing below may rest on an absence or a carry-forward.
+const normalized = normalizationFactsOf("wcl-aura-stack-absolute");
+const state = corpusState("wcl-aura-stack-absolute");
 
 /** Every normalized aura event of one chain, in canonical order, with its position. */
 function chain(abilityGameId: number) {
@@ -96,11 +66,11 @@ function chain(abilityGameId: number) {
 
 describe("the fixture carries the evidence the contract rests on", () => {
   it("normalizes every fixture event without a malformed family", () => {
-    expect(normalized.events.length).toBe(stackFixture.length);
-    expect(normalized.events.some((event) => event.kind === "MALFORMED_FAMILY")).toBe(false);
-    expect(normalized.malformedObservations.length).toBe(0);
-    expect(normalized.malformedEnvelopeCount).toBe(0);
-    expect(normalized.degradedCategories.size).toBe(0);
+    expect(normalized.normalizedEventCount).toBe(normalized.rawEventCount);
+    expect(normalized.malformedFamilyEvents).toBe(0);
+    expect(normalized.malformedObservations).toBe(0);
+    expect(normalized.malformedEnvelopes).toBe(0);
+    expect(normalized.degradedCategories).toEqual([]);
   });
 
   it("holds both complete chains", () => {
@@ -299,7 +269,7 @@ describe("M4 exposes the observed resulting count and derives nothing from it", 
     }
   });
 
-  it("reports NO_OBSERVATION before any stack number was seen", () => {
+  it("reports UNKNOWN before any stack number was seen, never a count of one", () => {
     const application = chain(ASCENDING_CHAIN)[0];
     if (application === undefined) return;
 
@@ -311,8 +281,13 @@ describe("M4 exposes the observed resulting count and derives nothing from it", 
     expect(result.certainty).toBe("UNKNOWN");
     if (result.certainty !== "UNKNOWN") return;
     // The aura is up and its count is one. That is an INFERENCE from the plain
-    // application, not an observation, so this layer does not supply it.
-    expect(result.reason).toBe("NO_OBSERVATION");
+    // application, not an observation, so this layer does not supply it. On
+    // this slice — an --indices selection that retains no coverage grant — the
+    // layer cannot even say "nothing was seen", only that it could not look:
+    // INSUFFICIENT_COVERAGE. The NO_OBSERVATION branch, which needs complete
+    // coverage, is exercised on synthetic premises in aura-state.test.ts.
+    expect(result.reason).toBe("INSUFFICIENT_COVERAGE");
+    expect(JSON.stringify(result)).not.toContain('"observedStacks":1');
   });
 });
 

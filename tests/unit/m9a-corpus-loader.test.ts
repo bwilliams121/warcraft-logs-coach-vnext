@@ -97,7 +97,7 @@ async function artifactRecord(
           invalidates: ["WINDOW_COVERAGE", "ABSENCE_PROOF"],
         },
       ],
-      retainedCoverage: { ranges: [], basis: "head slice" },
+      retainedCoverage: { grants: [], basis: "head slice" },
       retainedFor: "loader tests",
       limitations: [],
       ...provenanceOverrides,
@@ -191,6 +191,33 @@ describe("the manifest itself", () => {
 
     expect(errors.map((e) => e.code)).toEqual(["CONTRACT_VERSION_UNSUPPORTED"]);
     expect(errors[0]?.message).toContain(String(CORPUS_CONTRACT_VERSION + 1));
+  });
+
+  it("rejects the obsolete version-1 manifest explicitly, naming the structural change and the remedy", async () => {
+    // M9-A wrote version 1 with flat retained-coverage ranges. A version-1
+    // manifest must not be read under version-2 semantics — a flat range names
+    // no categories and no actors — so the loader refuses it and says why.
+    const built = await minimalCorpus();
+    built.manifest.contractVersion = 1;
+    ((built.manifest.artifacts[0] as Json)["provenance"] as Json)["retainedCoverage"] = {
+      ranges: [],
+      basis: "v1 shape",
+    };
+    const errors = await errorsOf(tableOf(built));
+
+    expect(errors.map((e) => e.code)).toEqual(["CONTRACT_VERSION_UNSUPPORTED"]);
+    expect(errors[0]?.message).toContain("obsolete");
+    expect(errors[0]?.message).toContain("flat retained-coverage ranges");
+    expect(errors[0]?.message).toContain("build-manifest.mjs");
+    expect(errors[0]?.message).toContain("version 2");
+  });
+
+  it("loads version 2 and nothing else", async () => {
+    const built = await minimalCorpus();
+    expect(built.manifest.contractVersion).toBe(2);
+    expect(CORPUS_CONTRACT_VERSION).toBe(2);
+    const result = await validateCorpus(tableOf(built));
+    expect(result.ok).toBe(true);
   });
 
   it("rejects a missing contract version the same way", async () => {
@@ -609,13 +636,77 @@ describe("lineage must match what was done to the bytes", () => {
     });
   });
 
-  it("rejects retained coverage wider than the source window", async () => {
+  it("rejects a retained coverage grant wider than the source window", async () => {
     const codes = await codesOf(
       await withProvenance({
-        retainedCoverage: { ranges: [{ fromReportTimeMs: 0, toReportTimeMs: 5000 }], basis: "too wide" },
+        retainedCoverage: {
+          grants: [
+            {
+              categories: ["CASTS"],
+              actorScope: null,
+              ranges: [{ fromReportTimeMs: 0, toReportTimeMs: 5000 }],
+            },
+          ],
+          basis: "too wide",
+        },
       }),
     );
     expect(codes).toContain("PROVENANCE_RETAINED_COVERAGE_EXCEEDS_SOURCE");
+  });
+
+  it("rejects two grants naming the same category", async () => {
+    const range = { fromReportTimeMs: 0, toReportTimeMs: 1000 };
+    const codes = await codesOf(
+      await withProvenance({
+        retainedCoverage: {
+          grants: [
+            { categories: ["CASTS", "AURAS"], actorScope: [5], ranges: [range] },
+            { categories: ["AURAS"], actorScope: null, ranges: [range] },
+          ],
+          basis: "overlapping",
+        },
+      }),
+    );
+    expect(codes).toContain("PROVENANCE_COVERAGE_GRANT_OVERLAP");
+  });
+
+  it("rejects a grant naming a category no capture can vouch for, at the schema", async () => {
+    const codes = await codesOf(
+      await withProvenance({
+        retainedCoverage: {
+          grants: [
+            {
+              categories: ["TARGETABILITY"],
+              actorScope: null,
+              ranges: [{ fromReportTimeMs: 0, toReportTimeMs: 10 }],
+            },
+          ],
+          basis: "unvouched",
+        },
+      }),
+    );
+    expect(codes).toEqual(["MANIFEST_SHAPE_INVALID"]);
+  });
+
+  it("rejects a synthetic artifact that claims retained coverage", async () => {
+    const codes = await codesOf(
+      await withProvenance({
+        kind: "SYNTHETIC",
+        source: null,
+        transformations: [],
+        retainedCoverage: {
+          grants: [
+            {
+              categories: ["CASTS"],
+              actorScope: null,
+              ranges: [{ fromReportTimeMs: 0, toReportTimeMs: 10 }],
+            },
+          ],
+          basis: "invented",
+        },
+      }),
+    );
+    expect(codes).toContain("PROVENANCE_COVERAGE_WITHOUT_SOURCE");
   });
 });
 
@@ -685,21 +776,36 @@ describe("cases may only claim what their layer owns, in a registered vocabulary
     expect(await codesOf(tableOf(built))).toEqual(["CASE_ASSERTION_PAYLOAD_KIND_MISMATCH"]);
   });
 
-  it("counts DECLARED assertions separately and never as executable coverage", async () => {
+  it("counts every registered kind as executable now that no kind is DECLARED", async () => {
+    // M9-A shipped two DECLARED kinds; M9-B made both executable. The loader
+    // still counts the two classes separately, so a future DECLARED kind is
+    // reported rather than counted — `declared` is asserted zero here, not
+    // assumed absent.
     const built = await minimalCorpus();
     built.manifest.cases = [
       caseRecord("case.one", "events.a"),
       caseRecord("case.two", "events.a", {
         owningLayer: "PUBLIC_CONTRACT",
-        assertions: [{ kind: "PUBLIC_CONTRACT.REST_MCP_PARITY", params: { surface: "ANALYSIS" } }],
+        assertions: [
+          {
+            kind: "PUBLIC_CONTRACT.REST_MCP_PARITY",
+            params: {
+              document: "ANALYSIS",
+              subject: { actorId: 5, className: "Rogue", specName: "Assassination" },
+              expected: { status: "ANALYZED" },
+            },
+          },
+        ],
       }),
     ];
     const result = await validateCorpus(tableOf(built));
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.corpus.coverage).toEqual({ executable: 1, declared: 1 });
-    expect(result.corpus.cases[1]?.assertions[0]?.execution).toBe("DECLARED");
+    expect(result.corpus.coverage).toEqual({ executable: 2, declared: 0 });
+    expect(
+      result.corpus.cases.every((entry) => entry.assertions.every((a) => a.execution === "EXECUTABLE")),
+    ).toBe(true);
   });
 
   it("requires a case to have at least one assertion — purpose text alone is not a case", async () => {
@@ -730,7 +836,15 @@ describe("authority-dependent expectations", () => {
             actorId: 19,
             targetActorId: 21,
             observedCast: { reportTimeMs: 100, abilityGameId: 703 },
-            expectedCoverage: "UNKNOWN",
+            expected: {
+              outcome: "UNKNOWN",
+              basis: "AUTHORITY_SELECTION_UNRESOLVED",
+              authorityCoverage: "UNKNOWN",
+              authorityToken: null,
+              selectionPrecision: null,
+              decisiveBlocker: "OBSERVED_STATE_MISSING",
+              observedActionRejected: false,
+            },
           },
         },
       ],
@@ -766,7 +880,7 @@ describe("authority-dependent expectations", () => {
     expect(errors[0]?.message).toContain(PINNED_AUTHORITY_REVISIONS["SIMC_APL_ROGUE_ASSASSINATION"]);
   });
 
-  it("accepts the committed revision, as a DECLARED assertion", async () => {
+  it("accepts the committed revision", async () => {
     const built = await minimalCorpus();
     built.manifest.cases = [
       authorityCase({
@@ -779,7 +893,11 @@ describe("authority-dependent expectations", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.corpus.coverage).toEqual({ executable: 0, declared: 1 });
+    expect(result.corpus.coverage).toEqual({ executable: 1, declared: 0 });
+  });
+
+  it("knows the pinned DoT-duration dataset as an authority too", () => {
+    expect(PINNED_AUTHORITY_REVISIONS["SIMC_DBC_ROGUE_DOT_DURATIONS"]).toMatch(/^simc-[0-9a-f]{8}-\d+$/);
   });
 });
 

@@ -1,14 +1,636 @@
 {
-  "contractVersion": 1,
+  "contractVersion": 2,
   "corpusId": "warcraft-logs-coach-vnext.regression-corpus",
   "artifacts": [
     {
-      "artifactId": "wcl-events.no-actor-sentinel-source",
-      "path": "artifacts/wcl-events/no-actor-sentinel-source.json",
+      "artifactId": "synthetic.actor-zero-cast",
+      "path": "artifacts/synthetic/actor-zero-cast.json",
       "encoding": "JSON",
       "payloadKind": "WCL_EVENT_ARRAY",
-      "sha256": "5a01122d68ef0ada32d1f8feb1c34ebb9742ade326dfc76aa457ad51624c9be5",
-      "byteLength": 1070,
+      "sha256": "6dcb92a325ce636031c9e31b539c2e33038ea5913dae59162fa7e8d99e680573",
+      "byteLength": 133,
+      "provenance": {
+        "kind": "SYNTHETIC",
+        "parentArtifactId": null,
+        "source": null,
+        "transformations": [],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Synthetic; there is no capture to retain coverage from."
+        },
+        "retainedFor": "One cast with sourceID 0 and targetID -1. No committed capture contains actor 0, so the rule that 0 is an ordinary actor id — and is never confused with absence or with the sentinel — is pinned on constructed input.",
+        "limitations": [
+          "Hand-authored. Whether Warcraft Logs ever emits actor 0 is not established by this repository; the rule is that nothing rules it out."
+        ]
+      }
+    },
+    {
+      "artifactId": "synthetic.graphql-event-page-null-data",
+      "path": "artifacts/synthetic/graphql-event-page-null-data.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "4f08306974e04e8c978dbd1569e4c855b35a39c67169ea0fa586cf30ec1625af",
+      "byteLength": 133,
+      "provenance": {
+        "kind": "SYNTHETIC",
+        "parentArtifactId": null,
+        "source": null,
+        "transformations": [],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Synthetic; there is no capture to retain coverage from."
+        },
+        "retainedFor": "A well-formed decoded GraphQL data object whose ReportEventPaginator carries data: null. The schema declares data as nullable JSON; this is the shape the decoder must classify as a malformed page and never as an empty one.",
+        "limitations": [
+          "Hand-authored against the documented schema shape. It is not a captured upstream response.",
+          "The cursor value 7551050 is arbitrary and carries no meaning."
+        ]
+      }
+    },
+    {
+      "artifactId": "synthetic.graphql-page-sequence-malformed-second-page",
+      "path": "artifacts/synthetic/graphql-page-sequence-malformed-second-page.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_PAGE_SEQUENCE",
+      "sha256": "ee0a6fda63a106d13d657ecdcbb12dac5bf3903dc50a99e3e4ac46d33e239234",
+      "byteLength": 765,
+      "provenance": {
+        "kind": "SYNTHETIC",
+        "parentArtifactId": null,
+        "source": null,
+        "transformations": [],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Synthetic; there is no capture to retain coverage from."
+        },
+        "retainedFor": "A well-formed first page followed by a page whose data is null. The stream must end PARTIAL with MALFORMED_PAGE, keeping the first page's events and never reading the second as empty.",
+        "limitations": ["Hand-authored against the documented paginator shape."]
+      }
+    },
+    {
+      "artifactId": "synthetic.graphql-page-sequence-two-pages",
+      "path": "artifacts/synthetic/graphql-page-sequence-two-pages.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_PAGE_SEQUENCE",
+      "sha256": "a171e41e70e3ae3ccc1211a767485bb7a262388d92413fa1d146528e63caeb75",
+      "byteLength": 1225,
+      "provenance": {
+        "kind": "SYNTHETIC",
+        "parentArtifactId": null,
+        "source": null,
+        "transformations": [],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Synthetic; there is no capture to retain coverage from."
+        },
+        "retainedFor": "Two decoded page responses: page 1 ends with nextPageTimestamp 1500 and page 2 is terminal. The last event of page 1 and the first of page 2 are identical in every field, so the sequence proves both the verbatim cursor and the no-deduplication rule at once.",
+        "limitations": [
+          "Hand-authored against the documented paginator shape. Real page boundaries in a real report have not been captured into the corpus; see the evidence-gap report."
+        ]
+      }
+    },
+    {
+      "artifactId": "synthetic.unsupported-type-event",
+      "path": "artifacts/synthetic/unsupported-type-event.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "1f49a92161e6f3ad3e3eb9ffa41fb8c0b843f6c0abbdce4d8840e97e3e06a63f",
+      "byteLength": 154,
+      "provenance": {
+        "kind": "SYNTHETIC",
+        "parentArtifactId": null,
+        "source": null,
+        "transformations": [],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Synthetic; there is no capture to retain coverage from."
+        },
+        "retainedFor": "One event with a valid envelope whose type string no contract recognises, so the unsupported-type path can be pinned without pretending a real family is unsupported.",
+        "limitations": [
+          "The type string is invented so it cannot collide with a real Warcraft Logs family. This proves the unsupported path exists; it proves nothing about any real type.",
+          "Hand-authored. Not evidence of any Warcraft Logs behaviour."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "path": "artifacts/wcl-events/wcl-assassination-d2-decision-corpus.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "2bb4ae8fdbbee66e19347823e695e3a1ffe9e8e894b919e3d9da01c9f1135339",
+      "byteLength": 225941,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 19,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-13",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2136000,
+            "endTimeMs": 2195000
+          },
+          "completeness": {
+            "eventsReturned": 2777,
+            "pagesRetrieved": "UNAVAILABLE",
+            "nextPageTimestamp": "UNAVAILABLE",
+            "state": "UNAVAILABLE",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, 'wcl-assassination-d2-decision-corpus.json': a wider capture [2,136,000 .. 2,195,000] of 2,777 events was taken first and cut to the committed start by re-running all seven corpus decisions at four cut points. Page counts and cursors were not recorded."
+          },
+          "captureTooling": {
+            "name": "M5-D2 capture probe under vitest.probe.config.ts over [2,136,000 .. 2,195,000], filtering IN PLACE; the committed start was chosen by measured cut",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/ (M5-D2 wider capture, 2,777 events) — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/<m5d2-cut-source>.json wcl-assassination-d2-decision-corpus.json"
+            },
+            "detail": "In-place filter of the wider capture, order preserved: EVERY cast by actor 19 (131 casts) and EVERY aura event targeting actor 19 or 21 in [2,164,325 .. 2,194,928], plus the pull combatantinfo at 2,004,589. 1,083 events. A strict forward extension of the C3c1 slice. Aura events targeting enemy 22 were captured and deliberately EXCLUDED; including them changed no corpus outcome.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-assassination-d2-decision-corpus.json tests/corpus/artifacts/wcl-events/wcl-assassination-d2-decision-corpus.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES"],
+              "actorScope": [19],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2164325,
+                  "toReportTimeMs": 2194928
+                }
+              ]
+            },
+            {
+              "categories": ["AURAS"],
+              "actorScope": [19, 21],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2164325,
+                  "toReportTimeMs": 2194928
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS (and the RESOURCES attached to them) for actor 19 over [2,164,325 .. 2,194,928] is complete by the predicate 'every actor-19 cast'; AURAS for targets 19 and 21 likewise. The window start is MEASURED: cutting later than 2,164,325 drops the Garrote anchor and case 1 degrades to UNKNOWN."
+        },
+        "retainedFor": "The M5-D2 real single-target decision corpus: seven real decisions from one real pull, chosen mechanically from the full-fight cast census. Also the single-fight, raid-night and encounter-context parity subject.",
+        "limitations": [
+          "Verifies OBSERVED decisions only; the only positive usability proof is the observed execution, so this is not next-action prediction.",
+          "Every locator matches on a timestamp and asserts uniqueness; index-relative addressing is not safe against a change of predicate.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-assassination-envenom-combo-points",
+      "path": "artifacts/wcl-events/wcl-assassination-envenom-combo-points.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "2a3fbb278f1ca5dac19963934ab6d3267ed98427d2835b77c25a52888246f472",
+      "byteLength": 35579,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 19,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-12",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": "UNAVAILABLE",
+            "endTimeMs": "UNAVAILABLE"
+          },
+          "completeness": {
+            "eventsReturned": "UNAVAILABLE",
+            "pagesRetrieved": "UNAVAILABLE",
+            "nextPageTimestamp": "UNAVAILABLE",
+            "state": "UNAVAILABLE",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, 'wcl-assassination-envenom-combo-points.json': assembled from several narrow live windows across a 424-second fight (M5-A) plus two single-timestamp windows (M5-B), each selected by fact. No single query window or page count describes the assembly; the M5-B windows each returned exactly one Envenom cast by actor 19."
+          },
+          "captureTooling": {
+            "name": "M5-A/M5-B narrow-window probes (.probe/m5b-fixture.config.ts), several single-timestamp and narrow windows assembled into .probe/m5b-fixture-source.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m5b-fixture-source.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m5b-fixture-source.json wcl-assassination-envenom-combo-points.json --indices 0,1,2,3,4,5,6,7,8,9,10,11,12,13"
+            },
+            "detail": "Kept all fourteen events of a probe-assembled source: two combatantinfo events (actors 13 and 19, both specID 259), seven Envenom casts by actors 13 and 19 selected by fact from narrow windows, and five costed discrete-resource casts from five classes.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-assassination-envenom-combo-points.json tests/corpus/artifacts/wcl-events/wcl-assassination-envenom-combo-points.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Assembled from non-adjacent narrow windows; no contiguous range survives for any category."
+        },
+        "retainedFor": "The M5-A Assassination decision surface: the 3-of-7 Envenom that is REJECTED_BY_AUTHORITY, the 7-of-7 Envenoms whose spend gate is satisfiable, and the Envenom at 2,090,898 that carries NO combo-point entry — the negative evidence that a missing entry must never read as zero. Also corroboration for the combo-point and Energy wire contracts.",
+        "limitations": [
+          "Nothing about Darkest Night: the buff appears nowhere in the report.",
+          "Nothing about generate-side combo-point state; combo points are reported only on casts that spend them.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-assassination-garrote-dot-remains",
+      "path": "artifacts/wcl-events/wcl-assassination-garrote-dot-remains.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "5834cf8027b2582c50dfe758e24990ce6c4aeceda8f9f42e330e962ecf5ec196",
+      "byteLength": 55708,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 19,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-13",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2164325,
+            "endTimeMs": 2176581
+          },
+          "completeness": {
+            "eventsReturned": "UNAVAILABLE",
+            "pagesRetrieved": "UNAVAILABLE",
+            "nextPageTimestamp": "UNAVAILABLE",
+            "state": "UNAVAILABLE",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, 'wcl-assassination-garrote-dot-remains.json': paged ranges over [2,164,325 .. 2,176,581] plus the pull combatantinfo at 2,004,589 from a separate query. Page counts and cursors were not recorded; the probe measured 0 unidentified-ability aura events on target 21 before capture."
+          },
+          "captureTooling": {
+            "name": ".probe/m5c3a-order.probe.ts under vitest.probe.config.ts, filtering IN PLACE to preserve retrieval order; wrote .probe/m5c3a-ordered-source.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m5c3a-ordered-source.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m5c3a-ordered-source.json wcl-assassination-garrote-dot-remains.json"
+            },
+            "detail": "In-place filter of the paged capture, order preserved: EVERY aura event in [2,164,325 .. 2,176,581] whose target is actor 19 or actor 21 (no ability or source filter), the two decision casts by actor 19, and the pull combatantinfo at 2,004,589. 270 events. Casts by actor 19 other than the two decision casts were NOT retained.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-assassination-garrote-dot-remains.json tests/corpus/artifacts/wcl-events/wcl-assassination-garrote-dot-remains.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["AURAS"],
+              "actorScope": [19, 21],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2164325,
+                  "toReportTimeMs": 2176581
+                }
+              ]
+            }
+          ],
+          "basis": "AURAS for targets 19 and 21 over [2,164,325 .. 2,176,581] is complete by the capture predicate (every aura event on either target, nothing filtered by ability or source), measured before capture with 0 unidentified-ability aura events on target 21. CASTS is NOT granted: only two of actor 19's casts were kept."
+        },
+        "retainedFor": "The Garrote remaining-duration derivation at Q: anchor at 2,164,326, a DIFFERENT rogue's Garrote at 2,172,232 that must not become the anchor, and the cast at 2,176,580 sharing its timestamp with its own consequences — with Warcraft Logs returning the cast FIRST.",
+        "limitations": [
+          "The 18,000 ms Garrote duration is pinned DBC data, not derived from this capture.",
+          "Nothing about the `cds` list, `talent.razor_wire`, `variable.single_target` or `pmultiplier`.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-assassination-kingsbane-cooldown",
+      "path": "artifacts/wcl-events/wcl-assassination-kingsbane-cooldown.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "79189db3e8acde60517b9088de1a0356eeee06980d5c523a3547c2139096e9e7",
+      "byteLength": 76272,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 19,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-13",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2164325,
+            "endTimeMs": 2176581
+          },
+          "completeness": {
+            "eventsReturned": "UNAVAILABLE",
+            "pagesRetrieved": "UNAVAILABLE",
+            "nextPageTimestamp": "UNAVAILABLE",
+            "state": "UNAVAILABLE",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, 'wcl-assassination-kingsbane-cooldown.json': the C3a window with the cast predicate widened to every actor-19 cast. Page counts and cursors were not recorded."
+          },
+          "captureTooling": {
+            "name": ".probe/c3c1-fixture.probe.ts under vitest.probe.config.ts, filtering IN PLACE; wrote .probe/m5c3c1-source.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m5c3c1-source.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m5c3c1-source.json wcl-assassination-kingsbane-cooldown.json --head 310"
+            },
+            "detail": "In-place filter of the paged capture, order preserved: EVERY aura event in [2,164,325 .. 2,176,581] whose target is actor 19 or 21, EVERY cast by actor 19 in that interval (42 casts), and the pull combatantinfo. 310 events; --head 310 kept the whole filtered source.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-assassination-kingsbane-cooldown.json tests/corpus/artifacts/wcl-events/wcl-assassination-kingsbane-cooldown.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES"],
+              "actorScope": [19],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2164325,
+                  "toReportTimeMs": 2176581
+                }
+              ]
+            },
+            {
+              "categories": ["AURAS"],
+              "actorScope": [19, 21],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2164325,
+                  "toReportTimeMs": 2176581
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS (and the RESOURCES attached to them) for actor 19 over [2,164,325 .. 2,176,581] is complete by the predicate 'every actor-19 cast'; AURAS for targets 19 and 21 likewise. No other actor's casts were retained."
+        },
+        "retainedFor": "The Kingsbane cooldown derivation at Q: `lastObservedCast(kingsbane, COMPLETE, before Q)` is only meaningful when every candidate is present, so all 42 actor-19 casts are here. Kingsbane at 2,173,778 is the anchor; the 24 melee autos and assorted abilities are what prove an unrelated cast does not anchor a cooldown.",
+        "limitations": [
+          "The 60 s Kingsbane base cooldown is pinned DBC, not derived from this capture; the observed next cast at Q+57,665 corroborates it.",
+          "Nothing about DoT ticking, Envenom duration or any predictive value.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-assassination-vanish-ambush-gate",
+      "path": "artifacts/wcl-events/wcl-assassination-vanish-ambush-gate.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "f8704fb9c214b66de7f48fd930e53b694d9f5833ac58144ace284a7cef77d819",
+      "byteLength": 15518,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 19,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-12",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": "UNAVAILABLE",
+            "endTimeMs": "UNAVAILABLE"
+          },
+          "completeness": {
+            "eventsReturned": 5,
+            "pagesRetrieved": "UNAVAILABLE",
+            "nextPageTimestamp": "UNAVAILABLE",
+            "state": "UNAVAILABLE",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, 'wcl-assassination-vanish-ambush-gate.json': two ranges, limit 10,000. The probe itself filtered to the five events of interest; the ranges' own event counts and cursors were not recorded."
+          },
+          "captureTooling": {
+            "name": ".probe/m5c2-fixture.probe.ts (two ranges) under vitest.probe.config.ts; wrote .probe/m5c2-fixture-source.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m5c2-fixture-source.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m5c2-fixture-source.json wcl-assassination-vanish-ambush-gate.json --indices 0,1,2,3,4"
+            },
+            "detail": "Kept all five events of the probe-filtered source, in captured order: the pull combatantinfo, the Vanish applybuff and cast at 2,176,120, and the Garrote cast followed by the Vanish removebuff at 2,176,580. The last two share a timestamp and their ORDER is the evidence.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-assassination-vanish-ambush-gate.json tests/corpus/artifacts/wcl-events/wcl-assassination-vanish-ambush-gate.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "The probe filtered to five events; whether every aura event targeting actor 19 between 2,176,120 and 2,176,580 was retained is not recorded, so no coverage is granted. Carrying the Vanish buff forward to the Garrote decision point is therefore UNKNOWN here; the C3a and C3c1 slices retain that coverage and prove it."
+        },
+        "retainedFor": "Actor 19's real build through the normalizer's talentTree (improved_ambush NOT_SELECTED, shrouded_suffocation SELECTED, blindside UNKNOWN), and the Vanish BUFF (11327) versus the Vanish ACTION (1856) being different identities.",
+        "limitations": [
+          "Nothing about `variable.single_target` or ability 8676.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-aura-stack-absolute",
+      "path": "artifacts/wcl-events/wcl-aura-stack-absolute.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "304e10d387d906d947efffd8e935f8d4dc2919d905b9e9b93c6ff792b3f8b131",
+      "byteLength": 2307,
       "provenance": {
         "kind": "SANITIZED_CAPTURE",
         "parentArtifactId": null,
@@ -37,7 +659,7 @@
             "pagesRetrieved": 1,
             "nextPageTimestamp": null,
             "state": "COMPLETE",
-            "evidence": "tests/fixtures/wcl/events/PROVENANCE.md, table 'Reproducing the raw captures those indices refer to', column followup-q1-omitted.json: 5,010 events returned, nextPageTimestamp null (terminal page). The full-fight run the window belongs to was COMPLETE: 40 pages, 196,366 events, no failures."
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, table 'Reproducing the raw captures those indices refer to', column followup-q1-omitted.json: 5,010 events returned, nextPageTimestamp null (terminal page). The full-fight run the window belongs to was COMPLETE: 40 pages, 196,366 events, no failures."
           },
           "captureTooling": {
             "name": "live probe follow-up query q1 (hostilityType omitted) run under vitest.probe.config.ts; wrote .probe/followup-q1-omitted.json",
@@ -53,9 +675,9 @@
             "tooling": {
               "name": "scripts/sanitize-probe.mjs",
               "revision": "UNAVAILABLE",
-              "invocation": "node scripts/sanitize-probe.mjs .probe/followup-q1-omitted.json wcl-no-actor-sentinel-source.json --where sourceID=-1 4"
+              "invocation": "node scripts/sanitize-probe.mjs .probe/followup-q1-omitted.json wcl-aura-stack-absolute.json --indices 1801,1827,1836,2372,2373,2378,2913,2914,3162,3385,3386,3770,3771,3867,3876"
             },
-            "detail": "Kept the first 4 events whose sourceID is -1, in captured order. Every other event in the 5,010-event window was dropped. The four retained events share timestamp 7,551,049 and ability 1285965; they differ only by target.",
+            "detail": "Kept exactly fifteen capture positions, in the order listed: two COMPLETE aura chains — every event Warcraft Logs returned inside the window for (ability 1297033, actor 9 on itself) and for (ability 1263382, actor 7 on itself). Every other event in the window was dropped, including every OTHER aura on actors 7 and 9.",
             "invalidates": [
               "WINDOW_COVERAGE",
               "ABSENCE_PROOF",
@@ -76,70 +698,125 @@
           {
             "kind": "LEGACY_FIXTURE_COPY",
             "tooling": {
-              "name": "M9-A seed (file copy)",
+              "name": "M9-A/M9-B migration (file copy)",
               "revision": "NOT_APPLICABLE",
-              "invocation": "cp tests/fixtures/wcl/events/wcl-no-actor-sentinel-source.json tests/corpus/artifacts/wcl-events/no-actor-sentinel-source.json"
+              "invocation": "cp tests/fixtures/wcl/events/wcl-aura-stack-absolute.json tests/corpus/artifacts/wcl-events/wcl-aura-stack-absolute.json"
             },
-            "detail": "Byte-identical copy of the legacy fixture (same sha256). The legacy file stays in place until M9-B migrates its importers; a test asserts the two remain identical while both exist.",
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
             "invalidates": []
           }
         ],
         "retainedCoverage": {
-          "ranges": [],
-          "basis": "A --where selection retains no contiguous range. The window held 5,010 events and this slice holds 4, so nothing between or around them is retained."
+          "grants": [],
+          "basis": "The two chains are complete for their own (ability, source, target) identities, but other auras on the same targets were dropped, so no category-level coverage survives for actors 7 or 9. Chain completeness is evidence for the stack-value contract; it is not coverage."
         },
-        "retainedFor": "Evidence that -1 is the no-actor sentinel on sourceID, not only on targetID, on real enemy-environment damage; and the smallest real slice for proving the corpus format.",
+        "retainedFor": "Establishes that on a stack-change aura event `stack` is the ABSOLUTE RESULTING count after that event (ESTABLISHED_ABSOLUTE_RESULTING), and that a stack removal reporting a positive count is a known-ACTIVE anchor.",
         "limitations": [
           "Prettier-formatted whitespace; the parsed payload is what the capture returned.",
-          "Cannot prove any absence, continuity or pagination behaviour.",
-          "No actor or ability names are present; identities are numeric ids only.",
-          "gameVersion 1 / logVersion 17 only."
+          "gameVersion 1 / logVersion 17 only.",
+          "A resulting count of ZERO appears in no capture and is deliberately not read as INACTIVE.",
+          "Presence carried forward from an anchor needs coverage this slice does not retain; only presence AT an observed transition is provable here."
         ]
       }
     },
     {
-      "artifactId": "wcl-events.no-actor-sentinel-source.unusable-negative",
-      "path": "artifacts/wcl-events/no-actor-sentinel-source.unusable-negative.json",
+      "artifactId": "wcl-boss-sourced",
+      "path": "artifacts/wcl-events/wcl-boss-sourced.json",
       "encoding": "JSON",
       "payloadKind": "WCL_EVENT_ARRAY",
-      "sha256": "eb5fcc6a59ecc7b0cc7b6214cda0152a516dedb6dcf69be4f7de78ffb8dc4ab6",
-      "byteLength": 1070,
+      "sha256": "294f90b89a3ce3085833413a2f3c2d8933c4228f09607f2edf89b157257f20b7",
+      "byteLength": 1092,
       "provenance": {
-        "kind": "DERIVED_FROM_CAPTURE",
-        "parentArtifactId": "wcl-events.no-actor-sentinel-source",
-        "source": null,
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "qJ1pgB49ZrRNVmCd",
+          "fightId": 6,
+          "reportRevision": 1,
+          "sourceActorId": 5,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-11",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": false,
+            "limit": 10000,
+            "startTimeMs": 7550000,
+            "endTimeMs": 7560000
+          },
+          "completeness": {
+            "eventsReturned": 5010,
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, table 'Reproducing the raw captures those indices refer to', column followup-q1-omitted.json: 5,010 events returned, nextPageTimestamp null (terminal page). The full-fight run the window belongs to was COMPLETE: 40 pages, 196,366 events, no failures."
+          },
+          "captureTooling": {
+            "name": "live probe follow-up query q1 (hostilityType omitted) run under vitest.probe.config.ts; wrote .probe/followup-q1-omitted.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/followup-q1-omitted.json — gitignored, not retained in the repository"
+        },
         "transformations": [
           {
-            "kind": "VALUE_MUTATION",
+            "kind": "SUBSET_SELECTION",
             "tooling": {
-              "name": "M9-A seed (scripted single-token replacement)",
-              "revision": "NOT_APPLICABLE",
-              "invocation": "replace the first occurrence of '\"sourceID\": -1,' with '\"sourceID\": -5,'"
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/followup-q1-omitted.json wcl-boss-sourced.json --where sourceID=160 4"
             },
-            "detail": "Raw index 0: sourceID changed from -1 to -5. Every other byte is identical to the parent; the byte length is unchanged. The value -5 has never been observed in any capture.",
+            "detail": "Kept the first 4 events whose sourceID is 160 (the boss), in captured order.",
             "invalidates": [
-              "OBSERVED_BEHAVIOUR",
               "WINDOW_COVERAGE",
               "ABSENCE_PROOF",
               "CROSS_EVENT_CONTINUITY",
               "PAGINATION_BEHAVIOUR"
             ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-boss-sourced.json tests/corpus/artifacts/wcl-events/wcl-boss-sourced.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
           }
         ],
         "retainedCoverage": {
-          "ranges": [],
-          "basis": "Inherits none from the parent, and a derivation never gains coverage."
+          "grants": [],
+          "basis": "A property-based selection retains no contiguous range for any category or actor; nothing between or around the retained events is present."
         },
-        "retainedFor": "Constructs the condition the UNUSABLE_VALUE rule exists for — a negative source id that is not the verified sentinel — on otherwise real event shapes, without claiming Warcraft Logs ever emitted it.",
+        "retainedFor": "Evidence that the unfiltered `All` stream carries enemy-sourced events: actor 160 is the boss. The source window held 202 boss-sourced events alongside 4,339 others.",
         "limitations": [
-          "Not evidence that Warcraft Logs emits any negative id other than -1.",
-          "Not evidence of anything about actor -5; the id was chosen to match nothing."
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned.",
+          "gameVersion 1 / logVersion 17 only.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "Actor 160's identity as the boss comes from master data recorded in the legacy provenance, not from these events."
         ]
       }
     },
     {
-      "artifactId": "wcl-events.cast-resource-pre-cost",
-      "path": "artifacts/wcl-events/cast-resource-pre-cost.json",
+      "artifactId": "wcl-cast-resource-pre-cost",
+      "path": "artifacts/wcl-events/wcl-cast-resource-pre-cost.json",
       "encoding": "JSON",
       "payloadKind": "WCL_EVENT_ARRAY",
       "sha256": "c0e2bb4b8aa59f298de40efc0c23ded246ac77703c73d1f4d7721e08cdb26c85",
@@ -172,7 +849,7 @@
             "pagesRetrieved": 1,
             "nextPageTimestamp": 2191432,
             "state": "PARTIAL",
-            "evidence": "tests/fixtures/wcl/events/PROVENANCE.md, table 'Reproducing the raw captures those indices refer to', column m4c1-rogue-resources.json: 10,003 events returned, nextPageTimestamp 2,191,432. The page limit was hit, so the capture covers only the contiguous prefix [2,174,394, 2,191,432). The selected positions sit inside that prefix."
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, table 'Reproducing the raw captures those indices refer to', column m4c1-rogue-resources.json: 10,003 events returned, nextPageTimestamp 2,191,432. The page limit was hit, so the capture covers only the contiguous prefix [2,174,394, 2,191,432). The selected positions sit inside that prefix."
           },
           "captureTooling": {
             "name": "M4-C1 evidence-investigation probe run under vitest.probe.config.ts; wrote .probe/m4c1-rogue-resources.json",
@@ -211,16 +888,16 @@
           {
             "kind": "LEGACY_FIXTURE_COPY",
             "tooling": {
-              "name": "M9-A seed (file copy)",
+              "name": "M9-A/M9-B migration (file copy)",
               "revision": "NOT_APPLICABLE",
-              "invocation": "cp tests/fixtures/wcl/events/wcl-cast-resource-pre-cost.json tests/corpus/artifacts/wcl-events/cast-resource-pre-cost.json"
+              "invocation": "cp tests/fixtures/wcl/events/wcl-cast-resource-pre-cost.json tests/corpus/artifacts/wcl-events/wcl-cast-resource-pre-cost.json"
             },
-            "detail": "Byte-identical copy of the legacy fixture (same sha256). The legacy file stays in place until M9-B migrates its importers; a test asserts the two remain identical while both exist.",
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
             "invalidates": []
           }
         ],
         "retainedCoverage": {
-          "ranges": [],
+          "grants": [],
           "basis": "An --indices selection retains five non-adjacent capture positions; no contiguous range survives."
         },
         "retainedFor": "The evidence contract that a costed COMPLETE cast's attached classResources[].amount is the amount BEFORE the cost: it carries amount == max == cost == 7, which is impossible under a post-cost reading.",
@@ -233,131 +910,494 @@
       }
     },
     {
-      "artifactId": "wcl-events.synthetic-unsupported-type",
-      "path": "artifacts/wcl-events/synthetic-unsupported-type.json",
+      "artifactId": "wcl-midfight-window",
+      "path": "artifacts/wcl-events/wcl-midfight-window.json",
       "encoding": "JSON",
       "payloadKind": "WCL_EVENT_ARRAY",
-      "sha256": "1f49a92161e6f3ad3e3eb9ffa41fb8c0b843f6c0abbdce4d8840e97e3e06a63f",
-      "byteLength": 154,
+      "sha256": "b354e9411cc168c000970407f4e6def0e864ba0a42277ed3347d98a621a24037",
+      "byteLength": 10540,
       "provenance": {
-        "kind": "SYNTHETIC",
+        "kind": "SANITIZED_CAPTURE",
         "parentArtifactId": null,
-        "source": null,
-        "transformations": [],
-        "retainedCoverage": {
-          "ranges": [],
-          "basis": "Synthetic; there is no capture to retain coverage from."
+        "source": {
+          "reportCode": "qJ1pgB49ZrRNVmCd",
+          "fightId": 6,
+          "reportRevision": 1,
+          "sourceActorId": 5,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-11",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": false,
+            "limit": 10000,
+            "startTimeMs": 7550000,
+            "endTimeMs": 7560000
+          },
+          "completeness": {
+            "eventsReturned": 5010,
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, table 'Reproducing the raw captures those indices refer to', column followup-q1-omitted.json: 5,010 events returned, nextPageTimestamp null (terminal page). The full-fight run the window belongs to was COMPLETE: 40 pages, 196,366 events, no failures."
+          },
+          "captureTooling": {
+            "name": "live probe follow-up query q1 (hostilityType omitted) run under vitest.probe.config.ts; wrote .probe/followup-q1-omitted.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/followup-q1-omitted.json — gitignored, not retained in the repository"
         },
-        "retainedFor": "One event with a valid envelope whose type string no contract recognises, so the unsupported-type path can be pinned without pretending a real family is unsupported.",
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/followup-q1-omitted.json wcl-midfight-window.json --per-type 3"
+            },
+            "detail": "Kept up to 3 events of EACH distinct raw type, in captured order, from the 5,010-event window. 59 events.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-midfight-window.json tests/corpus/artifacts/wcl-events/wcl-midfight-window.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "A property-based selection retains no contiguous range for any category or actor; nothing between or around the retained events is present."
+        },
+        "retainedFor": "Six families absent from the pull window (absorbed, healabsorbed, removedebuff, applydebuffstack, removedebuffstack, empowerstart/empowerend), 117 targetID -1 and 92 sourceID -1 sentinels in the source window, and stack-bearing transitions. Cited by src as fixtureId `wcl-midfight-window`.",
         "limitations": [
-          "The type string is invented so it cannot collide with a real Warcraft Logs family. This proves the unsupported path exists; it proves nothing about any real type.",
-          "Hand-authored. Not evidence of any Warcraft Logs behaviour."
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned.",
+          "gameVersion 1 / logVersion 17 only.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "Cannot prove any absence, continuity or pagination behaviour."
         ]
       }
     },
     {
-      "artifactId": "wcl-graphql.event-page-null-data",
-      "path": "artifacts/wcl-graphql/event-page-null-data.json",
+      "artifactId": "wcl-no-actor-sentinel-source",
+      "path": "artifacts/wcl-events/wcl-no-actor-sentinel-source.json",
       "encoding": "JSON",
-      "payloadKind": "WCL_GRAPHQL_DATA",
-      "sha256": "4f08306974e04e8c978dbd1569e4c855b35a39c67169ea0fa586cf30ec1625af",
-      "byteLength": 133,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "5a01122d68ef0ada32d1f8feb1c34ebb9742ade326dfc76aa457ad51624c9be5",
+      "byteLength": 1070,
       "provenance": {
-        "kind": "SYNTHETIC",
+        "kind": "SANITIZED_CAPTURE",
         "parentArtifactId": null,
-        "source": null,
-        "transformations": [],
-        "retainedCoverage": {
-          "ranges": [],
-          "basis": "Synthetic; there is no capture to retain coverage from."
+        "source": {
+          "reportCode": "qJ1pgB49ZrRNVmCd",
+          "fightId": 6,
+          "reportRevision": 1,
+          "sourceActorId": 5,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-11",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": false,
+            "limit": 10000,
+            "startTimeMs": 7550000,
+            "endTimeMs": 7560000
+          },
+          "completeness": {
+            "eventsReturned": 5010,
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md, table 'Reproducing the raw captures those indices refer to', column followup-q1-omitted.json: 5,010 events returned, nextPageTimestamp null (terminal page). The full-fight run the window belongs to was COMPLETE: 40 pages, 196,366 events, no failures."
+          },
+          "captureTooling": {
+            "name": "live probe follow-up query q1 (hostilityType omitted) run under vitest.probe.config.ts; wrote .probe/followup-q1-omitted.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/followup-q1-omitted.json — gitignored, not retained in the repository"
         },
-        "retainedFor": "A well-formed decoded GraphQL data object whose ReportEventPaginator carries data: null. The schema declares data as nullable JSON; this is the shape the decoder must classify as a malformed page and never as an empty one.",
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/followup-q1-omitted.json wcl-no-actor-sentinel-source.json --where sourceID=-1 4"
+            },
+            "detail": "Kept the first 4 events whose sourceID is -1, in captured order. The four retained events share timestamp 7,551,049 and ability 1285965; they differ only by target.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-no-actor-sentinel-source.json tests/corpus/artifacts/wcl-events/wcl-no-actor-sentinel-source.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "A property-based selection retains no contiguous range for any category or actor; nothing between or around the retained events is present."
+        },
+        "retainedFor": "Evidence that -1 is the no-actor sentinel on sourceID, not only on targetID, on real enemy-environment damage.",
         "limitations": [
-          "Hand-authored against the documented schema shape. It is not a captured upstream response.",
-          "The cursor value 7551050 is arbitrary and carries no meaning."
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned.",
+          "gameVersion 1 / logVersion 17 only.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "Cannot prove any absence, continuity or pagination behaviour."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-no-actor-sentinel-source.unusable-negative",
+      "path": "artifacts/wcl-events/wcl-no-actor-sentinel-source.unusable-negative.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "eb5fcc6a59ecc7b0cc7b6214cda0152a516dedb6dcf69be4f7de78ffb8dc4ab6",
+      "byteLength": 1070,
+      "provenance": {
+        "kind": "DERIVED_FROM_CAPTURE",
+        "parentArtifactId": "wcl-no-actor-sentinel-source",
+        "source": null,
+        "transformations": [
+          {
+            "kind": "VALUE_MUTATION",
+            "tooling": {
+              "name": "M9-A seed (scripted single-token replacement)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "replace the first occurrence of '\"sourceID\": -1,' with '\"sourceID\": -5,'"
+            },
+            "detail": "Raw index 0: sourceID changed from -1 to -5. Every other byte is identical to the parent; the byte length is unchanged. The value -5 has never been observed in any capture.",
+            "invalidates": [
+              "OBSERVED_BEHAVIOUR",
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Inherits none from the parent, and a derivation never gains coverage."
+        },
+        "retainedFor": "Constructs the condition the UNUSABLE_VALUE rule exists for — a negative source id that is not the verified sentinel — on otherwise real event shapes, without claiming Warcraft Logs ever emitted it.",
+        "limitations": [
+          "Not evidence that Warcraft Logs emits any negative id other than -1.",
+          "Not evidence of anything about actor -5; the id was chosen to match nothing."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-pull-window-with-resources",
+      "path": "artifacts/wcl-events/wcl-pull-window-with-resources.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "7c13a171a49a7e482842adcb0914f2efc929b7ece59f28d4acd7b33680ec3007",
+      "byteLength": 55269,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "qJ1pgB49ZrRNVmCd",
+          "fightId": 6,
+          "reportRevision": 1,
+          "sourceActorId": 5,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-11",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": "UNAVAILABLE",
+            "startTimeMs": "UNAVAILABLE",
+            "endTimeMs": "UNAVAILABLE"
+          },
+          "completeness": {
+            "eventsReturned": "UNAVAILABLE",
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "UNAVAILABLE",
+            "state": "PARTIAL",
+            "evidence": "tests/corpus/PROVENANCE-legacy.md: the first page of the pull, from a full-fight run that was COMPLETE overall (40 pages, 196,366 events, no failures). The page's own event count and cursor were not recorded; only that it was page 1 of 40, so the capture is a prefix and not the window."
+          },
+          "captureTooling": {
+            "name": "scripts/probe/wcl-events.probe.ts (npm run probe); wrote .probe/events-page1-withresources.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "npm.cmd run probe"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/events-page1-withresources.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/events-page1-withresources.json wcl-pull-window-with-resources.json --per-type 3"
+            },
+            "detail": "Kept up to 3 events of EACH distinct raw type, in captured order, from the first page of the pull. 43 events across 16 families.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A/M9-B migration (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-pull-window-with-resources.json tests/corpus/artifacts/wcl-events/wcl-pull-window-with-resources.json"
+            },
+            "detail": "Byte-identical copy of the former tests/fixtures/wcl/events slice (same sha256). The corpus copy is now the canonical payload; the legacy file was removed in M9-B once every consumer read from the corpus.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "A property-based selection retains no contiguous range for any category or actor; nothing between or around the retained events is present."
+        },
+        "retainedFor": "Type strings and field shapes for 16 raw families; the ONLY committed evidence for the flattened `resourceActor` attachment shape and for `combatantinfo` gear and talents. Cited by src/engine/normalization/supported-families.ts and src/wcl/evidence-capability.ts as fixtureId `wcl-pull-window-with-resources`.",
+        "limitations": [
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned.",
+          "gameVersion 1 / logVersion 17 only.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "The single name string is the public encounter name on `encounterstart`.",
+          "Cannot prove any absence, continuity or pagination behaviour."
         ]
       }
     }
   ],
   "cases": [
     {
-      "caseId": "normalization.no-actor-sentinel.source-absence",
-      "artifactId": "wcl-events.no-actor-sentinel-source",
-      "owningLayer": "NORMALIZATION",
-      "contractUnderTest": "src/engine/normalization/raw-event-fields.ts NO_ACTOR_SENTINEL; src/engine/normalization/event-normalizer.ts source reading",
-      "purpose": "Real enemy-environment damage carrying sourceID -1 normalizes to a null source with the NO_ACTOR_SENTINEL reason, and no ActorRef -1 is ever minted. The four events also share one timestamp, so the count check doubles as proof that equal timestamps are not collapsed.",
-      "assertions": [
-        { "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED", "params": { "expectedEventCount": 4 } },
-        {
-          "kind": "NORMALIZATION.SOURCE_ABSENCE",
-          "params": { "selector": { "kind": "EVERY_EVENT" }, "absence": "NO_ACTOR_SENTINEL" }
-        },
-        { "kind": "NORMALIZATION.NO_ACTOR_REF_HOLDS", "params": { "actorId": -1 } }
-      ],
-      "rationale": {
-        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-        "text": "The -1 sentinel contract is owned by the normalization layer and is evidence-backed: the mid-fight window capture carries 92 events with sourceID -1 and 117 with targetID -1, including environment damage with no stated source. Reading -1 as an actor id would mint a well-formed actor that exists nowhere in master data."
-      },
-      "authority": null,
-      "limitations": [
-        "Says nothing about negative values other than -1; that is the derived case's job.",
-        "gameVersion 1 / logVersion 17 only."
-      ],
-      "relatedTests": ["tests/regression/actor-sentinels-never-become-actors.test.ts"]
-    },
-    {
-      "caseId": "combat-state.trimmed-slice-cannot-prove-absence",
-      "artifactId": "wcl-events.no-actor-sentinel-source",
+      "caseId": "combat-state.aura-stack-is-the-absolute-resulting-count",
+      "artifactId": "wcl-aura-stack-absolute",
       "owningLayer": "COMBAT_STATE",
-      "contractUnderTest": "src/engine/state/state-result.ts gateAbsenceClaim; src/engine/state/combat-state.ts lastObservedCast",
-      "purpose": "A sanitized slice whose SUBSET_SELECTION retained no coverage cannot prove that an actor never cast anything. Asked for actor 14's last completed cast over the whole window, the state layer must answer UNKNOWN for INSUFFICIENT_COVERAGE — never EXACT null, which would be a proven absence manufactured from trimming.",
+      "contractUnderTest": "src/engine/auras/aura-observations.ts stack semantics; src/engine/auras/aura-state.ts latestStackObservation and presenceAt",
+      "purpose": "On a stack-change event `stack` is the absolute resulting count after that event: the ascending chain reads 2, 3, ... 6; the descending chain's removebuffstack reading 1 proves the aura survived it (ACTIVE at that transition) and only the ordinary removebuff ends it (INACTIVE). Between transitions, with no retained coverage, presence is UNKNOWN.",
       "assertions": [
         {
-          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
-          "params": { "actorId": 14, "abilityGameId": null, "reason": "INSUFFICIENT_COVERAGE" }
+          "kind": "COMBAT_STATE.AURA_STACK_OBSERVATION",
+          "params": {
+            "aura": {
+              "targetActorId": 9,
+              "abilityGameId": 1297033,
+              "auraClass": "BUFF",
+              "sourceActorId": 9
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 7552998
+            },
+            "expected": {
+              "rawType": "applybuffstack",
+              "observedStacks": 2,
+              "reportTimeMs": 7552998
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_STACK_OBSERVATION",
+          "params": {
+            "aura": {
+              "targetActorId": 9,
+              "abilityGameId": 1297033,
+              "auraClass": "BUFF",
+              "sourceActorId": 9
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 7556034
+            },
+            "expected": {
+              "rawType": "applybuffstack",
+              "observedStacks": 6,
+              "reportTimeMs": 7556034
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_STACK_OBSERVATION",
+          "params": {
+            "aura": {
+              "targetActorId": 7,
+              "abilityGameId": 1263382,
+              "auraClass": "BUFF",
+              "sourceActorId": 7
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 7553744
+            },
+            "expected": {
+              "rawType": "removebuffstack",
+              "observedStacks": 2,
+              "reportTimeMs": 7553744
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_STACK_OBSERVATION",
+          "params": {
+            "aura": {
+              "targetActorId": 7,
+              "abilityGameId": 1263382,
+              "auraClass": "BUFF",
+              "sourceActorId": 7
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 7554996
+            },
+            "expected": {
+              "rawType": "removebuffstack",
+              "observedStacks": 1,
+              "reportTimeMs": 7554996
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "params": {
+            "aura": {
+              "targetActorId": 7,
+              "abilityGameId": 1263382,
+              "auraClass": "BUFF",
+              "sourceActorId": 7
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 7554996
+            },
+            "expected": {
+              "certainty": "EXACT",
+              "presence": "ACTIVE",
+              "anchorReportTimeMs": 7554996
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "params": {
+            "aura": {
+              "targetActorId": 7,
+              "abilityGameId": 1263382,
+              "auraClass": "BUFF",
+              "sourceActorId": 7
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 7556178
+            },
+            "expected": {
+              "certainty": "EXACT",
+              "presence": "INACTIVE",
+              "anchorReportTimeMs": 7556178
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "params": {
+            "aura": {
+              "targetActorId": 7,
+              "abilityGameId": 1263382,
+              "auraClass": "BUFF",
+              "sourceActorId": 7
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 7555000
+            },
+            "expected": {
+              "certainty": "UNKNOWN",
+              "reason": "INSUFFICIENT_COVERAGE"
+            }
+          }
         }
       ],
       "rationale": {
-        "basis": ["OWNED_CONTRACT"],
-        "text": "Absence claims are gated on COMPLETE coverage of the interval (state-result.ts). The harness grants coverage only from the artifact's retainedCoverage, which is empty because the transformation record says so. CLAUDE.md: partial event retrieval does NOT mean the player performed no events during the missing interval."
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "A delta reading would need the first stack application to read 1, which never appears across 1,012 stack applications in two reports; an absolute-before reading would put a PRIOR count of 2 on an application that follows applybuff. The descending chain runs 1.18 s past its removebuffstack 1, which only the absolute-resulting reading allows."
       },
       "authority": null,
       "limitations": [
-        "Pins the reason INSUFFICIENT_COVERAGE, which presumes the CASTS category is OBSERVABLE from captures. If the harness ever stopped granting capability to captures the reason would move to CAPABILITY_UNVERIFIED, and this case should fail so the change is reviewed."
+        "A resulting count of ZERO appears in no capture and is not read as INACTIVE.",
+        "Presence between transitions needs coverage this slice does not retain; the UNKNOWN assertion pins that honestly."
       ],
-      "relatedTests": ["tests/regression/m4-state-never-invents-absence.test.ts"]
-    },
-    {
-      "caseId": "normalization.unobserved-negative-source-is-unusable-not-sentinel",
-      "artifactId": "wcl-events.no-actor-sentinel-source.unusable-negative",
-      "owningLayer": "NORMALIZATION",
-      "contractUnderTest": "src/engine/normalization/event-normalizer.ts actor-side reading; ActorAbsence UNUSABLE_VALUE",
-      "purpose": "A negative source id that is not the verified sentinel is recorded as UNUSABLE_VALUE — neither an actor nor a 'no actor' statement — while the untouched sentinel events in the same payload keep their NO_ACTOR_SENTINEL meaning. Proves the rule discriminates rather than treating all negatives alike.",
-      "assertions": [
-        { "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED", "params": { "expectedEventCount": 4 } },
-        {
-          "kind": "NORMALIZATION.SOURCE_ABSENCE",
-          "params": { "selector": { "kind": "RAW_INDEX", "index": 0 }, "absence": "UNUSABLE_VALUE" }
-        },
-        {
-          "kind": "NORMALIZATION.SOURCE_ABSENCE",
-          "params": { "selector": { "kind": "RAW_INDEX", "index": 1 }, "absence": "NO_ACTOR_SENTINEL" }
-        },
-        { "kind": "NORMALIZATION.NO_ACTOR_REF_HOLDS", "params": { "actorId": -5 } }
-      ],
-      "rationale": {
-        "basis": ["OWNED_CONTRACT"],
-        "text": "No evidence supports generalising -1's meaning. The normalization layer therefore records an unobserved negative as something it cannot interpret, and refuses to build an actor from it. The artifact is DERIVED: the -5 is constructed, and the case claims only how the layer treats it, not that it occurs."
-      },
-      "authority": null,
-      "limitations": [
-        "The mutated event was never observed; this is a rule-of-the-layer claim, not a capture claim."
-      ],
-      "relatedTests": ["tests/regression/actor-sentinels-never-become-actors.test.ts"]
+      "relatedTests": ["tests/unit/aura-stack-absolute-contract.test.ts", "tests/unit/aura-state.test.ts"]
     },
     {
       "caseId": "combat-state.costed-cast-resource-is-pre-cost",
-      "artifactId": "wcl-events.cast-resource-pre-cost",
+      "artifactId": "wcl-cast-resource-pre-cost",
       "owningLayer": "COMBAT_STATE",
       "contractUnderTest": "src/engine/resources/resource-observations.ts timing; src/engine/resources/resource-state.ts observationOnEvent",
       "purpose": "The resource snapshot attached to a costed COMPLETE cast is tagged PRE_COST with amount, max and cost preserved verbatim; an uncosted cast on the same actor stays EVENT_ASSOCIATED with a null cost. The finisher's 7/7 costing 7 is the cap-bounded falsifier of the post-cost reading.",
@@ -369,7 +1409,13 @@
             "abilityGameId": 32645,
             "reportTimeMs": 2175585,
             "resourceWireType": 4,
-            "expected": { "observedAmount": 7, "observedMax": 7, "observedCost": 7, "timing": "PRE_COST" }
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 7,
+              "observedMax": 7,
+              "observedCost": 7,
+              "timing": "PRE_COST"
+            }
           }
         },
         {
@@ -379,7 +1425,13 @@
             "abilityGameId": 116858,
             "reportTimeMs": 2175128,
             "resourceWireType": 7,
-            "expected": { "observedAmount": 50, "observedMax": 50, "observedCost": 20, "timing": "PRE_COST" }
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 50,
+              "observedMax": 50,
+              "observedCost": 20,
+              "timing": "PRE_COST"
+            }
           }
         },
         {
@@ -390,6 +1442,7 @@
             "reportTimeMs": 2182589,
             "resourceWireType": 3,
             "expected": {
+              "certainty": "EXACT",
               "observedAmount": 195,
               "observedMax": 250,
               "observedCost": 45,
@@ -405,6 +1458,7 @@
             "reportTimeMs": 2182589,
             "resourceWireType": 3,
             "expected": {
+              "certainty": "EXACT",
               "observedAmount": 150,
               "observedMax": 250,
               "observedCost": null,
@@ -415,7 +1469,7 @@
       ],
       "rationale": {
         "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
-        "text": "amount == max while cost > 0 is decided from one event with no arithmetic: a post-cost reading would require holding max + cost, above the cap. The wider investigation behind the fixture found 126 cap-bounded falsifiers and zero counterexamples across 423 costed entries in two reports. The timing tag itself is owned by the resource layer and decided once from the normalized model."
+        "text": "amount == max while cost > 0 is decided from one event with no arithmetic: a post-cost reading would require holding max + cost, above the cap. The wider investigation behind the fixture found 126 cap-bounded falsifiers and zero counterexamples across 423 costed entries in two reports."
       },
       "authority": null,
       "limitations": [
@@ -426,15 +1480,681 @@
       "relatedTests": ["tests/unit/cast-resource-pre-cost-contract.test.ts"]
     },
     {
+      "caseId": "combat-state.kingsbane-anchor-is-the-most-recent-observed-cast",
+      "artifactId": "wcl-assassination-kingsbane-cooldown",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/state/combat-state.ts lastObservedCast",
+      "purpose": "Among all 42 of actor 19's casts before Q, the last COMPLETE Kingsbane is the one at 2,173,778 — an observation, needing no coverage — and the 24 melee autos and assorted abilities around it do not anchor it. The Vanish action likewise anchors at 2,176,120.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+          "params": {
+            "actorId": 19,
+            "abilityGameId": 385627,
+            "at": {
+              "kind": "BEFORE_CAST",
+              "cast": {
+                "actorId": 19,
+                "reportTimeMs": 2176580,
+                "abilityGameId": 703
+              }
+            },
+            "expectedReportTimeMs": 2173778
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+          "params": {
+            "actorId": 19,
+            "abilityGameId": 1856,
+            "at": {
+              "kind": "BEFORE_CAST",
+              "cast": {
+                "actorId": 19,
+                "reportTimeMs": 2176580,
+                "abilityGameId": 703
+              }
+            },
+            "expectedReportTimeMs": 2176120
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "'Most recent' is only meaningful when every candidate is present, which is why the slice widened the cast predicate to every actor-19 cast. EXACT with a value is an observation and needs no coverage; only the null (proven absence) branch is gated."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/regression/m5c3c1-kingsbane-cooldown.test.ts"]
+    },
+    {
+      "caseId": "combat-state.missing-combo-point-entry-is-no-observation-not-zero",
+      "artifactId": "wcl-assassination-envenom-combo-points",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-state.ts observationOnEvent",
+      "purpose": "The real Envenom at 2,090,898 plainly happened — it carries an Energy cost of 35 — yet its classResources omits the combo-point entry entirely. Asked for its combo points, the layer answers UNKNOWN / NO_OBSERVATION. Reading it as zero would manufacture the sharpest possible false rejection.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 19,
+            "abilityGameId": 32645,
+            "reportTimeMs": 2090898,
+            "resourceWireType": 4,
+            "expected": {
+              "certainty": "UNKNOWN",
+              "reason": "NO_OBSERVATION"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 19,
+            "abilityGameId": 32645,
+            "reportTimeMs": 2090898,
+            "resourceWireType": 3,
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 173,
+              "observedMax": 250,
+              "observedCost": 35,
+              "timing": "PRE_COST"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "A second Envenom by the same actor 1,015 ms later carries t4: 6/7 cost 6, so the absence is a gap in the record, not a fact about the pool. NO_OBSERVATION is the layer's word for 'we hold the event and it carries no such snapshot'."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/regression/m5-envenom-unknown-states.test.ts"]
+    },
+    {
+      "caseId": "combat-state.resources-are-observed-never-regenerated",
+      "artifactId": "wcl-cast-resource-pre-cost",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-state.ts latestObservedAtOrBefore",
+      "purpose": "Asked for actor 19's Energy 4.4 seconds after the last observation, the state layer returns that observation STALE with its own amount (250) and its own time — not a regenerated figure, not an interpolation, and not 250 minus the 35 the finisher cost.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 19,
+            "resourceWireType": 3,
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 2180000
+            },
+            "expected": {
+              "certainty": "STALE",
+              "observedAmount": 250,
+              "observedAtReportTimeMs": 2175585
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The resource surface is an observation layer, not a simulator: no passive regeneration, no interpolation, no replay of a cost or a delta onto an earlier amount. STALE carries the age so a caller can see the gap it is being asked to tolerate."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/regression/m4-resource-state-is-never-simulated.test.ts"]
+    },
+    {
+      "caseId": "combat-state.trimmed-slice-cannot-prove-absence",
+      "artifactId": "wcl-no-actor-sentinel-source",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/state/state-result.ts gateAbsenceClaim; src/engine/state/combat-state.ts lastObservedCast",
+      "purpose": "A sanitized slice whose SUBSET_SELECTION retained no coverage cannot prove that an actor never cast anything. Asked for actor 14's last completed cast over the whole window, the state layer must answer UNKNOWN for INSUFFICIENT_COVERAGE — never EXACT null, which would be a proven absence manufactured from trimming.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
+          "params": {
+            "actorId": 14,
+            "abilityGameId": null,
+            "reason": "INSUFFICIENT_COVERAGE"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Absence claims are gated on COMPLETE coverage of the interval (state-result.ts). The harness grants coverage only from the artifact's retainedCoverage grants, which are empty because the transformation record says so. CLAUDE.md: partial event retrieval does NOT mean the player performed no events during the missing interval."
+      },
+      "authority": null,
+      "limitations": [
+        "Pins the reason INSUFFICIENT_COVERAGE, which presumes the CASTS category is OBSERVABLE from captures. If the harness ever stopped granting capability to captures the reason would move to CAPABILITY_UNVERIFIED, and this case should fail so the change is reviewed."
+      ],
+      "relatedTests": ["tests/regression/m4-state-never-invents-absence.test.ts"]
+    },
+    {
+      "caseId": "combat-state.vanish-buff-active-before-garrote-with-retained-coverage",
+      "artifactId": "wcl-assassination-kingsbane-cooldown",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/auras/aura-state.ts presenceAt (carry-forward under retained AURAS coverage)",
+      "purpose": "With AURAS coverage retained for target 19 over the window, the Vanish buff applied at 2,176,120 is carried forward to the instant before the Garrote cast at 2,176,580: ACTIVE, anchored on the observed application, no duration invented anywhere. The removebuff that follows the cast on the same millisecond does not reach back.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "params": {
+            "aura": {
+              "targetActorId": 19,
+              "abilityGameId": 11327,
+              "auraClass": "BUFF",
+              "sourceActorId": 19
+            },
+            "at": {
+              "kind": "BEFORE_CAST",
+              "cast": {
+                "actorId": 19,
+                "reportTimeMs": 2176580,
+                "abilityGameId": 703
+              }
+            },
+            "expected": {
+              "certainty": "EXACT",
+              "presence": "ACTIVE",
+              "anchorReportTimeMs": 2176120
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "params": {
+            "aura": {
+              "targetActorId": 19,
+              "abilityGameId": 11327,
+              "auraClass": "BUFF",
+              "sourceActorId": 19
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 2176580
+            },
+            "expected": {
+              "certainty": "EXACT",
+              "presence": "INACTIVE",
+              "anchorReportTimeMs": 2176580
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "The slice's predicate — every aura event targeting 19 or 21 in the interval, order preserved — is what makes the continuity claim honest; and at Q Warcraft Logs returns the cast BEFORE the removebuff, so BEFORE_EVENT at the cast excludes it."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m5c2-vanish-stealth-and-ambush-gate.test.ts",
+        "tests/regression/m5c3c1-kingsbane-cooldown.test.ts"
+      ]
+    },
+    {
+      "caseId": "combat-state.vanish-buff-is-observed-at-its-transitions-and-unknown-between",
+      "artifactId": "wcl-assassination-vanish-ambush-gate",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/auras/aura-state.ts presenceAt; src/engine/state/state-result.ts gateContinuityClaim",
+      "purpose": "The Vanish BUFF (11327) on actor 19 is INACTIVE at the end of 2,176,580 because its removebuff is the last transition on that millisecond — an observation. Immediately before the Garrote cast on the same millisecond, presence would have to be carried forward from the 2,176,120 application, and this five-event slice retains no coverage to carry it, so the answer is UNKNOWN / INSUFFICIENT_COVERAGE. The kingsbane-cooldown and D2 slices retain that coverage and prove ACTIVE.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "params": {
+            "aura": {
+              "targetActorId": 19,
+              "abilityGameId": 11327,
+              "auraClass": "BUFF",
+              "sourceActorId": 19
+            },
+            "at": {
+              "kind": "END_OF_TIMESTAMP",
+              "reportTimeMs": 2176580
+            },
+            "expected": {
+              "certainty": "EXACT",
+              "presence": "INACTIVE",
+              "anchorReportTimeMs": 2176580
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "params": {
+            "aura": {
+              "targetActorId": 19,
+              "abilityGameId": 11327,
+              "auraClass": "BUFF",
+              "sourceActorId": 19
+            },
+            "at": {
+              "kind": "BEFORE_CAST",
+              "cast": {
+                "actorId": 19,
+                "reportTimeMs": 2176580,
+                "abilityGameId": 703
+              }
+            },
+            "expected": {
+              "certainty": "UNKNOWN",
+              "reason": "INSUFFICIENT_COVERAGE"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Carrying an anchor forward asserts that nothing in the track contradicted it in between, which needs complete coverage of the interval for the target. The legacy M5-C2 harness granted that coverage by declaration; the corpus grants only what the transformation record retains, and this slice's probe did not record whether every aura event on actor 19 in the interval was kept."
+      },
+      "authority": null,
+      "limitations": [
+        "This is the corpus being stricter than the legacy M5-C2 harness, deliberately. The ACTIVE-at-Q fact is pinned on the two slices whose predicate retains AURAS coverage for target 19."
+      ],
+      "relatedTests": ["tests/regression/m5c2-vanish-stealth-and-ambush-gate.test.ts"]
+    },
+    {
+      "caseId": "normalization.actor-zero-is-an-ordinary-actor",
+      "artifactId": "synthetic.actor-zero-cast",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts actor-side reading",
+      "purpose": "Actor id 0 is a real id: nothing rules it out, so a cast with sourceID 0 binds a source actor 0 rather than reading as absence. Its targetID -1 is still the sentinel.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 1
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "params": {
+            "index": 0,
+            "side": "SOURCE",
+            "expected": {
+              "kind": "ACTOR",
+              "actorId": 0,
+              "instanceId": null
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "params": {
+            "index": 0,
+            "side": "TARGET",
+            "expected": {
+              "kind": "ABSENT",
+              "absence": "NO_ACTOR_SENTINEL"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A truthiness check on the actor id would drop actor 0 into absence. The layer's rule is that only the verified -1 sentinel and a missing key mean 'no actor'; every other integer is an id."
+      },
+      "authority": null,
+      "limitations": ["Synthetic input: no committed capture contains actor 0."],
+      "relatedTests": ["tests/regression/actor-sentinels-never-become-actors.test.ts"]
+    },
+    {
+      "caseId": "normalization.assassination-slices-normalize-cleanly",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/supported-families.ts; event-normalizer.ts",
+      "purpose": "The largest committed slice — 1,083 events including a full combatantinfo with gear and a 76-entry talent tree — normalizes with every family recognised, nothing dropped, and captured order intact, including the eight events sharing Q's millisecond with the Garrote cast FIRST.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 1083
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+          "params": {
+            "reportTimeMs": 2176580,
+            "count": 8
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "At Q the cast shares a timestamp with seven consequences and Warcraft Logs returns the cast first; the first C3a capture sorted by timestamp and got the DoT remainder wrong by 12 seconds. Order within a millisecond is evidence, and the normalizer must carry it through unchanged."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/ingestion-preserves-event-order.test.ts",
+        "tests/regression/m5c3a-garrote-remains-and-core-dot.test.ts"
+      ]
+    },
+    {
+      "caseId": "normalization.boss-sourced-events-survive-the-unfiltered-stream",
+      "artifactId": "wcl-boss-sourced",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/wcl/retrieval-plan.ts (one dataType: All stream, no actor filter); event-normalizer.ts source reading",
+      "purpose": "Enemy-sourced events are ordinary events with a real source actor. The unfiltered All stream carries them, and normalization binds actor 160 as the source of each without special-casing hostility.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 4
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "params": {
+            "index": 0,
+            "side": "SOURCE",
+            "expected": {
+              "kind": "ACTOR",
+              "actorId": 160,
+              "instanceId": null
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "params": {
+            "index": 3,
+            "side": "SOURCE",
+            "expected": {
+              "kind": "ACTOR",
+              "actorId": 160,
+              "instanceId": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "M3 ingests exactly one dataType: All stream with no actor filter because environment and enemy evidence is what actionability depends on; the source window held 202 boss-sourced events alongside 4,339 others, and this slice is four of them."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/contracts/retrieval-plan.test.ts"]
+    },
+    {
+      "caseId": "normalization.no-actor-sentinel.source-absence",
+      "artifactId": "wcl-no-actor-sentinel-source",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/raw-event-fields.ts NO_ACTOR_SENTINEL; src/engine/normalization/event-normalizer.ts source reading",
+      "purpose": "Real enemy-environment damage carrying sourceID -1 normalizes to a null source with the NO_ACTOR_SENTINEL reason, and no ActorRef -1 is ever minted. The four events also share one timestamp, so the count check doubles as proof that equal timestamps are not collapsed.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 4
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+          "params": {
+            "reportTimeMs": 7551049,
+            "count": 4
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "params": {
+            "selector": {
+              "kind": "EVERY_EVENT"
+            },
+            "absence": "NO_ACTOR_SENTINEL"
+          }
+        },
+        {
+          "kind": "NORMALIZATION.NO_ACTOR_REF_HOLDS",
+          "params": {
+            "actorId": -1
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "The -1 sentinel contract is owned by the normalization layer and is evidence-backed: the mid-fight window capture carries 92 events with sourceID -1 and 117 with targetID -1, including environment damage with no stated source. Reading -1 as an actor id would mint a well-formed actor that exists nowhere in master data."
+      },
+      "authority": null,
+      "limitations": [
+        "Says nothing about negative values other than -1; that is the derived case's job.",
+        "gameVersion 1 / logVersion 17 only."
+      ],
+      "relatedTests": [
+        "tests/regression/actor-sentinels-never-become-actors.test.ts",
+        "tests/regression/ingestion-preserves-event-order.test.ts"
+      ]
+    },
+    {
+      "caseId": "normalization.pull-window.families-and-attached-resource-side",
+      "artifactId": "wcl-pull-window-with-resources",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/supported-families.ts; event-normalizer.ts attached resources (resourceActor)",
+      "purpose": "The pull window — the only committed evidence for the flattened resourceActor attachment — normalizes with every family recognised, and each attached snapshot binds to the side resourceActor names: 2 is the TARGET's snapshot (a boss's health on a player's damage event), 1 is the SOURCE's. An event with no resourceActor carries no attachment.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 43
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+          "params": {
+            "index": 7,
+            "expectedSide": "TARGET"
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+          "params": {
+            "index": 8,
+            "expectedSide": "SOURCE"
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+          "params": {
+            "index": 17,
+            "expectedSide": "SOURCE"
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+          "params": {
+            "index": 0,
+            "expectedSide": "NONE"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "The capture established that resource snapshots are FLATTENED onto the event with resourceActor saying which side they describe (1 = source, 2 = target); there is no sourceResources/targetResources object. Attributing a target-side snapshot to the source would hand a player the boss's health."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/attached-resources-keep-their-side.test.ts",
+        "tests/unit/supported-families.test.ts"
+      ]
+    },
+    {
+      "caseId": "normalization.target-sentinel-and-input-order.midfight-window",
+      "artifactId": "wcl-midfight-window",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/supported-families.ts; raw-event-fields.ts VERIFIED_DIRECTION_FIELDS and NO_ACTOR_SENTINEL",
+      "purpose": "Every raw type in the mid-fight window is an evidence-backed contract; captured order and same-millisecond runs survive normalization; a begincast whose targetID is -1 gets a null target with the sentinel reason while its source stays a real actor carrying its sourceInstance (50, instance 28); and a removebuff carries SOURCE 11 and TARGET 18 read from the verified field names, never swapped.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 59
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+          "params": {
+            "reportTimeMs": 7550085,
+            "count": 6
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "params": {
+            "index": 6,
+            "side": "TARGET",
+            "expected": {
+              "kind": "ABSENT",
+              "absence": "NO_ACTOR_SENTINEL"
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "params": {
+            "index": 6,
+            "side": "SOURCE",
+            "expected": {
+              "kind": "ACTOR",
+              "actorId": 50,
+              "instanceId": 28
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "params": {
+            "index": 16,
+            "side": "SOURCE",
+            "expected": {
+              "kind": "ACTOR",
+              "actorId": 11,
+              "instanceId": null
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "params": {
+            "index": 16,
+            "side": "TARGET",
+            "expected": {
+              "kind": "ACTOR",
+              "actorId": 18,
+              "instanceId": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "supported-families.ts recognises only raw types that appear in a committed capture, and this slice is one of the two the registry cites. Direction is read from the verified field names (sourceID/targetID), which the captures established; a removebuff from 11 on 18 is 11's aura leaving 18, and nothing infers the reverse."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/unit/supported-families.test.ts",
+        "tests/regression/actor-sentinels-never-become-actors.test.ts",
+        "tests/regression/m4-aura-state-never-inverts-direction.test.ts"
+      ]
+    },
+    {
+      "caseId": "normalization.unobserved-negative-source-is-unusable-not-sentinel",
+      "artifactId": "wcl-no-actor-sentinel-source.unusable-negative",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts actor-side reading; ActorAbsence UNUSABLE_VALUE",
+      "purpose": "A negative source id that is not the verified sentinel is recorded as UNUSABLE_VALUE — neither an actor nor a 'no actor' statement — while the untouched sentinel events in the same payload keep their NO_ACTOR_SENTINEL meaning.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 4
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "params": {
+            "selector": {
+              "kind": "RAW_INDEX",
+              "index": 0
+            },
+            "absence": "UNUSABLE_VALUE"
+          }
+        },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "params": {
+            "selector": {
+              "kind": "RAW_INDEX",
+              "index": 1
+            },
+            "absence": "NO_ACTOR_SENTINEL"
+          }
+        },
+        {
+          "kind": "NORMALIZATION.NO_ACTOR_REF_HOLDS",
+          "params": {
+            "actorId": -5
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "No evidence supports generalising -1's meaning. The normalization layer therefore records an unobserved negative as something it cannot interpret, and refuses to build an actor from it. The artifact is DERIVED: the -5 is constructed, and the case claims only how the layer treats it, not that it occurs."
+      },
+      "authority": null,
+      "limitations": [
+        "The mutated event was never observed; this is a rule-of-the-layer claim, not a capture claim."
+      ],
+      "relatedTests": ["tests/regression/actor-sentinels-never-become-actors.test.ts"]
+    },
+    {
       "caseId": "normalization.unrecognised-type-is-counted-not-dropped",
-      "artifactId": "wcl-events.synthetic-unsupported-type",
+      "artifactId": "synthetic.unsupported-type-event",
       "owningLayer": "NORMALIZATION",
       "contractUnderTest": "src/engine/normalization/event-normalizer.ts UNSUPPORTED_TYPE / UNKNOWN_EVENT_TYPE",
       "purpose": "An event whose type string no evidence-backed contract recognises is preserved as an UNSUPPORTED_TYPE event and counted under its verbatim type string. It is not dropped, and it is not coerced into a known family.",
       "assertions": [
         {
           "kind": "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED",
-          "params": { "rawType": "synthetic_unsupported_type", "count": 1 }
+          "params": {
+            "rawType": "synthetic_unsupported_type",
+            "count": 1
+          }
         }
       ],
       "rationale": {
@@ -446,17 +2166,539 @@
       "relatedTests": ["tests/unit/supported-families.test.ts", "tests/unit/event-normalizer.test.ts"]
     },
     {
+      "caseId": "public-contract.analysis-parity-for-an-unsupported-spec",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "contractUnderTest": "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/services/analysis-service.ts",
+      "purpose": "Identified as a Protection Paladin, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document that says gameplay analysis was not attempted, identical on REST and MCP.",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "params": {
+            "document": "ANALYSIS",
+            "subject": {
+              "actorId": 19,
+              "className": "Paladin",
+              "specName": "Protection"
+            },
+            "expected": {
+              "status": "SPEC_NOT_SUPPORTED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "An unsupported specialization must not produce an empty report that reads as clean play. The public contract carries SPEC_NOT_SUPPORTED as its own status, with zero coverage and no authority."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/integration/transport-consistency.test.ts",
+        "tests/contracts/m6c-analysis-contract.test.ts"
+      ]
+    },
+    {
+      "caseId": "public-contract.analysis-parity-over-the-d2-corpus",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "contractUnderTest": "src/contracts/analysis-contract.ts PublicAnalysisResultSchema; src/api/worker.ts /v1/analysis; src/mcp/tools/analyze-warcraft-log.ts",
+      "purpose": "The single-fight analysis of actor 19 over the D2 corpus is one document on REST and on MCP (structuredContent and text), valid against the frozen public schema, ANALYZED, and publishing MATCH as AUTHORITY_COMPATIBLE_ONLY.",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "params": {
+            "document": "ANALYSIS",
+            "subject": {
+              "actorId": 19,
+              "className": "Rogue",
+              "specName": "Assassination"
+            },
+            "expected": {
+              "status": "ANALYZED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "One composition root builds one runner, both adapters receive it, and both call the same projection. Parity is tested rather than argued because a second projection added to one adapter is exactly the kind of change nothing else would notice."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/integration/transport-consistency.test.ts"]
+    },
+    {
+      "caseId": "public-contract.encounter-context-parity-local-only",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "contractUnderTest": "src/contracts/encounter-context-contract.ts; src/services/encounter-context-service.ts; /v1/encounter-context; analyze_encounter_context",
+      "purpose": "A local encounter-context request (no external references) over the same fake ports is one document on REST and MCP, valid against the frozen schema, with the external-reference section reporting NOT_REQUESTED. No rankings transport is wired, so nothing external could have been contacted.",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "params": {
+            "document": "ENCOUNTER_CONTEXT",
+            "fightIds": [1],
+            "subjectFightId": 1,
+            "subject": {
+              "actorId": 19
+            },
+            "expected": {
+              "externalReferenceStatus": "NOT_REQUESTED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Encounter context composes the raid-night SERVICE through one port set; a deployment that never enables external references wires no ranking transport at all, and the document says so explicitly rather than by omission."
+      },
+      "authority": null,
+      "limitations": [
+        "External-reference behaviour is not exercised: M9-B runs only what deterministic injected responses can support, and no rankings fixture is committed to the corpus."
+      ],
+      "relatedTests": ["tests/integration/m8h-encounter-context-transports.test.ts"]
+    },
+    {
+      "caseId": "public-contract.raid-night-parity-over-the-d2-corpus",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "contractUnderTest": "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
+      "purpose": "One raid-night request for one fight with one Assassination participant, through the real raid-night service over fake ports carrying the D2 corpus, is one document on REST and MCP with exactly one ANALYZED cell.",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "params": {
+            "document": "RAID_NIGHT",
+            "fightIds": [1],
+            "subject": {
+              "actorId": 19
+            },
+            "expected": {
+              "analyzedCells": 1
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The raid-night service is the production path with only the three Warcraft Logs ports faked; the cell is the real M5 facade's output projected by the real M7 aggregator."
+      },
+      "authority": null,
+      "limitations": [
+        "The orchestration fixture normalizes the D2 artifact under its own window and fans it per participant; parity for other artifacts is not supported by this executor."
+      ],
+      "relatedTests": [
+        "tests/integration/m7f-raid-night-transports.test.ts",
+        "tests/regression/m7f-raid-night-orchestration.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-assassination.deathmark-stays-unknown-on-predictive-state",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "contractUnderTest": "src/specs/rogue/assassination/observed-analysis.ts; decision-coverage.ts OBSERVED_STATE_MISSING",
+      "purpose": "The real Deathmark at 2,172,777 is compared and refuses: UNKNOWN because cds[0]'s condition ends in target.time_to_die and fight_remains, which are PREDICTIVE and never bound. A ready major cooldown that was actually used does not become a rejection just because the authority could not resolve.",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "params": {
+            "actorId": 19,
+            "targetActorId": 21,
+            "observedCast": {
+              "reportTimeMs": 2172777,
+              "abilityGameId": 360194
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "observedActionRejected": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY"],
+        "text": "Predictive state must not be substituted with the actual fight end. The decisive blocker is the scan's earliest unresolved candidate; the cds[0] entry's own reason is asserted directly by the legacy regression."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the Deathmark cast at 2,172,777 as the usability proof",
+          "no binding for target.time_to_die or fight_remains (PREDICTIVE)"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m5e-real-decision-comparisons.test.ts",
+        "tests/regression/m5d2-decision-corpus.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-assassination.envenom-after-q-diverges-rather-than-falling-through",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "contractUnderTest": "src/specs/rogue/assassination/first-gcd-selection.ts; decision-coverage.ts DIVERGENT_WORLDS",
+      "purpose": "The max-combo-point Envenom at 2,178,582 reaches spend[1] SELECTED in one world, but core_dot[0] Garrote is still an unresolved candidate ahead of it, so another world plays Garrote. The comparison stays UNKNOWN with DIVERGENT_WORLDS rather than picking the lower-priority entry.",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "params": {
+            "actorId": 19,
+            "targetActorId": 21,
+            "observedCast": {
+              "reportTimeMs": 2178582,
+              "abilityGameId": 32645
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "observedActionRejected": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY"],
+        "text": "An UNKNOWN higher-priority APL condition must never fall through to a confident lower-priority recommendation. Divergence is the honest answer and the corpus pins it as such."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the Envenom cast at 2,178,582 carrying 7 / 7 combo points PRE_COST",
+          "the unresolved core_dot[0] Garrote candidate ahead of spend"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m5d2-decision-corpus.test.ts",
+        "tests/regression/m5b-ordered-selection-never-overclaims.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-assassination.garrote-remains-derives-from-the-observed-anchor",
+      "artifactId": "wcl-assassination-garrote-dot-remains",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "contractUnderTest": "src/specs/rogue/assassination/dot-remains-state.ts bindDotRemains; src/data/game/rogue-dot-durations.json",
+      "purpose": "Immediately before the Garrote cast at Q, actor 19's Garrote on target 21 has 5,746 ms remaining: (2,164,326 + 18,000) - 2,176,580. The anchor is actor 19's own application, not actor 13's independent Garrote at 2,172,232, and not the re-application the cast itself causes.",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DOT_REMAINS",
+          "params": {
+            "actorId": 19,
+            "targetActorId": 21,
+            "simcToken": "garrote",
+            "atCast": {
+              "actorId": 19,
+              "reportTimeMs": 2176580,
+              "abilityGameId": 703
+            },
+            "expected": {
+              "state": "KNOWN",
+              "remainsMs": 5746,
+              "anchorReportTimeMs": 2164326
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The 18,000 ms duration is the pinned SIMC_DBC_ROGUE_DOT_DURATIONS dataset; the anchor is observed. Mistaking actor 13's application yields 13.652 s and the post-decision re-application yields 18.000 s — both plausible, only one right, and the slice contains both wrong answers so the derivation has to reject them."
+      },
+      "authority": {
+        "authorityId": "SIMC_DBC_ROGUE_DOT_DURATIONS",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "applydebuff 703 by 19 on 21 at 2,164,326 (the anchor)",
+          "every aura event targeting 19 or 21 in [2,164,325 .. 2,176,581], order preserved",
+          "the Garrote cast at 2,176,580 preceding its own removedebuff/applydebuff"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": ["tests/regression/m5c3a-garrote-remains-and-core-dot.test.ts"]
+    },
+    {
+      "caseId": "spec-assassination.low-combo-point-envenom-is-rejected",
+      "artifactId": "wcl-assassination-envenom-combo-points",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "contractUnderTest": "src/specs/rogue/assassination/envenom-decision.ts; observed-comparison.ts (OBSERVED_ACTION_REJECTED_BY_AUTHORITY)",
+      "purpose": "Actor 13's Envenom at 3 of 7 combo points is REJECTED: the spend gate is false under both Darkest Night resolutions. No replacement action is named — the globally ideal action stays UNKNOWN — and the rejection rests on the cast's own PRE_COST snapshot.",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "params": {
+            "actorId": 13,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2150252,
+              "abilityGameId": 32645
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "OBSERVED_ACTION_REJECTED_BY_AUTHORITY",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": null,
+              "observedActionRejected": true
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The pinned spend call condition is `!buff.darkest_night.up&combo_points>=5|buff.darkest_night.up&combo_points.deficit=0`; 3 < 5 and 3 != 7 fail it in every world. The observed 3/7 cost 3 is a cap-bounded PRE_COST observation on the cast itself."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the Envenom cast at 2,150,252 carrying classResources type 4: 3 / 7 cost 3",
+          "combatantinfo for actor 13 (specID 259)"
+        ]
+      },
+      "limitations": ["A rejection is not a coaching verdict; nothing here says what should have been cast."],
+      "relatedTests": [
+        "tests/regression/m5e-real-decision-comparisons.test.ts",
+        "tests/regression/m5-envenom-at-three-combo-points-is-rejected.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-assassination.missing-authority-is-not-a-rejection",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "contractUnderTest": "src/specs/rogue/assassination/observed-analysis.ts AUTHORITY_NOT_AVAILABLE",
+      "purpose": "With no authority resolvable, the facade reports AUTHORITY_NOT_AVAILABLE and evaluates nothing — including the Garrote at Q that MATCHes under the pinned artifact. A missing standard is NO_AUTHORITY_AVAILABLE, never UNKNOWN and never REJECTED.",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.AUTHORITY_UNAVAILABLE_IS_NOT_REJECTION",
+          "params": {
+            "actorId": 19,
+            "targetActorId": 21
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "NO_AUTHORITY_AVAILABLE and UNKNOWN are semantically distinct and neither may produce a player-failure finding. The facade models 'no authority' only when the caller says so explicitly."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/regression/m5-fails-closed-on-version-and-identity.test.ts"]
+    },
+    {
+      "caseId": "spec-assassination.observed-garrote-at-q-is-authority-compatible",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "contractUnderTest": "src/specs/rogue/assassination/observed-analysis.ts analyzeObservedAssassinationDecisions; observed-comparison.ts",
+      "purpose": "The real post-Vanish Garrote at Q is the one resolved comparison on the D2 corpus: MATCH at EXACT_ENTRY precision on the garrote token, with no M5-A rejection. MATCH means the pinned authority's selection was compatible with the observed action — verification of an observed decision, not a prediction and not an endorsement.",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "params": {
+            "actorId": 19,
+            "targetActorId": 21,
+            "observedCast": {
+              "reportTimeMs": 2176580,
+              "abilityGameId": 703
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "garrote",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "observedActionRejected": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "Stealth from Vanish makes cds[5]'s !stealthed.rogue FALSE so the unsupported vanish list is never entered; the Garrote DoT anchor makes core_dot[0]'s remainder term derivable; and the observed cast proves usability. Under the pinned artifact simc-33622e9d-1 that selects garrote at core_dot[0] in every enumerated world."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "Vanish buff 11327 ACTIVE at Q from the observed applybuff at 2,176,120",
+          "Garrote remains 5,746 ms from the 2,164,326 anchor",
+          "Kingsbane cooldown from the observed cast at 2,173,778",
+          "combatantinfo for actor 19 (talent tree)",
+          "the observed Garrote execution at Q as the usability proof"
+        ]
+      },
+      "limitations": [
+        "MATCH = AUTHORITY_COMPATIBLE_ONLY. The positive usability came from the observed execution, so this does not claim the selection would have held beforehand."
+      ],
+      "relatedTests": [
+        "tests/regression/m5e-real-decision-comparisons.test.ts",
+        "tests/regression/m5d2-decision-corpus.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-assassination.protection-paladin-is-refused-at-the-spec-gate",
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "contractUnderTest": "src/specs/rogue/assassination/observed-analysis.ts spec gate",
+      "purpose": "Asked to analyze actor 19 as paladin/protection, the facade returns SPEC_NOT_SUPPORTED before any Assassination rule runs. Protection Paladin remains explicitly unsupported until M10, and an unsupported spec never produces a decision list that could read as clean play.",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.SPEC_GATE",
+          "params": {
+            "actorId": 19,
+            "specId": "paladin/protection"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The facade requires the caller's resolved specialization and checks it first; no default and no inference. A wrong spec must not fall through into Assassination rules."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/analysis-composition-refusals.test.ts"]
+    },
+    {
+      "caseId": "spec-assassination.talent-tree-resolves-selected-not-selected-and-unknown",
+      "artifactId": "wcl-assassination-vanish-ambush-gate",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "contractUnderTest": "src/data/game/rogue-talents.ts resolveTalentSelection",
+      "purpose": "Actor 19's real build: improved_ambush is NOT_SELECTED because node 90692 carries a different entry (Tight Spender); shrouded_suffocation is SELECTED by its own entry 112669; blindside is UNKNOWN because its node is absent from the tree, and absence is never read as 'not taken'.",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "params": {
+            "actorId": 19,
+            "simcName": "improved_ambush",
+            "expected": "NOT_SELECTED"
+          }
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "params": {
+            "actorId": 19,
+            "simcName": "shrouded_suffocation",
+            "expected": "SELECTED"
+          }
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "params": {
+            "actorId": 19,
+            "simcName": "blindside",
+            "expected": "UNKNOWN"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "A node-presence rule would invert improved_ambush. Only two outcomes are decisive and both rest on an entry that IS present: the talent's own entry (SELECTED) or a different entry occupying its node (NOT_SELECTED). Missing talent data does not mean talent=false."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m5c2-vanish-stealth-and-ambush-gate.test.ts",
+        "tests/unit/rogue-talents.test.ts"
+      ]
+    },
+    {
+      "caseId": "wcl-transport.cursor-is-passed-verbatim-and-nothing-is-deduplicated",
+      "artifactId": "synthetic.graphql-page-sequence-two-pages",
+      "owningLayer": "WCL_TRANSPORT",
+      "contractUnderTest": "src/wcl/paginator.ts paginateEventStream",
+      "purpose": "The paginator requests page 2 at exactly the nextPageTimestamp page 1 returned (1500, no offset), stops on the terminal page, reports COMPLETE, and retrieves 4 events although two of them are identical in every observable field.",
+      "assertions": [
+        {
+          "kind": "WCL_PAGINATION.STREAM_OUTCOME",
+          "params": {
+            "plan": {
+              "startTimeMs": 1000,
+              "endTimeMs": 5000,
+              "limit": 100
+            },
+            "expected": {
+              "state": "COMPLETE",
+              "reason": "COMPLETED_NORMALLY",
+              "pagesRetrieved": 2,
+              "eventsRetrieved": 4,
+              "requestedStartTimes": [1000, 1500]
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The paginator's three rules: the cursor is passed back VERBATIM as the next startTime because the schema documents it as exactly that; nothing is deduplicated because multiple legitimate events can share every field; there is no page-level retry."
+      },
+      "authority": null,
+      "limitations": [
+        "Synthetic pages. A real report's page boundary has not been captured into the corpus."
+      ],
+      "relatedTests": ["tests/unit/wcl-paginator.test.ts"]
+    },
+    {
+      "caseId": "wcl-transport.malformed-later-page-keeps-earlier-evidence-and-stays-partial",
+      "artifactId": "synthetic.graphql-page-sequence-malformed-second-page",
+      "owningLayer": "WCL_TRANSPORT",
+      "contractUnderTest": "src/wcl/paginator.ts paginateEventStream; events-query.ts decodeEventPage",
+      "purpose": "When page 2 carries data: null, the stream ends PARTIAL with MALFORMED_PAGE, the 2 events of page 1 are kept, and nothing is retried.",
+      "assertions": [
+        {
+          "kind": "WCL_PAGINATION.STREAM_OUTCOME",
+          "params": {
+            "plan": {
+              "startTimeMs": 1000,
+              "endTimeMs": 5000,
+              "limit": 100
+            },
+            "expected": {
+              "state": "PARTIAL",
+              "reason": "MALFORMED_PAGE",
+              "pagesRetrieved": 1,
+              "eventsRetrieved": 2,
+              "requestedStartTimes": [1000, 1500]
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Every abnormal ending preserves what was already retrieved and records why it stopped. A failed page never becomes an empty period, which is the rule that keeps a 30-second retrieval gap from becoming 'you were idle for 30 seconds'."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/wcl-paginator.test.ts"]
+    },
+    {
       "caseId": "wcl-transport.null-event-data-is-malformed-not-empty",
-      "artifactId": "wcl-graphql.event-page-null-data",
+      "artifactId": "synthetic.graphql-event-page-null-data",
       "owningLayer": "WCL_TRANSPORT",
       "contractUnderTest": "src/wcl/events-query.ts decodeEventPage",
       "purpose": "A ReportEventPaginator whose data is null decodes to MALFORMED_PAGINATOR. 'We could not read your events' must never become 'you produced no events'.",
       "assertions": [
-        { "kind": "WCL_DECODE.EVENT_PAGE_OUTCOME", "params": { "expected": "MALFORMED_PAGINATOR" } }
+        {
+          "kind": "WCL_DECODE.EVENT_PAGE_OUTCOME",
+          "params": {
+            "expected": "MALFORMED_PAGINATOR"
+          }
+        }
       ],
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
-        "text": "The decoder owns the classification and documents it in place: data: JSON is nullable upstream, and a null or non-array payload is a malformed page, never an empty one. The paginator then records the stream PARTIAL with MALFORMED_PAGE rather than an empty period."
+        "text": "The decoder owns the classification and documents it in place: data: JSON is nullable upstream, and a null or non-array payload is a malformed page, never an empty one."
       },
       "authority": null,
       "limitations": [

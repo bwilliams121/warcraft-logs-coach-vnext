@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { SUPPORTED_TYPE_CONTRACTS } from "../../src/engine/normalization/supported-families.js";
 import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
 import { NORMALIZATION_REVISION } from "../../src/engine/normalization/combat-fight.js";
+import { committedEventArrays } from "../support/corpus/artifacts.js";
 
 function filesUnder(root: string): readonly string[] {
   if (!existsSync(root)) {
@@ -30,12 +31,14 @@ describe("every recognised raw type is evidence-gated", () => {
     }
   });
 
-  it("recognises only raw type strings that appear in a committed fixture", () => {
+  it("recognises only raw type strings that appear in a committed corpus artifact", () => {
     // The registry is no longer empty, so the gate has to be enforced against
-    // the fixtures themselves rather than against emptiness.
+    // the evidence itself rather than against emptiness. The evidence is the
+    // regression corpus: every committed WCL event array, synthetic ones
+    // included — a synthetic type string is deliberately one no contract names.
     const committed = new Set<string>();
-    for (const path of filesUnder("tests/fixtures/wcl/events").filter((file) => file.endsWith(".json"))) {
-      for (const event of JSON.parse(readFileSync(path, "utf8")) as { type?: string }[]) {
+    for (const events of committedEventArrays().values()) {
+      for (const event of events as { type?: string }[]) {
         if (typeof event.type === "string") {
           committed.add(event.type);
         }
@@ -60,17 +63,17 @@ describe("every recognised raw type is evidence-gated", () => {
     });
   });
 
-  it("cites a fixture that actually exists for every capture-backed contract", () => {
+  it("cites a corpus artifact that actually exists for every capture-backed contract", () => {
+    // `fixtureId` in production evidence IS the corpus artifact id. Renaming an
+    // artifact without re-citing it here fails the build, as it should.
+    const artifacts = committedEventArrays();
     for (const contract of SUPPORTED_TYPE_CONTRACTS) {
       if (contract.evidence.kind !== "SANITIZED_CAPTURE") {
         continue;
       }
-      const fixtures = filesUnder("tests/fixtures/wcl/events");
       expect(
-        fixtures.some((path) =>
-          path.includes(contract.evidence.kind === "SANITIZED_CAPTURE" ? contract.evidence.fixtureId : ""),
-        ),
-        `fixture ${contract.rawType} cited but not committed`,
+        artifacts.has(contract.evidence.fixtureId),
+        `${contract.rawType} cites fixtureId ${contract.evidence.fixtureId}, which is not a committed corpus artifact`,
       ).toBe(true);
     }
   });

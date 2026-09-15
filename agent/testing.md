@@ -291,6 +291,65 @@ Rules the corpus must never relax:
 The loader runs identically under plain Node and workerd, so the same corpus
 can back layer tests and transport-parity tests without a second loader.
 
+## The corpus is the canonical evidence (M9-B)
+
+The eleven sanitized event slices formerly under `tests/fixtures/wcl/events/`
+live under `tests/corpus/artifacts/wcl-events/` with the same names and bytes.
+Layer tests read them through `committedEventArray(id)` in
+`tests/support/corpus/artifacts.ts`; `fixtureId` in production evidence
+records IS the corpus artifact id, and a contract test resolves it against
+the corpus. There is no second copy. The investigation prose behind each
+slice is preserved verbatim in `tests/corpus/PROVENANCE-legacy.md`; the
+manifest is authoritative for what a slice is and may prove.
+
+Retained coverage is a list of GRANTS — categories, actor scope, ranges — and
+a fight built from an artifact is granted exactly those and nothing else.
+Three slices (C3a, C3c1, D2) carry grants because their in-place filters are
+recorded predicates; every property- or index-based selection carries none.
+The corpus contract is at version 2 (M9-B); version 1 (M9-A, flat ranges) is
+rejected explicitly and never reinterpreted.
+
+## One coverage policy for captured evidence (M9-B)
+
+`tests/support/corpus/fight.ts` is the only place captured events receive
+coverage. Layer tests build fights through `corpusFight` / `corpusState`, or
+through `corpusFightFrom` with a named PREMISE (`TRUNCATED_BEFORE`,
+`EVENT_REMOVED_AT`, `FANNED_ACTORS`) that the interpreter applies to the
+artifact's own grants and never widens beyond what the construction
+justifies. No test declares coverage over captured events by hand; a guard in
+`tests/contracts/m9a-corpus-layering.test.ts` fails any module that reads
+captured raw events, normalizes them itself and imports a fight builder.
+
+Where a hypothetical complete-coverage scenario is needed to test analyzer
+logic, it is built from SYNTHETIC events over `syntheticFight`, labelled as a
+test premise, and never attributed to a capture. The M5-C2 Vanish-before-
+Garrote rule is the model: the five-event capture pins UNKNOWN /
+INSUFFICIENT_COVERAGE; the same real events inside the C3c1 slice (recorded
+predicate) pin PROVEN TRUE; a synthetic premise tests the rule.
+
+The harness takes its runtime as an input (`NODE` | `WORKERD`) and refuses at
+selection time any case whose kinds need a runtime the caller lacks; the
+complete gate runs under workerd.
+
+## The harness (M9-B)
+
+`runCorpusHarness(selection)` in `tests/support/corpus/harness.ts` validates
+the corpus, runs one case, one layer or everything, and reports each
+assertion as `PASSED`, `FAILED` or `NOT_EXECUTED` — never `SKIPPED`. A failure
+carries the case id, artifact id, owning layer, kind, assertion ordinal,
+expected and actual semantic results, and an evidence locator when the layer
+offered one; it never dumps a payload. `complete` requires zero FAILED and
+zero NOT_EXECUTED.
+
+The complete-corpus gate is `tests/regression/m9b-corpus-gate.test.ts`, in
+the `workers` project because PUBLIC_CONTRACT parity drives the real Worker
+and MCP handler. It is part of `npm test`; M9-C owns a dedicated CI command.
+
+Expectation changes must fail understandably.
+`tests/unit/m9b-corpus-failure-demonstration.test.ts` mutates one thing at a
+time — a verdict, an anchor, a cursor, a byte, a pinned revision — and asserts
+the exact failure the harness reports.
+
 ---
 
 # Contract Tests

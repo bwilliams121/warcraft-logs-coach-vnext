@@ -36,18 +36,13 @@
  * EVENTS ARE LOCATED BY FACT, NEVER BY CANONICAL POSITION.
  */
 
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
 import { createCombatState, type CombatState } from "../../src/engine/state/combat-state.js";
-import type { EvidenceCategory } from "../../src/wcl/evidence-capability.js";
-import { syntheticFight } from "./synthetic-fight.js";
-import fixture from "../fixtures/wcl/events/wcl-assassination-kingsbane-cooldown.json";
+import { committedEventArray } from "./corpus/artifacts.js";
+import { corpusFight } from "./corpus/fight.js";
+
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const fixture = committedEventArray("wcl-assassination-kingsbane-cooldown");
 
 export const M5C3C1_FIXTURE_PROVENANCE = {
   reportCode: "A7R6kxPJ1hC8YQ4w",
@@ -100,33 +95,17 @@ export const M5C3C1_EXPECTED = {
   remainingSeconds: 57.198,
 } as const;
 
-const WINDOW_START = 2_004_589;
-const WINDOW_END = 2_176_581;
-
 export const M5C3C1_RAW_EVENTS = fixture as unknown as readonly Record<string, unknown>[];
 
+/**
+ * The fight, through the shared corpus coverage interpreter.
+ *
+ * The artifact's recorded predicate grants CASTS and RESOURCES for actor 19
+ * and AURAS for targets 19 and 21 over [2,164,325 .. 2,176,581]. Nothing is
+ * declared here; the manifest is the only source of coverage.
+ */
 function normalizeFixture(): CombatFight {
-  const normalizer = createNormalizer({
-    fightStartTimeMs: WINDOW_START,
-    requestedRange: inclusiveRange(WINDOW_START, WINDOW_END),
-    contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-    directionFields: VERIFIED_DIRECTION_FIELDS,
-  });
-  normalizer.accept({
-    streamId: "all",
-    pageOrdinal: 0,
-    requestedStartTimeMs: WINDOW_START,
-    nextPageTimestamp: null,
-    events: fixture as Record<string, unknown>[],
-  });
-  const normalized = normalizer.finish();
-
-  return syntheticFight({
-    observedCategories: ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO"] as readonly EvidenceCategory[],
-    events: normalized.events,
-    startTimeMs: WINDOW_START,
-    endTimeMs: WINDOW_END,
-  });
+  return corpusFight("wcl-assassination-kingsbane-cooldown");
 }
 
 export function m5c3c1Fight(): CombatFight {

@@ -25,18 +25,13 @@
  * as the M5-A fixture: a re-slice renumbers everything.
  */
 
-import { inclusiveRange } from "../../src/engine/evidence/coverage.js";
-import { createNormalizer } from "../../src/engine/normalization/event-normalizer.js";
-import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
-import {
-  indexContracts,
-  SUPPORTED_TYPE_CONTRACTS,
-} from "../../src/engine/normalization/supported-families.js";
 import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
 import { createCombatState, type CombatState } from "../../src/engine/state/combat-state.js";
-import type { EvidenceCategory } from "../../src/wcl/evidence-capability.js";
-import { syntheticFight } from "./synthetic-fight.js";
-import fixture from "../fixtures/wcl/events/wcl-assassination-vanish-ambush-gate.json";
+import { committedEventArray } from "./corpus/artifacts.js";
+import { corpusFight } from "./corpus/fight.js";
+
+/** The canonical corpus artifact; provenance in tests/corpus/manifest.json. */
+const fixture = committedEventArray("wcl-assassination-vanish-ambush-gate");
 
 export const M5C2_FIXTURE_PROVENANCE = {
   reportCode: "A7R6kxPJ1hC8YQ4w",
@@ -64,33 +59,31 @@ export const M5C2_EVENTS = {
   garroteCast: { actorId: M5C2_ACTOR, reportTimeMs: 2_176_580, abilityGameId: M5C2_IDS.garrote },
 } as const;
 
-const WINDOW_START = 2_004_589;
-const WINDOW_END = 2_176_581;
-
 export const M5C2_RAW_EVENTS = fixture as unknown as readonly Record<string, unknown>[];
 
+/**
+ * The fight, through the shared corpus coverage interpreter.
+ *
+ * This five-event slice retains NO coverage grant: its probe filtered to the
+ * events of interest and never recorded whether every aura event on actor 19
+ * between the Vanish application and the Garrote cast was kept. So on THIS
+ * artifact `stealthed.rogue` at the Garrote decision point is UNKNOWN /
+ * INSUFFICIENT_COVERAGE — the honest answer, and what the regression pins.
+ * The same real events sit inside the C3c1 and D2 slices, whose recorded
+ * predicates retain AURAS coverage for target 19; the proven-TRUE fact lives
+ * there (see `m5c2Stealthy()` below) and on a synthetic premise.
+ */
 function normalizeFixture(): CombatFight {
-  const normalizer = createNormalizer({
-    fightStartTimeMs: WINDOW_START,
-    requestedRange: inclusiveRange(WINDOW_START, WINDOW_END),
-    contracts: indexContracts(SUPPORTED_TYPE_CONTRACTS),
-    directionFields: VERIFIED_DIRECTION_FIELDS,
-  });
-  normalizer.accept({
-    streamId: "all",
-    pageOrdinal: 0,
-    requestedStartTimeMs: WINDOW_START,
-    nextPageTimestamp: null,
-    events: fixture as Record<string, unknown>[],
-  });
-  const normalized = normalizer.finish();
+  return corpusFight("wcl-assassination-vanish-ambush-gate");
+}
 
-  return syntheticFight({
-    observedCategories: ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO"] as readonly EvidenceCategory[],
-    events: normalized.events,
-    startTimeMs: WINDOW_START,
-    endTimeMs: WINDOW_END,
-  });
+/**
+ * The same Vanish -> Garrote sequence inside the C3c1 slice, which retains
+ * AURAS coverage for targets 19 and 21 over [2,164,325 .. 2,176,581] by its
+ * recorded predicate. Capture-backed: nothing declared, nothing premised.
+ */
+export function m5c2StateWithRetainedCoverage(): CombatState {
+  return createCombatState(corpusFight("wcl-assassination-kingsbane-cooldown"));
 }
 
 export function m5c2Fight(): CombatFight {

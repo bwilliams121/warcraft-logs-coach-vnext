@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": 1000,
+    "type": "cast",
+    "sourceID": 0,
+    "targetID": -1,
+    "abilityGameID": 1,
+    "fight": 1
+  }
+]
