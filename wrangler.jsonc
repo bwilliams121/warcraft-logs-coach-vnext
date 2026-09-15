@@ -48,6 +48,10 @@
   // purpose.
   //
   // Period must be 10 or 60. This binding needs no dashboard resource.
+  "limits": {
+    "cpu_ms": 120000,
+  },
+
   "ratelimits": [
     {
       "name": "ANALYSIS_RATE_LIMITER",
