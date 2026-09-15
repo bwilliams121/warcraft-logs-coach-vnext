@@ -52,7 +52,12 @@ import {
   type AnalyzeToolDeps,
 } from "./tools/analyze-warcraft-log.js";
 import { registerAnalyzeRaidNightTool, type RaidNightToolDeps } from "./tools/analyze-raid-night.js";
+import {
+  registerAnalyzeEncounterContextTool,
+  type EncounterContextToolDeps,
+} from "./tools/analyze-encounter-context.js";
 import type { RaidNightRunner } from "../services/raid-night-runner.js";
+import type { EncounterContextRunner } from "../services/encounter-context-runner.js";
 
 /** Advertised in `initialize`. Kept in step with package.json by hand, as the Worker version is. */
 export const MCP_SERVER_NAME = "warcraft-logs-coach-vnext";
@@ -99,6 +104,14 @@ const UNBOUND_RAID_NIGHT_RUNNER: RaidNightRunner = async () => ({
   },
 });
 
+const UNBOUND_ENCOUNTER_CONTEXT_RUNNER: EncounterContextRunner = async () => ({
+  ok: false,
+  error: {
+    code: "INTERNAL_ERROR",
+    message: "No encounter-context runner is bound to this MCP handler.",
+  },
+});
+
 export interface McpRequestOptions {
   /** Overridable so a test can prove rejection without weakening the real list. */
   readonly allowedHostnames?: readonly string[];
@@ -118,12 +131,19 @@ export interface McpRequestOptions {
    * equality proof meaningful.
    */
   readonly analyzeRaidNight?: RaidNightRunner | undefined;
+  /**
+   * The encounter-context entry point.
+   *
+   * Bound at the composition root exactly like the other two, so all three tools
+   * reach runners this layer cannot build for itself.
+   */
+  readonly analyzeEncounterContext?: EncounterContextRunner | undefined;
   /** Overridable so a test can drive allow/deny/throw deterministically. */
   readonly rateLimiter?: RateLimiterPort | undefined;
 }
 
 /** Everything the registered tools need. One object, both tools. */
-export type McpToolDeps = AnalyzeToolDeps & RaidNightToolDeps;
+export type McpToolDeps = AnalyzeToolDeps & RaidNightToolDeps & EncounterContextToolDeps;
 
 /**
  * Builds one server instance for one request.
@@ -134,11 +154,13 @@ export type McpToolDeps = AnalyzeToolDeps & RaidNightToolDeps;
  */
 export function createMcpServerInstance(deps: McpToolDeps): McpServer {
   const server = new McpServer({ name: MCP_SERVER_NAME, version: MCP_SERVER_VERSION });
-  // Exactly two real analysis tools. No ping, no primitive state queries: a tool
-  // that exposed an M4 query would invite a client to assemble its own analysis
-  // from parts, which is a second analyzer wearing a client's clothes.
+  // Exactly three real analysis tools. No ping, no primitive state queries, no
+  // rankings search: a tool that exposed an M4 query or a raw ranking board would
+  // invite a client to assemble its own analysis from parts, which is a second
+  // analyzer wearing a client's clothes.
   registerAnalyzeWarcraftLogTool(server, deps);
   registerAnalyzeRaidNightTool(server, deps);
+  registerAnalyzeEncounterContextTool(server, deps);
   return server;
 }
 
@@ -251,6 +273,7 @@ export async function handleMcpRequest(
   const handler = createHandler({
     analyze: options.analyze ?? UNBOUND_ANALYSIS_RUNNER,
     analyzeRaidNight: options.analyzeRaidNight ?? UNBOUND_RAID_NIGHT_RUNNER,
+    analyzeEncounterContext: options.analyzeEncounterContext ?? UNBOUND_ENCOUNTER_CONTEXT_RUNNER,
     // A deployment missing the binding is unmetered, and the tool treats that
     // as a refusal rather than as permission.
     rateLimiter: options.rateLimiter ?? env.ANALYSIS_RATE_LIMITER,

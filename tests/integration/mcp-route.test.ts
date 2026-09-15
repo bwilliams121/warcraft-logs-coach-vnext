@@ -196,6 +196,10 @@ describe("inbound bearer authorization fails closed", () => {
         ok: false as const,
         error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
       }),
+      encounterContextRunner: () => async () => ({
+        ok: false as const,
+        error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
+      }),
       mcp: async (request, env, workerDeps) =>
         await handleMcpRequest(request, env, {
           analyze: workerDeps.analysisRunner(env),
@@ -228,6 +232,10 @@ describe("inbound bearer authorization fails closed", () => {
       raidNightRunner: () => async () => ({
         ok: false as const,
         error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+      }),
+      encounterContextRunner: () => async () => ({
+        ok: false as const,
+        error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
       }),
       mcp: async (request, env, workerDeps) =>
         await handleMcpRequest(request, env, {
@@ -324,13 +332,15 @@ describe("Host and Origin validation", () => {
 });
 
 describe("tools/list exposes exactly the real analysis tools", () => {
-  it("lists exactly the two analysis tools", async () => {
+  it("lists exactly the three analysis tools", async () => {
     const result = resultOf(await rpcPayload(await callSelf(modern("tools/list"))));
     const tools = result["tools"] as readonly { readonly name: string }[];
 
     // Sorted: MCP makes no ordering promise for `tools/list`, so pinning
     // registration order would assert something the protocol does not guarantee.
-    expect(tools.map((tool) => tool.name).sort()).toEqual(["analyze_raid_night", ANALYZE_TOOL_NAME].sort());
+    expect(tools.map((tool) => tool.name).sort()).toEqual(
+      ["analyze_encounter_context", "analyze_raid_night", ANALYZE_TOOL_NAME].sort(),
+    );
   });
 
   it("exposes no probe or primitive tool", async () => {
@@ -340,8 +350,21 @@ describe("tools/list exposes exactly the real analysis tools", () => {
     const result = resultOf(await rpcPayload(await callSelf(modern("tools/list"))));
     const names = (result["tools"] as readonly { readonly name: string }[]).map((tool) => tool.name);
 
-    expect(names).toHaveLength(2);
-    for (const banned of ["ping", "aura", "resource", "apl", "simc", "combat_state", "debug"]) {
+    expect(names).toHaveLength(3);
+    for (const banned of [
+      "ping",
+      "aura",
+      "resource",
+      "apl",
+      "simc",
+      "combat_state",
+      "debug",
+      // M8-H adds encounter context as a composed analysis. A rankings SEARCH
+      // tool would be the primitive version of it, and there is none.
+      "rankings",
+      "search_rankings",
+      "external_references",
+    ]) {
       expect(names).not.toContain(banned);
     }
   });
@@ -473,7 +496,9 @@ describe("both protocol eras are served", () => {
     ).map((tool) => tool.name);
 
     expect(modernTools).toEqual(legacyTools);
-    expect([...modernTools].sort()).toEqual(["analyze_raid_night", ANALYZE_TOOL_NAME].sort());
+    expect([...modernTools].sort()).toEqual(
+      ["analyze_encounter_context", "analyze_raid_night", ANALYZE_TOOL_NAME].sort(),
+    );
   });
 
   it("requires no session for a legacy analysis call", async () => {
@@ -594,6 +619,10 @@ describe("the existing routes are untouched", () => {
       raidNightRunner: () => async () => ({
         ok: false as const,
         error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+      }),
+      encounterContextRunner: () => async () => ({
+        ok: false as const,
+        error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
       }),
       mcp: async (request, env, workerDeps) =>
         await handleMcpRequest(request, env, {

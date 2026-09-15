@@ -457,7 +457,7 @@ describe("the analyze_raid_night tool", () => {
     // Sorted on both sides: `tools/list` promises no ordering, so asserting the
     // SDK's registration order would pin an implementation detail.
     expect(payload.result.tools.map((tool) => tool.name).sort()).toEqual(
-      [ANALYZE_TOOL_NAME, RAID_NIGHT_TOOL_NAME].sort(),
+      [ANALYZE_TOOL_NAME, RAID_NIGHT_TOOL_NAME, "analyze_encounter_context"].sort(),
     );
   });
 

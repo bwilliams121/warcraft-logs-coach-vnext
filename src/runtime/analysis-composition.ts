@@ -37,6 +37,9 @@ import { createReportRoster } from "../wcl/report-roster.js";
 import { createTokenCache } from "../wcl/token-provider.js";
 import { analyzeRaidNight } from "../services/raid-night-service.js";
 import type { RaidNightRunner } from "../services/raid-night-runner.js";
+import { analyzeEncounterContext } from "../services/encounter-context-service.js";
+import type { EncounterContextRunner } from "../services/encounter-context-runner.js";
+import { createCandidateMetadataPort, createRankingPagePort } from "../wcl/rankings/external-ports.js";
 
 /**
  * Binds the real Warcraft Logs infrastructure to the application service.
@@ -101,4 +104,44 @@ export function createProductionRaidNightRunner(env: Env): RaidNightRunner {
 
   return async (request) =>
     await analyzeRaidNight(request, { env, discoverRoster, ingestFightCore, checkRevision });
+}
+
+/**
+ * Binds the real Warcraft Logs infrastructure to the encounter-context service.
+ *
+ * ONE TOKEN CACHE ACROSS BOTH HALVES. An encounter-context request performs the
+ * whole local raid-night retrieval AND, when asked, up to six external metadata
+ * requests — all against the same API with the same credentials. Sharing one
+ * cache means one OAuth exchange for the request rather than one per phase, and
+ * token requests spend the same finite quota the limiter protects.
+ *
+ * THE LOCAL PORTS ARE THE SAME ONES A RAID NIGHT GETS. `createReportRoster`,
+ * `createFightCoreIngestor` and `createReportRevisionReader` are bound here
+ * exactly as `createProductionRaidNightRunner` binds them, and the service
+ * COMPOSES `analyzeRaidNight` rather than reimplementing it — which is what keeps
+ * one selected fight to at most one `ingestFightCore`.
+ *
+ * NO RATE LIMITING HERE. Admission is a property of being publicly reachable and
+ * belongs to the adapter; a limiter call inside this composition would charge a
+ * second time for work the transport already admitted. See the REST route and
+ * the MCP tool, which are the only two places encounter-context units are
+ * charged.
+ */
+export function createProductionEncounterContextRunner(env: Env): EncounterContextRunner {
+  const boundFetch = (input: string, init: RequestInit): Promise<Response> => fetch(input, init);
+  const tokenCache = createTokenCache();
+
+  const discoverRoster = createReportRoster({ fetch: boundFetch, tokenCache });
+  const ingestFightCore = createFightCoreIngestor({ fetch: boundFetch, tokenCache });
+  const checkRevision = createReportRevisionReader({ fetch: boundFetch, tokenCache });
+
+  return async (request) =>
+    await analyzeEncounterContext(request, {
+      env,
+      raidNight: { discoverRoster, ingestFightCore, checkRevision },
+      external: {
+        rankingPage: createRankingPagePort({ fetch: boundFetch, tokenCache }),
+        candidateMetadata: createCandidateMetadataPort({ fetch: boundFetch, tokenCache }),
+      },
+    });
 }

@@ -63,6 +63,10 @@ function workerWith(preflight: PreflightPort): WorkerDeps {
       ok: false as const,
       error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
     }),
+    encounterContextRunner: () => async () => ({
+      ok: false as const,
+      error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
+    }),
     mcp: () => {
       throw new Error("the analysis route must not dispatch to MCP");
     },

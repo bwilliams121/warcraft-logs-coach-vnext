@@ -21,7 +21,7 @@ import { projectEncounterContextResult } from "../../src/contracts/encounter-con
 import { PUBLIC_ANALYSIS_SCHEMA_VERSION } from "../../src/contracts/analysis-contract.js";
 import { PUBLIC_RAID_NIGHT_SCHEMA_VERSION } from "../../src/contracts/raid-night-contract.js";
 import { buildRaidNightProgression } from "../../src/progression/encounter-progression.js";
-import type { EncounterContextAnalysis } from "../../src/services/encounter-context-service.js";
+import type { EncounterContextAnalysis } from "../../src/services/encounter-context-runner.js";
 import {
   aggregateOf,
   absent,

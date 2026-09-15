@@ -283,6 +283,10 @@ describe("the REST route is metered", () => {
         ok: false as const,
         error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
       }),
+      encounterContextRunner: () => async () => ({
+        ok: false as const,
+        error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
+      }),
       mcp: async () => new Response(null, { status: 404 }),
       version: "0.1.0",
     }).fetch(post(D2_REQUEST), MCP_TEST_ENV);

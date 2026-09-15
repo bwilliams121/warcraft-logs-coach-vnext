@@ -90,7 +90,10 @@ describe("the production composition root binds the real pieces", () => {
     // against the same finite quota the rate limiter exists to protect. The
     // single-fight runner shares one across preflight and ingestion; the
     // raid-night runner shares one across roster discovery, every fight
-    // retrieval and the final revision check.
+    // retrieval and the final revision check; the encounter-context runner
+    // shares one across all of that PLUS its external metadata requests, so a
+    // request that enables external references still performs one OAuth exchange
+    // rather than one per phase.
     //
     // Counted per runner factory rather than per file, so adding a third runner
     // without its own single cache still fails — and so does giving an existing
@@ -99,7 +102,7 @@ describe("the production composition root binds the real pieces", () => {
     const runnerFactories = code.match(/export function createProduction\w+Runner\(/g) ?? [];
     const caches = code.match(/createTokenCache\(\)/g) ?? [];
 
-    expect(runnerFactories).toHaveLength(2);
+    expect(runnerFactories).toHaveLength(3);
     expect(caches).toHaveLength(runnerFactories.length);
   });
 

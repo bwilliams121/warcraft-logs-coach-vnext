@@ -19,6 +19,13 @@ import type { AnalysisRunner } from "../services/analysis-runner.js";
 import type { RaidNightRunner } from "../services/raid-night-runner.js";
 import { parseRaidNightRequest } from "../services/raid-night-request.js";
 import { checkAnalysisRateLimitCost } from "../runtime/rate-limit.js";
+import { createProductionEncounterContextRunner } from "../runtime/analysis-composition.js";
+import {
+  encounterContextAdmissionUnits,
+  type EncounterContextRunner,
+} from "../services/encounter-context-runner.js";
+import { parseEncounterContextRequest } from "../services/encounter-context-request.js";
+import { encounterContextResultResponse } from "./responses.js";
 import {
   apiErrorResponse,
   jsonResponse,
@@ -32,6 +39,7 @@ const SERVICE_VERSION = "0.1.0";
 const HEALTH_PATH = "/health";
 const ANALYSIS_PATH = "/v1/analysis";
 const RAID_NIGHT_PATH = "/v1/raid-night";
+const ENCOUNTER_CONTEXT_PATH = "/v1/encounter-context";
 const MCP_PATH = "/mcp";
 
 export interface WorkerDeps {
@@ -56,6 +64,11 @@ export interface WorkerDeps {
    * per-request OAuth token cache shared across every step of the night.
    */
   readonly raidNightRunner: (env: Env) => RaidNightRunner;
+  /**
+   * The one shared encounter-context path, built per request for the same
+   * token-cache reason the raid-night runner is.
+   */
+  readonly encounterContextRunner: (env: Env) => EncounterContextRunner;
   /**
    * The shared analysis budget.
    *
@@ -99,12 +112,14 @@ const defaultMcp: WorkerDeps["mcp"] = async (request, env, deps) =>
   await handleMcpRequest(request, env, {
     analyze: deps.analysisRunner(env),
     analyzeRaidNight: deps.raidNightRunner(env),
+    analyzeEncounterContext: deps.encounterContextRunner(env),
     rateLimiter: deps.rateLimiter(env),
   });
 
 const DEFAULT_DEPS: WorkerDeps = {
   analysisRunner: createProductionAnalysisRunner,
   raidNightRunner: createProductionRaidNightRunner,
+  encounterContextRunner: createProductionEncounterContextRunner,
   rateLimiter: (env) => env.ANALYSIS_RATE_LIMITER,
   mcp: defaultMcp,
   version: SERVICE_VERSION,
@@ -248,6 +263,69 @@ async function handleRaidNight(request: Request, env: Env, deps: WorkerDeps): Pr
 }
 
 /**
+ * Serves `POST /v1/encounter-context`.
+ *
+ * THE SAME FIVE STEPS AS THE RAID-NIGHT ROUTE, IN THE SAME ORDER.
+ *
+ *   1. Bearer  — who may spend analysis capacity at all.
+ *   2. Body    — is this even a request.
+ *   3. PARSE   — because the METER depends on it.
+ *   4. Meter   — subject fights + external units, on the shared key.
+ *   5. Runner  — the one shared encounter-context path.
+ *
+ * THE UNIT COUNT IS NOT COMPUTED HERE. `encounterContextAdmissionUnits` lives
+ * beside the cost plan so REST and MCP charge the same formula; two transports
+ * pricing a request separately is how they come to disagree about what it costs.
+ *
+ * EXACTLY ONE ADMISSION PER PUBLIC REQUEST. The runner composes the raid-night
+ * SERVICE, not the public raid-night route or tool, and no limiter call exists
+ * inside `analyzeRaidNight` — so a nested raid night cannot be charged a second
+ * time. `/v1/raid-night` keeps charging exactly as it did.
+ */
+async function handleEncounterContext(request: Request, env: Env, deps: WorkerDeps): Promise<Response> {
+  if ((await verifyAnalysisBearer(request, env.ANALYSIS_AUTH_TOKEN)) === "UNAUTHORIZED") {
+    return apiErrorResponse("UNAUTHORIZED", UNAUTHORIZED_MESSAGE, {
+      headers: { "www-authenticate": "Bearer" },
+    });
+  }
+
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return apiErrorResponse("INVALID_REQUEST", "Request body must be valid JSON.");
+  }
+
+  const parsed = parseEncounterContextRequest(body);
+  if (!parsed.ok) {
+    // Refused before metering: it will spend no Warcraft Logs quota, so charging
+    // for it would charge for work that cannot happen.
+    return apiErrorResponse("INVALID_REQUEST", "The encounter-context request was not valid.", {
+      issues: parsed.issues,
+    });
+  }
+
+  const decision = await checkAnalysisRateLimitCost(
+    deps.rateLimiter(env),
+    encounterContextAdmissionUnits(parsed.request),
+  );
+  if (decision === "DENIED") {
+    return apiErrorResponse(
+      "RATE_LIMITED",
+      "Too many analysis requests. Retry later. This limit protects a shared Warcraft Logs API quota. An encounter-context request costs one unit per requested fight, plus six units when external references are enabled.",
+    );
+  }
+  if (decision === "UNAVAILABLE") {
+    return apiErrorResponse(
+      "RATE_LIMITER_UNAVAILABLE",
+      "The analysis rate limiter is unavailable, so this request was refused rather than run unmetered. Try again later.",
+    );
+  }
+
+  return encounterContextResultResponse(await deps.encounterContextRunner(env)(parsed.request));
+}
+
+/**
  * Builds a Worker handler. Dependencies are injected as one plain object, which
  * is what lets a test prove the API delegates rather than computes.
  */
@@ -281,6 +359,13 @@ export function createWorker(deps: WorkerDeps = DEFAULT_DEPS): WorkerHandler {
             return methodNotAllowed("POST");
           }
           return await handleRaidNight(request, env, deps);
+        }
+
+        if (pathname === ENCOUNTER_CONTEXT_PATH) {
+          if (request.method !== "POST") {
+            return methodNotAllowed("POST");
+          }
+          return await handleEncounterContext(request, env, deps);
         }
 
         if (pathname === MCP_PATH) {

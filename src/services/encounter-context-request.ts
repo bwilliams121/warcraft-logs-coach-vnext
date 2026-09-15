@@ -38,6 +38,17 @@ import {
  * `DISABLED` is a complete, ordinary answer, not a degraded one: local
  * progression is the primary product of this request and stands alone.
  */
+/**
+ * The ranking metrics a caller may request, re-exported from the request layer.
+ *
+ * A TRANSPORT MUST NOT REACH INTO `src/wcl`. The MCP tool needs this vocabulary
+ * to declare its input enum, and importing it from the Warcraft Logs transport
+ * would give the adapter a path to the retrieval machinery it is deliberately
+ * unable to see. The request module is already the one authority on what a valid
+ * request contains, so it is the right place to publish the vocabulary from.
+ */
+export { SUPPORTED_RANKING_METRICS, type RankingMetric } from "../wcl/rankings/rankings-query.js";
+
 export type ExternalReferenceOption =
   | { readonly mode: "DISABLED" }
   | {

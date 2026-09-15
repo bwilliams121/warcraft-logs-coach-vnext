@@ -9,6 +9,8 @@
 
 import { projectAnalysisResult } from "../contracts/analysis-projection.js";
 import { projectRaidNightResult } from "../contracts/raid-night-projection.js";
+import { projectEncounterContextResult } from "../contracts/encounter-context-projection.js";
+import type { EncounterContextRunResult } from "../services/encounter-context-runner.js";
 import type { RaidNightRunResult } from "../services/raid-night-runner.js";
 import {
   assertNever,
@@ -177,6 +179,26 @@ export function serviceResultResponse(result: AnalysisServiceResult): Response {
  * complete, truthful answers; returning 5xx for them would teach a client to retry
  * or discard a correct result.
  */
+/**
+ * Renders an encounter-context outcome.
+ *
+ * EVERY DOMAIN-VALID DOCUMENT IS 200, including one whose `externalReferences`
+ * status reports a rejected ranking request, an unrecognised payload or an
+ * encounter Warcraft Logs does not know. Those are complete, truthful answers
+ * that still carry the full local progression, and returning 5xx for them would
+ * teach a client to discard a correct result because a third-party leaderboard
+ * was unavailable.
+ *
+ * Only a LOCAL failure — the subject analysis itself could not be produced —
+ * maps to an error, through the same `ServiceErrorCode` table the other two
+ * routes use.
+ */
+export function encounterContextResultResponse(result: EncounterContextRunResult): Response {
+  return result.ok
+    ? jsonResponse(200, projectEncounterContextResult(result.analysis))
+    : apiErrorResponse(result.error.code, result.error.message);
+}
+
 export function raidNightResultResponse(result: RaidNightRunResult): Response {
   return result.ok
     ? jsonResponse(200, projectRaidNightResult(result.aggregate))

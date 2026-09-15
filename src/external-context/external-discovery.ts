@@ -25,6 +25,7 @@
  */
 
 import type { PullContext } from "../comparison/pull-identity.js";
+import type { WclCredentials } from "../config/env.js";
 import type { RawFightContextReport } from "../wcl/fight-context-query.js";
 import type { RankingDecodeResult } from "../wcl/rankings/rankings-decoder.js";
 import { MAX_CANDIDATE_PAGES, type EncounterRankingsRequest } from "../wcl/rankings/rankings-query.js";
@@ -41,8 +42,17 @@ import {
   type QualifiedExternalReference,
 } from "./candidate-qualification.js";
 
-/** Retrieves exactly one ranking page. Implemented over the real transport. */
-export type RankingPagePort = (request: EncounterRankingsRequest) => Promise<RankingDecodeResult>;
+/**
+ * Retrieves exactly one ranking page.
+ *
+ * Takes credentials as a second argument, matching every other Warcraft Logs
+ * port in this project: the SERVICE holds the validated configuration and the
+ * adapter mints a token from it, so no port closes over a secret.
+ */
+export type RankingPagePort = (
+  request: EncounterRankingsRequest,
+  credentials: WclCredentials,
+) => Promise<RankingDecodeResult>;
 
 /**
  * Retrieves typed metadata for ONE candidate pull.
@@ -55,6 +65,7 @@ export type RankingPagePort = (request: EncounterRankingsRequest) => Promise<Ran
 export type CandidateMetadataPort = (
   reportCode: string,
   fightId: number,
+  credentials: WclCredentials,
 ) => Promise<RawFightContextReport | null>;
 
 export interface ExternalDiscoveryPorts {
@@ -66,6 +77,8 @@ export interface ExternalDiscoveryRequest {
   readonly rankings: EncounterRankingsRequest;
   /** The pull external references are being gathered for. */
   readonly subject: PullContext;
+  /** Validated by the caller. Never read here beyond handing it to a port. */
+  readonly credentials: WclCredentials;
 }
 
 /**
@@ -121,7 +134,7 @@ export async function discoverExternalReferences(
 ): Promise<ExternalDiscovery> {
   // ONE page. `MAX_CANDIDATE_PAGES` is referenced so the bound is not merely
   // implied by the absence of a loop.
-  const decoded = await ports.rankingPage(request.rankings);
+  const decoded = await ports.rankingPage(request.rankings, request.credentials);
   const rankingRequests = MAX_CANDIDATE_PAGES;
 
   if (decoded.outcome === "REQUEST_REJECTED") {
@@ -175,7 +188,11 @@ export async function discoverExternalReferences(
   // The slice is a second, local guard so this loop's bound does not depend on
   // another module keeping its promise.
   for (const descriptor of selection.selected.slice(0, MAX_QUALIFIED_CANDIDATES)) {
-    const report = await ports.candidateMetadata(descriptor.reportCode, descriptor.fightId);
+    const report = await ports.candidateMetadata(
+      descriptor.reportCode,
+      descriptor.fightId,
+      request.credentials,
+    );
     metadataRequests += 1;
 
     const result = qualifyCandidate({

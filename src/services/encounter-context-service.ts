@@ -10,10 +10,18 @@
  * keep in agreement.
  *
  * The one thing M7 did not surface was each pull's M8-C context facts, which its
- * loop already holds. M8-G adds an optional observer to pick them up in passing
+ * loop already holds. M8-G added an optional observer to pick them up in passing
  * — see `EncounterFactsObserver` — so the invariant holds exactly:
  *
  *     one selected subject fight  ->  at most one ingestFightCore
+ *
+ * NO RATE LIMITING HERE, AND THAT IS WHAT PREVENTS A DOUBLE CHARGE
+ *
+ * Admission is a property of being publicly reachable, so it lives in the REST
+ * route and the MCP tool. `analyzeRaidNight` contains no limiter call either —
+ * the raid-night route and tool charge before calling it. So composing the
+ * SERVICE, as this function does, cannot charge the raid-night budget a second
+ * time; composing the public raid-night wrapper would have.
  *
  * EXTERNAL DISCOVERY IS A SEPARATE, OPTIONAL, METADATA-ONLY PHASE
  *
@@ -23,7 +31,7 @@
  * below can turn an external failure into a request failure.
  */
 
-import type { Env } from "../config/env.js";
+import { loadConfig, type Env } from "../config/env.js";
 import type { RaidNightAnalysis } from "../aggregation/raid-night.js";
 import type { PullContext } from "../comparison/pull-identity.js";
 import {
@@ -33,54 +41,11 @@ import {
 import { pullContextOf, type FightEncounterFacts } from "../progression/pull-projection.js";
 import {
   discoverExternalReferences,
-  type ExternalDiscovery,
   type ExternalDiscoveryPorts,
 } from "../external-context/external-discovery.js";
-import { MAX_QUALIFIED_CANDIDATES } from "../external-context/candidate-pool.js";
-import { MAX_CANDIDATE_PAGES } from "../wcl/rankings/rankings-query.js";
 import { analyzeRaidNight, type RaidNightServiceDeps } from "./raid-night-service.js";
 import type { EncounterContextRequest, ExternalReferenceOption } from "./encounter-context-request.js";
-import type { ServiceError } from "./result.js";
-
-/**
- * Why no external discovery was attempted, or why it could not be started.
- *
- * DISTINCT FROM M8-F's OWN FAILURES, which describe a discovery that ran. These
- * describe one that did not, and the difference matters to a reader deciding
- * whether to retry.
- */
-export type ExternalReferenceSkipReason =
-  /** The caller did not ask for external references. Costs nothing. */
-  | "NOT_REQUESTED"
-  /**
-   * The named subject fight is in no progression sequence.
-   *
-   * It was trash, or its encounter or difficulty was unresolved, so M8-B could
-   * not establish an encounter identity to search a ranking board with. Searching
-   * anyway would mean guessing what encounter the caller meant.
-   */
-  | "SUBJECT_PULL_NOT_IN_A_SEQUENCE";
-
-export type ExternalReferenceOutcome =
-  | { readonly kind: "SKIPPED"; readonly reason: ExternalReferenceSkipReason }
-  | { readonly kind: "ATTEMPTED"; readonly discovery: ExternalDiscovery };
-
-/**
- * The internal encounter-context result.
- *
- * NOT A WIRE DOCUMENT. `src/contracts/encounter-context-projection.ts` turns
- * this into one, and the layering tests keep the application layer free of
- * schemas — which is what lets this whole composition run under a plain Node
- * test project.
- */
-export interface EncounterContextAnalysis {
-  readonly progression: RaidNightProgression;
-  readonly external: ExternalReferenceOutcome;
-}
-
-export type EncounterContextRunResult =
-  | { readonly ok: true; readonly analysis: EncounterContextAnalysis }
-  | { readonly ok: false; readonly error: ServiceError };
+import type { EncounterContextRunResult } from "./encounter-context-runner.js";
 
 export interface EncounterContextServiceDeps {
   readonly env: Env;
@@ -94,32 +59,6 @@ export interface EncounterContextServiceDeps {
    * touches these.
    */
   readonly external?: ExternalDiscoveryPorts | undefined;
-}
-
-/**
- * The work a request will perform, computable before any of it happens.
- *
- * M8-H owns admission; this exists so admission has something truthful to read.
- * Every number is derived from the request alone — no retrieval, no clock, no
- * guess at how many pages a fight will take.
- */
-export interface EncounterContextCostPlan {
-  readonly subjectFightCount: number;
-  readonly externalReferencesEnabled: boolean;
-  /** One ranking page plus at most five metadata lookups, or zero when disabled. */
-  readonly maxExternalRequests: number;
-  /** M8-E adds none. Temporal context is computed from an already-ingested fight. */
-  readonly maxTemporalContextRequests: 0;
-}
-
-export function planEncounterContextCost(request: EncounterContextRequest): EncounterContextCostPlan {
-  const enabled = request.externalReferences.mode === "ENABLED";
-  return {
-    subjectFightCount: request.subject.fightIds.length,
-    externalReferencesEnabled: enabled,
-    maxExternalRequests: enabled ? MAX_CANDIDATE_PAGES + MAX_QUALIFIED_CANDIDATES : 0,
-    maxTemporalContextRequests: 0,
-  };
 }
 
 /**
@@ -163,6 +102,11 @@ export async function analyzeEncounterContext(
   request: EncounterContextRequest,
   deps: EncounterContextServiceDeps,
 ): Promise<EncounterContextRunResult> {
+  // Read BEFORE any work, and only to hand to the external adapter. The
+  // raid-night service validates configuration itself and fails the request with
+  // CONFIGURATION_ERROR, so an invalid config never reaches the branch below.
+  const config = loadConfig(deps.env);
+
   // ---- local: M7's orchestration, with the M8-C facts picked up in passing ----
   const encounterFacts: FightEncounterFacts[] = [];
 
@@ -207,7 +151,11 @@ export async function analyzeEncounterContext(
 
   // No ports wired is the same observable outcome as not asking: no discovery
   // happened. It is reported as a skip rather than invented as a failure.
-  if (deps.external === undefined) {
+  //
+  // An unusable configuration lands here too, and cannot in practice:
+  // `analyzeRaidNight` already refused the request above. The check exists so
+  // this function makes no unchecked assumption about what ran before it.
+  if (deps.external === undefined || !config.ok) {
     return {
       ok: true,
       analysis: { progression, external: { kind: "SKIPPED", reason: "NOT_REQUESTED" } },
@@ -228,11 +176,10 @@ export async function analyzeEncounterContext(
         partition: option.partition,
       },
       subject: subject.context,
+      credentials: config.config.wcl,
     },
     deps.external,
   );
 
   return { ok: true, analysis: { progression, external: { kind: "ATTEMPTED", discovery } } };
 }
-
-export type EncounterContextRunner = (request: EncounterContextRequest) => Promise<EncounterContextRunResult>;

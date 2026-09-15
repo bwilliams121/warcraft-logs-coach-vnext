@@ -160,6 +160,15 @@ describe("MCP cannot reach gameplay machinery", () => {
       "src/services/analysis-runner",
       "src/services/raid-night-runner",
       "src/services/raid-night-request",
+      // The encounter-context tool needs the same three kinds of thing, for the
+      // same reasons: its public contract and projection, its runner TYPE and
+      // admission formula, and the request parser shared with REST. Still
+      // absent: `analyzeEncounterContext` itself, which lives in
+      // `encounter-context-service` and is deliberately NOT on this list.
+      "src/contracts/encounter-context-contract",
+      "src/contracts/encounter-context-projection",
+      "src/services/encounter-context-runner",
+      "src/services/encounter-context-request",
       "src/services/result",
       "src/runtime/rate-limit",
       "src/runtime/bearer-auth",
@@ -478,16 +487,18 @@ describe("the application service stays transport-neutral", () => {
 });
 
 describe("the MCP tool surface is exactly one real tool", () => {
-  it("registers exactly the two analysis tools", () => {
-    // M7-F froze the surface at two. The count still matters: a third
+  it("registers exactly the three analysis tools", () => {
+    // M7-F froze the surface at two; M8-H adds the third and LAST composed
+    // analysis operation. The count still matters exactly as much: a fourth
     // registration is the shape a primitive or a probe would arrive in, and a
-    // bare "at least these two" assertion would not notice one.
+    // bare "at least these three" assertion would not notice one.
     const server = sourceOf("src/mcp/server.ts");
     const registrations = [...server.matchAll(/register\w*Tool\w*\(/g)];
 
-    expect(registrations).toHaveLength(2);
+    expect(registrations).toHaveLength(3);
     expect(server).toContain("registerAnalyzeWarcraftLogTool");
     expect(server).toContain("registerAnalyzeRaidNightTool");
+    expect(server).toContain("registerAnalyzeEncounterContextTool");
   });
 
   it("no longer carries the M6-A probe", () => {
@@ -507,8 +518,13 @@ describe("the MCP tool surface is exactly one real tool", () => {
     // its own verdict.
     const tools = MCP_FILES.filter((file) => file.startsWith("src/mcp/tools/"));
 
-    // Exactly the two composed analysis operations. Player-specific focus is a
-    // filter on the raid-night tool, not a third tool.
-    expect(tools).toEqual(["src/mcp/tools/analyze-raid-night.ts", "src/mcp/tools/analyze-warcraft-log.ts"]);
+    // Exactly the three composed analysis operations. Player-specific focus is a
+    // filter on the raid-night tool, not a fourth tool; and external references
+    // are an OPTION on encounter context, not a rankings-search tool.
+    expect(tools).toEqual([
+      "src/mcp/tools/analyze-encounter-context.ts",
+      "src/mcp/tools/analyze-raid-night.ts",
+      "src/mcp/tools/analyze-warcraft-log.ts",
+    ]);
   });
 });

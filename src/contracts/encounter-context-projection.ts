@@ -22,7 +22,7 @@ import type {
   RaidNightProgression,
   UnresolvedPull,
 } from "../progression/encounter-progression.js";
-import type { EncounterContextAnalysis } from "../services/encounter-context-service.js";
+import type { EncounterContextAnalysis } from "../services/encounter-context-runner.js";
 import {
   ENCOUNTER_CONTEXT_CAPABILITY,
   PUBLIC_ENCOUNTER_CONTEXT_SCHEMA_VERSION,

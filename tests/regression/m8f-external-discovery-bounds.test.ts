@@ -122,7 +122,7 @@ async function runDiscovery(
   });
 
   const discovery = await discoverExternalReferences(
-    { rankings: RANKINGS_REQUEST, subject: subjectPull() },
+    { rankings: RANKINGS_REQUEST, subject: subjectPull(), credentials: TEST_CREDENTIALS },
     {
       rankingPage: async (request) => {
         const outcome = await client.execute({

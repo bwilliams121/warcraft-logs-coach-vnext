@@ -22,6 +22,7 @@ import type { AnalysisServiceResult } from "../../src/services/result.js";
 import type { RateLimiterPort } from "../../src/runtime/rate-limit.js";
 import type { AnalysisRunner } from "../../src/services/analysis-runner.js";
 import type { RaidNightRunner, RaidNightRunResult } from "../../src/services/raid-night-runner.js";
+import type { EncounterContextRunner } from "../../src/services/encounter-context-runner.js";
 import type { RaidNightRequest } from "../../src/services/raid-night-request.js";
 import type { RaidNightAnalysis } from "../../src/aggregation/raid-night.js";
 import type { Env } from "../../src/config/env.js";
@@ -217,6 +218,7 @@ export const FORBIDDEN_RAID_NIGHT_RUNNER: RaidNightRunner = async () => {
 export function workerDepsFor(options: {
   readonly analyze?: AnalysisRunner;
   readonly raidNight?: RaidNightRunner;
+  readonly encounterContext?: EncounterContextRunner;
   readonly rateLimiter?: RateLimiterPort | undefined;
   readonly mcp?: WorkerDeps["mcp"];
 }): WorkerDeps {
@@ -225,6 +227,7 @@ export function workerDepsFor(options: {
     // Stubbed fail-closed rather than omitted, so a test that forgot to bind it
     // cannot silently reach a runner it did not choose.
     raidNightRunner: () => options.raidNight ?? UNBOUND_RAID_NIGHT,
+    encounterContextRunner: () => options.encounterContext ?? UNBOUND_ENCOUNTER_CONTEXT,
     rateLimiter: () => options.rateLimiter ?? ALLOWING_LIMITER,
     mcp: options.mcp ?? defaultTestMcp,
     version: "0.1.0",
@@ -241,6 +244,11 @@ const UNBOUND_RAID_NIGHT: RaidNightRunner = async () => ({
   error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
 });
 
+const UNBOUND_ENCOUNTER_CONTEXT: EncounterContextRunner = async () => ({
+  ok: false as const,
+  error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
+});
+
 /**
  * Routes `/mcp` through the same runners and limiter the Worker holds.
  *
@@ -252,5 +260,6 @@ const defaultTestMcp: WorkerDeps["mcp"] = async (request, env, deps) =>
   await handleMcpRequest(request, env, {
     analyze: deps.analysisRunner(env),
     analyzeRaidNight: deps.raidNightRunner(env),
+    analyzeEncounterContext: deps.encounterContextRunner(env),
     rateLimiter: deps.rateLimiter(env),
   });

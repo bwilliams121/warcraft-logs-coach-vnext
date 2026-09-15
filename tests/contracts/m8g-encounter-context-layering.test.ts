@@ -136,33 +136,60 @@ describe("the public projection reaches no gameplay authority", () => {
   });
 });
 
-describe("no transport exposes encounter context yet", () => {
-  it("declares no /v1/encounter-context route", () => {
+describe("M8-H exposes encounter context on both transports", () => {
+  // INVERTED IN M8-H, DELIBERATELY. These three assertions said "not yet" while
+  // M8-G shipped a document with no transport. Publishing it is M8-H's entire
+  // purpose, so the rules now pin that it IS exposed — on both transports, from
+  // one composition — rather than being deleted.
+  it("declares the /v1/encounter-context route", () => {
     const worker = codeOf("src/api/worker.ts");
-    expect(worker).not.toContain("encounter-context");
-    expect(worker).not.toContain("encounterContext");
+    expect(worker).toContain('"/v1/encounter-context"');
+    expect(worker).toContain("handleEncounterContext");
   });
 
-  it("registers no third MCP tool", () => {
-    const mcp = allPaths().filter((path) => path.startsWith("src/mcp/"));
-    for (const path of mcp) {
-      const code = codeOf(path);
-      expect(code, `${path} mentions encounter context`).not.toContain("encounter_context");
-      expect(code, `${path} mentions encounter context`).not.toContain("encounterContext");
-    }
-    // Exactly the two existing tools, still.
+  it("registers the third MCP tool and no more", () => {
     const tools = allPaths().filter((path) => path.startsWith("src/mcp/tools/"));
-    expect(tools).toEqual(["src/mcp/tools/analyze-raid-night.ts", "src/mcp/tools/analyze-warcraft-log.ts"]);
+    expect(tools).toEqual([
+      "src/mcp/tools/analyze-encounter-context.ts",
+      "src/mcp/tools/analyze-raid-night.ts",
+      "src/mcp/tools/analyze-warcraft-log.ts",
+    ]);
   });
 
-  it("the runtime composition wires no encounter-context runner", () => {
-    expect(codeOf("src/runtime/analysis-composition.ts")).not.toContain("EncounterContext");
+  it("the runtime composition wires exactly one encounter-context runner", () => {
+    const code = codeOf("src/runtime/analysis-composition.ts");
+    expect(code).toContain("createProductionEncounterContextRunner");
+    // One factory, not one per transport.
+    expect(code.match(/createProductionEncounterContextRunner/g)).toHaveLength(1);
   });
 
-  it("changes no rate-limit binding", () => {
-    // M8-H owns admission. The limiter is untouched here.
+  it("changes no rate-limit binding or key", () => {
+    // M8-H reuses the existing shared budget. A new key would give a caller a
+    // second allowance and reopen the bypass one shared key exists to close.
     const runtime = codeOf("src/runtime/rate-limit.ts");
     expect(runtime).not.toContain("encounter");
+    expect(runtime).toContain('ANALYSIS_RATE_LIMIT_KEY = "analysis:warcraft_log"');
+  });
+
+  it("charges admission only at the transport boundary", () => {
+    // The double-charge guard. No limiter call may appear in the application
+    // composition; if one did, a nested raid night would be metered twice.
+    for (const path of [
+      "src/services/encounter-context-service.ts",
+      "src/services/raid-night-service.ts",
+      "src/runtime/analysis-composition.ts",
+    ]) {
+      expect(codeOf(path), `${path} charges the limiter`).not.toContain("checkAnalysisRateLimit");
+    }
+    // And exactly the two public adapters do charge it.
+    const chargers = allPaths().filter(
+      (path) => codeOf(path).includes("checkAnalysisRateLimitCost") && !path.includes("rate-limit.ts"),
+    );
+    expect(chargers.sort()).toEqual([
+      "src/api/worker.ts",
+      "src/mcp/tools/analyze-encounter-context.ts",
+      "src/mcp/tools/analyze-raid-night.ts",
+    ]);
   });
 });
 

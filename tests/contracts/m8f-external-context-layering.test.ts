@@ -75,6 +75,7 @@ describe("the M8-F domains exist and are fully covered by these checks", () => {
     ]);
     expect(RANKING_MODULES).toEqual([
       "src/wcl/rankings/candidate-metadata-query.ts",
+      "src/wcl/rankings/external-ports.ts",
       "src/wcl/rankings/rankings-decoder.ts",
       "src/wcl/rankings/rankings-query.ts",
     ]);
@@ -318,7 +319,28 @@ describe("the domain has nowhere to record a ranking, parse or judgement", () =>
 });
 
 describe("the domain is deterministic and carries no wall clock", () => {
-  it.each(M8F_MODULES)("%s reads no clock and generates no identifier", (path) => {
+  /**
+   * The transport adapter, excluded from the clock ban with a reason.
+   *
+   * `external-ports.ts` is the M8-H adapter that binds a real GraphQL client, and
+   * it passes `Date.now` to `createTokenProvider` exactly as `createReportRoster`
+   * and `createFightCoreIngestor` do — for OAuth token EXPIRY, which is not
+   * analysis data and never reaches a document. Every module that shapes the
+   * RESULT stays under the ban.
+   */
+  const DETERMINISTIC_MODULES = M8F_MODULES.filter((path) => path !== "src/wcl/rankings/external-ports.ts");
+
+  it("the excluded adapter is the only one, and it really is an adapter", () => {
+    expect(M8F_MODULES.length - DETERMINISTIC_MODULES.length).toBe(1);
+    // It binds a client and nothing else: no decoding, no selection, no verdict.
+    const code = codeOf("src/wcl/rankings/external-ports.ts");
+    expect(code).toContain("createGraphqlClient");
+    for (const banned of ["selectCandidates", "qualifyCandidate", "assessPullComparability"]) {
+      expect(code, `the adapter does ${banned}`).not.toContain(banned);
+    }
+  });
+
+  it.each(DETERMINISTIC_MODULES)("%s reads no clock and generates no identifier", (path) => {
     const code = codeOf(path);
     for (const banned of [
       "Date.now",

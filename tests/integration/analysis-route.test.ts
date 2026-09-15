@@ -91,6 +91,10 @@ function worker(deps: Partial<WorkerDeps> = {}) {
       ok: false as const,
       error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
     }),
+    encounterContextRunner: () => async () => ({
+      ok: false as const,
+      error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
+    }),
     mcp: deps.mcp ?? UNREACHABLE_MCP,
     version: deps.version ?? "0.1.0",
   });

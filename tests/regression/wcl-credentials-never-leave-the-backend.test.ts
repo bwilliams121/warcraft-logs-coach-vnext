@@ -109,6 +109,10 @@ function throwingDeps(): WorkerDeps {
       ok: false as const,
       error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
     }),
+    encounterContextRunner: () => async () => ({
+      ok: false as const,
+      error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
+    }),
     mcp: async (request, env, workerDeps) =>
       await handleMcpRequest(request, env, {
         analyze: workerDeps.analysisRunner(env),
@@ -130,6 +134,10 @@ function defaultDeps(preflight: PreflightPort = RESOLVING_PREFLIGHT): WorkerDeps
     raidNightRunner: () => async () => ({
       ok: false as const,
       error: { code: "INTERNAL_ERROR" as const, message: "raid-night runner not bound here" },
+    }),
+    encounterContextRunner: () => async () => ({
+      ok: false as const,
+      error: { code: "INTERNAL_ERROR" as const, message: "encounter-context runner not bound here" },
     }),
     mcp: async (request, env, workerDeps) =>
       await handleMcpRequest(request, env, {

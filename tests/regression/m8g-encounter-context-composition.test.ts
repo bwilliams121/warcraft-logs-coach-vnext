@@ -17,10 +17,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import {
-  analyzeEncounterContext,
-  planEncounterContextCost,
-} from "../../src/services/encounter-context-service.js";
+import { analyzeEncounterContext } from "../../src/services/encounter-context-service.js";
+import { planEncounterContextCost } from "../../src/services/encounter-context-runner.js";
 import { parseEncounterContextRequest } from "../../src/services/encounter-context-request.js";
 import type { EncounterContextRequest } from "../../src/services/encounter-context-request.js";
 import { projectEncounterContextResult } from "../../src/contracts/encounter-context-projection.js";
