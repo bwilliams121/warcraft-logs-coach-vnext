@@ -1,0 +1,10 @@
+[
+  {
+    "timestamp": 1000,
+    "type": "synthetic_unsupported_type",
+    "sourceID": 1,
+    "targetID": 2,
+    "abilityGameID": 3,
+    "fight": 1
+  }
+]

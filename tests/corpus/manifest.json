@@ -1,0 +1,468 @@
+{
+  "contractVersion": 1,
+  "corpusId": "warcraft-logs-coach-vnext.regression-corpus",
+  "artifacts": [
+    {
+      "artifactId": "wcl-events.no-actor-sentinel-source",
+      "path": "artifacts/wcl-events/no-actor-sentinel-source.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "5a01122d68ef0ada32d1f8feb1c34ebb9742ade326dfc76aa457ad51624c9be5",
+      "byteLength": 1070,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "qJ1pgB49ZrRNVmCd",
+          "fightId": 6,
+          "reportRevision": 1,
+          "sourceActorId": 5,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-11",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": false,
+            "limit": 10000,
+            "startTimeMs": 7550000,
+            "endTimeMs": 7560000
+          },
+          "completeness": {
+            "eventsReturned": 5010,
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "tests/fixtures/wcl/events/PROVENANCE.md, table 'Reproducing the raw captures those indices refer to', column followup-q1-omitted.json: 5,010 events returned, nextPageTimestamp null (terminal page). The full-fight run the window belongs to was COMPLETE: 40 pages, 196,366 events, no failures."
+          },
+          "captureTooling": {
+            "name": "live probe follow-up query q1 (hostilityType omitted) run under vitest.probe.config.ts; wrote .probe/followup-q1-omitted.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/followup-q1-omitted.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/followup-q1-omitted.json wcl-no-actor-sentinel-source.json --where sourceID=-1 4"
+            },
+            "detail": "Kept the first 4 events whose sourceID is -1, in captured order. Every other event in the 5,010-event window was dropped. The four retained events share timestamp 7,551,049 and ability 1285965; they differ only by target.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A seed (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-no-actor-sentinel-source.json tests/corpus/artifacts/wcl-events/no-actor-sentinel-source.json"
+            },
+            "detail": "Byte-identical copy of the legacy fixture (same sha256). The legacy file stays in place until M9-B migrates its importers; a test asserts the two remain identical while both exist.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "ranges": [],
+          "basis": "A --where selection retains no contiguous range. The window held 5,010 events and this slice holds 4, so nothing between or around them is retained."
+        },
+        "retainedFor": "Evidence that -1 is the no-actor sentinel on sourceID, not only on targetID, on real enemy-environment damage; and the smallest real slice for proving the corpus format.",
+        "limitations": [
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned.",
+          "Cannot prove any absence, continuity or pagination behaviour.",
+          "No actor or ability names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-events.no-actor-sentinel-source.unusable-negative",
+      "path": "artifacts/wcl-events/no-actor-sentinel-source.unusable-negative.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "eb5fcc6a59ecc7b0cc7b6214cda0152a516dedb6dcf69be4f7de78ffb8dc4ab6",
+      "byteLength": 1070,
+      "provenance": {
+        "kind": "DERIVED_FROM_CAPTURE",
+        "parentArtifactId": "wcl-events.no-actor-sentinel-source",
+        "source": null,
+        "transformations": [
+          {
+            "kind": "VALUE_MUTATION",
+            "tooling": {
+              "name": "M9-A seed (scripted single-token replacement)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "replace the first occurrence of '\"sourceID\": -1,' with '\"sourceID\": -5,'"
+            },
+            "detail": "Raw index 0: sourceID changed from -1 to -5. Every other byte is identical to the parent; the byte length is unchanged. The value -5 has never been observed in any capture.",
+            "invalidates": [
+              "OBSERVED_BEHAVIOUR",
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          }
+        ],
+        "retainedCoverage": {
+          "ranges": [],
+          "basis": "Inherits none from the parent, and a derivation never gains coverage."
+        },
+        "retainedFor": "Constructs the condition the UNUSABLE_VALUE rule exists for — a negative source id that is not the verified sentinel — on otherwise real event shapes, without claiming Warcraft Logs ever emitted it.",
+        "limitations": [
+          "Not evidence that Warcraft Logs emits any negative id other than -1.",
+          "Not evidence of anything about actor -5; the id was chosen to match nothing."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-events.cast-resource-pre-cost",
+      "path": "artifacts/wcl-events/cast-resource-pre-cost.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "c0e2bb4b8aa59f298de40efc0c23ded246ac77703c73d1f4d7721e08cdb26c85",
+      "byteLength": 3045,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 19,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-12",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2174394,
+            "endTimeMs": 2194394
+          },
+          "completeness": {
+            "eventsReturned": 10003,
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": 2191432,
+            "state": "PARTIAL",
+            "evidence": "tests/fixtures/wcl/events/PROVENANCE.md, table 'Reproducing the raw captures those indices refer to', column m4c1-rogue-resources.json: 10,003 events returned, nextPageTimestamp 2,191,432. The page limit was hit, so the capture covers only the contiguous prefix [2,174,394, 2,191,432). The selected positions sit inside that prefix."
+          },
+          "captureTooling": {
+            "name": "M4-C1 evidence-investigation probe run under vitest.probe.config.ts; wrote .probe/m4c1-rogue-resources.json",
+            "revision": "UNAVAILABLE",
+            "invocation": "UNAVAILABLE"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m4c1-rogue-resources.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m4c1-rogue-resources.json wcl-cast-resource-pre-cost.json --indices 464,700,704,4713,4715"
+            },
+            "detail": "Kept exactly five capture positions, in the order listed: a Warlock cast (actor 12), a Rogue resourcechange, the Rogue's costed finisher, a costed Garrote, and an uncosted melee. Positions are meaningful only against report revision 30.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "UNAVAILABLE",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          },
+          {
+            "kind": "LEGACY_FIXTURE_COPY",
+            "tooling": {
+              "name": "M9-A seed (file copy)",
+              "revision": "NOT_APPLICABLE",
+              "invocation": "cp tests/fixtures/wcl/events/wcl-cast-resource-pre-cost.json tests/corpus/artifacts/wcl-events/cast-resource-pre-cost.json"
+            },
+            "detail": "Byte-identical copy of the legacy fixture (same sha256). The legacy file stays in place until M9-B migrates its importers; a test asserts the two remain identical while both exist.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "ranges": [],
+          "basis": "An --indices selection retains five non-adjacent capture positions; no contiguous range survives."
+        },
+        "retainedFor": "The evidence contract that a costed COMPLETE cast's attached classResources[].amount is the amount BEFORE the cost: it carries amount == max == cost == 7, which is impossible under a post-cost reading.",
+        "limitations": [
+          "Settles one instant per event. amount - cost is arithmetic across an instant nothing observed and is not established.",
+          "The melee and the Garrote share a timestamp; same-timestamp retrieval order is not causal order, so that pair is corroboration only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-events.synthetic-unsupported-type",
+      "path": "artifacts/wcl-events/synthetic-unsupported-type.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "1f49a92161e6f3ad3e3eb9ffa41fb8c0b843f6c0abbdce4d8840e97e3e06a63f",
+      "byteLength": 154,
+      "provenance": {
+        "kind": "SYNTHETIC",
+        "parentArtifactId": null,
+        "source": null,
+        "transformations": [],
+        "retainedCoverage": {
+          "ranges": [],
+          "basis": "Synthetic; there is no capture to retain coverage from."
+        },
+        "retainedFor": "One event with a valid envelope whose type string no contract recognises, so the unsupported-type path can be pinned without pretending a real family is unsupported.",
+        "limitations": [
+          "The type string is invented so it cannot collide with a real Warcraft Logs family. This proves the unsupported path exists; it proves nothing about any real type.",
+          "Hand-authored. Not evidence of any Warcraft Logs behaviour."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-graphql.event-page-null-data",
+      "path": "artifacts/wcl-graphql/event-page-null-data.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "4f08306974e04e8c978dbd1569e4c855b35a39c67169ea0fa586cf30ec1625af",
+      "byteLength": 133,
+      "provenance": {
+        "kind": "SYNTHETIC",
+        "parentArtifactId": null,
+        "source": null,
+        "transformations": [],
+        "retainedCoverage": {
+          "ranges": [],
+          "basis": "Synthetic; there is no capture to retain coverage from."
+        },
+        "retainedFor": "A well-formed decoded GraphQL data object whose ReportEventPaginator carries data: null. The schema declares data as nullable JSON; this is the shape the decoder must classify as a malformed page and never as an empty one.",
+        "limitations": [
+          "Hand-authored against the documented schema shape. It is not a captured upstream response.",
+          "The cursor value 7551050 is arbitrary and carries no meaning."
+        ]
+      }
+    }
+  ],
+  "cases": [
+    {
+      "caseId": "normalization.no-actor-sentinel.source-absence",
+      "artifactId": "wcl-events.no-actor-sentinel-source",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/raw-event-fields.ts NO_ACTOR_SENTINEL; src/engine/normalization/event-normalizer.ts source reading",
+      "purpose": "Real enemy-environment damage carrying sourceID -1 normalizes to a null source with the NO_ACTOR_SENTINEL reason, and no ActorRef -1 is ever minted. The four events also share one timestamp, so the count check doubles as proof that equal timestamps are not collapsed.",
+      "assertions": [
+        { "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED", "params": { "expectedEventCount": 4 } },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "params": { "selector": { "kind": "EVERY_EVENT" }, "absence": "NO_ACTOR_SENTINEL" }
+        },
+        { "kind": "NORMALIZATION.NO_ACTOR_REF_HOLDS", "params": { "actorId": -1 } }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "The -1 sentinel contract is owned by the normalization layer and is evidence-backed: the mid-fight window capture carries 92 events with sourceID -1 and 117 with targetID -1, including environment damage with no stated source. Reading -1 as an actor id would mint a well-formed actor that exists nowhere in master data."
+      },
+      "authority": null,
+      "limitations": [
+        "Says nothing about negative values other than -1; that is the derived case's job.",
+        "gameVersion 1 / logVersion 17 only."
+      ],
+      "relatedTests": ["tests/regression/actor-sentinels-never-become-actors.test.ts"]
+    },
+    {
+      "caseId": "combat-state.trimmed-slice-cannot-prove-absence",
+      "artifactId": "wcl-events.no-actor-sentinel-source",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/state/state-result.ts gateAbsenceClaim; src/engine/state/combat-state.ts lastObservedCast",
+      "purpose": "A sanitized slice whose SUBSET_SELECTION retained no coverage cannot prove that an actor never cast anything. Asked for actor 14's last completed cast over the whole window, the state layer must answer UNKNOWN for INSUFFICIENT_COVERAGE — never EXACT null, which would be a proven absence manufactured from trimming.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
+          "params": { "actorId": 14, "abilityGameId": null, "reason": "INSUFFICIENT_COVERAGE" }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Absence claims are gated on COMPLETE coverage of the interval (state-result.ts). The harness grants coverage only from the artifact's retainedCoverage, which is empty because the transformation record says so. CLAUDE.md: partial event retrieval does NOT mean the player performed no events during the missing interval."
+      },
+      "authority": null,
+      "limitations": [
+        "Pins the reason INSUFFICIENT_COVERAGE, which presumes the CASTS category is OBSERVABLE from captures. If the harness ever stopped granting capability to captures the reason would move to CAPABILITY_UNVERIFIED, and this case should fail so the change is reviewed."
+      ],
+      "relatedTests": ["tests/regression/m4-state-never-invents-absence.test.ts"]
+    },
+    {
+      "caseId": "normalization.unobserved-negative-source-is-unusable-not-sentinel",
+      "artifactId": "wcl-events.no-actor-sentinel-source.unusable-negative",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts actor-side reading; ActorAbsence UNUSABLE_VALUE",
+      "purpose": "A negative source id that is not the verified sentinel is recorded as UNUSABLE_VALUE — neither an actor nor a 'no actor' statement — while the untouched sentinel events in the same payload keep their NO_ACTOR_SENTINEL meaning. Proves the rule discriminates rather than treating all negatives alike.",
+      "assertions": [
+        { "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED", "params": { "expectedEventCount": 4 } },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "params": { "selector": { "kind": "RAW_INDEX", "index": 0 }, "absence": "UNUSABLE_VALUE" }
+        },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "params": { "selector": { "kind": "RAW_INDEX", "index": 1 }, "absence": "NO_ACTOR_SENTINEL" }
+        },
+        { "kind": "NORMALIZATION.NO_ACTOR_REF_HOLDS", "params": { "actorId": -5 } }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "No evidence supports generalising -1's meaning. The normalization layer therefore records an unobserved negative as something it cannot interpret, and refuses to build an actor from it. The artifact is DERIVED: the -5 is constructed, and the case claims only how the layer treats it, not that it occurs."
+      },
+      "authority": null,
+      "limitations": [
+        "The mutated event was never observed; this is a rule-of-the-layer claim, not a capture claim."
+      ],
+      "relatedTests": ["tests/regression/actor-sentinels-never-become-actors.test.ts"]
+    },
+    {
+      "caseId": "combat-state.costed-cast-resource-is-pre-cost",
+      "artifactId": "wcl-events.cast-resource-pre-cost",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-observations.ts timing; src/engine/resources/resource-state.ts observationOnEvent",
+      "purpose": "The resource snapshot attached to a costed COMPLETE cast is tagged PRE_COST with amount, max and cost preserved verbatim; an uncosted cast on the same actor stays EVENT_ASSOCIATED with a null cost. The finisher's 7/7 costing 7 is the cap-bounded falsifier of the post-cost reading.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 19,
+            "abilityGameId": 32645,
+            "reportTimeMs": 2175585,
+            "resourceWireType": 4,
+            "expected": { "observedAmount": 7, "observedMax": 7, "observedCost": 7, "timing": "PRE_COST" }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 12,
+            "abilityGameId": 116858,
+            "reportTimeMs": 2175128,
+            "resourceWireType": 7,
+            "expected": { "observedAmount": 50, "observedMax": 50, "observedCost": 20, "timing": "PRE_COST" }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 19,
+            "abilityGameId": 703,
+            "reportTimeMs": 2182589,
+            "resourceWireType": 3,
+            "expected": {
+              "observedAmount": 195,
+              "observedMax": 250,
+              "observedCost": 45,
+              "timing": "PRE_COST"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 19,
+            "abilityGameId": 1,
+            "reportTimeMs": 2182589,
+            "resourceWireType": 3,
+            "expected": {
+              "observedAmount": 150,
+              "observedMax": 250,
+              "observedCost": null,
+              "timing": "EVENT_ASSOCIATED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "amount == max while cost > 0 is decided from one event with no arithmetic: a post-cost reading would require holding max + cost, above the cap. The wider investigation behind the fixture found 126 cap-bounded falsifiers and zero counterexamples across 423 costed entries in two reports. The timing tag itself is owned by the resource layer and decided once from the normalized model."
+      },
+      "authority": null,
+      "limitations": [
+        "Establishes PRE_COST for costed COMPLETE casts only. resourcechange stays EVENT_ASSOCIATED because its evidence rests on same-timestamp adjacency.",
+        "Does not make the post-cost amount knowable.",
+        "gameVersion 1 / logVersion 17 only."
+      ],
+      "relatedTests": ["tests/unit/cast-resource-pre-cost-contract.test.ts"]
+    },
+    {
+      "caseId": "normalization.unrecognised-type-is-counted-not-dropped",
+      "artifactId": "wcl-events.synthetic-unsupported-type",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts UNSUPPORTED_TYPE / UNKNOWN_EVENT_TYPE",
+      "purpose": "An event whose type string no evidence-backed contract recognises is preserved as an UNSUPPORTED_TYPE event and counted under its verbatim type string. It is not dropped, and it is not coerced into a known family.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED",
+          "params": { "rawType": "synthetic_unsupported_type", "count": 1 }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Only evidence-backed types are contracted (supported-families.ts). Anything else must fail closed as explicitly unsupported rather than disappear, because a dropped event would read downstream as an event that never happened."
+      },
+      "authority": null,
+      "limitations": ["Synthetic input. Proves the path, not any real Warcraft Logs type."],
+      "relatedTests": ["tests/unit/supported-families.test.ts", "tests/unit/event-normalizer.test.ts"]
+    },
+    {
+      "caseId": "wcl-transport.null-event-data-is-malformed-not-empty",
+      "artifactId": "wcl-graphql.event-page-null-data",
+      "owningLayer": "WCL_TRANSPORT",
+      "contractUnderTest": "src/wcl/events-query.ts decodeEventPage",
+      "purpose": "A ReportEventPaginator whose data is null decodes to MALFORMED_PAGINATOR. 'We could not read your events' must never become 'you produced no events'.",
+      "assertions": [
+        { "kind": "WCL_DECODE.EVENT_PAGE_OUTCOME", "params": { "expected": "MALFORMED_PAGINATOR" } }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The decoder owns the classification and documents it in place: data: JSON is nullable upstream, and a null or non-array payload is a malformed page, never an empty one. The paginator then records the stream PARTIAL with MALFORMED_PAGE rather than an empty period."
+      },
+      "authority": null,
+      "limitations": [
+        "Exercises the decoder over a decoded data object, not a raw HTTP body; transport-level parsing failures are a separate boundary."
+      ],
+      "relatedTests": ["tests/unit/wcl-paginator.test.ts"]
+    }
+  ]
+}

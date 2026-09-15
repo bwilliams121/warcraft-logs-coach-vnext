@@ -237,6 +237,62 @@ The test should not require access to the original live log.
 
 ---
 
+# Regression Corpus (M9)
+
+Location:
+
+```text
+tests/corpus/
+```
+
+The regression corpus is the versioned, digest-pinned form of fixture
+provenance. Its contract lives in `tests/support/corpus/contract.ts` and its
+policy in `tests/corpus/README.md`; this section records what must stay true.
+
+Two records are kept apart:
+
+- An ARTIFACT is bytes plus provenance: lineage classification, source
+  capture coordinates and page/completeness facts, every transformation and
+  the claims it invalidates, and the coverage the artifact still retains.
+- A CASE is a claim about an artifact, owned by exactly one layer, expressed
+  as registered assertion kinds with typed parameters.
+
+Lineage is classified by what was DONE to the bytes:
+
+```text
+REAL_CAPTURE          untransformed Warcraft Logs output (none committed)
+SANITIZED_CAPTURE     selected / redacted / remapped; every event observed
+DERIVED_FROM_CAPTURE  deliberately mutated; names its parent; not observed
+SYNTHETIC             hand-authored; no lineage
+```
+
+A mutated capture is DERIVED, never SANITIZED. The loader rejects the
+mislabel.
+
+Rules the corpus must never relax:
+
+- Trimming is a transformation. A slice retains no coverage unless a
+  contiguous range provably survived, and a fight built from it is granted
+  coverage from `retainedCoverage` only. A slice cannot prove an absence.
+- A digest proves identity, not authenticity or completeness.
+- Corpus structure is validated; combat validity is not. A deliberately
+  malformed payload is a valid artifact when a case tests its rejection.
+- Nothing is sorted, deduplicated, repaired or normalized on load.
+- An assertion kind without an executor is DECLARED and is not coverage.
+- An authority-dependent case pins the committed authority revision; a stale
+  pin is rejected rather than silently re-pinned.
+- UNKNOWN and NO_AUTHORITY_AVAILABLE are separate outcome classes.
+- Unrecorded metadata is `UNAVAILABLE`, `REDACTED` or `NOT_APPLICABLE` —
+  three different facts — never `null` and never guessed.
+- Production code never imports the corpus or any test machinery, and the
+  corpus machinery reaches no transport, clock, filesystem or environment.
+  `tests/contracts/m9a-corpus-layering.test.ts` enforces both.
+
+The loader runs identically under plain Node and workerd, so the same corpus
+can back layer tests and transport-parity tests without a second loader.
+
+---
+
 # Contract Tests
 
 Location:

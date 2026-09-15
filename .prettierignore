@@ -8,3 +8,6 @@ dist/
 coverage/
 .wrangler/
 package-lock.json
+# Regression-corpus artifacts are digest-pinned evidence. No tool rewrites
+# their bytes; the manifest beside them is formatted normally.
+tests/corpus/artifacts/
