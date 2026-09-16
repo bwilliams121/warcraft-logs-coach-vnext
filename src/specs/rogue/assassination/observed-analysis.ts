@@ -34,6 +34,12 @@
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
+import type {
+  AnalysisAuthorityMetadata,
+  AnalysisStatus,
+  SpecAnalysisEnvelope,
+  SpecAnalysisInput,
+} from "../../../findings/analysis-envelope.js";
 import type { AplAuthority } from "../../../simc/apl-authority.js";
 import { pinnedAssassinationAuthority } from "../../../simc/pinned-authority.js";
 import { RESOURCE_WIRE_CONTRACTS } from "../../../data/wcl-wire/resource-types.js";
@@ -143,61 +149,41 @@ export interface ObservedDecisionCoverage {
   readonly excludedCastCount: number;
 }
 
-export type AnalysisStatus =
-  | "ANALYZED"
-  | "SPEC_NOT_SUPPORTED"
-  | "AUTHORITY_NOT_AVAILABLE"
-  | "PROFILE_NOT_RESOLVED"
-  | "INSUFFICIENT_EVIDENCE";
+/**
+ * The status vocabulary and authority metadata are SHARED since M10-A and
+ * declared in `src/findings/analysis-envelope.ts`; they are re-exported here so
+ * existing consumers keep their import path. Their values are unchanged.
+ */
+export { ANALYSIS_STATUSES } from "../../../findings/analysis-envelope.js";
+export type { AnalysisAuthorityMetadata, AnalysisStatus } from "../../../findings/analysis-envelope.js";
 
-export const ANALYSIS_STATUSES = [
-  "ANALYZED",
-  "SPEC_NOT_SUPPORTED",
-  "AUTHORITY_NOT_AVAILABLE",
-  "PROFILE_NOT_RESOLVED",
-  "INSUFFICIENT_EVIDENCE",
-] as const satisfies readonly AnalysisStatus[];
-
-/** Pinned authority identity, read from the artifact. Never hand-maintained. */
-export interface AnalysisAuthorityMetadata {
-  readonly authorityId: string;
-  readonly artifactRevision: string;
-  readonly repository: string;
-  readonly branch: string;
-  readonly commitSha: string;
-  readonly sourcePath: string;
-  readonly sourceSha256: string;
-  readonly specName: string;
-  readonly className: string;
+/**
+ * What Assassination attaches to an analyzed envelope: ITS payload.
+ *
+ * Owned here, not by shared code. The comparison records, the exclusion list
+ * and the coverage counters are Assassination's description of what it did;
+ * shared projectors read them only through `observedDecisionView` in
+ * `registration.ts`.
+ */
+export interface ObservedAssassinationPayload {
+  readonly comparisons: readonly ObservedActionComparison[];
+  readonly excluded: readonly ExcludedObservedCast[];
+  readonly coverage: ObservedDecisionCoverage;
 }
 
-export type ObservedAssassinationAnalysis =
-  | {
-      readonly status: "ANALYZED";
-      readonly specId: string;
-      readonly authority: AnalysisAuthorityMetadata;
-      readonly comparisons: readonly ObservedActionComparison[];
-      readonly excluded: readonly ExcludedObservedCast[];
-      readonly coverage: ObservedDecisionCoverage;
-    }
-  | {
-      readonly status: Exclude<AnalysisStatus, "ANALYZED">;
-      readonly specId: string;
-      readonly detail: string;
-    };
+/**
+ * The analysis as this facade returns it.
+ *
+ * Structurally identical to the pre-M10-A shape — the analyzed variant is the
+ * envelope's three fields plus the payload's three, flat — so every existing
+ * value, executor and test reads exactly what it read before.
+ */
+export type ObservedAssassinationAnalysis = SpecAnalysisEnvelope<
+  typeof ASSASSINATION_SPEC_ID,
+  ObservedAssassinationPayload
+>;
 
-export interface ObservedAnalysisInput {
-  readonly state: CombatState;
-  readonly actorId: number;
-  /**
-   * The caller's resolved specialization. REQUIRED.
-   *
-   * No default and no inference. A missing or wrong spec must not fall through
-   * into Assassination rules, so the caller states it and this module checks it.
-   */
-  readonly specId: string;
-  /** The enemy the decisions are about, where the caller established one. */
-  readonly targetActorId: number | null;
+export interface ObservedAnalysisInput extends SpecAnalysisInput {
   /** Omit for the pinned artifact; pass `null` to model "no authority". */
   readonly authority?: AplAuthority | null;
 }
@@ -429,7 +415,9 @@ export function analyzeObservedAssassinationDecisions(
 
   return {
     status: "ANALYZED",
-    specId,
+    // The literal, not `specId`: the spec gate above proved they are equal, and
+    // the envelope types the analyzed variant by this registration's id.
+    specId: ASSASSINATION_SPEC_ID,
     authority: metadataOf(authority),
     comparisons,
     excluded,

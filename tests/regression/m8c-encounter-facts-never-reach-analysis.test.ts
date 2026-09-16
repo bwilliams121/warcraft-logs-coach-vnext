@@ -28,6 +28,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+import { analyzedAssassinationOf } from "../support/assassination-analysis.js";
 
 import {
   PUBLIC_ANALYSIS_SCHEMA_VERSION,
@@ -295,11 +296,11 @@ describe("gameplay analysis cannot see the encounter facts", () => {
     ]);
 
     expect(fromKill.analysis.status).toBe("ANALYZED");
-    if (fromKill.analysis.status !== "ANALYZED") return;
+    const killPayload = analyzedAssassinationOf(fromKill);
 
     // Non-vacuous: the corpus really was analysed on both sides.
-    expect(fromKill.analysis.coverage.eligibleDecisions).toBeGreaterThan(0);
-    expect(fromKill.analysis.coverage.excludedCastCount).toBeGreaterThan(0);
+    expect(killPayload.coverage.eligibleDecisions).toBeGreaterThan(0);
+    expect(killPayload.coverage.excludedCastCount).toBeGreaterThan(0);
 
     expect(fromWipe).toEqual(fromKill);
     expect(JSON.stringify(fromWipe)).toBe(JSON.stringify(fromKill));

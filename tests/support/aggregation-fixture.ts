@@ -11,11 +11,16 @@
  */
 
 import type { FightAnalysis } from "../../src/services/result.js";
-import type { SpecAnalysis } from "../../src/services/analyzer-registry.js";
+import type { UnanalyzedStatus } from "../../src/findings/analysis-envelope.js";
 import type { FightIdentity } from "../../src/wcl/types.js";
 import type { ReportRosterSnapshot, RosterFight, RosterPlayer } from "../../src/wcl/roster-snapshot.js";
 import type { ObservedActionComparison } from "../../src/specs/rogue/assassination/observed-comparison.js";
-import type { ExcludedObservedCast } from "../../src/specs/rogue/assassination/observed-analysis.js";
+import type {
+  ExcludedObservedCast,
+  ObservedAssassinationAnalysis,
+  ObservedDecisionCoverage,
+} from "../../src/specs/rogue/assassination/observed-analysis.js";
+import { assassinationObservedDecisionView } from "../../src/specs/rogue/assassination/registration.js";
 import type { EvidenceLocator } from "../../src/engine/evidence/locator.js";
 
 export const REPORT_CODE = "aBcDeFgH12345678";
@@ -128,7 +133,7 @@ function coverageFor(
   sourceId: number,
   comparisons: readonly ObservedActionComparison[],
   excluded: readonly ExcludedObservedCast[],
-): Extract<SpecAnalysis, { status: "ANALYZED" }>["coverage"] {
+): ObservedDecisionCoverage {
   const match = comparisons.filter((entry) => entry.outcome === "MATCH");
   const rejected = comparisons.filter((entry) => entry.outcome === "REJECTED").length;
   const unknown = comparisons.filter((entry) => entry.outcome === "UNKNOWN");
@@ -169,36 +174,39 @@ export function analyzedFightAnalysis(options: {
   readonly artifactRevision?: string;
 }): FightAnalysis {
   const excluded = options.excluded ?? [];
+  const analysis: Extract<ObservedAssassinationAnalysis, { status: "ANALYZED" }> = {
+    status: "ANALYZED",
+    specId: "rogue/assassination",
+    authority: {
+      authorityId: "simc-rogue-assassination",
+      artifactRevision: options.artifactRevision ?? "r1",
+      repository: "simulationcraft/simc",
+      branch: "thewarwithin",
+      commitSha: options.authorityCommitSha ?? "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+      sourcePath: "engine/class_modules/apl/apl_rogue.cpp",
+      sourceSha256: "abc123",
+      specName: "Assassination",
+      className: "Rogue",
+    },
+    comparisons: options.comparisons,
+    excluded,
+    coverage: coverageFor(options.sourceId, options.comparisons, excluded),
+  };
   return {
     identity: identityFor(options),
     specId: "rogue/assassination",
     analyzerId: "rogue-assassination-observed-decisions",
     scope: "PLAYER_CONTEXT",
-    analysis: {
-      status: "ANALYZED",
-      specId: "rogue/assassination",
-      authority: {
-        authorityId: "simc-rogue-assassination",
-        artifactRevision: options.artifactRevision ?? "r1",
-        repository: "simulationcraft/simc",
-        branch: "thewarwithin",
-        commitSha: options.authorityCommitSha ?? "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
-        sourcePath: "engine/class_modules/apl/apl_rogue.cpp",
-        sourceSha256: "abc123",
-        specName: "Assassination",
-        className: "Rogue",
-      },
-      comparisons: options.comparisons,
-      excluded,
-      coverage: coverageFor(options.sourceId, options.comparisons, excluded),
-    },
+    analysis,
+    // The registration's own view, as the service attaches it.
+    observedDecisions: assassinationObservedDecisionView(analysis),
   };
 }
 
 export function nonAnalyzedFightAnalysis(options: {
   readonly fightId: number;
   readonly sourceId: number;
-  readonly status: Exclude<SpecAnalysis["status"], "ANALYZED">;
+  readonly status: UnanalyzedStatus;
   readonly specName?: string;
   readonly name?: string;
   readonly className?: string;
@@ -217,6 +225,7 @@ export function nonAnalyzedFightAnalysis(options: {
       specId: supported ? "rogue/assassination" : "paladin/protection",
       detail: options.detail ?? `no analysis: ${options.status}`,
     },
+    observedDecisions: null,
   };
 }
 

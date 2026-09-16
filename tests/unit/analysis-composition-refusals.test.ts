@@ -17,6 +17,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
+import { analyzedAssassinationOf } from "../support/assassination-analysis.js";
 
 import { analyzeFight, type AnalysisServiceDeps } from "../../src/services/analysis-service.js";
 import { analyzerForSpec } from "../../src/services/analyzer-registry.js";
@@ -378,8 +379,7 @@ describe("ingestion is a required dependency", () => {
 
     expect(withPort.ok).toBe(true);
     if (!withPort.ok) return;
-    const analysis = withPort.analysis.analysis;
-    if (analysis.status !== "ANALYZED") throw new Error("expected ANALYZED");
+    const analysis = analyzedAssassinationOf(withPort.analysis);
     expect(analysis.coverage.eligibleDecisions).toBe(11);
     expect(analysis.coverage.match).toBe(1);
   });

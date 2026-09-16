@@ -305,11 +305,16 @@ describe("the public contract stays transport-neutral and secret-free", () => {
   it("keeps the projection's reach narrow and explicit", () => {
     // The projection legitimately reads domain types. Pinning the exact list
     // means a new dependency is a decision rather than a drift.
+    //
+    // M10-A: the projection no longer imports the registry (it read the Rogue
+    // result type through it); it reads the spec-neutral view and the public
+    // spec-id narrowing instead. Both are shared vocabulary under src/findings.
     const specifiers = importSpecifiersOf("src/contracts/analysis-projection.ts");
 
     expect([...specifiers].sort()).toEqual([
       "../engine/evidence/locator.js",
-      "../services/analyzer-registry.js",
+      "../findings/observed-decision-view.js",
+      "../findings/spec-id.js",
       "../services/result.js",
       "./analysis-contract.js",
     ]);

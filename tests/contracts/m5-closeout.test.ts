@@ -205,8 +205,11 @@ describe("the /v1/analysis wiring decision is what the code does", () => {
 
   it("reaches the analyzer only through the registry", () => {
     // Composed, but still not by naming a specialization evaluator here. The
-    // service selects a registration and calls its facade.
-    expect(service).toContain("analyzer.analyze(");
+    // service selects a registration and runs it through the registry's
+    // ownership-checked entry point (M10-A integrity correction), never by
+    // calling a facade directly.
+    expect(service).toContain("runAnalyzer(analyzer,");
+    expect(service).not.toContain("analyzer.analyze(");
     expect(service).not.toContain("analyzeObservedAssassinationDecisions(");
   });
 });

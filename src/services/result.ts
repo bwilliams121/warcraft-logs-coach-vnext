@@ -6,9 +6,10 @@
  * is exactly one result shape.
  */
 
+import type { SpecAnalysisEnvelope } from "../findings/analysis-envelope.js";
 import type { SpecId } from "../findings/finding.js";
+import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import type { FightIdentity } from "../wcl/types.js";
-import type { SpecAnalysis } from "./analyzer-registry.js";
 import type { IngestionScope } from "./ingestion-scope.js";
 
 /**
@@ -186,8 +187,22 @@ export interface FightAnalysis {
    * requirement — or `null` when no analyzer ran and nothing was retrieved.
    */
   readonly scope: IngestionScope | null;
-  /** The analyzer's own result, unmodified. */
-  readonly analysis: SpecAnalysis;
+  /**
+   * The analyzer's own result, unmodified.
+   *
+   * Typed as the spec-neutral ENVELOPE. The specialization's payload is inside
+   * the analyzed variant, and this layer never reads it.
+   */
+  readonly analysis: SpecAnalysisEnvelope;
+  /**
+   * The registration's own projection of an analyzed result, or `null` when
+   * nothing was analyzed.
+   *
+   * The only form in which the public and raid-night projectors read an
+   * analysis. Produced by the registration that produced `analysis`, at the
+   * same place, so the two describe one result.
+   */
+  readonly observedDecisions: ObservedDecisionView | null;
 }
 
 export type AnalysisServiceResult =

@@ -58,13 +58,18 @@ import { analyzeFight } from "../../src/services/analysis-service.js";
 import type { FightAnalysis } from "../../src/services/result.js";
 import { createCombatState } from "../../src/engine/state/combat-state.js";
 import { focusedFightFor } from "../../src/engine/normalization/fight-core.js";
-import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
+import {
+  analyzeObservedAssassinationDecisions,
+  type ObservedAssassinationAnalysis,
+} from "../../src/specs/rogue/assassination/observed-analysis.js";
+import { assassinationObservedDecisionView } from "../../src/specs/rogue/assassination/registration.js";
 import {
   ENABLED_ANALYZERS,
   type RegisteredAnalyzer,
   type SpecAnalysis,
   type SpecAnalysisInput,
 } from "../../src/services/analyzer-registry.js";
+import { analyzedAssassination } from "../support/assassination-analysis.js";
 import type { PlayerFightResult } from "../../src/aggregation/cell.js";
 import { identityFor } from "../support/aggregation-fixture.js";
 import {
@@ -149,8 +154,8 @@ function withoutPullAddresses(value: unknown): unknown {
 }
 
 /** The evidence facts a locator points at. Identical across pulls, by requirement. */
-function evidenceFacts(analysis: SpecAnalysis): unknown {
-  if (analysis.status !== "ANALYZED") throw new Error(`expected ANALYZED, got ${analysis.status}`);
+function evidenceFacts(envelope: SpecAnalysis): unknown {
+  const analysis = analyzedAssassination(envelope);
   return {
     decisions: analysis.comparisons.map((comparison) => ({
       reportTimeMs: comparison.decision.reportTimeMs,
@@ -172,7 +177,7 @@ function evidenceFacts(analysis: SpecAnalysis): unknown {
 }
 
 /** The reference: this actor analyzed from a core that contains only them. */
-function referenceAnalysis(actorId: number): SpecAnalysis {
+function referenceAnalysis(actorId: number): ObservedAssassinationAnalysis {
   const core = pulledCore([actorId], [actorId]);
   return analyzeObservedAssassinationDecisions({
     state: createCombatState(focusedFightFor(core, actorId, "PLAYER_CONTEXT")),
@@ -185,13 +190,16 @@ function referenceAnalysis(actorId: number): SpecAnalysis {
 /** The reference cell: the M7-D projection of that single-player analysis. */
 function referenceCell(actorId: number): PlayerFightResult {
   const core = pulledCore([actorId], [actorId]);
+  const reference = referenceAnalysis(actorId);
   const projection = toPlayerFightCell({
     analysis: {
       identity: identityFor({ fightId: FIGHT_ID, sourceId: actorId, name: `Raider${String(actorId)}` }),
       specId: "rogue/assassination",
       analyzerId: ENABLED_ANALYZERS[0]?.analyzerId ?? "",
       scope: "PLAYER_CONTEXT",
-      analysis: referenceAnalysis(actorId),
+      analysis: reference,
+      observedDecisions:
+        reference.status === "ANALYZED" ? assassinationObservedDecisionView(reference) : null,
     },
     normalizationRevision: core.provenance.normalizationRevision,
   });
@@ -359,9 +367,9 @@ describe("the analysis inside a raid night", () => {
     const { observations } = await raidNight();
 
     for (const observation of observations) {
-      if (observation.analysis.status !== "ANALYZED") throw new Error("expected an analysis");
-      expect(observation.analysis.coverage.actorId).toBe(observation.actorId);
-      for (const comparison of observation.analysis.comparisons) {
+      const analysis = analyzedAssassination(observation.analysis);
+      expect(analysis.coverage.actorId).toBe(observation.actorId);
+      for (const comparison of analysis.comparisons) {
         expect(comparison.decision.actorId).toBe(observation.actorId);
       }
     }

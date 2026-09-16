@@ -71,8 +71,16 @@ import {
   type ReportRosterSnapshot,
   type RosterPlayer,
 } from "../wcl/roster-snapshot.js";
-import { analyzerForSpec, ENABLED_ANALYZERS, type RegisteredAnalyzer } from "./analyzer-registry.js";
-import { deriveIngestionScope, type AnalyzerRequirement } from "./ingestion-scope.js";
+import {
+  analyzerForSpec,
+  catalogFor,
+  describeCatalogDefects,
+  observedDecisionViewOf,
+  runAnalyzer,
+  type AnalyzerRegistration,
+  type ValidatedAnalyzerCatalog,
+} from "./analyzer-registry.js";
+import { deriveIngestionScopeFor } from "./ingestion-scope.js";
 import type { FightCoreIngestionPort, ReportRevisionPort, RosterDiscoveryPort } from "./raid-night-ports.js";
 import { MAX_RAID_NIGHT_CELLS, MAX_RAID_NIGHT_PLAYERS, type RaidNightRequest } from "./raid-night-request.js";
 import type { RaidNightRunResult } from "./raid-night-runner.js";
@@ -88,7 +96,7 @@ export interface RaidNightServiceDeps {
   /** M7-C's revision guard, for the one final confirmation. */
   readonly checkRevision: ReportRevisionPort;
   /** Injected so a test can prove dispatch without reaching into module state. */
-  readonly registry?: readonly RegisteredAnalyzer[] | undefined;
+  readonly registry?: readonly AnalyzerRegistration[] | undefined;
   /**
    * Optional notification of one ingested fight's M8-C context facts.
    *
@@ -245,7 +253,7 @@ type PlannedPlayer =
       readonly kind: "SUPPORTED";
       readonly sourceId: number;
       readonly specName: string;
-      readonly analyzer: RegisteredAnalyzer;
+      readonly analyzer: AnalyzerRegistration;
     }
   /** Present, specialization identified, no analyzer registered for it. */
   | { readonly kind: "UNSUPPORTED"; readonly sourceId: number; readonly specName: string }
@@ -263,7 +271,7 @@ function planFight(
   snapshot: ReportRosterSnapshot,
   fightId: number,
   selected: readonly RosterPlayer[],
-  registry: readonly RegisteredAnalyzer[],
+  registry: ValidatedAnalyzerCatalog,
 ): readonly PlannedPlayer[] {
   return selected.map((player): PlannedPlayer => {
     const participation = participationFor(snapshot, fightId, player.sourceId);
@@ -317,7 +325,18 @@ export async function analyzeRaidNight(
     );
   }
   const credentials = config.config.wcl;
-  const registry = deps.registry ?? ENABLED_ANALYZERS;
+
+  // ---- registry integrity, before the roster query ----
+  //
+  // Same placement and same reasoning as the single-fight service: a corrupt
+  // catalog is a deployment defect, not a fact about this report, and it is
+  // diagnosed before any Warcraft Logs point is spent. The validated catalog is
+  // what `planFight` dispatches through, and it selects PUBLIC rows only.
+  const catalog = catalogFor(deps.registry);
+  if (!catalog.ok) {
+    return failure("INTERNAL_ERROR", describeCatalogDefects(catalog.defects));
+  }
+  const registry = catalog.catalog;
 
   // ---- ONE roster query. Establishes R0 and every roster fact. ----
   const roster = await deps.discoverRoster(
@@ -439,15 +458,15 @@ export async function analyzeRaidNight(
     // that is registered but not selected has no claim on what this request
     // retrieves, and unioning the whole registry would pay for evidence nothing
     // here can read.
-    const requirements: readonly AnalyzerRequirement[] = supported.map((entry) => entry.analyzer.requirement);
-    const scope = deriveIngestionScope(requirements);
+    const selectedAnalyzers = supported.map((entry) => entry.analyzer);
+    const scope = deriveIngestionScopeFor(selectedAnalyzers);
     if (!scope.ok) {
       return failure(
         "INTERNAL_ERROR",
         "No ingestion scope could be derived for the selected analyzers, so no combat events were retrieved.",
       );
     }
-    const includeResources = requirements.some((requirement) => requirement.includeResources);
+    const includeResources = selectedAnalyzers.some((analyzer) => analyzer.requirement.includeResources);
 
     // ---- ONE ingestion for this fight, pinned to R0 ----
     const ingested = await deps.ingestFightCore(
@@ -521,7 +540,10 @@ export async function analyzeRaidNight(
       // iteration; nothing accumulates them.
       const focused = focusedFightFor(core, entry.sourceId, scope.scope);
       const state = createCombatState(focused);
-      const analysis = entry.analyzer.analyze({
+      // Through `runAnalyzer`, which checks the result is the registration's
+      // own. A mismatch is a deployment defect and fails the whole night: a
+      // cell built on a result its analyzer does not own is not a cell.
+      const run = runAnalyzer(entry.analyzer, {
         state,
         actorId: entry.sourceId,
         specId: entry.analyzer.specId,
@@ -530,6 +552,13 @@ export async function analyzeRaidNight(
         // a per-event fact with a guess.
         targetActorId: null,
       });
+      if (!run.ok) {
+        return failure(
+          "INTERNAL_ERROR",
+          `An analyzer returned a result it does not own, so no raid night was assembled. ${run.detail}`,
+        );
+      }
+      const { analysis } = run;
 
       const projection = toPlayerFightCell({
         analysis: {
@@ -538,6 +567,8 @@ export async function analyzeRaidNight(
           analyzerId: entry.analyzer.analyzerId,
           scope: scope.scope,
           analysis,
+          observedDecisions:
+            analysis.status === "ANALYZED" ? observedDecisionViewOf(registry, analysis) : null,
         },
         // From the core that actually produced this analysis, never a literal.
         normalizationRevision: core.provenance.normalizationRevision,

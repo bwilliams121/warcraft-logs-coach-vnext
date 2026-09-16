@@ -285,15 +285,17 @@ describe("the projection fails closed rather than aggregating nonsense", () => {
         }),
       ],
     });
-    // Corrupt one number. An aggregate multiplies any defect by the number of
-    // cells, and a total is exactly where a reader stops questioning the parts.
+    // Corrupt one number in the VIEW the projection reads. An aggregate
+    // multiplies any defect by the number of cells, and a total is exactly
+    // where a reader stops questioning the parts.
+    if (analysis.observedDecisions === null) throw new Error("expected a view");
     const corrupted = {
       ...analysis,
-      analysis: {
-        ...analysis.analysis,
-        coverage: { ...(analysis.analysis as { coverage: { match: number } }).coverage, match: 5 },
+      observedDecisions: {
+        ...analysis.observedDecisions,
+        coverage: { ...analysis.observedDecisions.coverage, match: 5 },
       },
-    } as typeof analysis;
+    } satisfies typeof analysis;
 
     const projection = toPlayerFightCell({
       analysis: corrupted,

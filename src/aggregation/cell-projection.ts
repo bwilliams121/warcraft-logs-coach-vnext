@@ -55,7 +55,9 @@ import type {
 export type CellProjectionFailure =
   | "COUNTS_DO_NOT_RECONCILE"
   /** The analysis reported ANALYZED but carried no analyzer or specialization. */
-  | "ANALYZED_WITHOUT_ANALYZER";
+  | "ANALYZED_WITHOUT_ANALYZER"
+  /** The analysis reported ANALYZED but its registration supplied no view of it. */
+  | "ANALYZED_WITHOUT_VIEW";
 
 export type CellProjection =
   | { readonly ok: true; readonly cell: PlayerFightResult }
@@ -165,7 +167,16 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
     return { ok: false, reason: "ANALYZED_WITHOUT_ANALYZER" };
   }
 
-  const coverage = result.coverage;
+  // The specialization's payload is not read here. Since M10-A this module
+  // consumes the VIEW the analyzer's registration produced — the one form in
+  // which shared code sees an analysis — so a second specialization changes
+  // its own registration and nothing in this domain.
+  const view = fightAnalysis.observedDecisions;
+  if (view === null) {
+    return { ok: false, reason: "ANALYZED_WITHOUT_VIEW" };
+  }
+
+  const coverage = view.coverage;
   const counts: CellCounts = {
     eligibleDecisions: coverage.eligibleDecisions,
     match: coverage.match,
@@ -181,7 +192,7 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
     exclusions: genericTally(coverage.exclusions),
   };
 
-  if (!countsReconcile(counts, result.excluded.length, result.comparisons.length)) {
+  if (!countsReconcile(counts, view.exclusions.length, view.decisions.length)) {
     return { ok: false, reason: "COUNTS_DO_NOT_RECONCILE" };
   }
 
@@ -193,19 +204,19 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
   const rejectedKeys: string[] = [];
   const evidenceKeys: string[] = [];
 
-  for (const comparison of result.comparisons) {
-    if (comparison.outcome === "REJECTED") {
+  for (const decision of view.decisions) {
+    if (decision.outcome === "REJECTED") {
       // The ONLY gameplay-incompatibility evidence in this whole model. The
-      // observed token is Rogue/SimulationCraft vocabulary, which is precisely
+      // observed token is the authority's own vocabulary, which is precisely
       // why it is flattened into an opaque key before it leaves this module.
-      rejectedKeys.push(patternKey(comparison.decision.observedToken, comparison.basis));
+      rejectedKeys.push(patternKey(decision.observedToken, decision.basis));
       continue;
     }
-    if (comparison.outcome === "UNKNOWN") {
+    if (decision.outcome === "UNKNOWN") {
       // Why the ANALYZER could not prove the comparison. Never a player fault.
       // A decision with no recorded blocker is still an unresolved decision, so
       // it is counted under an explicit sentinel rather than dropped.
-      evidenceKeys.push(patternKey(comparison.decisiveBlocker ?? "NO_BLOCKER_RECORDED", comparison.basis));
+      evidenceKeys.push(patternKey(decision.decisiveBlocker ?? "NO_BLOCKER_RECORDED", decision.basis));
     }
     // MATCH contributes to neither. It is authority-compatible, which is not a
     // pattern worth recurring on and is emphatically not "correct".
@@ -215,7 +226,7 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
     rejectedPatterns: tallyOf(rejectedKeys),
     evidenceLimitations: tallyOf(evidenceKeys),
     exclusionPatterns: tallyOf(
-      result.excluded.map((cast) => patternKey(cast.reason, String(cast.abilityGameId))),
+      view.exclusions.map((cast) => patternKey(cast.reason, String(cast.abilityGameId))),
     ),
   };
 

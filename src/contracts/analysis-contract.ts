@@ -36,7 +36,7 @@
 
 import * as z from "zod";
 
-import type { SpecId } from "../findings/finding.js";
+import type { PublicSpecId, SpecId } from "../findings/finding.js";
 
 /**
  * The public analysis schema version.
@@ -56,19 +56,26 @@ import type { SpecId } from "../findings/finding.js";
 export const PUBLIC_ANALYSIS_SCHEMA_VERSION = "warcraft-logs-coach.analysis/1";
 
 /**
- * Specializations this build can name internally.
+ * Specializations this contract may name.
  *
- * `satisfies` proves every entry is a real `SpecId`; the exhaustiveness guard
- * below proves every `SpecId` is listed. Adding a specialization without
- * deciding whether it is public is therefore a compile error rather than an
- * omission.
+ * DECLARED INDEPENDENTLY of the internal partition (`src/findings/spec-id.ts`),
+ * like every other public vocabulary in this file, and pinned equal to it by
+ * `tests/contracts/m10a-spec-partition.test.ts`. `satisfies` proves every
+ * entry is a real `SpecId`; the two guards below prove that this list is
+ * exactly the PUBLIC half of the partition — no public id missing, no
+ * internal-only id present. An internal-only specialization therefore cannot
+ * reach this enum by being added to `SpecId`: it reaches it only by a reviewed
+ * move into the public partition, and the compile fails until the two agree.
  */
 export const PUBLIC_SPEC_IDS = ["rogue/assassination"] as const satisfies readonly SpecId[];
 
-type UnlistedSpecId = Exclude<SpecId, (typeof PUBLIC_SPEC_IDS)[number]>;
-/** Compile-time guard: fails when a `SpecId` exists that this contract does not list. */
-const _everySpecIdIsListed: [UnlistedSpecId] extends [never] ? true : never = true;
-void _everySpecIdIsListed;
+type ListedSpecId = (typeof PUBLIC_SPEC_IDS)[number];
+/** Compile-time guard: fails when a PUBLIC `SpecId` exists that this contract does not list. */
+const _everyPublicSpecIdIsListed: [Exclude<PublicSpecId, ListedSpecId>] extends [never] ? true : never = true;
+void _everyPublicSpecIdIsListed;
+/** Compile-time guard: fails when this contract lists an id the partition keeps internal. */
+const _nothingInternalIsListed: [Exclude<ListedSpecId, PublicSpecId>] extends [never] ? true : never = true;
+void _nothingInternalIsListed;
 
 // ---------------------------------------------------------------------------
 // Public vocabularies

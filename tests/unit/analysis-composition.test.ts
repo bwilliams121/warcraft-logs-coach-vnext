@@ -21,6 +21,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
+import { analyzedAssassinationOf } from "../support/assassination-analysis.js";
 
 import { analyzeFight, type AnalysisServiceDeps } from "../../src/services/analysis-service.js";
 import {
@@ -119,8 +120,7 @@ describe("the composed path analyses the fixture", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    const analysis = result.analysis.analysis;
-    if (analysis.status !== "ANALYZED") throw new Error(`expected ANALYZED, got ${analysis.status}`);
+    const analysis = analyzedAssassinationOf(result.analysis);
 
     expect({
       eligible: analysis.coverage.eligibleDecisions,
@@ -140,8 +140,7 @@ describe("the composed path analyses the fixture", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    const analysis = result.analysis.analysis;
-    if (analysis.status !== "ANALYZED") return;
+    const analysis = analyzedAssassinationOf(result.analysis);
     expect(analysis.coverage.unknown).toBeGreaterThan(analysis.coverage.resolvedComparisons);
     expect(result.state).toBe("PARTIAL");
   });

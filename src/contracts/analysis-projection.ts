@@ -25,22 +25,81 @@
  * field reaches the public contract because someone wrote it here, not because
  * it happened to exist upstream. That is the difference between publishing a
  * result and leaking one.
+ *
+ * IT READS NO SPECIALIZATION PAYLOAD. Since M10-A the analyzed content reaches
+ * this module as `FightAnalysis.observedDecisions` — the view the analyzer's
+ * own registration produced — and the internal `specId` is narrowed through
+ * `requirePublicSpecId`. An internal-only analysis cannot be projected as an
+ * unsupported document or as `specId: null`: it throws, and the transport
+ * reports an internal error. `null` keeps its one meaning — no public analyzer
+ * was selected.
  */
 
 import type { EvidenceLocator } from "../engine/evidence/locator.js";
+import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import { requirePublicSpecId } from "../findings/spec-id.js";
 import { assertNever, type FightAnalysis } from "../services/result.js";
-import type { SpecAnalysis } from "../services/analyzer-registry.js";
 import {
   CAPABILITY,
   PUBLIC_ANALYSIS_SCHEMA_VERSION,
   PublicAnalysisResultSchema,
   type PublicAnalysisResult,
-  type PublicCoverage,
-  type PublicDecision,
   type PublicEvidenceLocator,
-  type PublicExclusion,
   type PublicIdentity,
 } from "./analysis-contract.js";
+
+/**
+ * The analyzed payload as this module assembles it, BEFORE schema validation.
+ *
+ * The vocabulary fields are strings here because the view carries them as
+ * strings; `PublicAnalysisResultSchema.parse` at the end of the projection is
+ * what proves each value is a member of the frozen public enum. The keys are
+ * exactly the schema's keys, so a field reaches the wire only because it is
+ * written here.
+ */
+interface ProjectedDecision {
+  readonly locator: PublicEvidenceLocator;
+  readonly position: number;
+  readonly fightTimeMs: number;
+  readonly targetActorId: number | null;
+  readonly observedAbilityGameId: number;
+  readonly observedToken: string;
+  readonly outcome: string;
+  readonly basis: string;
+  readonly authorityCoverage: string;
+  readonly authorityToken: string | null;
+  readonly selectionPrecision: string | null;
+  readonly decisiveBlocker: string | null;
+  readonly usabilityProvenance: string;
+}
+
+interface ProjectedExclusion {
+  readonly locator: PublicEvidenceLocator;
+  readonly position: number;
+  readonly abilityGameId: number;
+  readonly reportTimeMs: number;
+  readonly reason: string;
+}
+
+interface ProjectedTally {
+  readonly key: string;
+  readonly count: number;
+}
+
+interface ProjectedCoverage {
+  readonly eligibleDecisions: number;
+  readonly match: number;
+  readonly rejected: number;
+  readonly unknown: number;
+  readonly resolvedComparisons: number;
+  readonly exactEntryMatches: number;
+  readonly tokenConvergedMatches: number;
+  readonly selectionPrecision: readonly ProjectedTally[];
+  readonly unknownBases: readonly ProjectedTally[];
+  readonly unknownBlockerClasses: readonly ProjectedTally[];
+  readonly exclusions: readonly ProjectedTally[];
+  readonly excludedCastCount: number;
+}
 
 function projectLocator(locator: EvidenceLocator): PublicEvidenceLocator {
   return {
@@ -93,7 +152,9 @@ function projectCommon(analysis: FightAnalysis) {
     schemaVersion: PUBLIC_ANALYSIS_SCHEMA_VERSION,
     identity: projectIdentity(analysis),
     specialization: {
-      specId: analysis.specId,
+      // Narrowed, never mapped. An internal-only id here is an orchestration
+      // defect and fails closed; `null` still means only "no public analyzer".
+      specId: analysis.specId === null ? null : requirePublicSpecId(analysis.specId),
       gameplaySupported: analysis.analyzerId !== null,
     },
     capability: CAPABILITY,
@@ -104,45 +165,34 @@ function projectCommon(analysis: FightAnalysis) {
   } as const;
 }
 
-function projectDecisions(
-  analysis: Extract<SpecAnalysis, { status: "ANALYZED" }>,
-): readonly PublicDecision[] {
-  return analysis.comparisons.map((comparison) => ({
-    locator: projectLocator(comparison.decision.locator),
-    position: comparison.decision.position,
-    fightTimeMs: comparison.decision.fightTimeMs,
-    targetActorId: comparison.decision.targetActorId,
-    observedAbilityGameId: comparison.decision.abilityGameId,
-    observedToken: comparison.decision.observedToken,
-    outcome: comparison.outcome,
-    basis: comparison.basis,
-    authorityCoverage: comparison.authorityCoverage,
-    authorityToken: comparison.authorityToken,
-    selectionPrecision: comparison.selectionPrecision,
-    decisiveBlocker: comparison.decisiveBlocker,
-    usabilityProvenance: comparison.usabilityProvenance,
-    // `comparison.observedActionRejected` is NOT projected. Internally it is a
-    // boolean over a three-state judgment that has no positive result, so its
-    // `false` means "rejection was not proven" — not "not rejected". Publishing
-    // it would turn UNKNOWN into a negative claim the engine never made. When
-    // that rule DID fire, the comparison already carries
-    // `basis: "OBSERVED_ACTION_REJECTED_BY_AUTHORITY"`, which is the same fact
-    // stated positively.
-    //
-    // `comparison.rawBlocker` is NOT projected: it is the engine's own note
-    // about where a scan stopped, and `decisiveBlocker` is the stable answer.
-    //
-    // `comparison.decision.actorId` is NOT projected either: it is the analyzed
-    // player and is already `identity.player.sourceId`, constant across every
-    // decision. Repeating it per decision would invite a reader to wonder when
-    // it might differ.
+/**
+ * The view's vocabulary fields are plain strings — owned by the producing
+ * specialization and frozen by the schema — so each is validated by the
+ * `parse` at the end of the projection rather than by a type here. What the
+ * view deliberately does NOT carry (the engine's raw blocker, the three-state
+ * rejection flag, the per-decision actor id) was decided by the registration
+ * that built it; see `src/specs/rogue/assassination/registration.ts`.
+ */
+function projectDecisions(view: ObservedDecisionView): readonly ProjectedDecision[] {
+  return view.decisions.map((decision) => ({
+    locator: projectLocator(decision.locator),
+    position: decision.position,
+    fightTimeMs: decision.fightTimeMs,
+    targetActorId: decision.targetActorId,
+    observedAbilityGameId: decision.observedAbilityGameId,
+    observedToken: decision.observedToken,
+    outcome: decision.outcome,
+    basis: decision.basis,
+    authorityCoverage: decision.authorityCoverage,
+    authorityToken: decision.authorityToken,
+    selectionPrecision: decision.selectionPrecision,
+    decisiveBlocker: decision.decisiveBlocker,
+    usabilityProvenance: decision.usabilityProvenance,
   }));
 }
 
-function projectExclusions(
-  analysis: Extract<SpecAnalysis, { status: "ANALYZED" }>,
-): readonly PublicExclusion[] {
-  return analysis.excluded.map((cast) => ({
+function projectExclusions(view: ObservedDecisionView): readonly ProjectedExclusion[] {
+  return view.exclusions.map((cast) => ({
     locator: projectLocator(cast.locator),
     position: cast.position,
     abilityGameId: cast.abilityGameId,
@@ -151,8 +201,8 @@ function projectExclusions(
   }));
 }
 
-function projectCoverage(analysis: Extract<SpecAnalysis, { status: "ANALYZED" }>): PublicCoverage {
-  const { coverage } = analysis;
+function projectCoverage(view: ObservedDecisionView): ProjectedCoverage {
+  const { coverage } = view;
   return {
     eligibleDecisions: coverage.eligibleDecisions,
     match: coverage.match,
@@ -171,8 +221,6 @@ function projectCoverage(analysis: Extract<SpecAnalysis, { status: "ANALYZED" }>
     })),
     exclusions: coverage.exclusions.map((row) => ({ key: row.key, count: row.count })),
     excludedCastCount: coverage.excludedCastCount,
-    // `coverage.actorId` is NOT projected: same reasoning as the per-decision
-    // actor id — it is identity, and it is already published once.
   };
 }
 
@@ -196,7 +244,16 @@ export function projectAnalysisResult(analysis: FightAnalysis): PublicAnalysisRe
   const result = analysis.analysis;
 
   switch (result.status) {
-    case "ANALYZED":
+    case "ANALYZED": {
+      // An analyzed result without its registration's view is a service
+      // defect, not a shape to be filled with empty lists — that would publish
+      // "no decisions" for a fight that had them.
+      const view = analysis.observedDecisions;
+      if (view === null) {
+        throw new Error(
+          "an ANALYZED result reached the public projection without its observed-decision view",
+        );
+      }
       return PublicAnalysisResultSchema.parse({
         ...common,
         status: "ANALYZED",
@@ -211,10 +268,11 @@ export function projectAnalysisResult(analysis: FightAnalysis): PublicAnalysisRe
           specName: result.authority.specName,
           className: result.authority.className,
         },
-        decisions: projectDecisions(result),
-        exclusions: projectExclusions(result),
-        coverage: projectCoverage(result),
+        decisions: projectDecisions(view),
+        exclusions: projectExclusions(view),
+        coverage: projectCoverage(view),
       });
+    }
 
     // The four non-analyzed states share a shape because the analyzer produces
     // one: each carries an author-written `detail` and nothing else. They are

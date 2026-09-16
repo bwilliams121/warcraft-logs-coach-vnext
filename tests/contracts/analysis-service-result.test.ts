@@ -23,6 +23,7 @@ const ANALYSIS: FightAnalysis = {
   analyzerId: null,
   scope: null,
   analysis: specNotSupported("paladin/protection"),
+  observedDecisions: null,
 };
 
 /**

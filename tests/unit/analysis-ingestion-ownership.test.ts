@@ -21,6 +21,11 @@
  *
  * THE FAKE IS NOT A GAMEPLAY ANALYZER. It never runs — it exists only to sit in
  * the registry unselected, and its `analyze` throws to prove it stayed there.
+ *
+ * Since M10-A the fake is the shared internal-only fixture registration under
+ * the `paladin/protection` id (`tests/support/internal-fixture-registration.ts`),
+ * which is exactly the shape a second specialization will take in the catalog
+ * before it is public: known internally, registered, and invisible to dispatch.
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -31,6 +36,8 @@ import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import type { Env } from "../../src/config/env.js";
 import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
 import { M5D2_ACTOR, m5d2Fight } from "../support/m5d2-fixture.js";
+import { analyzedAssassinationOf } from "../support/assassination-analysis.js";
+import { internalFixtureRegistration } from "../support/internal-fixture-registration.js";
 
 const ENV: Env = {
   ENVIRONMENT: "test",
@@ -80,25 +87,34 @@ function assassination(): RegisteredAnalyzer {
 }
 
 /**
+ * The Assassination registration with its ONE capability's requirements
+ * altered.
+ *
+ * Since the M10-A integrity correction a registration's `requirement` is
+ * re-derived from its capabilities whenever it is validated, so overriding the
+ * field directly would be silently undone. The honest lever is the
+ * declaration itself.
+ */
+function assassinationDeclaring(
+  overrides: Partial<RegisteredAnalyzer["capabilities"][number]["requirements"]>,
+): RegisteredAnalyzer {
+  const base = assassination();
+  return {
+    ...base,
+    capabilities: base.capabilities.map((capability) => ({
+      ...capability,
+      requirements: { ...capability.requirements, ...overrides },
+    })),
+  };
+}
+
+/**
  * A registration that must never be selected for this request.
  *
  * Its requirement is deliberately the opposite of Assassination's on both axes,
  * so either kind of bleed changes the observed ingestion request.
  */
-const UNRELATED_ANALYZER: RegisteredAnalyzer = {
-  analyzerId: "fake-unrelated-analyzer",
-  // Cast because no second `SpecId` exists yet, which is the point: this is a
-  // test double standing in for a future registration, not a spec we support.
-  specId: "fake/unrelated" as RegisteredAnalyzer["specId"],
-  requirement: {
-    analyzerId: "fake-unrelated-analyzer",
-    requiredScope: "FULL_RAID",
-    includeResources: false,
-  },
-  analyze: () => {
-    throw new Error("the unrelated analyzer must never run");
-  },
-};
+const UNRELATED_ANALYZER: RegisteredAnalyzer = internalFixtureRegistration();
 
 function deps(registry: readonly RegisteredAnalyzer[], ingest: CombatIngestionPort): AnalysisServiceDeps {
   return { env: ENV, preflight: PREFLIGHT, ingest, registry };
@@ -155,8 +171,7 @@ describe("an unselected analyzer has no influence on this request", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    const analysis = result.analysis.analysis;
-    if (analysis.status !== "ANALYZED") throw new Error(`expected ANALYZED, got ${analysis.status}`);
+    const analysis = analyzedAssassinationOf(result.analysis);
     expect({
       eligible: analysis.coverage.eligibleDecisions,
       match: analysis.coverage.match,
@@ -182,10 +197,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
     // make this pass regardless of the registration — so the assertion that
     // matters is `false`, driven only by flipping the requirement.
     const ingest = vi.fn(FIXTURE_INGEST);
-    const frugal: RegisteredAnalyzer = {
-      ...assassination(),
-      requirement: { ...assassination().requirement, includeResources: false },
-    };
+    const frugal = assassinationDeclaring({ resources: [] });
 
     await analyzeFight(REQUEST, deps([frugal], ingest));
 
@@ -195,15 +207,12 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
   it("tracks the requirement in both directions", async () => {
     // Proves it is READ from the registration rather than coincidentally equal
     // to a constant: the same service produces both values.
-    const base = assassination();
     const observed: boolean[] = [];
 
     for (const includeResources of [true, false, true]) {
       const ingest = vi.fn(FIXTURE_INGEST);
-      await analyzeFight(
-        REQUEST,
-        deps([{ ...base, requirement: { ...base.requirement, includeResources } }], ingest),
-      );
+      const resources = includeResources ? assassination().capabilities[0]?.requirements.resources : [];
+      await analyzeFight(REQUEST, deps([assassinationDeclaring({ resources: resources ?? [] })], ingest));
       observed.push(ingest.mock.calls[0]?.[0].includeResources ?? !includeResources);
     }
 
@@ -212,12 +221,8 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
 
   it("carries scope from the requirement too", async () => {
     // The same ownership rule on the other axis, driven the same way.
-    const base = assassination();
     const ingest = vi.fn(FIXTURE_INGEST);
-    await analyzeFight(
-      REQUEST,
-      deps([{ ...base, requirement: { ...base.requirement, requiredScope: "FULL_RAID" } }], ingest),
-    );
+    await analyzeFight(REQUEST, deps([assassinationDeclaring({ scope: "FULL_RAID" })], ingest));
 
     expect(ingest.mock.calls[0]?.[0].scope).toBe("FULL_RAID");
   });

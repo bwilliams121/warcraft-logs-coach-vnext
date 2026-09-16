@@ -47,9 +47,16 @@ import type { ActionabilityEvidence } from "./actionability.js";
 import type { DecisionCategory } from "./authority.js";
 import type { ObservedActionDecisionPoint, ObservedActionJudgment } from "./judgment.js";
 import type { ScopedActionSelection } from "./scoped-selection.js";
+import type { SpecId } from "./spec-id.js";
 
-/** The specialization that produced a finding. */
-export type SpecId = "rogue/assassination";
+/**
+ * The specialization that produced a finding.
+ *
+ * Declared in `spec-id.ts` since M10-A, where the internal/public partition
+ * lives; re-exported here so every existing import of `SpecId` keeps working
+ * and the public contract's pinned import list is unchanged.
+ */
+export type { PublicSpecId, SpecId } from "./spec-id.js";
 
 /** Either question's answer. Discriminated on `kind`, never on `status`. */
 export type FindingJudgment = ObservedActionJudgment | ScopedActionSelection;

@@ -46,8 +46,13 @@
 import { describe, expect, it } from "vitest";
 
 import { analyzeFight } from "../../src/services/analysis-service.js";
-import { analyzerForSpec } from "../../src/services/analyzer-registry.js";
+import {
+  analyzerForSpec,
+  observedDecisionViewOf,
+  PRODUCTION_CATALOG,
+} from "../../src/services/analyzer-registry.js";
 import { deriveIngestionScope } from "../../src/services/ingestion-scope.js";
+import { analyzedAssassinationOf } from "../support/assassination-analysis.js";
 import { resolveSpecIdentity } from "../../src/services/spec-identity.js";
 import type { FightAnalysis } from "../../src/services/result.js";
 import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
@@ -220,6 +225,9 @@ async function viaReusableCore(): Promise<FightAnalysis> {
     analyzerId: analyzer.analyzerId,
     scope: scope.scope,
     analysis,
+    // The registration's view, attached exactly as the service attaches it.
+    observedDecisions:
+      analysis.status === "ANALYZED" ? observedDecisionViewOf(PRODUCTION_CATALOG, analysis) : null,
   };
 }
 
@@ -228,13 +236,13 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
     const viaService = await viaAnalysisService();
 
     expect(viaService.analysis.status).toBe("ANALYZED");
-    if (viaService.analysis.status !== "ANALYZED") return;
+    const payload = analyzedAssassinationOf(viaService);
 
     // The real corpus census, through real retrieval and real normalization.
-    expect(viaService.analysis.coverage.eligibleDecisions).toBe(11);
-    expect(viaService.analysis.coverage.match).toBe(1);
-    expect(viaService.analysis.coverage.unknown).toBe(10);
-    expect(viaService.analysis.coverage.excludedCastCount).toBe(120);
+    expect(payload.coverage.eligibleDecisions).toBe(11);
+    expect(payload.coverage.match).toBe(1);
+    expect(payload.coverage.unknown).toBe(10);
+    expect(payload.coverage.excludedCastCount).toBe(120);
     expect(viaService.specId).toBe("rogue/assassination");
     expect(viaService.analyzerId).toBe("rogue-assassination-observed-decisions");
     expect(viaService.scope).toBe("PLAYER_CONTEXT");
@@ -258,9 +266,18 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
     expect(viaCore.analyzerId).toEqual(viaService.analyzerId);
     expect(viaCore.scope).toEqual(viaService.scope);
     expect(viaCore.analysis).toEqual(viaService.analysis);
+    // M10-A: the registration's view of the analysis travels with it.
+    expect(viaCore.observedDecisions).toEqual(viaService.observedDecisions);
 
     // And no field exists on one side that the other does not supply.
     expect(Object.keys(viaCore).sort()).toEqual(Object.keys(viaService).sort());
-    expect(Object.keys(viaCore).sort()).toEqual(["analysis", "analyzerId", "identity", "scope", "specId"]);
+    expect(Object.keys(viaCore).sort()).toEqual([
+      "analysis",
+      "analyzerId",
+      "identity",
+      "observedDecisions",
+      "scope",
+      "specId",
+    ]);
   });
 });

@@ -17,6 +17,7 @@
 import { describe, expect, it } from "vitest";
 
 import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
+import { assassinationObservedDecisionView } from "../../src/specs/rogue/assassination/registration.js";
 import { toPlayerFightCell } from "../../src/aggregation/cell-projection.js";
 import type { FightAnalysis } from "../../src/services/result.js";
 import { M5D2_ACTOR, m5d2Fight, m5d2State } from "../support/m5d2-fixture.js";
@@ -58,6 +59,7 @@ const fightAnalysis: FightAnalysis = {
   analyzerId: "rogue-assassination-observed-decisions",
   scope: "PLAYER_CONTEXT",
   analysis,
+  observedDecisions: analysis.status === "ANALYZED" ? assassinationObservedDecisionView(analysis) : null,
 };
 
 const projection = toPlayerFightCell({

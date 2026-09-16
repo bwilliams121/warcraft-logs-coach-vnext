@@ -72,9 +72,9 @@ export type SpecIdentityResolution =
  * definition of "which specializations this build recognizes", and it should be
  * impossible to grow it by accident.
  */
-export const SUPPORTED_SPEC_IDENTITIES: Readonly<Record<string, SpecId>> = {
+export const SUPPORTED_SPEC_IDENTITIES: Readonly<Record<string, SpecId>> = Object.freeze({
   "rogue/assassination": "rogue/assassination",
-};
+});
 
 /**
  * Normalizes one Warcraft Logs display string for lookup.

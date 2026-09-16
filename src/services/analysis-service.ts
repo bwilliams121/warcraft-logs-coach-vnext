@@ -34,12 +34,15 @@ import type { FightIdentity, PreflightPort, WclFailureReason } from "../wcl/type
 import { parseAnalysisRequest } from "./analysis-request.js";
 import {
   analyzerForSpec,
-  ENABLED_ANALYZERS,
+  catalogFor,
+  describeCatalogDefects,
+  observedDecisionViewOf,
+  runAnalyzer,
   specNotSupported,
-  type RegisteredAnalyzer,
+  type AnalyzerRegistration,
 } from "./analyzer-registry.js";
 import type { CombatIngestionPort } from "./ingestion-port.js";
-import { deriveIngestionScope } from "./ingestion-scope.js";
+import { deriveIngestionScopeFor } from "./ingestion-scope.js";
 import {
   assertNever,
   serviceFailure,
@@ -89,10 +92,16 @@ export interface AnalysisServiceDeps {
    */
   readonly ingest: CombatIngestionPort;
   /**
-   * The registered analyzers. Injected so a test can prove dispatch and
-   * invocation counts without reaching into module state.
+   * The analyzer CATALOG — every registration, public and internal-only.
+   * Injected so a test can prove dispatch and invocation counts without
+   * reaching into module state.
+   *
+   * The service validates it and dispatches through its PUBLIC subset only. An
+   * internal-only registration in this list is never selected, never ingested
+   * for, and never run by a public request; a test that injects one proves
+   * exactly that.
    */
-  readonly registry?: readonly RegisteredAnalyzer[] | undefined;
+  readonly registry?: readonly AnalyzerRegistration[] | undefined;
 }
 
 /**
@@ -300,6 +309,7 @@ function unsupportedSpec(identity: FightIdentity, observedSpecId: string): Analy
     analyzerId: null,
     scope: null,
     analysis: specNotSupported(observedSpecId),
+    observedDecisions: null,
   };
   return { ok: true, state: resultStateFor(analysis), analysis };
 }
@@ -364,6 +374,19 @@ export async function analyzeFight(
     );
   }
 
+  // ---- registry integrity, before a single Warcraft Logs point is spent ----
+  //
+  // A deployment concern, diagnosed next to configuration for the same reason:
+  // a corrupt catalog is not a fact about this report or this player, and no
+  // request should proceed to preflight on the strength of a dispatch table
+  // that cannot be trusted. An injected catalog is snapshotted and validated
+  // on every request — nothing is cached, so nothing can go stale — and the
+  // production catalog was validated once, at module load.
+  const catalog = catalogFor(deps.registry);
+  if (!catalog.ok) {
+    return serviceFailure("INTERNAL_ERROR", describeCatalogDefects(catalog.defects));
+  }
+
   const preflight = await deps.preflight(parsed.request, config.config.wcl);
   if (!preflight.ok) {
     const { code, message } = describePreflightFailure(preflight.failure.reason);
@@ -394,21 +417,24 @@ export async function analyzeFight(
     return unsupportedSpec(identity, `${className}/${specName}`);
   }
 
-  // Defensive: a recognized specialization whose analyzer is not registered.
-  // Unreachable while every mapped identity has a registration, and handled
-  // rather than asserted because the honest answer is identical — no analyzer
-  // ran, and nothing was evaluated.
-  const analyzer = analyzerForSpec(resolved.specId, deps.registry ?? ENABLED_ANALYZERS);
+  // PUBLIC lookup only. An internal-only registration for this specialization
+  // is invisible here by construction. A resolved identity with no public
+  // analyzer is unreachable — catalog validation already proved the identity
+  // table and the public set agree — and is handled rather than asserted
+  // because the honest answer is identical: no analyzer ran, nothing was
+  // evaluated.
+  const analyzer = analyzerForSpec(resolved.specId, catalog.catalog);
   if (analyzer === null) {
     return unsupportedSpec(identity, resolved.specId);
   }
 
   // ---- evidence breadth, from THE SELECTED ANALYZER AND NOTHING ELSE ----
   //
-  // Derived from `analyzer.requirement` alone, not from the enabled set. One
-  // request analyzes one player in one specialization, so exactly one analyzer
-  // runs — and an analyzer that is not running has no claim on what this request
-  // retrieves.
+  // Derived from `analyzer.requirement` alone — itself derived from the
+  // registration's declared decision capabilities — not from the enabled set.
+  // One request analyzes one player in one specialization, so exactly one
+  // analyzer runs, and an analyzer that is not running has no claim on what
+  // this request retrieves.
   //
   // Unioning the whole registry would be invisible today, with one analyzer
   // registered, and wrong the moment a second arrives: registering a FULL_RAID
@@ -419,7 +445,7 @@ export async function analyzeFight(
   // function's job — it is simply asked about the requirement that actually
   // applies.
   const requirement = analyzer.requirement;
-  const scope = deriveIngestionScope([requirement]);
+  const scope = deriveIngestionScopeFor([analyzer]);
   if (!scope.ok) {
     // Unreachable by construction: derivation fails only on an empty list, and
     // the list is one selected analyzer. Handled rather than asserted because a
@@ -472,12 +498,24 @@ export async function analyzeFight(
   // `targetActorId: null` on purpose. The facade resolves each decision's target
   // from the observed cast that decision is about, which is a fact per event;
   // choosing one fight-level enemy here would overwrite that with a guess.
-  const analysis = analyzer.analyze({
+  //
+  // Through `runAnalyzer`, which checks the result is the registration's own.
+  // A registration that answers about another specialization is a defect in
+  // the deployment, reported as such — never as an unsupported specialization
+  // and never as a document with `specId: null`.
+  const run = runAnalyzer(analyzer, {
     state,
     actorId: identity.player.sourceId,
     specId: analyzer.specId,
     targetActorId: null,
   });
+  if (!run.ok) {
+    return serviceFailure(
+      "INTERNAL_ERROR",
+      `The selected analyzer returned a result it does not own, so no analysis was published. ${run.detail}`,
+    );
+  }
+  const { analysis } = run;
 
   const fightAnalysis: FightAnalysis = {
     identity,
@@ -485,6 +523,11 @@ export async function analyzeFight(
     analyzerId: analyzer.analyzerId,
     scope: scope.scope,
     analysis,
+    // The registration's own projection of its result — the only form in which
+    // shared projectors read the analysis. Built here, next to the analysis it
+    // describes, by the registration that produced it.
+    observedDecisions:
+      analysis.status === "ANALYZED" ? observedDecisionViewOf(catalog.catalog, analysis) : null,
   };
 
   return { ok: true, state: resultStateFor(fightAnalysis), analysis: fightAnalysis };

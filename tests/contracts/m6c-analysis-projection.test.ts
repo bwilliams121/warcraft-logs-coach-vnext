@@ -31,6 +31,9 @@ import { analyzeFight, type AnalysisServiceDeps } from "../../src/services/analy
 import { specNotSupported } from "../../src/services/analyzer-registry.js";
 import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import type { FightAnalysis } from "../../src/services/result.js";
+import { assassinationObservedDecisionView } from "../../src/specs/rogue/assassination/registration.js";
+import type { ObservedAssassinationAnalysis } from "../../src/specs/rogue/assassination/observed-analysis.js";
+import { analyzedAssassinationOf } from "../support/assassination-analysis.js";
 import type { Env } from "../../src/config/env.js";
 import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
 import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
@@ -100,14 +103,19 @@ async function domainAnalysis(className = "Rogue", specName = "Assassination"): 
 const ANALYZED = await domainAnalysis();
 const UNSUPPORTED = await domainAnalysis("Paladin", "Protection");
 
-/** Wraps an analyzer result in the application envelope an analyzer run produces. */
-function wrap(analysis: FightAnalysis["analysis"]): FightAnalysis {
+/**
+ * Wraps an analyzer result in the application envelope an analyzer run
+ * produces — including the registration's view of it, exactly as the service
+ * attaches it.
+ */
+function wrap(analysis: ObservedAssassinationAnalysis): FightAnalysis {
   return {
     identity: identityFor("Rogue", "Assassination"),
     specId: "rogue/assassination",
     analyzerId: "rogue-assassination-observed-decisions",
     scope: "PLAYER_CONTEXT",
     analysis,
+    observedDecisions: analysis.status === "ANALYZED" ? assassinationObservedDecisionView(analysis) : null,
   };
 }
 
@@ -563,8 +571,7 @@ describe("no internal machinery reaches the wire", () => {
   it("exposes the raw blocker's replacement instead", () => {
     // The internal comparison carries `rawBlocker`; the public one carries the
     // stable class. Proving the source HAD one makes the omission meaningful.
-    const source = ANALYZED.analysis;
-    if (source.status !== "ANALYZED") throw new Error("expected ANALYZED");
+    const source = analyzedAssassinationOf(ANALYZED);
     const withRaw = source.comparisons.filter((comparison) => comparison.rawBlocker !== null);
     expect(withRaw.length).toBeGreaterThan(0);
 
@@ -598,8 +605,7 @@ describe("the observed-action judgment is not flattened into a boolean", () => {
   it("still carries the boolean INTERNALLY, so the omission is a real choice", () => {
     // If M5 had stopped producing it, these tests would pass for the wrong
     // reason. The internal comparison is unchanged; only the wire is narrower.
-    const source = M5A_REJECTED.analysis;
-    if (source.status !== "ANALYZED") throw new Error("expected ANALYZED");
+    const source = analyzedAssassinationOf(M5A_REJECTED);
 
     expect(source.comparisons[0]?.observedActionRejected).toBe(true);
   });

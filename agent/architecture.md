@@ -5112,6 +5112,49 @@ infrastructure Paladin-specific gameplay meanings.
 
 If it does, revisit the abstraction.
 
+## M10-A — second-spec architecture and authority contract
+
+M10-A built the contracts a second specialization registers against, without
+creating its evaluator or exposing it. Protection Paladin exists only as an
+internal-only `SpecId`. The contracts, and where they live:
+
+| Concern                       | Module                                   |
+| ----------------------------- | ---------------------------------------- |
+| Internal vs public spec ids   | `src/findings/spec-id.ts`                |
+| Spec-neutral analysis envelope | `src/findings/analysis-envelope.ts`     |
+| Projector-facing view         | `src/findings/observed-decision-view.ts` |
+| Authority domains and bindings | `src/findings/authority-domain.ts`      |
+| Decision capabilities         | `src/findings/decision-capability.ts`    |
+| Registration row              | `src/findings/analyzer-registration.ts`  |
+| Catalog, exposure, integrity  | `src/services/analyzer-registry.ts`      |
+| Assassination's registration  | `src/specs/rogue/assassination/registration.ts` |
+
+Rules the tests pin:
+
+- A registration is `INTERNAL_ONLY` or `PUBLIC`. Public dispatch (the
+  application service, raid-night, REST, MCP) selects `PUBLIC` rows only. The
+  public set must equal the public spec partition and the identity table.
+- Registry corruption is an `INTERNAL_ERROR`, never `SPEC_NOT_SUPPORTED`.
+- An internal-only analysis cannot be projected publicly — not as unsupported
+  and not as `specId: null`. `null` means only "no public analyzer".
+- Authority is bound per domain (`OFFENSIVE_ROTATION`, `RESOURCE_SPENDING`,
+  `ACTIVE_MITIGATION`, `DEFENSIVE_COOLDOWN`, `SELF_HEALING`, `INTERRUPT`). A
+  SimulationCraft APL may bind `OFFENSIVE_ROTATION` only. Absence is a typed
+  resolution outcome (`DOMAIN_NOT_DECLARED`, `NO_PINNED_AUTHORITY_FOR_DOMAIN`,
+  `AUTHORITY_LOAD_FAILED`), never a binding and never an evidence UNKNOWN.
+- State requirements are declared per decision capability and derive the
+  ingestion requirement; Assassination declares one capability and derives
+  exactly the `PLAYER_CONTEXT` / resources-on requirement it had before.
+- Specialization payloads stay spec-owned; shared projectors read the view the
+  registration supplies.
+
+M10-B captures bounded Protection Paladin evidence and adds the shared-state
+foundations it needs (for example a `HOLY_POWER` wire contract). M10-C builds
+the internal evaluator under `src/specs/paladin/protection/`. M10-D moves the
+id into the public partition, the identity table and a `PUBLIC` registration
+together, replaces Protection Paladin in the unsupported-path tests with a
+still-unsupported specialization, and adds corpus proof.
+
 ---
 
 # Milestone 11 — Broader DPS/Tank Expansion

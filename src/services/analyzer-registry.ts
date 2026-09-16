@@ -1,144 +1,519 @@
 /**
- * The enabled analyzers.
+ * The analyzer catalog, its integrity rules, and the public dispatch set.
  *
  * WHAT A REGISTRATION IS
  *
- * One row joining three facts that must never drift apart:
+ * One row, written by the specialization (`src/specs/<class>/<spec>/
+ * registration.ts`), joining the facts that must never drift apart: which
+ * specialization it analyzes, whether it is exposed publicly, which decision
+ * families it evaluates and the evidence they need, which pinned authority it
+ * binds for each, how to run it, and how shared code may view its result.
+ * This module LISTS those rows and validates that they cohere. It contains no
+ * gameplay rule, no APL concept, no ability, no resource and no talent.
  *
- *     which specialization it analyzes
- *     what evidence it needs        (its ingestion requirement)
- *     how to run it                 (its facade)
+ * VALIDATED MEANS IMMUTABLE
  *
- * Keeping them on one row is the point. The failure this prevents is an
- * analyzer whose evidence requirement is declared somewhere else — a transport
- * that "knows" Rogue needs `PLAYER_CONTEXT`, a hand-maintained scope constant,
- * a request field a caller can set. Every one of those lets the analyzer and the
- * data it runs on be changed independently, and silent under-fetching is what
- * you get when they disagree.
+ * `validateAnalyzerCatalog` does not judge the array it is handed. It takes a
+ * deeply frozen SNAPSHOT of every row (`snapshotRegistration`), judges the
+ * snapshot, and — only when it coheres — returns it as a branded
+ * `ValidatedAnalyzerCatalog`. Every lookup in this module accepts nothing
+ * else. So there is no sequence of "validate, mutate, look up": the thing that
+ * was validated cannot be mutated (it is frozen), and the thing that can be
+ * mutated (the caller's array) was never what the lookup reads. There is no
+ * cache to go stale, because nothing is cached: a registry is a handful of
+ * rows and the check is cheap.
  *
- * So the direction is fixed:
+ * TWO COLLECTIONS, ONE SOURCE
  *
- *     analyzer capability -> required evidence -> ingestion scope
+ *     ANALYZER_REGISTRATIONS   every registration this build carries (raw rows)
+ *     PRODUCTION_CATALOG       those rows, validated and frozen at module load
+ *     ENABLED_ANALYZERS        the PUBLIC subset of the production catalog
  *
- * and never:
+ * A corrupt production catalog fails at module load — the loudest possible
+ * fail-closed for a build constant — and an injected catalog fails per request
+ * as an INTERNAL_ERROR. Neither is ever `SPEC_NOT_SUPPORTED`: that status is a
+ * truthful statement about coverage, and a corrupt registry is a defect.
  *
- *     transport -> hand-maintained request
- *
- * WHY THIS IS NOT A PLUGIN FRAMEWORK
- *
- * There is one analyzer. This is a typed list and a lookup, because that is
- * what one analyzer needs. The shape matters more than the machinery: M10 and
- * M11 add rows, and a row is the only thing they should have to add. Generalising
- * further now would mean designing for evaluators whose requirements nobody has
- * met yet.
- *
- * WHAT LIVES HERE AND WHAT DOES NOT
- *
- * This module names a facade and calls it. It contains no gameplay rule, no APL
- * concept, no ability, no resource and no talent. The application service depends
- * on this file precisely so it never has to import a specialization evaluator
- * itself.
+ * The application service, raid-night orchestration, REST and MCP dispatch
+ * only through the public set (`analyzerForSpec`). Internal lookup
+ * (`internalAnalyzerForSpec`) exists for tests and internal evaluation, and it
+ * is what lets a second specialization be registered, exercised and proven
+ * without becoming reachable by a public request.
  */
 
-import type { SpecId } from "../findings/finding.js";
 import {
-  analyzeObservedAssassinationDecisions,
-  type ObservedAnalysisInput,
-  type ObservedAssassinationAnalysis,
-} from "../specs/rogue/assassination/observed-analysis.js";
+  AnalyzerResultOwnershipError,
+  assertAnalysisOwnership,
+  checkAnalysisOwnership,
+  snapshotRegistration,
+  type AnalyzerRegistration,
+} from "../findings/analyzer-registration.js";
+import type {
+  AnalyzedEnvelope,
+  SpecAnalysisEnvelope,
+  SpecAnalysisInput,
+} from "../findings/analysis-envelope.js";
+import { providerMayGovern } from "../findings/authority-domain.js";
+import { validateCapabilities, type CapabilityDefectRecord } from "../findings/decision-capability.js";
+import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import { isPublicSpecId, isSpecId, PUBLIC_SPEC_IDS, type SpecId } from "../findings/spec-id.js";
+import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
 import type { AnalyzerRequirement } from "./ingestion-scope.js";
+import { SUPPORTED_SPEC_IDENTITIES } from "./spec-identity.js";
+
+export type { AnalyzerExposure, AnalyzerRegistration } from "../findings/analyzer-registration.js";
+export {
+  AnalyzerResultOwnershipError,
+  assertAnalysisOwnership,
+  checkAnalysisOwnership,
+} from "../findings/analyzer-registration.js";
+export type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 
 /**
- * The result any registered analyzer produces.
- *
- * Aliased rather than referenced directly so the application service is typed
- * against "an analysis", not against the Rogue module. The alias is Rogue's
- * type today because there is one analyzer; when a second lands, this becomes
- * the union and the service does not change.
+ * The result any registered analyzer produces, as orchestration sees it: the
+ * spec-neutral envelope. The specialization's payload rides inside the
+ * analyzed variant and is read only through the registration's view.
  */
-export type SpecAnalysis = ObservedAssassinationAnalysis;
+export type SpecAnalysis = SpecAnalysisEnvelope;
 
-/** What a registered analyzer is handed. Facts only — no gameplay interpretation. */
-export type SpecAnalysisInput = ObservedAnalysisInput;
+export type { SpecAnalysisInput };
 
-export interface RegisteredAnalyzer {
-  /** Stable id for scope derivation and disclosure. Not a display name. */
-  readonly analyzerId: string;
-  readonly specId: SpecId;
-  /** The evidence this analyzer needs. Read by scope derivation, never by a caller. */
-  readonly requirement: AnalyzerRequirement;
-  /** The facade. The service invokes exactly this and never a lower-level evaluator. */
-  readonly analyze: (input: SpecAnalysisInput) => SpecAnalysis;
+/** The pre-M10-A name for a registration row. Same type. */
+export type RegisteredAnalyzer = AnalyzerRegistration;
+
+// ---------------------------------------------------------------------------
+// The validated catalog
+// ---------------------------------------------------------------------------
+
+const VALIDATED = Symbol("validated-analyzer-catalog");
+
+/**
+ * A catalog that passed integrity validation, as a frozen snapshot.
+ *
+ * The brand is a runtime symbol as well as a type, so a value that merely
+ * LOOKS like a catalog cannot be handed to a lookup by a cast:
+ * `isValidatedCatalog` checks for it and every lookup refuses anything else.
+ */
+export interface ValidatedAnalyzerCatalog {
+  readonly [VALIDATED]: true;
+  readonly registrations: readonly AnalyzerRegistration[];
 }
 
-const ASSASSINATION_ANALYZER_ID = "rogue-assassination-observed-decisions";
+export function isValidatedCatalog(value: unknown): value is ValidatedAnalyzerCatalog {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { readonly [VALIDATED]?: unknown })[VALIDATED] === true &&
+    Object.isFrozen(value)
+  );
+}
+
+function requireValidated(catalog: ValidatedAnalyzerCatalog): readonly AnalyzerRegistration[] {
+  if (!isValidatedCatalog(catalog)) {
+    throw new AnalyzerCatalogIntegrityError([
+      {
+        defect: "UNVALIDATED_CATALOG",
+        analyzerId: null,
+        detail: "a lookup was handed a value that is not a validated analyzer catalog",
+      },
+    ]);
+  }
+  return catalog.registrations;
+}
+
+// ---------------------------------------------------------------------------
+// Integrity
+// ---------------------------------------------------------------------------
+
+export type CatalogDefect =
+  | "DUPLICATE_SPEC_ID"
+  | "DUPLICATE_ANALYZER_ID"
+  | "UNKNOWN_SPEC_ID"
+  | "PUBLIC_EXPOSURE_OF_INTERNAL_SPEC"
+  | "INVALID_CAPABILITY"
+  | "DUPLICATE_AUTHORITY_BINDING"
+  | "ORPHAN_AUTHORITY_BINDING"
+  | "PROVIDER_DOMAIN_INCOMPATIBLE"
+  | "AUTHORITY_ARTIFACT_MISMATCH"
+  | "PUBLIC_SET_DISAGREES_WITH_IDENTITY_TABLE"
+  | "PUBLIC_SET_DISAGREES_WITH_PARTITION"
+  /** A lookup was handed something other than a validated catalog. */
+  | "UNVALIDATED_CATALOG";
+
+export const CATALOG_DEFECTS = Object.freeze([
+  "DUPLICATE_SPEC_ID",
+  "DUPLICATE_ANALYZER_ID",
+  "UNKNOWN_SPEC_ID",
+  "PUBLIC_EXPOSURE_OF_INTERNAL_SPEC",
+  "INVALID_CAPABILITY",
+  "DUPLICATE_AUTHORITY_BINDING",
+  "ORPHAN_AUTHORITY_BINDING",
+  "PROVIDER_DOMAIN_INCOMPATIBLE",
+  "AUTHORITY_ARTIFACT_MISMATCH",
+  "PUBLIC_SET_DISAGREES_WITH_IDENTITY_TABLE",
+  "PUBLIC_SET_DISAGREES_WITH_PARTITION",
+  "UNVALIDATED_CATALOG",
+] as const satisfies readonly CatalogDefect[]);
+
+export interface CatalogDefectRecord {
+  readonly defect: CatalogDefect;
+  /** The registration at fault, or `null` for a catalog-level defect. */
+  readonly analyzerId: string | null;
+  /** Author-written. Names ids and vocabulary constants, never upstream data. */
+  readonly detail: string;
+  readonly capability?: CapabilityDefectRecord;
+}
+
+export type CatalogValidation =
+  | { readonly ok: true; readonly catalog: ValidatedAnalyzerCatalog }
+  | { readonly ok: false; readonly defects: readonly CatalogDefectRecord[] };
 
 /**
- * Assassination Rogue observed-decision analysis.
+ * Author-written message for a catalog that failed integrity validation.
  *
- * THIS IS WHERE ASSASSINATION'S EVIDENCE NEEDS ARE STATED, AND THE ONLY PLACE.
- *
- * `PLAYER_CONTEXT` is the honest requirement, not a conservative guess. The
- * analyzer reads one actor's observed casts, that actor's own resources and
- * auras, and the enemy/encounter state a decision was made against. It reads no
- * ally state at all — no other player's cooldowns, buffs or health — so
- * `FULL_RAID` would retrieve raid-wide evidence nothing in this analyzer can
- * consume, at real Warcraft Logs cost.
- *
- * `includeResources: true` because this analyzer reads combo points and energy.
- * That sentence is gameplay knowledge, which is exactly why it lives on the
- * registration rather than in the application service: the service builds the
- * ingestion request without ever learning which resources a Rogue has, or that
- * it is looking at a Rogue at all.
- *
- * Widen either field ONLY when the analyzer actually starts reading more.
+ * Names the defect codes — internal vocabulary constants — and nothing from
+ * upstream. Deliberately reported as INTERNAL_ERROR by every service: a corrupt
+ * registry is a defect in the deployment, and reporting it as
+ * SPEC_NOT_SUPPORTED would dress a malfunction as a truthful coverage limit.
  */
-const ASSASSINATION_ANALYZER: RegisteredAnalyzer = {
-  analyzerId: ASSASSINATION_ANALYZER_ID,
-  specId: "rogue/assassination",
-  requirement: {
-    analyzerId: ASSASSINATION_ANALYZER_ID,
-    requiredScope: "PLAYER_CONTEXT",
-    includeResources: true,
-  },
-  analyze: analyzeObservedAssassinationDecisions,
-};
+export function describeCatalogDefects(defects: readonly CatalogDefectRecord[]): string {
+  const codes = [...new Set(defects.map((defect) => defect.defect))].join(", ");
+  return `The analyzer registry failed integrity validation (${codes}), so no analysis was attempted.`;
+}
+
+/** Raised when a catalog is required valid and is not. Deterministic; names defect codes only. */
+export class AnalyzerCatalogIntegrityError extends Error {
+  readonly defects: readonly CatalogDefectRecord[];
+
+  constructor(defects: readonly CatalogDefectRecord[]) {
+    super(describeCatalogDefects(defects));
+    this.name = "AnalyzerCatalogIntegrityError";
+    this.defects = defects;
+  }
+}
+
+function sameSet(left: readonly string[], right: readonly string[]): boolean {
+  const a = new Set(left);
+  const b = new Set(right);
+  if (a.size !== b.size) return false;
+  for (const value of a) if (!b.has(value)) return false;
+  return true;
+}
+
+function validateRegistration(registration: AnalyzerRegistration, defects: CatalogDefectRecord[]): void {
+  const { analyzerId } = registration;
+
+  if (!isSpecId(registration.specId)) {
+    defects.push({
+      defect: "UNKNOWN_SPEC_ID",
+      analyzerId,
+      detail: `'${String(registration.specId)}' is not a specialization this build knows`,
+    });
+  } else if (registration.exposure === "PUBLIC" && !isPublicSpecId(registration.specId)) {
+    defects.push({
+      defect: "PUBLIC_EXPOSURE_OF_INTERNAL_SPEC",
+      analyzerId,
+      detail: `'${registration.specId}' is internal-only and cannot carry a PUBLIC registration`,
+    });
+  }
+
+  for (const capability of validateCapabilities(registration.capabilities)) {
+    defects.push({
+      defect: "INVALID_CAPABILITY",
+      analyzerId,
+      detail: `${capability.defect}: ${capability.detail}`,
+      capability,
+    });
+  }
+
+  const declaredDomains = new Set(registration.capabilities.map((capability) => capability.domain));
+  const boundDomains = new Set<string>();
+  for (const binding of registration.authorityBindings) {
+    if (boundDomains.has(binding.domain)) {
+      defects.push({
+        defect: "DUPLICATE_AUTHORITY_BINDING",
+        analyzerId,
+        detail: `two bindings claim the ${binding.domain} domain`,
+      });
+    }
+    boundDomains.add(binding.domain);
+
+    if (!declaredDomains.has(binding.domain)) {
+      defects.push({
+        defect: "ORPHAN_AUTHORITY_BINDING",
+        analyzerId,
+        detail: `a binding names the ${binding.domain} domain, which no declared capability evaluates`,
+      });
+    }
+    if (!providerMayGovern(binding.kind, binding.domain)) {
+      defects.push({
+        defect: "PROVIDER_DOMAIN_INCOMPATIBLE",
+        analyzerId,
+        detail: `${binding.kind} is not declared compatible with the ${binding.domain} domain`,
+      });
+    }
+
+    // The artifact is the truth; the binding repeats its identity so the two
+    // can be compared. A failed load is NOT an integrity defect: it is an
+    // authority condition the analyzer reports at evaluation time as
+    // AUTHORITY_NOT_AVAILABLE, exactly as it did before M10-A.
+    const loaded = binding.load();
+    if (!loaded.ok) continue;
+    const { artifact } = loaded.authority;
+    const artifactSpecId = `${artifact.spec.className}/${artifact.spec.specName}`;
+    const mismatches: string[] = [];
+    if (artifact.authorityId !== binding.authorityId) mismatches.push("authorityId");
+    if (artifact.artifactRevision !== binding.artifactRevision) mismatches.push("artifactRevision");
+    if (artifact.provenance.commitSha !== binding.commitSha) mismatches.push("commitSha");
+    if (artifactSpecId !== registration.specId) mismatches.push("specialization");
+    if (mismatches.length > 0) {
+      defects.push({
+        defect: "AUTHORITY_ARTIFACT_MISMATCH",
+        analyzerId,
+        detail: `the loaded artifact disagrees with the ${binding.domain} binding on: ${mismatches.join(", ")}`,
+      });
+    }
+  }
+}
 
 /**
- * Every analyzer this build can run.
+ * Validates a catalog. Total and deterministic; nothing is cached.
+ *
+ * Snapshots first, judges the snapshot, and returns the snapshot. The caller's
+ * array and objects are read once and never retained, so mutating them
+ * afterwards cannot reach the validated value.
+ */
+export function validateAnalyzerCatalog(registrations: readonly AnalyzerRegistration[]): CatalogValidation {
+  const snapshot = Object.freeze(registrations.map(snapshotRegistration));
+
+  const defects: CatalogDefectRecord[] = [];
+  const specIds = new Set<string>();
+  const analyzerIds = new Set<string>();
+
+  for (const registration of snapshot) {
+    if (specIds.has(registration.specId)) {
+      defects.push({
+        defect: "DUPLICATE_SPEC_ID",
+        analyzerId: registration.analyzerId,
+        detail: `'${registration.specId}' is registered more than once`,
+      });
+    }
+    specIds.add(registration.specId);
+    if (analyzerIds.has(registration.analyzerId)) {
+      defects.push({
+        defect: "DUPLICATE_ANALYZER_ID",
+        analyzerId: registration.analyzerId,
+        detail: `'${registration.analyzerId}' is registered more than once`,
+      });
+    }
+    analyzerIds.add(registration.analyzerId);
+    validateRegistration(registration, defects);
+  }
+
+  // ---- the three public promises must be one promise ----
+  //
+  // The spec partition says which ids MAY be public, the identity table says
+  // which Warcraft Logs identities RESOLVE, and the catalog says which
+  // analyzers a public request SELECTS. If any two disagree, a request can
+  // resolve to a specialization nothing will analyze, or an analyzer can be
+  // selected for an identity the partition forbids publishing.
+  const publicSpecIds = snapshot
+    .filter((registration) => registration.exposure === "PUBLIC")
+    .map((registration) => registration.specId);
+  if (!sameSet(publicSpecIds, PUBLIC_SPEC_IDS)) {
+    defects.push({
+      defect: "PUBLIC_SET_DISAGREES_WITH_PARTITION",
+      analyzerId: null,
+      detail: `public registrations [${publicSpecIds.join(", ")}] do not match the public spec partition [${PUBLIC_SPEC_IDS.join(", ")}]`,
+    });
+  }
+  const identityResolvable = Object.values(SUPPORTED_SPEC_IDENTITIES);
+  if (!sameSet(publicSpecIds, identityResolvable)) {
+    defects.push({
+      defect: "PUBLIC_SET_DISAGREES_WITH_IDENTITY_TABLE",
+      analyzerId: null,
+      detail: `public registrations [${publicSpecIds.join(", ")}] do not match the identity table [${identityResolvable.join(", ")}]`,
+    });
+  }
+
+  if (defects.length > 0) return { ok: false, defects };
+  const catalog: ValidatedAnalyzerCatalog = Object.freeze({
+    [VALIDATED]: true as const,
+    registrations: snapshot,
+  });
+  return { ok: true, catalog };
+}
+
+/** Validates, or throws `AnalyzerCatalogIntegrityError`. For build constants and tests. */
+export function requireValidatedCatalog(
+  registrations: readonly AnalyzerRegistration[],
+): ValidatedAnalyzerCatalog {
+  const validation = validateAnalyzerCatalog(registrations);
+  if (!validation.ok) throw new AnalyzerCatalogIntegrityError(validation.defects);
+  return validation.catalog;
+}
+
+// ---------------------------------------------------------------------------
+// The production catalog
+// ---------------------------------------------------------------------------
+
+/**
+ * Every registration this build carries, as written by the specializations.
  *
  * One row. An unsupported specialization is represented by ABSENCE from this
  * list, which is why there is no "unsupported" placeholder entry: a row that
- * cannot analyze anything would still be something the service could select.
+ * cannot analyze anything would still be something a lookup could select.
  */
-export const ENABLED_ANALYZERS: readonly RegisteredAnalyzer[] = [ASSASSINATION_ANALYZER];
+export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.freeze([
+  ASSASSINATION_REGISTRATION,
+]);
 
 /**
- * The ingestion requirements of the enabled analyzers.
+ * The production catalog, validated at module load.
  *
- * DERIVED from the registrations rather than listed separately, so a
- * registration cannot declare one scope while scope derivation reads another.
+ * A build whose registrations do not cohere does not start. That is the
+ * intended failure: a deployment constant that is wrong has no request to
+ * report itself on.
  */
-export const ENABLED_ANALYSIS_REQUIREMENTS: readonly AnalyzerRequirement[] = ENABLED_ANALYZERS.map(
-  (analyzer) => analyzer.requirement,
-);
+export const PRODUCTION_CATALOG: ValidatedAnalyzerCatalog = requireValidatedCatalog(ANALYZER_REGISTRATIONS);
 
-/**
- * Finds the analyzer for a specialization, or `null` when none exists.
- *
- * `null` means exactly "no analyzer is registered for this spec". It is never a
- * judgement about the player and never an invitation to try a different
- * analyzer.
- */
-export function analyzerForSpec(
-  specId: SpecId,
-  analyzers: readonly RegisteredAnalyzer[] = ENABLED_ANALYZERS,
-): RegisteredAnalyzer | null {
-  return analyzers.find((analyzer) => analyzer.specId === specId) ?? null;
+/** The registrations a public request may select. Derived, never listed. */
+export function publicAnalyzers(catalog: ValidatedAnalyzerCatalog): readonly AnalyzerRegistration[] {
+  return requireValidated(catalog).filter((registration) => registration.exposure === "PUBLIC");
 }
 
 /**
- * The analysis result for a specialization no registered analyzer covers.
+ * The public dispatch set of this build.
+ *
+ * The name predates the catalog: "enabled" has always meant "a public request
+ * may select it", and that is still exactly what it means.
+ */
+export const ENABLED_ANALYZERS: readonly AnalyzerRegistration[] = publicAnalyzers(PRODUCTION_CATALOG);
+
+/**
+ * The ingestion requirements of the public analyzers.
+ *
+ * DERIVED from the registrations, which derive theirs from declared
+ * capabilities, so a registration cannot declare one scope while scope
+ * derivation reads another.
+ */
+export const ENABLED_ANALYSIS_REQUIREMENTS: readonly AnalyzerRequirement[] = ENABLED_ANALYZERS.map(
+  (registration) => registration.requirement,
+);
+
+/**
+ * The catalog a service dispatches through: the injected rows validated per
+ * request, or the production catalog. Never an unvalidated array.
+ */
+export function catalogFor(registry: readonly AnalyzerRegistration[] | undefined): CatalogValidation {
+  return registry === undefined
+    ? { ok: true, catalog: PRODUCTION_CATALOG }
+    : validateAnalyzerCatalog(registry);
+}
+
+// ---------------------------------------------------------------------------
+// Lookup — validated catalogs only
+// ---------------------------------------------------------------------------
+
+/**
+ * Finds the PUBLIC analyzer for a specialization, or `null` when none exists.
+ *
+ * Internal-only registrations are invisible here whatever catalog is passed:
+ * this is the lookup every public path uses, and an internal-only row must be
+ * unreachable from it by construction rather than by the caller remembering
+ * to filter. Specialization ids are unique in a validated catalog, so there is
+ * no "first match" to speak of.
+ *
+ * `null` means exactly "no public analyzer is registered for this spec". It is
+ * never a judgement about the player and never an invitation to try a
+ * different analyzer.
+ */
+export function analyzerForSpec(
+  specId: SpecId,
+  catalog: ValidatedAnalyzerCatalog = PRODUCTION_CATALOG,
+): AnalyzerRegistration | null {
+  return publicAnalyzers(catalog).find((registration) => registration.specId === specId) ?? null;
+}
+
+/**
+ * Finds any registration for a specialization, public or internal-only.
+ *
+ * For internal evaluation and tests. Nothing on a public path may call this;
+ * `tests/contracts/m10a-cross-spec-isolation.test.ts` pins that.
+ */
+export function internalAnalyzerForSpec(
+  specId: SpecId,
+  catalog: ValidatedAnalyzerCatalog = PRODUCTION_CATALOG,
+): AnalyzerRegistration | null {
+  return requireValidated(catalog).find((registration) => registration.specId === specId) ?? null;
+}
+
+/**
+ * The owning registration's view of an analyzed result.
+ *
+ * The registration is FOUND, not supplied: the analysis names a
+ * specialization, the validated catalog holds at most one registration for
+ * it, and the ownership check confirms the pairing before the adapter runs.
+ * An analysis owned by no registration in this catalog, or one that fails the
+ * ownership check, throws — it is never adapted by a neighbour's view.
+ */
+export function observedDecisionViewOf(
+  catalog: ValidatedAnalyzerCatalog,
+  analysis: AnalyzedEnvelope,
+): ObservedDecisionView {
+  const registration = requireValidated(catalog).find((candidate) => candidate.specId === analysis.specId);
+  if (registration === undefined) {
+    throw new AnalyzerCatalogIntegrityError([
+      {
+        defect: "UNKNOWN_SPEC_ID",
+        analyzerId: null,
+        detail: `an analysis for '${String(analysis.specId)}' has no registration in this catalog`,
+      },
+    ]);
+  }
+  assertAnalysisOwnership(registration, analysis);
+  return registration.observedDecisionView(analysis);
+}
+
+export type AnalyzerRun =
+  | { readonly ok: true; readonly analysis: SpecAnalysisEnvelope }
+  | { readonly ok: false; readonly detail: string };
+
+/**
+ * Runs a registration's facade and checks the result is its own.
+ *
+ * The services call THIS rather than `registration.analyze` directly, so a
+ * registration built without `defineAnalyzerRegistration` — whose `analyze`
+ * carries no wrapper — is still held to ownership. Returns the check rather
+ * than throwing so a service can report a typed INTERNAL_ERROR; a wrapper
+ * that throws first is caught and reported the same way.
+ */
+export function runAnalyzer(registration: AnalyzerRegistration, input: SpecAnalysisInput): AnalyzerRun {
+  if (input.specId !== registration.specId) {
+    return {
+      ok: false,
+      detail: `the '${registration.analyzerId}' registration was asked about '${input.specId}' but owns '${registration.specId}'`,
+    };
+  }
+  let analysis: SpecAnalysisEnvelope;
+  try {
+    analysis = registration.analyze(input);
+  } catch (error: unknown) {
+    if (error instanceof AnalyzerResultOwnershipError) return { ok: false, detail: error.message };
+    throw error;
+  }
+  const ownership = checkAnalysisOwnership(registration, analysis);
+  if (!ownership.ok) {
+    return {
+      ok: false,
+      detail: `the '${registration.analyzerId}' registration returned a result it does not own (${ownership.defect}): ${ownership.detail}`,
+    };
+  }
+  return { ok: true, analysis };
+}
+
+/**
+ * The analysis result for a specialization no public analyzer covers.
  *
  * Built HERE rather than in the application service because this module is what
  * determines support: the answer and the list it is derived from stay together.
