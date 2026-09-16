@@ -15,6 +15,7 @@
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --where <key>=<value> <N>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --indices <i,j,k>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --decision-slice <subject> <target,target>
+ *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice <subject> [<toReportTimeMs>]
  *
  * `--per-type` keeps up to N events of EACH distinct `type`, in original order.
  * That yields far more evidence per byte than a head slice: a fixture that has
@@ -44,6 +45,18 @@
  * exactly those categories and actors over the capture window; the other
  * modes select by property or position and carry none.
  *
+ * `--actor-slice` is the M10-B predicate, made a recorded mode: EVERY event
+ * whose `sourceID` OR `targetID` is the subject — casts, resource changes,
+ * auras applied to or by the subject, damage taken and dealt, healing given
+ * and received, absorbs, summons, the subject's combatantinfo — in capture
+ * order, nothing else, optionally bounded to timestamps at or before
+ * `toReportTimeMs`. A tank's evidence is what happens TO the actor as much as
+ * what the actor does, which the decision-slice predicate cannot express.
+ * Because it is a predicate over the whole capture, a slice cut with it can
+ * carry a grant for every capture-vouched category with actor scope
+ * [subject] over [window start, bound]; the bound exists so a retained slice
+ * stays under the corpus artifact size limit, and the grant must end there.
+ *
  * Accepts a full GraphQL envelope, a bare event array, or an ARRAY OF PAGE
  * ENVELOPES (a paginated capture, concatenated in page order), and always
  * writes a bare event array plus a small provenance header alongside it.
@@ -70,7 +83,7 @@ const FORBIDDEN = ["client_secret", "access_token", "authorization", "bearer ", 
  * M9-B predates this field, and their manifest entries record UNAVAILABLE —
  * a fact about those captures, not something to backfill.
  */
-export const SANITIZER_REVISION = "sanitize-probe-3";
+export const SANITIZER_REVISION = "sanitize-probe-4";
 
 /** Where a reviewed slice lands: the regression corpus, never a loose fixture directory. */
 export const OUTPUT_ROOT = "tests/corpus/artifacts/wcl-events";
@@ -166,12 +179,27 @@ export function decisionSlice(events, subject, targets) {
   });
 }
 
+/**
+ * The `--actor-slice` predicate. Exported for tests.
+ *
+ * Keeps, in capture order, every event whose `sourceID` or `targetID` is
+ * `subject`, and — when `untilMs` is a number — only those with `timestamp`
+ * at or before it. Nothing is reordered, deduplicated or synthesised.
+ */
+export function actorSlice(events, subject, untilMs = null) {
+  return events.filter((event) => {
+    if (typeof event !== "object" || event === null) return false;
+    if (event.sourceID !== subject && event.targetID !== subject) return false;
+    return untilMs === null || (typeof event.timestamp === "number" && event.timestamp <= untilMs);
+  });
+}
+
 function main() {
   const [inputPath, outputName, mode, countRaw] = process.argv.slice(2);
 
   if (inputPath === undefined || outputName === undefined) {
     console.error(
-      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target]",
+      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs]]",
     );
     process.exit(1);
   }
@@ -182,7 +210,16 @@ function main() {
   const events = extractEvents(payload);
 
   let sliced;
-  if (mode === "--decision-slice") {
+  if (mode === "--actor-slice") {
+    const subject = Number(countRaw);
+    const untilRaw = process.argv[6];
+    const untilMs = untilRaw === undefined ? null : Number(untilRaw);
+    if (!Number.isSafeInteger(subject) || (untilMs !== null && !Number.isSafeInteger(untilMs))) {
+      console.error("usage: --actor-slice <subject actor id> [<toReportTimeMs>]");
+      process.exit(1);
+    }
+    sliced = actorSlice(events, subject, untilMs);
+  } else if (mode === "--decision-slice") {
     const subject = Number(countRaw);
     const targets = String(process.argv[6] ?? "")
       .split(",")

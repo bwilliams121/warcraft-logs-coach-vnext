@@ -52,6 +52,28 @@
  * independent of what that encoding is. The absolute scale is therefore not an
  * input to the comparison at all. See `adaptEnergyPct`.
  *
+ * HOLY POWER (M10-B) IS CORROBORATED BY A PROTECTION PALADIN CAPTURE
+ *
+ * Type 9 was seen on two actors in the same complete 20-player fight, both
+ * Paladins (a Protection tank, the capture's subject, and a Retribution
+ * Paladin) and on no other class; every attached type-9 entry was costed at
+ * exactly 3 against a stable `max` of 5, and every standalone `resourcechange`
+ * of type 9 carried `maxResourceAmount` 5. The specialization-specific
+ * corroboration that M10-A's audit found missing — a PROTECTION observation —
+ * is the subject's own Shield of the Righteous casts. Recorded, like the
+ * others, as corroboration and not proof.
+ *
+ * A COSTED HOLY POWER CAST IS PRE_COST; AN UNCOSTED ONE IS NOT ZERO
+ *
+ * The same M4 sampling contract applies unchanged: a COMPLETED cast carrying
+ * a positive type-9 `cost` reports the amount BEFORE that cost. The capture
+ * also holds two completed Shield of the Righteous casts that carry NO type-9
+ * entry at all — real casts of a spender with no resource snapshot — which
+ * is why "no entry" must stay NO_OBSERVATION and can never read as zero Holy
+ * Power. Nothing here models generation, and the standalone `resourcechange`
+ * events (+1, +2, +3 with `waste` 0–3 observed) remain observations that are
+ * never replayed onto a snapshot.
+ *
  * Outside the declared scope, `resourceWireTypeFor` fails closed. It does not
  * fall back, does not widen, and does not guess.
  */
@@ -64,9 +86,9 @@ import {
 } from "../provenance.js";
 
 /** Resource identities this project models. Deliberately not a full database. */
-export type ResourceId = "COMBO_POINTS" | "ENERGY";
+export type ResourceId = "COMBO_POINTS" | "ENERGY" | "HOLY_POWER";
 
-export const RESOURCE_IDS = ["COMBO_POINTS", "ENERGY"] as const satisfies readonly ResourceId[];
+export const RESOURCE_IDS = ["COMBO_POINTS", "ENERGY", "HOLY_POWER"] as const satisfies readonly ResourceId[];
 
 /** Evidence from a versioned game-data enumeration. Necessary, never sufficient. */
 export interface GameEnumEvidence {
@@ -166,6 +188,41 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "costed entries with amount below cost. Observed costs were 20, 25, 30, 35, 40, 45, 50 " +
           "and 60 — discrete values, none fractional. Per-actor max was stable for the whole " +
           "fight: 250 across 6,923 and 6,471 observations for the two Rogues respectively.",
+      },
+    },
+  },
+  {
+    wireType: 9,
+    resourceId: "HOLY_POWER",
+    scope: { gameVersion: 1, logVersion: 17 },
+    evidence: {
+      gameEnum: {
+        enumName: "Enum.PowerType",
+        memberName: "HolyPower",
+        value: 9,
+        expansion: "Midnight",
+        gameBuild: "12.0",
+        source: "World of Warcraft client power-type enumeration",
+        verifiedOn: "2026-09-16",
+      },
+      wireCorroboration: {
+        fixtureId: "wcl-protection-paladin-a7r6-opener",
+        reportCode: "A7R6kxPJ1hC8YQ4w",
+        reportRevision: 30,
+        capturedOn: "2026-09-16",
+        observation:
+          "Across the first 45 s of the same complete 20-player fight (30,588 events in four pages, " +
+          "the last terminal, revision 30 before and after), wire type 9 appeared attached to 34 " +
+          "events on exactly two actors — the Protection Paladin subject (actor 7, 16 entries) and a " +
+          "Retribution Paladin (actor 6, 18 entries) — and on no other class. Every attached entry " +
+          "was costed at 3 against max 5; zero had amount above max, a null max, or amount below " +
+          "cost. Standalone resource-change events of type 9 occurred on the same two actors only " +
+          "(43 and 64), every one with a maximum of 5, a change of 1, 2 or 3 and a waste field of " +
+          "0 to 3. The committed slice retains the subject's five costed Shield of the " +
+          "Righteous casts (amounts 4, 3, 3, 3, 3 of 5, cost 3) and two completed Shield of the " +
+          "Righteous casts carrying no type-9 entry at all, which are the evidence that absence is " +
+          "not zero. The earlier Retribution observation (A7R6 fight 7, actor 6, 4/5 cost 3) in " +
+          "wcl-assassination-envenom-combo-points is consistent with all of it.",
       },
     },
   },

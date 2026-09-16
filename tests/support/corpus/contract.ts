@@ -453,6 +453,55 @@ export const ASSERTION_KINDS = {
     description:
       "The flattened resource snapshot on the event at a raw index is bound to the side `resourceActor` names, and to that side's actor. NONE means the event carries no attached snapshot.",
   },
+  "NORMALIZATION.EVENT_FACTS": {
+    owningLayer: "NORMALIZATION",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        /** The event, by fact: report time, raw type, and the actor sides as captured. */
+        at: z
+          .object({
+            reportTimeMs: z.number().int(),
+            rawType: z.string().min(1),
+            sourceActorId: z.number().int().nullable(),
+            targetActorId: z.number().int().nullable(),
+            abilityGameId: z.number().int().nullable(),
+          })
+          .strict(),
+        expected: z
+          .object({
+            kind: z.string().min(1),
+            /** Normalized fields by dotted path (`length` reads an array's length), compared by JSON equality. Scalars only. */
+            fields: z.record(z.string(), z.union([z.number(), z.string(), z.boolean(), z.null()])),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "Exactly one normalized event matches the (report time, raw type, source, target, ability) locator, it has this normalized kind, and each named top-level field carries exactly this value. A damage, healing or absorb fact is read from the event that carries it — never aggregated, never interpreted.",
+  },
+  "NORMALIZATION.ACTOR_EVENT_CENSUS": {
+    owningLayer: "NORMALIZATION",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        side: actorSide,
+        /** Normalized kind -> count of events whose named side is the actor. Exact and exhaustive. */
+        expected: z.record(z.string(), z.number().int().nonnegative()),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The normalized events whose SOURCE (or TARGET) is this actor number exactly this many per kind, and no other kind appears. A census of what the slice holds for the actor — what it retained, not what happened.",
+  },
   "NORMALIZATION.NO_ACTOR_REF_HOLDS": {
     owningLayer: "NORMALIZATION",
     outcomeClass: "NEGATIVE_FACT",
@@ -655,6 +704,24 @@ export const ASSERTION_KINDS = {
     requiresAuthority: false,
     description:
       "Derived aura presence at the locator rests on exactly this observed transition, or is UNKNOWN for exactly this reason. Silence never reads as INACTIVE and a source is never inferred.",
+  },
+  "COMBAT_STATE.ACTOR_INDEX_CENSUS": {
+    owningLayer: "COMBAT_STATE",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        side: actorSide,
+        /** Normalized kind -> count of positions the M4 source/target index yields for the actor. */
+        expected: z.record(z.string(), z.number().int().nonnegative()),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "M4's positionsBySourceActor / positionsByTargetActor for this actor yields exactly these kinds in these counts, each position resolving to an event whose named side is the actor. The index exposes damage taken, healing received and absorbs as observed events with locators; no view aggregates them.",
   },
   "COMBAT_STATE.AURA_STACK_OBSERVATION": {
     owningLayer: "COMBAT_STATE",
@@ -1174,6 +1241,13 @@ const captureSource = z
     /** Where the raw capture is, if anywhere. Raw output is gitignored and is normally NOT retained. */
     rawCaptureRetained: z.literal(false),
     rawCaptureLocation: recordedString,
+    /**
+     * The report revision read AFTER the last page, when the capture plan
+     * re-checked it (M10-B onward). Equal to `reportRevision` for a coherent
+     * capture; a capture whose revision moved mid-pagination is PARTIAL and
+     * grants nothing. Absent for captures taken before the re-check existed.
+     */
+    reportRevisionAfterCapture: recordedInt.optional(),
     /**
      * Why this subject was selected, in Warcraft Logs' own performance terms.
      *

@@ -41,6 +41,44 @@ node scripts/authority/extract-simc-apl.mjs \
 Deterministic: the same commit yields a byte-identical artifact apart from
 `extractedOn`. `--file <path>` reads a local copy instead of fetching.
 
+## Protection Paladin APL — pinned at M10-B, NOT registered
+
+The same commit carries `engine/class_modules/apl/apl_paladin.cpp`, whose
+`//protection_apl_start .. //protection_apl_end` region is the Protection
+Paladin default action priority list (`void protection( player_t* p )`, two
+lists: `default` with 30 actions, `precombat` with 6, no list dispatch).
+
+| | |
+| --- | --- |
+| Source file | `engine/class_modules/apl/apl_paladin.cpp` |
+| Source SHA-256 | `ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02` |
+| Source bytes | 10,081 |
+| Artifact | `src/simc/data/paladin-protection.apl.json` (`SIMC_APL_PALADIN_PROTECTION`, revision `simc-33622e9d-1`) |
+| Extracted | 2026-09-16, `--target paladin-protection` |
+| Bound to | nothing. No catalog row, no `AuthorityDomainBinding`, no loader in `src/simc/pinned-authority.ts`, no production import |
+
+It is OFFENSIVE authority only. It is a damage-priority list for a simulation:
+it contains `shield_of_the_righteous` and `word_of_glory` as damage-ordered
+lines and conditions nothing on incoming damage, health or a defensive plan.
+When M10-C binds it, the binding is `SIMC_APL` for `OFFENSIVE_ROTATION` and
+the registry refuses any other domain (`PROVIDER_DOMAIN_COMPATIBILITY`).
+`ACTIVE_MITIGATION`, `DEFENSIVE_COOLDOWN`, `SELF_HEALING`,
+`RESOURCE_SPENDING` and `INTERRUPT` have NO pinned authority.
+
+Parser coverage measured at M10-B (pinned by
+`tests/contracts/m10b-protection-paladin-authority.test.ts`): 16 unconditional
+lines; of the 20 conditional lines 10 parse and 10 are refused as
+`UNSUPPORTED_IDENTIFIER` at `next_armament` (×3), `consecration.up` (×2),
+`talent.righteous_protector.enabled`, `prev_gcd.1.divine_toll`,
+`hero_tree.lightsmith`, `apex.3` and `full_recharge_time`. Widening the parser
+is M10-C's work, with tests, never by relaxing a refusal.
+
+Reproduce:
+
+```bash
+node scripts/authority/extract-simc-apl.mjs --target paladin-protection   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9   --commit-date 2026-09-12   --expect-sha256 ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02   --out src/simc/data/paladin-protection.apl.json
+```
+
 ## What the extractor guarantees
 
 **It fails closed.** It is not a general C++ parser and does not pretend to be.

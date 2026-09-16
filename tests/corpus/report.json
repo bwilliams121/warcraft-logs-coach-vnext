@@ -169,6 +169,20 @@
       "sha256": "cea2a9a5206be9aa3e174c995749e24bd030534553959db15cd37e3024657304"
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "byteLength": 427886,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "1e234f7b2f6329b4a7ad08e24c12048144f2edca118b9adc8f89534822f78971"
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "byteLength": 359134,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "DERIVED_FROM_CAPTURE",
+      "sha256": "08272ce986fe5699b210885d1d60b4a30ec00840624434ea565814d9482ff998"
+    },
+    {
       "artifactId": "wcl-pull-window-with-resources",
       "byteLength": 55269,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -178,8 +192,8 @@
   ],
   "byLayer": [
     {
-      "assertions": 20,
-      "cases": 8,
+      "assertions": 23,
+      "cases": 9,
       "failed": 0,
       "kindsExercised": [
         "WCL_DECODE.EVENT_PAGE_OUTCOME",
@@ -189,17 +203,19 @@
       ],
       "notExecuted": 0,
       "owningLayer": "WCL_TRANSPORT",
-      "passed": 20
+      "passed": 23
     },
     {
-      "assertions": 54,
-      "cases": 13,
+      "assertions": 72,
+      "cases": 22,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
+        "NORMALIZATION.ACTOR_EVENT_CENSUS",
         "NORMALIZATION.ALL_TYPES_RECOGNISED",
         "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
         "NORMALIZATION.EVENT_COUNT_PRESERVED",
+        "NORMALIZATION.EVENT_FACTS",
         "NORMALIZATION.FIGHT_HEADER",
         "NORMALIZATION.INPUT_ORDER_PRESERVED",
         "NORMALIZATION.NO_ACTOR_REF_HOLDS",
@@ -210,13 +226,14 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 54
+      "passed": 72
     },
     {
-      "assertions": 38,
-      "cases": 11,
+      "assertions": 62,
+      "cases": 19,
       "failed": 0,
       "kindsExercised": [
+        "COMBAT_STATE.ACTOR_INDEX_CENSUS",
         "COMBAT_STATE.AURA_PRESENCE",
         "COMBAT_STATE.AURA_STACK_OBSERVATION",
         "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
@@ -227,7 +244,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "COMBAT_STATE",
-      "passed": 38
+      "passed": 62
     },
     {
       "assertions": 20,
@@ -245,22 +262,22 @@
       "passed": 20
     },
     {
-      "assertions": 3,
-      "cases": 3,
+      "assertions": 4,
+      "cases": 4,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 3
+      "passed": 4
     },
     {
-      "assertions": 7,
-      "cases": 7,
+      "assertions": 8,
+      "cases": 8,
       "failed": 0,
       "kindsExercised": ["PUBLIC_CONTRACT.REST_MCP_PARITY"],
       "notExecuted": 0,
       "owningLayer": "PUBLIC_CONTRACT",
-      "passed": 7
+      "passed": 8
     }
   ],
   "cases": [
@@ -291,6 +308,20 @@
       "caseId": "application-service.high-parse-subject-is-analyzed-under-player-context",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.protection-paladin-subject-is-still-unsupported-on-its-own-evidence",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -478,6 +509,64 @@
       "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.holy-power-is-isolated-from-combo-points-energy-and-mana",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.holy-power-is-pre-cost-on-costed-shield-of-the-righteous-casts",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-assassination-kingsbane-cooldown",
       "assertions": [
         {
@@ -516,6 +605,25 @@
       "referencedArtifactIds": ["wcl-assassination-envenom-combo-points"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.missing-holy-power-entry-is-no-observation-not-zero",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "assertions": [
         {
@@ -530,6 +638,97 @@
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.protection-paladin-absence-is-proven-only-under-complete-coverage",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.protection-paladin-aura-is-observed-at-transitions-and-ambiguous-before-its-first",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.protection-paladin-gap-before-2010000-fails-closed",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener.gap-before-2010000"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.ACTOR_INDEX_CENSUS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.ACTOR_INDEX_CENSUS",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.protection-paladin-index-exposes-damage-taken-healing-and-absorbs",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-cast-resource-pre-cost",
       "assertions": [
         {
@@ -542,6 +741,30 @@
       "caseId": "combat-state.resources-are-observed-never-regenerated",
       "owningLayer": "COMBAT_STATE",
       "referencedArtifactIds": ["wcl-cast-resource-pre-cost"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.standalone-holy-power-changes-are-observed-never-replayed",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-no-actor-sentinel-source",
@@ -819,6 +1042,177 @@
       "referencedArtifactIds": ["wcl-pet-sourced-events-hunter-pet-29"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-absorb-attributes-the-shield-and-the-attacker",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-combatantinfo-carries-spec-66-and-an-80-node-talent-tree",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-damage-taken-is-an-observed-event-with-its-mitigation-fields",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-gap-derivation-keeps-824-events-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener.gap-before-2010000"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-holy-power-resourcechange-is-an-observation",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 5,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-opener-slice-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.EVENT_FACTS",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-self-heal-is-source-equals-target-and-received-healing-is-not",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-slice-census-for-actor-7",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-summon-keeps-the-pet-as-target",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
       "artifactId": "wcl-pull-window-with-resources",
       "assertions": [
         {
@@ -995,6 +1389,20 @@
       "caseId": "public-contract.analysis-parity-for-an-unsupported-spec",
       "owningLayer": "PUBLIC_CONTRACT",
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-for-the-protection-paladin-subject",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -1445,6 +1853,30 @@
       "referencedArtifactIds": ["wcl-fight-context-a7r6-fight-7"]
     },
     {
+      "artifactId": "wcl-fight-context-a7r6-fight-7",
+      "assertions": [
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.identity-resolves-the-protection-paladin-of-the-a7r6-kill",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["wcl-fight-context-a7r6-fight-7"]
+    },
+    {
       "artifactId": "synthetic.graphql-page-sequence-malformed-second-page",
       "assertions": [
         {
@@ -1538,7 +1970,7 @@
       "disposition": "DEFER_TO_MILESTONE",
       "id": "no-interrupt-events",
       "layers": ["NORMALIZATION", "COMBAT_STATE"],
-      "owner": "M10 (Protection Paladin): the first capture milestone whose subject has an interrupt (Rebuke) in its supported decision surface; its capture plan must retain every interrupt by the player."
+      "owner": "M10 (Protection Paladin): the first capture milestone whose subject has an interrupt (Rebuke) in its supported decision surface; a later bounded capture must retain every interrupt by the player, from a pull known to contain one."
     },
     {
       "closedBy": [],
@@ -1610,11 +2042,23 @@
       "owner": "M9"
     },
     {
-      "closedBy": [],
-      "disposition": "DEFER_TO_MILESTONE",
+      "closedBy": [
+        "wcl-transport.identity-resolves-the-protection-paladin-of-the-a7r6-kill",
+        "normalization.protection-paladin-opener-slice-normalizes-whole-and-in-order",
+        "normalization.protection-paladin-slice-census-for-actor-7",
+        "combat-state.holy-power-is-pre-cost-on-costed-shield-of-the-righteous-casts",
+        "combat-state.missing-holy-power-entry-is-no-observation-not-zero",
+        "combat-state.standalone-holy-power-changes-are-observed-never-replayed",
+        "combat-state.protection-paladin-aura-is-observed-at-transitions-and-ambiguous-before-its-first",
+        "combat-state.protection-paladin-index-exposes-damage-taken-healing-and-absorbs",
+        "combat-state.protection-paladin-gap-before-2010000-fails-closed",
+        "application-service.protection-paladin-subject-is-still-unsupported-on-its-own-evidence",
+        "public-contract.analysis-parity-for-the-protection-paladin-subject"
+      ],
+      "disposition": "CLOSE_IN_M10",
       "id": "no-protection-paladin-evidence",
       "layers": ["SPEC_ASSASSINATION"],
-      "owner": "M10 (Protection Paladin) owns its own capture plan."
+      "owner": "M10"
     },
     {
       "closedBy": [
@@ -1651,15 +2095,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 1602915,
-    "artifacts": 25,
-    "assertions": 142,
-    "cases": 54,
+    "artifactBytes": 2389935,
+    "artifacts": 27,
+    "assertions": 189,
+    "cases": 74,
     "declared": 0,
-    "executable": 142,
+    "executable": 189,
     "failed": 0,
-    "largestArtifactBytes": 312284,
+    "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 142
+    "passed": 189
   }
 }

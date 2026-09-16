@@ -40,13 +40,15 @@ function contractFor(resourceId: string) {
 
 describe("the declared wire contracts", () => {
   it("declares exactly the modelled resources, each scoped to one parser version", () => {
-    expect(RESOURCE_IDS).toEqual(["COMBO_POINTS", "ENERGY"]);
-    expect(RESOURCE_WIRE_CONTRACTS).toHaveLength(2);
+    expect(RESOURCE_IDS).toEqual(["COMBO_POINTS", "ENERGY", "HOLY_POWER"]);
+    expect(RESOURCE_WIRE_CONTRACTS).toHaveLength(3);
     for (const contract of RESOURCE_WIRE_CONTRACTS) {
       expect(contract.scope).toEqual({ gameVersion: 1, logVersion: 17 });
     }
     expect(contractFor("COMBO_POINTS").wireType).toBe(4);
     expect(contractFor("ENERGY").wireType).toBe(3);
+    // M10-B: corroborated by a Protection Paladin capture, never by the enum alone.
+    expect(contractFor("HOLY_POWER").wireType).toBe(9);
   });
 
   it("declares one wire type per resource and one resource per wire type", () => {
@@ -67,13 +69,22 @@ describe("the declared wire contracts", () => {
       expect(contract.evidence.gameEnum.enumName).toBe("Enum.PowerType");
       expect(contract.evidence.gameEnum.value).toBe(contract.wireType);
       expect(contract.evidence.gameEnum.gameBuild.length).toBeGreaterThan(0);
-      expect(contract.evidence.wireCorroboration.fixtureId).toBe("wcl-assassination-envenom-combo-points");
+      expect(["wcl-assassination-envenom-combo-points", "wcl-protection-paladin-a7r6-opener"]).toContain(
+        contract.evidence.wireCorroboration.fixtureId,
+      );
       expect(contract.evidence.wireCorroboration.reportCode).toBe("A7R6kxPJ1hC8YQ4w");
       expect(contract.evidence.wireCorroboration.reportRevision).toBe(30);
       expect(contract.evidence.wireCorroboration.observation.length).toBeGreaterThan(0);
     }
     expect(contractFor("COMBO_POINTS").evidence.gameEnum.memberName).toBe("ComboPoints");
     expect(contractFor("ENERGY").evidence.gameEnum.memberName).toBe("Energy");
+    expect(contractFor("HOLY_POWER").evidence.gameEnum.memberName).toBe("HolyPower");
+    // The Holy Power corroboration cites the Protection Paladin slice, which
+    // is where the specialization-specific observation lives.
+    expect(contractFor("HOLY_POWER").evidence.wireCorroboration.fixtureId).toBe(
+      "wcl-protection-paladin-a7r6-opener",
+    );
+    expect(contractFor("HOLY_POWER").evidence.wireCorroboration.observation).toContain("Protection Paladin");
   });
 
   it("records the Hunter discriminator in the Energy corroboration", () => {

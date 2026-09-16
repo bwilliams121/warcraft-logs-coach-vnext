@@ -575,6 +575,49 @@ const D2_SOURCE = source_a(
 );
 
 // --------------------------------------------------------------------------
+// M10-B bounded Protection Paladin capture (2026-09-16). Plan recorded in
+// .probe/m10b-capture-plan.md BEFORE running: subject actor 7 of A7R6 fight 7
+// (masterData subType Paladin, friendlySpecs index Protection — the identity
+// wcl-fight-context-a7r6-fight-7 already proved), budget 12 requests, page cap
+// 10. Actual: 6 requests — R1 FIGHT_CONTEXT_QUERY (revision 30, identity
+// re-verified, master data and header byte-identical to the committed context
+// apart from the per-actor talentImportCode), R2–R5 EVENTS_QUERY over the
+// pull's first 45 s in four pages (10,007 + 10,000 + 10,009 + 572 = 30,588
+// events, the fourth terminal), R6 REPORT_REVISION_QUERY (30, unchanged). No
+// rankings, no leaderboard, no second report. Raw pages are gitignored.
+// --------------------------------------------------------------------------
+
+const SLICER_REVISION_4 = "sanitize-probe-4";
+const [PP_START, PP_WINDOW_END, PP_SLICE_END] = [2004589, 2049589, 2026589];
+
+const M10B_PROBE = (question, requests) =>
+  tooling(
+    ".probe/m10b-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+    UNAVAILABLE,
+    `${question}; bounded to ${requests} in .probe/m10b-capture-plan.md before running, run once by hand on 2026-09-16 (6 requests in total for the whole capture, bound 12)`,
+  );
+
+const PROT_OPENER_SOURCE = source_a(
+  M10B_PROBE(
+    "R2–R5 opener window: EVENTS_QUERY over [2,004,589 .. 2,049,589] (the pull's first 45 s) at limit 10,000 with resources, no actor filter, hostilityType omitted",
+    "10 pages",
+  ),
+  ".probe/m10b-pages.json — gitignored, not retained in the repository",
+  query(true, 10000, PP_START, PP_WINDOW_END),
+  completeness(
+    30588,
+    4,
+    null,
+    "COMPLETE",
+    "Four pages (10,007 / 10,000 / 10,009 / 572 events; cursors 2,021,544, 2,034,579, 2,048,380, then null): the whole 45-second window was retrieved inside the 10-page cap. The fight's first event (the encounterstart at 2,004,589 = the fight start) is on page 1, so coverage runs from the pull. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first, so no page straddles two exports (.probe/m10b-request-count.json).",
+  ),
+  "2026-09-16",
+  { sourceActorId: 7, reportRevisionAfterCapture: 30 },
+);
+
+const ACTOR_SLICE_INVALIDATIONS = ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"];
+
+// --------------------------------------------------------------------------
 // Artifacts
 // --------------------------------------------------------------------------
 
@@ -1227,6 +1270,94 @@ const ARTIFACTS = [
       WHITESPACE,
     ],
   }),
+  artifact("wcl-protection-paladin-a7r6-opener", wcl("wcl-protection-paladin-a7r6-opener"), {
+    kind: "SANITIZED_CAPTURE",
+    source: PROT_OPENER_SOURCE,
+    transformations: [
+      selection(
+        "node scripts/sanitize-probe.mjs .probe/m10b-pages.json wcl-protection-paladin-a7r6-opener.json --actor-slice 7 2026589",
+        "The four page envelopes concatenated in page order, then the --actor-slice predicate, in place and order preserved: EVERY event whose sourceID or targetID is actor 7 with timestamp at or before 2,026,589 (the bound that keeps the slice under the 512 KiB artifact limit; the full 45 s would be 2,552 events / ~1.1 MB). 988 of 30,588 events: 45 casts, 17 resourcechange, 296 aura transitions targeting 7 and 258 sourced by 7 elsewhere, 220 damage (36 targeting 7), 280 heals (61 self, 98 received, 121 given), 74 absorbed (55 targeting 7), 1 summon, actor 7's combatantinfo. No other actor's own events, no death, dispel, drain or interrupt event (none involved actor 7 in the window; the two deaths in the raw window were NPCs).",
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_4),
+      credential_scan(SLICER_REVISION_4),
+    ],
+    grants: [
+      {
+        categories: [
+          "CASTS",
+          "RESOURCES",
+          "AURAS",
+          "DAMAGE",
+          "HEALING",
+          "ABSORBS",
+          "SUMMONS",
+          "COMBATANT_INFO",
+          "GEAR",
+        ],
+        actorScope: [7],
+        ranges: [{ fromReportTimeMs: PP_START, toReportTimeMs: PP_SLICE_END }],
+      },
+    ],
+    coverageBasis:
+      "Every capture-vouched category for actor 7 over [2,004,589 .. 2,026,589] is complete by the predicate 'every event actor 7 sources or is targeted by, at or before the bound' over a window the capture retrieved COMPLETE (four pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS, DAMAGE, HEALING and ABSORBS as their target; SUMMONS as their source; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. The window begins at the fight start, so an absence claim over any prefix of it is fully covered. Nothing is granted to any other actor, and nothing after the bound.",
+    retainedFor:
+      "The first real Protection Paladin evidence: the subject's opening 22 seconds of a heroic Entombed Sentinels kill as a TANK sees it. Holy Power on the wire (five costed Shield of the Righteous casts at 4, 3, 3, 3, 3 of 5 with cost 3, two more completed Shield of the Righteous casts carrying NO Holy Power entry, and 17 standalone +1 resourcechange events with max 5 and waste 0), the auras applied to the subject and by it, 36 damage events taken with mitigated/unmitigated/absorbed fields populated, self-healing (source = target), healing received, absorbs attributed to the subject's own shields with the attacker recorded, a summon of pet 37 (petOwner 7 in master data), and a combatantinfo with specID 66 and an 80-node talent tree. Observations only — no ability is classified as mitigation, defensive or utility here.",
+    limitations: [
+      "The first 22 seconds only: nothing about the rest of the pull, its cooldown cycles, later defensives or its ending.",
+      "No interrupt, death, dispel or drain event involves actor 7 in the window; INTERRUPTS stays UNVERIFIED and this slice cannot vouch for it.",
+      "Pet 37's own events after the summon were NOT retained (its sourceID is 37, not 7); the summon and the master-data petOwner link are the attribution evidence, and no pet action is rolled into the player.",
+      "Ability ids are retained as numbers; which of them is 'active mitigation' or a 'defensive' is a game-data/authority classification this artifact does not make.",
+      NO_NAMES,
+      VERSION_SCOPE,
+      WHITESPACE,
+    ],
+  }),
+  artifact(
+    "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+    wcl("wcl-protection-paladin-a7r6-opener.gap-before-2010000"),
+    {
+      kind: "DERIVED_FROM_CAPTURE",
+      parent: "wcl-protection-paladin-a7r6-opener",
+      transformations: [
+        {
+          kind: "EVENT_REMOVAL",
+          tooling: tooling(
+            "M10-B derivation (scripted event removal over the parent's parsed array)",
+            NOT_APPLICABLE,
+            "kept = events.filter((e) => !(e.timestamp > 2004589 && e.timestamp < 2010000)); written back with JSON.stringify(kept, null, 2)",
+          ),
+          detail:
+            "Every event strictly between the fight start (2,004,589) and 2,010,000 removed: 164 of 988 events, including the subject's first four casts, its first costed Shield of the Righteous (2,009,098) and the first aura transitions on it. The combatantinfo at the fight start and every event from 2,010,059 on are byte-for-byte the parent's, in the parent's order.",
+          invalidates: ["OBSERVED_BEHAVIOUR", "WINDOW_COVERAGE", "ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY"],
+        },
+      ],
+      grants: [
+        {
+          categories: [
+            "CASTS",
+            "RESOURCES",
+            "AURAS",
+            "DAMAGE",
+            "HEALING",
+            "ABSORBS",
+            "SUMMONS",
+            "COMBATANT_INFO",
+            "GEAR",
+          ],
+          actorScope: [7],
+          ranges: [{ fromReportTimeMs: 2010000, toReportTimeMs: PP_SLICE_END }],
+        },
+      ],
+      coverageBasis:
+        "The parent's grant clipped to begin at the removal boundary: from 2,010,000 to the parent's bound the retained events are exactly the parent's, so the parent's coverage still holds there; before it, nothing is covered. The window itself still starts at the fight start because the combatantinfo was kept, which is what makes the gap a PARTIAL interval rather than a shorter complete one.",
+      retainedFor:
+        "The truncated-evidence condition on a real tank slice: a window whose coverage does not begin where the window begins. An absence question over the whole window, or an aura's state before its first retained transition, must answer UNKNOWN / INSUFFICIENT_COVERAGE — never proven absence, never INACTIVE, and never Holy Power zero.",
+      limitations: [
+        "Not evidence of anything that happened between 2,004,589 and 2,010,000; those events were removed on purpose.",
+        "Inherits every limitation of its parent.",
+      ],
+    },
+  ),
 ];
 
 // --------------------------------------------------------------------------
@@ -1284,6 +1415,55 @@ const [GARROTE, ENVENOM, DEATHMARK, KINGSBANE, VANISH_ACTION, VANISH_BUFF, MELEE
 ];
 const [RUPTURE, SHIV] = [1943, 5938];
 const Q = 2176580;
+
+// M10-B: the Protection Paladin opener. Ability ids are retained as numbers and
+// named here only so a reviewer can follow the case; no case reads a name.
+const PP = "wcl-protection-paladin-a7r6-opener";
+const PP_GAP = "wcl-protection-paladin-a7r6-opener.gap-before-2010000";
+const A7R6_CONTEXT = "wcl-fight-context-a7r6-fight-7";
+const TANK = 7;
+const BOSS_21 = 21;
+const [SHIELD_OF_THE_RIGHTEOUS, ARDENT_DEFENDER, AVENGING_WRATH] = [53600, 31850, 31884];
+const HOLY_POWER_WIRE = 9;
+const PP_END_OF_SLICE = 2026421;
+const pp_sotr = (t) => cast(TANK, t, SHIELD_OF_THE_RIGHTEOUS);
+const pp_hp_pre_cost = (t, amount) =>
+  a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+    actorId: TANK,
+    abilityGameId: SHIELD_OF_THE_RIGHTEOUS,
+    reportTimeMs: t,
+    resourceWireType: HOLY_POWER_WIRE,
+    expected: {
+      certainty: "EXACT",
+      observedAmount: amount,
+      observedMax: 5,
+      observedCost: 3,
+      timing: "PRE_COST",
+    },
+  });
+const pp_no_observation = (t, wireType) =>
+  a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+    actorId: TANK,
+    abilityGameId: SHIELD_OF_THE_RIGHTEOUS,
+    reportTimeMs: t,
+    resourceWireType: wireType,
+    expected: unknown("NO_OBSERVATION"),
+  });
+const PP_SOURCE_CENSUS = {
+  COMBATANT_INFO: 1,
+  CAST: 45,
+  RESOURCE_CHANGE: 17,
+  AURA: 280,
+  DAMAGE: 196,
+  HEALING: 182,
+  ABSORB: 50,
+  SUMMON: 1,
+};
+const PP_TARGET_CENSUS = { CAST: 13, RESOURCE_CHANGE: 17, AURA: 181, DAMAGE: 36, HEALING: 159, ABSORB: 55 };
+const PP_RELATED = [
+  "tests/unit/m5-runtime-data-provenance.test.ts",
+  "tests/regression/m4-resource-state-is-never-simulated.test.ts",
+];
 
 const CASES = [
   // ---- NORMALIZATION (M3) ------------------------------------------------
@@ -3072,6 +3252,522 @@ const CASES = [
     ["OWNED_CONTRACT"],
     "The local half completes before the external half begins and the external half cannot modify it. A failed board is 'we did not obtain a pool', which is distinct from 'the pool is empty' and from 'the subject is not in a sequence'; the status names it and no metadata request is spent on a pool that was never obtained.",
     { related: ["tests/integration/m8h-encounter-context-transports.test.ts"] },
+  ),
+
+  // ---- M10-B: Protection Paladin evidence ---------------------------------
+  kase(
+    "wcl-transport.identity-resolves-the-protection-paladin-of-the-a7r6-kill",
+    A7R6_CONTEXT,
+    "WCL_TRANSPORT",
+    "src/wcl/identity.ts resolveFightIdentity over decodeFightContext",
+    "The committed A7R6 context resolves actor 7 as a Paladin whose spec at its roster index is Protection — the machine-verifiable identity M10-B's capture was planned against and re-verified live (revision 30 before and after the capture). The same report's actor 6 resolves as a Retribution Paladin, so the class alone never implies the spec; pet 37, whose petOwner is 7, is not a player.",
+    [
+      a("WCL_TRANSPORT.FIGHT_IDENTITY", {
+        fightId: 7,
+        sourceId: TANK,
+        expected: {
+          ok: true,
+          className: "Paladin",
+          specName: "Protection",
+          playerName: "Actor7",
+          reportRevision: 30,
+          logVersion: 17,
+          gameVersion: 1,
+        },
+      }),
+      a("WCL_TRANSPORT.FIGHT_IDENTITY", {
+        fightId: 7,
+        sourceId: 6,
+        expected: {
+          ok: true,
+          className: "Paladin",
+          specName: "Retribution",
+          playerName: "Actor6",
+          reportRevision: 30,
+          logVersion: 17,
+          gameVersion: 1,
+        },
+      }),
+      a("WCL_TRANSPORT.FIGHT_IDENTITY", {
+        fightId: 7,
+        sourceId: 37,
+        expected: { ok: false, reason: "SOURCE_NOT_A_PLAYER" },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject.",
+    { related: ["tests/unit/wcl-identity.test.ts", "tests/unit/spec-identity.test.ts"] },
+  ),
+  kase(
+    "normalization.protection-paladin-opener-slice-normalizes-whole-and-in-order",
+    PP,
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts",
+    "The 988-event actor-7 slice normalizes with every raw type recognised, every event kept in capture order, an 11-event millisecond run (2,008,051: four absorbs, two damage, two applydebuff, three removebuff) retained whole, and the first damage taken read as boss 21 → actor 7 from the verified field names.",
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: 988 }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+      a("NORMALIZATION.TIMESTAMP_RUN_RETAINED", { reportTimeMs: 2008051, count: 11 }),
+      a("NORMALIZATION.SIDE_REFERENCE", {
+        index: 77,
+        side: "SOURCE",
+        expected: { kind: "ACTOR", actorId: BOSS_21, instanceId: null },
+      }),
+      a("NORMALIZATION.SIDE_REFERENCE", {
+        index: 77,
+        side: "TARGET",
+        expected: { kind: "ACTOR", actorId: TANK, instanceId: null },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "A tank's slice is dominated by events that happen TO the actor; every one of the seventeen raw types it holds is already under contract, and direction is read from sourceID/targetID, never inferred from who the subject is.",
+    {
+      related: [
+        "tests/unit/supported-families.test.ts",
+        "tests/regression/ingestion-preserves-event-order.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "normalization.protection-paladin-slice-census-for-actor-7",
+    PP,
+    "NORMALIZATION",
+    "src/engine/normalization/normalized-events.ts source/target references",
+    "What the --actor-slice predicate retained for actor 7, by normalized kind and side, exactly: as SOURCE 45 casts, 17 resource changes, 280 aura transitions, 196 damage, 182 healing, 50 absorbs, 1 summon, 1 combatantinfo; as TARGET 13 casts, 17 resource changes, 181 aura transitions, 36 damage, 159 healing, 55 absorbs. The census is of the slice, never of the fight.",
+    [
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", { actorId: TANK, side: "SOURCE", expected: PP_SOURCE_CENSUS }),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", { actorId: TANK, side: "TARGET", expected: PP_TARGET_CENSUS }),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "Pinning the census is what makes every later count in this milestone checkable against the bytes: a damage-taken view that reported 37 events, or a self-heal classification that produced more than the 159 heals targeting the actor could contain, would be caught here first.",
+    { related: ["tests/unit/m9c-sanitize-payloads.test.ts"] },
+  ),
+  kase(
+    "normalization.protection-paladin-damage-taken-is-an-observed-event-with-its-mitigation-fields",
+    PP,
+    "NORMALIZATION",
+    "src/engine/normalization/normalized-events.ts DamageEvent; supported-families.ts decodeDamage",
+    "The first damage event targeting the tank (boss 21's melee at 2,008,051) normalizes to DAMAGE with amount 76,501, unmitigatedAmount 1,178,341, mitigatedAmount 731,895, absorbedAmount 369,945, no blocked field, hitType 1, not AoE, not a tick — every value verbatim from the capture and none derived.",
+    [
+      a("NORMALIZATION.EVENT_FACTS", {
+        at: {
+          reportTimeMs: 2008051,
+          rawType: "damage",
+          sourceActorId: BOSS_21,
+          targetActorId: TANK,
+          abilityGameId: 1,
+        },
+        expected: {
+          kind: "DAMAGE",
+          fields: {
+            amount: 76501,
+            unmitigatedAmount: 1178341,
+            mitigatedAmount: 731895,
+            absorbedAmount: 369945,
+            blockedAmount: null,
+            hitType: 1,
+            isAoE: false,
+            isTick: false,
+          },
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Damage intake is an observed event with its mitigation fields, read from the event that carries them. No health continuity, no mitigation effectiveness, no pressure score and no claim that a defensive was needed follows from it — those would be judgments, and this layer forms none.",
+    { related: ["tests/unit/supported-families.test.ts"] },
+  ),
+  kase(
+    "normalization.protection-paladin-self-heal-is-source-equals-target-and-received-healing-is-not",
+    PP,
+    "NORMALIZATION",
+    "src/engine/normalization/normalized-events.ts HealingEvent",
+    "The tank's first self-heal (ability 469,421 at 2,004,687, source 7 → target 7) normalizes to HEALING with amount 0 and overhealAmount 698 — a fully overhealed tick-less heal, recorded as observed. A heal received from actor 10 (61,295 at 2,005,272) is HEALING with source ≠ target: healing received, not self-healing. Neither carries a judgment of necessity or efficiency.",
+    [
+      a("NORMALIZATION.EVENT_FACTS", {
+        at: {
+          reportTimeMs: 2004687,
+          rawType: "heal",
+          sourceActorId: TANK,
+          targetActorId: TANK,
+          abilityGameId: 469421,
+        },
+        expected: {
+          kind: "HEALING",
+          fields: { amount: 0, overhealAmount: 698, absorbedAmount: null, hitType: 1, isTick: false },
+        },
+      }),
+      a("NORMALIZATION.EVENT_FACTS", {
+        at: {
+          reportTimeMs: 2005272,
+          rawType: "heal",
+          sourceActorId: 10,
+          targetActorId: TANK,
+          abilityGameId: 61295,
+        },
+        expected: { kind: "HEALING", fields: { amount: 0, overhealAmount: 6340, isTick: true } },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Self-healing is a factual classification — source.actorId === target.actorId on a HEALING event — and nothing more. Overheal is an observed field; a fully overhealed self-heal is not 'wasted', and a heal received is not the tank's decision.",
+    { related: ["tests/unit/supported-families.test.ts"] },
+  ),
+  kase(
+    "normalization.protection-paladin-absorb-attributes-the-shield-and-the-attacker",
+    PP,
+    "NORMALIZATION",
+    "src/engine/normalization/normalized-events.ts AbsorbEvent; supported-families.ts decodeAbsorb",
+    "At the same millisecond as the first melee taken, an absorbed event (source 7 → target 7, ability 209,388) normalizes to ABSORB of kind DAMAGE_ABSORBED for 12,828 with absorbedAbilityGameId 1 (the melee) and attributedActorId 21 (the attacker): the tank's own shield absorbed the boss's hit. Direction and attribution are three separately preserved facts.",
+    [
+      a("NORMALIZATION.EVENT_FACTS", {
+        at: {
+          reportTimeMs: 2008051,
+          rawType: "absorbed",
+          sourceActorId: TANK,
+          targetActorId: TANK,
+          abilityGameId: 209388,
+        },
+        expected: {
+          kind: "ABSORB",
+          fields: {
+            absorbKind: "DAMAGE_ABSORBED",
+            amount: 12828,
+            absorbedAbilityGameId: 1,
+            attributedActorId: BOSS_21,
+          },
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "An absorb records what was absorbed, by whose aura, from whom. Nothing infers the shield's remaining strength between observations or whether the shield was the right choice.",
+    { related: ["tests/unit/supported-families.test.ts"] },
+  ),
+  kase(
+    "normalization.protection-paladin-holy-power-resourcechange-is-an-observation",
+    PP,
+    "NORMALIZATION",
+    "src/engine/normalization/normalized-events.ts ResourceChangeEvent",
+    "The tank's first standalone Holy Power change (ability 220,637 at 2,005,436, source 7 → target 7) normalizes to RESOURCE_CHANGE with resourceType 9, resourceChange 1, maxResourceAmount 5, otherResourceChange 0 and reportedWasteAmount 0 — Warcraft Logs' own fields, verbatim, with `waste` preserved as an observed number and not a verdict.",
+    [
+      a("NORMALIZATION.EVENT_FACTS", {
+        at: {
+          reportTimeMs: 2005436,
+          rawType: "resourcechange",
+          sourceActorId: TANK,
+          targetActorId: TANK,
+          abilityGameId: 220637,
+        },
+        expected: {
+          kind: "RESOURCE_CHANGE",
+          fields: {
+            resourceType: HOLY_POWER_WIRE,
+            resourceChange: 1,
+            maxResourceAmount: 5,
+            otherResourceChange: 0,
+            reportedWasteAmount: 0,
+          },
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "A standalone resource change is structurally distinct from an attached snapshot and is never combined with one. It says a generator reported +1; it does not license adding 1 to any earlier amount.",
+    { related: PP_RELATED },
+  ),
+  kase(
+    "normalization.protection-paladin-combatantinfo-carries-spec-66-and-an-80-node-talent-tree",
+    PP,
+    "NORMALIZATION",
+    "src/engine/normalization/normalized-events.ts CombatantSnapshot; supported-families.ts decodeCombatantInfo",
+    "The tank's combatantinfo at the fight start normalizes to COMBATANT_INFO for actor 7 with specID 66, an 80-entry talentTree and 18 gear pieces. The identifiers are preserved as facts; which talents they are, and whether they are good, is a pinned game-data question this artifact does not answer.",
+    [
+      a("NORMALIZATION.EVENT_FACTS", {
+        at: {
+          reportTimeMs: 2004589,
+          rawType: "combatantinfo",
+          sourceActorId: TANK,
+          targetActorId: null,
+          abilityGameId: null,
+        },
+        expected: {
+          kind: "COMBATANT_INFO",
+          fields: {
+            "snapshot.actorId": TANK,
+            "snapshot.specId": 66,
+            "snapshot.talentTree.length": 80,
+            "snapshot.gear.length": 18,
+          },
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Spec and talents are read from combatantinfo's typed fields, never from spell usage. No Paladin talent artifact is pinned yet, so no entry resolves to SELECTED or NOT_SELECTED here — the tree is retained so a later resolution can be checked against it.",
+    { related: ["tests/unit/supported-families.test.ts"] },
+  ),
+  kase(
+    "normalization.protection-paladin-summon-keeps-the-pet-as-target",
+    PP,
+    "NORMALIZATION",
+    "src/engine/normalization/normalized-events.ts SummonEvent",
+    "The tank's summon at 2,026,241 (ability 434,132) normalizes to SUMMON with source 7 and target 37 (instance 1) — the pet the A7R6 master data links to petOwner 7. The pet's own later events were not retained; the summon and the master-data link are the whole of the attribution evidence, and nothing rolls the pet into the player.",
+    [
+      a("NORMALIZATION.EVENT_FACTS", {
+        at: {
+          reportTimeMs: 2026241,
+          rawType: "summon",
+          sourceActorId: TANK,
+          targetActorId: 37,
+          abilityGameId: 434132,
+        },
+        expected: { kind: "SUMMON", fields: { "target.instanceId": 1 } },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Pets and guardians are factual actors. A summon says who summoned whom; ownership of what the pet later does is a pinned attribution rule that does not exist yet, so nothing here attributes it.",
+    { related: ["tests/unit/supported-families.test.ts"] },
+  ),
+  kase(
+    "combat-state.holy-power-is-pre-cost-on-costed-shield-of-the-righteous-casts",
+    PP,
+    "COMBAT_STATE",
+    "src/engine/resources/resource-observations.ts timingOf; resource-state.ts observationOnEvent; src/data/wcl-wire/resource-types.ts HOLY_POWER",
+    "Five completed Shield of the Righteous casts by the tank carry an attached wire-type-9 entry with a positive cost, so each is an EXACT PRE_COST observation: 4, 3, 3, 3 and 3 of a maximum 5, cost 3 — the Holy Power the tank held BEFORE each spend, verbatim.",
+    [
+      pp_hp_pre_cost(2009098, 4),
+      pp_hp_pre_cost(2010926, 3),
+      pp_hp_pre_cost(2013247, 3),
+      pp_hp_pre_cost(2016930, 3),
+      pp_hp_pre_cost(2019725, 3),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "The PRE_COST contract is the same one established for combo points and Energy: a COMPLETED cast plus a positive cost on THIS resource entry. Holy Power's wire type is corroborated by this capture (type 9 on the two Paladins of the fight only, always max 5, always cost 3 when costed); the enum alone would not have licensed it.",
+    { related: PP_RELATED },
+  ),
+  kase(
+    "combat-state.missing-holy-power-entry-is-no-observation-not-zero",
+    PP,
+    "COMBAT_STATE",
+    "src/engine/resources/resource-state.ts observationOnEvent (NO_OBSERVATION)",
+    "Two completed Shield of the Righteous casts by the tank (2,013,772 and 2,025,524) carry a mana entry but NO wire-type-9 entry at all. Asked for Holy Power on them, the state layer answers UNKNOWN / NO_OBSERVATION. A real spender cast with no resource snapshot is exactly the shape that would become a false 'cast at zero Holy Power' if absence were read as zero.",
+    [pp_no_observation(2013772, HOLY_POWER_WIRE), pp_no_observation(2025524, HOLY_POWER_WIRE)],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "The sharpest negative evidence in the tank slice, and the Paladin counterpart of the Envenom at 2,090,898 with no combo-point entry: absence of an entry is absence of an observation. Nothing may replay the surrounding +1 changes to fill it in.",
+    { related: PP_RELATED },
+  ),
+  kase(
+    "combat-state.holy-power-is-isolated-from-combo-points-energy-and-mana",
+    PP,
+    "COMBAT_STATE",
+    "src/engine/resources/resource-state.ts observationOnEvent; src/data/wcl-wire/resource-types.ts",
+    "On the tank's first costed Shield of the Righteous, asking for wire type 4 (combo points) or 3 (Energy) yields NO_OBSERVATION: the Holy Power entry answers only a Holy Power question. On the uncosted cast at 2,013,772 the attached mana entry (type 0, 250,000 of 250,000, no cost) is EXACT but EVENT_ASSOCIATED — a snapshot with no established before/after — and still no Holy Power.",
+    [
+      pp_no_observation(2009098, 4),
+      pp_no_observation(2009098, 3),
+      a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+        actorId: TANK,
+        abilityGameId: SHIELD_OF_THE_RIGHTEOUS,
+        reportTimeMs: 2013772,
+        resourceWireType: 0,
+        expected: {
+          certainty: "EXACT",
+          observedAmount: 250000,
+          observedMax: 250000,
+          observedCost: null,
+          timing: "EVENT_ASSOCIATED",
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Adding a third wire contract must not let one resource answer for another: the lookup is by wire type on the snapshot the event actually carries. Combo Points and Energy keep their contracts and their evidence unchanged.",
+    { related: PP_RELATED },
+  ),
+  kase(
+    "combat-state.standalone-holy-power-changes-are-observed-never-replayed",
+    PP,
+    "COMBAT_STATE",
+    "src/engine/resources/resource-state.ts latestObservedAtOrBefore",
+    "At the end of 2,012,000 the latest Holy Power observation for the tank is the STALE 3-of-5 snapshot on the Shield of the Righteous at 2,010,926 — although two standalone +1 resourcechange events (2,011,115 and 2,011,924) lie between. At the end of 2,014,000 it is the snapshot at 2,013,247, not the uncosted cast at 2,013,772 that carried no entry. The instant before the cast at 2,010,926 the latest observation is the STALE 4-of-5 on the first costed cast at 2,009,098 — not 5 or more, which replaying the +1 changes at 2,009,535 and 2,010,338 would have produced. Before the first costed cast there is no observation at all: the +1 changes at 2,005,436 and 2,006,478 do not manufacture one.",
+    [
+      a("COMBAT_STATE.LATEST_RESOURCE_OBSERVATION", {
+        actorId: TANK,
+        resourceWireType: HOLY_POWER_WIRE,
+        at: end_of(2012000),
+        expected: { certainty: "STALE", observedAmount: 3, observedAtReportTimeMs: 2010926 },
+      }),
+      a("COMBAT_STATE.LATEST_RESOURCE_OBSERVATION", {
+        actorId: TANK,
+        resourceWireType: HOLY_POWER_WIRE,
+        at: end_of(2014000),
+        expected: { certainty: "STALE", observedAmount: 3, observedAtReportTimeMs: 2013247 },
+      }),
+      a("COMBAT_STATE.LATEST_RESOURCE_OBSERVATION", {
+        actorId: TANK,
+        resourceWireType: HOLY_POWER_WIRE,
+        at: before_cast(TANK, 2010926, SHIELD_OF_THE_RIGHTEOUS),
+        expected: { certainty: "STALE", observedAmount: 4, observedAtReportTimeMs: 2009098 },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "The resource surface is an observation layer, not a simulator. A generator's +1 is reported where it happened and is never added to an earlier amount to produce a later one; between observations Holy Power stays STALE or unknown, never reconstructed.",
+    { related: PP_RELATED },
+  ),
+  kase(
+    "combat-state.protection-paladin-absence-is-proven-only-under-complete-coverage",
+    PP,
+    "COMBAT_STATE",
+    "src/engine/state/combat-state.ts lastObservedCast; state-result.ts gateAbsenceClaim",
+    "Over the slice's window, which the grant covers COMPLETE from the fight start for actor 7, the tank provably never completed a cast of ability 31,884 — a proven absence, not an inferred one — and the last completed cast of ability 31,850 is at 2,010,252.",
+    [
+      a("COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT", {
+        actorId: TANK,
+        abilityGameId: AVENGING_WRATH,
+        at: end_of(PP_END_OF_SLICE),
+      }),
+      a("COMBAT_STATE.LAST_OBSERVED_CAST_AT", {
+        actorId: TANK,
+        abilityGameId: ARDENT_DEFENDER,
+        at: end_of(PP_END_OF_SLICE),
+        expectedReportTimeMs: 2010252,
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "'They never cast it' is sayable only when capability is OBSERVABLE, the actor is in scope and coverage is COMPLETE across the interval. The --actor-slice grant is what makes it sayable here; the gap derivation below is what takes it away.",
+    { related: ["tests/regression/m4-state-never-invents-absence.test.ts"] },
+  ),
+  kase(
+    "combat-state.protection-paladin-aura-is-observed-at-transitions-and-ambiguous-before-its-first",
+    PP,
+    "COMBAT_STATE",
+    "src/engine/auras/aura-state.ts presenceAt",
+    "The buff 31,850 the tank applied to itself is observed APPLIED at 2,010,252 and REMOVED at 2,022,254. Before its first observed transition its state is UNKNOWN / AMBIGUOUS_INITIAL_STATE even though coverage is complete from the pull; at 2,011,000 and 2,020,000 it is ACTIVE on the application; at the end of the slice INACTIVE on the removal.",
+    [
+      a("COMBAT_STATE.AURA_PRESENCE", {
+        aura: aura(TANK, ARDENT_DEFENDER, TANK),
+        at: end_of(2004600),
+        expected: unknown("AMBIGUOUS_INITIAL_STATE"),
+      }),
+      a("COMBAT_STATE.AURA_PRESENCE", {
+        aura: aura(TANK, ARDENT_DEFENDER, TANK),
+        at: end_of(2011000),
+        expected: { certainty: "EXACT", presence: "ACTIVE", anchorReportTimeMs: 2010252 },
+      }),
+      a("COMBAT_STATE.AURA_PRESENCE", {
+        aura: aura(TANK, ARDENT_DEFENDER, TANK),
+        at: end_of(2020000),
+        expected: { certainty: "EXACT", presence: "ACTIVE", anchorReportTimeMs: 2010252 },
+      }),
+      a("COMBAT_STATE.AURA_PRESENCE", {
+        aura: aura(TANK, ARDENT_DEFENDER, TANK),
+        at: end_of(PP_END_OF_SLICE),
+        expected: { certainty: "EXACT", presence: "INACTIVE", anchorReportTimeMs: 2022254 },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Aura state rests on observed transitions only. Silence before the first transition is not INACTIVE, and the source is the one the event named (the tank itself), never inferred. Whether 31,850 is a 'defensive' is a game-data classification no state case makes.",
+    { related: ["tests/regression/m4-aura-state-never-inverts-direction.test.ts"] },
+  ),
+  kase(
+    "combat-state.protection-paladin-index-exposes-damage-taken-healing-and-absorbs",
+    PP,
+    "COMBAT_STATE",
+    "src/engine/state/indexes.ts positionsBySourceActor / positionsByTargetActor",
+    "M4's target index for actor 7 yields exactly the 36 damage, 159 healing, 55 absorb, 181 aura, 17 resource-change and 13 cast events that name the tank as target, and its source index the 45 casts, 17 resource changes, 280 aura transitions, 196 damage, 182 healing, 50 absorbs, one summon and one combatantinfo it sourced — every position resolving to an event whose named side is the tank. This is the whole of the damage-intake, healing and absorb surface M10-C consumes: observed events with locators, and no view that sums, scores or models them.",
+    [
+      a("COMBAT_STATE.ACTOR_INDEX_CENSUS", { actorId: TANK, side: "TARGET", expected: PP_TARGET_CENSUS }),
+      a("COMBAT_STATE.ACTOR_INDEX_CENSUS", { actorId: TANK, side: "SOURCE", expected: PP_SOURCE_CENSUS }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "The existing indexes already expose everything a tank evaluator needs as facts, so M10-B adds no damage-intake, healing or absorb wrapper: a wrapper would either restate the index or start aggregating, and aggregation is where a 'pressure score' or a health model would creep in.",
+    { related: ["tests/unit/combat-state.test.ts"] },
+  ),
+  kase(
+    "normalization.protection-paladin-gap-derivation-keeps-824-events-in-order",
+    PP_GAP,
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts",
+    "The gap derivation holds exactly 824 of the parent's 988 events — the combatantinfo at the fight start and everything from 2,010,059 on — in the parent's order, every type still recognised.",
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: 824 }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "A derivation is judged on what it holds, and the count is what ties the recorded removal (164 events) to the bytes.",
+    { related: ["tests/unit/m9b-corpus-harness.test.ts"] },
+  ),
+  kase(
+    "combat-state.protection-paladin-gap-before-2010000-fails-closed",
+    PP_GAP,
+    "COMBAT_STATE",
+    "src/engine/state/state-result.ts gateAbsenceClaim; aura-state.ts presenceAt; resource-state.ts latestObservedAtOrBefore",
+    "With every event between the fight start and 2,010,000 removed and the grant clipped to begin at 2,010,000, the window still starts at the fight start (the combatantinfo was kept), so coverage is PARTIAL: the absence of ability 31,884 is no longer provable (UNKNOWN / INSUFFICIENT_COVERAGE), the last Shield of the Righteous before 2,009,500 is unknowable rather than 'none', and buff 31,850's state at 2,005,000 is INSUFFICIENT_COVERAGE — while at 2,020,000, inside the retained range, it is still ACTIVE on the retained application.",
+    [
+      a("COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN", {
+        actorId: TANK,
+        abilityGameId: AVENGING_WRATH,
+        reason: "INSUFFICIENT_COVERAGE",
+      }),
+      a("COMBAT_STATE.AURA_PRESENCE", {
+        aura: aura(TANK, ARDENT_DEFENDER, TANK),
+        at: end_of(2005000),
+        expected: unknown("INSUFFICIENT_COVERAGE"),
+      }),
+      a("COMBAT_STATE.AURA_PRESENCE", {
+        aura: aura(TANK, ARDENT_DEFENDER, TANK),
+        at: end_of(2020000),
+        expected: { certainty: "EXACT", presence: "ACTIVE", anchorReportTimeMs: 2010252 },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Truncated evidence returns UNKNOWN, never a negative fact. The same questions the parent answers with proven absence and observed presence are refused the moment the coverage no longer reaches them, and the retained range keeps its answers.",
+    {
+      related: [
+        "tests/regression/m4-state-never-invents-absence.test.ts",
+        "tests/unit/m9b-corpus-harness.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "application-service.protection-paladin-subject-is-still-unsupported-on-its-own-evidence",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts; analyzer-registry.ts (M10-A catalog)",
+    "The real Protection Paladin subject, over its own captured evidence, still yields SPEC_NOT_SUPPORTED from the service with no spec, no analyzer and a null scope. The M10-A catalog carries no Paladin registration; the identity table does not resolve Paladin/Protection; nothing is retrieved because nothing would read it.",
+    [
+      a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
+        subject: { actorId: TANK, className: "Paladin", specName: "Protection" },
+        expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: null },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "M10-B adds evidence and state, not an evaluator. Until M10-D moves paladin/protection into the public partition, the identity table and a PUBLIC registration together, a public request for this exact subject answers with the explicit unsupported status — never an empty analysis that reads as clean play.",
+    {
+      related: [
+        "tests/unit/analysis-composition-refusals.test.ts",
+        "tests/contracts/m10a-registry-integrity.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "public-contract.analysis-parity-for-the-protection-paladin-subject",
+    PP,
+    "PUBLIC_CONTRACT",
+    "src/contracts/analysis-projection.ts; src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
+    "The real Protection Paladin subject over its own evidence yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
+    [
+      a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
+        document: "ANALYSIS",
+        subject: { actorId: TANK, className: "Paladin", specName: "Protection" },
+        expected: { status: "SPEC_NOT_SUPPORTED" },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "The earlier unsupported-spec parity case relabels the Rogue subject; this one is the genuine article. The public document is unchanged in shape and meaning by M10-B, and the internal-only id never appears as a value.",
+    {
+      related: [
+        "tests/integration/transport-consistency.test.ts",
+        "tests/contracts/m10a-spec-partition.test.ts",
+      ],
+    },
   ),
 ];
 

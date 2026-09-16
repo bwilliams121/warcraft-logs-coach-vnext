@@ -35,9 +35,11 @@ describe("the committed corpus loads", () => {
     expect(loaded.manifest.contractVersion).toBe(2);
     // 17 artifacts / 31 cases at M9-B; M9-C added six bounded captures and
     // twelve cases; the M9-C correction added the second Assassination
-    // subject: two artifacts and eleven cases. Measured, then pinned.
-    expect(loaded.artifacts).toHaveLength(25);
-    expect(loaded.cases).toHaveLength(54);
+    // subject: two artifacts and eleven cases; M10-B added the Protection
+    // Paladin opener slice, its gap derivation and twenty cases. Measured,
+    // then pinned.
+    expect(loaded.artifacts).toHaveLength(27);
+    expect(loaded.cases).toHaveLength(74);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -50,7 +52,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds eighteen sanitized captures, two derivations and five synthetics", async () => {
+  it("holds nineteen sanitized captures, three derivations and five synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -77,11 +79,13 @@ describe("the committed corpus loads", () => {
       "wcl-page-sequence-limit-40",
       "wcl-page-terminal-one-millisecond",
       "wcl-pet-sourced-events-hunter-pet-29",
+      "wcl-protection-paladin-a7r6-opener",
       "wcl-pull-window-with-resources",
     ]);
     expect(byKind.get("DERIVED_FROM_CAPTURE")).toEqual([
       "wcl-no-actor-sentinel-source.unusable-negative",
       "wcl-page-sequence-limit-40.page-5-removed",
+      "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
     ]);
     expect(byKind.get("SYNTHETIC")).toEqual([
       "synthetic.actor-zero-cast",
@@ -114,14 +118,16 @@ describe("the committed corpus loads", () => {
     const loaded = await corpus();
     // The contract's ceilings are 512 KiB per artifact and 6 MiB in total.
     // Measured at the M9-C correction: 1,602,915 bytes in total, the largest
-    // the 312,284-byte A7R6 fight context. Pinned at half the ceilings so growth is noticed before
-    // it is a problem, not after.
+    // the 312,284-byte A7R6 fight context. M10-B added the 427,886-byte
+    // Protection Paladin slice (deliberately bounded at 22 s to stay under the
+    // per-artifact ceiling) and its 355 KB derivation. Pinned at half the
+    // total ceiling so growth is noticed before it is a problem, not after.
     expect(loaded.totalArtifactBytes).toBeLessThan(3 * 1024 * 1024);
     for (const entry of loaded.artifacts) {
       expect(entry.canonicalByteLength, entry.record.artifactId).toBeLessThan(512 * 1024);
     }
     const largest = Math.max(...loaded.artifacts.map((entry) => entry.canonicalByteLength));
-    expect(largest).toBeLessThan(384 * 1024);
+    expect(largest).toBeLessThan(448 * 1024);
   });
 });
 
@@ -197,7 +203,7 @@ describe("provenance is honest about lineage", () => {
       for (const transformation of entry.record.provenance.transformations) {
         if (transformation.tooling.name !== "scripts/sanitize-probe.mjs") continue;
         expect(transformation.tooling.revision, entry.record.artifactId).toMatch(
-          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[23]$/,
+          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[234]$/,
         );
       }
     }
@@ -234,10 +240,20 @@ describe("retained coverage is granted only where the capture predicate supports
   /** The M9-C correction's --decision-slice cut: the same predicate, subject 25, boss 235. */
   const HIGH_PARSE_SLICE = "wcl-assassination-high-parse-opener";
 
+  /** M10-B's --actor-slice cut and its gap derivation: every event actor 7 sources or is targeted by. */
+  const ACTOR_SLICES = [
+    "wcl-protection-paladin-a7r6-opener",
+    "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+  ];
+
   it("grants nothing on any property-based or index-based selection", async () => {
     const loaded = await corpus();
     for (const entry of loaded.artifacts) {
-      if (PREDICATE_SLICES.includes(entry.record.artifactId) || entry.record.artifactId === HIGH_PARSE_SLICE)
+      if (
+        PREDICATE_SLICES.includes(entry.record.artifactId) ||
+        entry.record.artifactId === HIGH_PARSE_SLICE ||
+        ACTOR_SLICES.includes(entry.record.artifactId)
+      )
         continue;
       expect(entry.record.provenance.retainedCoverage.grants, entry.record.artifactId).toEqual([]);
     }
@@ -251,6 +267,42 @@ describe("retained coverage is granted only where the capture predicate supports
       );
       expect(grant?.actorScope, id).toEqual([19, 21]);
     }
+  });
+
+  it("grants every capture-vouched category for actor 7 alone on the --actor-slice cut, from the fight start to its bound", async () => {
+    const loaded = await corpus();
+    const record = artifact(loaded, "wcl-protection-paladin-a7r6-opener").record;
+    const grants = record.provenance.retainedCoverage.grants;
+    expect(grants).toHaveLength(1);
+    expect(grants[0]?.actorScope).toEqual([7]);
+    expect([...(grants[0]?.categories ?? [])].sort()).toEqual([
+      "ABSORBS",
+      "AURAS",
+      "CASTS",
+      "COMBATANT_INFO",
+      "DAMAGE",
+      "GEAR",
+      "HEALING",
+      "RESOURCES",
+      "SUMMONS",
+    ]);
+    expect(grants[0]?.ranges).toEqual([{ fromReportTimeMs: 2_004_589, toReportTimeMs: 2_026_589 }]);
+    const source = record.provenance.source;
+    expect(source?.sourceActorId).toBe(7);
+    expect(source?.reportRevision).toBe(30);
+    expect(source?.reportRevisionAfterCapture).toBe(30);
+    expect(source?.completeness).toMatchObject({
+      pagesRetrieved: 4,
+      eventsReturned: 30_588,
+      nextPageTimestamp: null,
+      state: "COMPLETE",
+    });
+    // The derivation's grant begins at the removal boundary and never before.
+    const gap = artifact(loaded, "wcl-protection-paladin-a7r6-opener.gap-before-2010000").record;
+    expect(gap.provenance.retainedCoverage.grants[0]?.ranges).toEqual([
+      { fromReportTimeMs: 2_010_000, toReportTimeMs: 2_026_589 },
+    ]);
+    expect(gap.provenance.parentArtifactId).toBe("wcl-protection-paladin-a7r6-opener");
   });
 
   it("grants CASTS for actor 25 and AURAS for 25 and 235 on the --decision-slice cut, from the fight start", async () => {

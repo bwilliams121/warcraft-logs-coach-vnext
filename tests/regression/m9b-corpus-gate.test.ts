@@ -53,10 +53,11 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // Every case and every assertion, executed here and nowhere else. 31/74
     // at M9-B; M9-C added twelve cases and twenty-seven assertions; the M9-C
     // correction's second Assassination subject added eleven cases and
-    // forty-one assertions.
-    expect(result.summary.cases).toBe(54);
-    expect(result.summary.assertions).toBe(142);
-    expect(result.summary.passed).toBe(142);
+    // forty-one assertions; M10-B's Protection Paladin evidence added twenty
+    // cases and forty-seven assertions.
+    expect(result.summary.cases).toBe(74);
+    expect(result.summary.assertions).toBe(189);
+    expect(result.summary.passed).toBe(189);
   });
 
   it("covers every layer", async () => {

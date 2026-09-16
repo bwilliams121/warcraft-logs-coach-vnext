@@ -35,6 +35,16 @@ export function decisionSlice(
   targets: readonly number[],
 ): readonly unknown[];
 
+/**
+ * The `--actor-slice` predicate: every event whose sourceID or targetID is
+ * the subject, in capture order, optionally bounded to `timestamp <= untilMs`.
+ */
+export function actorSlice(
+  events: readonly unknown[],
+  subject: number,
+  untilMs?: number | null,
+): readonly unknown[];
+
 /** The slicer's own revision, recorded as `tooling.revision` on a corpus artifact. */
 export const SANITIZER_REVISION: string;
 

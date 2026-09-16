@@ -126,12 +126,20 @@ describe("invalid declarations fail closed", () => {
     expect(defectsOf([bad])).toContain("UNKNOWN_AUTHORITY_DOMAIN");
   });
 
-  it("an unknown resource id — HOLY_POWER has no wire contract in M10-A", () => {
+  it("an unknown resource id — RUNIC_POWER has no wire contract", () => {
     const bad: DecisionCapability = {
       ...VALID,
-      requirements: { ...VALID.requirements, resources: ["HOLY_POWER" as (typeof RESOURCE_IDS)[number]] },
+      requirements: { ...VALID.requirements, resources: ["RUNIC_POWER" as (typeof RESOURCE_IDS)[number]] },
     };
     expect(defectsOf([bad])).toContain("UNKNOWN_RESOURCE_ID");
+  });
+
+  it("HOLY_POWER is a declarable resource since M10-B, on captured evidence", () => {
+    const paladinShaped: DecisionCapability = {
+      ...VALID,
+      requirements: { ...VALID.requirements, resources: ["HOLY_POWER"] },
+    };
+    expect(defectsOf([paladinShaped])).toEqual([]);
   });
 
   it("an unknown evidence category", () => {

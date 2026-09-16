@@ -273,3 +273,55 @@ export function auraStackObservation(
   }
   return pass();
 }
+
+// ---------------------------------------------------------------------------
+// M10-B: the M4 actor indexes over a tank's slice
+// ---------------------------------------------------------------------------
+
+/**
+ * `positionsBySourceActor` / `positionsByTargetActor` for the actor yield
+ * exactly these kinds in these counts, and every position resolves to an
+ * event whose named side IS the actor. Damage taken, healing received and
+ * absorbs reach a consumer as observed events with locators; nothing here
+ * sums, scores or models them.
+ */
+export function actorIndexCensus(
+  corpus: LoadedCorpus,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"COMBAT_STATE.ACTOR_INDEX_CENSUS">,
+): AssertionOutcome {
+  const state = stateOf(corpus, artifact);
+  const positions =
+    params.side === "SOURCE"
+      ? state.positionsBySourceActor(params.actorId)
+      : state.positionsByTargetActor(params.actorId);
+  const counts = new Map<string, number>();
+  for (const position of positions) {
+    const event = state.eventAt(position);
+    if (event === null) {
+      return fail("an indexed position resolves to no event", { locator: { position } });
+    }
+    const side = params.side === "SOURCE" ? event.source : event.target;
+    if (side?.actorId !== params.actorId) {
+      return fail(`an indexed position's ${params.side} side is not actor ${String(params.actorId)}`, {
+        actual: { actorId: side?.actorId ?? null },
+        locator: event.locator,
+      });
+    }
+    counts.set(event.kind, (counts.get(event.kind) ?? 0) + 1);
+  }
+  const sorted = (entries: Iterable<[string, number]>) =>
+    Object.fromEntries([...entries].sort(([left], [right]) => (left < right ? -1 : 1)));
+  const actual = sorted(counts.entries());
+  const expected = sorted(Object.entries(params.expected));
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    return fail(
+      `the ${params.side} index census for actor ${String(params.actorId)} differs from what the case pins`,
+      {
+        expected,
+        actual,
+      },
+    );
+  }
+  return pass();
+}

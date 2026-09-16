@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { decisionSlice, extractEvents, SANITIZER_REVISION } from "../../scripts/sanitize-probe.mjs";
+import {
+  actorSlice,
+  decisionSlice,
+  extractEvents,
+  SANITIZER_REVISION,
+} from "../../scripts/sanitize-probe.mjs";
 import {
   SANITIZE_PAYLOADS_REVISION,
   sanitizeContext,
@@ -154,6 +159,40 @@ describe("the event slicer's --decision-slice predicate", () => {
     ]);
   });
 
+  it("--actor-slice keeps every event the subject sources OR is targeted by, in order, and nothing else", () => {
+    // Damage TO the subject, heals to and from it, its own resource changes,
+    // and auras it applies elsewhere all survive; a third party's events do not.
+    const tankEvents = [
+      { timestamp: 1, type: "combatantinfo", sourceID: 7 },
+      { timestamp: 2, type: "cast", sourceID: 7, targetID: 21, abilityGameID: 53600 },
+      { timestamp: 2, type: "applydebuff", sourceID: 7, targetID: 21, abilityGameID: 204301 },
+      { timestamp: 3, type: "damage", sourceID: 21, targetID: 7, abilityGameID: 1 },
+      { timestamp: 4, type: "heal", sourceID: 2, targetID: 7, abilityGameID: 77489 },
+      { timestamp: 5, type: "resourcechange", sourceID: 7, targetID: 7, abilityGameID: 204019 },
+      { timestamp: 6, type: "damage", sourceID: 21, targetID: 12, abilityGameID: 1 },
+      { timestamp: 7, type: "cast", sourceID: 12, targetID: 21, abilityGameID: 1 },
+      { timestamp: 8, type: "heal", sourceID: 7, targetID: 7, abilityGameID: 1 },
+      { timestamp: 9, type: "absorbed", sourceID: 21, targetID: 7, abilityGameID: 1 },
+    ];
+    expect(actorSlice(tankEvents, 7).map((e) => (e as { timestamp: number }).timestamp)).toEqual([
+      1, 2, 2, 3, 4, 5, 8, 9,
+    ]);
+  });
+
+  it("--actor-slice honours an inclusive timestamp bound and never reorders", () => {
+    const tankEvents = [
+      { timestamp: 5, type: "cast", sourceID: 7, targetID: 21 },
+      { timestamp: 3, type: "damage", sourceID: 21, targetID: 7 },
+      { timestamp: 9, type: "heal", sourceID: 7, targetID: 7 },
+      { timestamp: 9, type: "damage", sourceID: 21, targetID: 7 },
+      { timestamp: 10, type: "damage", sourceID: 21, targetID: 7 },
+    ];
+    expect(actorSlice(tankEvents, 7, 9).map((e) => (e as { timestamp: number }).timestamp)).toEqual([
+      5, 3, 9, 9,
+    ]);
+    expect(actorSlice(tankEvents, 7, null)).toHaveLength(5);
+  });
+
   it("concatenates an array of page envelopes in page order", () => {
     const pages = [
       {
@@ -223,7 +262,7 @@ describe("the committed corpus holds no stable player identifier", () => {
 
   it("records the sanitizer revisions the scripts export, so a manifest cannot claim a revision that does not exist", () => {
     expect(SANITIZE_PAYLOADS_REVISION).toBe("sanitize-payloads-2");
-    expect(SANITIZER_REVISION).toBe("sanitize-probe-3");
+    expect(SANITIZER_REVISION).toBe("sanitize-probe-4");
     const revisions = new Set<string>();
     for (const artifact of committedManifest().artifacts) {
       for (const transformation of artifact.provenance.transformations) {
@@ -233,7 +272,7 @@ describe("the committed corpus holds no stable player identifier", () => {
     }
     // Every recorded revision is one the tooling has had; the current ones are among them.
     for (const revision of revisions) {
-      expect(revision).toMatch(/^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[12]|sanitize-probe-[23])$/);
+      expect(revision).toMatch(/^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[12]|sanitize-probe-[234])$/);
     }
     expect(revisions.has(SANITIZE_PAYLOADS_REVISION)).toBe(true);
     expect(revisions.has(SANITIZER_REVISION)).toBe(true);

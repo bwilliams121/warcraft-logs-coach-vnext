@@ -1,0 +1,253 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "paladin",
+    "specName": "protection"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "2026-09-12",
+    "sourcePath": "engine/class_modules/apl/apl_paladin.cpp",
+    "sourceSha256": "ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02",
+    "sourceByteLength": 10081,
+    "regionStartMarker": "//protection_apl_start",
+    "regionEndMarker": "//protection_apl_end",
+    "extractedOn": "2026-09-16",
+    "extractorVersion": 1
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "auto_attack",
+          "comment": null,
+          "sourceLine": 81
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box",
+          "comment": null,
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_items",
+          "comment": null,
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "potion,if=buff.avenging_wrath.up",
+          "comment": null,
+          "sourceLine": 84
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "avenging_wrath,if=cooldown.divine_toll.remains<=10",
+          "comment": null,
+          "sourceLine": 85
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "fireblood,if=buff.avenging_wrath.up",
+          "comment": null,
+          "sourceLine": 86
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "divine_toll,if=buff.avenging_wrath.up|(!talent.righteous_protector.enabled&cooldown.avenging_wrath.remains>30)",
+          "comment": null,
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "hammer_of_light,if=(!buff.undisputed_ruling.up|buff.hammer_of_light_ready.remains<5)&debuff.judgment.up",
+          "comment": null,
+          "sourceLine": 88
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "shield_of_the_righteous,if=!buff.hammer_of_light_ready.up|(!buff.hammer_of_light_ready.remains<5&buff.undisputed_ruling.up)|buff.hammer_of_light_free.up|prev_gcd.1.divine_toll",
+          "comment": null,
+          "sourceLine": 89
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "holy_armaments,if=next_armament=sacred_weapon&(buff.sacred_weapon.remains<6|!buff.sacred_weapon.up)",
+          "comment": null,
+          "sourceLine": 90
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "hammer_of_wrath,if=buff.hammer_of_light_ready.up&!debuff.judgment.up",
+          "comment": null,
+          "sourceLine": 91
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "hammer_of_wrath,if=hero_tree.lightsmith",
+          "comment": null,
+          "sourceLine": 92
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "judgment,if=buff.hammer_of_light_ready.up&!debuff.judgment.up",
+          "comment": null,
+          "sourceLine": 93
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "avengers_shield,if=buff.vanguard.up|(buff.avenging_wrath.up&apex.3)",
+          "comment": null,
+          "sourceLine": 94
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "holy_armaments,if=next_armament=holy_bulwark&cooldown.avenging_wrath.remains<5",
+          "comment": null,
+          "sourceLine": 95
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "consecration,if=buff.divine_guidance.stack>=5",
+          "comment": null,
+          "sourceLine": 96
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "hammer_of_wrath",
+          "comment": null,
+          "sourceLine": 97
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "judgment,if=full_recharge_time<=gcd*2",
+          "comment": null,
+          "sourceLine": 98
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "avengers_shield",
+          "comment": null,
+          "sourceLine": 99
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "consecration,if=!consecration.up",
+          "comment": null,
+          "sourceLine": 100
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "hammer_of_the_righteous,if=buff.blessed_assurance.up",
+          "comment": null,
+          "sourceLine": 101
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "blessed_hammer,if=buff.blessed_assurance.up",
+          "comment": null,
+          "sourceLine": 102
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "judgment",
+          "comment": null,
+          "sourceLine": 103
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "holy_armaments,if=next_armament=holy_bulwark&charges=2",
+          "comment": null,
+          "sourceLine": 104
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "consecration,if=!consecration.up",
+          "comment": null,
+          "sourceLine": 105
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "blessed_hammer",
+          "comment": null,
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "hammer_of_the_righteous",
+          "comment": null,
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 27,
+          "actionStringVerbatim": "arcane_torrent",
+          "comment": null,
+          "sourceLine": 108
+        },
+        {
+          "priorityOrdinal": 28,
+          "actionStringVerbatim": "word_of_glory,if=buff.shining_light_free.up",
+          "comment": null,
+          "sourceLine": 109
+        },
+        {
+          "priorityOrdinal": 29,
+          "actionStringVerbatim": "consecration",
+          "comment": null,
+          "sourceLine": 110
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "rite_of_sanctification",
+          "comment": null,
+          "sourceLine": 74
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "rite_of_adjuration",
+          "comment": null,
+          "sourceLine": 75
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 76
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "devotion_aura",
+          "comment": null,
+          "sourceLine": 77
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "lights_judgment",
+          "comment": null,
+          "sourceLine": 78
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "consecration",
+          "comment": null,
+          "sourceLine": 79
+        }
+      ]
+    }
+  ]
+}

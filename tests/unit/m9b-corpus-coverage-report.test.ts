@@ -55,6 +55,8 @@ describe("coverage is measured from the corpus", () => {
       "wcl-assassination-garrote-dot-remains",
       "wcl-assassination-high-parse-opener",
       "wcl-assassination-kingsbane-cooldown",
+      "wcl-protection-paladin-a7r6-opener",
+      "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
     ]);
   });
 
@@ -103,9 +105,11 @@ describe("every declared gap is actionable", () => {
       expect(gap.currentSupport.length, gap.id).toBeGreaterThan(40);
       expect(gap.existingEvidence.length, gap.id).toBeGreaterThan(20);
       expect(gap.owner.length, gap.id).toBeGreaterThan(1);
-      expect(gap.closedBy.length > 0, gap.id).toBe(gap.disposition === "CLOSE_IN_M9");
+      const closed = gap.disposition === "CLOSE_IN_M9" || gap.disposition === "CLOSE_IN_M10";
+      expect(gap.closedBy.length > 0, gap.id).toBe(closed);
       for (const caseId of gap.closedBy) expect(caseIds.has(caseId), `${gap.id} -> ${caseId}`).toBe(true);
       if (gap.disposition === "CLOSE_IN_M9") expect(gap.owner).toBe("M9");
+      if (gap.disposition === "CLOSE_IN_M10") expect(gap.owner).toBe("M10");
     }
     expect(byDisposition.get("BLOCKS_M9_CLOSEOUT")).toBeUndefined();
     expect(byDisposition.get("PROVEN_BY_SYNTHETIC_CONTRACT")).toBeUndefined();
@@ -117,17 +121,17 @@ describe("every declared gap is actionable", () => {
       "no-external-reference-fixture",
       "single-report-assassination-corpus",
     ]);
+    expect(byDisposition.get("CLOSE_IN_M10")).toEqual(["no-protection-paladin-evidence"]);
     expect(byDisposition.get("DEFER_TO_MILESTONE")).toEqual([
       "no-interrupt-events",
       "no-death-or-dispel-events",
       "no-targetability-or-intermission",
-      "no-protection-paladin-evidence",
       "assassination-corpus-breadth",
     ]);
     expect(byDisposition.get("OUTSIDE_CURRENT_CAPABILITY")).toEqual(["no-identity-conflict-capture"]);
     // Every deferred or out-of-capability gap names a canonical milestone owner.
     for (const gap of KNOWN_EVIDENCE_GAPS) {
-      if (gap.disposition === "CLOSE_IN_M9") continue;
+      if (gap.disposition === "CLOSE_IN_M9" || gap.disposition === "CLOSE_IN_M10") continue;
       expect(gap.owner, gap.id).toMatch(/^M1[0-5] \(/);
     }
   });

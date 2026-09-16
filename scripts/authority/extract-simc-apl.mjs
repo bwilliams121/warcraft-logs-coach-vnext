@@ -2,15 +2,24 @@
 /**
  * Deterministic SimulationCraft APL extractor.
  *
- * Reads ONE pinned commit of `engine/class_modules/apl/apl_rogue.cpp` and emits
- * the Assassination authority artifact. Run manually; never at runtime. The
+ * Reads ONE pinned commit of one class module's APL source and emits one
+ * specialization's authority artifact. Run manually; never at runtime. The
  * analyzer has no network dependency on GitHub or the SimulationCraft site — it
  * imports the committed JSON this produces.
  *
+ * TARGETS. Each extractable specialization is a TARGET profile below: which
+ * source file, which region markers, which function header, which authority
+ * id, and which facts the pinned source must exhibit. `--target` selects one;
+ * the default is `rogue-assassination`, so every invocation recorded before
+ * M10-B regenerates the Assassination artifact byte for byte. M10-B added
+ * `paladin-protection` (`engine/class_modules/apl/apl_paladin.cpp`, the
+ * `//protection_apl_start` region). A target is a set of coordinates and
+ * required facts, never a different parser.
+ *
  * FAIL CLOSED IS THE WHOLE POINT. This is not a general C++ parser, and it does
  * not try to be. It understands exactly four constructs inside the bounded
- * Assassination region. Anything else inside that region is a hard failure with
- * a line number, because an extractor that silently skipped a line it did not
+ * region. Anything else inside that region is a hard failure with a line
+ * number, because an extractor that silently skipped a line it did not
  * understand would emit an artifact that LOOKS complete while missing an action
  * — and the reachability proof built on it would be worthless.
  *
@@ -24,6 +33,10 @@
  *   node scripts/authority/extract-simc-apl.mjs \
  *     --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
  *     --out src/simc/data/rogue-assassination.apl.json
+ *
+ *   node scripts/authority/extract-simc-apl.mjs --target paladin-protection \
+ *     --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+ *     --out src/simc/data/paladin-protection.apl.json
  */
 
 import { createHash } from "node:crypto";
@@ -31,38 +44,87 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 
 const REPOSITORY = "https://github.com/simulationcraft/simc";
-const SOURCE_PATH = "engine/class_modules/apl/apl_rogue.cpp";
-const REGION_START = "//assassination_apl_start";
-const REGION_END = "//assassination_apl_end";
 const EXTRACTOR_VERSION = 1;
 const ARTIFACT_VERSION = 1;
 
 /**
- * Facts this extractor REQUIRES the pinned source to exhibit.
+ * Facts this extractor REQUIRES the pinned source to exhibit, per target.
  *
  * Checked against the extracted artifact, not against a prompt. If the pinned
  * commit stops satisfying one of these, extraction fails loudly rather than
  * producing an artifact whose downstream verdicts would rest on a stale belief.
+ *
+ * Assassination's facts are about its list call graph. Protection's are
+ * deliberately structural only — two lists, no list dispatch, the spender and
+ * the self-heal each present exactly once in `default` — because M10-B pins
+ * the artifact without evaluating it; the facts a Protection evaluator will
+ * rest on are M10-C's to state.
  */
-const REQUIRED_FACTS = {
-  entryListName: "default",
-  requiredLists: [
-    "default",
-    "precombat",
-    "cds",
-    "core_dot",
-    "generate",
-    "spend",
-    "items",
-    "misc_cds",
-    "vanish",
-  ],
-  spendCallCondition: "!buff.darkest_night.up&combo_points>=5|buff.darkest_night.up&combo_points.deficit=0",
-  generateCallCondition: "!buff.darkest_night.up&combo_points<5|buff.darkest_night.up&combo_points.deficit>0",
-  envenomOnlyInList: "spend",
-  crimsonTempestInList: "generate",
-  defaultOrder: ["cds", "core_dot", "generate", "spend"],
+const TARGETS = {
+  "rogue-assassination": {
+    sourcePath: "engine/class_modules/apl/apl_rogue.cpp",
+    regionStart: "//assassination_apl_start",
+    regionEnd: "//assassination_apl_end",
+    functionHeader: "void assassination( player_t* p )",
+    regionName: "assassination",
+    authorityId: "SIMC_APL_ROGUE_ASSASSINATION",
+    spec: { className: "rogue", specName: "assassination" },
+    defaultOut: "src/simc/data/rogue-assassination.apl.json",
+    requiredFacts: {
+      kind: "ASSASSINATION_CALL_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "cds",
+        "core_dot",
+        "generate",
+        "spend",
+        "items",
+        "misc_cds",
+        "vanish",
+      ],
+      spendCallCondition:
+        "!buff.darkest_night.up&combo_points>=5|buff.darkest_night.up&combo_points.deficit=0",
+      generateCallCondition:
+        "!buff.darkest_night.up&combo_points<5|buff.darkest_night.up&combo_points.deficit>0",
+      envenomOnlyInList: "spend",
+      crimsonTempestInList: "generate",
+      defaultOrder: ["cds", "core_dot", "generate", "spend"],
+    },
+  },
+  "paladin-protection": {
+    sourcePath: "engine/class_modules/apl/apl_paladin.cpp",
+    regionStart: "//protection_apl_start",
+    regionEnd: "//protection_apl_end",
+    functionHeader: "void protection( player_t* p )",
+    regionName: "protection",
+    authorityId: "SIMC_APL_PALADIN_PROTECTION",
+    spec: { className: "paladin", specName: "protection" },
+    defaultOut: "src/simc/data/paladin-protection.apl.json",
+    requiredFacts: {
+      kind: "PROTECTION_STRUCTURE",
+      entryListName: "default",
+      requiredLists: ["default", "precombat"],
+      noListDispatch: true,
+      exactlyOnceInDefault: ["shield_of_the_righteous", "word_of_glory"],
+    },
+  },
 };
+
+const args = parseArgs(process.argv.slice(2));
+const targetName = typeof args.target === "string" ? args.target : "rogue-assassination";
+const TARGET = TARGETS[targetName];
+if (TARGET === undefined) {
+  console.error(
+    `EXTRACTION FAILED: unknown --target '${targetName}' (known: ${Object.keys(TARGETS).join(", ")})`,
+  );
+  process.exit(1);
+}
+const SOURCE_PATH = TARGET.sourcePath;
+const REGION_START = TARGET.regionStart;
+const REGION_END = TARGET.regionEnd;
+const REQUIRED_FACTS = TARGET.requiredFacts;
 
 function fail(message) {
   console.error(`EXTRACTION FAILED: ${message}`);
@@ -195,11 +257,13 @@ function extract(sourceText) {
     if (line.startsWith("//")) continue;
 
     if (!sawFunctionHeader) {
-      if (line === "void assassination( player_t* p )") {
+      if (line === TARGET.functionHeader) {
         sawFunctionHeader = true;
         continue;
       }
-      fail(`line ${lineNumber}: unexpected construct before the assassination function header: ${line}`);
+      fail(
+        `line ${lineNumber}: unexpected construct before the ${TARGET.regionName} function header: ${line}`,
+      );
     }
 
     if (line === "{") {
@@ -249,11 +313,11 @@ function extract(sourceText) {
     // Reached only by a construct this extractor does not model. Failing here is
     // the contract: a silently skipped line produces a complete-looking artifact
     // with a missing action, and every reachability proof built on it is void.
-    fail(`line ${lineNumber}: unsupported construct inside the assassination region: ${line}`);
+    fail(`line ${lineNumber}: unsupported construct inside the ${TARGET.regionName} region: ${line}`);
   }
 
-  if (!sawFunctionHeader) fail("assassination function header not found inside the region");
-  if (braceDepth !== 0) fail("unbalanced braces inside the assassination region");
+  if (!sawFunctionHeader) fail(`${TARGET.regionName} function header not found inside the region`);
+  if (braceDepth !== 0) fail(`unbalanced braces inside the ${TARGET.regionName} region`);
 
   return {
     lists: listOrder.map((listName) => ({
@@ -301,6 +365,32 @@ function verifyRequiredFacts(artifact) {
   }
   if (artifact.entryListName !== REQUIRED_FACTS.entryListName) {
     problems.push(`entry list is '${artifact.entryListName}'`);
+  }
+
+  if (REQUIRED_FACTS.kind === "PROTECTION_STRUCTURE") {
+    // Structural facts only: no call_action_list / run_action_list anywhere,
+    // and each named action exactly once in `default`. Nothing about which
+    // action wins — that is not this milestone's claim.
+    for (const list of artifact.lists) {
+      for (const action of list.actions) {
+        if (REQUIRED_FACTS.noListDispatch && callsListOf(action.actionStringVerbatim) !== null) {
+          problems.push(`list dispatch found in '${list.listName}': ${action.actionStringVerbatim}`);
+        }
+        const token = actionTokenOf(action.actionStringVerbatim);
+        if (token === "run_action_list" || token === "swap_action_list") {
+          problems.push(`unmodelled dispatch '${token}' found in '${list.listName}'`);
+        }
+      }
+    }
+    const defaults = byName.get("default");
+    for (const required of REQUIRED_FACTS.exactlyOnceInDefault) {
+      const count = (defaults?.actions ?? []).filter(
+        (action) => actionTokenOf(action.actionStringVerbatim) === required,
+      ).length;
+      if (count !== 1)
+        problems.push(`'${required}' appears ${count} times in default, expected exactly once`);
+    }
+    return problems;
   }
 
   const defaultList = byName.get("default");
@@ -361,7 +451,6 @@ function verifyRequiredFacts(artifact) {
   return problems;
 }
 
-const args = parseArgs(process.argv.slice(2));
 const sourceBuffer = await loadSource(args);
 const sourceSha256 = createHash("sha256").update(sourceBuffer).digest("hex");
 
@@ -374,9 +463,9 @@ const extracted = extract(sourceText);
 
 const artifact = {
   artifactVersion: ARTIFACT_VERSION,
-  authorityId: "SIMC_APL_ROGUE_ASSASSINATION",
+  authorityId: TARGET.authorityId,
   artifactRevision: `simc-${String(args.sha ?? "local").slice(0, 8)}-${EXTRACTOR_VERSION}`,
-  spec: { className: "rogue", specName: "assassination" },
+  spec: TARGET.spec,
   entryListName: "default",
   provenance: {
     repository: REPOSITORY,
@@ -402,7 +491,7 @@ if (problems.length > 0) {
   process.exit(1);
 }
 
-const outPath = typeof args.out === "string" ? args.out : "src/simc/data/rogue-assassination.apl.json";
+const outPath = typeof args.out === "string" ? args.out : TARGET.defaultOut;
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(outPath, `${JSON.stringify(artifact, null, 2)}\n`, "utf8");
 

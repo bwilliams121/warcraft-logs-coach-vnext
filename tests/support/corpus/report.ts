@@ -63,6 +63,8 @@ export interface CorpusCoverageReport {
  *                                    entry names it.
  * - `PROVEN_BY_SYNTHETIC_CONTRACT`   pinned by a synthetic contract that a
  *                                    capture would not strengthen; says why.
+ * - `CLOSE_IN_M10`                   closed by committed M10 cases named in
+ *                                    `closedBy`; same rule as CLOSE_IN_M9.
  * - `DEFER_TO_MILESTONE`             a real gap with a named owner.
  * - `OUTSIDE_CURRENT_CAPABILITY`     no bounded, policy-compliant capture can
  *                                    produce the evidence today; says why.
@@ -70,6 +72,7 @@ export interface CorpusCoverageReport {
  */
 export type GapDisposition =
   | "CLOSE_IN_M9"
+  | "CLOSE_IN_M10"
   | "PROVEN_BY_EXISTING_EVIDENCE"
   | "PROVEN_BY_SYNTHETIC_CONTRACT"
   | "DEFER_TO_MILESTONE"
@@ -91,7 +94,7 @@ export interface EvidenceGap {
   readonly disposition: GapDisposition;
   /** Who owns the remainder: a milestone, or `M9` for a closed gap. */
   readonly owner: string;
-  /** Committed corpus case ids that close the gap. Non-empty iff CLOSE_IN_M9. */
+  /** Committed corpus case ids that close the gap. Non-empty iff CLOSE_IN_M9 or CLOSE_IN_M10. */
   readonly closedBy: readonly string[];
 }
 
@@ -114,10 +117,10 @@ export const KNOWN_EVIDENCE_GAPS: readonly EvidenceGap[] = [
     currentSupport:
       "INTERRUPTS is UNVERIFIED in supported-families.ts: an event of that type is counted unsupported, never interpreted, and the category is degraded rather than silently absent.",
     existingEvidence:
-      "Synthetic only: normalization.unsupported-type-is-counted-not-interpreted pins the unsupported path. No capture holds the real type string.",
+      "Synthetic only: normalization.unsupported-type-is-counted-not-interpreted pins the unsupported path. No capture holds the real type string. M10-B's bounded Protection Paladin capture (A7R6kxPJ1hC8YQ4w fight 7, the pull's first 45 s, 30,588 events, every actor) contained NO interrupt event by any actor, so the wire shape remains unseen; the family stays unsupported and no grant was added.",
     disposition: "DEFER_TO_MILESTONE",
     owner:
-      "M10 (Protection Paladin): the first capture milestone whose subject has an interrupt (Rebuke) in its supported decision surface; its capture plan must retain every interrupt by the player.",
+      "M10 (Protection Paladin): the first capture milestone whose subject has an interrupt (Rebuke) in its supported decision surface; a later bounded capture must retain every interrupt by the player, from a pull known to contain one.",
     closedBy: [],
   },
   {
@@ -272,10 +275,22 @@ export const KNOWN_EVIDENCE_GAPS: readonly EvidenceGap[] = [
     currentSupport:
       "SPEC_NOT_SUPPORTED, pinned at the facade (spec-assassination.protection-paladin-is-refused-at-the-spec-gate), the service (application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing) and the public contract (public-contract.analysis-parity-for-an-unsupported-spec).",
     existingEvidence:
-      "The refusal is pinned at every layer. Decision-level tank evidence: none, by design — M9 does not capture for a milestone that has not defined its decision surface.",
-    disposition: "DEFER_TO_MILESTONE",
-    owner: "M10 (Protection Paladin) owns its own capture plan.",
-    closedBy: [],
+      "CLOSED by M10-B's bounded capture — A7R6kxPJ1hC8YQ4w fight 7, actor 7, the pull's first 45 s in four terminal pages at revision 30 before and after, cut by the --actor-slice predicate to the subject's first 22 s (988 events, every event actor 7 sources or is targeted by): real Protection Paladin identity, Holy Power PRE_COST on costed Shield of the Righteous casts, two completed spender casts with no Holy Power entry (NO_OBSERVATION, never zero), standalone Holy Power changes never replayed, aura transitions with ambiguous pre-first state, 36 damage events taken with mitigation fields, self-healing by source = target, absorb attribution, a summon of the subject's pet, combatantinfo with specID 66 and an 80-node talent tree, and a gap derivation that fails closed. The subject remains SPEC_NOT_SUPPORTED at the service and on both transports over its own evidence.",
+    disposition: "CLOSE_IN_M10",
+    owner: "M10",
+    closedBy: [
+      "wcl-transport.identity-resolves-the-protection-paladin-of-the-a7r6-kill",
+      "normalization.protection-paladin-opener-slice-normalizes-whole-and-in-order",
+      "normalization.protection-paladin-slice-census-for-actor-7",
+      "combat-state.holy-power-is-pre-cost-on-costed-shield-of-the-righteous-casts",
+      "combat-state.missing-holy-power-entry-is-no-observation-not-zero",
+      "combat-state.standalone-holy-power-changes-are-observed-never-replayed",
+      "combat-state.protection-paladin-aura-is-observed-at-transitions-and-ambiguous-before-its-first",
+      "combat-state.protection-paladin-index-exposes-damage-taken-healing-and-absorbs",
+      "combat-state.protection-paladin-gap-before-2010000-fails-closed",
+      "application-service.protection-paladin-subject-is-still-unsupported-on-its-own-evidence",
+      "public-contract.analysis-parity-for-the-protection-paladin-subject",
+    ],
   },
   {
     id: "single-report-assassination-corpus",

@@ -54,6 +54,10 @@ export async function executeAssertion(
       return normalization.sideReference(artifact, params as ParamsOf<typeof assertion.kind>);
     case "NORMALIZATION.ATTACHED_RESOURCE_SIDE":
       return normalization.attachedResourceSide(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "NORMALIZATION.EVENT_FACTS":
+      return normalization.eventFacts(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "NORMALIZATION.ACTOR_EVENT_CENSUS":
+      return normalization.actorEventCensus(artifact, params as ParamsOf<typeof assertion.kind>);
     case "NORMALIZATION.NO_ACTOR_REF_HOLDS":
       return normalization.noActorRefHolds(artifact, params as ParamsOf<typeof assertion.kind>);
     case "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED":
@@ -100,6 +104,8 @@ export async function executeAssertion(
       );
     case "COMBAT_STATE.AURA_PRESENCE":
       return combatState.auraPresence(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "COMBAT_STATE.ACTOR_INDEX_CENSUS":
+      return combatState.actorIndexCensus(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "COMBAT_STATE.AURA_STACK_OBSERVATION":
       return combatState.auraStackObservation(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_ASSASSINATION.DECISION_COVERAGE":
@@ -130,6 +136,8 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "NORMALIZATION.SOURCE_ABSENCE",
   "NORMALIZATION.SIDE_REFERENCE",
   "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+  "NORMALIZATION.EVENT_FACTS",
+  "NORMALIZATION.ACTOR_EVENT_CENSUS",
   "NORMALIZATION.NO_ACTOR_REF_HOLDS",
   "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED",
   "NORMALIZATION.ACTOR_CATALOG",
@@ -145,6 +153,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
   "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
   "COMBAT_STATE.AURA_PRESENCE",
+  "COMBAT_STATE.ACTOR_INDEX_CENSUS",
   "COMBAT_STATE.AURA_STACK_OBSERVATION",
   "SPEC_ASSASSINATION.DECISION_COVERAGE",
   "SPEC_ASSASSINATION.SPEC_GATE",

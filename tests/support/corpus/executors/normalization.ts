@@ -318,3 +318,103 @@ export function fightHeader(
   }
   return pass();
 }
+
+// ---------------------------------------------------------------------------
+// M10-B: factual reads of what a slice holds for one actor
+// ---------------------------------------------------------------------------
+
+/**
+ * Reads a dotted path off a normalized event. `length` on an array reads its
+ * length, so a case can pin "80 talent-tree entries" without copying them.
+ * Anything absent reads as null — which is what a case comparing against a
+ * pinned value then sees as a mismatch, never as a silent zero.
+ */
+function fieldAt(event: unknown, path: string): unknown {
+  let cursor: unknown = event;
+  for (const segment of path.split(".")) {
+    if (Array.isArray(cursor) && segment === "length") return cursor.length;
+    if (typeof cursor !== "object" || cursor === null) return null;
+    cursor = (cursor as Record<string, unknown>)[segment];
+  }
+  return cursor ?? null;
+}
+
+function sortedCensus(counts: Map<string, number>): Record<string, number> {
+  return Object.fromEntries([...counts.entries()].sort(([left], [right]) => (left < right ? -1 : 1)));
+}
+
+/**
+ * Exactly one normalized event matches the locator; it has the pinned kind and
+ * each named top-level field carries the pinned value. The event is read as
+ * captured — nothing is aggregated, interpolated or interpreted.
+ */
+export function eventFacts(
+  artifact: LoadedArtifact,
+  params: ParamsOf<"NORMALIZATION.EVENT_FACTS">,
+): AssertionOutcome {
+  const output = normalizeArtifact(artifact);
+  const { at } = params;
+  const matches = output.events.filter(
+    (event) =>
+      event.reportTimeMs === at.reportTimeMs &&
+      event.locator.rawType === at.rawType &&
+      (event.source?.actorId ?? null) === at.sourceActorId &&
+      (event.target?.actorId ?? null) === at.targetActorId &&
+      event.abilityGameId === at.abilityGameId,
+  );
+  const event = matches[0];
+  if (matches.length !== 1 || event === undefined) {
+    return fail(`expected exactly one normalized event at the locator; found ${String(matches.length)}`, {
+      expected: { matches: 1 },
+      actual: { matches: matches.length },
+      locator: at,
+    });
+  }
+  if (event.kind !== params.expected.kind) {
+    return fail("the normalized event has a different kind than the case pins", {
+      expected: { kind: params.expected.kind },
+      actual: { kind: event.kind },
+      locator: event.locator,
+    });
+  }
+  const actual: Record<string, unknown> = {};
+  for (const field of Object.keys(params.expected.fields)) actual[field] = fieldAt(event, field);
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected.fields)) {
+    return fail("the normalized event's fields differ from what the case pins", {
+      expected: params.expected.fields,
+      actual,
+      locator: event.locator,
+    });
+  }
+  return pass();
+}
+
+/**
+ * The normalized events whose named side is the actor, counted by kind —
+ * exactly and exhaustively. A census of what the slice RETAINED, never a
+ * claim about what happened in the fight.
+ */
+export function actorEventCensus(
+  artifact: LoadedArtifact,
+  params: ParamsOf<"NORMALIZATION.ACTOR_EVENT_CENSUS">,
+): AssertionOutcome {
+  const output = normalizeArtifact(artifact);
+  const counts = new Map<string, number>();
+  for (const event of output.events) {
+    const side = params.side === "SOURCE" ? event.source : event.target;
+    if (side?.actorId !== params.actorId) continue;
+    counts.set(event.kind, (counts.get(event.kind) ?? 0) + 1);
+  }
+  const actual = sortedCensus(counts);
+  const expected = sortedCensus(new Map(Object.entries(params.expected)));
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    return fail(
+      `the ${params.side} census for actor ${String(params.actorId)} differs from what the case pins`,
+      {
+        expected,
+        actual,
+      },
+    );
+  }
+  return pass();
+}

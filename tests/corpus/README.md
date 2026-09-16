@@ -272,6 +272,9 @@ least one committed case:
 | `COMBAT_STATE.LATEST_RESOURCE_OBSERVATION` | COMBAT_STATE | POSITIVE_FACT |
 | `COMBAT_STATE.AURA_PRESENCE` | COMBAT_STATE | POSITIVE_FACT (or UNKNOWN + reason) |
 | `COMBAT_STATE.AURA_STACK_OBSERVATION` | COMBAT_STATE | POSITIVE_FACT |
+| `NORMALIZATION.EVENT_FACTS` (M10-B) | NORMALIZATION | POSITIVE_FACT — one normalized event by (time, raw type, source, target, ability) with pinned kind and field values by dotted path |
+| `NORMALIZATION.ACTOR_EVENT_CENSUS` (M10-B) | NORMALIZATION | POSITIVE_FACT — normalized kinds counted for one actor as SOURCE or TARGET, exact and exhaustive |
+| `COMBAT_STATE.ACTOR_INDEX_CENSUS` (M10-B) | COMBAT_STATE | POSITIVE_FACT — M4's source/target index for one actor yields exactly these kinds and counts |
 | `SPEC_ASSASSINATION.DECISION_COVERAGE` | SPEC_ASSASSINATION | the facade's verdict, MATCH / REJECTED / UNKNOWN; authority-dependent |
 | `SPEC_ASSASSINATION.SPEC_GATE` | SPEC_ASSASSINATION | UNSUPPORTED |
 | `SPEC_ASSASSINATION.AUTHORITY_UNAVAILABLE_IS_NOT_REJECTION` | SPEC_ASSASSINATION | NO_AUTHORITY_AVAILABLE |
@@ -436,7 +439,7 @@ Two sanitizers exist, each one documented transformation per mode:
 
 | Tool | Revision | Input | Output |
 | --- | --- | --- | --- |
-| `scripts/sanitize-probe.mjs` | `sanitize-probe-3` | a decoded events response, a bare event array, or an array of page envelopes | a bare event array, selected by `--head` / `--per-type` / `--where` / `--indices` / `--decision-slice <subject> <targets>` (the D2 predicate as a recorded mode; the only mode whose output may carry a coverage grant) |
+| `scripts/sanitize-probe.mjs` | `sanitize-probe-4` | a decoded events response, a bare event array, or an array of page envelopes | a bare event array, selected by `--head` / `--per-type` / `--where` / `--indices` / `--decision-slice <subject> <targets>` (the D2 predicate as a recorded mode) / `--actor-slice <subject> [<toReportTimeMs>]` (M10-B: every event the subject sources OR is targeted by, optionally bounded). Only the two predicate modes may carry a coverage grant |
 | `scripts/corpus/sanitize-payloads.mjs` | `sanitize-payloads-2` | a decoded `data` object | `pages`: rateLimitData stripped; `context`: actor names → `Actor<id>`, servers → null, **player `gameID` → null** (revision 2; NPC and pet gameIDs are creature taxonomy and stay); `rankings`: names → `Candidate<n>`, servers → null, guilds removed, report codes → `RANK000nAAAAAAAA` (deterministic, equality-preserving) |
 
 **No stable player identifier is committed.** Names, servers, guilds and
@@ -509,6 +512,48 @@ resolve UNKNOWN / OBSERVED_STATE_MISSING under the pinned authority. It
 cannot say anything about the rest of the pull, about actor 8, about any
 target but 235, or about whether the subject played well.
 
+### M10-B bounded Protection Paladin capture
+
+M10-B took 6 live requests (bound 12, recorded in `.probe/m10b-capture-plan.md`
+before running) from a third temporary gitignored probe
+(`.probe/m10b-capture.probe.ts`), against the subject the committed A7R6
+context already proved: actor 7 of fight 7, masterData subType Paladin,
+friendlySpecs index Protection. No rankings, no leaderboard, no second report.
+
+| Request | Shape | Retained |
+| --- | --- | --- |
+| R1 `FIGHT_CONTEXT_QUERY` fight 7, actorID 7 | revision 30; actor 7 is a Player / Paladin / Protection; master data and header byte-identical to `wcl-fight-context-a7r6-fight-7` apart from the per-actor talent import code | nothing new (the committed context already carries it) |
+| R2–R5 `EVENTS_QUERY` [2,004,589 .. 2,049,589] limit 10,000 with resources (≤ 10 pages) | 30,588 events in four pages (10,007 / 10,000 / 10,009 / 572), the fourth terminal | `wcl-protection-paladin-a7r6-opener`: 988 events by `--actor-slice 7 2026589` |
+| R6 `REPORT_REVISION_QUERY` | 30 — unchanged across the pagination | recorded as `reportRevisionAfterCapture` on the source |
+
+The slice is bounded at 2,026,589 (the pull's first 22 s) because the full
+45 s of actor-7 events would be ~1.1 MB against the 512 KiB artifact ceiling;
+the grant ends where the slice does. It carries ONE grant — every
+capture-vouched category for actor 7 alone — because the predicate retains
+every event the tank sources or is targeted by, and nothing about anyone else.
+
+What it can assert — and only this: identity resolution over the committed
+context; that its 988 events normalize whole and in order with an exact
+census per kind and side; Holy Power PRE_COST on the five costed Shield of
+the Righteous casts (4, 3, 3, 3, 3 of 5, cost 3) and NO_OBSERVATION on the
+two completed Shield of the Righteous casts that carry no Holy Power entry;
+that standalone `+1` resource changes are never replayed onto a snapshot;
+damage-taken, self-heal, received-heal, absorb, summon and combatantinfo
+facts read from the events that carry them; aura presence for buff 31,850 on
+the tank (AMBIGUOUS before its first observed transition, ACTIVE on the
+application, INACTIVE on the removal); proven absence of ability 31,884 from
+the fight start; and, over the gap derivation, that every one of those
+absence and pre-first-transition questions returns UNKNOWN /
+INSUFFICIENT_COVERAGE once coverage no longer reaches them. It cannot say
+what any ability MEANS (mitigation, defensive, utility), whether any
+defensive was required, anything about health continuity, anything after
+2,026,589, anything about the pet's own actions, and nothing about
+interrupts — the raw window contained none by any actor, so `INTERRUPTS`
+stays UNVERIFIED.
+
+The subject itself is still `SPEC_NOT_SUPPORTED` over its own evidence, at
+the service and on both transports, pinned by two M10-B cases.
+
 ---
 
 ## Non-event captures
@@ -565,18 +610,22 @@ original. Migrating the remaining fixtures and their importers is M9-B's.
 
 ---
 
-## Contents after M9-C
+## Contents after M10-B
 
-Contract version 2 (M9-C's additions — the query union, `performanceContext`,
-`actorFilter`, six assertion kinds and the ENCOUNTER_CONTEXT external mode —
-are compatible: every M9-B manifest is still a valid version-2 manifest).
-Twenty-five artifacts, fifty-four cases, one hundred and forty-two
+Contract version 2, unchanged (M10-B's additions — the optional
+`reportRevisionAfterCapture` source field and three assertion kinds — are
+compatible: every earlier manifest is still a valid version-2 manifest).
+Twenty-seven artifacts, seventy-four cases, one hundred and eighty-nine
 assertions, every kind in the registry exercised, nothing DECLARED, every
-layer with cases of its own. Eighteen sanitized captures from four sources
-(`qJ1pgB49ZrRNVmCd` fight 6, `A7R6kxPJ1hC8YQ4w` fight 7, `gtKb2xHn87pNcFfW`
-fight 22, and one Sszorak heroic rankings page), two derivations, five
-synthetics. 1,602,915 bytes; the largest artifact is the 312,284-byte A7R6
-fight context.
+layer with cases of its own. Nineteen sanitized captures from four sources
+(`qJ1pgB49ZrRNVmCd` fight 6, `A7R6kxPJ1hC8YQ4w` fight 7 — now with a second
+subject, the Protection Paladin actor 7 — `gtKb2xHn87pNcFfW` fight 22, and
+one Sszorak heroic rankings page), three derivations, five synthetics.
+2,389,935 bytes; the largest artifact is the 427,886-byte Protection Paladin
+opener slice.
+
+At M9-C the corpus held twenty-five artifacts, fifty-four cases and one
+hundred and forty-two assertions in 1,602,915 bytes.
 
 The M9-B evidence gaps, dispositioned (`KNOWN_EVIDENCE_GAPS`, and in
 `report.json`); `no-death-interrupt-dispel-events` was split because its
@@ -591,10 +640,10 @@ owners differ, and one residual gap was opened:
 | no-external-reference-fixture | CLOSE_IN_M9 | a real sanitized rankings page through injected ports; COMPLETED and transport-failure cases |
 | single-report-assassination-corpus | CLOSE_IN_M9 | one coherent second subject — gtKb fight 22 actor 25: context, opener slice and rankings from one report/fight/source; eleven cases |
 | no-identity-conflict-capture | OUTSIDE_CURRENT_CAPABILITY | real resolution is corpus-pinned on both reports; `IDENTITY_CONFLICT` is a result state nothing produces or consumes and detection is unimplemented, so nothing can be proven about it; M15 owns it |
-| no-interrupt-events | DEFER_TO_MILESTONE | M10 — the first capture milestone whose subject has an interrupt in its supported surface |
+| no-interrupt-events | DEFER_TO_MILESTONE | M10 — the M10-B window (45 s, every actor) held no interrupt event; a later bounded capture from a pull known to contain one is still required |
 | no-death-or-dispel-events | DEFER_TO_MILESTONE | M12 — death actionability and healer dispel/triage; not a tank question |
 | no-targetability-or-intermission | DEFER_TO_MILESTONE | M14 — targetability; real intermission PHASE evidence is present (4 of 9 transitions on A7R6, none on gtKb) |
-| no-protection-paladin-evidence | DEFER_TO_MILESTONE | M10 owns its capture plan |
+| no-protection-paladin-evidence | CLOSE_IN_M10 | the bounded A7R6 actor-7 capture: identity, Holy Power, aura, damage/heal/absorb, combatantinfo and gap cases; the subject stays SPEC_NOT_SUPPORTED |
 | assassination-corpus-breadth | DEFER_TO_MILESTONE | M11 — a wipe, a pre-pull window, the low subject's own slice, the cast-to-application tolerance decision |
 
 ## The dedicated command: `npm run test:corpus`
