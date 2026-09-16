@@ -92,6 +92,7 @@ export const CORPUS_ERROR_CODES = [
   "PROVENANCE_COVERAGE_WITHOUT_SOURCE",
   "CASE_ID_DUPLICATE",
   "CASE_ARTIFACT_UNKNOWN",
+  "CASE_PARAM_ARTIFACT_UNKNOWN",
   "CASE_ASSERTION_KIND_UNKNOWN",
   "CASE_ASSERTION_PARAMS_INVALID",
   "CASE_ASSERTION_LAYER_MISMATCH",
@@ -132,6 +133,13 @@ export interface LoadedCase {
   readonly record: CorpusCaseRecord;
   readonly artifact: LoadedArtifact;
   readonly assertions: readonly LoadedAssertion[];
+  /**
+   * Every artifact the case reads: its own, plus any an assertion names in a
+   * `…ArtifactId` parameter (an external-reference case serves a ranking page
+   * from a second artifact). Sorted, deduplicated. Coverage of "every artifact
+   * is read by some case" counts these.
+   */
+  readonly referencedArtifactIds: readonly string[];
 }
 
 /**
@@ -354,8 +362,10 @@ function provenanceErrors(
         `grant ${String(ordinal)} claims coverage, but the artifact has no capture lineage to retain it from`,
       );
     }
-    const start = source?.query.startTimeMs;
-    const end = source?.query.endTimeMs;
+    // Only an events capture has a report-time window to retain coverage from.
+    const query = source?.query;
+    const start = query !== undefined && "startTimeMs" in query ? query.startTimeMs : undefined;
+    const end = query !== undefined && "endTimeMs" in query ? query.endTimeMs : undefined;
     for (const range of grant.ranges) {
       if (typeof start === "number" && range.fromReportTimeMs < start) {
         fail(
@@ -381,15 +391,31 @@ function provenanceErrors(
   return errors;
 }
 
+/** Every value under a key ending in `ArtifactId`, anywhere in a params object. */
+function artifactIdParamsOf(value: unknown, path: readonly string[] = []): { path: string; id: unknown }[] {
+  if (Array.isArray(value)) {
+    return value.flatMap((entry, index) => artifactIdParamsOf(entry, [...path, String(index)]));
+  }
+  if (typeof value !== "object" || value === null) return [];
+  return Object.entries(value).flatMap(([key, entry]) =>
+    key.endsWith("ArtifactId")
+      ? [{ path: [...path, key].join("."), id: entry }]
+      : artifactIdParamsOf(entry, [...path, key]),
+  );
+}
+
 function caseErrors(
   kase: CorpusCaseRecord,
   artifact: CorpusArtifactRecord | undefined,
+  knownArtifactIds: ReadonlySet<string>,
 ): {
   readonly errors: CorpusError[];
   readonly assertions: LoadedAssertion[];
+  readonly referencedArtifactIds: readonly string[];
 } {
   const errors: CorpusError[] = [];
   const assertions: LoadedAssertion[] = [];
+  const referenced = new Set<string>([kase.artifactId]);
   const subject = { caseId: kase.caseId };
   const fail = (code: CorpusErrorCode, message: string): void => {
     errors.push({ code, subject, message: `case ${kase.caseId}: ${message}` });
@@ -437,6 +463,16 @@ function caseErrors(
       );
     }
     needsAuthority ||= definition.requiresAuthority;
+    for (const reference of artifactIdParamsOf(parsed.data)) {
+      if (typeof reference.id !== "string" || !knownArtifactIds.has(reference.id)) {
+        fail(
+          "CASE_PARAM_ARTIFACT_UNKNOWN",
+          `assertion ${String(ordinal)} (${kind}) names artifact ${String(reference.id)} at ${reference.path}, which is not in the manifest`,
+        );
+        continue;
+      }
+      referenced.add(reference.id);
+    }
     assertions.push({ kind, params: parsed.data, execution: definition.execution });
   });
 
@@ -461,7 +497,7 @@ function caseErrors(
     }
   }
 
-  return { errors, assertions };
+  return { errors, assertions, referencedArtifactIds: [...referenced].sort(codePointCompare) };
 }
 
 // --------------------------------------------------------------------------
@@ -686,7 +722,7 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
     }
     casesById.set(kase.caseId, kase);
     const artifactRecord = artifactsById.get(kase.artifactId);
-    const checked = caseErrors(kase, artifactRecord);
+    const checked = caseErrors(kase, artifactRecord, new Set(artifactsById.keys()));
     errors.push(...checked.errors);
     const artifact = loadedById.get(kase.artifactId);
     if (artifact === undefined) continue;
@@ -694,7 +730,12 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
       if (assertion.execution === "EXECUTABLE") executable += 1;
       else declared += 1;
     }
-    loadedCases.push({ record: kase, artifact, assertions: checked.assertions });
+    loadedCases.push({
+      record: kase,
+      artifact,
+      assertions: checked.assertions,
+      referencedArtifactIds: checked.referencedArtifactIds,
+    });
   }
 
   if (errors.length > 0) {

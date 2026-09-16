@@ -36,10 +36,18 @@ tests/corpus/
     PROVENANCE-legacy.md   the M2–M8 investigation prose behind the migrated slices
     .gitattributes         pins LF under the root
     manifest.json          the index: every artifact, every case
+    report.json            the machine-readable report of the last complete workerd
+                           execution, written by `npm run test:corpus -- --write-report`
     artifacts/             evidence bytes, digest-pinned, never rewritten by tooling
         wcl-events/        sanitized WCL event arrays and their derivations
+        wcl-graphql/       sanitized decoded GraphQL `data`: page sequences, a fight
+                           context with master data, a rankings page
         synthetic/         hand-authored payloads: pages, page sequences, edge events
 ```
+
+The tooling lives in `scripts/corpus/`: `build-manifest.mjs` (the generator),
+`gate.mjs` (`npm run test:corpus`) and `sanitize-payloads.mjs`; the event
+slicer is `scripts/sanitize-probe.mjs`.
 
 `manifest.json` is formatted by Prettier like any other file. `artifacts/` is
 listed in `.prettierignore`: an artifact's bytes are its identity, and no tool
@@ -52,6 +60,7 @@ other (`CONTRACT_VERSION_UNSUPPORTED`). Bumping it is a reviewed migration.
 | --- | --- | --- |
 | 1 | M9-A | a flat list of report-time ranges, applied to every category and actor alike |
 | 2 | M9-B | `grants[]`, each with its own categories, actor scope and ranges; plus the `WCL_GRAPHQL_PAGE_SEQUENCE` payload kind |
+| 2 (M9-C additions, compatible) | M9-C | `query` becomes a union with `FIGHT_CONTEXT` and `ENCOUNTER_CHARACTER_RANKINGS` shapes; `actorFilter` may record a capture-only source filter; optional `performanceContext`; five new assertion kinds; the ENCOUNTER_CONTEXT parity params gain optional `subjectFight` and `external` |
 
 A version-1 manifest is not a valid version-2 manifest — a flat range names
 no categories and no actors — so the number moved. That is what the version
@@ -423,11 +432,112 @@ Deliberate corruption is never mixed into a capture in place. It is a
 separate `DERIVED_FROM_CAPTURE` artifact naming its parent and its mutation,
 or a `SYNTHETIC` artifact with no lineage claim.
 
-The existing slicer `scripts/sanitize-probe.mjs` remains the capture-to-slice
-tool. It has no version field, so `tooling.revision` is `UNAVAILABLE` for the
-slices it produced; giving it one is an M9-B tooling item.
+Two sanitizers exist, each one documented transformation per mode:
+
+| Tool | Revision | Input | Output |
+| --- | --- | --- | --- |
+| `scripts/sanitize-probe.mjs` | `sanitize-probe-3` | a decoded events response, a bare event array, or an array of page envelopes | a bare event array, selected by `--head` / `--per-type` / `--where` / `--indices` / `--decision-slice <subject> <targets>` (the D2 predicate as a recorded mode; the only mode whose output may carry a coverage grant) |
+| `scripts/corpus/sanitize-payloads.mjs` | `sanitize-payloads-2` | a decoded `data` object | `pages`: rateLimitData stripped; `context`: actor names → `Actor<id>`, servers → null, **player `gameID` → null** (revision 2; NPC and pet gameIDs are creature taxonomy and stay); `rankings`: names → `Candidate<n>`, servers → null, guilds removed, report codes → `RANK000nAAAAAAAA` (deterministic, equality-preserving) |
+
+**No stable player identifier is committed.** Names, servers, guilds and
+player `gameID`s (Blizzard character ids) are gone from every context and
+rankings artifact; report-local actor ids stay because events relate through
+them; the subject report codes (`qJ1…`, `A7R6…`, `gtKb…`) are corpus
+coordinates, and every third-party report code in the rankings page is
+remapped. `tests/unit/m9c-sanitize-payloads.test.ts` proves the rules on
+synthetic input and sweeps the committed artifacts.
+
+Both refuse to write a credential-shaped value. Slices cut before M9-B record
+`tooling.revision: UNAVAILABLE` because the slicer had no revision then; every
+later slice records the revision that cut it.
+
+### M9-C bounded captures
+
+M9-C took ten live requests in total, each bounded in writing before it was
+made, all through the production token provider, GraphQL client and query
+documents, from one temporary gitignored probe, against the one report and
+fight the corpus already used. Decoded `data` only was written — never a
+header or token — and the probe was not committed. Per question:
+
+| Question | Requests (bound) | Shape | Retained |
+| --- | --- | --- | --- |
+| Q1 page boundary | 5 (≤ 5) | `EVENTS_QUERY` over [2,176,000 .. 2,177,000], limit 40 | five pages verbatim minus rateLimitData |
+| Q1b terminal page | 1 (≤ 1) | `EVENTS_QUERY` over [2,176,580 .. 2,176,581], limit 20 | one terminal page |
+| Q2 pets and header | 1 (≤ 1) | `FIGHT_CONTEXT_QUERY` for fight 7 | full master data, names redacted |
+| Q3 performance context | 1 (≤ 1) | `report.rankings(fightIDs:[7])` | four numbers per subject, into `performanceContext`; the payload itself was NOT retained |
+| Q4 pet-sourced events | 2 (≤ 2; the first pet had no events) | `EVENTS_QUERY` with a CAPTURE-ONLY `sourceID` filter | 57 events, whole page |
+
+Plus one page of Sszorak heroic character rankings captured by the M8-F shape
+probe on the same day (`.probe/m8-rankings-shape.json`), sanitized with
+`rankings` mode.
+
+The M9-C correction added ONE more subject, 4 requests (bound 8), from a
+second temporary gitignored probe (`.probe/m9c2-capture.probe.ts`): selected
+without a request as row 0 of that Sszorak board page — the board's top
+parse — and resolved to source actor 25 by the M8-F candidate probe.
+
+| Request | Shape | Retained |
+| --- | --- | --- |
+| R1 `report.rankings(fightIDs:[22])` | verified 100 % / 100 % (partition 1, bracket 18, 8,606 parses); the same kill's other Assassination Rogue, actor 8, at 8 % / 17 % | numbers only → `performanceContext` |
+| R2 `FIGHT_CONTEXT_QUERY` fight 22, actorID 25 | 293 actors, revision 22, logVersion 17, gameVersion 1, Sszorak 3420 heroic 4, kill, 284,791 ms | `wcl-fight-context-gtkb-fight-22` |
+| R3–R4 `EVENTS_QUERY` [2,415,041 .. 2,435,041] limit 10,000 with resources (≤ 5 pages) | 18,318 events in two pages, the second terminal | `wcl-assassination-high-parse-opener`: 1,542 events by `--decision-slice 25 235` | Nothing was crawled, no unrelated player was gathered, no
+raw capture was imported whole, and no ranking was treated as authority: the
+rankings page is served to the real decoder through injected ports and the
+document it produces says `UNKNOWN` comparability for every reference.
+
+`performanceContext` on a capture source records why the subjects are in the
+corpus in Warcraft Logs' own terms. It is context only: no assertion kind can
+read it (the layering guard fails any executor, harness, loader or fight
+builder that mentions it), and no verdict in the corpus depends on rank. A
+bracket may explain a selection and never determines an expected result.
+
+| Subject | Report / fight | Verified bracket (partition 1) | Pull | Events in corpus |
+| --- | --- | --- | --- | --- |
+| actor 8 | gtKb2xHn87pNcFfW / 22 | 8 % overall, 17 % bracket | Sszorak heroic kill, 284,791 ms | none (provenance only) |
+| actor 13 | A7R6kxPJ1hC8YQ4w / 7 | 33 % / 34 % | Entombed Sentinels heroic kill, 424,514 ms | one rejected Envenom |
+| actor 19 | A7R6kxPJ1hC8YQ4w / 7 | 58 % / 63 % | same | the D2 corpus and every M5 slice |
+| actor 25 | gtKb2xHn87pNcFfW / 22 | 100 % / 100 % | Sszorak heroic kill, 284,791 ms | the opener slice |
+
+What the high-performance capture can assert — and only this: identity
+resolution over its master data; the catalog and header facts; that its 1,542
+events normalize whole and in order; aura presence for actor 25 and boss 235
+inside [2,415,041 .. 2,435,041] (AMBIGUOUS before the first observation of a
+pre-pull aura); the casts' own resource snapshots; last-observed anchors;
+PROVEN absences for actor 25's casts from the fight start; talent resolution;
+Garrote remaining-duration arithmetic; and that its observed decisions
+resolve UNKNOWN / OBSERVED_STATE_MISSING under the pinned authority. It
+cannot say anything about the rest of the pull, about actor 8, about any
+target but 235, or about whether the subject played well.
 
 ---
+
+## Non-event captures
+
+A capture source's `query` is a union: the analyzer's events query (the
+original shape, unchanged), a `FIGHT_CONTEXT` query naming its fight ids, or
+an `ENCOUNTER_CHARACTER_RANKINGS` query naming encounter, difficulty, class,
+spec, metric, partition (`OMITTED` = Warcraft Logs' latest at capture time,
+which moves) and page. Only an events capture has a report-time window, so
+the loader's "retained coverage must sit inside the source window" rule
+applies to events captures alone; a non-event capture grants no coverage.
+
+A case may read a second artifact through a `…ArtifactId` parameter — the
+external-reference parity case serves the rankings page that way. The loader
+resolves every such parameter (`CASE_PARAM_ARTIFACT_UNKNOWN` otherwise) and
+records the union on `LoadedCase.referencedArtifactIds`, which is what "every
+artifact is read by some case" counts.
+
+## `tests/fixtures/wcl/preflight-payloads.ts` — outside the corpus, by decision
+
+The preflight payload fixture is a MUTABLE BUILDER: each test shapes a fresh
+object into one malformed variant (a null class, a missing spec, a fight
+whose id disagrees, a non-array roster). The corpus holds immutable evidence
+with a digest; migrating the builder would freeze one variant per artifact
+and lose the property the fixture exists for. So it stays where it is, as a
+synthetic factory, and the REAL side of identity resolution — two players, a
+pet, an unknown id, a non-participant, the `-1` entry and a wrong fight over
+real master data — is corpus-pinned by
+`wcl-transport.identity-resolves-over-real-master-data-and-refuses-the-rest`.
 
 ## Storage policy
 
@@ -438,9 +548,15 @@ slices it produced; giving it one is an M9-B tooling item.
 
 Both are checked from measured canonical byte lengths, so the answer is the
 same on every machine. There is no external storage: fixtures must work
-offline and CI must never need a download or a credential. If M9-B's
-population approaches the corpus ceiling, raise it deliberately in
-`contract.ts` with the evidence, rather than storing artifacts elsewhere.
+offline and CI must never need a download or a credential. If the population
+approaches the corpus ceiling, raise it deliberately in `contract.ts` with
+the evidence, rather than storing artifacts elsewhere.
+
+Measured at the M9-C correction: 1,602,915 bytes across 25 artifacts; the
+largest is the 312,284-byte A7R6 fight context (the whole master data of a
+312-actor report).
+`m9b-corpus-manifest.test.ts` pins the total under 3 MiB and the largest
+artifact under 384 KiB so growth is noticed at half the ceilings.
 
 Legacy fixtures under `tests/fixtures/wcl/events/` are not migrated in M9-A.
 Two were copied byte-for-byte into the corpus (`LEGACY_FIXTURE_COPY`), and
@@ -449,30 +565,98 @@ original. Migrating the remaining fixtures and their importers is M9-B's.
 
 ---
 
-## Contents after M9-B
+## Contents after M9-C
 
-Contract version 2. Seventeen artifacts, thirty-one cases, seventy-four
-assertions, every kind in the registry exercised, nothing DECLARED. Two source captures back the eleven
-sanitized slices: `qJ1pgB49ZrRNVmCd` fight 6 (four slices from one mid-fight
-window plus the pull window) and `A7R6kxPJ1hC8YQ4w` fight 7 (six Assassination
-slices). One derivation, five synthetics. ~484 KB of artifacts against the
-6 MiB ceiling; the largest, the D2 slice, is 226 KB against 512 KiB.
+Contract version 2 (M9-C's additions — the query union, `performanceContext`,
+`actorFilter`, six assertion kinds and the ENCOUNTER_CONTEXT external mode —
+are compatible: every M9-B manifest is still a valid version-2 manifest).
+Twenty-five artifacts, fifty-four cases, one hundred and forty-two
+assertions, every kind in the registry exercised, nothing DECLARED, every
+layer with cases of its own. Eighteen sanitized captures from four sources
+(`qJ1pgB49ZrRNVmCd` fight 6, `A7R6kxPJ1hC8YQ4w` fight 7, `gtKb2xHn87pNcFfW`
+fight 22, and one Sszorak heroic rankings page), two derivations, five
+synthetics. 1,602,915 bytes; the largest artifact is the 312,284-byte A7R6
+fight context.
 
-`report.ts` measures coverage per layer and carries `KNOWN_EVIDENCE_GAPS` —
-what the corpus does not contain and what would close each gap: no death,
-interrupt, dispel or targetability event in any capture; no pet actor; no real
-page boundary or real partial retrieval; no identity-conflict capture; no
-APPLICATION_SERVICE case; no external-reference fixture; no Protection Paladin
-decision evidence for M10; and every Assassination decision from one report,
-one fight, one player.
+The M9-B evidence gaps, dispositioned (`KNOWN_EVIDENCE_GAPS`, and in
+`report.json`); `no-death-interrupt-dispel-events` was split because its
+owners differ, and one residual gap was opened:
+
+| Gap | Disposition | Closed by / owner |
+| --- | --- | --- |
+| no-pet-or-guardian-actor | CLOSE_IN_M9 | real master data (165 pets) and 44 real pet-sourced events |
+| no-real-page-boundary | CLOSE_IN_M9 | five real pages, four real boundaries, one real terminal page |
+| no-real-partial-retrieval | CLOSE_IN_M9 | the real five-page capture with page 5 removed (recorded derivation); a verbatim upstream failure body stays uncaptured — provoking one means spending quota |
+| no-application-service-cases | CLOSE_IN_M9 | `APPLICATION_SERVICE.FIGHT_ANALYSIS` over both reports |
+| no-external-reference-fixture | CLOSE_IN_M9 | a real sanitized rankings page through injected ports; COMPLETED and transport-failure cases |
+| single-report-assassination-corpus | CLOSE_IN_M9 | one coherent second subject — gtKb fight 22 actor 25: context, opener slice and rankings from one report/fight/source; eleven cases |
+| no-identity-conflict-capture | OUTSIDE_CURRENT_CAPABILITY | real resolution is corpus-pinned on both reports; `IDENTITY_CONFLICT` is a result state nothing produces or consumes and detection is unimplemented, so nothing can be proven about it; M15 owns it |
+| no-interrupt-events | DEFER_TO_MILESTONE | M10 — the first capture milestone whose subject has an interrupt in its supported surface |
+| no-death-or-dispel-events | DEFER_TO_MILESTONE | M12 — death actionability and healer dispel/triage; not a tank question |
+| no-targetability-or-intermission | DEFER_TO_MILESTONE | M14 — targetability; real intermission PHASE evidence is present (4 of 9 transitions on A7R6, none on gtKb) |
+| no-protection-paladin-evidence | DEFER_TO_MILESTONE | M10 owns its capture plan |
+| assassination-corpus-breadth | DEFER_TO_MILESTONE | M11 — a wipe, a pre-pull window, the low subject's own slice, the cast-to-application tolerance decision |
+
+## The dedicated command: `npm run test:corpus`
+
+`scripts/corpus/gate.mjs`, plain Node, one exit code, the same in PowerShell
+and on the Linux runner:
+
+1. regenerates the manifest to a temporary path and compares it, parsed, with
+   the committed one — a re-sliced artifact or an edited generator without
+   regeneration fails before any test runs;
+2. runs the Node corpus suite (loader, contract version 2, digests, harness,
+   coverage, layering, agreement, machine report);
+3. runs the complete workerd gate — every case of every layer, PUBLIC_CONTRACT
+   included — plus the network-isolation test, TWICE, in two separate vitest
+   processes, reads the machine-readable report each attaches to its task
+   metadata, and requires the two to be byte-identical and each complete
+   (zero failed, zero not-executed, zero declared);
+4. holds that report against the committed `tests/corpus/report.json`.
+   `--write-report` writes it instead, from the execution; the script never
+   composes a total itself.
+
+Child processes start with `WCL_CLIENT_ID`, `WCL_CLIENT_SECRET` and
+`ANALYSIS_AUTH_TOKEN` removed from their environment. Measured locally:
+~29 s (manifest 0.1 s, Node suite ~3.5 s, each workerd run ~12.5 s).
+
+`tests/corpus/report.json` is the machine-readable report: totals, per-layer
+counts and kinds, every artifact's digest and lineage, every case's assertions
+with status (the high-performance subject's eleven cases included), every
+gap's disposition and owner, the pinned authorities. No timestamp,
+duration, random id, path or environment value; keys sorted. The gate test's
+drift check names the first differing field.
+
+### What was proven at M9-C
+
+- **Network isolation**, dynamically: `m9c-corpus-network-isolation.test.ts`
+  runs an injected executor that fetches Warcraft Logs from inside the
+  harness, inside workerd; the request is answered locally (503) and the
+  harness reports a FAILED assertion naming the case. The real live preflight
+  port with sentinel credentials fails closed as `UPSTREAM_UNAVAILABLE`.
+- **Determinism**, independently: two separate workerd processes produce
+  byte-identical reports on every `test:corpus` run; the Node machine-report
+  test serialises two executions identically.
+- **Implementation defects fail the gate** (each applied, run, restored by
+  hand, confirmed with `git diff`):
+  - M3 transport: cursor passed back as `nextPageTimestamp + 1` — four cases
+    failed with the requested start times off by one, two on real pages.
+  - M4 coverage: absence gate relaxed from `COMPLETE` to `not ABSENT` — the
+    corpus PASSED. Every absence question ranged exactly over its grant. Added
+    `combat-state.partial-grant-cannot-prove-absence-before-it-begins` (a
+    real 160-second uncovered prefix); with the defect it fails
+    `EXACT PROVEN_ABSENCE` against `UNKNOWN INSUFFICIENT_COVERAGE`.
+  - M6/M8 public parity: MCP `structuredContent` diverging from REST failed
+    two parity cases at the SDK's output schema; a schema-valid divergence in
+    the MCP text block failed the same two at the three-way comparison.
 
 ## Regenerating the manifest
 
 ```powershell
 node scripts/corpus/build-manifest.mjs
 npx prettier --write tests/corpus/manifest.json
-npx vitest run --project node tests/unit/m9b-corpus-manifest.test.ts tests/unit/m9b-corpus-harness.test.ts
-npx vitest run --project workers tests/regression/m9b-corpus-gate.test.ts
+npm run test:corpus -- --write-report   # when cases changed: rewrites tests/corpus/report.json from the execution
+npm run test:corpus
 ```
 
 A new slice from `scripts/sanitize-probe.mjs` lands under `artifacts/wcl-events/`

@@ -68,6 +68,13 @@ import pinnedRogueDotDurations from "../../../src/data/game/rogue-dot-durations.
  * No version-1 corpus exists outside this repository, so there is no
  * migration layer: a version-1 manifest is rejected with an explicit error
  * that says to regenerate it (`scripts/corpus/build-manifest.mjs`).
+ *
+ * M9-C added to version 2 WITHOUT bumping it, because every addition is
+ * compatible — an M9-B manifest is still a valid version-2 manifest with the
+ * same meaning: an optional `performanceContext` on a capture source, a
+ * capture-only `{ sourceId }` actor filter alongside `"NONE"`, and new
+ * assertion kinds. A change that would give an existing manifest a different
+ * meaning is what moves the number.
  */
 export const CORPUS_CONTRACT_VERSION = 2;
 
@@ -517,6 +524,23 @@ export const ASSERTION_KINDS = {
   },
 
   // ---- COMBAT_STATE --------------------------------------------------------
+  "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT": {
+    owningLayer: "COMBAT_STATE",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        abilityGameId: z.number().int(),
+        at: temporalLocator,
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "Asked for the last COMPLETE cast of this ability by this actor at or before the locator, the state layer answers EXACT null — a PROVEN absence, earned by COMPLETE CASTS coverage for the actor from the fight start to the locator. The positive form of the absence gate: the only way 'never cast' is ever said.",
+  },
   "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN": {
     owningLayer: "COMBAT_STATE",
     outcomeClass: "UNKNOWN",
@@ -749,6 +773,190 @@ export const ASSERTION_KINDS = {
       "The remaining duration of this actor's DoT on this target, immediately before the observed cast, derives to exactly this from the pinned duration dataset and the observed anchor — or refuses with exactly this blocker.",
   },
 
+  "WCL_PAGINATION.PAGE_ENVELOPE_FACTS": {
+    owningLayer: "WCL_TRANSPORT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_GRAPHQL_PAGE_SEQUENCE"],
+    params: z
+      .object({
+        pages: z
+          .array(
+            z
+              .object({
+                eventCount: z.number().int().nonnegative(),
+                firstTimestamp: z.number().int().nullable(),
+                lastTimestamp: z.number().int().nullable(),
+                /** Verbatim from the envelope. `null` is the terminal page. */
+                nextPageTimestamp: z.number().int().nullable(),
+              })
+              .strict(),
+          )
+          .min(1),
+        /**
+         * The observed relation between consecutive real pages: the cursor a
+         * page returns is exactly the first timestamp of the next page, and is
+         * strictly greater than the last timestamp of the page that returned
+         * it. No overlap and no gap was observed; a future capture that shows
+         * either must add a new rule name rather than weaken this one.
+         */
+        boundaryRule: z.literal("CURSOR_IS_NEXT_PAGE_FIRST_TIMESTAMP_AND_EXCEEDS_PREVIOUS_LAST"),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "Each page envelope, through the real decoder, carries exactly these counts, first/last timestamps and verbatim cursor, and every consecutive pair obeys the stated boundary rule. Terminal versus non-terminal state is the cursor's nullness, read verbatim.",
+  },
+  "NORMALIZATION.ACTOR_CATALOG": {
+    owningLayer: "NORMALIZATION",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_GRAPHQL_DATA"],
+    params: z
+      .object({
+        fightId: z.number().int(),
+        expected: z
+          .object({
+            actors: z.number().int(),
+            players: z.number().int(),
+            pets: z.number().int(),
+            npcs: z.number().int(),
+            unknown: z.number().int(),
+            unusableEntries: z.number().int(),
+            /** Pet → owner links read from `petOwner` ONLY. */
+            petOwnerLinks: z.array(
+              z.object({ actorId: z.number().int(), petOwnerActorId: z.number().int() }).strict(),
+            ),
+            /** Actor ids the catalog must hold, verbatim from master data. */
+            holdsActorIds: z.array(z.number().int()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The real fight-context decoder and normalizer build exactly this actor catalog from master data: counts by type, pet-owner links from `petOwner` and nothing else, and the listed ids present. Names are not read.",
+  },
+  "NORMALIZATION.FIGHT_HEADER": {
+    owningLayer: "NORMALIZATION",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_GRAPHQL_DATA"],
+    params: z
+      .object({
+        fightId: z.number().int(),
+        expected: z
+          .object({
+            encounterId: z.number().int(),
+            difficulty: z.number().int().nullable(),
+            kill: z.boolean().nullable(),
+            startTimeMs: z.number().int(),
+            endTimeMs: z.number().int(),
+            finality: z.string().min(1),
+            friendlyPlayerCount: z.number().int(),
+            phases: z.array(
+              z
+                .object({
+                  phaseId: z.number().int(),
+                  isIntermission: z.boolean().nullable(),
+                  startTimeMs: z.number().int(),
+                })
+                .strict(),
+            ),
+            outcome: z
+              .object({
+                lastPhase: z.number().int().nullable(),
+                lastPhaseAsAbsoluteIndex: z.number().int().nullable(),
+                lastPhaseIsIntermission: z.boolean().nullable(),
+                bossPercentageRaw: z.number().nullable(),
+                fightPercentageRaw: z.number().nullable(),
+                wipeCalledReportTimeMs: z.number().int().nullable(),
+              })
+              .strict(),
+            zone: z.object({ id: z.number().int(), name: z.string() }).strict().nullable(),
+            abilities: z.number().int(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The real fight-context decoder and normalizer read exactly these typed fight facts — header, phase transitions with their intermission flags, verbatim outcome facts, zone and ability-catalog size — from a real report context.",
+  },
+  "WCL_TRANSPORT.FIGHT_IDENTITY": {
+    owningLayer: "WCL_TRANSPORT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_GRAPHQL_DATA"],
+    params: z
+      .object({
+        fightId: z.number().int(),
+        sourceId: z.number().int(),
+        expected: z.discriminatedUnion("ok", [
+          z
+            .object({
+              ok: z.literal(true),
+              className: z.string().min(1),
+              specName: z.string().min(1),
+              /** The redacted placeholder the artifact carries, proving the name is READ, not the real one. */
+              playerName: z.string().min(1),
+              reportRevision: z.number().int(),
+              logVersion: z.number().int(),
+              gameVersion: z.number().int().nullable(),
+            })
+            .strict(),
+          z
+            .object({
+              ok: z.literal(false),
+              reason: z.enum([
+                "REPORT_NOT_ACCESSIBLE",
+                "FIGHT_NOT_FOUND",
+                "SOURCE_NOT_FOUND",
+                "SOURCE_NOT_A_PLAYER",
+                "SOURCE_NOT_IN_FIGHT",
+                "IDENTITY_UNRESOLVED",
+                "UPSTREAM_DATA_INVALID",
+              ]),
+            })
+            .strict(),
+        ]),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The real preflight decoder and identity resolver, over a real report context, resolve this (fight, source) exactly so: name, class and index-aligned spec together, or the named refusal. A pet is not a player; an absent id is not found; a player absent from the pull is not in it.",
+  },
+  "APPLICATION_SERVICE.FIGHT_ANALYSIS": {
+    owningLayer: "APPLICATION_SERVICE",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        subject: z
+          .object({ actorId: z.number().int(), className: z.string().min(1), specName: z.string().min(1) })
+          .strict(),
+        expected: z
+          .object({
+            status: z.enum(["ANALYZED", "SPEC_NOT_SUPPORTED"]),
+            specId: z.string().nullable(),
+            analyzerId: z.string().nullable(),
+            /** `null` when no analyzer ran and nothing was retrieved. */
+            scope: z.enum(["PLAYER_CONTEXT", "FULL_RAID"]).nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The real application service over the artifact — preflight and ingestion faked, everything between them production — derives exactly this ingestion scope from the enabled analyzers, recognizes exactly this specialization and analyzer, and reports exactly this status. Never a transport.",
+  },
+
   // ---- PUBLIC_CONTRACT -----------------------------------------------------
   "PUBLIC_CONTRACT.REST_MCP_PARITY": {
     owningLayer: "PUBLIC_CONTRACT",
@@ -778,7 +986,60 @@ export const ASSERTION_KINDS = {
           fightIds: z.array(z.number().int()).min(1),
           subjectFightId: z.number().int(),
           subject: z.object({ actorId: z.number().int() }).strict(),
-          expected: z.object({ externalReferenceStatus: z.literal("NOT_REQUESTED") }).strict(),
+          /**
+           * The subject pull's encounter facts, stated so external candidates
+           * can be qualified against them. Omitted for a local-only request.
+           */
+          subjectFight: z
+            .object({
+              encounterId: z.number().int(),
+              difficulty: z.number().int(),
+              durationMs: z.number().int(),
+            })
+            .strict()
+            .optional(),
+          /**
+           * External-reference discovery, entirely offline: the ranking page is
+           * served from a corpus artifact, candidate metadata from a
+           * SYNTHETIC per-candidate report (a stated test premise, never a
+           * capture), and the port failure modes are injected. Omitted for a
+           * local-only request.
+           */
+          external: z
+            .object({
+              rankingsArtifactId: z.string().min(1),
+              /** How the ranking port behaves. `SERVE` answers from the artifact. */
+              rankingPort: z.enum(["SERVE", "TRANSPORT_FAILURE"]),
+              /** Candidates (by remapped report code) whose metadata request answers null. */
+              metadataUnavailableFor: z.array(z.string().min(1)),
+              className: z.string().min(1),
+              specName: z.string().min(1),
+            })
+            .strict()
+            .optional(),
+          expected: z.discriminatedUnion("externalReferenceStatus", [
+            z.object({ externalReferenceStatus: z.literal("NOT_REQUESTED") }).strict(),
+            z.object({ externalReferenceStatus: z.literal("PAYLOAD_UNRECOGNISED") }).strict(),
+            z
+              .object({
+                externalReferenceStatus: z.literal("COMPLETED"),
+                qualified: z.number().int().nonnegative(),
+                failures: z.number().int().nonnegative(),
+                ineligible: z.number().int().nonnegative(),
+                /** Every qualified reference's overall comparability, deduplicated. Across reports this is UNKNOWN. */
+                comparability: z.enum([
+                  "COMPARABLE",
+                  "COMPARABLE_WITH_CAVEATS",
+                  "NOT_COMPARABLE",
+                  "UNKNOWN",
+                  "NONE",
+                ]),
+                /** Metadata lookups the discovery issued. Bounded by MAX_QUALIFIED_CANDIDATES. */
+                metadataRequests: z.number().int().nonnegative(),
+                rankingRequests: z.number().int().nonnegative(),
+              })
+              .strict(),
+          ]),
         })
         .strict(),
     ]),
@@ -821,18 +1082,53 @@ const reportTimeRange = z
   .object({ fromReportTimeMs: z.number().int(), toReportTimeMs: z.number().int() })
   .strict();
 
-/** The retrieval that produced the SOURCE capture. Records what was asked, verbatim. */
-const captureQuery = z
+/** An events retrieval — the analyzer's own `EVENTS_QUERY` shape. */
+const eventsCaptureQuery = z
   .object({
     dataType: z.literal("All"),
     hostilityType: z.literal("OMITTED"),
-    actorFilter: z.literal("NONE"),
+    /**
+     * `"NONE"` for every analyzer-shaped query. `{ sourceId }` records a
+     * CAPTURE-ONLY filter used to bound a probe to one actor's events; the
+     * analyzer never filters by actor (see `src/wcl/events-query.ts`), and an
+     * artifact captured this way retains no coverage for anyone.
+     */
+    actorFilter: z.union([z.literal("NONE"), z.object({ sourceId: z.number().int() }).strict()]),
     includeResources: z.boolean(),
     limit: recordedInt,
     startTimeMs: recordedInt,
     endTimeMs: recordedInt,
   })
   .strict();
+
+/**
+ * The retrieval that produced the SOURCE capture. Records what was asked,
+ * verbatim.
+ *
+ * An events query is the original (and unchanged) shape. M9-C added the two
+ * typed, non-event retrievals the corpus now holds captures of, each keyed by
+ * its own `kind` so the events shape did not have to change: a report's
+ * fight context (`FIGHT_CONTEXT_QUERY`), and one page of an encounter's
+ * character rankings. A non-event capture has no report-time window, so the
+ * loader applies its window rule to events captures only.
+ */
+const captureQuery = z.union([
+  eventsCaptureQuery,
+  z.object({ kind: z.literal("FIGHT_CONTEXT"), fightIds: z.array(z.number().int()).min(1) }).strict(),
+  z
+    .object({
+      kind: z.literal("ENCOUNTER_CHARACTER_RANKINGS"),
+      encounterId: z.number().int(),
+      difficulty: z.number().int(),
+      className: z.string().min(1),
+      specName: z.string().min(1),
+      metric: z.enum(["dps", "hps"]),
+      /** `OMITTED` is Warcraft Logs' default: the latest partition AT CAPTURE TIME, which moves. */
+      partition: z.union([z.number().int(), z.literal("OMITTED")]),
+      page: z.number().int().positive(),
+    })
+    .strict(),
+]);
 
 /**
  * Pagination and completeness evidence for the SOURCE capture — the thing the
@@ -878,6 +1174,39 @@ const captureSource = z
     /** Where the raw capture is, if anywhere. Raw output is gitignored and is normally NOT retained. */
     rawCaptureRetained: z.literal(false),
     rawCaptureLocation: recordedString,
+    /**
+     * Why this subject was selected, in Warcraft Logs' own performance terms.
+     *
+     * CONTEXT ONLY. A bracket explains why a fixture is in the corpus; it never
+     * determines an expected action, verdict or coaching result, and no
+     * assertion kind can read it. Names are never retained: the subject is
+     * identified by the actor id the corpus already uses.
+     */
+    performanceContext: z
+      .object({
+        source: z.string().min(1),
+        partition: recordedInt,
+        metric: z.enum(["dps", "hps"]),
+        subjects: z.array(
+          z
+            .object({
+              actorId: z.number().int(),
+              className: z.string().min(1),
+              specName: z.string().min(1),
+              rankPercent: z.number(),
+              bracketPercent: z.number(),
+              bracket: z.number().int(),
+              /** Item-level bracket key, verbatim. Uninterpreted. */
+              bracketData: z.number().int(),
+              totalParses: z.number().int(),
+            })
+            .strict(),
+        ),
+        fightOutcome: z.enum(["KILL", "WIPE"]),
+        fightDurationMs: z.number().int(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

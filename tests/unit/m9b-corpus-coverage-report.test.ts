@@ -25,6 +25,8 @@ describe("coverage is measured from the corpus", () => {
     expect(report.cases.declared).toBe(0);
     expect(report.artifacts.sourceCaptures.map((s) => `${s.reportCode}/${String(s.fightId)}`)).toEqual([
       "A7R6kxPJ1hC8YQ4w/7",
+      "encounter 3420/difficulty 4",
+      "gtKb2xHn87pNcFfW/22",
       "qJ1pgB49ZrRNVmCd/6",
     ]);
   });
@@ -51,6 +53,7 @@ describe("coverage is measured from the corpus", () => {
     expect(report.artifacts.withRetainedCoverage).toEqual([
       "wcl-assassination-d2-decision-corpus",
       "wcl-assassination-garrote-dot-remains",
+      "wcl-assassination-high-parse-opener",
       "wcl-assassination-kingsbane-cooldown",
     ]);
   });
@@ -83,11 +86,86 @@ describe("every declared gap is actionable", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("records the APPLICATION_SERVICE gap, the one layer with no corpus case", async () => {
+  it("leaves no layer without a corpus case since M9-C", async () => {
     const report = corpusCoverageReport(await loadCorpusOrThrow(committedCorpusFiles()));
     const empty = report.byLayer.filter((layer) => layer.cases === 0).map((layer) => layer.owningLayer);
 
-    expect(empty).toEqual(["APPLICATION_SERVICE"]);
-    expect(report.gaps.some((gap) => gap.layers.includes("APPLICATION_SERVICE"))).toBe(true);
+    expect(empty).toEqual([]);
+  });
+
+  it("carries M9-C's disposition of every M9-B gap, and a closed gap names cases that exist", async () => {
+    const corpus = await loadCorpusOrThrow(committedCorpusFiles());
+    const caseIds = new Set(corpus.cases.map((entry) => entry.record.caseId));
+    const byDisposition = new Map<string, string[]>();
+    for (const gap of KNOWN_EVIDENCE_GAPS) {
+      byDisposition.set(gap.disposition, [...(byDisposition.get(gap.disposition) ?? []), gap.id]);
+      expect(gap.whyItMatters.length, gap.id).toBeGreaterThan(40);
+      expect(gap.currentSupport.length, gap.id).toBeGreaterThan(40);
+      expect(gap.existingEvidence.length, gap.id).toBeGreaterThan(20);
+      expect(gap.owner.length, gap.id).toBeGreaterThan(1);
+      expect(gap.closedBy.length > 0, gap.id).toBe(gap.disposition === "CLOSE_IN_M9");
+      for (const caseId of gap.closedBy) expect(caseIds.has(caseId), `${gap.id} -> ${caseId}`).toBe(true);
+      if (gap.disposition === "CLOSE_IN_M9") expect(gap.owner).toBe("M9");
+    }
+    expect(byDisposition.get("BLOCKS_M9_CLOSEOUT")).toBeUndefined();
+    expect(byDisposition.get("PROVEN_BY_SYNTHETIC_CONTRACT")).toBeUndefined();
+    expect(byDisposition.get("CLOSE_IN_M9")).toEqual([
+      "no-pet-or-guardian-actor",
+      "no-real-page-boundary",
+      "no-real-partial-retrieval",
+      "no-application-service-cases",
+      "no-external-reference-fixture",
+      "single-report-assassination-corpus",
+    ]);
+    expect(byDisposition.get("DEFER_TO_MILESTONE")).toEqual([
+      "no-interrupt-events",
+      "no-death-or-dispel-events",
+      "no-targetability-or-intermission",
+      "no-protection-paladin-evidence",
+      "assassination-corpus-breadth",
+    ]);
+    expect(byDisposition.get("OUTSIDE_CURRENT_CAPABILITY")).toEqual(["no-identity-conflict-capture"]);
+    // Every deferred or out-of-capability gap names a canonical milestone owner.
+    for (const gap of KNOWN_EVIDENCE_GAPS) {
+      if (gap.disposition === "CLOSE_IN_M9") continue;
+      expect(gap.owner, gap.id).toMatch(/^M1[0-5] \(/);
+    }
+  });
+
+  it("closes a gap only by cases that actually pin the closing behaviour", async () => {
+    // The closing case must read the artifact the gap's evidence lives in.
+    const corpus = await loadCorpusOrThrow(committedCorpusFiles());
+    const artifactsOf = (caseId: string) =>
+      corpus.cases.find((entry) => entry.record.caseId === caseId)?.referencedArtifactIds ?? [];
+    expect(artifactsOf("normalization.pet-sourced-events-keep-the-pet-as-source")).toEqual([
+      "wcl-pet-sourced-events-hunter-pet-29",
+    ]);
+    expect(
+      artifactsOf(
+        "public-contract.encounter-context-parity-with-external-references-over-a-real-ranking-page",
+      ),
+    ).toEqual(["wcl-assassination-d2-decision-corpus", "wcl-encounter-rankings-sszorak-page-1"]);
+    expect(artifactsOf("wcl-transport.missing-later-page-keeps-four-real-pages-and-stays-partial")).toEqual([
+      "wcl-page-sequence-limit-40.page-5-removed",
+    ]);
+  });
+
+  it("closes the single-report gap only with cases over ONE coherent report, fight and source", async () => {
+    const corpus = await loadCorpusOrThrow(committedCorpusFiles());
+    const gap = KNOWN_EVIDENCE_GAPS.find((entry) => entry.id === "single-report-assassination-corpus");
+    if (gap === undefined) throw new Error("gap missing");
+    const coordinates = new Set<string>();
+    for (const caseId of gap.closedBy) {
+      const kase = corpus.cases.find((entry) => entry.record.caseId === caseId);
+      if (kase === undefined) throw new Error(caseId);
+      const source = kase.artifact.record.provenance.source;
+      if (source === null) throw new Error(`${caseId} reads an artifact with no capture source`);
+      coordinates.add(
+        `${String(source.reportCode)}/${String(source.fightId)}/${String(source.sourceActorId)}`,
+      );
+    }
+    expect([...coordinates]).toEqual(["gtKb2xHn87pNcFfW/22/25"]);
+    // And that report is not the D2 report: the gap is about a SECOND subject.
+    expect(coordinates.has("A7R6kxPJ1hC8YQ4w/7/19")).toBe(false);
   });
 });

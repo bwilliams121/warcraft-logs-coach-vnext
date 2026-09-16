@@ -1,0 +1,1823 @@
+{
+  "worldData": {
+    "encounter": {
+      "id": 3420,
+      "name": "Sszorak",
+      "characterRankings": {
+        "page": 1,
+        "hasMorePages": true,
+        "count": 100,
+        "rankings": [
+          {
+            "name": "Candidate1",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 244075.07961979,
+            "hardModeLevel": 0,
+            "duration": 284791,
+            "startTime": 1789341185411,
+            "report": {
+              "code": "RANK0001AAAAAAAA",
+              "fightID": 22,
+              "startTime": 1789338770370
+            },
+            "bracketData": 325,
+            "faction": 1,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate2",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 238645.2215066,
+            "hardModeLevel": 0,
+            "duration": 296244,
+            "startTime": 1789303982223,
+            "report": {
+              "code": "RANK0002AAAAAAAA",
+              "fightID": 26,
+              "startTime": 1789301049147
+            },
+            "bracketData": 322,
+            "faction": 0,
+            "size": 27,
+            "server": null
+          },
+          {
+            "name": "Candidate3",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 236598.55538277,
+            "hardModeLevel": 0,
+            "duration": 403844,
+            "startTime": 1789419653552,
+            "report": {
+              "code": "RANK0003AAAAAAAA",
+              "fightID": 76,
+              "startTime": 1789397511717
+            },
+            "bracketData": 321,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate4",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 235364.21953206,
+            "hardModeLevel": 0,
+            "duration": 287302,
+            "startTime": 1789128968735,
+            "report": {
+              "code": "RANK0004AAAAAAAA",
+              "fightID": 36,
+              "startTime": 1789125516256
+            },
+            "bracketData": 325,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate5",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 234618.43266685,
+            "hardModeLevel": 0,
+            "duration": 416912,
+            "startTime": 1788972454261,
+            "report": {
+              "code": "RANK0005AAAAAAAA",
+              "fightID": 23,
+              "startTime": 1788969476637
+            },
+            "hidden": true,
+            "bracketData": 322,
+            "faction": 0,
+            "size": 28,
+            "server": null
+          },
+          {
+            "name": "Candidate6",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 228804.04698104,
+            "hardModeLevel": 0,
+            "duration": 399310,
+            "startTime": 1789030938446,
+            "report": {
+              "code": "RANK0006AAAAAAAA",
+              "fightID": 25,
+              "startTime": 1789027059891
+            },
+            "bracketData": 321,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate7",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 228337.77056053,
+            "hardModeLevel": 0,
+            "duration": 290046,
+            "startTime": 1789065450583,
+            "report": {
+              "code": "RANK0007AAAAAAAA",
+              "fightID": 26,
+              "startTime": 1789057517530
+            },
+            "bracketData": 319,
+            "faction": 0,
+            "size": 20,
+            "server": null
+          },
+          {
+            "name": "Candidate8",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 227719.23853495,
+            "hardModeLevel": 0,
+            "duration": 304098,
+            "startTime": 1788631906805,
+            "report": {
+              "code": "RANK0008AAAAAAAA",
+              "fightID": 13,
+              "startTime": 1788629048582
+            },
+            "bracketData": 322,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate9",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 224658.13623079,
+            "hardModeLevel": 0,
+            "duration": 283651,
+            "startTime": 1789068839467,
+            "report": {
+              "code": "RANK0009AAAAAAAA",
+              "fightID": 33,
+              "startTime": 1789063117450
+            },
+            "bracketData": 319,
+            "faction": 1,
+            "size": 22,
+            "server": null
+          },
+          {
+            "name": "Candidate10",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 224309.53897705,
+            "hardModeLevel": 0,
+            "duration": 313954,
+            "startTime": 1788976854696,
+            "report": {
+              "code": "RANK0010AAAAAAAA",
+              "fightID": 22,
+              "startTime": 1788967993795
+            },
+            "bracketData": 320,
+            "faction": 1,
+            "size": 21,
+            "server": null
+          },
+          {
+            "name": "Candidate11",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 224014.33826181,
+            "hardModeLevel": 0,
+            "duration": 277300,
+            "startTime": 1788373298679,
+            "report": {
+              "code": "RANK0011AAAAAAAA",
+              "fightID": 26,
+              "startTime": 1788369825922
+            },
+            "bracketData": 315,
+            "faction": 1,
+            "size": 28,
+            "server": null
+          },
+          {
+            "name": "Candidate12",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 223938.42724398,
+            "hardModeLevel": 0,
+            "duration": 412715,
+            "startTime": 1789425320965,
+            "report": {
+              "code": "RANK0012AAAAAAAA",
+              "fightID": 58,
+              "startTime": 1789412341201
+            },
+            "bracketData": 322,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate13",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 223686.37075863,
+            "hardModeLevel": 0,
+            "duration": 288468,
+            "startTime": 1788979687198,
+            "report": {
+              "code": "RANK0013AAAAAAAA",
+              "fightID": 22,
+              "startTime": 1788976614721
+            },
+            "bracketData": 319,
+            "faction": 0,
+            "size": 20,
+            "server": null
+          },
+          {
+            "name": "Candidate14",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 223574.69873669,
+            "hardModeLevel": 0,
+            "duration": 267789,
+            "startTime": 1789133671235,
+            "report": {
+              "code": "RANK0014AAAAAAAA",
+              "fightID": 39,
+              "startTime": 1789128620977
+            },
+            "bracketData": 320,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate15",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 223322.29683041,
+            "hardModeLevel": 0,
+            "duration": 379166,
+            "startTime": 1789445065626,
+            "report": {
+              "code": "RANK0015AAAAAAAA",
+              "fightID": 36,
+              "startTime": 1789439591491
+            },
+            "bracketData": 323,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate16",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 223127.72015457,
+            "hardModeLevel": 0,
+            "duration": 265518,
+            "startTime": 1788311006818,
+            "report": {
+              "code": "RANK0016AAAAAAAA",
+              "fightID": 10,
+              "startTime": 1788307224201
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate17",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 222681.80100996,
+            "hardModeLevel": 0,
+            "duration": 288527,
+            "startTime": 1789310678848,
+            "report": {
+              "code": "RANK0017AAAAAAAA",
+              "fightID": 23,
+              "startTime": 1789307926464
+            },
+            "bracketData": 321,
+            "faction": 0,
+            "size": 20,
+            "server": null
+          },
+          {
+            "name": "Candidate18",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 221244.51420075,
+            "hardModeLevel": 0,
+            "duration": 266324,
+            "startTime": 1788987287047,
+            "report": {
+              "code": "RANK0018AAAAAAAA",
+              "fightID": 45,
+              "startTime": 1788954457046
+            },
+            "bracketData": 321,
+            "faction": 1,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate19",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 221050.20931008,
+            "hardModeLevel": 0,
+            "duration": 278773,
+            "startTime": 1788379034953,
+            "report": {
+              "code": "RANK0019AAAAAAAA",
+              "fightID": 30,
+              "startTime": 1788357616599
+            },
+            "bracketData": 318,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate20",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 220629.66934895,
+            "hardModeLevel": 0,
+            "duration": 405624,
+            "startTime": 1789245569237,
+            "report": {
+              "code": "RANK0020AAAAAAAA",
+              "fightID": 19,
+              "startTime": 1789242814517
+            },
+            "bracketData": 321,
+            "faction": 0,
+            "size": 29,
+            "server": null
+          },
+          {
+            "name": "Candidate21",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 220553.77293553,
+            "hardModeLevel": 0,
+            "duration": 321063,
+            "startTime": 1788739698828,
+            "report": {
+              "code": "RANK0021AAAAAAAA",
+              "fightID": 6,
+              "startTime": 1788735030971
+            },
+            "hidden": true,
+            "bracketData": 317,
+            "faction": 0,
+            "size": 21,
+            "server": null
+          },
+          {
+            "name": "Candidate22",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 220531.29530329,
+            "hardModeLevel": 0,
+            "duration": 300061,
+            "startTime": 1788972235761,
+            "report": {
+              "code": "RANK0022AAAAAAAA",
+              "fightID": 23,
+              "startTime": 1788968730831
+            },
+            "bracketData": 319,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate23",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 220288.69654901,
+            "hardModeLevel": 0,
+            "duration": 269546,
+            "startTime": 1788436521828,
+            "report": {
+              "code": "RANK0023AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1788432683653
+            },
+            "bracketData": 316,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate24",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 220132.60006111,
+            "hardModeLevel": 0,
+            "duration": 396033,
+            "startTime": 1789206607177,
+            "report": {
+              "code": "RANK0024AAAAAAAA",
+              "fightID": 38,
+              "startTime": 1789200934899
+            },
+            "hidden": true,
+            "bracketData": 321,
+            "faction": 0,
+            "size": 29,
+            "server": null
+          },
+          {
+            "name": "Candidate25",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 219875.23877425,
+            "hardModeLevel": 0,
+            "duration": 297352,
+            "startTime": 1788936907434,
+            "report": {
+              "code": "RANK0025AAAAAAAA",
+              "fightID": 2,
+              "startTime": 1788935320969
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 20,
+            "server": null
+          },
+          {
+            "name": "Candidate26",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 219654.48005806,
+            "hardModeLevel": 0,
+            "duration": 410642,
+            "startTime": 1789390061544,
+            "report": {
+              "code": "RANK0026AAAAAAAA",
+              "fightID": 14,
+              "startTime": 1789386723708
+            },
+            "bracketData": 316,
+            "faction": 0,
+            "size": 21,
+            "server": null
+          },
+          {
+            "name": "Candidate27",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 219311.42182213,
+            "hardModeLevel": 0,
+            "duration": 391575,
+            "startTime": 1789357207003,
+            "report": {
+              "code": "RANK0027AAAAAAAA",
+              "fightID": 28,
+              "startTime": 1789353643478
+            },
+            "bracketData": 321,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate28",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 219230.37485404,
+            "hardModeLevel": 0,
+            "duration": 298036,
+            "startTime": 1789041545716,
+            "report": {
+              "code": "RANK0028AAAAAAAA",
+              "fightID": 12,
+              "startTime": 1789027480547
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate29",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 219013.5367093,
+            "hardModeLevel": 0,
+            "duration": 322752,
+            "startTime": 1789377174445,
+            "report": {
+              "code": "RANK0029AAAAAAAA",
+              "fightID": 18,
+              "startTime": 1789374335156
+            },
+            "hidden": true,
+            "bracketData": 321,
+            "faction": 0,
+            "size": 28,
+            "server": null
+          },
+          {
+            "name": "Candidate30",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 218736.49680427,
+            "hardModeLevel": 0,
+            "duration": 271769,
+            "startTime": 1788319816427,
+            "report": {
+              "code": "RANK0030AAAAAAAA",
+              "fightID": 13,
+              "startTime": 1788317375432
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 23,
+            "server": null
+          },
+          {
+            "name": "Candidate31",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 218707.16951821,
+            "hardModeLevel": 0,
+            "duration": 383652,
+            "startTime": 1789325835875,
+            "report": {
+              "code": "RANK0031AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1789322389842
+            },
+            "bracketData": 323,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate32",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 218134.87321835,
+            "hardModeLevel": 0,
+            "duration": 390159,
+            "startTime": 1788633859713,
+            "report": {
+              "code": "RANK0032AAAAAAAA",
+              "fightID": 43,
+              "startTime": 1788614256574
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 28,
+            "server": null
+          },
+          {
+            "name": "Candidate33",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 217636.15037376,
+            "hardModeLevel": 0,
+            "duration": 303936,
+            "startTime": 1788981071720,
+            "report": {
+              "code": "RANK0033AAAAAAAA",
+              "fightID": 30,
+              "startTime": 1788976821802
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate34",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 217284.6714245,
+            "hardModeLevel": 0,
+            "duration": 336848,
+            "startTime": 1789334584842,
+            "report": {
+              "code": "RANK0034AAAAAAAA",
+              "fightID": 49,
+              "startTime": 1789127842096
+            },
+            "hidden": true,
+            "bracketData": 319,
+            "faction": 0,
+            "size": 24,
+            "server": null
+          },
+          {
+            "name": "Candidate35",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 216737.91224567,
+            "hardModeLevel": 0,
+            "duration": 299518,
+            "startTime": 1789051296936,
+            "report": {
+              "code": "RANK0035AAAAAAAA",
+              "fightID": 68,
+              "startTime": 1788866294430
+            },
+            "bracketData": 317,
+            "faction": 1,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate36",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 216222.87044524,
+            "hardModeLevel": 0,
+            "duration": 316592,
+            "startTime": 1789128765351,
+            "report": {
+              "code": "RANK0036AAAAAAAA",
+              "fightID": 23,
+              "startTime": 1789119823257
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate37",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 216095.51188978,
+            "hardModeLevel": 0,
+            "duration": 309930,
+            "startTime": 1789380299067,
+            "report": {
+              "code": "RANK0037AAAAAAAA",
+              "fightID": 30,
+              "startTime": 1789373625754
+            },
+            "bracketData": 324,
+            "faction": 1,
+            "size": 23,
+            "server": null
+          },
+          {
+            "name": "Candidate38",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 216070.78942732,
+            "hardModeLevel": 0,
+            "duration": 266763,
+            "startTime": 1788609508421,
+            "report": {
+              "code": "RANK0038AAAAAAAA",
+              "fightID": 25,
+              "startTime": 1788605984953
+            },
+            "bracketData": 319,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate39",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 215780.85679481,
+            "hardModeLevel": 0,
+            "duration": 264334,
+            "startTime": 1788313635122,
+            "report": {
+              "code": "RANK0039AAAAAAAA",
+              "fightID": 23,
+              "startTime": 1788309906744
+            },
+            "bracketData": 315,
+            "faction": 0,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate40",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 215775.78625048,
+            "hardModeLevel": 0,
+            "duration": 296534,
+            "startTime": 1789067981709,
+            "report": {
+              "code": "RANK0040AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1789062633937
+            },
+            "bracketData": 322,
+            "faction": 1,
+            "size": 23,
+            "server": null
+          },
+          {
+            "name": "Candidate41",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 215643.94645144,
+            "hardModeLevel": 0,
+            "duration": 252257,
+            "startTime": 1789127687311,
+            "report": {
+              "code": "RANK0041AAAAAAAA",
+              "fightID": 34,
+              "startTime": 1789124029480
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate42",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 214887.60209546,
+            "hardModeLevel": 0,
+            "duration": 274498,
+            "startTime": 1788980448659,
+            "report": {
+              "code": "RANK0042AAAAAAAA",
+              "fightID": 23,
+              "startTime": 1788976503104
+            },
+            "bracketData": 321,
+            "faction": 0,
+            "size": 22,
+            "server": null
+          },
+          {
+            "name": "Candidate43",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 214772.63041017,
+            "hardModeLevel": 0,
+            "duration": 412487,
+            "startTime": 1789274344342,
+            "report": {
+              "code": "RANK0043AAAAAAAA",
+              "fightID": 26,
+              "startTime": 1789271023049
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate44",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 214756.70603738,
+            "hardModeLevel": 0,
+            "duration": 270167,
+            "startTime": 1788307666876,
+            "report": {
+              "code": "RANK0044AAAAAAAA",
+              "fightID": 17,
+              "startTime": 1788304500482
+            },
+            "bracketData": 314,
+            "faction": 0,
+            "size": 27,
+            "server": null
+          },
+          {
+            "name": "Candidate45",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 214736.38268835,
+            "hardModeLevel": 0,
+            "duration": 257191,
+            "startTime": 1788922146777,
+            "report": {
+              "code": "RANK0045AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1788918699317
+            },
+            "bracketData": 321,
+            "faction": 0,
+            "size": 28,
+            "server": null
+          },
+          {
+            "name": "Candidate46",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 214562.88654604,
+            "hardModeLevel": 0,
+            "duration": 278104,
+            "startTime": 1788746540551,
+            "report": {
+              "code": "RANK0046AAAAAAAA",
+              "fightID": 34,
+              "startTime": 1788732886255
+            },
+            "bracketData": 318,
+            "faction": 1,
+            "size": 24,
+            "server": null
+          },
+          {
+            "name": "Candidate47",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 213848.48944891,
+            "hardModeLevel": 0,
+            "duration": 289828,
+            "startTime": 1788783180550,
+            "report": {
+              "code": "RANK0047AAAAAAAA",
+              "fightID": 28,
+              "startTime": 1788765823746
+            },
+            "bracketData": 318,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate48",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 213683.48604078,
+            "hardModeLevel": 0,
+            "duration": 301557,
+            "startTime": 1789035117802,
+            "report": {
+              "code": "RANK0048AAAAAAAA",
+              "fightID": 37,
+              "startTime": 1789031086088
+            },
+            "hidden": true,
+            "bracketData": 318,
+            "faction": 1,
+            "size": 27,
+            "server": null
+          },
+          {
+            "name": "Candidate49",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212983.35358121,
+            "hardModeLevel": 0,
+            "duration": 262579,
+            "startTime": 1788374139300,
+            "report": {
+              "code": "RANK0049AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1788366126207
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate50",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212816.2343084,
+            "hardModeLevel": 0,
+            "duration": 273076,
+            "startTime": 1789046741130,
+            "report": {
+              "code": "RANK0050AAAAAAAA",
+              "fightID": 32,
+              "startTime": 1789041908923
+            },
+            "bracketData": 319,
+            "faction": 1,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate51",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212802.78524786,
+            "hardModeLevel": 0,
+            "duration": 287443,
+            "startTime": 1789133776255,
+            "report": {
+              "code": "RANK0051AAAAAAAA",
+              "fightID": 32,
+              "startTime": 1789129792301
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate52",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212785.3502102,
+            "hardModeLevel": 0,
+            "duration": 394149,
+            "startTime": 1788964786985,
+            "report": {
+              "code": "RANK0052AAAAAAAA",
+              "fightID": 37,
+              "startTime": 1788953517655
+            },
+            "hidden": true,
+            "bracketData": 319,
+            "faction": 0,
+            "size": 29,
+            "server": null
+          },
+          {
+            "name": "Candidate53",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212665.43071517,
+            "hardModeLevel": 0,
+            "duration": 263225,
+            "startTime": 1789090527271,
+            "report": {
+              "code": "RANK0053AAAAAAAA",
+              "fightID": 44,
+              "startTime": 1789075948692
+            },
+            "bracketData": 319,
+            "faction": 1,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate54",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212479.73994997,
+            "hardModeLevel": 0,
+            "duration": 275024,
+            "startTime": 1788379675388,
+            "report": {
+              "code": "RANK0054AAAAAAAA",
+              "fightID": 35,
+              "startTime": 1788374540286
+            },
+            "bracketData": 314,
+            "faction": 0,
+            "size": 19,
+            "server": null
+          },
+          {
+            "name": "Candidate55",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212152.64928804,
+            "hardModeLevel": 0,
+            "duration": 287096,
+            "startTime": 1788573358565,
+            "report": {
+              "code": "RANK0055AAAAAAAA",
+              "fightID": 104,
+              "startTime": 1788225041888
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 20,
+            "server": null
+          },
+          {
+            "name": "Candidate56",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212126.5170457,
+            "hardModeLevel": 0,
+            "duration": 301161,
+            "startTime": 1789041609413,
+            "report": {
+              "code": "RANK0056AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1789038277232
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate57",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 212081.05484846,
+            "hardModeLevel": 0,
+            "duration": 273025,
+            "startTime": 1789045485069,
+            "report": {
+              "code": "RANK0057AAAAAAAA",
+              "fightID": 40,
+              "startTime": 1789037961707
+            },
+            "bracketData": 317,
+            "faction": 1,
+            "size": 22,
+            "server": null
+          },
+          {
+            "name": "Candidate58",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211980.63947169,
+            "hardModeLevel": 0,
+            "duration": 390072,
+            "startTime": 1789450015620,
+            "report": {
+              "code": "RANK0058AAAAAAAA",
+              "fightID": 33,
+              "startTime": 1789446070993
+            },
+            "bracketData": 321,
+            "faction": 0,
+            "size": 28,
+            "server": null
+          },
+          {
+            "name": "Candidate59",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211967.78804918,
+            "hardModeLevel": 0,
+            "duration": 272818,
+            "startTime": 1788463727140,
+            "report": {
+              "code": "RANK0059AAAAAAAA",
+              "fightID": 38,
+              "startTime": 1788451821044
+            },
+            "bracketData": 314,
+            "faction": 0,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate60",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211905.19920836,
+            "hardModeLevel": 0,
+            "duration": 311759,
+            "startTime": 1789221972855,
+            "report": {
+              "code": "RANK0060AAAAAAAA",
+              "fightID": 29,
+              "startTime": 1789218501148
+            },
+            "bracketData": 322,
+            "faction": 0,
+            "size": 27,
+            "server": null
+          },
+          {
+            "name": "Candidate61",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211657.29764738,
+            "hardModeLevel": 0,
+            "duration": 274842,
+            "startTime": 1788986544405,
+            "report": {
+              "code": "RANK0061AAAAAAAA",
+              "fightID": 36,
+              "startTime": 1788980936007
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 21,
+            "server": null
+          },
+          {
+            "name": "Candidate62",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211610.67773502,
+            "hardModeLevel": 0,
+            "duration": 347658,
+            "startTime": 1789229530090,
+            "report": {
+              "code": "RANK0062AAAAAAAA",
+              "fightID": 3,
+              "startTime": 1789226197688
+            },
+            "bracketData": 323,
+            "faction": 0,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate63",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211454.05177117,
+            "hardModeLevel": 0,
+            "duration": 284135,
+            "startTime": 1789065346963,
+            "report": {
+              "code": "RANK0063AAAAAAAA",
+              "fightID": 22,
+              "startTime": 1789062207464
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 23,
+            "server": null
+          },
+          {
+            "name": "Candidate64",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211394.77867688,
+            "hardModeLevel": 0,
+            "duration": 306972,
+            "startTime": 1788388616044,
+            "report": {
+              "code": "RANK0064AAAAAAAA",
+              "fightID": 15,
+              "startTime": 1788381480117
+            },
+            "bracketData": 321,
+            "faction": 0,
+            "size": 22,
+            "server": null
+          },
+          {
+            "name": "Candidate65",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211371.28554871,
+            "hardModeLevel": 0,
+            "duration": 297655,
+            "startTime": 1788980363537,
+            "report": {
+              "code": "RANK0065AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1788976483201
+            },
+            "bracketData": 316,
+            "faction": 1,
+            "size": 22,
+            "server": null
+          },
+          {
+            "name": "Candidate66",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 211262.56315678,
+            "hardModeLevel": 0,
+            "duration": 260265,
+            "startTime": 1788980570110,
+            "report": {
+              "code": "RANK0066AAAAAAAA",
+              "fightID": 30,
+              "startTime": 1788969281182
+            },
+            "bracketData": 320,
+            "faction": 1,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate67",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210900.87959395,
+            "hardModeLevel": 0,
+            "duration": 263417,
+            "startTime": 1789191221904,
+            "report": {
+              "code": "RANK0067AAAAAAAA",
+              "fightID": 14,
+              "startTime": 1789189096388
+            },
+            "bracketData": 322,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate68",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210879.91901344,
+            "hardModeLevel": 0,
+            "duration": 298815,
+            "startTime": 1789325475955,
+            "report": {
+              "code": "RANK0068AAAAAAAA",
+              "fightID": 17,
+              "startTime": 1789315999976
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate69",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210751.08571278,
+            "hardModeLevel": 0,
+            "duration": 303257,
+            "startTime": 1789302067039,
+            "report": {
+              "code": "RANK0069AAAAAAAA",
+              "fightID": 45,
+              "startTime": 1789286826989
+            },
+            "bracketData": 320,
+            "faction": 1,
+            "size": 24,
+            "server": null
+          },
+          {
+            "name": "Candidate70",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210670.15991104,
+            "hardModeLevel": 0,
+            "duration": 307546,
+            "startTime": 1788805554094,
+            "report": {
+              "code": "RANK0070AAAAAAAA",
+              "fightID": 17,
+              "startTime": 1788802207454
+            },
+            "bracketData": 317,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate71",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210667.47144922,
+            "hardModeLevel": 0,
+            "duration": 245615,
+            "startTime": 1789044163671,
+            "report": {
+              "code": "RANK0071AAAAAAAA",
+              "fightID": 23,
+              "startTime": 1789041416588
+            },
+            "bracketData": 317,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate72",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210619.76259378,
+            "hardModeLevel": 0,
+            "duration": 291652,
+            "startTime": 1789218078048,
+            "report": {
+              "code": "RANK0072AAAAAAAA",
+              "fightID": 38,
+              "startTime": 1789215010272
+            },
+            "bracketData": 318,
+            "faction": 1,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate73",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210550.81131485,
+            "hardModeLevel": 0,
+            "duration": 342099,
+            "startTime": 1789047707417,
+            "report": {
+              "code": "RANK0073AAAAAAAA",
+              "fightID": 17,
+              "startTime": 1789044407055
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 27,
+            "server": null
+          },
+          {
+            "name": "Candidate74",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210514.2997538,
+            "hardModeLevel": 0,
+            "duration": 392769,
+            "startTime": 1789400713727,
+            "report": {
+              "code": "RANK0074AAAAAAAA",
+              "fightID": 139,
+              "startTime": 1789362743632
+            },
+            "bracketData": 321,
+            "faction": 0,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate75",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210494.81232778,
+            "hardModeLevel": 0,
+            "duration": 267461,
+            "startTime": 1788975452625,
+            "report": {
+              "code": "RANK0075AAAAAAAA",
+              "fightID": 5,
+              "startTime": 1788974661349
+            },
+            "bracketData": 320,
+            "faction": 1,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate76",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210363.61714613,
+            "hardModeLevel": 0,
+            "duration": 274371,
+            "startTime": 1788890279820,
+            "report": {
+              "code": "RANK0076AAAAAAAA",
+              "fightID": 26,
+              "startTime": 1788882448489
+            },
+            "bracketData": 319,
+            "faction": 0,
+            "size": 23,
+            "server": null
+          },
+          {
+            "name": "Candidate77",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210316.67491161,
+            "hardModeLevel": 0,
+            "duration": 274916,
+            "startTime": 1788376937470,
+            "report": {
+              "code": "RANK0077AAAAAAAA",
+              "fightID": 8,
+              "startTime": 1788371519764
+            },
+            "bracketData": 319,
+            "faction": 1,
+            "size": 29,
+            "server": null
+          },
+          {
+            "name": "Candidate78",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 210192.19586952,
+            "hardModeLevel": 0,
+            "duration": 272753,
+            "startTime": 1788942716579,
+            "report": {
+              "code": "RANK0078AAAAAAAA",
+              "fightID": 21,
+              "startTime": 1788939588116
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 24,
+            "server": null
+          },
+          {
+            "name": "Candidate79",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209923.29576348,
+            "hardModeLevel": 0,
+            "duration": 285069,
+            "startTime": 1788948595656,
+            "report": {
+              "code": "RANK0079AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1788943942868
+            },
+            "bracketData": 318,
+            "faction": 1,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate80",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209621.88506674,
+            "hardModeLevel": 0,
+            "duration": 287767,
+            "startTime": 1788311192496,
+            "report": {
+              "code": "RANK0080AAAAAAAA",
+              "fightID": 32,
+              "startTime": 1788306890184
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 24,
+            "server": null
+          },
+          {
+            "name": "Candidate81",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209589.11489409,
+            "hardModeLevel": 0,
+            "duration": 340061,
+            "startTime": 1788818524865,
+            "report": {
+              "code": "RANK0081AAAAAAAA",
+              "fightID": 10,
+              "startTime": 1788802875487
+            },
+            "bracketData": 319,
+            "faction": 0,
+            "size": 29,
+            "server": null
+          },
+          {
+            "name": "Candidate82",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209545.84939389,
+            "hardModeLevel": 0,
+            "duration": 286416,
+            "startTime": 1788978929253,
+            "report": {
+              "code": "RANK0082AAAAAAAA",
+              "fightID": 22,
+              "startTime": 1788973075218
+            },
+            "bracketData": 320,
+            "faction": 1,
+            "size": 22,
+            "server": null
+          },
+          {
+            "name": "Candidate83",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209535.38260209,
+            "hardModeLevel": 0,
+            "duration": 284264,
+            "startTime": 1789048690281,
+            "report": {
+              "code": "RANK0083AAAAAAAA",
+              "fightID": 34,
+              "startTime": 1789042978742
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate84",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209403.5620206,
+            "hardModeLevel": 0,
+            "duration": 266871,
+            "startTime": 1788438777399,
+            "report": {
+              "code": "RANK0084AAAAAAAA",
+              "fightID": 19,
+              "startTime": 1788435387436
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 28,
+            "server": null
+          },
+          {
+            "name": "Candidate85",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209310.87983359,
+            "hardModeLevel": 0,
+            "duration": 301898,
+            "startTime": 1788387184685,
+            "report": {
+              "code": "RANK0085AAAAAAAA",
+              "fightID": 36,
+              "startTime": 1788359437286
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 23,
+            "server": null
+          },
+          {
+            "name": "Candidate86",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209288.58489993,
+            "hardModeLevel": 0,
+            "duration": 296502,
+            "startTime": 1788463669710,
+            "report": {
+              "code": "RANK0086AAAAAAAA",
+              "fightID": 25,
+              "startTime": 1788458255659
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 21,
+            "server": null
+          },
+          {
+            "name": "Candidate87",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209110.73777862,
+            "hardModeLevel": 0,
+            "duration": 274703,
+            "startTime": 1788388409397,
+            "report": {
+              "code": "RANK0087AAAAAAAA",
+              "fightID": 14,
+              "startTime": 1788386011887
+            },
+            "bracketData": 314,
+            "faction": 1,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate88",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209046.12389254,
+            "hardModeLevel": 0,
+            "duration": 279920,
+            "startTime": 1789086356138,
+            "report": {
+              "code": "RANK0088AAAAAAAA",
+              "fightID": 15,
+              "startTime": 1789079112316
+            },
+            "bracketData": 319,
+            "faction": 1,
+            "size": 27,
+            "server": null
+          },
+          {
+            "name": "Candidate89",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 209023.18937505,
+            "hardModeLevel": 0,
+            "duration": 275126,
+            "startTime": 1788976728954,
+            "report": {
+              "code": "RANK0089AAAAAAAA",
+              "fightID": 7,
+              "startTime": 1788963059515
+            },
+            "bracketData": 319,
+            "faction": 0,
+            "size": 19,
+            "server": null
+          },
+          {
+            "name": "Candidate90",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208964.65901629,
+            "hardModeLevel": 0,
+            "duration": 275629,
+            "startTime": 1789131992739,
+            "report": {
+              "code": "RANK0090AAAAAAAA",
+              "fightID": 16,
+              "startTime": 1789129963854
+            },
+            "bracketData": 319,
+            "faction": 1,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate91",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208378.2240618,
+            "hardModeLevel": 0,
+            "duration": 303693,
+            "startTime": 1789127622797,
+            "report": {
+              "code": "RANK0091AAAAAAAA",
+              "fightID": 34,
+              "startTime": 1789122916657
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 25,
+            "server": null
+          },
+          {
+            "name": "Candidate92",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208351.96680542,
+            "hardModeLevel": 0,
+            "duration": 303182,
+            "startTime": 1789066766197,
+            "report": {
+              "code": "RANK0092AAAAAAAA",
+              "fightID": 1,
+              "startTime": 1789066710482
+            },
+            "bracketData": 320,
+            "faction": 1,
+            "size": 21,
+            "server": null
+          },
+          {
+            "name": "Candidate93",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208282.02957171,
+            "hardModeLevel": 0,
+            "duration": 413368,
+            "startTime": 1788603841472,
+            "report": {
+              "code": "RANK0093AAAAAAAA",
+              "fightID": 34,
+              "startTime": 1788598675342
+            },
+            "hidden": true,
+            "bracketData": 319,
+            "faction": 0,
+            "size": 23,
+            "server": null
+          },
+          {
+            "name": "Candidate94",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208223.18936782,
+            "hardModeLevel": 0,
+            "duration": 280206,
+            "startTime": 1788578093043,
+            "report": {
+              "code": "RANK0094AAAAAAAA",
+              "fightID": 27,
+              "startTime": 1788574423599
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 27,
+            "server": null
+          },
+          {
+            "name": "Candidate95",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208150.55948269,
+            "hardModeLevel": 0,
+            "duration": 280527,
+            "startTime": 1788916769810,
+            "report": {
+              "code": "RANK0095AAAAAAAA",
+              "fightID": 19,
+              "startTime": 1788913787166
+            },
+            "bracketData": 317,
+            "faction": 0,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate96",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208109.57179251,
+            "hardModeLevel": 0,
+            "duration": 307351,
+            "startTime": 1789046268084,
+            "report": {
+              "code": "RANK0096AAAAAAAA",
+              "fightID": 29,
+              "startTime": 1789041117544
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 26,
+            "server": null
+          },
+          {
+            "name": "Candidate97",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208101.71440781,
+            "hardModeLevel": 0,
+            "duration": 318244,
+            "startTime": 1789136232982,
+            "report": {
+              "code": "RANK0097AAAAAAAA",
+              "fightID": 43,
+              "startTime": 1789125636476
+            },
+            "bracketData": 322,
+            "faction": 1,
+            "size": 29,
+            "server": null
+          },
+          {
+            "name": "Candidate98",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 208049.93080976,
+            "hardModeLevel": 0,
+            "duration": 281109,
+            "startTime": 1788461071494,
+            "report": {
+              "code": "RANK0098AAAAAAAA",
+              "fightID": 23,
+              "startTime": 1788457324777
+            },
+            "bracketData": 320,
+            "faction": 1,
+            "size": 20,
+            "server": null
+          },
+          {
+            "name": "Candidate99",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 207903.54169052,
+            "hardModeLevel": 0,
+            "duration": 305645,
+            "startTime": 1789018554446,
+            "report": {
+              "code": "RANK0099AAAAAAAA",
+              "fightID": 35,
+              "startTime": 1789013112084
+            },
+            "bracketData": 320,
+            "faction": 0,
+            "size": 30,
+            "server": null
+          },
+          {
+            "name": "Candidate100",
+            "class": "Rogue",
+            "spec": "Assassination",
+            "amount": 207736.86842911,
+            "hardModeLevel": 0,
+            "duration": 293910,
+            "startTime": 1788955765071,
+            "report": {
+              "code": "RANK0100AAAAAAAA",
+              "fightID": 107,
+              "startTime": 1788864107231
+            },
+            "bracketData": 318,
+            "faction": 0,
+            "size": 20,
+            "server": null
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,1665 @@
+{
+  "artifacts": [
+    {
+      "artifactId": "synthetic.actor-zero-cast",
+      "byteLength": 133,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SYNTHETIC",
+      "sha256": "6dcb92a325ce636031c9e31b539c2e33038ea5913dae59162fa7e8d99e680573"
+    },
+    {
+      "artifactId": "synthetic.graphql-event-page-null-data",
+      "byteLength": 133,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SYNTHETIC",
+      "sha256": "4f08306974e04e8c978dbd1569e4c855b35a39c67169ea0fa586cf30ec1625af"
+    },
+    {
+      "artifactId": "synthetic.graphql-page-sequence-malformed-second-page",
+      "byteLength": 765,
+      "payloadKind": "WCL_GRAPHQL_PAGE_SEQUENCE",
+      "provenanceKind": "SYNTHETIC",
+      "sha256": "ee0a6fda63a106d13d657ecdcbb12dac5bf3903dc50a99e3e4ac46d33e239234"
+    },
+    {
+      "artifactId": "synthetic.graphql-page-sequence-two-pages",
+      "byteLength": 1225,
+      "payloadKind": "WCL_GRAPHQL_PAGE_SEQUENCE",
+      "provenanceKind": "SYNTHETIC",
+      "sha256": "a171e41e70e3ae3ccc1211a767485bb7a262388d92413fa1d146528e63caeb75"
+    },
+    {
+      "artifactId": "synthetic.unsupported-type-event",
+      "byteLength": 154,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SYNTHETIC",
+      "sha256": "1f49a92161e6f3ad3e3eb9ffa41fb8c0b843f6c0abbdce4d8840e97e3e06a63f"
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "byteLength": 225941,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "2bb4ae8fdbbee66e19347823e695e3a1ffe9e8e894b919e3d9da01c9f1135339"
+    },
+    {
+      "artifactId": "wcl-assassination-envenom-combo-points",
+      "byteLength": 35579,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "2a3fbb278f1ca5dac19963934ab6d3267ed98427d2835b77c25a52888246f472"
+    },
+    {
+      "artifactId": "wcl-assassination-garrote-dot-remains",
+      "byteLength": 55708,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "5834cf8027b2582c50dfe758e24990ce6c4aeceda8f9f42e330e962ecf5ec196"
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "byteLength": 302082,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "ed779d55d62efc2e14b9dd4e50705da1a3d4c35cb7c177d2df86cce961c76146"
+    },
+    {
+      "artifactId": "wcl-assassination-kingsbane-cooldown",
+      "byteLength": 76272,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "79189db3e8acde60517b9088de1a0356eeee06980d5c523a3547c2139096e9e7"
+    },
+    {
+      "artifactId": "wcl-assassination-vanish-ambush-gate",
+      "byteLength": 15518,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "f8704fb9c214b66de7f48fd930e53b694d9f5833ac58144ace284a7cef77d819"
+    },
+    {
+      "artifactId": "wcl-aura-stack-absolute",
+      "byteLength": 2307,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "304e10d387d906d947efffd8e935f8d4dc2919d905b9e9b93c6ff792b3f8b131"
+    },
+    {
+      "artifactId": "wcl-boss-sourced",
+      "byteLength": 1092,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "294f90b89a3ce3085833413a2f3c2d8933c4228f09607f2edf89b157257f20b7"
+    },
+    {
+      "artifactId": "wcl-cast-resource-pre-cost",
+      "byteLength": 3045,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "c0e2bb4b8aa59f298de40efc0c23ded246ac77703c73d1f4d7721e08cdb26c85"
+    },
+    {
+      "artifactId": "wcl-encounter-rankings-sszorak-page-1",
+      "byteLength": 53435,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "0b2fcb7806f481bbb61cc255096c66b07347c293e006ba89ffeb758a99503c26"
+    },
+    {
+      "artifactId": "wcl-fight-context-a7r6-fight-7",
+      "byteLength": 312284,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "1e9c75c0c8f3061a33e2535ccd2193507dc41e9775dd7e0c570d5f3b63b4a7f0"
+    },
+    {
+      "artifactId": "wcl-fight-context-gtkb-fight-22",
+      "byteLength": 310539,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "aa7c091af3655f8c572ed6c1c109872e3b0d8876abf219d6d38d9eeabed88ac1"
+    },
+    {
+      "artifactId": "wcl-midfight-window",
+      "byteLength": 10540,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "b354e9411cc168c000970407f4e6def0e864ba0a42277ed3347d98a621a24037"
+    },
+    {
+      "artifactId": "wcl-no-actor-sentinel-source",
+      "byteLength": 1070,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "5a01122d68ef0ada32d1f8feb1c34ebb9742ade326dfc76aa457ad51624c9be5"
+    },
+    {
+      "artifactId": "wcl-no-actor-sentinel-source.unusable-negative",
+      "byteLength": 1070,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "DERIVED_FROM_CAPTURE",
+      "sha256": "eb5fcc6a59ecc7b0cc7b6214cda0152a516dedb6dcf69be4f7de78ffb8dc4ab6"
+    },
+    {
+      "artifactId": "wcl-page-sequence-limit-40",
+      "byteLength": 67498,
+      "payloadKind": "WCL_GRAPHQL_PAGE_SEQUENCE",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "9ebc0a24d7fdd1a206308d9aea19db1d9c503f381df004082aaf151a0bae9fb5"
+    },
+    {
+      "artifactId": "wcl-page-sequence-limit-40.page-5-removed",
+      "byteLength": 55547,
+      "payloadKind": "WCL_GRAPHQL_PAGE_SEQUENCE",
+      "provenanceKind": "DERIVED_FROM_CAPTURE",
+      "sha256": "a99199c9ab93ca887ea66766aa873b1e2c2e11994ac15bc897e303fc681d5637"
+    },
+    {
+      "artifactId": "wcl-page-terminal-one-millisecond",
+      "byteLength": 4155,
+      "payloadKind": "WCL_GRAPHQL_PAGE_SEQUENCE",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "a5ea31f9c003e62a6c61b95ff1a2fb96eb31580bc00f97400ba2c2039aee77fe"
+    },
+    {
+      "artifactId": "wcl-pet-sourced-events-hunter-pet-29",
+      "byteLength": 11554,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "cea2a9a5206be9aa3e174c995749e24bd030534553959db15cd37e3024657304"
+    },
+    {
+      "artifactId": "wcl-pull-window-with-resources",
+      "byteLength": 55269,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "7c13a171a49a7e482842adcb0914f2efc929b7ece59f28d4acd7b33680ec3007"
+    }
+  ],
+  "byLayer": [
+    {
+      "assertions": 20,
+      "cases": 8,
+      "failed": 0,
+      "kindsExercised": [
+        "WCL_DECODE.EVENT_PAGE_OUTCOME",
+        "WCL_PAGINATION.PAGE_ENVELOPE_FACTS",
+        "WCL_PAGINATION.STREAM_OUTCOME",
+        "WCL_TRANSPORT.FIGHT_IDENTITY"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "WCL_TRANSPORT",
+      "passed": 20
+    },
+    {
+      "assertions": 54,
+      "cases": 13,
+      "failed": 0,
+      "kindsExercised": [
+        "NORMALIZATION.ACTOR_CATALOG",
+        "NORMALIZATION.ALL_TYPES_RECOGNISED",
+        "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+        "NORMALIZATION.EVENT_COUNT_PRESERVED",
+        "NORMALIZATION.FIGHT_HEADER",
+        "NORMALIZATION.INPUT_ORDER_PRESERVED",
+        "NORMALIZATION.NO_ACTOR_REF_HOLDS",
+        "NORMALIZATION.SIDE_REFERENCE",
+        "NORMALIZATION.SOURCE_ABSENCE",
+        "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+        "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "NORMALIZATION",
+      "passed": 54
+    },
+    {
+      "assertions": 38,
+      "cases": 11,
+      "failed": 0,
+      "kindsExercised": [
+        "COMBAT_STATE.AURA_PRESENCE",
+        "COMBAT_STATE.AURA_STACK_OBSERVATION",
+        "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+        "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT",
+        "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
+        "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+        "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "COMBAT_STATE",
+      "passed": 38
+    },
+    {
+      "assertions": 20,
+      "cases": 12,
+      "failed": 0,
+      "kindsExercised": [
+        "SPEC_ASSASSINATION.AUTHORITY_UNAVAILABLE_IS_NOT_REJECTION",
+        "SPEC_ASSASSINATION.DECISION_COVERAGE",
+        "SPEC_ASSASSINATION.DOT_REMAINS",
+        "SPEC_ASSASSINATION.SPEC_GATE",
+        "SPEC_ASSASSINATION.TALENT_RESOLUTION"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_ASSASSINATION",
+      "passed": 20
+    },
+    {
+      "assertions": 3,
+      "cases": 3,
+      "failed": 0,
+      "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS"],
+      "notExecuted": 0,
+      "owningLayer": "APPLICATION_SERVICE",
+      "passed": 3
+    },
+    {
+      "assertions": 7,
+      "cases": 7,
+      "failed": 0,
+      "kindsExercised": ["PUBLIC_CONTRACT.REST_MCP_PARITY"],
+      "notExecuted": 0,
+      "owningLayer": "PUBLIC_CONTRACT",
+      "passed": 7
+    }
+  ],
+  "cases": [
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.derives-player-context-scope-and-selects-the-assassination-analyzer",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.high-parse-subject-is-analyzed-under-player-context",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-aura-stack-absolute",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.AURA_STACK_OBSERVATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_STACK_OBSERVATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_STACK_OBSERVATION",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_STACK_OBSERVATION",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 6,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.aura-stack-is-the-absolute-resulting-count",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-aura-stack-absolute"]
+    },
+    {
+      "artifactId": "wcl-cast-resource-pre-cost",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.costed-cast-resource-is-pre-cost",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-cast-resource-pre-cost"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 5,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.high-parse-opener-pre-pull-stealth-is-ambiguous-until-its-observed-removal",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT",
+          "ordinal": 7,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT",
+          "ordinal": 8,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT",
+          "ordinal": 9,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.high-parse-opener-resource-snapshots-anchors-and-proven-absences",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-assassination-kingsbane-cooldown",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.kingsbane-anchor-is-the-most-recent-observed-cast",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-assassination-kingsbane-cooldown"]
+    },
+    {
+      "artifactId": "wcl-assassination-envenom-combo-points",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.missing-combo-point-entry-is-no-observation-not-zero",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-assassination-envenom-combo-points"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.partial-grant-cannot-prove-absence-before-it-begins",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-cast-resource-pre-cost",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.resources-are-observed-never-regenerated",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-cast-resource-pre-cost"]
+    },
+    {
+      "artifactId": "wcl-no-actor-sentinel-source",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.trimmed-slice-cannot-prove-absence",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-no-actor-sentinel-source"]
+    },
+    {
+      "artifactId": "wcl-assassination-kingsbane-cooldown",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.vanish-buff-active-before-garrote-with-retained-coverage",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-assassination-kingsbane-cooldown"]
+    },
+    {
+      "artifactId": "wcl-assassination-vanish-ambush-gate",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.AURA_PRESENCE",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.vanish-buff-is-observed-at-its-transitions-and-unknown-between",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-assassination-vanish-ambush-gate"]
+    },
+    {
+      "artifactId": "synthetic.actor-zero-cast",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.actor-zero-is-an-ordinary-actor",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["synthetic.actor-zero-cast"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.assassination-slices-normalize-cleanly",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-boss-sourced",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.boss-sourced-events-survive-the-unfiltered-stream",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-boss-sourced"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 6,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.high-parse-opener-slice-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-fight-context-gtkb-fight-22",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ACTOR_CATALOG",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.FIGHT_HEADER",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.high-parse-report-context-normalizes-with-no-intermission",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-fight-context-gtkb-fight-22"]
+    },
+    {
+      "artifactId": "wcl-no-actor-sentinel-source",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.NO_ACTOR_REF_HOLDS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.no-actor-sentinel.source-absence",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-no-actor-sentinel-source"]
+    },
+    {
+      "artifactId": "wcl-pet-sourced-events-hunter-pet-29",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 6,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.pet-sourced-events-keep-the-pet-as-source",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-pet-sourced-events-hunter-pet-29"]
+    },
+    {
+      "artifactId": "wcl-pull-window-with-resources",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+          "ordinal": 6,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.pull-window.families-and-attached-resource-side",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-pull-window-with-resources"]
+    },
+    {
+      "artifactId": "wcl-fight-context-a7r6-fight-7",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.FIGHT_HEADER",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.real-fight-header-carries-kill-difficulty-and-intermission-phases",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-fight-context-a7r6-fight-7"]
+    },
+    {
+      "artifactId": "wcl-fight-context-a7r6-fight-7",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ACTOR_CATALOG",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.real-master-data-catalogs-every-actor-including-pets-and-the-sentinel-entry",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-fight-context-a7r6-fight-7"]
+    },
+    {
+      "artifactId": "wcl-midfight-window",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.TIMESTAMP_RUN_RETAINED",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SIDE_REFERENCE",
+          "ordinal": 7,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.target-sentinel-and-input-order.midfight-window",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-midfight-window"]
+    },
+    {
+      "artifactId": "wcl-no-actor-sentinel-source.unusable-negative",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.SOURCE_ABSENCE",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.NO_ACTOR_REF_HOLDS",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.unobserved-negative-source-is-unusable-not-sentinel",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-no-actor-sentinel-source.unusable-negative"]
+    },
+    {
+      "artifactId": "synthetic.unsupported-type-event",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.unrecognised-type-is-counted-not-dropped",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["synthetic.unsupported-type-event"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-for-an-unsupported-spec",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-over-the-d2-corpus",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-over-the-high-parse-opener",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.encounter-context-external-transport-failure-preserves-local-progression",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": [
+        "wcl-assassination-d2-decision-corpus",
+        "wcl-encounter-rankings-sszorak-page-1"
+      ]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.encounter-context-parity-local-only",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.encounter-context-parity-with-external-references-over-a-real-ranking-page",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": [
+        "wcl-assassination-d2-decision-corpus",
+        "wcl-encounter-rankings-sszorak-page-1"
+      ]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.raid-night-parity-over-the-d2-corpus",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "requiredStateEvidence": [
+          "the Deathmark cast at 2,172,777 as the usability proof",
+          "no binding for target.time_to_die or fight_remains (PREDICTIVE)"
+        ]
+      },
+      "caseId": "spec-assassination.deathmark-stays-unknown-on-predictive-state",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "requiredStateEvidence": [
+          "the Envenom cast at 2,178,582 carrying 7 / 7 combo points PRE_COST",
+          "the unresolved core_dot[0] Garrote candidate ahead of spend"
+        ]
+      },
+      "caseId": "spec-assassination.envenom-after-q-diverges-rather-than-falling-through",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-garrote-dot-remains",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DOT_REMAINS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_DBC_ROGUE_DOT_DURATIONS",
+        "requiredStateEvidence": [
+          "applydebuff 703 by 19 on 21 at 2,164,326 (the anchor)",
+          "every aura event targeting 19 or 21 in [2,164,325 .. 2,176,581], order preserved",
+          "the Garrote cast at 2,176,580 preceding its own removedebuff/applydebuff"
+        ]
+      },
+      "caseId": "spec-assassination.garrote-remains-derives-from-the-observed-anchor",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-garrote-dot-remains"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-assassination.high-parse-build-resolves-improved-garrote-and-shrouded-suffocation",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "requiredStateEvidence": [
+          "the Envenom cast at 2,433,177 carrying classResources type 4: 5 / 7 cost 5 and type 3: 243 / 250 cost 35",
+          "Deathmark at 2,422,192 and Kingsbane at 2,423,194 as the only cooldown anchors in the window",
+          "combatantinfo for actor 25 (talent tree) at 2,415,041"
+        ]
+      },
+      "caseId": "spec-assassination.high-parse-opener-envenom-at-five-combo-points-stays-unknown",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "requiredStateEvidence": [
+          "Stealth 1784 on 25: only the removebuff at 2,416,179 is observed; application predates the window",
+          "combatantinfo for actor 25 (talent tree) at 2,415,041",
+          "no observed Deathmark, Kingsbane or Vanish cast before 2,416,180"
+        ]
+      },
+      "caseId": "spec-assassination.high-parse-opener-garrote-from-pre-pull-stealth-stays-unknown",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-assassination-high-parse-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DOT_REMAINS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.DOT_REMAINS",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.DOT_REMAINS",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_DBC_ROGUE_DOT_DURATIONS",
+        "requiredStateEvidence": [
+          "applydebuff 703 by 25 on 235 at 2,416,180 and its re-application at 2,420,190 (the anchors)",
+          "the Rupture cast at 2,418,187 carrying classResources type 4: 7 / 7 cost 7, and its applydebuff at 2,418,188",
+          "every aura event targeting 25 or 235 in [2,415,041 .. 2,435,041], order preserved"
+        ]
+      },
+      "caseId": "spec-assassination.high-parse-opener-garrote-remains-derives-and-rupture-refuses",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-assassination-envenom-combo-points",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "requiredStateEvidence": [
+          "the Envenom cast at 2,150,252 carrying classResources type 4: 3 / 7 cost 3",
+          "combatantinfo for actor 13 (specID 259)"
+        ]
+      },
+      "caseId": "spec-assassination.low-combo-point-envenom-is-rejected",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-envenom-combo-points"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.AUTHORITY_UNAVAILABLE_IS_NOT_REJECTION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-assassination.missing-authority-is-not-a-rejection",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
+        "requiredStateEvidence": [
+          "Vanish buff 11327 ACTIVE at Q from the observed applybuff at 2,176,120",
+          "Garrote remains 5,746 ms from the 2,164,326 anchor",
+          "Kingsbane cooldown from the observed cast at 2,173,778",
+          "combatantinfo for actor 19 (talent tree)",
+          "the observed Garrote execution at Q as the usability proof"
+        ]
+      },
+      "caseId": "spec-assassination.observed-garrote-at-q-is-authority-compatible",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-d2-decision-corpus",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-assassination.protection-paladin-is-refused-at-the-spec-gate",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-assassination-vanish-ambush-gate",
+      "assertions": [
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_ASSASSINATION.TALENT_RESOLUTION",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-assassination.talent-tree-resolves-selected-not-selected-and-unknown",
+      "owningLayer": "SPEC_ASSASSINATION",
+      "referencedArtifactIds": ["wcl-assassination-vanish-ambush-gate"]
+    },
+    {
+      "artifactId": "synthetic.graphql-page-sequence-two-pages",
+      "assertions": [
+        {
+          "kind": "WCL_PAGINATION.STREAM_OUTCOME",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.cursor-is-passed-verbatim-and-nothing-is-deduplicated",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["synthetic.graphql-page-sequence-two-pages"]
+    },
+    {
+      "artifactId": "wcl-fight-context-gtkb-fight-22",
+      "assertions": [
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.identity-resolves-both-assassination-rogues-of-the-high-parse-kill",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["wcl-fight-context-gtkb-fight-22"]
+    },
+    {
+      "artifactId": "wcl-fight-context-a7r6-fight-7",
+      "assertions": [
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 6,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.identity-resolves-over-real-master-data-and-refuses-the-rest",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["wcl-fight-context-a7r6-fight-7"]
+    },
+    {
+      "artifactId": "synthetic.graphql-page-sequence-malformed-second-page",
+      "assertions": [
+        {
+          "kind": "WCL_PAGINATION.STREAM_OUTCOME",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.malformed-later-page-keeps-earlier-evidence-and-stays-partial",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["synthetic.graphql-page-sequence-malformed-second-page"]
+    },
+    {
+      "artifactId": "wcl-page-sequence-limit-40.page-5-removed",
+      "assertions": [
+        {
+          "kind": "WCL_PAGINATION.PAGE_ENVELOPE_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_PAGINATION.STREAM_OUTCOME",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.missing-later-page-keeps-four-real-pages-and-stays-partial",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["wcl-page-sequence-limit-40.page-5-removed"]
+    },
+    {
+      "artifactId": "synthetic.graphql-event-page-null-data",
+      "assertions": [
+        {
+          "kind": "WCL_DECODE.EVENT_PAGE_OUTCOME",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.null-event-data-is-malformed-not-empty",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["synthetic.graphql-event-page-null-data"]
+    },
+    {
+      "artifactId": "wcl-page-sequence-limit-40",
+      "assertions": [
+        {
+          "kind": "WCL_PAGINATION.PAGE_ENVELOPE_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_PAGINATION.STREAM_OUTCOME",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.real-page-boundaries-carry-the-cursor-verbatim",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["wcl-page-sequence-limit-40"]
+    },
+    {
+      "artifactId": "wcl-page-terminal-one-millisecond",
+      "assertions": [
+        {
+          "kind": "WCL_PAGINATION.PAGE_ENVELOPE_FACTS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "WCL_PAGINATION.STREAM_OUTCOME",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "wcl-transport.real-terminal-page-completes-the-stream",
+      "owningLayer": "WCL_TRANSPORT",
+      "referencedArtifactIds": ["wcl-page-terminal-one-millisecond"]
+    }
+  ],
+  "contractVersion": 2,
+  "corpusId": "warcraft-logs-coach-vnext.regression-corpus",
+  "gaps": [
+    {
+      "closedBy": [],
+      "disposition": "DEFER_TO_MILESTONE",
+      "id": "no-interrupt-events",
+      "layers": ["NORMALIZATION", "COMBAT_STATE"],
+      "owner": "M10 (Protection Paladin): the first capture milestone whose subject has an interrupt (Rebuke) in its supported decision surface; its capture plan must retain every interrupt by the player."
+    },
+    {
+      "closedBy": [],
+      "disposition": "DEFER_TO_MILESTONE",
+      "id": "no-death-or-dispel-events",
+      "layers": ["NORMALIZATION", "COMBAT_STATE"],
+      "owner": "M12 (death-event and dispel/triage behaviour): the milestone that first consumes deaths for actionability and dispels for healer triage owns the capture. Not M10 — a tank capture may happen to contain a dispel, but healer triage semantics are not a tank question."
+    },
+    {
+      "closedBy": [],
+      "disposition": "DEFER_TO_MILESTONE",
+      "id": "no-targetability-or-intermission",
+      "layers": ["NORMALIZATION", "COMBAT_STATE"],
+      "owner": "M14 (targetability and temporal root-cause consumers): the milestone that derives actionability from targetability owns the capture; the phase evidence it will combine with is already committed."
+    },
+    {
+      "closedBy": [
+        "normalization.real-master-data-catalogs-every-actor-including-pets-and-the-sentinel-entry",
+        "normalization.pet-sourced-events-keep-the-pet-as-source"
+      ],
+      "disposition": "CLOSE_IN_M9",
+      "id": "no-pet-or-guardian-actor",
+      "layers": ["NORMALIZATION"],
+      "owner": "M9"
+    },
+    {
+      "closedBy": [
+        "wcl-transport.real-page-boundaries-carry-the-cursor-verbatim",
+        "wcl-transport.real-terminal-page-completes-the-stream"
+      ],
+      "disposition": "CLOSE_IN_M9",
+      "id": "no-real-page-boundary",
+      "layers": ["WCL_TRANSPORT"],
+      "owner": "M9"
+    },
+    {
+      "closedBy": ["wcl-transport.missing-later-page-keeps-four-real-pages-and-stays-partial"],
+      "disposition": "CLOSE_IN_M9",
+      "id": "no-real-partial-retrieval",
+      "layers": ["WCL_TRANSPORT", "COMBAT_STATE"],
+      "owner": "M9"
+    },
+    {
+      "closedBy": [],
+      "disposition": "OUTSIDE_CURRENT_CAPABILITY",
+      "id": "no-identity-conflict-capture",
+      "layers": ["APPLICATION_SERVICE"],
+      "owner": "M15 (identity and product maturity): implement conflict detection and its propagation, then own the evidence for both; until then no capture and no synthetic contract can honestly claim the result is proven."
+    },
+    {
+      "closedBy": [
+        "application-service.derives-player-context-scope-and-selects-the-assassination-analyzer",
+        "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing",
+        "application-service.high-parse-subject-is-analyzed-under-player-context"
+      ],
+      "disposition": "CLOSE_IN_M9",
+      "id": "no-application-service-cases",
+      "layers": ["APPLICATION_SERVICE"],
+      "owner": "M9"
+    },
+    {
+      "closedBy": [
+        "public-contract.encounter-context-parity-with-external-references-over-a-real-ranking-page",
+        "public-contract.encounter-context-external-transport-failure-preserves-local-progression"
+      ],
+      "disposition": "CLOSE_IN_M9",
+      "id": "no-external-reference-fixture",
+      "layers": ["PUBLIC_CONTRACT"],
+      "owner": "M9"
+    },
+    {
+      "closedBy": [],
+      "disposition": "DEFER_TO_MILESTONE",
+      "id": "no-protection-paladin-evidence",
+      "layers": ["SPEC_ASSASSINATION"],
+      "owner": "M10 (Protection Paladin) owns its own capture plan."
+    },
+    {
+      "closedBy": [
+        "wcl-transport.identity-resolves-both-assassination-rogues-of-the-high-parse-kill",
+        "normalization.high-parse-report-context-normalizes-with-no-intermission",
+        "normalization.high-parse-opener-slice-normalizes-whole-and-in-order",
+        "combat-state.high-parse-opener-pre-pull-stealth-is-ambiguous-until-its-observed-removal",
+        "combat-state.high-parse-opener-resource-snapshots-anchors-and-proven-absences",
+        "spec-assassination.high-parse-build-resolves-improved-garrote-and-shrouded-suffocation",
+        "spec-assassination.high-parse-opener-garrote-remains-derives-and-rupture-refuses",
+        "spec-assassination.high-parse-opener-garrote-from-pre-pull-stealth-stays-unknown",
+        "spec-assassination.high-parse-opener-envenom-at-five-combo-points-stays-unknown",
+        "application-service.high-parse-subject-is-analyzed-under-player-context",
+        "public-contract.analysis-parity-over-the-high-parse-opener"
+      ],
+      "disposition": "CLOSE_IN_M9",
+      "id": "single-report-assassination-corpus",
+      "layers": ["SPEC_ASSASSINATION"],
+      "owner": "M9"
+    },
+    {
+      "closedBy": [],
+      "disposition": "DEFER_TO_MILESTONE",
+      "id": "assassination-corpus-breadth",
+      "layers": ["SPEC_ASSASSINATION"],
+      "owner": "M11 (broader DPS corpus expansion): the milestone that widens the DPS corpus beyond the first vertical slice owns the second-subject breadth, the pre-pull window and the tolerance decision; not M15, because these are evidence needs of the Assassination analyzer itself, not product-maturity work."
+    }
+  ],
+  "pinnedAuthorities": {
+    "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
+    "SIMC_DBC_ROGUE_DOT_DURATIONS": "simc-33622e9d-1"
+  },
+  "reportVersion": 1,
+  "runtime": "WORKERD",
+  "selection": "ALL",
+  "totals": {
+    "artifactBytes": 1602915,
+    "artifacts": 25,
+    "assertions": 142,
+    "cases": 54,
+    "declared": 0,
+    "executable": 142,
+    "failed": 0,
+    "largestArtifactBytes": 312284,
+    "notExecuted": 0,
+    "passed": 142
+  }
+}

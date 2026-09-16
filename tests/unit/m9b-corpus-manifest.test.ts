@@ -33,8 +33,11 @@ describe("the committed corpus loads", () => {
 
     expect(loaded.manifest.contractVersion).toBe(CORPUS_CONTRACT_VERSION);
     expect(loaded.manifest.contractVersion).toBe(2);
-    expect(loaded.artifacts).toHaveLength(17);
-    expect(loaded.cases).toHaveLength(31);
+    // 17 artifacts / 31 cases at M9-B; M9-C added six bounded captures and
+    // twelve cases; the M9-C correction added the second Assassination
+    // subject: two artifacts and eleven cases. Measured, then pinned.
+    expect(loaded.artifacts).toHaveLength(25);
+    expect(loaded.cases).toHaveLength(54);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -47,7 +50,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds the eleven migrated captures, one derivation and five synthetics", async () => {
+  it("holds eighteen sanitized captures, two derivations and five synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -60,16 +63,26 @@ describe("the committed corpus loads", () => {
       "wcl-assassination-d2-decision-corpus",
       "wcl-assassination-envenom-combo-points",
       "wcl-assassination-garrote-dot-remains",
+      "wcl-assassination-high-parse-opener",
       "wcl-assassination-kingsbane-cooldown",
       "wcl-assassination-vanish-ambush-gate",
       "wcl-aura-stack-absolute",
       "wcl-boss-sourced",
       "wcl-cast-resource-pre-cost",
+      "wcl-encounter-rankings-sszorak-page-1",
+      "wcl-fight-context-a7r6-fight-7",
+      "wcl-fight-context-gtkb-fight-22",
       "wcl-midfight-window",
       "wcl-no-actor-sentinel-source",
+      "wcl-page-sequence-limit-40",
+      "wcl-page-terminal-one-millisecond",
+      "wcl-pet-sourced-events-hunter-pet-29",
       "wcl-pull-window-with-resources",
     ]);
-    expect(byKind.get("DERIVED_FROM_CAPTURE")).toEqual(["wcl-no-actor-sentinel-source.unusable-negative"]);
+    expect(byKind.get("DERIVED_FROM_CAPTURE")).toEqual([
+      "wcl-no-actor-sentinel-source.unusable-negative",
+      "wcl-page-sequence-limit-40.page-5-removed",
+    ]);
     expect(byKind.get("SYNTHETIC")).toEqual([
       "synthetic.actor-zero-cast",
       "synthetic.graphql-event-page-null-data",
@@ -81,20 +94,34 @@ describe("the committed corpus loads", () => {
 
   it("references every artifact from at least one case", async () => {
     const loaded = await corpus();
-    const referenced = new Set(loaded.cases.map((entry) => entry.artifact.record.artifactId));
+    // A case reads its own artifact and any it names in a `…ArtifactId`
+    // parameter; the ranking page is read that way by the external-reference
+    // parity case and by nothing else.
+    const referenced = new Set(loaded.cases.flatMap((entry) => entry.referencedArtifactIds));
     for (const entry of loaded.artifacts) {
       expect(referenced.has(entry.record.artifactId), entry.record.artifactId).toBe(true);
     }
+    const rankingsReaders = loaded.cases.filter((entry) =>
+      entry.referencedArtifactIds.includes("wcl-encounter-rankings-sszorak-page-1"),
+    );
+    expect(rankingsReaders.map((entry) => entry.record.caseId)).toEqual([
+      "public-contract.encounter-context-external-transport-failure-preserves-local-progression",
+      "public-contract.encounter-context-parity-with-external-references-over-a-real-ranking-page",
+    ]);
   });
 
   it("stays well inside the storage ceilings", async () => {
     const loaded = await corpus();
-    // ~484 KB of artifacts against a 6 MiB corpus ceiling; the largest is the
-    // 226 KB D2 slice against 512 KiB. Recorded as a fact, not a target.
-    expect(loaded.totalArtifactBytes).toBeLessThan(600 * 1024);
+    // The contract's ceilings are 512 KiB per artifact and 6 MiB in total.
+    // Measured at the M9-C correction: 1,602,915 bytes in total, the largest
+    // the 312,284-byte A7R6 fight context. Pinned at half the ceilings so growth is noticed before
+    // it is a problem, not after.
+    expect(loaded.totalArtifactBytes).toBeLessThan(3 * 1024 * 1024);
     for (const entry of loaded.artifacts) {
-      expect(entry.canonicalByteLength, entry.record.artifactId).toBeLessThan(256 * 1024);
+      expect(entry.canonicalByteLength, entry.record.artifactId).toBeLessThan(512 * 1024);
     }
+    const largest = Math.max(...loaded.artifacts.map((entry) => entry.canonicalByteLength));
+    expect(largest).toBeLessThan(384 * 1024);
   });
 });
 
@@ -123,23 +150,55 @@ describe("provenance is honest about lineage", () => {
 
   it("records every migrated capture's copy step and its sanitizing selection", async () => {
     const loaded = await corpus();
+    let migrated = 0;
     for (const entry of loaded.artifacts) {
       if (entry.record.provenance.kind !== "SANITIZED_CAPTURE") continue;
       const kinds = entry.record.provenance.transformations.map((t) => t.kind);
-      expect(kinds, entry.record.artifactId).toContain("SUBSET_SELECTION");
       expect(kinds, entry.record.artifactId).toContain("CREDENTIAL_SHAPE_SCAN");
-      expect(kinds, entry.record.artifactId).toContain("LEGACY_FIXTURE_COPY");
+      if (!kinds.includes("LEGACY_FIXTURE_COPY")) continue;
+      migrated += 1;
+      expect(kinds, entry.record.artifactId).toContain("SUBSET_SELECTION");
     }
+    expect(migrated).toBe(11);
+  });
+
+  it("records a sanitizing transformation on every M9-C capture, with the sanitizer revision", async () => {
+    const loaded = await corpus();
+    const sanitized = new Set(["SUBSET_SELECTION", "IDENTIFIER_REMAP", "FIELD_REDACTION"]);
+    let captured = 0;
+    for (const entry of loaded.artifacts) {
+      const { kind, transformations, source } = entry.record.provenance;
+      if (kind !== "SANITIZED_CAPTURE" || source?.capturedOn !== "2026-09-15") continue;
+      captured += 1;
+      const sanitizing = transformations.filter((t) => sanitized.has(t.kind));
+      expect(sanitizing.length, entry.record.artifactId).toBeGreaterThan(0);
+      for (const t of sanitizing) {
+        expect(t.tooling.revision, entry.record.artifactId).toMatch(/^sanitize-(payloads|probe)-\d+$/);
+        // Revision 2 of the payload sanitizer nulls player gameIDs; every
+        // context artifact must have been written by it or later.
+        if (
+          entry.record.payloadKind === "WCL_GRAPHQL_DATA" &&
+          "kind" in source.query &&
+          source.query.kind === "FIGHT_CONTEXT"
+        ) {
+          expect(t.tooling.revision, entry.record.artifactId).not.toBe("sanitize-payloads-1");
+        }
+      }
+    }
+    expect(captured).toBe(7);
   });
 
   it("marks unrecorded tooling revisions UNAVAILABLE rather than inventing them", async () => {
-    // The slicer had no version field when any committed slice was cut.
+    // The slicer had no version field when any pre-M9-C slice was cut; the
+    // one slice cut after M9-B records the revision that cut it.
     const loaded = await corpus();
     for (const entry of loaded.artifacts) {
+      const migrated = entry.record.provenance.transformations.some((t) => t.kind === "LEGACY_FIXTURE_COPY");
       for (const transformation of entry.record.provenance.transformations) {
-        if (transformation.tooling.name === "scripts/sanitize-probe.mjs") {
-          expect(transformation.tooling.revision, entry.record.artifactId).toBe("UNAVAILABLE");
-        }
+        if (transformation.tooling.name !== "scripts/sanitize-probe.mjs") continue;
+        expect(transformation.tooling.revision, entry.record.artifactId).toMatch(
+          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[23]$/,
+        );
       }
     }
   });
@@ -149,7 +208,8 @@ describe("provenance is honest about lineage", () => {
 
     expect(source?.completeness.nextPageTimestamp).toBe(2_191_432);
     expect(source?.completeness.state).toBe("PARTIAL");
-    expect(source?.query.includeResources).toBe(true);
+    const query = source?.query;
+    expect(query !== undefined && "includeResources" in query ? query.includeResources : null).toBe(true);
   });
 
   it("shares one source capture between the four slices cut from the mid-fight window", async () => {
@@ -171,10 +231,14 @@ describe("retained coverage is granted only where the capture predicate supports
     "wcl-assassination-d2-decision-corpus",
   ];
 
+  /** The M9-C correction's --decision-slice cut: the same predicate, subject 25, boss 235. */
+  const HIGH_PARSE_SLICE = "wcl-assassination-high-parse-opener";
+
   it("grants nothing on any property-based or index-based selection", async () => {
     const loaded = await corpus();
     for (const entry of loaded.artifacts) {
-      if (PREDICATE_SLICES.includes(entry.record.artifactId)) continue;
+      if (PREDICATE_SLICES.includes(entry.record.artifactId) || entry.record.artifactId === HIGH_PARSE_SLICE)
+        continue;
       expect(entry.record.provenance.retainedCoverage.grants, entry.record.artifactId).toEqual([]);
     }
   });
@@ -187,6 +251,24 @@ describe("retained coverage is granted only where the capture predicate supports
       );
       expect(grant?.actorScope, id).toEqual([19, 21]);
     }
+  });
+
+  it("grants CASTS for actor 25 and AURAS for 25 and 235 on the --decision-slice cut, from the fight start", async () => {
+    const loaded = await corpus();
+    const record = artifact(loaded, HIGH_PARSE_SLICE).record;
+    const grants = record.provenance.retainedCoverage.grants;
+    expect(grants.find((g) => g.categories.includes("CASTS"))?.actorScope).toEqual([25]);
+    expect(grants.find((g) => g.categories.includes("AURAS"))?.actorScope).toEqual([25, 235]);
+    const query = record.provenance.source?.query;
+    const windowStart = query !== undefined && "startTimeMs" in query ? query.startTimeMs : null;
+    for (const grant of grants) {
+      expect(grant.ranges).toEqual([{ fromReportTimeMs: 2415041, toReportTimeMs: 2435041 }]);
+    }
+    // The grant begins where the capture query began, which is the fight start.
+    expect(windowStart).toBe(2415041);
+    expect(
+      record.provenance.transformations.find((t) => t.kind === "SUBSET_SELECTION")?.tooling.invocation,
+    ).toContain("--decision-slice 25 235");
   });
 
   it("grants CASTS for actor 19 only where every actor-19 cast was retained", async () => {

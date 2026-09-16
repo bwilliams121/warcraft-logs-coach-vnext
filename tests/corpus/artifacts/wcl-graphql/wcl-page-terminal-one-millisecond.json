@@ -1,0 +1,150 @@
+[
+  {
+    "reportData": {
+      "report": {
+        "events": {
+          "data": [
+            {
+              "timestamp": 2176580,
+              "type": "resourcechange",
+              "sourceID": 7,
+              "targetID": 7,
+              "abilityGameID": 1307639,
+              "fight": 7,
+              "resourceChange": 3,
+              "resourceChangeType": 9,
+              "otherResourceChange": 0,
+              "maxResourceAmount": 5,
+              "waste": 2
+            },
+            {
+              "timestamp": 2176580,
+              "type": "applybuffstack",
+              "sourceID": 7,
+              "targetID": 7,
+              "abilityGameID": 1269179,
+              "fight": 7,
+              "stack": 2
+            },
+            {
+              "timestamp": 2176580,
+              "type": "resourcechange",
+              "sourceID": 19,
+              "targetID": 19,
+              "abilityGameID": 394664,
+              "fight": 7,
+              "resourceChange": 2,
+              "resourceChangeType": 4,
+              "otherResourceChange": 0,
+              "maxResourceAmount": 7,
+              "waste": 0
+            },
+            {
+              "timestamp": 2176580,
+              "type": "resourcechange",
+              "sourceID": 19,
+              "targetID": 19,
+              "abilityGameID": 703,
+              "fight": 7,
+              "resourceChange": 1,
+              "resourceChangeType": 4,
+              "otherResourceChange": 0,
+              "maxResourceAmount": 7,
+              "waste": 0
+            },
+            {
+              "timestamp": 2176580,
+              "type": "cast",
+              "sourceID": 19,
+              "targetID": 21,
+              "abilityGameID": 703,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176580,
+              "type": "removebuff",
+              "sourceID": 19,
+              "targetID": 19,
+              "abilityGameID": 11327,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176580,
+              "type": "applybuff",
+              "sourceID": 19,
+              "targetID": 19,
+              "abilityGameID": 392401,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176580,
+              "type": "refreshdebuff",
+              "sourceID": 12,
+              "targetID": 21,
+              "abilityGameID": 1305711,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176580,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 1269175,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 45587,
+              "unmitigatedAmount": 45587,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176580,
+              "type": "removedebuff",
+              "sourceID": 19,
+              "targetID": 21,
+              "abilityGameID": 703,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176580,
+              "type": "applydebuff",
+              "sourceID": 19,
+              "targetID": 21,
+              "abilityGameID": 703,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176580,
+              "type": "refreshdebuff",
+              "sourceID": 19,
+              "targetID": 21,
+              "abilityGameID": 392388,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176580,
+              "type": "refreshdebuff",
+              "sourceID": 19,
+              "targetID": 21,
+              "abilityGameID": 3409,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176580,
+              "type": "damage",
+              "sourceID": 13,
+              "targetID": 21,
+              "abilityGameID": 703,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 19805,
+              "unmitigatedAmount": 7465,
+              "isAoE": false,
+              "tick": true
+            }
+          ],
+          "nextPageTimestamp": null
+        }
+      }
+    }
+  }
+]

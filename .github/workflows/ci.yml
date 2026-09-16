@@ -1,11 +1,28 @@
 name: CI
 
-# Milestone 1 CI.
-#
 # This workflow deliberately declares NO secrets. The correctness suite is
 # offline-first: nothing here reaches Warcraft Logs, and no Warcraft Logs
 # credential is required for any test to pass. Tests that need credentials
 # construct obvious sentinel values themselves.
+#
+# Two jobs, both read-only:
+#
+#   verify   formatting, types, the full suite (`npm test`). Measured locally
+#            at ~32 s for the suite: 176 files under Node and workerd.
+#   corpus   the regression corpus's own command (`npm run test:corpus`),
+#            which regenerates the manifest and compares it with the committed
+#            one, runs the Node corpus suite, executes every corpus case —
+#            PUBLIC_CONTRACT parity included — inside workerd in two separate
+#            processes, requires the two machine-readable reports to be
+#            byte-identical, and holds them against the committed
+#            tests/corpus/report.json. Measured locally at ~29 s. It runs with
+#            the Warcraft Logs credential variables removed from the child
+#            environment whatever the runner holds, and the workers project's
+#            outbound service answers 503 to any fetch, so a corpus case that
+#            reached for the network would fail here, actionably, not pass.
+#
+# Neither job deploys, refreshes a fixture, downloads a corpus, or needs an
+# external service. `npm ci` installs exactly the lockfile.
 
 on:
   push:
@@ -41,3 +58,41 @@ jobs:
 
       - name: Test
         run: npm test
+
+  corpus:
+    runs-on: ubuntu-latest
+    # No credential is available to this job by construction, and the gate
+    # script strips the variables anyway; this makes the intent visible in the
+    # workflow rather than only in the script.
+    env:
+      WCL_CLIENT_ID: ""
+      WCL_CLIENT_SECRET: ""
+      ANALYSIS_AUTH_TOKEN: ""
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Corpus artifacts are committed with LF line endings and no credential-shaped value
+        # The manifest digests are over LF bytes (CRLF folded), so a CRLF
+        # checkout would still validate; this step keeps the committed bytes
+        # honest anyway. The credential sweep is the same one the sanitizers
+        # apply on write, repeated over what is actually committed.
+        run: |
+          set -euo pipefail
+          if grep -rlI $'\r' tests/corpus/artifacts tests/corpus/manifest.json tests/corpus/report.json; then
+            echo "corpus files must be LF" >&2; exit 1
+          fi
+          if grep -rliE 'client_secret|access_token|authorization|bearer ' tests/corpus/artifacts tests/corpus/manifest.json tests/corpus/report.json; then
+            echo "corpus files contain a credential-shaped value" >&2; exit 1
+          fi
+          echo "corpus artifacts: $(find tests/corpus/artifacts -type f | wc -l) files, $(du -sb tests/corpus/artifacts | cut -f1) bytes"
+
+      - name: Regression corpus (manifest currency, Node suite, workerd gate x2, report drift)
+        run: npm run test:corpus

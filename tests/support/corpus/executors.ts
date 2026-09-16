@@ -16,6 +16,7 @@
 
 import type { AssertionKind } from "./contract.js";
 import type { LoadedAssertion, LoadedCase, LoadedCorpus } from "./loader.js";
+import * as applicationService from "./executors/application-service.js";
 import * as combatState from "./executors/combat-state.js";
 import * as normalization from "./executors/normalization.js";
 import type { AssertionOutcome } from "./executors/outcome.js";
@@ -57,10 +58,30 @@ export async function executeAssertion(
       return normalization.noActorRefHolds(artifact, params as ParamsOf<typeof assertion.kind>);
     case "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED":
       return normalization.unsupportedTypeCounted(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "NORMALIZATION.ACTOR_CATALOG":
+      return normalization.actorCatalog(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "NORMALIZATION.FIGHT_HEADER":
+      return normalization.fightHeader(artifact, params as ParamsOf<typeof assertion.kind>);
     case "WCL_DECODE.EVENT_PAGE_OUTCOME":
       return transport.eventPageOutcome(artifact, params as ParamsOf<typeof assertion.kind>);
     case "WCL_PAGINATION.STREAM_OUTCOME":
       return await transport.paginationStreamOutcome(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "WCL_PAGINATION.PAGE_ENVELOPE_FACTS":
+      return transport.pageEnvelopeFacts(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "WCL_TRANSPORT.FIGHT_IDENTITY":
+      return transport.fightIdentity(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "APPLICATION_SERVICE.FIGHT_ANALYSIS":
+      return await applicationService.fightAnalysis(
+        corpus,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT":
+      return combatState.lastObservedCastProvenAbsent(
+        corpus,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN":
       return combatState.lastObservedCastUnknown(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "COMBAT_STATE.LAST_OBSERVED_CAST_AT":
@@ -111,8 +132,14 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
   "NORMALIZATION.NO_ACTOR_REF_HOLDS",
   "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED",
+  "NORMALIZATION.ACTOR_CATALOG",
+  "NORMALIZATION.FIGHT_HEADER",
   "WCL_DECODE.EVENT_PAGE_OUTCOME",
   "WCL_PAGINATION.STREAM_OUTCOME",
+  "WCL_PAGINATION.PAGE_ENVELOPE_FACTS",
+  "WCL_TRANSPORT.FIGHT_IDENTITY",
+  "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+  "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT",
   "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
   "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
   "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",

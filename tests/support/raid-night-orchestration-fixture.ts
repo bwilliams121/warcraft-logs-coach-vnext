@@ -241,6 +241,19 @@ export function assassinationSnapshot(options: {
   readonly requestedFightIds?: readonly number[];
   readonly specNameFor?: (fightId: number, sourceId: number) => string | null;
   readonly absentOn?: ReadonlyMap<number, readonly number[]>;
+  /**
+   * Typed fight facts for every listed fight, when a test needs the pulls to
+   * be a particular encounter — external-reference qualification matches
+   * candidates against the subject's encounter and difficulty. Defaults keep
+   * the fixture's original placeholder encounter.
+   */
+  readonly fightFacts?: {
+    readonly encounterId: number;
+    readonly difficulty: number | null;
+    readonly kill: boolean | null;
+    readonly startTimeMs: number;
+    readonly endTimeMs: number;
+  };
 }): ReportRosterSnapshot {
   const players: readonly RosterPlayer[] = options.sourceIds.map((sourceId) =>
     rosterPlayerFor({ sourceId, name: `Raider${String(sourceId)}` }),
@@ -249,6 +262,7 @@ export function assassinationSnapshot(options: {
     const absent = new Set(options.absentOn?.get(fightId) ?? []);
     return rosterFightFor({
       fightId,
+      ...(options.fightFacts === undefined ? {} : options.fightFacts),
       participants: options.sourceIds
         .filter((sourceId) => !absent.has(sourceId))
         .map((sourceId) => ({

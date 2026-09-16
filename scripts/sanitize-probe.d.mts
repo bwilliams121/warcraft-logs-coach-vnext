@@ -19,5 +19,24 @@ export type IndexSelection =
  */
 export function parseIndexSelection(spec: string | undefined, eventCount: number): IndexSelection;
 
-/** Pulls the event array out of a bare array or a full GraphQL envelope. Throws on neither. */
+/**
+ * Pulls the event array out of a bare array, a full GraphQL envelope, or an
+ * array of page envelopes (concatenated in page order). Throws on none of them.
+ */
 export function extractEvents(value: unknown): readonly unknown[];
+
+/**
+ * The `--decision-slice` predicate: every cast by the subject, every aura
+ * event targeting the subject or a listed target, the subject's combatantinfo.
+ */
+export function decisionSlice(
+  events: readonly unknown[],
+  subject: number,
+  targets: readonly number[],
+): readonly unknown[];
+
+/** The slicer's own revision, recorded as `tooling.revision` on a corpus artifact. */
+export const SANITIZER_REVISION: string;
+
+/** Where a reviewed slice is written: the corpus artifact tree. */
+export const OUTPUT_ROOT: string;

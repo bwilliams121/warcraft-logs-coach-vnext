@@ -331,6 +331,27 @@ The harness takes its runtime as an input (`NODE` | `WORKERD`) and refuses at
 selection time any case whose kinds need a runtime the caller lacks; the
 complete gate runs under workerd.
 
+## The corpus command and its proofs (M9-C)
+
+`npm run test:corpus` (`scripts/corpus/gate.mjs`) is the corpus's own CI
+command and a separate job in `.github/workflows/ci.yml`: manifest currency
+(regenerate and compare), the Node corpus suite, the complete workerd gate in
+two separate processes with byte-identical machine-readable reports, and a
+drift check against the committed `tests/corpus/report.json` (rewritten only
+by `--write-report`, from an execution). Credentials are stripped from every
+child environment; the workers pool answers 503 to any outbound fetch, and
+`tests/regression/m9c-corpus-network-isolation.test.ts` proves that path
+fails actionably from inside the harness.
+
+Mutation discipline: when the corpus grows, prove it has teeth by applying a
+real defect to production code, running the gate, recording the failing case
+and its expected/actual, restoring by hand and confirming with `git diff`. A
+defect the gate does not catch is a missing case, not a passing grade —
+M9-C's relaxed absence gate produced
+`combat-state.partial-grant-cannot-prove-absence-before-it-begins`.
+Performance metadata on a capture source is context for selection and never
+an expected result.
+
 ## The harness (M9-B)
 
 `runCorpusHarness(selection)` in `tests/support/corpus/harness.ts` validates

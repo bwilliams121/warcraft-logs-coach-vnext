@@ -142,9 +142,11 @@ const PURE_RING = [
   "support/corpus/fight.ts",
   "support/corpus/harness.ts",
   "support/corpus/loader.ts",
+  "support/corpus/machine-report.ts",
   "support/corpus/report.ts",
 ];
 const EXECUTOR_RING = [
+  "support/corpus/executors/application-service.ts",
   "support/corpus/executors/combat-state.ts",
   "support/corpus/executors/normalization.ts",
   "support/corpus/executors/outcome.ts",
@@ -160,7 +162,10 @@ const BANNED_EVERYWHERE = [
   "token-provider",
   "graphql-client",
   "ingest-fight",
-  "preflight",
+  // The LIVE preflight port and its composition. `preflight-query.js` (the
+  // query document and decoder) is not a transport and the identity executor
+  // may read it.
+  "wcl/preflight.js",
   "report-roster",
   "report-revision",
   "node:fs",
@@ -220,14 +225,38 @@ describe("the corpus machinery is offline, deterministic and read-only", () => {
     }
   });
 
-  it("lets only the public-contract executor reach the Worker, MCP and services", () => {
+  it("lets only the public-contract executor reach the Worker and MCP", () => {
     for (const path of EXECUTOR_RING) {
       const specifiers = importsOf(CORPUS_SUPPORT_SOURCES[`../${path}`] ?? "");
       const reachesInterfaces = specifiers.some(
-        (specifier) =>
-          specifier.includes("/api/") || specifier.includes("/mcp/") || specifier.includes("/services/"),
+        (specifier) => specifier.includes("/api/") || specifier.includes("/mcp/"),
       );
       expect(reachesInterfaces, path).toBe(path === "support/corpus/executors/public-contract.ts");
+    }
+  });
+
+  it("lets only the application-service and public-contract executors reach the services", () => {
+    const allowed = new Set([
+      "support/corpus/executors/application-service.ts",
+      "support/corpus/executors/public-contract.ts",
+    ]);
+    for (const path of EXECUTOR_RING) {
+      const specifiers = importsOf(CORPUS_SUPPORT_SOURCES[`../${path}`] ?? "");
+      const reachesServices = specifiers.some((specifier) => specifier.includes("/services/"));
+      expect(reachesServices, path).toBe(allowed.has(path));
+    }
+  });
+
+  it("lets the transport executor read the preflight QUERY but never the live preflight PORT", () => {
+    const specifiers = importsOf(
+      CORPUS_SUPPORT_SOURCES["../support/corpus/executors/wcl-transport.ts"] ?? "",
+    );
+    expect(specifiers.some((specifier) => specifier.endsWith("wcl/preflight-query.js"))).toBe(true);
+    expect(specifiers.some((specifier) => specifier.endsWith("wcl/preflight.js"))).toBe(false);
+    for (const path of CORPUS_SUPPORT_PATHS) {
+      for (const specifier of importsOf(CORPUS_SUPPORT_SOURCES[`../${path}`] ?? "")) {
+        expect(specifier, `${path} imports ${specifier}`).not.toMatch(/wcl\/preflight\.js$/);
+      }
     }
   });
 

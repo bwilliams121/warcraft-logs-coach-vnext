@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { OWNING_LAYER_IDS } from "../support/corpus/contract.js";
-import { describeFailures, runCorpusHarness } from "../support/corpus/harness.js";
+import { describeFailures, runCorpusHarness, type HarnessResult } from "../support/corpus/harness.js";
+import { committedCorpusFiles, loadCorpusOrThrow } from "../support/corpus/loader.js";
+import {
+  committedMachineReport,
+  machineReport,
+  reportDrift,
+  serializeMachineReport,
+} from "../support/corpus/machine-report.js";
 
 /**
  * THE COMPLETE-CORPUS GATE.
@@ -11,15 +18,31 @@ import { describeFailures, runCorpusHarness } from "../support/corpus/harness.js
  * the real Worker and MCP handler over the D2 corpus — which needs the Workers
  * runtime for its bearer-auth primitive and cannot run under plain Node.
  *
- * M9-C wires this into a dedicated CI command. Until then it runs as part of
- * `npm test`, and a regression anywhere in M3–M8 that the corpus can see fails
- * here with the case, artifact, layer, kind, expected and actual results.
+ * `npm run test:corpus` (scripts/corpus/gate.mjs) runs this file in its own
+ * vitest process, twice, and reads the machine-readable report each run
+ * attaches to its task metadata: that is how the report reaches disk without
+ * the corpus machinery ever touching a filesystem, and how two separate
+ * processes are shown to produce one identical document. It also runs as part
+ * of `npm test`, so a regression anywhere in M3–M8 that the corpus can see
+ * fails here with the case, artifact, layer, kind, expected and actual results.
  */
 
-describe("the committed corpus executes clean under workerd", () => {
-  it("passes every assertion of every case, in every layer", async () => {
-    const result = await runCorpusHarness({ kind: "ALL" }, { runtime: "WORKERD" });
-    if (!result.ok) throw new Error(describeFailures(result));
+async function runAll(): Promise<Extract<HarnessResult, { ok: true }>> {
+  const result = await runCorpusHarness({ kind: "ALL" }, { runtime: "WORKERD" });
+  if (!result.ok) throw new Error(describeFailures(result));
+  return result;
+}
+
+// One ALL run drives six REST+MCP parity cases besides the rest; two of them
+// back to back under a loaded full-suite run exceed the default 5 s.
+const GATE_TIMEOUT_MS = 60_000;
+
+describe("the committed corpus executes clean under workerd", { timeout: GATE_TIMEOUT_MS }, () => {
+  it("passes every assertion of every case, in every layer", async ({ task }) => {
+    const result = await runAll();
+    // The report of THIS execution, for scripts/corpus/gate.mjs to collect.
+    // Attached before any assertion so a failing run still reports what it ran.
+    task.meta.corpusReport = machineReport(result, await loadCorpusOrThrow(committedCorpusFiles()));
 
     expect(describeFailures(result)).toBe("");
     expect(result.summary.failed).toBe(0);
@@ -27,23 +50,24 @@ describe("the committed corpus executes clean under workerd", () => {
     expect(result.complete).toBe(true);
     expect(result.declaredInCorpus).toBe(0);
     expect(result.runtime).toBe("WORKERD");
-    // All 31 cases and all 74 assertions, executed here and nowhere else.
-    expect(result.summary.cases).toBe(31);
-    expect(result.summary.assertions).toBe(74);
-    expect(result.summary.passed).toBe(74);
+    // Every case and every assertion, executed here and nowhere else. 31/74
+    // at M9-B; M9-C added twelve cases and twenty-seven assertions; the M9-C
+    // correction's second Assassination subject added eleven cases and
+    // forty-one assertions.
+    expect(result.summary.cases).toBe(54);
+    expect(result.summary.assertions).toBe(142);
+    expect(result.summary.passed).toBe(142);
   });
 
-  it("covers every layer that owns a corpus case, and names the one that does not", async () => {
-    const result = await runCorpusHarness({ kind: "ALL" }, { runtime: "WORKERD" });
-    if (!result.ok) throw new Error(describeFailures(result));
+  it("covers every layer", async () => {
+    const result = await runAll();
     const covered = result.summary.byLayer
       .filter((layer) => layer.cases > 0)
       .map((layer) => layer.owningLayer);
 
-    // APPLICATION_SERVICE has no corpus case yet: its contracts are exercised
-    // through PUBLIC_CONTRACT parity, which composes the services, and through
-    // the existing service tests. Recorded here so the gap is a decision.
-    expect(covered).toEqual(OWNING_LAYER_IDS.filter((layer) => layer !== "APPLICATION_SERVICE"));
+    // APPLICATION_SERVICE gained its own cases in M9-C; no layer is exercised
+    // only through another layer's composition any more.
+    expect(covered).toEqual([...OWNING_LAYER_IDS]);
   });
 
   it("is deterministic across runs", async () => {
@@ -51,5 +75,20 @@ describe("the committed corpus executes clean under workerd", () => {
     const second = await runCorpusHarness({ kind: "ALL" }, { runtime: "WORKERD" });
 
     expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+  });
+
+  it("matches the committed machine-readable report, field for field", async () => {
+    // DRIFT CHECK. tests/corpus/report.json was written from an execution by
+    // `npm run test:corpus -- --write-report`; if this run says anything
+    // different — a total, a status, a digest, a gap disposition — the
+    // committed report is stale and the message names the first field.
+    const corpus = await loadCorpusOrThrow(committedCorpusFiles());
+    const actual = machineReport(await runAll(), corpus);
+    const committed = committedMachineReport();
+
+    expect(reportDrift(committed, actual)).toBeNull();
+    // And the serialisation the script writes is the one canonical form.
+    expect(serializeMachineReport(actual)).toBe(serializeMachineReport(actual));
+    expect(serializeMachineReport(actual)).not.toMatch(/\d{4}-\d{2}-\d{2}T|[A-Z]:\\\\|\/home\/|\/Users\//);
   });
 });

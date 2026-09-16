@@ -4,6 +4,8 @@
  */
 
 import type { ParamsOf } from "./params.js";
+import { normalizeFightContext } from "../../../../src/engine/normalization/fight-context.js";
+import { decodeFightContext } from "../../../../src/wcl/fight-context-query.js";
 import { normalizeArtifact, rawEventsOf } from "../fight.js";
 import type { LoadedArtifact } from "../loader.js";
 import { fail, pass, type AssertionOutcome } from "./outcome.js";
@@ -237,6 +239,82 @@ export function unsupportedTypeCounted(
       expected: { counted: params.count, preserved: params.count },
       actual: { counted, preserved },
     });
+  }
+  return pass();
+}
+
+/** The real decoder and normalizer over a report context artifact, or a reason they refused. */
+function normalizedContext(artifact: LoadedArtifact, fightId: number) {
+  const decoded = decodeFightContext(artifact.json);
+  if (!decoded.ok) return { ok: false as const, detail: "the fight-context decoder rejected the payload" };
+  if (decoded.value.report === null) return { ok: false as const, detail: "the payload served no report" };
+  const normalized = normalizeFightContext(decoded.value.report, fightId);
+  if (!normalized.ok)
+    return { ok: false as const, detail: `normalizeFightContext refused: ${normalized.reason}` };
+  return { ok: true as const, normalized };
+}
+
+export function actorCatalog(
+  artifact: LoadedArtifact,
+  params: ParamsOf<"NORMALIZATION.ACTOR_CATALOG">,
+): AssertionOutcome {
+  const context = normalizedContext(artifact, params.fightId);
+  if (!context.ok) return fail(context.detail);
+  const catalog = context.normalized.actors;
+  const actors = [...catalog.actors.values()];
+  const count = (type: string) => actors.filter((actor) => actor.actorType === type).length;
+  const actual = {
+    actors: actors.length,
+    players: count("PLAYER"),
+    pets: count("PET"),
+    npcs: count("NPC"),
+    unknown: count("UNKNOWN"),
+    unusableEntries: catalog.unusableEntryCount,
+    petOwnerLinks: params.expected.petOwnerLinks.map((link) => ({
+      actorId: link.actorId,
+      petOwnerActorId: catalog.actors.get(link.actorId)?.petOwnerActorId ?? null,
+    })),
+    holdsActorIds: params.expected.holdsActorIds.filter((id) => catalog.actors.has(id)),
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the actor catalog differs from what the case pins", { expected: params.expected, actual });
+  }
+  return pass();
+}
+
+export function fightHeader(
+  artifact: LoadedArtifact,
+  params: ParamsOf<"NORMALIZATION.FIGHT_HEADER">,
+): AssertionOutcome {
+  const context = normalizedContext(artifact, params.fightId);
+  if (!context.ok) return fail(context.detail);
+  const { fight, phases, zone, abilities } = context.normalized;
+  const actual = {
+    encounterId: fight.encounterId,
+    difficulty: fight.difficulty,
+    kill: fight.kill,
+    startTimeMs: fight.startTimeMs,
+    endTimeMs: fight.endTimeMs,
+    finality: fight.finality,
+    friendlyPlayerCount: fight.friendlyPlayers.length,
+    phases: phases.map((phase) => ({
+      phaseId: phase.phaseId,
+      isIntermission: phase.isIntermission,
+      startTimeMs: phase.startTimeMs,
+    })),
+    outcome: {
+      lastPhase: fight.outcome.lastPhase,
+      lastPhaseAsAbsoluteIndex: fight.outcome.lastPhaseAsAbsoluteIndex,
+      lastPhaseIsIntermission: fight.outcome.lastPhaseIsIntermission,
+      bossPercentageRaw: fight.outcome.bossPercentageRaw,
+      fightPercentageRaw: fight.outcome.fightPercentageRaw,
+      wipeCalledReportTimeMs: fight.outcome.wipeCalledReportTimeMs,
+    },
+    zone: zone === null ? null : { id: zone.id, name: zone.name },
+    abilities: abilities.abilities.size,
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the fight header differs from what the case pins", { expected: params.expected, actual });
   }
   return pass();
 }

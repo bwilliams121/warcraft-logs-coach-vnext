@@ -71,25 +71,55 @@ the Miniflare bindings while doing it.
 
 ## M9-C: corpus follow-through
 
-**Raised:** M9-B closeout (2026-09-15). **Do in:** M9-C.
+**Raised:** M9-B closeout (2026-09-15). **Resolved in M9-C (2026-09-15)** except
+where marked.
 
-- Wire `tests/regression/m9b-corpus-gate.test.ts` behind a dedicated CI
-  command and decide runtime/sharding. Until then the gate runs inside
-  `npm test`.
-- Deliberate-defect proof at the CI level: `m9b-corpus-failure-demonstration`
-  proves wrong EXPECTATIONS fail; M9-C proves a wrong IMPLEMENTATION fails
-  the gate.
-- `tests/fixtures/wcl/preflight-payloads.ts` (synthetic TypeScript) is the
-  only evidence outside the corpus contract. Decide whether preflight payloads
-  become corpus artifact kinds or stay as typed fixtures with a pointer.
-- `tests/support/raid-night-orchestration-fixture.ts` normalizes the D2
-  artifact under its own window and fans it per participant; the raid-night
-  and encounter-context parity executors therefore accept only the D2
-  artifact and say so. Generalising them needs the fixture to take the
-  artifact's window from the corpus rather than its own constants.
-- (Resolved in the M9-B correction pass, not M9-C work.) Every M5 support
-  harness now builds its fight through the shared corpus interpreter; there is
-  one coverage policy for captured evidence, and a guard enforces it.
-- Every evidence gap in `tests/support/corpus/report.ts`
-  (`KNOWN_EVIDENCE_GAPS`) names the capture that would close it. None is
-  closable offline.
+- Done: `npm run test:corpus` (`scripts/corpus/gate.mjs`) and a separate CI
+  job; the gate also still runs inside `npm test`.
+- Done: implementation-level mutation proofs (M3 cursor, M4 absence gate, M6/M8
+  parity); the M4 mutation was uncaught and produced a new case.
+- Decided: `tests/fixtures/wcl/preflight-payloads.ts` stays a synthetic
+  mutable builder outside the corpus (see `tests/corpus/README.md`); real
+  identity resolution is corpus-pinned over real master data.
+- Still open: `tests/support/raid-night-orchestration-fixture.ts` normalizes
+  the D2 artifact under its own window; the raid-night and encounter-context
+  parity executors accept only the D2 artifact and say so. M9-C added
+  `fightFacts` so the subject pull's encounter facts can be stated, but the
+  window is still the fixture's own.
+- Every M9-B evidence gap now carries a disposition in
+  `tests/support/corpus/report.ts` and `tests/corpus/report.json`.
+
+## After M9-C: evidence the corpus still lacks
+
+**Raised:** M9-C closeout (2026-09-15).
+
+Every remaining gap has a canonical owner (`KNOWN_EVIDENCE_GAPS`,
+`tests/corpus/report.json`):
+
+- **M10 (Protection Paladin):** the decision-level tank capture, which must
+  retain every interrupt by the player (`no-interrupt-events` — the first
+  capture milestone whose subject has an interrupt in its supported surface).
+- **M11 (broader DPS corpus expansion):** `assassination-corpus-breadth` — a
+  wipe, a pre-pull window that retains the Stealth application so an opener
+  decision can resolve, the low-bracket subject's own slice from the gtKb
+  kill (actor 8, 8 %, has performance provenance but no events), and a
+  decision on whether a bounded cast-to-application tolerance is sound for
+  combo-point DoTs (the gtKb report records Rupture's applydebuff one
+  millisecond after its cast, and `bindDotRemains` refuses).
+- **M12 (death-event and dispel/triage behaviour):**
+  `no-death-or-dispel-events`. Not M10: a tank capture may contain a dispel,
+  but healer triage semantics are not a tank question.
+- **M14 (targetability and temporal root-cause consumers):**
+  `no-targetability-or-intermission` — the targetability event shape; real
+  intermission PHASE transitions are already committed.
+- **M15 (identity and product maturity):** `no-identity-conflict-capture` —
+  `IDENTITY_CONFLICT` is a result state nothing produces or consumes; detection
+  and propagation are unimplemented, so the gap is OUTSIDE_CURRENT_CAPABILITY
+  until M15 implements them and owns their evidence.
+- A verbatim upstream failure BODY (rate-limit or 5xx from Warcraft Logs) is
+  not captured and will not be: provoking one means spending or exhausting
+  quota. The transport's classification of each is pinned by unit tests; the
+  corpus models the failure class over real pages.
+- The A7R6 events captures list `sourceActorId: 19` and `PLAYER_CONTEXT`; the
+  fight-context capture is recorded `FULL_RAID` because master data is
+  report-wide. Neither is a claim about ingestion scope derivation.

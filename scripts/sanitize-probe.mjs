@@ -14,6 +14,7 @@
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --per-type <N>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --where <key>=<value> <N>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --indices <i,j,k>
+ *     node scripts/sanitize-probe.mjs <input.json> <output-name> --decision-slice <subject> <target,target>
  *
  * `--per-type` keeps up to N events of EACH distinct `type`, in original order.
  * That yields far more evidence per byte than a head slice: a fixture that has
@@ -35,7 +36,16 @@
  * not an event to skip, because silently producing a shorter fixture than asked
  * for would quietly weaken the evidence a contract rests on.
  *
- * Accepts either a full GraphQL envelope or a bare event array, and always
+ * `--decision-slice` is the M5-D2 predicate, made a recorded mode: EVERY cast
+ * by the subject, EVERY aura event whose target is the subject or one of the
+ * listed targets, and the subject's combatantinfo — in capture order, nothing
+ * else. Because it is a predicate over the whole capture rather than a count
+ * or an index list, a slice cut with it can carry a coverage grant for
+ * exactly those categories and actors over the capture window; the other
+ * modes select by property or position and carry none.
+ *
+ * Accepts a full GraphQL envelope, a bare event array, or an ARRAY OF PAGE
+ * ENVELOPES (a paginated capture, concatenated in page order), and always
  * writes a bare event array plus a small provenance header alongside it.
  *
  * It is plain JavaScript with no `src/` imports, so plain `node` runs it — no
@@ -60,7 +70,7 @@ const FORBIDDEN = ["client_secret", "access_token", "authorization", "bearer ", 
  * M9-B predates this field, and their manifest entries record UNAVAILABLE —
  * a fact about those captures, not something to backfill.
  */
-export const SANITIZER_REVISION = "sanitize-probe-2";
+export const SANITIZER_REVISION = "sanitize-probe-3";
 
 /** Where a reviewed slice lands: the regression corpus, never a loose fixture directory. */
 export const OUTPUT_ROOT = "tests/corpus/artifacts/wcl-events";
@@ -111,6 +121,11 @@ export function parseIndexSelection(spec, eventCount) {
 /** Pulls the event array out of whichever shape the probe wrote. */
 export function extractEvents(value) {
   if (Array.isArray(value)) {
+    // A paginated capture: every element is a page envelope. Concatenated in
+    // page order, which is retrieval order. Anything else is a bare array.
+    if (value.length > 0 && value.every((page) => Array.isArray(page?.reportData?.report?.events?.data))) {
+      return value.flatMap((page) => page.reportData.report.events.data);
+    }
     return value;
   }
   const data = value?.reportData?.report?.events?.data;
@@ -120,12 +135,43 @@ export function extractEvents(value) {
   throw new Error("could not find an event array in the input");
 }
 
+/** The aura event families, as Warcraft Logs names them. */
+const AURA_TYPES = new Set([
+  "applybuff",
+  "refreshbuff",
+  "removebuff",
+  "applybuffstack",
+  "removebuffstack",
+  "applydebuff",
+  "refreshdebuff",
+  "removedebuff",
+  "applydebuffstack",
+  "removedebuffstack",
+]);
+
+/**
+ * The `--decision-slice` predicate. Exported for tests.
+ *
+ * Keeps, in capture order: every `cast` sourced by `subject`; every aura event
+ * whose `targetID` is `subject` or in `targets`; the subject's `combatantinfo`.
+ * Nothing is reordered, deduplicated or synthesised.
+ */
+export function decisionSlice(events, subject, targets) {
+  const auraTargets = new Set([subject, ...targets]);
+  return events.filter((event) => {
+    if (typeof event !== "object" || event === null) return false;
+    if (event.type === "cast" && event.sourceID === subject) return true;
+    if (event.type === "combatantinfo" && event.sourceID === subject) return true;
+    return AURA_TYPES.has(event.type) && auraTargets.has(event.targetID);
+  });
+}
+
 function main() {
   const [inputPath, outputName, mode, countRaw] = process.argv.slice(2);
 
   if (inputPath === undefined || outputName === undefined) {
     console.error(
-      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k]",
+      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target]",
     );
     process.exit(1);
   }
@@ -136,7 +182,18 @@ function main() {
   const events = extractEvents(payload);
 
   let sliced;
-  if (mode === "--indices") {
+  if (mode === "--decision-slice") {
+    const subject = Number(countRaw);
+    const targets = String(process.argv[6] ?? "")
+      .split(",")
+      .filter((entry) => entry.trim() !== "")
+      .map(Number);
+    if (!Number.isSafeInteger(subject) || targets.some((id) => !Number.isSafeInteger(id))) {
+      console.error("usage: --decision-slice <subject actor id> <target actor id,...>");
+      process.exit(1);
+    }
+    sliced = decisionSlice(events, subject, targets);
+  } else if (mode === "--indices") {
     const selection = parseIndexSelection(countRaw, events.length);
     if (!selection.ok) {
       console.error(selection.error);

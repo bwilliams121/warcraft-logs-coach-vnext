@@ -72,6 +72,32 @@ export function lastObservedCastUnknown(
   return pass();
 }
 
+export function lastObservedCastProvenAbsent(
+  corpus: LoadedCorpus,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT">,
+): AssertionOutcome {
+  const state = stateOf(corpus, artifact);
+  const at = positionAt(state, params.at);
+  if (!at.ok) return fail(at.detail);
+  const result = state.lastObservedCast({
+    actorId: params.actorId,
+    abilityGameId: params.abilityGameId,
+    castPhase: "COMPLETE",
+    before: at.position,
+  });
+  const actual = summarize(result, (cast) =>
+    cast === null ? "PROVEN_ABSENCE" : { reportTimeMs: cast.reportTimeMs },
+  );
+  if (result.certainty !== "EXACT" || result.value !== null) {
+    return fail("the state layer did not prove the absence the case pins", {
+      expected: { certainty: "EXACT", value: "PROVEN_ABSENCE" },
+      actual,
+    });
+  }
+  return pass();
+}
+
 export function lastObservedCastAt(
   corpus: LoadedCorpus,
   artifact: LoadedArtifact,

@@ -43,7 +43,13 @@ async function layer(
 
 describe("every Node-executable layer of the corpus executes clean", () => {
   it("names the Node-executable layers from the registry, not from a list", () => {
-    expect(NODE_LAYERS).toEqual(["WCL_TRANSPORT", "NORMALIZATION", "COMBAT_STATE", "SPEC_ASSASSINATION"]);
+    expect(NODE_LAYERS).toEqual([
+      "WCL_TRANSPORT",
+      "NORMALIZATION",
+      "COMBAT_STATE",
+      "SPEC_ASSASSINATION",
+      "APPLICATION_SERVICE",
+    ]);
   });
 
   it.each(NODE_LAYERS)(
@@ -213,8 +219,13 @@ describe("selection", () => {
   });
 
   it("refuses a layer with no cases rather than reporting an empty pass", async () => {
-    // APPLICATION_SERVICE owns no corpus case in M9-B; the gap is reported, not hidden.
-    const result = await runCorpusHarness({ kind: "LAYER", owningLayer: "APPLICATION_SERVICE" }, NODE);
+    // Every layer owns a case since M9-C, so the empty layer is constructed:
+    // the committed manifest with its two APPLICATION_SERVICE cases removed.
+    const files = { ...committedCorpusFiles() };
+    const manifest = JSON.parse(files[MANIFEST_PATH] ?? "{}") as { cases: { owningLayer: string }[] };
+    manifest.cases = manifest.cases.filter((entry) => entry.owningLayer !== "APPLICATION_SERVICE");
+    files[MANIFEST_PATH] = JSON.stringify(manifest);
+    const result = await runCorpusHarness({ kind: "LAYER", owningLayer: "APPLICATION_SERVICE" }, NODE, files);
 
     expect(result.ok).toBe(false);
     if (result.ok) return;

@@ -10,7 +10,9 @@
  */
 
 import { decodeEventPage } from "../../../../src/wcl/events-query.js";
+import { resolveFightIdentity } from "../../../../src/wcl/identity.js";
 import { paginateEventStream } from "../../../../src/wcl/paginator.js";
+import { decodePreflight } from "../../../../src/wcl/preflight-query.js";
 import { createEventRetrievalPlan } from "../../../../src/wcl/retrieval-plan.js";
 import type { RawEventPage } from "../../../../src/wcl/retrieval-types.js";
 import { jsonResponse } from "../../fake-fetch.js";
@@ -45,9 +47,12 @@ export async function paginationStreamOutcome(
   const received: RawEventPage[] = [];
   const { client, fetch } = createTestGraphqlClient((_request, index) => {
     const page = pages[index];
-    // Past the end of the sequence is a harness defect, not upstream behaviour:
-    // the artifact must carry every page the paginator will ask for.
-    if (page === undefined) return jsonResponse(500, { error: "page sequence exhausted" });
+    // A request past the end of the sequence is answered as an upstream
+    // failure. That models the one honest thing a bounded capture can say
+    // about the page it never retrieved: it was not obtained. The transport
+    // classifies it, and the stream must end PARTIAL keeping every retrieved
+    // page — never COMPLETE and never an empty period.
+    if (page === undefined) return jsonResponse(500, { error: "page not retrieved" });
     return jsonResponse(200, { data: page });
   });
   const plan = createEventRetrievalPlan({
@@ -76,6 +81,118 @@ export async function paginationStreamOutcome(
       expected: params.expected,
       actual,
     });
+  }
+
+  // No global sort, no deduplication: what the sink received is exactly the
+  // artifact's pages, in order, event for event.
+  const served = received.map((page) => page.events);
+  const expectedPages = pages.slice(0, received.length).map((page) => {
+    const decoded = decodeEventPage(page);
+    return decoded.ok && decoded.value.kind === "PAGE" ? decoded.value.events : null;
+  });
+  if (JSON.stringify(served) !== JSON.stringify(expectedPages)) {
+    return fail("the paginator handed the sink something other than the pages verbatim, in order", {
+      expected: { pagesVerbatimInOrder: true },
+      actual: { pagesVerbatimInOrder: false },
+    });
+  }
+  return pass();
+}
+
+export function pageEnvelopeFacts(
+  artifact: LoadedArtifact,
+  params: ParamsOf<"WCL_PAGINATION.PAGE_ENVELOPE_FACTS">,
+): AssertionOutcome {
+  if (!Array.isArray(artifact.json))
+    return fail("a page sequence artifact must be a JSON array of decoded data objects");
+  const facts: {
+    eventCount: number;
+    firstTimestamp: number | null;
+    lastTimestamp: number | null;
+    nextPageTimestamp: number | null;
+  }[] = [];
+  for (const [index, page] of (artifact.json as readonly unknown[]).entries()) {
+    const decoded = decodeEventPage(page);
+    if (!decoded.ok || decoded.value.kind !== "PAGE") {
+      return fail(`page ${String(index)} did not decode as a PAGE`, {
+        expected: { kind: "PAGE" },
+        actual: { kind: decoded.ok ? decoded.value.kind : "DECODE_FAILED" },
+        locator: { pageIndex: index },
+      });
+    }
+    const timestamps = decoded.value.events.map((event) =>
+      typeof event === "object" && event !== null ? (event as { timestamp?: unknown }).timestamp : undefined,
+    );
+    const first = timestamps[0];
+    const last = timestamps[timestamps.length - 1];
+    facts.push({
+      eventCount: decoded.value.events.length,
+      firstTimestamp: typeof first === "number" ? first : null,
+      lastTimestamp: typeof last === "number" ? last : null,
+      nextPageTimestamp: decoded.value.nextPageTimestamp,
+    });
+  }
+  if (JSON.stringify(facts) !== JSON.stringify(params.pages)) {
+    return fail("the page envelopes carry different facts than the case pins", {
+      expected: params.pages,
+      actual: facts,
+    });
+  }
+  for (let index = 0; index + 1 < facts.length; index += 1) {
+    const page = facts[index];
+    const next = facts[index + 1];
+    if (page === undefined || next === undefined) continue;
+    const holds =
+      page.nextPageTimestamp !== null &&
+      page.nextPageTimestamp === next.firstTimestamp &&
+      page.lastTimestamp !== null &&
+      page.nextPageTimestamp > page.lastTimestamp;
+    if (!holds) {
+      return fail(
+        `the boundary between pages ${String(index)} and ${String(index + 1)} does not obey ${params.boundaryRule}`,
+        {
+          expected: { rule: params.boundaryRule },
+          actual: {
+            cursor: page.nextPageTimestamp,
+            previousLast: page.lastTimestamp,
+            nextFirst: next.firstTimestamp,
+          },
+          locator: { pageIndex: index },
+        },
+      );
+    }
+  }
+  return pass();
+}
+
+export function fightIdentity(
+  artifact: LoadedArtifact,
+  params: ParamsOf<"WCL_TRANSPORT.FIGHT_IDENTITY">,
+): AssertionOutcome {
+  const decoded = decodePreflight(artifact.json);
+  if (!decoded.ok)
+    return fail("the preflight decoder rejected the report context", {
+      expected: "decodable",
+      actual: "DECODE_FAILED",
+    });
+  const resolution = resolveFightIdentity(decoded.value, {
+    reportCode: decoded.value.report?.code ?? "",
+    fightId: params.fightId,
+    sourceId: params.sourceId,
+  });
+  const actual = resolution.ok
+    ? {
+        ok: true,
+        className: resolution.identity.player.className,
+        specName: resolution.identity.player.specName,
+        playerName: resolution.identity.player.name,
+        reportRevision: resolution.identity.report.revision,
+        logVersion: resolution.identity.data.logVersion,
+        gameVersion: resolution.identity.data.gameVersion,
+      }
+    : { ok: false, reason: resolution.reason };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("identity resolved differently than the case pins", { expected: params.expected, actual });
   }
   return pass();
 }

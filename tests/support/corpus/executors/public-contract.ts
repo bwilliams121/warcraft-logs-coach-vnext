@@ -33,9 +33,13 @@ import type { EncounterContextRunner } from "../../../../src/services/encounter-
 import { analyzeRaidNight } from "../../../../src/services/raid-night-service.js";
 import type { RaidNightRunner } from "../../../../src/services/raid-night-runner.js";
 import type { CombatFight } from "../../../../src/engine/normalization/combat-fight.js";
+import type { ExternalDiscoveryPorts } from "../../../../src/external-context/external-discovery.js";
+import { decodeRankingPayload } from "../../../../src/wcl/rankings/rankings-decoder.js";
+import { decodeEncounterRankings } from "../../../../src/wcl/rankings/rankings-query.js";
 import type { FightIdentity } from "../../../../src/wcl/types.js";
 import type { ZodType } from "zod";
 import { ALLOWING_LIMITER, MCP_TEST_ENV, authHeaders, workerDepsFor } from "../../analysis-transports.js";
+import { candidateReport } from "../../m8f-fixture.js";
 import { REPORT_CODE, assassinationSnapshot, fakePorts } from "../../raid-night-orchestration-fixture.js";
 import { fightOf } from "../fight.js";
 import type { LoadedArtifact, LoadedCorpus } from "../loader.js";
@@ -162,6 +166,18 @@ function parityViolation(surfaces: Surfaces, schema: ZodType): AssertionOutcome 
   return null;
 }
 
+/**
+ * The one overall comparability every qualified reference carries, or `NONE`
+ * when nothing qualified. Two different values would be a defect in the
+ * assessment (M8-B answers the same across-report question the same way), and
+ * are reported verbatim so the failure names them.
+ */
+function comparabilityOf(values: readonly string[]): string {
+  const distinct = [...new Set(values)];
+  if (distinct.length === 0) return "NONE";
+  return distinct.length === 1 ? (distinct[0] ?? "NONE") : distinct.join("|");
+}
+
 /** Key-sorted deep copy, so structural equality ignores serialiser key order. */
 function sortKeys(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(sortKeys);
@@ -242,8 +258,96 @@ async function analysisParity(
   return pass();
 }
 
-function raidNightPorts(fightIds: readonly number[], actorId: number) {
-  return fakePorts({ snapshot: assassinationSnapshot({ fightIds, sourceIds: [actorId] }) });
+function raidNightPorts(
+  fightIds: readonly number[],
+  actorId: number,
+  subjectFight?: { encounterId: number; difficulty: number; durationMs: number },
+) {
+  const fightFacts =
+    subjectFight === undefined
+      ? {}
+      : {
+          fightFacts: {
+            encounterId: subjectFight.encounterId,
+            difficulty: subjectFight.difficulty,
+            kill: true,
+            startTimeMs: 1_000,
+            endTimeMs: 1_000 + subjectFight.durationMs,
+          },
+        };
+  return fakePorts({ snapshot: assassinationSnapshot({ fightIds, sourceIds: [actorId], ...fightFacts }) });
+}
+
+type ExternalSpec = NonNullable<
+  Extract<ParamsOf<"PUBLIC_CONTRACT.REST_MCP_PARITY">, { document: "ENCOUNTER_CONTEXT" }>["external"]
+>;
+
+interface ExternalPortDouble {
+  readonly ports: ExternalDiscoveryPorts;
+  rankingRequests(): number;
+  metadataRequests(): number;
+}
+
+/**
+ * M8-F's two ports, entirely offline.
+ *
+ * The ranking page is the sanitized capture, decoded by the REAL decoder. The
+ * per-candidate metadata is a SYNTHETIC report (a stated test premise: the
+ * corpus holds no third-party report) whose single player carries the row's
+ * remapped name and no server, so identity resolution has exactly one way to
+ * succeed. A `TRANSPORT_FAILURE` ranking port answers what the production
+ * adapter answers when the GraphQL call fails: PAYLOAD_UNRECOGNISED, never an
+ * empty pool. A candidate named in `metadataUnavailableFor` answers `null`,
+ * which is the port's "report not served" and must become a candidate-local
+ * failure that leaves every other candidate untouched.
+ */
+function externalPortDouble(
+  rankings: LoadedArtifact,
+  spec: ExternalSpec,
+  subject: { encounterId: number; difficulty: number },
+): ExternalPortDouble {
+  let rankingRequests = 0;
+  let metadataRequests = 0;
+  const rowNames = new Map<string, string>();
+  const decodedEnvelope = decodeEncounterRankings(rankings.json);
+  if (decodedEnvelope.ok) {
+    const page = decodedEnvelope.value.rankings as { rankings?: unknown[] } | undefined;
+    for (const row of page?.rankings ?? []) {
+      const record = row as { name?: unknown; report?: { code?: unknown; fightID?: unknown } };
+      if (typeof record.name === "string" && typeof record.report?.code === "string") {
+        rowNames.set(`${record.report.code}:${String(record.report.fightID)}`, record.name);
+      }
+    }
+  }
+  const unavailable = new Set(spec.metadataUnavailableFor);
+  return {
+    ports: {
+      rankingPage: async () => {
+        rankingRequests += 1;
+        if (spec.rankingPort === "TRANSPORT_FAILURE" || !decodedEnvelope.ok) {
+          return { outcome: "PAYLOAD_UNRECOGNISED", defect: "RANKINGS_NOT_A_RECORD" };
+        }
+        return decodeRankingPayload(decodedEnvelope.value.rankings);
+      },
+      candidateMetadata: async (reportCode, fightId) => {
+        metadataRequests += 1;
+        if (unavailable.has(reportCode)) return null;
+        const name = rowNames.get(`${reportCode}:${String(fightId)}`) ?? "Unlisted";
+        return candidateReport({
+          code: reportCode,
+          fightId,
+          encounterId: subject.encounterId,
+          difficulty: subject.difficulty,
+          actors: [
+            { id: 25, name, server: null, type: "Player", subType: "Rogue" },
+            { id: 90, name: "Boss", type: "NPC", subType: "Boss" },
+          ],
+        });
+      },
+    },
+    rankingRequests: () => rankingRequests,
+    metadataRequests: () => metadataRequests,
+  };
 }
 
 async function raidNightParity(
@@ -278,6 +382,7 @@ async function raidNightParity(
 }
 
 async function encounterContextParity(
+  corpus: LoadedCorpus,
   artifact: LoadedArtifact,
   params: Extract<ParamsOf<"PUBLIC_CONTRACT.REST_MCP_PARITY">, { document: "ENCOUNTER_CONTEXT" }>,
 ): Promise<AssertionOutcome> {
@@ -286,26 +391,148 @@ async function encounterContextParity(
       `encounter-context parity runs over ${RAID_NIGHT_ARTIFACT} only; the orchestration fixture normalizes that artifact under its own window`,
     );
   }
-  const ports = raidNightPorts(params.fightIds, params.subject.actorId);
+  const ports = raidNightPorts(params.fightIds, params.subject.actorId, params.subjectFight);
   const { env: _env, ...raidNightDeps } = ports.deps;
   const env: Env = MCP_TEST_ENV;
-  const encounterContext: EncounterContextRunner = async (request) =>
-    await analyzeEncounterContext(request, { env, raidNight: raidNightDeps });
-  const args = { reportCode: REPORT_CODE, fightIds: [...params.fightIds] };
+
+  // One fresh port double PER SURFACE, so the request counts below are what
+  // one document costs and both transports are shown to spend the same.
+  let doubles: { readonly rest: ExternalPortDouble; readonly mcp: ExternalPortDouble } | null = null;
+  if (params.external !== undefined) {
+    if (params.subjectFight === undefined) {
+      return fail("an external-enabled case must state the subject fight's encounter facts");
+    }
+    const rankingsArtifactId = params.external.rankingsArtifactId;
+    const rankings = corpus.artifacts.find((candidate) => candidate.record.artifactId === rankingsArtifactId);
+    if (rankings === undefined) {
+      return fail(`rankings artifact ${rankingsArtifactId} is not in the corpus`);
+    }
+    doubles = {
+      rest: externalPortDouble(rankings, params.external, params.subjectFight),
+      mcp: externalPortDouble(rankings, params.external, params.subjectFight),
+    };
+  }
+  const runnerOver = (external: ExternalPortDouble | null): EncounterContextRunner => {
+    return async (request) =>
+      await analyzeEncounterContext(request, {
+        env,
+        raidNight: raidNightDeps,
+        ...(external === null ? {} : { external: external.ports }),
+      });
+  };
+  const args = {
+    reportCode: REPORT_CODE,
+    fightIds: [...params.fightIds],
+    ...(params.external === undefined
+      ? {}
+      : {
+          externalReferences: {
+            mode: "ENABLED",
+            subjectFightId: params.subjectFightId,
+            className: params.external.className,
+            specName: params.external.specName,
+            metric: "dps",
+            partition: { mode: "PINNED", partition: 1 },
+          },
+        }),
+  };
 
   const surfaces: Surfaces = {
-    rest: await rest("/v1/encounter-context", args, { encounterContext }),
-    mcp: await mcp(ENCOUNTER_CONTEXT_TOOL_NAME, { source: "ids", ...args }, { encounterContext }),
+    rest: await rest("/v1/encounter-context", args, {
+      encounterContext: runnerOver(doubles?.rest ?? null),
+    }),
+    mcp: await mcp(
+      ENCOUNTER_CONTEXT_TOOL_NAME,
+      { source: "ids", ...args },
+      {
+        encounterContext: runnerOver(doubles?.mcp ?? null),
+      },
+    ),
   };
   const violation = parityViolation(surfaces, PublicEncounterContextResultSchema);
   if (violation !== null) return violation;
 
-  const document = surfaces.rest.body as { externalReferences: { status: string } };
-  if (document.externalReferences.status !== params.expected.externalReferenceStatus) {
+  const spent = (double: ExternalPortDouble | null) => ({
+    metadataRequests: double?.metadataRequests() ?? 0,
+    rankingRequests: double?.rankingRequests() ?? 0,
+  });
+  const external = doubles?.rest ?? null;
+  if (doubles !== null && JSON.stringify(spent(doubles.rest)) !== JSON.stringify(spent(doubles.mcp))) {
+    return fail("REST and MCP spent different external requests for the same document", {
+      expected: spent(doubles.rest),
+      actual: spent(doubles.mcp),
+    });
+  }
+
+  const document = surfaces.rest.body as {
+    encounters: readonly { pulls: readonly unknown[] }[];
+    unresolvedPulls: readonly unknown[];
+    externalReferences: {
+      status: string;
+      qualified?: readonly {
+        comparability: { comparability: string };
+        reportCode: string;
+        fightId: number;
+      }[];
+      failures?: readonly unknown[];
+      ineligible?: readonly unknown[];
+    };
+  };
+  const section = document.externalReferences;
+  if (section.status !== params.expected.externalReferenceStatus) {
     return fail("the shared encounter-context document carries a different external-reference status", {
       expected: { externalReferenceStatus: params.expected.externalReferenceStatus },
-      actual: { externalReferenceStatus: document.externalReferences.status },
+      actual: { externalReferenceStatus: section.status },
     });
+  }
+  // Whatever the external half did, the local half stands: the subject's own
+  // pulls are published. An external failure that emptied local progression
+  // would be a defect the status alone could not show.
+  const localPulls =
+    document.encounters.reduce((sum, e) => sum + e.pulls.length, 0) + document.unresolvedPulls.length;
+  if (localPulls !== params.fightIds.length) {
+    return fail("local progression does not carry every requested pull", {
+      expected: { localPulls: params.fightIds.length },
+      actual: { localPulls },
+    });
+  }
+  if (params.expected.externalReferenceStatus === "COMPLETED") {
+    const qualified = section.qualified ?? [];
+    const ordered = qualified.every((reference, index) => {
+      const previous = qualified[index - 1];
+      if (previous === undefined) return true;
+      return (
+        previous.reportCode < reference.reportCode ||
+        (previous.reportCode === reference.reportCode && previous.fightId < reference.fightId)
+      );
+    });
+    const actual = {
+      qualified: qualified.length,
+      failures: section.failures?.length ?? 0,
+      ineligible: section.ineligible?.length ?? 0,
+      comparability: comparabilityOf(qualified.map((reference) => reference.comparability.comparability)),
+      metadataRequests: external?.metadataRequests() ?? 0,
+      rankingRequests: external?.rankingRequests() ?? 0,
+    };
+    const { externalReferenceStatus: _status, ...expected } = params.expected;
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      return fail("the external-reference section differs from what the case pins", { expected, actual });
+    }
+    if (!ordered) {
+      return fail("qualified references are not in ascending (reportCode, fightId) order", {
+        expected: "ascending by coordinate",
+        actual: qualified.map((reference) => `${reference.reportCode}:${String(reference.fightId)}`),
+      });
+    }
+  } else if (external !== null) {
+    // A discovery that did not complete must not have spent metadata requests.
+    const metadataRequests = external.metadataRequests();
+    if (metadataRequests !== 0) {
+      return fail("a discovery that did not complete still issued candidate metadata requests", {
+        expected: { metadataRequests: 0 },
+        actual: { metadataRequests },
+      });
+    }
   }
   return pass();
 }
@@ -321,6 +548,6 @@ export async function restMcpParity(
     case "RAID_NIGHT":
       return await raidNightParity(artifact, params);
     case "ENCOUNTER_CONTEXT":
-      return await encounterContextParity(artifact, params);
+      return await encounterContextParity(corpus, artifact, params);
   }
 }

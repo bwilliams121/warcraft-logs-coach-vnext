@@ -1,0 +1,1981 @@
+[
+  {
+    "reportData": {
+      "report": {
+        "events": {
+          "data": [
+            {
+              "timestamp": 2176008,
+              "type": "heal",
+              "sourceID": 9,
+              "targetID": 9,
+              "abilityGameID": 143924,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 4749
+            },
+            {
+              "timestamp": 2176008,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 5,
+              "abilityGameID": 143924,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 40037
+            },
+            {
+              "timestamp": 2176008,
+              "type": "heal",
+              "sourceID": 17,
+              "targetID": 17,
+              "abilityGameID": 143924,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 317
+            },
+            {
+              "timestamp": 2176008,
+              "type": "heal",
+              "sourceID": 10,
+              "targetID": 10,
+              "abilityGameID": 143924,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 2792
+            },
+            {
+              "timestamp": 2176008,
+              "type": "heal",
+              "sourceID": 12,
+              "targetID": 12,
+              "abilityGameID": 143924,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 3850
+            },
+            {
+              "timestamp": 2176008,
+              "type": "heal",
+              "sourceID": 8,
+              "targetID": 8,
+              "abilityGameID": 143924,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 7742
+            },
+            {
+              "timestamp": 2176008,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 3,
+              "abilityGameID": 1256581,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 18053
+            },
+            {
+              "timestamp": 2176018,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 8,
+              "abilityGameID": 1287665,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 816,
+              "tick": true
+            },
+            {
+              "timestamp": 2176018,
+              "type": "removebuff",
+              "sourceID": 5,
+              "targetID": 5,
+              "abilityGameID": 1252487,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176018,
+              "type": "heal",
+              "sourceID": 9,
+              "targetID": 13,
+              "abilityGameID": 124682,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 7364,
+              "overheal": 6937,
+              "tick": true
+            },
+            {
+              "timestamp": 2176018,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 22,
+              "abilityGameID": 469882,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 1492,
+              "unmitigatedAmount": 1492,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176018,
+              "type": "damage",
+              "sourceID": 12,
+              "targetID": 21,
+              "abilityGameID": 116858,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 238523,
+              "unmitigatedAmount": 83810,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176018,
+              "type": "applybuffstack",
+              "sourceID": 3,
+              "targetID": 3,
+              "abilityGameID": 1242974,
+              "fight": 7,
+              "stack": 11
+            },
+            {
+              "timestamp": 2176019,
+              "type": "applybuffstack",
+              "sourceID": 6,
+              "targetID": 6,
+              "abilityGameID": 406086,
+              "fight": 7,
+              "stack": 2
+            },
+            {
+              "timestamp": 2176019,
+              "type": "removebuff",
+              "sourceID": 2,
+              "targetID": 12,
+              "abilityGameID": 372014,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176019,
+              "type": "applybuff",
+              "sourceID": 15,
+              "targetID": 12,
+              "abilityGameID": 372014,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176019,
+              "type": "applybuff",
+              "sourceID": 10,
+              "targetID": 11,
+              "abilityGameID": 462568,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176019,
+              "type": "applybuff",
+              "sourceID": 10,
+              "targetID": 17,
+              "abilityGameID": 462568,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176019,
+              "type": "heal",
+              "sourceID": 51,
+              "sourceInstance": 10,
+              "targetID": 17,
+              "abilityGameID": 52042,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 11192,
+              "tick": true
+            },
+            {
+              "timestamp": 2176019,
+              "type": "heal",
+              "sourceID": 51,
+              "sourceInstance": 10,
+              "targetID": 11,
+              "abilityGameID": 52042,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 3184,
+              "tick": true
+            },
+            {
+              "timestamp": 2176038,
+              "type": "cast",
+              "sourceID": 13,
+              "targetID": 22,
+              "abilityGameID": 1,
+              "fight": 7,
+              "melee": true
+            },
+            {
+              "timestamp": 2176038,
+              "type": "damage",
+              "sourceID": 13,
+              "targetID": 22,
+              "abilityGameID": 1,
+              "fight": 7,
+              "hitType": 0,
+              "amount": 0,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176038,
+              "type": "applybuffstack",
+              "sourceID": 3,
+              "targetID": 3,
+              "abilityGameID": 1296930,
+              "fight": 7,
+              "stack": 4
+            },
+            {
+              "timestamp": 2176038,
+              "type": "refreshbuff",
+              "sourceID": 3,
+              "targetID": 3,
+              "abilityGameID": 1296930,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176038,
+              "type": "applybuff",
+              "sourceID": 17,
+              "targetID": 17,
+              "abilityGameID": 449314,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176038,
+              "type": "begincast",
+              "sourceID": 17,
+              "targetID": -1,
+              "abilityGameID": 11366,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176038,
+              "type": "cast",
+              "sourceID": 17,
+              "targetID": 21,
+              "abilityGameID": 11366,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176039,
+              "type": "refreshbuff",
+              "sourceID": 12,
+              "targetID": 12,
+              "abilityGameID": 1265939,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176039,
+              "type": "applydebuffstack",
+              "sourceID": 12,
+              "targetID": 21,
+              "abilityGameID": 445474,
+              "fight": 7,
+              "stack": 9
+            },
+            {
+              "timestamp": 2176039,
+              "type": "removebuff",
+              "sourceID": 17,
+              "targetID": 17,
+              "abilityGameID": 48108,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176050,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 19,
+              "abilityGameID": 77489,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 23236,
+              "tick": true
+            },
+            {
+              "timestamp": 2176050,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 13,
+              "abilityGameID": 367364,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 0,
+              "overheal": 709,
+              "tick": true
+            },
+            {
+              "timestamp": 2176050,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 13,
+              "abilityGameID": 366155,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 0,
+              "overheal": 4096,
+              "tick": true
+            },
+            {
+              "timestamp": 2176050,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 17,
+              "abilityGameID": 77489,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 4371,
+              "tick": true
+            },
+            {
+              "timestamp": 2176050,
+              "type": "heal",
+              "sourceID": 18,
+              "targetID": 18,
+              "abilityGameID": 213011,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 0,
+              "overheal": 2268
+            },
+            {
+              "timestamp": 2176050,
+              "type": "removebuff",
+              "sourceID": 18,
+              "targetID": 18,
+              "abilityGameID": 453314,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176063,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 20,
+              "abilityGameID": 1256581,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 24059
+            },
+            {
+              "timestamp": 2176083,
+              "type": "heal",
+              "sourceID": 4,
+              "targetID": 4,
+              "abilityGameID": 383104,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 12589
+            },
+            {
+              "timestamp": 2176083,
+              "type": "cast",
+              "sourceID": 20,
+              "targetID": 22,
+              "abilityGameID": 34026,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176083,
+              "type": "damage",
+              "sourceID": 30,
+              "targetID": 22,
+              "abilityGameID": 83381,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 56182,
+              "unmitigatedAmount": 30654,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176083,
+              "type": "damage",
+              "sourceID": 29,
+              "targetID": 22,
+              "abilityGameID": 83381,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 56182,
+              "unmitigatedAmount": 30654,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176083,
+              "type": "damage",
+              "sourceID": 38,
+              "targetID": 22,
+              "abilityGameID": 83381,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 56182,
+              "unmitigatedAmount": 30654,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176083,
+              "type": "damage",
+              "sourceID": 60,
+              "sourceInstance": 4,
+              "targetID": 22,
+              "abilityGameID": 1232922,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 6491,
+              "mitigated": 2339,
+              "unmitigatedAmount": 8830,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176083,
+              "type": "damage",
+              "sourceID": 58,
+              "sourceInstance": 23,
+              "targetID": 22,
+              "abilityGameID": 1232922,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 13522,
+              "mitigated": 4874,
+              "unmitigatedAmount": 18396,
+              "isAoE": false
+            }
+          ],
+          "nextPageTimestamp": 2176092
+        }
+      }
+    }
+  },
+  {
+    "reportData": {
+      "report": {
+        "events": {
+          "data": [
+            {
+              "timestamp": 2176092,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 3,
+              "abilityGameID": 1256581,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 14728
+            },
+            {
+              "timestamp": 2176092,
+              "type": "damage",
+              "sourceID": 18,
+              "targetID": 21,
+              "abilityGameID": 198030,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 15009,
+              "unmitigatedAmount": 5959,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176101,
+              "type": "removebuff",
+              "sourceID": 10,
+              "targetID": 9,
+              "abilityGameID": 462568,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176101,
+              "type": "cast",
+              "sourceID": 5,
+              "targetID": 14,
+              "abilityGameID": 1265991,
+              "fight": 7,
+              "fake": true
+            },
+            {
+              "timestamp": 2176101,
+              "type": "removebuff",
+              "sourceID": 20,
+              "targetID": 20,
+              "abilityGameID": 1276720,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176117,
+              "type": "resourcechange",
+              "sourceID": 16,
+              "targetID": 16,
+              "abilityGameID": 51505,
+              "fight": 7,
+              "resourceChange": 8,
+              "resourceChangeType": 11,
+              "otherResourceChange": 0,
+              "maxResourceAmount": 125,
+              "waste": 0
+            },
+            {
+              "timestamp": 2176119,
+              "type": "cast",
+              "sourceID": 16,
+              "targetID": 21,
+              "abilityGameID": 51505,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176120,
+              "type": "applybuff",
+              "sourceID": 16,
+              "targetID": 16,
+              "abilityGameID": 260734,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176120,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 11,
+              "abilityGameID": 1256581,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 9261
+            },
+            {
+              "timestamp": 2176120,
+              "type": "applybuff",
+              "sourceID": 19,
+              "targetID": 19,
+              "abilityGameID": 11327,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176120,
+              "type": "applybuff",
+              "sourceID": 19,
+              "targetID": 19,
+              "abilityGameID": 392403,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176120,
+              "type": "cast",
+              "sourceID": 19,
+              "targetID": -1,
+              "abilityGameID": 1856,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176120,
+              "type": "damage",
+              "sourceID": 19,
+              "targetID": 21,
+              "abilityGameID": 255546,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 6273,
+              "unmitigatedAmount": 6090,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176135,
+              "type": "damage",
+              "sourceID": 8,
+              "targetID": 22,
+              "abilityGameID": 1287663,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 364,
+              "unmitigatedAmount": 352,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176135,
+              "type": "damage",
+              "sourceID": 3,
+              "targetID": 22,
+              "abilityGameID": 7268,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 33297,
+              "unmitigatedAmount": 15142,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176135,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 3,
+              "abilityGameID": 1256581,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 6312
+            },
+            {
+              "timestamp": 2176164,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 3,
+              "abilityGameID": 1256581,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 6313
+            },
+            {
+              "timestamp": 2176182,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 14,
+              "abilityGameID": 355941,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 30011,
+              "tick": true
+            },
+            {
+              "timestamp": 2176182,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 5,
+              "abilityGameID": 355941,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 11653,
+              "tick": true
+            },
+            {
+              "timestamp": 2176182,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 4,
+              "abilityGameID": 355941,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 5809,
+              "tick": true
+            },
+            {
+              "timestamp": 2176182,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 13,
+              "abilityGameID": 355941,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 0,
+              "overheal": 6824,
+              "tick": true
+            },
+            {
+              "timestamp": 2176182,
+              "type": "removebuff",
+              "sourceID": 13,
+              "targetID": 13,
+              "abilityGameID": 1295901,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176183,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 19,
+              "abilityGameID": 355941,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 5639,
+              "tick": true
+            },
+            {
+              "timestamp": 2176183,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 15,
+              "abilityGameID": 355941,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 9994,
+              "tick": true
+            },
+            {
+              "timestamp": 2176183,
+              "type": "begincast",
+              "sourceID": 12,
+              "targetID": -1,
+              "abilityGameID": 6353,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176183,
+              "type": "damage",
+              "sourceID": 14,
+              "targetID": 22,
+              "abilityGameID": 52212,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 1164,
+              "unmitigatedAmount": 1076,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176183,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 10,
+              "abilityGameID": 77489,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 41596,
+              "tick": true
+            },
+            {
+              "timestamp": 2176192,
+              "type": "damage",
+              "sourceID": 15,
+              "targetID": 22,
+              "abilityGameID": 445474,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 10242,
+              "unmitigatedAmount": 9944,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176192,
+              "type": "removedebuff",
+              "sourceID": 7,
+              "targetID": 22,
+              "abilityGameID": 1302139,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176192,
+              "type": "heal",
+              "sourceID": 10,
+              "targetID": 12,
+              "abilityGameID": 382024,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 3698,
+              "tick": true
+            },
+            {
+              "timestamp": 2176192,
+              "type": "damage",
+              "sourceID": 13,
+              "targetID": 21,
+              "abilityGameID": 1287663,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 364,
+              "unmitigatedAmount": 353,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176192,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 13,
+              "abilityGameID": 77489,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 0,
+              "overheal": 7525,
+              "tick": true
+            },
+            {
+              "timestamp": 2176192,
+              "type": "removebuff",
+              "sourceID": 14,
+              "targetID": 14,
+              "abilityGameID": 188290,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176192,
+              "type": "applybuff",
+              "sourceID": 14,
+              "targetID": 14,
+              "abilityGameID": 188290,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176192,
+              "type": "resourcechange",
+              "sourceID": 7,
+              "targetID": 7,
+              "abilityGameID": 375576,
+              "fight": 7,
+              "resourceChange": 1,
+              "resourceChangeType": 9,
+              "otherResourceChange": 0,
+              "maxResourceAmount": 5,
+              "waste": 0
+            },
+            {
+              "timestamp": 2176192,
+              "type": "cast",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 375576,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176192,
+              "type": "applybuff",
+              "sourceID": 4,
+              "targetID": 4,
+              "abilityGameID": 456120,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176202,
+              "type": "cast",
+              "sourceID": 13,
+              "targetID": 22,
+              "abilityGameID": 1,
+              "fight": 7,
+              "melee": true
+            },
+            {
+              "timestamp": 2176202,
+              "type": "damage",
+              "sourceID": 13,
+              "targetID": 22,
+              "abilityGameID": 1,
+              "fight": 7,
+              "hitType": 0,
+              "amount": 0,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176204,
+              "type": "begincast",
+              "sourceID": 16,
+              "targetID": -1,
+              "abilityGameID": 188196,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176204,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 433717,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 9186,
+              "unmitigatedAmount": 8917,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176204,
+              "type": "applybuff",
+              "sourceID": 7,
+              "targetID": 7,
+              "abilityGameID": 386730,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176204,
+              "type": "heal",
+              "sourceID": 7,
+              "targetID": 17,
+              "abilityGameID": 469822,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 2
+            }
+          ],
+          "nextPageTimestamp": 2176226
+        }
+      }
+    }
+  },
+  {
+    "reportData": {
+      "report": {
+        "events": {
+          "data": [
+            {
+              "timestamp": 2176226,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 3,
+              "abilityGameID": 1256581,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 51697
+            },
+            {
+              "timestamp": 2176226,
+              "type": "cast",
+              "sourceID": 2,
+              "targetID": 17,
+              "abilityGameID": 33076,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176227,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 81297,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 2302,
+              "unmitigatedAmount": 2234,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176227,
+              "type": "applybuff",
+              "sourceID": 2,
+              "targetID": 17,
+              "abilityGameID": 1246768,
+              "fight": 7,
+              "absorb": 31278
+            },
+            {
+              "timestamp": 2176227,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 15,
+              "abilityGameID": 243241,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 31291
+            },
+            {
+              "timestamp": 2176227,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 10,
+              "abilityGameID": 243241,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 14178
+            },
+            {
+              "timestamp": 2176227,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 12,
+              "abilityGameID": 243241,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 31225
+            },
+            {
+              "timestamp": 2176227,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 4,
+              "abilityGameID": 243241,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 14219,
+              "overheal": 570
+            },
+            {
+              "timestamp": 2176227,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 17,
+              "abilityGameID": 243241,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 31549
+            },
+            {
+              "timestamp": 2176227,
+              "type": "applybuff",
+              "sourceID": 2,
+              "targetID": 17,
+              "abilityGameID": 65081,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176227,
+              "type": "damage",
+              "sourceID": 22,
+              "targetID": 7,
+              "abilityGameID": 1310126,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 97838,
+              "mitigated": 60842,
+              "unmitigatedAmount": 158680,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176237,
+              "type": "applybuffstack",
+              "sourceID": 3,
+              "targetID": 3,
+              "abilityGameID": 1242974,
+              "fight": 7,
+              "stack": 12
+            },
+            {
+              "timestamp": 2176237,
+              "type": "resourcechange",
+              "sourceID": 3,
+              "targetID": 3,
+              "abilityGameID": 461524,
+              "fight": 7,
+              "resourceChange": 1,
+              "resourceChangeType": 16,
+              "otherResourceChange": 0,
+              "maxResourceAmount": 4,
+              "waste": 1
+            },
+            {
+              "timestamp": 2176237,
+              "type": "applybuffstack",
+              "sourceID": 7,
+              "targetID": 7,
+              "abilityGameID": 280375,
+              "fight": 7,
+              "stack": 6
+            },
+            {
+              "timestamp": 2176237,
+              "type": "heal",
+              "sourceID": 7,
+              "targetID": 7,
+              "abilityGameID": 1245923,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 8633
+            },
+            {
+              "timestamp": 2176238,
+              "type": "damage",
+              "sourceID": 18,
+              "targetID": 21,
+              "abilityGameID": 198030,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 5878,
+              "unmitigatedAmount": 5706,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176247,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 469882,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 3544,
+              "unmitigatedAmount": 3544,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176247,
+              "type": "removebuff",
+              "sourceID": 17,
+              "targetID": 17,
+              "abilityGameID": 1292300,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176247,
+              "type": "applybuffstack",
+              "sourceID": 3,
+              "targetID": 3,
+              "abilityGameID": 1296930,
+              "fight": 7,
+              "stack": 5
+            },
+            {
+              "timestamp": 2176247,
+              "type": "refreshbuff",
+              "sourceID": 3,
+              "targetID": 3,
+              "abilityGameID": 1296930,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176247,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 22,
+              "abilityGameID": 1306635,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 624,
+              "unmitigatedAmount": 605,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176247,
+              "type": "damage",
+              "sourceID": 14,
+              "targetID": 22,
+              "abilityGameID": 1287663,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 363,
+              "unmitigatedAmount": 352,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176256,
+              "type": "refreshbuff",
+              "sourceID": 2,
+              "targetID": 15,
+              "abilityGameID": 77489,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176256,
+              "type": "refreshbuff",
+              "sourceID": 2,
+              "targetID": 10,
+              "abilityGameID": 77489,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176256,
+              "type": "refreshbuff",
+              "sourceID": 2,
+              "targetID": 12,
+              "abilityGameID": 77489,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176256,
+              "type": "refreshbuff",
+              "sourceID": 2,
+              "targetID": 4,
+              "abilityGameID": 77489,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176256,
+              "type": "refreshbuff",
+              "sourceID": 2,
+              "targetID": 17,
+              "abilityGameID": 77489,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176256,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 17,
+              "abilityGameID": 1246798,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 121779,
+              "overheal": 202222
+            },
+            {
+              "timestamp": 2176256,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 81297,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 2306,
+              "unmitigatedAmount": 2238,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176265,
+              "type": "cast",
+              "sourceID": 60,
+              "sourceInstance": 4,
+              "targetID": 22,
+              "abilityGameID": 1,
+              "fight": 7,
+              "melee": true
+            },
+            {
+              "timestamp": 2176266,
+              "type": "heal",
+              "sourceID": 7,
+              "targetID": 7,
+              "abilityGameID": 1245923,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 8648
+            },
+            {
+              "timestamp": 2176266,
+              "type": "damage",
+              "sourceID": 60,
+              "sourceInstance": 4,
+              "targetID": 22,
+              "abilityGameID": 1,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 14575,
+              "unmitigatedAmount": 9501,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176266,
+              "type": "applybuff",
+              "sourceID": 2,
+              "targetID": 16,
+              "abilityGameID": 65081,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176266,
+              "type": "applydebuff",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 1302139,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176266,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 204301,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 1591,
+              "unmitigatedAmount": 1544,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176266,
+              "type": "applydebuff",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 204301,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176266,
+              "type": "removebuff",
+              "sourceID": 15,
+              "targetID": 15,
+              "abilityGameID": 1308012,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176277,
+              "type": "damage",
+              "sourceID": 17,
+              "targetID": 21,
+              "abilityGameID": 1287663,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 363,
+              "unmitigatedAmount": 352,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176277,
+              "type": "damage",
+              "sourceID": 13,
+              "targetID": 21,
+              "abilityGameID": 394021,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 1819,
+              "unmitigatedAmount": 1819,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176278,
+              "type": "damage",
+              "sourceID": 20,
+              "targetID": 22,
+              "abilityGameID": 1287663,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 363,
+              "unmitigatedAmount": 352,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176278,
+              "type": "refreshbuff",
+              "sourceID": 2,
+              "targetID": 17,
+              "abilityGameID": 77489,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176278,
+              "type": "damage",
+              "sourceID": 6,
+              "targetID": 22,
+              "abilityGameID": 431911,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 8068,
+              "unmitigatedAmount": 3514,
+              "isAoE": true
+            }
+          ],
+          "nextPageTimestamp": 2176287
+        }
+      }
+    }
+  },
+  {
+    "reportData": {
+      "report": {
+        "events": {
+          "data": [
+            {
+              "timestamp": 2176287,
+              "type": "heal",
+              "sourceID": 9,
+              "targetID": 15,
+              "abilityGameID": 124682,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 7293,
+              "tick": true
+            },
+            {
+              "timestamp": 2176287,
+              "type": "damage",
+              "sourceID": 13,
+              "targetID": 21,
+              "abilityGameID": 381628,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 7069,
+              "unmitigatedAmount": 6119,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176287,
+              "type": "heal",
+              "sourceID": 6,
+              "targetID": 6,
+              "abilityGameID": 431939,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 0,
+              "overheal": 346
+            },
+            {
+              "timestamp": 2176287,
+              "type": "damage",
+              "sourceID": 13,
+              "targetID": 22,
+              "abilityGameID": 1287663,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 363,
+              "unmitigatedAmount": 353,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176287,
+              "type": "damage",
+              "sourceID": 6,
+              "targetID": 22,
+              "abilityGameID": 431911,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 8067,
+              "unmitigatedAmount": 3514,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176295,
+              "type": "damage",
+              "sourceID": 17,
+              "targetID": 22,
+              "abilityGameID": 12654,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 1298,
+              "unmitigatedAmount": 1260,
+              "isAoE": true,
+              "tick": true
+            },
+            {
+              "timestamp": 2176295,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 1300662,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 318,
+              "unmitigatedAmount": 318,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176295,
+              "type": "damage",
+              "sourceID": 17,
+              "targetID": 22,
+              "abilityGameID": 419800,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 378,
+              "unmitigatedAmount": 378,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176312,
+              "type": "resourcechange",
+              "sourceID": 8,
+              "targetID": 8,
+              "abilityGameID": 285466,
+              "fight": 7,
+              "resourceChange": 3,
+              "resourceChangeType": 11,
+              "otherResourceChange": 0,
+              "maxResourceAmount": 125,
+              "waste": 0
+            },
+            {
+              "timestamp": 2176313,
+              "type": "heal",
+              "sourceID": 10,
+              "targetID": 10,
+              "abilityGameID": 1287665,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 740,
+              "tick": true
+            },
+            {
+              "timestamp": 2176313,
+              "type": "damage",
+              "sourceID": 8,
+              "targetID": 22,
+              "abilityGameID": 285466,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 32533,
+              "unmitigatedAmount": 9822,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176335,
+              "type": "heal",
+              "sourceID": 9,
+              "targetID": 5,
+              "abilityGameID": 119611,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 2742,
+              "tick": true
+            },
+            {
+              "timestamp": 2176335,
+              "type": "damage",
+              "sourceID": 7,
+              "targetID": 21,
+              "abilityGameID": 1287663,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 364,
+              "unmitigatedAmount": 353,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176335,
+              "type": "damage",
+              "sourceID": 3,
+              "targetID": 22,
+              "abilityGameID": 7268,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 15607,
+              "unmitigatedAmount": 15152,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176335,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 11,
+              "abilityGameID": 443126,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 12623
+            },
+            {
+              "timestamp": 2176335,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 15,
+              "abilityGameID": 443126,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 12623
+            },
+            {
+              "timestamp": 2176335,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 7,
+              "abilityGameID": 443126,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 12623
+            },
+            {
+              "timestamp": 2176335,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 12,
+              "abilityGameID": 443126,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 12623
+            },
+            {
+              "timestamp": 2176335,
+              "type": "absorbed",
+              "sourceID": 5,
+              "targetID": 12,
+              "abilityGameID": 367364,
+              "fight": 7,
+              "attackerID": 12,
+              "amount": 4,
+              "extraAbilityGameID": 387846
+            },
+            {
+              "timestamp": 2176335,
+              "type": "absorbed",
+              "sourceID": 12,
+              "targetID": 12,
+              "abilityGameID": 108366,
+              "fight": 7,
+              "attackerID": 12,
+              "amount": 431,
+              "extraAbilityGameID": 387846
+            },
+            {
+              "timestamp": 2176335,
+              "type": "damage",
+              "sourceID": 12,
+              "targetID": 12,
+              "abilityGameID": 387846,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 0,
+              "unmitigatedAmount": 435,
+              "absorbed": 435,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176335,
+              "type": "absorbed",
+              "sourceID": 15,
+              "targetID": 15,
+              "abilityGameID": 108366,
+              "fight": 7,
+              "attackerID": 15,
+              "amount": 352,
+              "extraAbilityGameID": 387846
+            },
+            {
+              "timestamp": 2176335,
+              "type": "damage",
+              "sourceID": 15,
+              "targetID": 15,
+              "abilityGameID": 387846,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 0,
+              "unmitigatedAmount": 352,
+              "absorbed": 352,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176345,
+              "type": "damage",
+              "sourceID": 2,
+              "targetID": 22,
+              "abilityGameID": 1287663,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 374,
+              "unmitigatedAmount": 363,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176345,
+              "type": "damage",
+              "sourceID": 32,
+              "sourceInstance": 19,
+              "targetID": 22,
+              "abilityGameID": 447419,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 30378,
+              "unmitigatedAmount": 9294,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176345,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 15,
+              "abilityGameID": 1287665,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 763,
+              "tick": true
+            },
+            {
+              "timestamp": 2176345,
+              "type": "heal",
+              "sourceID": 5,
+              "targetID": 12,
+              "abilityGameID": 1256688,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 4
+            },
+            {
+              "timestamp": 2176353,
+              "type": "removebuffstack",
+              "sourceID": 17,
+              "targetID": 17,
+              "abilityGameID": 1287774,
+              "fight": 7,
+              "stack": 2
+            },
+            {
+              "timestamp": 2176353,
+              "type": "refreshbuff",
+              "sourceID": 17,
+              "targetID": 17,
+              "abilityGameID": 1287774,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176353,
+              "type": "damage",
+              "sourceID": 32,
+              "sourceInstance": 20,
+              "targetID": 22,
+              "abilityGameID": 447419,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 30680,
+              "unmitigatedAmount": 9386,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176362,
+              "type": "heal",
+              "sourceID": 10,
+              "targetID": 2,
+              "abilityGameID": 382024,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 0,
+              "overheal": 7339,
+              "tick": true
+            },
+            {
+              "timestamp": 2176362,
+              "type": "heal",
+              "sourceID": 10,
+              "targetID": 5,
+              "abilityGameID": 382024,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 3562,
+              "tick": true
+            },
+            {
+              "timestamp": 2176362,
+              "type": "damage",
+              "sourceID": 17,
+              "targetID": 21,
+              "abilityGameID": 12654,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 4977,
+              "unmitigatedAmount": 4831,
+              "isAoE": true,
+              "tick": true
+            },
+            {
+              "timestamp": 2176362,
+              "type": "damage",
+              "sourceID": 19,
+              "targetID": 22,
+              "abilityGameID": 2818,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 5943,
+              "unmitigatedAmount": 2773,
+              "isAoE": false,
+              "tick": true
+            },
+            {
+              "timestamp": 2176362,
+              "type": "damage",
+              "sourceID": 17,
+              "targetID": 21,
+              "abilityGameID": 419800,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 1449,
+              "unmitigatedAmount": 1449,
+              "isAoE": false
+            },
+            {
+              "timestamp": 2176373,
+              "type": "heal",
+              "sourceID": 10,
+              "targetID": 18,
+              "abilityGameID": 61295,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 0,
+              "overheal": 10985,
+              "tick": true
+            },
+            {
+              "timestamp": 2176373,
+              "type": "removedebuff",
+              "sourceID": 14,
+              "targetID": 22,
+              "abilityGameID": 56222,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176383,
+              "type": "cast",
+              "sourceID": 29,
+              "targetID": -1,
+              "abilityGameID": 201754,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176383,
+              "type": "cast",
+              "sourceID": 29,
+              "targetID": -1,
+              "abilityGameID": 201754,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176383,
+              "type": "heal",
+              "sourceID": 2,
+              "targetID": 10,
+              "abilityGameID": 139,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 23124,
+              "tick": true
+            },
+            {
+              "timestamp": 2176383,
+              "type": "cast",
+              "sourceID": 30,
+              "targetID": -1,
+              "abilityGameID": 201754,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176383,
+              "type": "cast",
+              "sourceID": 30,
+              "targetID": -1,
+              "abilityGameID": 201754,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176383,
+              "type": "cast",
+              "sourceID": 38,
+              "targetID": -1,
+              "abilityGameID": 201754,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176383,
+              "type": "cast",
+              "sourceID": 38,
+              "targetID": -1,
+              "abilityGameID": 201754,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176383,
+              "type": "cast",
+              "sourceID": 15,
+              "targetID": 21,
+              "abilityGameID": 80240,
+              "fight": 7
+            },
+            {
+              "timestamp": 2176383,
+              "type": "damage",
+              "sourceID": 29,
+              "targetID": 22,
+              "abilityGameID": 201754,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 9873,
+              "unmitigatedAmount": 6436,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176383,
+              "type": "damage",
+              "sourceID": 29,
+              "targetID": 22,
+              "abilityGameID": 201754,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 9366,
+              "mitigated": 3377,
+              "unmitigatedAmount": 12743,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176383,
+              "type": "damage",
+              "sourceID": 30,
+              "targetID": 22,
+              "abilityGameID": 201754,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 9616,
+              "mitigated": 3467,
+              "unmitigatedAmount": 13083,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176383,
+              "type": "damage",
+              "sourceID": 30,
+              "targetID": 22,
+              "abilityGameID": 201754,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 4756,
+              "mitigated": 1714,
+              "unmitigatedAmount": 6470,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176383,
+              "type": "damage",
+              "sourceID": 38,
+              "targetID": 22,
+              "abilityGameID": 201754,
+              "fight": 7,
+              "hitType": 2,
+              "amount": 19324,
+              "unmitigatedAmount": 12597,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176383,
+              "type": "damage",
+              "sourceID": 38,
+              "targetID": 22,
+              "abilityGameID": 201754,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 4797,
+              "mitigated": 1729,
+              "unmitigatedAmount": 6526,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176383,
+              "type": "damage",
+              "sourceID": 18,
+              "targetID": 21,
+              "abilityGameID": 198030,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 8029,
+              "unmitigatedAmount": 7794,
+              "isAoE": true
+            },
+            {
+              "timestamp": 2176383,
+              "type": "heal",
+              "sourceID": 6,
+              "targetID": 3,
+              "abilityGameID": 469421,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 68
+            },
+            {
+              "timestamp": 2176383,
+              "type": "heal",
+              "sourceID": 6,
+              "targetID": 13,
+              "abilityGameID": 469421,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 0,
+              "overheal": 69
+            },
+            {
+              "timestamp": 2176383,
+              "type": "heal",
+              "sourceID": 6,
+              "targetID": 14,
+              "abilityGameID": 469421,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 71
+            },
+            {
+              "timestamp": 2176383,
+              "type": "heal",
+              "sourceID": 6,
+              "targetID": 9,
+              "abilityGameID": 469421,
+              "fight": 7,
+              "hitType": 1,
+              "amount": 71
+            },
+            {
+              "timestamp": 2176383,
+              "type": "applydebuff",
+              "sourceID": 15,
+              "targetID": 21,
+              "abilityGameID": 80240,
+              "fight": 7
+            }
+          ],
+          "nextPageTimestamp": 2176396
+        }
+      }
+    }
+  }
+]
