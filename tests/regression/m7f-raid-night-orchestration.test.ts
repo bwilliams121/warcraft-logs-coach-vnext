@@ -54,21 +54,31 @@ function errorOf(run: RaidNightRunResult): string {
 }
 
 describe("one roster query, whatever the request asks for", () => {
-  it("discovers the roster exactly once for four fights and many players", async () => {
-    const snapshot = assassinationSnapshot({
-      fightIds: [1, 2, 3, 4],
-      sourceIds: [ZERO_ID, M5D2_ACTOR, ROGUE_B],
-    });
-    const ports = fakePorts({ snapshot });
+  // Twelve real M5 analyses (four fights x three players over the D2 corpus)
+  // in one request. Under a loaded CI runner that exceeds the default 5 s;
+  // the work is the point of the test, so the timeout is raised for this
+  // test only.
+  const FOUR_FIGHT_TIMEOUT_MS = 20_000;
 
-    const run = await runNight({ reportCode: REPORT_CODE, fightIds: [1, 2, 3, 4] }, ports);
-    expect(aggregateOf(run).coverage.cellsTotal).toBe(12);
+  it(
+    "discovers the roster exactly once for four fights and many players",
+    async () => {
+      const snapshot = assassinationSnapshot({
+        fightIds: [1, 2, 3, 4],
+        sourceIds: [ZERO_ID, M5D2_ACTOR, ROGUE_B],
+      });
+      const ports = fakePorts({ snapshot });
 
-    // Not one per fight, and not one per player.
-    expect(ports.rosterCalls()).toBe(1);
-    // And exactly one final confirmation, not one per fight.
-    expect(ports.revisionCalls()).toBe(1);
-  });
+      const run = await runNight({ reportCode: REPORT_CODE, fightIds: [1, 2, 3, 4] }, ports);
+      expect(aggregateOf(run).coverage.cellsTotal).toBe(12);
+
+      // Not one per fight, and not one per player.
+      expect(ports.rosterCalls()).toBe(1);
+      // And exactly one final confirmation, not one per fight.
+      expect(ports.revisionCalls()).toBe(1);
+    },
+    FOUR_FIGHT_TIMEOUT_MS,
+  );
 });
 
 describe("one ingestion per needed fight, never one per player", () => {
