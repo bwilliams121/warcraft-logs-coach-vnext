@@ -1,16 +1,20 @@
 # Post-merge deployment and smoke checklist
 
-Two parts, both run **manually**, in order. Nothing here is executed by CI or by
-an agent: every step touches production or spends Warcraft Logs API points.
+Three parts, all run **manually**, in order. Nothing here is executed by CI or
+by an agent: every step touches production or spends Warcraft Logs API points.
 
 - **Part I — Milestone 6** (below) is the original single-fight checklist. It is
   kept as written because it is what was actually run. Two expectations in it
   are now historical rather than current, and are marked where they occur.
-- **[Part II — Milestone 8](#part-ii--milestone-8)** is the current checklist. It
-  covers the whole deployed surface: three REST endpoints and three MCP tools.
+- **[Part II — Milestone 8](#part-ii--milestone-8)** covers the whole deployed
+  surface: three REST endpoints and three MCP tools. Its step M8-5 is
+  superseded by Part III (see the note there).
+- **[Part III — Milestone 10-D](#part-iii--milestone-10-d)** is the current
+  checklist: the second public analyzer (Protection Paladin), the Arms Warrior
+  as the unsupported subject, and the invariance of everything else.
 
-If you are deploying today, run Part II. Part I steps 1-4 and 11-12 still apply
-verbatim and Part II does not repeat them.
+If you are deploying today, run Part III. Part II M8-1 (preconditions) and
+M8-13 (leakage sweep) still apply verbatim and Part III refers to them.
 
 **Milestone 6 is not complete until step 13.** Every offline test can pass while
 the one thing that has never been exercised still fails — see
@@ -612,3 +616,173 @@ Worth stating, so a green checklist is not over-read:
   measurements.** This workload has still never been profiled inside a
   Cloudflare isolate. Step M8-6 is the closest thing to evidence, and it is one
   data point.
+
+---
+
+# Part III — Milestone 10-D
+
+The deployed surface is unchanged in routes and tools. What changed: a second
+public analyzer, `paladin-protection-observed-decisions`, selected for
+`Paladin/Protection`; the public `specId` enum of
+`warcraft-logs-coach.analysis/1` now carries `paladin/protection`; and the
+`analyze_warcraft_log` / `analyze_raid_night` descriptions name both supported
+specializations and Protection's limits. No schema version moved.
+
+**Run Part III only after M10-D is reviewed, committed, pushed, CI-green and
+deployment is separately authorized. Nothing below is executed by an agent.**
+
+Preconditions, unchanged: Part II M8-1 (CI green on the merged commit,
+`ANALYSIS_AUTH_TOKEN` present, the dry run lists the rate-limit binding and no
+new binding). Secret handling as in Part II — load the token once into `$auth`,
+never print it.
+
+## M10-1. Deploy
+
+```powershell
+npx.cmd wrangler deploy
+```
+
+Brandon runs it; no agent does.
+
+## M10-2. Health
+
+As M8-3. HTTP 200, nothing about configuration.
+
+## M10-3. REST single fight — Assassination (invariance)
+
+Costs **1** unit. Same identifiers as M8-4: `A7R6kxPJ1hC8YQ4w` fight 7 actor 19.
+
+Expect 200, `schemaVersion = warcraft-logs-coach.analysis/1`, `status`
+`ANALYZED`, `specialization.specId = "rogue/assassination"`,
+`analyzerId = "rogue-assassination-observed-decisions"`. Compare the body,
+key-order-independently, with the pre-deploy capture of the same request if one
+was taken: the Assassination document must not have moved. Then run Part I
+step 10's arithmetic.
+
+## M10-4. REST single fight — Protection Paladin (newly public)
+
+Costs **1** unit. Same report and fight, actor **7** — the Protection Paladin
+the committed corpus evidence was captured from (`wcl-fight-context-a7r6-fight-7`
+proves the identity: masterData subType Paladin, friendlySpecs "Protection").
+
+```powershell
+$body = @{ reportCode = "A7R6kxPJ1hC8YQ4w"; fightId = 7; sourceId = 7 } | ConvertTo-Json
+$r = Invoke-WebRequest -Uri "$base/v1/analysis" -Method POST -Body $body `
+     -ContentType "application/json" -Headers $auth -SkipHttpErrorCheck
+$r.StatusCode
+```
+
+Expect 200 and confirm all of:
+
+- `status` is `ANALYZED` — **not** `SPEC_NOT_SUPPORTED`;
+- `specialization` is `{ "specId": "paladin/protection", "gameplaySupported": true }`;
+- `analyzerId` is `paladin-protection-observed-decisions`;
+- `authority.authorityId` is `SIMC_APL_PALADIN_PROTECTION`,
+  `authority.artifactRevision` is `simc-33622e9d-1`,
+  `authority.commitSha` is `33622e9d1662ff0e451691edf85a6b49cc9d11d9`;
+- `capability.matchMeaning` is `AUTHORITY_COMPATIBLE_ONLY` and
+  `capability.scoresPerformance` is `false`;
+- Part I step 10's arithmetic holds;
+- `coverage.exclusions` contains a `NON_GCD_ACTION` row (Shield of the
+  Righteous and melee swings land there) and the string `MELEE_SWING` appears
+  **nowhere** in the body;
+- none of `rawBlocker`, `domains`, `holyPower`, `build`, `resolved` appears as
+  a key;
+- `eligibleDecisions` is plausible for the whole pull — the committed 165 s
+  bundle over the same subject yields 149 eligible / 4 MATCH / 0 REJECTED /
+  145 UNKNOWN, so the whole pull is expected to be UNKNOWN-heavy with a small
+  number of MATCH decisions. Do not read that as a grade. The committed MATCH
+  decisions inside the first 165 s (Divine Toll at report times 2,026,655 and
+  2,088,835; Avenger's Shield at 2,074,381 and 2,139,100) should appear as
+  `MATCH` with `selectionPrecision` `EXACT_ENTRY` if the whole-pull evidence
+  agrees with the committed slices; if any differs, record it — that is a
+  finding about whole-fight evidence, not something to adjust.
+
+## M10-5. REST single fight — unsupported (Arms Warrior)
+
+Costs **1** unit. Same report and fight, actor **4** — Warrior/Arms per the
+same committed context artifact. (Part II's M8-5 used fight 6 actor 5 and
+called it a Protection Paladin; the committed master data has actor 5 as an
+Evoker. Either way it was unsupported. Use actor 4 now, whose identity is
+machine-pinned.)
+
+Expect 200 with `status` `SPEC_NOT_SUPPORTED`, `specialization`
+`{ "specId": null, "gameplaySupported": false }`, `analyzerId` `null`, a
+`detail` naming `warrior/arms` and saying no gameplay analysis was attempted,
+and **no** `decisions`, `coverage` or `authority` field. This is still the most
+important negative on the list: an unsupported spec must not read as clean
+play.
+
+## M10-6. MCP `tools/list`
+
+As M8-9: exactly the three tools. Then read the two descriptions as a model
+would and confirm each contains, verbatim modulo line wrapping:
+
+- `Supported specializations: Assassination Rogue and Protection Paladin`
+- `OFFENSIVE global-cooldown decisions`
+- `NOT evaluate defensive cooldowns, active mitigation, self-healing,`
+- `interrupts, or survival`
+- `Shield of the Righteous are excluded,` … `not judged`
+- `not that a mistake was made`
+
+and that neither says `Only Assassination Rogue`. Then confirm the
+`analyze_warcraft_log` **outputSchema** advertises `specId` with exactly the
+two enum members `rogue/assassination` and `paladin/protection`. This
+`tools/list` change is the ONLY intended Assassination-adjacent metadata
+change of the deployment.
+
+## M10-7. MCP `tools/call` — Protection and Arms
+
+Costs **1** unit each. Call `analyze_warcraft_log` with
+`{ "source": "ids", "reportCode": "A7R6kxPJ1hC8YQ4w", "fightId": 7, "sourceId": 7 }`
+and again with `"sourceId": 4`. Expect `isError` absent for both, a
+`structuredContent` object, and `content[0].text` whose parsed JSON equals it.
+
+## M10-8. Transport parity, decoded from raw bytes
+
+Exactly M8-11's procedure, applied to the Protection pair (M10-4 vs the first
+M10-7 call) and to the Arms pair (M10-5 vs the second). Both must print
+`PARITY OK`. Delete the scratch files afterwards.
+
+## M10-9. Raid night with the tank
+
+Costs **1** unit. `{ reportCode = "A7R6kxPJ1hC8YQ4w"; fightIds = @(7) }`.
+Expect 200, `schemaVersion = warcraft-logs-coach.raid-night/1`, and in `cells`:
+actor 7 `kind` `ANALYZED` with `provenance.specId` `paladin/protection`;
+actor 19 `ANALYZED` with `rogue/assassination`; actor 4 `NOT_ANALYZED` with
+`status` `SPEC_NOT_SUPPORTED`; every other participant `NOT_ANALYZED` /
+`SPEC_NOT_SUPPORTED` or `ANALYSIS_UNAVAILABLE` as their identity dictates. No
+`MELEE_SWING` anywhere. `coverage.cellsAnalyzed` is 2.
+
+## M10-10. Encounter context does not move authority
+
+Costs **1** unit (local only). `/v1/encounter-context` with the same single
+fight. The actor-7 point's cell must deep-equal the actor-7 cell from M10-9
+(counts, provenance, recurrence). `externalReferences.status` is
+`NOT_REQUESTED`.
+
+## M10-11. Unauthorized and leakage sweep
+
+As M8-13, over every response captured in this Part.
+
+## M10-12. Only then mark Milestone 10 complete
+
+If every step passes, M10 is complete. If a step surfaces a problem — a
+Protection request answering `SPEC_NOT_SUPPORTED`, a `MELEE_SWING` or internal
+field on the wire, an Assassination document that moved, a whole-pull outcome
+that contradicts the committed slices — M10 is **not** complete: record exactly
+what was observed and stop. Do not adjust the analyzer, the projection or the
+descriptions to make a smoke step pass.
+
+## What Part III cannot prove
+
+- **Whole-pull Protection cost inside a Cloudflare isolate has never been
+  measured.** The committed evidence is bounded (22 s, 45 s, 165 s); the
+  offline measurements in `scripts/bench/m10d-public-invariance.bench.ts` are
+  Node numbers. M10-4 is the first whole-pull execution, and `cpu_ms` stays at
+  120,000 until a measurement says otherwise.
+- **Identity/evidence mismatch is not detected.** A Warcraft Logs identity that
+  names a supported specialization over another class's events dispatches the
+  real analyzer; `IDENTITY_CONFLICT` remains M15's. The identities above are
+  machine-pinned from the committed context artifact precisely so this cannot
+  happen here.

@@ -21,6 +21,9 @@ import { NO_ENCOUNTER_OUTCOME_FACTS } from "./synthetic-fight.js";
 import type { RevisionCheck } from "../../src/wcl/report-revision.js";
 import type { ReportRosterResult } from "../../src/wcl/report-roster.js";
 import type { ReportRosterSnapshot, RosterFight, RosterPlayer } from "../../src/wcl/roster-snapshot.js";
+import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
+import type { CombatActor } from "../../src/engine/normalization/actors.js";
+import { corpusFight } from "./corpus/fight.js";
 import { M5D2_ACTOR, M5D2_RAW_EVENTS, m5d2FightFrom } from "./m5d2-fixture.js";
 import {
   REPORT_CODE,
@@ -145,6 +148,84 @@ export function corpusCore(
   };
 }
 
+/**
+ * A `NormalizedFightCore` carrying one committed corpus artifact AS IS — no
+ * fan-out, no relabelling (M10-D).
+ *
+ * The artifact's events are normalized by the real normalizer under the
+ * corpus's own grants, exactly as `corpusFight` builds them for every other
+ * corpus consumer; this function only adds what a raid night needs and the
+ * corpus header does not carry: a roster-shaped actor catalog (the corpus
+ * fight header is a stated synthetic premise with an EMPTY actor catalog) and
+ * the report-level context fields, deliberately unresolved.
+ *
+ * WHAT THIS IS FOR. A mixed-specialization raid night over REAL evidence: the
+ * A7R6 opener slice describes actor 7 (Protection Paladin); actors 19
+ * (Assassination Rogue), 4 (Arms Warrior) and 14 (Blood Death Knight) are
+ * real participants of the same fight per the committed fight-context
+ * artifact, and none of their events is in the slice. A raid night over this
+ * core therefore analyzes the Paladin for real and must answer TRUTHFULLY for
+ * the Rogue — the analyzer runs and finds no profile — rather than being
+ * handed manufactured Rogue evidence.
+ */
+export function corpusArtifactCore(
+  artifactId: string,
+  fightId: number,
+  participants: readonly { readonly sourceId: number; readonly className: string }[],
+  enemies: readonly number[] = [],
+): NormalizedFightCore {
+  const fixture: CombatFight = corpusFight(artifactId);
+  const actors = new Map<number, CombatActor>();
+  for (const participant of participants) {
+    actors.set(participant.sourceId, {
+      actorId: participant.sourceId,
+      gameId: null,
+      name: `Raider${String(participant.sourceId)}`,
+      server: null,
+      actorType: "PLAYER",
+      rawType: "Player",
+      subType: participant.className,
+      petOwnerActorId: null,
+    });
+  }
+  for (const enemy of enemies) {
+    actors.set(enemy, {
+      actorId: enemy,
+      gameId: null,
+      name: `Enemy${String(enemy)}`,
+      server: null,
+      actorType: "NPC",
+      rawType: "NPC",
+      subType: "Boss",
+      petOwnerActorId: null,
+    });
+  }
+  return {
+    provenance: { ...fixture.provenance, fightId },
+    report: fixture.report,
+    data: fixture.data,
+    fight: { ...fixture.fight, id: fightId },
+    actors,
+    abilities: fixture.abilities,
+    phases: fixture.phases,
+    events: fixture.events,
+    malformedObservations: fixture.malformedObservations,
+    streams: fixture.completeness.streams,
+    streamIdsBySource: {
+      EVENTS_ALL_STREAM: ["all"],
+      TYPED_GRAPHQL_FIELD: ["all"],
+      TYPED_GRAPHQL_FIELD_PER_ACTOR: ["all"],
+      REPORT_MASTER_DATA: ["all"],
+    },
+    degradedCategories: new Set(),
+    streamsWithUntypedDefects: new Set(),
+    friendlyPlayers: participants.map((participant) => participant.sourceId),
+    encounterOutcome: NO_ENCOUNTER_OUTCOME_FACTS,
+    zone: null,
+    talentImport: { actorId: participants[0]?.sourceId ?? 0, code: null },
+  };
+}
+
 export interface FakePorts {
   readonly deps: RaidNightServiceDeps;
   /** How many times roster discovery was called. Must be 1 per request. */
@@ -170,6 +251,12 @@ export interface FakePortOptions {
   /** What the final revision confirmation returns. Defaults to MATCHES at R0. */
   readonly finalRevision?: RevisionCheck;
   readonly rosterFailure?: ReportRosterResult;
+  /**
+   * The core the ingestion port serves for a fight, replacing the D2 fan-out.
+   * `participants` are the snapshot's participants for that fight, in order.
+   * Absent, the D2 corpus is fanned per participant as before M10-D.
+   */
+  readonly coreFor?: (fightId: number, participants: readonly number[]) => NormalizedFightCore;
 }
 
 export function fakePorts(options: FakePortOptions): FakePorts {
@@ -208,7 +295,10 @@ export function fakePorts(options: FakePortOptions): FakePorts {
         snapshot.fights
           .find((fight) => fight.fightId === request.fightId)
           ?.participants.map((entry) => entry.sourceId) ?? [];
-      const core = corpusCore(request.fightId, participants, options.eventActorIds ?? participants);
+      const core =
+        options.coreFor === undefined
+          ? corpusCore(request.fightId, participants, options.eventActorIds ?? participants)
+          : options.coreFor(request.fightId, participants);
       return {
         ok: true,
         core: { ...core, report: { ...core.report, revision: contextRevision } },
@@ -240,6 +330,12 @@ export function assassinationSnapshot(options: {
   readonly sourceIds: readonly number[];
   readonly requestedFightIds?: readonly number[];
   readonly specNameFor?: (fightId: number, sourceId: number) => string | null;
+  /**
+   * The Warcraft Logs class of each player. Defaults to Rogue. A test naming
+   * an unsupported participant must pair a REAL class with a real spec
+   * (Warrior/Arms), never leave the default and produce "Rogue/Protection".
+   */
+  readonly classNameFor?: (sourceId: number) => string;
   readonly absentOn?: ReadonlyMap<number, readonly number[]>;
   /**
    * Typed fight facts for every listed fight, when a test needs the pulls to
@@ -256,7 +352,11 @@ export function assassinationSnapshot(options: {
   };
 }): ReportRosterSnapshot {
   const players: readonly RosterPlayer[] = options.sourceIds.map((sourceId) =>
-    rosterPlayerFor({ sourceId, name: `Raider${String(sourceId)}` }),
+    rosterPlayerFor({
+      sourceId,
+      name: `Raider${String(sourceId)}`,
+      ...(options.classNameFor === undefined ? {} : { className: options.classNameFor(sourceId) }),
+    }),
   );
   const fights: readonly RosterFight[] = options.fightIds.map((fightId) => {
     const absent = new Set(options.absentOn?.get(fightId) ?? []);

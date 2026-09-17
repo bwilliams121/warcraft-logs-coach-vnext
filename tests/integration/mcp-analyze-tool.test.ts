@@ -204,7 +204,7 @@ describe("every analysis status is a successful tool result", () => {
     // retry or discard it, and would read as "the tool broke" rather than
     // "this build does not analyze that specialization".
     const result = await callTool(IDS_ARGS, {
-      analyze: fixtureAnalysisRunner({ className: "Paladin", specName: "Protection" }),
+      analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
     });
 
     expect(result.isError).toBeUndefined();
@@ -401,7 +401,7 @@ describe("the analysis tool is metered", () => {
     // though no gameplay analysis followed.
     const limiter = countingLimiter(10);
     await callTool(IDS_ARGS, {
-      analyze: fixtureAnalysisRunner({ className: "Paladin", specName: "Protection" }),
+      analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
       rateLimiter: limiter,
     });
 
@@ -616,7 +616,7 @@ describe("no secret leaves through the analysis tool", () => {
       name: "an unsupported spec",
       run: async () =>
         await callTool(IDS_ARGS, {
-          analyze: fixtureAnalysisRunner({ className: "Paladin", specName: "Protection" }),
+          analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
         }),
     },
     {

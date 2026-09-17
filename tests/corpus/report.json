@@ -241,7 +241,7 @@
   ],
   "byLayer": [
     {
-      "assertions": 23,
+      "assertions": 24,
       "cases": 9,
       "failed": 0,
       "kindsExercised": [
@@ -252,7 +252,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "WCL_TRANSPORT",
-      "passed": 23
+      "passed": 24
     },
     {
       "assertions": 103,
@@ -339,7 +339,7 @@
         "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
         "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
         "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
-        "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
+        "SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION",
         "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
         "SPEC_PROTECTION_PALADIN.SPEC_GATE",
         "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
@@ -350,25 +350,39 @@
       "passed": 110
     },
     {
-      "assertions": 6,
-      "cases": 5,
+      "assertions": 7,
+      "cases": 6,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 6
+      "passed": 7
     },
     {
-      "assertions": 8,
-      "cases": 8,
+      "assertions": 10,
+      "cases": 10,
       "failed": 0,
       "kindsExercised": ["PUBLIC_CONTRACT.REST_MCP_PARITY"],
       "notExecuted": 0,
       "owningLayer": "PUBLIC_CONTRACT",
-      "passed": 8
+      "passed": 10
     }
   ],
   "cases": [
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.arms-warrior-subject-is-unsupported-on-the-same-evidence",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "assertions": [
@@ -412,7 +426,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.protection-paladin-registration-is-internal-only",
+      "caseId": "application-service.protection-paladin-registration-is-public",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -426,7 +440,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.protection-paladin-subject-is-still-unsupported-on-its-own-evidence",
+      "caseId": "application-service.protection-paladin-subject-is-analyzed-under-player-context",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -1744,6 +1758,20 @@
         }
       ],
       "authority": null,
+      "caseId": "public-contract.analysis-parity-for-the-arms-warrior-subject",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
       "caseId": "public-contract.analysis-parity-for-the-protection-paladin-subject",
       "owningLayer": "PUBLIC_CONTRACT",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
@@ -1823,6 +1851,20 @@
         "wcl-assassination-d2-decision-corpus",
         "wcl-encounter-rankings-sszorak-page-1"
       ]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.raid-night-parity-mixed-roster-over-the-a7r6-opener",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -2193,6 +2235,28 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.analysis-projects-publicly-with-a-total-reason-mapping",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_PROTECTION_PALADIN.SPEC_GATE",
           "ordinal": 0,
           "status": "PASSED"
@@ -2487,28 +2551,6 @@
         "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
         "wcl-protection-paladin-a7r6-rotational-45s"
       ]
-    },
-    {
-      "artifactId": "wcl-protection-paladin-a7r6-opener",
-      "assertions": [
-        {
-          "kind": "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
-          "ordinal": 0,
-          "status": "PASSED"
-        }
-      ],
-      "authority": {
-        "artifactRevision": "simc-33622e9d-1",
-        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
-        "requiredStateEvidence": [
-          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
-          "every COMPLETE cast by actor 7 in the slice, in canonical order",
-          "the Holy Power entry on each costed Shield of the Righteous cast"
-        ]
-      },
-      "caseId": "spec-protection-paladin.internal-analysis-cannot-project-publicly",
-      "owningLayer": "SPEC_PROTECTION_PALADIN",
-      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -3233,6 +3275,11 @@
           "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
           "ordinal": 2,
           "status": "PASSED"
+        },
+        {
+          "kind": "WCL_TRANSPORT.FIGHT_IDENTITY",
+          "ordinal": 3,
+          "status": "PASSED"
         }
       ],
       "authority": null,
@@ -3416,8 +3463,10 @@
         "combat-state.protection-paladin-aura-is-observed-at-transitions-and-ambiguous-before-its-first",
         "combat-state.protection-paladin-index-exposes-damage-taken-healing-and-absorbs",
         "combat-state.protection-paladin-gap-before-2010000-fails-closed",
-        "application-service.protection-paladin-subject-is-still-unsupported-on-its-own-evidence",
-        "public-contract.analysis-parity-for-the-protection-paladin-subject"
+        "application-service.protection-paladin-subject-is-analyzed-under-player-context",
+        "public-contract.analysis-parity-for-the-protection-paladin-subject",
+        "spec-protection-paladin.analysis-projects-publicly-with-a-total-reason-mapping",
+        "public-contract.raid-night-parity-mixed-roster-over-the-a7r6-opener"
       ],
       "disposition": "CLOSE_IN_M10",
       "id": "no-protection-paladin-evidence",
@@ -3462,13 +3511,13 @@
   "totals": {
     "artifactBytes": 3364052,
     "artifacts": 34,
-    "assertions": 335,
-    "cases": 109,
+    "assertions": 339,
+    "cases": 112,
     "declared": 0,
-    "executable": 335,
+    "executable": 339,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 335
+    "passed": 339
   }
 }

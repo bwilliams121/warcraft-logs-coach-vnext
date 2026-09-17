@@ -1624,6 +1624,15 @@ const PP = "wcl-protection-paladin-a7r6-opener";
 const PP_GAP = "wcl-protection-paladin-a7r6-opener.gap-before-2010000";
 const A7R6_CONTEXT = "wcl-fight-context-a7r6-fight-7";
 const TANK = 7;
+/** A7R6 fight 7 actor 4 — Warrior/Arms per the committed fight-context artifact: the canonical UNSUPPORTED identity since M10-D. */
+const ARMS = 4;
+const PROT_ANALYZER = "paladin-protection-observed-decisions";
+const PROT_ANALYZED_ENVELOPE = {
+  status: "ANALYZED",
+  specId: "paladin/protection",
+  analyzerId: PROT_ANALYZER,
+  scope: "PLAYER_CONTEXT",
+};
 const BOSS_21 = 21;
 const [SHIELD_OF_THE_RIGHTEOUS, ARDENT_DEFENDER, AVENGING_WRATH] = [53600, 31850, 31884];
 const HOLY_POWER_WIRE = 9;
@@ -3279,12 +3288,12 @@ const CASES = [
     D2,
     "PUBLIC_CONTRACT",
     "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/services/analysis-service.ts",
-    "Identified as a Protection Paladin, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document that says gameplay analysis was not attempted, identical on REST and MCP.",
+    "Identified as an Arms Warrior, the same actor over the same artifact yields SPEC_NOT_SUPPORTED on both transports — a well-formed document with specialization.specId null and analyzerId null that says gameplay analysis was not attempted, identical on REST and MCP.",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "ANALYSIS",
-        subject: { actorId: 19, className: "Paladin", specName: "Protection" },
-        expected: { status: "SPEC_NOT_SUPPORTED" },
+        subject: { actorId: 19, className: "Warrior", specName: "Arms" },
+        expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null },
       }),
     ],
     ["OWNED_CONTRACT"],
@@ -3307,14 +3316,17 @@ const CASES = [
         document: "RAID_NIGHT",
         fightIds: [1],
         subject: { actorId: 19 },
-        expected: { analyzedCells: 1 },
+        expected: {
+          analyzedCells: 1,
+          cells: [{ sourceId: 19, kind: "ANALYZED", specId: "rogue/assassination" }],
+        },
       }),
     ],
     ["OWNED_CONTRACT"],
     "The raid-night service is the production path with only the three Warcraft Logs ports faked; the cell is the real M5 facade's output projected by the real M7 aggregator.",
     {
       limitations: [
-        "The orchestration fixture normalizes the D2 artifact under its own window and fans it per participant; parity for other artifacts is not supported by this executor.",
+        "Without a stated composition the orchestration fixture normalizes the D2 artifact under its own window and fans it per participant; a composition over another artifact serves that artifact as one core (see the A7R6 mixed-roster case).",
       ],
       related: [
         "tests/integration/m7f-raid-night-transports.test.ts",
@@ -4133,15 +4145,15 @@ const CASES = [
     D2,
     "APPLICATION_SERVICE",
     "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-    "The same actor identified as Paladin/Protection yields SPEC_NOT_SUPPORTED from the service with no spec, no analyzer and a null scope: nothing was retrieved because nothing was going to read it, and the status is explicit rather than an empty report.",
+    "The same actor identified as Warrior/Arms — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec, no analyzer and a null scope: nothing was retrieved because nothing was going to read it, and the status is explicit rather than an empty report.",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
-        subject: { actorId: 19, className: "Paladin", specName: "Protection" },
+        subject: { actorId: 19, className: "Warrior", specName: "Arms" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: null },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "An unsupported specialization is fully determined by identity, so the service answers before spending a single Warcraft Logs point on events — and it answers with a status, never with a well-formed report of zero findings that reads as clean play. Protection Paladin stays SPEC_NOT_SUPPORTED until M10.",
+    "An unsupported specialization is fully determined by identity, so the service answers before spending a single Warcraft Logs point on events — and it answers with a status, never with a well-formed report of zero findings that reads as clean play. (Until M10-D this case used Paladin/Protection, which is supported now.)",
     { related: ["tests/unit/analysis-service.test.ts", "tests/unit/analysis-composition-refusals.test.ts"] },
   ),
 
@@ -4257,9 +4269,23 @@ const CASES = [
         sourceId: 37,
         expected: { ok: false, reason: "SOURCE_NOT_A_PLAYER" },
       }),
+      // M10-D: the canonical UNSUPPORTED identity, machine-pinned from the same capture.
+      a("WCL_TRANSPORT.FIGHT_IDENTITY", {
+        fightId: 7,
+        sourceId: ARMS,
+        expected: {
+          ok: true,
+          className: "Warrior",
+          specName: "Arms",
+          playerName: "Actor4",
+          reportRevision: 30,
+          logVersion: 17,
+          gameVersion: 1,
+        },
+      }),
     ],
     ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-    "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject.",
+    "Identity is read from masterData subType and friendlySpecs at the roster index and from nothing else. A Protection Paladin and a Retribution Paladin in one kill resolve to different specializations from one class, and the tank's own pet is refused as a subject. Actor 4 is the Arms Warrior every unsupported-path case names since M10-D: a real participant of this kill, not an invented pair.",
     { related: ["tests/unit/wcl-identity.test.ts", "tests/unit/spec-identity.test.ts"] },
   ),
   kase(
@@ -4691,23 +4717,44 @@ const CASES = [
     },
   ),
   kase(
-    "application-service.protection-paladin-subject-is-still-unsupported-on-its-own-evidence",
+    "application-service.protection-paladin-subject-is-analyzed-under-player-context",
     PP,
     "APPLICATION_SERVICE",
-    "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts; analyzer-registry.ts (M10-A catalog)",
-    "The real Protection Paladin subject, over its own captured evidence, still yields SPEC_NOT_SUPPORTED from the service with no spec, no analyzer and a null scope. The M10-A catalog carries no Paladin registration; the identity table does not resolve Paladin/Protection; nothing is retrieved because nothing would read it.",
+    "src/services/analysis-service.ts; spec-identity.ts; analyzer-registry.ts (M10-D public catalog)",
+    "The real Protection Paladin subject, over its own captured evidence, is recognized as paladin/protection, dispatched to the Protection analyzer, ingested at PLAYER_CONTEXT with resources, and reported ANALYZED. (From M10-B to M10-C this case pinned SPEC_NOT_SUPPORTED; M10-D moved the id into the public partition, the identity table and a PUBLIC registration together.)",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
         subject: { actorId: TANK, className: "Paladin", specName: "Protection" },
+        expected: PROT_ANALYZED_ENVELOPE,
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "The service derives ingestion scope from the requirement of THE analyzer that runs, and discloses the analyzer and spec ids so a report can say which evaluator spoke. ANALYZED maps to the PARTIAL service state: 21 eligible decisions, none resolved, is disclosed as coverage rather than read as clean play.",
+    {
+      related: [
+        "tests/regression/m10d-public-second-registration-invariance.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "application-service.arms-warrior-subject-is-unsupported-on-the-same-evidence",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
+    "Actor 4 of the same fight, the Arms Warrior the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec, no analyzer and a null scope. The slice holds none of actor 4's events, and none is needed: the answer is fully determined by identity, before any retrieval.",
+    [
+      a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
+        subject: { actorId: ARMS, className: "Warrior", specName: "Arms" },
         expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: null },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "M10-B adds evidence and state, not an evaluator. Until M10-D moves paladin/protection into the public partition, the identity table and a PUBLIC registration together, a public request for this exact subject answers with the explicit unsupported status — never an empty analysis that reads as clean play.",
+    "The unsupported path Protection Paladin used to prove, kept by a real captured identity that remains unsupported. Neither registered analyzer runs and nothing is ingested.",
     {
       related: [
+        "tests/regression/m10d-public-second-registration-invariance.test.ts",
         "tests/unit/analysis-composition-refusals.test.ts",
-        "tests/contracts/m10a-registry-integrity.test.ts",
       ],
     },
   ),
@@ -4716,39 +4763,100 @@ const CASES = [
     PP,
     "PUBLIC_CONTRACT",
     "src/contracts/analysis-projection.ts; src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
-    "The real Protection Paladin subject over its own evidence yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
+    "The real Protection Paladin subject over its own evidence is ANALYZED on both transports — one document naming paladin/protection and the Protection analyzer, identical on REST and MCP (structuredContent and text), schema-valid under warcraft-logs-coach.analysis/1, publishing MATCH as AUTHORITY_COMPATIBLE_ONLY. (From M10-B to M10-C this case pinned SPEC_NOT_SUPPORTED.)",
     [
       a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
         document: "ANALYSIS",
         subject: { actorId: TANK, className: "Paladin", specName: "Protection" },
-        expected: { status: "SPEC_NOT_SUPPORTED" },
+        expected: { status: "ANALYZED", specId: "paladin/protection", analyzerId: PROT_ANALYZER },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "The earlier unsupported-spec parity case relabels the Rogue subject; this one is the genuine article. The public document is unchanged in shape and meaning by M10-B, and the internal-only id never appears as a value.",
+    "The schema version is unchanged: growing the public specId enum is how supported specializations arrive, and no document a consumer had already received changed. Every decision UNKNOWN is carried as coverage, not hidden.",
     {
       related: [
-        "tests/integration/transport-consistency.test.ts",
+        "tests/regression/m10d-public-second-registration-invariance.test.ts",
         "tests/contracts/m10a-spec-partition.test.ts",
       ],
+    },
+  ),
+  kase(
+    "public-contract.analysis-parity-for-the-arms-warrior-subject",
+    PP,
+    "PUBLIC_CONTRACT",
+    "src/contracts/analysis-contract.ts (SPEC_NOT_SUPPORTED variant); src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
+    "Actor 4 of the same fight, the Arms Warrior, yields SPEC_NOT_SUPPORTED on both transports — one well-formed document with specialization.specId null and analyzerId null, identical on REST and MCP, schema-valid under warcraft-logs-coach.analysis/1.",
+    [
+      a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
+        document: "ANALYSIS",
+        subject: { actorId: ARMS, className: "Warrior", specName: "Arms" },
+        expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "The genuine unsupported article since M10-D: a real captured identity with no analyzer. An unsupported specialization must not produce an empty report that reads as clean play, and both transports say so identically.",
+    {
+      related: [
+        "tests/regression/m10d-public-second-registration-invariance.test.ts",
+        "tests/integration/transport-consistency.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "public-contract.raid-night-parity-mixed-roster-over-the-a7r6-opener",
+    PP,
+    "PUBLIC_CONTRACT",
+    "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
+    "One raid-night request over the A7R6 opener served as ONE core, with a roster of four real participants of that fight: the Protection Paladin (actor 7) is ANALYZED under paladin/protection; the Assassination Rogue (actor 19) has none of its evidence in the slice and its analyzer answers PROFILE_NOT_RESOLVED; the Arms Warrior (actor 4) is SPEC_NOT_SUPPORTED; the Blood Death Knight (actor 14) is ABSENT. One document on REST and MCP, one ingestion.",
+    [
+      a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
+        document: "RAID_NIGHT",
+        fightIds: [7],
+        subject: { actorId: TANK },
+        composition: {
+          participants: [
+            { sourceId: TANK, className: "Paladin", specName: "Protection", absent: false },
+            { sourceId: 19, className: "Rogue", specName: "Assassination", absent: false },
+            { sourceId: ARMS, className: "Warrior", specName: "Arms", absent: false },
+            { sourceId: 14, className: "DeathKnight", specName: "Blood", absent: true },
+          ],
+        },
+        expected: {
+          analyzedCells: 1,
+          cells: [
+            { sourceId: TANK, kind: "ANALYZED", specId: "paladin/protection" },
+            { sourceId: 19, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
+            { sourceId: ARMS, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
+            { sourceId: 14, kind: "ABSENT" },
+          ],
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Nothing is relabelled and no Rogue evidence is manufactured: the Rogue's cell is the analyzer's own truthful answer to a slice that holds none of its events, never an ANALYZED cell built from nothing. Both public analyzers dispatch from one ingestion, and the unsupported and absent players cost nothing.",
+    {
+      limitations: [
+        "The roster identities are the committed fight-context artifact's; the core is the opener slice, which describes actor 7 only, so no other participant can be ANALYZED over it.",
+      ],
+      related: ["tests/regression/m10d-mixed-raid-night.test.ts"],
     },
   ),
 
   // ---- SPEC_PROTECTION_PALADIN (M10-C) -------------------------------------
   kase(
-    "application-service.protection-paladin-registration-is-internal-only",
+    "application-service.protection-paladin-registration-is-public",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-    "The validated production catalog carries the Protection Paladin registration for the INTERNAL lookup and not for the PUBLIC one, in either catalog order; the public identity table still does not resolve Paladin/Protection. Assassination resolves on both lookups and its identity resolves, exactly as before.",
+    "The validated production catalog carries the Protection Paladin registration for BOTH lookups, PUBLIC, in either catalog order, and the public identity table resolves Paladin/Protection. Assassination resolves on both lookups and its identity resolves, exactly as before. (From M10-C to M10-D the registration was INTERNAL_ONLY: real to the internal lookup, invisible to the public one.)",
     [
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "paladin/protection",
         expected: {
-          internalAnalyzerId: "paladin-protection-observed-decisions",
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          internalAnalyzerId: PROT_ANALYZER,
+          publicAnalyzerId: PROT_ANALYZER,
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
@@ -4762,8 +4870,14 @@ const CASES = [
       }),
     ],
     ["OWNED_CONTRACT"],
-    "An evaluator has to exist, be registered and be exercised BEFORE it is safe to expose. The registration is real (the cases below run it) and invisible to every public path (the two M10-B cases above still answer SPEC_NOT_SUPPORTED over this artifact, and the registry validates that the public set, the identity table and the partition agree).",
-    { related: ["tests/contracts/m10a-registry-integrity.test.ts", ...PP_C_RELATED] },
+    "An evaluator has to exist, be registered and be exercised BEFORE it is safe to expose; M10-C did that internally and M10-D exposed it. The registry validates that the public set, the identity table and the partition agree, so the three could not have moved separately.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+        ...PP_C_RELATED,
+      ],
+    },
   ),
   kase(
     "spec-protection-paladin.pinned-authority-loads-with-exact-provenance",
@@ -5197,15 +5311,40 @@ const CASES = [
     { related: ["tests/regression/m10a-analyzer-result-ownership.test.ts", ...PP_C_RELATED] },
   ),
   kase(
-    "spec-protection-paladin.internal-analysis-cannot-project-publicly",
+    "spec-protection-paladin.analysis-projects-publicly-with-a-total-reason-mapping",
     PP,
     "SPEC_PROTECTION_PALADIN",
-    "src/findings/spec-id.ts requirePublicSpecId; InternalSpecExposureError",
-    "The analyzed Protection result names paladin/protection, which the public partition does not contain, so the narrowing every public projector uses throws InternalSpecExposureError. There is no path from this payload to a public document, and no null-specId substitute.",
-    [a("SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE", { actorId: TANK })],
-    ["OWNED_CONTRACT"],
-    "specId null on a public document already means 'no publicly supported analyzer'. An internal-only analysis reaching a projector is an orchestration defect and fails closed as an error, never as a quieter document — and the two M10-B public cases prove the public paths never produce this payload in the first place.",
-    { authority: PP_AUTHORITY, related: ["tests/contracts/m10a-spec-partition.test.ts", ...PP_C_RELATED] },
+    "src/specs/paladin/protection/registration.ts protectionObservedDecisionView, PROTECTION_EXCLUSION_PUBLIC_PROJECTION; src/contracts/analysis-projection.ts",
+    "The analyzed opener result, read through the registration's view and projected by the real public projection, validates against warcraft-logs-coach.analysis/1 and carries 21 eligible / 0 MATCH / 0 REJECTED / 21 UNKNOWN over 24 excluded casts. The internal exclusion tally (11 MELEE_SWING, 11 NON_GCD_ACTION, 1 EXECUTION_LANE_NOT_ESTABLISHED, 1 NO_AUTHORITY_TOKEN_BINDING) projects onto the public vocabulary as NON_GCD_ACTION 22 / EXECUTION_LANE_NOT_ESTABLISHED 1 / NO_AUTHORITY_TOKEN_BINDING 1, summing to the excluded count; no internal-only reason string and no withheld payload field reaches the document. (From M10-C to M10-D this case pinned that the result could NOT be projected.)",
+    [
+      a("SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION", {
+        actorId: TANK,
+        expected: {
+          specId: "paladin/protection",
+          analyzerId: PROT_ANALYZER,
+          eligibleDecisions: 21,
+          match: 0,
+          rejected: 0,
+          unknown: 21,
+          excludedCastCount: 24,
+          exclusions: {
+            NON_GCD_ACTION: 22,
+            EXECUTION_LANE_NOT_ESTABLISHED: 1,
+            NO_AUTHORITY_TOKEN_BINDING: 1,
+          },
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "A melee swing is positively identified and off the global cooldown, so NON_GCD_ACTION is the truthful public reason for it; the internal payload keeps the finer MELEE_SWING and the public reader loses one bit of precision rather than gaining an untruthful one. The mapping is total by construction and the merged tally still reconciles with the excluded count, which the cell projection re-checks before any aggregate is summed.",
+    {
+      authority: PP_AUTHORITY,
+      related: [
+        "tests/contracts/m10d-protection-public-projection.test.ts",
+        "tests/contracts/m10a-spec-partition.test.ts",
+        ...PP_C_RELATED,
+      ],
+    },
   ),
 ];
 

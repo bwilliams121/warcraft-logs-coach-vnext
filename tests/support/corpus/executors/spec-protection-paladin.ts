@@ -29,7 +29,9 @@
 
 import type { CombatState } from "../../../../src/engine/state/combat-state.js";
 import type { GearPiece } from "../../../../src/engine/normalization/normalized-events.js";
-import { InternalSpecExposureError, requirePublicSpecId } from "../../../../src/findings/spec-id.js";
+import { PublicAnalysisResultSchema } from "../../../../src/contracts/analysis-contract.js";
+import { projectAnalysisResult } from "../../../../src/contracts/analysis-projection.js";
+import { PROTECTION_PALADIN_ANALYZER_ID } from "../../../../src/specs/paladin/protection/spec.js";
 import {
   analyzeObservedProtectionPaladinDecisions,
   summarizeProtectionDecisions,
@@ -784,27 +786,158 @@ export function specGate(
   return pass();
 }
 
-export function notPubliclyProjectable(
+/** Every property name appearing anywhere in a JSON value. */
+function keysOf(value: unknown, into = new Set<string>()): Set<string> {
+  if (Array.isArray(value)) value.forEach((entry) => keysOf(entry, into));
+  else if (value !== null && typeof value === "object") {
+    for (const [key, entry] of Object.entries(value)) {
+      into.add(key);
+      keysOf(entry, into);
+    }
+  }
+  return into;
+}
+
+/** Payload fields the view withholds; none may reach a public document. */
+const WITHHELD_KEYS = [
+  "rawBlocker",
+  "observedActionRejected",
+  "actorId",
+  "domains",
+  "holyPower",
+  "build",
+  "resolved",
+  "diagnostics",
+  "scope",
+];
+/** Internal-only vocabulary; none may appear as a public value. */
+const INTERNAL_STRINGS = [
+  "MELEE_SWING",
+  "TRANSITION_UNSUPPORTED",
+  "DIVERGENT_GCD_OUTCOMES",
+  "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+  "AUTHORITY_LOAD_FAILED",
+  "DOMAIN_NOT_DECLARED",
+];
+
+/**
+ * SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION (M10-D): the registration's
+ * analysis through its own view and the real public projection.
+ *
+ * The application envelope is assembled here exactly as the service
+ * assembles it (spec id, analyzer id, the registration's view); the
+ * projection and the schema are the production ones. The identity is the
+ * artifact's synthetic header with the case's actor — the document's
+ * identity block is not what this kind asserts.
+ */
+export function publicProjection(
   context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
-  params: ParamsOf<"SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE">,
+  params: ParamsOf<"SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION">,
 ): AssertionOutcome {
   const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
+  const { state, analysis } = run;
+  const { fight } = state;
+  // The projection's own input type, so this executor names the contract it
+  // drives and never reaches the services layer (the M9-A layering guard).
+  const envelope: Parameters<typeof projectAnalysisResult>[0] = {
+    identity: {
+      report: {
+        code: fight.report.code,
+        revision: fight.report.revision,
+        startTime: fight.report.startTimeUnixMs,
+        endTime: fight.report.endTimeUnixMs,
+      },
+      data: fight.data,
+      fight: {
+        id: fight.fight.id,
+        name: fight.fight.name,
+        encounterId: fight.fight.encounterId,
+        difficulty: fight.fight.difficulty,
+        startTime: fight.fight.startTimeMs,
+        endTime: fight.fight.endTimeMs,
+      },
+      player: {
+        sourceId: params.actorId,
+        name: "Corpusplayer",
+        className: "Paladin",
+        specName: "Protection",
+      },
+    },
+    specId: PROTECTION_PALADIN_SPEC_ID,
+    analyzerId: PROTECTION_PALADIN_ANALYZER_ID,
+    scope: "PLAYER_CONTEXT",
+    analysis,
+    observedDecisions: PROTECTION_PALADIN_REGISTRATION.observedDecisionView(analysis),
+  };
+
+  let projected: ReturnType<typeof projectAnalysisResult>;
   try {
-    requirePublicSpecId(run.analysis.specId);
+    projected = projectAnalysisResult(envelope);
   } catch (error: unknown) {
-    if (error instanceof InternalSpecExposureError) return pass();
-    return fail("the public narrowing boundary threw something other than InternalSpecExposureError", {
-      actual: { name: error instanceof Error ? error.name : typeof error },
+    return fail("the public projection threw", {
+      expected: { projected: true },
+      actual: { error: error instanceof Error ? error.message : String(error) },
     });
   }
-  return fail("the analyzed internal result was narrowed to a public specialization", {
-    expected: { thrown: "InternalSpecExposureError" },
-    actual: { specId: run.analysis.specId },
-  });
+  const parsed = PublicAnalysisResultSchema.safeParse(projected);
+  if (!parsed.success) {
+    return fail("the projected document does not validate against the frozen public schema", {
+      expected: "schema-valid document",
+      actual: parsed.error.issues
+        .slice(0, 3)
+        .map((issue) => `${issue.path.map(String).join(".")}: ${issue.message}`),
+    });
+  }
+  if (projected.status !== "ANALYZED") {
+    return fail("the projected document is not ANALYZED", {
+      expected: { status: "ANALYZED" },
+      actual: { status: projected.status },
+    });
+  }
+
+  const exclusions: Record<string, number> = {};
+  for (const row of projected.coverage.exclusions) exclusions[row.key] = row.count;
+  const actual = {
+    specId: projected.specialization.specId,
+    analyzerId: projected.analyzerId,
+    eligibleDecisions: projected.coverage.eligibleDecisions,
+    match: projected.coverage.match,
+    rejected: projected.coverage.rejected,
+    unknown: projected.coverage.unknown,
+    excludedCastCount: projected.coverage.excludedCastCount,
+    exclusions,
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the projected totals differ from what the case pins", { expected: params.expected, actual });
+  }
+  const tallySum = projected.coverage.exclusions.reduce((sum, row) => sum + row.count, 0);
+  if (tallySum !== projected.coverage.excludedCastCount || projected.exclusions.length !== tallySum) {
+    return fail("the projected exclusion tally does not reconcile with the excluded count", {
+      expected: {
+        tallySum: projected.coverage.excludedCastCount,
+        exclusions: projected.coverage.excludedCastCount,
+      },
+      actual: { tallySum, exclusions: projected.exclusions.length },
+    });
+  }
+  const json = JSON.stringify(projected);
+  const leaked = INTERNAL_STRINGS.filter((internal) => json.includes(internal));
+  if (leaked.length > 0) {
+    return fail("an internal-only vocabulary string reached the public document", {
+      expected: [],
+      actual: leaked,
+    });
+  }
+  const keys = keysOf(projected);
+  const withheld = WITHHELD_KEYS.filter((key) => keys.has(key));
+  if (withheld.length > 0) {
+    return fail("a withheld payload field reached the public document", { expected: [], actual: withheld });
+  }
+  return pass();
 }
 
 /**

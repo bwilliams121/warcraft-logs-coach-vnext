@@ -231,14 +231,19 @@ describe("analyzeFight", () => {
     }
   });
 
-  it("enables_exactly_the_assassination_analyzer", () => {
-    // Superseded `milestone_2_enables_no_analyzers`. The registry was empty
-    // until an evaluator existed to fill it; M6-B registers the one that does.
-    // Pinned exactly, because this list is what scope derivation reads and a
-    // silent addition would widen retrieval for every request.
+  it("enables_exactly_the_two_public_analyzers", () => {
+    // Superseded `milestone_2_enables_no_analyzers` and, in M10-D,
+    // `enables_exactly_the_assassination_analyzer`. Pinned exactly, because
+    // this list is build capability metadata and a silent addition would
+    // misstate what the deployment supports.
     expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
+      },
+      {
+        analyzerId: "paladin-protection-observed-decisions",
         requiredScope: "PLAYER_CONTEXT",
         includeResources: true,
       },

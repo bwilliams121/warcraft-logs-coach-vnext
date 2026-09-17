@@ -42,7 +42,8 @@ import {
   workerDepsFor,
 } from "../support/analysis-transports.js";
 import { corpusFight, corpusState } from "../support/corpus/fight.js";
-import { internalFixtureRegistration } from "../support/internal-fixture-registration.js";
+import { productionCatalogWith } from "../support/catalog.js";
+import { fixtureRegistration } from "../support/fixture-registration.js";
 import {
   M5D2_ACTOR,
   REPORT_CODE,
@@ -107,12 +108,12 @@ describe("the ownership rule, directly", () => {
 });
 
 describe("a registration built through defineAnalyzerRegistration refuses forged results", () => {
-  it("an internal-only Paladin registration cannot return an Assassination-owned analysis", () => {
+  it("a Paladin registration (row-level fixture exposure) cannot return an Assassination-owned analysis", () => {
     const impostor = defineAnalyzerRegistration({
       analyzerId: "impostor-paladin",
       specId: "paladin/protection",
       exposure: "INTERNAL_ONLY",
-      capabilities: internalFixtureRegistration().capabilities,
+      capabilities: fixtureRegistration().capabilities,
       authorityBindings: [],
       analyze: () => realAssassinationAnalysis(),
       observedDecisionView: () => {
@@ -296,7 +297,10 @@ describe("a forged result never reaches the public surfaces", () => {
   function depsWith(registration: AnalyzerRegistration): AnalysisServiceDeps {
     const preflight: PreflightPort = async () => ({ ok: true, identity, rateLimit: undefined });
     const ingest: CombatIngestionPort = async () => ({ ok: true, fight, rateLimit: undefined });
-    return { env: MCP_TEST_ENV, preflight, ingest, registry: [registration] };
+    // COMPLETE catalog (M10-D): the forged Assassination row replaces the real
+    // one and the real Protection row stays, so the refusal below is the
+    // OWNERSHIP refusal and not the registry refusing an incomplete table.
+    return { env: MCP_TEST_ENV, preflight, ingest, registry: productionCatalogWith(registration) };
   }
 
   const FORGED = forgedAssassination(
@@ -316,6 +320,9 @@ describe("a forged result never reaches the public surfaces", () => {
       if (result.ok) return;
       expect(result.error.code).toBe("INTERNAL_ERROR");
       expect(result.error.message).not.toContain("SPEC_NOT_SUPPORTED");
+      // The ownership refusal, by name — never the catalog-integrity one.
+      expect(result.error.message).toContain("does not own");
+      expect(result.error.message).not.toContain("integrity validation");
     });
 
     it(`${label}: REST answers 500 INTERNAL_ERROR and MCP a tool error`, async () => {
@@ -374,11 +381,12 @@ describe("a forged result never reaches the public surfaces", () => {
     const ports = fakePorts({ snapshot });
     const run = await runNight(
       { reportCode: REPORT_CODE, fightIds: [1] },
-      { ...ports, deps: { ...ports.deps, registry: [FORGED] } },
+      { ...ports, deps: { ...ports.deps, registry: productionCatalogWith(FORGED) } },
     );
     expect(run.ok).toBe(false);
     if (run.ok) return;
     expect(run.error.code).toBe("INTERNAL_ERROR");
     expect(run.error.message).not.toContain("SPEC_NOT_SUPPORTED");
+    expect(run.error.message).toContain("does not own");
   });
 });

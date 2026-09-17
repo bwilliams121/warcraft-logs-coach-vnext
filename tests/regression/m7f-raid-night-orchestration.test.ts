@@ -40,8 +40,18 @@ import type { RaidNightRunResult } from "../../src/services/raid-night-runner.js
 
 /** A second supported Rogue, so "many players on one fight" is a real case. */
 const ROGUE_B = 23;
-const PALADIN = 7;
+/**
+ * The canonical UNSUPPORTED participant: Warrior/Arms, A7R6 fight 7 actor 4
+ * per the committed fight-context artifact. (Until M10-D this file used
+ * source 7 with spec "Protection" and the fixture's default class, which
+ * spelled the impossible identity Rogue/Protection; Protection Paladin is
+ * supported now and a real unsupported class/spec pair takes its place.)
+ */
+const ARMS = 4;
 const ZERO_ID = 0;
+
+/** The fixture's class for each player: Warrior for the Arms participant, Rogue otherwise. */
+const classNameFor = (sourceId: number): string => (sourceId === ARMS ? "Warrior" : "Rogue");
 
 function aggregateOf(run: RaidNightRunResult): RaidNightAnalysis {
   if (!run.ok) throw new Error(`expected success, got ${run.error.code}: ${run.error.message}`);
@@ -118,12 +128,13 @@ describe("one ingestion per needed fight, never one per player", () => {
 
 describe("zero ingestion when no selected player needs it", () => {
   it("retrieves nothing when every present specialization is unsupported", async () => {
-    // Protection Paladin has no registered analyzer. Paginating this pull would
+    // Arms Warrior has no registered analyzer. Paginating this pull would
     // spend a full retrieval on evidence nothing can read.
     const snapshot = assassinationSnapshot({
       fightIds: [1],
-      sourceIds: [PALADIN],
-      specNameFor: () => "Protection",
+      sourceIds: [ARMS],
+      classNameFor,
+      specNameFor: () => "Arms",
     });
     const ports = fakePorts({ snapshot });
 
@@ -158,8 +169,11 @@ describe("zero ingestion when no selected player needs it", () => {
   it("retrieves nothing for a mix of absent and unsupported", async () => {
     const snapshot = assassinationSnapshot({
       fightIds: [1],
-      sourceIds: [PALADIN, M5D2_ACTOR],
-      specNameFor: () => "Protection",
+      sourceIds: [ARMS, M5D2_ACTOR],
+      classNameFor,
+      // The present Rogue is absent and the Arms Warrior is unsupported; the
+      // Rogue's own spec string is still Assassination.
+      specNameFor: (_fightId, sourceId) => (sourceId === ARMS ? "Arms" : "Assassination"),
       absentOn: new Map([[1, [M5D2_ACTOR]]]),
     });
     const ports = fakePorts({ snapshot });
@@ -175,8 +189,9 @@ describe("zero ingestion when no selected player needs it", () => {
     // evidence, and the unsupported ones ride along at no extra cost.
     const snapshot = assassinationSnapshot({
       fightIds: [1],
-      sourceIds: [PALADIN, M5D2_ACTOR],
-      specNameFor: (_fightId, sourceId) => (sourceId === PALADIN ? "Protection" : "Assassination"),
+      sourceIds: [ARMS, M5D2_ACTOR],
+      classNameFor,
+      specNameFor: (_fightId, sourceId) => (sourceId === ARMS ? "Arms" : "Assassination"),
     });
     const ports = fakePorts({ snapshot });
 
@@ -189,10 +204,12 @@ describe("zero ingestion when no selected player needs it", () => {
 
   it("ingests only the fights that need it in a mixed night", async () => {
     // Fight 2 is all-unsupported; the others are not. One retrieval is skipped.
+    // The Rogue is reported as an unsupported Rogue spec on fight 2 — a real
+    // pair (Rogue/Outlaw), since a class does not change between pulls.
     const snapshot = assassinationSnapshot({
       fightIds: [1, 2, 3],
       sourceIds: [M5D2_ACTOR],
-      specNameFor: (fightId) => (fightId === 2 ? "Protection" : "Assassination"),
+      specNameFor: (fightId) => (fightId === 2 ? "Outlaw" : "Assassination"),
     });
     const ports = fakePorts({ snapshot });
 
@@ -213,8 +230,9 @@ describe("a mixed roster keeps every status distinct", () => {
   it("analyzes the supported player, reports the rest truthfully", async () => {
     const snapshot = assassinationSnapshot({
       fightIds: [1, 2],
-      sourceIds: [PALADIN, M5D2_ACTOR, ROGUE_B],
-      specNameFor: (_fightId, sourceId) => (sourceId === PALADIN ? "Protection" : "Assassination"),
+      sourceIds: [ARMS, M5D2_ACTOR, ROGUE_B],
+      classNameFor,
+      specNameFor: (_fightId, sourceId) => (sourceId === ARMS ? "Arms" : "Assassination"),
       absentOn: new Map([[2, [ROGUE_B]]]),
     });
     const ports = fakePorts({ snapshot });
@@ -390,14 +408,14 @@ describe("revision integrity fails closed at every stage", () => {
 describe("the source filter", () => {
   const snapshot = assassinationSnapshot({
     fightIds: [1],
-    sourceIds: [ZERO_ID, PALADIN, M5D2_ACTOR],
+    sourceIds: [ZERO_ID, ARMS, M5D2_ACTOR],
   });
 
   it("defaults to every player in the selected fights", async () => {
     const ports = fakePorts({ snapshot });
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, ports));
     expect(aggregate.coverage.cellsTotal).toBe(3);
-    expect(aggregate.roster.map((player) => player.sourceId)).toEqual([ZERO_ID, PALADIN, M5D2_ACTOR]);
+    expect(aggregate.roster.map((player) => player.sourceId)).toEqual([ZERO_ID, ARMS, M5D2_ACTOR]);
   });
 
   it("narrows the matrix to the requested players", async () => {
@@ -445,7 +463,7 @@ describe("the source filter", () => {
   });
 
   it("keeps two players sharing a name distinct", async () => {
-    const shared = assassinationSnapshot({ fightIds: [1], sourceIds: [PALADIN, M5D2_ACTOR] });
+    const shared = assassinationSnapshot({ fightIds: [1], sourceIds: [ARMS, M5D2_ACTOR] });
     const named = {
       ...shared,
       players: shared.players.map((player) => ({ ...player, name: "SameName" })),
@@ -455,7 +473,7 @@ describe("the source filter", () => {
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, ports));
     expect(aggregate.roster.every((player) => player.name === "SameName")).toBe(true);
     expect(aggregate.roster.map((player) => player.playerKey)).toEqual([
-      `${REPORT_CODE}:7`,
+      `${REPORT_CODE}:4`,
       `${REPORT_CODE}:19`,
     ]);
   });

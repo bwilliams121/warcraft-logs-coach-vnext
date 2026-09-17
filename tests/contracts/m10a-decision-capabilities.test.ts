@@ -26,7 +26,7 @@ import {
   ASSASSINATION_REGISTRATION,
   ASSASSINATION_ROTATION_CAPABILITY,
 } from "../../src/specs/rogue/assassination/registration.js";
-import { internalFixtureRegistration } from "../support/internal-fixture-registration.js";
+import { fixtureRegistration } from "../support/fixture-registration.js";
 
 const VALID: DecisionCapability = ASSASSINATION_ROTATION_CAPABILITY;
 
@@ -94,7 +94,7 @@ describe("the ingestion requirement is derived from the declaration", () => {
   });
 
   it("scope derivation over registrations still unions, as the raid-night path relies on", () => {
-    const fixture = internalFixtureRegistration();
+    const fixture = fixtureRegistration();
     expect(deriveIngestionScopeFor([ASSASSINATION_REGISTRATION])).toEqual(
       deriveIngestionScope([ASSASSINATION_REGISTRATION.requirement]),
     );
@@ -105,10 +105,15 @@ describe("the ingestion requirement is derived from the declaration", () => {
     expect(both.contributingAnalyzers).toEqual([fixture.analyzerId]);
   });
 
-  it("the build's public requirement set is unchanged", () => {
+  it("the build's public requirement set is the two public analyzers' derived requirements", () => {
     expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
+      },
+      {
+        analyzerId: "paladin-protection-observed-decisions",
         requiredScope: "PLAYER_CONTEXT",
         includeResources: true,
       },

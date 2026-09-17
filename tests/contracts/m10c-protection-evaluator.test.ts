@@ -41,13 +41,14 @@ import {
   type ProtectionPaladinAnalysis,
 } from "../../src/specs/paladin/protection/observed-analysis.js";
 import {
+  PROTECTION_EXCLUSION_PUBLIC_PROJECTION,
   PROTECTION_PALADIN_REGISTRATION,
   protectionObservedDecisionView,
 } from "../../src/specs/paladin/protection/registration.js";
 import { standaloneProtectionAuthorityAccess } from "../../src/specs/paladin/protection/authority-bindings.js";
 import { MATCH_MEANING } from "../../src/specs/paladin/protection/domains.js";
 import { checkAnalysisOwnership } from "../../src/findings/analyzer-registration.js";
-import { requirePublicSpecId, InternalSpecExposureError } from "../../src/findings/spec-id.js";
+import { requirePublicSpecId } from "../../src/findings/spec-id.js";
 
 const OPENER = "wcl-protection-paladin-a7r6-opener";
 const GAP = "wcl-protection-paladin-a7r6-opener.gap-before-2010000";
@@ -250,15 +251,27 @@ describe("over the REAL M10-B opener", () => {
     expect(interrupt).toMatchObject({ evidenceFamily: "UNVERIFIED" });
   });
 
-  it("passes the registration's runtime ownership check and cannot be projected publicly", () => {
+  it("passes the registration's runtime ownership check and narrows to the public spec id (M10-D)", () => {
     expect(checkAnalysisOwnership(PROTECTION_PALADIN_REGISTRATION, analysis)).toEqual({ ok: true });
-    expect(() => requirePublicSpecId(analysis.specId)).toThrow(InternalSpecExposureError);
+    // Until M10-D this threw InternalSpecExposureError; the id is public now.
+    expect(requirePublicSpecId(analysis.specId)).toBe("paladin/protection");
   });
 
   it("the view adapter reconciles with the payload record for record", () => {
     const view = protectionObservedDecisionView(analysis);
     expect(view.decisions).toHaveLength(analysis.comparisons.length);
     expect(view.exclusions).toHaveLength(analysis.excluded.length);
+    // The ONE transformation the view applies (M10-D): the internal reason is
+    // projected onto the public vocabulary, record for record, and the payload
+    // itself keeps MELEE_SWING.
+    view.exclusions.forEach((record, index) => {
+      const cast = analysis.excluded[index];
+      if (cast === undefined) throw new Error("index");
+      expect(record.position).toBe(cast.position);
+      expect(record.reason).toBe(PROTECTION_EXCLUSION_PUBLIC_PROJECTION[cast.reason]);
+    });
+    expect(analysis.excluded.filter((cast) => cast.reason === "MELEE_SWING")).toHaveLength(11);
+    expect(view.exclusions.some((record) => record.reason === "MELEE_SWING")).toBe(false);
     view.decisions.forEach((record, index) => {
       const comparison = analysis.comparisons[index];
       if (comparison === undefined) throw new Error("index");
@@ -281,9 +294,18 @@ describe("over the REAL M10-B opener", () => {
       selectionPrecision: [{ key: "UNKNOWN", count: 21 }],
       unknownBases: [{ key: "AUTHORITY_SELECTION_UNRESOLVED", count: 21 }],
       unknownBlockerClasses: [{ key: "DIVERGENT_WORLDS", count: 21 }],
-      exclusions: analysis.coverage.exclusions,
+      // The tally is projected too: the 11 swings and the 11 NON_GCD presses
+      // merge into one public row, and the total still equals the count.
+      exclusions: [
+        { key: "NON_GCD_ACTION", count: 22 },
+        { key: "EXECUTION_LANE_NOT_ESTABLISHED", count: 1 },
+        { key: "NO_AUTHORITY_TOKEN_BINDING", count: 1 },
+      ],
       excludedCastCount: 24,
     });
+    expect(view.coverage.exclusions.reduce((sum, row) => sum + row.count, 0)).toBe(
+      view.coverage.excludedCastCount,
+    );
     // The view is exactly the shared shape: no Paladin-only field rides along.
     expect(Object.keys(view).sort()).toEqual(["coverage", "decisions", "exclusions"]);
   });
@@ -326,7 +348,14 @@ describe("refusals", () => {
       authority: accessWith(null),
     });
     expect(result.status).toBe("AUTHORITY_NOT_AVAILABLE");
-    if (result.status === "AUTHORITY_NOT_AVAILABLE") expect(result.detail).toContain("AUTHORITY_LOAD_FAILED");
+    // The detail is author-written and FIXED (M10-D): the internal resolution
+    // outcome is not interpolated into a string that reaches the public wire.
+    if (result.status === "AUTHORITY_NOT_AVAILABLE") {
+      expect(result.detail).not.toContain("AUTHORITY_LOAD_FAILED");
+      expect(result.detail).toBe(
+        "The pinned SimulationCraft Protection Paladin authority artifact could not be resolved, so no offensive decision was evaluated.",
+      );
+    }
   });
 
   it("reports PROFILE_NOT_RESOLVED without a combatant profile for the actor", () => {

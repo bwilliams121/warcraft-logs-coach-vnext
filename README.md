@@ -428,7 +428,7 @@ state.
 
 ## Second Specialization
 
-Protection Paladin is the intended second specialization.
+Protection Paladin is the second specialization, public since M10-D.
 
 The purpose of the second spec is not merely to add another class.
 
@@ -437,6 +437,21 @@ It is an architectural test.
 If adding Protection Paladin requires rewriting shared infrastructure or adding
 Paladin-specific gameplay logic into generic systems, the abstraction should be
 reviewed before scaling further.
+
+What public Protection Paladin analysis is, exactly:
+
+- observed OFFENSIVE global-cooldown decisions compared against the pinned
+  SimulationCraft Protection APL, and nothing else;
+- defensive cooldowns, active mitigation, self-healing, interrupts and
+  survival are NOT evaluated — no authority is bound to those domains;
+- off-global-cooldown actions such as Shield of the Righteous are excluded
+  from the decision population, not judged;
+- `MATCH` means authority-compatible only; `UNKNOWN` means the evidence
+  cannot establish the result, never that a mistake was made.
+
+The canonical unsupported specialization used by tests and smoke checks is
+Warrior/Arms (A7R6 fight 7, actor 4), a real captured identity with no
+analyzer.
 
 ---
 

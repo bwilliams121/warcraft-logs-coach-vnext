@@ -7,8 +7,10 @@
  * the observed foreground casts of one Protection Paladin, evaluates each
  * GCD-consuming one against the pinned offensive authority through the shared
  * first-GCD query, records what Holy Power each cast observed, and reports the
- * six decision domains separately. It is INTERNAL_ONLY: no public path
- * selects it, and its result cannot be projected publicly.
+ * six decision domains separately. PUBLIC since M10-D: the application
+ * service selects it for a resolved Protection Paladin identity, and the
+ * registration's view (`registration.ts`) is what the public projection
+ * reads — the payload below is never projected directly.
  *
  * WHAT IT DELIBERATELY IS NOT
  *
@@ -444,7 +446,10 @@ export function analyzeObservedProtectionPaladinDecisions(
     return unsupported(
       "AUTHORITY_NOT_AVAILABLE",
       specId,
-      `The pinned SimulationCraft Protection Paladin authority could not be resolved (${offensive.outcome}), so no offensive decision was evaluated.`,
+      // Author-written and FIXED, like Assassination's: the resolution outcome
+      // (`offensive.outcome`) is an internal vocabulary constant and is not
+      // interpolated into a string that reaches the public `detail` field.
+      "The pinned SimulationCraft Protection Paladin authority artifact could not be resolved, so no offensive decision was evaluated.",
     );
   }
   const authority = offensive.authority;

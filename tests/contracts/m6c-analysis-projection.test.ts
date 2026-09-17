@@ -101,7 +101,10 @@ async function domainAnalysis(className = "Rogue", specName = "Assassination"): 
 }
 
 const ANALYZED = await domainAnalysis();
-const UNSUPPORTED = await domainAnalysis("Paladin", "Protection");
+// Warrior/Arms: the canonical captured unsupported identity (A7R6 fight 7,
+// actor 4). Paladin/Protection is supported since M10-D and is no longer the
+// unsupported subject anywhere in this suite.
+const UNSUPPORTED = await domainAnalysis("Warrior", "Arms");
 
 /**
  * Wraps an analyzer result in the application envelope an analyzer run
@@ -395,26 +398,26 @@ describe("identity is preserved, and unrecognized specs stay unrecognized", () =
   });
 
   it("keeps an unsupported spec factually identifiable without inventing an id", () => {
-    // The Paladin is still a Protection Paladin in `identity.player`. What the
+    // The Warrior is still an Arms Warrior in `identity.player`. What the
     // engine does NOT claim is an internal name for that specialization.
     const projected = projectAnalysisResult(UNSUPPORTED);
 
-    expect(projected.identity.player.className).toBe("Paladin");
-    expect(projected.identity.player.specName).toBe("Protection");
+    expect(projected.identity.player.className).toBe("Warrior");
+    expect(projected.identity.player.specName).toBe("Arms");
     expect(projected.specialization.specId).toBeNull();
     expect(projected.specialization.gameplaySupported).toBe(false);
   });
 
   it("never carries an unrecognized spec id as a VALUE outside explanatory prose", () => {
     // The distinction that matters. The detail string legitimately quotes
-    // `paladin/protection` to say which specialization has no analyzer — that
-    // is informative. What must never happen is the same string appearing as an
+    // `warrior/arms` to say which specialization has no analyzer — that is
+    // informative. What must never happen is the same string appearing as an
     // identifier a consumer would read as a recognized specialization.
     const projected = projectAnalysisResult(UNSUPPORTED);
     if (projected.status === "ANALYZED") throw new Error("expected a non-analyzed result");
 
     // The prose may name it...
-    expect(projected.detail).toContain("paladin/protection");
+    expect(projected.detail).toContain("warrior/arms");
 
     // ...but no field value may BE it.
     const values: unknown[] = [];
@@ -425,8 +428,9 @@ describe("identity is preserved, and unrecognized specs stay unrecognized", () =
     };
     walk({ ...projected, detail: undefined });
 
-    expect(values).not.toContain("paladin/protection");
+    expect(values).not.toContain("warrior/arms");
     expect(values).not.toContain("rogue/assassination");
+    expect(values).not.toContain("paladin/protection");
   });
 
   it("marks a supported spec as supported even when its analysis did not complete", () => {
@@ -486,7 +490,7 @@ describe("a non-analyzed result cannot be mistaken for clean play", () => {
     // words rather than composing a second, subtly different explanation.
     expect(projected.detail).toBe(source.detail);
 
-    const registryDetail = specNotSupported("paladin/protection");
+    const registryDetail = specNotSupported("warrior/arms");
     if (registryDetail.status === "ANALYZED") throw new Error("expected a non-analyzed result");
     expect(projected.detail).toBe(registryDetail.detail);
   });

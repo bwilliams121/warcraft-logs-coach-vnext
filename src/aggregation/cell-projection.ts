@@ -12,7 +12,9 @@
  *
  * So the spec-aware surface is deliberately a single module with a single job:
  * turn one heavy, spec-shaped analysis into a small, spec-NEUTRAL cell. When
- * M10 lands, this file learns about Protection Paladin and nothing else does.
+ * M10 landed, this file did NOT have to learn about Protection Paladin: since
+ * M10-A it reads the registration-supplied view, so a second specialization
+ * changed its own registration and nothing in this domain.
  *
  * WHAT IT DECIDES, WHICH IS MORE THAN IT LOOKS
  *

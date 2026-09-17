@@ -145,7 +145,7 @@ describe("every analysis-domain status is a successful response", () => {
   const statuses = [
     {
       name: "SPEC_NOT_SUPPORTED",
-      runner: fixtureAnalysisRunner({ className: "Paladin", specName: "Protection" }),
+      runner: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
     },
   ] as const;
 
@@ -168,7 +168,7 @@ describe("every analysis-domain status is a successful response", () => {
     // mistakes found".
     const body = (await (
       await callRest(D2_REQUEST, {
-        analyze: fixtureAnalysisRunner({ className: "Paladin", specName: "Protection" }),
+        analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
       })
     ).json()) as Record<string, unknown>;
 
@@ -357,7 +357,7 @@ describe("no secret leaves through the live REST route", () => {
       name: "an unsupported spec",
       run: async () =>
         await callRest(D2_REQUEST, {
-          analyze: fixtureAnalysisRunner({ className: "Paladin", specName: "Protection" }),
+          analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
         }),
     },
     {

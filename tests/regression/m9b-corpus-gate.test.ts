@@ -62,10 +62,13 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // derivative with seven cases and thirty assertions; M10-C5 Phase B2
     // added the four steady-state segments, the bundle compositions and the
     // evaluator over the composed 165 s fight: twelve cases and seventy-three
-    // assertions.
-    expect(result.summary.cases).toBe(109);
-    expect(result.summary.assertions).toBe(335);
-    expect(result.summary.passed).toBe(335);
+    // assertions; M10-D's public Protection integration added three cases
+    // and four assertions (the Arms Warrior through the service and both
+    // transports, the mixed-roster raid night, and actor 4's identity) and
+    // repurposed four cases in place. Measured, then pinned.
+    expect(result.summary.cases).toBe(112);
+    expect(result.summary.assertions).toBe(339);
+    expect(result.summary.passed).toBe(339);
   });
 
   it("covers every layer", async () => {

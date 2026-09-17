@@ -44,6 +44,8 @@ import pinnedAssassinationApl from "../../../src/simc/data/rogue-assassination.a
 import pinnedRogueDotDurations from "../../../src/data/game/rogue-dot-durations.json";
 import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
+import { SPEC_IDS } from "../../../src/findings/spec-id.js";
+import { PUBLIC_EXCLUSION_REASONS } from "../../../src/contracts/analysis-contract.js";
 import { PROTECTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/protection/observed-analysis.js";
 
 // --------------------------------------------------------------------------
@@ -78,6 +80,14 @@ import { PROTECTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/protect
  * capture-only `{ sourceId }` actor filter alongside `"NONE"`, and new
  * assertion kinds. A change that would give an existing manifest a different
  * meaning is what moves the number.
+ *
+ * M10-D REMOVED one kind without bumping: `SPEC_PROTECTION_PALADIN.
+ * NOT_PUBLICLY_PROJECTABLE` asserted that the Protection result could not be
+ * narrowed to a public id, which stopped being true by design when Protection
+ * became public. A kind whose claim is false by construction is not kept
+ * executable; its one case was repurposed onto the new
+ * `SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION`. No manifest outside this
+ * repository names the removed kind, so no manifest changed meaning.
  */
 export const CORPUS_CONTRACT_VERSION = 2;
 
@@ -1325,16 +1335,33 @@ export const ASSERTION_KINDS = {
     description:
       "The Protection facade refuses this specialization with SPEC_NOT_SUPPORTED before any Protection rule runs: no comparisons, no domains, no authority.",
   },
-  "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE": {
+  "SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION": {
     owningLayer: "SPEC_PROTECTION_PALADIN",
-    outcomeClass: "UNSUPPORTED",
+    outcomeClass: "POSITIVE_FACT",
     payloadKinds: ["WCL_EVENT_ARRAY"],
-    params: z.object({ actorId: z.number().int() }).strict(),
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            specId: z.enum(SPEC_IDS),
+            analyzerId: z.string().min(1),
+            eligibleDecisions: z.number().int().nonnegative(),
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            unknown: z.number().int().nonnegative(),
+            excludedCastCount: z.number().int().nonnegative(),
+            /** The PROJECTED tally, keyed by public reason. Rows sharing a public reason are merged. */
+            exclusions: z.record(z.enum(PUBLIC_EXCLUSION_REASONS), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
     execution: "EXECUTABLE",
     runtime: "ANY",
     requiresAuthority: true,
     description:
-      "The analyzed Protection result names an INTERNAL_ONLY specialization, and the public narrowing boundary refuses it with InternalSpecExposureError rather than a quieter document. An internal result reaches no public projection.",
+      "The registration's analysis, read through its own view and projected by the real public projection, validates against warcraft-logs-coach.analysis/1 and carries exactly these totals; every excluded cast's reason and the coverage tally are mapped onto the public vocabulary (MELEE_SWING → NON_GCD_ACTION, rows merged), the tally sums to the excluded count, and no internal-only reason string or withheld field (raw blocker, domains, Holy Power, build, resolver diagnostics) reaches the document.",
   },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------
@@ -1592,7 +1619,8 @@ export const ASSERTION_KINDS = {
     payloadKinds: ["WCL_EVENT_ARRAY"],
     params: z
       .object({
-        specId: z.string().min(1),
+        /** A specialization this build KNOWS. An unsupported class/spec pair is not a SpecId and is asserted through FIGHT_ANALYSIS instead. */
+        specId: z.enum(SPEC_IDS),
         expected: z
           .object({
             /** The analyzer id the INTERNAL lookup resolves, or `null` when none is registered. */
@@ -1610,7 +1638,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "The validated production catalog answers the internal and the public lookup for this specialization exactly so, and the public identity table agrees. An INTERNAL_ONLY registration is real to the first and invisible to the second; catalog order changes neither answer.",
+      "The validated production catalog answers the internal and the public lookup for this known specialization exactly so, and the public identity table agrees; catalog order changes neither answer. An INTERNAL_ONLY registration would be real to the first lookup and invisible to the second (none exists since M10-D); a PUBLIC one answers both.",
   },
 
   // ---- PUBLIC_CONTRACT -----------------------------------------------------
@@ -1625,7 +1653,14 @@ export const ASSERTION_KINDS = {
           subject: z
             .object({ actorId: z.number().int(), className: z.string().min(1), specName: z.string().min(1) })
             .strict(),
-          expected: z.object({ status: z.enum(["ANALYZED", "SPEC_NOT_SUPPORTED"]) }).strict(),
+          expected: z
+            .object({
+              status: z.enum(["ANALYZED", "SPEC_NOT_SUPPORTED"]),
+              /** M10-D: which public specialization and analyzer the shared document names, or null. */
+              specId: z.enum(SPEC_IDS).nullable().optional(),
+              analyzerId: z.string().min(1).nullable().optional(),
+            })
+            .strict(),
         })
         .strict(),
       z
@@ -1633,7 +1668,46 @@ export const ASSERTION_KINDS = {
           document: z.literal("RAID_NIGHT"),
           fightIds: z.array(z.number().int()).min(1),
           subject: z.object({ actorId: z.number().int() }).strict(),
-          expected: z.object({ analyzedCells: z.number().int().nonnegative() }).strict(),
+          /**
+           * M10-D: a roster over the case's OWN artifact, served as one core
+           * with no fan-out and no relabelling. Absent, the D2 fan-out
+           * fixture is used and the artifact must be the D2 corpus.
+           */
+          composition: z
+            .object({
+              participants: z
+                .array(
+                  z
+                    .object({
+                      sourceId: z.number().int(),
+                      className: z.string().min(1),
+                      specName: z.string().min(1),
+                      absent: z.boolean(),
+                    })
+                    .strict(),
+                )
+                .min(1),
+            })
+            .strict()
+            .optional(),
+          expected: z
+            .object({
+              analyzedCells: z.number().int().nonnegative(),
+              /** Every cell, by player: its kind and, for NOT_ANALYZED, its status. */
+              cells: z
+                .array(
+                  z
+                    .object({
+                      sourceId: z.number().int(),
+                      kind: z.enum(["ABSENT", "ANALYZED", "NOT_ANALYZED", "ANALYSIS_UNAVAILABLE"]),
+                      status: z.string().min(1).optional(),
+                      specId: z.enum(SPEC_IDS).optional(),
+                    })
+                    .strict(),
+                )
+                .optional(),
+            })
+            .strict(),
         })
         .strict(),
       z

@@ -5148,12 +5148,59 @@ Rules the tests pin:
 - Specialization payloads stay spec-owned; shared projectors read the view the
   registration supplies.
 
-M10-B captures bounded Protection Paladin evidence and adds the shared-state
-foundations it needs (for example a `HOLY_POWER` wire contract). M10-C builds
-the internal evaluator under `src/specs/paladin/protection/`. M10-D moves the
-id into the public partition, the identity table and a `PUBLIC` registration
-together, replaces Protection Paladin in the unsupported-path tests with a
-still-unsupported specialization, and adds corpus proof.
+M10-B captured bounded Protection Paladin evidence and added the shared-state
+foundations it needs (for example a `HOLY_POWER` wire contract). M10-C built
+the internal evaluator under `src/specs/paladin/protection/`.
+
+## M10-D — public integration
+
+M10-D moved `paladin/protection` public. The move is one reviewed edit to
+FIVE sites the compiler and the registry require to agree: the public spec
+partition (`src/findings/spec-id.ts`), the public contract's own `specId`
+enum (`src/contracts/analysis-contract.ts`), the identity table
+(`src/services/spec-identity.ts`), the `satisfies` on
+`src/specs/paladin/protection/spec.ts`, and the registration's exposure.
+Moving any one alone fails at compile time or at catalog validation.
+
+Rules the tests pin:
+
+- Both known specializations are PUBLIC; `INTERNAL_ONLY_SPEC_IDS` is EMPTY.
+  The internal-only partition, `requirePublicSpecId`,
+  `InternalSpecExposureError` and the registry's exposure rules are retained
+  as dormant architecture for the next specialization, and the emptiness is
+  pinned explicitly rather than left to look accidental.
+- An injected catalog must carry every public registration, exactly as the
+  production catalog must; a test that observes or replaces one row builds the
+  whole catalog (`tests/support/catalog.ts`). A catalog missing a public row
+  is refused as INTERNAL_ERROR, never served from the rows that survived.
+- Schema `warcraft-logs-coach.analysis/1` is unchanged. Widening the public
+  `specId` enum is how supported specializations arrive; no field, meaning or
+  discriminant changed and no previously issued document changed.
+- The Protection view applies ONE transformation: `MELEE_SWING →
+  NON_GCD_ACTION` per excluded cast and in the coverage tally (rows sharing a
+  public reason merge; the sum still equals `excludedCastCount`). Every other
+  vocabulary the payload publishes is a shared one already pinned equal to the
+  public enum. Raw blockers, domain results, Holy Power observations, build
+  resolution and resolver diagnostics stay inside the payload.
+- Public `detail` strings are author-written and fixed; no resolution-outcome
+  constant is interpolated into them.
+- The canonical UNSUPPORTED specialization is Warrior/Arms, A7R6 fight 7
+  actor 4, machine-pinned from the committed fight-context artifact. Every
+  unsupported-path proof (identity, service refusal, projection, REST, MCP,
+  parity, raid night, corpus) names it; the identity/evidence pairing
+  `Paladin/Protection` over Rogue events is never used, because it would
+  dispatch a real analyzer over another class's evidence.
+- A mixed raid night over the real A7R6 opener slice (Protection ANALYZED,
+  Assassination PROFILE_NOT_RESOLVED because the slice holds none of its
+  evidence, Arms SPEC_NOT_SUPPORTED, an absent player) proves one roster
+  query, one ingestion, one revision check, each analyzer once, and that
+  encounter/comparison context leaves the Protection cell untouched.
+- Corpus-only concepts (bundles, declared holes, evaluation windows) never
+  appear under `src/`; a static guard pins it.
+- Public wording (tool descriptions, this document, the Protection README)
+  states the offensive-GCD-only scope and the excluded domains positively, and
+  claims no optimization, correctness, mitigation, survival, healing or
+  interrupt evaluation.
 
 ---
 

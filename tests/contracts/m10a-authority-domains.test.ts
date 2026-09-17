@@ -27,7 +27,7 @@ import {
   ASSASSINATION_OFFENSIVE_AUTHORITY,
   ASSASSINATION_REGISTRATION,
 } from "../../src/specs/rogue/assassination/registration.js";
-import { internalFixtureRegistration } from "../support/internal-fixture-registration.js";
+import { fixtureRegistration } from "../support/fixture-registration.js";
 
 function defectsOf(catalog: readonly AnalyzerRegistration[]): readonly string[] {
   const validation = validateAnalyzerCatalog(catalog);
@@ -129,7 +129,7 @@ describe("the registry checks a binding against its artifact", () => {
   it("no other specialization can register Assassination's binding as its own", () => {
     // The Rogue artifact bound by a Paladin registration: the artifact's
     // specialization disagrees with the registration's, and the catalog refuses.
-    const borrowed = internalFixtureRegistration({
+    const borrowed = fixtureRegistration({
       capabilities: [
         {
           capabilityId: "borrowed-rotation",
@@ -150,7 +150,7 @@ describe("the registry checks a binding against its artifact", () => {
   });
 
   it("a SimulationCraft APL bound to a defensive domain fails as provider/domain incompatibility", () => {
-    const laundered = internalFixtureRegistration({
+    const laundered = fixtureRegistration({
       authorityBindings: [{ ...ASSASSINATION_OFFENSIVE_AUTHORITY, domain: "ACTIVE_MITIGATION" }],
     });
     const defects = defectsOf([ASSASSINATION_REGISTRATION, laundered]).join("\n");
@@ -158,7 +158,7 @@ describe("the registry checks a binding against its artifact", () => {
   });
 
   it("a binding for a domain no capability declares is an orphan", () => {
-    const orphan = internalFixtureRegistration({
+    const orphan = fixtureRegistration({
       authorityBindings: [{ ...ASSASSINATION_OFFENSIVE_AUTHORITY, domain: "OFFENSIVE_ROTATION" }],
     });
     // The fixture declares ACTIVE_MITIGATION only, so OFFENSIVE_ROTATION is unowned here.
@@ -196,7 +196,7 @@ describe("no-authority outcomes are typed, distinct, and not evidence UNKNOWN", 
   });
 
   it("the fixture's declared tank domain resolves to no pinned authority, truthfully", () => {
-    const fixture = internalFixtureRegistration();
+    const fixture = fixtureRegistration();
     expect(fixture.authority.forDomain("ACTIVE_MITIGATION").outcome).toBe("NO_PINNED_AUTHORITY_FOR_DOMAIN");
     // And it cannot see Assassination's binding through its own access object.
     expect(fixture.authority.forDomain("OFFENSIVE_ROTATION").outcome).toBe("DOMAIN_NOT_DECLARED");

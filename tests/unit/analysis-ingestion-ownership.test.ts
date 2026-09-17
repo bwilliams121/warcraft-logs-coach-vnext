@@ -19,13 +19,14 @@
  *   RESOURCE BLEED     one analyzer's resource needs become every analyzer's,
  *                      in either direction.
  *
- * THE FAKE IS NOT A GAMEPLAY ANALYZER. It never runs — it exists only to sit in
- * the registry unselected, and its `analyze` throws to prove it stayed there.
- *
- * Since M10-A the fake is the shared internal-only fixture registration under
- * the `paladin/protection` id (`tests/support/internal-fixture-registration.ts`),
- * which is exactly the shape a second specialization will take in the catalog
- * before it is public: known internally, registered, and invisible to dispatch.
+ * THE UNRELATED ANALYZER NEVER RUNS. Since M10-D it is the REAL public
+ * Protection Paladin registration, WIDENED for this file only: its
+ * declarations are rewritten to the opposite of Assassination's on both axes
+ * (`FULL_RAID`, no resources) and its `analyze` is replaced by one that
+ * throws, so reaching it would surface as a failure rather than as a quietly
+ * wrong result. The catalog is complete — both public rows are present, as
+ * the registry requires — and the only question is whether the row that was
+ * NOT selected for a Rogue request can influence what that request retrieves.
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -37,7 +38,7 @@ import type { Env } from "../../src/config/env.js";
 import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
 import { M5D2_ACTOR, m5d2Fight } from "../support/m5d2-fixture.js";
 import { analyzedAssassinationOf } from "../support/assassination-analysis.js";
-import { internalFixtureRegistration } from "../support/internal-fixture-registration.js";
+import { productionRegistrationFor } from "../support/catalog.js";
 
 const ENV: Env = {
   ENVIRONMENT: "test",
@@ -111,10 +112,27 @@ function assassinationDeclaring(
 /**
  * A registration that must never be selected for this request.
  *
- * Its requirement is deliberately the opposite of Assassination's on both axes,
- * so either kind of bleed changes the observed ingestion request.
+ * The real Protection Paladin row with its capability requirements rewritten
+ * to the opposite of Assassination's on both axes, so either kind of bleed
+ * changes the observed ingestion request — and a facade that throws, so
+ * running it cannot go unnoticed.
  */
-const UNRELATED_ANALYZER: RegisteredAnalyzer = internalFixtureRegistration();
+const UNRELATED_ANALYZER: RegisteredAnalyzer = (() => {
+  const protection = productionRegistrationFor("paladin/protection");
+  return {
+    ...protection,
+    capabilities: protection.capabilities.map((capability) => ({
+      ...capability,
+      requirements: { ...capability.requirements, scope: "FULL_RAID" as const, resources: [] },
+    })),
+    analyze: () => {
+      throw new Error("the unrelated Protection registration must never run for a Rogue request");
+    },
+  };
+})();
+
+/** The production Protection row, unmodified: the catalog as deployed. */
+const PRODUCTION_PROTECTION: RegisteredAnalyzer = productionRegistrationFor("paladin/protection");
 
 function deps(registry: readonly RegisteredAnalyzer[], ingest: CombatIngestionPort): AnalysisServiceDeps {
   return { env: ENV, preflight: PREFLIGHT, ingest, registry };
@@ -144,15 +162,17 @@ describe("an unselected analyzer has no influence on this request", () => {
     expect(first.mock.calls[0]?.[0].scope).toBe("PLAYER_CONTEXT");
   });
 
-  it("produces the identical request with and without the unrelated analyzer", async () => {
-    // The sharpest form: the extra registration must change nothing at all.
-    const alone = vi.fn(FIXTURE_INGEST);
-    const alongside = vi.fn(FIXTURE_INGEST);
+  it("produces the identical request whether the other registration is widened or not", async () => {
+    // The sharpest form: rewriting the OTHER registration's declarations must
+    // change nothing about this request at all.
+    const production = vi.fn(FIXTURE_INGEST);
+    const widened = vi.fn(FIXTURE_INGEST);
 
-    await analyzeFight(REQUEST, deps([assassination()], alone));
-    await analyzeFight(REQUEST, deps([assassination(), UNRELATED_ANALYZER], alongside));
+    await analyzeFight(REQUEST, deps([assassination(), PRODUCTION_PROTECTION], production));
+    await analyzeFight(REQUEST, deps([assassination(), UNRELATED_ANALYZER], widened));
 
-    expect(alongside.mock.calls[0]?.[0]).toEqual(alone.mock.calls[0]?.[0]);
+    expect(widened.mock.calls[0]?.[0]).toEqual(production.mock.calls[0]?.[0]);
+    expect(production.mock.calls[0]?.[0]).toMatchObject({ scope: "PLAYER_CONTEXT", includeResources: true });
   });
 
   it("never runs the unselected analyzer", async () => {
@@ -186,7 +206,7 @@ describe("an unselected analyzer has no influence on this request", () => {
 describe("resource inclusion is declared by the analyzer, not by the service", () => {
   it("retrieves resources because Assassination's registration asks for them", async () => {
     const ingest = vi.fn(FIXTURE_INGEST);
-    await analyzeFight(REQUEST, deps([assassination()], ingest));
+    await analyzeFight(REQUEST, deps([assassination(), PRODUCTION_PROTECTION], ingest));
 
     expect(assassination().requirement.includeResources).toBe(true);
     expect(ingest.mock.calls[0]?.[0].includeResources).toBe(true);
@@ -199,7 +219,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
     const ingest = vi.fn(FIXTURE_INGEST);
     const frugal = assassinationDeclaring({ resources: [] });
 
-    await analyzeFight(REQUEST, deps([frugal], ingest));
+    await analyzeFight(REQUEST, deps([frugal, PRODUCTION_PROTECTION], ingest));
 
     expect(ingest.mock.calls[0]?.[0].includeResources).toBe(false);
   });
@@ -212,7 +232,10 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
     for (const includeResources of [true, false, true]) {
       const ingest = vi.fn(FIXTURE_INGEST);
       const resources = includeResources ? assassination().capabilities[0]?.requirements.resources : [];
-      await analyzeFight(REQUEST, deps([assassinationDeclaring({ resources: resources ?? [] })], ingest));
+      await analyzeFight(
+        REQUEST,
+        deps([assassinationDeclaring({ resources: resources ?? [] }), PRODUCTION_PROTECTION], ingest),
+      );
       observed.push(ingest.mock.calls[0]?.[0].includeResources ?? !includeResources);
     }
 
@@ -222,7 +245,10 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
   it("carries scope from the requirement too", async () => {
     // The same ownership rule on the other axis, driven the same way.
     const ingest = vi.fn(FIXTURE_INGEST);
-    await analyzeFight(REQUEST, deps([assassinationDeclaring({ scope: "FULL_RAID" })], ingest));
+    await analyzeFight(
+      REQUEST,
+      deps([assassinationDeclaring({ scope: "FULL_RAID" }), PRODUCTION_PROTECTION], ingest),
+    );
 
     expect(ingest.mock.calls[0]?.[0].scope).toBe("FULL_RAID");
   });

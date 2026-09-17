@@ -43,9 +43,13 @@ describe("the committed corpus loads", () => {
     // M10-C5 Phase A added the 45-second rotational slice, its predeclared
     // gap derivative and seven cases; M10-C5 Phase B2 added the four measured
     // steady-state segments and twelve cases (four normalization, two bundle
-    // compositions, six evaluator). Measured, then pinned.
+    // compositions, six evaluator); M10-D added no artifact and three cases
+    // (the Arms Warrior through the service and both transports over the
+    // opener slice, and the mixed roster raid night over the same slice),
+    // and repurposed four cases whose premise — Protection internal-only —
+    // ended. Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(34);
-    expect(loaded.cases).toHaveLength(109);
+    expect(loaded.cases).toHaveLength(112);
     expect(loaded.coverage.declared).toBe(0);
   });
 

@@ -89,6 +89,16 @@ function identityFrom(
 }
 
 export interface RunnerOptions {
+  /**
+   * The identity preflight reports. Defaults to Rogue/Assassination, the
+   * subject the fixture fight actually describes.
+   *
+   * ONLY PAIR AN UNSUPPORTED IDENTITY WITH THIS FIXTURE. The fight is the
+   * Rogue's; a supported identity other than the Rogue's (Paladin/Protection
+   * since M10-D) would dispatch a real analyzer over another class's events,
+   * which is an identity/evidence mismatch and not a transport test. The
+   * canonical unsupported identity is Warrior/Arms (A7R6 fight 7, actor 4).
+   */
   readonly className?: string;
   readonly specName?: string;
   /** Swap the fixture so a test can reach the M5-A rejection corpus. */

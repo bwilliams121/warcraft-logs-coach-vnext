@@ -33,6 +33,7 @@ import { deriveIngestionScope } from "../../src/services/ingestion-scope.js";
 import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import type { Env } from "../../src/config/env.js";
 import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
+import { productionCatalogWith } from "../support/catalog.js";
 import { M5D2_ACTOR, m5d2Fight } from "../support/m5d2-fixture.js";
 
 const ENV: Env = {
@@ -187,7 +188,7 @@ describe("the analyzer is invoked exactly once, through its facade", () => {
     const analyze = vi.fn(real.analyze);
     const spied: RegisteredAnalyzer = { ...real, analyze };
 
-    await analyzeFight(REQUEST, deps({ registry: [spied] }));
+    await analyzeFight(REQUEST, deps({ registry: productionCatalogWith(spied) }));
 
     expect(analyze).toHaveBeenCalledTimes(1);
   });
@@ -197,7 +198,7 @@ describe("the analyzer is invoked exactly once, through its facade", () => {
     if (real === null) throw new Error("the Assassination analyzer is not registered");
     const analyze = vi.fn(real.analyze);
 
-    await analyzeFight(REQUEST, deps({ registry: [{ ...real, analyze }] }));
+    await analyzeFight(REQUEST, deps({ registry: productionCatalogWith({ ...real, analyze }) }));
 
     const input = analyze.mock.calls[0]?.[0];
     expect(input?.specId).toBe("rogue/assassination");
@@ -224,9 +225,16 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
     // A different question from "what should THIS request retrieve". It
     // describes what the deployment supports, and the service is deliberately
     // not given it.
+    // Two public analyzers since M10-D, each deriving the same requirement
+    // from its own capabilities.
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.requirement)).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
+      },
+      {
+        analyzerId: "paladin-protection-observed-decisions",
         requiredScope: "PLAYER_CONTEXT",
         includeResources: true,
       },

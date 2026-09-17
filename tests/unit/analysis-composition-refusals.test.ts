@@ -22,6 +22,7 @@ import { analyzedAssassinationOf } from "../support/assassination-analysis.js";
 import { analyzeFight, type AnalysisServiceDeps } from "../../src/services/analysis-service.js";
 import { analyzerForSpec } from "../../src/services/analyzer-registry.js";
 import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
+import { productionCatalogWith } from "../support/catalog.js";
 import type { Env } from "../../src/config/env.js";
 import { wclFailure, type FightIdentity, type PreflightPort } from "../../src/wcl/types.js";
 import { M5D2_ACTOR, m5d2Fight } from "../support/m5d2-fixture.js";
@@ -67,7 +68,13 @@ const FIXTURE_INGEST: CombatIngestionPort = async () => ({
   rateLimit: undefined,
 });
 
-/** A preflight, an ingestor and an analyzer, each individually observable. */
+/**
+ * A preflight, an ingestor and the Assassination analyzer, each individually
+ * observable. The injected catalog is the COMPLETE production catalog with
+ * the Assassination row wrapped (`productionCatalogWith`): since M10-D a
+ * catalog carrying only Assassination is an incomplete dispatch table the
+ * service refuses, not a way to observe one analyzer.
+ */
 function spies(className = "Rogue", specName = "Assassination") {
   const real = analyzerForSpec("rogue/assassination");
   if (real === null) throw new Error("the Assassination analyzer is not registered");
@@ -84,7 +91,7 @@ function spies(className = "Rogue", specName = "Assassination") {
     env: ENV,
     preflight,
     ingest,
-    registry: [{ ...real, analyze }],
+    registry: productionCatalogWith({ ...real, analyze }),
   };
   return { preflight, ingest, analyze, deps };
 }
@@ -93,7 +100,7 @@ describe("an unsupported specialization", () => {
   it("reports SPEC_NOT_SUPPORTED as a successful result", async () => {
     // Success, not an error. The service did its job and answered truthfully.
     // Returning a failure would push callers toward retrying a correct answer.
-    const { deps } = spies("Paladin", "Protection");
+    const { deps } = spies("Warrior", "Arms");
     const result = await analyzeFight(REQUEST, deps);
 
     expect(result.ok).toBe(true);
@@ -105,7 +112,7 @@ describe("an unsupported specialization", () => {
   it("never runs the Assassination analyzer", async () => {
     // THE failure this guards: Rogue rules applied to someone else's fight,
     // producing a confident, well-formed report about the wrong game.
-    const { analyze, deps } = spies("Paladin", "Protection");
+    const { analyze, deps } = spies("Warrior", "Arms");
     await analyzeFight(REQUEST, deps);
 
     expect(analyze).not.toHaveBeenCalled();
@@ -114,14 +121,14 @@ describe("an unsupported specialization", () => {
   it("retrieves no combat events at all", async () => {
     // The spec is fully determined by M2 identity, so paginating a whole log to
     // report that we were never going to analyze it would be pure waste.
-    const { ingest, deps } = spies("Paladin", "Protection");
+    const { ingest, deps } = spies("Warrior", "Arms");
     await analyzeFight(REQUEST, deps);
 
     expect(ingest).not.toHaveBeenCalled();
   });
 
   it("names no supported spec and claims no analyzer", async () => {
-    const { deps } = spies("Paladin", "Protection");
+    const { deps } = spies("Warrior", "Arms");
     const result = await analyzeFight(REQUEST, deps);
 
     expect(result.ok).toBe(true);
@@ -134,7 +141,7 @@ describe("an unsupported specialization", () => {
   it("says out loud that no analysis was attempted", async () => {
     // An empty result that reads as clean play is the disclosure failure this
     // detail exists to prevent.
-    const { deps } = spies("Paladin", "Protection");
+    const { deps } = spies("Warrior", "Arms");
     const result = await analyzeFight(REQUEST, deps);
 
     expect(result.ok).toBe(true);
@@ -146,7 +153,7 @@ describe("an unsupported specialization", () => {
   });
 
   it("carries no comparisons or coverage a reader could mistake for findings", async () => {
-    const { deps } = spies("Paladin", "Protection");
+    const { deps } = spies("Warrior", "Arms");
     const result = await analyzeFight(REQUEST, deps);
 
     expect(result.ok).toBe(true);
@@ -155,12 +162,16 @@ describe("an unsupported specialization", () => {
     expect("coverage" in result.analysis.analysis).toBe(false);
   });
 
-  it("refuses every non-Assassination specialization the same way", async () => {
+  it("refuses every unsupported specialization the same way", async () => {
+    // Warrior/Arms is the canonical captured unsupported identity (A7R6 fight 7,
+    // actor 4); the others are stated names. Paladin/Protection is NOT in this
+    // list: it has been supported since M10-D.
     for (const [className, specName] of [
       ["Rogue", "Outlaw"],
       ["Rogue", "Subtlety"],
       ["Evoker", "Augmentation"],
-      ["Paladin", "Protection"],
+      ["Warrior", "Arms"],
+      ["Paladin", "Retribution"],
       ["Priest", "Discipline"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);
@@ -207,7 +218,7 @@ describe("an unusable identity", () => {
     // other is a coverage limit. Collapsing them would hide a broken upstream
     // behind a routine "we don't support that spec".
     const blank = await analyzeFight(REQUEST, spies("   ", "Assassination").deps);
-    const unsupported = await analyzeFight(REQUEST, spies("Paladin", "Protection").deps);
+    const unsupported = await analyzeFight(REQUEST, spies("Warrior", "Arms").deps);
 
     expect(blank.ok).toBe(false);
     expect(unsupported.ok).toBe(true);

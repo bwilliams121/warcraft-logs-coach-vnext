@@ -1,13 +1,24 @@
 # Protection Paladin — internal observed-decision evaluator (M10-C)
 
-**Exposure: `INTERNAL_ONLY`.** This evaluator is registered in the production
-catalog (`paladin-protection-observed-decisions`, `paladin/protection`) and
-is reachable only by `internalAnalyzerForSpec`, the corpus executor and
-tests. The application service, raid-night orchestration, REST and MCP select
-from the PUBLIC subset only; `paladin/protection` is not in `PUBLIC_SPEC_IDS`,
-not in `SUPPORTED_SPEC_IDENTITIES`, and an analyzed result of this evaluator
-throws `InternalSpecExposureError` at every public projector. Public
-Protection Paladin analysis remains `SPEC_NOT_SUPPORTED`.
+**Exposure: `PUBLIC` (since M10-D).** This evaluator is registered in the
+production catalog (`paladin-protection-observed-decisions`,
+`paladin/protection`) and is selected by the application service, raid-night
+orchestration, REST and MCP for a resolved `Paladin/Protection` identity.
+`paladin/protection` is in `PUBLIC_SPEC_IDS`, in the public contract's
+`specId` enum and in `SUPPORTED_SPEC_IDENTITIES`; the registry validates that
+the three agree. From M10-C to M10-D it was `INTERNAL_ONLY`.
+
+**What the public document says, and does not.** Only the registration's view
+(`registration.ts`) is projected: the comparisons, the excluded casts and the
+coverage block, with the ONE transformation `MELEE_SWING → NON_GCD_ACTION`
+applied per cast and in the tally. The six domain results, the Holy Power
+observations, the build resolution and the resolver diagnostics stay inside
+the payload. Public analysis therefore compares observed OFFENSIVE
+global-cooldown decisions against the pinned authority and nothing else: it
+does not evaluate defensive cooldowns, active mitigation, self-healing,
+interrupts or survival, and off-GCD actions such as Shield of the Righteous
+are excluded, not judged. `MATCH` is authority-compatible only; `UNKNOWN`
+means the evidence cannot establish the result, never that a mistake was made.
 
 ## What it answers
 

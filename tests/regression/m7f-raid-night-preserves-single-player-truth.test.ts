@@ -70,6 +70,7 @@ import {
   type SpecAnalysisInput,
 } from "../../src/services/analyzer-registry.js";
 import { analyzedAssassination } from "../support/assassination-analysis.js";
+import { productionCatalogWith } from "../support/catalog.js";
 import type { PlayerFightResult } from "../../src/aggregation/cell.js";
 import { identityFor } from "../support/aggregation-fixture.js";
 import {
@@ -97,26 +98,26 @@ interface Observation {
 }
 
 function recordingRegistry(into: Observation[]): readonly RegisteredAnalyzer[] {
-  const registered = ENABLED_ANALYZERS[0];
-  if (registered === undefined) throw new Error("no analyzer is registered");
-  return [
-    {
-      ...registered,
-      analyze: (input: SpecAnalysisInput): SpecAnalysis => {
-        // The REAL analyzer runs. This wrapper observes and returns its result
-        // untouched — a wrapper that substituted anything would make the
-        // comparison below meaningless.
-        const analysis = registered.analyze(input);
-        into.push({
-          actorId: input.actorId,
-          specId: input.specId,
-          targetActorId: input.targetActorId,
-          analysis,
-        });
-        return analysis;
-      },
+  const registered = ENABLED_ANALYZERS.find((analyzer) => analyzer.specId === "rogue/assassination");
+  if (registered === undefined) throw new Error("the Assassination analyzer is not registered");
+  // The COMPLETE production catalog with the Assassination row wrapped
+  // (M10-D): an injected catalog must carry every public registration.
+  return productionCatalogWith({
+    ...registered,
+    analyze: (input: SpecAnalysisInput): SpecAnalysis => {
+      // The REAL analyzer runs. This wrapper observes and returns its result
+      // untouched — a wrapper that substituted anything would make the
+      // comparison below meaningless.
+      const analysis = registered.analyze(input);
+      into.push({
+        actorId: input.actorId,
+        specId: input.specId,
+        targetActorId: input.targetActorId,
+        analysis,
+      });
+      return analysis;
     },
-  ];
+  });
 }
 
 /**

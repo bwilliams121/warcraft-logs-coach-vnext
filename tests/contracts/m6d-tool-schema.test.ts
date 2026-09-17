@@ -48,8 +48,26 @@ describe("the description carries the epistemic boundary", () => {
   const required: readonly { readonly claim: string; readonly phrase: string }[] = [
     { claim: "verifies decisions already made", phrase: "ACTUALLY MADE" },
     { claim: "compares against pinned SimulationCraft", phrase: "SimulationCraft action priority list" },
-    { claim: "only one spec is supported", phrase: "Only Assassination Rogue is currently supported" },
+    {
+      claim: "exactly the two supported specs are named",
+      phrase: "Supported specializations: Assassination Rogue and Protection Paladin",
+    },
     { claim: "unsupported is not clean play", phrase: "not evidence of clean play" },
+    // Protection Paladin's public limits (M10-D), stated positively and exactly.
+    {
+      claim: "Protection compares offensive GCD decisions only",
+      phrase: "compares only observed OFFENSIVE global-cooldown decisions against",
+    },
+    {
+      claim: "Protection does not evaluate defensive play",
+      phrase: "does NOT evaluate defensive cooldowns, active mitigation, self-healing,",
+    },
+    { claim: "nor interrupts or survival", phrase: "interrupts, or survival" },
+    {
+      claim: "off-GCD actions are excluded, not judged",
+      phrase: "Off-global-cooldown actions such as Shield of the Righteous are excluded,",
+    },
+    { claim: "UNKNOWN is not a mistake", phrase: "not that a mistake was made" },
     { claim: "the three outcomes", phrase: "MATCH, REJECTED or UNKNOWN" },
     { claim: "MATCH is authority-compatible only", phrase: "MATCH means authority-compatible only" },
     {

@@ -67,7 +67,10 @@ export const PUBLIC_ANALYSIS_SCHEMA_VERSION = "warcraft-logs-coach.analysis/1";
  * reach this enum by being added to `SpecId`: it reaches it only by a reviewed
  * move into the public partition, and the compile fails until the two agree.
  */
-export const PUBLIC_SPEC_IDS = ["rogue/assassination"] as const satisfies readonly SpecId[];
+export const PUBLIC_SPEC_IDS = [
+  "rogue/assassination",
+  "paladin/protection",
+] as const satisfies readonly SpecId[];
 
 type ListedSpecId = (typeof PUBLIC_SPEC_IDS)[number];
 /** Compile-time guard: fails when a PUBLIC `SpecId` exists that this contract does not list. */
@@ -232,11 +235,19 @@ export const IdentitySchema = z
  * Which specialization the engine RECOGNIZED, as opposed to what Warcraft Logs
  * reported.
  *
- * These are different questions and the split is load-bearing. A Protection
- * Paladin has a perfectly good factual identity in `identity.player`, and
+ * These are different questions and the split is load-bearing. An Arms
+ * Warrior has a perfectly good factual identity in `identity.player`, and
  * `specId: null` here — because this build has no internal name for that
- * specialization. Inventing `paladin/protection` to fill the gap would claim
+ * specialization. Inventing `warrior/arms` to fill the gap would claim
  * recognition the engine does not have.
+ *
+ * WIDENING THIS ENUM IS NOT A SCHEMA VERSION CHANGE. `paladin/protection`
+ * joined it in M10-D under `analysis/1`: the shape is unchanged, the meaning
+ * of both fields is unchanged, the `status` discriminant is unchanged, and no
+ * document a consumer had already received changes — the only documents that
+ * differ are those of the newly supported specialization, which previously
+ * carried `SPEC_NOT_SUPPORTED`. The versioning rule above forbids NARROWING
+ * an enum; growing this one is how supported specializations arrive.
  */
 export const SpecializationSchema = z
   .object({

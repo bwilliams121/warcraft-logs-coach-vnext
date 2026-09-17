@@ -25,7 +25,7 @@
  *     Workers Paid CPU, default     30 seconds
  *     Workers Paid CPU, max         5 minutes (configurable)
  *
- * `wrangler.jsonc` requests no CPU override, so the default applies. Those are
+ * `wrangler.jsonc` sets `limits.cpu_ms` to 120,000 (M10-C4). Those are
  * PLATFORM numbers sitting beside a NODE measurement; comparing them directly
  * would be the error this comment exists to prevent. A heap delta measured here
  * does not prove anything fits there.

@@ -31,15 +31,35 @@ function outcome(className: string, specName: string): string {
   return result.ok ? result.specId : result.reason;
 }
 
-describe("the supported identity", () => {
+describe("the supported identities", () => {
   it("maps Rogue/Assassination to the Assassination spec id", () => {
     expect(outcome("Rogue", "Assassination")).toBe("rogue/assassination");
   });
 
-  it("recognizes exactly one specialization", () => {
+  it("maps Paladin/Protection to the Protection spec id (public since M10-D)", () => {
+    expect(outcome("Paladin", "Protection")).toBe("paladin/protection");
+    // The same normalization as Assassination: casing and surrounding
+    // whitespace only.
+    expect(outcome("paladin", "protection")).toBe("paladin/protection");
+    expect(outcome("  Paladin ", " Protection")).toBe("paladin/protection");
+    expect(outcome("PALADIN", "PROTECTION")).toBe("paladin/protection");
+  });
+
+  it("recognizes exactly two specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
-    expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual(["rogue/assassination"]);
+    expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual(["rogue/assassination", "paladin/protection"]);
+  });
+
+  it("does not let one Paladin specialization stand for another", () => {
+    // Same class, different spec: a Retribution or Holy Paladin is not a
+    // Protection Paladin, and there is no nearest-match.
+    expect(outcome("Paladin", "Retribution")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Paladin", "Holy")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Paladin", "Protection ")).toBe("paladin/protection");
+    expect(outcome("Paladin", "Protectionn")).toBe("UNSUPPORTED_SPECIALIZATION");
+    // Right spec name, wrong class: a Protection Warrior is not a Paladin.
+    expect(outcome("Warrior", "Protection")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
   it("maps the id to itself, never to a different spec", () => {
@@ -102,17 +122,20 @@ describe("nothing missing resolves", () => {
   it("keeps an unusable identity distinct from an unsupported one", () => {
     // One is a data problem, the other a coverage limit. They need different
     // remedies, so they must not share a reason.
-    expect(outcome("", "Assassination")).not.toBe(outcome("Paladin", "Protection"));
+    expect(outcome("", "Assassination")).not.toBe(outcome("Warrior", "Arms"));
   });
 });
 
-describe("no unsupported identity falls through to Assassination", () => {
+describe("no unsupported identity falls through to a supported specialization", () => {
   const unsupported: readonly (readonly [string, string])[] = [
     // The other two Rogue specs — the nearest misses, sharing a class.
     ["Rogue", "Outlaw"],
     ["Rogue", "Subtlety"],
-    // The spec named for a later milestone. It must not work early.
-    ["Paladin", "Protection"],
+    // The other Paladin specs — the same nearest miss for the second spec.
+    ["Paladin", "Retribution"],
+    ["Paladin", "Holy"],
+    // The canonical captured unsupported identity: A7R6 fight 7, actor 4.
+    ["Warrior", "Arms"],
     // Other real specs.
     ["Evoker", "Augmentation"],
     ["Priest", "Discipline"],
@@ -121,6 +144,8 @@ describe("no unsupported identity falls through to Assassination", () => {
     // Right spec, wrong class.
     ["Paladin", "Assassination"],
     ["Mage", "Assassination"],
+    ["Warrior", "Protection"],
+    ["Rogue", "Protection"],
     // Right class, no spec that exists.
     ["Rogue", "Assassinationn"],
     ["Rogue", "Assassin"],
@@ -134,7 +159,7 @@ describe("no unsupported identity falls through to Assassination", () => {
     });
   }
 
-  it("never returns the supported id for any of them", () => {
+  it("never returns a supported id for any of them", () => {
     for (const [className, specName] of unsupported) {
       const result = resolve(className, specName);
       expect(`${className}/${specName}:${result.ok}`).toBe(`${className}/${specName}:false`);
@@ -196,17 +221,17 @@ describe("prototype keys cannot masquerade as a specialization", () => {
 
 describe("a refusal discloses what it saw", () => {
   it("reports the normalized pair that failed", () => {
-    const result = resolve("  Paladin ", "Protection");
+    const result = resolve("  Warrior ", "Arms");
 
     expect(result.ok).toBe(false);
     if (result.ok) return;
-    expect(result.observed).toEqual({ className: "paladin", specName: "protection" });
+    expect(result.observed).toEqual({ className: "warrior", specName: "arms" });
   });
 
   it("carries no spec id on the failure branch", () => {
     // Structural: there is no variant returning a usable id alongside a
     // failure, so a caller cannot read one out of a refusal.
-    const result = resolve("Paladin", "Protection");
+    const result = resolve("Warrior", "Arms");
 
     expect("specId" in result).toBe(false);
   });

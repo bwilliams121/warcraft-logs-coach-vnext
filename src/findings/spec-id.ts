@@ -11,7 +11,9 @@
  * correct while there was one specialization, and it is exactly wrong for a
  * second one being built behind the public surface: the internal name must
  * exist so the architecture can be exercised, and it must NOT be publishable
- * until its evaluator is real, registered and activated.
+ * until its evaluator is real, registered and activated. Protection Paladin
+ * lived in the internal-only half from M10-A through M10-C and moved to the
+ * public half in M10-D.
  *
  * So the vocabulary is partitioned, and the partition is checked twice:
  *
@@ -23,11 +25,17 @@
  * WHAT `INTERNAL_ONLY` MEANS, AND WHAT IT DOES NOT
  *
  * An internal-only id is a name the engine may use in registrations, findings
- * and tests. It says nothing about support: Protection Paladin is listed here so
- * the second-spec architecture can be proven against a real id, and it remains
- * `SPEC_NOT_SUPPORTED` on every public path because the identity table
+ * and tests. It says nothing about support: an internal-only specialization
+ * remains `SPEC_NOT_SUPPORTED` on every public path because the identity table
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
+ *
+ * SINCE M10-D THE INTERNAL-ONLY SET IS EMPTY. Both known specializations are
+ * public. The partition, the narrowing boundary and the registry's exposure
+ * rules are retained as DORMANT architecture: the next specialization is
+ * expected to arrive here first, as Protection Paladin did, and the compile
+ * time proofs below hold over an empty set exactly as they held over one
+ * member. Nothing here should be deleted merely because it is unexercised.
  *
  * THE NARROWING BOUNDARY, AND WHY IT THROWS
  *
@@ -49,21 +57,24 @@ export const SPEC_IDS = Object.freeze([
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
-export const PUBLIC_SPEC_IDS = Object.freeze(["rogue/assassination"] as const satisfies readonly SpecId[]);
+export const PUBLIC_SPEC_IDS = Object.freeze([
+  "rogue/assassination",
+  "paladin/protection",
+] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
 
 /**
  * Known internally, never named publicly.
  *
- * Protection Paladin arrives here in M10-A as an ARCHITECTURE PROOF id. It moves
- * to `PUBLIC_SPEC_IDS` only when M10-D activates its analyzer, and that move is
- * a reviewed edit to three places that must agree: this partition, the identity
- * table, and the registration's exposure.
+ * Protection Paladin arrived here in M10-A as an ARCHITECTURE PROOF id and
+ * moved to `PUBLIC_SPEC_IDS` in M10-D, when its analyzer was activated. That
+ * move was one reviewed edit to five places that must agree: this partition,
+ * the public contract's own `specId` enum, the identity table, the
+ * `satisfies` on the specialization's id constant, and the registration's
+ * exposure. The set is EMPTY until the next specialization is built.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
-  "paladin/protection",
-] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

@@ -22,7 +22,9 @@ const ANALYSIS: FightAnalysis = {
   specId: null,
   analyzerId: null,
   scope: null,
-  analysis: specNotSupported("paladin/protection"),
+  // The observed identity of a specialization no analyzer covers (Warrior/Arms
+  // since M10-D made Protection Paladin public). A fixture label only.
+  analysis: specNotSupported("warrior/arms"),
   observedDecisions: null,
 };
 

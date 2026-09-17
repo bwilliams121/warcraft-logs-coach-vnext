@@ -208,7 +208,7 @@ describe("every analysis-domain status is identical across transports", () => {
   it("agrees on SPEC_NOT_SUPPORTED", async () => {
     const body = (await expectTransportsAgree(
       D2_REQUEST,
-      fixtureAnalysisRunner({ className: "Paladin", specName: "Protection" }),
+      fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
     )) as Record<string, unknown>;
 
     expect(body["status"]).toBe("SPEC_NOT_SUPPORTED");

@@ -89,6 +89,37 @@ where marked.
 - Every M9-B evidence gap now carries a disposition in
   `tests/support/corpus/report.ts` and `tests/corpus/report.json`.
 
+## After M10-D: the internal-only partition is dormant
+
+**Raised:** M10-D (2026-09-18).
+
+Both known specializations are PUBLIC and `INTERNAL_ONLY_SPEC_IDS` is empty.
+The partition, `requirePublicSpecId`, `InternalSpecExposureError`, the
+registry's `INTERNAL_ONLY` exposure and `internalAnalyzerForSpec` are kept as
+the on-ramp for the next specialization, which is expected to arrive as an
+internal-only id first, exactly as Protection Paladin did in M10-A. Until
+then `PUBLIC_EXPOSURE_OF_INTERNAL_SPEC` has no reachable subject, and the
+proofs that once used a test-owned internal-only row live on the two real
+registrations (`tests/support/catalog.ts`,
+`tests/regression/m10d-public-second-registration-invariance.test.ts`). The
+milestone that adds the next id must re-prove the internal-only path over its
+real registration before exposing it (the M10-C pattern) — nothing here should
+be deleted on the grounds that it is unexercised.
+
+Two identity/evidence caveats M10-D surfaced, both outside its scope:
+
+- A Warcraft Logs identity naming a supported specialization over another
+  class's events dispatches the real analyzer and yields `ANALYZED` with
+  zero eligible decisions (every cast excluded) or `PROFILE_NOT_RESOLVED`.
+  That was true of Assassination before M10-D and is now two-sided.
+  `IDENTITY_CONFLICT` detection remains M15's; tests and smoke checks must
+  never pair a supported identity with another class's evidence.
+- `agent/deployment-smoke.md` Part II step M8-5 names actor 5 as the
+  Protection Paladin; the committed A7R6 master data has actor 5 as an
+  Evoker (Preservation) and actor 7 as the Protection Paladin, and the step
+  expects consumable categories schema v1 does not carry. Part III supersedes
+  it with actors 7 (Protection) and 4 (Warrior/Arms).
+
 ## After M9-C: evidence the corpus still lacks
 
 **Raised:** M9-C closeout (2026-09-15).

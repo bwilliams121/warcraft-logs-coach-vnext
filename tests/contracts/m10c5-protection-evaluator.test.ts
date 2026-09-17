@@ -19,7 +19,7 @@ import {
 } from "../../src/specs/paladin/protection/observed-analysis.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protection/registration.js";
 import { PROTECTION_PALADIN_SPEC_ID } from "../../src/specs/paladin/protection/spec.js";
-import { requirePublicSpecId, InternalSpecExposureError } from "../../src/findings/spec-id.js";
+import { requirePublicSpecId } from "../../src/findings/spec-id.js";
 import { PUBLIC_SPEC_IDS } from "../../src/findings/spec-id.js";
 
 const OPENER = "wcl-protection-paladin-a7r6-opener";
@@ -282,12 +282,13 @@ describe("the predeclared gap derivative restores UNKNOWN where its anchor was r
   });
 });
 
-describe("Protection remains internal-only", () => {
-  it("the analyzed result still cannot be narrowed to a public spec id, and the public set is unchanged", () => {
+describe("Protection is public since M10-D", () => {
+  it("the analyzed result narrows to the public spec id, and the public set carries both specializations", () => {
     const analysis = analyzeReal(ROTATIONAL);
-    expect(() => requirePublicSpecId(analysis.specId)).toThrow(InternalSpecExposureError);
-    expect(PUBLIC_SPEC_IDS).toEqual(["rogue/assassination"]);
-    expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("INTERNAL_ONLY");
+    // Until M10-D this threw InternalSpecExposureError.
+    expect(requirePublicSpecId(analysis.specId)).toBe("paladin/protection");
+    expect(PUBLIC_SPEC_IDS).toEqual(["rogue/assassination", "paladin/protection"]);
+    expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
   });
 
   it("the facade still refuses a foreign specialization before any Protection rule runs", () => {

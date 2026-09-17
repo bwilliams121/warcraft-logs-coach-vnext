@@ -241,8 +241,8 @@ export async function executeAssertion(
       );
     case "SPEC_PROTECTION_PALADIN.SPEC_GATE":
       return protection.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
-    case "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE":
-      return protection.notPubliclyProjectable(
+    case "SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION":
+      return protection.publicProjection(
         context,
         corpus,
         kase,
@@ -304,7 +304,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
   "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
   "SPEC_PROTECTION_PALADIN.SPEC_GATE",
-  "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
+  "SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION",
   "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
   "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY",
   "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION",

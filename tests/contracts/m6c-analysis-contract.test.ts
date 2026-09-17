@@ -103,8 +103,10 @@ describe("the public vocabularies match the internal ones exactly", () => {
     expect([...PUBLIC_USABILITY_PROVENANCES]).toEqual(["OBSERVED_EXECUTION", "NOT_ESTABLISHED"]);
   });
 
-  it("publishes exactly the supported specialization", () => {
-    expect([...PUBLIC_SPEC_IDS]).toEqual(["rogue/assassination"]);
+  it("publishes exactly the two supported specializations", () => {
+    // Widened in M10-D under analysis/1: growing this enum is how supported
+    // specializations arrive, and narrowing it is what would need a version.
+    expect([...PUBLIC_SPEC_IDS]).toEqual(["rogue/assassination", "paladin/protection"]);
   });
 
   it("keeps outcome and precision as separate vocabularies", () => {
@@ -183,7 +185,7 @@ describe("the schema is strict rather than permissive", () => {
         startTimeMs: 0,
         endTimeMs: 1000,
       },
-      player: { sourceId: 19, name: "Fixtureplayer", className: "Paladin", specName: "Protection" },
+      player: { sourceId: 19, name: "Fixtureplayer", className: "Warrior", specName: "Arms" },
       data: { logVersion: 17, gameVersion: 1 },
     },
     specialization: { specId: null, gameplaySupported: false },
@@ -240,13 +242,25 @@ describe("the schema is strict rather than permissive", () => {
   });
 
   it("rejects a fabricated specialization id", () => {
-    // `paladin/protection` is not a spec this build recognizes. Publishing it
-    // would claim recognition the engine does not have.
+    // `warrior/arms` is not a spec this build recognizes. Publishing it would
+    // claim recognition the engine does not have. (Until M10-D this test used
+    // `paladin/protection`, which the enum now legitimately carries.)
     const fabricated = {
       ...MINIMAL_UNANALYZED,
-      specialization: { specId: "paladin/protection", gameplaySupported: false },
+      specialization: { specId: "warrior/arms", gameplaySupported: false },
     };
     expect(PublicAnalysisResultSchema.safeParse(fabricated).success).toBe(false);
+  });
+
+  it("accepts both public specialization ids and nothing else", () => {
+    for (const specId of ["rogue/assassination", "paladin/protection"]) {
+      const supported = { ...MINIMAL_UNANALYZED, specialization: { specId, gameplaySupported: true } };
+      expect(PublicAnalysisResultSchema.safeParse(supported).success, specId).toBe(true);
+    }
+    for (const specId of ["Paladin/Protection", "paladin/retribution", "warrior/protection", ""]) {
+      const rejected = { ...MINIMAL_UNANALYZED, specialization: { specId, gameplaySupported: false } };
+      expect(PublicAnalysisResultSchema.safeParse(rejected).success, specId).toBe(false);
+    }
   });
 });
 

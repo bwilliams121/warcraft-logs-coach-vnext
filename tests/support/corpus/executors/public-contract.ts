@@ -40,7 +40,12 @@ import type { FightIdentity } from "../../../../src/wcl/types.js";
 import type { ZodType } from "zod";
 import { ALLOWING_LIMITER, MCP_TEST_ENV, authHeaders, workerDepsFor } from "../../analysis-transports.js";
 import { candidateReport } from "../../m8f-fixture.js";
-import { REPORT_CODE, assassinationSnapshot, fakePorts } from "../../raid-night-orchestration-fixture.js";
+import {
+  REPORT_CODE,
+  assassinationSnapshot,
+  corpusArtifactCore,
+  fakePorts,
+} from "../../raid-night-orchestration-fixture.js";
 import { fightOf } from "../fight.js";
 import type { LoadedArtifact, LoadedCorpus } from "../loader.js";
 import { fail, pass, type AssertionOutcome } from "./outcome.js";
@@ -242,11 +247,29 @@ async function analysisParity(
   const violation = parityViolation(surfaces, PublicAnalysisResultSchema);
   if (violation !== null) return violation;
 
-  const document = surfaces.rest.body as { status: string; capability?: { matchMeaning?: string } };
+  const document = surfaces.rest.body as {
+    status: string;
+    capability?: { matchMeaning?: string };
+    specialization?: { specId?: string | null };
+    analyzerId?: string | null;
+  };
   if (document.status !== params.expected.status) {
     return fail("the shared analysis document carries a different status", {
       expected: { status: params.expected.status },
       actual: { status: document.status },
+    });
+  }
+  // M10-D: which specialization and analyzer the document names, when pinned.
+  if (params.expected.specId !== undefined && document.specialization?.specId !== params.expected.specId) {
+    return fail("the shared analysis document names a different specialization", {
+      expected: { specId: params.expected.specId },
+      actual: { specId: document.specialization?.specId ?? null },
+    });
+  }
+  if (params.expected.analyzerId !== undefined && document.analyzerId !== params.expected.analyzerId) {
+    return fail("the shared analysis document names a different analyzer", {
+      expected: { analyzerId: params.expected.analyzerId },
+      actual: { analyzerId: document.analyzerId ?? null },
     });
   }
   if (document.status === "ANALYZED" && document.capability?.matchMeaning !== "AUTHORITY_COMPATIBLE_ONLY") {
@@ -350,16 +373,49 @@ function externalPortDouble(
   };
 }
 
+/**
+ * M10-D: ports over the case's own artifact as ONE core, for a stated roster.
+ * No fan-out and no relabelling: the artifact's events are served as they are
+ * and every participant is identified by the class and spec the case states.
+ */
+function compositionPorts(
+  artifactId: string,
+  fightIds: readonly number[],
+  participants: readonly { sourceId: number; className: string; specName: string; absent: boolean }[],
+) {
+  const classOf = new Map(participants.map((entry) => [entry.sourceId, entry.className]));
+  const specOf = new Map(participants.map((entry) => [entry.sourceId, entry.specName]));
+  const absent = participants.filter((entry) => entry.absent).map((entry) => entry.sourceId);
+  return fakePorts({
+    snapshot: assassinationSnapshot({
+      fightIds,
+      sourceIds: participants.map((entry) => entry.sourceId),
+      classNameFor: (sourceId) => classOf.get(sourceId) ?? "Rogue",
+      specNameFor: (_fightId, sourceId) => specOf.get(sourceId) ?? null,
+      absentOn: new Map(fightIds.map((fightId) => [fightId, absent])),
+    }),
+    coreFor: (fightId, present) =>
+      corpusArtifactCore(
+        artifactId,
+        fightId,
+        present.map((sourceId) => ({ sourceId, className: classOf.get(sourceId) ?? "Rogue" })),
+      ),
+  });
+}
+
 async function raidNightParity(
   artifact: LoadedArtifact,
   params: Extract<ParamsOf<"PUBLIC_CONTRACT.REST_MCP_PARITY">, { document: "RAID_NIGHT" }>,
 ): Promise<AssertionOutcome> {
-  if (artifact.record.artifactId !== RAID_NIGHT_ARTIFACT) {
+  if (params.composition === undefined && artifact.record.artifactId !== RAID_NIGHT_ARTIFACT) {
     return fail(
-      `raid-night parity runs over ${RAID_NIGHT_ARTIFACT} only; the orchestration fixture normalizes that artifact under its own window`,
+      `raid-night parity without a composition runs over ${RAID_NIGHT_ARTIFACT} only; the orchestration fixture normalizes that artifact under its own window`,
     );
   }
-  const ports = raidNightPorts(params.fightIds, params.subject.actorId);
+  const ports =
+    params.composition === undefined
+      ? raidNightPorts(params.fightIds, params.subject.actorId)
+      : compositionPorts(artifact.record.artifactId, params.fightIds, params.composition.participants);
   const raidNight: RaidNightRunner = async (request) => await analyzeRaidNight(request, ports.deps);
   const args = { reportCode: REPORT_CODE, fightIds: [...params.fightIds] };
 
@@ -370,13 +426,47 @@ async function raidNightParity(
   const violation = parityViolation(surfaces, PublicRaidNightResultSchema);
   if (violation !== null) return violation;
 
-  const document = surfaces.rest.body as { cells: readonly { kind: string }[] };
+  const document = surfaces.rest.body as {
+    cells: readonly {
+      kind: string;
+      sourceId: number;
+      status?: string;
+      provenance?: { specId?: string };
+    }[];
+  };
   const analyzedCells = document.cells.filter((cell) => cell.kind === "ANALYZED").length;
   if (analyzedCells !== params.expected.analyzedCells) {
     return fail("the shared raid-night document analyzed a different number of cells", {
       expected: { analyzedCells: params.expected.analyzedCells },
       actual: { analyzedCells, cellKinds: document.cells.map((cell) => cell.kind) },
     });
+  }
+  if (params.expected.cells !== undefined) {
+    const actual = params.expected.cells.map((expected) => {
+      const cell = document.cells.find((candidate) => candidate.sourceId === expected.sourceId);
+      return {
+        sourceId: expected.sourceId,
+        kind: cell?.kind ?? "MISSING",
+        ...(expected.status === undefined ? {} : { status: cell?.status ?? "MISSING" }),
+        ...(expected.specId === undefined ? {} : { specId: cell?.provenance?.specId ?? "MISSING" }),
+      };
+    });
+    if (JSON.stringify(actual) !== JSON.stringify(params.expected.cells)) {
+      return fail("the shared raid-night document's cells differ from what the case pins", {
+        expected: params.expected.cells,
+        actual,
+      });
+    }
+    // Both surfaces ran over ONE set of ports: each transport paid exactly one
+    // ingestion per requested fight, whoever was in it, and neither paid more.
+    const ingested = ports.ingestedFightIds();
+    const expectedIngested = [...params.fightIds, ...params.fightIds];
+    if (JSON.stringify(ingested) !== JSON.stringify(expectedIngested)) {
+      return fail("the two surfaces did not each ingest exactly the requested fights once", {
+        expected: { ingested: expectedIngested },
+        actual: { ingested },
+      });
+    }
   }
   return pass();
 }

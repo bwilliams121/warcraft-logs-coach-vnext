@@ -222,7 +222,9 @@ export function nonAnalyzedFightAnalysis(options: {
     scope: supported ? "PLAYER_CONTEXT" : null,
     analysis: {
       status: options.status,
-      specId: supported ? "rogue/assassination" : "paladin/protection",
+      // The OBSERVED identity string on an unsupported envelope: Warrior/Arms,
+      // the canonical unsupported specialization since M10-D.
+      specId: supported ? "rogue/assassination" : "warrior/arms",
       detail: options.detail ?? `no analysis: ${options.status}`,
     },
     observedDecisions: null,

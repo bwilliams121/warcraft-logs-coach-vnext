@@ -37,8 +37,17 @@
  * The application service, raid-night orchestration, REST and MCP dispatch
  * only through the public set (`analyzerForSpec`). Internal lookup
  * (`internalAnalyzerForSpec`) exists for tests and internal evaluation, and it
- * is what lets a second specialization be registered, exercised and proven
- * without becoming reachable by a public request.
+ * is what lets a specialization be registered, exercised and proven without
+ * becoming reachable by a public request — as Protection Paladin was from
+ * M10-C until M10-D made it public. Since M10-D every registration is PUBLIC
+ * and the internal-only machinery is dormant; it is kept because the next
+ * specialization arrives through it.
+ *
+ * INJECTED CATALOGS MUST BE COMPLETE. The public-set equality below applies to
+ * an injected catalog exactly as to the production one: a test that wants to
+ * observe or replace one registration must still hand the service every
+ * public row (`tests/support/catalog.ts`), or a request for the missing
+ * specialization would read `SPEC_NOT_SUPPORTED` off an incomplete table.
  */
 
 import {
@@ -361,14 +370,14 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * One row. An unsupported specialization is represented by ABSENCE from this
- * list, which is why there is no "unsupported" placeholder entry: a row that
- * cannot analyze anything would still be something a lookup could select.
+ * Two rows, both PUBLIC. An unsupported specialization is represented by
+ * ABSENCE from this list, which is why there is no "unsupported" placeholder
+ * entry: a row that cannot analyze anything would still be something a lookup
+ * could select.
  */
 export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.freeze([
   ASSASSINATION_REGISTRATION,
-  // INTERNAL_ONLY since M10-C. In the catalog, reachable by the internal
-  // lookup and by tests; never selected by a public path.
+  // INTERNAL_ONLY from M10-C; PUBLIC since M10-D.
   PROTECTION_PALADIN_REGISTRATION,
 ]);
 
