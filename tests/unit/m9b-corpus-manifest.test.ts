@@ -41,9 +41,11 @@ describe("the committed corpus loads", () => {
     // correction added one synthetic authority artifact and three shared
     // decision-engine cases; M10-C2 added one measured Protection case;
     // M10-C5 Phase A added the 45-second rotational slice, its predeclared
-    // gap derivative and seven cases. Measured, then pinned.
-    expect(loaded.artifacts).toHaveLength(30);
-    expect(loaded.cases).toHaveLength(97);
+    // gap derivative and seven cases; M10-C5 Phase B2 added the four measured
+    // steady-state segments and twelve cases (four normalization, two bundle
+    // compositions, six evaluator). Measured, then pinned.
+    expect(loaded.artifacts).toHaveLength(34);
+    expect(loaded.cases).toHaveLength(109);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -56,7 +58,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds twenty sanitized captures, four derivations and six synthetics", async () => {
+  it("holds twenty-four sanitized captures, four derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -84,6 +86,10 @@ describe("the committed corpus loads", () => {
       "wcl-page-terminal-one-millisecond",
       "wcl-pet-sourced-events-hunter-pet-29",
       "wcl-protection-paladin-a7r6-opener",
+      "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+      "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+      "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
       "wcl-protection-paladin-a7r6-rotational-45s",
       "wcl-pull-window-with-resources",
     ]);
@@ -127,9 +133,12 @@ describe("the committed corpus loads", () => {
     // Measured at the M9-C correction: 1,602,915 bytes in total, the largest
     // the 312,284-byte A7R6 fight context. M10-B added the 427,886-byte
     // Protection Paladin slice (deliberately bounded at 22 s to stay under the
-    // per-artifact ceiling) and its 355 KB derivation. Pinned at half the
-    // total ceiling so growth is noticed before it is a problem, not after.
-    expect(loaded.totalArtifactBytes).toBeLessThan(3 * 1024 * 1024);
+    // per-artifact ceiling) and its 355 KB derivation. M10-C5 Phase B2 added
+    // the four steady-state segments (43,545 + 172,085 + 153,998 + 182,066
+    // bytes), taking the total to 3,364,052 bytes. The notice line moves from
+    // half the ceiling to two thirds of it — still well inside 6 MiB, and
+    // still a line growth has to cross deliberately, not silently.
+    expect(loaded.totalArtifactBytes).toBeLessThan(4 * 1024 * 1024);
     for (const entry of loaded.artifacts) {
       expect(entry.canonicalByteLength, entry.record.artifactId).toBeLessThan(512 * 1024);
     }
@@ -202,15 +211,16 @@ describe("provenance is honest about lineage", () => {
   });
 
   it("marks unrecorded tooling revisions UNAVAILABLE rather than inventing them", async () => {
-    // The slicer had no version field when any pre-M9-C slice was cut; the
-    // one slice cut after M9-B records the revision that cut it.
+    // The slicer had no version field when any pre-M9-C slice was cut; every
+    // slice cut after M9-B records the revision that cut it (revision 6 is
+    // the --from option M10-C5 Phase B2 added for the steady-state segments).
     const loaded = await corpus();
     for (const entry of loaded.artifacts) {
       const migrated = entry.record.provenance.transformations.some((t) => t.kind === "LEGACY_FIXTURE_COPY");
       for (const transformation of entry.record.provenance.transformations) {
         if (transformation.tooling.name !== "scripts/sanitize-probe.mjs") continue;
         expect(transformation.tooling.revision, entry.record.artifactId).toMatch(
-          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[2345]$/,
+          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[23456]$/,
         );
       }
     }
@@ -257,6 +267,10 @@ describe("retained coverage is granted only where the capture predicate supports
     "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
     "wcl-protection-paladin-a7r6-rotational-45s",
     "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+    "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+    "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+    "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+    "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
   ];
 
   it("grants nothing on any property-based or index-based selection", async () => {

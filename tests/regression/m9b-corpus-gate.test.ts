@@ -59,10 +59,13 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // correction's SHARED_DECISION_ENGINE layer added three cases and three
     // assertions; M10-C2 added the measured use_items sub-action-set case;
     // M10-C5 Phase A added the 45-second rotational slice and its gap
-    // derivative with seven cases and thirty assertions.
-    expect(result.summary.cases).toBe(97);
-    expect(result.summary.assertions).toBe(262);
-    expect(result.summary.passed).toBe(262);
+    // derivative with seven cases and thirty assertions; M10-C5 Phase B2
+    // added the four steady-state segments, the bundle compositions and the
+    // evaluator over the composed 165 s fight: twelve cases and seventy-three
+    // assertions.
+    expect(result.summary.cases).toBe(109);
+    expect(result.summary.assertions).toBe(335);
+    expect(result.summary.passed).toBe(335);
   });
 
   it("covers every layer", async () => {

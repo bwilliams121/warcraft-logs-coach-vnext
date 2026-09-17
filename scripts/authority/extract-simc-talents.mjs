@@ -193,6 +193,16 @@ const PALADIN_PROTECTION_TARGET = {
       binding:
         'sc_paladin.cpp:4201 talents.divine_toll = find_talent_spell( talent_tree::CLASS, "Divine Toll" )',
     },
+    // M10-C5 Phase B: `buff.blessed_assurance.up` (default[20], default[21])
+    // can be FALSE by build when the Lightsmith choice node was spent on
+    // Divine Guidance instead.
+    {
+      simcName: "blessed_assurance",
+      displayNameEn: "Blessed Assurance",
+      tree: "HERO",
+      binding:
+        'sc_paladin.cpp:4253 talents.lightsmith.blessed_assurance = find_talent_spell( talent_tree::HERO, "Blessed Assurance" )',
+    },
   ],
   heroTrees: [
     // `hero_tree_e` values, sc_enums.hpp:320-321. `hero_tree.<name>` resolves

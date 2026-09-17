@@ -59,7 +59,7 @@
     "gcdFieldName": "_gcd",
     "gcdFieldUnits": "MILLISECONDS",
     "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
-    "extractedOn": "2026-09-16",
+    "extractedOn": "2026-09-17",
     "extractorVersion": 1,
     "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
   },
@@ -155,6 +155,11 @@
       "displayNameEn": "Holy Bulwark"
     },
     {
+      "abilityGameId": 432472,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Sacred Weapon"
+    },
+    {
       "abilityGameId": 1241413,
       "baseGcdMs": 1500,
       "displayNameEn": "Hammer of Wrath"
@@ -219,7 +224,7 @@
     },
     {
       "simcToken": "holy_armaments",
-      "candidateAbilityGameIds": [432459],
+      "candidateAbilityGameIds": [432459, 432472],
       "binding": {
         "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
         "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
@@ -227,7 +232,7 @@
         "symbol": "paladin_t::create_action / holy_armaments_t",
         "startLine": 3429,
         "endLine": 3430,
-        "sourceNote": "create_action dispatches \"holy_armaments\" to holy_armaments_t, whose base is paladin_spell_t( \"holy_armaments\", p, p->find_spell( 432459 ) ) at sc_paladin.cpp:2616. The DBC record is named \"Holy Bulwark\"; the token is the Lightsmith armament action, background unless the Lightsmith hero tree is active (sc_paladin.cpp:2621).",
+        "sourceNote": "create_action dispatches \"holy_armaments\" to holy_armaments_t, whose base is paladin_spell_t( \"holy_armaments\", p, p->find_spell( 432459 ) ) at sc_paladin.cpp:2616. The DBC record is named \"Holy Bulwark\"; the token is the Lightsmith armament action, background unless the Lightsmith hero tree is active (sc_paladin.cpp:2621). holy_armaments_t::execute (2632-2635) casts active.armament[ next_armament ] with LS_HARDCAST — Holy Bulwark or Sacred Weapon — so the press the log records is 432459 or 432472 (the Sacred Weapon spell row) depending on the alternation; both rows share `_gcd` 1500, `_charges` 2, `_charge_cooldown` 60000 and category 2220.",
         "crossCheck": "NONE_TALENT_BOUND"
       }
     },

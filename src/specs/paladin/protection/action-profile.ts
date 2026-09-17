@@ -108,6 +108,7 @@ export const HAMMER_OF_THE_RIGHTEOUS_TOKEN = "hammer_of_the_righteous";
 export const HOLY_ARMAMENTS_TOKEN = "holy_armaments";
 export const HAMMER_OF_LIGHT_TOKEN = "hammer_of_light";
 export const AVENGING_WRATH_TOKEN = "avenging_wrath";
+export const HAMMER_OF_WRATH_TOKEN = "hammer_of_wrath";
 export const USE_ITEM_TOKEN = "use_item";
 export const USE_ITEMS_TOKEN = "use_items";
 
@@ -534,6 +535,20 @@ export interface ProtectionReadinessFact {
   readonly abilityGameId: number | null;
 }
 
+/**
+ * An action whose own `ready()` requires an aura the evidence has PROVEN
+ * inactive at this decision (M10-C5 Phase B): Hammer of Wrath outside wings.
+ * Only a BOUND `up: false` from an observed removal produces one; silence
+ * never does.
+ */
+export interface ProtectionAuraGateFact {
+  readonly simcToken: string;
+  readonly requiredAuraAbilityGameId: number;
+  readonly anchorReportTimeMs: number;
+}
+
+export const NO_AURA_GATE_FACTS: readonly ProtectionAuraGateFact[] = [];
+
 export const NO_READINESS_FACTS: readonly ProtectionReadinessFact[] = [];
 
 export function resolveProtectionUsability(
@@ -542,6 +557,7 @@ export function resolveProtectionUsability(
   observedAbilityGameId: number,
   spender: ProtectionSpenderFacts = UNKNOWN_SPENDER_FACTS,
   readiness: readonly ProtectionReadinessFact[] = NO_READINESS_FACTS,
+  auraGates: readonly ProtectionAuraGateFact[] = NO_AURA_GATE_FACTS,
 ): ActionUsabilityVerdict {
   const entry: ExecutedEntry = {
     listName: action.listName,
@@ -591,6 +607,25 @@ export function resolveProtectionUsability(
         "the ability's own cooldown, anchored on the actor's last OBSERVED cast before this decision under " +
         "the pinned base and the reviewed modifier policy, is proven to exceed the queueing tolerance, so " +
         "action_t::ready cannot succeed. The bound is a LOWER bound and is compared as one.",
+    });
+  }
+
+  // An aura the action's own ready() requires, PROVEN inactive at this
+  // decision. Hammer of Wrath is `judgment_base_t::action_ready() &&
+  // p()->buffs.hammer_of_wrath->up()` (sc_paladin.cpp:1799-1801): outside
+  // wings the buff is down and the action cannot fire whatever its cooldown
+  // says. The fact comes from the aura binding (a BOUND `up: false` reading
+  // of 1277026), never from silence.
+  const gate = auraGates.find((entry) => entry.simcToken === action.actionToken);
+  if (gate !== undefined) {
+    return provenUnusable("REQUIRED_AURA_INACTIVE", {
+      abilityGameId: gate.requiredAuraAbilityGameId,
+      itemId: null,
+      provenRemainingAtLeastMs: null,
+      cooldownToleranceMs: null,
+      detail:
+        `action_ready() requires aura ${String(gate.requiredAuraAbilityGameId)} up, and M4 proved it INACTIVE ` +
+        `from the removal observed at ${String(gate.anchorReportTimeMs)}; the action cannot fire whatever its cooldown says.`,
     });
   }
 

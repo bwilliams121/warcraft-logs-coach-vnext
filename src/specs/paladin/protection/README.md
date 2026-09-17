@@ -71,9 +71,9 @@ pinned data and the evidence prove one:
 | `hero_tree.lightsmith` | observed entries belong to exactly one pinned sub-tree | unbound |
 | `apex.3` | the third pinned tiered trait is SELECTED / NOT_SELECTED | unbound |
 | `prev_gcd.1.divine_toll` | a previous GCD-lane cast is found by walking back over pinned lanes, stepping over melee swings and NON_GCD presses, under COMPLETE cast coverage between it and the decision | unbound |
-| `next_armament` | hero tree resolved and not Lightsmith → KNOWN −1 | UNKNOWN_NUMBER / STATE_NOT_MODELLED |
+| `next_armament` | hero tree resolved and not Lightsmith → KNOWN −1; Lightsmith → KNOWN 0 / 1 from the last Holy Armaments hardcast strictly before the decision under complete cast coverage since (`armament-state.ts`) | UNKNOWN_NUMBER / STATE_NOT_ESTABLISHED (Lightsmith, no anchor) or STATE_NOT_MODELLED (tree unresolved) |
 | `sacred_weapon`, `holy_bulwark` | always: KNOWN 1 and 0 | — |
-| `consecration.up` | never | unbound (enumerated) |
+| `consecration.up` | the last Consecration cast and the pinned ground-effect lifetime decide TRUE or FALSE (see below) | unbound (enumerated) |
 | `full_recharge_time`, `charges` (self-addressing), `gcd` | never | UNKNOWN_NUMBER / STATE_NOT_MODELLED |
 
 Built-in atoms are unchanged: every `buff.<name>.*` and `debuff.<name>.up` is
@@ -151,38 +151,103 @@ readiness stays UNKNOWN before and after the observed press);
 rule), starts its 1 s cooldown, and MAY change atoms the list reads —
 `buff.shining_light_free`, `buff.divine_guidance.stack`,
 `buff.blessed_assurance.up`, and through its own melee hit or Forge's
-Reckoning the stochastic Divine Inspiration armament channel
-(`next_armament`, `buff.sacred_weapon`) — so it is admitted ONLY while every
-one of those is unbound (`requiresUnbound`; the engine then already
-enumerates both truths) and refused the moment the caller binds one without
-branching. Word of Glory still refuses its branch with `TRANSITION_UNSUPPORTED`.
+Reckoning the Divine Inspiration armament channel (`buff.sacred_weapon`).
+Those are its `requiresUnbound` atoms, and since M10-C5 Phase B they mean
+what the name says: the SUCCESSOR state of a branch that executed the
+contract FORGETS exactly those atoms (`forgottenAtoms` in
+`first-gcd-state.ts`; `forgetAtoms` in the adapter strips them from the
+caller's bindings for that branch), so the engine enumerates them again
+while every unrelated binding stays. A caller's binding of such an atom is
+no longer a refusal. `next_armament` was listed at M10-C4 on the claim that
+a Divine Inspiration proc flips the alternation; the pinned source says the
+proc advances `divine_inspiration_next` and only an LS_HARDCAST advances
+`next_armament` (sc_paladin.cpp:2641, 2752-2753), so the claim was
+withdrawn. Word of Glory still refuses its branch with
+`TRANSITION_UNSUPPORTED`.
 Usability of a spender is PROVEN_UNUSABLE only when Holy Power is KNOWN below
 the pinned cost and every free-cast route is disproved; it is never inferred
 from an observed uncosted cast.
 
-## Cooldowns and auras (M10-C5 Phase A)
+## Cooldowns and auras (M10-C5 Phase A and Phase B)
 
-Two Protection-owned bindings feed the shared engine from OBSERVED evidence
-strictly before each decision, and nothing else:
+Protection-owned bindings feed the shared engine from OBSERVED evidence
+strictly before each decision, or from the observed BUILD, and nothing else:
 
-- `cooldown-bindings.ts` derives `divine_toll` and `avenging_wrath` through
-  the generic M4 cooldown primitive over the pinned
-  `paladin-protection-cooldowns.json`. The pinned base is folded with the
-  actor's censused static modifiers by the shared three-way talent rule —
-  SELECTED applied exactly, NOT_SELECTED ignored, UNKNOWN applied only when
-  it shortens (a lower bound) — and the dynamic absence proof is carried as
-  the engine's modifier policy. `avenging_wrath` is an alias group (Sentinel
-  389539 under the talent, Avenging Wrath 31884 otherwise): a cast of either
-  member anchors it. Only PROVEN_NOT_READY is ever acted on
-  (`ACTIVE_COOLDOWN` usability); READY is never claimed. The wings overlay
-  binds the cooldown atom to the actor's effective base, never the raw DBC
-  value.
+- `cooldown-bindings.ts` derives `divine_toll`, `avenging_wrath`,
+  `avengers_shield` and `consecration` through the generic M4 cooldown
+  primitive over the pinned `paladin-protection-cooldowns.json`. The pinned
+  base is folded with the actor's censused static modifiers by the shared
+  three-way talent rule — SELECTED applied exactly, NOT_SELECTED ignored,
+  UNKNOWN applied only when it shortens (a lower bound) — and the dynamic
+  absence proof is carried as the engine's modifier policy. `avenging_wrath`
+  is an alias group (Sentinel 389539 under the talent, Avenging Wrath 31884
+  otherwise): a cast of either member anchors it. Only PROVEN_NOT_READY is
+  ever acted on (`ACTIVE_COOLDOWN` usability); READY is never claimed. The
+  wings overlay binds the cooldown atom to the actor's effective base, never
+  the raw DBC value.
+
+  Phase B's census (`extract-simc-ability-cooldowns.mjs`) reads the SPEC and
+  CLASS passives `parse_all_class_passives` registers, not only traits: the
+  spec passive "Protection Paladin" (137028) hastes Avenger's Shield,
+  Consecration and Shield of the Righteous, and the rank passive
+  "Consecration" (327980) halves Consecration's cooldown. A HASTED modifier
+  refuses the base — no haste model exists — so both tokens derive
+  `UNKNOWN` / `MODIFIERS_NOT_PROVEN_ABSENT` by design, and that refusal is
+  what blocks `default[13]`, `default[15]` and `default[18]` on the real
+  evidence. The Grand Crusader reset of Avenger's Shield is a DECLARED
+  dynamic mutation with an observable signature (aura 85416 on the actor):
+  `dynamicMutationsAbsent` proves it absent only under complete AURAS
+  coverage with no application between the anchor and the decision. The
+  policy is ready for the day a haste model exists; it manufactures nothing
+  today.
+- `bindGroundEffectPresence` (same module) binds `consecration.up` —
+  SimulationCraft's `active_consecration != nullptr`, whether the actor's own
+  hardcast Consecration is alive, not whether they stand in it — from the
+  last observed Consecration cast and the pinned lifetime. The duration is
+  spell 26573's DBC `_duration` (12,000 ms) plus Consecration in Flame's
+  P_DURATION effect (+2,000 ms, applied by SimulationCraft's passive parser
+  to `data().duration()`, which `consecration_t` reads as `cons_duration`),
+  so 14,000 ms under this build. The effect is NOT alive for the whole
+  duration: `active_consecration` is cleared on EVENT_DESTRUCTED, which
+  `ground_aoe_event_t::execute` fires at EVERY pulse, and another pulse is
+  scheduled only while at least one hasted tick (1,000 ms base, shortened
+  by spell haste) remains — the pointer dies at the LAST pulse, inside
+  (D − 1,000 ms, D]. Without a haste model the binder therefore claims TRUE
+  only while elapsed ≤ D − 1,000 ms (13,000 ms here), FALSE only after D
+  under complete CASTS coverage over the whole lookback, and UNKNOWN in
+  between (`ELAPSED_INSIDE_LAST_PULSE_ALLOWANCE`,
+  `ELAPSED_INSIDE_DURATION_UNCERTAINTY`, `ELAPSED_AT_DURATION_BOUNDARY`) or
+  whenever the cast state is not established. The lifetime facts are read
+  mechanically from the pinned `engine/player/ground_aoe.{hpp,cpp}` and
+  `sc_paladin.cpp` by the extractor (`groundEffect.lifetime`), and no player
+  aura is consulted.
 - `aura-bindings.ts` binds `buff.avenging_wrath` from the Sentinel aura
   (`paladin-protection-aura-authority.ts`: under Sentinel the expression is
-  rewritten to `buff.sentinel`, whose buff IS spell 389539) through M4's
-  `presenceAt` — ACTIVE from an observed application, INACTIVE from an
-  observed removal, UNBOUND otherwise. Without Sentinel the identity is not
-  pinned (Radiant Glory would change the record) and the atom stays unbound.
+  rewritten to `buff.sentinel`, whose buff IS spell 389539),
+  `buff.vanguard` from 1268810 under `apex.1` (Glory of the Vanguard), and
+  the Hammer of Wrath READINESS aura 1277026 (not an APL buff atom: it is
+  what `hammer_of_wrath_t::ready()` requires outside wings), each through
+  M4's `presenceAt` — ACTIVE from an observed application, INACTIVE from an
+  observed removal, UNBOUND otherwise. The query is by POSITION, so an aura
+  the decision's own cast applies at the same millisecond is visible to the
+  next decision and never to the cast that caused it. A BOUND `up: false`
+  reading of the readiness aura is the ONLY thing that makes Hammer of
+  Wrath PROVEN_UNUSABLE (`REQUIRED_AURA_INACTIVE`); silence never does.
+- `build-absences.ts` binds FALSE from the observed TALENT TREE, behind a
+  gate the tree establishes: `hammer_of_light_ready`, `hammer_of_light_free`
+  and `undisputed_ruling` under a RESOLVED non-Templar hero tree, and
+  `blessed_assurance` when the choice node holds Divine Guidance. An
+  unresolved tree or an UNKNOWN talent refuses
+  (`BUILD_GATE_NOT_ESTABLISHED`). This module is the one place in the tree
+  that spells `up: false` as a literal, and it never reads the aura stream.
+- `armament-state.ts` is the coverage-gated `next_armament` state machine:
+  KNOWN only from the last Holy Armaments HARDCAST strictly before the
+  decision (the log records a press under the armament it produced — Holy
+  Bulwark 432459 or Sacred Weapon 432472, both bound to the
+  `holy_armaments` token) under COMPLETE cast coverage since; a buff
+  transition never anchors it, a later hardcast never speaks about an
+  earlier decision, and a declared coverage hole resets it to UNKNOWN. The
+  resolver binds the atom from it or refuses with `STATE_NOT_ESTABLISHED`.
 
 ## What the real evidence yields
 
@@ -228,17 +293,47 @@ No later event is ever consulted: the same Sentinel press proves nothing
 for the Blessed Hammer 384 ms before it.
 
 M10-C's acceptance rule (`real MATCH + real REJECTED > 0`) is met on this
-evidence with exactly one real MATCH. Rotational steady state below
-`default[9]` remains unmeasured: `next_armament` is anchor-only, and the
-Judgment / Hammer of Wrath / Avenger's Shield readiness after a full cooldown
-cycle needs a longer capture (Phase B, not authorized).
+evidence with exactly one real MATCH.
+
+Over the composed 165-second fight (M10-C5 Phase B2: the byte-identical 45 s
+slice joined to four measured segments through a machine-validated zero-event
+certificate for [2,049,582 .. 2,049,588], evaluated inside [+120 s, +165 s]):
+37 eligible decisions, 1 MATCH, 0 REJECTED, 36 UNKNOWN. The MATCH is the
+Avenger's Shield press at 2,139,100 (+134,511 ms), selected by the exact
+entry `default[13] avengers_shield` under `buff.vanguard.up` — bound TRUE by
+the Vanguard aura M4 observed applied at 2,131,157 — with every higher entry
+resolved: Divine Toll and wings PROVEN_NOT_READY from their presses at
+2,088,835 / 2,088,344, the three Templar-only gates FALSE by the observed
+build, `next_armament` KNOWN holy_bulwark from the Sacred Weapon hardcast at
+2,125,600, and `default[11] hammer_of_wrath` PROVEN_UNUSABLE because its
+readiness aura was observed removed at 2,106,345. The same rule resolves the
+Avenger's Shield press at 2,074,381 in the history, so the whole 165 s holds
+149 eligible decisions with 4 MATCH (two Divine Toll, two Avenger's Shield)
+and 145 UNKNOWN. The prediction made at Phase B1 — that the Judgment at
+2,131,157 would converge through every higher entry — is DISPROVED: it blocks
+at `default[15] consecration`, whose gate reads a stack count no binding
+field carries and whose readiness is hasted. The 36 UNKNOWN in the window
+block at 18 × `default[6]` (from 2,148,837 the Divine Toll and wings lower
+bounds have elapsed), 9 × `default[15]`, 5 × `default[13]` (Vanguard up,
+Avenger's Shield's own hasted cooldown unknown), 3 × `default[14]`, 1 ×
+`default[9]`. The gap bundle — the 60–120 s segments omitted with the hole
+declared — returns every decision in the window to `default[6]` and the
+Avenger's Shield press to UNKNOWN: no anchor, no aura transition, no
+alternation and no ground-effect lookback carries across a declared hole.
+
+Deferred, each a recorded refusal rather than a guess: a charge engine
+(`default[23]`, `charges`, `full_recharge_time` beyond need), GCD intervals,
+haste and rating conversion, Divine Guidance stacks, Sacred Weapon remains,
+READY inference, and public projection.
 
 ## Not here, on purpose
 
-No cooldown data beyond Divine Toll and wings, no aura identity beyond the
-Sentinel aura, no spender cost, no mitigation or health model, no defensive,
-self-healing or interrupt judgment, no top-log or performance input, no
-public exposure, and no inference from an absent gear key. Each is a
+No cooldown data beyond Divine Toll, wings, Avenger's Shield and
+Consecration, no haste or charge model, no aura identity beyond the Sentinel,
+Vanguard and Hammer of Wrath readiness auras, no stack counts, no mitigation
+or health model, no defensive, self-healing or interrupt judgment, no top-log
+or performance input, no public exposure, and no inference from an absent
+gear key. Each is a
 recorded missing fact, and each blocks the affected decision closed rather
 than pressuring a guess.
 

@@ -75,6 +75,7 @@ import {
   protectionTokenByAbilityId,
 } from "../../../data/game/paladin-protection-gcd-semantics.js";
 import {
+  resolveProtectionApexTrait,
   resolveProtectionHeroTree,
   resolveProtectionTalent,
 } from "../../../data/game/paladin-protection-talents.js";
@@ -83,7 +84,12 @@ import type {
   ObservedTalentEntry,
   TalentResolution,
 } from "../../../data/game/talent-selection.js";
-import type { ProtectionBuildFacts, ProtectionReadinessFact } from "./action-profile.js";
+import type {
+  ProtectionAuraGateFact,
+  ProtectionBuildFacts,
+  ProtectionReadinessFact,
+} from "./action-profile.js";
+import { HAMMER_OF_WRATH_TOKEN } from "./action-profile.js";
 import { AVENGING_WRATH_TOKEN } from "./action-profile.js";
 import {
   bindSupportedProtectionAuras,
@@ -189,6 +195,10 @@ export interface ProtectionBuildResolution {
   readonly sentinel: TalentResolution;
   readonly avengingWrath: TalentResolution;
   readonly blessedHammer: TalentResolution;
+  /** `apex.1`, the trait that gates the Vanguard buff identity (M10-C5 Phase B). */
+  readonly gloryOfTheVanguard: TalentResolution;
+  /** The Lightsmith choice node against Divine Guidance (M10-C5 Phase B). */
+  readonly blessedAssurance: TalentResolution;
   readonly heroTree: HeroTreeResolution;
 }
 
@@ -464,6 +474,8 @@ export function analyzeObservedProtectionPaladinDecisions(
     sentinel: resolveProtectionTalent(observedTalents, "sentinel"),
     avengingWrath: resolveProtectionTalent(observedTalents, "avenging_wrath"),
     blessedHammer: resolveProtectionTalent(observedTalents, "blessed_hammer"),
+    gloryOfTheVanguard: resolveProtectionApexTrait(observedTalents, 1),
+    blessedAssurance: resolveProtectionTalent(observedTalents, "blessed_assurance"),
     heroTree: resolveProtectionHeroTree(observedTalents),
   };
   const buildFacts: ProtectionBuildFacts = {
@@ -559,17 +571,22 @@ export function analyzeObservedProtectionPaladinDecisions(
     // ---- bindings: only what is POSITIVELY established ----
     //
     // No Rogue resource is read: combo points and energy are stated UNKNOWN,
-    // which the pinned Protection APL never asks about anyway. At M10-C5 Phase
-    // A one buff atom (`avenging_wrath`, through the pinned Sentinel aura) and
-    // two cooldowns (`divine_toll`, `avenging_wrath`) are bound from OBSERVED
-    // transitions and casts strictly before the decision; everything else is
-    // enumerated, and a verdict survives only if it holds under every
+    // which the pinned Protection APL never asks about anyway. Buff atoms are
+    // bound from OBSERVED transitions strictly before the decision (Sentinel
+    // wings, Vanguard) or from the observed BUILD (the Templar-only and
+    // Blessed Assurance absences); cooldowns from observed casts; everything
+    // else is enumerated, and a verdict survives only if it holds under every
     // assignment.
     const auras = bindSupportedProtectionAuras({
       state,
       actorId,
       position,
-      talents: { sentinel: build.sentinel },
+      talents: {
+        sentinel: build.sentinel,
+        glory_of_the_vanguard: build.gloryOfTheVanguard,
+        blessed_assurance: build.blessedAssurance,
+      },
+      heroTree: build.heroTree,
     });
     const cooldowns = deriveSupportedProtectionCooldowns({ state, actorId, position, observedTalents });
     const bindings: AtomBindings = {
@@ -586,6 +603,19 @@ export function analyzeObservedProtectionPaladinDecisions(
       readiness: entry.readiness,
       abilityGameId: entry.readinessAbilityGameId,
     }));
+    // Hammer of Wrath's own ready() requires its readiness aura (1277026)
+    // outside wings; an OBSERVED removal proves it unusable. Silence never does.
+    const auraGates: ProtectionAuraGateFact[] = auras.flatMap((aura) =>
+      aura.atomName === "hammer_of_wrath" && aura.state === "BOUND" && !aura.up
+        ? [
+            {
+              simcToken: HAMMER_OF_WRATH_TOKEN,
+              requiredAuraAbilityGameId: aura.abilityGameId,
+              anchorReportTimeMs: aura.anchorLocator.reportTimeMs,
+            },
+          ]
+        : [],
+    );
 
     const outcome = protectionFirstGcdSelectionAt({
       authority,
@@ -593,6 +623,7 @@ export function analyzeObservedProtectionPaladinDecisions(
       buildFacts,
       observedAbilityGameId: abilityGameId,
       readiness,
+      auraGates,
       wingsCooldownLowerBoundMs,
     });
 

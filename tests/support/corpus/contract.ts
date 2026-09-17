@@ -126,6 +126,12 @@ const recordedString = z.union([z.string().min(1), unrecorded]);
 /** `YYYY-MM-DD`, or a marker. A capture date is corpus metadata, never analyzer output. */
 const recordedDate = z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/), unrecorded]);
 
+const identifier = z.string().regex(/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/, "lowercase, digits, `.` and `-` only");
+
+const reportTimeRange = z
+  .object({ fromReportTimeMs: z.number().int(), toReportTimeMs: z.number().int() })
+  .strict();
+
 /**
  * What an artifact's bytes ARE, in lineage terms.
  *
@@ -417,6 +423,20 @@ const aplEntryRef = z
     actionToken: z.string().min(1),
   })
   .strict();
+
+/**
+ * Optional on every Protection kind that analyzes a fight (M10-C5 Phase B):
+ * the case's artifact may be the LAST part of a bundle whose earlier parts
+ * are named here in order, with every coverage hole the composition is
+ * allowed to have; and the evaluation population may be restricted to a
+ * fixed report-time window — a time filter, never an outcome filter — while
+ * the history still begins at the bundle's first event.
+ */
+const BUNDLE_PARAMS = {
+  historyArtifactIds: z.array(identifier).optional(),
+  declaredHoles: z.array(reportTimeRange).optional(),
+  evaluationWindow: reportTimeRange.optional(),
+} as const;
 
 export const ASSERTION_KINDS = {
   // ---- NORMALIZATION -------------------------------------------------------
@@ -906,6 +926,65 @@ export const ASSERTION_KINDS = {
   // The INTERNAL_ONLY Protection Paladin evaluator, reached through its
   // registration. Nothing here is public: no kind below drives a transport,
   // and the projection kind asserts that the result CANNOT be published.
+  "NORMALIZATION.BUNDLE_COMPOSITION": {
+    owningLayer: "NORMALIZATION",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        /** The case's artifact is the LAST part; these precede it, in order. */
+        historyArtifactIds: z.array(identifier).min(1),
+        /** Every hole the composed coverage is allowed to have. Exact and exhaustive. */
+        declaredHoles: z.array(reportTimeRange),
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            events: z.number().int().positive(),
+            /** The composed coverage per category: COMPLETE, PARTIAL or ABSENT over the composed window. */
+            coverage: z.record(z.string().min(1), z.enum(["COMPLETE", "PARTIAL", "ABSENT"])),
+            /** The merged covered ranges of CASTS for the actor, after certificates and declared holes. */
+            castRanges: z.array(reportTimeRange).min(1),
+            windowFromReportTimeMs: z.number().int(),
+            windowToReportTimeMs: z.number().int(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The bundle composer joins these artifacts in order into ONE normalized fight: every event kept in order with no duplicate across a boundary, every grant joined only where adjacent or bridged by a validated zero-event certificate, and exactly the declared holes left as PARTIAL coverage. An undeclared hole, an undeclared adjacency, an overlap, a reversed segment or a boundary duplicate refuses the composition.",
+  },
+  "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        historyArtifactIds: z.array(identifier).optional(),
+        declaredHoles: z.array(reportTimeRange).optional(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            state: z.enum(["KNOWN", "UNKNOWN"]),
+            /** `next_armament` as SimulationCraft numbers it: 0 Holy Bulwark, 1 Sacred Weapon; null when UNKNOWN. */
+            nextArmament: z.number().int().nullable(),
+            /** The hardcast the answer rests on (report time, ability), or null. */
+            anchorReportTimeMs: z.number().int().nullable(),
+            anchorAbilityGameId: z.number().int().nullable(),
+            reason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the Lightsmith alternation is KNOWN only from an observed Holy Armaments HARDCAST strictly before it under complete CASTS coverage since — never from a buff transition, never from a later cast, never across a declared hole — and equals exactly this value with this anchor; otherwise UNKNOWN with the reason.",
+  },
   "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE": {
     owningLayer: "SPEC_PROTECTION_PALADIN",
     outcomeClass: "POSITIVE_FACT",
@@ -937,6 +1016,7 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
         targetActorId: z.number().int().nullable(),
         observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
         expected: z
@@ -967,6 +1047,7 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
         expected: z
           .object({
             eligibleDecisions: z.number().int().nonnegative(),
@@ -1087,6 +1168,7 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
         /** The decision point: one COMPLETE cast by the actor. */
         observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
         /** The APL token whose cooldown is asked about. */
@@ -1121,18 +1203,20 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
         observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
         /** The buff atom name as the pinned APL writes it after `buff.`. */
         atomName: z.string().min(1),
         expected: z
           .object({
-            state: z.enum(["BOUND", "UNBOUND"]),
+            /** BOUND_BY_BUILD (M10-C5 Phase B): FALSE from the observed build, with the gate in `reason`. */
+            state: z.enum(["BOUND", "UNBOUND", "BOUND_BY_BUILD"]),
             up: z.boolean().nullable(),
             /** The aura spell the atom read, when the identity was established for the build. */
             abilityGameId: z.number().int().nullable(),
             /** The observed transition the answer rests on (report time), or null. */
             anchorReportTimeMs: z.number().int().nullable(),
-            /** The binding's own reason when UNBOUND, or null. */
+            /** The binding's own reason when UNBOUND, the build gate when BOUND_BY_BUILD, or null. */
             reason: z.string().nullable(),
           })
           .strict(),
@@ -1151,6 +1235,7 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
         expected: z
           .object({
             match: z.number().int().nonnegative(),
@@ -1205,6 +1290,7 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
         observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
         atom: z.string().min(1),
         expected: z.discriminatedUnion("kind", [
@@ -1647,11 +1733,8 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
 // Manifest schema
 // --------------------------------------------------------------------------
 
-const identifier = z.string().regex(/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/, "lowercase, digits, `.` and `-` only");
-
-const reportTimeRange = z
-  .object({ fromReportTimeMs: z.number().int(), toReportTimeMs: z.number().int() })
-  .strict();
+// `identifier` and `reportTimeRange` are declared beside the other primitive
+// schemas near the top of this file; the assertion kinds use them too.
 
 /** An events retrieval — the analyzer's own `EVENTS_QUERY` shape. */
 const eventsCaptureQuery = z
@@ -1843,10 +1926,39 @@ const coverageGrant = z
  * category no grant names gets no coverage, and a slice with no grants can
  * prove no absence.
  */
+/**
+ * A ZERO-EVENT COVERAGE CERTIFICATE (M10-C5 Phase B): the interval between
+ * the end of a preceding artifact's retained coverage and the start of this
+ * artifact's own holds no event, and the manifest says WHY in a form the
+ * loader can check rather than take on trust.
+ *
+ * The proof rests on two terminal captures of the same report and fight: the
+ * preceding artifact's source requested up to an EXCLUSIVE end at or beyond
+ * this interval and paginated to a terminal page, so every event the source
+ * held before that end was retrieved and the preceding artifact — a whole
+ * predicate over that capture — retained none inside the interval; and this
+ * artifact's own source begins at or before the interval's end. The loader
+ * verifies each of those facts and that neither artifact retains an event
+ * inside the interval. A bundle composer may then join the two grants across
+ * it. Without a certificate, an unretained millisecond is a hole, and a hole
+ * is never adjacency.
+ */
+const emptyIntervalCertificate = z
+  .object({
+    fromReportTimeMs: z.number().int(),
+    toReportTimeMs: z.number().int(),
+    /** The artifact whose retained coverage ends immediately before `fromReportTimeMs`. */
+    precedingArtifactId: identifier,
+    basis: z.string().min(1),
+  })
+  .strict();
+
 const retainedCoverage = z
   .object({
     grants: z.array(coverageGrant),
     basis: z.string().min(1),
+    /** Present only on a segment that continues a preceding artifact across an empty interval. */
+    certifiedEmpty: z.array(emptyIntervalCertificate).optional(),
   })
   .strict();
 

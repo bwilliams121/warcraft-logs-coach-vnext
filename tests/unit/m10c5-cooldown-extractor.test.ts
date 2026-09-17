@@ -108,6 +108,9 @@ describe("the committed artifact", () => {
       "engine/dbc/spell_data.hpp",
       "engine/dbc/generated/trait_data.inc",
       "engine/dbc/trait_data.hpp",
+      // M10-C5 Phase B: the spec and class passives parse_all_class_passives reads.
+      "engine/dbc/generated/specialization_spells.inc",
+      "engine/dbc/generated/class_spells.inc",
       "engine/dbc/generated/client_data_version.inc",
       "engine/dbc/data_enums.hh",
       "engine/player/player.cpp",
@@ -115,6 +118,9 @@ describe("the committed artifact", () => {
       "engine/class_modules/paladin/sc_paladin.cpp",
       "engine/class_modules/paladin/sc_paladin.hpp",
       "engine/class_modules/paladin/sc_paladin_protection.cpp",
+      // M10-C5 Phase B2 audit: the ground-effect lifetime a `<x>.up` expression reads.
+      "engine/player/ground_aoe.hpp",
+      "engine/player/ground_aoe.cpp",
     ]);
     for (const ability of artifact.abilities) {
       const census = ability.passiveModifierCensus;

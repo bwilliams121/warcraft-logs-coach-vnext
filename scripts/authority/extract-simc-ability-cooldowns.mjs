@@ -47,10 +47,24 @@
  * hit. A consumer that cannot resolve a censused trait's selection must treat
  * the modifier as POSSIBLE in the direction it acts.
  *
+ * THREE PASSIVE SOURCES (M10-C5 Phase B correction)
+ *
+ * `parse_all_passive_talents` is not the only parser call. `parse_all_class_
+ * passives` (player.cpp) parses every CLASS passive (`__passive_spells_data`
+ * in class_spells.inc) and every SPECIALIZATION spell with SX_PASSIVE
+ * (`__specialization_spell_data`) — and that is where the spec aura
+ * "Protection Paladin" (137028) hastes Avenger's Shield, Consecration and
+ * Shield of the Righteous and reduces the Judgment category's recharge, and
+ * where "Consecration" rank 3 (327980) halves Consecration's cooldown. Phase
+ * A's census read traits only and would have missed those; every modifier
+ * now carries its `origin` (TRAIT, SPEC_PASSIVE or CLASS_PASSIVE), and a
+ * passive origin is always active for the spec.
+ *
  * WHAT THE CENSUS DOES NOT CLAIM
  *
  * It censuses TRAITS of one class (trait_data.inc, `id_class`) that the target
- * specialization can select (a row's spec list names the spec, or is empty).
+ * specialization can select (a row's spec list names the spec, or is empty),
+ * the specialization's passive spells and the class's passive spells.
  * Set bonuses,
  * embellishments, racials and external auras are outside it and are covered,
  * where at all, by the hand review. It is a census of the pinned build's data,
@@ -82,6 +96,8 @@ const SOURCES = {
   spellDataLayout: "engine/dbc/spell_data.hpp",
   traitData: "engine/dbc/generated/trait_data.inc",
   traitDataLayout: "engine/dbc/trait_data.hpp",
+  specializationSpells: "engine/dbc/generated/specialization_spells.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
   clientDataVersion: "engine/dbc/generated/client_data_version.inc",
   dataEnums: "engine/dbc/data_enums.hh",
   playerModule: "engine/player/player.cpp",
@@ -89,6 +105,9 @@ const SOURCES = {
   classModule: "engine/class_modules/paladin/sc_paladin.cpp",
   classHeader: "engine/class_modules/paladin/sc_paladin.hpp",
   specModule: "engine/class_modules/paladin/sc_paladin_protection.cpp",
+  /** The ground-effect lifetime a `<x>.up` expression over a ground aoe actually reads (M10-C5 Phase B2 audit). */
+  groundAoeHeader: "engine/player/ground_aoe.hpp",
+  groundAoeModule: "engine/player/ground_aoe.cpp",
 };
 
 const TREE_NAME = { 1: "CLASS", 2: "SPECIALIZATION", 3: "HERO" };
@@ -183,6 +202,85 @@ const PALADIN_PROTECTION_TARGET = {
       cooldownHandle: "cooldowns.avenging_wrath",
       cooldownName: "avenging_wrath",
     },
+    {
+      simcToken: "avengers_shield",
+      abilityGameId: 31935,
+      aliasGroup: null,
+      createAction:
+        'sc_paladin_protection.cpp:972-973 create_action_protection dispatches "avengers_shield" to avengers_shield_t',
+      specBinding:
+        'sc_paladin_protection.cpp:1026-1030 region; avengers_shield_t : paladin_spell_t( "avengers_shield", p, p->find_specialization_spell( "Avenger\'s Shield" ) )',
+      actionStruct: { file: "specModule", name: "avengers_shield_t" },
+      cooldownHandle: "cooldowns.avengers_shield",
+      cooldownName: "avengers_shield",
+      /**
+       * Grand Crusader resets the cooldown in the module with NO buff of its
+       * own (sc_paladin_protection.cpp:903-950). The game applies buff 85416
+       * on the same proc; that observable signature is a Warcraft Logs fact
+       * the consumer must establish from evidence, not a SimulationCraft one.
+       */
+      knownDynamicMutations: [
+        {
+          member: "reset",
+          site: "paladin_t::trigger_grand_crusader",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "AURA_APPLICATION_ON_ACTOR",
+            abilityGameId: 85416,
+            basis:
+              "Grand Crusader's proc buff (DBC 85416, 6,000 ms, an Avenger's Shield modifier by family flags); in the Phase B1 capture 16 of its 19 removals coincide to the millisecond with an Avenger's Shield cast",
+          },
+        },
+      ],
+    },
+    {
+      simcToken: "consecration",
+      abilityGameId: 26573,
+      aliasGroup: null,
+      createAction: 'sc_paladin.cpp:3387-3388 create_action dispatches "consecration" to consecration_t',
+      specBinding:
+        'sc_paladin.cpp:425 consecration_t : paladin_spell_t( "consecration", p, p->find_spell( 26573 ) )',
+      actionStruct: { file: "classModule", name: "consecration_t" },
+      cooldownHandle: "cooldowns.consecration",
+      cooldownName: "consecration",
+      knownDynamicMutations: [
+        {
+          member: "adjust",
+          site: "consecration_t::execute (guarded by !player->in_combat && precombat_time > 0)",
+          effect: "PRECOMBAT_ONLY",
+        },
+      ],
+      /**
+       * consecration_t has TWO constructors: the hardcast one (sc_paladin.cpp:425-449)
+       * leaves the cooldown as the DBC gives it; the source_name overload
+       * (453-467) is for BACKGROUND copies (Divine Toll, Blessed Hammer,
+       * Sacred Weapon consecrations) and zeroes their cooldown. init_finished
+       * reads `cooldown->duration` for the precombat bound. Neither is an
+       * override of the player's action cooldown.
+       */
+      knownStructCooldownReferences: {
+        count: 2,
+        note: "cooldown->duration = 0_ms in the background source_name constructor (453-467, background = true); cooldown->duration.total_seconds() read in init_finished for the precombat bound",
+      },
+      /**
+       * `consecration.up` reads `active_consecration != nullptr` (sc_paladin.cpp:5036-5038):
+       * the HARDCAST ground effect, whose duration is `data().duration()`. The pointer
+       * is set on EVENT_CREATED and cleared on EVENT_DESTRUCTED by the state callback
+       * (sc_paladin.cpp:513-546), and ground_aoe_event_t fires DESTRUCTED at EVERY
+       * pulse before deciding whether another pulse fits (ground_aoe.cpp:207-283):
+       * the effect is therefore alive until its LAST pulse, not until the nominal
+       * duration. `lifetime` below is read mechanically from the pinned text.
+       */
+      groundEffect: {
+        expression: "consecration.up / consecration.ticking",
+        source:
+          "sc_paladin.cpp:5023-5043 create_consecration_expression; 500-556 consecration_t::execute (cons_params.duration( data().duration() ); a HARDCAST cancels the previous active_consecration)",
+        lifetime: {
+          activeStructMember: "active_consecration",
+          paramsVariable: "cons_params",
+        },
+      },
+    },
   ],
   aliasGroups: {
     wings: {
@@ -262,6 +360,7 @@ export function readSpellRecords(text, wantedIds, members) {
       chargeCooldownMs: intToken(tokens[at("_charge_cooldown")]),
       internalCooldownMs: intToken(tokens[at("_internal_cooldown")]),
       gcdMs: intToken(tokens[at("_gcd")]),
+      durationMs: intToken(tokens[at("_duration")]),
       classFamily: intToken(tokens[at("_class_flags_family")]),
       classFlags: arrayToken(tokens[at("_class_flags")]),
       attributes: arrayToken(tokens[at("_attributes")]),
@@ -365,16 +464,57 @@ function directionOf(kind, value) {
 }
 
 /** The census of one class's passive traits against one target spell. */
-export function censusPassiveModifiers({ traits, traitRecords, effects, target, labels, specId }) {
+export function censusPassiveModifiers({
+  traits,
+  traitRecords,
+  effects,
+  target,
+  labels,
+  specId,
+  specPassiveIds = new Set(),
+  classPassiveIds = new Set(),
+  property = "COOLDOWN",
+}) {
   const targetLabels = labels.get(target.spellId) ?? [];
   const matches = [];
   for (const effect of effects) {
     if (!APPLY_AURA_TYPES.has(effect.type)) continue;
     const owner = traitRecords.get(effect.spellId);
     if (owner === undefined || !isPassive(owner)) continue;
-    const matched = passiveEffectMatch(effect, owner, target, targetLabels);
+    const matched =
+      property === "COOLDOWN"
+        ? passiveEffectMatch(effect, owner, target, targetLabels)
+        : durationEffectMatch(effect, owner, target);
     if (matched === null) continue;
-    const rule = COOLDOWN_SUBTYPES[effect.subtype];
+    const rule = property === "COOLDOWN" ? COOLDOWN_SUBTYPES[effect.subtype] : DURATION_RULES[effect.subtype];
+    const origin = specPassiveIds.has(effect.spellId)
+      ? "SPEC_PASSIVE"
+      : classPassiveIds.has(effect.spellId)
+        ? "CLASS_PASSIVE"
+        : null;
+    if (origin !== null) {
+      matches.push({
+        origin,
+        talentSpellId: effect.spellId,
+        displayNameEn: owner.nameEn,
+        tree: null,
+        specIds: [],
+        traitNodeId: null,
+        traitEntryId: null,
+        nodeType: null,
+        alternativeEntries: [],
+        effectId: effect.effectId,
+        effectIndex: effect.index,
+        subtype: effect.subtype,
+        subtypeName: rule.name,
+        miscValue1: effect.miscValue1,
+        miscValue2: effect.miscValue2,
+        matchedBy: matched,
+        kind: rule.kind,
+        value: effect.baseValue,
+        direction: directionOf(rule.kind, effect.baseValue),
+      });
+    }
     for (const trait of traits.filter(
       (row) =>
         row.talentSpellId === effect.spellId && (row.specIds.length === 0 || row.specIds.includes(specId)),
@@ -383,6 +523,7 @@ export function censusPassiveModifiers({ traits, traitRecords, effects, target, 
         (row) => row.traitNodeId === trait.traitNodeId && row.traitEntryId !== trait.traitEntryId,
       );
       matches.push({
+        origin: "TRAIT",
         talentSpellId: effect.spellId,
         displayNameEn: owner.nameEn,
         tree: TREE_NAME[trait.treeIndex] ?? `TREE_${String(trait.treeIndex)}`,
@@ -410,9 +551,52 @@ export function censusPassiveModifiers({ traits, traitRecords, effects, target, 
   }
   matches.sort(
     (a, b) =>
-      a.talentSpellId - b.talentSpellId || a.traitEntryId - b.traitEntryId || a.effectIndex - b.effectIndex,
+      a.talentSpellId - b.talentSpellId ||
+      (a.traitEntryId ?? 0) - (b.traitEntryId ?? 0) ||
+      a.effectIndex - b.effectIndex,
   );
   return matches;
+}
+
+/** `P_DURATION` (1): the property a ground effect's lifetime reads. */
+const P_DURATION = 1;
+const DURATION_RULES = {
+  107: { name: "A_ADD_FLAT_MODIFIER", kind: "FLAT_MS" },
+  108: { name: "A_ADD_PCT_MODIFIER", kind: "PCT" },
+};
+
+/** A flat/pct modifier of the DURATION property, matched by class family flags. */
+export function durationEffectMatch(effect, ownerRecord, target) {
+  if (DURATION_RULES[effect.subtype] === undefined || effect.miscValue1 !== P_DURATION) return null;
+  if (ownerRecord.classFamily !== target.classFamily) return null;
+  const hit = effect.classFlags.some((word, i) => (word & (target.classFlags[i] ?? 0)) !== 0);
+  return hit ? "CLASS_FLAGS" : null;
+}
+
+/** The spell ids of one class's passive spells and one spec's passive spells, as SimulationCraft's parser enumerates them. */
+export function readPassiveSpellIds({
+  classSpellsText,
+  specializationSpellsText,
+  classId,
+  specId,
+  spellRecords,
+}) {
+  const passiveBlock = classSpellsText.slice(classSpellsText.indexOf("__passive_spells_data"));
+  const classPassiveIds = new Set(
+    [...passiveBlock.matchAll(/\{\s*(\d+),\s*(\d+)\s*,/g)]
+      .filter((match) => Number(match[1]) === classId)
+      .map((match) => Number(match[2])),
+  );
+  const specPassiveIds = new Set(
+    [...specializationSpellsText.matchAll(/^\s*\{\s*(\d+),\s*(\d+),\s*(\d+),/gm)]
+      .filter((match) => Number(match[1]) === classId && Number(match[2]) === specId)
+      .map((match) => Number(match[3]))
+      .filter((id) => {
+        const record = spellRecords.get(id);
+        return record !== undefined && isPassive(record);
+      }),
+  );
+  return { classPassiveIds, specPassiveIds };
 }
 
 // --------------------------------------------------------------------------
@@ -477,6 +661,106 @@ function enclosingStruct(text, lineNumber) {
 }
 
 /**
+ * The ground-effect LIFETIME rule a `<x>.up` expression actually follows,
+ * read mechanically from the pinned ground_aoe files and the class module
+ * (M10-C5 Phase B2 audit). Every fact below is REQUIRED to hold; a drifted
+ * module fails the extraction.
+ *
+ *   ground_aoe_params_t()            pulse_time_( 1_s ), expiration_pulse_( NO_EXPIRATION_PULSE ), n_pulses_( 0 )
+ *   _pulse_time                      tick *= p->cache.spell_haste() under SPELL_HASTE (haste only SHORTENS the tick)
+ *   may_pulse (NO_EXPIRATION_PULSE)  return time_left >= pulse_time( false )
+ *   execute                          EVENT_DESTRUCTED is fired at EVERY pulse, then `if ( may_pulse() ) schedule_event()`
+ *   internal constructor             EVENT_CREATED is fired for every scheduled pulse event
+ *   consecration_t                   cons_params sets duration and hasted( SPELL_HASTE ) and NOTHING else about
+ *                                    pulsing; the callback sets the active pointer on EVENT_CREATED and clears it
+ *                                    on EVENT_DESTRUCTED
+ *
+ * Consequence: the pointer is non-null from the cast until the LAST pulse —
+ * the first pulse after which less than one hasted tick of the duration
+ * remains — which lies in (D − tick, D] with tick ≤ pulseBaseMs. A consumer
+ * may claim TRUE only while elapsed ≤ D − pulseBaseMs, and FALSE only after D.
+ */
+export function groundEffectLifetimeChecks(ability, loaded) {
+  const problems = [];
+  const need = (text, needle, where) => {
+    if (!text.includes(needle))
+      problems.push(`${ability.simcToken}: ${where} no longer contains \`${needle}\``);
+  };
+  const forbid = (text, needle, where) => {
+    if (text.includes(needle)) problems.push(`${ability.simcToken}: ${where} now contains \`${needle}\``);
+  };
+  const aoe = loaded.groundAoeModule;
+  need(aoe, "pulse_time_( 1_s )", "ground_aoe.cpp ground_aoe_params_t()");
+  need(aoe, "expiration_pulse_( NO_EXPIRATION_PULSE )", "ground_aoe.cpp ground_aoe_params_t()");
+  need(aoe, "n_pulses_( 0 )", "ground_aoe.cpp ground_aoe_params_t()");
+  need(
+    aoe,
+    "case ground_aoe_params_t::SPELL_HASTE:       tick *= p->cache.spell_haste();",
+    "ground_aoe.cpp _pulse_time",
+  );
+  need(aoe, "return time_left >= pulse_time( false );", "ground_aoe.cpp may_pulse");
+  need(
+    aoe,
+    "params->state_callback()( ground_aoe_params_t::EVENT_DESTRUCTED, this );",
+    "ground_aoe.cpp execute",
+  );
+  need(
+    aoe,
+    "params->state_callback()( ground_aoe_params_t::EVENT_CREATED, this );",
+    "ground_aoe.cpp constructor",
+  );
+  const destructed = aoe.indexOf("params->state_callback()( ground_aoe_params_t::EVENT_DESTRUCTED, this );");
+  const mayPulse = aoe.indexOf("if ( may_pulse() )");
+  if (destructed === -1 || mayPulse === -1 || destructed > mayPulse)
+    problems.push(
+      `${ability.simcToken}: ground_aoe.cpp execute no longer fires EVENT_DESTRUCTED before deciding on the next pulse`,
+    );
+  const header = loaded.groundAoeHeader;
+  need(header, "NO_EXPIRATION_PULSE = 0,", "ground_aoe.hpp expiration_pulse_type");
+  need(header, "EVENT_DESTRUCTED,", "ground_aoe.hpp state_type");
+
+  const member = ability.groundEffect.lifetime.activeStructMember;
+  const params = ability.groundEffect.lifetime.paramsVariable;
+  const module = loaded.classModule;
+  const start = module.indexOf(`${params} = ground_aoe_params_t()`);
+  if (start === -1) {
+    problems.push(
+      `${ability.simcToken}: sc_paladin.cpp no longer builds ${params} from ground_aoe_params_t()`,
+    );
+    return { problems, lifetime: null };
+  }
+  const end = module.indexOf("} );", start);
+  const chain = module.slice(start, end === -1 ? start + 4000 : end);
+  need(chain, ".duration( cons_duration )", `sc_paladin.cpp ${params}`);
+  need(chain, ".hasted( ground_aoe_params_t::SPELL_HASTE )", `sc_paladin.cpp ${params}`);
+  forbid(chain, ".pulse_time(", `sc_paladin.cpp ${params}`);
+  forbid(chain, ".expiration_pulse(", `sc_paladin.cpp ${params}`);
+  forbid(chain, ".n_pulses(", `sc_paladin.cpp ${params}`);
+  need(module, "timespan_t cons_duration = data().duration();", "sc_paladin.cpp consecration_t");
+  need(chain, `p()->${member} = event;`, `sc_paladin.cpp ${params} state callback (EVENT_CREATED)`);
+  need(chain, `p()->${member} = nullptr;`, `sc_paladin.cpp ${params} state callback (EVENT_DESTRUCTED)`);
+  need(module, `return ${member} != nullptr;`, "sc_paladin.cpp create_consecration_expression");
+  return {
+    problems,
+    lifetime: {
+      activeStructMember: member,
+      paramsVariable: params,
+      pulseBaseMs: 1000,
+      pulseHasted: "SPELL_HASTE",
+      expirationPulse: "NO_EXPIRATION_PULSE",
+      rule: "ALIVE_UNTIL_LAST_PULSE",
+      claim:
+        "The active pointer is set on EVENT_CREATED and cleared on EVENT_DESTRUCTED; ground_aoe_event_t::execute fires EVENT_DESTRUCTED at every pulse and schedules another only while time_left >= one hasted pulse (may_pulse under NO_EXPIRATION_PULSE). The effect is therefore alive from the cast until the last pulse, at tick * floor(D / tick) with tick = 1,000 ms * spell haste factor <= 1,000 ms — inside (D - 1,000 ms, D]. TRUE may be claimed only while elapsed <= D - 1,000 ms; FALSE only after D; the interval between is UNKNOWN without a haste model.",
+      sources: [
+        "engine/player/ground_aoe.cpp: ground_aoe_params_t() defaults; _pulse_time; may_pulse; execute",
+        "engine/player/ground_aoe.hpp: expiration_pulse_type; state_type",
+        "engine/class_modules/paladin/sc_paladin.cpp: consecration_t (cons_duration, cons_params, state callback); create_consecration_expression",
+      ],
+    },
+  };
+}
+
+/**
  * The absence checks for one ability, each computed from the pinned text and
  * each REQUIRED to hold. A drifted module fails the extraction rather than
  * producing a policy that no longer describes it.
@@ -518,11 +802,19 @@ export function dynamicPolicyChecks(ability, loaded, traits) {
     "is_ready",
     "duration",
   ]);
+  const declared = ability.knownDynamicMutations ?? [];
   const mutating = arrowUses.filter((member) => !READ_ONLY_MEMBERS.has(member));
-  require("NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE", `every '${handleArrow}<member>' in sc_paladin.cpp + sc_paladin_protection.cpp`, mutating.length ===
-    0, arrowUses.length === 0
+  const undeclared = mutating.filter((member) => !declared.some((known) => known.member === member));
+  const declaredMissing = declared.filter((known) => !mutating.includes(known.member));
+  require(declared.length === 0
+    ? "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE"
+    : "EVERY_DYNAMIC_MUTATION_IS_DECLARED", `every '${handleArrow}<member>' in sc_paladin.cpp + sc_paladin_protection.cpp`, undeclared.length ===
+    0 && declaredMissing.length === 0, arrowUses.length === 0
     ? `no '${handleArrow}' use exists in the module`
-    : `${String(arrowUses.length)} use(s): ${arrowUses.map((m) => `->${m}()`).join(", ")} — reads only; no adjust(), reset(), start() or duration assignment`);
+    : `${String(arrowUses.length)} use(s): ${arrowUses.map((m) => `->${m}()`).join(", ")}` +
+        (declared.length === 0
+          ? " — reads only; no adjust(), reset(), start() or duration assignment"
+          : `; the mutation(s) ${declared.map((known) => `->${known.member}() in ${known.site} [${known.effect}]`).join("; ")} are declared and nothing else mutates it`));
 
   // 2. Named cooldown objects obtained by name: reads only.
   const byName = `get_cooldown( "${ability.cooldownName}" )`;
@@ -554,8 +846,13 @@ export function dynamicPolicyChecks(ability, loaded, traits) {
   const namesIt = mutators.filter(
     (receiver) => receiver.includes(ability.cooldownHandle) || receiver.includes(ability.cooldownName),
   );
-  require("NO_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN", "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module", namesIt.length ===
-    0, `${String(mutators.length)} mutation site(s) in the module; receivers: ${[...new Set(mutators)].join(", ")}; none names this cooldown`);
+  require(declared.length === 0
+    ? "NO_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN"
+    : "ONLY_DECLARED_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN", "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module", namesIt.length ===
+    declared.length, `${String(mutators.length)} mutation site(s) in the module; receivers: ${[...new Set(mutators)].join(", ")}; ` +
+    (declared.length === 0
+      ? "none names this cooldown"
+      : `exactly ${String(declared.length)} name(s) this cooldown, each declared: ${declared.map((known) => `${known.member}() in ${known.site}`).join("; ")}`));
 
   // 4. The one recharge-rate mechanism is a buff that is never constructed.
   const autumnDefined = count(loaded.classModule, "struct blessing_of_autumn_t");
@@ -585,16 +882,21 @@ export function dynamicPolicyChecks(ability, loaded, traits) {
         endLine: null,
       }
     : structBody(structFile, ability.actionStruct.name);
+  const knownReferences = ability.knownStructCooldownReferences?.count ?? 0;
   const overrides =
     body === null
       ? null
-      : count(body.text, "cooldown->") +
+      : count(body.text.replaceAll(`${ability.cooldownHandle}->`, ""), "cooldown->") -
+        knownReferences +
         count(body.text, "update_ready") +
         count(body.text, "cooldown_duration");
   require("NO_ACTION_LEVEL_COOLDOWN_OVERRIDE", `the body of ${ability.actionStruct.name} for 'cooldown->', 'update_ready' and 'cooldown_duration'`, body !==
     null && overrides === 0, body === null
     ? `${ability.actionStruct.name} was not found`
-    : `${ability.actionStruct.name}${body.startLine === null ? " (out-of-line members)" : ` (lines ${String(body.startLine)}-${String(body.endLine)})`} declares no cooldown override and no update_ready; the base action_t::update_ready path applies unchanged`);
+    : `${ability.actionStruct.name}${body.startLine === null ? " (out-of-line members)" : ` (lines ${String(body.startLine)}-${String(body.endLine)})`} declares no cooldown override and no update_ready; the base action_t::update_ready path applies unchanged` +
+        (knownReferences === 0
+          ? ""
+          : ` (${String(knownReferences)} declared cooldown reference(s): ${ability.knownStructCooldownReferences.note})`));
 
   // 6. The hasted-cooldown flag is set only in other actions' structs.
   const hastedSites = [];
@@ -692,6 +994,7 @@ async function main() {
         "_charge_cooldown",
         "_internal_cooldown",
         "_gcd",
+        "_duration",
         "_class_flags_family",
         "_class_flags",
         "_attributes",
@@ -729,27 +1032,56 @@ async function main() {
   if (traits.length === 0) fail(`no trait rows for class ${String(target.classId)}`);
   const traitSpellIds = [...new Set(traits.map((row) => row.talentSpellId))];
   const abilityIds = target.abilities.map((ability) => ability.abilityGameId);
-  const spellRead = readSpellRecords(loaded.spellData, [...abilityIds, ...traitSpellIds], spellMembers);
+  // Spec and class passive candidates need their spell records first (to test SX_PASSIVE).
+  const specRows = [...loaded.specializationSpells.matchAll(/^\s*\{\s*(\d+),\s*(\d+),\s*(\d+),/gm)]
+    .filter((match) => Number(match[1]) === target.classId && Number(match[2]) === target.specId)
+    .map((match) => Number(match[3]));
+  const classBlock = loaded.classSpells.slice(loaded.classSpells.indexOf("__passive_spells_data"));
+  const classRows = [...classBlock.matchAll(/\{\s*(\d+),\s*(\d+)\s*,/g)]
+    .filter((match) => Number(match[1]) === target.classId)
+    .map((match) => Number(match[2]));
+  const spellRead = readSpellRecords(
+    loaded.spellData,
+    [...new Set([...abilityIds, ...traitSpellIds, ...specRows, ...classRows])],
+    spellMembers,
+  );
   if (!spellRead.ok) fail(spellRead.error);
+  const { classPassiveIds, specPassiveIds } = readPassiveSpellIds({
+    classSpellsText: loaded.classSpells,
+    specializationSpellsText: loaded.specializationSpells,
+    classId: target.classId,
+    specId: target.specId,
+    spellRecords: spellRead.records,
+  });
   const labels = readSpellLabels(loaded.spellData);
   if (labels === null) fail("sc_spell_data.inc has no __spelllabel_data table");
-  const { effects, examined } = readAuraEffects(loaded.spellData, traitSpellIds, effectMembers);
+  const candidateIds = [...new Set([...traitSpellIds, ...specPassiveIds, ...classPassiveIds])];
+  const { effects, examined } = readAuraEffects(loaded.spellData, candidateIds, effectMembers);
 
   const abilities = [];
   const problems = [];
   for (const ability of target.abilities) {
     const record = spellRead.records.get(ability.abilityGameId);
     if (record === undefined) fail(`spell ${String(ability.abilityGameId)} is not in the pinned spell table`);
-    const passiveModifiers = censusPassiveModifiers({
+    const censusInput = {
       traits,
       traitRecords: spellRead.records,
       effects,
       target: record,
       labels,
       specId: target.specId,
-    });
+      specPassiveIds,
+      classPassiveIds,
+    };
+    const passiveModifiers = censusPassiveModifiers(censusInput);
+    const durationModifiers =
+      ability.groundEffect === undefined
+        ? undefined
+        : censusPassiveModifiers({ ...censusInput, property: "DURATION" });
     const policy = dynamicPolicyChecks(ability, loaded, traits);
     problems.push(...policy.problems);
+    const lifetime = ability.groundEffect === undefined ? null : groundEffectLifetimeChecks(ability, loaded);
+    if (lifetime !== null) problems.push(...lifetime.problems);
     abilities.push({
       simcToken: ability.simcToken,
       abilityGameId: ability.abilityGameId,
@@ -766,6 +1098,20 @@ async function main() {
       classFamily: record.classFamily,
       classFlags: record.classFlags,
       labels: labels.get(ability.abilityGameId) ?? [],
+      ...(ability.groundEffect === undefined
+        ? {}
+        : {
+            groundEffect: {
+              expression: ability.groundEffect.expression,
+              source: ability.groundEffect.source,
+              durationMs: record.durationMs,
+              durationModifiers,
+              lifetime: lifetime?.lifetime ?? null,
+            },
+          }),
+      ...(ability.knownDynamicMutations === undefined
+        ? {}
+        : { knownDynamicMutations: ability.knownDynamicMutations }),
       binding: {
         method: "MACHINE_EXTRACTED_DBC_RECORD",
         sourcePath: SOURCES.spellData,
@@ -777,9 +1123,11 @@ async function main() {
         classId: target.classId,
         traitRowsExamined: traits.length,
         traitSpellsExamined: traitSpellIds.length,
+        specPassiveSpellsExamined: specPassiveIds.size,
+        classPassiveSpellsExamined: classPassiveIds.size,
         effectRowsExamined: examined,
         subtypesChecked: Object.entries(COOLDOWN_SUBTYPES).map(([id, rule]) => `${id}:${rule.name}`),
-        rule: "player.cpp parse_all_passive_talents -> parse_passive_effects (SX_PASSIVE spells; E_APPLY_AURA effects) -> register_passive_effect: A_ADD_FLAT/PCT_MODIFIER with misc_value1 == P_COOLDOWN (11) match by class family flags; the LABEL variants match by misc_value2 against __spelllabel_data; category subtypes match the spell's _category; category-mask subtypes match the spell's _category_type mask; A_HASTED_COOLDOWN matches by family flags. A matched flat value is added to the DBC cooldown field and a matched pct value scales it BEFORE action_t::init reads spell_data.cooldown() (dbc_override_->register_spell( id, \"cooldown\", value )).",
+        rule: "player.cpp parse_all_class_passives (class passives from class_spells.inc __passive_spells_data; specialization spells with SX_PASSIVE from specialization_spells.inc) and parse_all_passive_talents -> parse_passive_effects (SX_PASSIVE spells; E_APPLY_AURA effects) -> register_passive_effect: A_ADD_FLAT/PCT_MODIFIER with misc_value1 == P_COOLDOWN (11) match by class family flags; the LABEL variants match by misc_value2 against __spelllabel_data; category subtypes match the spell's _category; category-mask subtypes match the spell's _category_type mask; A_HASTED_COOLDOWN matches by family flags. A matched flat value is added to the DBC cooldown field and a matched pct value scales it BEFORE action_t::init reads spell_data.cooldown() (dbc_override_->register_spell( id, \"cooldown\", value )).",
         modifiers: passiveModifiers,
       },
       dynamicModifierPolicy: {

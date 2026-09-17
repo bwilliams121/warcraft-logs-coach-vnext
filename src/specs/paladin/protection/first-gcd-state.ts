@@ -52,13 +52,37 @@ export interface ExecutedEntry {
   readonly sourceLine: number;
 }
 
+/** An atom a hypothetical execution may have changed, so the branch no longer trusts the caller's binding of it. */
+export interface ForgottenAtom {
+  readonly kind: "BUFF" | "SPEC_ATOM";
+  readonly name: string;
+}
+
 export interface ProtectionFirstGcdState {
   readonly executedEntries: readonly ExecutedEntry[];
   readonly race: ProtectionRaceWorld;
+  /**
+   * Atoms FORGOTTEN in this branch (M10-C5 Phase B): a contract's
+   * UNBOUND_ATOMS_MAY_CHANGE names what an execution may change; the
+   * successor state drops the caller's binding of exactly those atoms, so the
+   * shared evaluator enumerates them again. Everything else stays bound.
+   */
+  readonly forgottenAtoms: readonly ForgottenAtom[];
 }
 
 export function initialProtectionState(race: ProtectionRaceWorld): ProtectionFirstGcdState {
-  return { executedEntries: [], race };
+  return { executedEntries: [], race, forgottenAtoms: [] };
+}
+
+const forgottenKey = (atom: ForgottenAtom): string => `${atom.kind}:${atom.name}`;
+
+export function withForgottenAtoms(
+  state: ProtectionFirstGcdState,
+  atoms: readonly ForgottenAtom[],
+): ProtectionFirstGcdState {
+  const known = new Set(state.forgottenAtoms.map(forgottenKey));
+  const added = atoms.filter((atom) => !known.has(forgottenKey(atom)));
+  return added.length === 0 ? state : { ...state, forgottenAtoms: [...state.forgottenAtoms, ...added] };
 }
 
 export function executedEntryKey(entry: ExecutedEntry): string {
@@ -78,13 +102,15 @@ export function withExecution(state: ProtectionFirstGcdState, entry: ExecutedEnt
   return {
     executedEntries: hasExecuted(state, entry) ? state.executedEntries : [...state.executedEntries, entry],
     race: state.race,
+    forgottenAtoms: state.forgottenAtoms,
   };
 }
 
 /** Stable and serializable: the engine's cycle detection compares these. */
 export function protectionStateKey(state: ProtectionFirstGcdState): string {
   const executed = state.executedEntries.map(executedEntryKey).sort().join(",");
-  return `${state.race}|[${executed}]`;
+  const forgotten = state.forgottenAtoms.map(forgottenKey).sort().join(",");
+  return `${state.race}|[${executed}]|forgot[${forgotten}]`;
 }
 
 export function racialIsApplicableIn(state: ProtectionFirstGcdState, simcToken: string): boolean {

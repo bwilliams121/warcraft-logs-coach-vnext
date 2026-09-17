@@ -145,10 +145,17 @@ describe("the resolver over the REAL M10-B opener", () => {
     expect(diagnostics.heroTree).toMatchObject({ state: "RESOLVED", simcName: "lightsmith", subTreeId: 49 });
     expect(diagnostics.righteousProtector.reason).toBe("OWN_ENTRY_SELECTED");
     expect(diagnostics.apex3.decidedByEntryId).toBe(137020);
-    // Under Lightsmith the armament alternation is not observable: a refusal, not the constructor's default.
+    // Under Lightsmith the armament alternation is modelled (M10-C5 Phase B)
+    // but at the first Judgment no hardcast precedes the decision: a refusal
+    // with the state machine's reason, not the constructor's default.
     expect(valueOf(specAtoms.bound, NEXT_ARMAMENT)).toEqual({
       kind: "MAGNITUDE",
-      binding: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_MODELLED" },
+      binding: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" },
+    });
+    expect(diagnostics.armament).toEqual({
+      state: "UNKNOWN",
+      reason: "NO_HARDCAST_IN_EVIDENCE",
+      stoppedAtPosition: null,
     });
     expect(valueOf(specAtoms.bound, SACRED_WEAPON)).toEqual({
       kind: "MAGNITUDE",

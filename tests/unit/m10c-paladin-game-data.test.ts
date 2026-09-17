@@ -105,6 +105,7 @@ describe("the GCD-semantics artifact", () => {
     [389539, "Sentinel", 0, "NON_GCD"],
     [427453, "Hammer of Light", 1500, "GCD_CONSUMING"],
     [432459, "Holy Bulwark", 1500, "GCD_CONSUMING"],
+    [432472, "Sacred Weapon", 1500, "GCD_CONSUMING"],
     [1241413, "Hammer of Wrath", 1500, "GCD_CONSUMING"],
   ])("ability %i (%s) has base GCD %i ms, lane %s", (abilityGameId, displayNameEn, baseGcdMs, lane) => {
     const record = gcdArtifact.abilities.find((entry) => entry.abilityGameId === abilityGameId);
@@ -113,8 +114,10 @@ describe("the GCD-semantics artifact", () => {
     expect(protectionExecutionLaneForAbility(abilityGameId)).toBe(lane);
   });
 
-  it("carries exactly nineteen ability records, fourteen token bindings and four meta lanes", () => {
-    expect(gcdArtifact.abilities).toHaveLength(19);
+  it("carries exactly twenty ability records, fourteen token bindings and four meta lanes", () => {
+    // M10-C5 Phase B added Sacred Weapon 432472: the game records a Holy
+    // Armaments press under the armament it produced.
+    expect(gcdArtifact.abilities).toHaveLength(20);
     expect(gcdArtifact.tokenBindings).toHaveLength(14);
     expect(gcdArtifact.metaActionLanes.map((meta) => meta.simcToken)).toEqual([
       "auto_attack",
@@ -128,7 +131,6 @@ describe("the GCD-semantics artifact", () => {
     ["divine_toll", [375576]],
     ["hammer_of_light", [427453]],
     ["shield_of_the_righteous", [53600]],
-    ["holy_armaments", [432459]],
     ["hammer_of_wrath", [1241413]],
     ["judgment", [275779]],
     ["avengers_shield", [31935]],
@@ -142,6 +144,13 @@ describe("the GCD-semantics artifact", () => {
     const binding = protectionTokenBinding(token);
     expect(binding.kind).toBe("KNOWN_ONE");
     if (binding.kind === "KNOWN_ONE") expect([binding.abilityGameId]).toEqual(ids);
+  });
+
+  it("holy_armaments binds to the TWO armaments the press is recorded under, both GCD_CONSUMING", () => {
+    const binding = protectionTokenBinding("holy_armaments");
+    expect(binding.kind).toBe("KNOWN_SET");
+    if (binding.kind === "KNOWN_SET") expect([...binding.abilityGameIds].sort()).toEqual([432459, 432472]);
+    expect(protectionExecutionLaneForAbility(432472)).toBe("GCD_CONSUMING");
   });
 
   it("avenging_wrath binds to TWO records whose lanes agree, so the token's lane holds without the talent", () => {
@@ -224,9 +233,10 @@ describe("the talent artifact", () => {
     );
   });
 
-  it("carries the six talents, two hero sub-trees and three apex tiers the target declares", () => {
+  it("carries the seven talents, two hero sub-trees and three apex tiers the target declares", () => {
     expect(protectionModelledTalentNames()).toEqual([
       "avenging_wrath",
+      "blessed_assurance",
       "blessed_hammer",
       "divine_toll",
       "hammer_of_the_righteous",

@@ -513,6 +513,9 @@ const PALADIN_PROTECTION_FACTS = {
     { abilityGameId: 389539, displayNameEn: "Sentinel", baseGcdMs: 0 },
     { abilityGameId: 427453, displayNameEn: "Hammer of Light", baseGcdMs: 1500 },
     { abilityGameId: 432459, displayNameEn: "Holy Bulwark", baseGcdMs: 1500 },
+    // M10-C5 Phase B: the Sacred Weapon record the same press casts on the
+    // alternate armament. Same lane as 432459; bound to the same token below.
+    { abilityGameId: 432472, displayNameEn: "Sacred Weapon", baseGcdMs: 1500 },
     { abilityGameId: 1241413, displayNameEn: "Hammer of Wrath", baseGcdMs: 1500 },
     // ---- abilities the M10-B subject cast that the APL does not name ----
     // Lane records only. They classify the observed casts (all four are
@@ -587,7 +590,17 @@ const PALADIN_PROTECTION_FACTS = {
     },
     {
       simcToken: "holy_armaments",
-      candidateAbilityGameIds: [432459],
+      // TWO records (M10-C5 Phase B). SimulationCraft models ONE action on
+      // 432459 whose execute_time and effect come from the alternation state
+      // (sc_paladin.cpp:2628-2635: `active.armament[ p()->next_armament ]`),
+      // but the game logs the press under whichever armament it cast: Holy
+      // Bulwark 432459 or Sacred Weapon 432472. Both DBC records carry `_gcd`
+      // 1500, `_charges` 2, `_charge_cooldown` 60000 and category 2220, so
+      // the lane and the cooldown object are the same under either id. The
+      // Phase B1 evidence holds both ids as GCD-spaced casts by the subject
+      // (+61.521 s and +121.011 s as 432472; +70.832 s and +162.809 s as
+      // 432459), each applying its own armament buff at the same millisecond.
+      candidateAbilityGameIds: [432459, 432472],
       crossCheck: "NONE_TALENT_BOUND",
       sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
       symbol: "paladin_t::create_action / holy_armaments_t",
@@ -597,7 +610,10 @@ const PALADIN_PROTECTION_FACTS = {
         'create_action dispatches "holy_armaments" to holy_armaments_t, whose base is ' +
         'paladin_spell_t( "holy_armaments", p, p->find_spell( 432459 ) ) at sc_paladin.cpp:2616. The DBC record ' +
         'is named "Holy Bulwark"; the token is the Lightsmith armament action, background unless the Lightsmith ' +
-        "hero tree is active (sc_paladin.cpp:2621).",
+        "hero tree is active (sc_paladin.cpp:2621). holy_armaments_t::execute (2632-2635) casts " +
+        "active.armament[ next_armament ] with LS_HARDCAST — Holy Bulwark or Sacred Weapon — so the press the " +
+        "log records is 432459 or 432472 (the Sacred Weapon spell row) depending on the alternation; both rows " +
+        "share `_gcd` 1500, `_charges` 2, `_charge_cooldown` 60000 and category 2220.",
     },
     {
       simcToken: "hammer_of_wrath",

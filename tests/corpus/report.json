@@ -190,6 +190,34 @@
       "sha256": "08272ce986fe5699b210885d1d60b4a30ec00840624434ea565814d9482ff998"
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "byteLength": 182066,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "c48ce814082d9e5bb73b383843f9104aa3ee44aa5a2b2410e26c9ad82e96198c"
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+      "byteLength": 43545,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "5dbcb8dc8e95deab10e8df68c98fdb155b12d7988fbe6108510ca0db71df2638"
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+      "byteLength": 172085,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "52c5762b5d3d7412c637a82ee1202f9f428529e9bdd68de0337a84772f32b868"
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+      "byteLength": 153998,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "d09476cc1a94cea2daadeb33da425a4443bdda5dd27ff132ca9b901658256033"
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
       "byteLength": 257348,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -227,14 +255,15 @@
       "passed": 23
     },
     {
-      "assertions": 81,
-      "cases": 24,
+      "assertions": 103,
+      "cases": 30,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
         "NORMALIZATION.ALL_TYPES_RECOGNISED",
         "NORMALIZATION.ATTACHED_RESOURCE_SIDE",
+        "NORMALIZATION.BUNDLE_COMPOSITION",
         "NORMALIZATION.EVENT_COUNT_PRESERVED",
         "NORMALIZATION.EVENT_FACTS",
         "NORMALIZATION.FIGHT_HEADER",
@@ -247,7 +276,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 81
+      "passed": 103
     },
     {
       "assertions": 62,
@@ -296,10 +325,11 @@
       "passed": 20
     },
     {
-      "assertions": 59,
-      "cases": 17,
+      "assertions": 110,
+      "cases": 23,
       "failed": 0,
       "kindsExercised": [
+        "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
         "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
         "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE",
         "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION",
@@ -317,7 +347,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_PROTECTION_PALADIN",
-      "passed": 59
+      "passed": 110
     },
     {
       "assertions": 6,
@@ -1119,6 +1149,44 @@
       "referencedArtifactIds": ["wcl-pet-sourced-events-hunter-pet-29"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-165s-bundle-composes-five-parts-into-one-complete-fight",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-165s-gap-bundle-keeps-exactly-the-declared-hole",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
@@ -1236,6 +1304,142 @@
       "caseId": "normalization.protection-paladin-opener-slice-normalizes-whole-and-in-order",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-rotational-165s-seg-120-165-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-165s.seg-120-165"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-rotational-165s-seg-45-60-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-rotational-165s-seg-60-90-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-165s.seg-60-90"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-rotational-165s-seg-90-120-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
@@ -2107,6 +2311,88 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 7,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 8,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 9,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 10,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 11,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-protection-paladin.gap-bundle-resets-every-claim-that-spans-the-declared-hole",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
       "assertions": [
         {
@@ -2137,6 +2423,70 @@
       "caseId": "spec-protection-paladin.gap-derivation-evaluates-fewer-decisions-and-binds-no-previous-press",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener.gap-before-2010000"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 7,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -2196,6 +2546,70 @@
       "caseId": "spec-protection-paladin.missing-holy-power-is-no-observation-never-zero",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 7,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-protection-paladin.next-armament-is-anchored-only-on-a-hardcast-strictly-before-the-decision",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -2469,6 +2883,129 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-protection-paladin.steady-state-window-population-is-thirty-seven-with-one-real-match",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 7,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 8,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "ordinal": 9,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 10,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 11,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-protection-paladin.the-avengers-shield-press-under-vanguard-is-a-real-exact-entry-match",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
       "assertions": [
         {
@@ -2505,6 +3042,70 @@
       "caseId": "spec-protection-paladin.the-divine-toll-press-is-a-real-exact-entry-match",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 7,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-protection-paladin.the-predicted-judgment-convergence-is-disproved-at-consecration",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -2859,15 +3460,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 2812358,
-    "artifacts": 30,
-    "assertions": 262,
-    "cases": 97,
+    "artifactBytes": 3364052,
+    "artifacts": 34,
+    "assertions": 335,
+    "cases": 109,
     "declared": 0,
-    "executable": 262,
+    "executable": 335,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 262
+    "passed": 335
   }
 }

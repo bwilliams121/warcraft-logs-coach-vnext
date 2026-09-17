@@ -61,8 +61,10 @@ describe("the Paladin tree", () => {
   it("exists and is the expected set of modules", () => {
     expect(PALADIN_TREE.map((path) => path.slice("src/specs/paladin/protection/".length))).toEqual([
       "action-profile.ts",
+      "armament-state.ts",
       "aura-bindings.ts",
       "authority-bindings.ts",
+      "build-absences.ts",
       "cooldown-bindings.ts",
       "domains.ts",
       "first-gcd-adapter.ts",
@@ -216,6 +218,7 @@ describe("shared code reaches the two trees only through the registry", () => {
       .map((path) => path.slice("src/data/game/".length))
       .filter((name) => /^(paladin|rogue)-/.test(name));
     expect(classNamed.filter((name) => name.startsWith("paladin-"))).toEqual([
+      "paladin-protection-armament-authority.ts",
       "paladin-protection-aura-authority.ts",
       "paladin-protection-cooldowns.json",
       "paladin-protection-cooldowns.ts",

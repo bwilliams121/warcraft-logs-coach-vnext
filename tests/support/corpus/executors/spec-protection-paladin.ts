@@ -16,6 +16,15 @@
  * checks against that one frozen result. The gap derivative is a different
  * artifact with a different digest and is analyzed on its own. Nothing is
  * memoized in production code, and nothing survives the run.
+ *
+ * BUNDLES (M10-C5 Phase B). A case whose params carry `historyArtifactIds`
+ * is analyzed over ONE fight composed from those artifacts, in order, with
+ * the case's own artifact last, and exactly the `declaredHoles` left as
+ * PARTIAL coverage (`stateOfBundle`). The memo key then names every part's
+ * id, digest and provenance plus the holes, so a bundle with one segment
+ * swapped, re-cut or re-ordered is a different analysis. `evaluationWindow`
+ * restricts the population an aggregate assertion counts to decisions whose
+ * report time lies inside it; it never changes the analysis itself.
  */
 
 import type { CombatState } from "../../../../src/engine/state/combat-state.js";
@@ -23,6 +32,7 @@ import type { GearPiece } from "../../../../src/engine/normalization/normalized-
 import { InternalSpecExposureError, requirePublicSpecId } from "../../../../src/findings/spec-id.js";
 import {
   analyzeObservedProtectionPaladinDecisions,
+  summarizeProtectionDecisions,
   type ProtectionPaladinAnalysis,
 } from "../../../../src/specs/paladin/protection/observed-analysis.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../../../../src/specs/paladin/protection/registration.js";
@@ -34,7 +44,14 @@ import {
 } from "../../../../src/specs/paladin/protection/subaction-candidates.js";
 import { PROTECTION_PALADIN_SPEC_ID } from "../../../../src/specs/paladin/protection/spec.js";
 import type { CorpusExecutionContext } from "../execution-context.js";
-import { positionOfCast, stateOf } from "../fight.js";
+import {
+  bundleOf,
+  BundleCompositionError,
+  positionOfCast,
+  stateOf,
+  stateOfBundle,
+  type BundleHole,
+} from "../fight.js";
 import type { LoadedArtifact, LoadedCase, LoadedCorpus } from "../loader.js";
 import { fail, pass, type AssertionOutcome } from "./outcome.js";
 import type { ParamsOf } from "./params.js";
@@ -51,11 +68,39 @@ function analysisFacts(analysis: ProtectionPaladinAnalysis): unknown {
     : { status: analysis.status, detail: analysis.detail };
 }
 
+/** The bundle a case asks for, or null for a single-artifact analysis. */
+interface BundleRequest {
+  readonly historyArtifactIds: readonly string[];
+  readonly declaredHoles: readonly BundleHole[];
+}
+
+function bundleRequestOf(params: {
+  readonly historyArtifactIds?: readonly string[] | undefined;
+  readonly declaredHoles?: readonly BundleHole[] | undefined;
+}): BundleRequest | null {
+  if (params.historyArtifactIds === undefined || params.historyArtifactIds.length === 0) return null;
+  return { historyArtifactIds: params.historyArtifactIds, declaredHoles: params.declaredHoles ?? [] };
+}
+
+function partsOf(
+  corpus: LoadedCorpus,
+  artifact: LoadedArtifact,
+  bundle: BundleRequest,
+): readonly LoadedArtifact[] {
+  const parts = bundle.historyArtifactIds.map((artifactId) => {
+    const part = corpus.artifacts.find((entry) => entry.record.artifactId === artifactId);
+    if (part === undefined) throw new BundleCompositionError(`unknown artifact ${artifactId}`);
+    return part;
+  });
+  return [...parts, artifact];
+}
+
 /**
- * The registration's analysis of one actor over one artifact, derived once per
- * run. The key names every input: the code path, the artifact (id, digest and
- * provenance — the events and the coverage the fight is granted), the actor,
- * the specialization and the target.
+ * The registration's analysis of one actor over one artifact — or one bundle
+ * — derived once per run. The key names every input: the code path, every
+ * part in order (id, digest and provenance — the events and the coverage the
+ * fight is granted), the declared holes, the actor, the specialization and
+ * the target.
  */
 function analysisOf(
   context: CorpusExecutionContext,
@@ -63,19 +108,31 @@ function analysisOf(
   artifact: LoadedArtifact,
   actorId: number,
   targetActorId: number | null,
+  bundle: BundleRequest | null,
 ): { readonly state: CombatState; readonly analysis: ProtectionPaladinAnalysis } {
+  const parts = bundle === null ? [artifact] : partsOf(corpus, artifact, bundle);
   const key = JSON.stringify({
     derivation: "PROTECTION_PALADIN_REGISTRATION.analyze",
     analyzerId: PROTECTION_PALADIN_REGISTRATION.analyzerId,
-    artifactId: artifact.record.artifactId,
-    artifactSha256: artifact.record.sha256,
-    provenance: artifact.record.provenance,
+    parts: parts.map((part) => ({
+      artifactId: part.record.artifactId,
+      artifactSha256: part.record.sha256,
+      provenance: part.record.provenance,
+    })),
+    declaredHoles: bundle?.declaredHoles ?? [],
     actorId,
     specId: PROTECTION_PALADIN_SPEC_ID,
     targetActorId,
   });
   return context.memo.once(key, () => {
-    const state = stateOf(corpus, artifact);
+    const state =
+      bundle === null
+        ? stateOf(corpus, artifact)
+        : stateOfBundle(
+            corpus,
+            parts.map((part) => part.record.artifactId),
+            bundle.declaredHoles,
+          );
     const analysis = PROTECTION_PALADIN_REGISTRATION.analyze({
       state,
       actorId,
@@ -94,10 +151,20 @@ function analyzedOrFail(
   artifact: LoadedArtifact,
   actorId: number,
   targetActorId: number | null = null,
+  bundle: BundleRequest | null = null,
 ):
   | { readonly ok: true; readonly state: CombatState; readonly analysis: Analyzed }
   | { readonly ok: false; readonly outcome: AssertionOutcome } {
-  const { state, analysis } = analysisOf(context, corpus, artifact, actorId, targetActorId);
+  let derived: ReturnType<typeof analysisOf>;
+  try {
+    derived = analysisOf(context, corpus, artifact, actorId, targetActorId, bundle);
+  } catch (error) {
+    if (error instanceof BundleCompositionError) {
+      return { ok: false, outcome: fail(error.message, { expected: { composed: true } }) };
+    }
+    throw error;
+  }
+  const { state, analysis } = derived;
   if (analysis.status !== "ANALYZED") {
     return {
       ok: false,
@@ -165,7 +232,15 @@ export function decisionCoverage(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.DECISION_COVERAGE">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, params.targetActorId);
+  const run = analyzedOrFail(
+    context,
+    corpus,
+    kase,
+    artifact,
+    params.actorId,
+    params.targetActorId,
+    bundleRequestOf(params),
+  );
   if (!run.ok) return run.outcome;
   const position = castPosition(run.state, params.actorId, params.observedCast);
   if (!position.ok) return position.outcome;
@@ -198,6 +273,13 @@ export function decisionCoverage(
   return pass();
 }
 
+function insideWindow(
+  reportTimeMs: number,
+  window: { readonly fromReportTimeMs: number; readonly toReportTimeMs: number },
+): boolean {
+  return reportTimeMs >= window.fromReportTimeMs && reportTimeMs <= window.toReportTimeMs;
+}
+
 export function coverageSummary(
   context: CorpusExecutionContext,
   corpus: LoadedCorpus,
@@ -205,9 +287,17 @@ export function coverageSummary(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
   if (!run.ok) return run.outcome;
-  const { coverage } = run.analysis;
+  const window = params.evaluationWindow ?? null;
+  const coverage =
+    window === null
+      ? run.analysis.coverage
+      : summarizeProtectionDecisions(
+          params.actorId,
+          run.analysis.comparisons.filter((entry) => insideWindow(entry.decision.reportTimeMs, window)),
+          run.analysis.excluded.filter((entry) => insideWindow(entry.reportTimeMs, window)),
+        );
   const actual = {
     eligibleDecisions: coverage.eligibleDecisions,
     match: coverage.match,
@@ -361,7 +451,7 @@ export function cooldownReadinessAt(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
   if (!run.ok) return run.outcome;
   const position = castPosition(run.state, params.actorId, params.observedCast);
   if (!position.ok) return position.outcome;
@@ -413,7 +503,7 @@ export function auraBindingAt(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.AURA_BINDING_AT">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
   if (!run.ok) return run.outcome;
   const position = castPosition(run.state, params.actorId, params.observedCast);
   if (!position.ok) return position.outcome;
@@ -434,13 +524,21 @@ export function auraBindingAt(
           anchorReportTimeMs: aura.anchorLocator.reportTimeMs,
           reason: null,
         }
-      : {
-          state: aura.state,
-          up: null,
-          abilityGameId: aura.abilityGameId,
-          anchorReportTimeMs: null,
-          reason: aura.reason,
-        };
+      : aura.state === "BOUND_BY_BUILD"
+        ? {
+            state: aura.state,
+            up: aura.up,
+            abilityGameId: aura.abilityGameId,
+            anchorReportTimeMs: null,
+            reason: aura.gate,
+          }
+        : {
+            state: aura.state,
+            up: null,
+            abilityGameId: aura.abilityGameId,
+            anchorReportTimeMs: null,
+            reason: aura.reason,
+          };
   if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
     return fail("the aura binding at this decision differs from the case", {
       expected: params.expected,
@@ -458,12 +556,17 @@ export function unknownBlockerDistribution(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
   if (!run.ok) return run.outcome;
+  const window = params.evaluationWindow ?? null;
+  const comparisons =
+    window === null
+      ? run.analysis.comparisons
+      : run.analysis.comparisons.filter((entry) => insideWindow(entry.decision.reportTimeMs, window));
   const blockedAt = new Map<string, number>();
   let match = 0;
   let rejected = 0;
-  for (const comparison of run.analysis.comparisons) {
+  for (const comparison of comparisons) {
     if (comparison.outcome === "MATCH") {
       match += 1;
       continue;
@@ -500,9 +603,61 @@ export function unknownBlockerDistribution(
     return fail("the UNKNOWN blocker distribution differs from the case", { expected, actual });
   }
   const unknown = [...blockedAt.values()].reduce((sum, count) => sum + count, 0);
-  if (match + rejected + unknown !== run.analysis.comparisons.length) {
+  if (match + rejected + unknown !== comparisons.length) {
     return fail("the blockers and the resolved counts do not partition the eligible decisions", {
-      actual: { match, rejected, unknown, eligible: run.analysis.comparisons.length },
+      actual: { match, rejected, unknown, eligible: comparisons.length },
+    });
+  }
+  return pass();
+}
+
+export function armamentStateAt(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const position = castPosition(run.state, params.actorId, params.observedCast);
+  if (!position.ok) return position.outcome;
+  const resolved = run.analysis.resolved.find((entry) => entry.position === position.position);
+  if (resolved === undefined) {
+    return fail("the observed cast is not an eligible decision, so no armament state was resolved there", {
+      expected: params.observedCast,
+      locator: run.state.locatorAt(position.position),
+    });
+  }
+  const armament = resolved.diagnostics.armament;
+  if (armament === null) {
+    return fail("the hero tree is not Lightsmith, so the alternation is not consulted", {
+      expected: params.expected,
+      actual: { heroTree: resolved.diagnostics.heroTree },
+      locator: run.state.locatorAt(position.position),
+    });
+  }
+  const actual =
+    armament.state === "KNOWN"
+      ? {
+          state: armament.state,
+          nextArmament: armament.nextArmament,
+          anchorReportTimeMs: armament.anchorReportTimeMs,
+          anchorAbilityGameId: armament.anchorAbilityGameId,
+          reason: null,
+        }
+      : {
+          state: armament.state,
+          nextArmament: null,
+          anchorReportTimeMs: null,
+          anchorAbilityGameId: null,
+          reason: armament.reason,
+        };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the Lightsmith alternation at this decision differs from the case", {
+      expected: params.expected,
+      actual,
+      locator: run.state.locatorAt(position.position),
     });
   }
   return pass();
@@ -548,7 +703,7 @@ export function resolvedAtom(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.RESOLVED_ATOM">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
   if (!run.ok) return run.outcome;
   const position = castPosition(run.state, params.actorId, params.observedCast);
   if (!position.ok) return position.outcome;
@@ -650,4 +805,53 @@ export function notPubliclyProjectable(
     expected: { thrown: "InternalSpecExposureError" },
     actual: { specId: run.analysis.specId },
   });
+}
+
+/**
+ * NORMALIZATION.BUNDLE_COMPOSITION: the composer over these parts, in order,
+ * with the case's artifact last. Not memoized: a composition assertion is the
+ * one place the composition itself is under test.
+ */
+export function bundleComposition(
+  corpus: LoadedCorpus,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"NORMALIZATION.BUNDLE_COMPOSITION">,
+): AssertionOutcome {
+  const ids = [...params.historyArtifactIds, artifact.record.artifactId];
+  let composed: ReturnType<typeof bundleOf>;
+  try {
+    composed = bundleOf(corpus, ids, params.declaredHoles);
+  } catch (error) {
+    if (error instanceof BundleCompositionError) {
+      return fail(error.message, { expected: { composed: true }, actual: { composed: false } });
+    }
+    throw error;
+  }
+  const { fight } = composed;
+  const coverage = Object.fromEntries(
+    Object.keys(params.expected.coverage).map((category) => [
+      category,
+      (
+        fight.completeness.categories as Record<
+          string,
+          { readonly coverage?: { readonly state: string } } | undefined
+        >
+      )[category]?.coverage?.state ?? "ABSENT",
+    ]),
+  );
+  const castRanges = (composed.coveredRanges.CASTS ?? []).map((range) => ({
+    fromReportTimeMs: range.fromReportTimeMs,
+    toReportTimeMs: range.toReportTimeMs,
+  }));
+  const actual = {
+    events: composed.events,
+    coverage,
+    castRanges,
+    windowFromReportTimeMs: fight.fight.startTimeMs,
+    windowToReportTimeMs: fight.fight.endTimeMs,
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the composed bundle differs from the case", { expected: params.expected, actual });
+  }
+  return pass();
 }

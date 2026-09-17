@@ -24,7 +24,7 @@
     ],
     "clientDataWowVersion": "12.1.0.69587",
     "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
-    "extractedOn": "2026-09-16",
+    "extractedOn": "2026-09-17",
     "extractorVersion": 1,
     "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeId }. In the supported capture (report A7R6kxPJ1hC8YQ4w revision 30, logVersion 17, gameVersion 1) `id` equals trait_data_t::id_trait_node_entry and `nodeId` equals trait_data_t::id_node. Corroborated for the Protection Paladin subject (actor 7) by Righteous Protector 102440/81477, Sentinel 102466/81497, Blessed Hammer 102430/81469 at the Hammer of the Righteous choice node, and Holy Armaments 117882/95234 in the Lightsmith sub-tree. This equivalence is recorded for that capture and parser version; it is not claimed for Warcraft Logs in general.",
     "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
@@ -40,6 +40,23 @@
       "nodeType": "NORMAL",
       "alternativeEntries": [],
       "binding": "sc_paladin_protection.cpp:1043 talents.avenging_wrath = find_talent_spell( talent_tree::SPECIALIZATION, \"Avenging Wrath\" )"
+    },
+    {
+      "simcName": "blessed_assurance",
+      "displayNameEn": "Blessed Assurance",
+      "tree": "HERO",
+      "traitNodeId": 95235,
+      "traitEntryId": 117883,
+      "talentSpellId": 433015,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 117884,
+          "displayNameEn": "Divine Guidance",
+          "talentSpellId": 433106
+        }
+      ],
+      "binding": "sc_paladin.cpp:4253 talents.lightsmith.blessed_assurance = find_talent_spell( talent_tree::HERO, \"Blessed Assurance\" )"
     },
     {
       "simcName": "blessed_hammer",

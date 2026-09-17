@@ -462,7 +462,7 @@ Two sanitizers exist, each one documented transformation per mode:
 
 | Tool | Revision | Input | Output |
 | --- | --- | --- | --- |
-| `scripts/sanitize-probe.mjs` | `sanitize-probe-5` | a decoded events response, a bare event array, or an array of page envelopes | a bare event array, selected by `--head` / `--per-type` / `--where` / `--indices` / `--decision-slice <subject> <targets>` (the D2 predicate as a recorded mode) / `--actor-slice <subject> [<toReportTimeMs>] [--families <type,...>]` (M10-B: every event the subject sources OR is targeted by, optionally bounded; M10-C5: optionally restricted to the listed raw types, whole — a slice cut with `--families` grants coverage only to the categories its retained families vouch for). Only the two predicate modes may carry a coverage grant |
+| `scripts/sanitize-probe.mjs` | `sanitize-probe-6` | a decoded events response, a bare event array, or an array of page envelopes | a bare event array, selected by `--head` / `--per-type` / `--where` / `--indices` / `--decision-slice <subject> <targets>` (the D2 predicate as a recorded mode) / `--actor-slice <subject> [<toReportTimeMs>] [--from <exclusiveFromMs>] [--families <type,...>]` (M10-B: every event the subject sources OR is targeted by, optionally bounded; M10-C5: optionally restricted to the listed raw types, whole — a slice cut with `--families` grants coverage only to the categories its retained families vouch for; M10-C5 Phase B2: `--from` cuts a SEGMENT that starts strictly after the given millisecond, so a long capture can be committed as several artifacts each under the per-artifact ceiling). Only the two predicate modes may carry a coverage grant |
 | `scripts/corpus/derive-gap.mjs` | `derive-gap-1` | a committed event artifact | the same array with every event strictly inside `--remove-between <fromMs> <toMs>` removed, serialized as the slicer serializes (M10-C5; reproduces the M10-B opener gap derivative byte for byte, which `tests/unit/derive-gap.test.ts` checks) |
 | `scripts/corpus/sanitize-payloads.mjs` | `sanitize-payloads-2` | a decoded `data` object | `pages`: rateLimitData stripped; `context`: actor names → `Actor<id>`, servers → null, **player `gameID` → null** (revision 2; NPC and pet gameIDs are creature taxonomy and stay); `rankings`: names → `Candidate<n>`, servers → null, guilds removed, report codes → `RANK000nAAAAAAAA` (deterministic, equality-preserving) |
 
@@ -633,6 +633,87 @@ Two were copied byte-for-byte into the corpus (`LEGACY_FIXTURE_COPY`), and
 original. Migrating the remaining fixtures and their importers is M9-B's.
 
 ---
+
+## Contents after M10-C5 Phase B2
+
+Contract version 2, unchanged. Thirty-four artifacts, one hundred and nine
+cases, three hundred and thirty-five assertions. Four artifacts were added
+from the Phase B1 capture (`.probe/m10c5-phase-b-pages.json`, gitignored:
+68,870 events over [2,049,590 .. 2,169,588], seven pages, terminal, report
+revision 30 before and after), with NO new Warcraft Logs request at Phase B2.
+Each is an actor-7 segment cut by `sanitize-probe-6`'s `--actor-slice 7
+<to> --from <from> --families ...` with the same family list as the Phase A
+slice, and each grants CASTS, RESOURCES, AURAS, COMBATANT_INFO and GEAR for
+actor 7 over exactly its own interval:
+
+- `wcl-protection-paladin-a7r6-rotational-165s.seg-45-60` — 202 events,
+  43,545 bytes, granted over [2,049,589 .. 2,064,589]. Its record carries a
+  ZERO-EVENT CERTIFICATE (`retainedCoverage.certifiedEmpty`) for
+  [2,049,582 .. 2,049,588] naming `wcl-protection-paladin-a7r6-rotational-45s`
+  as the preceding artifact: the Phase A slice's grant ends at its last event
+  (2,049,581) under an exclusive query end of 2,049,589, and the Phase B1
+  capture starts at 2,049,589 and holds nothing before 2,049,590. The loader
+  validates the certificate against BOTH records — both terminal COMPLETE
+  captures of the same report and fight, the interval exactly bridging the
+  preceding grant's end and this grant's start, inside the preceding query
+  window, and no retained event of either artifact inside it
+  (`PROVENANCE_EMPTY_CERTIFICATE_INVALID` otherwise). The segment's grant was
+  NOT widened to 2,049,582: a grant before its own source window is still
+  refused (`PROVENANCE_RETAINED_COVERAGE_EXCEEDS_SOURCE`).
+- `…seg-60-90` — 827 events, 172,085 bytes, [2,064,590 .. 2,094,589]; holds
+  the Sacred Weapon (2,066,110) and Holy Bulwark (2,075,421) hardcasts.
+- `…seg-90-120` — 723 events, 153,998 bytes, [2,094,590 .. 2,124,589]; holds
+  the removal of the Hammer of Wrath readiness aura at 2,106,345.
+- `…seg-120-165` — 875 events, 182,066 bytes, [2,124,590 .. 2,169,589]; the
+  evaluation window's own segment, and the case artifact of every bundle
+  case.
+
+A segment alone analyzes to `PROFILE_NOT_RESOLVED` — it carries no
+combatantinfo — which is the correct refusal. The evaluator cases run over a
+BUNDLE: `tests/support/corpus/fight.ts` (`bundleOverEvidence`) composes the
+parts named by `historyArtifactIds`, in order, with the case's own artifact
+last, into ONE normalized fight. Grants join only where adjacent or bridged by
+a validated certificate; every part must descend from the same capture with
+the same actor scope; events may not go backwards across a boundary; no event
+row may appear on both sides of one; and the holes the joined grants leave
+must equal `declaredHoles` exactly. The full bundle
+(`rotational-45s` + four segments) is 3,720 events with every retained
+category COMPLETE over one range [2,004,589 .. 2,169,589]; the gap bundle
+(`rotational-45s`, `seg-45-60`, `seg-120-165` with the hole
+[2,064,590 .. 2,124,589] declared) is 2,170 events, PARTIAL. The Protection
+memo keys a bundle by every part's id, digest and provenance plus the holes.
+`evaluationWindow` restricts what an aggregate assertion COUNTS to decisions
+whose report time lies inside it; it never changes the analysis.
+
+Two kinds were added (`NORMALIZATION.BUNDLE_COMPOSITION`,
+`SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT`), `AURA_BINDING_AT` gained the
+`BOUND_BY_BUILD` state, and twelve cases: four NORMALIZATION censuses of the
+segments, two bundle compositions, and six SPEC_PROTECTION_PALADIN cases.
+The measured result inside [+120 s, +165 s] — 37 eligible GCD decisions,
+predeclared at Phase B1 — is ONE real MATCH: the Avenger's Shield press at
+2,139,100 (+134,511 ms), selected by the exact entry `default[13]
+avengers_shield` under `buff.vanguard.up`, bound TRUE by the Vanguard aura
+M4 observed applied at 2,131,157, with Divine Toll and wings PROVEN_NOT_READY
+from the presses at 2,088,835 / 2,088,344, the Templar-only gates FALSE by the
+observed build, `next_armament` KNOWN holy_bulwark from the Sacred Weapon
+hardcast at 2,125,600, and Hammer of Wrath PROVEN_UNUSABLE from the observed
+removal of its readiness aura. The Judgment at 2,131,157 that Phase B1
+predicted would converge is UNKNOWN at `default[15] consecration` (a stack
+count no binding field carries; a hasted cooldown no model computes): the
+prediction is disproved and recorded, not forced. The other 35 UNKNOWN keep
+exact blockers (18 × `default[6]`, 9 × `default[15]`, 5 × `default[13]`,
+3 × `default[14]`, 1 × `default[9]`). Over the whole 165 s: 149 eligible,
+4 MATCH (the two Divine Toll presses, the two Avenger's Shield presses under
+Vanguard), 0 REJECTED. The gap bundle returns every windowed decision to
+`default[6]` and the Avenger's Shield press to UNKNOWN. Phase A outcome
+invariant; one intentional internal diagnostic refinement: every Phase A and
+M10-C selection outcome, blocker class, aura and cooldown pin is unchanged,
+and exactly one assertion — `next_armament` at the first Judgment of the
+opener (`resolver-binds-the-build-facts-the-real-tree-proves`, assertion 5)
+— now reads `STATE_NOT_ESTABLISHED` (modelled since Phase B2, no hardcast
+before the press) instead of `STATE_NOT_MODELLED`. The reason string is an
+internal diagnostic the engine never compares; the less truthful reason was
+not kept for byte identity. No REJECTED decision exists; none was forced.
 
 ## Contents after M10-C5 Phase A
 

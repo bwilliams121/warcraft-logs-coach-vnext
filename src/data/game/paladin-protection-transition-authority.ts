@@ -357,11 +357,13 @@ const SHIELD_OF_THE_RIGHTEOUS: ProtectionNonGcdTransitionContract = {
       name: "sacred_weapon",
       why: "the Divine Inspiration RPPM callback can cast a Sacred Weapon armament from this action's own melee hit or Forge's Reckoning (default[9])",
     },
-    {
-      kind: "SPEC_ATOM",
-      name: "next_armament",
-      why: "a Divine Inspiration proc flips the Lightsmith armament alternation (default[9], default[14])",
-    },
+    // CORRECTED AT M10-C5 PHASE B. M10-C4 listed `next_armament` here on the
+    // claim that a Divine Inspiration proc flips the alternation. The pinned
+    // source says otherwise: cast_holy_armaments advances next_armament only
+    // when src == LS_HARDCAST (sc_paladin.cpp:2641, 2752); a Divine
+    // Inspiration proc advances divine_inspiration_next (2753) and nothing
+    // else. A Shield of the Righteous execution therefore cannot change
+    // next_armament, and the atom is no longer listed.
   ],
   claims: [
     {

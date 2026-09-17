@@ -22,7 +22,12 @@
  * contracts. Nothing here fabricates a normalized event.
  */
 
-import { classifyCoverage, inclusiveRange, type TimeRangeMs } from "../../../src/engine/evidence/coverage.js";
+import {
+  classifyCoverage,
+  inclusiveRange,
+  intersectRangeLists,
+  type TimeRangeMs,
+} from "../../../src/engine/evidence/coverage.js";
 import type { CategoryEvidence } from "../../../src/engine/normalization/completeness.js";
 import type { CombatFight } from "../../../src/engine/normalization/combat-fight.js";
 import {
@@ -334,6 +339,264 @@ export function fightOverEvidence(
 /** A fight over a loader-validated artifact (the harness path). */
 export function fightOf(corpus: LoadedCorpus, artifact: LoadedArtifact): CombatFight {
   return fightOverEvidence(evidenceOf(corpus, artifact));
+}
+
+// --------------------------------------------------------------------------
+// Bundles (M10-C5 Phase B)
+// --------------------------------------------------------------------------
+
+/**
+ * A BUNDLE is several artifacts of ONE capture lineage, in chronological
+ * order, composed into one fight: the committed 45-second Phase A slice and
+ * the segments that continue it. Composition is deliberately strict, because
+ * a join is a coverage claim:
+ *
+ *   - events are concatenated in artifact order and must not step backwards
+ *     in time across a boundary, and no event row may appear on both sides
+ *     of a boundary;
+ *   - every part must grant the same actor scope, and every part must
+ *     descend from the same report and fight;
+ *   - a category's covered ranges are the parts' grants, joined where
+ *     ADJACENT (`to + 1 == from`) or bridged by a loader-validated zero-event
+ *     certificate; the gaps that remain must be EXACTLY the holes the caller
+ *     declared — an undeclared hole refuses, and so does a declared hole that
+ *     is not there;
+ *   - overlapping grants refuse: two parts cannot both vouch for the same
+ *     millisecond.
+ *
+ * The result is a normal fight over one event array: M3 and M4 see nothing
+ * bundle-specific, and a declared hole is simply PARTIAL coverage there.
+ */
+export interface BundleHole {
+  readonly fromReportTimeMs: number;
+  readonly toReportTimeMs: number;
+}
+
+export interface BundleComposition {
+  readonly fight: CombatFight;
+  /** The merged covered ranges per category, after certificates and holes. */
+  readonly coveredRanges: Readonly<Partial<Record<EvidenceCategory, readonly TimeRangeMs[]>>>;
+  readonly holes: readonly BundleHole[];
+  readonly events: number;
+}
+
+export class BundleCompositionError extends Error {
+  constructor(message: string) {
+    super(`bundle composition refused: ${message}`);
+    this.name = "BundleCompositionError";
+  }
+}
+
+function eventTimestamp(event: Record<string, unknown>): number | null {
+  const value = event["timestamp"];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+/** Ranges joined where adjacent or overlapping-by-one; overlaps refuse. */
+function joinRanges(ranges: readonly BundleHole[], label: string): BundleHole[] {
+  const sorted = [...ranges].sort((a, b) => a.fromReportTimeMs - b.fromReportTimeMs);
+  const joined: BundleHole[] = [];
+  for (const range of sorted) {
+    const last = joined[joined.length - 1];
+    if (last === undefined) {
+      joined.push({ ...range });
+      continue;
+    }
+    if (range.fromReportTimeMs <= last.toReportTimeMs) {
+      throw new BundleCompositionError(
+        `${label}: [${String(range.fromReportTimeMs)} .. ${String(range.toReportTimeMs)}] overlaps [${String(last.fromReportTimeMs)} .. ${String(last.toReportTimeMs)}]`,
+      );
+    }
+    if (range.fromReportTimeMs === last.toReportTimeMs + 1) {
+      joined[joined.length - 1] = {
+        fromReportTimeMs: last.fromReportTimeMs,
+        toReportTimeMs: range.toReportTimeMs,
+      };
+    } else {
+      joined.push({ ...range });
+    }
+  }
+  return joined;
+}
+
+function holesBetween(joined: readonly BundleHole[]): BundleHole[] {
+  const holes: BundleHole[] = [];
+  for (let index = 1; index < joined.length; index += 1) {
+    const previous = joined[index - 1];
+    const current = joined[index];
+    if (previous === undefined || current === undefined) continue;
+    holes.push({
+      fromReportTimeMs: previous.toReportTimeMs + 1,
+      toReportTimeMs: current.fromReportTimeMs - 1,
+    });
+  }
+  return holes;
+}
+
+const holeKey = (hole: BundleHole): string =>
+  `${String(hole.fromReportTimeMs)}..${String(hole.toReportTimeMs)}`;
+
+export function bundleOverEvidence(
+  parts: readonly ArtifactEvidence[],
+  declaredHoles: readonly BundleHole[],
+): BundleComposition {
+  if (parts.length < 2) throw new BundleCompositionError("a bundle needs at least two parts");
+  const first = parts[0];
+  if (first === undefined) throw new BundleCompositionError("no parts");
+
+  // ---- lineage and scope ----
+  const lineage = parts.map((part) => `${String(part.source?.reportCode)}/${String(part.source?.fightId)}`);
+  if (new Set(lineage).size !== 1 || first.source === null) {
+    throw new BundleCompositionError(`parts descend from different captures: ${lineage.join(", ")}`);
+  }
+  const scopes = parts.flatMap((part) =>
+    part.record.provenance.retainedCoverage.grants.map((grant) => JSON.stringify(grant.actorScope)),
+  );
+  if (new Set(scopes).size !== 1) {
+    throw new BundleCompositionError(
+      `parts grant different actor scopes: ${[...new Set(scopes)].join(", ")}`,
+    );
+  }
+
+  // ---- events: order and boundary duplicates ----
+  const rawEvents: Record<string, unknown>[] = [];
+  for (let index = 0; index < parts.length; index += 1) {
+    const part = parts[index];
+    if (part === undefined) continue;
+    const previous = parts[index - 1];
+    if (previous !== undefined) {
+      const lastPrevious = previous.rawEvents[previous.rawEvents.length - 1];
+      const firstCurrent = part.rawEvents[0];
+      const before = lastPrevious === undefined ? null : eventTimestamp(lastPrevious);
+      const after = firstCurrent === undefined ? null : eventTimestamp(firstCurrent);
+      if (before !== null && after !== null && after < before) {
+        throw new BundleCompositionError(
+          `${part.record.artifactId} starts at ${String(after)}, before ${previous.record.artifactId} ends at ${String(before)}`,
+        );
+      }
+      const rows = new Set(previous.rawEvents.map((event) => JSON.stringify(event)));
+      const shared = part.rawEvents.filter((event) => rows.has(JSON.stringify(event))).length;
+      if (shared > 0) {
+        throw new BundleCompositionError(
+          `${String(shared)} event row(s) appear in both ${previous.record.artifactId} and ${part.record.artifactId}`,
+        );
+      }
+    }
+    rawEvents.push(...part.rawEvents);
+  }
+
+  // ---- coverage: grants joined by adjacency or certificate; holes must match ----
+  const coveredRanges: Partial<Record<EvidenceCategory, readonly TimeRangeMs[]>> = {};
+  const holesByCategory = new Map<string, readonly BundleHole[]>();
+  for (const category of CAPTURE_VOUCHED_CATEGORIES) {
+    const ranges: BundleHole[] = [];
+    for (const part of parts) {
+      const grant = part.record.provenance.retainedCoverage.grants.find((candidate) =>
+        candidate.categories.includes(category),
+      );
+      if (grant === undefined) continue;
+      ranges.push(...grant.ranges);
+      // A certificate bridges the interval before this part's own coverage
+      // for every category this part grants; the loader validated it.
+      for (const certificate of part.record.provenance.retainedCoverage.certifiedEmpty ?? []) {
+        if (parts.some((candidate) => candidate.record.artifactId === certificate.precedingArtifactId)) {
+          ranges.push({
+            fromReportTimeMs: certificate.fromReportTimeMs,
+            toReportTimeMs: certificate.toReportTimeMs,
+          });
+        }
+      }
+    }
+    if (ranges.length === 0) continue;
+    const joined = joinRanges(ranges, category);
+    holesByCategory.set(category, holesBetween(joined));
+    coveredRanges[category] = joined.map((range) =>
+      inclusiveRange(range.fromReportTimeMs, range.toReportTimeMs),
+    );
+  }
+  const holeSets = [...holesByCategory.values()].map((holes) => holes.map(holeKey).join("|"));
+  if (new Set(holeSets).size > 1) {
+    throw new BundleCompositionError(
+      `categories disagree on the holes: ${[...new Set(holeSets)].join(" vs ")}`,
+    );
+  }
+  const holes = [...holesByCategory.values()][0] ?? [];
+  const declared = new Set(declaredHoles.map(holeKey));
+  const actual = new Set(holes.map(holeKey));
+  const undeclared = holes.filter((hole) => !declared.has(holeKey(hole)));
+  const missing = declaredHoles.filter((hole) => !actual.has(holeKey(hole)));
+  if (undeclared.length > 0) {
+    throw new BundleCompositionError(`undeclared coverage hole(s): ${undeclared.map(holeKey).join(", ")}`);
+  }
+  if (missing.length > 0) {
+    throw new BundleCompositionError(`declared hole(s) not present: ${missing.map(holeKey).join(", ")}`);
+  }
+
+  // ---- the fight: one event array through the real normalizer ----
+  const window = windowOfEvents(rawEvents);
+  const normalized = normalizeEvents(rawEvents);
+  const capability = capabilityFor(first.record, first.source);
+  const categories: Partial<Record<EvidenceCategory, CategoryEvidence>> = {};
+  const actorScope = first.record.provenance.retainedCoverage.grants[0]?.actorScope ?? null;
+  for (const category of CAPTURE_VOUCHED_CATEGORIES) {
+    const ranges = coveredRanges[category] ?? [];
+    categories[category] = {
+      capability: "OBSERVABLE",
+      source: capability,
+      coverage: {
+        state: classifyCoverage(intersectRangeLists(ranges, [window]), window),
+        reason: "COMPLETED_NORMALLY",
+        coveredRanges: ranges,
+        sourceStreamIds: ["all"],
+        actorScope: actorScope === null ? null : [...actorScope],
+      },
+    };
+  }
+  const fight = syntheticFight({
+    events: normalized.events,
+    malformedObservations: normalized.malformedObservations,
+    startTimeMs: window.fromReportTimeMs,
+    endTimeMs: window.toReportTimeMs,
+    categories,
+  });
+  return { fight, coveredRanges, holes, events: rawEvents.length };
+}
+
+/** A bundle over loader-validated artifacts, in the given order (the harness path). */
+export function bundleOf(
+  corpus: LoadedCorpus,
+  artifactIds: readonly string[],
+  declaredHoles: readonly BundleHole[],
+): BundleComposition {
+  const parts = artifactIds.map((artifactId) => {
+    const artifact = corpus.artifacts.find((entry) => entry.record.artifactId === artifactId);
+    if (artifact === undefined) throw new BundleCompositionError(`unknown artifact ${artifactId}`);
+    return evidenceOf(corpus, artifact);
+  });
+  return bundleOverEvidence(parts, declaredHoles);
+}
+
+export function stateOfBundle(
+  corpus: LoadedCorpus,
+  artifactIds: readonly string[],
+  declaredHoles: readonly BundleHole[],
+): CombatState {
+  return createCombatState(bundleOf(corpus, artifactIds, declaredHoles).fight);
+}
+
+/** A bundle over committed artifacts, synchronously (the layer-test path). */
+export function corpusBundle(
+  artifactIds: readonly string[],
+  declaredHoles: readonly BundleHole[],
+): BundleComposition {
+  return bundleOverEvidence(artifactIds.map(committedEvidence), declaredHoles);
+}
+
+export function corpusBundleState(
+  artifactIds: readonly string[],
+  declaredHoles: readonly BundleHole[],
+): CombatState {
+  return createCombatState(corpusBundle(artifactIds, declaredHoles).fight);
 }
 
 export function stateOf(corpus: LoadedCorpus, artifact: LoadedArtifact): CombatState {

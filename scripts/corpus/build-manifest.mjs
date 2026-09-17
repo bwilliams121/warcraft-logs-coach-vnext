@@ -630,6 +630,86 @@ const PROT_OPENER_SOURCE = source_a(
 const ACTOR_SLICE_INVALIDATIONS = ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"];
 
 // --------------------------------------------------------------------------
+// M10-C5 Phase B1 (2026-09-18): ONE bounded steady-state capture of the SAME
+// subject, adjoining the M10-B capture. 9 requests (R1 context, 7 event
+// pages, R9 revision), revision 30 before and after, terminal.
+// --------------------------------------------------------------------------
+
+const SLICER_REVISION_6 = "sanitize-probe-6";
+const [PPB_START, PPB_END] = [2049589, 2169589];
+const M10C5B_PROBE = (question, requests) =>
+  tooling(
+    ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+    UNAVAILABLE,
+    `${question}; bounded to ${requests} in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)`,
+  );
+const PROT_STEADY_SOURCE = source_a(
+  M10C5B_PROBE(
+    "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted",
+    "10 pages",
+  ),
+  ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+  query(true, 10000, PPB_START, PPB_END),
+  completeness(
+    68870,
+    7,
+    null,
+    "COMPLETE",
+    "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589].",
+  ),
+  "2026-09-18",
+  { sourceActorId: 7, reportRevisionAfterCapture: 30 },
+);
+const PPB_FAMILIES =
+  "cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo";
+const PPB_CATEGORIES = ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"];
+const PPB_SEGMENT_BASIS = (fromMs, toMs) =>
+  `The retained families are complete for actor 7 over [${fromMs.toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every event actor 7 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent.`;
+/**
+ * One chronological segment of the Phase B capture: (fromMs, toMs] by
+ * --from/--actor-slice. Its grant begins at fromMs + 1, or at the capture's
+ * own window start when that is later: a segment can never vouch for a
+ * millisecond its capture did not request, so the first segment's grant
+ * begins at 2,049,589 and the interval before it is CERTIFIED rather than
+ * granted.
+ */
+function ppb_segment(name, fromMs, toMs, facts, extra = {}) {
+  const file = `wcl-protection-paladin-a7r6-rotational-165s.seg-${name}`;
+  const grantFrom = Math.max(fromMs + 1, PPB_START);
+  return artifact(file, wcl(file), {
+    kind: "SANITIZED_CAPTURE",
+    source: PROT_STEADY_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json ${file}.json --actor-slice 7 ${String(toMs)} --from ${String(fromMs)} --families ${PPB_FAMILIES}`,
+        `The seven page envelopes concatenated in page order, then the --actor-slice predicate with --from ${String(fromMs)} (exclusive) and the bound ${String(toMs)} (inclusive), restricted by --families to the same thirteen raw types as the Phase A slice. In place and order preserved. ${facts}`,
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_6),
+      credential_scan(SLICER_REVISION_6),
+    ],
+    grants: [
+      {
+        categories: PPB_CATEGORIES,
+        actorScope: [7],
+        ranges: [{ fromReportTimeMs: grantFrom, toReportTimeMs: toMs }],
+      },
+    ],
+    coverageBasis: PPB_SEGMENT_BASIS(grantFrom, toMs),
+    retainedFor:
+      "M10-C5 Phase B: one chronological segment of the same subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer (tests/support/corpus/fight.ts bundleOverEvidence). History for every evaluated decision begins at the pull through the Phase A slice; evaluation is fixed to [+120,000 .. +165,000] ms.",
+    limitations: [
+      "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+      "No damage, healing, absorb or summon event is retained.",
+      "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+      NO_NAMES,
+      VERSION_SCOPE,
+      WHITESPACE,
+    ],
+    ...extra,
+  });
+}
+
+// --------------------------------------------------------------------------
 // Artifacts
 // --------------------------------------------------------------------------
 
@@ -655,7 +735,11 @@ function artifact(artifactId, path, options) {
       parentArtifactId: options.parent ?? null,
       source: options.source ?? null,
       transformations: (options.transformations ?? []).map(plain),
-      retainedCoverage: { grants: options.grants ?? [], basis: options.coverageBasis },
+      retainedCoverage: {
+        grants: options.grants ?? [],
+        basis: options.coverageBasis,
+        ...(options.certifiedEmpty === undefined ? {} : { certifiedEmpty: options.certifiedEmpty }),
+      },
       retainedFor: options.retainedFor,
       limitations: options.limitations,
     },
@@ -1450,6 +1534,32 @@ const ARTIFACTS = [
       ],
     },
   ),
+  // ---- M10-C5 Phase B: the steady-state segments ---------------------------
+  ppb_segment(
+    "45-60",
+    2049581,
+    2064589,
+    "202 of 68,870 events (first 2,049,618, last 2,064,581). This segment's --from equals the Phase A slice's grant end (2,049,581): the two share no event, and the millisecond interval between the Phase A grant and this capture's window start is certified empty below.",
+    {
+      certifiedEmpty: [
+        {
+          fromReportTimeMs: 2049582,
+          toReportTimeMs: 2049588,
+          precedingArtifactId: "wcl-protection-paladin-a7r6-rotational-45s",
+          basis:
+            "The M10-B capture requested [2,004,589 .. 2,049,589) — an EXCLUSIVE end of 2,049,589 — and paginated to a terminal page whose last event is 2,049,581, so every event the report holds before 2,049,589 was retrieved and the Phase A slice (every actor-7 event of the retained families in that capture) retained none in [2,049,582 .. 2,049,588]; this capture begins at 2,049,589 and its first event is 2,049,590. The loader re-checks both captures' recorded windows and completeness and that neither artifact retains an event inside the interval.",
+        },
+      ],
+    },
+  ),
+  ppb_segment("60-90", 2064589, 2094589, "827 of 68,870 events (first 2,064,705, last 2,094,381)."),
+  ppb_segment("90-120", 2094589, 2124589, "723 of 68,870 events (first 2,094,652, last 2,124,573)."),
+  ppb_segment(
+    "120-165",
+    2124589,
+    2169589,
+    "875 of 68,870 events (first 2,124,603, last 2,169,554): the whole fixed evaluation window [+120,000 .. +165,000] ms, plus nothing after the capture's end.",
+  ),
 ];
 
 // --------------------------------------------------------------------------
@@ -1713,6 +1823,530 @@ const PP_C5_RELATED = [
   "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
   "tests/unit/m10c5-protection-aura-bindings.test.ts",
   "tests/regression/m10c-internal-registration-invariance.test.ts",
+];
+
+// M10-C5 Phase B2: the steady-state bundle. Five artifacts composed in order
+// into ONE fight — Phase A's byte-identical 45 s slice, then the four measured
+// segments cut from the Phase B1 capture — and the gap bundle that omits the
+// 60–90 and 90–120 segments with its hole declared. Evaluation is confined to
+// [+120 s, +165 s]; the history before it is what the decisions there rest on.
+const PPB_45_60 = "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60";
+const PPB_60_90 = "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90";
+const PPB_90_120 = "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120";
+const PPB_120_165 = "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165";
+const PPB_HISTORY = [PP45, PPB_45_60, PPB_60_90, PPB_90_120];
+const PPB_GAP_HISTORY = [PP45, PPB_45_60];
+const PPB_HOLE = { fromReportTimeMs: 2064590, toReportTimeMs: 2124589 };
+const PPB_WINDOW = { fromReportTimeMs: 2124589, toReportTimeMs: 2169589 };
+const PPB_FULL = { historyArtifactIds: PPB_HISTORY, declaredHoles: [] };
+const PPB_GAP = { historyArtifactIds: PPB_GAP_HISTORY, declaredHoles: [PPB_HOLE] };
+const [PP_HOLY_BULWARK, PP_SACRED_WEAPON, PP_WORD_OF_GLORY] = [432459, 432472, 85673];
+const [PP_VANGUARD_BUFF, PP_HOW_READINESS_BUFF] = [1268810, 1277026];
+const PPB_AUTHORITY = {
+  ...PROT_SIMC,
+  requiredStateEvidence: [
+    "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+    "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+    "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+    "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts",
+  ],
+};
+const PPB_RELATED = [
+  "tests/contracts/m10c5-protection-evaluator.test.ts",
+  "tests/unit/m10c5b-armament-state.test.ts",
+  "tests/unit/m10c5b-corpus-bundle.test.ts",
+  "tests/unit/m10c5-protection-aura-bindings.test.ts",
+  "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+  "tests/regression/m10c-internal-registration-invariance.test.ts",
+];
+const ppb_decision = (bundle, t, ability, expected = PP_UNKNOWN_DIVERGENT) =>
+  a("SPEC_PROTECTION_PALADIN.DECISION_COVERAGE", {
+    actorId: TANK,
+    ...bundle,
+    targetActorId: null,
+    observedCast: { reportTimeMs: t, abilityGameId: ability },
+    expected,
+  });
+const ppb_cooldown = (bundle, t, ability, simcToken, expected) =>
+  a("SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT", {
+    actorId: TANK,
+    ...bundle,
+    observedCast: { reportTimeMs: t, abilityGameId: ability },
+    simcToken,
+    expected,
+  });
+const ppb_aura = (bundle, t, ability, atomName, expected) =>
+  a("SPEC_PROTECTION_PALADIN.AURA_BINDING_AT", {
+    actorId: TANK,
+    ...bundle,
+    observedCast: { reportTimeMs: t, abilityGameId: ability },
+    atomName,
+    expected,
+  });
+const ppb_atom = (bundle, t, ability, atom, expected) =>
+  a("SPEC_PROTECTION_PALADIN.RESOLVED_ATOM", {
+    actorId: TANK,
+    ...bundle,
+    observedCast: { reportTimeMs: t, abilityGameId: ability },
+    atom,
+    expected,
+  });
+const ppb_armament = (bundle, t, ability, expected) =>
+  a("SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT", {
+    actorId: TANK,
+    ...bundle,
+    observedCast: { reportTimeMs: t, abilityGameId: ability },
+    expected,
+  });
+const ppb_known = (nextArmament, anchorReportTimeMs, anchorAbilityGameId) => ({
+  state: "KNOWN",
+  nextArmament,
+  anchorReportTimeMs,
+  anchorAbilityGameId,
+  reason: null,
+});
+const ppb_bound = (up, abilityGameId, anchorReportTimeMs) => ({
+  state: "BOUND",
+  up,
+  abilityGameId,
+  anchorReportTimeMs,
+  reason: null,
+});
+const ppb_unbound = (abilityGameId) => ({
+  state: "UNBOUND",
+  up: null,
+  abilityGameId,
+  anchorReportTimeMs: null,
+  reason: "AURA_STATE_UNKNOWN",
+});
+const ppb_by_build = (abilityGameId, gate) => ({
+  state: "BOUND_BY_BUILD",
+  up: false,
+  abilityGameId,
+  anchorReportTimeMs: null,
+  reason: gate,
+});
+/** A hasted cooldown: the binder refuses the base and readiness stays UNKNOWN by design. */
+const PPB_HASTED_UNKNOWN = pp_cd_unknown("MODIFIERS_NOT_PROVEN_ABSENT");
+/** The lower bound has elapsed: nothing proves NOT_READY, and nothing proves READY either. */
+const PPB_ELAPSED_UNKNOWN = pp_cd_unknown(null);
+const PP_MATCH_AVENGERS_SHIELD = { ...PP_MATCH_DIVINE_TOLL, authorityToken: "avengers_shield" };
+const PPB_WINDOW_EXCLUSIONS = { MELEE_SWING: 16, NON_GCD_ACTION: 13, EXECUTION_LANE_NOT_ESTABLISHED: 3 };
+const ppb_segment_case = (artifactId, label, events, source, target, hardcasts) =>
+  kase(
+    `normalization.protection-paladin-rotational-165s-${label}-normalizes-whole-and-in-order`,
+    artifactId,
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+    `The ${String(events)}-event family-filtered actor-7 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE ${String(source.CAST)} casts, ${String(source.RESOURCE_CHANGE)} Holy Power changes, ${String(source.AURA)} aura transitions; as TARGET ${String(target.CAST)} casts, ${String(target.RESOURCE_CHANGE)} resource changes, ${String(target.AURA)} aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. ${hardcasts}`,
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: events }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", { actorId: TANK, side: "SOURCE", expected: source }),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", { actorId: TANK, side: "TARGET", expected: target }),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population.",
+    { related: ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"] },
+  );
+const PPB_CASES = [
+  ppb_segment_case(
+    PPB_45_60,
+    "seg-45-60",
+    202,
+    { CAST: 16, RESOURCE_CHANGE: 7, AURA: 134 },
+    { CAST: 7, RESOURCE_CHANGE: 7, AURA: 123 },
+    "No Holy Armaments hardcast lies in this segment.",
+  ),
+  ppb_segment_case(
+    PPB_60_90,
+    "seg-60-90",
+    827,
+    { CAST: 65, RESOURCE_CHANGE: 22, AURA: 601 },
+    { CAST: 24, RESOURCE_CHANGE: 22, AURA: 474 },
+    "Two Holy Armaments hardcasts lie in it: Sacred Weapon 432472 at 2,066,110 and Holy Bulwark 432459 at 2,075,421.",
+  ),
+  ppb_segment_case(
+    PPB_90_120,
+    "seg-90-120",
+    723,
+    { CAST: 60, RESOURCE_CHANGE: 21, AURA: 508 },
+    { CAST: 25, RESOURCE_CHANGE: 21, AURA: 448 },
+    "No Holy Armaments hardcast lies in this segment; the Hammer of Wrath readiness aura 1277026 is removed in it at 2,106,345.",
+  ),
+  ppb_segment_case(
+    PPB_120_165,
+    "seg-120-165",
+    875,
+    { CAST: 69, RESOURCE_CHANGE: 25, AURA: 654 },
+    { CAST: 27, RESOURCE_CHANGE: 25, AURA: 514 },
+    "Two Holy Armaments hardcasts lie in it: Sacred Weapon 432472 at 2,125,600 and Holy Bulwark 432459 at 2,167,398.",
+  ),
+  kase(
+    "normalization.protection-paladin-165s-bundle-composes-five-parts-into-one-complete-fight",
+    PPB_120_165,
+    "NORMALIZATION",
+    "tests/support/corpus/fight.ts bundleOverEvidence; loader.ts certificateErrors; scripts/corpus/build-manifest.mjs certifiedEmpty",
+    "The five parts — the Phase A 45 s slice (byte-identical, its grant ending at 2,049,581), then the segments granted from 2,049,589, 2,064,590, 2,094,590 and 2,124,590 — compose into one 3,720-event fight over [2,004,589 .. 2,169,554] with CASTS, AURAS, RESOURCES, COMBATANT_INFO and GEAR each COMPLETE over ONE joined range [2,004,589 .. 2,169,589]. The seven milliseconds [2,049,582 .. 2,049,588] between the first two parts are not silently widened over: the seg-45-60 record carries a zero-event certificate for exactly that interval, validated by the loader against both terminal captures, and the composer joins across it only because the certificate exists.",
+    [
+      a("NORMALIZATION.BUNDLE_COMPOSITION", {
+        historyArtifactIds: PPB_HISTORY,
+        declaredHoles: [],
+        actorId: TANK,
+        expected: {
+          events: 3720,
+          coverage: {
+            CASTS: "COMPLETE",
+            AURAS: "COMPLETE",
+            RESOURCES: "COMPLETE",
+            COMBATANT_INFO: "COMPLETE",
+            GEAR: "COMPLETE",
+            DAMAGE: "ABSENT",
+            HEALING: "ABSENT",
+            ABSORBS: "ABSENT",
+            SUMMONS: "ABSENT",
+          },
+          castRanges: [{ fromReportTimeMs: 2004589, toReportTimeMs: 2169589 }],
+          windowFromReportTimeMs: 2004589,
+          windowToReportTimeMs: 2169554,
+        },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "Composition is a claim about coverage, and coverage is never inferred from the bytes: two grants join only where adjacent or bridged by a machine-validated certificate, every part must descend from the same capture with the same actor scope, events must not go backwards across a boundary, and no event row may appear on both sides of one. An undeclared hole, an overlap, a reversed segment, a duplicate boundary row, a certificate that does not fit its neighbours or a digest that does not match the record all refuse the composition — the layer tests exercise each refusal. The families the slicer dropped stay ABSENT.",
+    { related: ["tests/unit/m10c5b-corpus-bundle.test.ts", "tests/unit/m9b-corpus-loader.test.ts"] },
+  ),
+  kase(
+    "normalization.protection-paladin-165s-gap-bundle-keeps-exactly-the-declared-hole",
+    PPB_120_165,
+    "NORMALIZATION",
+    "tests/support/corpus/fight.ts bundleOverEvidence (declared holes)",
+    "With the 60–90 and 90–120 segments omitted and the hole [2,064,590 .. 2,124,589] declared, the three remaining parts compose into a 2,170-event fight over the same window whose CASTS, AURAS, RESOURCES, COMBATANT_INFO and GEAR are PARTIAL: two covered ranges, [2,004,589 .. 2,064,589] and [2,124,590 .. 2,169,589], with exactly the declared hole between them.",
+    [
+      a("NORMALIZATION.BUNDLE_COMPOSITION", {
+        historyArtifactIds: PPB_GAP_HISTORY,
+        declaredHoles: [PPB_HOLE],
+        actorId: TANK,
+        expected: {
+          events: 2170,
+          coverage: {
+            CASTS: "PARTIAL",
+            AURAS: "PARTIAL",
+            RESOURCES: "PARTIAL",
+            COMBATANT_INFO: "PARTIAL",
+            GEAR: "PARTIAL",
+            DAMAGE: "ABSENT",
+          },
+          castRanges: [
+            { fromReportTimeMs: 2004589, toReportTimeMs: 2064589 },
+            { fromReportTimeMs: 2124590, toReportTimeMs: 2169589 },
+          ],
+          windowFromReportTimeMs: 2004589,
+          windowToReportTimeMs: 2169554,
+        },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "A hole is admissible only when declared exactly: the composer computes the holes from the joined grants and refuses when the declared set and the computed set differ in either direction. Inside the hole the fight is PARTIAL, and every claim that spans it fails its gate downstream — no state carries across a declared hole.",
+    { related: ["tests/unit/m10c5b-corpus-bundle.test.ts"] },
+  ),
+  kase(
+    "spec-protection-paladin.steady-state-window-population-is-thirty-seven-with-one-real-match",
+    PPB_120_165,
+    "SPEC_PROTECTION_PALADIN",
+    "src/specs/paladin/protection/observed-analysis.ts analyzeObservedProtectionPaladinDecisions; tests/support/corpus/executors/spec-protection-paladin.ts (evaluationWindow)",
+    "Over the composed 165 s fight, evaluated only inside [+120 s, +165 s] (report time [2,124,589 .. 2,169,589]), the evaluator finds 37 eligible GCD decisions — 11 Judgments, 13 Blessed Hammers, 5 Avenger's Shields, 4 Word of Glory, 2 Consecrations, 2 Holy Armaments hardcasts — and excludes 32 casts in the window by name: 16 melee swings, 13 NON_GCD presses, 3 abilities with no pinned lane. Of the 37: 1 MATCH, 0 REJECTED, 36 UNKNOWN. The 36 block at five entries: 18 at default[6] divine_toll (from 2,148,837 on, the Divine Toll and wings cooldowns anchored at 2,088,835 / 2,088,344 have elapsed and a hypothetical wings press reopens the branch), 9 at default[15] consecration, 5 at default[13] avengers_shield, 3 at default[14] holy_armaments, 1 at default[9] holy_armaments.",
+    [
+      a("SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY", {
+        actorId: TANK,
+        ...PPB_FULL,
+        evaluationWindow: PPB_WINDOW,
+        expected: {
+          eligibleDecisions: 37,
+          match: 1,
+          rejected: 0,
+          unknown: 36,
+          exclusions: PPB_WINDOW_EXCLUSIONS,
+        },
+      }),
+      a("SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION", {
+        actorId: TANK,
+        ...PPB_FULL,
+        evaluationWindow: PPB_WINDOW,
+        expected: {
+          match: 1,
+          rejected: 0,
+          blockedAt: {
+            "default[6] divine_toll": 18,
+            "default[9] holy_armaments": 1,
+            "default[13] avengers_shield": 5,
+            "default[14] holy_armaments": 3,
+            "default[15] consecration": 9,
+          },
+        },
+      }),
+      // Over the whole composed history: the two Phase A/B1 Divine Toll presses,
+      // and the two Avenger's Shield presses Phase B2's bindings resolve.
+      a("SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY", {
+        actorId: TANK,
+        ...PPB_FULL,
+        expected: {
+          eligibleDecisions: 149,
+          match: 4,
+          rejected: 0,
+          unknown: 145,
+          exclusions: {
+            MELEE_SWING: 88,
+            NON_GCD_ACTION: 67,
+            EXECUTION_LANE_NOT_ESTABLISHED: 6,
+            NO_AUTHORITY_TOKEN_BINDING: 1,
+          },
+        },
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "The population was predeclared at Phase B1 from the raw cast counts (36 by the Phase A token table, 37 once the Sacred Weapon record binds the holy_armaments token) before any Phase B2 semantics ran; nothing was trimmed to isolate the decision that resolves. The window restricts what is COUNTED, never what is ANALYZED: every decision inside it rests on the history before it, and the whole-history summary is disclosed alongside so the window cannot read as the fight.",
+    {
+      authority: PPB_AUTHORITY,
+      limitations: [
+        "Avenger's Shield and Consecration cooldowns are hasted by the spec passive (137028) and no haste model exists: their readiness stays UNKNOWN by design, which is what blocks default[13] (when Vanguard is up) and default[15] and default[18].",
+        "buff.divine_guidance.stack is a stack count, which no binding field carries: default[15]'s gate is enumerated, and the Judgment at 2,131,157 does NOT converge — its worlds select default[15] consecration or default[17] judgment. The prediction made at Phase B1 is disproved on this evidence, not forced.",
+        "Once the Divine Toll and wings lower bounds have elapsed (from 2,148,837), the branch where wings fires hypothetically reopens default[6], and nothing in the log proves the cooldowns still running.",
+      ],
+      related: PPB_RELATED,
+    },
+  ),
+  kase(
+    "spec-protection-paladin.the-avengers-shield-press-under-vanguard-is-a-real-exact-entry-match",
+    PPB_120_165,
+    "SPEC_PROTECTION_PALADIN",
+    "src/specs/paladin/protection/aura-bindings.ts; build-absences.ts; armament-state.ts; action-profile.ts (REQUIRED_AURA_INACTIVE); first-gcd-adapter.ts; src/simc/first-gcd-selection.ts",
+    "The Avenger's Shield press at 2,139,100 (+134,511 ms) is MATCH by the exact entry default[13] avengers_shield, inside the evaluation window. Every higher entry is resolved by evidence or reviewed contract: default[6] divine_toll is PROVEN_NOT_READY (9,735 ms remain from the press at 2,088,835) and its gate FALSE (wings aura BOUND false from the removal at 2,106,345; Righteous Protector SELECTED); default[7] hammer_of_light, default[10] and default[12] are gated on buff.hammer_of_light_ready, BOUND false by the observed build (Lightsmith, not Templar); default[8] shield_of_the_righteous is a NON_GCD transition explored both ways, its successor forgetting only the atoms it may change; default[9] holy_armaments needs next_armament = sacred_weapon and the alternation is KNOWN holy_bulwark from the Sacred Weapon hardcast at 2,125,600; default[11] hammer_of_wrath is PROVEN_UNUSABLE — its ready() requires aura 1277026, which M4 proved INACTIVE from the removal at 2,106,345 (REQUIRED_AURA_INACTIVE). default[13]'s gate is TRUE from buff.vanguard.up, BOUND true by the Vanguard aura 1268810 applied at 2,131,157 (removed only at 2,139,123, after the press), and Avenger's Shield's own usability is its observed execution. All race worlds and both Shield of the Righteous worlds select the same entry.",
+    [
+      ppb_decision(PPB_FULL, 2139100, PP_AVENGERS_SHIELD, PP_MATCH_AVENGERS_SHIELD),
+      ppb_aura(PPB_FULL, 2139100, PP_AVENGERS_SHIELD, "vanguard", ppb_bound(true, PP_VANGUARD_BUFF, 2131157)),
+      ppb_aura(
+        PPB_FULL,
+        2139100,
+        PP_AVENGERS_SHIELD,
+        "avenging_wrath",
+        ppb_bound(false, PP_SENTINEL, 2106345),
+      ),
+      ppb_aura(
+        PPB_FULL,
+        2139100,
+        PP_AVENGERS_SHIELD,
+        "hammer_of_wrath",
+        ppb_bound(false, PP_HOW_READINESS_BUFF, 2106345),
+      ),
+      ppb_aura(
+        PPB_FULL,
+        2139100,
+        PP_AVENGERS_SHIELD,
+        "hammer_of_light_ready",
+        ppb_by_build(427441, "HERO_TREE_NOT:templar"),
+      ),
+      ppb_aura(
+        PPB_FULL,
+        2139100,
+        PP_AVENGERS_SHIELD,
+        "blessed_assurance",
+        ppb_by_build(433019, "TALENT_NOT_SELECTED:blessed_assurance"),
+      ),
+      ppb_cooldown(
+        PPB_FULL,
+        2139100,
+        PP_AVENGERS_SHIELD,
+        "divine_toll",
+        pp_not_ready(9735, 2088835, PP_DIVINE_TOLL),
+      ),
+      ppb_cooldown(
+        PPB_FULL,
+        2139100,
+        PP_AVENGERS_SHIELD,
+        "avenging_wrath",
+        pp_not_ready(9244, 2088344, PP_SENTINEL),
+      ),
+      ppb_cooldown(PPB_FULL, 2139100, PP_AVENGERS_SHIELD, "avengers_shield", PPB_HASTED_UNKNOWN),
+      ppb_armament(PPB_FULL, 2139100, PP_AVENGERS_SHIELD, ppb_known(0, 2125600, PP_SACRED_WEAPON)),
+      ppb_atom(PPB_FULL, 2139100, PP_AVENGERS_SHIELD, "next_armament", {
+        kind: "MAGNITUDE",
+        state: "KNOWN_NUMBER",
+        value: 0,
+        reason: null,
+      }),
+      ppb_atom(PPB_FULL, 2139100, PP_AVENGERS_SHIELD, "consecration.up", { kind: "TRUTH", value: true }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "A real MATCH needs every higher-priority entry resolved and the selected entry's own gate and usability proven — not assumed. Three Phase B2 facts carry it, each from evidence strictly before the press or from the observed build: the Vanguard aura M4 observed applied; the Hammer of Wrath readiness aura M4 observed removed, which is the ONLY way an aura-gated action becomes PROVEN_UNUSABLE (silence never does); and the Lightsmith alternation anchored on an observed hardcast under complete cast coverage since. Avenger's Shield's own hasted cooldown is UNKNOWN and irrelevant: its press proves usability at its own position and nothing about any other.",
+    { authority: PPB_AUTHORITY, related: PPB_RELATED },
+  ),
+  kase(
+    "spec-protection-paladin.the-predicted-judgment-convergence-is-disproved-at-consecration",
+    PPB_120_165,
+    "SPEC_PROTECTION_PALADIN",
+    "src/specs/paladin/protection/observed-analysis.ts; cooldown-bindings.ts bindGroundEffectPresence; src/simc/first-gcd-selection.ts",
+    "The Judgment at 2,131,157 (+126,568 ms), predicted at Phase B1 to converge on judgment through every higher entry, is UNKNOWN, blocked at default[15] consecration: its worlds select default[15] consecration (divine_guidance.stack >= 5 enumerated TRUE, Consecration ready) or default[17] judgment. consecration.up is BOUND true (the Consecration cast at 2,127,666, 3,491 ms earlier, against a 14,000 ms duration — 12,000 ms plus Consecration in Flame), the Consecration cooldown is UNKNOWN (hasted), and buff.vanguard.up is BOUND false from the removal at 2,082,694: the Vanguard application at the SAME millisecond, 2,131,157, is produced by this very Judgment and sits after it in canonical order, so the press does not see it. At the Blessed Hammer 1,028 ms later it does: BOUND true from 2,131,157.",
+    [
+      ppb_decision(PPB_FULL, 2131157, PP_JUDGMENT),
+      ppb_aura(PPB_FULL, 2131157, PP_JUDGMENT, "vanguard", ppb_bound(false, PP_VANGUARD_BUFF, 2082694)),
+      ppb_aura(PPB_FULL, 2132185, PP_BLESSED_HAMMER, "vanguard", ppb_bound(true, PP_VANGUARD_BUFF, 2131157)),
+      ppb_atom(PPB_FULL, 2131157, PP_JUDGMENT, "consecration.up", { kind: "TRUTH", value: true }),
+      ppb_cooldown(PPB_FULL, 2131157, PP_JUDGMENT, "consecration", PPB_HASTED_UNKNOWN),
+      ppb_cooldown(
+        PPB_FULL,
+        2131157,
+        PP_JUDGMENT,
+        "divine_toll",
+        pp_not_ready(17678, 2088835, PP_DIVINE_TOLL),
+      ),
+      // consecration.up FALSE only from a complete 14,000 ms lookback: the Sacred
+      // Weapon hardcast at 2,125,600 sits 37,787 ms after the previous Consecration.
+      ppb_atom(PPB_FULL, 2125600, PP_SACRED_WEAPON, "consecration.up", { kind: "TRUTH", value: false }),
+      ppb_atom(PPB_FULL, 2128710, PP_BLESSED_HAMMER, "consecration.up", { kind: "TRUTH", value: true }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "The stop rule, honoured: a prediction that the evidence does not bear out is recorded as the blocker distribution, not manufactured. Two honest refusals block the entry — a stack count no binding field carries and a hasted cooldown no model computes — and each is a deferred item, not a guess. The same-millisecond rule is the M4 position rule, not a timestamp comparison: an aura the decision's own cast applies is visible to the next decision and never to the cast that caused it.",
+    {
+      authority: PPB_AUTHORITY,
+      limitations: [
+        "consecration.up binds SimulationCraft's `active_consecration != nullptr` — whether the actor's own hardcast ground effect is alive — from the last observed cast and the pinned duration, not whether the actor stands in it.",
+      ],
+      related: PPB_RELATED,
+    },
+  ),
+  kase(
+    "spec-protection-paladin.next-armament-is-anchored-only-on-a-hardcast-strictly-before-the-decision",
+    PPB_120_165,
+    "SPEC_PROTECTION_PALADIN",
+    "src/specs/paladin/protection/armament-state.ts armamentStateAt; src/data/game/paladin-protection-armament-authority.ts",
+    "At the Sacred Weapon hardcast at 2,125,600 the alternation is KNOWN sacred_weapon (1) from the Holy Bulwark hardcast at 2,075,421 — its own press is not consulted, and neither is anything after it. At the Judgment 1,031 ms later it is KNOWN holy_bulwark (0) from that Sacred Weapon hardcast. The proc-sourced Sacred Weapon application at 2,131,424 (no cast event) does not move it: at the Blessed Hammer at 2,132,185 it is still KNOWN holy_bulwark from 2,125,600. At the Judgment at 2,168,432 it is KNOWN sacred_weapon from the Holy Bulwark hardcast at 2,167,398. Across the whole history the four hardcasts alternate SW -> HB -> SW -> HB, exactly the pinned rule.",
+    [
+      ppb_armament(PPB_FULL, 2125600, PP_SACRED_WEAPON, ppb_known(1, 2075421, PP_HOLY_BULWARK)),
+      ppb_armament(PPB_FULL, 2126631, PP_JUDGMENT, ppb_known(0, 2125600, PP_SACRED_WEAPON)),
+      ppb_armament(PPB_FULL, 2132185, PP_BLESSED_HAMMER, ppb_known(0, 2125600, PP_SACRED_WEAPON)),
+      ppb_armament(PPB_FULL, 2168432, PP_JUDGMENT, ppb_known(1, 2167398, PP_HOLY_BULWARK)),
+      ppb_armament(PPB_FULL, 2066110, PP_SACRED_WEAPON, {
+        state: "UNKNOWN",
+        nextArmament: null,
+        anchorReportTimeMs: null,
+        anchorAbilityGameId: null,
+        reason: "NO_HARDCAST_IN_EVIDENCE",
+      }),
+      ppb_armament(PPB_FULL, 2067151, PP_JUDGMENT, ppb_known(0, 2066110, PP_SACRED_WEAPON)),
+      ppb_atom(PPB_FULL, 2126631, PP_JUDGMENT, "next_armament", {
+        kind: "MAGNITUDE",
+        state: "KNOWN_NUMBER",
+        value: 0,
+        reason: null,
+      }),
+      ppb_atom(PPB_FULL, 2066110, PP_SACRED_WEAPON, "next_armament", {
+        kind: "MAGNITUDE",
+        state: "UNKNOWN_NUMBER",
+        value: null,
+        reason: "STATE_NOT_ESTABLISHED",
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "cast_holy_armaments advances next_armament only when src == LS_HARDCAST (sc_paladin.cpp:2641, 2752); a Divine Inspiration proc advances divine_inspiration_next and a Blessing of the Forge armament advances nothing. The log records a press under the armament it produced, so an observed hardcast fixes the value AFTER it — and only while CASTS coverage is COMPLETE from the hardcast to the decision. The first hardcast in evidence is itself UNKNOWN: the state before the first observed press is outside the log, and a later cast never speaks about an earlier decision.",
+    { authority: PPB_AUTHORITY, related: PPB_RELATED },
+  ),
+  kase(
+    "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura",
+    PPB_120_165,
+    "SPEC_PROTECTION_PALADIN",
+    "src/specs/paladin/protection/aura-bindings.ts (hammer_of_wrath readiness identity); action-profile.ts REQUIRED_AURA_INACTIVE; src/data/game/paladin-protection-aura-authority.ts",
+    "The Hammer of Wrath readiness aura 1277026 is applied by the Sentinel press at 2,088,344 and removed at 2,106,345. At the Divine Toll press at 2,088,835 the atom is BOUND true from that application (and Divine Toll is the MATCH there, selected at default[6] before the scan reaches Hammer of Wrath). At the Sacred Weapon hardcast at 2,125,600 and at every decision in the window it is BOUND false from the removal, and default[11] hammer_of_wrath — gated only on hero_tree.lightsmith, TRUE — is eliminated as PROVEN_UNUSABLE rather than left to a world in which it fires. Vanguard follows the same rule: BOUND false at 2,125,600 from the removal at 2,082,694, BOUND true at 2,132,185 from the application at 2,131,157, BOUND false again at 2,139,123's successor, the Judgment at 2,140,155.",
+    [
+      ppb_aura(
+        PPB_FULL,
+        2088835,
+        PP_DIVINE_TOLL,
+        "hammer_of_wrath",
+        ppb_bound(true, PP_HOW_READINESS_BUFF, 2088344),
+      ),
+      ppb_decision(PPB_FULL, 2088835, PP_DIVINE_TOLL, PP_MATCH_DIVINE_TOLL),
+      ppb_aura(
+        PPB_FULL,
+        2125600,
+        PP_SACRED_WEAPON,
+        "hammer_of_wrath",
+        ppb_bound(false, PP_HOW_READINESS_BUFF, 2106345),
+      ),
+      ppb_aura(PPB_FULL, 2125600, PP_SACRED_WEAPON, "vanguard", ppb_bound(false, PP_VANGUARD_BUFF, 2082694)),
+      ppb_aura(PPB_FULL, 2140155, PP_JUDGMENT, "vanguard", ppb_bound(false, PP_VANGUARD_BUFF, 2139123)),
+      ppb_decision(PPB_FULL, 2140155, PP_JUDGMENT),
+      // The earlier Avenger's Shield press under Vanguard, at 2,074,381, resolves the same way.
+      ppb_decision(PPB_FULL, 2074381, PP_AVENGERS_SHIELD, PP_MATCH_AVENGERS_SHIELD),
+      ppb_aura(PPB_FULL, 2074381, PP_AVENGERS_SHIELD, "vanguard", ppb_bound(true, PP_VANGUARD_BUFF, 2067151)),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "hammer_of_wrath_t::ready() requires the readiness buff outside wings (sc_paladin.cpp:1799-1801, with the Lightsmith path at 3684 and the buff at 3632-3634). An action is PROVEN_UNUSABLE from an OBSERVED removal and from nothing else: before the first observed transition the aura is UNBOUND and the action stays MAY_SELECT — silence is not absence. The Judgment at 2,140,155 blocks at default[15] with Vanguard down: with Vanguard up the same scan would have reached default[13] and stopped on Avenger's Shield's hasted cooldown instead.",
+    { authority: PPB_AUTHORITY, related: PPB_RELATED },
+  ),
+  kase(
+    "spec-protection-paladin.gap-bundle-resets-every-claim-that-spans-the-declared-hole",
+    PPB_120_165,
+    "SPEC_PROTECTION_PALADIN",
+    "tests/support/corpus/fight.ts bundleOverEvidence (declared holes); src/specs/paladin/protection/armament-state.ts; cooldown-bindings.ts; aura-bindings.ts; resolver.ts previousGcdCastAt",
+    "Over the gap bundle — the same window, with [2,064,590 .. 2,124,589] declared missing — the 37 decisions in the window are all UNKNOWN and all block at default[6] divine_toll: the Divine Toll and wings presses at 2,088,835 / 2,088,344 are not in evidence and every wings, Vanguard and Hammer of Wrath aura transition before the hole cannot be carried across it (UNBOUND, AURA_STATE_UNKNOWN). At the Sacred Weapon hardcast at 2,125,600 the alternation is UNKNOWN (NO_HARDCAST_IN_EVIDENCE — the anchor at 2,075,421 lies in the hole) and consecration.up is UNBOUND (the 14,000 ms lookback crosses the hole); at the Judgment 1,031 ms later the alternation is KNOWN again from the hardcast that survived, and at the Blessed Hammer at 2,128,710 consecration.up is BOUND true from the Consecration cast at 2,127,666 that also survived. The Avenger's Shield press at 2,139,100 that MATCHES on the full bundle is UNKNOWN here — the Vanguard aura is still BOUND true from 2,131,157, but Hammer of Wrath is no longer proven unusable and Divine Toll no longer proven not ready.",
+    [
+      a("SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY", {
+        actorId: TANK,
+        ...PPB_GAP,
+        evaluationWindow: PPB_WINDOW,
+        expected: {
+          eligibleDecisions: 37,
+          match: 0,
+          rejected: 0,
+          unknown: 37,
+          exclusions: PPB_WINDOW_EXCLUSIONS,
+        },
+      }),
+      a("SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION", {
+        actorId: TANK,
+        ...PPB_GAP,
+        evaluationWindow: PPB_WINDOW,
+        expected: { match: 0, rejected: 0, blockedAt: { "default[6] divine_toll": 37 } },
+      }),
+      ppb_decision(PPB_GAP, 2139100, PP_AVENGERS_SHIELD),
+      ppb_aura(PPB_GAP, 2139100, PP_AVENGERS_SHIELD, "vanguard", ppb_bound(true, PP_VANGUARD_BUFF, 2131157)),
+      ppb_aura(PPB_GAP, 2139100, PP_AVENGERS_SHIELD, "hammer_of_wrath", ppb_unbound(PP_HOW_READINESS_BUFF)),
+      ppb_aura(PPB_GAP, 2139100, PP_AVENGERS_SHIELD, "avenging_wrath", ppb_unbound(PP_SENTINEL)),
+      ppb_cooldown(PPB_GAP, 2139100, PP_AVENGERS_SHIELD, "divine_toll", PPB_ELAPSED_UNKNOWN),
+      ppb_armament(PPB_GAP, 2125600, PP_SACRED_WEAPON, {
+        state: "UNKNOWN",
+        nextArmament: null,
+        anchorReportTimeMs: null,
+        anchorAbilityGameId: null,
+        reason: "NO_HARDCAST_IN_EVIDENCE",
+      }),
+      ppb_armament(PPB_GAP, 2126631, PP_JUDGMENT, ppb_known(0, 2125600, PP_SACRED_WEAPON)),
+      ppb_atom(PPB_GAP, 2125600, PP_SACRED_WEAPON, "consecration.up", { kind: "UNBOUND" }),
+      ppb_atom(PPB_GAP, 2128710, PP_BLESSED_HAMMER, "consecration.up", { kind: "TRUTH", value: true }),
+      // The whole-history disclosure: only Phase A's Divine Toll press survives as a MATCH.
+      a("SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY", {
+        actorId: TANK,
+        ...PPB_GAP,
+        expected: {
+          eligibleDecisions: 93,
+          match: 1,
+          rejected: 0,
+          unknown: 92,
+          exclusions: {
+            MELEE_SWING: 46,
+            NON_GCD_ACTION: 41,
+            EXECUTION_LANE_NOT_ESTABLISHED: 5,
+            NO_AUTHORITY_TOKEN_BINDING: 1,
+          },
+        },
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "Every MATCH on the full bundle rests on retained evidence, and removing that evidence removes the MATCH: no state carries across a declared hole — not a cooldown anchor, not an aura transition, not the alternation, not a ground effect's lookback, not the previous GCD press. A claim whose own anchor lies after the hole keeps exactly what that anchor proves. The Divine Toll lower bound from 2,026,655 is still a valid lower bound across the hole (an unretrieved recast could only lengthen it) and has simply elapsed, which proves nothing about readiness.",
+    { authority: PPB_AUTHORITY, related: PPB_RELATED },
+  ),
 ];
 
 const SE = "synthetic.apl-priority-short-circuit";
@@ -4230,7 +4864,7 @@ const CASES = [
     PP,
     "SPEC_PROTECTION_PALADIN",
     "src/specs/paladin/protection/resolver.ts resolveProtectionAtoms; vocabulary.ts; src/data/game/paladin-protection-talents.json",
-    "At the first Judgment, the Protection resolver binds talent.righteous_protector.enabled TRUE (entry 102440 at node 81477), hero_tree.lightsmith TRUE (fourteen observed entries belong to pinned sub-tree 49), apex.3 TRUE (entry 137020, the third tiered trait in table order), the armament constants sacred_weapon = 1 and holy_bulwark = 0, and states next_armament and gcd as UNKNOWN_NUMBER / STATE_NOT_MODELLED. consecration.up is left UNBOUND, and prev_gcd.1.divine_toll is UNBOUND at the first press because no GCD cast precedes it in the evidence; at the Blessed Hammer that follows it is FALSE, the previous GCD press being that Judgment.",
+    "At the first Judgment, the Protection resolver binds talent.righteous_protector.enabled TRUE (entry 102440 at node 81477), hero_tree.lightsmith TRUE (fourteen observed entries belong to pinned sub-tree 49), apex.3 TRUE (entry 137020, the third tiered trait in table order), the armament constants sacred_weapon = 1 and holy_bulwark = 0, states gcd as UNKNOWN_NUMBER / STATE_NOT_MODELLED and next_armament as UNKNOWN_NUMBER / STATE_NOT_ESTABLISHED (modelled since M10-C5 Phase B, but no Holy Armaments hardcast precedes the first press). consecration.up is left UNBOUND (the 14,000 ms longest duration before the press reaches before the pull), and prev_gcd.1.divine_toll is UNBOUND at the first press because no GCD cast precedes it in the evidence; at the Blessed Hammer that follows it is FALSE, the previous GCD press being that Judgment.",
     [
       pp_atom(2005436, PP_JUDGMENT, "talent.righteous_protector.enabled", { kind: "TRUTH", value: true }),
       pp_atom(2005436, PP_JUDGMENT, "hero_tree.lightsmith", { kind: "TRUTH", value: true }),
@@ -4251,7 +4885,7 @@ const CASES = [
         kind: "MAGNITUDE",
         state: "UNKNOWN_NUMBER",
         value: null,
-        reason: "STATE_NOT_MODELLED",
+        reason: "STATE_NOT_ESTABLISHED",
       }),
       pp_atom(2005436, PP_JUDGMENT, "gcd", {
         kind: "MAGNITUDE",
@@ -4264,7 +4898,7 @@ const CASES = [
       pp_atom(2006478, PP_BLESSED_HAMMER, "prev_gcd.1.divine_toll", { kind: "TRUTH", value: false }),
     ],
     ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
-    "Each binding is a reading of the pinned source (player.cpp for talent.x.enabled, hero_tree and apex; sc_paladin.cpp for next_armament and the armament constants; action.cpp for prev_gcd) applied to a fact the evidence PROVES. What the evidence cannot prove — whether the tank stands in Consecration, the Lightsmith alternation state, a GCD length — is left unbound or stated unmodelled, never defaulted. The previous-GCD walk steps over the Hand of Reckoning (NON_GCD) and the melee swings, and claims a press only under COMPLETE cast coverage between it and the decision.",
+    "Each binding is a reading of the pinned source (player.cpp for talent.x.enabled, hero_tree and apex; sc_paladin.cpp for next_armament and the armament constants; action.cpp for prev_gcd) applied to a fact the evidence PROVES. What the evidence cannot prove — whether the tank's own Consecration is still down, the Lightsmith alternation state before any observed hardcast, a GCD length — is left unbound or stated unestablished / unmodelled, never defaulted. The previous-GCD walk steps over the Hand of Reckoning (NON_GCD) and the melee swings, and claims a press only under COMPLETE cast coverage between it and the decision.",
     { authority: PP_AUTHORITY, related: PP_C_RELATED },
   ),
   kase(
@@ -4549,6 +5183,8 @@ const CASES = [
     "The MATCH on the parent rests on retained evidence, and removing that evidence removes the MATCH: no state carries over from a window the derivative does not hold. A decision whose own anchor survived the gap keeps what that anchor proves and nothing more.",
     { authority: PP45_AUTHORITY, related: PP_C5_RELATED },
   ),
+  // ---- M10-C5 Phase B2: the steady-state bundle ------------------------
+  ...PPB_CASES,
   kase(
     "spec-protection-paladin.assassination-is-refused-at-the-spec-gate",
     PP,

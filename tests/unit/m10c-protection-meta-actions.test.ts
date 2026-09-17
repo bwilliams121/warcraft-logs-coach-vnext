@@ -27,10 +27,16 @@ import {
 } from "../../src/specs/paladin/protection/action-profile.js";
 import {
   hasExecutedToken,
+  forgetAtoms,
   overlayWings,
   protectionContractForSelected,
 } from "../../src/specs/paladin/protection/first-gcd-adapter.js";
-import { initialProtectionState, withExecution } from "../../src/specs/paladin/protection/first-gcd-state.js";
+import {
+  initialProtectionState,
+  protectionStateKey,
+  withExecution,
+  withForgottenAtoms,
+} from "../../src/specs/paladin/protection/first-gcd-state.js";
 import {
   resolveProtectionHeroTree,
   resolveProtectionTalent,
@@ -709,7 +715,7 @@ describe("the reviewed NON_GCD contracts and the wings overlay", () => {
     expect(resolveProtectionUsability(neutral, useItems, 1_297_761).kind).toBe("UNKNOWN");
   });
 
-  it("shield_of_the_righteous: pinned cost 3, 1 s cooldown, admitted only while its unbound atoms stay unbound", () => {
+  it("shield_of_the_righteous: pinned cost 3, 1 s cooldown, and a successor that forgets exactly the atoms it may change", () => {
     const cost = protectionSpenderCostFor("shield_of_the_righteous");
     expect(cost).toMatchObject({
       spellId: 53_600,
@@ -728,13 +734,17 @@ describe("the reviewed NON_GCD contracts and the wings overlay", () => {
       writes: ["OWN_PREFIX_AVAILABILITY", "HOLY_POWER_SPEND", "UNBOUND_ATOMS_MAY_CHANGE"],
       holyPowerCost: 3,
     });
+    // CORRECTED AT M10-C5 PHASE B: `next_armament` is no longer listed. A
+    // Divine Inspiration proc advances divine_inspiration_next, not
+    // next_armament (sc_paladin.cpp:2641, 2752-2753); only an LS_HARDCAST
+    // flips the alternation, and a Shield of the Righteous execution is not one.
     expect(contract?.requiresUnbound?.map((atom) => atom.name)).toEqual([
       "shining_light_free",
       "divine_guidance",
       "blessed_assurance",
       "sacred_weapon",
-      "next_armament",
     ]);
+    expect(contract?.requiresUnbound?.some((atom) => atom.name === "next_armament")).toBe(false);
     const sotr = selected(pinnedAction("shield_of_the_righteous"));
     const unbound: AtomBindings = {
       comboPoints: unknownNumber("STATE_NOT_MODELLED"),
@@ -743,10 +753,40 @@ describe("the reviewed NON_GCD contracts and the wings overlay", () => {
       knownBuffs: [{ name: "avenging_wrath", up: true }],
     };
     expect("contract" in protectionContractForSelected(sotr, facts([]), unbound)).toBe(true);
-    // Bind one of the atoms the execution may change, and the contract refuses.
-    const bound: AtomBindings = { ...unbound, knownBuffs: [{ name: "blessed_assurance", up: false }] };
-    const refused = protectionContractForSelected(sotr, facts([]), bound);
-    expect("refusal" in refused && refused.refusal).toContain("blessed_assurance");
+    // A caller's binding of an atom the execution may change is NOT a
+    // refusal (M10-C5 Phase B): the branch proceeds and its SUCCESSOR forgets
+    // exactly that atom, so the shared evaluator enumerates it again.
+    const bound: AtomBindings = {
+      ...unbound,
+      knownBuffs: [
+        { name: "blessed_assurance", up: false },
+        { name: "avenging_wrath", up: true },
+      ],
+    };
+    expect("contract" in protectionContractForSelected(sotr, facts([]), bound)).toBe(true);
+    const forgotten = (contract?.requiresUnbound ?? []).map((atom) => ({ kind: atom.kind, name: atom.name }));
+    const widened = forgetAtoms(bound, forgotten);
+    // Selective: the atom the contract names is gone; the one it does not name stays bound.
+    expect(widened.knownBuffs).toEqual([{ name: "avenging_wrath", up: true }]);
+    expect(forgetAtoms(unbound, forgotten)).toEqual(unbound);
+    // The successor state records the forgetting, and its key differs from the plain successor.
+    const executed = withExecution(neutral, {
+      listName: "default",
+      priorityOrdinal: pinnedAction("shield_of_the_righteous").priorityOrdinal,
+      actionToken: "shield_of_the_righteous",
+      sourceLine: pinnedAction("shield_of_the_righteous").sourceLine,
+    });
+    const successor = withForgottenAtoms(executed, forgotten);
+    expect(successor.forgottenAtoms.map((atom) => atom.name)).toEqual([
+      "shining_light_free",
+      "divine_guidance",
+      "blessed_assurance",
+      "sacred_weapon",
+    ]);
+    expect(protectionStateKey(successor)).not.toBe(protectionStateKey(executed));
+    expect(protectionStateKey(successor)).toContain("forgot[");
+    // Forgetting is idempotent: the same atoms again change nothing.
+    expect(withForgottenAtoms(successor, forgotten)).toBe(successor);
     // A fired Shield of the Righteous is unusable in its branch (1 s cooldown, prefix rule).
     const fired = withExecution(neutral, {
       listName: "default",
@@ -784,6 +824,34 @@ describe("the reviewed NON_GCD contracts and the wings overlay", () => {
     ).toBe("UNKNOWN");
     // The observed SotR cast proves usability only at its own position.
     expect(resolveProtectionUsability(neutral, sotr, 53_600).kind).toBe("PROVEN_USABLE");
+  });
+
+  it("hammer_of_wrath is PROVEN_UNUSABLE only from an aura-gate fact, which only an observed removal produces", () => {
+    const hammerOfWrath = pinnedAction("hammer_of_wrath");
+    // No gate fact: nothing is proved.
+    expect(resolveProtectionUsability(neutral, hammerOfWrath, JUDGMENT).kind).toBe("UNKNOWN");
+    // The observed-analysis wiring produces a gate fact only from a BOUND
+    // `up: false` reading of the readiness aura; here it is supplied directly.
+    const verdict = resolveProtectionUsability(neutral, hammerOfWrath, JUDGMENT, undefined, undefined, [
+      { simcToken: "hammer_of_wrath", requiredAuraAbilityGameId: 1_277_026, anchorReportTimeMs: 2_106_345 },
+    ]);
+    expect(verdict).toMatchObject({
+      kind: "PROVEN_UNUSABLE",
+      reason: "REQUIRED_AURA_INACTIVE",
+      evidence: { abilityGameId: 1_277_026 },
+    });
+    // A gate for another token does not touch this one.
+    expect(
+      resolveProtectionUsability(neutral, pinnedAction("avengers_shield"), JUDGMENT, undefined, undefined, [
+        { simcToken: "hammer_of_wrath", requiredAuraAbilityGameId: 1_277_026, anchorReportTimeMs: 2_106_345 },
+      ]).kind,
+    ).toBe("UNKNOWN");
+    // The observed press proves usability at its own position, whatever the gate says.
+    expect(
+      resolveProtectionUsability(neutral, hammerOfWrath, 1_241_413, undefined, undefined, [
+        { simcToken: "hammer_of_wrath", requiredAuraAbilityGameId: 1_277_026, anchorReportTimeMs: 2_106_345 },
+      ]).kind,
+    ).toBe("PROVEN_USABLE");
   });
 
   it("the overlay binds the wings buff TRUE and the cooldown bounded BELOW by the caller's effective base, replacing any caller entry", () => {

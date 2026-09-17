@@ -90,6 +90,7 @@ export const CORPUS_ERROR_CODES = [
   "PROVENANCE_RETAINED_COVERAGE_EXCEEDS_SOURCE",
   "PROVENANCE_COVERAGE_GRANT_OVERLAP",
   "PROVENANCE_COVERAGE_WITHOUT_SOURCE",
+  "PROVENANCE_EMPTY_CERTIFICATE_INVALID",
   "CASE_ID_DUPLICATE",
   "CASE_ARTIFACT_UNKNOWN",
   "CASE_PARAM_ARTIFACT_UNKNOWN",
@@ -391,7 +392,11 @@ function provenanceErrors(
   return errors;
 }
 
-/** Every value under a key ending in `ArtifactId`, anywhere in a params object. */
+/**
+ * Every value under a key ending in `ArtifactId`, anywhere in a params
+ * object — and every element of a list under a key ending in `ArtifactIds`
+ * (a bundle's history parts, M10-C5 Phase B).
+ */
 function artifactIdParamsOf(value: unknown, path: readonly string[] = []): { path: string; id: unknown }[] {
   if (Array.isArray(value)) {
     return value.flatMap((entry, index) => artifactIdParamsOf(entry, [...path, String(index)]));
@@ -400,8 +405,126 @@ function artifactIdParamsOf(value: unknown, path: readonly string[] = []): { pat
   return Object.entries(value).flatMap(([key, entry]) =>
     key.endsWith("ArtifactId")
       ? [{ path: [...path, key].join("."), id: entry }]
-      : artifactIdParamsOf(entry, [...path, key]),
+      : key.endsWith("ArtifactIds") && Array.isArray(entry)
+        ? entry.map((id, index) => ({ path: [...path, key, String(index)].join("."), id }))
+        : artifactIdParamsOf(entry, [...path, key]),
   );
+}
+
+/**
+ * A zero-event certificate is checked against BOTH artifacts' recorded
+ * captures and retained events (M10-C5 Phase B). Every rule below is one the
+ * bundle composer relies on when it joins two grants across the interval.
+ */
+function certificateErrors(
+  artifact: CorpusArtifactRecord,
+  byId: ReadonlyMap<string, CorpusArtifactRecord>,
+  eventsById: ReadonlyMap<string, readonly Record<string, unknown>[]>,
+): CorpusError[] {
+  const errors: CorpusError[] = [];
+  const subject = { artifactId: artifact.artifactId };
+  const fail = (message: string): void => {
+    errors.push({
+      code: "PROVENANCE_EMPTY_CERTIFICATE_INVALID",
+      subject,
+      message: `artifact ${artifact.artifactId}: ${message}`,
+    });
+  };
+  const certificates = artifact.provenance.retainedCoverage.certifiedEmpty ?? [];
+  for (const [ordinal, certificate] of certificates.entries()) {
+    const label = `certificate ${String(ordinal)}`;
+    const { fromReportTimeMs: from, toReportTimeMs: to, precedingArtifactId } = certificate;
+    if (to < from) {
+      fail(`${label} ends before it starts`);
+      continue;
+    }
+    const preceding = byId.get(precedingArtifactId);
+    if (preceding === undefined) {
+      fail(`${label} names unknown preceding artifact ${precedingArtifactId}`);
+      continue;
+    }
+    const ownSource = artifact.provenance.source;
+    const precedingSource = preceding.provenance.source;
+    const ownQuery = ownSource?.query;
+    const precedingQuery = precedingSource?.query;
+    if (
+      ownSource === null ||
+      ownSource === undefined ||
+      precedingSource === null ||
+      precedingSource === undefined ||
+      ownQuery === undefined ||
+      precedingQuery === undefined ||
+      !("startTimeMs" in ownQuery) ||
+      !("endTimeMs" in precedingQuery)
+    ) {
+      fail(`${label}: both artifacts must be events captures with recorded queries`);
+      continue;
+    }
+    if (
+      ownSource.reportCode !== precedingSource.reportCode ||
+      ownSource.fightId !== precedingSource.fightId
+    ) {
+      fail(`${label}: the preceding artifact is a different report or fight`);
+    }
+    if (
+      precedingSource.completeness.state !== "COMPLETE" ||
+      precedingSource.completeness.nextPageTimestamp !== null
+    ) {
+      fail(`${label}: the preceding capture is not a terminal COMPLETE capture`);
+    }
+    if (ownSource.completeness.state !== "COMPLETE" || ownSource.completeness.nextPageTimestamp !== null) {
+      fail(`${label}: this artifact's capture is not a terminal COMPLETE capture`);
+    }
+    const precedingEnd = Math.max(
+      ...preceding.provenance.retainedCoverage.grants.flatMap((grant) =>
+        grant.ranges.map((r) => r.toReportTimeMs),
+      ),
+      Number.NEGATIVE_INFINITY,
+    );
+    if (from !== precedingEnd + 1) {
+      fail(
+        `${label} starts at ${String(from)}, but the preceding artifact's retained coverage ends at ${String(precedingEnd)}`,
+      );
+    }
+    // The preceding capture's EXCLUSIVE end must lie beyond the interval, so
+    // every event the source held inside it was retrieved by that capture.
+    const precedingQueryEnd = precedingQuery.endTimeMs;
+    if (typeof precedingQueryEnd !== "number" || to >= precedingQueryEnd) {
+      fail(
+        `${label} ends at ${String(to)}, not before the preceding capture's exclusive query end ${String(precedingQueryEnd)}`,
+      );
+    }
+    // And this artifact's own coverage must begin right after the interval,
+    // inside its own capture window.
+    const ownStart = Math.min(
+      ...artifact.provenance.retainedCoverage.grants.flatMap((grant) =>
+        grant.ranges.map((r) => r.fromReportTimeMs),
+      ),
+      Number.POSITIVE_INFINITY,
+    );
+    if (ownStart !== to + 1) {
+      fail(
+        `${label} ends at ${String(to)}, but this artifact's retained coverage begins at ${String(ownStart)}`,
+      );
+    }
+    const ownQueryStart = ownQuery.startTimeMs;
+    if (typeof ownQueryStart !== "number" || ownQueryStart > to + 1) {
+      fail(`${label}: this artifact's capture begins at ${String(ownQueryStart)}, after the interval`);
+    }
+    // Neither artifact retains an event inside the interval.
+    for (const [id, events] of [
+      [preceding.artifactId, eventsById.get(preceding.artifactId) ?? []],
+      [artifact.artifactId, eventsById.get(artifact.artifactId) ?? []],
+    ] as const) {
+      const inside = events.filter((event) => {
+        const timestamp = event["timestamp"];
+        return typeof timestamp === "number" && timestamp >= from && timestamp <= to;
+      }).length;
+      if (inside > 0)
+        fail(`${label}: ${id} retains ${String(inside)} event(s) inside the certified-empty interval`);
+    }
+  }
+  return errors;
 }
 
 function caseErrors(
@@ -703,6 +826,16 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
   // Lineage.
   for (const artifact of artifactsById.values()) {
     errors.push(...provenanceErrors(artifact, artifactsById));
+  }
+
+  // Zero-event certificates, checked against both artifacts' retained events.
+  const eventsById = new Map<string, readonly Record<string, unknown>[]>();
+  for (const entry of loadedArtifacts) {
+    if (Array.isArray(entry.json))
+      eventsById.set(entry.record.artifactId, entry.json as Record<string, unknown>[]);
+  }
+  for (const artifact of artifactsById.values()) {
+    errors.push(...certificateErrors(artifact, artifactsById, eventsById));
   }
 
   // Cases.

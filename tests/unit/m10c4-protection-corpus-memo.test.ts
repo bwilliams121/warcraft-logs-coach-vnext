@@ -11,7 +11,9 @@
  *
  *   - real analysis runs exactly once per distinct input per run;
  *   - every assertion still executes against that result;
- *   - the opener and its gap derivative are distinct inputs;
+ *   - the opener and its gap derivative are distinct inputs, and so are the
+ *     M10-C5 Phase B2 bundle and its gap bundle (every part and every
+ *     declared hole is in the key);
  *   - two runs share nothing and each performs the real work again;
  *   - the memoized value is frozen, so no assertion can change what the next
  *     one reads;
@@ -51,7 +53,18 @@ const ANALYZING_KINDS = new Set([
   "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
   "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
   "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+  "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
 ]);
+
+interface BundleParams {
+  readonly historyArtifactIds?: readonly string[];
+  readonly declaredHoles?: readonly { fromReportTimeMs: number; toReportTimeMs: number }[];
+}
+
+/** The parts an assertion's analysis is over: its history, then its own artifact. */
+function partsOf(artifactId: string, params: BundleParams): readonly string[] {
+  return [...(params.historyArtifactIds ?? []), artifactId];
+}
 
 /** What the committed manifest says the layer will ask the memo for. */
 async function expectedWork() {
@@ -63,9 +76,10 @@ async function expectedWork() {
     for (const assertion of kase.assertions) {
       if (!ANALYZING_KINDS.has(assertion.kind)) continue;
       analyzingAssertions += 1;
-      const params = assertion.params as { actorId: number; targetActorId?: number | null };
+      const params = assertion.params as { actorId: number; targetActorId?: number | null } & BundleParams;
       const input = JSON.stringify({
-        artifactId: kase.artifact.record.artifactId,
+        parts: partsOf(kase.artifact.record.artifactId, params),
+        declaredHoles: params.declaredHoles ?? [],
         actorId: params.actorId,
         targetActorId: params.targetActorId ?? null,
       });
@@ -88,101 +102,140 @@ async function runLayerCapturingContext() {
 }
 
 describe("the Protection Paladin layer performs exactly one real analysis per distinct input per run", () => {
-  it("analyzes each distinct (artifact, actor, target) input once and serves every other assertion from it", async () => {
-    const expected = await expectedWork();
-    const { result, contexts } = await runLayerCapturingContext();
+  // Measured at M10-C5 Phase B2 in isolation: one layer run is ~2.8 s (six
+  // real analyses, two of them over the composed 3,720-event fight), so the
+  // two-run test below is ~5 s and the default 5 s per-test timeout is
+  // inadequate for it. The same 20 s reading as the harness test's layer
+  // block is used for this block: the work is still bounded and pinned to
+  // exactly six analyses per run.
+  const LAYER_TIMEOUT_MS = 20_000;
 
-    // Every assertion executed; nothing skipped, nothing declared.
-    expect(result.summary.cases).toBe(expected.cases.length);
-    expect(result.summary.passed).toBe(result.summary.assertions);
-    expect(result.summary.failed).toBe(0);
-    expect(result.summary.notExecuted).toBe(0);
+  it(
+    "analyzes each distinct (artifact, actor, target) input once and serves every other assertion from it",
+    async () => {
+      const expected = await expectedWork();
+      const { result, contexts } = await runLayerCapturingContext();
 
-    // One context for the whole run, handed to every assertion.
-    expect(contexts.size).toBe(1);
-    const [context] = contexts;
-    if (context === undefined) throw new Error("no context");
-    const stats = context.memo.stats().filter((stat) => stat.key.includes(DERIVATION));
+      // Every assertion executed; nothing skipped, nothing declared.
+      expect(result.summary.cases).toBe(expected.cases.length);
+      expect(result.summary.passed).toBe(result.summary.assertions);
+      expect(result.summary.failed).toBe(0);
+      expect(result.summary.notExecuted).toBe(0);
 
-    // Exactly as many real analyses as distinct inputs, each computed once —
-    // and the manifest says there are four: the opener, the M10-C5 45-second
-    // slice, and each one's gap derivative.
-    expect(expected.inputs.size).toBe(4);
-    expect(stats.length).toBe(expected.inputs.size);
-    for (const stat of stats) expect(stat.computed, stat.key).toBe(1);
+      // One context for the whole run, handed to every assertion.
+      expect(contexts.size).toBe(1);
+      const [context] = contexts;
+      if (context === undefined) throw new Error("no context");
+      const stats = context.memo.stats().filter((stat) => stat.key.includes(DERIVATION));
 
-    // Every analysis-reading assertion was served, and none re-ran the evaluator.
-    const served = stats.reduce((sum, stat) => sum + stat.served, 0);
-    const computed = stats.reduce((sum, stat) => sum + stat.computed, 0);
-    expect(computed + served).toBe(expected.analyzingAssertions);
-    expect(expected.analyzingAssertions).toBeGreaterThan(computed);
+      // Exactly as many real analyses as distinct inputs, each computed once —
+      // and the manifest says there are six: the opener, the M10-C5 45-second
+      // slice, each one's gap derivative, the Phase B2 five-part bundle and its
+      // three-part gap bundle.
+      expect(expected.inputs.size).toBe(6);
+      expect(stats.length).toBe(expected.inputs.size);
+      for (const stat of stats) expect(stat.computed, stat.key).toBe(1);
 
-    // Per input: the manifest's count of assertions over that input equals
-    // computed + served for the key naming that artifact.
-    for (const [input, count] of expected.inputs) {
-      const { artifactId } = JSON.parse(input) as { artifactId: string };
-      const stat = stats.find((candidate) => {
-        const key = JSON.parse(candidate.key) as { artifactId: string };
-        return key.artifactId === artifactId;
-      });
-      expect(stat, artifactId).toBeDefined();
-      expect((stat?.computed ?? 0) + (stat?.served ?? 0), artifactId).toBe(count);
-    }
-  });
+      // Every analysis-reading assertion was served, and none re-ran the evaluator.
+      const served = stats.reduce((sum, stat) => sum + stat.served, 0);
+      const computed = stats.reduce((sum, stat) => sum + stat.computed, 0);
+      expect(computed + served).toBe(expected.analyzingAssertions);
+      expect(expected.analyzingAssertions).toBeGreaterThan(computed);
 
-  it("keys the memo by every analysis input, so the opener and its gap derivative never collide", async () => {
-    const { contexts } = await runLayerCapturingContext();
-    const [context] = contexts;
-    if (context === undefined) throw new Error("no context");
-    const keys = context.memo
-      .stats()
-      .filter((stat) => stat.key.includes(DERIVATION))
-      .map((stat) => JSON.parse(stat.key) as Record<string, unknown>);
+      // Per input: the manifest's count of assertions over that input equals
+      // computed + served for the key naming that artifact.
+      for (const [input, count] of expected.inputs) {
+        const { parts, declaredHoles } = JSON.parse(input) as { parts: string[]; declaredHoles: unknown[] };
+        const stat = stats.find((candidate) => {
+          const key = JSON.parse(candidate.key) as {
+            parts: { artifactId: string }[];
+            declaredHoles: unknown[];
+          };
+          return (
+            JSON.stringify(key.parts.map((part) => part.artifactId)) === JSON.stringify(parts) &&
+            JSON.stringify(key.declaredHoles) === JSON.stringify(declaredHoles)
+          );
+        });
+        expect(stat, input).toBeDefined();
+        expect((stat?.computed ?? 0) + (stat?.served ?? 0), input).toBe(count);
+      }
+    },
+    LAYER_TIMEOUT_MS,
+  );
 
-    expect(keys.map((key) => key["artifactId"]).sort()).toEqual([
-      "wcl-protection-paladin-a7r6-opener",
-      "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
-      "wcl-protection-paladin-a7r6-rotational-45s",
-      "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
-    ]);
-    for (const key of keys) {
-      expect(Object.keys(key).sort()).toEqual(
-        [
-          "derivation",
-          "analyzerId",
-          "artifactId",
-          "artifactSha256",
-          "provenance",
-          "actorId",
-          "specId",
-          "targetActorId",
-        ].sort(),
-      );
-      expect(key["artifactSha256"]).toMatch(/^[0-9a-f]{64}$/);
-      expect(key["specId"]).toBe("paladin/protection");
-    }
-    const digests = new Set(keys.map((key) => key["artifactSha256"]));
-    expect(digests.size).toBe(keys.length);
-  });
-
-  it("shares nothing between runs: a second run gets its own context and performs the real work again", async () => {
-    const first = await runLayerCapturingContext();
-    const second = await runLayerCapturingContext();
-    const [firstContext] = first.contexts;
-    const [secondContext] = second.contexts;
-    if (firstContext === undefined || secondContext === undefined) throw new Error("no context");
-
-    expect(secondContext).not.toBe(firstContext);
-    const computedIn = (context: CorpusExecutionContext) =>
-      context.memo
+  it(
+    "keys the memo by every analysis input, so the opener and its gap derivative never collide",
+    async () => {
+      const { contexts } = await runLayerCapturingContext();
+      const [context] = contexts;
+      if (context === undefined) throw new Error("no context");
+      const keys = context.memo
         .stats()
         .filter((stat) => stat.key.includes(DERIVATION))
-        .reduce((sum, stat) => sum + stat.computed, 0);
-    expect(computedIn(firstContext)).toBe(4);
-    expect(computedIn(secondContext)).toBe(4);
-    expect(JSON.stringify(second.result.results)).toBe(JSON.stringify(first.result.results));
-    expect(second.result.summary).toEqual(first.result.summary);
-  });
+        .map((stat) => JSON.parse(stat.key) as Record<string, unknown>);
+
+      const partsOfKey = (key: Record<string, unknown>) =>
+        (key["parts"] as { artifactId: string; artifactSha256: string }[]).map((part) => part.artifactId);
+      const B2 = "wcl-protection-paladin-a7r6-rotational-165s";
+      expect(keys.map((key) => partsOfKey(key).join(" > ")).sort()).toEqual(
+        [
+          "wcl-protection-paladin-a7r6-opener",
+          "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+          "wcl-protection-paladin-a7r6-rotational-45s",
+          "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+          `wcl-protection-paladin-a7r6-rotational-45s > ${B2}.seg-45-60 > ${B2}.seg-60-90 > ${B2}.seg-90-120 > ${B2}.seg-120-165`,
+          `wcl-protection-paladin-a7r6-rotational-45s > ${B2}.seg-45-60 > ${B2}.seg-120-165`,
+        ].sort(),
+      );
+      for (const key of keys) {
+        expect(Object.keys(key).sort()).toEqual(
+          ["derivation", "analyzerId", "parts", "declaredHoles", "actorId", "specId", "targetActorId"].sort(),
+        );
+        for (const part of key["parts"] as { artifactSha256: string; provenance: unknown }[]) {
+          expect(part.artifactSha256).toMatch(/^[0-9a-f]{64}$/);
+          expect(part.provenance).toBeDefined();
+        }
+        expect(key["specId"]).toBe("paladin/protection");
+      }
+      // Every key names a different set of digests (with its holes): the gap
+      // bundle differs from the full bundle by the two parts it lacks.
+      const identities = new Set(
+        keys.map((key) =>
+          JSON.stringify([
+            (key["parts"] as { artifactSha256: string }[]).map((part) => part.artifactSha256),
+            key["declaredHoles"],
+          ]),
+        ),
+      );
+      expect(identities.size).toBe(keys.length);
+      const gapBundle = keys.find((key) => (key["declaredHoles"] as unknown[]).length === 1);
+      expect(gapBundle?.["declaredHoles"]).toEqual([{ fromReportTimeMs: 2064590, toReportTimeMs: 2124589 }]);
+    },
+    LAYER_TIMEOUT_MS,
+  );
+
+  it(
+    "shares nothing between runs: a second run gets its own context and performs the real work again",
+    async () => {
+      const first = await runLayerCapturingContext();
+      const second = await runLayerCapturingContext();
+      const [firstContext] = first.contexts;
+      const [secondContext] = second.contexts;
+      if (firstContext === undefined || secondContext === undefined) throw new Error("no context");
+
+      expect(secondContext).not.toBe(firstContext);
+      const computedIn = (context: CorpusExecutionContext) =>
+        context.memo
+          .stats()
+          .filter((stat) => stat.key.includes(DERIVATION))
+          .reduce((sum, stat) => sum + stat.computed, 0);
+      expect(computedIn(firstContext)).toBe(6);
+      expect(computedIn(secondContext)).toBe(6);
+      expect(JSON.stringify(second.result.results)).toBe(JSON.stringify(first.result.results));
+      expect(second.result.summary).toEqual(first.result.summary);
+    },
+    LAYER_TIMEOUT_MS,
+  );
 });
 
 describe("the execution context itself", () => {

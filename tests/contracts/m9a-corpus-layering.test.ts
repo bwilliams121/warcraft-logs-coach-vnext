@@ -363,7 +363,11 @@ describe("captured evidence receives coverage only through the shared corpus int
 
   /** Raw captured events, however obtained. */
   function readsCapturedRawEvents(source: string): boolean {
-    return /\bcommittedEventArray\b/.test(source) || /\b[A-Z0-9_]+_RAW_EVENTS\b/.test(source);
+    return (
+      /\bcommittedEventArray\b/.test(source) ||
+      /\bcommittedEvidence\b/.test(source) ||
+      /\b[A-Z0-9_]+_RAW_EVENTS\b/.test(source)
+    );
   }
 
   function normalizesItself(source: string): boolean {
@@ -415,6 +419,17 @@ describe("captured evidence receives coverage only through the shared corpus int
       "normalizationFactsOf",
       "positionOfCast",
       "FightPremise",
+      // M10-C5 Phase B2: the bundle analogues of corpusFight / corpusState,
+      // the composer's refusal, and the evidence-level entry the bundle
+      // refusal tests need to present a MUTATED part (a renamed record, a
+      // duplicated boundary row) to the composer. `committedEvidence` counts
+      // as reading captured raw events for the triple rule above.
+      "corpusBundle",
+      "corpusBundleState",
+      "BundleCompositionError",
+      "bundleOverEvidence",
+      "committedEvidence",
+      "ArtifactEvidence",
     ]);
     for (const path of testPaths) {
       const source = sourceAt(path);

@@ -38,13 +38,15 @@ export function decisionSlice(
 /**
  * The `--actor-slice` predicate: every event whose sourceID or targetID is
  * the subject, in capture order, optionally bounded to `timestamp <= untilMs`,
- * optionally restricted to the raw `type` strings in `families`.
+ * optionally restricted to the raw `type` strings in `families`, optionally
+ * restricted to `timestamp > fromMs`.
  */
 export function actorSlice(
   events: readonly unknown[],
   subject: number,
   untilMs?: number | null,
   families?: readonly string[] | null,
+  fromMs?: number | null,
 ): readonly unknown[];
 
 export type FamilySelection =

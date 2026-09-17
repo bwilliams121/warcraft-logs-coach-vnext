@@ -71,6 +71,7 @@ import {
 } from "../../../data/game/paladin-protection-transition-authority.js";
 import {
   AVENGING_WRATH_TOKEN,
+  NO_AURA_GATE_FACTS,
   NO_READINESS_FACTS,
   UNKNOWN_SPENDER_FACTS,
   USE_ITEM_TOKEN,
@@ -78,15 +79,17 @@ import {
   resolveProtectionApplicability,
   resolveProtectionUsability,
   wornSubActionSet,
+  type ProtectionAuraGateFact,
   type ProtectionBuildFacts,
   type ProtectionReadinessFact,
   type ProtectionSpenderFacts,
 } from "./action-profile.js";
-import { specAtomValueFor } from "../../../simc/expression/spec-vocabulary.js";
 import { protectionItemEffectForToken } from "../../../data/game/paladin-protection-item-effects.js";
 import { isEmptyGearSlot } from "../../../engine/normalization/combatant-info.js";
 import {
   initialProtectionState,
+  withForgottenAtoms,
+  type ForgottenAtom,
   protectionStateKey,
   withExecution,
   PROTECTION_RACE_WORLDS,
@@ -109,6 +112,8 @@ export interface ProtectionFirstGcdQueryInput {
   readonly spender?: ProtectionSpenderFacts;
   /** What is known about cooldown readiness at this decision. Defaults to nothing. */
   readonly readiness?: readonly ProtectionReadinessFact[];
+  /** Actions whose required aura is PROVEN inactive at this decision. Defaults to nothing. */
+  readonly auraGates?: readonly ProtectionAuraGateFact[];
   /**
    * The LOWER BOUND, in milliseconds, of the wings cooldown a hypothetical
    * wings execution starts for THIS actor — the pinned base after the actor's
@@ -208,25 +213,34 @@ export function protectionContractForSelected(
 ): { readonly contract: ProtectionNonGcdTransitionContract } | { readonly refusal: string } {
   const resolved = protectionContractForSelectedToken(action, buildFacts);
   if ("refusal" in resolved) return resolved;
-  // UNBOUND_ATOMS_MAY_CHANGE is admissible only while every named atom is
-  // unbound: a bound atom this contract changes without an overlay would be
-  // a value the branch carries forward wrongly.
-  const bound = (bindings === undefined ? [] : (resolved.contract.requiresUnbound ?? [])).filter((atom) =>
-    atom.kind === "BUFF"
-      ? bindings?.knownBuffs.some((buff) => buff.name === atom.name)
-      : (() => {
-          const value = specAtomValueFor(bindings?.specAtoms, atom.name, null);
-          return value !== undefined && (value.kind === "TRUTH" || value.binding.state !== "UNKNOWN_NUMBER");
-        })(),
-  );
-  if (bound.length > 0) {
-    return {
-      refusal:
-        `'${action.actionToken}' changes ${bound.map((atom) => atom.name).join(", ")} in a way the evidence ` +
-        "cannot pin, and the caller has bound that atom; the contract is admissible only while it is unbound",
-    };
-  }
+  // UNBOUND_ATOMS_MAY_CHANGE (corrected at M10-C5 Phase B): the atoms a
+  // contract names are the ones the execution may change without an
+  // overlay. A caller's binding of such an atom is not a reason to refuse
+  // the branch; it is a value the SUCCESSOR must forget, which
+  // `runOneRaceWorld` does by widening exactly those atoms back to
+  // enumeration (`forgottenAtoms`). Nothing here reads `bindings` any more;
+  // the parameter stays so callers and tests keep one signature.
+  void bindings;
   return resolved;
+}
+
+/** The caller's bindings with the branch's forgotten atoms removed, so the evaluator enumerates them. */
+export function forgetAtoms(bindings: AtomBindings, forgotten: readonly ForgottenAtom[]): AtomBindings {
+  if (forgotten.length === 0) return bindings;
+  const buffs = new Set(forgotten.filter((atom) => atom.kind === "BUFF").map((atom) => atom.name));
+  const specAtoms = new Set(forgotten.filter((atom) => atom.kind === "SPEC_ATOM").map((atom) => atom.name));
+  const widened: AtomBindings = {
+    ...bindings,
+    knownBuffs: bindings.knownBuffs.filter((buff) => !buffs.has(buff.name)),
+  };
+  if (bindings.specAtoms === undefined) return widened;
+  return {
+    ...widened,
+    specAtoms: {
+      ...bindings.specAtoms,
+      bound: bindings.specAtoms.bound.filter((entry) => !specAtoms.has(entry.key)),
+    },
+  };
 }
 
 function protectionContractForSelectedToken(
@@ -328,12 +342,15 @@ function runOneRaceWorld(
       input.observedAbilityGameId,
       input.spender ?? UNKNOWN_SPENDER_FACTS,
       input.readiness ?? NO_READINESS_FACTS,
+      input.auraGates ?? NO_AURA_GATE_FACTS,
     );
 
-  const bindingsFor = (state: ProtectionFirstGcdState): AtomBindings =>
-    hasExecutedToken(state, AVENGING_WRATH_TOKEN)
-      ? overlayWings(input.bindings, input.wingsCooldownLowerBoundMs ?? null)
-      : input.bindings;
+  const bindingsFor = (state: ProtectionFirstGcdState): AtomBindings => {
+    const forgotten = forgetAtoms(input.bindings, state.forgottenAtoms);
+    return hasExecutedToken(state, AVENGING_WRATH_TOKEN)
+      ? overlayWings(forgotten, input.wingsCooldownLowerBoundMs ?? null)
+      : forgotten;
+  };
 
   const scanFor = (state: ProtectionFirstGcdState): OneForegroundScanResult =>
     resolveOneForegroundScan({
@@ -362,7 +379,11 @@ function runOneRaceWorld(
     const resolved = protectionContractForSelected(action, input.buildFacts, bindingsFor(state));
     if ("refusal" in resolved) return { kind: "UNSUPPORTED", detail: resolved.refusal };
     const { contract } = resolved;
-    const nextState = withExecution(state, entryOf(action.step));
+    // The successor forgets exactly the atoms this execution may change.
+    const nextState = withForgottenAtoms(
+      withExecution(state, entryOf(action.step)),
+      (contract.requiresUnbound ?? []).map((atom) => ({ kind: atom.kind, name: atom.name })),
+    );
     return {
       kind: "APPLIED",
       nextState,

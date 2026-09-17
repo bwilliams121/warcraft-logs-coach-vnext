@@ -320,6 +320,16 @@ describe("M5 invents no combat state", () => {
     // FALSE is never spelled as a literal binding; it only ever comes from the
     // EXACT presence comparison above.
     expect(code).not.toMatch(/up:\s*false/);
+    // M10-C5 Phase B: the build-implied absences (a Templar-only buff under
+    // Lightsmith; Blessed Assurance when the node holds Divine Guidance) are
+    // the ONE place `up: false` is spelled, in their own module, and only
+    // behind a gate the observed talent tree establishes — never from the
+    // aura stream, never from silence.
+    const absences = codeOf("src/specs/paladin/protection/build-absences.ts");
+    expect(absences.match(/up:\s*false/g)).toHaveLength(2);
+    expect(absences).toContain('reason: "BUILD_GATE_NOT_ESTABLISHED"');
+    expect(absences).toContain("if (!established)");
+    expect(absences).not.toContain("presenceAt");
     // One identity, one anchor; no count, no enumeration of contributors.
     expect(code).toContain("readonly anchorPosition: number;");
     expect(code).not.toContain("contributors");

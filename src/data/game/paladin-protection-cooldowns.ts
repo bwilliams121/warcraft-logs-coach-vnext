@@ -39,14 +39,22 @@ export type PassiveModifierKind = "FLAT_MS" | "PCT" | "HASTED" | "CHARGES";
 export type PassiveModifierDirection =
   "SHORTENS" | "LENGTHENS" | "NONE" | "SHORTENS_WITH_HASTE" | "CHANGES_CHARGES";
 
-/** One censused passive trait effect that SimulationCraft would apply to the ability's cooldown. */
+/**
+ * Where a censused passive effect comes from (M10-C5 Phase B). A TRAIT is
+ * selected or not per the observed tree; a SPEC_PASSIVE or CLASS_PASSIVE is
+ * always active for the specialization, so its identity fields are null.
+ */
+export type PassiveModifierOrigin = "TRAIT" | "SPEC_PASSIVE" | "CLASS_PASSIVE";
+
+/** One censused passive effect that SimulationCraft would apply to the ability's cooldown (or, for a ground effect, its duration). */
 export interface PassiveCooldownModifier {
+  readonly origin: PassiveModifierOrigin;
   readonly talentSpellId: number;
   readonly displayNameEn: string;
-  readonly tree: TalentTree;
-  readonly traitNodeId: number;
-  readonly traitEntryId: number;
-  readonly nodeType: TalentNodeType;
+  readonly tree: TalentTree | null;
+  readonly traitNodeId: number | null;
+  readonly traitEntryId: number | null;
+  readonly nodeType: TalentNodeType | null;
   readonly alternativeEntries: readonly TalentAlternativeEntry[];
   readonly effectIndex: number;
   readonly subtype: number;
@@ -64,6 +72,46 @@ export interface DynamicModifierCheck {
   readonly finding: string;
 }
 
+/** A dynamic cooldown mutation the module DOES perform, declared and re-checked by the extractor. */
+export interface KnownDynamicMutation {
+  readonly member: string;
+  readonly site: string;
+  /** PRECOMBAT_ONLY never applies in combat; RESET_TO_READY may, and is proven absent only by its observable signature. */
+  readonly effect: "PRECOMBAT_ONLY" | "RESET_TO_READY";
+  readonly observableSignature?: {
+    readonly kind: "AURA_APPLICATION_ON_ACTOR";
+    readonly abilityGameId: number;
+    readonly basis: string;
+  };
+}
+
+/** A ground effect the APL reads as `<token>.up`: its pinned lifetime and the passives that change it. */
+/**
+ * How long a `<x>.up` expression over a ground aoe stays TRUE (M10-C5 Phase
+ * B2 audit): SimulationCraft's ground_aoe_event_t keeps the active pointer
+ * only until its LAST pulse, which falls inside (D − tick, D] with the tick
+ * hasted downwards from `pulseBaseMs`. A consumer may claim TRUE only while
+ * elapsed ≤ D − pulseBaseMs and FALSE only after D.
+ */
+export interface GroundEffectLifetime {
+  readonly activeStructMember: string;
+  readonly paramsVariable: string;
+  readonly pulseBaseMs: number;
+  readonly pulseHasted: string;
+  readonly expirationPulse: string;
+  readonly rule: "ALIVE_UNTIL_LAST_PULSE";
+  readonly claim: string;
+  readonly sources: readonly string[];
+}
+
+export interface GroundEffectRecord {
+  readonly expression: string;
+  readonly source: string;
+  readonly durationMs: number;
+  readonly durationModifiers: readonly PassiveCooldownModifier[];
+  readonly lifetime: GroundEffectLifetime;
+}
+
 export interface ProtectionCooldownAbility {
   readonly simcToken: string;
   readonly abilityGameId: number;
@@ -76,6 +124,8 @@ export interface ProtectionCooldownAbility {
   readonly category: number;
   readonly categoryCooldownMs: number;
   readonly passiveModifiers: readonly PassiveCooldownModifier[];
+  readonly knownDynamicMutations: readonly KnownDynamicMutation[];
+  readonly groundEffect: GroundEffectRecord | null;
   readonly dynamicModifierPolicy: {
     readonly sourcePaths: readonly string[];
     readonly sourceSha256: Readonly<Record<string, string>>;
@@ -117,13 +167,18 @@ let cached: ProtectionCooldownLoad | null = null;
 
 function readModifier(raw: unknown): PassiveCooldownModifier | null {
   if (!isRecord(raw)) return null;
+  const origin = raw.origin;
   const tree = raw.tree;
   const nodeType = raw.nodeType;
   const kind = raw.kind;
   const direction = raw.direction;
+  if (origin !== "TRAIT" && origin !== "SPEC_PASSIVE" && origin !== "CLASS_PASSIVE") return null;
+  const passive = origin !== "TRAIT";
   if (
-    (tree !== "CLASS" && tree !== "SPECIALIZATION" && tree !== "HERO") ||
-    (nodeType !== "NORMAL" && nodeType !== "CHOICE") ||
+    (passive
+      ? tree !== null || nodeType !== null || raw.traitNodeId !== null || raw.traitEntryId !== null
+      : (tree !== "CLASS" && tree !== "SPECIALIZATION" && tree !== "HERO") ||
+        (nodeType !== "NORMAL" && nodeType !== "CHOICE")) ||
     (kind !== "FLAT_MS" && kind !== "PCT" && kind !== "HASTED" && kind !== "CHARGES") ||
     (direction !== "SHORTENS" &&
       direction !== "LENGTHENS" &&
@@ -145,12 +200,13 @@ function readModifier(raw: unknown): PassiveCooldownModifier | null {
   }
   const scalars = {
     talentSpellId: int(raw.talentSpellId),
-    traitNodeId: int(raw.traitNodeId),
-    traitEntryId: int(raw.traitEntryId),
     effectIndex: int(raw.effectIndex),
     subtype: int(raw.subtype),
     value: num(raw.value),
   };
+  const traitNodeId = passive ? null : int(raw.traitNodeId);
+  const traitEntryId = passive ? null : int(raw.traitEntryId);
+  if (!passive && (traitNodeId === null || traitEntryId === null)) return null;
   const displayNameEn = str(raw.displayNameEn);
   const subtypeName = str(raw.subtypeName);
   const matchedBy = str(raw.matchedBy);
@@ -164,9 +220,12 @@ function readModifier(raw: unknown): PassiveCooldownModifier | null {
   }
   return {
     ...(scalars as { [K in keyof typeof scalars]: number }),
+    origin,
+    traitNodeId,
+    traitEntryId,
     displayNameEn,
-    tree,
-    nodeType,
+    tree: passive ? null : (tree as TalentTree),
+    nodeType: passive ? null : (nodeType as TalentNodeType),
     alternativeEntries: alternatives,
     subtypeName,
     matchedBy,
@@ -257,6 +316,96 @@ function load(): ProtectionCooldownLoad {
       if (read === null) return fail("INVALID_CENSUS", `ability ${simcToken} modifier row`);
       passiveModifiers.push(read);
     }
+    const mutations: KnownDynamicMutation[] = [];
+    if (entry.knownDynamicMutations !== undefined) {
+      if (!Array.isArray(entry.knownDynamicMutations))
+        return fail("INVALID_ABILITIES", `ability ${simcToken} mutations`);
+      for (const mutation of entry.knownDynamicMutations) {
+        if (
+          !isRecord(mutation) ||
+          str(mutation.member) === null ||
+          str(mutation.site) === null ||
+          (mutation.effect !== "PRECOMBAT_ONLY" && mutation.effect !== "RESET_TO_READY")
+        ) {
+          return fail("INVALID_ABILITIES", `ability ${simcToken} mutation row`);
+        }
+        const signature = mutation.observableSignature;
+        if (
+          signature !== undefined &&
+          (!isRecord(signature) ||
+            signature.kind !== "AURA_APPLICATION_ON_ACTOR" ||
+            int(signature.abilityGameId) === null ||
+            str(signature.basis) === null)
+        ) {
+          return fail("INVALID_ABILITIES", `ability ${simcToken} mutation signature`);
+        }
+        mutations.push({
+          member: mutation.member as string,
+          site: mutation.site as string,
+          effect: mutation.effect,
+          ...(signature === undefined
+            ? {}
+            : {
+                observableSignature: {
+                  kind: "AURA_APPLICATION_ON_ACTOR" as const,
+                  abilityGameId: (signature as Record<string, unknown>).abilityGameId as number,
+                  basis: (signature as Record<string, unknown>).basis as string,
+                },
+              }),
+        });
+      }
+    }
+    let groundEffect: GroundEffectRecord | null = null;
+    if (entry.groundEffect !== undefined) {
+      const ground = entry.groundEffect;
+      if (
+        !isRecord(ground) ||
+        str(ground.expression) === null ||
+        str(ground.source) === null ||
+        int(ground.durationMs) === null ||
+        !Array.isArray(ground.durationModifiers)
+      ) {
+        return fail("INVALID_ABILITIES", `ability ${simcToken} ground effect`);
+      }
+      const durationModifiers: PassiveCooldownModifier[] = [];
+      for (const modifier of ground.durationModifiers) {
+        const read = readModifier(modifier);
+        if (read === null) return fail("INVALID_ABILITIES", `ability ${simcToken} duration modifier row`);
+        durationModifiers.push(read);
+      }
+      const lifetime = ground.lifetime;
+      if (
+        !isRecord(lifetime) ||
+        str(lifetime.activeStructMember) === null ||
+        str(lifetime.paramsVariable) === null ||
+        int(lifetime.pulseBaseMs) === null ||
+        (lifetime.pulseBaseMs as number) <= 0 ||
+        str(lifetime.pulseHasted) === null ||
+        str(lifetime.expirationPulse) === null ||
+        lifetime.rule !== "ALIVE_UNTIL_LAST_PULSE" ||
+        str(lifetime.claim) === null ||
+        !Array.isArray(lifetime.sources) ||
+        !lifetime.sources.every((source) => typeof source === "string")
+      ) {
+        return fail("INVALID_ABILITIES", `ability ${simcToken} ground effect lifetime`);
+      }
+      groundEffect = {
+        expression: ground.expression as string,
+        source: ground.source as string,
+        durationMs: ground.durationMs as number,
+        durationModifiers,
+        lifetime: {
+          activeStructMember: lifetime.activeStructMember as string,
+          paramsVariable: lifetime.paramsVariable as string,
+          pulseBaseMs: lifetime.pulseBaseMs as number,
+          pulseHasted: lifetime.pulseHasted as string,
+          expirationPulse: lifetime.expirationPulse as string,
+          rule: "ALIVE_UNTIL_LAST_PULSE",
+          claim: lifetime.claim as string,
+          sources: [...(lifetime.sources as string[])],
+        },
+      };
+    }
     const policy = entry.dynamicModifierPolicy;
     if (
       !isRecord(policy) ||
@@ -300,6 +449,8 @@ function load(): ProtectionCooldownLoad {
       aliasGroup,
       ...(scalars as { [K in keyof typeof scalars]: number }),
       passiveModifiers,
+      knownDynamicMutations: mutations,
+      groundEffect,
       dynamicModifierPolicy: {
         sourcePaths: policy.sourcePaths.filter((path): path is string => typeof path === "string"),
         sourceSha256: Object.fromEntries(

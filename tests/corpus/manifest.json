@@ -2333,6 +2333,506 @@
       }
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-165s.seg-120-165.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "c48ce814082d9e5bb73b383843f9104aa3ee44aa5a2b2410e26c9ad82e96198c",
+      "byteLength": 182066,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-18",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2049589,
+            "endTimeMs": 2169589
+          },
+          "completeness": {
+            "eventsReturned": 68870,
+            "pagesRetrieved": 7,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589]."
+          },
+          "captureTooling": {
+            "name": ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json wcl-protection-paladin-a7r6-rotational-165s.seg-120-165.json --actor-slice 7 2169589 --from 2124589 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seven page envelopes concatenated in page order, then the --actor-slice predicate with --from 2124589 (exclusive) and the bound 2169589 (inclusive), restricted by --families to the same thirteen raw types as the Phase A slice. In place and order preserved. 875 of 68,870 events (first 2,124,603, last 2,169,554): the whole fixed evaluation window [+120,000 .. +165,000] ms, plus nothing after the capture's end.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [7],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2124590,
+                  "toReportTimeMs": 2169589
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 7 over [2,124,590 .. 2,169,589] by the predicate 'every event actor 7 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent."
+        },
+        "retainedFor": "M10-C5 Phase B: one chronological segment of the same subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer (tests/support/corpus/fight.ts bundleOverEvidence). History for every evaluated decision begins at the pull through the Phase A slice; evaluation is fixed to [+120,000 .. +165,000] ms.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+      "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-165s.seg-45-60.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "5dbcb8dc8e95deab10e8df68c98fdb155b12d7988fbe6108510ca0db71df2638",
+      "byteLength": 43545,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-18",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2049589,
+            "endTimeMs": 2169589
+          },
+          "completeness": {
+            "eventsReturned": 68870,
+            "pagesRetrieved": 7,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589]."
+          },
+          "captureTooling": {
+            "name": ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json wcl-protection-paladin-a7r6-rotational-165s.seg-45-60.json --actor-slice 7 2064589 --from 2049581 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seven page envelopes concatenated in page order, then the --actor-slice predicate with --from 2049581 (exclusive) and the bound 2064589 (inclusive), restricted by --families to the same thirteen raw types as the Phase A slice. In place and order preserved. 202 of 68,870 events (first 2,049,618, last 2,064,581). This segment's --from equals the Phase A slice's grant end (2,049,581): the two share no event, and the millisecond interval between the Phase A grant and this capture's window start is certified empty below.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [7],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2049589,
+                  "toReportTimeMs": 2064589
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 7 over [2,049,589 .. 2,064,589] by the predicate 'every event actor 7 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent.",
+          "certifiedEmpty": [
+            {
+              "fromReportTimeMs": 2049582,
+              "toReportTimeMs": 2049588,
+              "precedingArtifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+              "basis": "The M10-B capture requested [2,004,589 .. 2,049,589) — an EXCLUSIVE end of 2,049,589 — and paginated to a terminal page whose last event is 2,049,581, so every event the report holds before 2,049,589 was retrieved and the Phase A slice (every actor-7 event of the retained families in that capture) retained none in [2,049,582 .. 2,049,588]; this capture begins at 2,049,589 and its first event is 2,049,590. The loader re-checks both captures' recorded windows and completeness and that neither artifact retains an event inside the interval."
+            }
+          ]
+        },
+        "retainedFor": "M10-C5 Phase B: one chronological segment of the same subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer (tests/support/corpus/fight.ts bundleOverEvidence). History for every evaluated decision begins at the pull through the Phase A slice; evaluation is fixed to [+120,000 .. +165,000] ms.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+      "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "52c5762b5d3d7412c637a82ee1202f9f428529e9bdd68de0337a84772f32b868",
+      "byteLength": 172085,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-18",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2049589,
+            "endTimeMs": 2169589
+          },
+          "completeness": {
+            "eventsReturned": 68870,
+            "pagesRetrieved": 7,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589]."
+          },
+          "captureTooling": {
+            "name": ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.json --actor-slice 7 2094589 --from 2064589 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seven page envelopes concatenated in page order, then the --actor-slice predicate with --from 2064589 (exclusive) and the bound 2094589 (inclusive), restricted by --families to the same thirteen raw types as the Phase A slice. In place and order preserved. 827 of 68,870 events (first 2,064,705, last 2,094,381).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [7],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2064590,
+                  "toReportTimeMs": 2094589
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 7 over [2,064,590 .. 2,094,589] by the predicate 'every event actor 7 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent."
+        },
+        "retainedFor": "M10-C5 Phase B: one chronological segment of the same subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer (tests/support/corpus/fight.ts bundleOverEvidence). History for every evaluated decision begins at the pull through the Phase A slice; evaluation is fixed to [+120,000 .. +165,000] ms.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+      "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-165s.seg-90-120.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "d09476cc1a94cea2daadeb33da425a4443bdda5dd27ff132ca9b901658256033",
+      "byteLength": 153998,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-18",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2049589,
+            "endTimeMs": 2169589
+          },
+          "completeness": {
+            "eventsReturned": 68870,
+            "pagesRetrieved": 7,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589]."
+          },
+          "captureTooling": {
+            "name": ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json wcl-protection-paladin-a7r6-rotational-165s.seg-90-120.json --actor-slice 7 2124589 --from 2094589 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seven page envelopes concatenated in page order, then the --actor-slice predicate with --from 2094589 (exclusive) and the bound 2124589 (inclusive), restricted by --families to the same thirteen raw types as the Phase A slice. In place and order preserved. 723 of 68,870 events (first 2,094,652, last 2,124,573).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [7],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2094590,
+                  "toReportTimeMs": 2124589
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 7 over [2,094,590 .. 2,124,589] by the predicate 'every event actor 7 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent."
+        },
+        "retainedFor": "M10-C5 Phase B: one chronological segment of the same subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer (tests/support/corpus/fight.ts bundleOverEvidence). History for every evaluated decision begins at the pull through the Phase A slice; evaluation is fixed to [+120,000 .. +165,000] ms.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
       "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-45s.json",
       "encoding": "JSON",
@@ -4590,6 +5090,112 @@
       "relatedTests": ["tests/unit/normalization-event-normalizer.test.ts"]
     },
     {
+      "caseId": "normalization.protection-paladin-165s-bundle-composes-five-parts-into-one-complete-fight",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "tests/support/corpus/fight.ts bundleOverEvidence; loader.ts certificateErrors; scripts/corpus/build-manifest.mjs certifiedEmpty",
+      "purpose": "The five parts — the Phase A 45 s slice (byte-identical, its grant ending at 2,049,581), then the segments granted from 2,049,589, 2,064,590, 2,094,590 and 2,124,590 — compose into one 3,720-event fight over [2,004,589 .. 2,169,554] with CASTS, AURAS, RESOURCES, COMBATANT_INFO and GEAR each COMPLETE over ONE joined range [2,004,589 .. 2,169,589]. The seven milliseconds [2,049,582 .. 2,049,588] between the first two parts are not silently widened over: the seg-45-60 record carries a zero-event certificate for exactly that interval, validated by the loader against both terminal captures, and the composer joins across it only because the certificate exists.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "params": {
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "actorId": 7,
+            "expected": {
+              "events": 3720,
+              "coverage": {
+                "CASTS": "COMPLETE",
+                "AURAS": "COMPLETE",
+                "RESOURCES": "COMPLETE",
+                "COMBATANT_INFO": "COMPLETE",
+                "GEAR": "COMPLETE",
+                "DAMAGE": "ABSENT",
+                "HEALING": "ABSENT",
+                "ABSORBS": "ABSENT",
+                "SUMMONS": "ABSENT"
+              },
+              "castRanges": [
+                {
+                  "fromReportTimeMs": 2004589,
+                  "toReportTimeMs": 2169589
+                }
+              ],
+              "windowFromReportTimeMs": 2004589,
+              "windowToReportTimeMs": 2169554
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "Composition is a claim about coverage, and coverage is never inferred from the bytes: two grants join only where adjacent or bridged by a machine-validated certificate, every part must descend from the same capture with the same actor scope, events must not go backwards across a boundary, and no event row may appear on both sides of one. An undeclared hole, an overlap, a reversed segment, a duplicate boundary row, a certificate that does not fit its neighbours or a digest that does not match the record all refuse the composition — the layer tests exercise each refusal. The families the slicer dropped stay ABSENT."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/m10c5b-corpus-bundle.test.ts", "tests/unit/m9b-corpus-loader.test.ts"]
+    },
+    {
+      "caseId": "normalization.protection-paladin-165s-gap-bundle-keeps-exactly-the-declared-hole",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "tests/support/corpus/fight.ts bundleOverEvidence (declared holes)",
+      "purpose": "With the 60–90 and 90–120 segments omitted and the hole [2,064,590 .. 2,124,589] declared, the three remaining parts compose into a 2,170-event fight over the same window whose CASTS, AURAS, RESOURCES, COMBATANT_INFO and GEAR are PARTIAL: two covered ranges, [2,004,589 .. 2,064,589] and [2,124,590 .. 2,169,589], with exactly the declared hole between them.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "params": {
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "actorId": 7,
+            "expected": {
+              "events": 2170,
+              "coverage": {
+                "CASTS": "PARTIAL",
+                "AURAS": "PARTIAL",
+                "RESOURCES": "PARTIAL",
+                "COMBATANT_INFO": "PARTIAL",
+                "GEAR": "PARTIAL",
+                "DAMAGE": "ABSENT"
+              },
+              "castRanges": [
+                {
+                  "fromReportTimeMs": 2004589,
+                  "toReportTimeMs": 2064589
+                },
+                {
+                  "fromReportTimeMs": 2124590,
+                  "toReportTimeMs": 2169589
+                }
+              ],
+              "windowFromReportTimeMs": 2004589,
+              "windowToReportTimeMs": 2169554
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "A hole is admissible only when declared exactly: the composer computes the holes from the joined grants and refuses when the declared set and the computed set differ in either direction. Inside the hole the fight is PARTIAL, and every claim that spans it fails its gate downstream — no state carries across a declared hole."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
       "caseId": "normalization.protection-paladin-absorb-attributes-the-shield-and-the-attacker",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "NORMALIZATION",
@@ -4838,6 +5444,222 @@
         "tests/unit/supported-families.test.ts",
         "tests/regression/ingestion-preserves-event-order.test.ts"
       ]
+    },
+    {
+      "caseId": "normalization.protection-paladin-rotational-165s-seg-120-165-normalizes-whole-and-in-order",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+      "purpose": "The 875-event family-filtered actor-7 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE 69 casts, 25 Holy Power changes, 654 aura transitions; as TARGET 27 casts, 25 resource changes, 514 aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. Two Holy Armaments hardcasts lie in it: Sacred Weapon 432472 at 2,125,600 and Holy Bulwark 432459 at 2,167,398.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 875
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "SOURCE",
+            "expected": {
+              "CAST": 69,
+              "RESOURCE_CHANGE": 25,
+              "AURA": 654
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 27,
+              "RESOURCE_CHANGE": 25,
+              "AURA": 514
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
+      "caseId": "normalization.protection-paladin-rotational-165s-seg-45-60-normalizes-whole-and-in-order",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+      "purpose": "The 202-event family-filtered actor-7 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE 16 casts, 7 Holy Power changes, 134 aura transitions; as TARGET 7 casts, 7 resource changes, 123 aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. No Holy Armaments hardcast lies in this segment.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 202
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "SOURCE",
+            "expected": {
+              "CAST": 16,
+              "RESOURCE_CHANGE": 7,
+              "AURA": 134
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 7,
+              "RESOURCE_CHANGE": 7,
+              "AURA": 123
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
+      "caseId": "normalization.protection-paladin-rotational-165s-seg-60-90-normalizes-whole-and-in-order",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+      "purpose": "The 827-event family-filtered actor-7 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE 65 casts, 22 Holy Power changes, 601 aura transitions; as TARGET 24 casts, 22 resource changes, 474 aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. Two Holy Armaments hardcasts lie in it: Sacred Weapon 432472 at 2,066,110 and Holy Bulwark 432459 at 2,075,421.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 827
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "SOURCE",
+            "expected": {
+              "CAST": 65,
+              "RESOURCE_CHANGE": 22,
+              "AURA": 601
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 24,
+              "RESOURCE_CHANGE": 22,
+              "AURA": 474
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
+      "caseId": "normalization.protection-paladin-rotational-165s-seg-90-120-normalizes-whole-and-in-order",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+      "purpose": "The 723-event family-filtered actor-7 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE 60 casts, 21 Holy Power changes, 508 aura transitions; as TARGET 25 casts, 21 resource changes, 448 aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. No Holy Armaments hardcast lies in this segment; the Hammer of Wrath readiness aura 1277026 is removed in it at 2,106,345.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 723
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "SOURCE",
+            "expected": {
+              "CAST": 60,
+              "RESOURCE_CHANGE": 21,
+              "AURA": 508
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 25,
+              "RESOURCE_CHANGE": 21,
+              "AURA": 448
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
     },
     {
       "caseId": "normalization.protection-paladin-rotational-45s-gap-keeps-681-events-in-order",
@@ -6813,6 +7635,371 @@
       ]
     },
     {
+      "caseId": "spec-protection-paladin.gap-bundle-resets-every-claim-that-spans-the-declared-hole",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "tests/support/corpus/fight.ts bundleOverEvidence (declared holes); src/specs/paladin/protection/armament-state.ts; cooldown-bindings.ts; aura-bindings.ts; resolver.ts previousGcdCastAt",
+      "purpose": "Over the gap bundle — the same window, with [2,064,590 .. 2,124,589] declared missing — the 37 decisions in the window are all UNKNOWN and all block at default[6] divine_toll: the Divine Toll and wings presses at 2,088,835 / 2,088,344 are not in evidence and every wings, Vanguard and Hammer of Wrath aura transition before the hole cannot be carried across it (UNBOUND, AURA_STATE_UNKNOWN). At the Sacred Weapon hardcast at 2,125,600 the alternation is UNKNOWN (NO_HARDCAST_IN_EVIDENCE — the anchor at 2,075,421 lies in the hole) and consecration.up is UNBOUND (the 14,000 ms lookback crosses the hole); at the Judgment 1,031 ms later the alternation is KNOWN again from the hardcast that survived, and at the Blessed Hammer at 2,128,710 consecration.up is BOUND true from the Consecration cast at 2,127,666 that also survived. The Avenger's Shield press at 2,139,100 that MATCHES on the full bundle is UNKNOWN here — the Vanguard aura is still BOUND true from 2,131,157, but Hammer of Wrath is no longer proven unusable and Divine Toll no longer proven not ready.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "evaluationWindow": {
+              "fromReportTimeMs": 2124589,
+              "toReportTimeMs": 2169589
+            },
+            "expected": {
+              "eligibleDecisions": 37,
+              "match": 0,
+              "rejected": 0,
+              "unknown": 37,
+              "exclusions": {
+                "MELEE_SWING": 16,
+                "NON_GCD_ACTION": 13,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 3
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "evaluationWindow": {
+              "fromReportTimeMs": 2124589,
+              "toReportTimeMs": 2169589
+            },
+            "expected": {
+              "match": 0,
+              "rejected": 0,
+              "blockedAt": {
+                "default[6] divine_toll": 37
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atomName": "vanguard",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 1268810,
+              "anchorReportTimeMs": 2131157,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atomName": "hammer_of_wrath",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 1277026,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atomName": "avenging_wrath",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 389539,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "simcToken": "divine_toll",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "observedCast": {
+              "reportTimeMs": 2125600,
+              "abilityGameId": 432472
+            },
+            "expected": {
+              "state": "UNKNOWN",
+              "nextArmament": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "reason": "NO_HARDCAST_IN_EVIDENCE"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "observedCast": {
+              "reportTimeMs": 2126631,
+              "abilityGameId": 275779
+            },
+            "expected": {
+              "state": "KNOWN",
+              "nextArmament": 0,
+              "anchorReportTimeMs": 2125600,
+              "anchorAbilityGameId": 432472,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "observedCast": {
+              "reportTimeMs": 2125600,
+              "abilityGameId": 432472
+            },
+            "atom": "consecration.up",
+            "expected": {
+              "kind": "UNBOUND"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "observedCast": {
+              "reportTimeMs": 2128710,
+              "abilityGameId": 204019
+            },
+            "atom": "consecration.up",
+            "expected": {
+              "kind": "TRUTH",
+              "value": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60"
+            ],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2064590,
+                "toReportTimeMs": 2124589
+              }
+            ],
+            "expected": {
+              "eligibleDecisions": 93,
+              "match": 1,
+              "rejected": 0,
+              "unknown": 92,
+              "exclusions": {
+                "MELEE_SWING": 46,
+                "NON_GCD_ACTION": 41,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 5,
+                "NO_AUTHORITY_TOKEN_BINDING": 1
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "Every MATCH on the full bundle rests on retained evidence, and removing that evidence removes the MATCH: no state carries across a declared hole — not a cooldown anchor, not an aura transition, not the alternation, not a ground effect's lookback, not the previous GCD press. A claim whose own anchor lies after the hole keeps exactly what that anchor proves. The Divine Toll lower bound from 2,026,655 is still a valid lower bound across the hole (an unretrieved recast could only lengthen it) and has simply elapsed, which proves nothing about readiness."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5b-armament-state.test.ts",
+        "tests/unit/m10c5b-corpus-bundle.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
       "caseId": "spec-protection-paladin.gap-derivation-evaluates-fewer-decisions-and-binds-no-previous-press",
       "artifactId": "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
@@ -6890,6 +8077,247 @@
       "relatedTests": [
         "tests/contracts/m10c-protection-evaluator.test.ts",
         "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/aura-bindings.ts (hammer_of_wrath readiness identity); action-profile.ts REQUIRED_AURA_INACTIVE; src/data/game/paladin-protection-aura-authority.ts",
+      "purpose": "The Hammer of Wrath readiness aura 1277026 is applied by the Sentinel press at 2,088,344 and removed at 2,106,345. At the Divine Toll press at 2,088,835 the atom is BOUND true from that application (and Divine Toll is the MATCH there, selected at default[6] before the scan reaches Hammer of Wrath). At the Sacred Weapon hardcast at 2,125,600 and at every decision in the window it is BOUND false from the removal, and default[11] hammer_of_wrath — gated only on hero_tree.lightsmith, TRUE — is eliminated as PROVEN_UNUSABLE rather than left to a world in which it fires. Vanguard follows the same rule: BOUND false at 2,125,600 from the removal at 2,082,694, BOUND true at 2,132,185 from the application at 2,131,157, BOUND false again at 2,139,123's successor, the Judgment at 2,140,155.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2088835,
+              "abilityGameId": 375576
+            },
+            "atomName": "hammer_of_wrath",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 1277026,
+              "anchorReportTimeMs": 2088344,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2088835,
+              "abilityGameId": 375576
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "divine_toll",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2125600,
+              "abilityGameId": 432472
+            },
+            "atomName": "hammer_of_wrath",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 1277026,
+              "anchorReportTimeMs": 2106345,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2125600,
+              "abilityGameId": 432472
+            },
+            "atomName": "vanguard",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 1268810,
+              "anchorReportTimeMs": 2082694,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2140155,
+              "abilityGameId": 275779
+            },
+            "atomName": "vanguard",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 1268810,
+              "anchorReportTimeMs": 2139123,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2140155,
+              "abilityGameId": 275779
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2074381,
+              "abilityGameId": 31935
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "avengers_shield",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2074381,
+              "abilityGameId": 31935
+            },
+            "atomName": "vanguard",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 1268810,
+              "anchorReportTimeMs": 2067151,
+              "reason": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "hammer_of_wrath_t::ready() requires the readiness buff outside wings (sc_paladin.cpp:1799-1801, with the Lightsmith path at 3684 and the buff at 3632-3634). An action is PROVEN_UNUSABLE from an OBSERVED removal and from nothing else: before the first observed transition the aura is UNBOUND and the action stays MAY_SELECT — silence is not absence. The Judgment at 2,140,155 blocks at default[15] with Vanguard down: with Vanguard up the same scan would have reached default[13] and stopped on Avenger's Shield's hasted cooldown instead."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5b-armament-state.test.ts",
+        "tests/unit/m10c5b-corpus-bundle.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
         "tests/regression/m10c-internal-registration-invariance.test.ts"
       ]
     },
@@ -6993,6 +8421,230 @@
       "relatedTests": [
         "tests/contracts/m10c-protection-evaluator.test.ts",
         "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.next-armament-is-anchored-only-on-a-hardcast-strictly-before-the-decision",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/armament-state.ts armamentStateAt; src/data/game/paladin-protection-armament-authority.ts",
+      "purpose": "At the Sacred Weapon hardcast at 2,125,600 the alternation is KNOWN sacred_weapon (1) from the Holy Bulwark hardcast at 2,075,421 — its own press is not consulted, and neither is anything after it. At the Judgment 1,031 ms later it is KNOWN holy_bulwark (0) from that Sacred Weapon hardcast. The proc-sourced Sacred Weapon application at 2,131,424 (no cast event) does not move it: at the Blessed Hammer at 2,132,185 it is still KNOWN holy_bulwark from 2,125,600. At the Judgment at 2,168,432 it is KNOWN sacred_weapon from the Holy Bulwark hardcast at 2,167,398. Across the whole history the four hardcasts alternate SW -> HB -> SW -> HB, exactly the pinned rule.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2125600,
+              "abilityGameId": 432472
+            },
+            "expected": {
+              "state": "KNOWN",
+              "nextArmament": 1,
+              "anchorReportTimeMs": 2075421,
+              "anchorAbilityGameId": 432459,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2126631,
+              "abilityGameId": 275779
+            },
+            "expected": {
+              "state": "KNOWN",
+              "nextArmament": 0,
+              "anchorReportTimeMs": 2125600,
+              "anchorAbilityGameId": 432472,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2132185,
+              "abilityGameId": 204019
+            },
+            "expected": {
+              "state": "KNOWN",
+              "nextArmament": 0,
+              "anchorReportTimeMs": 2125600,
+              "anchorAbilityGameId": 432472,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2168432,
+              "abilityGameId": 275779
+            },
+            "expected": {
+              "state": "KNOWN",
+              "nextArmament": 1,
+              "anchorReportTimeMs": 2167398,
+              "anchorAbilityGameId": 432459,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2066110,
+              "abilityGameId": 432472
+            },
+            "expected": {
+              "state": "UNKNOWN",
+              "nextArmament": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "reason": "NO_HARDCAST_IN_EVIDENCE"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2067151,
+              "abilityGameId": 275779
+            },
+            "expected": {
+              "state": "KNOWN",
+              "nextArmament": 0,
+              "anchorReportTimeMs": 2066110,
+              "anchorAbilityGameId": 432472,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2126631,
+              "abilityGameId": 275779
+            },
+            "atom": "next_armament",
+            "expected": {
+              "kind": "MAGNITUDE",
+              "state": "KNOWN_NUMBER",
+              "value": 0,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2066110,
+              "abilityGameId": 432472
+            },
+            "atom": "next_armament",
+            "expected": {
+              "kind": "MAGNITUDE",
+              "state": "UNKNOWN_NUMBER",
+              "value": null,
+              "reason": "STATE_NOT_ESTABLISHED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "cast_holy_armaments advances next_armament only when src == LS_HARDCAST (sc_paladin.cpp:2641, 2752); a Divine Inspiration proc advances divine_inspiration_next and a Blessing of the Forge armament advances nothing. The log records a press under the armament it produced, so an observed hardcast fixes the value AFTER it — and only while CASTS coverage is COMPLETE from the hardcast to the decision. The first hardcast in evidence is itself UNKNOWN: the state before the first observed press is outside the log, and a later cast never speaks about an earlier decision."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5b-armament-state.test.ts",
+        "tests/unit/m10c5b-corpus-bundle.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
         "tests/regression/m10c-internal-registration-invariance.test.ts"
       ]
     },
@@ -7310,7 +8962,7 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
       "contractUnderTest": "src/specs/paladin/protection/resolver.ts resolveProtectionAtoms; vocabulary.ts; src/data/game/paladin-protection-talents.json",
-      "purpose": "At the first Judgment, the Protection resolver binds talent.righteous_protector.enabled TRUE (entry 102440 at node 81477), hero_tree.lightsmith TRUE (fourteen observed entries belong to pinned sub-tree 49), apex.3 TRUE (entry 137020, the third tiered trait in table order), the armament constants sacred_weapon = 1 and holy_bulwark = 0, and states next_armament and gcd as UNKNOWN_NUMBER / STATE_NOT_MODELLED. consecration.up is left UNBOUND, and prev_gcd.1.divine_toll is UNBOUND at the first press because no GCD cast precedes it in the evidence; at the Blessed Hammer that follows it is FALSE, the previous GCD press being that Judgment.",
+      "purpose": "At the first Judgment, the Protection resolver binds talent.righteous_protector.enabled TRUE (entry 102440 at node 81477), hero_tree.lightsmith TRUE (fourteen observed entries belong to pinned sub-tree 49), apex.3 TRUE (entry 137020, the third tiered trait in table order), the armament constants sacred_weapon = 1 and holy_bulwark = 0, states gcd as UNKNOWN_NUMBER / STATE_NOT_MODELLED and next_armament as UNKNOWN_NUMBER / STATE_NOT_ESTABLISHED (modelled since M10-C5 Phase B, but no Holy Armaments hardcast precedes the first press). consecration.up is left UNBOUND (the 14,000 ms longest duration before the press reaches before the pull), and prev_gcd.1.divine_toll is UNBOUND at the first press because no GCD cast precedes it in the evidence; at the Blessed Hammer that follows it is FALSE, the previous GCD press being that Judgment.",
       "assertions": [
         {
           "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
@@ -7404,7 +9056,7 @@
               "kind": "MAGNITUDE",
               "state": "UNKNOWN_NUMBER",
               "value": null,
-              "reason": "STATE_NOT_MODELLED"
+              "reason": "STATE_NOT_ESTABLISHED"
             }
           }
         },
@@ -7471,7 +9123,7 @@
       ],
       "rationale": {
         "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
-        "text": "Each binding is a reading of the pinned source (player.cpp for talent.x.enabled, hero_tree and apex; sc_paladin.cpp for next_armament and the armament constants; action.cpp for prev_gcd) applied to a fact the evidence PROVES. What the evidence cannot prove — whether the tank stands in Consecration, the Lightsmith alternation state, a GCD length — is left unbound or stated unmodelled, never defaulted. The previous-GCD walk steps over the Hand of Reckoning (NON_GCD) and the melee swings, and claims a press only under COMPLETE cast coverage between it and the decision."
+        "text": "Each binding is a reading of the pinned source (player.cpp for talent.x.enabled, hero_tree and apex; sc_paladin.cpp for next_armament and the armament constants; action.cpp for prev_gcd) applied to a fact the evidence PROVES. What the evidence cannot prove — whether the tank's own Consecration is still down, the Lightsmith alternation state before any observed hardcast, a GCD length — is left unbound or stated unestablished / unmodelled, never defaulted. The previous-GCD walk steps over the Hand of Reckoning (NON_GCD) and the melee swings, and claims a press only under COMPLETE cast coverage between it and the decision."
       },
       "authority": {
         "authorityId": "SIMC_APL_PALADIN_PROTECTION",
@@ -7697,6 +9349,456 @@
       ]
     },
     {
+      "caseId": "spec-protection-paladin.steady-state-window-population-is-thirty-seven-with-one-real-match",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts analyzeObservedProtectionPaladinDecisions; tests/support/corpus/executors/spec-protection-paladin.ts (evaluationWindow)",
+      "purpose": "Over the composed 165 s fight, evaluated only inside [+120 s, +165 s] (report time [2,124,589 .. 2,169,589]), the evaluator finds 37 eligible GCD decisions — 11 Judgments, 13 Blessed Hammers, 5 Avenger's Shields, 4 Word of Glory, 2 Consecrations, 2 Holy Armaments hardcasts — and excludes 32 casts in the window by name: 16 melee swings, 13 NON_GCD presses, 3 abilities with no pinned lane. Of the 37: 1 MATCH, 0 REJECTED, 36 UNKNOWN. The 36 block at five entries: 18 at default[6] divine_toll (from 2,148,837 on, the Divine Toll and wings cooldowns anchored at 2,088,835 / 2,088,344 have elapsed and a hypothetical wings press reopens the branch), 9 at default[15] consecration, 5 at default[13] avengers_shield, 3 at default[14] holy_armaments, 1 at default[9] holy_armaments.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "evaluationWindow": {
+              "fromReportTimeMs": 2124589,
+              "toReportTimeMs": 2169589
+            },
+            "expected": {
+              "eligibleDecisions": 37,
+              "match": 1,
+              "rejected": 0,
+              "unknown": 36,
+              "exclusions": {
+                "MELEE_SWING": 16,
+                "NON_GCD_ACTION": 13,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 3
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "evaluationWindow": {
+              "fromReportTimeMs": 2124589,
+              "toReportTimeMs": 2169589
+            },
+            "expected": {
+              "match": 1,
+              "rejected": 0,
+              "blockedAt": {
+                "default[6] divine_toll": 18,
+                "default[9] holy_armaments": 1,
+                "default[13] avengers_shield": 5,
+                "default[14] holy_armaments": 3,
+                "default[15] consecration": 9
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "expected": {
+              "eligibleDecisions": 149,
+              "match": 4,
+              "rejected": 0,
+              "unknown": 145,
+              "exclusions": {
+                "MELEE_SWING": 88,
+                "NON_GCD_ACTION": 67,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 6,
+                "NO_AUTHORITY_TOKEN_BINDING": 1
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The population was predeclared at Phase B1 from the raw cast counts (36 by the Phase A token table, 37 once the Sacred Weapon record binds the holy_armaments token) before any Phase B2 semantics ran; nothing was trimmed to isolate the decision that resolves. The window restricts what is COUNTED, never what is ANALYZED: every decision inside it rests on the history before it, and the whole-history summary is disclosed alongside so the window cannot read as the fight."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [
+        "Avenger's Shield and Consecration cooldowns are hasted by the spec passive (137028) and no haste model exists: their readiness stays UNKNOWN by design, which is what blocks default[13] (when Vanguard is up) and default[15] and default[18].",
+        "buff.divine_guidance.stack is a stack count, which no binding field carries: default[15]'s gate is enumerated, and the Judgment at 2,131,157 does NOT converge — its worlds select default[15] consecration or default[17] judgment. The prediction made at Phase B1 is disproved on this evidence, not forced.",
+        "Once the Divine Toll and wings lower bounds have elapsed (from 2,148,837), the branch where wings fires hypothetically reopens default[6], and nothing in the log proves the cooldowns still running."
+      ],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5b-armament-state.test.ts",
+        "tests/unit/m10c5b-corpus-bundle.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.the-avengers-shield-press-under-vanguard-is-a-real-exact-entry-match",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/aura-bindings.ts; build-absences.ts; armament-state.ts; action-profile.ts (REQUIRED_AURA_INACTIVE); first-gcd-adapter.ts; src/simc/first-gcd-selection.ts",
+      "purpose": "The Avenger's Shield press at 2,139,100 (+134,511 ms) is MATCH by the exact entry default[13] avengers_shield, inside the evaluation window. Every higher entry is resolved by evidence or reviewed contract: default[6] divine_toll is PROVEN_NOT_READY (9,735 ms remain from the press at 2,088,835) and its gate FALSE (wings aura BOUND false from the removal at 2,106,345; Righteous Protector SELECTED); default[7] hammer_of_light, default[10] and default[12] are gated on buff.hammer_of_light_ready, BOUND false by the observed build (Lightsmith, not Templar); default[8] shield_of_the_righteous is a NON_GCD transition explored both ways, its successor forgetting only the atoms it may change; default[9] holy_armaments needs next_armament = sacred_weapon and the alternation is KNOWN holy_bulwark from the Sacred Weapon hardcast at 2,125,600; default[11] hammer_of_wrath is PROVEN_UNUSABLE — its ready() requires aura 1277026, which M4 proved INACTIVE from the removal at 2,106,345 (REQUIRED_AURA_INACTIVE). default[13]'s gate is TRUE from buff.vanguard.up, BOUND true by the Vanguard aura 1268810 applied at 2,131,157 (removed only at 2,139,123, after the press), and Avenger's Shield's own usability is its observed execution. All race worlds and both Shield of the Righteous worlds select the same entry.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "avengers_shield",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atomName": "vanguard",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 1268810,
+              "anchorReportTimeMs": 2131157,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atomName": "avenging_wrath",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 389539,
+              "anchorReportTimeMs": 2106345,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atomName": "hammer_of_wrath",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 1277026,
+              "anchorReportTimeMs": 2106345,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atomName": "hammer_of_light_ready",
+            "expected": {
+              "state": "BOUND_BY_BUILD",
+              "up": false,
+              "abilityGameId": 427441,
+              "anchorReportTimeMs": null,
+              "reason": "HERO_TREE_NOT:templar"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atomName": "blessed_assurance",
+            "expected": {
+              "state": "BOUND_BY_BUILD",
+              "up": false,
+              "abilityGameId": 433019,
+              "anchorReportTimeMs": null,
+              "reason": "TALENT_NOT_SELECTED:blessed_assurance"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "simcToken": "divine_toll",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 9735,
+              "anchorReportTimeMs": 2088835,
+              "anchorAbilityGameId": 375576,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "simcToken": "avenging_wrath",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 9244,
+              "anchorReportTimeMs": 2088344,
+              "anchorAbilityGameId": 389539,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "simcToken": "avengers_shield",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "MODIFIERS_NOT_PROVEN_ABSENT"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "expected": {
+              "state": "KNOWN",
+              "nextArmament": 0,
+              "anchorReportTimeMs": 2125600,
+              "anchorAbilityGameId": 432472,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atom": "next_armament",
+            "expected": {
+              "kind": "MAGNITUDE",
+              "state": "KNOWN_NUMBER",
+              "value": 0,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2139100,
+              "abilityGameId": 31935
+            },
+            "atom": "consecration.up",
+            "expected": {
+              "kind": "TRUTH",
+              "value": true
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A real MATCH needs every higher-priority entry resolved and the selected entry's own gate and usability proven — not assumed. Three Phase B2 facts carry it, each from evidence strictly before the press or from the observed build: the Vanguard aura M4 observed applied; the Hammer of Wrath readiness aura M4 observed removed, which is the ONLY way an aura-gated action becomes PROVEN_UNUSABLE (silence never does); and the Lightsmith alternation anchored on an observed hardcast under complete cast coverage since. Avenger's Shield's own hasted cooldown is UNKNOWN and irrelevant: its press proves usability at its own position and nothing about any other."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5b-armament-state.test.ts",
+        "tests/unit/m10c5b-corpus-bundle.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
       "caseId": "spec-protection-paladin.the-divine-toll-press-is-a-real-exact-entry-match",
       "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
@@ -7800,6 +9902,236 @@
         "tests/contracts/m10c5-protection-evaluator.test.ts",
         "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
         "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.the-predicted-judgment-convergence-is-disproved-at-consecration",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts; cooldown-bindings.ts bindGroundEffectPresence; src/simc/first-gcd-selection.ts",
+      "purpose": "The Judgment at 2,131,157 (+126,568 ms), predicted at Phase B1 to converge on judgment through every higher entry, is UNKNOWN, blocked at default[15] consecration: its worlds select default[15] consecration (divine_guidance.stack >= 5 enumerated TRUE, Consecration ready) or default[17] judgment. consecration.up is BOUND true (the Consecration cast at 2,127,666, 3,491 ms earlier, against a 14,000 ms duration — 12,000 ms plus Consecration in Flame), the Consecration cooldown is UNKNOWN (hasted), and buff.vanguard.up is BOUND false from the removal at 2,082,694: the Vanguard application at the SAME millisecond, 2,131,157, is produced by this very Judgment and sits after it in canonical order, so the press does not see it. At the Blessed Hammer 1,028 ms later it does: BOUND true from 2,131,157.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2131157,
+              "abilityGameId": 275779
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2131157,
+              "abilityGameId": 275779
+            },
+            "atomName": "vanguard",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 1268810,
+              "anchorReportTimeMs": 2082694,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2132185,
+              "abilityGameId": 204019
+            },
+            "atomName": "vanguard",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 1268810,
+              "anchorReportTimeMs": 2131157,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2131157,
+              "abilityGameId": 275779
+            },
+            "atom": "consecration.up",
+            "expected": {
+              "kind": "TRUTH",
+              "value": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2131157,
+              "abilityGameId": 275779
+            },
+            "simcToken": "consecration",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "MODIFIERS_NOT_PROVEN_ABSENT"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2131157,
+              "abilityGameId": 275779
+            },
+            "simcToken": "divine_toll",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 17678,
+              "anchorReportTimeMs": 2088835,
+              "anchorAbilityGameId": 375576,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2125600,
+              "abilityGameId": 432472
+            },
+            "atom": "consecration.up",
+            "expected": {
+              "kind": "TRUTH",
+              "value": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2128710,
+              "abilityGameId": 204019
+            },
+            "atom": "consecration.up",
+            "expected": {
+              "kind": "TRUTH",
+              "value": true
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The stop rule, honoured: a prediction that the evidence does not bear out is recorded as the blocker distribution, not manufactured. Two honest refusals block the entry — a stack count no binding field carries and a hasted cooldown no model computes — and each is a deferred item, not a guess. The same-millisecond rule is the M4 position rule, not a timestamp comparison: an aura the decision's own cast applies is visible to the next decision and never to the cast that caused it."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [
+        "consecration.up binds SimulationCraft's `active_consecration != nullptr` — whether the actor's own hardcast ground effect is alive — from the last observed cast and the pinned duration, not whether the actor stands in it."
+      ],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5b-armament-state.test.ts",
+        "tests/unit/m10c5b-corpus-bundle.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
         "tests/regression/m10c-internal-registration-invariance.test.ts"
       ]
     },

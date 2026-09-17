@@ -129,7 +129,7 @@ describe("the real resolved decision: the Divine Toll press at +22,066 ms", () =
   });
 
   it("rests on evidence strictly before the press: the wings aura applied at 2,026,241 and the Sentinel cast at 2,026,241", () => {
-    expect(resolved?.auras).toEqual([
+    expect(resolved?.auras.find((entry) => entry.atomName === "avenging_wrath")).toEqual(
       expect.objectContaining({
         atomName: "avenging_wrath",
         state: "BOUND",
@@ -137,6 +137,20 @@ describe("the real resolved decision: the Divine Toll press at +22,066 ms", () =
         abilityGameId: SENTINEL,
         anchorPosition: 403,
       }),
+    );
+    // M10-C5 Phase B reads more atoms at the same decision; none of them is
+    // what selected Divine Toll, and none is bound from silence: Vanguard has
+    // no observed transition yet (UNBOUND), the Hammer of Wrath readiness aura
+    // was applied by the same Sentinel press (BOUND true), and the four
+    // build-implied absences come from the talent tree.
+    expect(resolved?.auras.map((entry) => [entry.atomName, entry.state])).toEqual([
+      ["avenging_wrath", "BOUND"],
+      ["vanguard", "UNBOUND"],
+      ["hammer_of_wrath", "BOUND"],
+      ["hammer_of_light_ready", "BOUND_BY_BUILD"],
+      ["hammer_of_light_free", "BOUND_BY_BUILD"],
+      ["undisputed_ruling", "BOUND_BY_BUILD"],
+      ["blessed_assurance", "BOUND_BY_BUILD"],
     ]);
     const wings = resolved?.cooldowns.find((entry) => entry.simcToken === "avenging_wrath");
     expect(wings?.readiness).toEqual({

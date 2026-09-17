@@ -47,14 +47,26 @@
  *   next_armament
  *       -1 (KNOWN) when the hero tree is RESOLVED and is not Lightsmith,
  *       because sc_paladin.cpp:5205-5208 returns -1 before consulting the
- *       armament state. Otherwise UNKNOWN_NUMBER / STATE_NOT_MODELLED: the
- *       alternation starts from a pre-pull state this build cannot observe.
+ *       armament state. Under Lightsmith, KNOWN from the last observed Holy
+ *       Armaments HARDCAST strictly before the decision under complete CASTS
+ *       coverage since (`armament-state.ts`, M10-C5 Phase B); otherwise
+ *       UNKNOWN_NUMBER / STATE_NOT_ESTABLISHED with the state machine's
+ *       reason — the alternation starts from a pre-pull state this build
+ *       cannot observe, and a buff transition never anchors it.
  *   sacred_weapon, holy_bulwark
  *       KNOWN constants 1 and 0 (sc_paladin.hpp:25-29).
  *   consecration.up
- *       Unbound, always. Whether the actor stands in their Consecration is not
- *       something Warcraft Logs records, and a ground effect's lifetime is not
- *       derived from its cast here.
+ *       SimulationCraft's `active_consecration != nullptr` (sc_paladin.cpp:
+ *       5036-5038) is whether the actor's own hardcast Consecration ground
+ *       effect is alive — not whether they stand in it. M10-C5 Phase B binds
+ *       it from the last observed Consecration cast and the pinned duration
+ *       (`bindGroundEffectPresence`): TRUE only while the elapsed time is at
+ *       most the shortest admissible duration less the last-pulse allowance
+ *       (the ground aoe dies at its last hasted pulse, inside (D − 1 s, D]);
+ *       FALSE only when the whole longest duration before the decision lies
+ *       inside the log under complete CASTS coverage; UNKNOWN (unbound,
+ *       enumerated) in between and whenever the cast state or the duration
+ *       modifiers are not established.
  *   full_recharge_time, charges, gcd
  *       UNKNOWN_NUMBER / STATE_NOT_MODELLED, stated per action token for the
  *       two self-addressing ones. No charge or GCD-length model exists.
@@ -65,6 +77,8 @@ import { gateAbsenceClaim } from "../../../engine/state/state-result.js";
 import { inclusiveRange } from "../../../engine/evidence/coverage.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import { knownNumber, unknownNumber } from "../../../simc/expression/evaluate.js";
+import { armamentStateAt, type ArmamentState } from "./armament-state.js";
+import { bindGroundEffectPresence, type GroundEffectPresence } from "./cooldown-bindings.js";
 import type { SpecAtomBinding, SpecAtomBindings } from "../../../simc/expression/spec-vocabulary.js";
 import {
   protectionExecutionLaneForAbility,
@@ -79,6 +93,7 @@ import {
 import type { ObservedTalentEntry } from "../../../data/game/talent-selection.js";
 import type { HeroTreeResolution, TalentResolution } from "../../../data/game/talent-selection.js";
 import {
+  CONSECRATION_UP,
   APEX_3,
   CHARGES,
   FULL_RECHARGE_TIME,
@@ -199,6 +214,10 @@ export interface ProtectionResolverDiagnostics {
   readonly heroTree: HeroTreeResolution;
   readonly apex3: TalentResolution;
   readonly previousGcdCast: PreviousGcdCast;
+  /** The Lightsmith alternation at this decision (M10-C5 Phase B); `null` when the tree is not Lightsmith. */
+  readonly armament: ArmamentState | null;
+  /** The actor's own Consecration ground effect at this decision (M10-C5 Phase B). */
+  readonly consecration: GroundEffectPresence;
   /** The modelled talents that resolved, in `knownTalents` shape. */
   readonly knownTalents: readonly { readonly name: string; readonly taken: boolean }[];
 }
@@ -220,6 +239,11 @@ function notModelled(key: string, actionToken: string | null = null): SpecAtomBi
   return { key, actionToken, value: { kind: "MAGNITUDE", binding: unknownNumber("STATE_NOT_MODELLED") } };
 }
 
+/** Modelled, but not established by this evidence at this decision. */
+function notEstablished(key: string, actionToken: string | null = null): SpecAtomBinding {
+  return { key, actionToken, value: { kind: "MAGNITUDE", binding: unknownNumber("STATE_NOT_ESTABLISHED") } };
+}
+
 /** Binds every declared atom this evidence supports; leaves the rest unbound. */
 export function resolveProtectionAtoms(input: ProtectionResolverInput): ProtectionResolution {
   const { state, actorId, position, observedTalents } = input;
@@ -233,14 +257,21 @@ export function resolveProtectionAtoms(input: ProtectionResolverInput): Protecti
 
   // ---- hero tree: membership of observed entries in the pinned sub-trees ----
   const heroTree = resolveProtectionHeroTree(observedTalents);
+  let armament: ArmamentState | null = null;
   if (heroTree.state === "RESOLVED") {
     const lightsmith = heroTree.simcName === LIGHTSMITH_HERO_TREE_NAME;
     bound.push(truth(HERO_TREE_LIGHTSMITH, lightsmith));
     // `next_armament` is -1 the moment the tree is not Lightsmith. Under
-    // Lightsmith the alternation state is NOT observable (see the header), so
-    // it stays a refusal rather than becoming the constructor's initial value.
-    if (!lightsmith) bound.push(magnitude(NEXT_ARMAMENT, NEXT_ARMAMENT_WHEN_NOT_LIGHTSMITH));
-    else bound.push(notModelled(NEXT_ARMAMENT));
+    // Lightsmith it is KNOWN only from an observed hardcast strictly before
+    // the decision under complete coverage since; otherwise a refusal with the
+    // state machine's reason, never the constructor's initial value.
+    if (!lightsmith) {
+      bound.push(magnitude(NEXT_ARMAMENT, NEXT_ARMAMENT_WHEN_NOT_LIGHTSMITH));
+    } else {
+      armament = armamentStateAt({ state, actorId, position });
+      if (armament.state === "KNOWN") bound.push(magnitude(NEXT_ARMAMENT, armament.nextArmament));
+      else bound.push(notEstablished(NEXT_ARMAMENT));
+    }
   } else {
     bound.push(notModelled(NEXT_ARMAMENT));
   }
@@ -277,7 +308,12 @@ export function resolveProtectionAtoms(input: ProtectionResolverInput): Protecti
     bound.push(notModelled(CHARGES, token));
   }
 
-  // `consecration.up` is deliberately absent: unbound, therefore enumerated.
+  // ---- consecration.up: the ground effect's lifetime from its last cast ----
+  const consecration = bindGroundEffectPresence(
+    { state, actorId, position, observedTalents },
+    "consecration",
+  );
+  if (consecration.state === "BOUND") bound.push(truth(CONSECRATION_UP, consecration.up));
 
   return {
     specAtoms: { vocabulary: PROTECTION_ATOM_VOCABULARY, bound },
@@ -286,6 +322,8 @@ export function resolveProtectionAtoms(input: ProtectionResolverInput): Protecti
       heroTree,
       apex3,
       previousGcdCast,
+      armament,
+      consecration,
       knownTalents: resolveProtectionModelledTalents(observedTalents),
     },
   };

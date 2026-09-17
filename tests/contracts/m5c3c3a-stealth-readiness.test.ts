@@ -192,7 +192,12 @@ describe("a proven TRUE makes Stealth unusable, and nothing else does", () => {
       // route disproved: `action_t::ready()` fails cost_affordable(). It rests
       // on observed resource evidence, so it is an OBSERVED reason.
       "INSUFFICIENT_RESOURCE",
+      // M10-C5 Phase B. An action whose own ready() requires an aura that M4
+      // proved INACTIVE from an observed removal (Hammer of Wrath outside
+      // wings, aura 1277026). Observed evidence, so an OBSERVED reason.
+      "REQUIRED_AURA_INACTIVE",
     ]);
+    expect([...OBSERVED_UNUSABLE_REASONS]).toContain("REQUIRED_AURA_INACTIVE");
     // The new reasons describe the OBSERVED fight, so they belong to the
     // observed set. Only the counterfactual one is excluded from it.
     expect([...OBSERVED_UNUSABLE_REASONS]).toContain("RESTEALTH_NOT_PERMITTED_IN_COMBAT");

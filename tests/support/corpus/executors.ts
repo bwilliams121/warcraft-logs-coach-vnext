@@ -221,6 +221,16 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT":
+      return protection.armamentStateAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "NORMALIZATION.BUNDLE_COMPOSITION":
+      return protection.bundleComposition(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM":
       return protection.resolvedAtom(
         context,
@@ -261,6 +271,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "NORMALIZATION.UNSUPPORTED_TYPE_COUNTED",
   "NORMALIZATION.ACTOR_CATALOG",
   "NORMALIZATION.FIGHT_HEADER",
+  "NORMALIZATION.BUNDLE_COMPOSITION",
   "WCL_DECODE.EVENT_PAGE_OUTCOME",
   "WCL_PAGINATION.STREAM_OUTCOME",
   "WCL_PAGINATION.PAGE_ENVELOPE_FACTS",
@@ -291,6 +302,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
   "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
   "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+  "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
   "SPEC_PROTECTION_PALADIN.SPEC_GATE",
   "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
   "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",

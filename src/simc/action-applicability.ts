@@ -199,6 +199,16 @@ export type UnusableReason =
    */
   | "INSUFFICIENT_RESOURCE"
   /**
+   * The action's own `ready()` requires an aura the player has been PROVEN
+   * not to hold (M10-C5 Phase B).
+   *
+   * Shared vocabulary only: WHICH action requires WHICH aura is a
+   * specialization's reading of its own module, and the claim rests on an
+   * OBSERVED removal under coverage (M4 EXACT INACTIVE), never on silence.
+   * The specialization names the aura in the evidence.
+   */
+  | "REQUIRED_AURA_INACTIVE"
+  /**
    * The action re-enters a state the player already holds (M5-D1).
    *
    * `vanish_t::ready()` opens with `if ( p()->buffs.vanish->check() ) return
@@ -233,6 +243,7 @@ export const UNUSABLE_REASONS = [
   "VANISH_BUFF_ALREADY_ACTIVE",
   "SIMULATED_PREFIX_EXECUTION",
   "INSUFFICIENT_RESOURCE",
+  "REQUIRED_AURA_INACTIVE",
 ] as const satisfies readonly UnusableReason[];
 
 /**
@@ -249,6 +260,7 @@ export const OBSERVED_UNUSABLE_REASONS = [
   "RESTEALTH_NOT_PERMITTED_IN_COMBAT",
   "VANISH_BUFF_ALREADY_ACTIVE",
   "INSUFFICIENT_RESOURCE",
+  "REQUIRED_AURA_INACTIVE",
 ] as const satisfies readonly UnusableReason[];
 
 /**

@@ -15,9 +15,12 @@ import {
   type ProtectionCooldownAbility,
 } from "../../src/data/game/paladin-protection-cooldowns.js";
 import {
+  bindGroundEffectPresence,
   deriveProtectionCooldown,
   deriveSupportedProtectionCooldowns,
+  dynamicMutationsAbsent,
   effectiveBaseFor,
+  groundEffectDurationBounds,
   protectionCooldownBindingsFrom,
   SUPPORTED_PROTECTION_COOLDOWN_TOKENS,
 } from "../../src/specs/paladin/protection/cooldown-bindings.js";
@@ -29,6 +32,7 @@ const TANK = 7;
 const [DIVINE_TOLL, SENTINEL, AVENGING_WRATH, HAMMER_OF_WRATH, BLESSED_HAMMER] = [
   375576, 389539, 31884, 1241413, 204019,
 ];
+const [AVENGERS_SHIELD, CONSECRATION, JUDGMENT] = [31935, 26573, 275779];
 /** Entry ids from the pinned census / talent artifact. */
 const RIGHTEOUS_PROTECTOR_ENTRY = 102440;
 const QUICKENED_INVOCATION_ENTRY = 115168;
@@ -51,7 +55,7 @@ function at(state: ReturnType<typeof corpusState>, reportTimeMs: number, ability
 }
 
 describe("the pinned cooldown dataset", () => {
-  it("loads with the machine census and the reviewed dynamic policy for exactly the Phase A abilities", () => {
+  it("loads with the machine census and the reviewed dynamic policy for exactly the Phase A and Phase B abilities", () => {
     const loaded = pinnedProtectionPaladinCooldowns();
     expect(loaded.ok).toBe(true);
     if (!loaded.ok) return;
@@ -60,24 +64,67 @@ describe("the pinned cooldown dataset", () => {
       ["divine_toll", DIVINE_TOLL],
       ["avenging_wrath", SENTINEL],
       ["avenging_wrath", AVENGING_WRATH],
+      ["avengers_shield", AVENGERS_SHIELD],
+      ["consecration", CONSECRATION],
     ]);
     expect(Object.keys(loaded.aliasGroups)).toEqual(["wings"]);
+    const base: Record<string, number> = {
+      divine_toll: 60_000,
+      avenging_wrath: 120_000,
+      avengers_shield: 15_000,
+      consecration: 9_000,
+    };
     for (const ability of loaded.abilities) {
-      expect(ability.baseCooldownMs).toBe(ability.simcToken === "divine_toll" ? 60_000 : 120_000);
+      expect(ability.baseCooldownMs).toBe(base[ability.simcToken]);
       expect(ability.chargeCooldownMs).toBe(0);
+      const declared = ability.knownDynamicMutations.length > 0;
       expect(ability.dynamicModifierPolicy.checks.map((check) => check.claim)).toEqual([
-        "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
+        declared ? "EVERY_DYNAMIC_MUTATION_IS_DECLARED" : "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
         "NO_MUTATION_THROUGH_A_NAMED_COOLDOWN_OBJECT",
-        "NO_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN",
+        declared
+          ? "ONLY_DECLARED_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN"
+          : "NO_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN",
         "NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE",
         "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
         "NO_MODULE_HASTED_COOLDOWN_FLAG",
         "NO_MODULE_AFFECT_LIST_NAMES_THIS_SPELL",
       ]);
     }
+    // Phase B's declared dynamic mutations: Grand Crusader resets Avenger's
+    // Shield (observable as aura 85416 on the actor); Consecration's only
+    // adjust is the precombat one.
+    const [avengersShield] = protectionCooldownAbilitiesFor("avengers_shield");
+    expect(avengersShield?.knownDynamicMutations).toEqual([
+      expect.objectContaining({
+        member: "reset",
+        site: "paladin_t::trigger_grand_crusader",
+        effect: "RESET_TO_READY",
+        observableSignature: expect.objectContaining({
+          kind: "AURA_APPLICATION_ON_ACTOR",
+          abilityGameId: 85416,
+        }),
+      }),
+    ]);
+    const [consecration] = protectionCooldownAbilitiesFor("consecration");
+    expect(consecration?.knownDynamicMutations).toEqual([
+      expect.objectContaining({ member: "adjust", effect: "PRECOMBAT_ONLY" }),
+    ]);
+    expect(consecration?.groundEffect).toEqual(
+      expect.objectContaining({
+        durationMs: 12_000,
+        durationModifiers: [
+          expect.objectContaining({
+            displayNameEn: "Consecration in Flame",
+            kind: "FLAT_MS",
+            value: 2_000,
+            traitEntryId: 102450,
+          }),
+        ],
+      }),
+    );
   });
 
-  it("censuses exactly the passive traits that would change these cooldowns: Quickened Invocation on Divine Toll, Righteous Protector on both wings records", () => {
+  it("censuses exactly the passives that would change these cooldowns: Quickened Invocation on Divine Toll, Righteous Protector on both wings records, the spec passive's haste on Avenger's Shield and Consecration, Consecration's own rank passive", () => {
     const [divineToll] = protectionCooldownAbilitiesFor("divine_toll");
     const wings = protectionCooldownAbilitiesFor("avenging_wrath");
     expect(
@@ -91,7 +138,34 @@ describe("the pinned cooldown dataset", () => {
         record.passiveModifiers.map((m) => [m.displayNameEn, m.kind, m.value, m.direction, m.traitEntryId]),
       ).toEqual([["Righteous Protector", "PCT", -50, "SHORTENS", RIGHTEOUS_PROTECTOR_ENTRY]]);
     }
-    expect(SUPPORTED_PROTECTION_COOLDOWN_TOKENS).toEqual(["divine_toll", "avenging_wrath"]);
+    // Phase B: the spec passive "Protection Paladin" (137028) hastes Avenger's
+    // Shield and Consecration — a SPEC_PASSIVE origin with no trait identity —
+    // and the class-spell rank passive "Consecration" (327980) halves
+    // Consecration's cooldown. Neither is modelled numerically; both are
+    // censused so the binder refuses instead of computing a wrong base.
+    const [avengersShield] = protectionCooldownAbilitiesFor("avengers_shield");
+    expect(
+      avengersShield?.passiveModifiers.map((m) => [
+        m.origin,
+        m.displayNameEn,
+        m.kind,
+        m.direction,
+        m.traitEntryId,
+      ]),
+    ).toEqual([["SPEC_PASSIVE", "Protection Paladin", "HASTED", "SHORTENS_WITH_HASTE", null]]);
+    const [consecration] = protectionCooldownAbilitiesFor("consecration");
+    expect(
+      consecration?.passiveModifiers.map((m) => [m.origin, m.displayNameEn, m.kind, m.value, m.direction]),
+    ).toEqual([
+      ["SPEC_PASSIVE", "Protection Paladin", "HASTED", 100, "SHORTENS_WITH_HASTE"],
+      ["SPEC_PASSIVE", "Consecration", "PCT", -50, "SHORTENS"],
+    ]);
+    expect(SUPPORTED_PROTECTION_COOLDOWN_TOKENS).toEqual([
+      "divine_toll",
+      "avenging_wrath",
+      "avengers_shield",
+      "consecration",
+    ]);
   });
 });
 
@@ -264,6 +338,136 @@ describe("over the REAL 45-second slice", () => {
   it("the Quickened Invocation node was spent on Divine Resonance, so Divine Toll's base is exact, not a bound", () => {
     expect(observedTalents.some((entry) => entry.id === DIVINE_RESONANCE_ENTRY)).toBe(true);
     expect(observedTalents.some((entry) => entry.id === QUICKENED_INVOCATION_ENTRY)).toBe(false);
+  });
+});
+
+describe("Phase B: the observable Grand Crusader reset policy and the Consecration ground effect over the REAL 45-second slice", () => {
+  const state = corpusState(ROTATIONAL);
+  const observedTalents = talentsOf(state);
+  const [avengersShield] = protectionCooldownAbilitiesFor("avengers_shield");
+  if (avengersShield === undefined) throw new Error("no avengers_shield record");
+
+  it("proves the Grand Crusader reset ABSENT only over complete AURAS coverage with no 85416 application between the anchor and the decision", () => {
+    // Anchor: the Avenger's Shield at 2,019,931 (the Grand Crusader buff is
+    // REMOVED at that millisecond, which is not an application). The next
+    // application is at 2,023,092.
+    const anchor = at(state, 2019931, AVENGERS_SHIELD);
+    const before = dynamicMutationsAbsent(
+      avengersShield,
+      state,
+      TANK,
+      anchor,
+      at(state, 2022719, BLESSED_HAMMER),
+    );
+    expect(before.ok).toBe(true);
+    if (before.ok) expect(before.claims).toEqual(["OBSERVABLE_RESET_ABSENT:reset:85416:[2019931..2022719]"]);
+    const after = dynamicMutationsAbsent(
+      avengersShield,
+      state,
+      TANK,
+      anchor,
+      at(state, 2025857, BLESSED_HAMMER),
+    );
+    expect(after).toEqual({
+      ok: false,
+      reason: "the reset signature 85416 was applied 1 time(s) between the anchor and the decision",
+    });
+    // Over the gap derivative the interval is not covered, so absence cannot be claimed.
+    const gap = corpusState(GAP);
+    const gapAnchor = at(gap, 2029047, AVENGERS_SHIELD);
+    const overGap = dynamicMutationsAbsent(
+      avengersShield,
+      gap,
+      TANK,
+      gapAnchor,
+      at(gap, 2032916, AVENGERS_SHIELD),
+    );
+    expect(overGap.ok).toBe(false);
+  });
+
+  it("still derives Avenger's Shield and Consecration as UNKNOWN: the spec passive hastes both and no haste model exists", () => {
+    for (const [token, id] of [
+      ["avengers_shield", AVENGERS_SHIELD],
+      ["consecration", CONSECRATION],
+    ] as const) {
+      const derived = deriveProtectionCooldown(
+        { state, actorId: TANK, position: at(state, 2048592, CONSECRATION), observedTalents },
+        token,
+      );
+      expect(derived?.readiness).toEqual({ state: "UNKNOWN", reason: "COOLDOWN_STATE_UNKNOWN" });
+      expect(derived?.remainsSeconds).toBeNull();
+      const record = derived?.perAbility.find((entry) => entry.abilityGameId === id);
+      expect(record?.effectiveBase.state).toBe("REFUSED");
+      expect(record?.cooldown).toMatchObject({ state: "UNKNOWN", reason: "MODIFIERS_NOT_PROVEN_ABSENT" });
+    }
+  });
+
+  it("binds consecration.up from the last Consecration cast and the pinned 12,000 + 2,000 ms duration", () => {
+    const [consecration] = protectionCooldownAbilitiesFor("consecration");
+    if (consecration === undefined) throw new Error("no consecration record");
+    expect(groundEffectDurationBounds(consecration, observedTalents)).toMatchObject({
+      shortestMs: 14_000,
+      longestMs: 14_000,
+    });
+    // TRUE: 3,978 ms after the cast at 2,015,953.
+    expect(
+      bindGroundEffectPresence(
+        { state, actorId: TANK, position: at(state, 2019931, AVENGERS_SHIELD), observedTalents },
+        "consecration",
+      ),
+    ).toMatchObject({ state: "BOUND", up: true, elapsedMs: 3_978, durationMs: 14_000 });
+    // The Consecration press at 2,020,816 asks about the PREVIOUS one, 4,863 ms earlier.
+    expect(
+      bindGroundEffectPresence(
+        { state, actorId: TANK, position: at(state, 2020816, CONSECRATION), observedTalents },
+        "consecration",
+      ),
+    ).toMatchObject({ state: "BOUND", up: true, elapsedMs: 4_863 });
+    // FALSE: 19,011 ms after the cast at 2,020,816, with the whole 14,000 ms
+    // lookback inside the log under complete CASTS coverage.
+    expect(
+      bindGroundEffectPresence(
+        { state, actorId: TANK, position: at(state, 2039827, CONSECRATION), observedTalents },
+        "consecration",
+      ),
+    ).toMatchObject({ state: "BOUND", up: false, elapsedMs: 19_011, durationMs: 14_000 });
+    // UNKNOWN: at the first Judgment the lookback reaches before the pull.
+    expect(
+      bindGroundEffectPresence(
+        { state, actorId: TANK, position: at(state, 2005436, JUDGMENT), observedTalents },
+        "consecration",
+      ),
+    ).toEqual({ state: "UNKNOWN", reason: "PRE_PULL_GROUND_EFFECT_NOT_EXCLUDED" });
+    // UNKNOWN: with Consecration in Flame unresolved the duration is [12,000, 14,000],
+    // and 12,100 ms after the cast at 2,020,816 is inside the uncertainty.
+    expect(groundEffectDurationBounds(consecration, [])).toMatchObject({
+      shortestMs: 12_000,
+      longestMs: 14_000,
+    });
+    expect(
+      bindGroundEffectPresence(
+        { state, actorId: TANK, position: at(state, 2032916, AVENGERS_SHIELD), observedTalents: [] },
+        "consecration",
+      ),
+    ).toEqual({ state: "UNKNOWN", reason: "ELAPSED_INSIDE_DURATION_UNCERTAINTY" });
+    // UNKNOWN over the gap: the lookback crosses uncovered history.
+    expect(
+      bindGroundEffectPresence(
+        {
+          state: corpusState(GAP),
+          actorId: TANK,
+          position: at(corpusState(GAP), 2039827, CONSECRATION),
+          observedTalents,
+        },
+        "consecration",
+      ),
+    ).toMatchObject({ state: "UNKNOWN" });
+    expect(
+      bindGroundEffectPresence({ state, actorId: TANK, position: 0, observedTalents }, "divine_toll"),
+    ).toEqual({
+      state: "UNKNOWN",
+      reason: "NO_PINNED_GROUND_EFFECT",
+    });
   });
 });
 

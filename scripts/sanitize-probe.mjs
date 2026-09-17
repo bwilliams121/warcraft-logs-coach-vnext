@@ -15,7 +15,7 @@
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --where <key>=<value> <N>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --indices <i,j,k>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --decision-slice <subject> <target,target>
- *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice <subject> [<toReportTimeMs>] [--families <type,type,...>]
+ *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice <subject> [<toReportTimeMs>] [--from <exclusiveFromMs>] [--families <type,type,...>]
  *
  * `--per-type` keeps up to N events of EACH distinct `type`, in original order.
  * That yields far more evidence per byte than a head slice: a fixture that has
@@ -66,6 +66,13 @@
  * this way must grant coverage only to the categories its retained families
  * vouch for. Nothing within a retained family is trimmed.
  *
+ * `--from` (M10-C5 Phase B, `--actor-slice` only) keeps only events with
+ * `timestamp` STRICTLY AFTER the given millisecond, so a long capture can be
+ * committed as chronological SEGMENTS that share no event: segment k keeps
+ * (from_k, to_k] and the next begins at to_k. The grant of such a segment
+ * starts at from + 1; the composer that joins segments requires adjacency
+ * and refuses overlaps or holes it was not told about.
+ *
  * Accepts a full GraphQL envelope, a bare event array, or an ARRAY OF PAGE
  * ENVELOPES (a paginated capture, concatenated in page order), and always
  * writes a bare event array plus a small provenance header alongside it.
@@ -92,7 +99,7 @@ const FORBIDDEN = ["client_secret", "access_token", "authorization", "bearer ", 
  * M9-B predates this field, and their manifest entries record UNAVAILABLE —
  * a fact about those captures, not something to backfill.
  */
-export const SANITIZER_REVISION = "sanitize-probe-5";
+export const SANITIZER_REVISION = "sanitize-probe-6";
 
 /** Where a reviewed slice lands: the regression corpus, never a loose fixture directory. */
 export const OUTPUT_ROOT = "tests/corpus/artifacts/wcl-events";
@@ -194,14 +201,17 @@ export function decisionSlice(events, subject, targets) {
  * Keeps, in capture order, every event whose `sourceID` or `targetID` is
  * `subject`, and — when `untilMs` is a number — only those with `timestamp`
  * at or before it, and — when `families` is a list — only those whose raw
- * `type` is in it. Nothing is reordered, deduplicated or synthesised.
+ * `type` is in it, and — when `fromMs` is a number — only those with
+ * `timestamp` strictly after it. Nothing is reordered, deduplicated or
+ * synthesised.
  */
-export function actorSlice(events, subject, untilMs = null, families = null) {
+export function actorSlice(events, subject, untilMs = null, families = null, fromMs = null) {
   const kept = families === null ? null : new Set(families);
   return events.filter((event) => {
     if (typeof event !== "object" || event === null) return false;
     if (event.sourceID !== subject && event.targetID !== subject) return false;
     if (kept !== null && !kept.has(event.type)) return false;
+    if (fromMs !== null && !(typeof event.timestamp === "number" && event.timestamp > fromMs)) return false;
     return untilMs === null || (typeof event.timestamp === "number" && event.timestamp <= untilMs);
   });
 }
@@ -236,7 +246,7 @@ function main() {
 
   if (inputPath === undefined || outputName === undefined) {
     console.error(
-      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs] [--families type,type]]",
+      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs] [--from exclusiveFromMs] [--families type,type]]",
     );
     process.exit(1);
   }
@@ -250,31 +260,48 @@ function main() {
   if (mode === "--actor-slice") {
     const subject = Number(countRaw);
     const rest = process.argv.slice(6);
-    const familiesAt = rest.indexOf("--families");
-    const positional = familiesAt === -1 ? rest : rest.slice(0, familiesAt);
+    // Options may follow the optional bound in any order; each takes one value.
+    const options = new Map();
+    const positional = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      const token = rest[i];
+      if (token === "--families" || token === "--from") {
+        if (options.has(token) || rest[i + 1] === undefined) {
+          console.error(
+            `usage: --actor-slice <subject actor id> [<toReportTimeMs>] [--from <exclusiveFromMs>] [--families <type,type,...>] (${token} given twice or without a value)`,
+          );
+          process.exit(1);
+        }
+        options.set(token, rest[i + 1]);
+        i += 1;
+      } else positional.push(token);
+    }
+    const familiesAt = options.has("--families") ? 0 : -1;
     const untilRaw = positional[0];
     const untilMs = untilRaw === undefined ? null : Number(untilRaw);
+    const fromMs = options.has("--from") ? Number(options.get("--from")) : null;
     if (
       !Number.isSafeInteger(subject) ||
       (untilMs !== null && !Number.isSafeInteger(untilMs)) ||
-      positional.length > 1 ||
-      (familiesAt !== -1 && rest.length !== familiesAt + 2)
+      (fromMs !== null && !Number.isSafeInteger(fromMs)) ||
+      (fromMs !== null && untilMs !== null && !(fromMs < untilMs)) ||
+      positional.length > 1
     ) {
       console.error(
-        "usage: --actor-slice <subject actor id> [<toReportTimeMs>] [--families <type,type,...>]",
+        "usage: --actor-slice <subject actor id> [<toReportTimeMs>] [--from <exclusiveFromMs>] [--families <type,type,...>]  (from < to)",
       );
       process.exit(1);
     }
     let families = null;
     if (familiesAt !== -1) {
-      const selection = parseFamilySelection(rest[familiesAt + 1]);
+      const selection = parseFamilySelection(options.get("--families"));
       if (!selection.ok) {
         console.error(selection.error);
         process.exit(1);
       }
       families = selection.families;
     }
-    sliced = actorSlice(events, subject, untilMs, families);
+    sliced = actorSlice(events, subject, untilMs, families, fromMs);
   } else if (mode === "--decision-slice") {
     const subject = Number(countRaw);
     const targets = String(process.argv[6] ?? "")
