@@ -54,11 +54,16 @@ describe("every Node-executable layer of the corpus executes clean", () => {
     ]);
   });
 
-  // A specialization layer re-runs its real evaluator for every case — the
-  // Protection layer runs twelve analyses over the opener — and under a fully
-  // loaded runner that exceeds the default 5 s. The work is the point of the
-  // test, so the timeout is raised for this block only (the same reading as
-  // the M7-F orchestration test).
+  // A specialization layer runs its real evaluator, and under a fully loaded
+  // runner that exceeds the default 5 s, so the timeout is raised for this
+  // block only (the same reading as the M7-F orchestration test). The work is
+  // bounded: each layer's executor analyzes every distinct input exactly ONCE
+  // per run through the run's own execution context — the Protection layer
+  // performs two real analyses (opener, gap derivative) for its thirty-eight
+  // assertions, about half a second in isolation. Before the M10-C4 CI
+  // correction it re-ran the evaluator per assertion (thirty-six analyses,
+  // ten seconds in isolation) and timed out here under CI load; the exact
+  // count is pinned by `m10c4-protection-corpus-memo.test.ts`.
   const LAYER_TIMEOUT_MS = 20_000;
 
   it.each(NODE_LAYERS)(

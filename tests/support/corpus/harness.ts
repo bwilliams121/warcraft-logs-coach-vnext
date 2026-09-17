@@ -37,9 +37,16 @@
  * here reads a clock, the environment, or a random source; nothing writes a
  * file; nothing caches across calls. Two runs over the same file table produce
  * structurally identical results.
+ *
+ * Each run creates its own `CorpusExecutionContext` and hands it to every
+ * assertion: an executor that needs one expensive derivation for many
+ * assertions computes it once THERE, and the context dies with the run. It is
+ * the only place a value outlives a single assertion, and nothing outlives the
+ * run.
  */
 
 import { ASSERTION_KINDS, OWNING_LAYER_IDS, type ExecutionRuntime, type OwningLayer } from "./contract.js";
+import { createExecutionContext, type CorpusExecutionContext } from "./execution-context.js";
 import { executeAssertion } from "./executors.js";
 import {
   committedCorpusFiles,
@@ -167,6 +174,7 @@ async function runAssertion(
   assertion: LoadedAssertion,
   ordinal: number,
   execute: AssertionExecutor,
+  context: CorpusExecutionContext,
 ): Promise<AssertionResult> {
   const base = {
     caseId: kase.record.caseId,
@@ -184,7 +192,7 @@ async function runAssertion(
   }
   let outcome: Awaited<ReturnType<AssertionExecutor>>;
   try {
-    outcome = await execute(corpus, kase, assertion);
+    outcome = await execute(corpus, kase, assertion, context);
   } catch (error) {
     // An executor that throws has not proven anything either way. It is a
     // FAILED assertion with the throw as its detail — never a crash that takes
@@ -273,10 +281,11 @@ export async function runCorpusHarness(
   }
 
   const execute = options.execute ?? executeAssertion;
+  const context = createExecutionContext();
   const results: AssertionResult[] = [];
   for (const kase of selected) {
     for (const [ordinal, assertion] of kase.assertions.entries()) {
-      results.push(await runAssertion(corpus, kase, assertion, ordinal, execute));
+      results.push(await runAssertion(corpus, kase, assertion, ordinal, execute, context));
     }
   }
   const summary = summarize(selected, results);

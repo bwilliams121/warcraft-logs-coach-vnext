@@ -15,6 +15,7 @@
  */
 
 import type { AssertionKind } from "./contract.js";
+import type { CorpusExecutionContext } from "./execution-context.js";
 import type { LoadedAssertion, LoadedCase, LoadedCorpus } from "./loader.js";
 import * as applicationService from "./executors/application-service.js";
 import * as combatState from "./executors/combat-state.js";
@@ -33,11 +34,16 @@ export type { AssertionOutcome } from "./executors/outcome.js";
  * Runs one assertion. Payload-kind compatibility and parameter validity were
  * established by the loader, so a mismatch here is a programming error and
  * throws rather than failing softly.
+ *
+ * `context` is the run's own scope (see `execution-context.ts`): an executor
+ * that derives one expensive value for many assertions derives it once per run
+ * there. It is created by the harness per run and is never module state.
  */
 export async function executeAssertion(
   corpus: LoadedCorpus,
   kase: LoadedCase,
   assertion: LoadedAssertion,
+  context: CorpusExecutionContext,
 ): Promise<AssertionOutcome> {
   const { artifact } = kase;
   const params = assertion.params;
@@ -135,17 +141,31 @@ export async function executeAssertion(
       return spec.dotRemains(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE":
       return protection.authorityProvenance(
+        context,
         corpus,
         kase,
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
     case "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE":
-      return protection.decisionCoverage(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+      return protection.decisionCoverage(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY":
-      return protection.coverageSummary(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+      return protection.coverageSummary(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION":
       return protection.holyPowerObservation(
+        context,
         corpus,
         kase,
         artifact,
@@ -153,23 +173,43 @@ export async function executeAssertion(
       );
     case "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED":
       return protection.holyPowerNotObserved(
+        context,
         corpus,
         kase,
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
     case "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT":
-      return protection.domainResult(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+      return protection.domainResult(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION":
-      return protection.buildResolution(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+      return protection.buildResolution(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET":
       return protection.useItemsSubActionSet(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM":
-      return protection.resolvedAtom(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+      return protection.resolvedAtom(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_PROTECTION_PALADIN.SPEC_GATE":
       return protection.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE":
       return protection.notPubliclyProjectable(
+        context,
         corpus,
         kase,
         artifact,

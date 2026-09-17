@@ -8,6 +8,14 @@
  * hand-built authority. No transport, no service, no network: the corpus
  * fight builder supplies the state, and everything between it and the
  * outcome is production code from `src/specs/paladin/protection/`.
+ *
+ * ONE REAL ANALYSIS PER INPUT PER RUN. Thirty-odd assertions read the same
+ * analysis of the same artifact and actor. `analyzedOrFail` derives it once
+ * per corpus execution through the run's own `CorpusExecutionContext`, keyed
+ * by every input the analysis has, and every assertion then checks what it
+ * checks against that one frozen result. The gap derivative is a different
+ * artifact with a different digest and is analyzed on its own. Nothing is
+ * memoized in production code, and nothing survives the run.
  */
 
 import type { CombatState } from "../../../../src/engine/state/combat-state.js";
@@ -25,6 +33,7 @@ import {
   resolveProtectionHeroEntry,
 } from "../../../../src/specs/paladin/protection/subaction-candidates.js";
 import { PROTECTION_PALADIN_SPEC_ID } from "../../../../src/specs/paladin/protection/spec.js";
+import type { CorpusExecutionContext } from "../execution-context.js";
 import { positionOfCast, stateOf } from "../fight.js";
 import type { LoadedArtifact, LoadedCase, LoadedCorpus } from "../loader.js";
 import { fail, pass, type AssertionOutcome } from "./outcome.js";
@@ -42,8 +51,44 @@ function analysisFacts(analysis: ProtectionPaladinAnalysis): unknown {
     : { status: analysis.status, detail: analysis.detail };
 }
 
+/**
+ * The registration's analysis of one actor over one artifact, derived once per
+ * run. The key names every input: the code path, the artifact (id, digest and
+ * provenance — the events and the coverage the fight is granted), the actor,
+ * the specialization and the target.
+ */
+function analysisOf(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  artifact: LoadedArtifact,
+  actorId: number,
+  targetActorId: number | null,
+): { readonly state: CombatState; readonly analysis: ProtectionPaladinAnalysis } {
+  const key = JSON.stringify({
+    derivation: "PROTECTION_PALADIN_REGISTRATION.analyze",
+    analyzerId: PROTECTION_PALADIN_REGISTRATION.analyzerId,
+    artifactId: artifact.record.artifactId,
+    artifactSha256: artifact.record.sha256,
+    provenance: artifact.record.provenance,
+    actorId,
+    specId: PROTECTION_PALADIN_SPEC_ID,
+    targetActorId,
+  });
+  return context.memo.once(key, () => {
+    const state = stateOf(corpus, artifact);
+    const analysis = PROTECTION_PALADIN_REGISTRATION.analyze({
+      state,
+      actorId,
+      specId: PROTECTION_PALADIN_SPEC_ID,
+      targetActorId,
+    }) as ProtectionPaladinAnalysis;
+    return { state, analysis };
+  });
+}
+
 /** Runs the registration, checks the pinned revision, and narrows to ANALYZED. */
 function analyzedOrFail(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
@@ -52,13 +97,7 @@ function analyzedOrFail(
 ):
   | { readonly ok: true; readonly state: CombatState; readonly analysis: Analyzed }
   | { readonly ok: false; readonly outcome: AssertionOutcome } {
-  const state = stateOf(corpus, artifact);
-  const analysis = PROTECTION_PALADIN_REGISTRATION.analyze({
-    state,
-    actorId,
-    specId: PROTECTION_PALADIN_SPEC_ID,
-    targetActorId,
-  }) as ProtectionPaladinAnalysis;
+  const { state, analysis } = analysisOf(context, corpus, artifact, actorId, targetActorId);
   if (analysis.status !== "ANALYZED") {
     return {
       ok: false,
@@ -94,12 +133,13 @@ function castPosition(
 }
 
 export function authorityProvenance(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
   const { authority } = run.analysis;
   const actual = {
@@ -119,12 +159,13 @@ export function authorityProvenance(
 }
 
 export function decisionCoverage(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.DECISION_COVERAGE">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId, params.targetActorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, params.targetActorId);
   if (!run.ok) return run.outcome;
   const position = castPosition(run.state, params.actorId, params.observedCast);
   if (!position.ok) return position.outcome;
@@ -158,12 +199,13 @@ export function decisionCoverage(
 }
 
 export function coverageSummary(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
   const { coverage } = run.analysis;
   const actual = {
@@ -207,12 +249,13 @@ function holyPowerRecordFor(
 }
 
 export function holyPowerObservation(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
   const found = holyPowerRecordFor(run, params.actorId, params.cast);
   if (!found.ok) return found.outcome;
@@ -227,12 +270,13 @@ export function holyPowerObservation(
 }
 
 export function holyPowerNotObserved(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
   const found = holyPowerRecordFor(run, params.actorId, params.cast);
   if (!found.ok) return found.outcome;
@@ -247,12 +291,13 @@ export function holyPowerNotObserved(
 }
 
 export function domainResult(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.DOMAIN_RESULT">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
   const domain = run.analysis.domains.find((entry) => entry.domain === params.domain);
   if (domain === undefined) {
@@ -310,12 +355,13 @@ export function useItemsSubActionSet(
 }
 
 export function buildResolution(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
   const { build } = run.analysis;
   const talents: Record<string, string> = {
@@ -342,12 +388,13 @@ export function buildResolution(
 }
 
 export function resolvedAtom(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.RESOLVED_ATOM">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
   const position = castPosition(run.state, params.actorId, params.observedCast);
   if (!position.ok) return position.outcome;
@@ -429,12 +476,13 @@ export function specGate(
 }
 
 export function notPubliclyProjectable(
+  context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   kase: LoadedCase,
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
   if (!run.ok) return run.outcome;
   try {
     requirePublicSpecId(run.analysis.specId);

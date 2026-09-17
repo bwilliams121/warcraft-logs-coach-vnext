@@ -139,6 +139,7 @@ const CORPUS_SUPPORT_PATHS = Object.keys(CORPUS_SUPPORT_SOURCES)
 const PURE_RING = [
   "support/corpus/artifacts.ts",
   "support/corpus/contract.ts",
+  "support/corpus/execution-context.ts",
   "support/corpus/executors.ts",
   "support/corpus/fight.ts",
   "support/corpus/harness.ts",
