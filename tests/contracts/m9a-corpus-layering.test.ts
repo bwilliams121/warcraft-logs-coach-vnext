@@ -23,6 +23,7 @@ import {
   ASSERTION_KINDS,
   OUTCOME_CLASSES,
   OWNING_LAYERS,
+  ownershipRootProblems,
   type AssertionKind,
 } from "../support/corpus/contract.js";
 import { EXECUTABLE_KINDS } from "../support/corpus/executors.js";
@@ -152,7 +153,9 @@ const EXECUTOR_RING = [
   "support/corpus/executors/outcome.ts",
   "support/corpus/executors/params.ts",
   "support/corpus/executors/public-contract.ts",
+  "support/corpus/executors/shared-decision-engine.ts",
   "support/corpus/executors/spec-assassination.ts",
+  "support/corpus/executors/spec-protection-paladin.ts",
   "support/corpus/executors/wcl-transport.ts",
 ];
 
@@ -232,6 +235,27 @@ describe("the corpus machinery is offline, deterministic and read-only", () => {
         (specifier) => specifier.includes("/api/") || specifier.includes("/mcp/"),
       );
       expect(reachesInterfaces, path).toBe(path === "support/corpus/executors/public-contract.ts");
+    }
+  });
+
+  it("lets only the shared-decision-engine executor exercise src/simc without a specialization, and it imports nothing else", () => {
+    // Correction 2 (M10-C). The shared engine is its own layer, so its executor
+    // must reach the engine directly — and must not smuggle in a specialization,
+    // a service, a fight builder or a normalizer, which would make its cases
+    // coverage of something the layer does not own.
+    const path = "support/corpus/executors/shared-decision-engine.ts";
+    const specifiers = importsOf(CORPUS_SUPPORT_SOURCES[`../${path}`] ?? "");
+    const production = specifiers.filter((specifier) => specifier.includes("/src/"));
+    expect(production.length).toBeGreaterThan(0);
+    for (const specifier of production) {
+      expect(specifier, `${path} imports ${specifier}`).toMatch(/\/src\/simc\//);
+    }
+    // Every OTHER executor that reaches the engine does so through a specialization tree.
+    for (const other of EXECUTOR_RING) {
+      if (other === path) continue;
+      const otherSpecifiers = importsOf(CORPUS_SUPPORT_SOURCES[`../${other}`] ?? "");
+      const reachesEngine = otherSpecifiers.some((specifier) => specifier.includes("/src/simc/"));
+      expect(reachesEngine, `${other} reaches src/simc directly`).toBe(false);
     }
   });
 
@@ -436,6 +460,24 @@ describe("assertion execution matches the registry exactly", () => {
     expect(registered.filter(([, def]) => (def.execution as string) === "DECLARED")).toEqual([]);
     const corpus = await loadCorpusOrThrow(committedCorpusFiles());
     expect(corpus.coverage.declared).toBe(0);
+  });
+
+  it("maps every source root to exactly one layer, with no overlap and no nesting", () => {
+    // Correction 2 (M10-C): `src/simc/` had been listed under both specialization
+    // layers. The map is a partition now, and the check is not vacuous.
+    expect(ownershipRootProblems()).toEqual([]);
+    const owners = Object.entries(OWNING_LAYERS).filter(([, roots]) =>
+      (roots as readonly string[]).includes("src/simc/"),
+    );
+    expect(owners.map(([layer]) => layer)).toEqual(["SHARED_DECISION_ENGINE"]);
+    expect(OWNING_LAYERS.SPEC_ASSASSINATION).toEqual(["src/specs/rogue/"]);
+    expect(OWNING_LAYERS.SPEC_PROTECTION_PALADIN).toEqual(["src/specs/paladin/"]);
+    expect(
+      ownershipRootProblems({ A: ["src/simc/"], B: ["src/simc/", "src/specs/"], C: ["src/specs/rogue/"] }),
+    ).toEqual([
+      "root src/simc/ is owned by both A and B",
+      "root src/specs/rogue/ (C) is nested under src/specs/ (B)",
+    ]);
   });
 
   it("owns every kind with a layer whose source roots exist", () => {

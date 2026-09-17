@@ -36,10 +36,13 @@ describe("the committed corpus loads", () => {
     // 17 artifacts / 31 cases at M9-B; M9-C added six bounded captures and
     // twelve cases; the M9-C correction added the second Assassination
     // subject: two artifacts and eleven cases; M10-B added the Protection
-    // Paladin opener slice, its gap derivation and twenty cases. Measured,
-    // then pinned.
-    expect(loaded.artifacts).toHaveLength(27);
-    expect(loaded.cases).toHaveLength(74);
+    // Paladin opener slice, its gap derivation and twenty cases; M10-C added
+    // twelve evaluator cases over the same two artifacts; the M10-C
+    // correction added one synthetic authority artifact and three shared
+    // decision-engine cases; M10-C2 added one measured Protection case.
+    // Measured, then pinned.
+    expect(loaded.artifacts).toHaveLength(28);
+    expect(loaded.cases).toHaveLength(90);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -52,7 +55,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds nineteen sanitized captures, three derivations and five synthetics", async () => {
+  it("holds nineteen sanitized captures, three derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -89,6 +92,7 @@ describe("the committed corpus loads", () => {
     ]);
     expect(byKind.get("SYNTHETIC")).toEqual([
       "synthetic.actor-zero-cast",
+      "synthetic.apl-priority-short-circuit",
       "synthetic.graphql-event-page-null-data",
       "synthetic.graphql-page-sequence-malformed-second-page",
       "synthetic.graphql-page-sequence-two-pages",

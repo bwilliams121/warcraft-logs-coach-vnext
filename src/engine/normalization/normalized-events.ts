@@ -266,16 +266,64 @@ export interface SummonEvent extends CombatEventBase {
   readonly kind: "SUMMON";
 }
 
+/**
+ * The ONE dated Warcraft Logs contract this project holds for the optional
+ * identity fields of a `combatantinfo` gear row (M10-C4).
+ *
+ * PROVENANCE. On 2026-09-17 Warcraft Logs answered a written question about
+ * `permanentEnchant`, `temporaryEnchant` and `gems`: "the value of those
+ * fields is the value we use for the UI on warcraftlogs. no further
+ * guarantees are made. the interpretations you posted are currently
+ * correct." The interpretations posted were: an omitted `permanentEnchant`
+ * means no permanent enchant is applied; an omitted `temporaryEnchant` means
+ * no temporary enchant is active; an omitted `gems` means no gems are
+ * installed, without proving whether the item has sockets.
+ *
+ * WHAT THAT IS AND IS NOT. It is a statement of CURRENT UI behaviour, made
+ * in writing, and it is the only reason an omission is read as "none". It is
+ * not a GraphQL schema guarantee, not a frozen API contract, and it carries
+ * no promise about future payloads. Every reading of it is tagged with this
+ * revision identifier so that when the payload drifts, the drift is
+ * localised to `combatant-info.ts` and to this name.
+ */
+export const WCL_GEAR_UI_SEMANTICS_REVISION = "WCL_COMBATANT_INFO_GEAR_UI_SEMANTICS_2026_09_17";
+
+/** Why a present optional gear field could not be read. Never collapsed to "none". */
+export type GearFieldUnknownReason = "NULL_VALUE" | "ZERO_VALUE" | "MALFORMED_VALUE";
+
+/**
+ * One optional identity on a gear row, normalised ONCE at the adapter
+ * boundary. Consumers read this and never the raw key.
+ *
+ *     KNOWN        present with a valid identity
+ *     KNOWN_NONE   the key was OMITTED on a valid row: none, under the dated contract
+ *     UNKNOWN      present but null, zero or malformed: nothing is claimed
+ */
+export type GearEnchantState =
+  | { readonly state: "KNOWN"; readonly enchantId: number }
+  | { readonly state: "KNOWN_NONE"; readonly contract: typeof WCL_GEAR_UI_SEMANTICS_REVISION }
+  | { readonly state: "UNKNOWN"; readonly reason: GearFieldUnknownReason };
+
+/**
+ * The installed gems of a gear row. `KNOWN` with an empty list is an OBSERVED
+ * empty array; `KNOWN_NONE` is an omitted key under the dated contract. Both
+ * mean no installed gems; neither says whether the item has sockets — no
+ * field here does, and no consumer may infer it.
+ */
+export type GearGemsState =
+  | { readonly state: "KNOWN"; readonly gemIds: readonly number[] }
+  | { readonly state: "KNOWN_NONE"; readonly contract: typeof WCL_GEAR_UI_SEMANTICS_REVISION }
+  | { readonly state: "UNKNOWN"; readonly reason: GearFieldUnknownReason };
+
 export interface GearPiece {
   /** Positional: Warcraft Logs supplies no slot key, so this is the array index. */
   readonly slotIndex: number;
   readonly itemId: number;
   readonly itemLevel: number | null;
   readonly quality: number | null;
-  readonly permanentEnchantId: number | null;
-  readonly temporaryEnchantId: number | null;
-  /** Null means the key was absent, which is different from an empty list. */
-  readonly gemIds: readonly number[] | null;
+  readonly permanentEnchant: GearEnchantState;
+  readonly temporaryEnchant: GearEnchantState;
+  readonly gems: GearGemsState;
   readonly bonusIds: readonly number[] | null;
   readonly setId: number | null;
 }
@@ -301,6 +349,13 @@ export interface CombatantSnapshot {
   readonly actorId: number;
   readonly specId: number | null;
   readonly gear: readonly GearPiece[];
+  /**
+   * Array positions of the raw `gear` collection that were not a readable row
+   * (not an object, or no integer `id`). Such a row is ABSENT from `gear` and
+   * is UNKNOWN: a consumer that needs the whole equipment must refuse while
+   * this is non-empty.
+   */
+  readonly malformedGearRows: readonly number[];
   readonly talentTree: readonly TalentTreeEntry[];
 }
 

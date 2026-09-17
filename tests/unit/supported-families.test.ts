@@ -180,21 +180,31 @@ describe("combatant info", () => {
     );
   });
 
-  it("keeps optional gear fields optional rather than defaulting them", () => {
+  it("normalises omitted gear keys to KNOWN_NONE under the dated Warcraft Logs contract, and nothing else", () => {
     const snapshot = combatantInfo[0];
     if (snapshot?.kind !== "COMBATANT_INFO") throw new Error("no combatant info");
 
-    const missingEnchant = snapshot.snapshot.gear.filter((piece) => piece.permanentEnchantId === null);
-    // The capture has items with no enchant. Null means absent — never 0, and
-    // never "no enchant was applied".
-    expect(missingEnchant.length).toBeGreaterThan(0);
-    for (const piece of missingEnchant) {
-      expect(piece.permanentEnchantId).toBeNull();
-      expect(piece.permanentEnchantId).not.toBe(0);
+    // The capture has items with no enchant key. Under the 2026-09-17 contract
+    // an OMITTED key is known-none, tagged with the revision that licenses it;
+    // it is never 0, and it is never a KNOWN identity.
+    const omitted = snapshot.snapshot.gear.filter((piece) => piece.permanentEnchant.state === "KNOWN_NONE");
+    expect(omitted.length).toBeGreaterThan(0);
+    for (const piece of omitted) {
+      expect(piece.permanentEnchant).toEqual({
+        state: "KNOWN_NONE",
+        contract: "WCL_COMBATANT_INFO_GEAR_UI_SEMANTICS_2026_09_17",
+      });
     }
-
-    const noGems = snapshot.snapshot.gear.filter((piece) => piece.gemIds === null);
-    expect(noGems.length).toBeGreaterThan(0);
+    const known = snapshot.snapshot.gear.filter((piece) => piece.permanentEnchant.state === "KNOWN");
+    expect(known.length).toBeGreaterThan(0);
+    for (const piece of known) {
+      expect(piece.permanentEnchant.state === "KNOWN" && piece.permanentEnchant.enchantId).toBeGreaterThan(0);
+    }
+    expect(snapshot.snapshot.gear.some((piece) => piece.gems.state === "KNOWN_NONE")).toBe(true);
+    // Nothing in the capture is UNKNOWN: every present value was readable.
+    expect(snapshot.snapshot.gear.some((piece) => piece.permanentEnchant.state === "UNKNOWN")).toBe(false);
+    expect(snapshot.snapshot.gear.some((piece) => piece.gems.state === "UNKNOWN")).toBe(false);
+    expect(snapshot.snapshot.malformedGearRows).toEqual([]);
   });
 
   it("records no optimization verdict", () => {

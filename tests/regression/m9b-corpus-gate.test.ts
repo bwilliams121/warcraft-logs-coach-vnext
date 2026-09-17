@@ -54,10 +54,13 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // at M9-B; M9-C added twelve cases and twenty-seven assertions; the M9-C
     // correction's second Assassination subject added eleven cases and
     // forty-one assertions; M10-B's Protection Paladin evidence added twenty
-    // cases and forty-seven assertions.
-    expect(result.summary.cases).toBe(74);
-    expect(result.summary.assertions).toBe(189);
-    expect(result.summary.passed).toBe(189);
+    // cases and forty-seven assertions; M10-C's internal Protection Paladin
+    // evaluator added twelve cases and thirty-nine assertions; the M10-C
+    // correction's SHARED_DECISION_ENGINE layer added three cases and three
+    // assertions; M10-C2 added the measured use_items sub-action-set case.
+    expect(result.summary.cases).toBe(90);
+    expect(result.summary.assertions).toBe(232);
+    expect(result.summary.passed).toBe(232);
   });
 
   it("covers every layer", async () => {

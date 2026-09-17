@@ -120,9 +120,14 @@ Capture timestamps are corpus metadata. They never appear in analyzer output.
 - `caseId`, `artifactId` — many cases may point at one artifact; the payload
   is never duplicated
 - `owningLayer` — one of `WCL_TRANSPORT`, `NORMALIZATION`, `COMBAT_STATE`,
-  `SPEC_ASSASSINATION`, `APPLICATION_SERVICE`, `PUBLIC_CONTRACT`. Each maps to
-  real source roots in `contract.ts`, and a case may only use assertion kinds
-  its layer owns (`CASE_ASSERTION_LAYER_MISMATCH`)
+  `SHARED_DECISION_ENGINE` (M10-C correction: `src/simc/`),
+  `SPEC_ASSASSINATION` (`src/specs/rogue/`), `SPEC_PROTECTION_PALADIN`
+  (M10-C; `src/specs/paladin/`), `APPLICATION_SERVICE`, `PUBLIC_CONTRACT`.
+  Each maps to real source roots in `contract.ts`; the roots form a
+  PARTITION — no root is listed twice or nested under another
+  (`ownershipRootProblems`, checked at load and pinned by
+  `m9a-corpus-layering`) — and a case may only use assertion kinds its layer
+  owns (`CASE_ASSERTION_LAYER_MISMATCH`)
 - `contractUnderTest` — the module/contract the claim is about
 - `purpose` — **descriptive prose, never executed**
 - `assertions` — **the executed part**: registered kinds with typed parameters
@@ -275,11 +280,26 @@ least one committed case:
 | `NORMALIZATION.EVENT_FACTS` (M10-B) | NORMALIZATION | POSITIVE_FACT — one normalized event by (time, raw type, source, target, ability) with pinned kind and field values by dotted path |
 | `NORMALIZATION.ACTOR_EVENT_CENSUS` (M10-B) | NORMALIZATION | POSITIVE_FACT — normalized kinds counted for one actor as SOURCE or TARGET, exact and exhaustive |
 | `COMBAT_STATE.ACTOR_INDEX_CENSUS` (M10-B) | COMBAT_STATE | POSITIVE_FACT — M4's source/target index for one actor yields exactly these kinds and counts |
+| `SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY` (M10-C correction) | SHARED_DECISION_ENGINE | POSITIVE_FACT — one foreground scan of a SYNTHETIC authority under stated bindings resolves DEFINITE to exactly this entry |
+| `SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY` (M10-C correction) | SHARED_DECISION_ENGINE | UNKNOWN — the priority short-circuit: an undecided higher entry leaves the scan AMBIGUOUS between exactly these candidates |
+| `SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION` (M10-C correction) | SHARED_DECISION_ENGINE | UNSUPPORTED — an unsupported identifier BLOCKS the scan at that entry with the fragment on its gate |
 | `SPEC_ASSASSINATION.DECISION_COVERAGE` | SPEC_ASSASSINATION | the facade's verdict, MATCH / REJECTED / UNKNOWN; authority-dependent |
 | `SPEC_ASSASSINATION.SPEC_GATE` | SPEC_ASSASSINATION | UNSUPPORTED |
 | `SPEC_ASSASSINATION.AUTHORITY_UNAVAILABLE_IS_NOT_REJECTION` | SPEC_ASSASSINATION | NO_AUTHORITY_AVAILABLE |
 | `SPEC_ASSASSINATION.TALENT_RESOLUTION` | SPEC_ASSASSINATION | POSITIVE_FACT |
 | `SPEC_ASSASSINATION.DOT_REMAINS` | SPEC_ASSASSINATION | POSITIVE_FACT (or UNKNOWN + blocker); authority-dependent |
+| `SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — the registration's analysis cites exactly this pinned authority; authority-dependent |
+| `SPEC_PROTECTION_PALADIN.DECISION_COVERAGE` (M10-C) | SPEC_PROTECTION_PALADIN | the evaluator's verdict on one observed GCD cast, MATCH / REJECTED / UNKNOWN, with the engine's raw blocker verbatim; authority-dependent |
+| `SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — eligible / match / rejected / unknown and every exclusion reason counted; authority-dependent |
+| `SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — the PRE_COST Holy Power a cast carried, as recorded on the payload |
+| `SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED` (M10-C) | SPEC_PROTECTION_PALADIN | UNKNOWN — the cast carries no Holy Power entry and the payload says NO_OBSERVATION, never zero |
+| `SPEC_PROTECTION_PALADIN.DOMAIN_RESULT` (M10-C) | SPEC_PROTECTION_PALADIN | NO_AUTHORITY_AVAILABLE — one of the six decision domains, with the registration's own resolution and, for INTERRUPT, the evidence family stated separately |
+| `SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — talent selections and hero sub-tree from the observed tree against the pinned trait data |
+| `SPEC_PROTECTION_PALADIN.RESOLVED_ATOM` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — one declared identifier's binding at a decision: a truth, a magnitude, or UNBOUND |
+| `SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET` (M10-C2/C3) | SPEC_PROTECTION_PALADIN | UNKNOWN — the `use_items` sub-action set closable from combatant info against the pinned item, enchant and use-effect-universe datasets and the shared equivalence proof: on-use items, every slot left open by reason, and how many omissions the proof closed |
+| `SPEC_PROTECTION_PALADIN.SPEC_GATE` (M10-C) | SPEC_PROTECTION_PALADIN | UNSUPPORTED |
+| `SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE` (M10-C) | SPEC_PROTECTION_PALADIN | UNSUPPORTED — the analyzed internal result throws at the public narrowing boundary |
+| `APPLICATION_SERVICE.INTERNAL_REGISTRATION` (M10-C) | APPLICATION_SERVICE | POSITIVE_FACT — the internal and public lookups and the identity table, over the production catalog and its reverse |
 | `PUBLIC_CONTRACT.REST_MCP_PARITY` | PUBLIC_CONTRACT | PARITY |
 
 `SPEC_ASSASSINATION.DECISION_COVERAGE` runs the real
@@ -610,22 +630,95 @@ original. Migrating the remaining fixtures and their importers is M9-B's.
 
 ---
 
-## Contents after M10-B
+## Contents after M10-C4
 
-Contract version 2, unchanged (M10-B's additions — the optional
-`reportRevisionAfterCapture` source field and three assertion kinds — are
-compatible: every earlier manifest is still a valid version-2 manifest).
-Twenty-seven artifacts, seventy-four cases, one hundred and eighty-nine
+Contract version 2, unchanged; totals unchanged (twenty-eight artifacts,
+ninety cases, two hundred and thirty-two assertions). M10-C4 adopted the
+dated Warcraft Logs gear contract at the normalization boundary, closed the
+real `use_items` sub-action set (case renamed
+`use-items-sub-action-set-closes-under-the-dated-gear-contract`: no open
+slot), transitioned Shield of the Righteous by reviewed contract, and moved
+every real decision's blocker to `DIVERGENT_GCD_OUTCOMES` at `default[6]
+divine_toll` (public class DIVERGENT_WORLDS; case renamed
+`real-decisions-are-unknown-because-the-worlds-diverge-not-rejected`). No
+real decision resolves; no resolved-decision assertion was added.
+
+## Contents after M10-C3
+
+Contract version 2, unchanged; totals unchanged from M10-C2 (twenty-eight
+artifacts, ninety cases, two hundred and thirty-two assertions). M10-C3
+(observational equivalence) widened the one measured `use_items` case: the
+pinned enchant artifact now resolves every use-producing row's USE spell and
+SimulationCraft handler, and the case pins that the shared equivalence proof
+(`src/simc/subaction-equivalence.ts`, driven by
+`src/specs/paladin/protection/subaction-candidates.ts`) closed ZERO of the 22
+omitted keys under the subject's SELECTED Divine Inspiration. No real
+decision resolves; no resolved-decision assertion was added.
+
+## Contents after M10-C2
+
+Contract version 2, unchanged. M10-C2 (real-evidence closure) added one
+measured Protection case, `use-items-sub-action-set-is-open-on-the-reported-gear`,
+over the opener: the pinned use-effect universe (every use-producing row of
+the build's enchant table, with its temporary / permanent-mask / gem-borne
+placement) closes the 16 omitted `temporaryEnchant` keys and cannot close the
+9 omitted `permanentEnchant` keys or the 13 omitted `gems` keys, so
+`default[2] use_items` remains the universal blocker and no real decision
+resolves. Twenty-eight artifacts, ninety cases, two hundred and thirty-two
+assertions; 2,391,519 bytes. No assertion claims a resolved real decision,
+because none exists.
+
+## Contents after the M10-C correction
+
+Contract version 2, unchanged. The correction split the shared decision
+engine out of both specialization layers: `src/simc/` had been listed under
+`SPEC_ASSASSINATION` and `SPEC_PROTECTION_PALADIN` alike, so one case could
+read as coverage of two things. It is now `SHARED_DECISION_ENGINE`, its own
+layer with three kinds and three cases over one labelled SYNTHETIC authority
+artifact (`synthetic.apl-priority-short-circuit`, `JSON_VALUE`), and the
+ownership map is checked to be a partition. No existing case moved: every
+Assassination and Protection case reaches the engine through its
+specialization's own facade or registration, which is what those cases
+claim.
+
+Twenty-eight artifacts, eighty-nine cases, two hundred and thirty-one
 assertions, every kind in the registry exercised, nothing DECLARED, every
-layer with cases of its own. Nineteen sanitized captures from four sources
-(`qJ1pgB49ZrRNVmCd` fight 6, `A7R6kxPJ1hC8YQ4w` fight 7 — now with a second
-subject, the Protection Paladin actor 7 — `gtKb2xHn87pNcFfW` fight 22, and
-one Sszorak heroic rankings page), three derivations, five synthetics.
-2,389,935 bytes; the largest artifact is the 427,886-byte Protection Paladin
-opener slice.
+layer with cases of its own. Nineteen sanitized captures, three derivations
+and six synthetics; 2,391,519 bytes. Before the correction (M10-C as
+delivered): twenty-seven artifacts, eighty-six cases, two hundred and
+twenty-eight assertions; 2,389,935 bytes. By layer, before → after:
+WCL_TRANSPORT 9/23 → 9/23, NORMALIZATION 22/72 → 22/72, COMBAT_STATE 19/62 →
+19/62, SHARED_DECISION_ENGINE — → 3/3, SPEC_ASSASSINATION 12/20 → 12/20,
+SPEC_PROTECTION_PALADIN 11/37 → 11/37, APPLICATION_SERVICE 5/6 → 5/6,
+PUBLIC_CONTRACT 8/8 → 8/8 (cases/assertions).
 
-At M9-C the corpus held twenty-five artifacts, fifty-four cases and one
-hundred and forty-two assertions in 1,602,915 bytes.
+The twelve M10-C cases run the REAL internal Protection Paladin registration
+over the M10-B opener and its gap derivation. What they pin is exactly what
+that evaluator concludes on this evidence: 21 eligible GCD decisions, every
+one UNKNOWN. After the correction the scan passes `default[1] use_item`
+(NOT_APPLICABLE: the puzzle box is pinned and not worn) and stops at
+`default[2] use_items`, APPLICABLE because Voracious Heart of Ula'tek is worn
+and on-use, but with no admissible transition: `use_items` fires whichever
+sub-action is ready, and the sub-action set cannot be CLOSED from the gear
+the log reports (Warcraft Logs omits `permanentEnchant`, `temporaryEnchant`
+and `gems` on rows that have none, and this project reads an absent key as
+"not reported", never as "none"; after M10-C2's universe census the 16
+absent `temporaryEnchant` keys are excluded by the pinned build, and the 9
+absent `permanentEnchant` keys and 13 absent `gems` keys are not); 24 casts
+excluded under four named reasons (11 melee swings, 11 NON_GCD presses
+including all seven Shield of the Righteous, one unpinned trinket effect,
+one token-less Blessing of Spellwarding); five exact PRE_COST Holy Power
+observations and every other cast NO_OBSERVATION; the build resolved from the
+tree (Righteous Protector, Sentinel, Avenging Wrath and Blessed Hammer
+SELECTED; Lightsmith by entry membership); the resolver's bindings for the
+declared identifiers; the six domains, five of them NO_PINNED_AUTHORITY and
+interrupts additionally UNVERIFIED; the spec gate; and that the analyzed
+result throws at the public narrowing boundary. Zero resolved decisions is
+the measured coverage and is disclosed as such.
+
+At M10-B the corpus held twenty-seven artifacts, seventy-four cases and one
+hundred and eighty-nine assertions; at M9-C twenty-five artifacts, fifty-four
+cases and one hundred and forty-two assertions in 1,602,915 bytes.
 
 The M9-B evidence gaps, dispositioned (`KNOWN_EVIDENCE_GAPS`, and in
 `report.json`); `no-death-interrupt-dispel-events` was split because its

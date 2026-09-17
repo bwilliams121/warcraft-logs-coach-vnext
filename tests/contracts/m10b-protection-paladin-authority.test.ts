@@ -10,10 +10,12 @@
  * committed so M10-C can bind it as `SIMC_APL` authority for
  * `OFFENSIVE_ROTATION` — and for nothing else.
  *
- * It is NOT registered: no catalog row, no binding, no loader in
- * `src/simc/pinned-authority.ts` reads it, and no production module imports
- * it. These tests pin that, together with the classification a future binding
- * must respect: a damage-oriented priority list that happens to contain
+ * AT M10-B it was NOT registered. AT M10-C it is: bound by
+ * `src/specs/paladin/protection/registration.ts` to OFFENSIVE_ROTATION and to
+ * nothing else, loaded by that tree's own `pinned-authority.ts`, and reached
+ * by production code through exactly that module. The tests below pin the
+ * M10-C state, together with the classification the binding respects: a
+ * damage-oriented priority list that happens to contain
  * `shield_of_the_righteous` and `word_of_glory` is still offensive authority.
  * SimulationCraft orders those lines for damage in a simulation; nothing in
  * the source conditions them on incoming damage, health or a defensive plan,
@@ -133,9 +135,11 @@ describe("what the current parser can and cannot read of it (recorded, not weake
     // buff.remains, buff.stack, debuff.up, cooldown.remains, comparisons);
     // ten are refused at the identifier the parser does not know — `next_armament`
     // (three lines), `consecration.up` (two), `talent.x.enabled`, `prev_gcd`,
-    // `hero_tree`, `apex`, `full_recharge_time`. Recorded so M10-C widens the
-    // parser deliberately, with tests, and never by relaxing it: every refusal
-    // is UNSUPPORTED_IDENTIFIER, none is a silent false.
+    // `hero_tree`, `apex`, `full_recharge_time`. STILL TRUE AT M10-C for the
+    // shared parser WITHOUT a vocabulary: M10-C admitted these through the
+    // specialization seam (`src/specs/paladin/protection/vocabulary.ts`),
+    // never by relaxing the shared parser. Every refusal is
+    // UNSUPPORTED_IDENTIFIER, none is a silent false.
     expect(parsed + [...refused.values()].reduce((sum, count) => sum + count, 0)).toBe(20);
     expect(parsed).toBe(10);
     expect([...refused.entries()].sort()).toEqual([
@@ -150,21 +154,21 @@ describe("what the current parser can and cannot read of it (recorded, not weake
   });
 });
 
-describe("the artifact is pinned, not registered, and offensive only", () => {
-  it("no production module imports it", () => {
-    for (const path of filesUnder("src")) {
-      expect(readFileSync(path, "utf8"), `${path} imports the Paladin artifact`).not.toContain(
-        "paladin-protection.apl.json",
-      );
-    }
+describe("the artifact is pinned, bound by exactly one registration, and offensive only", () => {
+  it("exactly one production module imports it: the Paladin tree's own loader (M10-C)", () => {
+    const importers = filesUnder("src").filter((path) =>
+      readFileSync(path, "utf8").includes("paladin-protection.apl.json"),
+    );
+    expect(importers).toEqual(["src/specs/paladin/protection/pinned-authority.ts"]);
   });
 
-  it("no registration in the production catalog binds it", () => {
-    for (const registration of ANALYZER_REGISTRATIONS) {
-      for (const binding of registration.authorityBindings) {
-        expect(binding.authorityId).not.toBe("SIMC_APL_PALADIN_PROTECTION");
-      }
-    }
+  it("exactly one registration in the production catalog binds it, to OFFENSIVE_ROTATION only (M10-C)", () => {
+    const bindings = ANALYZER_REGISTRATIONS.flatMap((registration) =>
+      registration.authorityBindings
+        .filter((binding) => binding.authorityId === "SIMC_APL_PALADIN_PROTECTION")
+        .map((binding) => [registration.specId, binding.domain]),
+    );
+    expect(bindings).toEqual([["paladin/protection", "OFFENSIVE_ROTATION"]]);
   });
 
   it("a SIMC_APL binding of it could govern OFFENSIVE_ROTATION and no tank domain", () => {

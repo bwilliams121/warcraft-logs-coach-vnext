@@ -8,6 +8,13 @@
       "sha256": "6dcb92a325ce636031c9e31b539c2e33038ea5913dae59162fa7e8d99e680573"
     },
     {
+      "artifactId": "synthetic.apl-priority-short-circuit",
+      "byteLength": 1584,
+      "payloadKind": "JSON_VALUE",
+      "provenanceKind": "SYNTHETIC",
+      "sha256": "31b3996b528c0821596b60b364297bf3d3b4310195128a4d3d5b6405f05e587f"
+    },
+    {
       "artifactId": "synthetic.graphql-event-page-null-data",
       "byteLength": 133,
       "payloadKind": "WCL_GRAPHQL_DATA",
@@ -247,6 +254,19 @@
       "passed": 62
     },
     {
+      "assertions": 3,
+      "cases": 3,
+      "failed": 0,
+      "kindsExercised": [
+        "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION",
+        "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+        "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "passed": 3
+    },
+    {
       "assertions": 20,
       "cases": 12,
       "failed": 0,
@@ -262,13 +282,34 @@
       "passed": 20
     },
     {
-      "assertions": 4,
-      "cases": 4,
+      "assertions": 38,
+      "cases": 12,
       "failed": 0,
-      "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS"],
+      "kindsExercised": [
+        "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE",
+        "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION",
+        "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+        "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+        "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+        "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+        "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+        "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
+        "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+        "SPEC_PROTECTION_PALADIN.SPEC_GATE",
+        "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "passed": 38
+    },
+    {
+      "assertions": 6,
+      "cases": 5,
+      "failed": 0,
+      "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 4
+      "passed": 6
     },
     {
       "assertions": 8,
@@ -308,6 +349,25 @@
       "caseId": "application-service.high-parse-subject-is-analyzed-under-player-context",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-assassination-high-parse-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.protection-paladin-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -1495,6 +1555,48 @@
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
     },
     {
+      "artifactId": "synthetic.apl-priority-short-circuit",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.proven-higher-priority-entry-selects-definitely",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-priority-short-circuit"]
+    },
+    {
+      "artifactId": "synthetic.apl-priority-short-circuit",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.undecided-higher-priority-entry-is-not-fallen-through",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-priority-short-circuit"]
+    },
+    {
+      "artifactId": "synthetic.apl-priority-short-circuit",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.unsupported-expression-refuses-at-the-entry",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-priority-short-circuit"]
+    },
+    {
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "assertions": [
         {
@@ -1764,6 +1866,392 @@
       "caseId": "spec-assassination.talent-tree-resolves-selected-not-selected-and-unknown",
       "owningLayer": "SPEC_ASSASSINATION",
       "referencedArtifactIds": ["wcl-assassination-vanish-ambush-gate"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-protection-paladin.assassination-is-refused-at-the-spec-gate",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.build-resolves-from-the-observed-tree-not-from-casts",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.exact-holy-power-is-recorded-on-costed-spender-casts",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.gap-derivation-evaluates-fewer-decisions-and-binds-no-previous-press",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener.gap-before-2010000"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.internal-analysis-cannot-project-publicly",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.missing-holy-power-is-no-observation-never-zero",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 5,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.offensive-authority-governs-no-defensive-domain",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.opener-yields-twenty-one-eligible-decisions-all-unknown",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.pinned-authority-loads-with-exact-provenance",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.real-decisions-are-unknown-because-the-worlds-diverge-not-rejected",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 7,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 8,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "ordinal": 9,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.resolver-binds-the-build-facts-the-real-tree-proves",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.use-items-sub-action-set-closes-under-the-dated-gear-contract",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "synthetic.graphql-page-sequence-two-pages",
@@ -2088,6 +2576,7 @@
     }
   ],
   "pinnedAuthorities": {
+    "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
     "SIMC_DBC_ROGUE_DOT_DURATIONS": "simc-33622e9d-1"
   },
@@ -2095,15 +2584,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 2389935,
-    "artifacts": 27,
-    "assertions": 189,
-    "cases": 74,
+    "artifactBytes": 2391519,
+    "artifacts": 28,
+    "assertions": 232,
+    "cases": 90,
     "declared": 0,
-    "executable": 189,
+    "executable": 232,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 189
+    "passed": 232
   }
 }

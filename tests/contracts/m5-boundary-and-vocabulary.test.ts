@@ -367,6 +367,11 @@ describe("M5 forms no unearned verdict", () => {
     const COMPARISON_LAYER = [
       "src/specs/rogue/assassination/observed-comparison.ts",
       "src/specs/rogue/assassination/observed-analysis.ts",
+      // M10-C: the comparison rule is shared, and the second specialization's
+      // facade and domain vocabulary carry the same defined-and-tested word.
+      "src/findings/observed-comparison.ts",
+      "src/specs/paladin/protection/observed-analysis.ts",
+      "src/specs/paladin/protection/domains.ts",
     ];
     for (const path of M5_FILES) {
       const code = codeOf(path);

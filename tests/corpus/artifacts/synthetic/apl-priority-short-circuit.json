@@ -1,0 +1,39 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_SYNTHETIC_SHARED_ENGINE_PRIORITY",
+  "artifactRevision": "synthetic-1",
+  "spec": { "className": "synthetic", "specName": "shared_engine" },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://example.invalid/simc",
+    "branch": "synthetic",
+    "commitSha": "0000000000000000000000000000000000000000",
+    "commitDate": "2026-01-01",
+    "sourcePath": "synthetic/apl-priority-short-circuit",
+    "sourceSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "sourceByteLength": 1,
+    "regionStartMarker": "//synthetic_apl_start",
+    "regionEndMarker": "//synthetic_apl_end",
+    "extractedOn": "2026-01-01",
+    "extractorVersion": 1
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "high_priority,if=buff.proc.up", "comment": null, "sourceLine": 100 },
+        { "priorityOrdinal": 1, "actionStringVerbatim": "mid_priority,if=talent.opt", "comment": null, "sourceLine": 101 },
+        { "priorityOrdinal": 2, "actionStringVerbatim": "filler", "comment": null, "sourceLine": 102 }
+      ]
+    },
+    {
+      "listName": "unsupported",
+      "receiverIdentifier": "unsupported",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "gated,if=some.identifier.nobody.supports>1", "comment": null, "sourceLine": 200 },
+        { "priorityOrdinal": 1, "actionStringVerbatim": "filler", "comment": null, "sourceLine": 201 }
+      ]
+    }
+  ]
+}

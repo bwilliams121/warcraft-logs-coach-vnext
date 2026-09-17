@@ -67,12 +67,24 @@ export type NotApplicableReason =
    * actions before any readiness check. Structurally identical to an unequipped
    * item: the action is not there, rather than being there and unready.
    */
-  | "RACIAL_NOT_AVAILABLE_TO_RACE";
+  | "RACIAL_NOT_AVAILABLE_TO_RACE"
+  /**
+   * An action whose pinned constructor sets `background = true` under a build
+   * fact the actor's observed combatant profile PROVES (M10-C).
+   *
+   * The general form of the three above: a talent not taken, a talent that
+   * replaces the action, a hero tree not active. The specialization that
+   * claims it names the constructor site and the proven fact in
+   * `pinnedBehaviour`. An UNKNOWN build fact never lands here — the action
+   * stays applicable, because there is a world in which it exists.
+   */
+  | "BACKGROUND_UNDER_PROVEN_BUILD";
 
 export const NOT_APPLICABLE_REASONS = [
   "ITEM_NOT_EQUIPPED",
   "NO_ON_USE_EFFECT",
   "RACIAL_NOT_AVAILABLE_TO_RACE",
+  "BACKGROUND_UNDER_PROVEN_BUILD",
 ] as const satisfies readonly NotApplicableReason[];
 
 /** Numeric evidence behind an applicability verdict. Never a display name. */
@@ -182,6 +194,11 @@ export type UnusableReason =
    */
   | "RESTEALTH_NOT_PERMITTED_IN_COMBAT"
   /**
+   * The action's resource cost is provably unaffordable: the resource is
+   * KNOWN below the pinned cost and every free-cast route is excluded.
+   */
+  | "INSUFFICIENT_RESOURCE"
+  /**
    * The action re-enters a state the player already holds (M5-D1).
    *
    * `vanish_t::ready()` opens with `if ( p()->buffs.vanish->check() ) return
@@ -215,6 +232,7 @@ export const UNUSABLE_REASONS = [
   "RESTEALTH_NOT_PERMITTED_IN_COMBAT",
   "VANISH_BUFF_ALREADY_ACTIVE",
   "SIMULATED_PREFIX_EXECUTION",
+  "INSUFFICIENT_RESOURCE",
 ] as const satisfies readonly UnusableReason[];
 
 /**
@@ -230,6 +248,7 @@ export const OBSERVED_UNUSABLE_REASONS = [
   "ALREADY_STEALTHED",
   "RESTEALTH_NOT_PERMITTED_IN_COMBAT",
   "VANISH_BUFF_ALREADY_ACTIVE",
+  "INSUFFICIENT_RESOURCE",
 ] as const satisfies readonly UnusableReason[];
 
 /**

@@ -106,10 +106,10 @@ function classPrefixOfModule(resolved: string): string | null {
 }
 
 describe("the sweep has something to sweep", () => {
-  it("finds the Assassination tree and no other specialization tree", () => {
+  it("finds the Assassination tree and, since M10-C, the Protection Paladin tree", () => {
     const trees = new Set(SPEC_FILES.map(specTreeOf).filter((tree): tree is string => tree !== null));
-    expect([...trees]).toEqual(["src/specs/rogue/assassination"]);
-    expect(existsSync("src/specs/paladin")).toBe(false);
+    expect([...trees].sort()).toEqual(["src/specs/paladin/protection", "src/specs/rogue/assassination"]);
+    expect(existsSync("src/specs/paladin/protection/registration.ts")).toBe(true);
   });
 
   it("reads real import statements", () => {
@@ -168,6 +168,15 @@ describe("shared code reaches specializations only through the registration boun
       importSpecifiersOf(path).some((specifier) => resolveSpecifier(path, specifier).includes("src/specs/")),
     );
     expect(importers).toEqual(["src/services/analyzer-registry.ts"]);
+    // And it imports exactly the two registrations, nothing deeper.
+    const specImports = importSpecifiersOf("src/services/analyzer-registry.ts")
+      .map((specifier) => resolveSpecifier("src/services/analyzer-registry.ts", specifier))
+      .filter((resolved) => resolved.includes("src/specs/"))
+      .sort();
+    expect(specImports).toEqual([
+      "src/specs/paladin/protection/registration.js",
+      "src/specs/rogue/assassination/registration.js",
+    ]);
   });
 
   it("shared authority code imports no specialization module", () => {

@@ -1,0 +1,411 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_PALADIN_PROTECTION_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "byteLength": 185639
+      },
+      {
+        "path": "engine/class_modules/paladin/sc_paladin_protection.cpp",
+        "sha256": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+        "byteLength": 42936
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-09-16",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 26573,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Consecration"
+    },
+    {
+      "abilityGameId": 31850,
+      "baseGcdMs": 0,
+      "displayNameEn": "Ardent Defender"
+    },
+    {
+      "abilityGameId": 31884,
+      "baseGcdMs": 0,
+      "displayNameEn": "Avenging Wrath"
+    },
+    {
+      "abilityGameId": 31935,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Avenger's Shield"
+    },
+    {
+      "abilityGameId": 53595,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Hammer of the Righteous"
+    },
+    {
+      "abilityGameId": 53600,
+      "baseGcdMs": 0,
+      "displayNameEn": "Shield of the Righteous"
+    },
+    {
+      "abilityGameId": 62124,
+      "baseGcdMs": 0,
+      "displayNameEn": "Hand of Reckoning"
+    },
+    {
+      "abilityGameId": 85673,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Word of Glory"
+    },
+    {
+      "abilityGameId": 155145,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Torrent"
+    },
+    {
+      "abilityGameId": 190784,
+      "baseGcdMs": 0,
+      "displayNameEn": "Divine Steed"
+    },
+    {
+      "abilityGameId": 204018,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blessing of Spellwarding"
+    },
+    {
+      "abilityGameId": 204019,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blessed Hammer"
+    },
+    {
+      "abilityGameId": 265221,
+      "baseGcdMs": 0,
+      "displayNameEn": "Fireblood"
+    },
+    {
+      "abilityGameId": 275779,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Judgment"
+    },
+    {
+      "abilityGameId": 375576,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Divine Toll"
+    },
+    {
+      "abilityGameId": 389539,
+      "baseGcdMs": 0,
+      "displayNameEn": "Sentinel"
+    },
+    {
+      "abilityGameId": 427453,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Hammer of Light"
+    },
+    {
+      "abilityGameId": 432459,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Holy Bulwark"
+    },
+    {
+      "abilityGameId": 1241413,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Hammer of Wrath"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "avenging_wrath",
+      "candidateAbilityGameIds": [31884, 389539],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_protection.cpp",
+        "sourceSha256": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+        "symbol": "paladin_t::create_action_protection / sentinel_t",
+        "startLine": 980,
+        "endLine": 981,
+        "sourceNote": "create_action_protection: if ( name == \"avenging_wrath\" && talents.sentinel->ok() ) return new sentinel_t; sentinel_t( p, options_str ) : paladin_spell_t( \"sentinel\", p, p->talents.sentinel ) at sc_paladin_protection.cpp:723, talents.sentinel = find_talent_spell( SPECIALIZATION, \"Sentinel\" ) at sc_paladin_protection.cpp:1074 (trait spell 389539). Otherwise paladin_t::create_action dispatches to avenging_wrath_t( p, options_str ) : paladin_spell_t( \"avenging_wrath\", p, p->find_spell( 31884 ) ) at sc_paladin.cpp:3381-3382 and 283-284, which sets background = true when the Sentinel talent is taken.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "divine_toll",
+      "candidateAbilityGameIds": [375576],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / divine_toll_t",
+        "startLine": 3423,
+        "endLine": 3424,
+        "sourceNote": "create_action dispatches \"divine_toll\" to divine_toll_t, whose base is paladin_spell_t( \"divine_toll\", p, p->talents.divine_toll ) at sc_paladin.cpp:1823; talents.divine_toll = find_talent_spell( talent_tree::CLASS, \"Divine Toll\" ) at sc_paladin.cpp:4201, whose Protection trait row carries spell 375576.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "hammer_of_light",
+      "candidateAbilityGameIds": [427453],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / hammer_of_light_t",
+        "startLine": 3431,
+        "endLine": 3432,
+        "sourceNote": "create_action dispatches \"hammer_of_light\" to hammer_of_light_t, whose base is holy_power_consumer_t( \"hammer_of_light\", p, p->spells.templar.hammer_of_light_driver ) at sc_paladin.cpp:2143; spells.templar.hammer_of_light_driver = find_spell( 427453 ) at sc_paladin.cpp:4336.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "shield_of_the_righteous",
+      "candidateAbilityGameIds": [53600],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / shield_of_the_righteous_t",
+        "startLine": 3425,
+        "endLine": 3426,
+        "sourceNote": "create_action dispatches \"shield_of_the_righteous\" to shield_of_the_righteous_t, whose base is holy_power_consumer_t( \"shield_of_the_righteous\", p, p->spec.shield_of_the_righteous ) at sc_paladin.cpp:2902; spec.shield_of_the_righteous = find_class_spell( \"Shield of the Righteous\" ) at sc_paladin_protection.cpp:1106. class_spells.inc row { 2, 0, 53600 } confirms the id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "holy_armaments",
+      "candidateAbilityGameIds": [432459],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / holy_armaments_t",
+        "startLine": 3429,
+        "endLine": 3430,
+        "sourceNote": "create_action dispatches \"holy_armaments\" to holy_armaments_t, whose base is paladin_spell_t( \"holy_armaments\", p, p->find_spell( 432459 ) ) at sc_paladin.cpp:2616. The DBC record is named \"Holy Bulwark\"; the token is the Lightsmith armament action, background unless the Lightsmith hero tree is active (sc_paladin.cpp:2621).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "hammer_of_wrath",
+      "candidateAbilityGameIds": [1241413],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / hammer_of_wrath_t",
+        "startLine": 3407,
+        "endLine": 3410,
+        "sourceNote": "create_action dispatches \"hammer_of_wrath\" for PALADIN_PROTECTION to hammer_of_wrath_t( this, \"hammer_of_wrath\", options_str, find_spell( 1241413 ) ). The Retribution branch (24275) is a different record and is not a candidate for this specialization.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "judgment",
+      "candidateAbilityGameIds": [275779],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / judgment_t",
+        "startLine": 3414,
+        "endLine": 3417,
+        "sourceNote": "create_action dispatches \"judgment\" for PALADIN_PROTECTION to judgment_t( this, \"judgment\", options_str, find_spell( 275779 ) ). class_spells.inc row { 2, 66, 275779 } confirms the id as the Protection Judgment.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "avengers_shield",
+      "candidateAbilityGameIds": [31935],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_protection.cpp",
+        "sourceSha256": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+        "symbol": "paladin_t::create_action_protection / avengers_shield_base_t",
+        "startLine": 975,
+        "endLine": 975,
+        "sourceNote": "create_action_protection dispatches \"avengers_shield\" to avengers_shield_t, whose base avengers_shield_base_t is paladin_spell_t( n, p, p->find_talent_spell( SPECIALIZATION, \"Avenger's Shield\" ) ) at sc_paladin_protection.cpp:171; the Protection trait row carries spell 31935.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "consecration",
+      "candidateAbilityGameIds": [26573],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / consecration_t",
+        "startLine": 3387,
+        "endLine": 3388,
+        "sourceNote": "create_action dispatches \"consecration\" to consecration_t, whose base is paladin_spell_t( \"consecration\", p, p->find_spell( 26573 ) ) at sc_paladin.cpp:425. class_spells.inc row { 2, 0, 26573 } confirms the id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "hammer_of_the_righteous",
+      "candidateAbilityGameIds": [53595],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_protection.cpp",
+        "sourceSha256": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+        "symbol": "paladin_t::create_action_protection / hammer_of_the_righteous_t",
+        "startLine": 979,
+        "endLine": 979,
+        "sourceNote": "create_action_protection dispatches \"hammer_of_the_righteous\" to hammer_of_the_righteous_t, whose base is paladin_melee_attack_t( \"hammer_of_the_righteous\", p, p->find_talent_spell( SPECIALIZATION, \"Hammer of the Righteous\" ) ) at sc_paladin_protection.cpp:608; the trait row carries spell 53595. The action is background when the Blessed Hammer talent is taken (sc_paladin_protection.cpp:612-613).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "blessed_hammer",
+      "candidateAbilityGameIds": [204019],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_protection.cpp",
+        "sourceSha256": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+        "symbol": "paladin_t::create_action_protection / blessed_hammer_t",
+        "startLine": 976,
+        "endLine": 976,
+        "sourceNote": "create_action_protection dispatches \"blessed_hammer\" to blessed_hammer_t, whose base is paladin_spell_t( \"blessed_hammer\", p, p->talents.blessed_hammer ) at sc_paladin_protection.cpp:407; talents.blessed_hammer = find_talent_spell( SPECIALIZATION, \"Blessed Hammer\" ) at sc_paladin_protection.cpp:1026, whose trait row carries spell 204019.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "arcane_torrent",
+      "candidateAbilityGameIds": [155145],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / arcane_torrent_t",
+        "startLine": 11056,
+        "endLine": 11057,
+        "sourceNote": "player_t::create_action dispatches \"arcane_torrent\" to arcane_torrent_t, whose base is racial_spell_t( p, \"arcane_torrent\", p->find_racial_spell( \"Arcane Torrent\" ) ) at player.cpp:9050-9051. racial_spells.inc carries nine Arcane Torrent rows selected by class mask; the row whose class mask is 0x00000002 (Paladin) is { 0x0200 (Blood Elf), 0x00000002, 155145 }. Only that row can resolve for a Paladin, so it is the single candidate.",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    },
+    {
+      "simcToken": "word_of_glory",
+      "candidateAbilityGameIds": [85673],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / word_of_glory_t",
+        "startLine": 3427,
+        "endLine": 3428,
+        "sourceNote": "create_action dispatches \"word_of_glory\" to word_of_glory_t( this, options_str, \"word_of_glory\" ), whose base is holy_power_consumer_t( name, p, p->find_class_spell( \"Word of Glory\" ) ) at sc_paladin.cpp:1218. class_spells.inc row { 2, 0, 85673 } confirms the id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "fireblood",
+      "candidateAbilityGameIds": [265221],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / fireblood_t",
+        "startLine": 11064,
+        "endLine": 11065,
+        "sourceNote": "player_t::create_action dispatches \"fireblood\" to fireblood_t, whose base is racial_spell_t( p, \"fireblood\", p->find_racial_spell( \"Fireblood\" ) ) at player.cpp:9400-9401. racial_spells.inc: { 0x0800 (Dark Iron Dwarf), 0x3fff, 265221, \"Fireblood\" }.",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "auto_melee_attack_t::auto_melee_attack_t",
+        "line": 1034,
+        "sourceNote": "auto_melee_attack_t's constructor (struct opens at sc_paladin.cpp:1024) is built on spell_data_t::nil() and assigns trigger_gcd = 0_ms. No spell record backs the APL token; its ready() is `!is_moving() && main_hand_attack->execute_event == nullptr` (sc_paladin.cpp:1046-1052)."
+      }
+    },
+    {
+      "simcToken": "use_item",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "use_item_t::use_item_t",
+        "line": 9999,
+        "sourceNote": "use_item_t's constructor (struct opens at player.cpp:9847) assigns trigger_gcd = timespan_t::zero(). No spell record backs the APL token."
+      }
+    },
+    {
+      "simcToken": "use_items",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "use_items_t::use_items_t",
+        "line": 10232,
+        "sourceNote": "use_items_t's constructor (struct opens at player.cpp:10216) assigns trigger_gcd = timespan_t::zero(). It is the foreground entry; its per-slot sub-actions are internal."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). The lane therefore holds for EVERY potion identity; Warcraft Logs supplies no player level to pick one."
+      }
+    }
+  ]
+}

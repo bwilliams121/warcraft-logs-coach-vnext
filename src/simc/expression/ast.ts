@@ -194,6 +194,29 @@ export type ExpressionNode =
    * expression containing it can parse whole; it has no binding field.
    */
   | { readonly kind: "TARGET_TIME_TO_DIE" }
+  /**
+   * An identifier a SPECIALIZATION declared (M10-C). See
+   * `spec-vocabulary.ts`.
+   *
+   * ONE generic node for every specialization-owned identifier, carrying the
+   * two properties the evaluator needs — shape and scope — copied from the
+   * declaration at parse time so a node cannot outlive or contradict the
+   * vocabulary that produced it. The parser emits it ONLY when a vocabulary
+   * was supplied and the identifier matched no built-in first; without a
+   * vocabulary, the parser is byte-for-byte the pre-M10-C parser.
+   *
+   * The shared code learns nothing from this node about what the identifier
+   * MEANS. Its value comes from the specialization's bindings or, when none is
+   * supplied, from the same rules every built-in follows: an unbound truth is
+   * enumerated, an unbound magnitude is UNKNOWN_NUMBER.
+   */
+  | {
+      readonly kind: "SPEC_ATOM";
+      readonly identifier: string;
+      readonly shape: AtomShape;
+      readonly scope: AtomScope;
+      readonly selfAddressing: boolean;
+    }
   | { readonly kind: "NOT"; readonly operand: ExpressionNode }
   /**
    * `*` and `+`, at pinned SimulationCraft precedence.
@@ -343,6 +366,12 @@ export function atomOf(node: ExpressionNode): AtomDescriptor | null {
       return { key: `cooldown.${node.cooldownName}.remains`, shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "TARGET_TIME_TO_DIE":
       return { key: "target.time_to_die", shape: "NUMERIC", scope: "TARGET_SCOPED" };
+    case "SPEC_ATOM":
+      // Keyed by the identifier verbatim, so every occurrence of one declared
+      // atom correlates and two different declared atoms never share a world
+      // assignment. A declared identifier can never equal a built-in key: the
+      // vocabulary refuses one that would.
+      return { key: node.identifier, shape: node.shape, scope: node.scope };
     default:
       return null;
   }

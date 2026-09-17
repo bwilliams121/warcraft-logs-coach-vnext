@@ -96,12 +96,53 @@ export interface TalentIdentity {
   readonly binding: string;
 }
 
+/** One entry of a hero sub-tree, as the generated trait table lists it. */
+export interface HeroTreeEntry {
+  readonly traitEntryId: number;
+  readonly traitNodeId: number;
+  readonly displayNameEn: string;
+  readonly talentSpellId: number;
+}
+
+/**
+ * A hero sub-tree (M10-C): every HERO-tree entry available to the
+ * specialization under one `id_sub_tree`.
+ *
+ * `hero_tree.<simcName>` is answered by MEMBERSHIP — an observed entry either
+ * appears in one of these lists or it does not. Nothing here says which tree
+ * a player chose; that is decided per fight from the observed tree, and only
+ * from entries this table knows.
+ */
+export interface HeroTreeIdentity {
+  readonly simcName: string;
+  readonly subTreeId: number;
+  readonly entries: readonly HeroTreeEntry[];
+}
+
+/**
+ * One NODE_TIERED specialization trait (M10-C), in the position SimulationCraft
+ * gives it: `apex.N` is the N-th tiered trait of the spec tree in generated
+ * table order (player.cpp:12313-12331). `apexIndex` is that 1-based N.
+ */
+export interface ApexTraitIdentity {
+  readonly apexIndex: number;
+  readonly traitEntryId: number;
+  readonly traitNodeId: number;
+  readonly displayNameEn: string;
+  readonly talentSpellId: number;
+  readonly selectionIndex: number;
+}
+
 export interface TalentArtifact {
   readonly artifactVersion: number;
   readonly datasetId: string;
   readonly artifactRevision: string;
   readonly provenance: TalentArtifactProvenance;
   readonly talents: readonly TalentIdentity[];
+  /** Absent for a specialization whose APL never asks `hero_tree.<name>`. */
+  readonly heroTrees?: readonly HeroTreeIdentity[];
+  /** Absent for a specialization whose APL never asks `apex.N`. */
+  readonly apexTraits?: readonly ApexTraitIdentity[];
 }
 
 /** Field names that must NOT appear on a talent: they are decided at read time. */
@@ -116,7 +157,9 @@ export type TalentArtifactValidationReason =
   | "DUPLICATE_TALENT_NAME"
   | "DUPLICATE_TRAIT_ENTRY"
   | "CHOICE_NODE_WITHOUT_ALTERNATIVES"
-  | "NORMAL_NODE_WITH_ALTERNATIVES";
+  | "NORMAL_NODE_WITH_ALTERNATIVES"
+  | "MALFORMED_HERO_TREES"
+  | "MALFORMED_APEX_TRAITS";
 
 export type TalentArtifactValidation =
   | { readonly ok: true; readonly artifact: TalentArtifact }
@@ -207,6 +250,121 @@ function validateAlternatives(value: unknown): readonly TalentAlternativeEntry[]
     alternatives.push({ traitEntryId, displayNameEn: nameEn, talentSpellId });
   }
   return alternatives;
+}
+
+function nonNegativeInt(record: Record<string, unknown>, key: string): number | null {
+  const value = record[key];
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
+}
+
+type SectionResult<T> =
+  { readonly ok: true; readonly value: T } | { readonly ok: false; readonly detail: string };
+
+/**
+ * The optional `heroTrees` section. `undefined` when absent; a present but
+ * malformed section is a validation failure, never silently dropped.
+ */
+function validateHeroTrees(value: unknown): SectionResult<readonly HeroTreeIdentity[] | undefined> {
+  if (value === undefined) return { ok: true, value: undefined };
+  if (!Array.isArray(value) || value.length === 0)
+    return { ok: false, detail: "heroTrees is not a non-empty array" };
+  const trees: HeroTreeIdentity[] = [];
+  const seenSubTrees = new Set<number>();
+  const seenNames = new Set<string>();
+  const seenEntries = new Set<number>();
+  for (let index = 0; index < value.length; index += 1) {
+    const raw = value[index];
+    if (!isRecord(raw)) return { ok: false, detail: `heroTrees[${index}] is not an object` };
+    const simcName = str(raw, "simcName");
+    const subTreeId = positiveInt(raw, "subTreeId");
+    const entriesRaw = raw["entries"];
+    if (simcName === null || subTreeId === null || !Array.isArray(entriesRaw) || entriesRaw.length === 0) {
+      return { ok: false, detail: `heroTrees[${index}] is missing required fields` };
+    }
+    if (seenSubTrees.has(subTreeId) || seenNames.has(simcName)) {
+      return { ok: false, detail: `heroTrees[${index}] repeats a sub-tree id or name` };
+    }
+    seenSubTrees.add(subTreeId);
+    seenNames.add(simcName);
+    const entries: HeroTreeEntry[] = [];
+    for (let entryIndex = 0; entryIndex < entriesRaw.length; entryIndex += 1) {
+      const entryRaw = entriesRaw[entryIndex];
+      if (!isRecord(entryRaw))
+        return { ok: false, detail: `heroTrees[${index}].entries[${entryIndex}] is not an object` };
+      const traitEntryId = positiveInt(entryRaw, "traitEntryId");
+      const traitNodeId = positiveInt(entryRaw, "traitNodeId");
+      const nameEn = str(entryRaw, "displayNameEn");
+      const talentSpellId = positiveInt(entryRaw, "talentSpellId");
+      if (traitEntryId === null || traitNodeId === null || nameEn === null || talentSpellId === null) {
+        return { ok: false, detail: `heroTrees[${index}].entries[${entryIndex}] is missing required fields` };
+      }
+      // An entry in two sub-trees would make membership ambiguous, which is
+      // the one thing this section exists to decide.
+      if (seenEntries.has(traitEntryId)) {
+        return {
+          ok: false,
+          detail: `trait entry ${String(traitEntryId)} appears in more than one hero tree`,
+        };
+      }
+      seenEntries.add(traitEntryId);
+      entries.push({ traitEntryId, traitNodeId, displayNameEn: nameEn, talentSpellId });
+    }
+    trees.push({ simcName, subTreeId, entries });
+  }
+  return { ok: true, value: trees };
+}
+
+/**
+ * The optional `apexTraits` section. The indices must be exactly 1..N in
+ * order: `apex.N` is positional, and a gap or a shuffle would answer the wrong
+ * question with a plausible-looking entry.
+ */
+function validateApexTraits(value: unknown): SectionResult<readonly ApexTraitIdentity[] | undefined> {
+  if (value === undefined) return { ok: true, value: undefined };
+  if (!Array.isArray(value) || value.length === 0) {
+    return { ok: false, detail: "apexTraits is not a non-empty array" };
+  }
+  const traits: ApexTraitIdentity[] = [];
+  const seenEntries = new Set<number>();
+  for (let index = 0; index < value.length; index += 1) {
+    const raw = value[index];
+    if (!isRecord(raw)) return { ok: false, detail: `apexTraits[${index}] is not an object` };
+    const apexIndex = positiveInt(raw, "apexIndex");
+    const traitEntryId = positiveInt(raw, "traitEntryId");
+    const traitNodeId = positiveInt(raw, "traitNodeId");
+    const nameEn = str(raw, "displayNameEn");
+    const talentSpellId = positiveInt(raw, "talentSpellId");
+    const selectionIndex = nonNegativeInt(raw, "selectionIndex");
+    if (
+      apexIndex === null ||
+      traitEntryId === null ||
+      traitNodeId === null ||
+      nameEn === null ||
+      talentSpellId === null ||
+      selectionIndex === null
+    ) {
+      return { ok: false, detail: `apexTraits[${index}] is missing required fields` };
+    }
+    if (apexIndex !== index + 1) {
+      return {
+        ok: false,
+        detail: `apexTraits[${index}] carries apexIndex ${String(apexIndex)}; expected ${String(index + 1)}`,
+      };
+    }
+    if (seenEntries.has(traitEntryId)) {
+      return { ok: false, detail: `trait entry ${String(traitEntryId)} appears twice in apexTraits` };
+    }
+    seenEntries.add(traitEntryId);
+    traits.push({
+      apexIndex,
+      traitEntryId,
+      traitNodeId,
+      displayNameEn: nameEn,
+      talentSpellId,
+      selectionIndex,
+    });
+  }
+  return { ok: true, value: traits };
 }
 
 export function validateTalentArtifact(value: unknown): TalentArtifactValidation {
@@ -316,5 +474,21 @@ export function validateTalentArtifact(value: unknown): TalentArtifactValidation
     });
   }
 
-  return { ok: true, artifact: { artifactVersion, datasetId, artifactRevision, provenance, talents } };
+  const heroTrees = validateHeroTrees(value["heroTrees"]);
+  if (!heroTrees.ok) return invalid("MALFORMED_HERO_TREES", heroTrees.detail);
+  const apexTraits = validateApexTraits(value["apexTraits"]);
+  if (!apexTraits.ok) return invalid("MALFORMED_APEX_TRAITS", apexTraits.detail);
+
+  return {
+    ok: true,
+    artifact: {
+      artifactVersion,
+      datasetId,
+      artifactRevision,
+      provenance,
+      talents,
+      ...(heroTrees.value === undefined ? {} : { heroTrees: heroTrees.value }),
+      ...(apexTraits.value === undefined ? {} : { apexTraits: apexTraits.value }),
+    },
+  };
 }

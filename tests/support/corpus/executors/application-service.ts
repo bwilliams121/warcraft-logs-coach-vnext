@@ -10,6 +10,15 @@
  */
 
 import { analyzeFight, type AnalysisServiceDeps } from "../../../../src/services/analysis-service.js";
+import {
+  analyzerForSpec,
+  internalAnalyzerForSpec,
+  requireValidatedCatalog,
+  ANALYZER_REGISTRATIONS,
+  PRODUCTION_CATALOG,
+} from "../../../../src/services/analyzer-registry.js";
+import { resolveSpecIdentity } from "../../../../src/services/spec-identity.js";
+import { isSpecId } from "../../../../src/findings/spec-id.js";
 import type { CombatFight } from "../../../../src/engine/normalization/combat-fight.js";
 import type { FightIdentity } from "../../../../src/wcl/types.js";
 import { MCP_TEST_ENV } from "../../analysis-transports.js";
@@ -80,6 +89,45 @@ export async function fightAnalysis(
       expected: params.expected,
       actual,
     });
+  }
+  return pass();
+}
+
+/**
+ * The registry's two lookups for one specialization, and the identity table
+ * beside them — over the production catalog AND a reversed one, so catalog
+ * order is proven not to matter by the same assertion.
+ */
+export function internalRegistration(
+  params: ParamsOf<"APPLICATION_SERVICE.INTERNAL_REGISTRATION">,
+): AssertionOutcome {
+  if (!isSpecId(params.specId)) {
+    return fail("the case names a specialization this build does not know", {
+      expected: { specId: params.specId },
+      actual: { known: false },
+    });
+  }
+  const specId = params.specId;
+  const reversed = requireValidatedCatalog([...ANALYZER_REGISTRATIONS].reverse());
+  const outcomes = [PRODUCTION_CATALOG, reversed].map((catalog) => {
+    const internal = internalAnalyzerForSpec(specId, catalog);
+    const publicRow = analyzerForSpec(specId, catalog);
+    const [className, specName] = specId.split("/");
+    return {
+      internalAnalyzerId: internal?.analyzerId ?? null,
+      publicAnalyzerId: publicRow?.analyzerId ?? null,
+      exposure: internal?.exposure ?? null,
+      identityResolvesPublicly: resolveSpecIdentity({ className: className ?? "", specName: specName ?? "" })
+        .ok,
+    };
+  });
+  for (const actual of outcomes) {
+    if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+      return fail("the catalog answered the lookups differently than the case pins", {
+        expected: params.expected,
+        actual,
+      });
+    }
   }
   return pass();
 }

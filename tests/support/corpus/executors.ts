@@ -23,6 +23,8 @@ import type { AssertionOutcome } from "./executors/outcome.js";
 import type { ParamsOf } from "./executors/params.js";
 import * as publicContract from "./executors/public-contract.js";
 import * as spec from "./executors/spec-assassination.js";
+import * as protection from "./executors/spec-protection-paladin.js";
+import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
 export type { AssertionOutcome } from "./executors/outcome.js";
@@ -74,6 +76,15 @@ export async function executeAssertion(
       return transport.pageEnvelopeFacts(artifact, params as ParamsOf<typeof assertion.kind>);
     case "WCL_TRANSPORT.FIGHT_IDENTITY":
       return transport.fightIdentity(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY":
+      return sharedEngine.scanSelectsDefinitely(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY":
+      return sharedEngine.scanUndecidedByHigherPriority(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION":
+      return sharedEngine.scanRefusesUnsupportedExpression(
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "APPLICATION_SERVICE.FIGHT_ANALYSIS":
       return await applicationService.fightAnalysis(
         corpus,
@@ -122,6 +133,50 @@ export async function executeAssertion(
       return spec.talentResolution(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_ASSASSINATION.DOT_REMAINS":
       return spec.dotRemains(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE":
+      return protection.authorityProvenance(
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE":
+      return protection.decisionCoverage(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY":
+      return protection.coverageSummary(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION":
+      return protection.holyPowerObservation(
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED":
+      return protection.holyPowerNotObserved(
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT":
+      return protection.domainResult(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION":
+      return protection.buildResolution(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET":
+      return protection.useItemsSubActionSet(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM":
+      return protection.resolvedAtom(corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.SPEC_GATE":
+      return protection.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE":
+      return protection.notPubliclyProjectable(
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "APPLICATION_SERVICE.INTERNAL_REGISTRATION":
+      return applicationService.internalRegistration(params as ParamsOf<typeof assertion.kind>);
     case "PUBLIC_CONTRACT.REST_MCP_PARITY":
       return await publicContract.restMcpParity(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
   }
@@ -160,5 +215,20 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_ASSASSINATION.AUTHORITY_UNAVAILABLE_IS_NOT_REJECTION",
   "SPEC_ASSASSINATION.TALENT_RESOLUTION",
   "SPEC_ASSASSINATION.DOT_REMAINS",
+  "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE",
+  "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+  "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+  "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+  "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+  "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+  "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION",
+  "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET",
+  "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+  "SPEC_PROTECTION_PALADIN.SPEC_GATE",
+  "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
+  "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+  "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY",
+  "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION",
+  "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",
 ];

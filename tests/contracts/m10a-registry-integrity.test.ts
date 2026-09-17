@@ -73,20 +73,25 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries exactly one registration, and it is Assassination, PUBLIC", () => {
+  it("carries two registrations: Assassination PUBLIC and, since M10-C, Protection Paladin INTERNAL_ONLY", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
         registration.specId,
         registration.exposure,
       ]),
-    ).toEqual([[ASSASSINATION_ANALYZER_ID, "rogue/assassination", "PUBLIC"]]);
+    ).toEqual([
+      [ASSASSINATION_ANALYZER_ID, "rogue/assassination", "PUBLIC"],
+      ["paladin-protection-observed-decisions", "paladin/protection", "INTERNAL_ONLY"],
+    ]);
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
+    // The PUBLIC subset is still exactly one analyzer.
     expect(ENABLED_ANALYZERS).toHaveLength(1);
+    expect(ENABLED_ANALYZERS[0]?.specId).toBe("rogue/assassination");
   });
 
-  it("registers no production Protection Paladin analyzer", () => {
-    expect(internalAnalyzerForSpec("paladin/protection")).toBeNull();
+  it("registers a Protection Paladin analyzer that only the internal lookup resolves", () => {
+    expect(internalAnalyzerForSpec("paladin/protection")?.exposure).toBe("INTERNAL_ONLY");
     expect(analyzerForSpec("paladin/protection")).toBeNull();
   });
 

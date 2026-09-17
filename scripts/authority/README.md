@@ -41,7 +41,7 @@ node scripts/authority/extract-simc-apl.mjs \
 Deterministic: the same commit yields a byte-identical artifact apart from
 `extractedOn`. `--file <path>` reads a local copy instead of fetching.
 
-## Protection Paladin APL — pinned at M10-B, NOT registered
+## Protection Paladin APL — pinned at M10-B, bound at M10-C (INTERNAL_ONLY)
 
 The same commit carries `engine/class_modules/apl/apl_paladin.cpp`, whose
 `//protection_apl_start .. //protection_apl_end` region is the Protection
@@ -55,23 +55,100 @@ lists: `default` with 30 actions, `precombat` with 6, no list dispatch).
 | Source bytes | 10,081 |
 | Artifact | `src/simc/data/paladin-protection.apl.json` (`SIMC_APL_PALADIN_PROTECTION`, revision `simc-33622e9d-1`) |
 | Extracted | 2026-09-16, `--target paladin-protection` |
-| Bound to | nothing. No catalog row, no `AuthorityDomainBinding`, no loader in `src/simc/pinned-authority.ts`, no production import |
+| Bound to | `OFFENSIVE_ROTATION` only, by `src/specs/paladin/protection/registration.ts` (INTERNAL_ONLY) through the tree's own `pinned-authority.ts` loader. No other domain; no public exposure. |
 
 It is OFFENSIVE authority only. It is a damage-priority list for a simulation:
 it contains `shield_of_the_righteous` and `word_of_glory` as damage-ordered
 lines and conditions nothing on incoming damage, health or a defensive plan.
-When M10-C binds it, the binding is `SIMC_APL` for `OFFENSIVE_ROTATION` and
-the registry refuses any other domain (`PROVIDER_DOMAIN_COMPATIBILITY`).
+M10-C bound it: the binding is `SIMC_APL` for `OFFENSIVE_ROTATION` and the
+registry refuses any other domain (`PROVIDER_DOMAIN_COMPATIBILITY`).
 `ACTIVE_MITIGATION`, `DEFENSIVE_COOLDOWN`, `SELF_HEALING`,
-`RESOURCE_SPENDING` and `INTERRUPT` have NO pinned authority.
+`RESOURCE_SPENDING` and `INTERRUPT` have NO pinned authority, and the
+evaluator reports each as such.
 
 Parser coverage measured at M10-B (pinned by
 `tests/contracts/m10b-protection-paladin-authority.test.ts`): 16 unconditional
 lines; of the 20 conditional lines 10 parse and 10 are refused as
 `UNSUPPORTED_IDENTIFIER` at `next_armament` (×3), `consecration.up` (×2),
 `talent.righteous_protector.enabled`, `prev_gcd.1.divine_toll`,
-`hero_tree.lightsmith`, `apex.3` and `full_recharge_time`. Widening the parser
-is M10-C's work, with tests, never by relaxing a refusal.
+`hero_tree.lightsmith`, `apex.3` and `full_recharge_time`. That is STILL the
+shared parser's answer without a vocabulary. M10-C admitted these identifiers
+through the specialization seam (`src/simc/expression/spec-vocabulary.ts`,
+declared in `src/specs/paladin/protection/vocabulary.ts`), never by relaxing
+the shared parser: every conditional line now parses WITH the Protection
+vocabulary, and the resolver binds a value only where the pinned data and the
+evidence prove one.
+
+### Protection Paladin game data — pinned at M10-C
+
+Two further artifacts from the same commit, produced by the GCD and talent
+extractors under a `--target paladin-protection` profile (the default target
+stays `rogue-assassination`, and both Rogue artifacts regenerate byte for
+byte through the refactored extractors):
+
+| Artifact | Dataset | Contents |
+| --- | --- | --- |
+| `src/data/game/paladin-protection-gcd-semantics.json` | `SIMC_DBC_PALADIN_PROTECTION_GCD_SEMANTICS` | 19 machine-extracted `_gcd` records (the 15 APL actions and the 4 observed-only abilities Ardent Defender, Hand of Reckoning, Divine Steed, Blessing of Spellwarding), 14 hand-reviewed token bindings citing `sc_paladin.cpp` / `sc_paladin_protection.cpp` / `player.cpp` / `racial_spells.inc` by line, 4 meta-action lanes (`auto_attack` from the Paladin module, `use_item`, `use_items`, `potion`) |
+| `src/data/game/paladin-protection-talents.json` | `SIMC_TRAIT_PALADIN_PROTECTION_TALENTS` | 6 talents (righteous_protector, sentinel, avenging_wrath, blessed_hammer, hammer_of_the_righteous — a choice node — and the Protection row of divine_toll), the Templar (48) and Lightsmith (49) hero sub-trees with every entry each offers spec 66, and the three tiered `apex.N` traits in generated-table order |
+| `src/data/game/paladin-protection-item-effects.json` (M10-C correction 1) | `SIMC_DBC_PALADIN_PROTECTION_ITEM_USE_EFFECTS` | the M10-B subject's complete worn equipment (17 items; the shirt slot is empty) plus `algethar_puzzle_box`, the one item the APL names; produced by `extract-simc-item-effects.mjs --target paladin-protection`, which drops the Rogue-only cooldown-modifier review (`NO_ROGUE_MODIFIER_APPLIES_TO_AN_ITEM_USE_COOLDOWN`) so a Paladin item cooldown stays MODIFIERS_POSSIBLE. Exactly one worn item is on-use: Voracious Heart of Ula'tek (270175, driver 1297761, cooldown 90,000 ms, gcd 0) |
+| `src/data/game/paladin-protection-spender-costs.json` (M10-C4) | `SIMC_DBC_PALADIN_PROTECTION_SPENDER_COSTS` | the `__spellpower_data` rows of Shield of the Righteous (53600: Holy Power cost 3, and the aura-conditioned Instrument of the Divine variant) and Word of Glory (85673), with each spell's cooldown / GCD / charge / cast-time scalars and the `cost()` first-row rule; produced by the new class-neutral `extract-simc-power-costs.mjs`, which checks the `spellpower_data_t` layout and reads `POWER_HOLY_POWER` from `sc_enums.hpp` |
+| `src/data/game/paladin-protection-enchant-effects.json` (M10-C correction 1) | `SIMC_DBC_PALADIN_PROTECTION_ENCHANT_USE_EFFECTS` | every permanent enchant (7961, 8031, 7987, 8159, 8019, 7967, 7981), temporary enchant (7143) and gem (240890 → enchant 8117, 240983 → 8552) the subject's combatant info reports, each pinned as NOT creating a use effect (`ench_type` never ITEM_ENCHANTMENT_USE_SPELL = 7, verified against `data_enums.hh`); produced by the new class-neutral `extract-simc-enchant-effects.mjs`, which checks the `item_enchantment_data_t` / `gem_property_data_t` / `dbc_item_data_t` / `temporary_enchant_entry_t` / `permanent_enchant_entry_t` layouts before reading a row and hashes `engine/item/enchants.cpp` for the hand-reviewed rule. M10-C2 added `useEffectUniverse`: a census of ALL 5,334 enchant rows — 39 create a use effect; 0 are temporary enchants, 18 are permanent enchants whose `permanent_enchant.inc` inventory-type mask is 0x10042 (waist, back, head), 7 are gem-borne, and 14 have no pinned placement at all — with every summary re-derived from the rows by the runtime validator. M10-C3 resolved every row's USE spell against `sc_spell_data.inc` (cooldown, internal cooldown, category, charges, GCD, cast time, effect rows and trigger spell), applied SimulationCraft's generic buff/action rules from `special_effect.cpp`, and censused `register_special_effect` across all seven `unique_gear*.cpp` modules: 5 rows have a USE spell absent from the pinned table, 6 are scripted, 19 are gem-borne once forward gem links are followed, 3 have no pinned placement |
+
+Two facts a reader should not have to rediscover: Shield of the Righteous,
+Avenging Wrath, Sentinel and Ardent Defender are all `_gcd` 0 (NON_GCD to the
+first-GCD query); and `avenging_wrath` binds to TWO records (31884 and 389539)
+because Protection's `create_action` substitutes `sentinel_t` when the
+Sentinel talent is taken (`sc_paladin_protection.cpp:980-981`) — both lane 0,
+so the token's lane holds without deciding the talent.
+
+Why the enchant artifact exists at all: `use_items` with no `slots=` builds a
+sub-action for every worn slot whose ITEM, GEM or ENCHANT carries a use effect
+(`use_items_t::create_use_subactions`, player.cpp:10456-10463). The item
+artifact answers the first source; without the other two, "exactly one
+sub-action exists" would be a hope, and the `use_items` transition contract
+could not be admitted.
+
+What the universe census establishes, and what it cannot: an omitted
+`temporaryEnchant` key on a Warcraft Logs gear row is irrelevant to the
+sub-action set (no temporary enchant in the build creates a use effect). An
+omitted `permanentEnchant` key is NOT closable by type — 3 use-producing rows
+have no placement any pinned table states, and real permanent tinkers admit
+the waist and back — and an omitted `gems` key is not closable without a
+socket model. M10-C3 then asked whether the admitted candidates are at least
+observationally equivalent (`src/simc/subaction-equivalence.ts`); they are
+not, because the candidate sets contain rows whose USE spell is absent from
+the pinned table, scripted rows, a row that casts for 500 ms, rows that deal
+damage or heal (observable under the subject's Divine Inspiration), and rows
+with no cooldown. Those omissions kept `default[2] use_items` unresolved on the M10-B subject
+until M10-C4, when a written Warcraft Logs statement (2026-09-17: the fields
+carry what its UI shows, omission means none, no further guarantee) was
+adopted as the dated adapter contract `WCL_COMBATANT_INFO_GEAR_UI_SEMANTICS_
+2026_09_17` in `combatant-info.ts` — a Warcraft Logs fact, not a
+SimulationCraft one, and the census and equivalence proof still guard any
+payload whose identities are present but unreadable.
+
+NOT pinned at M10-C (after correction 1), and therefore refused rather than
+modelled: any Paladin cooldown durations other than wings' base 120,000 ms,
+the Holy Power cost of the spenders (the DBC power table was not extracted),
+any Paladin aura identities (so every `buff.<name>.*` atom is enumerated,
+except `buff.avenging_wrath.up` in a branch where wings has fired), and any
+transition contract beyond `auto_attack`, `potion`, `fireblood`,
+`avenging_wrath` and the one reviewed on-use driver 1297761
+(`paladin-protection-transition-authority.ts`, which also cites
+`unique_gear_midnight.cpp` for the scripted trinket).
+
+```bash
+node scripts/authority/extract-simc-gcd.mjs --target paladin-protection \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-16
+node scripts/authority/extract-simc-talents.mjs --target paladin-protection \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-16
+node scripts/authority/extract-simc-item-effects.mjs --target paladin-protection \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-16
+node scripts/authority/extract-simc-enchant-effects.mjs --target paladin-protection \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-16
+node scripts/authority/extract-simc-power-costs.mjs --target paladin-protection \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-17
+```
 
 Reproduce:
 

@@ -42,6 +42,19 @@
  *   node scripts/authority/extract-simc-gcd.mjs \
  *     --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
  *     --out src/data/game/rogue-gcd-semantics.json
+ *
+ * TARGETS (M10-C). `--target` selects one specialization profile: its dataset
+ * id, class id, the class module(s) whose hand-reviewed readings the token
+ * bindings cite, and its required facts. The default is `rogue-assassination`,
+ * so every invocation recorded before M10-C regenerates the Rogue artifact
+ * byte for byte. `paladin-protection` reads the same DBC tables and cites
+ * `sc_paladin.cpp` / `sc_paladin_protection.cpp` / `racial_spells.inc`
+ * instead of `sc_rogue.cpp`. A target is coordinates and facts, never a
+ * different parser.
+ *
+ *   node scripts/authority/extract-simc-gcd.mjs --target paladin-protection \
+ *     --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+ *     --out src/data/game/paladin-protection-gcd-semantics.json
  */
 
 import { createHash } from "node:crypto";
@@ -448,6 +461,350 @@ const REQUIRED_FACTS = {
   ],
 };
 
+/**
+ * The Protection Paladin profile (M10-C).
+ *
+ * The SAME kinds of knowledge as the Rogue facts above, with the SAME
+ * methods: `abilities` are machine-extracted `_gcd` records, `tokenBindings`
+ * are hand-reviewed readings of pinned C++ verified against those records,
+ * and `metaActionLanes` are hand-reviewed `trigger_gcd` assignments for
+ * tokens no DBC row backs.
+ *
+ * Only the actions the pinned Protection APL names, plus the abilities the
+ * M10-B capture observed the subject casting, are listed. An observed ability
+ * with no APL token (Ardent Defender, Hand of Reckoning, Divine Steed,
+ * Blessing of Spellwarding) gets a LANE record and no binding: the lane is
+ * what classifies the observed cast, and a token nobody wrote would be a
+ * binding nobody reviewed.
+ */
+const PALADIN_PROTECTION_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the class and specialization modules the token
+  // bindings are hand-reviewed readings of.
+  classModule: "engine/class_modules/paladin/sc_paladin.cpp",
+  specModule: "engine/class_modules/paladin/sc_paladin_protection.cpp",
+  // HASHED, NEVER PARSED. The Paladin Arcane Torrent row is a class-mask
+  // reading of this table; the racial and meta-action lanes cite the next two.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const PALADIN_PROTECTION_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    // ---- actions the pinned Protection APL names ----
+    { abilityGameId: 26573, displayNameEn: "Consecration", baseGcdMs: 1500 },
+    { abilityGameId: 31884, displayNameEn: "Avenging Wrath", baseGcdMs: 0 },
+    { abilityGameId: 31935, displayNameEn: "Avenger's Shield", baseGcdMs: 1500 },
+    { abilityGameId: 53595, displayNameEn: "Hammer of the Righteous", baseGcdMs: 1500 },
+    { abilityGameId: 53600, displayNameEn: "Shield of the Righteous", baseGcdMs: 0 },
+    { abilityGameId: 85673, displayNameEn: "Word of Glory", baseGcdMs: 1500 },
+    { abilityGameId: 155145, displayNameEn: "Arcane Torrent", baseGcdMs: 1500 },
+    { abilityGameId: 204019, displayNameEn: "Blessed Hammer", baseGcdMs: 1500 },
+    { abilityGameId: 265221, displayNameEn: "Fireblood", baseGcdMs: 0 },
+    { abilityGameId: 275779, displayNameEn: "Judgment", baseGcdMs: 1500 },
+    { abilityGameId: 375576, displayNameEn: "Divine Toll", baseGcdMs: 1500 },
+    { abilityGameId: 389539, displayNameEn: "Sentinel", baseGcdMs: 0 },
+    { abilityGameId: 427453, displayNameEn: "Hammer of Light", baseGcdMs: 1500 },
+    { abilityGameId: 432459, displayNameEn: "Holy Bulwark", baseGcdMs: 1500 },
+    { abilityGameId: 1241413, displayNameEn: "Hammer of Wrath", baseGcdMs: 1500 },
+    // ---- abilities the M10-B subject cast that the APL does not name ----
+    // Lane records only. They classify the observed casts (all four are
+    // outside the offensive authority) and bind to no token.
+    { abilityGameId: 31850, displayNameEn: "Ardent Defender", baseGcdMs: 0 },
+    { abilityGameId: 62124, displayNameEn: "Hand of Reckoning", baseGcdMs: 0 },
+    { abilityGameId: 190784, displayNameEn: "Divine Steed", baseGcdMs: 0 },
+    { abilityGameId: 204018, displayNameEn: "Blessing of Spellwarding", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "avenging_wrath",
+      // TWO records, and the split is a talent this extractor does not
+      // evaluate. Protection's create_action returns sentinel_t when the
+      // Sentinel talent is taken (the talent spell, 389539) and otherwise falls
+      // to the base avenging_wrath_t on 31884. Both records are `_gcd` 0, so
+      // the lane holds under either resolution without choosing one.
+      candidateAbilityGameIds: [31884, 389539],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: "engine/class_modules/paladin/sc_paladin_protection.cpp",
+      symbol: "paladin_t::create_action_protection / sentinel_t",
+      startLine: 980,
+      endLine: 981,
+      sourceNote:
+        'create_action_protection: if ( name == "avenging_wrath" && talents.sentinel->ok() ) return new sentinel_t; ' +
+        'sentinel_t( p, options_str ) : paladin_spell_t( "sentinel", p, p->talents.sentinel ) at ' +
+        'sc_paladin_protection.cpp:723, talents.sentinel = find_talent_spell( SPECIALIZATION, "Sentinel" ) at ' +
+        "sc_paladin_protection.cpp:1074 (trait spell 389539). Otherwise paladin_t::create_action dispatches " +
+        'to avenging_wrath_t( p, options_str ) : paladin_spell_t( "avenging_wrath", p, p->find_spell( 31884 ) ) ' +
+        "at sc_paladin.cpp:3381-3382 and 283-284, which sets background = true when the Sentinel talent is taken.",
+    },
+    {
+      simcToken: "divine_toll",
+      candidateAbilityGameIds: [375576],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "paladin_t::create_action / divine_toll_t",
+      startLine: 3423,
+      endLine: 3424,
+      sourceNote:
+        'create_action dispatches "divine_toll" to divine_toll_t, whose base is ' +
+        'paladin_spell_t( "divine_toll", p, p->talents.divine_toll ) at sc_paladin.cpp:1823; ' +
+        'talents.divine_toll = find_talent_spell( talent_tree::CLASS, "Divine Toll" ) at sc_paladin.cpp:4201, ' +
+        "whose Protection trait row carries spell 375576.",
+    },
+    {
+      simcToken: "hammer_of_light",
+      candidateAbilityGameIds: [427453],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "paladin_t::create_action / hammer_of_light_t",
+      startLine: 3431,
+      endLine: 3432,
+      sourceNote:
+        'create_action dispatches "hammer_of_light" to hammer_of_light_t, whose base is ' +
+        'holy_power_consumer_t( "hammer_of_light", p, p->spells.templar.hammer_of_light_driver ) at ' +
+        "sc_paladin.cpp:2143; spells.templar.hammer_of_light_driver = find_spell( 427453 ) at sc_paladin.cpp:4336.",
+    },
+    {
+      simcToken: "shield_of_the_righteous",
+      candidateAbilityGameIds: [53600],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "paladin_t::create_action / shield_of_the_righteous_t",
+      startLine: 3425,
+      endLine: 3426,
+      sourceNote:
+        'create_action dispatches "shield_of_the_righteous" to shield_of_the_righteous_t, whose base is ' +
+        'holy_power_consumer_t( "shield_of_the_righteous", p, p->spec.shield_of_the_righteous ) at ' +
+        'sc_paladin.cpp:2902; spec.shield_of_the_righteous = find_class_spell( "Shield of the Righteous" ) at ' +
+        "sc_paladin_protection.cpp:1106. class_spells.inc row { 2, 0, 53600 } confirms the id.",
+    },
+    {
+      simcToken: "holy_armaments",
+      candidateAbilityGameIds: [432459],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "paladin_t::create_action / holy_armaments_t",
+      startLine: 3429,
+      endLine: 3430,
+      sourceNote:
+        'create_action dispatches "holy_armaments" to holy_armaments_t, whose base is ' +
+        'paladin_spell_t( "holy_armaments", p, p->find_spell( 432459 ) ) at sc_paladin.cpp:2616. The DBC record ' +
+        'is named "Holy Bulwark"; the token is the Lightsmith armament action, background unless the Lightsmith ' +
+        "hero tree is active (sc_paladin.cpp:2621).",
+    },
+    {
+      simcToken: "hammer_of_wrath",
+      candidateAbilityGameIds: [1241413],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "paladin_t::create_action / hammer_of_wrath_t",
+      startLine: 3407,
+      endLine: 3410,
+      sourceNote:
+        'create_action dispatches "hammer_of_wrath" for PALADIN_PROTECTION to ' +
+        'hammer_of_wrath_t( this, "hammer_of_wrath", options_str, find_spell( 1241413 ) ). The Retribution ' +
+        "branch (24275) is a different record and is not a candidate for this specialization.",
+    },
+    {
+      simcToken: "judgment",
+      candidateAbilityGameIds: [275779],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "paladin_t::create_action / judgment_t",
+      startLine: 3414,
+      endLine: 3417,
+      sourceNote:
+        'create_action dispatches "judgment" for PALADIN_PROTECTION to ' +
+        'judgment_t( this, "judgment", options_str, find_spell( 275779 ) ). class_spells.inc row ' +
+        "{ 2, 66, 275779 } confirms the id as the Protection Judgment.",
+    },
+    {
+      simcToken: "avengers_shield",
+      candidateAbilityGameIds: [31935],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: "engine/class_modules/paladin/sc_paladin_protection.cpp",
+      symbol: "paladin_t::create_action_protection / avengers_shield_base_t",
+      startLine: 975,
+      endLine: 975,
+      sourceNote:
+        'create_action_protection dispatches "avengers_shield" to avengers_shield_t, whose base ' +
+        'avengers_shield_base_t is paladin_spell_t( n, p, p->find_talent_spell( SPECIALIZATION, "Avenger\'s Shield" ) ) ' +
+        "at sc_paladin_protection.cpp:171; the Protection trait row carries spell 31935.",
+    },
+    {
+      simcToken: "consecration",
+      candidateAbilityGameIds: [26573],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "paladin_t::create_action / consecration_t",
+      startLine: 3387,
+      endLine: 3388,
+      sourceNote:
+        'create_action dispatches "consecration" to consecration_t, whose base is ' +
+        'paladin_spell_t( "consecration", p, p->find_spell( 26573 ) ) at sc_paladin.cpp:425. class_spells.inc ' +
+        "row { 2, 0, 26573 } confirms the id.",
+    },
+    {
+      simcToken: "hammer_of_the_righteous",
+      candidateAbilityGameIds: [53595],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: "engine/class_modules/paladin/sc_paladin_protection.cpp",
+      symbol: "paladin_t::create_action_protection / hammer_of_the_righteous_t",
+      startLine: 979,
+      endLine: 979,
+      sourceNote:
+        'create_action_protection dispatches "hammer_of_the_righteous" to hammer_of_the_righteous_t, whose base is ' +
+        'paladin_melee_attack_t( "hammer_of_the_righteous", p, p->find_talent_spell( SPECIALIZATION, ' +
+        '"Hammer of the Righteous" ) ) at sc_paladin_protection.cpp:608; the trait row carries spell 53595. ' +
+        "The action is background when the Blessed Hammer talent is taken (sc_paladin_protection.cpp:612-613).",
+    },
+    {
+      simcToken: "blessed_hammer",
+      candidateAbilityGameIds: [204019],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: "engine/class_modules/paladin/sc_paladin_protection.cpp",
+      symbol: "paladin_t::create_action_protection / blessed_hammer_t",
+      startLine: 976,
+      endLine: 976,
+      sourceNote:
+        'create_action_protection dispatches "blessed_hammer" to blessed_hammer_t, whose base is ' +
+        'paladin_spell_t( "blessed_hammer", p, p->talents.blessed_hammer ) at sc_paladin_protection.cpp:407; ' +
+        'talents.blessed_hammer = find_talent_spell( SPECIALIZATION, "Blessed Hammer" ) at ' +
+        "sc_paladin_protection.cpp:1026, whose trait row carries spell 204019.",
+    },
+    {
+      simcToken: "arcane_torrent",
+      candidateAbilityGameIds: [155145],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / arcane_torrent_t",
+      startLine: 11056,
+      endLine: 11057,
+      sourceNote:
+        'player_t::create_action dispatches "arcane_torrent" to arcane_torrent_t, whose base is ' +
+        'racial_spell_t( p, "arcane_torrent", p->find_racial_spell( "Arcane Torrent" ) ) at player.cpp:9050-9051. ' +
+        "racial_spells.inc carries nine Arcane Torrent rows selected by class mask; the row whose class mask is " +
+        "0x00000002 (Paladin) is { 0x0200 (Blood Elf), 0x00000002, 155145 }. Only that row can resolve for a " +
+        "Paladin, so it is the single candidate.",
+    },
+    {
+      simcToken: "word_of_glory",
+      candidateAbilityGameIds: [85673],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "paladin_t::create_action / word_of_glory_t",
+      startLine: 3427,
+      endLine: 3428,
+      sourceNote:
+        'create_action dispatches "word_of_glory" to word_of_glory_t( this, options_str, "word_of_glory" ), whose ' +
+        'base is holy_power_consumer_t( name, p, p->find_class_spell( "Word of Glory" ) ) at sc_paladin.cpp:1218. ' +
+        "class_spells.inc row { 2, 0, 85673 } confirms the id.",
+    },
+    {
+      simcToken: "fireblood",
+      candidateAbilityGameIds: [265221],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / fireblood_t",
+      startLine: 11064,
+      endLine: 11065,
+      sourceNote:
+        'player_t::create_action dispatches "fireblood" to fireblood_t, whose base is ' +
+        'racial_spell_t( p, "fireblood", p->find_racial_spell( "Fireblood" ) ) at player.cpp:9400-9401. ' +
+        'racial_spells.inc: { 0x0800 (Dark Iron Dwarf), 0x3fff, 265221, "Fireblood" }.',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",
+      symbol: "auto_melee_attack_t::auto_melee_attack_t",
+      line: 1034,
+      sourceNote:
+        "auto_melee_attack_t's constructor (struct opens at sc_paladin.cpp:1024) is built on " +
+        "spell_data_t::nil() and assigns trigger_gcd = 0_ms. No spell record backs the APL token; its " +
+        "ready() is `!is_moving() && main_hand_attack->execute_event == nullptr` (sc_paladin.cpp:1046-1052).",
+    },
+    {
+      simcToken: "use_item",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/player.cpp",
+      symbol: "use_item_t::use_item_t",
+      line: 9999,
+      sourceNote:
+        "use_item_t's constructor (struct opens at player.cpp:9847) assigns " +
+        "trigger_gcd = timespan_t::zero(). No spell record backs the APL token.",
+    },
+    {
+      simcToken: "use_items",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/player.cpp",
+      symbol: "use_items_t::use_items_t",
+      line: 10232,
+      sourceNote:
+        "use_items_t's constructor (struct opens at player.cpp:10216) assigns " +
+        "trigger_gcd = timespan_t::zero(). It is the foreground entry; its per-slot " +
+        "sub-actions are internal.",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). The lane therefore holds " +
+        "for EVERY potion identity; Warcraft Logs supplies no player level to pick one.",
+    },
+  ],
+};
+
+/**
+ * The extractable targets. Each is coordinates and facts; the parser, the
+ * hash gate, the field-index derivation and every verification rule are the
+ * same for all of them.
+ */
+export const TARGETS = {
+  "rogue-assassination": {
+    datasetId: DATASET_ID,
+    classId: ROGUE_CLASS_ID,
+    className: "Rogue",
+    sources: SOURCES,
+    classModulePath: SOURCES.rogueModule,
+    /** Files hashed but never parsed, listed for the run summary. */
+    handReviewedPaths: [SOURCES.rogueModule, SOURCES.playerModule, SOURCES.consumableModule],
+    requiredFacts: REQUIRED_FACTS,
+    defaultOut: "src/data/game/rogue-gcd-semantics.json",
+  },
+  "paladin-protection": {
+    datasetId: "SIMC_DBC_PALADIN_PROTECTION_GCD_SEMANTICS",
+    classId: 2,
+    className: "Paladin",
+    sources: PALADIN_PROTECTION_SOURCES,
+    classModulePath: PALADIN_PROTECTION_SOURCES.classModule,
+    handReviewedPaths: [
+      PALADIN_PROTECTION_SOURCES.classModule,
+      PALADIN_PROTECTION_SOURCES.specModule,
+      PALADIN_PROTECTION_SOURCES.racialSpells,
+      PALADIN_PROTECTION_SOURCES.playerModule,
+      PALADIN_PROTECTION_SOURCES.consumableModule,
+    ],
+    requiredFacts: PALADIN_PROTECTION_FACTS,
+    defaultOut: "src/data/game/paladin-protection-gcd-semantics.json",
+  },
+};
+
+const DEFAULT_TARGET = TARGETS["rogue-assassination"];
+
 function fail(message) {
   console.error(`EXTRACTION FAILED: ${message}`);
   process.exit(1);
@@ -817,9 +1174,11 @@ export function verifyRequiredFacts({
   measuredSourcePaths,
   spellDataText,
   spellDataLayoutText,
+  target = DEFAULT_TARGET,
 }) {
   const problems = [];
-  const knownPaths = new Set(measuredSourcePaths ?? Object.values(SOURCES));
+  const REQUIRED_FACTS = target.requiredFacts;
+  const knownPaths = new Set(measuredSourcePaths ?? Object.values(target.sources));
 
   if (gcdFieldIndex !== expectedGcdFieldIndex) {
     problems.push(
@@ -977,7 +1336,7 @@ export function verifyRequiredFacts({
     // A binding may name a file other than the Rogue module - the racials are
     // read out of player.cpp. Whichever file it names must be one this run
     // actually hashed, or the recorded hash would belong to a different file.
-    const bindingPath = binding.sourcePath ?? SOURCES.rogueModule;
+    const bindingPath = binding.sourcePath ?? target.classModulePath;
     if (!knownPaths.has(bindingPath)) {
       problems.push(
         `token '${binding.simcToken}' cites '${bindingPath}', which this extractor does not hash`,
@@ -988,11 +1347,11 @@ export function verifyRequiredFacts({
 
     for (const candidate of binding.candidateAbilityGameIds) {
       const match = classSpells.find(
-        (entry) => entry.classId === ROGUE_CLASS_ID && entry.spellId === candidate,
+        (entry) => entry.classId === target.classId && entry.spellId === candidate,
       );
       if (match === undefined) {
         problems.push(
-          `token '${binding.simcToken}' claims spell ${candidate} is a Rogue class ability, but class_spells.inc has no such row`,
+          `token '${binding.simcToken}' claims spell ${candidate} is a ${target.className} class ability, but class_spells.inc has no such row`,
         );
       }
     }
@@ -1107,10 +1466,19 @@ export function formatArtifactJson(artifact) {
   return `${out.join("\n")}\n`;
 }
 
-export function buildArtifact({ commitSha, sources, build, records, extractedOn, rogueModuleSha256 }) {
+export function buildArtifact({
+  commitSha,
+  sources,
+  build,
+  records,
+  extractedOn,
+  rogueModuleSha256,
+  target = DEFAULT_TARGET,
+}) {
+  const REQUIRED_FACTS = target.requiredFacts;
   const byPath = new Map(sources.map((source) => [source.path, source.sha256]));
   if (rogueModuleSha256 !== undefined && rogueModuleSha256 !== null) {
-    byPath.set(SOURCES.rogueModule, rogueModuleSha256);
+    byPath.set(target.classModulePath, rogueModuleSha256);
   }
 
   /** The measured hash of the file a hand-reviewed reading cites. Never invented. */
@@ -1124,7 +1492,7 @@ export function buildArtifact({ commitSha, sources, build, records, extractedOn,
 
   return {
     artifactVersion: ARTIFACT_VERSION,
-    datasetId: DATASET_ID,
+    datasetId: target.datasetId,
     artifactRevision: `simc-${commitSha.slice(0, 8)}-${EXTRACTOR_VERSION}`,
     provenance: {
       repository: REPOSITORY,
@@ -1165,8 +1533,8 @@ export function buildArtifact({ commitSha, sources, build, records, extractedOn,
       // never machine-parsed and this record must not imply that it was.
       binding: {
         method: HAND_REVIEWED_BINDING_METHOD,
-        sourcePath: binding.sourcePath ?? SOURCES.rogueModule,
-        sourceSha256: hashFor(binding.sourcePath ?? SOURCES.rogueModule),
+        sourcePath: binding.sourcePath ?? target.classModulePath,
+        sourceSha256: hashFor(binding.sourcePath ?? target.classModulePath),
         symbol: binding.symbol,
         startLine: binding.startLine,
         endLine: binding.endLine,
@@ -1184,8 +1552,8 @@ export function buildArtifact({ commitSha, sources, build, records, extractedOn,
               effectIndex: resolution.effectIndex,
               resolvedAbilityGameId: resolution.expectedTriggerSpellId,
               method: MACHINE_EXTRACTED_TRIGGER_METHOD,
-              sourcePath: SOURCES.spellData,
-              sourceSha256: hashFor(SOURCES.spellData),
+              sourcePath: target.sources.spellData,
+              sourceSha256: hashFor(target.sources.spellData),
               note: resolution.note,
             })),
           }),
@@ -1227,10 +1595,16 @@ async function loadSource(args, key, path) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  const targetName = typeof args.target === "string" ? args.target : "rogue-assassination";
+  const target = TARGETS[targetName];
+  if (target === undefined) {
+    fail(`unknown --target '${targetName}' (known: ${Object.keys(TARGETS).join(", ")})`);
+  }
+  const REQUIRED_FACTS = target.requiredFacts;
 
   const loaded = {};
   const sources = [];
-  for (const [key, path] of Object.entries(SOURCES)) {
+  for (const [key, path] of Object.entries(target.sources)) {
     const buffer = await loadSource(args, key, path);
     const sha256 = createHash("sha256").update(buffer).digest("hex");
     const problem = sourceHashProblem(path, args[`expect-${key}-sha256`], sha256);
@@ -1264,6 +1638,7 @@ async function main() {
     measuredSourcePaths: new Set(sources.map((source) => source.path)),
     spellDataText: loaded.spellData,
     spellDataLayoutText: loaded.spellDataLayout,
+    target,
   });
   if (problems.length > 0) {
     console.error("EXTRACTION FAILED: the pinned data does not exhibit the required facts.\n");
@@ -1283,9 +1658,10 @@ async function main() {
     records: slice,
     extractedOn:
       typeof args["extracted-on"] === "string" ? args["extracted-on"] : new Date().toISOString().slice(0, 10),
+    target,
   });
 
-  const outPath = typeof args.out === "string" ? args.out : "src/data/game/rogue-gcd-semantics.json";
+  const outPath = typeof args.out === "string" ? args.out : target.defaultOut;
   mkdirSync(dirname(outPath), { recursive: true });
   writeFileSync(outPath, formatArtifactJson(artifact), "utf8");
 
@@ -1298,7 +1674,7 @@ async function main() {
   console.log(`  tokens        ${artifact.tokenBindings.length} (${HAND_REVIEWED_BINDING_METHOD})`);
   console.log(`  meta actions  ${artifact.metaActionLanes.length} (${HAND_REVIEWED_TRIGGER_GCD_METHOD})`);
   console.log("  required facts: VERIFIED");
-  for (const path of [SOURCES.rogueModule, SOURCES.playerModule, SOURCES.consumableModule]) {
+  for (const path of target.handReviewedPaths) {
     console.log(`  NOTE: ${path} was hashed, NOT parsed. Readings of it are hand-reviewed.`);
   }
 }

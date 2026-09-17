@@ -219,6 +219,9 @@ describe("no coaching vocabulary reaches the M5 output layer", () => {
     "src/specs/rogue/assassination/observed-comparison.ts",
     "src/specs/rogue/assassination/observed-analysis.ts",
     "src/specs/rogue/assassination/decision-coverage.ts",
+    // M10-C: the shared homes the two Rogue modules above now re-export.
+    "src/findings/observed-comparison.ts",
+    "src/simc/decision-coverage.ts",
   ];
 
   it("declares no correctness, optimality or severity vocabulary", () => {

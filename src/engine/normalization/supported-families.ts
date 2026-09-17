@@ -302,6 +302,7 @@ function decodeCombatantInfo(base: CombatEventBase, raw: Record<string, unknown>
   if (actorId === null || problems.length > 0) {
     return { ok: false, problems };
   }
+  const gear = normalizeGear(raw["gear"]);
   return {
     ok: true,
     event: {
@@ -310,7 +311,8 @@ function decodeCombatantInfo(base: CombatEventBase, raw: Record<string, unknown>
       snapshot: {
         actorId,
         specId: optionalInteger(raw, "specID"),
-        gear: normalizeGear(raw["gear"]),
+        gear: gear.pieces,
+        malformedGearRows: gear.malformedRows,
         // `talentTree`, never `talents`. See combatant-info.ts.
         talentTree: normalizeTalentTree(raw["talentTree"]),
       },

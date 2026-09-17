@@ -105,12 +105,16 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
   // Rogue state TO the engine, and the direction of that dependency never
   // reverses.
   const ADAPTER_PATH = "src/specs/rogue/assassination/first-gcd-adapter.ts";
+  // M10-C: the second specialization supplies its own adapter, in ITS tree,
+  // adapting Protection state TO the same engine. Still one adapter per
+  // specialization, still one direction.
+  const PALADIN_ADAPTER_PATH = "src/specs/paladin/protection/first-gcd-adapter.ts";
 
-  it("wires the engine into exactly one specialization module", () => {
+  it("wires the engine into exactly one adapter module per specialization tree", () => {
     const wiring = filesUnder("src/specs").filter((path) =>
       codeOf(path).includes("firstGcdSelectionAcrossRescans"),
     );
-    expect(wiring).toEqual([ADAPTER_PATH]);
+    expect(wiring.sort()).toEqual([PALADIN_ADAPTER_PATH, ADAPTER_PATH].sort());
   });
 
   it("keeps the dependency pointing one way", () => {
@@ -147,7 +151,9 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
     // Reading is legitimate — an adapter must inspect what it forwards, and
     // M5-D2's coverage classifier must inspect what it counts. But the set is
     // enumerated, so a new reader is a deliberate change rather than a drift.
-    const COVERAGE_PATH = "src/specs/rogue/assassination/decision-coverage.ts";
+    // M10-C: the classifier moved to shared SimC code so a second
+    // specialization can use the identical classification.
+    const COVERAGE_PATH = "src/simc/decision-coverage.ts";
     const reading = filesUnder("src").filter((path) => codeOf(path).includes("ROTATIONAL_GCD_SELECTED"));
     expect(reading.sort()).toEqual([ADAPTER_PATH, COVERAGE_PATH, ENGINE_PATH].sort());
   });

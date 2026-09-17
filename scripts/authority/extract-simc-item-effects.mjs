@@ -225,6 +225,175 @@ const ACTION_SEMANTICS_CHECKS = [
   },
 ];
 
+/**
+ * The Protection Paladin profile (M10-C correction 1).
+ *
+ * EVERY item the M10-B subject (A7R6kxPJ1hC8YQ4w fight 7, actor 7) equips —
+ * seventeen worn items, the shirt slot being empty — plus the one item the
+ * pinned Protection APL names by token. All of them, not just the ones with
+ * effects, because the claim `use_items` needs is a NEGATIVE one over the
+ * whole equipment: "no worn item other than X carries an on-use effect". That
+ * claim is only as good as the coverage of the list, so the list is the
+ * actor's complete gear and nothing is inferred about an item that is not
+ * pinned.
+ */
+const PALADIN_PROTECTION_ITEMS = [
+  {
+    itemId: 193_701,
+    displayNameEn: "Algeth'ar Puzzle Box",
+    simcToken: "algethar_puzzle_box",
+    inventoryType: INVENTORY_TYPE_TRINKET,
+    why: "default[1] use_item,name=algethar_puzzle_box; the subject does not equip it",
+  },
+  {
+    itemId: 271_465,
+    displayNameEn: "Warhelm of the Consecrated Flame",
+    simcToken: null,
+    inventoryType: 1,
+    why: "worn: head",
+  },
+  {
+    itemId: 273_781,
+    displayNameEn: "Strand of Warding Fangs",
+    simcToken: null,
+    inventoryType: 2,
+    why: "worn: neck",
+  },
+  {
+    itemId: 271_463,
+    displayNameEn: "Pauldrons of the Consecrated Flame",
+    simcToken: null,
+    inventoryType: 3,
+    why: "worn: shoulder",
+  },
+  {
+    itemId: 271_468,
+    displayNameEn: "Bulwark of the Consecrated Flame",
+    simcToken: null,
+    inventoryType: 5,
+    why: "worn: chest",
+  },
+  {
+    itemId: 159_418,
+    displayNameEn: "Girdle of Pestilent Purification",
+    simcToken: null,
+    inventoryType: 6,
+    why: "worn: waist",
+  },
+  {
+    itemId: 271_464,
+    displayNameEn: "Greaves of the Consecrated Flame",
+    simcToken: null,
+    inventoryType: 7,
+    why: "worn: legs",
+  },
+  {
+    itemId: 237_828,
+    displayNameEn: "Spellbreaker's March",
+    simcToken: null,
+    inventoryType: 8,
+    why: "worn: feet",
+  },
+  {
+    itemId: 251_133,
+    displayNameEn: "Overseer's Vambraces",
+    simcToken: null,
+    inventoryType: 9,
+    why: "worn: wrist",
+  },
+  {
+    itemId: 156_038,
+    displayNameEn: "Gauntlets of the Iron Furnace",
+    simcToken: null,
+    inventoryType: 10,
+    why: "worn: hands",
+  },
+  {
+    itemId: 272_150,
+    displayNameEn: "Ouroboric Signet",
+    simcToken: null,
+    inventoryType: 11,
+    why: "worn: finger1",
+  },
+  {
+    itemId: 273_792,
+    displayNameEn: "Band of the Amani Warlord",
+    simcToken: null,
+    inventoryType: 11,
+    why: "worn: finger2",
+  },
+  {
+    itemId: 270_175,
+    displayNameEn: "Voracious Heart of Ula'tek",
+    simcToken: null,
+    inventoryType: INVENTORY_TYPE_TRINKET,
+    why: "worn: trinket1 — the ONE worn item with an on-use effect, reached through default[2] use_items",
+  },
+  {
+    itemId: 270_173,
+    displayNameEn: "Zul'jin's Guillotine Technique",
+    simcToken: null,
+    inventoryType: INVENTORY_TYPE_TRINKET,
+    why: "worn: trinket2 (on-equip effect only)",
+  },
+  {
+    itemId: 193_763,
+    displayNameEn: "Fireproof Drape",
+    simcToken: null,
+    inventoryType: 16,
+    why: "worn: back",
+  },
+  {
+    itemId: 268_209,
+    displayNameEn: "Aman'muso, Warlord's Vengeance",
+    simcToken: null,
+    inventoryType: 21,
+    why: "worn: main hand (on-equip effect only)",
+  },
+  {
+    itemId: 237_831,
+    displayNameEn: "Spellbreaker's Rebuke",
+    simcToken: null,
+    inventoryType: 14,
+    why: "worn: off hand (shield)",
+  },
+  {
+    itemId: 205_286,
+    displayNameEn: "Loamm Niffen Tabard",
+    simcToken: null,
+    inventoryType: 19,
+    why: "worn: tabard",
+  },
+];
+
+/**
+ * The action-semantics checks that hold for ANY class: everything above except
+ * the Rogue-module cooldown review, which is a reading of `sc_rogue.cpp` and
+ * says nothing about a Paladin. A Paladin consumer therefore has NO
+ * modifier-absence claim for an item cooldown and must derive it as
+ * MODIFIERS_POSSIBLE (UNKNOWN) rather than borrow the Rogue finding.
+ */
+const CLASS_NEUTRAL_ACTION_SEMANTICS_CHECKS = ACTION_SEMANTICS_CHECKS.filter(
+  (check) => check.claim !== "NO_ROGUE_MODIFIER_APPLIES_TO_AN_ITEM_USE_COOLDOWN",
+);
+
+export const TARGETS = {
+  "rogue-assassination": {
+    datasetId: DATASET_ID,
+    requiredItems: REQUIRED_ITEMS,
+    actionSemanticsChecks: ACTION_SEMANTICS_CHECKS,
+    defaultOut: "src/data/game/rogue-item-effects.json",
+  },
+  "paladin-protection": {
+    datasetId: "SIMC_DBC_PALADIN_PROTECTION_ITEM_USE_EFFECTS",
+    requiredItems: PALADIN_PROTECTION_ITEMS,
+    actionSemanticsChecks: CLASS_NEUTRAL_ACTION_SEMANTICS_CHECKS,
+    defaultOut: "src/data/game/paladin-protection-item-effects.json",
+  },
+};
+
+const DEFAULT_TARGET = TARGETS["rogue-assassination"];
+
 function fail(message) {
   console.error(`EXTRACTION FAILED: ${message}`);
   process.exit(1);
@@ -580,7 +749,15 @@ export function classifyEffectWrites(text, driverSpellId, effectFieldIndices) {
 }
 
 /** Checks every required fact. An empty list is the only thing that licenses writing. */
-export function verifyRequiredFacts({ names, duplicates, inventoryTypes, effectsByItem, effectSpells }) {
+export function verifyRequiredFacts({
+  names,
+  duplicates,
+  inventoryTypes,
+  effectsByItem,
+  effectSpells,
+  target = DEFAULT_TARGET,
+}) {
+  const REQUIRED_ITEMS = target.requiredItems;
   const problems = [];
   if (duplicates.length > 0) {
     problems.push(`item ids appear more than once and are ambiguous: ${duplicates.join(", ")}`);
@@ -687,7 +864,9 @@ export function buildArtifact({
   effectsByItem,
   effectSpells,
   extractedOn,
+  target = DEFAULT_TARGET,
 }) {
+  const REQUIRED_ITEMS = target.requiredItems;
   const playerModuleSource = sources.find((source) => source.path === SOURCES.playerModule);
   if (playerModuleSource === undefined) {
     throw new Error(`cannot record action semantics without a measured hash of ${SOURCES.playerModule}`);
@@ -745,7 +924,7 @@ export function buildArtifact({
 
   return {
     artifactVersion: ARTIFACT_VERSION,
-    datasetId: DATASET_ID,
+    datasetId: target.datasetId,
     artifactRevision: `simc-${commitSha.slice(0, 8)}-${EXTRACTOR_VERSION}`,
     provenance: {
       repository: REPOSITORY,
@@ -780,7 +959,7 @@ export function buildArtifact({
       sourcePath: SOURCES.playerModule,
       sourceSha256: playerModuleSource.sha256,
       reviewedOn: extractedOn,
-      checks: ACTION_SEMANTICS_CHECKS,
+      checks: target.actionSemanticsChecks,
     },
     items,
   };
@@ -800,8 +979,12 @@ async function loadSource(args, key, path) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const outPath = typeof args.out === "string" ? args.out : null;
-  if (outPath === null) fail("--out is required");
+  const targetName = typeof args.target === "string" ? args.target : "rogue-assassination";
+  const target = TARGETS[targetName];
+  if (target === undefined)
+    fail(`unknown --target '${targetName}' (known: ${Object.keys(TARGETS).join(", ")})`);
+  const REQUIRED_ITEMS = target.requiredItems;
+  const outPath = typeof args.out === "string" ? args.out : target.defaultOut;
 
   const loaded = {};
   const sources = [];
@@ -857,7 +1040,14 @@ async function main() {
     });
   }
 
-  const problems = verifyRequiredFacts({ names, duplicates, inventoryTypes, effectsByItem, effectSpells });
+  const problems = verifyRequiredFacts({
+    names,
+    duplicates,
+    inventoryTypes,
+    effectsByItem,
+    effectSpells,
+    target,
+  });
   if (problems.length > 0) fail(`\n  - ${problems.join("\n  - ")}`);
 
   const artifact = buildArtifact({
@@ -869,7 +1059,9 @@ async function main() {
     inventoryTypeColumn,
     effectsByItem,
     effectSpells,
-    extractedOn: new Date().toISOString().slice(0, 10),
+    extractedOn:
+      typeof args["extracted-on"] === "string" ? args["extracted-on"] : new Date().toISOString().slice(0, 10),
+    target,
   });
 
   mkdirSync(dirname(outPath), { recursive: true });

@@ -173,6 +173,7 @@ describe("the observed profile is read from the log, and says what it cannot kno
       actorId: M5C3C1_ACTOR,
       specId: null,
       gear: [],
+      malformedGearRows: [],
       talentTree: [],
     });
     expect(slotOccupancy(unresolved, "trinket1").state).toBe("NOT_RESOLVED");

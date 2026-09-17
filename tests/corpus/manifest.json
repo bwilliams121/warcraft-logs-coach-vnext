@@ -25,6 +25,29 @@
       }
     },
     {
+      "artifactId": "synthetic.apl-priority-short-circuit",
+      "path": "artifacts/synthetic/apl-priority-short-circuit.json",
+      "encoding": "JSON",
+      "payloadKind": "JSON_VALUE",
+      "sha256": "31b3996b528c0821596b60b364297bf3d3b4310195128a4d3d5b6405f05e587f",
+      "byteLength": 1584,
+      "provenance": {
+        "kind": "SYNTHETIC",
+        "parentArtifactId": null,
+        "source": null,
+        "transformations": [],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Synthetic; there is no capture to retain coverage from."
+        },
+        "retainedFor": "A labelled SYNTHETIC SimulationCraft authority artifact for the shared decision engine: a `default` list whose first entry is gated on a buff, whose second is gated on a talent (`talent.opt`) and whose third is unconditional, plus an `unsupported` list whose first entry names an identifier the shared parser does not support. Loaded through the real loader; exercised by the real one-scan engine under bindings stated in each case.",
+        "limitations": [
+          "Hand-authored. The authority id names no class or specialization and is registered nowhere; it proves the engine's priority semantics, not any rotation.",
+          "Every premise (bindings, proven-usable tokens, entry list) is stated in the case parameters, not derived from any log."
+        ]
+      }
+    },
+    {
       "artifactId": "synthetic.graphql-event-page-null-data",
       "path": "artifacts/synthetic/graphql-event-page-null-data.json",
       "encoding": "JSON",
@@ -2470,6 +2493,51 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/analysis-service.test.ts"]
+    },
+    {
+      "caseId": "application-service.protection-paladin-registration-is-internal-only",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+      "purpose": "The validated production catalog carries the Protection Paladin registration for the INTERNAL lookup and not for the PUBLIC one, in either catalog order; the public identity table still does not resolve Paladin/Protection. Assassination resolves on both lookups and its identity resolves, exactly as before.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "paladin/protection",
+            "expected": {
+              "internalAnalyzerId": "paladin-protection-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        },
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "rogue/assassination",
+            "expected": {
+              "internalAnalyzerId": "rogue-assassination-observed-decisions",
+              "publicAnalyzerId": "rogue-assassination-observed-decisions",
+              "exposure": "PUBLIC",
+              "identityResolvesPublicly": true
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "An evaluator has to exist, be registered and be exercised BEFORE it is safe to expose. The registration is real (the cases below run it) and invisible to every public path (the two M10-B cases above still answer SPEC_NOT_SUPPORTED over this artifact, and the registry validates that the public set, the identity table and the partition agree)."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
     },
     {
       "caseId": "application-service.protection-paladin-subject-is-still-unsupported-on-its-own-evidence",
@@ -5389,6 +5457,128 @@
       ]
     },
     {
+      "caseId": "shared-decision-engine.proven-higher-priority-entry-selects-definitely",
+      "artifactId": "synthetic.apl-priority-short-circuit",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "contractUnderTest": "src/simc/nested-selection.ts resolveOneForegroundScan; src/simc/list-selection.ts evaluateCondition",
+      "purpose": "With buff.proc bound UP and high_priority proven usable, one foreground scan of `default` resolves DEFINITE to default[0] high_priority. The talent-gated and unconditional entries below it are unreachable and are not consulted.",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+          "params": {
+            "entryListName": "default",
+            "knownBuffs": [
+              {
+                "name": "proc",
+                "up": true
+              }
+            ],
+            "knownTalents": [],
+            "provenUsableTokens": ["high_priority"],
+            "expected": {
+              "listName": "default",
+              "priorityOrdinal": 0,
+              "actionToken": "high_priority"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A SimulationCraft list is an ordered priority list: the first entry proven to fire is the answer. DEFINITE requires both a TRUE gate and proven usability, which is why the case states the usable token explicitly rather than letting the engine assume readiness."
+      },
+      "authority": null,
+      "limitations": ["Synthetic authority; every premise is stated in the parameters."],
+      "relatedTests": [
+        "tests/unit/simc-nested-selection.test.ts",
+        "tests/contracts/m5c3c3b-engine-scope.test.ts",
+        "tests/contracts/m10c-cross-spec-isolation.test.ts"
+      ]
+    },
+    {
+      "caseId": "shared-decision-engine.undecided-higher-priority-entry-is-not-fallen-through",
+      "artifactId": "synthetic.apl-priority-short-circuit",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "contractUnderTest": "src/simc/nested-selection.ts resolveOneForegroundScan; src/simc/list-selection.ts evaluateCondition (boolean world enumeration)",
+      "purpose": "With buff.proc UNBOUND, talent.opt bound NOT taken, and both high_priority and filler proven usable, the scan is AMBIGUOUS between default[0] high_priority (possible) and default[2] filler (definite). The proven lower-priority filler is NOT promoted to the answer because an undecided entry stands above it; the eliminated talent-gated entry is absent from the candidates.",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY",
+          "params": {
+            "entryListName": "default",
+            "knownBuffs": [],
+            "knownTalents": [
+              {
+                "name": "opt",
+                "taken": false
+              }
+            ],
+            "provenUsableTokens": ["high_priority", "filler"],
+            "expectedCandidates": [
+              {
+                "listName": "default",
+                "priorityOrdinal": 0,
+                "actionToken": "high_priority",
+                "definite": false
+              },
+              {
+                "listName": "default",
+                "priorityOrdinal": 2,
+                "actionToken": "filler",
+                "definite": true
+              }
+            ]
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The priority short-circuit rule: uncertainty on a higher-priority line contaminates every lower-priority selection. An unbound buff is enumerated across both truth values, and the scan may only claim what holds in every world — which is that ONE of the two candidates fires, not which."
+      },
+      "authority": null,
+      "limitations": ["Synthetic authority; every premise is stated in the parameters."],
+      "relatedTests": [
+        "tests/unit/simc-nested-selection.test.ts",
+        "tests/contracts/m5c3c3b-engine-scope.test.ts",
+        "tests/contracts/m10c-cross-spec-isolation.test.ts"
+      ]
+    },
+    {
+      "caseId": "shared-decision-engine.unsupported-expression-refuses-at-the-entry",
+      "artifactId": "synthetic.apl-priority-short-circuit",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "contractUnderTest": "src/simc/expression/parse.ts (unsupported identifier); src/simc/nested-selection.ts UNSUPPORTED_AUTHORITY_EXPRESSION",
+      "purpose": "A scan of `unsupported` stops at unsupported[0] gated, whose condition names some.identifier.nobody.supports: the parser refuses the identifier, the scan is BLOCKED with UNSUPPORTED_AUTHORITY_EXPRESSION, the blocking entry's gate carries the refused fragment, and the unconditional filler below it is never selected.",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION",
+          "params": {
+            "entryListName": "unsupported",
+            "knownBuffs": [],
+            "knownTalents": [],
+            "provenUsableTokens": ["gated", "filler"],
+            "expectedBlockedAt": {
+              "listName": "unsupported",
+              "priorityOrdinal": 0,
+              "actionToken": "gated"
+            },
+            "expectedFragment": "some.identifier.nobody.supports"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "Unsupported SimulationCraft state fails closed. UNSUPPORTED never becomes false (which would fall through to filler) or true (which would select gated); the refusal carries the exact entry, and its gate the exact fragment, so the gap is nameable."
+      },
+      "authority": null,
+      "limitations": ["Synthetic authority; every premise is stated in the parameters."],
+      "relatedTests": [
+        "tests/unit/simc-nested-selection.test.ts",
+        "tests/contracts/m5c3c3b-engine-scope.test.ts",
+        "tests/contracts/m10c-cross-spec-isolation.test.ts"
+      ]
+    },
+    {
       "caseId": "spec-assassination.deathmark-stays-unknown-on-predictive-state",
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "owningLayer": "SPEC_ASSASSINATION",
@@ -5936,6 +6126,907 @@
       "relatedTests": [
         "tests/regression/m5c2-vanish-stealth-and-ambush-gate.test.ts",
         "tests/unit/rogue-talents.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.assassination-is-refused-at-the-spec-gate",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts (spec gate)",
+      "purpose": "Asked about rogue/assassination over this artifact, the Protection facade refuses with SPEC_NOT_SUPPORTED naming that specialization, before any Protection rule, authority load or profile resolution runs.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.SPEC_GATE",
+          "params": {
+            "actorId": 7,
+            "specId": "rogue/assassination"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The mirror of the Assassination spec gate: a facade owns one specialization and answers for no other. Ownership is also enforced at runtime by the registration and the registry, which refuse a result naming another spec or citing a foreign authority."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m10a-analyzer-result-ownership.test.ts",
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.build-resolves-from-the-observed-tree-not-from-casts",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/data/game/paladin-protection-talents.ts; src/data/game/talent-selection.ts",
+      "purpose": "The subject's build, from combatantinfo alone: Righteous Protector SELECTED, Sentinel SELECTED, Avenging Wrath SELECTED, Blessed Hammer SELECTED (so Hammer of the Righteous is NOT_SELECTED at the shared choice node), and the Lightsmith hero tree RESOLVED by entry membership.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "talents": {
+                "righteous_protector": "SELECTED",
+                "sentinel": "SELECTED",
+                "avenging_wrath": "SELECTED",
+                "blessed_hammer": "SELECTED"
+              },
+              "heroTree": {
+                "state": "RESOLVED",
+                "simcName": "lightsmith"
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "Talent selection is decided by trait ENTRY number against the pinned table, hero tree by sub-tree membership of observed entries. The subject's Sentinel cast at 2,026,241 corroborates nothing here and is not consulted: a cast is not a talent fact."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.exact-holy-power-is-recorded-on-costed-spender-casts",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts holyPowerOn; src/engine/resources/resource-state.ts observationOnEvent",
+      "purpose": "The evaluator records the Holy Power the wire carried on each costed Shield of the Righteous cast — 4, 3, 3, 3, 3 of 5 at cost 3 — as EXACT_PRE_COST observations attached to the excluded NON_GCD casts.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2009098,
+              "abilityGameId": 53600
+            },
+            "expected": {
+              "state": "EXACT_PRE_COST",
+              "amount": 4,
+              "max": 5,
+              "cost": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2010926,
+              "abilityGameId": 53600
+            },
+            "expected": {
+              "state": "EXACT_PRE_COST",
+              "amount": 3,
+              "max": 5,
+              "cost": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2013247,
+              "abilityGameId": 53600
+            },
+            "expected": {
+              "state": "EXACT_PRE_COST",
+              "amount": 3,
+              "max": 5,
+              "cost": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2016930,
+              "abilityGameId": 53600
+            },
+            "expected": {
+              "state": "EXACT_PRE_COST",
+              "amount": 3,
+              "max": 5,
+              "cost": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2019725,
+              "abilityGameId": 53600
+            },
+            "expected": {
+              "state": "EXACT_PRE_COST",
+              "amount": 3,
+              "max": 5,
+              "cost": 3
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "Exact Holy Power exists exactly where the wire observed it. The evaluator reads it through M4's observation accessor and reports it as what it is — an amount before the cast's own cost — with no replay, no regeneration and no post-cost arithmetic. It is recorded as evidence about the fight, not used to judge the spender: no resource-spending authority is pinned."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.gap-derivation-evaluates-fewer-decisions-and-binds-no-previous-press",
+      "artifactId": "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts; resolver.ts previousGcdCastAt",
+      "purpose": "With the first 5.4 s removed, the evaluator finds 16 eligible decisions (all UNKNOWN) over 20 exclusions, the first Blessed Hammer at 2,010,338 is compared and refuses exactly as on the parent, and prev_gcd.1.divine_toll is UNBOUND there because no GCD cast precedes it in the retained evidence.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "eligibleDecisions": 16,
+              "match": 0,
+              "rejected": 0,
+              "unknown": 16,
+              "exclusions": {
+                "MELEE_SWING": 9,
+                "NON_GCD_ACTION": 9,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 1,
+                "NO_AUTHORITY_TOKEN_BINDING": 1
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2010338,
+              "abilityGameId": 204019
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2010338,
+              "abilityGameId": 204019
+            },
+            "atom": "prev_gcd.1.divine_toll",
+            "expected": {
+              "kind": "UNBOUND"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "Truncated evidence shrinks the population and withholds the previous-press claim; it does not change what a retained decision resolves to, and it never produces a value for a press that was not retained. The removed Shield of the Righteous at 2,009,098 is gone from the payload, not zero."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.internal-analysis-cannot-project-publicly",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/findings/spec-id.ts requirePublicSpecId; InternalSpecExposureError",
+      "purpose": "The analyzed Protection result names paladin/protection, which the public partition does not contain, so the narrowing every public projector uses throws InternalSpecExposureError. There is no path from this payload to a public document, and no null-specId substitute.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
+          "params": {
+            "actorId": 7
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "specId null on a public document already means 'no publicly supported analyzer'. An internal-only analysis reaching a projector is an orchestration defect and fails closed as an error, never as a quieter document — and the two M10-B public cases prove the public paths never produce this payload in the first place."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-spec-partition.test.ts",
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.missing-holy-power-is-no-observation-never-zero",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts holyPowerOn",
+      "purpose": "The two completed Shield of the Righteous casts that carry no Holy Power entry (2,013,772 and 2,025,524), and every uncosted press such as the Judgment at 2,005,436 and the Blessed Hammer at 2,006,478, are recorded as NO_OBSERVATION. Their occurrence proves they fired; it proves no amount.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2013772,
+              "abilityGameId": 53600
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2025524,
+              "abilityGameId": 53600
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
+          "params": {
+            "actorId": 7,
+            "cast": {
+              "reportTimeMs": 2006478,
+              "abilityGameId": 204019
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "A successful spender cast with no attached entry is not evidence of a free proc and not evidence of an exact pre-cast value; the evaluator states NO_OBSERVATION and infers nothing. A future evaluator that needs the amount must treat these as UNKNOWN decisions."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.offensive-authority-governs-no-defensive-domain",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/domains.ts; authority-bindings.ts; src/findings/authority-domain.ts",
+      "purpose": "The payload represents all six domains separately: OFFENSIVE_ROTATION is AUTHORITY_AVAILABLE under SIMC_APL_PALADIN_PROTECTION; RESOURCE_SPENDING, ACTIVE_MITIGATION, DEFENSIVE_COOLDOWN and SELF_HEALING resolve NO_PINNED_AUTHORITY_FOR_DOMAIN with the offensive authority explicitly not governing them; INTERRUPT resolves the same AND states the evidence family UNVERIFIED, separately.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 7,
+            "domain": "OFFENSIVE_ROTATION",
+            "expected": {
+              "resolution": "AUTHORITY_AVAILABLE",
+              "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+              "offensiveAuthorityGoverns": null,
+              "evidenceFamily": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 7,
+            "domain": "RESOURCE_SPENDING",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 7,
+            "domain": "ACTIVE_MITIGATION",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 7,
+            "domain": "DEFENSIVE_COOLDOWN",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 7,
+            "domain": "SELF_HEALING",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 7,
+            "domain": "INTERRUPT",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": "UNVERIFIED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY"],
+        "text": "NO_PINNED_AUTHORITY_FOR_DOMAIN is a missing standard, not missing evidence; UNVERIFIED is missing evidence, not a missing standard. Both are read from the registration's own authority access and from completeness, never hard-coded, and neither is ever rendered as a defensive verdict or as 'no interrupts were used'. A SimulationCraft binding for any defensive domain is refused by PROVIDER_DOMAIN_COMPATIBILITY before it could reach here."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10a-authority-domains.test.ts",
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.opener-yields-twenty-one-eligible-decisions-all-unknown",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts analyzeObservedProtectionPaladinDecisions",
+      "purpose": "Over the subject's 45 completed casts the evaluator finds 21 eligible GCD decisions and excludes 24 by name: 11 melee swings (Warcraft Logs' melee flag), 11 NON_GCD presses (7 Shield of the Righteous, Ardent Defender, Hand of Reckoning, Divine Steed, Sentinel — all _gcd 0 in the pinned dataset), 1 ability with no pinned lane (the on-use trinket effect 1297761), 1 GCD ability with no authority token (Blessing of Spellwarding). Every eligible decision is UNKNOWN; none is MATCH and none is REJECTED.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "eligibleDecisions": 21,
+              "match": 0,
+              "rejected": 0,
+              "unknown": 21,
+              "exclusions": {
+                "MELEE_SWING": 11,
+                "NON_GCD_ACTION": 11,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 1,
+                "NO_AUTHORITY_TOKEN_BINDING": 1
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The denominator is the observed GCD decisions the authority could be asked about and nothing else; every other cast is counted under the reason it was set aside, never dropped. Zero resolved decisions is the truthful measure of M10-C's coverage on this pull, and it is disclosed rather than flattered: Protection's primary spender is off the GCD, and the first unmodelled entry of the pinned list bounds every scan."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [
+        "Shield of the Righteous casts are NON_GCD and therefore not GCD decisions to the shared first-GCD query; their Holy Power is recorded as evidence, not judged.",
+        "No decision resolves on this evidence: every NON_GCD entry above the first GCD candidate transitions (use_item NOT_APPLICABLE; use_items, potion, avenging_wrath, fireblood and shield_of_the_righteous by reviewed contract), and the scan then reaches GCD candidates whose readiness the 22 s window cannot establish — Divine Toll (60 s cooldown, no cast in the window, pre-pull state outside the log) in the branch where wings fired, Holy Armaments (Lightsmith alternation state unobservable), Hammer of Wrath, Avenger's Shield and Judgment's recharge — so the explored worlds select different first GCD entries."
+      ],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.pinned-authority-loads-with-exact-provenance",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/pinned-authority.ts; authority-bindings.ts; registration.ts",
+      "purpose": "Run through its registration, the Protection evaluator analyzes actor 7 under SIMC_APL_PALADIN_PROTECTION at simc-33622e9d-1, citing commit 33622e9d… and the apl_paladin.cpp source digest ed3fb1ac… — read off the loaded artifact, not typed here.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+              "artifactRevision": "simc-33622e9d-1",
+              "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+              "sourcePath": "engine/class_modules/apl/apl_paladin.cpp",
+              "sourceSha256": "ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "OWNED_CONTRACT"],
+        "text": "The registration binds this one authority to OFFENSIVE_ROTATION and delivers it through the M10-A authority-access boundary; the registry re-checks id, revision, commit and specialization against what load() yields. A verdict that cannot say which bytes it rested on is not one this corpus records."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.real-decisions-are-unknown-because-the-worlds-diverge-not-rejected",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/first-gcd-adapter.ts; src/specs/paladin/protection/action-profile.ts; src/data/game/paladin-protection-transition-authority.ts; src/simc/first-gcd-selection.ts; src/findings/observed-comparison.ts",
+      "purpose": "The first Judgment (2,005,436), the first Blessed Hammer (2,006,478), the first Avenger's Shield (2,013,520) and the first Consecration (2,015,953) are each compared and each stay UNKNOWN: the scan passes default[1] use_item (NOT_APPLICABLE), transitions default[2] use_items (the set closed under the dated Warcraft Logs gear contract; the Ula'tek use is deterministic and writes only a stat buff at the instant), default[3] potion, default[4] avenging_wrath (wings overlaid in that branch), default[5] fireblood and default[8] shield_of_the_righteous (cost 3 from the pinned power table; every atom it may change is unbound), and then explores each GCD candidate with unknown readiness as the one that fires. Those branches select different entries — default[6] divine_toll where wings fired, default[9] holy_armaments otherwise — so the engine reports DIVERGENT_GCD_OUTCOMES, carried under the DIVERGENT_WORLDS class.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2006478,
+              "abilityGameId": 204019
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2013520,
+              "abilityGameId": 31935
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2015953,
+              "abilityGameId": 26573
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A GCD entry whose readiness the evidence cannot establish is neither assumed ready nor assumed on cooldown: the world where it fires and the world where it does not are both explored, and the decision resolves only if they agree. Here they do not, and the disagreement is reported at its earliest entry. No observed press is REJECTED, because every entry naming these tokens includes an unconditional line the authority could always select; none is MATCH, because a higher-priority candidate might have fired."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.resolver-binds-the-build-facts-the-real-tree-proves",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/resolver.ts resolveProtectionAtoms; vocabulary.ts; src/data/game/paladin-protection-talents.json",
+      "purpose": "At the first Judgment, the Protection resolver binds talent.righteous_protector.enabled TRUE (entry 102440 at node 81477), hero_tree.lightsmith TRUE (fourteen observed entries belong to pinned sub-tree 49), apex.3 TRUE (entry 137020, the third tiered trait in table order), the armament constants sacred_weapon = 1 and holy_bulwark = 0, and states next_armament and gcd as UNKNOWN_NUMBER / STATE_NOT_MODELLED. consecration.up is left UNBOUND, and prev_gcd.1.divine_toll is UNBOUND at the first press because no GCD cast precedes it in the evidence; at the Blessed Hammer that follows it is FALSE, the previous GCD press being that Judgment.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "talent.righteous_protector.enabled",
+            "expected": {
+              "kind": "TRUTH",
+              "value": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "hero_tree.lightsmith",
+            "expected": {
+              "kind": "TRUTH",
+              "value": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "apex.3",
+            "expected": {
+              "kind": "TRUTH",
+              "value": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "sacred_weapon",
+            "expected": {
+              "kind": "MAGNITUDE",
+              "state": "KNOWN_NUMBER",
+              "value": 1,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "holy_bulwark",
+            "expected": {
+              "kind": "MAGNITUDE",
+              "state": "KNOWN_NUMBER",
+              "value": 0,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "next_armament",
+            "expected": {
+              "kind": "MAGNITUDE",
+              "state": "UNKNOWN_NUMBER",
+              "value": null,
+              "reason": "STATE_NOT_MODELLED"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "gcd",
+            "expected": {
+              "kind": "MAGNITUDE",
+              "state": "UNKNOWN_NUMBER",
+              "value": null,
+              "reason": "STATE_NOT_MODELLED"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "consecration.up",
+            "expected": {
+              "kind": "UNBOUND"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atom": "prev_gcd.1.divine_toll",
+            "expected": {
+              "kind": "UNBOUND"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2006478,
+              "abilityGameId": 204019
+            },
+            "atom": "prev_gcd.1.divine_toll",
+            "expected": {
+              "kind": "TRUTH",
+              "value": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "Each binding is a reading of the pinned source (player.cpp for talent.x.enabled, hero_tree and apex; sc_paladin.cpp for next_armament and the armament constants; action.cpp for prev_gcd) applied to a fact the evidence PROVES. What the evidence cannot prove — whether the tank stands in Consecration, the Lightsmith alternation state, a GCD length — is left unbound or stated unmodelled, never defaulted. The previous-GCD walk steps over the Hand of Reckoning (NON_GCD) and the melee swings, and claims a press only under COMPLETE cast coverage between it and the decision."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.use-items-sub-action-set-closes-under-the-dated-gear-contract",
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/engine/normalization/combatant-info.ts (WCL_COMBATANT_INFO_GEAR_UI_SEMANTICS_2026_09_17); src/specs/paladin/protection/action-profile.ts wornSubActionSet; src/data/game/paladin-protection-item-effects.ts; src/data/game/paladin-protection-enchant-effects.ts",
+      "purpose": "Against the subject's seventeen worn items under the dated Warcraft Logs gear contract: every omitted permanentEnchant, temporaryEnchant and gems key normalises to KNOWN_NONE (38 of them), every present enchant and gem is pinned as not use-producing, and exactly one pinned item-sourced on-use effect remains — Voracious Heart of Ula'tek (270175). No slot is open and the equivalence proof had nothing to close. Had any identity been present-but-null, the M10-C2 census and the M10-C3 equivalence proof would have kept the slot open with its exact blocking candidates (pinned by the unit tests over a null-identity copy of this gear).",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "onUseItemIds": [270175],
+              "open": [],
+              "openSlotIndices": [],
+              "provenIrrelevant": 0,
+              "divineInspiration": "SELECTED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "An omitted gear key means 'none' for exactly one reason: Warcraft Logs stated in writing on 2026-09-17 that omission is how its own UI reads these fields, with no further guarantee. That reading lives in one adapter under one revision identifier; a present-but-null or malformed value is still UNKNOWN everywhere, and payload drift is localised to that adapter."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c-protection-evaluator.test.ts",
+        "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts",
+        "tests/unit/m10c-protection-meta-actions.test.ts"
       ]
     },
     {

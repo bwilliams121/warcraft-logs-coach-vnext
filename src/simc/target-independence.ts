@@ -121,7 +121,10 @@ export function proveTargetIndependentFalsehood(
 ): TargetIndependentElimination {
   if (action.conditionRaw === null) return notProven("NO_CONDITION");
 
-  const parsed = parseSimcExpression(action.conditionRaw);
+  // The SAME vocabulary `evaluateCondition` parses with, read from the same
+  // bindings, so an elimination proof and the line's own evaluation can never
+  // disagree about which identifiers exist.
+  const parsed = parseSimcExpression(action.conditionRaw, bindings.specAtoms?.vocabulary);
   if (!parsed.ok) return notProven("CONDITION_UNSUPPORTED");
 
   const conjuncts = topLevelConjuncts(parsed.ast);

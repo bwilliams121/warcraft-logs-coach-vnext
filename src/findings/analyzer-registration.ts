@@ -122,7 +122,21 @@ export interface AnalyzerRegistration {
 // ---------------------------------------------------------------------------
 
 export type OwnershipDefect =
-  "INPUT_NAMES_ANOTHER_SPEC" | "RESULT_NAMES_ANOTHER_SPEC" | "ANALYZED_WITHOUT_SPEC_ID";
+  | "INPUT_NAMES_ANOTHER_SPEC"
+  | "RESULT_NAMES_ANOTHER_SPEC"
+  | "ANALYZED_WITHOUT_SPEC_ID"
+  /**
+   * An ANALYZED result names this registration's spec but cites an authority
+   * this registration does not bind (M10-C).
+   *
+   * The forgery the id check alone cannot catch once TWO registrations exist:
+   * another specialization's analysis relabelled with this spec id carries a
+   * matching `specId` and a shape-compatible payload, and would flow into this
+   * registration's view adapter unnoticed. The authority metadata every
+   * analyzed envelope carries is what the relabelling cannot fake — it names
+   * the artifact the decisions were actually evaluated against.
+   */
+  | "RESULT_CITES_FOREIGN_AUTHORITY";
 
 /**
  * Raised when an analyzer is asked about, or answers about, a specialization
@@ -171,6 +185,24 @@ export function checkAnalysisOwnership(
       defect: "RESULT_NAMES_ANOTHER_SPEC",
       detail: `the result names '${String(specId)}' but the registration owns '${registration.specId}'`,
     };
+  }
+  if (record.status === "ANALYZED") {
+    // An analyzed result cites the authority it was evaluated against. It must
+    // be one this registration binds; a registration binding nothing (an
+    // evaluator with no pinned authority) could not have produced an ANALYZED
+    // result citing one at all.
+    const cited = (record as { readonly authority?: { readonly authorityId?: unknown } }).authority
+      ?.authorityId;
+    const bound = registration.authorityBindings.map((binding) => binding.authorityId);
+    if (typeof cited !== "string" || !bound.includes(cited)) {
+      return {
+        ok: false,
+        defect: "RESULT_CITES_FOREIGN_AUTHORITY",
+        detail:
+          `the result cites authority '${String(cited)}' but the registration binds ` +
+          `[${bound.join(", ")}]`,
+      };
+    }
   }
   return { ok: true };
 }

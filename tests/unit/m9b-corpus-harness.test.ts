@@ -47,10 +47,19 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       "WCL_TRANSPORT",
       "NORMALIZATION",
       "COMBAT_STATE",
+      "SHARED_DECISION_ENGINE",
       "SPEC_ASSASSINATION",
+      "SPEC_PROTECTION_PALADIN",
       "APPLICATION_SERVICE",
     ]);
   });
+
+  // A specialization layer re-runs its real evaluator for every case — the
+  // Protection layer runs twelve analyses over the opener — and under a fully
+  // loaded runner that exceeds the default 5 s. The work is the point of the
+  // test, so the timeout is raised for this block only (the same reading as
+  // the M7-F orchestration test).
+  const LAYER_TIMEOUT_MS = 20_000;
 
   it.each(NODE_LAYERS)(
     "%s passes every assertion of every case, with nothing left unexecuted",
@@ -63,6 +72,7 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       expect(result.complete).toBe(true);
       expect(result.runtime).toBe("NODE");
     },
+    LAYER_TIMEOUT_MS,
   );
 
   it("declares nothing anywhere in the corpus", async () => {

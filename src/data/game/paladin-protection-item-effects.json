@@ -1,0 +1,415 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_PALADIN_PROTECTION_ITEM_USE_EFFECTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/item_data.inc",
+        "sha256": "223062c9cce5aaa70b45cc230c9f329ffcceb9ca0bb98a1dd6e42e29dcfa96d6",
+        "byteLength": 26406817
+      },
+      {
+        "path": "engine/dbc/generated/item_effect.inc",
+        "sha256": "d263146e93c6e05dc158a6fd91f272ecbe070e835d8dbfc73ff75e48552390c9",
+        "byteLength": 1033644
+      },
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "itemDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "triggerTypeSource": "engine/dbc/data_enums.hh item_spell_trigger_type",
+    "inventoryTypeColumnIndex": 8,
+    "inventoryTypeIdentification": "identified as the ONE item_data.inc column (index 8, counting from the first field after the item id) agreeing with all 16 pinned inventory-type anchors across 14 distinct values. Not a hard-coded offset.",
+    "inventoryTypeAnchors": [
+      {
+        "itemId": 271510,
+        "inventoryType": 1,
+        "slot": "head"
+      },
+      {
+        "itemId": 251173,
+        "inventoryType": 2,
+        "slot": "neck"
+      },
+      {
+        "itemId": 271508,
+        "inventoryType": 3,
+        "slot": "shoulder"
+      },
+      {
+        "itemId": 42360,
+        "inventoryType": 4,
+        "slot": "shirt"
+      },
+      {
+        "itemId": 244570,
+        "inventoryType": 5,
+        "slot": "chest"
+      },
+      {
+        "itemId": 159301,
+        "inventoryType": 6,
+        "slot": "waist"
+      },
+      {
+        "itemId": 271509,
+        "inventoryType": 7,
+        "slot": "legs"
+      },
+      {
+        "itemId": 251153,
+        "inventoryType": 8,
+        "slot": "feet"
+      },
+      {
+        "itemId": 244576,
+        "inventoryType": 9,
+        "slot": "wrist"
+      },
+      {
+        "itemId": 271511,
+        "inventoryType": 10,
+        "slot": "hands"
+      },
+      {
+        "itemId": 272149,
+        "inventoryType": 11,
+        "slot": "finger1"
+      },
+      {
+        "itemId": 251136,
+        "inventoryType": 11,
+        "slot": "finger2"
+      },
+      {
+        "itemId": 270173,
+        "inventoryType": 12,
+        "slot": "trinket1"
+      },
+      {
+        "itemId": 273796,
+        "inventoryType": 12,
+        "slot": "trinket2"
+      },
+      {
+        "itemId": 272230,
+        "inventoryType": 16,
+        "slot": "back"
+      },
+      {
+        "itemId": 233290,
+        "inventoryType": 19,
+        "slot": "tabard"
+      }
+    ],
+    "cooldownFieldUnits": "MILLISECONDS",
+    "extractedOn": "2026-09-16",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned artifacts: CombatFight exposes no client-build key, so a gate against one would always pass while appearing rigorous."
+  },
+  "actionSemantics": {
+    "method": "HAND_REVIEWED_CPP_ACTION_SEMANTICS",
+    "sourcePath": "engine/player/player.cpp",
+    "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+    "reviewedOn": "2026-09-16",
+    "checks": [
+      {
+        "claim": "NAMED_ITEM_NOT_EQUIPPED_IS_BACKGROUND",
+        "search": "use_item_t constructor, engine/player/player.cpp",
+        "finding": "`item = player->find_item_by_name( item_name ); if ( !item ) { background = true; return; }` (player.cpp:9874-9884). A named item the actor does not equip yields a background action, and `select_action` skips background actions before any readiness or condition check (player.cpp:14229-14230)."
+      },
+      {
+        "claim": "SLOT_WITHOUT_ON_USE_EFFECT_IS_BACKGROUND",
+        "search": "use_item_t::init and use_items_t::init, engine/player/player.cpp",
+        "finding": "`use_item_t::init` looks up `special_effect( SPECIAL_EFFECT_SOURCE_NONE, SPECIAL_EFFECT_USE )` and, with neither buff nor action created, sets `background = true` and erases the entry from the foreground action list (player.cpp:10024-10029). `use_items_t::init` sets `background = true` when no sub-actions were created at all (player.cpp:10285-10290)."
+      },
+      {
+        "claim": "USE_ITEMS_PARENT_IS_THE_FOREGROUND_ENTRY",
+        "search": "use_items_t::ready and create_use_subactions, engine/player/player.cpp",
+        "finding": "`use_items_t` is the object in the APL's foreground action list; its generated `use_item` sub-actions are internal. `ready()` returns true only when at least one sub-action is ready (player.cpp:10295-10312). Authority identity therefore remains the `use_items` entry."
+      },
+      {
+        "claim": "INDIVIDUAL_COOLDOWN_COMES_FROM_THE_EFFECT_DRIVER_SPELL",
+        "search": "special_effect_t::cooldown, engine/item/special_effect.cpp:745-765",
+        "finding": "With no explicit override and an item-effect row whose `cooldown_duration` is -1, the lookup falls through to `driver()->cooldown()` — the effect spell's own `_cooldown`."
+      },
+      {
+        "claim": "READY_CHECKS_INDIVIDUAL_AND_GROUP_COOLDOWNS_DIFFERENTLY",
+        "search": "use_item_t::ready, engine/player/player.cpp",
+        "finding": "The shared group is checked with a strict `cooldown_group->remains() > 0`, while the item's own cooldown goes through `action_t::ready()` and therefore `cooldown_t::is_ready()`, which allows queueing within the player's cooldown tolerance. The two rules are NOT the same and must not share a bridge."
+      }
+    ]
+  },
+  "items": [
+    {
+      "itemId": 193701,
+      "displayNameEn": "Algeth'ar Puzzle Box",
+      "simcToken": "algethar_puzzle_box",
+      "inventoryType": 12,
+      "why": "default[1] use_item,name=algethar_puzzle_box; the subject does not equip it",
+      "effects": [
+        {
+          "effectId": 170101,
+          "spellId": 383781,
+          "effectIndex": 0,
+          "triggerType": 0,
+          "triggerName": "ON_USE",
+          "cooldownDurationMs": -1,
+          "cooldownGroupDurationMs": -1
+        }
+      ],
+      "onUseEffect": {
+        "effectSpellId": 383781,
+        "displayNameEn": "Algeth'ar Puzzle",
+        "baseCooldownMs": 120000,
+        "categoryCooldownMs": 20000,
+        "baseGcdMs": 1000,
+        "writeClassification": "PLAYER_STAT_BUFF_ONLY",
+        "effectShape": [
+          {
+            "type": 6,
+            "subtype": 189
+          }
+        ]
+      }
+    },
+    {
+      "itemId": 271465,
+      "displayNameEn": "Warhelm of the Consecrated Flame",
+      "simcToken": null,
+      "inventoryType": 1,
+      "why": "worn: head",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 273781,
+      "displayNameEn": "Strand of Warding Fangs",
+      "simcToken": null,
+      "inventoryType": 2,
+      "why": "worn: neck",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 271463,
+      "displayNameEn": "Pauldrons of the Consecrated Flame",
+      "simcToken": null,
+      "inventoryType": 3,
+      "why": "worn: shoulder",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 271468,
+      "displayNameEn": "Bulwark of the Consecrated Flame",
+      "simcToken": null,
+      "inventoryType": 5,
+      "why": "worn: chest",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 159418,
+      "displayNameEn": "Girdle of Pestilent Purification",
+      "simcToken": null,
+      "inventoryType": 6,
+      "why": "worn: waist",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 271464,
+      "displayNameEn": "Greaves of the Consecrated Flame",
+      "simcToken": null,
+      "inventoryType": 7,
+      "why": "worn: legs",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 237828,
+      "displayNameEn": "Spellbreaker's March",
+      "simcToken": null,
+      "inventoryType": 8,
+      "why": "worn: feet",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 251133,
+      "displayNameEn": "Overseer's Vambraces",
+      "simcToken": null,
+      "inventoryType": 9,
+      "why": "worn: wrist",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 156038,
+      "displayNameEn": "Gauntlets of the Iron Furnace",
+      "simcToken": null,
+      "inventoryType": 10,
+      "why": "worn: hands",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 272150,
+      "displayNameEn": "Ouroboric Signet",
+      "simcToken": null,
+      "inventoryType": 11,
+      "why": "worn: finger1",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 273792,
+      "displayNameEn": "Band of the Amani Warlord",
+      "simcToken": null,
+      "inventoryType": 11,
+      "why": "worn: finger2",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 270175,
+      "displayNameEn": "Voracious Heart of Ula'tek",
+      "simcToken": null,
+      "inventoryType": 12,
+      "why": "worn: trinket1 — the ONE worn item with an on-use effect, reached through default[2] use_items",
+      "effects": [
+        {
+          "effectId": 231450,
+          "spellId": 1297760,
+          "effectIndex": 0,
+          "triggerType": 1,
+          "triggerName": "OTHER",
+          "cooldownDurationMs": -1,
+          "cooldownGroupDurationMs": -1
+        },
+        {
+          "effectId": 234585,
+          "spellId": 1297761,
+          "effectIndex": 1,
+          "triggerType": 0,
+          "triggerName": "ON_USE",
+          "cooldownDurationMs": -1,
+          "cooldownGroupDurationMs": -1
+        }
+      ],
+      "onUseEffect": {
+        "effectSpellId": 1297761,
+        "displayNameEn": "Voracious Heart of Ula'tek",
+        "baseCooldownMs": 90000,
+        "categoryCooldownMs": 20000,
+        "baseGcdMs": 0,
+        "writeClassification": "OTHER",
+        "effectShape": [
+          {
+            "type": 6,
+            "subtype": 29
+          },
+          {
+            "type": 6,
+            "subtype": 29
+          },
+          {
+            "type": 3,
+            "subtype": 0
+          }
+        ]
+      }
+    },
+    {
+      "itemId": 270173,
+      "displayNameEn": "Zul'jin's Guillotine Technique",
+      "simcToken": null,
+      "inventoryType": 12,
+      "why": "worn: trinket2 (on-equip effect only)",
+      "effects": [
+        {
+          "effectId": 234583,
+          "spellId": 1291728,
+          "effectIndex": 0,
+          "triggerType": 1,
+          "triggerName": "OTHER",
+          "cooldownDurationMs": -1,
+          "cooldownGroupDurationMs": -1
+        }
+      ],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 193763,
+      "displayNameEn": "Fireproof Drape",
+      "simcToken": null,
+      "inventoryType": 16,
+      "why": "worn: back",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 268209,
+      "displayNameEn": "Aman'muso, Warlord's Vengeance",
+      "simcToken": null,
+      "inventoryType": 21,
+      "why": "worn: main hand (on-equip effect only)",
+      "effects": [
+        {
+          "effectId": 232799,
+          "spellId": 1291718,
+          "effectIndex": 0,
+          "triggerType": 1,
+          "triggerName": "OTHER",
+          "cooldownDurationMs": -1,
+          "cooldownGroupDurationMs": -1
+        }
+      ],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 237831,
+      "displayNameEn": "Spellbreaker's Rebuke",
+      "simcToken": null,
+      "inventoryType": 14,
+      "why": "worn: off hand (shield)",
+      "effects": [],
+      "onUseEffect": null
+    },
+    {
+      "itemId": 205286,
+      "displayNameEn": "Loamm Niffen Tabard",
+      "simcToken": null,
+      "inventoryType": 19,
+      "why": "worn: tabard",
+      "effects": [],
+      "onUseEffect": null
+    }
+  ]
+}

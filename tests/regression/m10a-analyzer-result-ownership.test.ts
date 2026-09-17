@@ -32,6 +32,8 @@ import {
 import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
 import { ASSASSINATION_REGISTRATION } from "../../src/specs/rogue/assassination/registration.js";
+import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protection/registration.js";
+import { analyzeObservedProtectionPaladinDecisions } from "../../src/specs/paladin/protection/observed-analysis.js";
 import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
 import {
   ALLOWING_LIMITER,
@@ -50,6 +52,7 @@ import {
 } from "../support/raid-night-orchestration-fixture.js";
 
 const D2 = "wcl-assassination-d2-decision-corpus";
+const PROT_OPENER = "wcl-protection-paladin-a7r6-opener";
 const HOST = "warcraft-logs-coach-vnext.brandon-williams-323.workers.dev";
 const MODERN_META = {
   "io.modelcontextprotocol/protocolVersion": "2026-07-28",
@@ -217,30 +220,54 @@ describe("a mismatched result cannot reach observedDecisionViewOf", () => {
   it("an analysis owned by no registration in the catalog throws before any adapter runs", () => {
     const real = realAssassinationAnalysis();
     if (real.status !== "ANALYZED") throw new Error("expected ANALYZED");
-    const foreign = { ...real, specId: "paladin/protection" as const };
+    // No registration carries this id. (Since M10-C `paladin/protection` DOES,
+    // so the unregistered case needs an id outside the build's vocabulary.)
+    const foreign = { ...real, specId: "warrior/protection" as unknown as "rogue/assassination" };
     expect(() => observedDecisionViewOf(PRODUCTION_CATALOG, foreign)).toThrow(AnalyzerCatalogIntegrityError);
   });
 
+  it("a Rogue analysis relabelled with the REGISTERED Paladin id is refused by ownership, not adapted (M10-C)", () => {
+    // The forgery the id check alone cannot catch once two registrations
+    // exist: the relabelled result names a real registration and carries a
+    // shape-compatible payload. What it cannot fake is the authority it cites.
+    const real = realAssassinationAnalysis();
+    if (real.status !== "ANALYZED") throw new Error("expected ANALYZED");
+    const relabelled = { ...real, specId: "paladin/protection" as const };
+    expect(() => observedDecisionViewOf(PRODUCTION_CATALOG, relabelled)).toThrow(
+      AnalyzerResultOwnershipError,
+    );
+    expect(() => observedDecisionViewOf(PRODUCTION_CATALOG, relabelled)).toThrow(
+      /RESULT_CITES_FOREIGN_AUTHORITY/,
+    );
+  });
+
   it("is adapted only by its owner, never by a neighbour's view", () => {
+    // UPDATED AT M10-C. The neighbour is now the REAL Protection registration
+    // with a genuine Protection analysis over the M10-B evidence; a relabelled
+    // Rogue analysis no longer reaches any view at all (the previous test).
     const rogueView = vi.fn(ASSASSINATION_REGISTRATION.observedDecisionView);
-    const paladinView = vi.fn(() => {
-      throw new Error("the fixture has no analysis to view");
-    });
+    const paladinView = vi.fn(PROTECTION_PALADIN_REGISTRATION.observedDecisionView);
     const catalog = requireValidatedCatalog([
       { ...ASSASSINATION_REGISTRATION, observedDecisionView: rogueView },
-      { ...internalFixtureRegistration(), observedDecisionView: paladinView },
+      { ...PROTECTION_PALADIN_REGISTRATION, observedDecisionView: paladinView },
     ]);
     const real = realAssassinationAnalysis();
     if (real.status !== "ANALYZED") throw new Error("expected ANALYZED");
+    const paladin = analyzeObservedProtectionPaladinDecisions({
+      state: corpusState(PROT_OPENER),
+      actorId: 7,
+      specId: "paladin/protection",
+      targetActorId: null,
+    });
+    if (paladin.status !== "ANALYZED") throw new Error("expected ANALYZED");
 
-    expect(() => observedDecisionViewOf(catalog, { ...real, specId: "paladin/protection" })).toThrow(
-      "the fixture has no analysis to view",
-    );
+    expect(observedDecisionViewOf(catalog, paladin).decisions.length).toBeGreaterThan(0);
     expect(rogueView).not.toHaveBeenCalled();
     expect(paladinView).toHaveBeenCalledTimes(1);
 
     expect(observedDecisionViewOf(catalog, real).decisions.length).toBeGreaterThan(0);
     expect(rogueView).toHaveBeenCalledTimes(1);
+    expect(paladinView).toHaveBeenCalledTimes(1);
   });
 });
 

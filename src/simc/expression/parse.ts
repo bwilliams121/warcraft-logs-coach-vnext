@@ -58,9 +58,20 @@
  * A consequence worth knowing: the pinned `generate` call condition uses `>`
  * and therefore now PARSES. It does not follow that it is decidable — see
  * `evaluate.ts` — only that its refusal is no longer a syntax refusal.
+ *
+ * THE SPECIALIZATION SEAM (M10-C)
+ *
+ * `parseSimcExpression` takes an OPTIONAL vocabulary (`spec-vocabulary.ts`).
+ * It is consulted in exactly one place — after every built-in pattern has
+ * failed to match an identifier — and it yields exactly one node kind,
+ * `SPEC_ATOM`. Without a vocabulary the parser is unchanged: every identifier
+ * outside the subset above is still refused whole. Nothing in this file names
+ * a specialization, and the built-in list above is still the ONLY list this
+ * file knows.
  */
 
 import type { ComparisonOperator, ExpressionNode } from "./ast.js";
+import type { SpecAtomVocabulary } from "./spec-vocabulary.js";
 
 export type ParseFailureReason =
   | "EMPTY_EXPRESSION"
@@ -90,6 +101,8 @@ const DIGIT = /[0-9]/;
 interface Cursor {
   readonly text: string;
   index: number;
+  /** The specialization vocabulary, when one was supplied. Read by `parseIdentifier` only. */
+  readonly vocabulary: SpecAtomVocabulary | undefined;
 }
 
 function failure(reason: ParseFailureReason, fragment: string, offset: number): ParseResult {
@@ -224,15 +237,15 @@ const COOLDOWN_REMAINS = /^cooldown\.([A-Za-z_][A-Za-z0-9_]*)\.remains$/;
  */
 const TALENT = /^talent\.([A-Za-z_][A-Za-z0-9_]*)$/;
 
-function parseIdentifier(cursor: Cursor): ExpressionNode {
-  const start = cursor.index;
-  while (cursor.index < cursor.text.length) {
-    const char = cursor.text[cursor.index];
-    if (char === undefined || !IDENTIFIER_BODY.test(char)) break;
-    cursor.index += 1;
-  }
-  const raw = cursor.text.slice(start, cursor.index);
-
+/**
+ * The built-in identifier reading, or `null` when the subset does not contain
+ * `raw`.
+ *
+ * Split out of `parseIdentifier` so the SAME function answers two questions:
+ * what a built-in identifier parses to, and whether a specialization's
+ * declaration would shadow one (`isBuiltinIdentifier`). One list, one reader.
+ */
+function builtinIdentifier(raw: string): ExpressionNode | null {
   if (raw === "combo_points") return { kind: "COMBO_POINTS" };
   if (raw === "combo_points.deficit") return { kind: "COMBO_POINTS_DEFICIT" };
   if (raw === "energy.pct") return { kind: "ENERGY_PCT" };
@@ -304,6 +317,40 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
   if (cooldownRemains !== null) {
     const name = cooldownRemains[1];
     if (name !== undefined) return { kind: "COOLDOWN_REMAINS", cooldownName: name };
+  }
+
+  return null;
+}
+
+/** Whether the shared subset reads this identifier. Exported for the vocabulary guard. */
+export function isBuiltinIdentifier(identifier: string): boolean {
+  return builtinIdentifier(identifier) !== null;
+}
+
+function parseIdentifier(cursor: Cursor): ExpressionNode {
+  const start = cursor.index;
+  while (cursor.index < cursor.text.length) {
+    const char = cursor.text[cursor.index];
+    if (char === undefined || !IDENTIFIER_BODY.test(char)) break;
+    cursor.index += 1;
+  }
+  const raw = cursor.text.slice(start, cursor.index);
+
+  const builtin = builtinIdentifier(raw);
+  if (builtin !== null) return builtin;
+
+  // THE ONE SEAM. Built-ins first, so a vocabulary can never change what a
+  // built-in identifier means; and only a DECLARED identifier is admitted, so
+  // the vocabulary cannot open a namespace either.
+  const declared = cursor.vocabulary?.lookup(raw) ?? null;
+  if (declared !== null) {
+    return {
+      kind: "SPEC_ATOM",
+      identifier: declared.identifier,
+      shape: declared.shape,
+      scope: declared.scope,
+      selfAddressing: declared.selfAddressing,
+    };
   }
 
   // Everything else is refused. `spell_targets.y`, `buff.x.duration`,
@@ -511,11 +558,18 @@ function parseOr(cursor: Cursor): ExpressionNode {
  * Whitespace is not stripped: SimC APL conditions contain none, and silently
  * tolerating it would accept strings the authority could not actually contain.
  */
-export function parseSimcExpression(expression: string): ParseResult {
+export function parseSimcExpression(
+  expression: string,
+  /**
+   * A specialization's declared identifiers (M10-C). OMITTED for every caller
+   * that existed before, which leaves their parse byte-for-byte unchanged.
+   */
+  vocabulary?: SpecAtomVocabulary,
+): ParseResult {
   if (expression.length === 0) {
     return failure("EMPTY_EXPRESSION", "", 0);
   }
-  const cursor: Cursor = { text: expression, index: 0 };
+  const cursor: Cursor = { text: expression, index: 0, vocabulary };
   try {
     const ast = parseOr(cursor);
     if (cursor.index !== expression.length) {

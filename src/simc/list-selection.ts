@@ -245,7 +245,10 @@ export function evaluateCondition(action: AplAction, bindings: AtomBindings): Li
   if (action.conditionRaw === null) {
     return { kind: "UNCONDITIONAL" };
   }
-  const parsed = parseSimcExpression(action.conditionRaw);
+  // Parsed with the specialization vocabulary the bindings carry (M10-C), or
+  // with none. The vocabulary rides on the bindings so the parser and the
+  // evaluator read one declaration for one expression.
+  const parsed = parseSimcExpression(action.conditionRaw, bindings.specAtoms?.vocabulary);
   if (!parsed.ok) {
     return { kind: "UNSUPPORTED", reason: parsed.reason, fragment: parsed.fragment };
   }

@@ -146,3 +146,35 @@ export function buildArtifact(input: {
    */
   readonly rogueModuleSha256?: string;
 }): unknown;
+
+/** One extractable specialization profile (M10-C). Coordinates and facts, never a parser. */
+export interface GcdExtractionTarget {
+  readonly datasetId: string;
+  readonly classId: number;
+  readonly className: string;
+  readonly sources: Readonly<Record<string, string>>;
+  readonly classModulePath: string;
+  readonly handReviewedPaths: readonly string[];
+  readonly requiredFacts: {
+    readonly clientDataWowVersion: string;
+    readonly clientDataHotfixBuild: number;
+    readonly sanityAnchors: readonly {
+      readonly abilityGameId: number;
+      readonly displayNameEn: string;
+      readonly baseGcdMs: number;
+    }[];
+    readonly abilities: readonly {
+      readonly abilityGameId: number;
+      readonly displayNameEn: string;
+      readonly baseGcdMs: number;
+    }[];
+    readonly tokenBindings: readonly {
+      readonly simcToken: string;
+      readonly candidateAbilityGameIds: readonly number[];
+    }[];
+    readonly metaActionLanes: readonly { readonly simcToken: string; readonly triggerGcdMs: number }[];
+  };
+  readonly defaultOut: string;
+}
+
+export const TARGETS: Readonly<Record<"rogue-assassination" | "paladin-protection", GcdExtractionTarget>>;

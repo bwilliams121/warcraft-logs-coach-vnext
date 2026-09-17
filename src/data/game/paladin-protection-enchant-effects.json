@@ -1,0 +1,2539 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_PALADIN_PROTECTION_ENCHANT_USE_EFFECTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/spell_item_enchantment.inc",
+        "sha256": "0be38e08232daa7d39cecdfef7c6df52ccf4622ae1d54f88fe9ecfaa4187802c",
+        "byteLength": 1092816
+      },
+      {
+        "path": "engine/dbc/generated/temporary_enchant.inc",
+        "sha256": "476253cfcc29822b3cc5fa5e2d951d1747ae0e7f0a71d8a770aae7db69122558",
+        "byteLength": 7007
+      },
+      {
+        "path": "engine/dbc/generated/permanent_enchant.inc",
+        "sha256": "c16a68f4f6fbd936601055bc2bc1a088a1ff0eee438ff1aa7c4a6a5e590b73ec",
+        "byteLength": 86347
+      },
+      {
+        "path": "engine/dbc/generated/gem_data.inc",
+        "sha256": "55738c79cd1363e066f474783b030e91560b76bf5835d002650dfab3a74f3883",
+        "byteLength": 152247
+      },
+      {
+        "path": "engine/dbc/generated/item_data.inc",
+        "sha256": "223062c9cce5aaa70b45cc230c9f329ffcceb9ca0bb98a1dd6e42e29dcfa96d6",
+        "byteLength": 26406817
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_item_enchantment.hpp",
+        "sha256": "985bfc1658b78108e4d04aaeabf5360c7aa303d7a0e68de85201d59e364f1583",
+        "byteLength": 1351
+      },
+      {
+        "path": "engine/dbc/temporary_enchant.hpp",
+        "sha256": "041de3ef88f3ecba582b233dc9968ef74d1cac69042a17f287bd2f92cf60008f",
+        "byteLength": 903
+      },
+      {
+        "path": "engine/dbc/permanent_enchant.hpp",
+        "sha256": "0930b8e868a57eca72eadc20d7aa1d1940ca21e77633ebd7abf888e0c47b93d3",
+        "byteLength": 1071
+      },
+      {
+        "path": "engine/dbc/gem_data.hpp",
+        "sha256": "09eb4eb12b42e30a472867b7240d6a9336b82ee421eb472db487a1afa233bb1a",
+        "byteLength": 775
+      },
+      {
+        "path": "engine/dbc/item_data.hpp",
+        "sha256": "75c1bba66d29dad31ac0248a3e1cbb3f7bb5d7f3c305188d6338f705499d9433",
+        "byteLength": 2112
+      },
+      {
+        "path": "engine/dbc/data_enums.hh",
+        "sha256": "25a88c629f3d4ebb4ac966f3927307b28f756cf9cef9482dc77a79b197873ea4",
+        "byteLength": 75791
+      },
+      {
+        "path": "engine/item/enchants.cpp",
+        "sha256": "e4b4cb85c4f74896f3a330d3932aaa5e32b67a1ab7f48d0fd8b9f0fa2fb92ff0",
+        "byteLength": 19322
+      },
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/item/special_effect.cpp",
+        "sha256": "ceb52167fb715eb8451282f364c942eb6ecf1d958d18bf621ceee366d9655ed6",
+        "byteLength": 36166
+      },
+      {
+        "path": "engine/player/unique_gear.cpp",
+        "sha256": "6b680d0203834c057d871f07bbd226133f5d307b3d19f67ce3d75ee2de40fe16",
+        "byteLength": 165702
+      },
+      {
+        "path": "engine/player/unique_gear_legion.cpp",
+        "sha256": "5c01c5c9bb9cd7a21da16775d31db344213f0790f648263d649029325acb1b80",
+        "byteLength": 190220
+      },
+      {
+        "path": "engine/player/unique_gear_bfa.cpp",
+        "sha256": "8ac43e38622bbf8b8e7a72e4ff16a724e6141bfa2fcd6810abf975b1ddf32981",
+        "byteLength": 223959
+      },
+      {
+        "path": "engine/player/unique_gear_shadowlands.cpp",
+        "sha256": "82d28e3baca9391aa729936410cb45e0d6bb34cc88e792145b76d67cca552860",
+        "byteLength": 188126
+      },
+      {
+        "path": "engine/player/unique_gear_dragonflight.cpp",
+        "sha256": "9da6b654267212bd2c3fafc9187a3b38ab838ea624214d68d70a750115050074",
+        "byteLength": 402914
+      },
+      {
+        "path": "engine/player/unique_gear_thewarwithin.cpp",
+        "sha256": "1d2241b67d38f392829f5b7274992b6ddd4cff0fe03264fef87e20bc3b9c6bfc",
+        "byteLength": 445864
+      },
+      {
+        "path": "engine/player/unique_gear_midnight.cpp",
+        "sha256": "96ad359bdabe5a07e6ec3f94dcb783d9c3959c420a57a63e1fb714f5d2c47f0e",
+        "byteLength": 232700
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "extractor": "scripts/authority/extract-simc-enchant-effects.mjs",
+    "extractorVersion": 1,
+    "extractedOn": "2026-09-16",
+    "method": "MACHINE_EXTRACTED_DBC_RECORD",
+    "useSpellEnchantType": 7
+  },
+  "enchantSemantics": {
+    "method": "HAND_REVIEWED_CPP_ENCHANT_SEMANTICS",
+    "sourcePath": "engine/item/enchants.cpp",
+    "sourceSha256": "e4b4cb85c4f74896f3a330d3932aaa5e32b67a1ab7f48d0fd8b9f0fa2fb92ff0",
+    "reviewedOn": "2026-09-16",
+    "checks": [
+      {
+        "claim": "USE_EFFECT_REQUIRES_USE_SPELL_TYPE_WITH_NONZERO_PROP",
+        "symbol": "enchant::initialize_item_enchant",
+        "lines": "193-198",
+        "detail": "The only branch that sets effect.type = SPECIAL_EFFECT_USE is `case ITEM_ENCHANTMENT_USE_SPELL`, and it `continue`s when ench_prop[i] == 0. Every other ench_type (STAT, EQUIP_SPELL, DAMAGE, RESISTANCE, APPLY_BONUS, ...) produces stats, an EQUIP effect, or nothing. So an enchant row whose three ench_type entries contain no USE_SPELL cannot create a use sub-action."
+      },
+      {
+        "claim": "GEM_EFFECTS_FLOW_THROUGH_THE_SAME_ENCHANT_PATH",
+        "symbol": "enchant::initialize_gem",
+        "lines": "330-352",
+        "detail": "A gem is resolved item -> gem_properties -> gem_property_data_t.enchant_id -> item_enchantment row, then passed to initialize_item_enchant with SPECIAL_EFFECT_SOURCE_GEM. A gem's use-effect question is therefore its enchant row's question."
+      }
+    ]
+  },
+  "useEffectUniverse": {
+    "method": "MACHINE_EXTRACTED_DBC_RECORD",
+    "totalEnchantRows": 5334,
+    "temporaryEnchantRows": 116,
+    "permanentEnchantIds": 1043,
+    "useProducingRows": [
+      {
+        "enchantId": 3290,
+        "nameEn": "Spring Loaded Cape Expander",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [52641, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": false,
+        "drivers": [
+          {
+            "spellId": 52641,
+            "resolved": false
+          }
+        ]
+      },
+      {
+        "enchantId": 3291,
+        "nameEn": "Test On Use Charges",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [47181, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": false,
+        "drivers": [
+          {
+            "spellId": 47181,
+            "resolved": false
+          }
+        ]
+      },
+      {
+        "enchantId": 3599,
+        "nameEn": "Electromagnetic Pulse Generator",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [54735, 0, 0],
+        "spellId": 54736,
+        "reqSkill": 2504,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 54735,
+            "resolved": true,
+            "driver": {
+              "spellId": 54735,
+              "nameEn": "Electromagnetic Pulse",
+              "cooldownMs": 60000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 60000,
+              "category": 1283,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 12,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 64,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 54773
+                }
+              ]
+            },
+            "trigger": {
+              "spellId": 54773,
+              "nameEn": "Electromagnetic Pulse (DND)",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 60000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 3601,
+        "nameEn": "Frag Belt",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [67890, 30645, 0],
+        "spellId": 54793,
+        "reqSkill": 2504,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 67890,
+            "resolved": true,
+            "driver": {
+              "spellId": 67890,
+              "nameEn": "Cobalt Frag Bomb",
+              "cooldownMs": 60000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 60000,
+              "category": 1283,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 500,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 2,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 6,
+                  "subtype": 12,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "SPELL",
+              "actionCastTimeMs": 500,
+              "effectiveCooldownMs": 60000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 3605,
+        "nameEn": "Flexweave Underlay",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [55001, 3, 0],
+        "spellId": 55002,
+        "reqSkill": 2504,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 65536,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 55001,
+            "resolved": false
+          }
+        ]
+      },
+      {
+        "enchantId": 3859,
+        "nameEn": "Springy Arachnoweave",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [55001, 45, 0],
+        "spellId": 0,
+        "reqSkill": 2505,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": false,
+        "drivers": [
+          {
+            "spellId": 55001,
+            "resolved": false
+          }
+        ]
+      },
+      {
+        "enchantId": 4187,
+        "nameEn": "Invisibility Field",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [84348, 0, 0],
+        "spellId": 84424,
+        "reqSkill": 2503,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 84348,
+            "resolved": true,
+            "driver": {
+              "spellId": 84348,
+              "nameEn": "Invisibility Field",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 600000,
+              "category": 4,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 4188,
+        "nameEn": "Grounded Plasma Shield",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [82626, 0, 0],
+        "spellId": 84427,
+        "reqSkill": 2503,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 82626,
+            "resolved": true,
+            "driver": {
+              "spellId": 82626,
+              "nameEn": "Grounded Plasma Shield",
+              "cooldownMs": 300000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 300000,
+              "category": 1283,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 6,
+                  "subtype": 69,
+                  "miscValue": 127,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": ["engine/player/unique_gear.cpp"],
+            "generic": {
+              "buffType": "ABSORB",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 300000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 4214,
+        "nameEn": "Cardboard Assassin",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [94548, 0, 0],
+        "spellId": 84425,
+        "reqSkill": 2503,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 94548,
+            "resolved": true,
+            "driver": {
+              "spellId": 94548,
+              "nameEn": "Cardboard Assassin",
+              "cooldownMs": 300000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 300000,
+              "category": 4,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 28,
+                  "subtype": 0,
+                  "miscValue": 51229,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 300000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 4222,
+        "nameEn": "Mind Amplification Dish",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [67799, 0, 0],
+        "spellId": 67839,
+        "reqSkill": 2504,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 67799,
+            "resolved": true,
+            "driver": {
+              "spellId": 67799,
+              "nameEn": "Mind Amplification Dish",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 600000,
+              "category": 1283,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 500,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 500,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 4223,
+        "nameEn": "Nitro Boosts",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [55004, 32, 31],
+        "spellId": 55016,
+        "reqSkill": 2504,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 55004,
+            "resolved": true,
+            "driver": {
+              "spellId": 55004,
+              "nameEn": "Nitro Boosts",
+              "cooldownMs": 120000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 60000,
+              "category": 4,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": ["engine/player/unique_gear.cpp"],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 120000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 4750,
+        "nameEn": "Spinal Healing Injector",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [82184, 0, 0],
+        "spellId": 82200,
+        "reqSkill": 2503,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 82184,
+            "resolved": true,
+            "driver": {
+              "spellId": 82184,
+              "nameEn": "Spinal Healing Injector",
+              "cooldownMs": 60000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 60000,
+              "category": 30,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 10,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "HEAL",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 60000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 4897,
+        "nameEn": "Goblin Glider",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [126389, 3, 0],
+        "spellId": 126392,
+        "reqSkill": 2502,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 65536,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 126389,
+            "resolved": true,
+            "driver": {
+              "spellId": 126389,
+              "nameEn": "Goblin Glider",
+              "cooldownMs": 180000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 180000,
+              "category": 1470,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 1,
+                  "type": 64,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 126408
+                },
+                {
+                  "index": 2,
+                  "type": 6,
+                  "subtype": 409,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 3,
+                  "type": 6,
+                  "subtype": 139,
+                  "miscValue": 1059,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 4,
+                  "type": 6,
+                  "subtype": 139,
+                  "miscValue": 1102,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": {
+              "spellId": 126408,
+              "nameEn": "Forward Thrust",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 98,
+                  "subtype": 0,
+                  "miscValue": -250,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 180000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 5000,
+        "nameEn": "Watergliding Jets",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [131459, 0, 0],
+        "spellId": 109099,
+        "reqSkill": 2502,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 131459,
+            "resolved": false
+          }
+        ]
+      },
+      {
+        "enchantId": 5952,
+        "nameEn": "Holographic Horror Projector",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [269186, 0, 0],
+        "spellId": 255936,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 31
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 269186,
+            "resolved": true,
+            "driver": {
+              "spellId": 269186,
+              "nameEn": "Holographic Horror Projector",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 600000,
+              "category": 1283,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 1,
+                  "type": 6,
+                  "subtype": 26,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 5953,
+        "nameEn": "Personal Space Amplifier",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [255974, 0, 0],
+        "spellId": 255940,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 31
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 255974,
+            "resolved": true,
+            "driver": {
+              "spellId": 255974,
+              "nameEn": "Personal Space Amplifier",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 600000,
+              "category": 1283,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 98,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 5967,
+        "nameEn": "Miniaturized Plasma Shield",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [269120, 0, 0],
+        "spellId": 269123,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 31
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 269120,
+            "resolved": true,
+            "driver": {
+              "spellId": 269120,
+              "nameEn": "Miniaturized Plasma Shield",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 600000,
+              "category": 1283,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 69,
+                  "miscValue": 127,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "ABSORB",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6098,
+        "nameEn": "Use: Channel a cyclotronic blast, dealing $293491s1 damage every $293491t1 sec for $293491D.",
+        "enchTypes": [7, 14, 0],
+        "enchProps": [293491, 13377, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": 167672,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 293491,
+            "resolved": true,
+            "driver": {
+              "spellId": 293491,
+              "nameEn": "Cyclotronic Blast",
+              "cooldownMs": 120000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 20000,
+              "category": 1141,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 1500,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 3,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": ["engine/player/unique_gear_bfa.cpp"],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "SPELL",
+              "actionCastTimeMs": 1500,
+              "effectiveCooldownMs": 120000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6099,
+        "nameEn": "Use: Deal $293512s1 damage to a foe and increase the Device's damage to targets with the same name.",
+        "enchTypes": [7, 14, 3],
+        "enchProps": [293512, 13377, 306393],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": 167677,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 293512,
+            "resolved": true,
+            "driver": {
+              "spellId": 293512,
+              "nameEn": "Harmonic Dematerializer",
+              "cooldownMs": 15000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 2,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 6,
+                  "subtype": 4,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": ["engine/player/unique_gear_bfa.cpp"],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "SPELL",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 15000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6139,
+        "nameEn": "Use: Mind control target Mechanical creature.",
+        "enchTypes": [7, 14, 3],
+        "enchProps": [299042, 13377, 312058],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": 168756,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 299042,
+            "resolved": true,
+            "driver": {
+              "spellId": 299042,
+              "nameEn": "Synaptic Circuit Override",
+              "cooldownMs": 900000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 1,
+                  "type": 6,
+                  "subtype": 79,
+                  "miscValue": 127,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 900000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6144,
+        "nameEn": "Use: Create a stampede of Mechagnome automatons to trample your foes.",
+        "enchTypes": [7, 14, 0],
+        "enchProps": [299455, 13377, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 299455,
+            "resolved": true,
+            "driver": {
+              "spellId": 299455,
+              "nameEn": "Replication Protocol",
+              "cooldownMs": 300000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 20000,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 4,
+                  "miscValue": 1,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 300000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6192,
+        "nameEn": "Dimensional Shifter",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [321405, 0, 0],
+        "spellId": 310495,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 321405,
+            "resolved": true,
+            "driver": {
+              "spellId": 321405,
+              "nameEn": "Dimensional Shifter",
+              "cooldownMs": 120000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 120000,
+              "category": 1891,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 120000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6193,
+        "nameEn": "Electro-Jump",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [321419, 0, 0],
+        "spellId": 310496,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 321419,
+            "resolved": true,
+            "driver": {
+              "spellId": 321419,
+              "nameEn": "Electro-Jump",
+              "cooldownMs": 120000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 120000,
+              "category": 1891,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 120000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6194,
+        "nameEn": "Damage Retaliator",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [321473, 0, 0],
+        "spellId": 310497,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 64,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 321473,
+            "resolved": true,
+            "driver": {
+              "spellId": 321473,
+              "nameEn": "Damage Retaliator",
+              "cooldownMs": 120000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 120000,
+              "category": 1891,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 120000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6499,
+        "nameEn": "$spell@spelldesc382957",
+        "enchTypes": [3, 7, 0],
+        "enchProps": [382958, 382957, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 382957,
+            "resolved": true,
+            "driver": {
+              "spellId": 382957,
+              "nameEn": "Darkmoon Deck: Inferno",
+              "cooldownMs": 90000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 20000,
+              "category": 1141,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 2,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": ["engine/player/unique_gear_dragonflight.cpp"],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "SPELL",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 90000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6502,
+        "nameEn": "$spell@spelldesc384044",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [384044, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 384044,
+            "resolved": true,
+            "driver": {
+              "spellId": 384044,
+              "nameEn": "Supercollide-O-Tron",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 300000,
+              "category": 4,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 23,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6504,
+        "nameEn": "$spell@spelldesc384081",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [384081, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 384081,
+            "resolved": true,
+            "driver": {
+              "spellId": 384081,
+              "nameEn": "Plane Displacer",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 300000,
+              "category": 4,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 18,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 6,
+                  "subtype": 19,
+                  "miscValue": 2,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 3,
+                  "type": 6,
+                  "subtype": 335,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 4,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6505,
+        "nameEn": "$spell@spelldesc384098",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [384098, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 384098,
+            "resolved": true,
+            "driver": {
+              "spellId": 384098,
+              "nameEn": "Alarm-O-Turret",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 300000,
+              "category": 4,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 179,
+                  "subtype": 0,
+                  "miscValue": 26233,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6506,
+        "nameEn": "$spell@spelldesc384141",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [384141, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 384141,
+            "resolved": true,
+            "driver": {
+              "spellId": 384141,
+              "nameEn": "Grease Grenade",
+              "cooldownMs": 300000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 300000,
+              "category": 1892,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 2,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 179,
+                  "subtype": 0,
+                  "miscValue": 26252,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "SPELL",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 300000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6507,
+        "nameEn": "$spell@spelldesc384266",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [395598, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": 198304,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 395598,
+            "resolved": true,
+            "driver": {
+              "spellId": 395598,
+              "nameEn": "Grounded Circuitry",
+              "cooldownMs": 2700000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 2700000,
+              "category": 2089,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 140,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 384266
+                }
+              ]
+            },
+            "trigger": {
+              "spellId": 384266,
+              "nameEn": "Grounded Circuitry",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 4,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 2700000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6508,
+        "nameEn": "$spell@spelldesc385520",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [385520, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 385520,
+            "resolved": true,
+            "driver": {
+              "spellId": 385520,
+              "nameEn": "Breath of Neltharion",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 300000,
+              "category": 4,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 263,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 6,
+                  "subtype": 23,
+                  "miscValue": 0,
+                  "triggerSpellId": 385519
+                },
+                {
+                  "index": 2,
+                  "type": 6,
+                  "subtype": 33,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": {
+              "spellId": 385519,
+              "nameEn": "Breath of Neltharion",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 2,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "scriptedIn": ["engine/player/unique_gear_dragonflight.cpp"],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "SPELL",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6519,
+        "nameEn": "This device always malfunctions.",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [385749, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": 198853,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 385749,
+            "resolved": true,
+            "driver": {
+              "spellId": 385749,
+              "nameEn": "Always Malfunction (DNT)",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 0
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6535,
+        "nameEn": "$spell@spelldesc386674 |n$spell@spelldesc386681",
+        "enchTypes": [7, 3, 0],
+        "enchProps": [386681, 386674, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 386681,
+            "resolved": true,
+            "driver": {
+              "spellId": 386681,
+              "nameEn": "Activate Magnet",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6691,
+        "nameEn": "$spell@spelldesc393795",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [393795, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 393795,
+            "resolved": true,
+            "driver": {
+              "spellId": 393795,
+              "nameEn": "Arclight Vital Correctors",
+              "cooldownMs": 600000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 2049,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 1500,
+              "castTimeMs": 3000,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 3,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 3000,
+              "effectiveCooldownMs": 600000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6692,
+        "nameEn": "$spell@spelldesc384266",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [395599, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": 198305,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 395599,
+            "resolved": true,
+            "driver": {
+              "spellId": 395599,
+              "nameEn": "Grounded Circuitry",
+              "cooldownMs": 1800000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 1800000,
+              "category": 2089,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 140,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 384266
+                }
+              ]
+            },
+            "trigger": {
+              "spellId": 384266,
+              "nameEn": "Grounded Circuitry",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 4,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 1800000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6693,
+        "nameEn": "$spell@spelldesc384266",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [395600, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": 198306,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 395600,
+            "resolved": true,
+            "driver": {
+              "spellId": 395600,
+              "nameEn": "Grounded Circuitry",
+              "cooldownMs": 900000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 900000,
+              "category": 2089,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 140,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 384266
+                }
+              ]
+            },
+            "trigger": {
+              "spellId": 384266,
+              "nameEn": "Grounded Circuitry",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 4,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 900000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 6831,
+        "nameEn": "$spell@spelldesc407949",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [407949, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 407949,
+            "resolved": true,
+            "driver": {
+              "spellId": 407949,
+              "nameEn": "Shadowflame Rockets",
+              "cooldownMs": 300000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 300000,
+              "category": 4,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 31,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 1,
+                  "type": 6,
+                  "subtype": 226,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 2,
+                  "type": 6,
+                  "subtype": 241,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 3,
+                  "type": 6,
+                  "subtype": 60,
+                  "miscValue": 127,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 4,
+                  "type": 6,
+                  "subtype": 395,
+                  "miscValue": 28671,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": null,
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 300000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 8702,
+        "nameEn": "R0CKY",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [1297523, 3, 0],
+        "spellId": 1297585,
+        "reqSkill": 2910,
+        "reqSkillValue": 1,
+        "gemItemId": null,
+        "gemBorne": false,
+        "temporary": false,
+        "permanent": [
+          {
+            "itemClass": 4,
+            "maskInventoryType": 2,
+            "maskItemSubclass": 30
+          }
+        ],
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 1297523,
+            "resolved": true,
+            "driver": {
+              "spellId": 1297523,
+              "nameEn": "R0CKY",
+              "cooldownMs": 180000,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 180000,
+              "category": 1470,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 1,
+                  "type": 64,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 126408
+                },
+                {
+                  "index": 2,
+                  "type": 6,
+                  "subtype": 409,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 3,
+                  "type": 6,
+                  "subtype": 139,
+                  "miscValue": 1059,
+                  "triggerSpellId": 0
+                },
+                {
+                  "index": 4,
+                  "type": 6,
+                  "subtype": 139,
+                  "miscValue": 1102,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "trigger": {
+              "spellId": 126408,
+              "nameEn": "Forward Thrust",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 98,
+                  "subtype": 0,
+                  "miscValue": -250,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 180000
+            }
+          }
+        ]
+      },
+      {
+        "enchantId": 8705,
+        "nameEn": "[DNT] 12.1 Delves - Corrosive - ZGS TEST",
+        "enchTypes": [7, 0, 0],
+        "enchProps": [1301266, 0, 0],
+        "spellId": 0,
+        "reqSkill": 0,
+        "reqSkillValue": 0,
+        "gemItemId": null,
+        "gemBorne": true,
+        "temporary": false,
+        "permanent": null,
+        "placementKnown": true,
+        "drivers": [
+          {
+            "spellId": 1301266,
+            "resolved": true,
+            "driver": {
+              "spellId": 1301266,
+              "nameEn": "Corrosive Gifts",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 1,
+                  "type": 64,
+                  "subtype": 0,
+                  "miscValue": 0,
+                  "triggerSpellId": 1311162
+                }
+              ]
+            },
+            "trigger": {
+              "spellId": 1311162,
+              "nameEn": "Corrosive Gifts",
+              "cooldownMs": 0,
+              "internalCooldownMs": 0,
+              "categoryCooldownMs": 0,
+              "category": 0,
+              "charges": 0,
+              "chargeCooldownMs": 0,
+              "gcdMs": 0,
+              "castTimeMs": 0,
+              "maxTargets": 0,
+              "effects": [
+                {
+                  "index": 0,
+                  "type": 6,
+                  "subtype": 4,
+                  "miscValue": 0,
+                  "triggerSpellId": 0
+                }
+              ]
+            },
+            "scriptedIn": [],
+            "generic": {
+              "buffType": "NONE",
+              "actionType": "NONE",
+              "actionCastTimeMs": 0,
+              "effectiveCooldownMs": 0
+            }
+          }
+        ]
+      }
+    ],
+    "temporaryUseProducingCount": 0,
+    "gemBorneUseProducingCount": 19,
+    "permanentUseProducingInventoryTypeMask": 65602,
+    "unplacedUseProducingCount": 3,
+    "genericRuleEnumerators": {
+      "E_SCHOOL_DAMAGE": 2,
+      "E_DUMMY": 3,
+      "E_APPLY_AURA": 6,
+      "E_HEALTH_LEECH": 9,
+      "E_HEAL": 10,
+      "E_ENERGIZE": 30,
+      "E_WEAPON_PERCENT_DAMAGE": 31,
+      "E_WEAPON_DAMAGE": 58,
+      "E_TRIGGER_SPELL": 64,
+      "A_PERIODIC_DAMAGE": 3,
+      "A_PERIODIC_HEAL": 8,
+      "A_MOD_DAMAGE_DONE": 13,
+      "A_MOD_RESISTANCE": 22,
+      "A_PERIODIC_ENERGIZE": 24,
+      "A_MOD_STAT": 29,
+      "A_MOD_INCREASE_HEALTH": 34,
+      "A_PERIODIC_LEECH": 53,
+      "A_SCHOOL_ABSORB": 69,
+      "A_MOD_ATTACK_POWER": 99,
+      "A_MOD_RANGED_ATTACK_POWER": 124,
+      "A_MOD_RATING": 189,
+      "A_MOD_INCREASE_HEALTH_2": 250,
+      "A_MOD_BONUS_ARMOR": 465
+    },
+    "scriptedDriverCount": 6,
+    "unresolvedDriverCount": 5
+  },
+  "enchants": [
+    {
+      "enchantId": 7961,
+      "nameEn": "Enchant Helm - Empowered Hex of Leeching |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a",
+      "enchTypes": [5, 3, 0],
+      "enchProps": [62, 1242755, 0],
+      "createsUseEffect": false,
+      "why": "head permanentEnchant"
+    },
+    {
+      "enchantId": 8031,
+      "nameEn": "Enchant Shoulders - Silvermoon's Mending |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a",
+      "enchTypes": [5, 0, 0],
+      "enchProps": [62, 0, 0],
+      "createsUseEffect": false,
+      "why": "shoulder permanentEnchant"
+    },
+    {
+      "enchantId": 7987,
+      "nameEn": "Enchant Chest - Mark of the Worldsoul |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a",
+      "enchTypes": [5, 0, 0],
+      "enchProps": [71, 0, 0],
+      "createsUseEffect": false,
+      "why": "chest permanentEnchant"
+    },
+    {
+      "enchantId": 8159,
+      "nameEn": "+$k2 Agility/Strength & +$k1 Stamina |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a",
+      "enchTypes": [5, 5, 0],
+      "enchProps": [7, 72, 0],
+      "createsUseEffect": false,
+      "why": "legs permanentEnchant"
+    },
+    {
+      "enchantId": 8019,
+      "nameEn": "Enchant Boots - Farstrider's Hunt |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a",
+      "enchTypes": [5, 5, 0],
+      "enchProps": [61, 7, 0],
+      "createsUseEffect": false,
+      "why": "feet permanentEnchant"
+    },
+    {
+      "enchantId": 7967,
+      "nameEn": "Enchant Ring - Eyes of the Eagle |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a",
+      "enchTypes": [3, 0, 0],
+      "enchProps": [1236701, 0, 0],
+      "createsUseEffect": false,
+      "why": "finger1 and finger2 permanentEnchant"
+    },
+    {
+      "enchantId": 7981,
+      "nameEn": "Enchant Weapon - Jan'alai's Precision |A:Professions-ChatIcon-Quality-12-Tier2:20:20|a",
+      "enchTypes": [3, 0, 0],
+      "enchProps": [1236725, 0, 0],
+      "createsUseEffect": false,
+      "why": "main hand permanentEnchant"
+    },
+    {
+      "enchantId": 7143,
+      "nameEn": "Rite of Sanctification",
+      "enchTypes": [3, 0, 0],
+      "enchProps": [433550, 0, 0],
+      "createsUseEffect": false,
+      "why": "main hand temporaryEnchant (Rite of Sanctification)"
+    }
+  ],
+  "gems": [
+    {
+      "itemId": 240890,
+      "displayNameEn": "Flawless Deadly Peridot",
+      "gemPropertiesId": 4360,
+      "enchant": {
+        "enchantId": 8117,
+        "nameEn": "+$k1 Haste & +$k2 Critical Strike",
+        "enchTypes": [5, 5, 0],
+        "enchProps": [36, 32, 0],
+        "createsUseEffect": false,
+        "why": "head, finger1 and finger2 gem"
+      }
+    },
+    {
+      "itemId": 240983,
+      "displayNameEn": "Indecipherable Eversong Diamond",
+      "gemPropertiesId": 4402,
+      "enchant": {
+        "enchantId": 8552,
+        "nameEn": "+$k1 Primary Stat",
+        "enchTypes": [5, 0, 0],
+        "enchProps": [71, 0, 0],
+        "createsUseEffect": false,
+        "why": "neck gem"
+      }
+    }
+  ]
+}

@@ -1,0 +1,362 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_PALADIN_PROTECTION_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-09-16",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeId }. In the supported capture (report A7R6kxPJ1hC8YQ4w revision 30, logVersion 17, gameVersion 1) `id` equals trait_data_t::id_trait_node_entry and `nodeId` equals trait_data_t::id_node. Corroborated for the Protection Paladin subject (actor 7) by Righteous Protector 102440/81477, Sentinel 102466/81497, Blessed Hammer 102430/81469 at the Hammer of the Righteous choice node, and Holy Armaments 117882/95234 in the Lightsmith sub-tree. This equivalence is recorded for that capture and parser version; it is not claimed for Warcraft Logs in general.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "avenging_wrath",
+      "displayNameEn": "Avenging Wrath",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81483,
+      "traitEntryId": 102448,
+      "talentSpellId": 31884,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_protection.cpp:1043 talents.avenging_wrath = find_talent_spell( talent_tree::SPECIALIZATION, \"Avenging Wrath\" )"
+    },
+    {
+      "simcName": "blessed_hammer",
+      "displayNameEn": "Blessed Hammer",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81469,
+      "traitEntryId": 102430,
+      "talentSpellId": 204019,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 102431,
+          "displayNameEn": "Hammer of the Righteous",
+          "talentSpellId": 53595
+        }
+      ],
+      "binding": "sc_paladin_protection.cpp:1026 talents.blessed_hammer = find_talent_spell( talent_tree::SPECIALIZATION, \"Blessed Hammer\" )"
+    },
+    {
+      "simcName": "divine_toll",
+      "displayNameEn": "Divine Toll",
+      "tree": "CLASS",
+      "traitNodeId": 110006,
+      "traitEntryId": 136496,
+      "talentSpellId": 375576,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin.cpp:4201 talents.divine_toll = find_talent_spell( talent_tree::CLASS, \"Divine Toll\" )"
+    },
+    {
+      "simcName": "hammer_of_the_righteous",
+      "displayNameEn": "Hammer of the Righteous",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81469,
+      "traitEntryId": 102431,
+      "talentSpellId": 53595,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 102430,
+          "displayNameEn": "Blessed Hammer",
+          "talentSpellId": 204019
+        }
+      ],
+      "binding": "sc_paladin_protection.cpp:1025 talents.hammer_of_the_righteous = find_talent_spell( talent_tree::SPECIALIZATION, \"Hammer of the Righteous\" )"
+    },
+    {
+      "simcName": "righteous_protector",
+      "displayNameEn": "Righteous Protector",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81477,
+      "traitEntryId": 102440,
+      "talentSpellId": 204074,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_protection.cpp:1081 talents.righteous_protector = find_talent_spell( talent_tree::SPECIALIZATION, \"Righteous Protector\" )"
+    },
+    {
+      "simcName": "sentinel",
+      "displayNameEn": "Sentinel",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81497,
+      "traitEntryId": 102466,
+      "talentSpellId": 389539,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_protection.cpp:1074 talents.sentinel = find_talent_spell( talent_tree::SPECIALIZATION, \"Sentinel\" )"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "templar",
+      "subTreeId": 48,
+      "entries": [
+        {
+          "traitEntryId": 117810,
+          "traitNodeId": 95177,
+          "displayNameEn": "Wrathful Descent",
+          "talentSpellId": 431551
+        },
+        {
+          "traitEntryId": 117811,
+          "traitNodeId": 95178,
+          "displayNameEn": "Higher Calling",
+          "talentSpellId": 431687
+        },
+        {
+          "traitEntryId": 117812,
+          "traitNodeId": 95179,
+          "displayNameEn": "Sacrosanct Crusade",
+          "talentSpellId": 431730
+        },
+        {
+          "traitEntryId": 117813,
+          "traitNodeId": 95180,
+          "displayNameEn": "Light's Guidance",
+          "talentSpellId": 427445
+        },
+        {
+          "traitEntryId": 117814,
+          "traitNodeId": 95181,
+          "displayNameEn": "Bonds of Fellowship",
+          "talentSpellId": 432992
+        },
+        {
+          "traitEntryId": 117815,
+          "traitNodeId": 95182,
+          "displayNameEn": "Light's Deliverance",
+          "talentSpellId": 425518
+        },
+        {
+          "traitEntryId": 117816,
+          "traitNodeId": 95183,
+          "displayNameEn": "Zealous Vindication",
+          "talentSpellId": 431463
+        },
+        {
+          "traitEntryId": 117818,
+          "traitNodeId": 95184,
+          "displayNameEn": "Hammerfall",
+          "talentSpellId": 432463
+        },
+        {
+          "traitEntryId": 117819,
+          "traitNodeId": 95185,
+          "displayNameEn": "Sanctification",
+          "talentSpellId": 432977
+        },
+        {
+          "traitEntryId": 117820,
+          "traitNodeId": 95185,
+          "displayNameEn": "Endless Wrath",
+          "talentSpellId": 432615
+        },
+        {
+          "traitEntryId": 117822,
+          "traitNodeId": 95186,
+          "displayNameEn": "Undisputed Ruling",
+          "talentSpellId": 432626
+        },
+        {
+          "traitEntryId": 117823,
+          "traitNodeId": 95187,
+          "displayNameEn": "Shake the Heavens",
+          "talentSpellId": 431533
+        },
+        {
+          "traitEntryId": 117858,
+          "traitNodeId": 95181,
+          "displayNameEn": "Unrelenting Charger",
+          "talentSpellId": 432990
+        },
+        {
+          "traitEntryId": 136003,
+          "traitNodeId": 109745,
+          "displayNameEn": "Divine Exaction",
+          "talentSpellId": 1260429
+        },
+        {
+          "traitEntryId": 136004,
+          "traitNodeId": 109746,
+          "displayNameEn": "Light's Judicator",
+          "talentSpellId": 1261525
+        },
+        {
+          "traitEntryId": 136005,
+          "traitNodeId": 109747,
+          "displayNameEn": "Divine Hammer",
+          "talentSpellId": 432929
+        },
+        {
+          "traitEntryId": 136184,
+          "traitNodeId": 109745,
+          "displayNameEn": "Seal of the Templar",
+          "talentSpellId": 1263252
+        }
+      ]
+    },
+    {
+      "simcName": "lightsmith",
+      "subTreeId": 49,
+      "entries": [
+        {
+          "traitEntryId": 117873,
+          "traitNodeId": 95228,
+          "displayNameEn": "Solidarity",
+          "talentSpellId": 432802
+        },
+        {
+          "traitEntryId": 117874,
+          "traitNodeId": 95229,
+          "displayNameEn": "Valiance",
+          "talentSpellId": 432919
+        },
+        {
+          "traitEntryId": 117875,
+          "traitNodeId": 95230,
+          "displayNameEn": "Blessing of the Forge",
+          "talentSpellId": 433011
+        },
+        {
+          "traitEntryId": 117876,
+          "traitNodeId": 95231,
+          "displayNameEn": "Forewarning",
+          "talentSpellId": 432804
+        },
+        {
+          "traitEntryId": 117877,
+          "traitNodeId": 95231,
+          "displayNameEn": "Divine Inspiration",
+          "talentSpellId": 432964
+        },
+        {
+          "traitEntryId": 117878,
+          "traitNodeId": 95232,
+          "displayNameEn": "Tempered in Battle",
+          "talentSpellId": 469701
+        },
+        {
+          "traitEntryId": 117879,
+          "traitNodeId": 95232,
+          "displayNameEn": "Authoritative Rebuke",
+          "talentSpellId": 469886
+        },
+        {
+          "traitEntryId": 117880,
+          "traitNodeId": 95233,
+          "displayNameEn": "Rite of Adjuration",
+          "talentSpellId": 433583
+        },
+        {
+          "traitEntryId": 117881,
+          "traitNodeId": 95233,
+          "displayNameEn": "Rite of Sanctification",
+          "talentSpellId": 433568
+        },
+        {
+          "traitEntryId": 117882,
+          "traitNodeId": 95234,
+          "displayNameEn": "Holy Armaments",
+          "talentSpellId": 432459
+        },
+        {
+          "traitEntryId": 117883,
+          "traitNodeId": 95235,
+          "displayNameEn": "Blessed Assurance",
+          "talentSpellId": 433015
+        },
+        {
+          "traitEntryId": 117884,
+          "traitNodeId": 95235,
+          "displayNameEn": "Divine Guidance",
+          "talentSpellId": 433106
+        },
+        {
+          "traitEntryId": 117885,
+          "traitNodeId": 95236,
+          "displayNameEn": "Laying Down Arms",
+          "talentSpellId": 432866
+        },
+        {
+          "traitEntryId": 117886,
+          "traitNodeId": 95237,
+          "displayNameEn": "Shared Resolve",
+          "talentSpellId": 432821
+        },
+        {
+          "traitEntryId": 117887,
+          "traitNodeId": 95238,
+          "displayNameEn": "Reflection of Radiance",
+          "talentSpellId": 1271466
+        },
+        {
+          "traitEntryId": 136000,
+          "traitNodeId": 109742,
+          "displayNameEn": "Masterwork",
+          "talentSpellId": 1271387
+        },
+        {
+          "traitEntryId": 136001,
+          "traitNodeId": 109743,
+          "displayNameEn": "Hammer and Anvil",
+          "talentSpellId": 433718
+        },
+        {
+          "traitEntryId": 136002,
+          "traitNodeId": 109744,
+          "displayNameEn": "Resounding Strike",
+          "talentSpellId": 1271553
+        }
+      ]
+    }
+  ],
+  "apexTraits": [
+    {
+      "apexIndex": 1,
+      "traitEntryId": 137022,
+      "traitNodeId": 110418,
+      "displayNameEn": "Glory of the Vanguard",
+      "talentSpellId": 1267203,
+      "selectionIndex": 0
+    },
+    {
+      "apexIndex": 2,
+      "traitEntryId": 137021,
+      "traitNodeId": 110418,
+      "displayNameEn": "Glory of the Vanguard",
+      "talentSpellId": 1267211,
+      "selectionIndex": 100
+    },
+    {
+      "apexIndex": 3,
+      "traitEntryId": 137020,
+      "traitNodeId": 110418,
+      "displayNameEn": "Glory of the Vanguard",
+      "talentSpellId": 1267215,
+      "selectionIndex": 200
+    }
+  ]
+}

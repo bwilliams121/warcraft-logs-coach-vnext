@@ -78,6 +78,7 @@
  */
 
 import { collectAtoms, type AtomShape, type ComparisonOperator, type ExpressionNode } from "./ast.js";
+import { specAtomValueFor, type SpecAtomBindings } from "./spec-vocabulary.js";
 
 /**
  * WHICH ACTION a bare, self-addressing atom belongs to.
@@ -346,6 +347,18 @@ export interface AtomBindings {
     readonly actionToken: string;
     readonly refreshable: boolean;
   }[];
+  /**
+   * A specialization's declared atoms and their values (M10-C).
+   *
+   * The vocabulary here is the one the parser was handed for the same
+   * expression — `evaluateCondition` reads it from this field to parse, so
+   * the two cannot disagree. A declared TRUTH with no binding is enumerated; a
+   * declared MAGNITUDE with no binding is UNKNOWN_NUMBER
+   * (`STATE_NOT_ESTABLISHED`). A self-addressing atom is read only through a
+   * binding keyed by the acting action's token. Absent entirely, no
+   * `SPEC_ATOM` node can exist and nothing here is consulted.
+   */
+  readonly specAtoms?: SpecAtomBindings;
 }
 
 export type TraceAtomBinding = "KNOWN" | "BOUNDED" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
@@ -714,6 +727,15 @@ function evaluateInWorld(
     case "DOT_REMAINS":
       // KEYED BY THE ACTING ACTION. Never a scalar shared across entries.
       return worldValueOf(actingDotRemains(bindings, context));
+    case "SPEC_ATOM": {
+      const value = specAtomValueFor(bindings.specAtoms, node.identifier, context.currentActionToken);
+      if (value?.kind === "MAGNITUDE") return worldValueOf(value.binding);
+      if (value?.kind === "TRUTH") return value.value ? 1 : 0;
+      // Unbound. A magnitude is UNKNOWN, never zero; a truth reads this world's
+      // assignment, exactly as an unbound `buff.<name>.up` does.
+      if (node.shape === "NUMERIC") return UNKNOWN;
+      return world.get(node.identifier) === true ? 1 : 0;
+    }
     case "DOT_REFRESHABLE": {
       const proven = actingDotRefreshable(bindings, context);
       if (proven !== undefined) return proven ? 1 : 0;
@@ -833,6 +855,32 @@ function resolveAtom(
     return knownCooldown === undefined
       ? unknownNumeric("STATE_NOT_ESTABLISHED")
       : fromBinding(knownCooldown.remainsSeconds);
+  }
+
+  // A specialization-declared atom (M10-C). Consulted through the SAME helper
+  // `evaluateInWorld` uses, so the trace and the answer agree about which
+  // binding was read. A declared key can never equal a built-in key, so
+  // nothing above could have claimed it first.
+  const declared = bindings.specAtoms?.vocabulary.lookup(key) ?? null;
+  if (declared !== null) {
+    const value = specAtomValueFor(bindings.specAtoms, key, context.currentActionToken);
+    if (value?.kind === "MAGNITUDE") return fromBinding(value.binding);
+    if (value?.kind === "TRUTH") return known(value.value ? 1 : 0);
+    // Unbound. The resolver had a model for none of this, or its evidence fell
+    // short — either way the specialization did not state a value, and a
+    // magnitude it did not state is not established.
+    if (shape === "NUMERIC") return unknownNumeric("STATE_NOT_ESTABLISHED");
+    return {
+      trace: {
+        key,
+        shape,
+        binding: "UNRESOLVED_BOOLEAN",
+        value: null,
+        atLeast: null,
+        unknownNumberReason: null,
+      },
+      enumerate: true,
+    };
   }
 
   if (shape === "NUMERIC") {

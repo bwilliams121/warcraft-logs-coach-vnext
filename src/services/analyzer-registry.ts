@@ -57,6 +57,7 @@ import { providerMayGovern } from "../findings/authority-domain.js";
 import { validateCapabilities, type CapabilityDefectRecord } from "../findings/decision-capability.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { isPublicSpecId, isSpecId, PUBLIC_SPEC_IDS, type SpecId } from "../findings/spec-id.js";
+import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
 import type { AnalyzerRequirement } from "./ingestion-scope.js";
 import { SUPPORTED_SPEC_IDENTITIES } from "./spec-identity.js";
@@ -366,6 +367,9 @@ export function requireValidatedCatalog(
  */
 export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.freeze([
   ASSASSINATION_REGISTRATION,
+  // INTERNAL_ONLY since M10-C. In the catalog, reachable by the internal
+  // lookup and by tests; never selected by a public path.
+  PROTECTION_PALADIN_REGISTRATION,
 ]);
 
 /**

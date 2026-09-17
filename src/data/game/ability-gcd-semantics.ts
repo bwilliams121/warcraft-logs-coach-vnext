@@ -90,101 +90,43 @@
 
 import artifact from "./rogue-gcd-semantics.json";
 import {
-  validateGcdSemanticsArtifact,
-  type AbilityGcdRecord,
-  type GcdSemanticsArtifact,
-  type MetaActionLaneProvenance,
-  type MetaActionLaneRecord,
-  type TokenBindingProvenance,
-  type TokenBindingRecord,
-} from "./gcd-semantics-artifact.js";
+  baseGcdMsForAbilityIn,
+  executionLaneForAbilityIn,
+  executionLaneForTokenIn,
+  invariantLaneAcrossIn,
+  loadGcdSemantics,
+  metaActionLaneProvenanceIn,
+  metaActionLaneRecordIn,
+  resolveTokenBindingIn,
+  type ExecutionLane,
+  type GcdSemanticsLoad,
+  type LoadedGcdSemantics,
+  type TokenBinding,
+} from "./gcd-semantics-index.js";
+import type { MetaActionLaneProvenance, MetaActionLaneRecord } from "./gcd-semantics-artifact.js";
 
 /**
- * Whether performing an action consumes the rotational GCD slot.
+ * THE ROGUE BINDING OF THE CLASS-NEUTRAL INDEX (M10-C).
  *
- * Three members, and the third is a refusal rather than a value. Nothing may
- * collapse `UNKNOWN_LANE` into either of the other two.
+ * The lane rule, the token-invariance rule and the meta-action rule moved to
+ * `gcd-semantics-index.ts` so a second specialization can apply the identical
+ * rule over its own artifact. This module is that rule bound to the Rogue
+ * dataset, memoised exactly as before, with every export it had. Nothing a
+ * Rogue caller sees has changed.
  */
-export type ExecutionLane = "GCD_CONSUMING" | "NON_GCD" | "UNKNOWN_LANE";
 
-export const EXECUTION_LANES = [
-  "GCD_CONSUMING",
-  "NON_GCD",
-  "UNKNOWN_LANE",
-] as const satisfies readonly ExecutionLane[];
+export {
+  EXECUTION_LANES,
+  laneForBaseGcdMs,
+  type ExecutionLane,
+  type GcdSemanticsLoad,
+  type TokenBinding,
+} from "./gcd-semantics-index.js";
 
-/**
- * The lane of a known base GCD.
- *
- * Takes a number that was actually read from the dataset, so there is no way to
- * ask this question about an ability we have no record for — that path returns
- * `UNKNOWN_LANE` at the lookup, not here.
- */
-export function laneForBaseGcdMs(baseGcdMs: number): Extract<ExecutionLane, "GCD_CONSUMING" | "NON_GCD"> {
-  return baseGcdMs > 0 ? "GCD_CONSUMING" : "NON_GCD";
-}
+let cached: LoadedGcdSemantics | null = null;
 
-/**
- * What a SimulationCraft token is known to bind to.
- *
- * `KNOWN_SET` is a real answer, not a degraded one: it says we know exactly
- * which records the token can reach and that there is more than one. It is kept
- * distinct from `KNOWN_ONE` so a caller cannot treat a two-branch binding as a
- * settled single identity.
- */
-export type TokenBinding =
-  | {
-      readonly kind: "KNOWN_ONE";
-      readonly abilityGameId: number;
-      /** How a human established this, and from which pinned bytes. */
-      readonly provenance: TokenBindingProvenance;
-    }
-  | {
-      readonly kind: "KNOWN_SET";
-      readonly abilityGameIds: readonly number[];
-      readonly provenance: TokenBindingProvenance;
-    }
-  | { readonly kind: "UNKNOWN"; readonly simcToken: string };
-
-export type GcdSemanticsLoad =
-  | { readonly ok: true; readonly artifact: GcdSemanticsArtifact }
-  | { readonly ok: false; readonly reason: string; readonly detail: string };
-
-interface LoadedIndex {
-  readonly artifact: GcdSemanticsArtifact;
-  readonly byAbilityId: ReadonlyMap<number, AbilityGcdRecord>;
-  readonly byToken: ReadonlyMap<string, TokenBindingRecord>;
-  readonly byMetaToken: ReadonlyMap<string, MetaActionLaneRecord>;
-}
-
-let cached: { readonly load: GcdSemanticsLoad; readonly index: LoadedIndex | null } | null = null;
-
-function load(): { readonly load: GcdSemanticsLoad; readonly index: LoadedIndex | null } {
-  if (cached !== null) return cached;
-
-  const validation = validateGcdSemanticsArtifact(artifact);
-  if (!validation.ok) {
-    cached = { load: { ok: false, reason: validation.reason, detail: validation.detail }, index: null };
-    return cached;
-  }
-
-  const byAbilityId = new Map<number, AbilityGcdRecord>();
-  for (const record of validation.artifact.abilities) {
-    byAbilityId.set(record.abilityGameId, record);
-  }
-  const byToken = new Map<string, TokenBindingRecord>();
-  for (const binding of validation.artifact.tokenBindings) {
-    byToken.set(binding.simcToken, binding);
-  }
-  const byMetaToken = new Map<string, MetaActionLaneRecord>();
-  for (const meta of validation.artifact.metaActionLanes) {
-    byMetaToken.set(meta.simcToken, meta);
-  }
-
-  cached = {
-    load: { ok: true, artifact: validation.artifact },
-    index: { artifact: validation.artifact, byAbilityId, byToken, byMetaToken },
-  };
+function load(): LoadedGcdSemantics {
+  cached ??= loadGcdSemantics(artifact);
   return cached;
 }
 
@@ -205,7 +147,7 @@ export function resetGcdSemanticsCache(): void {
  * ability has no GCD, and a caller must not read it as one.
  */
 export function baseGcdMsForAbility(abilityGameId: number): number | null {
-  return load().index?.byAbilityId.get(abilityGameId)?.baseGcdMs ?? null;
+  return baseGcdMsForAbilityIn(load().index, abilityGameId);
 }
 
 /**
@@ -216,20 +158,12 @@ export function baseGcdMsForAbility(abilityGameId: number): number | null {
  * "Thistle Tea" — so a name could not identify a record even in principle.
  */
 export function executionLaneForAbility(abilityGameId: number): ExecutionLane {
-  const baseGcdMs = baseGcdMsForAbility(abilityGameId);
-  return baseGcdMs === null ? "UNKNOWN_LANE" : laneForBaseGcdMs(baseGcdMs);
+  return executionLaneForAbilityIn(load().index, abilityGameId);
 }
 
 /** What the pinned sources establish about a SimulationCraft token's identity. */
 export function resolveTokenBinding(simcToken: string): TokenBinding {
-  const binding = load().index?.byToken.get(simcToken);
-  if (binding === undefined) return { kind: "UNKNOWN", simcToken };
-  const ids = binding.candidateAbilityGameIds;
-  const only = ids.length === 1 ? ids[0] : undefined;
-  if (only !== undefined) {
-    return { kind: "KNOWN_ONE", abilityGameId: only, provenance: binding.binding };
-  }
-  return { kind: "KNOWN_SET", abilityGameIds: ids, provenance: binding.binding };
+  return resolveTokenBindingIn(load().index, simcToken);
 }
 
 /**
@@ -240,12 +174,12 @@ export function resolveTokenBinding(simcToken: string): TokenBinding {
  * this section has nothing to say, and the spell-id path answers instead.
  */
 export function metaActionLaneRecordFor(simcToken: string): MetaActionLaneRecord | null {
-  return load().index?.byMetaToken.get(simcToken) ?? null;
+  return metaActionLaneRecordIn(load().index, simcToken);
 }
 
 /** The provenance behind a meta-action lane, or `null` when there is none. */
 export function metaActionLaneProvenanceFor(simcToken: string): MetaActionLaneProvenance | null {
-  return metaActionLaneRecordFor(simcToken)?.binding ?? null;
+  return metaActionLaneProvenanceIn(load().index, simcToken);
 }
 
 /**
@@ -258,28 +192,7 @@ export function metaActionLaneProvenanceFor(simcToken: string): MetaActionLanePr
  * build does not establish.
  */
 export function executionLaneForToken(simcToken: string): ExecutionLane {
-  const binding = resolveTokenBinding(simcToken);
-  if (binding.kind === "UNKNOWN") {
-    // No spell-id binding. The token may still be a META ACTION, whose lane is a
-    // hand-reviewed `trigger_gcd` rather than a DBC `_gcd`. Same field semantics,
-    // same units, same `> 0` predicate — different evidence, and the artifact
-    // validator guarantees a token cannot be in both places.
-    const meta = metaActionLaneRecordFor(simcToken);
-    return meta === null ? "UNKNOWN_LANE" : laneForBaseGcdMs(meta.triggerGcdMs);
-  }
-
-  const ids = binding.kind === "KNOWN_ONE" ? [binding.abilityGameId] : binding.abilityGameIds;
-  let settled: ExecutionLane | null = null;
-  for (const abilityGameId of ids) {
-    const lane = executionLaneForAbility(abilityGameId);
-    if (lane === "UNKNOWN_LANE") return "UNKNOWN_LANE";
-    if (settled === null) {
-      settled = lane;
-      continue;
-    }
-    if (settled !== lane) return "UNKNOWN_LANE";
-  }
-  return settled ?? "UNKNOWN_LANE";
+  return executionLaneForTokenIn(load().index, simcToken);
 }
 
 /**
@@ -289,13 +202,5 @@ export function executionLaneForToken(simcToken: string): ExecutionLane {
  * disagrees, without needing a pinned dataset that contains one.
  */
 export function invariantLaneAcross(abilityGameIds: readonly number[]): ExecutionLane {
-  if (abilityGameIds.length === 0) return "UNKNOWN_LANE";
-  let settled: ExecutionLane | null = null;
-  for (const abilityGameId of abilityGameIds) {
-    const lane = executionLaneForAbility(abilityGameId);
-    if (lane === "UNKNOWN_LANE") return "UNKNOWN_LANE";
-    if (settled !== null && settled !== lane) return "UNKNOWN_LANE";
-    settled = lane;
-  }
-  return settled ?? "UNKNOWN_LANE";
+  return invariantLaneAcrossIn(load().index, abilityGameIds);
 }

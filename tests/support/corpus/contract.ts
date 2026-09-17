@@ -42,6 +42,9 @@ import {
 import { RETRIEVAL_OUTCOME_REASONS } from "../../../src/engine/evidence/coverage.js";
 import pinnedAssassinationApl from "../../../src/simc/data/rogue-assassination.apl.json";
 import pinnedRogueDotDurations from "../../../src/data/game/rogue-dot-durations.json";
+import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.json";
+import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
+import { PROTECTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/protection/observed-analysis.js";
 
 // --------------------------------------------------------------------------
 // Version and limits
@@ -239,17 +242,66 @@ export type PayloadKind = (typeof PAYLOAD_KINDS)[number];
 /**
  * The layer that owns a case's claim. Each maps to source roots so the
  * ownership is checkable, not a label.
+ *
+ * EVERY ROOT BELONGS TO EXACTLY ONE LAYER. A root listed under two layers
+ * would let one case's claim be counted as coverage of two things, and would
+ * leave "who owns a change here" with two answers. `assertOwnershipRootsDisjoint`
+ * refuses overlap and nesting at load time; the M9-A layering test pins the
+ * same fact statically.
+ *
+ * The shared decision engine (`src/simc/`) is therefore ITS OWN layer, not a
+ * root of either specialization: it is specialization-neutral by contract
+ * (`m10c-cross-spec-isolation`), and a Protection case that exercised it would
+ * otherwise have read as Assassination coverage, and vice versa.
  */
 export const OWNING_LAYERS = {
   WCL_TRANSPORT: ["src/wcl/"],
   NORMALIZATION: ["src/engine/normalization/", "src/engine/evidence/"],
   COMBAT_STATE: ["src/engine/state/", "src/engine/auras/", "src/engine/resources/", "src/engine/game-state/"],
-  SPEC_ASSASSINATION: ["src/specs/rogue/", "src/simc/"],
+  /** The specialization-neutral APL parsing, evaluation and first-scan engine. */
+  SHARED_DECISION_ENGINE: ["src/simc/"],
+  SPEC_ASSASSINATION: ["src/specs/rogue/"],
+  /** M10-C. The internal Protection Paladin evaluator and nothing else. */
+  SPEC_PROTECTION_PALADIN: ["src/specs/paladin/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
 export type OwningLayer = keyof typeof OWNING_LAYERS;
 export const OWNING_LAYER_IDS = Object.keys(OWNING_LAYERS) as readonly OwningLayer[];
+
+/**
+ * Refuses an ownership map in which any root is repeated, or is a prefix of
+ * another root (which would make the nested one owned twice). Returns the
+ * problems rather than throwing so a test can pin the exact message.
+ */
+export function ownershipRootProblems(
+  layers: Readonly<Record<string, readonly string[]>> = OWNING_LAYERS,
+): readonly string[] {
+  const problems: string[] = [];
+  const owners = new Map<string, string>();
+  for (const [layer, roots] of Object.entries(layers)) {
+    for (const root of roots) {
+      const previous = owners.get(root);
+      if (previous !== undefined) problems.push(`root ${root} is owned by both ${previous} and ${layer}`);
+      owners.set(root, layer);
+    }
+  }
+  const entries = [...owners.entries()];
+  for (const [root, layer] of entries) {
+    for (const [other, otherLayer] of entries) {
+      if (root !== other && other.startsWith(root)) {
+        problems.push(`root ${other} (${otherLayer}) is nested under ${root} (${layer})`);
+      }
+    }
+  }
+  return problems;
+}
+
+export function assertOwnershipRootsDisjoint(): void {
+  const problems = ownershipRootProblems();
+  if (problems.length > 0) throw new Error(`OWNING_LAYERS is not a partition: ${problems.join("; ")}`);
+}
+assertOwnershipRootsDisjoint();
 
 /**
  * What kind of outcome an assertion pins.
@@ -356,6 +408,15 @@ const auraIdentity = z
   .strict();
 
 const expectedUnknown = z.object({ certainty: z.literal("UNKNOWN"), reason: unknownReason }).strict();
+
+/** One authority entry by its SimulationCraft-native coordinates. */
+const aplEntryRef = z
+  .object({
+    listName: z.string().min(1),
+    priorityOrdinal: z.number().int().nonnegative(),
+    actionToken: z.string().min(1),
+  })
+  .strict();
 
 export const ASSERTION_KINDS = {
   // ---- NORMALIZATION -------------------------------------------------------
@@ -840,6 +901,330 @@ export const ASSERTION_KINDS = {
       "The remaining duration of this actor's DoT on this target, immediately before the observed cast, derives to exactly this from the pinned duration dataset and the observed anchor — or refuses with exactly this blocker.",
   },
 
+  // ---- SPEC_PROTECTION_PALADIN (M10-C) --------------------------------------
+  //
+  // The INTERNAL_ONLY Protection Paladin evaluator, reached through its
+  // registration. Nothing here is public: no kind below drives a transport,
+  // and the projection kind asserts that the result CANNOT be published.
+  "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            authorityId: z.string().min(1),
+            artifactRevision: z.string().min(1),
+            commitSha: z.string().regex(/^[0-9a-f]{40}$/),
+            sourcePath: z.string().min(1),
+            sourceSha256: z.string().regex(/^[0-9a-f]{64}$/),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Protection Paladin registration analyzes this actor and cites exactly this pinned offensive authority: id, revision, commit and source digest read off the loaded artifact, never hand-maintained.",
+  },
+  "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        targetActorId: z.number().int().nullable(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            outcome: z.enum(COMPARISON_OUTCOMES),
+            basis: z.enum(COMPARISON_BASES),
+            authorityCoverage: z.enum(DECISION_COVERAGES),
+            authorityToken: z.string().nullable(),
+            selectionPrecision: z.enum(["EXACT_ENTRY", "TOKEN_CONVERGED"]).nullable(),
+            decisiveBlocker: z.enum(DECISION_BLOCKER_CLASSES).nullable(),
+            /** The engine's own blocker, verbatim, so an OTHER class still names its cause. */
+            rawBlocker: z.string().nullable(),
+            observedActionRejected: z.boolean(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Protection Paladin evaluator, under the committed pinned authority, compares this observed GCD cast exactly so. MATCH means AUTHORITY_COMPATIBLE_ONLY; UNKNOWN carries the engine's own blocker verbatim; REJECTED is preserved as the evaluator produced it.",
+  },
+  "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            eligibleDecisions: z.number().int().nonnegative(),
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            unknown: z.number().int().nonnegative(),
+            /** Exact and exhaustive: every exclusion reason with a non-zero count. */
+            exclusions: z.record(z.enum(PROTECTION_EXCLUSION_REASONS), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator's coverage disclosure over this actor's every completed cast: the eligible-decision denominator, the three outcomes that partition it, and each excluded cast counted under its named reason. A cast is never dropped silently.",
+  },
+  "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        cast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            state: z.literal("EXACT_PRE_COST"),
+            amount: z.number().int().nonnegative(),
+            max: z.number().int().positive().nullable(),
+            cost: z.number().int().nonnegative().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator records exactly this Holy Power observation on this cast: the PRE_COST amount the wire carried, its max and its cost. An observation, never a derived or replayed state.",
+  },
+  "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        cast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator records NO_OBSERVATION for this cast: the event carries no Holy Power entry, and the evaluator states that rather than any amount. Missing Holy Power is never zero and never an inferred value.",
+  },
+  "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        domain: z.enum(AUTHORITY_DOMAINS),
+        expected: z
+          .object({
+            resolution: z.enum(AUTHORITY_RESOLUTION_OUTCOMES),
+            /** Pinned only for OFFENSIVE_ROTATION under AUTHORITY_AVAILABLE. */
+            authorityId: z.string().nullable(),
+            /** `false` for every non-offensive domain; `null` for the offensive one. */
+            offensiveAuthorityGoverns: z.boolean().nullable(),
+            /** Pinned only for INTERRUPT: the evidence family's capability, verbatim. */
+            evidenceFamily: z.enum(["OBSERVABLE", "NOT_OBSERVABLE", "UNVERIFIED"]).nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator represents this decision domain exactly so: the registration's own authority resolution for it, whether the offensive authority may govern it (never, outside OFFENSIVE_ROTATION), and for INTERRUPT the evidence family's capability stated separately from the missing standard.",
+  },
+  "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            talents: z.record(z.string().min(1), z.enum(TALENT_SELECTIONS)),
+            heroTree: z.union([
+              z.object({ state: z.literal("RESOLVED"), simcName: z.string().min(1) }).strict(),
+              z.object({ state: z.literal("UNKNOWN") }).strict(),
+            ]),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator resolves the actor's build from the observed talent tree against the pinned Paladin trait data exactly so: each named talent's three-way selection and the hero sub-tree by entry membership. Never inferred from a cast.",
+  },
+  "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            /** The pinned worn items with an item-sourced use effect, in slot order. */
+            onUseItemIds: z.array(z.number().int()),
+            /** Every open slot, by reason and count. Empty means the set is CLOSED. */
+            open: z.array(
+              z.object({ reason: z.string().min(1), count: z.number().int().positive() }).strict(),
+            ),
+            /** The open slot indices, in order. */
+            openSlotIndices: z.array(z.number().int().nonnegative()),
+            /** Omitted keys the shared equivalence proof closed (M10-C3). Zero on the committed subject. */
+            provenIrrelevant: z.number().int().nonnegative(),
+            /** The Divine Inspiration selection the equivalence policy ran under. */
+            divineInspiration: z.enum(TALENT_SELECTIONS),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The `use_items` sub-action set the evaluator can close from the actor's combatant info against the pinned item and enchant datasets, including the exhaustive use-effect universe and the shared observational-equivalence proof over every candidate the pinned build admits at an omitted key: exactly these worn on-use items, exactly these slots left OPEN by reason, and exactly this many omissions the proof closed — never an omission read as 'none'.",
+  },
+  "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        atom: z.string().min(1),
+        expected: z.discriminatedUnion("kind", [
+          z.object({ kind: z.literal("TRUTH"), value: z.boolean() }).strict(),
+          z
+            .object({
+              kind: z.literal("MAGNITUDE"),
+              state: z.enum(["KNOWN_NUMBER", "BOUNDED_NUMBER", "UNKNOWN_NUMBER"]),
+              value: z.number().nullable(),
+              reason: z.string().nullable(),
+            })
+            .strict(),
+          /** Declared, parsed, and NOT bound: enumerated by the evaluator, never a value. */
+          z.object({ kind: z.literal("UNBOUND") }).strict(),
+        ]),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At the decision this cast marks, the Protection resolver binds this declared identifier exactly so — a proven truth, a stated magnitude, or nothing at all. An UNBOUND truth is enumerated across worlds; an unmodelled magnitude names why.",
+  },
+  "SPEC_PROTECTION_PALADIN.SPEC_GATE": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Protection facade refuses this specialization with SPEC_NOT_SUPPORTED before any Protection rule runs: no comparisons, no domains, no authority.",
+  },
+  "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int() }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The analyzed Protection result names an INTERNAL_ONLY specialization, and the public narrowing boundary refuses it with InternalSpecExposureError rather than a quieter document. An internal result reaches no public projection.",
+  },
+
+  // ---- SHARED_DECISION_ENGINE ---------------------------------------------
+  //
+  // Driven directly over a SYNTHETIC authority artifact (JSON_VALUE) with every
+  // premise — bindings, proven-usable tokens, entry list — stated in the case.
+  // No specialization module is involved; the subject is the engine's own
+  // priority semantics.
+  "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY": {
+    owningLayer: "SHARED_DECISION_ENGINE",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["JSON_VALUE"],
+    params: z
+      .object({
+        entryListName: z.string().min(1),
+        knownBuffs: z.array(z.object({ name: z.string().min(1), up: z.boolean() }).strict()),
+        knownTalents: z.array(z.object({ name: z.string().min(1), taken: z.boolean() }).strict()),
+        provenUsableTokens: z.array(z.string().min(1)),
+        expected: aplEntryRef,
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "One foreground scan under the stated bindings resolves DEFINITE to exactly this entry: its gate is proven TRUE and its usability proven, so nothing below it is reachable.",
+  },
+  "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY": {
+    owningLayer: "SHARED_DECISION_ENGINE",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["JSON_VALUE"],
+    params: z
+      .object({
+        entryListName: z.string().min(1),
+        knownBuffs: z.array(z.object({ name: z.string().min(1), up: z.boolean() }).strict()),
+        knownTalents: z.array(z.object({ name: z.string().min(1), taken: z.boolean() }).strict()),
+        provenUsableTokens: z.array(z.string().min(1)),
+        expectedCandidates: z.array(aplEntryRef.extend({ definite: z.boolean() }).strict()).min(2),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The priority short-circuit: a higher-priority entry whose gate is UNDECIDED leaves the scan AMBIGUOUS between exactly these candidates, and the proven lower-priority entry is never promoted to the answer.",
+  },
+  "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION": {
+    owningLayer: "SHARED_DECISION_ENGINE",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["JSON_VALUE"],
+    params: z
+      .object({
+        entryListName: z.string().min(1),
+        knownBuffs: z.array(z.object({ name: z.string().min(1), up: z.boolean() }).strict()),
+        knownTalents: z.array(z.object({ name: z.string().min(1), taken: z.boolean() }).strict()),
+        provenUsableTokens: z.array(z.string().min(1)),
+        expectedBlockedAt: aplEntryRef,
+        expectedFragment: z.string().min(1),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "An entry whose condition the shared parser does not support BLOCKS the scan at that entry with UNSUPPORTED_AUTHORITY_EXPRESSION, naming the fragment; it is never evaluated as false or true and nothing below it is selected.",
+  },
+
   "WCL_PAGINATION.PAGE_ENVELOPE_FACTS": {
     owningLayer: "WCL_TRANSPORT",
     outcomeClass: "POSITIVE_FACT",
@@ -1024,6 +1409,33 @@ export const ASSERTION_KINDS = {
       "The real application service over the artifact — preflight and ingestion faked, everything between them production — derives exactly this ingestion scope from the enabled analyzers, recognizes exactly this specialization and analyzer, and reports exactly this status. Never a transport.",
   },
 
+  "APPLICATION_SERVICE.INTERNAL_REGISTRATION": {
+    owningLayer: "APPLICATION_SERVICE",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        specId: z.string().min(1),
+        expected: z
+          .object({
+            /** The analyzer id the INTERNAL lookup resolves, or `null` when none is registered. */
+            internalAnalyzerId: z.string().nullable(),
+            /** The analyzer id the PUBLIC lookup resolves, or `null`. */
+            publicAnalyzerId: z.string().nullable(),
+            exposure: z.enum(["INTERNAL_ONLY", "PUBLIC"]).nullable(),
+            /** Whether the public identity table resolves this specialization's class/spec pair. */
+            identityResolvesPublicly: z.boolean(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The validated production catalog answers the internal and the public lookup for this specialization exactly so, and the public identity table agrees. An INTERNAL_ONLY registration is real to the first and invisible to the second; catalog order changes neither answer.",
+  },
+
   // ---- PUBLIC_CONTRACT -----------------------------------------------------
   "PUBLIC_CONTRACT.REST_MCP_PARITY": {
     owningLayer: "PUBLIC_CONTRACT",
@@ -1137,6 +1549,7 @@ export function assertionKindDefinition(kind: AssertionKind): AssertionKindDefin
 export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedAssassinationApl.authorityId]: pinnedAssassinationApl.artifactRevision,
   [pinnedRogueDotDurations.datasetId]: pinnedRogueDotDurations.artifactRevision,
+  [pinnedProtectionApl.authorityId]: pinnedProtectionApl.artifactRevision,
 };
 
 // --------------------------------------------------------------------------

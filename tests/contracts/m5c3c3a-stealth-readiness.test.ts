@@ -188,12 +188,17 @@ describe("a proven TRUE makes Stealth unusable, and nothing else does", () => {
       // tests ONE named buff, not the four-aura stealthed.rogue mask.
       "VANISH_BUFF_ALREADY_ACTIVE",
       "SIMULATED_PREFIX_EXECUTION",
+      // M10-C4. A resource KNOWN below a PINNED cost with every free-cast
+      // route disproved: `action_t::ready()` fails cost_affordable(). It rests
+      // on observed resource evidence, so it is an OBSERVED reason.
+      "INSUFFICIENT_RESOURCE",
     ]);
-    // Both new reasons describe the OBSERVED fight, so both belong to the
+    // The new reasons describe the OBSERVED fight, so they belong to the
     // observed set. Only the counterfactual one is excluded from it.
     expect([...OBSERVED_UNUSABLE_REASONS]).toContain("RESTEALTH_NOT_PERMITTED_IN_COMBAT");
     expect([...OBSERVED_UNUSABLE_REASONS]).toContain("VANISH_BUFF_ALREADY_ACTIVE");
     expect([...OBSERVED_UNUSABLE_REASONS]).toContain("ALREADY_STEALTHED");
+    expect([...OBSERVED_UNUSABLE_REASONS]).toContain("INSUFFICIENT_RESOURCE");
     expect([...OBSERVED_UNUSABLE_REASONS]).not.toContain("SIMULATED_PREFIX_EXECUTION");
   });
 
