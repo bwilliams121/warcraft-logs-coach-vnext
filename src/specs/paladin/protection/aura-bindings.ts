@@ -1,0 +1,131 @@
+/**
+ * `buff.<name>.up` — the Protection-owned reading of aura state (M10-C5 Phase A).
+ *
+ * WHAT THIS COMPOSES
+ *
+ *     src/engine/auras (through M4 state)      `presenceAt`: ACTIVE or INACTIVE
+ *                                              from an OBSERVED transition, or
+ *                                              UNKNOWN; never inactive from
+ *                                              silence
+ *     paladin-protection-aura-authority        which spell an atom reads, and
+ *                                              under which talent
+ *     the actor's resolved build               whether that talent is SELECTED
+ *
+ * An atom is bound only when its identity is pinned for THIS build and M4
+ * answers EXACT. ACTIVE binds `up: true`; INACTIVE — a removal M4 observed and
+ * proved nothing reversed since — binds `up: false`. Anything else leaves the
+ * atom unbound, and the shared evaluator enumerates it.
+ *
+ * NO FUTURE ORACLE. The query is `BEFORE_EVENT` at the decision position: an
+ * application at or after the decision is not consulted. The Sentinel press
+ * at +21,652 ms therefore binds the atom TRUE for the Divine Toll press 414 ms
+ * later and for nothing before it.
+ */
+
+import { sourceRef, targetRef } from "../../../engine/normalization/normalized-events.js";
+import { fromSource } from "../../../engine/auras/aura-state.js";
+import type { CombatState } from "../../../engine/state/combat-state.js";
+import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
+import type { UnknownReason } from "../../../engine/state/state-result.js";
+import {
+  protectionAuraIdentitiesFor,
+  type ProtectionAuraIdentity,
+} from "../../../data/game/paladin-protection-aura-authority.js";
+import type { TalentResolution } from "../../../data/game/talent-selection.js";
+
+export interface ProtectionAuraInput {
+  readonly state: CombatState;
+  readonly actorId: number;
+  /** Canonical index of the decision point. Never an ingestion ordinal. */
+  readonly position: number;
+  /** The build facts that gate each pinned identity, by talent name. */
+  readonly talents: Readonly<Record<string, TalentResolution>>;
+}
+
+export type ProtectionAuraBinding =
+  | {
+      readonly atomName: string;
+      readonly state: "BOUND";
+      readonly up: boolean;
+      readonly abilityGameId: number;
+      readonly anchorPosition: number;
+      readonly anchorLocator: EvidenceLocator;
+    }
+  | {
+      readonly atomName: string;
+      readonly state: "UNBOUND";
+      readonly reason:
+        /** No pinned identity's gating talent is SELECTED for this build. */
+        | "IDENTITY_NOT_ESTABLISHED_FOR_BUILD"
+        /** M4 could not answer. Carries M4's reason. */
+        | "AURA_STATE_UNKNOWN";
+      readonly abilityGameId: number | null;
+      readonly auraReason: UnknownReason | null;
+    };
+
+function identityFor(
+  atomName: string,
+  talents: ProtectionAuraInput["talents"],
+): ProtectionAuraIdentity | null {
+  for (const identity of protectionAuraIdentitiesFor(atomName)) {
+    const gate = talents[identity.requiresTalent.simcName];
+    if (gate !== undefined && gate.selection === identity.requiresTalent.selection) return identity;
+  }
+  return null;
+}
+
+/** Binds one pinned buff atom at a decision position. */
+export function bindProtectionAura(input: ProtectionAuraInput, atomName: string): ProtectionAuraBinding {
+  const identity = identityFor(atomName, input.talents);
+  if (identity === null) {
+    return {
+      atomName,
+      state: "UNBOUND",
+      reason: "IDENTITY_NOT_ESTABLISHED_FOR_BUILD",
+      abilityGameId: null,
+      auraReason: null,
+    };
+  }
+  const result = input.state.auras.presenceAt({
+    target: targetRef(input.actorId, null),
+    abilityGameId: identity.abilityGameId,
+    auraClass: "BUFF",
+    source: fromSource(sourceRef(input.actorId, null)),
+    at: { anchor: "BEFORE_EVENT", position: input.position },
+  });
+  if (result.certainty !== "EXACT") {
+    return {
+      atomName,
+      state: "UNBOUND",
+      reason: "AURA_STATE_UNKNOWN",
+      abilityGameId: identity.abilityGameId,
+      auraReason: "reason" in result ? result.reason : null,
+    };
+  }
+  return {
+    atomName,
+    state: "BOUND",
+    up: result.value.presence === "ACTIVE",
+    abilityGameId: identity.abilityGameId,
+    anchorPosition: result.value.anchor.position,
+    anchorLocator: result.value.anchor.locator,
+  };
+}
+
+/** The atoms this specialization binds at Phase A. */
+export const SUPPORTED_PROTECTION_AURA_ATOMS = ["avenging_wrath"] as const;
+
+export function bindSupportedProtectionAuras(input: ProtectionAuraInput): readonly ProtectionAuraBinding[] {
+  return SUPPORTED_PROTECTION_AURA_ATOMS.map((atomName) => bindProtectionAura(input, atomName));
+}
+
+/** The `knownBuffs` shape, from the bindings that bound. */
+export function protectionBuffBindingsFrom(
+  bindings: readonly ProtectionAuraBinding[],
+): readonly { readonly name: string; readonly up: boolean }[] {
+  const known: { name: string; up: boolean }[] = [];
+  for (const binding of bindings) {
+    if (binding.state === "BOUND") known.push({ name: binding.atomName, up: binding.up });
+  }
+  return known;
+}

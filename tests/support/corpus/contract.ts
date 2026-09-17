@@ -973,8 +973,12 @@ export const ASSERTION_KINDS = {
             match: z.number().int().nonnegative(),
             rejected: z.number().int().nonnegative(),
             unknown: z.number().int().nonnegative(),
-            /** Exact and exhaustive: every exclusion reason with a non-zero count. */
-            exclusions: z.record(z.enum(PROTECTION_EXCLUSION_REASONS), z.number().int().positive()),
+            /**
+             * Exact and exhaustive: every exclusion reason with a non-zero
+             * count, and only those (a partial record over the vocabulary —
+             * a reason with no excluded cast is absent, never zero).
+             */
+            exclusions: z.partialRecord(z.enum(PROTECTION_EXCLUSION_REASONS), z.number().int().positive()),
           })
           .strict(),
       })
@@ -1075,6 +1079,93 @@ export const ASSERTION_KINDS = {
     requiresAuthority: true,
     description:
       "The evaluator resolves the actor's build from the observed talent tree against the pinned Paladin trait data exactly so: each named talent's three-way selection and the hero sub-tree by entry membership. Never inferred from a cast.",
+  },
+  "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        /** The decision point: one COMPLETE cast by the actor. */
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        /** The APL token whose cooldown is asked about. */
+        simcToken: z.string().min(1),
+        expected: z
+          .object({
+            readiness: z.enum(["PROVEN_NOT_READY", "UNKNOWN"]),
+            /** Present exactly when PROVEN_NOT_READY: the lower bound the proof rests on. */
+            provenRemainingAtLeastMs: z.number().int().positive().nullable(),
+            /** The observed cast the proof is anchored on (report time), or null. */
+            anchorReportTimeMs: z.number().int().nullable(),
+            /** The ability the anchor is a cast of, or null. */
+            anchorAbilityGameId: z.number().int().nullable(),
+            /** The effective base the derivation used for that ability, or null when nothing anchored. */
+            effectiveBaseMs: z.number().int().positive().nullable(),
+            /** The engine's UNKNOWN reason for the first pinned ability, when nothing anchored. */
+            unknownReason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the specialization's cooldown bindings derive exactly this readiness for the token from the actor's last OBSERVED cast strictly before the decision, the pinned base after the censused static modifiers, and the reviewed dynamic absence proof — PROVEN_NOT_READY with its lower bound and anchor, or UNKNOWN with the engine's reason. Never READY, and never from a later cast.",
+  },
+  "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        /** The buff atom name as the pinned APL writes it after `buff.`. */
+        atomName: z.string().min(1),
+        expected: z
+          .object({
+            state: z.enum(["BOUND", "UNBOUND"]),
+            up: z.boolean().nullable(),
+            /** The aura spell the atom read, when the identity was established for the build. */
+            abilityGameId: z.number().int().nullable(),
+            /** The observed transition the answer rests on (report time), or null. */
+            anchorReportTimeMs: z.number().int().nullable(),
+            /** The binding's own reason when UNBOUND, or null. */
+            reason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the specialization's aura bindings bind (or refuse to bind) this buff atom exactly so, from a transition M4 OBSERVED strictly before the decision on the actor's own aura, under the pinned identity the actor's build selects. Never inactive from silence, and never from a later transition.",
+  },
+  "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            /** Every UNKNOWN decision's engine blocker, `list[ordinal] token` -> count. Exact and exhaustive. */
+            blockedAt: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "Every UNKNOWN decision of this actor retains an exact engine blocker at a named authority entry, and the blockers distribute exactly so; together with the resolved counts this partitions the eligible population. No UNKNOWN is blocker-less and none is dropped.",
   },
   "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET": {
     owningLayer: "SPEC_PROTECTION_PALADIN",

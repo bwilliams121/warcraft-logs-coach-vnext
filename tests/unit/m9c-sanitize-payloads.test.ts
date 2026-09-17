@@ -4,6 +4,7 @@ import {
   actorSlice,
   decisionSlice,
   extractEvents,
+  parseFamilySelection,
   SANITIZER_REVISION,
 } from "../../scripts/sanitize-probe.mjs";
 import {
@@ -12,7 +13,7 @@ import {
   sanitizePages,
   sanitizeRankings,
 } from "../../scripts/corpus/sanitize-payloads.mjs";
-import { committedManifest } from "../support/corpus/artifacts.js";
+import { committedEventArray, committedManifest } from "../support/corpus/artifacts.js";
 import { committedCorpusFiles, loadCorpusOrThrow } from "../support/corpus/loader.js";
 
 /**
@@ -193,6 +194,69 @@ describe("the event slicer's --decision-slice predicate", () => {
     expect(actorSlice(tankEvents, 7, null)).toHaveLength(5);
   });
 
+  it("--actor-slice --families keeps only the listed raw types, whole, in order, under the same bound (M10-C5)", () => {
+    const tankEvents = [
+      { timestamp: 1, type: "combatantinfo", sourceID: 7 },
+      { timestamp: 2, type: "cast", sourceID: 7, targetID: 21 },
+      { timestamp: 3, type: "damage", sourceID: 21, targetID: 7 },
+      { timestamp: 4, type: "applybuff", sourceID: 7, targetID: 7 },
+      { timestamp: 5, type: "heal", sourceID: 7, targetID: 7 },
+      { timestamp: 6, type: "resourcechange", sourceID: 7, targetID: 7 },
+      { timestamp: 7, type: "cast", sourceID: 7, targetID: 21 },
+      { timestamp: 8, type: "cast", sourceID: 9, targetID: 21 },
+    ];
+    const families = ["cast", "resourcechange", "applybuff", "combatantinfo"];
+    expect(
+      actorSlice(tankEvents, 7, null, families).map((e) => (e as { timestamp: number }).timestamp),
+    ).toEqual([1, 2, 4, 6, 7]);
+    expect(actorSlice(tankEvents, 7, 6, families).map((e) => (e as { timestamp: number }).timestamp)).toEqual(
+      [1, 2, 4, 6],
+    );
+    // No list means no filter: the M10-B behaviour is unchanged.
+    expect(actorSlice(tankEvents, 7, null, null)).toHaveLength(7);
+    expect(actorSlice(tankEvents, 7)).toHaveLength(7);
+  });
+
+  it("--families refuses rather than trims: empty, duplicated or malformed entries are errors", () => {
+    expect(parseFamilySelection("cast,applybuff")).toEqual({ ok: true, families: ["cast", "applybuff"] });
+    for (const spec of ["", "cast,,applybuff", "cast,cast", "cast,Apply-Buff", undefined]) {
+      const result = parseFamilySelection(spec);
+      expect(result.ok, String(spec)).toBe(false);
+      if (!result.ok) expect(result.error).toContain("--families");
+    }
+  });
+
+  it("the committed 45-second slice is exactly the family filter's output over the actor: thirteen raw types and nothing else", () => {
+    const retained = new Set([
+      "cast",
+      "resourcechange",
+      "applybuff",
+      "refreshbuff",
+      "removebuff",
+      "applybuffstack",
+      "removebuffstack",
+      "applydebuff",
+      "refreshdebuff",
+      "removedebuff",
+      "applydebuffstack",
+      "removedebuffstack",
+      "combatantinfo",
+    ]);
+    const events = committedEventArray("wcl-protection-paladin-a7r6-rotational-45s") as {
+      type: string;
+      sourceID?: number;
+      targetID?: number;
+      timestamp: number;
+    }[];
+    expect(events).toHaveLength(1093);
+    for (const event of events) {
+      expect(retained.has(event.type), event.type).toBe(true);
+      expect(event.sourceID === 7 || event.targetID === 7).toBe(true);
+      expect(event.timestamp).toBeLessThanOrEqual(2049581);
+    }
+    expect(new Set(events.map((event) => event.type)).size).toBe(13);
+  });
+
   it("concatenates an array of page envelopes in page order", () => {
     const pages = [
       {
@@ -262,7 +326,7 @@ describe("the committed corpus holds no stable player identifier", () => {
 
   it("records the sanitizer revisions the scripts export, so a manifest cannot claim a revision that does not exist", () => {
     expect(SANITIZE_PAYLOADS_REVISION).toBe("sanitize-payloads-2");
-    expect(SANITIZER_REVISION).toBe("sanitize-probe-4");
+    expect(SANITIZER_REVISION).toBe("sanitize-probe-5");
     const revisions = new Set<string>();
     for (const artifact of committedManifest().artifacts) {
       for (const transformation of artifact.provenance.transformations) {
@@ -272,7 +336,9 @@ describe("the committed corpus holds no stable player identifier", () => {
     }
     // Every recorded revision is one the tooling has had; the current ones are among them.
     for (const revision of revisions) {
-      expect(revision).toMatch(/^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[12]|sanitize-probe-[234])$/);
+      expect(revision).toMatch(
+        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[12]|sanitize-probe-[2345]|derive-gap-1)$/,
+      );
     }
     expect(revisions.has(SANITIZE_PAYLOADS_REVISION)).toBe(true);
     expect(revisions.has(SANITIZER_REVISION)).toBe(true);

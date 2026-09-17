@@ -48,6 +48,9 @@ const ANALYZING_KINDS = new Set([
   "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION",
   "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
   "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
+  "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+  "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+  "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
 ]);
 
 /** What the committed manifest says the layer will ask the memo for. */
@@ -102,8 +105,9 @@ describe("the Protection Paladin layer performs exactly one real analysis per di
     const stats = context.memo.stats().filter((stat) => stat.key.includes(DERIVATION));
 
     // Exactly as many real analyses as distinct inputs, each computed once —
-    // and the manifest says there are two: the opener and its gap derivative.
-    expect(expected.inputs.size).toBe(2);
+    // and the manifest says there are four: the opener, the M10-C5 45-second
+    // slice, and each one's gap derivative.
+    expect(expected.inputs.size).toBe(4);
     expect(stats.length).toBe(expected.inputs.size);
     for (const stat of stats) expect(stat.computed, stat.key).toBe(1);
 
@@ -138,6 +142,8 @@ describe("the Protection Paladin layer performs exactly one real analysis per di
     expect(keys.map((key) => key["artifactId"]).sort()).toEqual([
       "wcl-protection-paladin-a7r6-opener",
       "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "wcl-protection-paladin-a7r6-rotational-45s",
+      "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
     ]);
     for (const key of keys) {
       expect(Object.keys(key).sort()).toEqual(
@@ -172,8 +178,8 @@ describe("the Protection Paladin layer performs exactly one real analysis per di
         .stats()
         .filter((stat) => stat.key.includes(DERIVATION))
         .reduce((sum, stat) => sum + stat.computed, 0);
-    expect(computedIn(firstContext)).toBe(2);
-    expect(computedIn(secondContext)).toBe(2);
+    expect(computedIn(firstContext)).toBe(4);
+    expect(computedIn(secondContext)).toBe(4);
     expect(JSON.stringify(second.result.results)).toBe(JSON.stringify(first.result.results));
     expect(second.result.summary).toEqual(first.result.summary);
   });

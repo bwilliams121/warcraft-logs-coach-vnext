@@ -83,6 +83,7 @@ import {
 } from "../../../data/game/paladin-protection-enchant-effects.js";
 import type { ItemEffectIdentity } from "../../../data/game/item-effect-artifact.js";
 import type { GearPiece } from "../../../engine/normalization/normalized-events.js";
+import type { CooldownReadiness } from "../../../engine/game-state/cooldowns/cooldown-usability.js";
 import { installedGemIds, isEmptyGearSlot } from "../../../engine/normalization/combatant-info.js";
 import type { TalentSelection } from "../../../data/game/talent-selection.js";
 import type { NumericBinding } from "../../../simc/expression/evaluate.js";
@@ -520,11 +521,27 @@ export const UNKNOWN_SPENDER_FACTS: ProtectionSpenderFacts = {
   freeCastExcluded: false,
 };
 
+/**
+ * What is known about cooldown READINESS at this decision, per APL token —
+ * derived by the specialization's cooldown bindings from OBSERVED prior casts
+ * (M10-C5 Phase A). Only PROVEN_NOT_READY is ever acted on; everything else
+ * is UNKNOWN usability. A token absent from the list has no readiness fact.
+ */
+export interface ProtectionReadinessFact {
+  readonly simcToken: string;
+  readonly readiness: CooldownReadiness;
+  /** The ability whose observed cast the proof rests on, when PROVEN_NOT_READY. */
+  readonly abilityGameId: number | null;
+}
+
+export const NO_READINESS_FACTS: readonly ProtectionReadinessFact[] = [];
+
 export function resolveProtectionUsability(
   state: ProtectionFirstGcdState,
   action: AplAction,
   observedAbilityGameId: number,
   spender: ProtectionSpenderFacts = UNKNOWN_SPENDER_FACTS,
+  readiness: readonly ProtectionReadinessFact[] = NO_READINESS_FACTS,
 ): ActionUsabilityVerdict {
   const entry: ExecutedEntry = {
     listName: action.listName,
@@ -559,6 +576,23 @@ export function resolveProtectionUsability(
         ? binding.abilityGameIds
         : [];
   if (candidates.includes(observedAbilityGameId)) return { kind: "PROVEN_USABLE" };
+
+  // A DERIVED cooldown proven to exceed the queueing tolerance. Checked AFTER
+  // the observed press, so a derivation can never contradict an observation;
+  // and only the negative direction is ever claimed (cooldown-usability.ts).
+  const fact = readiness.find((entry) => entry.simcToken === action.actionToken);
+  if (fact !== undefined && fact.readiness.state === "PROVEN_NOT_READY") {
+    return provenUnusable("ACTIVE_COOLDOWN", {
+      abilityGameId: fact.abilityGameId,
+      itemId: null,
+      provenRemainingAtLeastMs: fact.readiness.provenRemainingAtLeastMs,
+      cooldownToleranceMs: fact.readiness.cooldownToleranceMs,
+      detail:
+        "the ability's own cooldown, anchored on the actor's last OBSERVED cast before this decision under " +
+        "the pinned base and the reviewed modifier policy, is proven to exceed the queueing tolerance, so " +
+        "action_t::ready cannot succeed. The bound is a LOWER bound and is compared as one.",
+    });
+  }
 
   // A PINNED-COST spender with a KNOWN pool below the cost and no free route.
   const cost = protectionSpenderCostFor(action.actionToken);

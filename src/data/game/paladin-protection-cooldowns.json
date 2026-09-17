@@ -1,0 +1,475 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_PALADIN_PROTECTION_ABILITY_COOLDOWNS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/data_enums.hh",
+        "sha256": "25a88c629f3d4ebb4ac966f3927307b28f756cf9cef9482dc77a79b197873ea4",
+        "byteLength": 75791
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/action/action.cpp",
+        "sha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+        "byteLength": 175059
+      },
+      {
+        "path": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "byteLength": 185639
+      },
+      {
+        "path": "engine/class_modules/paladin/sc_paladin.hpp",
+        "sha256": "51fa0abc7fab5e433325c83a4115a7a73a2e57d93276265cf892abb894f56af1",
+        "byteLength": 61752
+      },
+      {
+        "path": "engine/class_modules/paladin/sc_paladin_protection.cpp",
+        "sha256": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+        "byteLength": 42936
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "cooldownFieldUnits": "MILLISECONDS",
+    "classId": 2,
+    "className": "Paladin",
+    "specId": 66,
+    "extractedOn": "2026-09-18",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned datasets: CombatFight exposes no client-build key. The build is recorded for traceability."
+  },
+  "aliasGroups": {
+    "wings": {
+      "simcToken": "avenging_wrath",
+      "basis": "sc_paladin_protection.cpp:980-981 substitutes sentinel_t for the `avenging_wrath` action when the Sentinel talent is taken, and sc_paladin.cpp:286-291 makes avenging_wrath_t background under Sentinel; sc_paladin.cpp:5296-5299 rewrites every `<x>.avenging_wrath` expression to `<x>.sentinel` under Protection when Sentinel is taken. Both spells share DBC category 1550 with a 120,000 ms category cooldown. Which member is castable is a talent fact the consumer resolves; a cast of EITHER member anchors the group's cooldown."
+    }
+  },
+  "abilities": [
+    {
+      "simcToken": "divine_toll",
+      "abilityGameId": 375576,
+      "displayNameEn": "Divine Toll",
+      "aliasGroup": null,
+      "baseCooldownMs": 60000,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "category": 0,
+      "categoryCooldownMs": 0,
+      "categoryTypeMask": 0,
+      "baseGcdMs": 1500,
+      "classFamily": 10,
+      "classFlags": [134217728, 16384, 268435458, 0],
+      "labels": [16, 26, 292, 5350],
+      "binding": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+        "createAction": "sc_paladin.cpp:3423-3424 if ( name == \"divine_toll\" ) return new divine_toll_t( this, options_str )",
+        "specBinding": "sc_paladin.cpp:4201 talents.divine_toll = find_talent_spell( talent_tree::CLASS, \"Divine Toll\" )"
+      },
+      "passiveModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_PASSIVE_TRAIT_EFFECTS",
+        "classId": 2,
+        "traitRowsExamined": 289,
+        "traitSpellsExamined": 266,
+        "effectRowsExamined": 1178,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "173:A_MOD_RECHARGE_TIME_PCT_CATEGORY_MASK",
+          "205:A_MOD_RECHARGE_TIME_CATEGORY_MASK",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER",
+          "341:A_MODIFY_CATEGORY_COOLDOWN",
+          "411:A_MOD_MAX_CHARGES",
+          "416:A_HASTED_COOLDOWN",
+          "453:A_MOD_RECHARGE_TIME_CATEGORY",
+          "454:A_MOD_RECHARGE_TIME_PCT_CATEGORY",
+          "457:A_HASTED_CATEGORY"
+        ],
+        "rule": "player.cpp parse_all_passive_talents -> parse_passive_effects (SX_PASSIVE spells; E_APPLY_AURA effects) -> register_passive_effect: A_ADD_FLAT/PCT_MODIFIER with misc_value1 == P_COOLDOWN (11) match by class family flags; the LABEL variants match by misc_value2 against __spelllabel_data; category subtypes match the spell's _category; category-mask subtypes match the spell's _category_type mask; A_HASTED_COOLDOWN matches by family flags. A matched flat value is added to the DBC cooldown field and a matched pct value scales it BEFORE action_t::init reads spell_data.cooldown() (dbc_override_->register_spell( id, \"cooldown\", value )).",
+        "modifiers": [
+          {
+            "talentSpellId": 379391,
+            "displayNameEn": "Quickened Invocation",
+            "tree": "CLASS",
+            "specIds": [66],
+            "traitNodeId": 81479,
+            "traitEntryId": 115168,
+            "nodeType": "CHOICE",
+            "alternativeEntries": [
+              {
+                "traitEntryId": 102443,
+                "displayNameEn": "Divine Resonance",
+                "talentSpellId": 386738
+              }
+            ],
+            "effectId": 1008310,
+            "effectIndex": 0,
+            "subtype": 107,
+            "subtypeName": "A_ADD_FLAT_MODIFIER",
+            "miscValue1": 11,
+            "miscValue2": 0,
+            "matchedBy": "CLASS_FLAGS",
+            "kind": "FLAT_MS",
+            "value": -15000,
+            "direction": "SHORTENS"
+          }
+        ]
+      },
+      "dynamicModifierPolicy": {
+        "method": "HAND_REVIEWED_CPP_ABSENCE_PROOF",
+        "appliesTo": "divine_toll",
+        "sourcePaths": [
+          "engine/class_modules/paladin/sc_paladin.cpp",
+          "engine/class_modules/paladin/sc_paladin_protection.cpp",
+          "engine/class_modules/paladin/sc_paladin.hpp"
+        ],
+        "sourceSha256": {
+          "classModule": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+          "specModule": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+          "classHeader": "51fa0abc7fab5e433325c83a4115a7a73a2e57d93276265cf892abb894f56af1"
+        },
+        "reviewedOn": "2026-09-18",
+        "checks": [
+          {
+            "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
+            "search": "every 'cooldowns.divine_toll-><member>' in sc_paladin.cpp + sc_paladin_protection.cpp",
+            "finding": "1 use(s): ->up() — reads only; no adjust(), reset(), start() or duration assignment"
+          },
+          {
+            "claim": "NO_MUTATION_THROUGH_A_NAMED_COOLDOWN_OBJECT",
+            "search": "every 'get_cooldown( \"divine_toll\" )' site",
+            "finding": "2 site(s): the constructor assignment to the handle and/or a read-only expression member initialiser (`<x>_cd( p.get_cooldown(...) )`, consulted through remains() only)"
+          },
+          {
+            "claim": "NO_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN",
+            "search": "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module",
+            "finding": "18 mutation site(s) in the module; receivers: cooldowns.consecration, cooldowns.holy_shock, cooldowns.holy_armaments, cooldowns.lay_on_hands, cooldowns.guardian_of_ancient_kings, cooldowns.judgment, cooldowns.blade_of_justice, cooldowns.avengers_shield, cooldowns.blessing_of_spellwarding, cooldowns.art_of_war, cooldowns.divine_resonance_icd, cooldowns.walk_into_light_icd, cooldowns.second_sunrise_icd, cooldowns.guided_prayer_icd, cooldowns.blessing_of_protection, a->cooldown, a->internal_cooldown; none names this cooldown"
+          },
+          {
+            "claim": "NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE",
+            "search": "'adjust_recharge_multiplier' sites; 'blessing_of_autumn_t' construction; Blessing of the Seasons traits in trait_data.inc",
+            "finding": "struct blessing_of_autumn_t is defined once (sc_paladin.cpp) and constructed nowhere (0 'new blessing_of_autumn_t', 0 references in sc_paladin.hpp); no Paladin trait row is named for Blessing of the Seasons; every '->adjust_recharge_multiplier(' call in the module sits inside that dead struct"
+          },
+          {
+            "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+            "search": "the body of divine_toll_t for 'cooldown->', 'update_ready' and 'cooldown_duration'",
+            "finding": "divine_toll_t (lines 1815-1938) declares no cooldown override and no update_ready; the base action_t::update_ready path applies unchanged"
+          },
+          {
+            "claim": "NO_MODULE_HASTED_COOLDOWN_FLAG",
+            "search": "'cooldown->hasted' sites and their enclosing structs; every assignment of paladin_action_t::hasted_cd",
+            "finding": "3 site(s): specModule:425 in blessed_hammer_t; specModule:620 in hammer_of_the_righteous_t; classHeader:1213 in paladin_action_t; none is this ability's struct; paladin_action_t::hasted_cd is initialised false once and assigned true nowhere (0 assignment(s)), so the base init() forwards false"
+          },
+          {
+            "claim": "NO_MODULE_AFFECT_LIST_NAMES_THIS_SPELL",
+            "search": "'register_passive_affect_list(' calls and the spell ids they add",
+            "finding": "1 call(s): register_passive_affect_list( talents.blessed_champion, affect_list_t( 1 ).add_spell( 20271, 275773 ) );; none adds 375576"
+          }
+        ]
+      },
+      "cooldownStart": {
+        "anchor": "ACTION_EXECUTE",
+        "evidence": [
+          "action.cpp:1914 action_t::execute() calls update_ready()",
+          "action.cpp:2333-2372 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
+          "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier"
+        ],
+        "note": "For an instant, non-channelled ability, execution coincides with the observed cast. Divine Toll, Sentinel and Avenging Wrath are instant in the pinned data."
+      }
+    },
+    {
+      "simcToken": "avenging_wrath",
+      "abilityGameId": 389539,
+      "displayNameEn": "Sentinel",
+      "aliasGroup": "wings",
+      "baseCooldownMs": 120000,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "category": 1550,
+      "categoryCooldownMs": 120000,
+      "categoryTypeMask": 0,
+      "baseGcdMs": 0,
+      "classFamily": 10,
+      "classFlags": [0, 0, 4096, 0],
+      "labels": [16, 26, 292, 690],
+      "binding": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+        "createAction": "sc_paladin_protection.cpp:980-981 if ( name == \"avenging_wrath\" && talents.sentinel->ok() ) return new sentinel_t( this, options_str )",
+        "specBinding": "sc_paladin_protection.cpp:723 sentinel_t : paladin_spell_t( \"sentinel\", p, p->talents.sentinel )"
+      },
+      "passiveModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_PASSIVE_TRAIT_EFFECTS",
+        "classId": 2,
+        "traitRowsExamined": 289,
+        "traitSpellsExamined": 266,
+        "effectRowsExamined": 1178,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "173:A_MOD_RECHARGE_TIME_PCT_CATEGORY_MASK",
+          "205:A_MOD_RECHARGE_TIME_CATEGORY_MASK",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER",
+          "341:A_MODIFY_CATEGORY_COOLDOWN",
+          "411:A_MOD_MAX_CHARGES",
+          "416:A_HASTED_COOLDOWN",
+          "453:A_MOD_RECHARGE_TIME_CATEGORY",
+          "454:A_MOD_RECHARGE_TIME_PCT_CATEGORY",
+          "457:A_HASTED_CATEGORY"
+        ],
+        "rule": "player.cpp parse_all_passive_talents -> parse_passive_effects (SX_PASSIVE spells; E_APPLY_AURA effects) -> register_passive_effect: A_ADD_FLAT/PCT_MODIFIER with misc_value1 == P_COOLDOWN (11) match by class family flags; the LABEL variants match by misc_value2 against __spelllabel_data; category subtypes match the spell's _category; category-mask subtypes match the spell's _category_type mask; A_HASTED_COOLDOWN matches by family flags. A matched flat value is added to the DBC cooldown field and a matched pct value scales it BEFORE action_t::init reads spell_data.cooldown() (dbc_override_->register_spell( id, \"cooldown\", value )).",
+        "modifiers": [
+          {
+            "talentSpellId": 204074,
+            "displayNameEn": "Righteous Protector",
+            "tree": "SPECIALIZATION",
+            "specIds": [66],
+            "traitNodeId": 81477,
+            "traitEntryId": 102440,
+            "nodeType": "NORMAL",
+            "alternativeEntries": [],
+            "effectId": 301163,
+            "effectIndex": 0,
+            "subtype": 108,
+            "subtypeName": "A_ADD_PCT_MODIFIER",
+            "miscValue1": 11,
+            "miscValue2": 0,
+            "matchedBy": "CLASS_FLAGS",
+            "kind": "PCT",
+            "value": -50,
+            "direction": "SHORTENS"
+          }
+        ]
+      },
+      "dynamicModifierPolicy": {
+        "method": "HAND_REVIEWED_CPP_ABSENCE_PROOF",
+        "appliesTo": "avenging_wrath",
+        "sourcePaths": [
+          "engine/class_modules/paladin/sc_paladin.cpp",
+          "engine/class_modules/paladin/sc_paladin_protection.cpp",
+          "engine/class_modules/paladin/sc_paladin.hpp"
+        ],
+        "sourceSha256": {
+          "classModule": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+          "specModule": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+          "classHeader": "51fa0abc7fab5e433325c83a4115a7a73a2e57d93276265cf892abb894f56af1"
+        },
+        "reviewedOn": "2026-09-18",
+        "checks": [
+          {
+            "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
+            "search": "every 'cooldowns.sentinel-><member>' in sc_paladin.cpp + sc_paladin_protection.cpp",
+            "finding": "no 'cooldowns.sentinel->' use exists in the module"
+          },
+          {
+            "claim": "NO_MUTATION_THROUGH_A_NAMED_COOLDOWN_OBJECT",
+            "search": "every 'get_cooldown( \"sentinel\" )' site",
+            "finding": "no site obtains this cooldown by name"
+          },
+          {
+            "claim": "NO_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN",
+            "search": "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module",
+            "finding": "18 mutation site(s) in the module; receivers: cooldowns.consecration, cooldowns.holy_shock, cooldowns.holy_armaments, cooldowns.lay_on_hands, cooldowns.guardian_of_ancient_kings, cooldowns.judgment, cooldowns.blade_of_justice, cooldowns.avengers_shield, cooldowns.blessing_of_spellwarding, cooldowns.art_of_war, cooldowns.divine_resonance_icd, cooldowns.walk_into_light_icd, cooldowns.second_sunrise_icd, cooldowns.guided_prayer_icd, cooldowns.blessing_of_protection, a->cooldown, a->internal_cooldown; none names this cooldown"
+          },
+          {
+            "claim": "NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE",
+            "search": "'adjust_recharge_multiplier' sites; 'blessing_of_autumn_t' construction; Blessing of the Seasons traits in trait_data.inc",
+            "finding": "struct blessing_of_autumn_t is defined once (sc_paladin.cpp) and constructed nowhere (0 'new blessing_of_autumn_t', 0 references in sc_paladin.hpp); no Paladin trait row is named for Blessing of the Seasons; every '->adjust_recharge_multiplier(' call in the module sits inside that dead struct"
+          },
+          {
+            "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+            "search": "the body of sentinel_t for 'cooldown->', 'update_ready' and 'cooldown_duration'",
+            "finding": "sentinel_t (lines 721-756) declares no cooldown override and no update_ready; the base action_t::update_ready path applies unchanged"
+          },
+          {
+            "claim": "NO_MODULE_HASTED_COOLDOWN_FLAG",
+            "search": "'cooldown->hasted' sites and their enclosing structs; every assignment of paladin_action_t::hasted_cd",
+            "finding": "3 site(s): specModule:425 in blessed_hammer_t; specModule:620 in hammer_of_the_righteous_t; classHeader:1213 in paladin_action_t; none is this ability's struct; paladin_action_t::hasted_cd is initialised false once and assigned true nowhere (0 assignment(s)), so the base init() forwards false"
+          },
+          {
+            "claim": "NO_MODULE_AFFECT_LIST_NAMES_THIS_SPELL",
+            "search": "'register_passive_affect_list(' calls and the spell ids they add",
+            "finding": "1 call(s): register_passive_affect_list( talents.blessed_champion, affect_list_t( 1 ).add_spell( 20271, 275773 ) );; none adds 389539"
+          }
+        ]
+      },
+      "cooldownStart": {
+        "anchor": "ACTION_EXECUTE",
+        "evidence": [
+          "action.cpp:1914 action_t::execute() calls update_ready()",
+          "action.cpp:2333-2372 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
+          "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier"
+        ],
+        "note": "For an instant, non-channelled ability, execution coincides with the observed cast. Divine Toll, Sentinel and Avenging Wrath are instant in the pinned data."
+      }
+    },
+    {
+      "simcToken": "avenging_wrath",
+      "abilityGameId": 31884,
+      "displayNameEn": "Avenging Wrath",
+      "aliasGroup": "wings",
+      "baseCooldownMs": 120000,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "category": 1550,
+      "categoryCooldownMs": 120000,
+      "categoryTypeMask": 0,
+      "baseGcdMs": 0,
+      "classFamily": 10,
+      "classFlags": [0, 256, 0, 0],
+      "labels": [16, 26, 292, 690],
+      "binding": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+        "createAction": "sc_paladin.cpp:3381-3382 if ( name == \"avenging_wrath\" ) return new avenging_wrath_t( this, options_str )",
+        "specBinding": "sc_paladin.cpp:282-283 avenging_wrath_t : paladin_spell_t( \"avenging_wrath\", p, p->find_spell( 31884 ) )"
+      },
+      "passiveModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_PASSIVE_TRAIT_EFFECTS",
+        "classId": 2,
+        "traitRowsExamined": 289,
+        "traitSpellsExamined": 266,
+        "effectRowsExamined": 1178,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "173:A_MOD_RECHARGE_TIME_PCT_CATEGORY_MASK",
+          "205:A_MOD_RECHARGE_TIME_CATEGORY_MASK",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER",
+          "341:A_MODIFY_CATEGORY_COOLDOWN",
+          "411:A_MOD_MAX_CHARGES",
+          "416:A_HASTED_COOLDOWN",
+          "453:A_MOD_RECHARGE_TIME_CATEGORY",
+          "454:A_MOD_RECHARGE_TIME_PCT_CATEGORY",
+          "457:A_HASTED_CATEGORY"
+        ],
+        "rule": "player.cpp parse_all_passive_talents -> parse_passive_effects (SX_PASSIVE spells; E_APPLY_AURA effects) -> register_passive_effect: A_ADD_FLAT/PCT_MODIFIER with misc_value1 == P_COOLDOWN (11) match by class family flags; the LABEL variants match by misc_value2 against __spelllabel_data; category subtypes match the spell's _category; category-mask subtypes match the spell's _category_type mask; A_HASTED_COOLDOWN matches by family flags. A matched flat value is added to the DBC cooldown field and a matched pct value scales it BEFORE action_t::init reads spell_data.cooldown() (dbc_override_->register_spell( id, \"cooldown\", value )).",
+        "modifiers": [
+          {
+            "talentSpellId": 204074,
+            "displayNameEn": "Righteous Protector",
+            "tree": "SPECIALIZATION",
+            "specIds": [66],
+            "traitNodeId": 81477,
+            "traitEntryId": 102440,
+            "nodeType": "NORMAL",
+            "alternativeEntries": [],
+            "effectId": 301163,
+            "effectIndex": 0,
+            "subtype": 108,
+            "subtypeName": "A_ADD_PCT_MODIFIER",
+            "miscValue1": 11,
+            "miscValue2": 0,
+            "matchedBy": "CLASS_FLAGS",
+            "kind": "PCT",
+            "value": -50,
+            "direction": "SHORTENS"
+          }
+        ]
+      },
+      "dynamicModifierPolicy": {
+        "method": "HAND_REVIEWED_CPP_ABSENCE_PROOF",
+        "appliesTo": "avenging_wrath",
+        "sourcePaths": [
+          "engine/class_modules/paladin/sc_paladin.cpp",
+          "engine/class_modules/paladin/sc_paladin_protection.cpp",
+          "engine/class_modules/paladin/sc_paladin.hpp"
+        ],
+        "sourceSha256": {
+          "classModule": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+          "specModule": "9d334955482bd6e70b0b8b26d1ecc3237932f6067d142c2e99b1f0b21a5d06a4",
+          "classHeader": "51fa0abc7fab5e433325c83a4115a7a73a2e57d93276265cf892abb894f56af1"
+        },
+        "reviewedOn": "2026-09-18",
+        "checks": [
+          {
+            "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
+            "search": "every 'cooldowns.avenging_wrath-><member>' in sc_paladin.cpp + sc_paladin_protection.cpp",
+            "finding": "no 'cooldowns.avenging_wrath->' use exists in the module"
+          },
+          {
+            "claim": "NO_MUTATION_THROUGH_A_NAMED_COOLDOWN_OBJECT",
+            "search": "every 'get_cooldown( \"avenging_wrath\" )' site",
+            "finding": "no site obtains this cooldown by name"
+          },
+          {
+            "claim": "NO_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN",
+            "search": "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module",
+            "finding": "18 mutation site(s) in the module; receivers: cooldowns.consecration, cooldowns.holy_shock, cooldowns.holy_armaments, cooldowns.lay_on_hands, cooldowns.guardian_of_ancient_kings, cooldowns.judgment, cooldowns.blade_of_justice, cooldowns.avengers_shield, cooldowns.blessing_of_spellwarding, cooldowns.art_of_war, cooldowns.divine_resonance_icd, cooldowns.walk_into_light_icd, cooldowns.second_sunrise_icd, cooldowns.guided_prayer_icd, cooldowns.blessing_of_protection, a->cooldown, a->internal_cooldown; none names this cooldown"
+          },
+          {
+            "claim": "NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE",
+            "search": "'adjust_recharge_multiplier' sites; 'blessing_of_autumn_t' construction; Blessing of the Seasons traits in trait_data.inc",
+            "finding": "struct blessing_of_autumn_t is defined once (sc_paladin.cpp) and constructed nowhere (0 'new blessing_of_autumn_t', 0 references in sc_paladin.hpp); no Paladin trait row is named for Blessing of the Seasons; every '->adjust_recharge_multiplier(' call in the module sits inside that dead struct"
+          },
+          {
+            "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+            "search": "the body of avenging_wrath_t for 'cooldown->', 'update_ready' and 'cooldown_duration'",
+            "finding": "avenging_wrath_t (out-of-line members) declares no cooldown override and no update_ready; the base action_t::update_ready path applies unchanged"
+          },
+          {
+            "claim": "NO_MODULE_HASTED_COOLDOWN_FLAG",
+            "search": "'cooldown->hasted' sites and their enclosing structs; every assignment of paladin_action_t::hasted_cd",
+            "finding": "3 site(s): specModule:425 in blessed_hammer_t; specModule:620 in hammer_of_the_righteous_t; classHeader:1213 in paladin_action_t; none is this ability's struct; paladin_action_t::hasted_cd is initialised false once and assigned true nowhere (0 assignment(s)), so the base init() forwards false"
+          },
+          {
+            "claim": "NO_MODULE_AFFECT_LIST_NAMES_THIS_SPELL",
+            "search": "'register_passive_affect_list(' calls and the spell ids they add",
+            "finding": "1 call(s): register_passive_affect_list( talents.blessed_champion, affect_list_t( 1 ).add_spell( 20271, 275773 ) );; none adds 31884"
+          }
+        ]
+      },
+      "cooldownStart": {
+        "anchor": "ACTION_EXECUTE",
+        "evidence": [
+          "action.cpp:1914 action_t::execute() calls update_ready()",
+          "action.cpp:2333-2372 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
+          "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier"
+        ],
+        "note": "For an instant, non-channelled ability, execution coincides with the observed cast. Divine Toll, Sentinel and Avenging Wrath are instant in the pinned data."
+      }
+    }
+  ]
+}

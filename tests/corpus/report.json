@@ -190,6 +190,20 @@
       "sha256": "08272ce986fe5699b210885d1d60b4a30ec00840624434ea565814d9482ff998"
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "byteLength": 257348,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "cbb8c9977755976207c6bf08d6c318876e3990727a037b41c19f948a26c198b4"
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+      "byteLength": 163491,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "DERIVED_FROM_CAPTURE",
+      "sha256": "bb6538c5a886a0c557fba439522225cc9413fafaa4f96d2887bfdea3eca26428"
+    },
+    {
       "artifactId": "wcl-pull-window-with-resources",
       "byteLength": 55269,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -213,8 +227,8 @@
       "passed": 23
     },
     {
-      "assertions": 72,
-      "cases": 22,
+      "assertions": 81,
+      "cases": 24,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
@@ -233,7 +247,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 72
+      "passed": 81
     },
     {
       "assertions": 62,
@@ -282,12 +296,14 @@
       "passed": 20
     },
     {
-      "assertions": 38,
-      "cases": 12,
+      "assertions": 59,
+      "cases": 17,
       "failed": 0,
       "kindsExercised": [
+        "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
         "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE",
         "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION",
+        "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
         "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
         "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
         "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
@@ -296,11 +312,12 @@
         "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",
         "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
         "SPEC_PROTECTION_PALADIN.SPEC_GATE",
+        "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
         "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET"
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_PROTECTION_PALADIN",
-      "passed": 38
+      "passed": 59
     },
     {
       "assertions": 6,
@@ -1221,6 +1238,69 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-rotational-45s-gap-keeps-681-events-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.protection-paladin-rotational-45s-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s"]
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
@@ -1868,6 +1948,44 @@
       "referencedArtifactIds": ["wcl-assassination-vanish-ambush-gate"]
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.a-later-cast-never-establishes-earlier-state",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s"]
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
@@ -1902,6 +2020,49 @@
       "caseId": "spec-protection-paladin.build-resolves-from-the-observed-tree-not-from-casts",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.every-remaining-unknown-retains-its-blocker-at-two-entries",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -2230,6 +2391,120 @@
       "caseId": "spec-protection-paladin.resolver-binds-the-build-facts-the-real-tree-proves",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 6,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.rotational-45s-gap-restores-unknown-when-the-anchor-is-removed",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.rotational-45s-population-is-forty-seven-selected-before-any-outcome",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "caseId": "spec-protection-paladin.the-divine-toll-press-is-a-real-exact-entry-match",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-rotational-45s"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -2584,15 +2859,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 2391519,
-    "artifacts": 28,
-    "assertions": 232,
-    "cases": 90,
+    "artifactBytes": 2812358,
+    "artifacts": 30,
+    "assertions": 262,
+    "cases": 97,
     "declared": 0,
-    "executable": 232,
+    "executable": 262,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 232
+    "passed": 262
   }
 }

@@ -83,7 +83,21 @@ import type {
   ObservedTalentEntry,
   TalentResolution,
 } from "../../../data/game/talent-selection.js";
-import type { ProtectionBuildFacts } from "./action-profile.js";
+import type { ProtectionBuildFacts, ProtectionReadinessFact } from "./action-profile.js";
+import { AVENGING_WRATH_TOKEN } from "./action-profile.js";
+import {
+  bindSupportedProtectionAuras,
+  protectionBuffBindingsFrom,
+  type ProtectionAuraBinding,
+} from "./aura-bindings.js";
+import {
+  deriveSupportedProtectionCooldowns,
+  effectiveBaseFor,
+  protectionCooldownBindingsFrom,
+  type ProtectionDerivedCooldown,
+  type ProtectionTokenCooldown,
+} from "./cooldown-bindings.js";
+import { protectionCooldownAbilitiesFor } from "../../../data/game/paladin-protection-cooldowns.js";
 import { DIVINE_INSPIRATION_DISPLAY_NAME, resolveProtectionHeroEntry } from "./subaction-candidates.js";
 import { standaloneProtectionAuthorityAccess } from "./authority-bindings.js";
 import { protectionDomainResults, type ProtectionDomainResults } from "./domains.js";
@@ -190,8 +204,39 @@ export interface ProtectionPaladinPayload {
   readonly resolved: readonly {
     readonly position: number;
     readonly diagnostics: ProtectionResolverDiagnostics;
+    /** The buff atoms bound (or not) at this decision, with M4's anchor. */
+    readonly auras: readonly ProtectionAuraBinding[];
+    /** The cooldowns derived (or not) at this decision. */
+    readonly cooldowns: readonly ProtectionCooldownDiagnostics[];
     /** Where the shared first-GCD engine stopped, when it did. Internal evidence; never projected. */
     readonly selection: ProtectionSelectionDiagnostics;
+  }[];
+}
+
+/** One derived cooldown at a decision, as the payload carries it. */
+export interface ProtectionCooldownDiagnostics {
+  readonly simcToken: string;
+  readonly readiness: ProtectionTokenCooldown["readiness"];
+  readonly readinessAbilityGameId: number | null;
+  readonly remainsSeconds: ProtectionTokenCooldown["remainsSeconds"];
+  readonly perAbility: readonly {
+    readonly abilityGameId: number;
+    readonly effectiveBase: ProtectionDerivedCooldown["effectiveBase"];
+    readonly staticModifiers: ProtectionDerivedCooldown["staticModifiers"];
+    readonly cooldown:
+      | {
+          readonly state: "UNKNOWN";
+          readonly reason: string;
+          readonly anchorPosition: number | null;
+        }
+      | {
+          readonly state: "EXACT" | "BOUNDED";
+          readonly atLeastRemainingMs: number;
+          readonly baseCooldownMs: number;
+          readonly elapsedMs: number;
+          readonly anchorPosition: number;
+          readonly anchorLocator: EvidenceLocator;
+        };
   }[];
 }
 
@@ -287,6 +332,50 @@ function metadataOf(authority: AplAuthority): AnalysisAuthorityMetadata {
     sourceSha256: provenance.sourceSha256,
     specName: artifact.spec.specName,
     className: artifact.spec.className,
+  };
+}
+
+/** The smallest effective wings base any pinned wings record admits for this build, or null. */
+function wingsCooldownLowerBoundFor(observedTalents: readonly ObservedTalentEntry[]): number | null {
+  let bound: number | null = null;
+  for (const ability of protectionCooldownAbilitiesFor(AVENGING_WRATH_TOKEN)) {
+    const { base } = effectiveBaseFor(ability, observedTalents);
+    if (base.state === "REFUSED") return null;
+    bound = bound === null ? base.ms : Math.min(bound, base.ms);
+  }
+  return bound;
+}
+
+/** One derived cooldown, reduced to what evidence needs. */
+function cooldownDiagnosticsOf(entry: ProtectionTokenCooldown): ProtectionCooldownDiagnostics {
+  return {
+    simcToken: entry.simcToken,
+    readiness: entry.readiness,
+    readinessAbilityGameId: entry.readinessAbilityGameId,
+    remainsSeconds: entry.remainsSeconds,
+    perAbility: entry.perAbility.map((derived) => ({
+      abilityGameId: derived.abilityGameId,
+      effectiveBase: derived.effectiveBase,
+      staticModifiers: derived.staticModifiers,
+      cooldown:
+        derived.cooldown.state === "UNKNOWN"
+          ? {
+              state: "UNKNOWN",
+              reason: derived.cooldown.reason,
+              anchorPosition: derived.cooldown.anchor?.position ?? null,
+            }
+          : {
+              state: derived.cooldown.state,
+              atLeastRemainingMs:
+                derived.cooldown.state === "EXACT"
+                  ? derived.cooldown.remainingMs
+                  : derived.cooldown.atLeastRemainingMs,
+              baseCooldownMs: derived.cooldown.baseCooldownMs,
+              elapsedMs: derived.cooldown.elapsedMs,
+              anchorPosition: derived.cooldown.anchor.position,
+              anchorLocator: derived.cooldown.anchor.locator,
+            },
+    })),
   };
 }
 
@@ -388,6 +477,11 @@ export function analyzeObservedProtectionPaladinDecisions(
   };
   const actionTokens = [...new Set(authority.actions.map((action) => action.actionToken))];
   const tokens = protectionTokenByAbilityId();
+  // The wings cooldown a HYPOTHETICAL wings execution would start for this
+  // actor: the pinned base after the censused static modifiers, as a lower
+  // bound over both wings records. Established once from the build, not per
+  // decision, and null when either record refuses.
+  const wingsCooldownLowerBoundMs = wingsCooldownLowerBoundFor(observedTalents);
 
   const comparisons: ObservedActionComparison[] = [];
   const excluded: ExcludedProtectionCast[] = [];
@@ -396,6 +490,8 @@ export function analyzeObservedProtectionPaladinDecisions(
     position: number;
     diagnostics: ProtectionResolverDiagnostics;
     selection: ProtectionSelectionDiagnostics;
+    auras: readonly ProtectionAuraBinding[];
+    cooldowns: readonly ProtectionCooldownDiagnostics[];
   }[] = [];
 
   for (const position of state.positionsBySourceActor(actorId)) {
@@ -463,30 +559,49 @@ export function analyzeObservedProtectionPaladinDecisions(
     // ---- bindings: only what is POSITIVELY established ----
     //
     // No Rogue resource is read: combo points and energy are stated UNKNOWN,
-    // which the pinned Protection APL never asks about anyway. Buffs are not
-    // bound — no Paladin aura identity is pinned at M10-C — so every
-    // `buff.<name>.up` is enumerated, and a verdict survives only if it holds
-    // under both assignments.
+    // which the pinned Protection APL never asks about anyway. At M10-C5 Phase
+    // A one buff atom (`avenging_wrath`, through the pinned Sentinel aura) and
+    // two cooldowns (`divine_toll`, `avenging_wrath`) are bound from OBSERVED
+    // transitions and casts strictly before the decision; everything else is
+    // enumerated, and a verdict survives only if it holds under every
+    // assignment.
+    const auras = bindSupportedProtectionAuras({
+      state,
+      actorId,
+      position,
+      talents: { sentinel: build.sentinel },
+    });
+    const cooldowns = deriveSupportedProtectionCooldowns({ state, actorId, position, observedTalents });
     const bindings: AtomBindings = {
       comboPoints: unknownNumber("STATE_NOT_MODELLED"),
       comboPointsDeficit: unknownNumber("STATE_NOT_MODELLED"),
       energyPct: unknownNumber("STATE_NOT_MODELLED"),
-      knownBuffs: [],
+      knownBuffs: protectionBuffBindingsFrom(auras),
       knownTalents: resolution.diagnostics.knownTalents,
+      knownCooldownRemainsSeconds: protectionCooldownBindingsFrom(cooldowns),
       specAtoms: resolution.specAtoms,
     };
+    const readiness: ProtectionReadinessFact[] = cooldowns.map((entry) => ({
+      simcToken: entry.simcToken,
+      readiness: entry.readiness,
+      abilityGameId: entry.readinessAbilityGameId,
+    }));
 
     const outcome = protectionFirstGcdSelectionAt({
       authority,
       bindings,
       buildFacts,
       observedAbilityGameId: abilityGameId,
+      readiness,
+      wingsCooldownLowerBoundMs,
     });
 
     resolved.push({
       position,
       diagnostics: resolution.diagnostics,
       selection: selectionDiagnosticsOf(outcome.result),
+      auras,
+      cooldowns: cooldowns.map(cooldownDiagnosticsOf),
     });
 
     // Protection's own proof that the authority could not have selected the

@@ -160,6 +160,30 @@ Usability of a spender is PROVEN_UNUSABLE only when Holy Power is KNOWN below
 the pinned cost and every free-cast route is disproved; it is never inferred
 from an observed uncosted cast.
 
+## Cooldowns and auras (M10-C5 Phase A)
+
+Two Protection-owned bindings feed the shared engine from OBSERVED evidence
+strictly before each decision, and nothing else:
+
+- `cooldown-bindings.ts` derives `divine_toll` and `avenging_wrath` through
+  the generic M4 cooldown primitive over the pinned
+  `paladin-protection-cooldowns.json`. The pinned base is folded with the
+  actor's censused static modifiers by the shared three-way talent rule —
+  SELECTED applied exactly, NOT_SELECTED ignored, UNKNOWN applied only when
+  it shortens (a lower bound) — and the dynamic absence proof is carried as
+  the engine's modifier policy. `avenging_wrath` is an alias group (Sentinel
+  389539 under the talent, Avenging Wrath 31884 otherwise): a cast of either
+  member anchors it. Only PROVEN_NOT_READY is ever acted on
+  (`ACTIVE_COOLDOWN` usability); READY is never claimed. The wings overlay
+  binds the cooldown atom to the actor's effective base, never the raw DBC
+  value.
+- `aura-bindings.ts` binds `buff.avenging_wrath` from the Sentinel aura
+  (`paladin-protection-aura-authority.ts`: under Sentinel the expression is
+  rewritten to `buff.sentinel`, whose buff IS spell 389539) through M4's
+  `presenceAt` — ACTIVE from an observed application, INACTIVE from an
+  observed removal, UNBOUND otherwise. Without Sentinel the identity is not
+  pinned (Radiant Glory would change the record) and the atom stays unbound.
+
 ## What the real evidence yields
 
 Over `wcl-protection-paladin-a7r6-opener`: 21 eligible decisions, all
@@ -180,24 +204,39 @@ SYNTHETIC premises in `tests/contracts/m10c-protection-evaluator.test.ts`,
 including a Shield of the Righteous prefix that converges and one that
 diverges.
 
-M10-C is therefore INCOMPLETE by its own acceptance rule: no real eligible
-decision resolves. The first irreducible blocker is now the readiness of
-the GCD candidates at the decision: `default[6] divine_toll` (60 s cooldown,
-never cast in the 22 s window, so its state at pull — the only thing that
-would decide it — is outside the log) in the branch where wings fired, and
-`default[9] holy_armaments` (the Lightsmith alternation state `next_armament`
-is not observable in Warcraft Logs) otherwise, followed by Hammer of Wrath,
-Avenger's Shield and Judgment's recharge, all of which turn on cooldown or
-charge state at pull. None of that can be derived from the committed
-evidence or the pinned sources; it requires a different real artifact whose
-decisions sit more than a full cooldown after pull with complete cast
-coverage in between (a new capture), or an evidence family Warcraft Logs
-does not provide.
+On the opener alone M10-C was INCOMPLETE by its own acceptance rule: no
+real eligible decision resolved, because the readiness of the GCD candidates
+at the decision — Divine Toll's cooldown state at pull, the Lightsmith
+alternation — is outside a 22 s log.
+
+Over `wcl-protection-paladin-a7r6-rotational-45s` (M10-C5 Phase A, the whole
+45-second capture of the same subject): 47 eligible decisions, 1 MATCH, 0
+REJECTED, 46 UNKNOWN. The MATCH is the Divine Toll press at 2,026,655
+(+22,066 ms), selected by the exact entry `default[6] divine_toll`: the
+Sentinel press 414 ms earlier proves wings cannot fire (at least 59,586 ms of
+a 60,000 ms effective base remain — 120,000 ms halved by the SELECTED
+Righteous Protector, per the census), the Sentinel aura M4 observed applied
+binds `buff.avenging_wrath.up` TRUE, and the press itself proves Divine
+Toll usable; all three race worlds agree. The 46 UNKNOWN keep exact blockers:
+21 at `default[6] divine_toll` (before the Sentinel press: no anchor of any
+kind) and 25 at `default[9] holy_armaments` (after the Divine Toll press,
+whose cooldown is then PROVEN_NOT_READY from its own cast, the next honest
+blocker is `next_armament`, which only an observed Holy Armaments hardcast
+could anchor — none occurs in the window). The predeclared gap derivative
+(everything before 2,026,589 removed) restores UNKNOWN for the same press.
+No later event is ever consulted: the same Sentinel press proves nothing
+for the Blessed Hammer 384 ms before it.
+
+M10-C's acceptance rule (`real MATCH + real REJECTED > 0`) is met on this
+evidence with exactly one real MATCH. Rotational steady state below
+`default[9]` remains unmeasured: `next_armament` is anchor-only, and the
+Judgment / Hammer of Wrath / Avenger's Shield readiness after a full cooldown
+cycle needs a longer capture (Phase B, not authorized).
 
 ## Not here, on purpose
 
-No cooldown data beyond wings' base, no aura identities beyond the wings
-overlay, no spender cost, no mitigation or health model, no defensive,
+No cooldown data beyond Divine Toll and wings, no aura identity beyond the
+Sentinel aura, no spender cost, no mitigation or health model, no defensive,
 self-healing or interrupt judgment, no top-log or performance input, no
 public exposure, and no inference from an absent gear key. Each is a
 recorded missing fact, and each blocks the affected decision closed rather

@@ -354,6 +354,160 @@ export function useItemsSubActionSet(
   return pass();
 }
 
+export function cooldownReadinessAt(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  if (!run.ok) return run.outcome;
+  const position = castPosition(run.state, params.actorId, params.observedCast);
+  if (!position.ok) return position.outcome;
+  const resolved = run.analysis.resolved.find((entry) => entry.position === position.position);
+  const cooldown = resolved?.cooldowns.find((entry) => entry.simcToken === params.simcToken);
+  if (resolved === undefined || cooldown === undefined) {
+    return fail("the evaluator derived no cooldown for this token at this decision", {
+      expected: { simcToken: params.simcToken },
+      locator: run.state.locatorAt(position.position),
+    });
+  }
+  const anchored = cooldown.perAbility.find(
+    (entry) => entry.abilityGameId === cooldown.readinessAbilityGameId,
+  );
+  const anchorCooldown = anchored?.cooldown;
+  const first = cooldown.perAbility[0];
+  const actual = {
+    readiness: cooldown.readiness.state,
+    provenRemainingAtLeastMs:
+      cooldown.readiness.state === "PROVEN_NOT_READY" ? cooldown.readiness.provenRemainingAtLeastMs : null,
+    anchorReportTimeMs:
+      anchorCooldown !== undefined && anchorCooldown.state !== "UNKNOWN"
+        ? anchorCooldown.anchorLocator.reportTimeMs
+        : null,
+    anchorAbilityGameId: cooldown.readinessAbilityGameId,
+    effectiveBaseMs:
+      anchored !== undefined && anchored.effectiveBase.state !== "REFUSED" ? anchored.effectiveBase.ms : null,
+    unknownReason:
+      cooldown.readiness.state === "PROVEN_NOT_READY" ||
+      first === undefined ||
+      first.cooldown.state !== "UNKNOWN"
+        ? null
+        : first.cooldown.reason,
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the cooldown readiness at this decision differs from the case", {
+      expected: params.expected,
+      actual,
+      locator: run.state.locatorAt(position.position),
+    });
+  }
+  return pass();
+}
+
+export function auraBindingAt(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_PROTECTION_PALADIN.AURA_BINDING_AT">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  if (!run.ok) return run.outcome;
+  const position = castPosition(run.state, params.actorId, params.observedCast);
+  if (!position.ok) return position.outcome;
+  const resolved = run.analysis.resolved.find((entry) => entry.position === position.position);
+  const aura = resolved?.auras.find((entry) => entry.atomName === params.atomName);
+  if (resolved === undefined || aura === undefined) {
+    return fail("the evaluator bound no aura atom of this name at this decision", {
+      expected: { atomName: params.atomName },
+      locator: run.state.locatorAt(position.position),
+    });
+  }
+  const actual =
+    aura.state === "BOUND"
+      ? {
+          state: aura.state,
+          up: aura.up,
+          abilityGameId: aura.abilityGameId,
+          anchorReportTimeMs: aura.anchorLocator.reportTimeMs,
+          reason: null,
+        }
+      : {
+          state: aura.state,
+          up: null,
+          abilityGameId: aura.abilityGameId,
+          anchorReportTimeMs: null,
+          reason: aura.reason,
+        };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the aura binding at this decision differs from the case", {
+      expected: params.expected,
+      actual,
+      locator: run.state.locatorAt(position.position),
+    });
+  }
+  return pass();
+}
+
+export function unknownBlockerDistribution(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  if (!run.ok) return run.outcome;
+  const blockedAt = new Map<string, number>();
+  let match = 0;
+  let rejected = 0;
+  for (const comparison of run.analysis.comparisons) {
+    if (comparison.outcome === "MATCH") {
+      match += 1;
+      continue;
+    }
+    if (comparison.outcome === "REJECTED") {
+      rejected += 1;
+      continue;
+    }
+    const resolved = run.analysis.resolved.find((entry) => entry.position === comparison.decision.position);
+    const key = resolved?.selection.blockedAt ?? null;
+    if (key === null) {
+      return fail("an UNKNOWN decision carries no engine blocker", {
+        actual: { outcome: comparison.outcome, rawBlocker: comparison.rawBlocker },
+        locator: comparison.decision.locator,
+      });
+    }
+    blockedAt.set(key, (blockedAt.get(key) ?? 0) + 1);
+  }
+  const actual = {
+    match,
+    rejected,
+    blockedAt: Object.fromEntries(
+      [...blockedAt.entries()].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)),
+    ),
+  };
+  const expected = {
+    match: params.expected.match,
+    rejected: params.expected.rejected,
+    blockedAt: Object.fromEntries(
+      Object.entries(params.expected.blockedAt).sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)),
+    ),
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    return fail("the UNKNOWN blocker distribution differs from the case", { expected, actual });
+  }
+  const unknown = [...blockedAt.values()].reduce((sum, count) => sum + count, 0);
+  if (match + rejected + unknown !== run.analysis.comparisons.length) {
+    return fail("the blockers and the resolved counts do not partition the eligible decisions", {
+      actual: { match, rejected, unknown, eligible: run.analysis.comparisons.length },
+    });
+  }
+  return pass();
+}
+
 export function buildResolution(
   context: CorpusExecutionContext,
   corpus: LoadedCorpus,

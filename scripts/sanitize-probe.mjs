@@ -15,7 +15,7 @@
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --where <key>=<value> <N>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --indices <i,j,k>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --decision-slice <subject> <target,target>
- *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice <subject> [<toReportTimeMs>]
+ *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice <subject> [<toReportTimeMs>] [--families <type,type,...>]
  *
  * `--per-type` keeps up to N events of EACH distinct `type`, in original order.
  * That yields far more evidence per byte than a head slice: a fixture that has
@@ -57,6 +57,15 @@
  * [subject] over [window start, bound]; the bound exists so a retained slice
  * stays under the corpus artifact size limit, and the grant must end there.
  *
+ * `--families` (M10-C5, `--actor-slice` only) additionally keeps ONLY events
+ * whose raw `type` is in the list — a generic family filter, recorded in the
+ * invocation, so a longer window fits under the artifact limit by dropping
+ * families a question does not need rather than by shortening the window.
+ * The retained families are still complete over the window by the same
+ * predicate; a family that was filtered out is NOT retained, and a slice cut
+ * this way must grant coverage only to the categories its retained families
+ * vouch for. Nothing within a retained family is trimmed.
+ *
  * Accepts a full GraphQL envelope, a bare event array, or an ARRAY OF PAGE
  * ENVELOPES (a paginated capture, concatenated in page order), and always
  * writes a bare event array plus a small provenance header alongside it.
@@ -83,7 +92,7 @@ const FORBIDDEN = ["client_secret", "access_token", "authorization", "bearer ", 
  * M9-B predates this field, and their manifest entries record UNAVAILABLE —
  * a fact about those captures, not something to backfill.
  */
-export const SANITIZER_REVISION = "sanitize-probe-4";
+export const SANITIZER_REVISION = "sanitize-probe-5";
 
 /** Where a reviewed slice lands: the regression corpus, never a loose fixture directory. */
 export const OUTPUT_ROOT = "tests/corpus/artifacts/wcl-events";
@@ -184,14 +193,42 @@ export function decisionSlice(events, subject, targets) {
  *
  * Keeps, in capture order, every event whose `sourceID` or `targetID` is
  * `subject`, and — when `untilMs` is a number — only those with `timestamp`
- * at or before it. Nothing is reordered, deduplicated or synthesised.
+ * at or before it, and — when `families` is a list — only those whose raw
+ * `type` is in it. Nothing is reordered, deduplicated or synthesised.
  */
-export function actorSlice(events, subject, untilMs = null) {
+export function actorSlice(events, subject, untilMs = null, families = null) {
+  const kept = families === null ? null : new Set(families);
   return events.filter((event) => {
     if (typeof event !== "object" || event === null) return false;
     if (event.sourceID !== subject && event.targetID !== subject) return false;
+    if (kept !== null && !kept.has(event.type)) return false;
     return untilMs === null || (typeof event.timestamp === "number" && event.timestamp <= untilMs);
   });
+}
+
+/**
+ * Parses a `--families` list: raw Warcraft Logs type strings, comma-separated,
+ * each non-empty and listed once. Exported for tests. Refuses rather than
+ * trims, for the same reason `parseIndexSelection` does.
+ */
+export function parseFamilySelection(spec) {
+  if (typeof spec !== "string" || spec.trim().length === 0) {
+    return {
+      ok: false,
+      error: "--families requires a comma-separated list of raw event types, e.g. --families cast,applybuff",
+    };
+  }
+  const families = [];
+  for (const field of spec.split(",")) {
+    const type = field.trim();
+    if (type.length === 0) return { ok: false, error: `--families has an empty entry in "${spec}"` };
+    if (!/^[a-z]+$/.test(type))
+      return { ok: false, error: `--families entry "${type}" is not a raw Warcraft Logs event type` };
+    if (families.includes(type))
+      return { ok: false, error: `--families entry "${type}" is listed more than once` };
+    families.push(type);
+  }
+  return { ok: true, families };
 }
 
 function main() {
@@ -199,7 +236,7 @@ function main() {
 
   if (inputPath === undefined || outputName === undefined) {
     console.error(
-      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs]]",
+      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs] [--families type,type]]",
     );
     process.exit(1);
   }
@@ -212,13 +249,32 @@ function main() {
   let sliced;
   if (mode === "--actor-slice") {
     const subject = Number(countRaw);
-    const untilRaw = process.argv[6];
+    const rest = process.argv.slice(6);
+    const familiesAt = rest.indexOf("--families");
+    const positional = familiesAt === -1 ? rest : rest.slice(0, familiesAt);
+    const untilRaw = positional[0];
     const untilMs = untilRaw === undefined ? null : Number(untilRaw);
-    if (!Number.isSafeInteger(subject) || (untilMs !== null && !Number.isSafeInteger(untilMs))) {
-      console.error("usage: --actor-slice <subject actor id> [<toReportTimeMs>]");
+    if (
+      !Number.isSafeInteger(subject) ||
+      (untilMs !== null && !Number.isSafeInteger(untilMs)) ||
+      positional.length > 1 ||
+      (familiesAt !== -1 && rest.length !== familiesAt + 2)
+    ) {
+      console.error(
+        "usage: --actor-slice <subject actor id> [<toReportTimeMs>] [--families <type,type,...>]",
+      );
       process.exit(1);
     }
-    sliced = actorSlice(events, subject, untilMs);
+    let families = null;
+    if (familiesAt !== -1) {
+      const selection = parseFamilySelection(rest[familiesAt + 1]);
+      if (!selection.ok) {
+        console.error(selection.error);
+        process.exit(1);
+      }
+      families = selection.families;
+    }
+    sliced = actorSlice(events, subject, untilMs, families);
   } else if (mode === "--decision-slice") {
     const subject = Number(countRaw);
     const targets = String(process.argv[6] ?? "")

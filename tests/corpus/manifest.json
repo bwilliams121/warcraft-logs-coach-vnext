@@ -2333,6 +2333,180 @@
       }
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-45s.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "cbb8c9977755976207c6bf08d6c318876e3990727a037b41c19f948a26c198b4",
+      "byteLength": 257348,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-16",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2004589,
+            "endTimeMs": 2049589
+          },
+          "completeness": {
+            "eventsReturned": 30588,
+            "pagesRetrieved": 4,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Four pages (10,007 / 10,000 / 10,009 / 572 events; cursors 2,021,544, 2,034,579, 2,048,380, then null): the whole 45-second window was retrieved inside the 10-page cap. The fight's first event (the encounterstart at 2,004,589 = the fight start) is on page 1, so coverage runs from the pull. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first, so no page straddles two exports (.probe/m10b-request-count.json)."
+          },
+          "captureTooling": {
+            "name": ".probe/m10b-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R5 opener window: EVENTS_QUERY over [2,004,589 .. 2,049,589] (the pull's first 45 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10b-capture-plan.md before running, run once by hand on 2026-09-16 (6 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-5",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10b-pages.json wcl-protection-paladin-a7r6-rotational-45s.json --actor-slice 7 2049581 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The same four page envelopes as the opener, concatenated in page order, then the --actor-slice predicate bounded at the capture's last timestamp (2,049,581) and restricted by --families to thirteen raw types: cast, resourcechange, the ten aura-transition types and combatantinfo. In place and order preserved, 1,093 of 30,588 events: 132 casts (101 by actor 7, 31 targeting it), 43 resourcechange (all targeting 7), 917 aura transitions (502 targeting 7, 415 sourced by 7 on others), actor 7's combatantinfo at the fight start; first event 2,004,589, last 2,049,482. Damage, healing, absorbed and summon events involving actor 7 (1,459 of its 2,552 events in the window) were FILTERED OUT by family, not trimmed within a family, so the whole 45-second window fits under the 512 KiB artifact limit (257,348 bytes) where the unfiltered actor slice would not (~1.1 MB).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-5",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [7],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2004589,
+                  "toReportTimeMs": 2049581
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 7 over [2,004,589 .. 2,049,581] by the predicate 'every event actor 7 sources or is targeted by, of a retained family, at or before the bound' over a window the capture retrieved COMPLETE (four pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted: those families were filtered out and this slice cannot vouch for them. The window begins at the fight start, so an absence claim over any prefix of it in a retained family is fully covered. Nothing is granted to any other actor, and nothing after the bound."
+        },
+        "retainedFor": "M10-C5 Phase A: the whole 45-second capture of the same Protection Paladin subject, as the shared decision engine needs it — every cast, every Holy Power change and every aura transition on or by the subject from the pull, with the combatantinfo. It holds what the 22-second opener could not: the subject's Sentinel press at 2,026,241 (+21,652) and the Sentinel aura it applied, the Divine Toll press at 2,026,655 (+22,066), the Voracious Heart of Ula'tek use and the Light's Potential potion, ten Hammer of Wrath casts under the Sentinel-triggered Hammer of Wrath buff, and the later Blessed Hammer, Judgment, Avenger's Shield and Consecration presses whose readiness a 45-second history can or cannot establish. 101 casts by actor 7 in total, the evaluation population being every eligible GCD-lane cast among them; the evaluation window is the whole slice, fixed before any evaluator ran.",
+        "limitations": [
+          "Forty-five seconds of a 424-second kill: nothing about the fight's later cooldown cycles or its ending.",
+          "No damage, healing, absorb or summon event is retained; mitigation, survival and pet attribution questions belong to the opener slice, not to this one.",
+          "No Holy Armaments hardcast (432459 / 432472) occurs in the window, so the Lightsmith alternation state cannot be anchored from this evidence.",
+          "Cooldown state at the pull is outside the log: nothing here says whether any ability was on cooldown when the fight began.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+      "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "bb6538c5a886a0c557fba439522225cc9413fafaa4f96d2887bfdea3eca26428",
+      "byteLength": 163491,
+      "provenance": {
+        "kind": "DERIVED_FROM_CAPTURE",
+        "parentArtifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+        "source": null,
+        "transformations": [
+          {
+            "kind": "EVENT_REMOVAL",
+            "tooling": {
+              "name": "scripts/corpus/derive-gap.mjs",
+              "revision": "derive-gap-1",
+              "invocation": "node scripts/corpus/derive-gap.mjs wcl-protection-paladin-a7r6-rotational-45s.json wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589.json --remove-between 2004589 2026589"
+            },
+            "detail": "Every event strictly between the fight start (2,004,589) and 2,026,589 removed: 412 of 1,093 events, including 45 of the subject's 101 casts — among them the Sentinel press at 2,026,241 and the Sentinel aura application that press produced. The combatantinfo at the fight start and every event from 2,026,628 on (56 casts by the subject, the Divine Toll press at 2,026,655 first among the GCD-lane ones) are byte-for-byte the parent's, in the parent's order. THE BOUNDARY WAS PREDECLARED: 2,026,589 is the M10-B opener's bound, fixed before this derivative existed and before any Phase A evaluation; it was not chosen from any decision's outcome. The same tool reproduces the committed opener gap derivative byte for byte from the opener (checked by tests/unit/derive-gap.test.ts).",
+            "invalidates": [
+              "OBSERVED_BEHAVIOUR",
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY"
+            ]
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [7],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2026589,
+                  "toReportTimeMs": 2049581
+                }
+              ]
+            }
+          ],
+          "basis": "The parent's grant clipped to begin at the removal boundary: from 2,026,589 to the parent's bound the retained events are exactly the parent's, so the parent's coverage still holds there; before it, nothing is covered. The window itself still starts at the fight start because the combatantinfo was kept, which is what makes the gap a PARTIAL interval rather than a shorter complete one."
+        },
+        "retainedFor": "The truncated-history condition on the Phase A evidence: the same decisions after 2,026,589 as the parent, but with the history that anchors them — the Sentinel press and its aura — removed. A cooldown or aura fact the parent establishes from that history must return to UNKNOWN here, never carry over; and no decision may resolve on this derivative that needed the removed events.",
+        "limitations": [
+          "Not evidence of anything that happened between 2,004,589 and 2,026,589; those events were removed on purpose.",
+          "Inherits every limitation of its parent."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-pull-window-with-resources",
       "path": "artifacts/wcl-events/wcl-pull-window-with-resources.json",
       "encoding": "JSON",
@@ -4666,6 +4840,104 @@
       ]
     },
     {
+      "caseId": "normalization.protection-paladin-rotational-45s-gap-keeps-681-events-in-order",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; scripts/corpus/derive-gap.mjs",
+      "purpose": "The predeclared gap derivation holds exactly 681 of the parent's 1,093 events — the combatantinfo at the fight start and everything from 2,026,628 on — in the parent's order, every type still recognised; 56 of the subject's casts remain as SOURCE.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 681
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "SOURCE",
+            "expected": {
+              "COMBATANT_INFO": 1,
+              "CAST": 56,
+              "RESOURCE_CHANGE": 26,
+              "AURA": 521
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The boundary (2,026,589) was fixed by M10-B before this derivative existed and is recorded in the transformation; the count ties the recorded removal (412 events) to the bytes, and the committed tool reproduces the M10-B gap derivative byte for byte from the opener."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/derive-gap.test.ts"]
+    },
+    {
+      "caseId": "normalization.protection-paladin-rotational-45s-normalizes-whole-and-in-order",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts",
+      "purpose": "The 1,093-event family-filtered actor-7 slice normalizes with every raw type recognised and every event kept in capture order: as SOURCE 101 casts, 43 Holy Power changes, 801 aura transitions, 1 combatantinfo; as TARGET 32 casts, 43 resource changes, 502 aura transitions. No damage, healing, absorb or summon event is present, by the recorded family filter.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 1093
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "SOURCE",
+            "expected": {
+              "COMBATANT_INFO": 1,
+              "CAST": 101,
+              "RESOURCE_CHANGE": 43,
+              "AURA": 801
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 7,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 32,
+              "RESOURCE_CHANGE": 43,
+              "AURA": 502
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the slice, never of the fight: exactly the families the --families option retained, complete for actor 7 over the whole capture, and nothing of the families it dropped. The 101 casts are the raw population every evaluator count below partitions."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/derive-gap.test.ts"]
+    },
+    {
       "caseId": "normalization.protection-paladin-self-heal-is-source-equals-target-and-received-healing-is-not",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "NORMALIZATION",
@@ -6129,6 +6401,109 @@
       ]
     },
     {
+      "caseId": "spec-protection-paladin.a-later-cast-never-establishes-earlier-state",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/cooldown-bindings.ts; aura-bindings.ts; src/engine/game-state/cooldowns/cooldown-state.ts; src/engine/auras/aura-state.ts",
+      "purpose": "At the Blessed Hammer at 2,025,857 — 384 ms BEFORE the Sentinel press — the wings cooldown is UNKNOWN (NO_OBSERVED_CAST) and the wings aura is UNBOUND (AURA_STATE_UNKNOWN), exactly as at the first Judgment 21 s earlier; the press that follows is not consulted. At the Consecration at 2,048,592, after the Sentinel aura's observed removal at 2,048,248, the atom is BOUND false from that removal.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2025857,
+              "abilityGameId": 204019
+            },
+            "simcToken": "avenging_wrath",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "NO_OBSERVED_CAST"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2025857,
+              "abilityGameId": 204019
+            },
+            "atomName": "avenging_wrath",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 389539,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "atomName": "avenging_wrath",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 389539,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2048592,
+              "abilityGameId": 26573
+            },
+            "atomName": "avenging_wrath",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 389539,
+              "anchorReportTimeMs": 2048248,
+              "reason": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The oracle rule, on real evidence: a cooldown is anchored only on a COMPLETE cast strictly before the decision position, and an aura only on a transition M4 observed strictly before it. The same Sentinel press that resolves the Divine Toll decision 414 ms after it proves nothing about the decision 384 ms before it. INACTIVE is a proven state only from an observed removal, never from silence."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
       "caseId": "spec-protection-paladin.assassination-is-refused-at-the-spec-gate",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "SPEC_PROTECTION_PALADIN",
@@ -6199,6 +6574,133 @@
       "relatedTests": [
         "tests/contracts/m10c-protection-evaluator.test.ts",
         "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.every-remaining-unknown-retains-its-blocker-at-two-entries",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts; src/simc/first-gcd-selection.ts",
+      "purpose": "The 46 UNKNOWN decisions block at exactly two entries: 21 at default[6] divine_toll (every decision before the Sentinel press — no wings aura anchor, no cooldown anchor, the pre-pull state outside the log) and 25 at default[9] holy_armaments (every decision after the Divine Toll press — Divine Toll and wings both PROVEN_NOT_READY from their observed casts, and the scan reaches the Lightsmith alternation, whose next_armament no hardcast in the window anchors). The first Hammer of Wrath at 2,027,501 is the first of the 25.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "match": 1,
+              "rejected": 0,
+              "blockedAt": {
+                "default[6] divine_toll": 21,
+                "default[9] holy_armaments": 25
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2027501,
+              "abilityGameId": 1241413
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2027501,
+              "abilityGameId": 1241413
+            },
+            "simcToken": "divine_toll",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 59154,
+              "anchorReportTimeMs": 2026655,
+              "anchorAbilityGameId": 375576,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2027501,
+              "abilityGameId": 1241413
+            },
+            "simcToken": "avenging_wrath",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 58740,
+              "anchorReportTimeMs": 2026241,
+              "anchorAbilityGameId": 389539,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2005436,
+              "abilityGameId": 275779
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "Complete past history establishes post-cast cooldown state: once Divine Toll has been observed pressed, every later decision knows it cannot fire again for at least 60,000 ms less the elapsed time (Quickened Invocation NOT_SELECTED — its node was spent on Divine Resonance — so the base is exact), and the scan moves past default[6] to the next honest blocker. next_armament stays UNKNOWN throughout Phase A because no identified Holy Armaments hardcast anchors it; a buff transition alone never does."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [
+        "Decisions before the Sentinel press cannot resolve on this evidence: the wings and Divine Toll cooldown state at the pull is outside the log, and the wings aura has no observed transition before 2,026,241.",
+        "Decisions after the Divine Toll press block at default[9] holy_armaments: the Lightsmith alternation state is anchor-only and the window holds no Holy Armaments hardcast."
+      ],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
         "tests/regression/m10c-internal-registration-invariance.test.ts"
       ]
     },
@@ -6984,6 +7486,320 @@
       "relatedTests": [
         "tests/contracts/m10c-protection-evaluator.test.ts",
         "tests/unit/m10c-protection-resolver.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.rotational-45s-gap-restores-unknown-when-the-anchor-is-removed",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts; cooldown-bindings.ts; aura-bindings.ts",
+      "purpose": "With everything strictly between the fight start and 2,026,589 removed — the Sentinel press and its aura application among it — the same Divine Toll press at 2,026,655 is UNKNOWN again, blocked at default[6] divine_toll: the wings cooldown is UNKNOWN (CAST_STATE_UNKNOWN — the retained evidence no longer covers the interval before the decision) and the wings aura is UNBOUND. The Divine Toll press itself was retained, so at the Hammer of Wrath 846 ms later Divine Toll is still PROVEN_NOT_READY from it. 26 eligible decisions over 30 exclusions; 0 MATCH, 0 REJECTED; 1 blocked at default[6], 25 at default[9].",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "eligibleDecisions": 26,
+              "match": 0,
+              "rejected": 0,
+              "unknown": 26,
+              "exclusions": {
+                "MELEE_SWING": 17,
+                "NON_GCD_ACTION": 12,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 1
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "match": 0,
+              "rejected": 0,
+              "blockedAt": {
+                "default[6] divine_toll": 1,
+                "default[9] holy_armaments": 25
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2026655,
+              "abilityGameId": 375576
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2026655,
+              "abilityGameId": 375576
+            },
+            "simcToken": "avenging_wrath",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "CAST_STATE_UNKNOWN"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2026655,
+              "abilityGameId": 375576
+            },
+            "atomName": "avenging_wrath",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 389539,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2027501,
+              "abilityGameId": 1241413
+            },
+            "simcToken": "divine_toll",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 59154,
+              "anchorReportTimeMs": 2026655,
+              "anchorAbilityGameId": 375576,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2027501,
+              "abilityGameId": 1241413
+            },
+            "simcToken": "avenging_wrath",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "CAST_STATE_UNKNOWN"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The MATCH on the parent rests on retained evidence, and removing that evidence removes the MATCH: no state carries over from a window the derivative does not hold. A decision whose own anchor survived the gap keeps what that anchor proves and nothing more."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.rotational-45s-population-is-forty-seven-selected-before-any-outcome",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-analysis.ts analyzeObservedProtectionPaladinDecisions",
+      "purpose": "Over the subject's 101 completed casts the evaluator finds 47 eligible GCD decisions and excludes 54 by name: 28 melee swings, 23 NON_GCD presses (19 Shield of the Righteous, Sentinel, Ardent Defender, Hand of Reckoning, Divine Steed), 2 abilities with no pinned lane (the Ula'tek trinket use 1297761 and the Light's Potential potion 1236616), 1 GCD ability with no authority token (Blessing of Spellwarding). Of the 47: 1 MATCH, 0 REJECTED, 46 UNKNOWN.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 7,
+            "expected": {
+              "eligibleDecisions": 47,
+              "match": 1,
+              "rejected": 0,
+              "unknown": 46,
+              "exclusions": {
+                "MELEE_SWING": 28,
+                "NON_GCD_ACTION": 23,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 2,
+                "NO_AUTHORITY_TOKEN_BINDING": 1
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The population is every eligible GCD-lane cast in the whole slice, enumerated mechanically from the normalized fight and fixed by the exclusion rules alone — the same rules the opener used, over a longer window. The 47 were predeclared from the raw cast counts before the evaluator ran; nothing was trimmed to isolate the one decision that resolves."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [
+        "Shield of the Righteous casts are NON_GCD and therefore not GCD decisions to the shared first-GCD query; their Holy Power is recorded as evidence, not judged."
+      ],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.the-divine-toll-press-is-a-real-exact-entry-match",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/aura-bindings.ts; cooldown-bindings.ts; action-profile.ts resolveProtectionUsability; first-gcd-adapter.ts; src/simc/first-gcd-selection.ts",
+      "purpose": "The Divine Toll press at 2,026,655 (+22,066 ms; canonical position 418) is MATCH by the exact entry default[6] divine_toll. Every higher entry is handled truthfully: default[0] auto_attack, default[2] use_items, default[3] potion and default[5] fireblood are contract-harmless NON_GCD prefixes explored both ways; default[1] use_item is NOT_APPLICABLE; default[4] avenging_wrath is PROVEN_UNUSABLE — the Sentinel press at 2,026,241 anchors the wings cooldown at a base of 60,000 ms (120,000 ms halved by the SELECTED Righteous Protector, per the censused passive effect) with 414 ms elapsed, so at least 59,586 ms remain against a 250 ms queueing tolerance. default[6]'s condition is TRUE from `buff.avenging_wrath.up`, bound TRUE by the Sentinel aura M4 observed applied at 2,026,241, and Divine Toll's own usability is its observed execution. All three race worlds select the same entry.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2026655,
+              "abilityGameId": 375576
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "divine_toll",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2026655,
+              "abilityGameId": 375576
+            },
+            "simcToken": "avenging_wrath",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 59586,
+              "anchorReportTimeMs": 2026241,
+              "anchorAbilityGameId": 389539,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2026655,
+              "abilityGameId": 375576
+            },
+            "simcToken": "divine_toll",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "NO_OBSERVED_CAST"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "observedCast": {
+              "reportTimeMs": 2026655,
+              "abilityGameId": 375576
+            },
+            "atomName": "avenging_wrath",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 389539,
+              "anchorReportTimeMs": 2026241,
+              "reason": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A real MATCH needs every higher-priority entry resolved by evidence or reviewed contract and the selected entry's own condition and usability proven — not assumed. Nothing here reads a later event: the aura anchor and the cooldown anchor both precede the decision, and Divine Toll's readiness comes from its own press at this position, which proves usability and nothing about any earlier decision. The pre-pull cooldown state that blocked the opener never enters: Divine Toll's cooldown is UNKNOWN (no observed cast) and irrelevant once its entry is selected by a TRUE gate."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree)",
+          "every COMPLETE cast by actor 7 in the slice, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7, in canonical order",
+          "the Holy Power entry on each costed Shield of the Righteous cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
         "tests/regression/m10c-internal-registration-invariance.test.ts"
       ]
     },

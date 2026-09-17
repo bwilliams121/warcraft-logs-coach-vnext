@@ -57,6 +57,8 @@ describe("coverage is measured from the corpus", () => {
       "wcl-assassination-kingsbane-cooldown",
       "wcl-protection-paladin-a7r6-opener",
       "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "wcl-protection-paladin-a7r6-rotational-45s",
+      "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
     ]);
   });
 

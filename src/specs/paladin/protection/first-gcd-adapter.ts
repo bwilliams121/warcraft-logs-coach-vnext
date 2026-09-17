@@ -67,11 +67,11 @@ import { protectionExecutionLaneForToken } from "../../../data/game/paladin-prot
 import {
   protectionItemUseContractFor,
   protectionTransitionContractFor,
-  WINGS_BASE_COOLDOWN_MS,
   type ProtectionNonGcdTransitionContract,
 } from "../../../data/game/paladin-protection-transition-authority.js";
 import {
   AVENGING_WRATH_TOKEN,
+  NO_READINESS_FACTS,
   UNKNOWN_SPENDER_FACTS,
   USE_ITEM_TOKEN,
   USE_ITEMS_TOKEN,
@@ -79,6 +79,7 @@ import {
   resolveProtectionUsability,
   wornSubActionSet,
   type ProtectionBuildFacts,
+  type ProtectionReadinessFact,
   type ProtectionSpenderFacts,
 } from "./action-profile.js";
 import { specAtomValueFor } from "../../../simc/expression/spec-vocabulary.js";
@@ -106,6 +107,17 @@ export interface ProtectionFirstGcdQueryInput {
   readonly observedAbilityGameId: number;
   /** What is known about Holy Power spending at this decision. Defaults to nothing. */
   readonly spender?: ProtectionSpenderFacts;
+  /** What is known about cooldown readiness at this decision. Defaults to nothing. */
+  readonly readiness?: readonly ProtectionReadinessFact[];
+  /**
+   * The LOWER BOUND, in milliseconds, of the wings cooldown a hypothetical
+   * wings execution starts for THIS actor — the pinned base after the actor's
+   * censused static modifiers (cooldown-bindings.ts). `null` when it could not
+   * be established, in which case the overlay binds the buff and leaves the
+   * cooldown atom unbound. Defaults to null: the overlay never assumes the
+   * unmodified DBC base.
+   */
+  readonly wingsCooldownLowerBoundMs?: number | null;
   /** Defaults to every race world, which is what an unknown race requires. */
   readonly raceWorlds?: readonly ProtectionRaceWorld[];
 }
@@ -143,24 +155,34 @@ export function hasExecutedToken(state: ProtectionFirstGcdState, actionToken: st
  *
  * Only two atoms change, and only because the WINGS_BUFF_AND_COOLDOWN
  * contract says they do: the buff is up, and the cooldown is at least the
- * base. A caller-supplied entry for the same name is REPLACED, because the
- * hypothetical execution is later than any observation the caller derived
- * from. Nothing else is touched.
+ * actor's effective base — `cooldownLowerBoundMs`, the pinned DBC base after
+ * the actor's censused static modifiers (Righteous Protector halves it), which
+ * the CALLER establishes and which is NEVER defaulted to the unmodified base.
+ * When it is `null` the cooldown atom is left as the caller bound it (or
+ * unbound). A caller-supplied entry for the same name is otherwise REPLACED,
+ * because the hypothetical execution is later than any observation the
+ * caller derived from. Nothing else is touched.
  */
-export function overlayWings(bindings: AtomBindings): AtomBindings {
+export function overlayWings(bindings: AtomBindings, cooldownLowerBoundMs: number | null): AtomBindings {
+  const remains = (bindings.knownCooldownRemainsSeconds ?? []).filter(
+    (cooldown) => cooldown.name !== WINGS_ATOM_NAME,
+  );
   return {
     ...bindings,
     knownBuffs: [
       ...bindings.knownBuffs.filter((buff) => buff.name !== WINGS_ATOM_NAME),
       { name: WINGS_ATOM_NAME, up: true },
     ],
-    knownCooldownRemainsSeconds: [
-      ...(bindings.knownCooldownRemainsSeconds ?? []).filter((cooldown) => cooldown.name !== WINGS_ATOM_NAME),
-      {
-        name: WINGS_ATOM_NAME,
-        remainsSeconds: boundedBelowNumber(WINGS_BASE_COOLDOWN_MS / 1000, "STATE_NOT_ESTABLISHED"),
-      },
-    ],
+    knownCooldownRemainsSeconds:
+      cooldownLowerBoundMs === null
+        ? remains
+        : [
+            ...remains,
+            {
+              name: WINGS_ATOM_NAME,
+              remainsSeconds: boundedBelowNumber(cooldownLowerBoundMs / 1000, "STATE_NOT_ESTABLISHED"),
+            },
+          ],
   };
 }
 
@@ -305,10 +327,13 @@ function runOneRaceWorld(
       action,
       input.observedAbilityGameId,
       input.spender ?? UNKNOWN_SPENDER_FACTS,
+      input.readiness ?? NO_READINESS_FACTS,
     );
 
   const bindingsFor = (state: ProtectionFirstGcdState): AtomBindings =>
-    hasExecutedToken(state, AVENGING_WRATH_TOKEN) ? overlayWings(input.bindings) : input.bindings;
+    hasExecutedToken(state, AVENGING_WRATH_TOKEN)
+      ? overlayWings(input.bindings, input.wingsCooldownLowerBoundMs ?? null)
+      : input.bindings;
 
   const scanFor = (state: ProtectionFirstGcdState): OneForegroundScanResult =>
     resolveOneForegroundScan({

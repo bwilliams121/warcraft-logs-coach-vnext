@@ -296,6 +296,9 @@ least one committed case:
 | `SPEC_PROTECTION_PALADIN.DOMAIN_RESULT` (M10-C) | SPEC_PROTECTION_PALADIN | NO_AUTHORITY_AVAILABLE — one of the six decision domains, with the registration's own resolution and, for INTERRUPT, the evidence family stated separately |
 | `SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — talent selections and hero sub-tree from the observed tree against the pinned trait data |
 | `SPEC_PROTECTION_PALADIN.RESOLVED_ATOM` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — one declared identifier's binding at a decision: a truth, a magnitude, or UNBOUND |
+| `SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT` (M10-C5) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — one token's cooldown readiness at a decision from the actor's last OBSERVED cast strictly before it, the pinned base after the censused static modifiers and the reviewed dynamic absence proof: PROVEN_NOT_READY with its lower bound and anchor, or UNKNOWN with the engine's reason; never READY |
+| `SPEC_PROTECTION_PALADIN.AURA_BINDING_AT` (M10-C5) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — one buff atom's binding at a decision from a transition M4 observed strictly before it on the actor's own aura, under the identity the build selects: BOUND up/down with its anchor, or UNBOUND with its reason |
+| `SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION` (M10-C5) | SPEC_PROTECTION_PALADIN | UNKNOWN — every UNKNOWN decision's engine blocker at a named authority entry, exact and exhaustive, partitioning the eligible population with the resolved counts |
 | `SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET` (M10-C2/C3) | SPEC_PROTECTION_PALADIN | UNKNOWN — the `use_items` sub-action set closable from combatant info against the pinned item, enchant and use-effect-universe datasets and the shared equivalence proof: on-use items, every slot left open by reason, and how many omissions the proof closed |
 | `SPEC_PROTECTION_PALADIN.SPEC_GATE` (M10-C) | SPEC_PROTECTION_PALADIN | UNSUPPORTED |
 | `SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE` (M10-C) | SPEC_PROTECTION_PALADIN | UNSUPPORTED — the analyzed internal result throws at the public narrowing boundary |
@@ -459,7 +462,8 @@ Two sanitizers exist, each one documented transformation per mode:
 
 | Tool | Revision | Input | Output |
 | --- | --- | --- | --- |
-| `scripts/sanitize-probe.mjs` | `sanitize-probe-4` | a decoded events response, a bare event array, or an array of page envelopes | a bare event array, selected by `--head` / `--per-type` / `--where` / `--indices` / `--decision-slice <subject> <targets>` (the D2 predicate as a recorded mode) / `--actor-slice <subject> [<toReportTimeMs>]` (M10-B: every event the subject sources OR is targeted by, optionally bounded). Only the two predicate modes may carry a coverage grant |
+| `scripts/sanitize-probe.mjs` | `sanitize-probe-5` | a decoded events response, a bare event array, or an array of page envelopes | a bare event array, selected by `--head` / `--per-type` / `--where` / `--indices` / `--decision-slice <subject> <targets>` (the D2 predicate as a recorded mode) / `--actor-slice <subject> [<toReportTimeMs>] [--families <type,...>]` (M10-B: every event the subject sources OR is targeted by, optionally bounded; M10-C5: optionally restricted to the listed raw types, whole — a slice cut with `--families` grants coverage only to the categories its retained families vouch for). Only the two predicate modes may carry a coverage grant |
+| `scripts/corpus/derive-gap.mjs` | `derive-gap-1` | a committed event artifact | the same array with every event strictly inside `--remove-between <fromMs> <toMs>` removed, serialized as the slicer serializes (M10-C5; reproduces the M10-B opener gap derivative byte for byte, which `tests/unit/derive-gap.test.ts` checks) |
 | `scripts/corpus/sanitize-payloads.mjs` | `sanitize-payloads-2` | a decoded `data` object | `pages`: rateLimitData stripped; `context`: actor names → `Actor<id>`, servers → null, **player `gameID` → null** (revision 2; NPC and pet gameIDs are creature taxonomy and stay); `rankings`: names → `Candidate<n>`, servers → null, guilds removed, report codes → `RANK000nAAAAAAAA` (deterministic, equality-preserving) |
 
 **No stable player identifier is committed.** Names, servers, guilds and
@@ -629,6 +633,42 @@ Two were copied byte-for-byte into the corpus (`LEGACY_FIXTURE_COPY`), and
 original. Migrating the remaining fixtures and their importers is M9-B's.
 
 ---
+
+## Contents after M10-C5 Phase A
+
+Contract version 2, unchanged. Thirty artifacts, ninety-seven cases, two
+hundred and sixty-two assertions. Two artifacts were added from the SAME
+M10-B capture (`.probe/m10b-pages.json`, gitignored) with no new Warcraft
+Logs request:
+
+- `wcl-protection-paladin-a7r6-rotational-45s` — the whole 45-second
+  capture as an actor-7 slice restricted by `--families` to casts, Holy
+  Power changes, aura transitions and the combatantinfo (1,093 events,
+  257,348 bytes; the unfiltered actor slice would not fit under the 512 KiB
+  limit). It grants CASTS, RESOURCES, AURAS, COMBATANT_INFO and GEAR for
+  actor 7 over [2,004,589 .. 2,049,581] and NOT the families it dropped.
+- `wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589` — its
+  predeclared gap derivative, cut by the committed `derive-gap.mjs` at the
+  M10-B opener's bound (2,026,589), a boundary fixed before any Phase A
+  evaluation. It removes the Sentinel press and its aura application.
+
+Three kinds were added (`COOLDOWN_READINESS_AT`, `AURA_BINDING_AT`,
+`UNKNOWN_BLOCKER_DISTRIBUTION`) and seven cases: two NORMALIZATION censuses
+of the new slices and five SPEC_PROTECTION_PALADIN cases. The measured
+result over the 45-second population — 47 eligible GCD decisions, fixed by
+the exclusion rules before the evaluator ran — is ONE real MATCH: the Divine
+Toll press at 2,026,655 (+22,066 ms), selected by the exact entry `default[6]
+divine_toll`, resting on the Sentinel aura M4 observed applied 414 ms earlier
+(`buff.avenging_wrath.up` TRUE) and on the Sentinel press that proves wings
+cannot fire for at least 59,586 ms (base 120,000 ms halved by the SELECTED
+Righteous Protector, per the machine census in
+`paladin-protection-cooldowns.json`). The other 46 stay UNKNOWN with exact
+blockers: 21 at `default[6] divine_toll` (before the Sentinel press) and 25
+at `default[9] holy_armaments` (after the Divine Toll press, whose cooldown is
+then PROVEN_NOT_READY from its own cast; `next_armament` remains
+anchor-only). The gap derivative restores UNKNOWN for the same press (26
+eligible, 0 resolved). The opener and its gap are unchanged (21 and 16, all
+UNKNOWN at `default[6]`). No REJECTED decision exists; none was forced.
 
 ## Contents after M10-C4
 

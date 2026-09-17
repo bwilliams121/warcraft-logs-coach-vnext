@@ -193,6 +193,12 @@ describe("M5 invents no combat state", () => {
     // enemy right now — to establish that a living enemy is engaged. It cannot
     // produce a duration or a count; its companion test below pins that.
     "src/specs/rogue/assassination/combat-engagement.ts",
+    // M10-C5 Phase A. The Protection Paladin's ONE buff atom, read from a
+    // single pinned identity through `presenceAt`. Unlike stealth it may bind
+    // FALSE — but only from M4's EXACT INACTIVE, which rests on an OBSERVED
+    // removal under coverage, never from silence; its companion test below
+    // pins that the UNKNOWN branch binds nothing.
+    "src/specs/paladin/protection/aura-bindings.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];
@@ -300,6 +306,24 @@ describe("M5 invents no combat state", () => {
     expect(code).toContain('readonly state: "UNKNOWN"');
     expect(code).not.toContain('"NO_ENEMY"');
     expect(code).not.toContain('state: "DISENGAGED"');
+  });
+
+  it("still lets no silence become inactivity: the Protection aura reader binds only from an EXACT M4 answer", () => {
+    // M10-C5's companion test for the fourth declared aura reader. It reads
+    // ONE pinned identity per atom and binds `up` from M4's presence, which is
+    // ACTIVE or INACTIVE only from an observed transition. Anything short of
+    // EXACT is UNBOUND — there is no path from "no transition seen" to FALSE.
+    const code = codeOf("src/specs/paladin/protection/aura-bindings.ts");
+    expect(code).toContain('if (result.certainty !== "EXACT")');
+    expect(code).toContain('state: "UNBOUND"');
+    expect(code).toContain('up: result.value.presence === "ACTIVE"');
+    // FALSE is never spelled as a literal binding; it only ever comes from the
+    // EXACT presence comparison above.
+    expect(code).not.toMatch(/up:\s*false/);
+    // One identity, one anchor; no count, no enumeration of contributors.
+    expect(code).toContain("readonly anchorPosition: number;");
+    expect(code).not.toContain("contributors");
+    expect(code).not.toContain("spell_targets");
   });
 
   it("still lets no absence become inactivity: the aura reader cannot say FALSE", () => {

@@ -37,13 +37,22 @@ export function decisionSlice(
 
 /**
  * The `--actor-slice` predicate: every event whose sourceID or targetID is
- * the subject, in capture order, optionally bounded to `timestamp <= untilMs`.
+ * the subject, in capture order, optionally bounded to `timestamp <= untilMs`,
+ * optionally restricted to the raw `type` strings in `families`.
  */
 export function actorSlice(
   events: readonly unknown[],
   subject: number,
   untilMs?: number | null,
+  families?: readonly string[] | null,
 ): readonly unknown[];
+
+export type FamilySelection =
+  | { readonly ok: true; readonly families: readonly string[] }
+  | { readonly ok: false; readonly error: string };
+
+/** Parses a `--families` list: raw event types, comma-separated, each once. Refuses rather than trims. */
+export function parseFamilySelection(spec: string | undefined): FamilySelection;
 
 /** The slicer's own revision, recorded as `tooling.revision` on a corpus artifact. */
 export const SANITIZER_REVISION: string;

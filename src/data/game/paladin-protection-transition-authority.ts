@@ -151,6 +151,13 @@ export const SHIELD_OF_THE_RIGHTEOUS_HOLY_POWER_COST = 3;
 export const SHIELD_OF_THE_RIGHTEOUS_COOLDOWN_MS = 1_000;
 
 /** The wings cooldown both records share (`_cooldown` 120000 for 31884 and 389539). */
+/**
+ * The RAW DBC `_cooldown` of both wings records. NOT the value an actor's
+ * wings cooldown starts at: a SELECTED passive trait may modify the DBC field
+ * before `action_t::init` reads it (M10-C5: Righteous Protector, −50%). The
+ * effective base for an actor comes from `cooldown-bindings.ts`; this constant
+ * is the pinned scalar that folding starts from.
+ */
 export const WINGS_BASE_COOLDOWN_MS = 120_000;
 
 const AUTO_ATTACK: ProtectionNonGcdTransitionContract = {
@@ -295,8 +302,12 @@ const AVENGING_WRATH: ProtectionNonGcdTransitionContract = {
       lines: "_cooldown column",
       claim:
         "Both records carry `_cooldown` 120000 and `_gcd` 0. At zero elapsed simulated time the started " +
-        "cooldown's remainder is at least the base (SimulationCraft adds a sampled non-negative lag on " +
-        "start, action.cpp:2350-2360), so `cooldown.avenging_wrath.remains` is bound BELOW by 120 s.",
+        "cooldown's remainder is at least the base the action was initialised with (SimulationCraft adds a " +
+        "sampled non-negative lag on start, action.cpp:2350-2360), so `cooldown.avenging_wrath.remains` is " +
+        "bound BELOW by that base. THE BASE IS NOT THE RAW 120 s: a SELECTED passive trait may have " +
+        "modified the DBC field before init (Righteous Protector halves it, per the M10-C5 census in " +
+        "paladin-protection-cooldowns.json), so the adapter's overlay takes the actor's effective base " +
+        "from the cooldown bindings and binds nothing when it cannot be established.",
     },
     {
       sourcePath: "engine/class_modules/paladin/sc_paladin.cpp",

@@ -197,6 +197,30 @@ export async function executeAssertion(
       );
     case "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET":
       return protection.useItemsSubActionSet(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT":
+      return protection.cooldownReadinessAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT":
+      return protection.auraBindingAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION":
+      return protection.unknownBlockerDistribution(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM":
       return protection.resolvedAtom(
         context,
@@ -263,6 +287,9 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
   "SPEC_PROTECTION_PALADIN.BUILD_RESOLUTION",
   "SPEC_PROTECTION_PALADIN.USE_ITEMS_SUB_ACTION_SET",
+  "SPEC_PROTECTION_PALADIN.COOLDOWN_READINESS_AT",
+  "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+  "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
   "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
   "SPEC_PROTECTION_PALADIN.SPEC_GATE",
   "SPEC_PROTECTION_PALADIN.NOT_PUBLICLY_PROJECTABLE",

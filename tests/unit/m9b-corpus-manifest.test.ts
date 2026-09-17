@@ -39,10 +39,11 @@ describe("the committed corpus loads", () => {
     // Paladin opener slice, its gap derivation and twenty cases; M10-C added
     // twelve evaluator cases over the same two artifacts; the M10-C
     // correction added one synthetic authority artifact and three shared
-    // decision-engine cases; M10-C2 added one measured Protection case.
-    // Measured, then pinned.
-    expect(loaded.artifacts).toHaveLength(28);
-    expect(loaded.cases).toHaveLength(90);
+    // decision-engine cases; M10-C2 added one measured Protection case;
+    // M10-C5 Phase A added the 45-second rotational slice, its predeclared
+    // gap derivative and seven cases. Measured, then pinned.
+    expect(loaded.artifacts).toHaveLength(30);
+    expect(loaded.cases).toHaveLength(97);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -55,7 +56,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds nineteen sanitized captures, three derivations and six synthetics", async () => {
+  it("holds twenty sanitized captures, four derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -83,12 +84,14 @@ describe("the committed corpus loads", () => {
       "wcl-page-terminal-one-millisecond",
       "wcl-pet-sourced-events-hunter-pet-29",
       "wcl-protection-paladin-a7r6-opener",
+      "wcl-protection-paladin-a7r6-rotational-45s",
       "wcl-pull-window-with-resources",
     ]);
     expect(byKind.get("DERIVED_FROM_CAPTURE")).toEqual([
       "wcl-no-actor-sentinel-source.unusable-negative",
       "wcl-page-sequence-limit-40.page-5-removed",
       "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
     ]);
     expect(byKind.get("SYNTHETIC")).toEqual([
       "synthetic.actor-zero-cast",
@@ -207,7 +210,7 @@ describe("provenance is honest about lineage", () => {
       for (const transformation of entry.record.provenance.transformations) {
         if (transformation.tooling.name !== "scripts/sanitize-probe.mjs") continue;
         expect(transformation.tooling.revision, entry.record.artifactId).toMatch(
-          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[234]$/,
+          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[2345]$/,
         );
       }
     }
@@ -244,10 +247,16 @@ describe("retained coverage is granted only where the capture predicate supports
   /** The M9-C correction's --decision-slice cut: the same predicate, subject 25, boss 235. */
   const HIGH_PARSE_SLICE = "wcl-assassination-high-parse-opener";
 
-  /** M10-B's --actor-slice cut and its gap derivation: every event actor 7 sources or is targeted by. */
+  /**
+   * M10-B's --actor-slice cut and its gap derivation: every event actor 7
+   * sources or is targeted by; M10-C5's family-filtered cut of the same
+   * capture over the whole window, and ITS predeclared gap derivation.
+   */
   const ACTOR_SLICES = [
     "wcl-protection-paladin-a7r6-opener",
     "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+    "wcl-protection-paladin-a7r6-rotational-45s",
+    "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
   ];
 
   it("grants nothing on any property-based or index-based selection", async () => {

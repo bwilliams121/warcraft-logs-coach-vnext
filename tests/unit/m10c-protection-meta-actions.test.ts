@@ -786,7 +786,7 @@ describe("the reviewed NON_GCD contracts and the wings overlay", () => {
     expect(resolveProtectionUsability(neutral, sotr, 53_600).kind).toBe("PROVEN_USABLE");
   });
 
-  it("the overlay binds the wings buff TRUE and the cooldown bounded BELOW by 120 s, replacing any caller entry", () => {
+  it("the overlay binds the wings buff TRUE and the cooldown bounded BELOW by the caller's effective base, replacing any caller entry", () => {
     const base: AtomBindings = {
       comboPoints: unknownNumber("STATE_NOT_MODELLED"),
       comboPointsDeficit: unknownNumber("STATE_NOT_MODELLED"),
@@ -799,7 +799,9 @@ describe("the reviewed NON_GCD contracts and the wings overlay", () => {
         { name: "avenging_wrath", remainsSeconds: unknownNumber("STATE_NOT_ESTABLISHED") },
       ],
     };
-    const overlaid = overlayWings(base);
+    // The synthetic premise states the unmodified DBC base as the actor's
+    // effective base; the real evaluator supplies the censused value instead.
+    const overlaid = overlayWings(base, WINGS_BASE_COOLDOWN_MS);
     expect(overlaid.knownBuffs).toEqual([
       { name: "sacred_weapon", up: true },
       { name: "avenging_wrath", up: true },
@@ -817,6 +819,18 @@ describe("the reviewed NON_GCD contracts and the wings overlay", () => {
     expect(overlaid.energyPct).toEqual(base.energyPct);
     // The input is untouched.
     expect(base.knownBuffs[0]).toEqual({ name: "avenging_wrath", up: false });
+    // With no established effective base the buff is still overlaid and the
+    // cooldown atom is left UNBOUND — never defaulted to the raw DBC value.
+    const unbounded = overlayWings(base, null);
+    expect(unbounded.knownBuffs).toEqual(overlaid.knownBuffs);
+    expect(unbounded.knownCooldownRemainsSeconds).toEqual([]);
+    // The real evaluator's value for this subject: 120 s halved by Righteous Protector.
+    expect(overlayWings(base, 60_000).knownCooldownRemainsSeconds).toEqual([
+      {
+        name: "avenging_wrath",
+        remainsSeconds: { state: "BOUNDED_NUMBER", atLeast: 60, reason: "STATE_NOT_ESTABLISHED" },
+      },
+    ]);
   });
 
   it("the overlay is keyed off the PREFIX, never off a later observed cast (the oracle rule)", () => {

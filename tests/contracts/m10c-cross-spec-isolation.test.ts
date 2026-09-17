@@ -61,7 +61,9 @@ describe("the Paladin tree", () => {
   it("exists and is the expected set of modules", () => {
     expect(PALADIN_TREE.map((path) => path.slice("src/specs/paladin/protection/".length))).toEqual([
       "action-profile.ts",
+      "aura-bindings.ts",
       "authority-bindings.ts",
+      "cooldown-bindings.ts",
       "domains.ts",
       "first-gcd-adapter.ts",
       "first-gcd-state.ts",
@@ -113,9 +115,14 @@ describe("the Paladin tree", () => {
       "src/data/game/paladin-protection-item-effects.js",
       "src/data/game/paladin-protection-enchant-effects.js",
       "src/data/game/paladin-protection-spender-costs.js",
+      "src/data/game/paladin-protection-cooldowns.js",
+      "src/data/game/paladin-protection-aura-authority.js",
     ];
+    // The Paladin data modules may also reach one another (the aura authority
+    // reuses the transition authority's measured hashes); nothing else may.
     for (const path of ALL_SRC) {
       if (path.startsWith("src/specs/paladin/protection/")) continue;
+      if (/^src\/data\/game\/paladin-protection-/.test(path)) continue;
       for (const specifier of importSpecifiersOf(path)) {
         const resolved = resolveSpecifier(path, specifier);
         for (const guarded of PALADIN_ONLY) {
@@ -209,6 +216,9 @@ describe("shared code reaches the two trees only through the registry", () => {
       .map((path) => path.slice("src/data/game/".length))
       .filter((name) => /^(paladin|rogue)-/.test(name));
     expect(classNamed.filter((name) => name.startsWith("paladin-"))).toEqual([
+      "paladin-protection-aura-authority.ts",
+      "paladin-protection-cooldowns.json",
+      "paladin-protection-cooldowns.ts",
       "paladin-protection-enchant-effects.json",
       "paladin-protection-enchant-effects.ts",
       "paladin-protection-gcd-semantics.json",
