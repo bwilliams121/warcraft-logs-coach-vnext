@@ -21,10 +21,20 @@ import * as z from "zod";
 
 import {
   AnalyzeWarcraftLogInputSchema,
-  ANALYZE_TOOL_DESCRIPTION,
+  analyzeToolDescription,
   ANALYZE_TOOL_NAME,
   ANALYZE_TOOL_TITLE,
 } from "../../src/mcp/tools/analyze-warcraft-log.js";
+import { SUPPORTED_SPECIALIZATIONS_SENTENCE } from "../../src/services/analyzer-registry.js";
+
+/**
+ * The description as production publishes it: the tool's own prose with the
+ * supported-specialization sentence the composition root derives from the
+ * production catalog (M11-A1). Tests read the same derivation, so a
+ * specialization that becomes public changes this text without anyone
+ * editing a literal.
+ */
+const ANALYZE_TOOL_DESCRIPTION = analyzeToolDescription(SUPPORTED_SPECIALIZATIONS_SENTENCE);
 import {
   PUBLIC_ANALYSIS_SCHEMA_VERSION,
   PublicAnalysisResultSchema,
@@ -49,8 +59,8 @@ describe("the description carries the epistemic boundary", () => {
     { claim: "verifies decisions already made", phrase: "ACTUALLY MADE" },
     { claim: "compares against pinned SimulationCraft", phrase: "SimulationCraft action priority list" },
     {
-      claim: "exactly the two supported specs are named",
-      phrase: "Supported specializations: Assassination Rogue and Protection Paladin",
+      claim: "the derived supported-specialization sentence is carried verbatim",
+      phrase: SUPPORTED_SPECIALIZATIONS_SENTENCE,
     },
     { claim: "unsupported is not clean play", phrase: "not evidence of clean play" },
     // Protection Paladin's public limits (M10-D), stated positively and exactly.

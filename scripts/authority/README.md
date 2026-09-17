@@ -41,7 +41,7 @@ node scripts/authority/extract-simc-apl.mjs \
 Deterministic: the same commit yields a byte-identical artifact apart from
 `extractedOn`. `--file <path>` reads a local copy instead of fetching.
 
-## Protection Paladin APL — pinned at M10-B, bound at M10-C (INTERNAL_ONLY)
+## Protection Paladin APL — pinned at M10-B, bound at M10-C, PUBLIC since M10-D
 
 The same commit carries `engine/class_modules/apl/apl_paladin.cpp`, whose
 `//protection_apl_start .. //protection_apl_end` region is the Protection
@@ -55,7 +55,7 @@ lists: `default` with 30 actions, `precombat` with 6, no list dispatch).
 | Source bytes | 10,081 |
 | Artifact | `src/simc/data/paladin-protection.apl.json` (`SIMC_APL_PALADIN_PROTECTION`, revision `simc-33622e9d-1`) |
 | Extracted | 2026-09-16, `--target paladin-protection` |
-| Bound to | `OFFENSIVE_ROTATION` only, by `src/specs/paladin/protection/registration.ts` (INTERNAL_ONLY) through the tree's own `pinned-authority.ts` loader. No other domain; no public exposure. |
+| Bound to | `OFFENSIVE_ROTATION` only, by `src/specs/paladin/protection/registration.ts` through the tree's own `pinned-authority.ts` loader. No other domain. The registration was INTERNAL_ONLY from M10-C and has been PUBLIC since M10-D; exposure changed nothing about what the artifact governs. |
 
 It is OFFENSIVE authority only. It is a damage-priority list for a simulation:
 it contains `shield_of_the_righteous` and `word_of_glory` as damage-ordered

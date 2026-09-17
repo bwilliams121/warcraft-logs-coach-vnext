@@ -13,5 +13,8 @@ export const PROTECTION_PALADIN_SPEC_ID = "paladin/protection" satisfies PublicS
 
 export const PROTECTION_PALADIN_ANALYZER_ID = "paladin-protection-observed-decisions";
 
+/** The human-readable name the public surfaces derive their support wording from (M11-A1). */
+export const PROTECTION_PALADIN_DISPLAY_NAME = "Protection Paladin";
+
 /** The `ResourceId` of the one resource this evaluator reads. */
 export const HOLY_POWER_RESOURCE_ID = "HOLY_POWER";

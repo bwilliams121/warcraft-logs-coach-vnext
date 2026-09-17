@@ -111,6 +111,7 @@ describe("a registration built through defineAnalyzerRegistration refuses forged
   it("a Paladin registration (row-level fixture exposure) cannot return an Assassination-owned analysis", () => {
     const impostor = defineAnalyzerRegistration({
       analyzerId: "impostor-paladin",
+      displayName: "Impostor Paladin",
       specId: "paladin/protection",
       exposure: "INTERNAL_ONLY",
       capabilities: fixtureRegistration().capabilities,
@@ -133,6 +134,7 @@ describe("a registration built through defineAnalyzerRegistration refuses forged
   it("a public Assassination registration cannot return 'paladin/protection'", () => {
     const rogueLying = defineAnalyzerRegistration({
       analyzerId: "rogue-lying",
+      displayName: "Rogue Lying",
       specId: "rogue/assassination",
       exposure: "PUBLIC",
       capabilities: ASSASSINATION_REGISTRATION.capabilities,
@@ -150,6 +152,7 @@ describe("a registration built through defineAnalyzerRegistration refuses forged
     const facade = vi.fn(() => realAssassinationAnalysis());
     const registration = defineAnalyzerRegistration({
       analyzerId: "rogue-guarded",
+      displayName: "Rogue Guarded",
       specId: "rogue/assassination",
       exposure: "PUBLIC",
       capabilities: ASSASSINATION_REGISTRATION.capabilities,
@@ -166,6 +169,7 @@ describe("a registration built through defineAnalyzerRegistration refuses forged
   it("refuses to view an analysis it does not own", () => {
     const registration = defineAnalyzerRegistration({
       analyzerId: "rogue-guarded",
+      displayName: "Rogue Guarded",
       specId: "rogue/assassination",
       exposure: "PUBLIC",
       capabilities: ASSASSINATION_REGISTRATION.capabilities,

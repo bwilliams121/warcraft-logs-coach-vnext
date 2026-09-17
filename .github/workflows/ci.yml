@@ -8,7 +8,7 @@ name: CI
 # Two jobs, both read-only:
 #
 #   verify   formatting, types, the full suite (`npm test`). Measured locally
-#            at ~32 s for the suite: 176 files under Node and workerd.
+#            at ~54 s for the suite at M11-A1: 212 files under Node and workerd.
 #   corpus   the regression corpus's own command (`npm run test:corpus`),
 #            which regenerates the manifest and compares it with the committed
 #            one, runs the Node corpus suite, executes every corpus case —

@@ -119,6 +119,7 @@ describe("the binding and the declared domains", () => {
     const forged = defineAnalyzerRegistration({
       analyzerId: "forged-defensive-binding",
       specId: "paladin/protection",
+      displayName: "Forged Protection Paladin",
       exposure: "INTERNAL_ONLY",
       capabilities: PROTECTION_CAPABILITIES,
       authorityBindings: [
@@ -139,6 +140,7 @@ describe("the binding and the declared domains", () => {
     const forged = defineAnalyzerRegistration({
       analyzerId: "forged-rogue-authority",
       specId: "paladin/protection",
+      displayName: "Forged Protection Paladin",
       exposure: "INTERNAL_ONLY",
       capabilities: PROTECTION_CAPABILITIES,
       authorityBindings: [

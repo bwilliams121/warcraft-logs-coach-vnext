@@ -46,53 +46,61 @@ export const RAID_NIGHT_TOOL_TITLE = "Analyze a Warcraft Logs raid night across 
  * against is a summarising agent keeping the first sentence and discarding the
  * rest — so the first sentence already says "factual evidence" rather than
  * "analyzes a raid".
+ *
+ * The "Supported specializations: …" sentence is INJECTED by the composition
+ * root, derived from the PUBLIC registrations of the production analyzer
+ * catalog (M11-A1) — the same derivation the single-fight tool receives, so
+ * the two descriptions cannot name different sets. See
+ * `analyzeToolDescription` in `./analyze-warcraft-log.ts` for the reasoning.
  */
-export const RAID_NIGHT_TOOL_DESCRIPTION = [
-  "Aggregates FACTUAL evidence across an explicit, bounded set of fights from ONE Warcraft Logs",
-  `report: who was present, what they played, which fight/player results exist, and integer decision`,
-  "counts where gameplay analysis was possible.",
-  "",
-  `Requires an explicit list of 1 to ${String(MAX_RAID_NIGHT_FIGHTS)} fight IDs. There is no "whole report" form, because its cost`,
-  `cannot be bounded in advance. At most ${String(MAX_RAID_NIGHT_PLAYERS)} players are analyzed per request.`,
-  "",
-  "Gameplay support depends on registered analyzers. Supported specializations: Assassination Rogue",
-  "and Protection Paladin. Every other specialization appears as a factual SPEC_NOT_SUPPORTED cell —",
-  "a limit of this build's coverage, NOT a statement that the player did badly.",
-  "",
-  "Protection Paladin cells count only observed OFFENSIVE global-cooldown decisions compared against",
-  "pinned authority. They do NOT evaluate defensive cooldowns, active mitigation, self-healing,",
-  "interrupts, or survival; off-global-cooldown actions such as Shield of the Righteous are excluded,",
-  "not judged.",
-  "",
-  "Cell kinds are distinct and must not be conflated. ABSENT means the player was not in that pull.",
-  "SPEC_NOT_SUPPORTED means no analyzer exists for their specialization. ANALYSIS_UNAVAILABLE means",
-  "nothing was attempted, because the fight's evidence did not arrive or Warcraft Logs supplied no",
-  "usable specialization. None of these is poor performance, and none carries decision counts.",
-  "",
-  "MATCH means authority-compatible only: the supported analysis resolved the same action that was",
-  "observed. MATCH does NOT mean correct, optimal, ideal, best or mistake-free. REJECTED means the",
-  "authority positively established the observed action was not selectable. UNKNOWN means the",
-  "analyzer could not prove the comparison — a legitimate result, never a fault and never a miss:",
-  "the available evidence cannot establish the result, not that a mistake was made.",
-  "",
-  "evidenceLimitations describes why the ANALYZER could not conclude; exclusionPatterns describes",
-  "casts it did not evaluate. Neither says anything about the player. Only rejectedPatterns carries",
-  "gameplay evidence, and on current coverage it is frequently empty.",
-  "",
-  "trendEvidence is an ordered factual series with explicit comparability flags. It contains NO",
-  "improvement or regression judgement, because movement in these counts tracks analyzer coverage at",
-  "least as much as it tracks play.",
-  "",
-  "This tool does NOT predict an arbitrary next action, does NOT score or grade any player or the",
-  "raid, does NOT rank anyone, and does NOT compare against other logs or guilds. There is no rating,",
-  "percentage or accuracy anywhere in its output, and status NO_ANALYZED_CELLS does NOT mean clean",
-  "play — it means no gameplay analysis was produced at all.",
-  "",
-  "Partial coverage is expected. Read the coverage block before characterizing a night, and do not",
-  "compute a correctness percentage from the counts.",
-  "",
-  "Requires a public or unlisted Warcraft Logs report.",
-].join("\n");
+export function raidNightToolDescription(supportedSpecializations: string): string {
+  return [
+    "Aggregates FACTUAL evidence across an explicit, bounded set of fights from ONE Warcraft Logs",
+    `report: who was present, what they played, which fight/player results exist, and integer decision`,
+    "counts where gameplay analysis was possible.",
+    "",
+    `Requires an explicit list of 1 to ${String(MAX_RAID_NIGHT_FIGHTS)} fight IDs. There is no "whole report" form, because its cost`,
+    `cannot be bounded in advance. At most ${String(MAX_RAID_NIGHT_PLAYERS)} players are analyzed per request.`,
+    "",
+    `Gameplay support depends on registered analyzers. ${supportedSpecializations}`,
+    "Every other specialization appears as a factual SPEC_NOT_SUPPORTED cell —",
+    "a limit of this build's coverage, NOT a statement that the player did badly.",
+    "",
+    "Protection Paladin cells count only observed OFFENSIVE global-cooldown decisions compared against",
+    "pinned authority. They do NOT evaluate defensive cooldowns, active mitigation, self-healing,",
+    "interrupts, or survival; off-global-cooldown actions such as Shield of the Righteous are excluded,",
+    "not judged.",
+    "",
+    "Cell kinds are distinct and must not be conflated. ABSENT means the player was not in that pull.",
+    "SPEC_NOT_SUPPORTED means no analyzer exists for their specialization. ANALYSIS_UNAVAILABLE means",
+    "nothing was attempted, because the fight's evidence did not arrive or Warcraft Logs supplied no",
+    "usable specialization. None of these is poor performance, and none carries decision counts.",
+    "",
+    "MATCH means authority-compatible only: the supported analysis resolved the same action that was",
+    "observed. MATCH does NOT mean correct, optimal, ideal, best or mistake-free. REJECTED means the",
+    "authority positively established the observed action was not selectable. UNKNOWN means the",
+    "analyzer could not prove the comparison — a legitimate result, never a fault and never a miss:",
+    "the available evidence cannot establish the result, not that a mistake was made.",
+    "",
+    "evidenceLimitations describes why the ANALYZER could not conclude; exclusionPatterns describes",
+    "casts it did not evaluate. Neither says anything about the player. Only rejectedPatterns carries",
+    "gameplay evidence, and on current coverage it is frequently empty.",
+    "",
+    "trendEvidence is an ordered factual series with explicit comparability flags. It contains NO",
+    "improvement or regression judgement, because movement in these counts tracks analyzer coverage at",
+    "least as much as it tracks play.",
+    "",
+    "This tool does NOT predict an arbitrary next action, does NOT score or grade any player or the",
+    "raid, does NOT rank anyone, and does NOT compare against other logs or guilds. There is no rating,",
+    "percentage or accuracy anywhere in its output, and status NO_ANALYZED_CELLS does NOT mean clean",
+    "play — it means no gameplay analysis was produced at all.",
+    "",
+    "Partial coverage is expected. Read the coverage block before characterizing a night, and do not",
+    "compute a correctness percentage from the counts.",
+    "",
+    "Requires a public or unlisted Warcraft Logs report.",
+  ].join("\n");
+}
 
 /**
  * The tool's input.
@@ -161,6 +169,8 @@ export interface RaidNightToolDeps {
   readonly analyzeRaidNight: RaidNightRunner;
   /** Absent means unmetered, which this tool treats as a refusal. */
   readonly rateLimiter?: RateLimiterPort | undefined;
+  /** The derived "Supported specializations: …" sentence, from the composition root. */
+  readonly supportedSpecializations: string;
 }
 
 /**
@@ -207,7 +217,7 @@ export function registerAnalyzeRaidNightTool(server: McpServer, deps: RaidNightT
     RAID_NIGHT_TOOL_NAME,
     {
       title: RAID_NIGHT_TOOL_TITLE,
-      description: RAID_NIGHT_TOOL_DESCRIPTION,
+      description: raidNightToolDescription(deps.supportedSpecializations),
       inputSchema: AnalyzeRaidNightInputSchema,
       // The M7-E public contract, unchanged. There is no MCP-shaped raid-night
       // DTO: the SDK validates `structuredContent` against this before the result

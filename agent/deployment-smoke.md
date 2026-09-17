@@ -315,6 +315,16 @@ full-fight sanity list against it — that arithmetic is unchanged.
 
 ## M8-5. REST single fight — unsupported spec
 
+> **Superseded by Part III step M10-5.** Kept as written because it is what
+> was run at M8. Two of its statements are no longer accurate: the committed
+> A7R6 master data has actor 5 as an Evoker (Preservation), not a Protection
+> Paladin — and Protection Paladin has been a SUPPORTED specialization since
+> M10-D in any case — and schema `warcraft-logs-coach.analysis/1` carries no
+> consumable category, so the second bullet below cannot be checked against
+> the current output (preparation analysis is unimplemented product intent;
+> see `agent/follow-ups.md`). Use M10-5, whose unsupported subject is
+> machine-pinned from the committed context artifact.
+
 Costs **1** unit. Same report, fight 6 (Sszorak, `encounterID` 3420), actor 5,
 who is a Protection Paladin.
 

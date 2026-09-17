@@ -53,9 +53,12 @@ const REPORT = join(ROOT, "tests", "corpus", "report.json");
 const GATE_TEST = "tests/regression/m9b-corpus-gate.test.ts";
 const ISOLATION_TEST = "tests/regression/m9c-corpus-network-isolation.test.ts";
 
+// Every entry names a file that exists. vitest treats a non-matching filter as
+// a no-op, so a stale entry would not fail the gate — it would silently list a
+// test that never runs. `tests/unit/m9a-corpus-seed-cases.test.ts` was removed
+// during M9-B and its entry here was retired in M11-A1.
 const NODE_CORPUS_TESTS = [
   "tests/unit/m9a-corpus-loader.test.ts",
-  "tests/unit/m9a-corpus-seed-cases.test.ts",
   "tests/contracts/m9a-corpus-layering.test.ts",
   "tests/unit/m9b-corpus-manifest.test.ts",
   "tests/unit/m9b-corpus-harness.test.ts",

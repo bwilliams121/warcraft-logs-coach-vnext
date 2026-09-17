@@ -1,4 +1,4 @@
-# Protection Paladin — internal observed-decision evaluator (M10-C)
+# Protection Paladin — observed-decision evaluator (M10-C, PUBLIC since M10-D)
 
 **Exposure: `PUBLIC` (since M10-D).** This evaluator is registered in the
 production catalog (`paladin-protection-observed-decisions`,
@@ -335,7 +335,7 @@ alternation and no ground-effect lookback carries across a declared hole.
 Deferred, each a recorded refusal rather than a guess: a charge engine
 (`default[23]`, `charges`, `full_recharge_time` beyond need), GCD intervals,
 haste and rating conversion, Divine Guidance stacks, Sacred Weapon remains,
-READY inference, and public projection.
+and READY inference.
 
 ## Not here, on purpose
 
@@ -343,14 +343,19 @@ No cooldown data beyond Divine Toll, wings, Avenger's Shield and
 Consecration, no haste or charge model, no aura identity beyond the Sentinel,
 Vanguard and Hammer of Wrath readiness auras, no stack counts, no mitigation
 or health model, no defensive, self-healing or interrupt judgment, no top-log
-or performance input, no public exposure, and no inference from an absent
-gear key. Each is a
+or performance input, and no inference from an absent gear key. Each is a
 recorded missing fact, and each blocks the affected decision closed rather
-than pressuring a guess.
+than pressuring a guess. Public exposure is not a missing fact: the evaluator
+is PUBLIC (see the top of this document), and exposure changed nothing about
+what it concludes.
 
-Public projection is planned, not performed: `registration.ts` records how
-`MELEE_SWING` (→ `NON_GCD_ACTION`: a positively identified swing is off the
-GCD, scheduled by the pinned NON_GCD `auto_attack`; it is not an unknown
-lane) and the `TRANSITION_UNSUPPORTED` raw blocker (→ class `OTHER`, raw
-withheld) land in schema v1 without a public vocabulary change, and names the
-one alternative (a new public reason) as an M10-D design gate.
+Public projection is performed by the registration's view since M10-D:
+`registration.ts` maps `MELEE_SWING` → `NON_GCD_ACTION` (a positively
+identified swing is off the GCD, scheduled by the pinned NON_GCD
+`auto_attack`; it is not an unknown lane) per excluded cast and in the
+coverage tally, and the `TRANSITION_UNSUPPORTED` raw blocker lands as class
+`OTHER` with the raw string withheld — both inside schema v1 without a public
+vocabulary change. The one alternative considered (a new public exclusion
+reason) was a schema decision deliberately not taken in M10-D;
+`tests/contracts/m10d-protection-public-projection.test.ts` pins the mapping
+as total and pins that `MELEE_SWING` never reaches the wire.

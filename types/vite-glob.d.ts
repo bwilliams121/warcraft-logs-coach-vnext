@@ -8,15 +8,23 @@
  * them — the same reason `@types/node` is not installed. See
  * `./node-builtins.d.ts`, which exists for exactly this reason.
  *
- * So this declares the one form the test suite uses — eager, raw, default —
- * and nothing else. A second overload appearing here is a signal the suite has
- * started relying on Vite's module graph for more than reading source text,
- * which should be looked at rather than accommodated.
+ * So this declares exactly the two forms the test suite uses and nothing else:
  *
- * Used by `tests/contracts/m6a-mcp-layering.test.ts` to enumerate source files
- * without a filesystem walk.
+ *   - eager, raw, default — source TEXT, for the layering sweeps
+ *     (`tests/contracts/m6a-mcp-layering.test.ts` and its siblings)
+ *   - eager MODULES — the evaluated exports of each matched file, used by ONE
+ *     guard, `tests/contracts/m11a-registration-list-complete.test.ts`, to
+ *     compare every `src/specs/<class>/<spec>/registration.ts` module's real
+ *     registration object against the production catalog by identity rather
+ *     than by filename. Reading source text cannot prove that comparison.
+ *
+ * A third overload appearing here is a signal the suite has started relying
+ * on Vite's module graph for more than those two things, which should be
+ * looked at rather than accommodated. Neither form is available to `src/`:
+ * this file is test typing, and the Worker never calls `import.meta.glob`.
  */
 
 interface ImportMeta {
   glob(pattern: string, options: { eager: true; query: "?raw"; import: "default" }): Record<string, string>;
+  glob(pattern: string, options: { eager: true }): Record<string, Record<string, unknown>>;
 }

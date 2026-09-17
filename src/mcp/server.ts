@@ -112,6 +112,21 @@ const UNBOUND_ENCOUNTER_CONTEXT_RUNNER: EncounterContextRunner = async () => ({
   },
 });
 
+/**
+ * The same fail-closed sentinel for the tool descriptions' supported-
+ * specialization sentence (M11-A1).
+ *
+ * The real sentence is DERIVED from the production analyzer catalog and
+ * bound at the composition root, like the runners: this layer imports no
+ * registry and cannot compute it. A handler constructed without one gets a
+ * sentence that says so, rather than a hand-written list that could name a
+ * specialization the dispatcher does not select. The production `tools/list`
+ * is pinned by test to carry the derived sentence, so a composition root that
+ * forgot to bind it fails there, not in a client.
+ */
+const UNBOUND_SUPPORTED_SPECIALIZATIONS =
+  "Supported specializations: none are bound to this MCP handler (composition defect).";
+
 export interface McpRequestOptions {
   /** Overridable so a test can prove rejection without weakening the real list. */
   readonly allowedHostnames?: readonly string[];
@@ -140,6 +155,12 @@ export interface McpRequestOptions {
   readonly analyzeEncounterContext?: EncounterContextRunner | undefined;
   /** Overridable so a test can drive allow/deny/throw deterministically. */
   readonly rateLimiter?: RateLimiterPort | undefined;
+  /**
+   * The derived "Supported specializations: …" sentence for the tool
+   * descriptions. Bound at the composition root from the production catalog;
+   * absent only in tests that do not read descriptions.
+   */
+  readonly supportedSpecializations?: string | undefined;
 }
 
 /** Everything the registered tools need. One object, both tools. */
@@ -277,6 +298,7 @@ export async function handleMcpRequest(
     // A deployment missing the binding is unmetered, and the tool treats that
     // as a refusal rather than as permission.
     rateLimiter: options.rateLimiter ?? env.ANALYSIS_RATE_LIMITER,
+    supportedSpecializations: options.supportedSpecializations ?? UNBOUND_SUPPORTED_SPECIALIZATIONS,
   });
 
   // `fetch` is called with no `authInfo`: see `./auth.ts` for why the static

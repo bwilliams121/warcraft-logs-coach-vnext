@@ -44,41 +44,54 @@ export const ANALYZE_TOOL_TITLE = "Analyze Warcraft Logs observed rotational dec
  * failure this guards against is a summarising agent keeping the first sentence
  * and discarding the rest, so the first sentence already says "verifies
  * decisions the player actually made" rather than "analyzes a log".
+ *
+ * THE SUPPORTED-SPECIALIZATION SENTENCE IS INJECTED, NOT WRITTEN HERE (M11-A1).
+ * It is derived from the PUBLIC registrations of the production analyzer
+ * catalog (`supportedSpecializationsSentence` in the application layer) and
+ * handed to this module by the composition root, exactly as the runner is.
+ * This module cannot compute it — it imports no registry and no analyzer —
+ * and must not hand-list specializations, because a name typed here could
+ * disagree with what the dispatcher actually selects. Everything else in the
+ * description is this tool's own prose: the per-specialization LIMITS stay
+ * author-written because they are claims about what an analyzer refuses to
+ * judge, which no registry field can generate.
  */
-export const ANALYZE_TOOL_DESCRIPTION = [
-  "Verifies the rotational decisions a player ACTUALLY MADE in one Warcraft Logs raid fight, by",
-  "comparing each observed cast against a pinned SimulationCraft action priority list.",
-  "",
-  "Supported specializations: Assassination Rogue and Protection Paladin. Any other specialization",
-  "returns status SPEC_NOT_SUPPORTED with no decision analysis, which is a complete and truthful",
-  "result — it is not evidence of clean play.",
-  "",
-  "Protection Paladin analysis compares only observed OFFENSIVE global-cooldown decisions against",
-  "pinned authority. It does NOT evaluate defensive cooldowns, active mitigation, self-healing,",
-  "interrupts, or survival. Off-global-cooldown actions such as Shield of the Righteous are excluded,",
-  "not judged.",
-  "",
-  "Each observed decision resolves to MATCH, REJECTED or UNKNOWN.",
-  "MATCH means authority-compatible only: the supported analysis resolved the same action that was",
-  "observed. MATCH does NOT mean correct, optimal, ideal, best, recommended or mistake-free.",
-  "REJECTED means the authority can positively establish the observed action was not selectable in",
-  "the proven state; it does not name what should have been done instead.",
-  "UNKNOWN means the evidence or the authority could not prove the comparison. UNKNOWN is a",
-  "legitimate successful result and must never be read as a fault: it means the available evidence",
-  "cannot establish the result, not that a mistake was made.",
-  "",
-  "This tool does NOT predict an arbitrary next action, does NOT tell the player what they should",
-  "have pressed at a moment they pressed nothing, and does NOT score performance. There is no",
-  "rating, grade or accuracy anywhere in its output.",
-  "",
-  "Partial coverage is expected: most decisions typically resolve to UNKNOWN, and casts whose",
-  "execution lane is not established are excluded from the denominator entirely. Read the coverage",
-  "disclosure before characterizing the fight, and do not compute a correctness percentage from",
-  "the counts.",
-  "",
-  "Requires a public or unlisted Warcraft Logs report, and one specific fight and one specific",
-  "player within it.",
-].join("\n");
+export function analyzeToolDescription(supportedSpecializations: string): string {
+  return [
+    "Verifies the rotational decisions a player ACTUALLY MADE in one Warcraft Logs raid fight, by",
+    "comparing each observed cast against a pinned SimulationCraft action priority list.",
+    "",
+    `${supportedSpecializations} Any other specialization`,
+    "returns status SPEC_NOT_SUPPORTED with no decision analysis, which is a complete and truthful",
+    "result — it is not evidence of clean play.",
+    "",
+    "Protection Paladin analysis compares only observed OFFENSIVE global-cooldown decisions against",
+    "pinned authority. It does NOT evaluate defensive cooldowns, active mitigation, self-healing,",
+    "interrupts, or survival. Off-global-cooldown actions such as Shield of the Righteous are excluded,",
+    "not judged.",
+    "",
+    "Each observed decision resolves to MATCH, REJECTED or UNKNOWN.",
+    "MATCH means authority-compatible only: the supported analysis resolved the same action that was",
+    "observed. MATCH does NOT mean correct, optimal, ideal, best, recommended or mistake-free.",
+    "REJECTED means the authority can positively establish the observed action was not selectable in",
+    "the proven state; it does not name what should have been done instead.",
+    "UNKNOWN means the evidence or the authority could not prove the comparison. UNKNOWN is a",
+    "legitimate successful result and must never be read as a fault: it means the available evidence",
+    "cannot establish the result, not that a mistake was made.",
+    "",
+    "This tool does NOT predict an arbitrary next action, does NOT tell the player what they should",
+    "have pressed at a moment they pressed nothing, and does NOT score performance. There is no",
+    "rating, grade or accuracy anywhere in its output.",
+    "",
+    "Partial coverage is expected: most decisions typically resolve to UNKNOWN, and casts whose",
+    "execution lane is not established are excluded from the denominator entirely. Read the coverage",
+    "disclosure before characterizing the fight, and do not compute a correctness percentage from",
+    "the counts.",
+    "",
+    "Requires a public or unlisted Warcraft Logs report, and one specific fight and one specific",
+    "player within it.",
+  ].join("\n");
+}
 
 /**
  * The tool's input.
@@ -146,6 +159,11 @@ export interface AnalyzeToolDeps {
   readonly analyze: AnalysisRunner;
   /** Absent means unmetered, which this tool treats as a refusal. See `../rate-limit.ts`. */
   readonly rateLimiter?: RateLimiterPort | undefined;
+  /**
+   * The derived "Supported specializations: …" sentence, from the composition
+   * root. See `analyzeToolDescription`.
+   */
+  readonly supportedSpecializations: string;
 }
 
 /**
@@ -184,7 +202,7 @@ export function registerAnalyzeWarcraftLogTool(server: McpServer, deps: AnalyzeT
     ANALYZE_TOOL_NAME,
     {
       title: ANALYZE_TOOL_TITLE,
-      description: ANALYZE_TOOL_DESCRIPTION,
+      description: analyzeToolDescription(deps.supportedSpecializations),
       inputSchema: AnalyzeWarcraftLogInputSchema,
       // The M6-C public contract, unchanged. There is no MCP-shaped analysis
       // DTO: the SDK validates `structuredContent` against this before the

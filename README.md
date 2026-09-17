@@ -317,7 +317,13 @@ identity, recipient survival, and observed cooldown overlap.
 Preparation is a first-class analysis category independent of rotational APL
 decisions, and runs in parallel with specialization evaluation.
 
-Every analysis report must include a status for:
+**Product intent, not yet implemented.** No preparation analyzer exists under
+`src/` today and schema `warcraft-logs-coach.analysis/1` carries no consumable
+or preparation field; the requirement below describes what the product must
+eventually emit, and nothing in the current output should be read as a
+consumable status.
+
+Every analysis report must eventually include a status for:
 
 - health potion usage
 - healthstone usage
@@ -543,11 +549,12 @@ transport — a test asserts the two payloads are deeply equal.
 
 ### What the analysis actually is
 
-**Assassination Rogue observed-decision authority verification.**
+**Observed-decision authority verification for the publicly supported
+specializations: Assassination Rogue and Protection Paladin.**
 
 It takes the rotational decisions a player *already made* and checks each one
-against a pinned SimulationCraft action priority list. Each observed decision
-resolves to one of three outcomes:
+against that specialization's pinned SimulationCraft action priority list.
+Each observed decision resolves to one of three outcomes:
 
 | Outcome | Meaning |
 | --- | --- |
@@ -569,9 +576,18 @@ expected — most decisions typically resolve to `UNKNOWN`, and casts whose
 execution lane is not established are excluded from the denominator entirely.
 Read the `coverage` block before characterizing a fight.
 
-Any specialization other than Assassination Rogue returns
-`status: "SPEC_NOT_SUPPORTED"` with no decisions and no coverage. That is a
-complete, truthful answer — not evidence of clean play.
+Protection Paladin analysis (public since M10-D) compares only observed
+OFFENSIVE global-cooldown decisions against the pinned Protection APL. It does
+not evaluate defensive cooldowns, active mitigation, self-healing, interrupts
+or survival; off-global-cooldown actions such as Shield of the Righteous are
+excluded from the decision population, not judged. See the
+[Second Specialization](#second-specialization) section.
+
+Any specialization other than those two returns `status: "SPEC_NOT_SUPPORTED"`
+with no decisions and no coverage. That is a complete, truthful answer — not
+evidence of clean play. The canonical list of supported specializations is
+derived at runtime from the production analyzer catalog (the PUBLIC
+registrations), which is also what the MCP tool descriptions publish.
 
 ### REST — `POST /v1/analysis`
 
@@ -610,10 +626,18 @@ one private principal, two surfaces, so neither is the cheap way in.
 ### MCP — `POST /mcp`
 
 A stateless Streamable HTTP MCP server (protocol `2026-07-28`, with stateless
-compatibility for 2025-era clients). It exposes exactly one tool:
+compatibility for 2025-era clients). It exposes exactly three tools, each a
+thin interface over the same application services as the REST routes — no
+`ping`, no primitives:
 
-**`analyze_warcraft_log`**, taking a tagged input union so the two forms cannot
-be mixed:
+| Tool | REST equivalent | Schema |
+| --- | --- | --- |
+| `analyze_warcraft_log` | `POST /v1/analysis` | `warcraft-logs-coach.analysis/1` |
+| `analyze_raid_night` | `POST /v1/raid-night` | `warcraft-logs-coach.raid-night/1` |
+| `analyze_encounter_context` | `POST /v1/encounter-context` | `warcraft-logs-coach.encounter-context/1` |
+
+`analyze_warcraft_log` takes a tagged input union so the two forms cannot be
+mixed:
 
 ```json
 { "source": "url", "reportUrl": "https://www.warcraftlogs.com/reports/<code>#fight=8&source=15" }
@@ -945,9 +969,11 @@ Invoke-WebRequest -Uri https://<worker-host>/v1/analysis -Method POST -Body $bod
 
 Expected: HTTP 200 with a `warcraft-logs-coach.analysis/1` result for a valid
 report/fight/player, and a specific 404/422 for an invalid one. For an
-Assassination Rogue the `status` should be `ANALYZED`; for any other
-specialization it should be `SPEC_NOT_SUPPORTED`, which is a truthful result and
-not a failure.
+Assassination Rogue or a Protection Paladin the `status` should be `ANALYZED`;
+for any other specialization it should be `SPEC_NOT_SUPPORTED`, which is a
+truthful result and not a failure. (The request above carries no
+`Authorization` header and will answer `401`; the full checklist shows the
+authenticated form.)
 
 The full post-deploy checklist is in
 [`agent/deployment-smoke.md`](agent/deployment-smoke.md).

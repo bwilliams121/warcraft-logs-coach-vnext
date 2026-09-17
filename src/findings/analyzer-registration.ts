@@ -85,6 +85,17 @@ export const ANALYZER_EXPOSURES = Object.freeze([
 export interface AnalyzerDefinition<TAnalysis extends SpecAnalysisEnvelope> {
   readonly analyzerId: string;
   readonly specId: SpecId;
+  /**
+   * The specialization's human-readable name, e.g. `"Protection Paladin"`.
+   *
+   * Presentation data, not gameplay data: it is read by nothing that analyzes
+   * a fight. It exists so the public surfaces derive their "supported
+   * specializations" wording from the PUBLIC registrations (M11-A1,
+   * `supportedSpecializationsSentence`) instead of hand-listing names in
+   * several tool modules that could disagree. The registry refuses a blank
+   * one (`INVALID_DISPLAY_NAME`).
+   */
+  readonly displayName: string;
   readonly exposure: AnalyzerExposure;
   readonly capabilities: readonly DecisionCapability[];
   readonly authorityBindings: readonly AuthorityDomainBinding[];
@@ -100,6 +111,8 @@ export interface AnalyzerDefinition<TAnalysis extends SpecAnalysisEnvelope> {
 export interface AnalyzerRegistration {
   readonly analyzerId: string;
   readonly specId: SpecId;
+  /** See `AnalyzerDefinition.displayName`. Copied by the snapshot like every other datum. */
+  readonly displayName: string;
   readonly exposure: AnalyzerExposure;
   readonly capabilities: readonly DecisionCapability[];
   readonly authorityBindings: readonly AuthorityDomainBinding[];
@@ -273,6 +286,7 @@ export function snapshotRegistration(registration: AnalyzerRegistration): Analyz
   return Object.freeze({
     analyzerId: registration.analyzerId,
     specId: registration.specId,
+    displayName: registration.displayName,
     exposure: registration.exposure,
     capabilities,
     authorityBindings,
@@ -309,6 +323,7 @@ export function defineAnalyzerRegistration<TAnalysis extends SpecAnalysisEnvelop
   const registration: AnalyzerRegistration = Object.freeze({
     analyzerId: definition.analyzerId,
     specId: definition.specId,
+    displayName: definition.displayName,
     exposure: definition.exposure,
     capabilities,
     authorityBindings: bindings,

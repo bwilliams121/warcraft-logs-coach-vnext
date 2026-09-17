@@ -627,10 +627,13 @@ largest is the 312,284-byte A7R6 fight context (the whole master data of a
 `m9b-corpus-manifest.test.ts` pins the total under 3 MiB and the largest
 artifact under 384 KiB so growth is noticed at half the ceilings.
 
-Legacy fixtures under `tests/fixtures/wcl/events/` are not migrated in M9-A.
-Two were copied byte-for-byte into the corpus (`LEGACY_FIXTURE_COPY`), and
-`tests/unit/m9a-corpus-seed-cases.test.ts` asserts each copy still equals its
-original. Migrating the remaining fixtures and their importers is M9-B's.
+Historical (M9-A): legacy fixtures under `tests/fixtures/wcl/events/` were not
+migrated in M9-A. Two were copied byte-for-byte into the corpus
+(`LEGACY_FIXTURE_COPY`, still recorded on their transformations), and a
+seed-cases test asserted each copy still equalled its original. M9-B migrated
+the remaining fixtures and their importers, after which the legacy events
+directory and that test were removed; the copies' identity is now proven by
+the digests in the manifest alone.
 
 ---
 

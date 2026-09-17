@@ -89,6 +89,26 @@ where marked.
 - Every M9-B evidence gap now carries a disposition in
   `tests/support/corpus/report.ts` and `tests/corpus/report.json`.
 
+## PRODUCT-INTENT GAP: preparation / consumable status is not implemented
+
+**Raised:** M11-A Phase 1 audit (2026-09-17). **Owner:** not yet assigned; not
+M11-A.
+
+`CLAUDE.md`, `agent/product-intent.md`, `agent/architecture.md` and `README.md`
+all require every analysis report to carry a status for health-potion,
+healthstone and combat-potion usage (`UNKNOWN` under incomplete coverage,
+never omitted). Today no preparation analyzer exists under `src/`, schema
+`warcraft-logs-coach.analysis/1` has no consumable or preparation field, and
+`agent/deployment-smoke.md` step M8-5's consumable check cannot be performed
+against the current output. The README now labels the requirement as product
+intent not yet implemented, so no document claims the status is emitted.
+
+Done looks like: a shared preparation analyzer running as a parallel finding
+producer, an additive (optional, therefore schema-v1-compatible) public field
+carrying the three statuses, and contract tests proving the category is never
+omitted and never reads zero from `PARTIAL`/`ABSENT` coverage. Making the field
+required is a schema-v2 decision. None of that is M11-A work.
+
 ## After M10-D: the internal-only partition is dormant
 
 **Raised:** M10-D (2026-09-18).

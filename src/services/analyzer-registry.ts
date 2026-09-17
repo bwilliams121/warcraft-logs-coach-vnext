@@ -148,7 +148,9 @@ export type CatalogDefect =
   | "PUBLIC_SET_DISAGREES_WITH_IDENTITY_TABLE"
   | "PUBLIC_SET_DISAGREES_WITH_PARTITION"
   /** A lookup was handed something other than a validated catalog. */
-  | "UNVALIDATED_CATALOG";
+  | "UNVALIDATED_CATALOG"
+  /** A registration's human-readable name is blank (M11-A1). */
+  | "INVALID_DISPLAY_NAME";
 
 export const CATALOG_DEFECTS = Object.freeze([
   "DUPLICATE_SPEC_ID",
@@ -163,6 +165,7 @@ export const CATALOG_DEFECTS = Object.freeze([
   "PUBLIC_SET_DISAGREES_WITH_IDENTITY_TABLE",
   "PUBLIC_SET_DISAGREES_WITH_PARTITION",
   "UNVALIDATED_CATALOG",
+  "INVALID_DISPLAY_NAME",
 ] as const satisfies readonly CatalogDefect[]);
 
 export interface CatalogDefectRecord {
@@ -224,6 +227,14 @@ function validateRegistration(registration: AnalyzerRegistration, defects: Catal
       defect: "PUBLIC_EXPOSURE_OF_INTERNAL_SPEC",
       analyzerId,
       detail: `'${registration.specId}' is internal-only and cannot carry a PUBLIC registration`,
+    });
+  }
+
+  if (typeof registration.displayName !== "string" || registration.displayName.trim().length === 0) {
+    defects.push({
+      defect: "INVALID_DISPLAY_NAME",
+      analyzerId,
+      detail: `'${analyzerId}' has no human-readable specialization name`,
     });
   }
 
@@ -413,6 +424,41 @@ export const ENABLED_ANALYZERS: readonly AnalyzerRegistration[] = publicAnalyzer
 export const ENABLED_ANALYSIS_REQUIREMENTS: readonly AnalyzerRequirement[] = ENABLED_ANALYZERS.map(
   (registration) => registration.requirement,
 );
+
+/**
+ * The human-readable list of publicly supported specializations, DERIVED
+ * from the PUBLIC registrations of a validated catalog (M11-A1).
+ *
+ * This is the one source of the "Supported specializations: …" wording the
+ * MCP tool descriptions publish. Before M11-A1 each tool module hand-listed
+ * the names, which is a partial-publication hazard: a specialization could be
+ * made public in the catalog and forgotten in one description, or named in a
+ * description before its registration existed. Deriving the sentence from
+ * the same set the dispatcher uses makes the two agree by construction.
+ *
+ * Ordering is code-point order of the display names, so the wording is a
+ * pure function of the catalog and identical on every build. INTERNAL_ONLY
+ * registrations are excluded exactly as `analyzerForSpec` excludes them —
+ * through `publicAnalyzers` — so a dormant or in-progress specialization can
+ * never be advertised. The joining grammar ("A", "A and B", "A, B and C") is
+ * the only prose here.
+ */
+export function supportedSpecializationsSentence(
+  catalog: ValidatedAnalyzerCatalog = PRODUCTION_CATALOG,
+): string {
+  const names = publicAnalyzers(catalog)
+    .map((registration) => registration.displayName)
+    .sort((left, right) => (left < right ? -1 : left > right ? 1 : 0));
+  const list =
+    names.length <= 1
+      ? (names[0] ?? "none")
+      : `${names.slice(0, -1).join(", ")} and ${String(names[names.length - 1])}`;
+  return `Supported specializations: ${list}.`;
+}
+
+/** The production wording, fixed at module load from the production catalog. */
+export const SUPPORTED_SPECIALIZATIONS_SENTENCE: string =
+  supportedSpecializationsSentence(PRODUCTION_CATALOG);
 
 /**
  * The catalog a service dispatches through: the injected rows validated per

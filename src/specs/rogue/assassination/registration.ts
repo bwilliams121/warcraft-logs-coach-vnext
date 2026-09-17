@@ -52,6 +52,9 @@ import {
 
 export const ASSASSINATION_ANALYZER_ID = "rogue-assassination-observed-decisions";
 
+/** The human-readable name the public surfaces derive their support wording from (M11-A1). */
+export const ASSASSINATION_DISPLAY_NAME = "Assassination Rogue";
+
 export const ASSASSINATION_ROTATION_CAPABILITY_ID = "rogue-assassination.observed-rotational-decision";
 
 /**
@@ -146,6 +149,7 @@ export function assassinationObservedDecisionView(
 export const ASSASSINATION_REGISTRATION: AnalyzerRegistration = defineAnalyzerRegistration({
   analyzerId: ASSASSINATION_ANALYZER_ID,
   specId: ASSASSINATION_SPEC_ID,
+  displayName: ASSASSINATION_DISPLAY_NAME,
   exposure: "PUBLIC",
   capabilities: [ASSASSINATION_ROTATION_CAPABILITY],
   authorityBindings: [ASSASSINATION_OFFENSIVE_AUTHORITY],

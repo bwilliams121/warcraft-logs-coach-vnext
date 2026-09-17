@@ -7,7 +7,7 @@
  * The loader validates — digests, lineage, references — and is async because
  * hashing is. A layer test that wants "the D2 events" at module load time
  * cannot await, and re-validating the whole corpus in every such test would be
- * redundant: `m9a-corpus-seed-cases.test.ts` and the harness already prove the
+ * redundant: `m9a-corpus-loader.test.ts` and the harness already prove the
  * committed corpus loads clean, in both Vitest projects, on every run.
  *
  * So this reads the same build-time file table the loader reads, resolves an

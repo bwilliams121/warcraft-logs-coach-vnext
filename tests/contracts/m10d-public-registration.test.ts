@@ -22,12 +22,13 @@ import { describe, expect, it } from "vitest";
 
 import { PUBLIC_SPEC_IDS as CONTRACT_PUBLIC_SPEC_IDS } from "../../src/contracts/analysis-contract.js";
 import { INTERNAL_ONLY_SPEC_IDS, PUBLIC_SPEC_IDS, SPEC_IDS } from "../../src/findings/spec-id.js";
-import { ANALYZE_TOOL_DESCRIPTION } from "../../src/mcp/tools/analyze-warcraft-log.js";
-import { RAID_NIGHT_TOOL_DESCRIPTION } from "../../src/mcp/tools/analyze-raid-night.js";
+import { analyzeToolDescription } from "../../src/mcp/tools/analyze-warcraft-log.js";
+import { raidNightToolDescription } from "../../src/mcp/tools/analyze-raid-night.js";
 import {
   ANALYZER_REGISTRATIONS,
   AnalyzerCatalogIntegrityError,
   ENABLED_ANALYZERS,
+  SUPPORTED_SPECIALIZATIONS_SENTENCE,
   ENABLED_ANALYSIS_REQUIREMENTS,
   validateAnalyzerCatalog,
   type AnalyzerRegistration,
@@ -164,7 +165,14 @@ describe("the complete-catalog helper", () => {
 });
 
 describe("the public descriptions state Protection's limits and claim nothing beyond them", () => {
-  const SUPPORT_SENTENCE = "Supported specializations: Assassination Rogue and Protection Paladin";
+  // The supported-specialization sentence is DERIVED from the production
+  // catalog's PUBLIC registrations (M11-A1) and injected into both
+  // descriptions by the composition root. The tests below read the same
+  // derivation, and `m11a-supported-specializations-derivation` pins what the
+  // derivation itself must say.
+  const SUPPORT_SENTENCE = SUPPORTED_SPECIALIZATIONS_SENTENCE;
+  const ANALYZE_TOOL_DESCRIPTION = analyzeToolDescription(SUPPORT_SENTENCE);
+  const RAID_NIGHT_TOOL_DESCRIPTION = raidNightToolDescription(SUPPORT_SENTENCE);
   const REQUIRED_MEANINGS = [
     "OFFENSIVE global-cooldown decisions",
     // Grammar differs by tool ("It does NOT" / "They do NOT"); the meaning does not.

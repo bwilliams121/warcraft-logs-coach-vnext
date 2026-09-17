@@ -75,7 +75,11 @@ import {
   type ProtectionExclusionReason,
   type ProtectionPaladinAnalysis,
 } from "./observed-analysis.js";
-import { PROTECTION_PALADIN_ANALYZER_ID, PROTECTION_PALADIN_SPEC_ID } from "./spec.js";
+import {
+  PROTECTION_PALADIN_ANALYZER_ID,
+  PROTECTION_PALADIN_DISPLAY_NAME,
+  PROTECTION_PALADIN_SPEC_ID,
+} from "./spec.js";
 
 /**
  * The public projection of every internal exclusion reason. Total by
@@ -192,6 +196,7 @@ export function protectionObservedDecisionView(
 export const PROTECTION_PALADIN_REGISTRATION: AnalyzerRegistration = defineAnalyzerRegistration({
   analyzerId: PROTECTION_PALADIN_ANALYZER_ID,
   specId: PROTECTION_PALADIN_SPEC_ID,
+  displayName: PROTECTION_PALADIN_DISPLAY_NAME,
   exposure: "PUBLIC",
   capabilities: PROTECTION_CAPABILITIES,
   authorityBindings: PROTECTION_AUTHORITY_BINDINGS,

@@ -75,6 +75,7 @@ export function fixtureRegistration(options: FixtureRegistrationOptions = {}): A
   return defineAnalyzerRegistration({
     analyzerId,
     specId: options.specId ?? "paladin/protection",
+    displayName: `Fixture (${analyzerId})`,
     exposure: options.exposure ?? "INTERNAL_ONLY",
     capabilities: options.capabilities ?? [FIXTURE_CAPABILITY],
     authorityBindings: options.authorityBindings ?? [],

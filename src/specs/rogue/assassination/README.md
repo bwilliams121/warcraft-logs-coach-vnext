@@ -148,7 +148,14 @@ no field whose name could be printed as "percent correct".
 
 ## Production status
 
-Not wired, by decision. `/v1/analysis` still returns `ANALYSIS_NOT_IMPLEMENTED`
-and nothing is deployed — but the message no longer claims that no analyzer
-exists, because one does. See the Milestone 5 closeout in
-`agent/architecture.md` for the reasoning and the M6 handoff.
+**PUBLIC.** The facade is bound at the single production composition root
+(M6-E) through `registration.ts` (`rogue-assassination-observed-decisions`,
+`rogue/assassination`, exposure `PUBLIC`) and is selected by the application
+service, raid-night orchestration, REST (`POST /v1/analysis`) and MCP
+(`analyze_warcraft_log`) for a resolved `Rogue/Assassination` identity. The
+published document is `warcraft-logs-coach.analysis/1`, projected from the
+registration's view; `rawBlocker`, the three-state `observedActionRejected`
+flag and the per-decision actor id stay inside the payload. Nothing above
+about the supported decision surface, the meaning of `MATCH`, or the
+exclusions changed when the endpoint was wired. The M5-era record of why
+wiring waited is in the Milestone 5 closeout of `agent/architecture.md`.

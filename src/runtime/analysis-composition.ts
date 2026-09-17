@@ -29,6 +29,7 @@
 
 import type { Env } from "../config/env.js";
 import { analyzeFight } from "../services/analysis-service.js";
+import { SUPPORTED_SPECIALIZATIONS_SENTENCE } from "../services/analyzer-registry.js";
 import type { AnalysisRunner } from "../services/analysis-runner.js";
 import { createPreflight } from "../wcl/preflight.js";
 import { createFightCoreIngestor, createFightIngestor } from "../wcl/ingest-fight.js";
@@ -145,3 +146,17 @@ export function createProductionEncounterContextRunner(env: Env): EncounterConte
       },
     });
 }
+
+/**
+ * The "Supported specializations: …" sentence the production MCP tool
+ * descriptions publish (M11-A1).
+ *
+ * Re-exported from the application layer HERE, at the composition root,
+ * because the transports may not import the analyzer registry (they hold no
+ * catalog and compose no analysis) and the MCP layer may not compute the
+ * sentence for itself. It is derived from the PUBLIC registrations of the
+ * production catalog — the same set the dispatcher selects from — and is
+ * handed to the MCP handler by `src/api/worker.ts` exactly as the runners
+ * are. There is no second source of this wording.
+ */
+export const PRODUCTION_SUPPORTED_SPECIALIZATIONS: string = SUPPORTED_SPECIALIZATIONS_SENTENCE;
