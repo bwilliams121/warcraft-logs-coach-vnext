@@ -5551,6 +5551,35 @@ authority or evidence, no shared-engine capability, no schema v2, no
 deployment. Production deployment and smoke remain a separately authorized
 post-CI step (`agent/deployment-smoke.md`).
 
+**Post-deploy: the raid night's final revision read (2026-09-18).** The
+first production raid nights after the A5 deploy were refused with
+`REPORT_REVISION_UNVERIFIED` while the same request succeeded from Node in
+19 s (55 outbound requests, 56 of 9,000 points). Two changes followed.
+First — DEPLOYED and production-validated — diagnostics: the transport keeps
+fixed-shape facts about a failed attempt (a closed-vocabulary thrown-error
+name, a timeout flag, the outbound ordinal: `WclDiagnostics`,
+`countOutbound`), `checkReportRevision` keeps the transport's failure on
+`RevisionCheck.cause` instead of collapsing it, and the raid-night service
+emits ONE fixed-vocabulary log record (`RaidNightDiagnosticRecord`, through a
+non-authoritative `diagnostics` port whose throws are swallowed) while the
+public `REPORT_REVISION_UNVERIFIED` document is unchanged. That classified
+production precisely: the 55th outbound request, `CoachReportRevision`,
+aborted by the client's own 20 s timeout after every page and analyzer had
+succeeded. Second — IMPLEMENTED, PENDING deployment and production
+validation — the bounded retry: the service retries that ONE condition
+exactly once (`UNVERIFIED` / `UPSTREAM` / `UPSTREAM_UNAVAILABLE` /
+`isTimeout`) with a fresh request through the same port; the retry's answer
+replaces the first and is judged by the unchanged rules (MATCHES publishes
+and emits a `RAID_NIGHT_REVISION_RETRY_RECOVERED` record naming the first
+failure by its closed-vocabulary fields; CHANGED refuses as changed;
+anything else refuses as unverified with `retried: true` on the record). No
+other cause is retried, the 20 s timeout, pagination and general retry
+policy are unchanged, and nothing is ever published on the strength of a
+timed-out check
+(`tests/regression/m11a5-raid-night-revision-{diagnostic,retry}.test.ts`).
+Whether the retry recovers the production raid night is not yet known; it
+is proven offline only.
+
 ---
 
 # Milestone 12 — Healer Foundation

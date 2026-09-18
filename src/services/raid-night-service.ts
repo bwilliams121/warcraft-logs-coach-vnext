@@ -83,8 +83,10 @@ import {
 import { deriveIngestionScopeFor } from "./ingestion-scope.js";
 import type {
   FightCoreIngestionPort,
+  RaidNightDiagnostic,
   RaidNightDiagnosticRecord,
   RaidNightDiagnosticsPort,
+  RaidNightRevisionRecoveredRecord,
   ReportRevisionPort,
   RosterDiscoveryPort,
 } from "./raid-night-ports.js";
@@ -599,13 +601,33 @@ export async function analyzeRaidNight(
   }
 
   // ---- ONE final revision confirmation, after every fight, before publishing ----
-  const finalCheck = await deps.checkRevision(request.reportCode, r0, credentials);
+  //
+  // With ONE bounded retry, for exactly one condition (M11-A5): the first
+  // check's fetch was aborted by the client's own 20 s timeout. Production
+  // classified three refused raid nights as precisely that — the cheapest query
+  // of the request timing out after the whole ingestion had succeeded — and a
+  // second fresh request is the proportionate answer. Nothing else is retried:
+  // a refusal, a rate limit, invalid data, an unserved report or a non-timeout
+  // throw would only be repeated or would spend more of a quota. The retry is
+  // a second real request through the same port; its answer REPLACES the first
+  // and is judged by the same rules. Nothing is published on the strength of
+  // the timed-out attempt, and there is no loop: two checks at most.
+  const firstCheck = await deps.checkRevision(request.reportCode, r0, credentials);
+  const retried = isRetryableRevisionTimeout(firstCheck);
+  const finalCheck = retried ? await deps.checkRevision(request.reportCode, r0, credentials) : firstCheck;
   const revisionFailure = describeRevisionCheck(finalCheck, r0);
   if (revisionFailure !== null) {
     // The public answer is unchanged and deliberately opaque; the diagnostic
-    // record is the sanctioned, fixed-vocabulary account of what happened.
-    emitDiagnostic(deps.diagnostics, diagnosticRecordOf(finalCheck));
+    // record is the sanctioned, fixed-vocabulary account of what happened —
+    // of the TERMINAL check, with `retried` saying whether a retry preceded it.
+    emitDiagnostic(deps.diagnostics, diagnosticRecordOf(finalCheck, retried));
     return failure(revisionFailure.code, revisionFailure.message);
+  }
+  if (retried) {
+    // The retry MATCHED: the night publishes exactly as an ordinary one, and
+    // the operator learns it needed the retry. An ordinary first-check MATCHES
+    // emits nothing.
+    emitDiagnostic(deps.diagnostics, recoveredRecordOf(firstCheck));
   }
 
   // ---- the M7-D gate, then aggregation, then the public document ----
@@ -653,7 +675,7 @@ const REVISION_UNVERIFIED_MESSAGE =
  */
 function emitDiagnostic(
   port: RaidNightDiagnosticsPort | undefined,
-  record: RaidNightDiagnosticRecord | null,
+  record: RaidNightDiagnostic | null,
 ): void {
   if (port === undefined || record === null) return;
   try {
@@ -664,11 +686,47 @@ function emitDiagnostic(
 }
 
 /**
+ * The ONE condition the final revision check is retried for: the transport
+ * reported UNAVAILABLE because the fetch was aborted by the client's own
+ * timeout. A predicate over the check's fixed-shape diagnostics — nothing is
+ * read from the network to decide, and every other cause answers false.
+ */
+export function isRetryableRevisionTimeout(check: RevisionCheck): boolean {
+  return (
+    check.outcome === "UNVERIFIED" &&
+    check.cause.kind === "UPSTREAM" &&
+    check.cause.failure.reason === "UPSTREAM_UNAVAILABLE" &&
+    check.cause.failure.diagnostics.isTimeout === true
+  );
+}
+
+/**
+ * The fixed-vocabulary account of a retry that recovered: the first check's
+ * closed-vocabulary error name, timeout flag and outbound ordinal, nothing
+ * else. `firstCheck` is by construction the retryable timeout.
+ */
+export function recoveredRecordOf(firstCheck: RevisionCheck): RaidNightRevisionRecoveredRecord {
+  const diagnostics =
+    firstCheck.outcome === "UNVERIFIED" && firstCheck.cause.kind === "UPSTREAM"
+      ? firstCheck.cause.failure.diagnostics
+      : null;
+  return {
+    event: "RAID_NIGHT_REVISION_RETRY_RECOVERED",
+    stage: "FINAL_REVISION_CHECK",
+    retried: true,
+    firstErrorName: diagnostics?.errorName ?? null,
+    firstIsTimeout: diagnostics?.isTimeout ?? null,
+    firstOutboundIndex: diagnostics?.outboundIndex ?? null,
+  };
+}
+
+/**
  * The fixed-vocabulary account of a failed final revision check, or `null` for
  * CHANGED (which has its own public code and needs no diagnosis). Copies enum
  * members, integers and booleans by name; nothing else exists to copy.
+ * `retried` says whether the described check was the retry.
  */
-export function diagnosticRecordOf(check: RevisionCheck): RaidNightDiagnosticRecord | null {
+export function diagnosticRecordOf(check: RevisionCheck, retried: boolean): RaidNightDiagnosticRecord | null {
   const empty = {
     event: "RAID_NIGHT_REVISION_UNVERIFIED" as const,
     stage: "FINAL_REVISION_CHECK" as const,
@@ -679,6 +737,7 @@ export function diagnosticRecordOf(check: RevisionCheck): RaidNightDiagnosticRec
     errorName: null,
     isTimeout: null,
     outboundIndex: null,
+    retried,
   };
   switch (check.outcome) {
     case "CHANGED":

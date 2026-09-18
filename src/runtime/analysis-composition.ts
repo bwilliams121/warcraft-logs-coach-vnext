@@ -40,7 +40,7 @@ import { createReportRevisionReader } from "../wcl/report-revision.js";
 import { createReportRoster } from "../wcl/report-roster.js";
 import { createTokenCache } from "../wcl/token-provider.js";
 import { countOutbound } from "../wcl/types.js";
-import type { RaidNightDiagnosticRecord } from "../services/raid-night-ports.js";
+import type { RaidNightDiagnostic } from "../services/raid-night-ports.js";
 import { analyzeRaidNight } from "../services/raid-night-service.js";
 import type { RaidNightRunner } from "../services/raid-night-runner.js";
 import { analyzeEncounterContext } from "../services/encounter-context-service.js";
@@ -123,14 +123,15 @@ export function createProductionRaidNightRunner(env: Env): RaidNightRunner {
 /**
  * The one production log line a raid night may write (M11-A5).
  *
- * The record is fixed-vocabulary by type (`RaidNightDiagnosticRecord`): enum
+ * The record is fixed-vocabulary by type (`RaidNightDiagnostic`): enum
  * members, integers, booleans, nulls. It is serialized as-is and nothing is
  * appended, so the line cannot carry upstream text, an exception message, a
  * header, a token or evidence. Read with `wrangler tail` or the Workers Logs
  * view; it exists so a `REPORT_REVISION_UNVERIFIED` refusal, which is
- * deliberately opaque to callers, is not opaque to the operator.
+ * deliberately opaque to callers, is not opaque to the operator — and so a
+ * night that needed the bounded retry to publish is counted.
  */
-export function logRaidNightDiagnostic(record: RaidNightDiagnosticRecord): void {
+export function logRaidNightDiagnostic(record: RaidNightDiagnostic): void {
   console.log(JSON.stringify(record));
 }
 

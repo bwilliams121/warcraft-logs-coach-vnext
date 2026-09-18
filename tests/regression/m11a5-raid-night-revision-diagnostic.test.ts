@@ -19,7 +19,7 @@ import { describe, expect, it, vi } from "vitest";
 import { logRaidNightDiagnostic } from "../../src/runtime/analysis-composition.js";
 import { statusForErrorCode } from "../../src/api/responses.js";
 import { toolErrorForServiceCode } from "../../src/mcp/tool-errors.js";
-import type { RaidNightDiagnosticRecord } from "../../src/services/raid-night-ports.js";
+import type { RaidNightDiagnostic, RaidNightDiagnosticRecord } from "../../src/services/raid-night-ports.js";
 import { diagnosticRecordOf } from "../../src/services/raid-night-service.js";
 import { createGraphqlClient } from "../../src/wcl/graphql-client.js";
 import { checkReportRevision, type RevisionCheck } from "../../src/wcl/report-revision.js";
@@ -69,6 +69,7 @@ const RECORD_KEYS = [
   "errorName",
   "isTimeout",
   "outboundIndex",
+  "retried",
 ] as const;
 
 function expectFixedVocabulary(record: RaidNightDiagnosticRecord): void {
@@ -85,6 +86,7 @@ function expectFixedVocabulary(record: RaidNightDiagnosticRecord): void {
     expect(value === null || Number.isInteger(value), key).toBe(true);
   }
   expect(record.isTimeout === null || typeof record.isTimeout === "boolean").toBe(true);
+  expect(typeof record.retried).toBe("boolean");
 }
 
 describe("diagnosticRecordOf: the fixed-vocabulary account of a failed final check", () => {
@@ -94,7 +96,7 @@ describe("diagnosticRecordOf: the fixed-vocabulary account of a failed final che
     const check = await realCheck(() => {
       throw timeout;
     });
-    const record = diagnosticRecordOf(check);
+    const record = diagnosticRecordOf(check, false);
     expect(record).toEqual({
       event: "RAID_NIGHT_REVISION_UNVERIFIED",
       stage: "FINAL_REVISION_CHECK",
@@ -106,7 +108,9 @@ describe("diagnosticRecordOf: the fixed-vocabulary account of a failed final che
       errorName: "TimeoutError",
       isTimeout: true,
       outboundIndex: 2,
+      retried: false,
     });
+    expect(diagnosticRecordOf(check, true)).toMatchObject({ retried: true, errorName: "TimeoutError" });
     if (record !== null) expectFixedVocabulary(record);
   });
 
@@ -129,7 +133,7 @@ describe("diagnosticRecordOf: the fixed-vocabulary account of a failed final che
       ],
     ];
     for (const [graphql, expected] of cases) {
-      const record = diagnosticRecordOf(await realCheck(graphql));
+      const record = diagnosticRecordOf(await realCheck(graphql), false);
       expect(record).not.toBeNull();
       if (record === null) continue;
       expect(record).toMatchObject(expected);
@@ -138,10 +142,12 @@ describe("diagnosticRecordOf: the fixed-vocabulary account of a failed final che
   });
 
   it("names a MATCHES for some other revision, and has nothing to say about CHANGED", () => {
-    expect(diagnosticRecordOf({ outcome: "MATCHES", revision: 31 })).toMatchObject({
+    expect(diagnosticRecordOf({ outcome: "MATCHES", revision: 31 }, false)).toMatchObject({
       cause: "REVISION_MISMATCH",
+      retried: false,
     });
-    expect(diagnosticRecordOf({ outcome: "CHANGED", expected: 30, observed: 31 })).toBeNull();
+    expect(diagnosticRecordOf({ outcome: "CHANGED", expected: 30, observed: 31 }, false)).toBeNull();
+    expect(diagnosticRecordOf({ outcome: "CHANGED", expected: 30, observed: 31 }, true)).toBeNull();
   });
 });
 
@@ -149,7 +155,7 @@ describe("the raid-night service emits the record once, and the public answer do
   const snapshot = assassinationSnapshot({ fightIds: [1], sourceIds: [19] });
 
   it("emits exactly one record on an UNVERIFIED final check, with the public code and wording unchanged", async () => {
-    const received: RaidNightDiagnosticRecord[] = [];
+    const received: RaidNightDiagnostic[] = [];
     const ports = fakePorts({
       snapshot,
       finalRevision: {
@@ -184,11 +190,12 @@ describe("the raid-night service emits the record once, and the public answer do
       httpStatus: 429,
       outboundIndex: 55,
     });
-    if (received[0] !== undefined) expectFixedVocabulary(received[0]);
+    const first = received[0];
+    if (first !== undefined && first.event === "RAID_NIGHT_REVISION_UNVERIFIED") expectFixedVocabulary(first);
   });
 
   it("emits nothing when the final check MATCHES, and nothing for CHANGED (which has its own public code)", async () => {
-    const received: RaidNightDiagnosticRecord[] = [];
+    const received: RaidNightDiagnostic[] = [];
     const ok = fakePorts({ snapshot });
     const good = await runNight(
       { reportCode: REPORT_CODE, fightIds: [1] },
@@ -290,7 +297,7 @@ describe("the production log line cannot carry arbitrary text", () => {
     const check = await realCheck(() => {
       throw hostile;
     });
-    const record = diagnosticRecordOf(check);
+    const record = diagnosticRecordOf(check, false);
     expect(record).not.toBeNull();
     if (record === null) return;
     const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
@@ -329,6 +336,7 @@ describe("the production log line cannot carry arbitrary text", () => {
       errorName: "TypeError",
       isTimeout: false,
       outboundIndex: 55,
+      retried: false,
     };
     expectFixedVocabulary(sample);
     const strings = Object.values(sample).filter((value): value is string => typeof value === "string");

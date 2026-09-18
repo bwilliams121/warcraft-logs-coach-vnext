@@ -68,7 +68,35 @@ export interface RaidNightDiagnosticRecord {
   readonly errorName: ThrownErrorName | null;
   readonly isTimeout: boolean | null;
   readonly outboundIndex: number | null;
+  /**
+   * Whether the ONE bounded retry of the final check was made before this
+   * record's failure (M11-A5). When true, every field above describes the
+   * terminal retry failure, never the first timeout that earned the retry.
+   */
+  readonly retried: boolean;
 }
 
-/** Receives the diagnostic record. Production writes it to the Worker log; tests capture it. */
-export type RaidNightDiagnosticsPort = (record: RaidNightDiagnosticRecord) => void;
+/**
+ * The record for the OTHER outcome of the bounded retry: the first final check
+ * timed out, the retry ran, and it MATCHED, so the raid night was published.
+ *
+ * Emitted so a recovered night is visible to the operator — a raid night that
+ * needed the retry is a fact about production worth counting — while the
+ * public document stays byte-identical to an ordinary night. Fixed vocabulary
+ * only: the first failure is identified by its closed-vocabulary name, its
+ * timeout flag and its outbound ordinal, never by text.
+ */
+export interface RaidNightRevisionRecoveredRecord {
+  readonly event: "RAID_NIGHT_REVISION_RETRY_RECOVERED";
+  readonly stage: "FINAL_REVISION_CHECK";
+  readonly retried: true;
+  readonly firstErrorName: ThrownErrorName | null;
+  readonly firstIsTimeout: boolean | null;
+  readonly firstOutboundIndex: number | null;
+}
+
+/** Every record a raid night may emit. A port switches on `event`. */
+export type RaidNightDiagnostic = RaidNightDiagnosticRecord | RaidNightRevisionRecoveredRecord;
+
+/** Receives a diagnostic record. Production writes it to the Worker log; tests capture it. */
+export type RaidNightDiagnosticsPort = (record: RaidNightDiagnostic) => void;

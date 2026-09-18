@@ -250,6 +250,12 @@ export interface FakePortOptions {
   readonly contextRevisions?: ReadonlyMap<number, number>;
   /** What the final revision confirmation returns. Defaults to MATCHES at R0. */
   readonly finalRevision?: RevisionCheck;
+  /**
+   * What successive final revision confirmations return, in order (M11-A5:
+   * the service may make one bounded retry). The last entry repeats. Takes
+   * precedence over `finalRevision` when given.
+   */
+  readonly finalRevisions?: readonly RevisionCheck[];
   readonly rosterFailure?: ReportRosterResult;
   /**
    * The core the ingestion port serves for a fight, replacing the D2 fan-out.
@@ -307,6 +313,12 @@ export function fakePorts(options: FakePortOptions): FakePorts {
     },
     checkRevision: async (_code, expected) => {
       revisionCalls += 1;
+      const sequence = options.finalRevisions;
+      if (sequence !== undefined && sequence.length > 0) {
+        return (
+          sequence[Math.min(revisionCalls, sequence.length) - 1] ?? { outcome: "MATCHES", revision: expected }
+        );
+      }
       return options.finalRevision ?? { outcome: "MATCHES", revision: expected };
     },
   };
