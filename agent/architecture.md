@@ -5336,6 +5336,34 @@ milestone-scoped: the guard fails the moment `warrior/arms` becomes a
 `SpecId` in any exposure, so the fixture is migrated before that
 specialization is onboarded.
 
+### M11-A3 — authority audit and first-spec selection
+
+An audit/selection milestone: no analyzer, no `SpecId`, no engine change.
+`agent/m11-a3-authority-audit.md` records the read-only bounded audit of the
+pinned SimulationCraft lists of all thirty ordinary M11 specializations
+(seventeen at line level — the ones with real evidence — thirteen
+structurally), the existing real evidence (every ordinary M11 identity has
+LOCAL RAW evidence only: the actor-unfiltered A7R6 fight-7 and gtKb
+fight-22 captures; no committed sanitized capture exercises one), the
+engine-gap inventory, and the G1–G7 matrix. Outcome:
+
+    FIRST NEW SPEC: paladin/retribution
+
+Retribution is the only audited list with no `run_action_list`, no
+`target_if`, no cast times and a target count read exactly once inside one
+variable; its spender decisions resolve on real evidence (A7R6 actor 6:
+13 `REJECTED` by unselectability alone, 6 `MATCH` + 2 `REJECTED` through the
+definite scan, 48 `UNKNOWN` with named blockers). The one identity
+dependency is race for the GCD-consuming `lights_judgment` line, closable
+by a pinned faction fact. `agent/m11-a4-first-spec-contract.md` is the
+bounded A4 scope; `agent/m11-spec-coaching-inventory.md` and the
+test-owned `tests/support/m11/coaching-inventory.json` (proven by
+`m11a3-coaching-inventory`) carry the deep-dive question framework, the
+thirty-spec backlog in structural cohorts, and the Ritual Clipping
+requirement under its unresolved Diabolist ownership. The fifteen lists
+behind `run_action_list` and the eleven casters wait on named engine
+milestones, not on spec work.
+
 ---
 
 # Milestone 12 — Healer Foundation

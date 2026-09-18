@@ -109,6 +109,36 @@ carrying the three statuses, and contract tests proving the category is never
 omitted and never reads zero from `PARTIAL`/`ABSENT` coverage. Making the field
 required is a schema-v2 decision. None of that is M11-A work.
 
+## After M11-A3: shared-engine candidates the audit named
+
+**Raised:** M11-A3 (2026-09-17). Each is an ENGINE milestone with its own
+design and proof; none is authorized by A3 and none is needed by the
+Retribution first slice. Listed in the order the audit found them to unlock
+the most of the remaining M11 population (`agent/m11-a3-authority-audit.md`
+§6).
+
+- **`run_action_list` with a decidable gate.** Fifteen of thirty ordinary
+  lists put their whole rotation behind it. Two sound, bounded steps: skip a
+  `run_action_list` whose gate is proven FALSE exactly as a FALSE
+  `call_action_list` gate is skipped today; then model a proven-TRUE one as
+  "continue in the child, never return". Neither touches expression
+  semantics.
+- **Binding fields for `buff.<x>.stack` and `buff.<x>.remains`.** Both are
+  built-ins with no binding field, so no specialization can bind them and
+  every line reading them is UNKNOWN. Aura stack and remaining
+  reconstruction (M4 already carries stacks on events) is the single most
+  valuable shared addition for M11 coverage.
+- **A proven lower bound above zero is a proven non-zero** (`truthOf` on a
+  `BOUNDED_NUMBER`), and sign-aware bound propagation through `*`/`+`/`-`.
+  Retribution's `generators[0]` gate and several trinket gates read a
+  cooldown remainder as a bare truth or multiply `gcd`.
+- **Cast/channel decision anchors.** Every caster's decision point is its
+  `begincast`; the shared observed-decision model anchors on `cast`. Blocks
+  the first slice of eleven specializations.
+- **Charge state, target count (with evidence, never a default), generic
+  in-scan `variable` execution, pets.** Named for completeness; each is
+  spec-blocking for some cohort and none has a design yet.
+
 ## After M11-A2: deferred structural items
 
 **Raised:** M11-A2 (2026-09-18). None is a defect; each is a decision.

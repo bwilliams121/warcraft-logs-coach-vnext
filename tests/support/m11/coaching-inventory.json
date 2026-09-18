@@ -1,0 +1,870 @@
+{
+  "inventoryVersion": 1,
+  "milestone": "M11-A3",
+  "pinnedSimcCommit": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+  "evokerClassification": {
+    "evoker/devastation": "M11",
+    "evoker/preservation": "M12",
+    "evoker/augmentation": "M13"
+  },
+  "selectedFirstSpec": "paladin/retribution",
+  "cohorts": {
+    "SELECTED": ["paladin/retribution"],
+    "B_INSTANT_TARGET_GATED": [
+      "demonhunter/havoc",
+      "hunter/beast_mastery",
+      "druid/feral",
+      "hunter/survival",
+      "monk/windwalker",
+      "rogue/subtlety",
+      "shaman/enhancement",
+      "druid/guardian"
+    ],
+    "C_RUN_ACTION_LIST_DISPATCH": [
+      "warrior/arms",
+      "warrior/fury",
+      "warrior/protection",
+      "deathknight/blood",
+      "deathknight/frost",
+      "monk/brewmaster",
+      "demonhunter/vengeance",
+      "demonhunter/devourer",
+      "rogue/outlaw"
+    ],
+    "D_CAST_ANCHORED": [
+      "mage/arcane",
+      "mage/fire",
+      "mage/frost",
+      "warlock/destruction",
+      "warlock/affliction",
+      "warlock/demonology",
+      "shaman/elemental",
+      "priest/shadow",
+      "druid/balance",
+      "evoker/devastation",
+      "hunter/marksmanship"
+    ],
+    "E_PET_AND_VARIABLE_HEAVY": ["deathknight/unholy"]
+  },
+  "specs": [
+    {
+      "specId": "paladin/retribution",
+      "cohort": "SELECTED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
+      "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",
+      "questions": [
+        {
+          "id": "paladin/retribution.spender-choice",
+          "question": "At each Holy Power spender press, did the player cast the spender the pinned authority selects (Divine Storm only when variable.ds_castable holds, otherwise Templar's/Final Verdict)?",
+          "scope": "OBSERVED_DECISION",
+          "timeHorizon": "ONE_DECISION",
+          "evidenceNeeded": [
+            "spender cast events with classResources type 9 (pre-cost Holy Power)",
+            "aura intervals on the actor: Empyrean Legacy 387178, Divine Arbiter 1306161 and 1306162, Divine Purpose 408458, Avenging Wrath 31884, Hammer of Wrath readiness aura 1241410",
+            "observed casts of Wake of Ashes, Divine Toll, Execution Sentence, Avenging Wrath, Blade of Justice, Hammer of Wrath (cooldown/charge proofs)",
+            "combatantinfo talent tree and gear"
+          ],
+          "authorityNeeded": [
+            "SIMC_APL_PALADIN_RETRIBUTION (apl_paladin.cpp retribution region at the pin)",
+            "pinned DBC cooldown/charge/GCD rows and a reviewed cooldown-modifier census",
+            "pinned module semantics: Divine Arbiter trigger/consume (sc_paladin.hpp:1666-1716), Hammer of Wrath / Judgment readiness (sc_paladin.cpp:1536-1539, 1799-1802), build-dependent background rules"
+          ],
+          "normalizedStateNeeded": [
+            "actor casts",
+            "actor auras with stacks",
+            "Holy Power observations",
+            "talent selection",
+            "gear"
+          ],
+          "implementationReadiness": "READY_FOR_SPEC_MILESTONE",
+          "unknownConditions": [
+            "no arbiter or Empyrean Legacy aura is up (active_enemies is unbound, so ds_castable is undecidable)",
+            "Wake of Ashes / Divine Toll / Execution Sentence / Avenging Wrath possibly ready (raid_event-gated lines block the scan)",
+            "a Walk Into Light build under Avenging Wrath with Hammer of Wrath charge state unproven",
+            "the Lightforged race world cannot be excluded (scan route only; the unselectability route is race-independent)",
+            "Templar hero-tree builds (hammer_of_light lines read unbindable buff remains)"
+          ],
+          "outputNeed": "EXISTING_INTERNAL_FINDINGS",
+          "a4Classification": "A4_REQUIRED",
+          "notes": "This is the first truthful rotational vertical slice, not a supplemental analysis. Audit walk over A7R6 actor 6: 13 REJECTED by unselectability, 6 MATCH + 2 REJECTED by definite scan, 48 UNKNOWN with named reasons."
+        },
+        {
+          "id": "paladin/retribution.holy-power-waste",
+          "question": "How much Holy Power generation was wasted at the 5-point cap, and how much of it came from pressed generators rather than the auto-attack-driven Crusading Strikes?",
+          "scope": "RESOURCE_MANAGEMENT",
+          "timeHorizon": "WHOLE_FIGHT",
+          "evidenceNeeded": [
+            "resourcechange events of the actor with resourceChangeType 9 carrying resourceChange and waste (observed, e.g. Crusading Strikes at +59.841 with waste=1, Blade of Justice at +73.326 with waste=2)",
+            "spender casts carrying max Holy Power on the wire (classResources max 5)",
+            "RESOURCES completeness for the actor over the window"
+          ],
+          "authorityNeeded": [
+            "WCL_OBSERVED_FACT for the waste field (Warcraft Logs states the wasted amount per gain; nothing is inferred from a cap)",
+            "a spec-owned invariant separating unavoidable auto-attack generation (Crusading Strikes) from pressed generators"
+          ],
+          "normalizedStateNeeded": ["Holy Power resource events with waste", "actor casts"],
+          "implementationReadiness": "READY_FOR_SPEC_MILESTONE",
+          "unknownConditions": [
+            "RESOURCES completeness PARTIAL or ABSENT over any part of the window",
+            "a gain event without a waste field"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "a4Classification": "A4_OPTIONAL",
+          "notes": "Rests on the same evidence the rotational slice already normalizes and on no APL line; the candidate that validates the supplemental seam with the least architectural risk. Not required for promotion."
+        },
+        {
+          "id": "paladin/retribution.empyrean-legacy-consumption",
+          "question": "Was each Empyrean Legacy aura consumed by a Verdict before it expired, and was a Divine Storm pressed while it was up?",
+          "scope": "TEMPORAL_WINDOW",
+          "timeHorizon": "SHORT_WINDOW",
+          "evidenceNeeded": [
+            "Empyrean Legacy 387178 apply/remove intervals (20,000 ms, max 2 stacks per DBC)",
+            "spender casts"
+          ],
+          "authorityNeeded": [
+            "pinned finishers[0] gate: ds_castable requires !buff.empyrean_legacy.up",
+            "pinned mechanics read of the Empyrean Legacy trigger/consume in sc_paladin.cpp (the aura is triggered on Avenging Wrath execute when the talent is taken)"
+          ],
+          "normalizedStateNeeded": ["actor auras", "actor casts"],
+          "implementationReadiness": "READY_FOR_SPEC_MILESTONE",
+          "unknownConditions": [
+            "AURAS completeness insufficient across the interval",
+            "removal not observed under coverage (expiry vs consumption cannot be told apart)"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "a4Classification": "LATER_M11",
+          "notes": "The rotational slice already rejects a Divine Storm pressed under the aura; the temporal question adds expiry-without-consumption, which is a lost-value observation, not an APL decision."
+        },
+        {
+          "id": "paladin/retribution.divine-arbiter-alternation",
+          "question": "Was each Divine Arbiter buff (set bonus) consumed by the opposite spender before its 20 s expiry?",
+          "scope": "TEMPORAL_WINDOW",
+          "timeHorizon": "SHORT_WINDOW",
+          "evidenceNeeded": [
+            "Divine Arbiter 1306161 / 1306162 apply/remove intervals",
+            "spender casts",
+            "combatantinfo gear (the four-piece must be worn)"
+          ],
+          "authorityNeeded": [
+            "pinned set-bonus semantics sc_paladin.hpp:1666-1716 (trigger on Divine Purpose consumption, consumption by a different spender)"
+          ],
+          "normalizedStateNeeded": ["actor auras", "actor casts", "gear"],
+          "implementationReadiness": "READY_FOR_SPEC_MILESTONE",
+          "unknownConditions": [
+            "set-bonus possession not provable from gear",
+            "AURAS completeness insufficient"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "a4Classification": "LATER_M11",
+          "notes": "Season-bound (Midnight season 2 four-piece). Mostly subsumed by the observed-decision slice."
+        },
+        {
+          "id": "paladin/retribution.wings-hammer-of-wrath-window",
+          "question": "During each Avenging Wrath (while the Hammer of Wrath readiness aura is up, Judgment is unusable and Hammer of Wrath usable), how many Hammer of Wrath presses were available versus used?",
+          "scope": "UPTIME_MAINTENANCE",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": [
+            "Hammer of Wrath readiness aura 1241410 intervals",
+            "Hammer of Wrath casts",
+            "haste at each press"
+          ],
+          "authorityNeeded": [
+            "pinned Hammer of Wrath charge data (1 charge / 7,500 ms per DBC; Walk Into Light adds a charge per the APL's cooldown.hammer_of_wrath.charges=2 line)",
+            "pinned readiness rule sc_paladin.cpp:1799-1802"
+          ],
+          "normalizedStateNeeded": ["actor auras", "actor casts", "a charge/recharge model"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": [
+            "hasted recharge cannot be bounded from evidence",
+            "charge state at the start of the window unknown"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "a4Classification": "BLOCKED",
+          "notes": "Needs a charge model (shared engine candidate) or a spec-owned bounded charge state; not a first-slice item."
+        },
+        {
+          "id": "paladin/retribution.wake-of-ashes-cooldown-drift",
+          "question": "How far did Wake of Ashes drift from its 30 s charge cooldown over the fight (observed casts at +3.3, +35.8, +67.1, +99.3, +131.1 s on A7R6 actor 6)?",
+          "scope": "COOLDOWN_ALIGNMENT",
+          "timeHorizon": "WHOLE_FIGHT",
+          "evidenceNeeded": ["Wake of Ashes casts", "CASTS completeness over the fight"],
+          "authorityNeeded": [
+            "pinned DBC row 255937 (1 charge, 30,000 ms) with a modifier census",
+            "the pinned generators[1] gate to say whether a delay was authority-compatible — which reads raid_event.* and is unsupported"
+          ],
+          "normalizedStateNeeded": ["actor casts", "cooldown census"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": [
+            "whether a delay was intended by the authority (raid_event gates are simulation-only and never bindable)"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "a4Classification": "LATER_M11",
+          "notes": "An observation-only drift summary is producible; a blame verdict is not, and must not be manufactured by treating raid_event as false."
+        },
+        {
+          "id": "paladin/retribution.execution-sentence-wake-alignment",
+          "question": "Was Execution Sentence pressed within one GCD before Wake of Ashes, as the pinned cooldowns[9] gate requires (cooldown.wake_of_ashes.remains<gcd|variable.pre_es_wake=1)?",
+          "scope": "COOLDOWN_ALIGNMENT",
+          "timeHorizon": "SHORT_WINDOW",
+          "evidenceNeeded": ["Execution Sentence and Wake of Ashes casts", "haste at the press"],
+          "authorityNeeded": [
+            "pinned cooldowns[9] gate",
+            "an upper bound on gcd (the shared evaluator has only lower bounds)"
+          ],
+          "normalizedStateNeeded": ["actor casts", "cooldown remains as a bounded magnitude"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": [
+            "gcd magnitude not upper-bounded",
+            "target.time_to_die in the same gate is predictive"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "a4Classification": "LATER_M11",
+          "notes": "Observed: +2.531 ES then +3.281 Wake (compatible); +69.240 ES after +67.108 Wake (the gate's third conjunct is FALSE unless pre_es_wake=1, which is pinned 0)."
+        },
+        {
+          "id": "paladin/retribution.avenging-wrath-usage",
+          "question": "Were Avenging Wrath presses aligned with its effective cooldown over the whole fight (three casts at +0.7, +63.3, +127.4 s on A7R6 actor 6)?",
+          "scope": "WHOLE_FIGHT",
+          "timeHorizon": "WHOLE_FIGHT",
+          "evidenceNeeded": ["Avenging Wrath casts", "combatantinfo talents"],
+          "authorityNeeded": [
+            "pinned DBC row 31884 (120,000 ms) with the reviewed modifier census that explains the observed ~63 s spacing"
+          ],
+          "normalizedStateNeeded": ["actor casts", "talent selection"],
+          "implementationReadiness": "NEEDS_AUTHORITY",
+          "unknownConditions": [
+            "the effective cooldown cannot be bounded until the census exists",
+            "raid_event gates on the line are unsupported, so only usage facts are reportable"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "a4Classification": "LATER_M11",
+          "notes": "A4 produces the census for the rotational slice's usability proofs; the usage summary can follow."
+        }
+      ]
+    },
+    {
+      "specId": "demonhunter/havoc",
+      "cohort": "B_INSTANT_TARGET_GATED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
+      "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",
+      "questions": [
+        {
+          "id": "demonhunter/havoc.essence-break-window-fill",
+          "question": "Inside each Essence Break debuff window, were Death Sweep / Annihilation pressed as the pinned default[12..13] lines select?",
+          "scope": "TEMPORAL_WINDOW",
+          "timeHorizon": "SHORT_WINDOW",
+          "evidenceNeeded": [
+            "Essence Break debuff intervals on the target",
+            "Death Sweep / Annihilation casts",
+            "Metamorphosis aura",
+            "Fury on casts (classResources type 17, observed on every cast of A7R6 actor 18)"
+          ],
+          "authorityNeeded": [
+            "pinned havoc default[12] death_sweep,if=debuff.essence_break.up|… and default[13] annihilation,if=debuff.essence_break.up|…"
+          ],
+          "normalizedStateNeeded": ["target debuffs", "actor auras", "actor casts", "Fury observations"],
+          "implementationReadiness": "READY_FOR_SPEC_MILESTONE",
+          "unknownConditions": [
+            "default[1..2] retarget_auto_attack (target_if with the >? operator) not excluded by a NON_GCD boundary proof",
+            "action.<x>.demonsurge_available state for Fel-scarred builds"
+          ],
+          "outputNeed": "EXISTING_INTERNAL_FINDINGS",
+          "notes": "The only part of the Havoc rotation the shared scan can reach: default[14] throw_glaive cannot parse (>?) and blocks every decision below it."
+        },
+        {
+          "id": "demonhunter/havoc.fury-cap",
+          "question": "Was Fury generated at cap?",
+          "scope": "RESOURCE_MANAGEMENT",
+          "timeHorizon": "WHOLE_FIGHT",
+          "evidenceNeeded": ["resourcechange events type 17 with waste", "Fury max on casts"],
+          "authorityNeeded": ["WCL_OBSERVED_FACT (waste field)"],
+          "normalizedStateNeeded": ["Fury resource events"],
+          "implementationReadiness": "NEEDS_EVIDENCE",
+          "unknownConditions": ["waste field semantics for Fury not yet inspected on the evidence"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": "Same shape as the Retribution waste question; the Fury waste field was not inspected in A3."
+        }
+      ]
+    },
+    {
+      "specId": "hunter/beast_mastery",
+      "cohort": "B_INSTANT_TARGET_GATED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "hunter/beast_mastery.barbed-shot-charge-capping",
+          "question": "Did Barbed Shot charges sit at cap (the pinned st[0] and st[5] lines press it on full_recharge_time<gcd)?",
+          "scope": "COOLDOWN_ALIGNMENT",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": ["Barbed Shot casts", "haste"],
+          "authorityNeeded": ["pinned Barbed Shot charge data", "pinned st[0]/st[5] lines"],
+          "normalizedStateNeeded": ["a charge/recharge model"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["charge state unbounded from evidence", "target_if on the same lines"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": "Pet dependence of Kill Command and target_if on every ST list keep the rotational slice out of reach; this is the one line-backed question."
+        }
+      ]
+    },
+    {
+      "specId": "druid/feral",
+      "cohort": "B_INSTANT_TARGET_GATED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "druid/feral.rip-rake-snapshot-refresh",
+          "question": "Were Rip and Rake refreshed with a weaker snapshot (the pinned lines read pmultiplier and refreshable)?",
+          "scope": "UPTIME_MAINTENANCE",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": ["Rip/Rake debuff intervals", "Tiger's Fury / Bloodtalons auras at application"],
+          "authorityNeeded": ["pinned builder/finisher lines reading pmultiplier"],
+          "normalizedStateNeeded": ["snapshot multiplier reconstruction"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["pmultiplier is unbindable by design (no inference from damage numbers)"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": "The same refusal Assassination records for pmultiplier applies."
+        }
+      ]
+    },
+    {
+      "specId": "hunter/survival",
+      "cohort": "B_INSTANT_TARGET_GATED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "monk/windwalker",
+      "cohort": "B_INSTANT_TARGET_GATED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "rogue/subtlety",
+      "cohort": "B_INSTANT_TARGET_GATED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "shaman/enhancement",
+      "cohort": "B_INSTANT_TARGET_GATED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "druid/guardian",
+      "cohort": "B_INSTANT_TARGET_GATED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "warrior/arms",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "warrior/arms.colossus-smash-window-fill",
+          "question": "Inside each Colossus Smash debuff window, which pinned ST lines gated on debuff.colossus_smash.up were pressed?",
+          "scope": "TEMPORAL_WINDOW",
+          "timeHorizon": "SHORT_WINDOW",
+          "evidenceNeeded": ["Colossus Smash debuff intervals", "actor casts", "Rage on casts"],
+          "authorityNeeded": [
+            "pinned colossus_st / slayer_st lines (reachable only through run_action_list)"
+          ],
+          "normalizedStateNeeded": ["target debuffs", "actor casts"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": [
+            "run_action_list dispatch unmodelled",
+            "variable.execute_phase and target.health.pct"
+          ],
+          "outputNeed": "EXISTING_INTERNAL_FINDINGS",
+          "notes": "Arms is the current unsupported sentinel; the sentinel must migrate before warrior/arms can become a SpecId."
+        }
+      ]
+    },
+    {
+      "specId": "warrior/fury",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "warrior/protection",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "deathknight/blood",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",
+      "questions": [
+        {
+          "id": "deathknight/blood.coagulopathy-maintenance-clip",
+          "question": "Was Death Strike pressed to refresh Coagulopathy before it expired (pinned high_prio_actions[1]: death_strike,if=buff.coagulopathy.up&buff.coagulopathy.remains<=gcd), and how much margin remained?",
+          "scope": "MECHANIC_CLIPPING",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": ["Coagulopathy aura intervals", "Death Strike casts", "haste (gcd)"],
+          "authorityNeeded": ["pinned high_prio_actions[1]", "pinned Coagulopathy duration"],
+          "normalizedStateNeeded": ["aura remaining reconstruction", "gcd magnitude"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": [
+            "buff.<x>.remains is unbindable in the shared evaluator",
+            "gcd not upper-bounded"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": "The clearest tank-side maintenance/clipping question found in the audit; reachable without run_action_list because high_prio_actions is called unconditionally."
+        },
+        {
+          "id": "deathknight/blood.bone-shield-stack-maintenance",
+          "question": "Were Bone Shield stacks maintained (pinned lines read buff.bone_shield.stack and .remains)?",
+          "scope": "UPTIME_MAINTENANCE",
+          "timeHorizon": "WHOLE_FIGHT",
+          "evidenceNeeded": ["Bone Shield apply/stack/remove events"],
+          "authorityNeeded": ["pinned deathbringer/sanlayn lines (behind run_action_list)"],
+          "normalizedStateNeeded": ["aura stack reconstruction"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["buff.<x>.stack unbindable", "run_action_list dispatch"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "deathknight/frost",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "deathknight/frost.rune-and-runic-power-pooling",
+          "question": "Were Runes and Runic Power pooled ahead of cooldowns as the pinned variables rune_pooling / rp_pooling / sending_cds describe?",
+          "scope": "RESOURCE_MANAGEMENT",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": ["Rune and Runic Power observations", "cooldown casts"],
+          "authorityNeeded": ["pinned variables list (19 assignments)"],
+          "normalizedStateNeeded": ["generic variable execution", "rune regeneration model"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["generic variable.<name> execution unsupported", "run_action_list dispatch"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "monk/brewmaster",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "monk/brewmaster.celestial-brew-charge-capping",
+          "question": "Did Celestial Brew charges sit at cap (pinned master_of_harmony[0]: black_ox_brew,if=cooldown.celestial_brew.charges_fractional<1)?",
+          "scope": "COOLDOWN_ALIGNMENT",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": ["Celestial Brew / Black Ox Brew casts"],
+          "authorityNeeded": ["pinned charge data", "pinned hero-tree lists (behind run_action_list)"],
+          "normalizedStateNeeded": ["a charge/recharge model"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["charge state unbounded", "run_action_list dispatch"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": "Defensive value of the brews is a separate authority question the audit did not open."
+        }
+      ]
+    },
+    {
+      "specId": "demonhunter/vengeance",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "demonhunter/devourer",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "demonhunter/devourer.reap-soul-threshold",
+          "question": "Was Reap pressed at the soul thresholds the pinned reaps calls require (action.reap.souls_consumed>=4, or >=1 late in the fight)?",
+          "scope": "RESOURCE_MANAGEMENT",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": ["Reap casts", "soul fragment events"],
+          "authorityNeeded": [
+            "pinned mechanics read of action.reap.souls_consumed in sc_demon_hunter.cpp (not fetched in A3)",
+            "pinned reaps call lines"
+          ],
+          "normalizedStateNeeded": ["soul fragment state"],
+          "implementationReadiness": "NEEDS_AUTHORITY",
+          "unknownConditions": ["souls_consumed semantics not pinned", "run_action_list dispatch"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": "Devourer exists at the pin (roster 1480) and has real evidence (gtKb actor 32)."
+        }
+      ]
+    },
+    {
+      "specId": "rogue/outlaw",
+      "cohort": "C_RUN_ACTION_LIST_DISPATCH",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "mage/arcane",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "mage/arcane.arcane-charge-barrage-timing",
+          "question": "Was Arcane Barrage pressed at the Arcane Charge / Arcane Salvo state the pinned sunfury[2] and spellslinger[2] lines select?",
+          "scope": "OBSERVED_DECISION",
+          "timeHorizon": "ONE_DECISION",
+          "evidenceNeeded": [
+            "Arcane Charge stack events",
+            "Arcane Salvo stack events",
+            "casts with begincast anchors"
+          ],
+          "authorityNeeded": ["pinned sunfury/spellslinger lists"],
+          "normalizedStateNeeded": ["aura stack reconstruction", "cast-time decision anchors"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": [
+            "buff.<x>.stack unbindable",
+            "begincast-anchored decisions unmodelled",
+            "variable.aoe_count with active_enemies"
+          ],
+          "outputNeed": "EXISTING_INTERNAL_FINDINGS",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "mage/fire",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "mage/fire.combustion-window-fill",
+          "question": "Inside each Combustion window, were the pinned *_combustion lines followed (the lines read action.pyroblast.executing, execute_remains, buff.combustion.remains)?",
+          "scope": "TEMPORAL_WINDOW",
+          "timeHorizon": "SHORT_WINDOW",
+          "evidenceNeeded": [
+            "Combustion aura intervals",
+            "begincast/cast pairs",
+            "Hot Streak / Hyperthermia auras"
+          ],
+          "authorityNeeded": ["pinned ff_combustion / sf_combustion lists (behind run_action_list)"],
+          "normalizedStateNeeded": ["cast-in-progress state", "aura remaining reconstruction"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": [
+            "cast/channel anchor model",
+            "run_action_list dispatch",
+            "use_while_casting semantics"
+          ],
+          "outputNeed": "EXISTING_INTERNAL_FINDINGS",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "mage/frost",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "warlock/destruction",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",
+      "questions": [
+        {
+          "id": "warlock/destruction.ritual-clipping",
+          "question": "Detect actual Ritual clipping/lost cycles from real combat evidence; distinguish true clipping from close but successful refreshes; measure the safety margin where evidence permits; report UNKNOWN when the required temporal state cannot be reconstructed.",
+          "scope": "MECHANIC_CLIPPING",
+          "timeHorizon": "REPEATED_CYCLES",
+          "ownership": "UNRESOLVED_DIABOLIST_HERO_TREE",
+          "evidenceNeeded": [
+            "Diabolic Ritual: Overlord 431944 / Mother of Chaos 432815 / Pit Lord 432816 aura intervals and Demonic Art 428524 / 432794 auras (observed on gtKb Demonology actors 3, 7, 10; absent on the A7R6 Destruction subjects, which are Hellcaller builds)",
+            "spender casts with begincast anchors and Soul Shard observations"
+          ],
+          "authorityNeeded": [
+            "pinned mechanics read of the Diabolic Ritual cycle in sc_warlock*.cpp (NOT fetched in A3 — what a clip or a lost cycle is must be established there, not from memory)",
+            "pinned Destruction lines: variables[1] ritual_length = sum of the three buff remains; default[7] chaos_bolt,if=talent.diabolic_ritual&(demonic_art|(variable.ritual_length<action.chaos_bolt.execute_time))…",
+            "pinned Demonology line: call_action_list,name=diabolist,if=talent.diabolic_ritual"
+          ],
+          "normalizedStateNeeded": [
+            "aura remaining reconstruction for three buffs",
+            "cast-time anchors",
+            "generic variable execution"
+          ],
+          "implementationReadiness": "NEEDS_AUTHORITY",
+          "unknownConditions": [
+            "ritual aura removal not observed under coverage",
+            "cast anchor unavailable",
+            "the mechanic's cycle rules not yet pinned"
+          ],
+          "outputNeed": "UNASSESSED",
+          "notes": "Product requirement recorded verbatim (Brandon). Ownership: the Diabolist hero tree is reachable from Destruction and Demonology per pinned APL text and absent from Affliction; which module owns the analysis is unresolved."
+        },
+        {
+          "id": "warlock/destruction.immolate-wither-refresh",
+          "question": "Were Immolate / Wither refreshed inside the pinned refresh rules (default[12..13]: remains below 30% of duration or refreshable, with Chaos Bolt in flight and cast-time terms)?",
+          "scope": "UPTIME_MAINTENANCE",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": [
+            "Immolate/Wither debuff intervals (observed: 8 and 14 Wither casts on the two A7R6 subjects)",
+            "Chaos Bolt begincast/cast/damage timing"
+          ],
+          "authorityNeeded": ["pinned default[12..13]"],
+          "normalizedStateNeeded": [
+            "DoT remaining for a non-acting action",
+            "cast anchors",
+            "in-flight state"
+          ],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": [
+            "dot.<x>.remains / duration atoms",
+            "action.chaos_bolt.in_flight and execute_time"
+          ],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "warlock/affliction",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "warlock/demonology",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",
+      "questions": [
+        {
+          "id": "warlock/demonology.ritual-clipping",
+          "question": "Detect actual Ritual clipping/lost cycles from real combat evidence; distinguish true clipping from close but successful refreshes; measure the safety margin where evidence permits; report UNKNOWN when the required temporal state cannot be reconstructed.",
+          "scope": "MECHANIC_CLIPPING",
+          "timeHorizon": "REPEATED_CYCLES",
+          "ownership": "UNRESOLVED_DIABOLIST_HERO_TREE",
+          "evidenceNeeded": [
+            "Diabolic Ritual: Overlord 431944 / Mother of Chaos 432815 / Pit Lord 432816 aura intervals and Demonic Art 428524 / 432794 auras (observed on gtKb Demonology actors 3, 7, 10 inside the 20 s opener)",
+            "spender casts with begincast anchors and Soul Shard observations"
+          ],
+          "authorityNeeded": [
+            "pinned mechanics read of the Diabolic Ritual cycle in sc_warlock*.cpp (NOT fetched in A3)",
+            "pinned Demonology line: call_action_list,name=diabolist,if=talent.diabolic_ritual and the diabolist list"
+          ],
+          "normalizedStateNeeded": [
+            "aura remaining reconstruction for three buffs",
+            "cast-time anchors",
+            "pet state"
+          ],
+          "implementationReadiness": "NEEDS_AUTHORITY",
+          "unknownConditions": [
+            "ritual aura removal not observed under coverage",
+            "cast anchor unavailable",
+            "the mechanic's cycle rules not yet pinned"
+          ],
+          "outputNeed": "UNASSESSED",
+          "notes": "Same product requirement as the Destruction entry; both candidate owners carry it until the owning module is decided with evidence."
+        },
+        {
+          "id": "warlock/demonology.tyrant-setup",
+          "question": "Was Summon Demonic Tyrant pressed with the pinned pet setup (lines read pet.demonic_tyrant.active, buff.demonic_core.stack, buff.wild_imps.stack)?",
+          "scope": "COOLDOWN_ALIGNMENT",
+          "timeHorizon": "SHORT_WINDOW",
+          "evidenceNeeded": [
+            "pet summon/despawn events",
+            "Demonic Core / Wild Imps stack events",
+            "Tyrant cast"
+          ],
+          "authorityNeeded": ["pinned diabolist / soulharvest lists"],
+          "normalizedStateNeeded": ["pet state", "aura stack reconstruction"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["pet model", "buff.<x>.stack unbindable"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "shaman/elemental",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "shaman/elemental.flame-shock-maintenance",
+          "question": "Was Flame Shock refreshed inside the pinned refreshable window (single_target lines read dot.flame_shock.refreshable / remains)?",
+          "scope": "UPTIME_MAINTENANCE",
+          "timeHorizon": "REPEATED_CYCLES",
+          "evidenceNeeded": ["Flame Shock debuff intervals", "casts"],
+          "authorityNeeded": ["pinned single_target list (behind run_action_list)"],
+          "normalizedStateNeeded": ["DoT remaining for a non-acting action"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["dot.<x>.remains atoms", "run_action_list dispatch", "cast anchors"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "priest/shadow",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "priest/shadow.dot-maintenance",
+          "question": "Were Vampiric Touch and Shadow Word: Pain maintained (the pinned variable dots_up and main lines read dot.vampiric_touch.refreshable / remains)?",
+          "scope": "UPTIME_MAINTENANCE",
+          "timeHorizon": "WHOLE_FIGHT",
+          "evidenceNeeded": ["DoT debuff intervals", "casts"],
+          "authorityNeeded": ["pinned main list (behind run_action_list)"],
+          "normalizedStateNeeded": ["DoT remaining for a non-acting action", "generic variable execution"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["run_action_list dispatch", "target_if on the DoT lines", "cast anchors"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "druid/balance",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "druid/balance.astral-power-capping",
+          "question": "Was Astral Power generated at cap (pinned lines read astral_power.deficit)?",
+          "scope": "RESOURCE_MANAGEMENT",
+          "timeHorizon": "WHOLE_FIGHT",
+          "evidenceNeeded": ["Astral Power resourcechange events with waste"],
+          "authorityNeeded": ["WCL_OBSERVED_FACT (waste field)"],
+          "normalizedStateNeeded": ["resource events"],
+          "implementationReadiness": "NEEDS_EVIDENCE",
+          "unknownConditions": ["waste field not inspected for this resource"],
+          "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
+          "notes": ""
+        }
+      ]
+    },
+    {
+      "specId": "evoker/devastation",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "deepDiveInventoryStatus": "PARTIAL",
+      "questions": [
+        {
+          "id": "evoker/devastation.empower-cast-usage",
+          "question": "Were empowered casts (Fire Breath, Eternity Surge) used as the pinned es / fb lists select (variable.can_use_empower, dot.fire_breath_damage.refreshable)?",
+          "scope": "OBSERVED_DECISION",
+          "timeHorizon": "ONE_DECISION",
+          "evidenceNeeded": [
+            "empower begincast/cast events with empower level",
+            "Fire Breath debuff intervals"
+          ],
+          "authorityNeeded": ["pinned es / fb lists (behind run_action_list)"],
+          "normalizedStateNeeded": ["empower cast anchors", "DoT remaining", "generic variable execution"],
+          "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
+          "unknownConditions": ["cast/channel anchor model", "run_action_list dispatch", "26 variables"],
+          "outputNeed": "EXISTING_INTERNAL_FINDINGS",
+          "notes": "Roster role UNKNOWN; placed in M11 by declared classification."
+        }
+      ]
+    },
+    {
+      "specId": "hunter/marksmanship",
+      "cohort": "D_CAST_ANCHORED",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    },
+    {
+      "specId": "deathknight/unholy",
+      "cohort": "E_PET_AND_VARIABLE_HEAVY",
+      "currentAnalyzerStatus": "UNREGISTERED",
+      "realEvidenceStatus": "NO_KNOWN_REAL_EVIDENCE",
+      "authorityAuditStatus": "AUTHORITY_NOT_YET_AUDITED",
+      "deepDiveInventoryStatus": "UNASSESSED",
+      "questions": []
+    }
+  ]
+}
