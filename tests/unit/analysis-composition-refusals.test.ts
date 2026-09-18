@@ -26,6 +26,7 @@ import { productionCatalogWith } from "../support/catalog.js";
 import type { Env } from "../../src/config/env.js";
 import { wclFailure, type FightIdentity, type PreflightPort } from "../../src/wcl/types.js";
 import { M5D2_ACTOR, m5d2Fight } from "../support/m5d2-fixture.js";
+import { UNSUPPORTED_WCL_IDENTITY } from "../support/unsupported-subject.js";
 
 const ENV: Env = {
   ENVIRONMENT: "test",
@@ -100,7 +101,7 @@ describe("an unsupported specialization", () => {
   it("reports SPEC_NOT_SUPPORTED as a successful result", async () => {
     // Success, not an error. The service did its job and answered truthfully.
     // Returning a failure would push callers toward retrying a correct answer.
-    const { deps } = spies("Warrior", "Arms");
+    const { deps } = spies(UNSUPPORTED_WCL_IDENTITY.className, UNSUPPORTED_WCL_IDENTITY.specName);
     const result = await analyzeFight(REQUEST, deps);
 
     expect(result.ok).toBe(true);
@@ -112,7 +113,7 @@ describe("an unsupported specialization", () => {
   it("never runs the Assassination analyzer", async () => {
     // THE failure this guards: Rogue rules applied to someone else's fight,
     // producing a confident, well-formed report about the wrong game.
-    const { analyze, deps } = spies("Warrior", "Arms");
+    const { analyze, deps } = spies(UNSUPPORTED_WCL_IDENTITY.className, UNSUPPORTED_WCL_IDENTITY.specName);
     await analyzeFight(REQUEST, deps);
 
     expect(analyze).not.toHaveBeenCalled();
@@ -121,14 +122,14 @@ describe("an unsupported specialization", () => {
   it("retrieves no combat events at all", async () => {
     // The spec is fully determined by M2 identity, so paginating a whole log to
     // report that we were never going to analyze it would be pure waste.
-    const { ingest, deps } = spies("Warrior", "Arms");
+    const { ingest, deps } = spies(UNSUPPORTED_WCL_IDENTITY.className, UNSUPPORTED_WCL_IDENTITY.specName);
     await analyzeFight(REQUEST, deps);
 
     expect(ingest).not.toHaveBeenCalled();
   });
 
   it("names no supported spec and claims no analyzer", async () => {
-    const { deps } = spies("Warrior", "Arms");
+    const { deps } = spies(UNSUPPORTED_WCL_IDENTITY.className, UNSUPPORTED_WCL_IDENTITY.specName);
     const result = await analyzeFight(REQUEST, deps);
 
     expect(result.ok).toBe(true);
@@ -141,7 +142,7 @@ describe("an unsupported specialization", () => {
   it("says out loud that no analysis was attempted", async () => {
     // An empty result that reads as clean play is the disclosure failure this
     // detail exists to prevent.
-    const { deps } = spies("Warrior", "Arms");
+    const { deps } = spies(UNSUPPORTED_WCL_IDENTITY.className, UNSUPPORTED_WCL_IDENTITY.specName);
     const result = await analyzeFight(REQUEST, deps);
 
     expect(result.ok).toBe(true);
@@ -153,7 +154,7 @@ describe("an unsupported specialization", () => {
   });
 
   it("carries no comparisons or coverage a reader could mistake for findings", async () => {
-    const { deps } = spies("Warrior", "Arms");
+    const { deps } = spies(UNSUPPORTED_WCL_IDENTITY.className, UNSUPPORTED_WCL_IDENTITY.specName);
     const result = await analyzeFight(REQUEST, deps);
 
     expect(result.ok).toBe(true);
@@ -218,7 +219,10 @@ describe("an unusable identity", () => {
     // other is a coverage limit. Collapsing them would hide a broken upstream
     // behind a routine "we don't support that spec".
     const blank = await analyzeFight(REQUEST, spies("   ", "Assassination").deps);
-    const unsupported = await analyzeFight(REQUEST, spies("Warrior", "Arms").deps);
+    const unsupported = await analyzeFight(
+      REQUEST,
+      spies(UNSUPPORTED_WCL_IDENTITY.className, UNSUPPORTED_WCL_IDENTITY.specName).deps,
+    );
 
     expect(blank.ok).toBe(false);
     expect(unsupported.ok).toBe(true);

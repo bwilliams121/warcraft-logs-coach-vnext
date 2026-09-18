@@ -50,6 +50,7 @@ import {
   registerAnalyzeWarcraftLogTool,
   type AnalysisRunner,
   type AnalyzeToolDeps,
+  type PublicSpecializationDescriptions,
 } from "./tools/analyze-warcraft-log.js";
 import { registerAnalyzeRaidNightTool, type RaidNightToolDeps } from "./tools/analyze-raid-night.js";
 import {
@@ -124,8 +125,10 @@ const UNBOUND_ENCOUNTER_CONTEXT_RUNNER: EncounterContextRunner = async () => ({
  * is pinned by test to carry the derived sentence, so a composition root that
  * forgot to bind it fails there, not in a client.
  */
-const UNBOUND_SUPPORTED_SPECIALIZATIONS =
-  "Supported specializations: none are bound to this MCP handler (composition defect).";
+const UNBOUND_PUBLIC_SPECIALIZATIONS: PublicSpecializationDescriptions = Object.freeze({
+  sentence: "Supported specializations: none are bound to this MCP handler (composition defect).",
+  limits: Object.freeze([]),
+});
 
 export interface McpRequestOptions {
   /** Overridable so a test can prove rejection without weakening the real list. */
@@ -160,7 +163,7 @@ export interface McpRequestOptions {
    * descriptions. Bound at the composition root from the production catalog;
    * absent only in tests that do not read descriptions.
    */
-  readonly supportedSpecializations?: string | undefined;
+  readonly publicSpecializations?: PublicSpecializationDescriptions | undefined;
 }
 
 /** Everything the registered tools need. One object, both tools. */
@@ -298,7 +301,7 @@ export async function handleMcpRequest(
     // A deployment missing the binding is unmetered, and the tool treats that
     // as a refusal rather than as permission.
     rateLimiter: options.rateLimiter ?? env.ANALYSIS_RATE_LIMITER,
-    supportedSpecializations: options.supportedSpecializations ?? UNBOUND_SUPPORTED_SPECIALIZATIONS,
+    publicSpecializations: options.publicSpecializations ?? UNBOUND_PUBLIC_SPECIALIZATIONS,
   });
 
   // `fetch` is called with no `authInfo`: see `./auth.ts` for why the static

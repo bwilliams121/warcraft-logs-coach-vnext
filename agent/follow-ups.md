@@ -109,6 +109,38 @@ carrying the three statuses, and contract tests proving the category is never
 omitted and never reads zero from `PARTIAL`/`ABSENT` coverage. Making the field
 required is a schema-v2 decision. None of that is M11-A work.
 
+## After M11-A2: deferred structural items
+
+**Raised:** M11-A2 (2026-09-18). None is a defect; each is a decision.
+
+- **Assassination publishes no limitation paragraph.** Its module's
+  `limitsProse` is empty on both surfaces, which reproduces the M10-D
+  descriptions byte for byte. Whether Assassination's supported surface
+  deserves its own paragraph is a wording decision for the milestone that
+  next touches the descriptions.
+- **The shared parser's Rogue built-ins stay** (`combo_points`,
+  `energy.pct`, `stealthed.rogue`, `variable.single_target`, bare
+  `remains`/`pmultiplier`/`refreshable`), frozen by
+  `m11a-parser-builtins-frozen`. Migrating them into a Rogue vocabulary
+  would risk Assassination invariance for no gameplay benefit.
+- **The M5-era Assassination data layout is frozen, not fixed:**
+  `src/simc/pinned-authority.ts`, the generically named
+  `src/data/game/ability-gcd-semantics.ts` (the shared engine imports one
+  TYPE from it), and the class-only-named `rogue-*` datasets are pinned as
+  Assassination-owned exceptions in `m11a2-cross-spec-isolation`. A future
+  Rogue specialization must not import them; relocating them is a separate,
+  invariance-proven change.
+- **The supplemental-analysis seam is unwired.** `defineSpecModule`
+  accepts spec-owned supplemental analyses and both modules register none;
+  orchestration, ingestion scope and the public contract know nothing of
+  them. The milestone that registers the first one designs the wiring.
+- **Two M9-C corpus cases pair the unsupported identity with actor 19's
+  evidence** as a declared identity premise
+  (`application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing`,
+  `public-contract.analysis-parity-for-an-unsupported-spec`). Recorded in
+  `m11a2-unsupported-subject.test.ts`; they are not the real subject and
+  were left as they are.
+
 ## After M10-D: the internal-only partition is dormant
 
 **Raised:** M10-D (2026-09-18).

@@ -52,26 +52,27 @@ import {
   runNight,
   type FakePorts,
 } from "../support/raid-night-orchestration-fixture.js";
+import { CURRENT_UNSUPPORTED_SUBJECT } from "../support/unsupported-subject.js";
 
 const PROT_OPENER = "wcl-protection-paladin-a7r6-opener";
 /** A7R6 fight 7 identities, per `wcl-fight-context-a7r6-fight-7.json`. */
 const FIGHT_ID = 7;
 const PALADIN = 7;
 const ROGUE = 19;
-const ARMS = 4;
+const ARMS = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
 const BLOOD_DK = 14;
 const ROSTER = [PALADIN, ROGUE, ARMS, BLOOD_DK] as const;
 
 const CLASS_OF: Readonly<Record<number, string>> = {
   [PALADIN]: "Paladin",
   [ROGUE]: "Rogue",
-  [ARMS]: "Warrior",
+  [ARMS]: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
   [BLOOD_DK]: "DeathKnight",
 };
 const SPEC_OF: Readonly<Record<number, string>> = {
   [PALADIN]: "Protection",
   [ROGUE]: "Assassination",
-  [ARMS]: "Arms",
+  [ARMS]: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
   [BLOOD_DK]: "Blood",
 };
 
@@ -173,7 +174,7 @@ describe("a mixed roster over the real A7R6 opener", () => {
     const arms = cellOf(cells, ARMS);
     expect(arms.kind).toBe("NOT_ANALYZED");
     if (arms.kind !== "NOT_ANALYZED") return;
-    expect(arms.specName).toBe("Arms");
+    expect(arms.specName).toBe(CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName);
     expect(arms.status).toBe("SPEC_NOT_SUPPORTED");
     expect(arms.detail).toContain("no gameplay analysis was attempted");
 

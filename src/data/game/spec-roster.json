@@ -1,0 +1,767 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_SPECIALIZATION_ROSTER",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/specialization_spells.inc",
+        "sha256": "514d7a509a3b95f130aadccb6a6f1a28c6f5f2568f211cd5139bb567b712e4fc",
+        "byteLength": 45852
+      },
+      {
+        "path": "engine/util/util.cpp",
+        "sha256": "30737d317fa5d312985952fa2945093c523b583033b75d855dcf104141c14e4d",
+        "byteLength": 120525
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "extractor": "scripts/authority/extract-simc-roster.mjs",
+    "extractorVersion": 1,
+    "extractedOn": "2026-09-18",
+    "method": "MACHINE_EXTRACTED_DBC_RECORD",
+    "playableRule": "class id != 0; the group's spell names include no 'Initial <Class>' placeholder; exactly one spell name is a util.cpp spec_map display name",
+    "roleRule": "role is the <DPS|Tank|Healer> word of the group's 'Stat Negation Aura - <Stat> <Role>' spell; UNKNOWN when the group carries none",
+    "specKeyRule": "displayName with the trailing player_type_string_long class name removed, lower-cased, non-alphanumerics folded to '_'",
+    "declaredRowCount": 614,
+    "excluded": {
+      "petFamilies": [
+        {
+          "specId": 535,
+          "spellNames": ["Pathfinding", "Endurance Training", "Predator's Thirst", "Primal Rage"]
+        },
+        {
+          "specId": 536,
+          "spellNames": ["Master's Call", "Pathfinding", "Endurance Training", "Predator's Thirst"]
+        },
+        {
+          "specId": 537,
+          "spellNames": ["Pathfinding", "Endurance Training", "Predator's Thirst", "Survival of the Fittest"]
+        }
+      ],
+      "initialPlaceholders": [
+        {
+          "specId": 1444,
+          "classToken": "shaman",
+          "name": "Initial Shaman"
+        },
+        {
+          "specId": 1446,
+          "classToken": "warrior",
+          "name": "Initial Warrior"
+        },
+        {
+          "specId": 1447,
+          "classToken": "druid",
+          "name": "Initial Druid"
+        },
+        {
+          "specId": 1450,
+          "classToken": "monk",
+          "name": "Initial Monk"
+        },
+        {
+          "specId": 1451,
+          "classToken": "paladin",
+          "name": "Initial Paladin"
+        },
+        {
+          "specId": 1452,
+          "classToken": "priest",
+          "name": "Initial Priest"
+        },
+        {
+          "specId": 1456,
+          "classToken": "demonhunter",
+          "name": "Initial Demon Hunter"
+        },
+        {
+          "specId": 1465,
+          "classToken": "evoker",
+          "name": "Initial Evoker"
+        }
+      ]
+    }
+  },
+  "playableSpecializationCount": 40,
+  "specializations": [
+    {
+      "simcSpecId": 62,
+      "simcEnumerator": "MAGE_ARCANE",
+      "classId": 8,
+      "classToken": "mage",
+      "className": "Mage",
+      "specKey": "arcane",
+      "rosterKey": "mage/arcane",
+      "displayName": "Arcane Mage",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137021, 462083, 1256909]
+    },
+    {
+      "simcSpecId": 63,
+      "simcEnumerator": "MAGE_FIRE",
+      "classId": 8,
+      "classToken": "mage",
+      "className": "Mage",
+      "specKey": "fire",
+      "rosterKey": "mage/fire",
+      "displayName": "Fire Mage",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137019, 462085, 1256911]
+    },
+    {
+      "simcSpecId": 64,
+      "simcEnumerator": "MAGE_FROST",
+      "classId": 8,
+      "classToken": "mage",
+      "className": "Mage",
+      "specKey": "frost",
+      "rosterKey": "mage/frost",
+      "displayName": "Frost Mage",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137020, 462086, 1256913]
+    },
+    {
+      "simcSpecId": 65,
+      "simcEnumerator": "PALADIN_HOLY",
+      "classId": 2,
+      "classToken": "paladin",
+      "className": "Paladin",
+      "specKey": "holy",
+      "rosterKey": "paladin/holy",
+      "displayName": "Holy Paladin",
+      "role": "HEALER",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162701,
+        "spellName": "Stat Negation Aura - Intellect Healer"
+      },
+      "specPassiveSpellIds": [137029, 428076, 462093, 1258016]
+    },
+    {
+      "simcSpecId": 66,
+      "simcEnumerator": "PALADIN_PROTECTION",
+      "classId": 2,
+      "classToken": "paladin",
+      "className": "Paladin",
+      "specKey": "protection",
+      "rosterKey": "paladin/protection",
+      "displayName": "Protection Paladin",
+      "role": "TANK",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162702,
+        "spellName": "Stat Negation Aura - Strength Tank"
+      },
+      "specPassiveSpellIds": [137028, 462095, 1256936, 1305063]
+    },
+    {
+      "simcSpecId": 70,
+      "simcEnumerator": "PALADIN_RETRIBUTION",
+      "classId": 2,
+      "classToken": "paladin",
+      "className": "Paladin",
+      "specKey": "retribution",
+      "rosterKey": "paladin/retribution",
+      "displayName": "Retribution Paladin",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162698,
+        "spellName": "Stat Negation Aura - Strength DPS"
+      },
+      "specPassiveSpellIds": [137027, 412314, 462096, 1258011]
+    },
+    {
+      "simcSpecId": 71,
+      "simcEnumerator": "WARRIOR_ARMS",
+      "classId": 1,
+      "classToken": "warrior",
+      "className": "Warrior",
+      "specKey": "arms",
+      "rosterKey": "warrior/arms",
+      "displayName": "Arms Warrior",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162698,
+        "spellName": "Stat Negation Aura - Strength DPS"
+      },
+      "specPassiveSpellIds": [137049, 462115, 1256919]
+    },
+    {
+      "simcSpecId": 72,
+      "simcEnumerator": "WARRIOR_FURY",
+      "classId": 1,
+      "classToken": "warrior",
+      "className": "Warrior",
+      "specKey": "fury",
+      "rosterKey": "warrior/fury",
+      "displayName": "Fury Warrior",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162698,
+        "spellName": "Stat Negation Aura - Strength DPS"
+      },
+      "specPassiveSpellIds": [137050, 462117, 1257520]
+    },
+    {
+      "simcSpecId": 73,
+      "simcEnumerator": "WARRIOR_PROTECTION",
+      "classId": 1,
+      "classToken": "warrior",
+      "className": "Warrior",
+      "specKey": "protection",
+      "rosterKey": "warrior/protection",
+      "displayName": "Protection Warrior",
+      "role": "TANK",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162702,
+        "spellName": "Stat Negation Aura - Strength Tank"
+      },
+      "specPassiveSpellIds": [137048, 462119, 1256935, 1258163]
+    },
+    {
+      "simcSpecId": 102,
+      "simcEnumerator": "DRUID_BALANCE",
+      "classId": 11,
+      "classToken": "druid",
+      "className": "Druid",
+      "specKey": "balance",
+      "rosterKey": "druid/balance",
+      "displayName": "Balance Druid",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137013, 462068, 1256996]
+    },
+    {
+      "simcSpecId": 103,
+      "simcEnumerator": "DRUID_FERAL",
+      "classId": 11,
+      "classToken": "druid",
+      "className": "Druid",
+      "specKey": "feral",
+      "rosterKey": "druid/feral",
+      "displayName": "Feral Druid",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137011, 462070, 1256992]
+    },
+    {
+      "simcSpecId": 104,
+      "simcEnumerator": "DRUID_GUARDIAN",
+      "classId": 11,
+      "classToken": "druid",
+      "className": "Druid",
+      "specKey": "guardian",
+      "rosterKey": "druid/guardian",
+      "displayName": "Guardian Druid",
+      "role": "TANK",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162700,
+        "spellName": "Stat Negation Aura - Agility Tank"
+      },
+      "specPassiveSpellIds": [137010, 462071, 1256993]
+    },
+    {
+      "simcSpecId": 105,
+      "simcEnumerator": "DRUID_RESTORATION",
+      "classId": 11,
+      "classToken": "druid",
+      "className": "Druid",
+      "specKey": "restoration",
+      "rosterKey": "druid/restoration",
+      "displayName": "Restoration Druid",
+      "role": "HEALER",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162701,
+        "spellName": "Stat Negation Aura - Intellect Healer"
+      },
+      "specPassiveSpellIds": [137012, 462073, 1256995]
+    },
+    {
+      "simcSpecId": 250,
+      "simcEnumerator": "DEATH_KNIGHT_BLOOD",
+      "classId": 6,
+      "classToken": "deathknight",
+      "className": "Death Knight",
+      "specKey": "blood",
+      "rosterKey": "deathknight/blood",
+      "displayName": "Blood Death Knight",
+      "role": "TANK",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162702,
+        "spellName": "Stat Negation Aura - Strength Tank"
+      },
+      "specPassiveSpellIds": [137008, 462061, 1256916]
+    },
+    {
+      "simcSpecId": 251,
+      "simcEnumerator": "DEATH_KNIGHT_FROST",
+      "classId": 6,
+      "classToken": "deathknight",
+      "className": "Death Knight",
+      "specKey": "frost",
+      "rosterKey": "deathknight/frost",
+      "displayName": "Frost Death Knight",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162698,
+        "spellName": "Stat Negation Aura - Strength DPS"
+      },
+      "specPassiveSpellIds": [137006, 462063, 1256915]
+    },
+    {
+      "simcSpecId": 252,
+      "simcEnumerator": "DEATH_KNIGHT_UNHOLY",
+      "classId": 6,
+      "classToken": "deathknight",
+      "className": "Death Knight",
+      "specKey": "unholy",
+      "rosterKey": "deathknight/unholy",
+      "displayName": "Unholy Death Knight",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162698,
+        "spellName": "Stat Negation Aura - Strength DPS"
+      },
+      "specPassiveSpellIds": [137007, 462064, 1256918]
+    },
+    {
+      "simcSpecId": 253,
+      "simcEnumerator": "HUNTER_BEAST_MASTERY",
+      "classId": 3,
+      "classToken": "hunter",
+      "className": "Hunter",
+      "specKey": "beast_mastery",
+      "rosterKey": "hunter/beast_mastery",
+      "displayName": "Beast Mastery Hunter",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137015, 462079, 1256939]
+    },
+    {
+      "simcSpecId": 254,
+      "simcEnumerator": "HUNTER_MARKSMANSHIP",
+      "classId": 3,
+      "classToken": "hunter",
+      "className": "Hunter",
+      "specKey": "marksmanship",
+      "rosterKey": "hunter/marksmanship",
+      "displayName": "Marksmanship Hunter",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137016, 462081, 1256940]
+    },
+    {
+      "simcSpecId": 255,
+      "simcEnumerator": "HUNTER_SURVIVAL",
+      "classId": 3,
+      "classToken": "hunter",
+      "className": "Hunter",
+      "specKey": "survival",
+      "rosterKey": "hunter/survival",
+      "displayName": "Survival Hunter",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137017, 462082, 1256941]
+    },
+    {
+      "simcSpecId": 256,
+      "simcEnumerator": "PRIEST_DISCIPLINE",
+      "classId": 5,
+      "classToken": "priest",
+      "className": "Priest",
+      "specKey": "discipline",
+      "rosterKey": "priest/discipline",
+      "displayName": "Discipline Priest",
+      "role": "HEALER",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162701,
+        "spellName": "Stat Negation Aura - Intellect Healer"
+      },
+      "specPassiveSpellIds": [137032, 462098, 1256903]
+    },
+    {
+      "simcSpecId": 257,
+      "simcEnumerator": "PRIEST_HOLY",
+      "classId": 5,
+      "classToken": "priest",
+      "className": "Priest",
+      "specKey": "holy",
+      "rosterKey": "priest/holy",
+      "displayName": "Holy Priest",
+      "role": "HEALER",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162701,
+        "spellName": "Stat Negation Aura - Intellect Healer"
+      },
+      "specPassiveSpellIds": [137031, 462099, 1238052]
+    },
+    {
+      "simcSpecId": 258,
+      "simcEnumerator": "PRIEST_SHADOW",
+      "classId": 5,
+      "classToken": "priest",
+      "className": "Priest",
+      "specKey": "shadow",
+      "rosterKey": "priest/shadow",
+      "displayName": "Shadow Priest",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137033, 462101, 1256905]
+    },
+    {
+      "simcSpecId": 259,
+      "simcEnumerator": "ROGUE_ASSASSINATION",
+      "classId": 4,
+      "classToken": "rogue",
+      "className": "Rogue",
+      "specKey": "assassination",
+      "rosterKey": "rogue/assassination",
+      "displayName": "Assassination Rogue",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137037, 462102, 1256950]
+    },
+    {
+      "simcSpecId": 260,
+      "simcEnumerator": "ROGUE_OUTLAW",
+      "classId": 4,
+      "classToken": "rogue",
+      "className": "Rogue",
+      "specKey": "outlaw",
+      "rosterKey": "rogue/outlaw",
+      "displayName": "Outlaw Rogue",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137036, 462104, 1256947]
+    },
+    {
+      "simcSpecId": 261,
+      "simcEnumerator": "ROGUE_SUBTLETY",
+      "classId": 4,
+      "classToken": "rogue",
+      "className": "Rogue",
+      "specKey": "subtlety",
+      "rosterKey": "rogue/subtlety",
+      "displayName": "Subtlety Rogue",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137035, 462105, 1256946]
+    },
+    {
+      "simcSpecId": 262,
+      "simcEnumerator": "SHAMAN_ELEMENTAL",
+      "classId": 7,
+      "classToken": "shaman",
+      "className": "Shaman",
+      "specKey": "elemental",
+      "rosterKey": "shaman/elemental",
+      "displayName": "Elemental Shaman",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137040, 462107, 1231772]
+    },
+    {
+      "simcSpecId": 263,
+      "simcEnumerator": "SHAMAN_ENHANCEMENT",
+      "classId": 7,
+      "classToken": "shaman",
+      "className": "Shaman",
+      "specKey": "enhancement",
+      "rosterKey": "shaman/enhancement",
+      "displayName": "Enhancement Shaman",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137041, 462108, 1214207]
+    },
+    {
+      "simcSpecId": 264,
+      "simcEnumerator": "SHAMAN_RESTORATION",
+      "classId": 7,
+      "classToken": "shaman",
+      "className": "Shaman",
+      "specKey": "restoration",
+      "rosterKey": "shaman/restoration",
+      "displayName": "Restoration Shaman",
+      "role": "HEALER",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162701,
+        "spellName": "Stat Negation Aura - Intellect Healer"
+      },
+      "specPassiveSpellIds": [137039, 462110, 1256945]
+    },
+    {
+      "simcSpecId": 265,
+      "simcEnumerator": "WARLOCK_AFFLICTION",
+      "classId": 9,
+      "classToken": "warlock",
+      "className": "Warlock",
+      "specKey": "affliction",
+      "rosterKey": "warlock/affliction",
+      "displayName": "Affliction Warlock",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137043, 462111, 1256906]
+    },
+    {
+      "simcSpecId": 266,
+      "simcEnumerator": "WARLOCK_DEMONOLOGY",
+      "classId": 9,
+      "classToken": "warlock",
+      "className": "Warlock",
+      "specKey": "demonology",
+      "rosterKey": "warlock/demonology",
+      "displayName": "Demonology Warlock",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137044, 462113, 1256907]
+    },
+    {
+      "simcSpecId": 267,
+      "simcEnumerator": "WARLOCK_DESTRUCTION",
+      "classId": 9,
+      "classToken": "warlock",
+      "className": "Warlock",
+      "specKey": "destruction",
+      "rosterKey": "warlock/destruction",
+      "displayName": "Destruction Warlock",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [137046, 462114, 1256908]
+    },
+    {
+      "simcSpecId": 268,
+      "simcEnumerator": "MONK_BREWMASTER",
+      "classId": 10,
+      "classToken": "monk",
+      "className": "Monk",
+      "specKey": "brewmaster",
+      "rosterKey": "monk/brewmaster",
+      "displayName": "Brewmaster Monk",
+      "role": "TANK",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162700,
+        "spellName": "Stat Negation Aura - Agility Tank"
+      },
+      "specPassiveSpellIds": [137023, 462087, 1256978, 1258153]
+    },
+    {
+      "simcSpecId": 269,
+      "simcEnumerator": "MONK_WINDWALKER",
+      "classId": 10,
+      "classToken": "monk",
+      "className": "Monk",
+      "specKey": "windwalker",
+      "rosterKey": "monk/windwalker",
+      "displayName": "Windwalker Monk",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [137025, 462091, 1222923, 1258122]
+    },
+    {
+      "simcSpecId": 270,
+      "simcEnumerator": "MONK_MISTWEAVER",
+      "classId": 10,
+      "classToken": "monk",
+      "className": "Monk",
+      "specKey": "mistweaver",
+      "rosterKey": "monk/mistweaver",
+      "displayName": "Mistweaver Monk",
+      "role": "HEALER",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162701,
+        "spellName": "Stat Negation Aura - Intellect Healer"
+      },
+      "specPassiveSpellIds": [137024, 428200, 462090, 1258138]
+    },
+    {
+      "simcSpecId": 577,
+      "simcEnumerator": "DEMON_HUNTER_HAVOC",
+      "classId": 12,
+      "classToken": "demonhunter",
+      "className": "Demon Hunter",
+      "specKey": "havoc",
+      "rosterKey": "demonhunter/havoc",
+      "displayName": "Havoc Demon Hunter",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162697,
+        "spellName": "Stat Negation Aura - Agility DPS"
+      },
+      "specPassiveSpellIds": [212612, 462066, 1256955]
+    },
+    {
+      "simcSpecId": 581,
+      "simcEnumerator": "DEMON_HUNTER_VENGEANCE",
+      "classId": 12,
+      "classToken": "demonhunter",
+      "className": "Demon Hunter",
+      "specKey": "vengeance",
+      "rosterKey": "demonhunter/vengeance",
+      "displayName": "Vengeance Demon Hunter",
+      "role": "TANK",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162700,
+        "spellName": "Stat Negation Aura - Agility Tank"
+      },
+      "specPassiveSpellIds": [212613, 462067, 1256959]
+    },
+    {
+      "simcSpecId": 1467,
+      "simcEnumerator": "EVOKER_DEVASTATION",
+      "classId": 13,
+      "classToken": "evoker",
+      "className": "Evoker",
+      "specKey": "devastation",
+      "rosterKey": "evoker/devastation",
+      "displayName": "Devastation Evoker",
+      "role": "UNKNOWN",
+      "roleEvidence": null,
+      "specPassiveSpellIds": [356809, 462076, 1256943, 1286123]
+    },
+    {
+      "simcSpecId": 1468,
+      "simcEnumerator": "EVOKER_PRESERVATION",
+      "classId": 13,
+      "classToken": "evoker",
+      "className": "Evoker",
+      "specKey": "preservation",
+      "rosterKey": "evoker/preservation",
+      "displayName": "Preservation Evoker",
+      "role": "UNKNOWN",
+      "roleEvidence": null,
+      "specPassiveSpellIds": [356810, 462078, 1256944]
+    },
+    {
+      "simcSpecId": 1473,
+      "simcEnumerator": "EVOKER_AUGMENTATION",
+      "classId": 13,
+      "classToken": "evoker",
+      "className": "Evoker",
+      "specKey": "augmentation",
+      "rosterKey": "evoker/augmentation",
+      "displayName": "Augmentation Evoker",
+      "role": "UNKNOWN",
+      "roleEvidence": null,
+      "specPassiveSpellIds": [396186, 462074, 1256942]
+    },
+    {
+      "simcSpecId": 1480,
+      "simcEnumerator": "DEMON_HUNTER_DEVOURER",
+      "classId": 12,
+      "classToken": "demonhunter",
+      "className": "Demon Hunter",
+      "specKey": "devourer",
+      "rosterKey": "demonhunter/devourer",
+      "displayName": "Devourer Demon Hunter",
+      "role": "DPS",
+      "roleEvidence": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "spellId": 162699,
+        "spellName": "Stat Negation Aura - Intellect DPS"
+      },
+      "specPassiveSpellIds": [1213636, 1256964, 1256968]
+    }
+  ]
+}

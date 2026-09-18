@@ -4,6 +4,12 @@
 production catalog (`paladin-protection-observed-decisions`,
 `paladin/protection`) and is selected by the application service, raid-night
 orchestration, REST and MCP for a resolved `Paladin/Protection` identity.
+Since M11-A2 the registration is built by the specialization module
+factory (`PROTECTION_PALADIN_MODULE` in `registration.ts`, through
+`defineSpecModule`), which pins the identity to the roster row
+(`simcSpecId` 66, role `TANK`), owns the public limitation prose the tool
+descriptions compose, and registers zero supplemental analyses; nothing
+about what the evaluator concludes changed.
 `paladin/protection` is in `PUBLIC_SPEC_IDS`, in the public contract's
 `specId` enum and in `SUPPORTED_SPEC_IDENTITIES`; the registry validates that
 the three agree. From M10-C to M10-D it was `INTERNAL_ONLY`.

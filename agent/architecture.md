@@ -5218,6 +5218,124 @@ Each spec should contribute:
 
 Do not batch all specializations before shared architecture proves stable.
 
+## M11-A — the onboarding foundation
+
+M11-A1 (guards) and M11-A2 (foundation, factory, proof) built the machinery
+a third specialization registers against. No third specialization exists;
+the two public analyzers are unchanged, and no first M11 specialization has
+been selected. Healers remain M12 and Augmentation Evoker remains M13.
+
+### The specialization module and its factory
+
+`src/findings/spec-module.ts` — `defineSpecModule` — is where a
+specialization tree states what it is: a canonical IDENTITY (`specId`,
+`analyzerId`, `displayName`, the Warcraft Logs `wclClassName` /
+`wclSpecName` the tree took from committed capture evidence, and the SimC
+spec id and DBC-pinned role READ from the roster), an EXPOSURE, its decision
+CAPABILITIES, the pinned AUTHORITY it binds per domain, its facade, its
+view, its public LIMITS prose per surface, and zero or more SUPPLEMENTAL
+analyses. The factory checks coherence (the id is known and is a roster
+specialization; the display name is the roster's; identity strings are
+non-blank; supplemental ids are prefixed and unique with valid evidence
+requirements) and builds the registration row through
+`defineAnalyzerRegistration`, so every M10 ownership rule applies unchanged.
+
+What the factory owns: plumbing. What it refuses to own: every gameplay
+meaning — APL contents, authority pins and hashes, vocabulary, state
+bindings, resource/aura/cooldown/transition semantics, eligibility,
+exclusions, decisions, projection mappings, corpus evidence, promotion
+readiness. Those remain per-specialization code and data. There is no
+`if spec === …` in the factory and the conformance suite pins that.
+
+Both existing specializations are built through it
+(`ASSASSINATION_MODULE`, `PROTECTION_PALADIN_MODULE`); their analyzers,
+state, authority loaders, exclusions and views were not touched, and the
+M10-D invariance captures are byte-identical before and after the
+migration.
+
+### The supplemental-analysis seam
+
+A specialization may own supplemental, deep-dive analyses over the same
+normalized combat state — a temporal window, a mechanic clip, resource
+waste, cooldown alignment, a proc window, an uptime — each returning
+spec-defined findings, `UNKNOWN`, or `NO_AUTHORITY_AVAILABLE`. M11-A2
+established the type (`SupplementalAnalysisDefinition`), the registration
+seam on the module, and the conformance rules only. Both current
+specializations register none; nothing in `src/services`, `src/contracts`,
+`src/mcp` or `src/api` invokes or names one; no public field carries a
+supplemental finding. Wiring a supplemental analysis into orchestration,
+ingestion-scope derivation and (additively) the public contract is a future
+specialization milestone's design, not a default.
+
+### The pinned specialization roster
+
+`src/data/game/spec-roster.json`, produced by
+`scripts/authority/extract-simc-roster.mjs` from `specialization_spells.inc`,
+`util.cpp` and `client_data_version.inc` at the project's pinned commit,
+lists every PLAYABLE specialization at that build — forty, including
+Devourer Demon Hunter — with hunter-pet families and `Initial <Class>`
+placeholders excluded structurally, and role pinned only from the
+`Stat Negation Aura` passive (thirty-seven rows; the three Evoker roles are
+`UNKNOWN`). It is reference data: a roster row confers no support. The
+factory uses it to refuse a `specId` that names no real specialization and
+to carry the SimC id and role on the identity. CI validates the committed
+artifact; the extractor runs only against a local pinned checkout.
+
+### Spec-level corpus ownership and generalized isolation
+
+Corpus layers own `src/specs/<class>/<spec>/`, never the class directory,
+and the test-owned `SPEC_LAYER_OF` is a total, injective join from every
+`SpecId` to its layer. Cross-specialization isolation is a structural rule
+over every discovered tree (`m11a2-cross-spec-isolation`): no tree imports
+another; spec-owned data (`src/data/game/<class>-<spec>-*`, the APL
+artifact) is consumed only by its owner; class-level data is class data, not
+the first spec's; and the M5-era Assassination exceptions —
+`src/simc/pinned-authority.ts`, the generically named
+`ability-gcd-semantics.ts`, the `rogue-*` datasets — are FROZEN by name,
+not a pattern.
+
+### Decision-authority ownership
+
+A decision authority (`SIMC_APL_<CLASS>_<SPEC>`) bound to a domain is owned
+by exactly one registration for that domain
+(`DUPLICATE_DECISION_AUTHORITY_BINDING`). Shared PROVENANCE is legitimate:
+the same SimulationCraft commit, the same upstream source file (two regions
+of one `apl_paladin.cpp`), the same client build, class-level mechanics
+datasets.
+
+### Internal-first onboarding and the promotion gate
+
+A new specialization arrives as `INTERNAL_ONLY`: its id joins `SPEC_IDS`
+and `INTERNAL_ONLY_SPEC_IDS`, its module registers, its facade is exercised
+through `internalAnalyzerForSpec`, the corpus executors and the
+registration's view, and the public Worker, REST, MCP and raid-night keep
+refusing it. Promotion is a reviewed working-tree edit to the five public
+sites, verified by parity, schema, invariance and the promotion-evidence
+gate against the candidate tree, then committed and CI-checked, then — only
+after committed CI success — separately authorized for production smoke.
+
+The promotion-evidence gate is TEST-OWNED
+(`tests/contracts/m11-promotion-evidence-gate.test.ts`): a PUBLIC
+registration must be backed by at least one corpus `DECISION_COVERAGE`
+assertion expecting `MATCH` or `REJECTED`, whose whole referenced evidence
+set is `SANITIZED_CAPTURE` (a `SYNTHETIC` or `DERIVED_FROM_CAPTURE`
+artifact anywhere disqualifies), whose actor the committed fight-context
+master data proves to be that specialization — through the identity table
+for a PUBLIC spec, against the module's own WCL strings for an
+INTERNAL_ONLY one — and which the committed corpus report records as
+PASSED. Zero qualifying cases fails CI for a PUBLIC spec and is reported for
+an INTERNAL_ONLY one. Production carries no case id, artifact id, layer or
+readiness; `m10d-no-corpus-window-in-production` pins that.
+
+### The current unsupported subject
+
+The real unsupported identity every unsupported-path proof uses is
+centralized in `tests/support/unsupported-subject.ts` (Warrior/Arms, A7R6
+fight 7 actor 4) and proven from the committed context. It is
+milestone-scoped: the guard fails the moment `warrior/arms` becomes a
+`SpecId` in any exposure, so the fixture is migrated before that
+specialization is onboarded.
+
 ---
 
 # Milestone 12 — Healer Foundation

@@ -61,6 +61,7 @@ import {
   fakePorts,
   runNight,
 } from "../support/raid-night-orchestration-fixture.js";
+import { CURRENT_UNSUPPORTED_SUBJECT, UNSUPPORTED_WCL_IDENTITY } from "../support/unsupported-subject.js";
 
 const HOST = "warcraft-logs-coach-vnext.brandon-williams-323.workers.dev";
 const MODERN_META = {
@@ -74,7 +75,7 @@ const GTKB = "wcl-assassination-high-parse-opener";
 const PROT_OPENER = "wcl-protection-paladin-a7r6-opener";
 const PROT_ACTOR = 7;
 /** A7R6 fight 7 actor 4 — Warrior/Arms per the committed fight-context artifact. */
-const ARMS_ACTOR = 4;
+const ARMS_ACTOR = CURRENT_UNSUPPORTED_SUBJECT.sourceId;
 
 interface Subject {
   readonly label: string;
@@ -105,8 +106,8 @@ const ARMS_SUBJECT: Subject = {
   label: "the real Arms Warrior",
   artifact: PROT_OPENER,
   actorId: ARMS_ACTOR,
-  className: "Warrior",
-  specName: "Arms",
+  className: CURRENT_UNSUPPORTED_SUBJECT.expectedClassName,
+  specName: CURRENT_UNSUPPORTED_SUBJECT.expectedSpecName,
   status: "SPEC_NOT_SUPPORTED",
 };
 
@@ -198,7 +199,7 @@ describe("the production catalog", () => {
       ok: true,
       specId: "paladin/protection",
     });
-    expect(resolveSpecIdentity({ className: "Warrior", specName: "Arms" })).toMatchObject({
+    expect(resolveSpecIdentity(UNSUPPORTED_WCL_IDENTITY)).toMatchObject({
       ok: false,
       reason: "UNSUPPORTED_SPECIALIZATION",
     });
@@ -358,9 +359,9 @@ describe("the REAL Arms Warrior subject keeps the unsupported path", () => {
       const projected = projectAnalysisResult(result.analysis);
       expect(projected.status).toBe("SPEC_NOT_SUPPORTED");
       expect(projected.specialization).toEqual({ specId: null, gameplaySupported: false });
-      expect(projected.identity.player).toMatchObject({ className: "Warrior", specName: "Arms" });
+      expect(projected.identity.player).toMatchObject(UNSUPPORTED_WCL_IDENTITY);
       if (projected.status === "ANALYZED") return;
-      expect(projected.detail).toContain("warrior/arms");
+      expect(projected.detail).toContain(CURRENT_UNSUPPORTED_SUBJECT.observedSpecId);
       expect(projected.detail).toContain("no gameplay analysis was attempted");
     });
   }
@@ -460,8 +461,9 @@ describe("raid-night cells over the D2 fixture with an Arms participant", () => 
       const snapshot = assassinationSnapshot({
         fightIds: [1, 2],
         sourceIds: [ARMS_ACTOR, M5D2_ACTOR, ROGUE_B],
-        classNameFor: (sourceId) => (sourceId === ARMS_ACTOR ? "Warrior" : "Rogue"),
-        specNameFor: (_fightId, sourceId) => (sourceId === ARMS_ACTOR ? "Arms" : "Assassination"),
+        classNameFor: (sourceId) => (sourceId === ARMS_ACTOR ? UNSUPPORTED_WCL_IDENTITY.className : "Rogue"),
+        specNameFor: (_fightId, sourceId) =>
+          sourceId === ARMS_ACTOR ? UNSUPPORTED_WCL_IDENTITY.specName : "Assassination",
         absentOn: new Map([[2, [ROGUE_B]]]),
       });
       const ports = fakePorts({ snapshot });

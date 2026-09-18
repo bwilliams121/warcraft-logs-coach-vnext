@@ -9,6 +9,7 @@ import {
   type FightAnalysis,
 } from "../../src/services/result.js";
 import type { FightIdentity } from "../../src/wcl/types.js";
+import { CURRENT_UNSUPPORTED_SUBJECT } from "../support/unsupported-subject.js";
 
 const IDENTITY: FightIdentity = {
   report: { code: "aBcDeFgH12345678", revision: 24, startTime: 0, endTime: 600_000 },
@@ -24,7 +25,7 @@ const ANALYSIS: FightAnalysis = {
   scope: null,
   // The observed identity of a specialization no analyzer covers (Warrior/Arms
   // since M10-D made Protection Paladin public). A fixture label only.
-  analysis: specNotSupported("warrior/arms"),
+  analysis: specNotSupported(CURRENT_UNSUPPORTED_SUBJECT.observedSpecId),
   observedDecisions: null,
 };
 

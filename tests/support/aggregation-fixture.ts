@@ -22,6 +22,7 @@ import type {
 } from "../../src/specs/rogue/assassination/observed-analysis.js";
 import { assassinationObservedDecisionView } from "../../src/specs/rogue/assassination/registration.js";
 import type { EvidenceLocator } from "../../src/engine/evidence/locator.js";
+import { CURRENT_UNSUPPORTED_SUBJECT } from "./unsupported-subject.js";
 
 export const REPORT_CODE = "aBcDeFgH12345678";
 export const REVISION = 30;
@@ -224,7 +225,7 @@ export function nonAnalyzedFightAnalysis(options: {
       status: options.status,
       // The OBSERVED identity string on an unsupported envelope: Warrior/Arms,
       // the canonical unsupported specialization since M10-D.
-      specId: supported ? "rogue/assassination" : "warrior/arms",
+      specId: supported ? "rogue/assassination" : CURRENT_UNSUPPORTED_SUBJECT.observedSpecId,
       detail: options.detail ?? `no analysis: ${options.status}`,
     },
     observedDecisions: null,

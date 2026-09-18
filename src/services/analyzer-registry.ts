@@ -150,7 +150,20 @@ export type CatalogDefect =
   /** A lookup was handed something other than a validated catalog. */
   | "UNVALIDATED_CATALOG"
   /** A registration's human-readable name is blank (M11-A1). */
-  | "INVALID_DISPLAY_NAME";
+  | "INVALID_DISPLAY_NAME"
+  /**
+   * Two registrations bind the SAME decision authority to the SAME domain
+   * (M11-A2). A decision authority — an APL artifact identified by its
+   * `authorityId` — is owned by exactly one analyzer for the domain it
+   * governs; it is what `RESULT_CITES_FOREIGN_AUTHORITY` keys on, so sharing
+   * it would let two analyzers' results pass each other's ownership check.
+   * This is NOT a ban on shared provenance: two specializations may cite the
+   * same SimulationCraft commit, the same upstream source file (two regions
+   * of one `apl_paladin.cpp`), the same client build, or the same
+   * class-level mechanics dataset. Only the decision-authority IDENTITY per
+   * domain is unique.
+   */
+  | "DUPLICATE_DECISION_AUTHORITY_BINDING";
 
 export const CATALOG_DEFECTS = Object.freeze([
   "DUPLICATE_SPEC_ID",
@@ -166,6 +179,7 @@ export const CATALOG_DEFECTS = Object.freeze([
   "PUBLIC_SET_DISAGREES_WITH_PARTITION",
   "UNVALIDATED_CATALOG",
   "INVALID_DISPLAY_NAME",
+  "DUPLICATE_DECISION_AUTHORITY_BINDING",
 ] as const satisfies readonly CatalogDefect[]);
 
 export interface CatalogDefectRecord {
@@ -310,6 +324,29 @@ export function validateAnalyzerCatalog(registrations: readonly AnalyzerRegistra
   const defects: CatalogDefectRecord[] = [];
   const specIds = new Set<string>();
   const analyzerIds = new Set<string>();
+
+  // ---- decision-authority ownership across registrations (M11-A2) ----
+  //
+  // Keyed by (authorityId, domain). Two rows binding one artifact for one
+  // domain is a defect whichever spec ids they carry; the same artifact
+  // bound for two DIFFERENT domains by one row is already refused by
+  // `PROVIDER_DOMAIN_COMPATIBILITY` for a SimulationCraft APL, and would be a
+  // deliberate design for a provider kind that may govern several domains.
+  const decisionAuthorityOwners: Record<string, string> = Object.create(null) as Record<string, string>;
+  for (const registration of snapshot) {
+    for (const binding of registration.authorityBindings) {
+      const key = `${binding.authorityId} @ ${binding.domain}`;
+      const owner: string | undefined = decisionAuthorityOwners[key];
+      if (owner !== undefined && owner !== registration.analyzerId) {
+        defects.push({
+          defect: "DUPLICATE_DECISION_AUTHORITY_BINDING",
+          analyzerId: registration.analyzerId,
+          detail: `'${binding.authorityId}' for ${binding.domain} is already bound by '${owner}'`,
+        });
+      }
+      decisionAuthorityOwners[key] = registration.analyzerId;
+    }
+  }
 
   for (const registration of snapshot) {
     if (specIds.has(registration.specId)) {
@@ -459,6 +496,45 @@ export function supportedSpecializationsSentence(
 /** The production wording, fixed at module load from the production catalog. */
 export const SUPPORTED_SPECIALIZATIONS_SENTENCE: string =
   supportedSpecializationsSentence(PRODUCTION_CATALOG);
+
+/**
+ * Everything the public tool descriptions say ABOUT specializations, derived
+ * from the PUBLIC registrations of a validated catalog (M11-A2).
+ *
+ * `sentence` is `supportedSpecializationsSentence`. `limits` is each PUBLIC
+ * registration's author-written limitation prose, in the SAME order the
+ * sentence names them (code-point order of display names), one entry per
+ * registration whether or not its prose is empty — a consumer skips empty
+ * entries and never reorders. INTERNAL_ONLY registrations contribute nothing
+ * to either, through the same `publicAnalyzers` filter dispatch uses.
+ */
+export interface PublicSpecializationDescriptions {
+  readonly sentence: string;
+  readonly limits: readonly { readonly analysis: string; readonly raidNight: string }[];
+}
+
+export function publicSpecializationDescriptions(
+  catalog: ValidatedAnalyzerCatalog = PRODUCTION_CATALOG,
+): PublicSpecializationDescriptions {
+  const ordered = [...publicAnalyzers(catalog)].sort((left, right) =>
+    left.displayName < right.displayName ? -1 : left.displayName > right.displayName ? 1 : 0,
+  );
+  return Object.freeze({
+    sentence: supportedSpecializationsSentence(catalog),
+    limits: Object.freeze(
+      ordered.map((registration) =>
+        Object.freeze({
+          analysis: registration.publicLimits.analysis,
+          raidNight: registration.publicLimits.raidNight,
+        }),
+      ),
+    ),
+  });
+}
+
+/** The production descriptions, fixed at module load from the production catalog. */
+export const PUBLIC_SPECIALIZATION_DESCRIPTIONS: PublicSpecializationDescriptions =
+  publicSpecializationDescriptions(PRODUCTION_CATALOG);
 
 /**
  * The catalog a service dispatches through: the injected rows validated per

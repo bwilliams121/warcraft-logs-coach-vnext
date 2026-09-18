@@ -73,6 +73,18 @@ import type { AnalyzerRequirement } from "../services/ingestion-scope.js";
 
 export type AnalyzerExposure = "INTERNAL_ONLY" | "PUBLIC";
 
+/** Public limitation prose per surface. See `AnalyzerDefinition.publicLimits`. */
+export interface PublicLimitsProse {
+  readonly analysis: string;
+  readonly raidNight: string;
+}
+
+export const NO_PUBLIC_LIMITS: PublicLimitsProse = Object.freeze({ analysis: "", raidNight: "" });
+
+function snapshotLimits(limits: PublicLimitsProse | undefined): PublicLimitsProse {
+  return Object.freeze({ analysis: limits?.analysis ?? "", raidNight: limits?.raidNight ?? "" });
+}
+
 export const ANALYZER_EXPOSURES = Object.freeze([
   "INTERNAL_ONLY",
   "PUBLIC",
@@ -99,6 +111,14 @@ export interface AnalyzerDefinition<TAnalysis extends SpecAnalysisEnvelope> {
   readonly exposure: AnalyzerExposure;
   readonly capabilities: readonly DecisionCapability[];
   readonly authorityBindings: readonly AuthorityDomainBinding[];
+  /**
+   * Author-written public limitation prose per surface (M11-A2), composed
+   * into the MCP tool descriptions for PUBLIC registrations. Presentation
+   * data like `displayName`; empty strings mean "no limitation paragraph on
+   * that surface". Optional here so a hand-assembled registration defaults
+   * to none; the snapshot always carries both strings.
+   */
+  readonly publicLimits?: PublicLimitsProse | undefined;
   /** The facade, handed the registration's own authority access. */
   readonly analyze: (input: SpecAnalysisInput, authority: AuthorityAccess) => TAnalysis;
   /** The spec-owned projection of an analyzed result. */
@@ -114,6 +134,8 @@ export interface AnalyzerRegistration {
   /** See `AnalyzerDefinition.displayName`. Copied by the snapshot like every other datum. */
   readonly displayName: string;
   readonly exposure: AnalyzerExposure;
+  /** See `AnalyzerDefinition.publicLimits`. Always present on a row. */
+  readonly publicLimits: PublicLimitsProse;
   readonly capabilities: readonly DecisionCapability[];
   readonly authorityBindings: readonly AuthorityDomainBinding[];
   /**
@@ -288,6 +310,7 @@ export function snapshotRegistration(registration: AnalyzerRegistration): Analyz
     specId: registration.specId,
     displayName: registration.displayName,
     exposure: registration.exposure,
+    publicLimits: snapshotLimits(registration.publicLimits),
     capabilities,
     authorityBindings,
     requirement: Object.freeze(requirementFromCapabilities(registration.analyzerId, capabilities)),
@@ -325,6 +348,7 @@ export function defineAnalyzerRegistration<TAnalysis extends SpecAnalysisEnvelop
     specId: definition.specId,
     displayName: definition.displayName,
     exposure: definition.exposure,
+    publicLimits: snapshotLimits(definition.publicLimits),
     capabilities,
     authorityBindings: bindings,
     requirement: Object.freeze(requirementFromCapabilities(definition.analyzerId, capabilities)),

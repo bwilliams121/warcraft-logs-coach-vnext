@@ -63,10 +63,8 @@
  *         adapter withholds it. No mapping is needed and none is added.
  */
 
-import {
-  defineAnalyzerRegistration,
-  type AnalyzerRegistration,
-} from "../../../findings/analyzer-registration.js";
+import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import { PROTECTION_AUTHORITY_BINDINGS, PROTECTION_CAPABILITIES } from "./authority-bindings.js";
 import {
@@ -193,16 +191,59 @@ export function protectionObservedDecisionView(
   };
 }
 
-export const PROTECTION_PALADIN_REGISTRATION: AnalyzerRegistration = defineAnalyzerRegistration({
-  analyzerId: PROTECTION_PALADIN_ANALYZER_ID,
-  specId: PROTECTION_PALADIN_SPEC_ID,
-  displayName: PROTECTION_PALADIN_DISPLAY_NAME,
+/**
+ * The public limitation prose the tool descriptions publish for Protection
+ * (M11-A2). Owned HERE, by the specialization, because it is a claim about
+ * what this evaluator refuses to judge — which no registry field can
+ * generate. Two surfaces, two grammars, one meaning; the M10-D wording is
+ * preserved byte for byte and composed into the descriptions in
+ * public-registration order.
+ */
+export const PROTECTION_PUBLIC_LIMITS = Object.freeze({
+  analysis: [
+    "Protection Paladin analysis compares only observed OFFENSIVE global-cooldown decisions against",
+    "pinned authority. It does NOT evaluate defensive cooldowns, active mitigation, self-healing,",
+    "interrupts, or survival. Off-global-cooldown actions such as Shield of the Righteous are excluded,",
+    "not judged.",
+  ].join("\n"),
+  raidNight: [
+    "Protection Paladin cells count only observed OFFENSIVE global-cooldown decisions compared against",
+    "pinned authority. They do NOT evaluate defensive cooldowns, active mitigation, self-healing,",
+    "interrupts, or survival; off-global-cooldown actions such as Shield of the Righteous are excluded,",
+    "not judged.",
+  ].join("\n"),
+});
+
+/**
+ * The Protection Paladin specialization module (M11-A2).
+ *
+ * Built through the specialization module factory, which checks the identity
+ * coheres with the pinned roster and builds the registration row through
+ * `defineAnalyzerRegistration` exactly as before — the facade, the view, the
+ * six capabilities and the one binding are the same objects M10-C
+ * registered and M10-D made public. The WCL identity strings are the ones
+ * the committed A7R6 fight-context capture reports for actor 7 (`subType`
+ * Paladin, `friendlySpecs` Protection); the conformance suite pins them
+ * against that artifact.
+ */
+export const PROTECTION_PALADIN_MODULE: SpecModule = defineSpecModule({
+  identity: {
+    specId: PROTECTION_PALADIN_SPEC_ID,
+    analyzerId: PROTECTION_PALADIN_ANALYZER_ID,
+    displayName: PROTECTION_PALADIN_DISPLAY_NAME,
+    wclClassName: "Paladin",
+    wclSpecName: "Protection",
+  },
   exposure: "PUBLIC",
   capabilities: PROTECTION_CAPABILITIES,
   authorityBindings: PROTECTION_AUTHORITY_BINDINGS,
+  limitsProse: PROTECTION_PUBLIC_LIMITS,
   // The facade receives the registration's OWN authority access and asks it
   // per domain. There is no argument through which another specialization's
   // binding could arrive.
   analyze: (input, authority) => analyzeObservedProtectionPaladinDecisions({ ...input, authority }),
   observedDecisionView: protectionObservedDecisionView,
 });
+
+/** The row the production catalog lists. The module owns it; this name is the M10 export, unchanged. */
+export const PROTECTION_PALADIN_REGISTRATION: AnalyzerRegistration = PROTECTION_PALADIN_MODULE.registration;

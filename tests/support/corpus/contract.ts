@@ -44,7 +44,7 @@ import pinnedAssassinationApl from "../../../src/simc/data/rogue-assassination.a
 import pinnedRogueDotDurations from "../../../src/data/game/rogue-dot-durations.json";
 import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
-import { SPEC_IDS } from "../../../src/findings/spec-id.js";
+import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
 import { PUBLIC_EXCLUSION_REASONS } from "../../../src/contracts/analysis-contract.js";
 import { PROTECTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/protection/observed-analysis.js";
 
@@ -276,14 +276,93 @@ export const OWNING_LAYERS = {
   COMBAT_STATE: ["src/engine/state/", "src/engine/auras/", "src/engine/resources/", "src/engine/game-state/"],
   /** The specialization-neutral APL parsing, evaluation and first-scan engine. */
   SHARED_DECISION_ENGINE: ["src/simc/"],
-  SPEC_ASSASSINATION: ["src/specs/rogue/"],
-  /** M10-C. The internal Protection Paladin evaluator and nothing else. */
-  SPEC_PROTECTION_PALADIN: ["src/specs/paladin/"],
+  /**
+   * SPEC-LEVEL ROOTS (M11-A2). Until M11-A2 the two specialization layers
+   * were rooted at the CLASS directory (`src/specs/rogue/`,
+   * `src/specs/paladin/`), which cannot scale: a second Rogue or Paladin
+   * specialization would have been owned by its sibling's layer and its
+   * cases counted as the sibling's coverage. Each specialization layer now
+   * owns exactly its own `src/specs/<class>/<spec>/` tree, and
+   * `SPEC_LAYER_OF` below is the test-owned join from a `SpecId` to that
+   * layer. No case, artifact or expectation moved: ownership is metadata.
+   */
+  SPEC_ASSASSINATION: ["src/specs/rogue/assassination/"],
+  /** M10-C. The Protection Paladin evaluator and nothing else. */
+  SPEC_PROTECTION_PALADIN: ["src/specs/paladin/protection/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
 export type OwningLayer = keyof typeof OWNING_LAYERS;
 export const OWNING_LAYER_IDS = Object.keys(OWNING_LAYERS) as readonly OwningLayer[];
+
+/**
+ * The corpus layer that owns each specialization's cases (M11-A2).
+ *
+ * TEST-OWNED. Nothing under `src/` imports this module, and the
+ * production/corpus purity guard bans the name outright in production. It is
+ * the join the promotion-evidence gate uses to find a registration's own
+ * real-evidence cases, and it is typed over `SpecId` — every id this build
+ * knows, PUBLIC or INTERNAL_ONLY — so an INTERNAL_ONLY specialization has a
+ * corpus home from the day its id exists and its readiness can be reported
+ * before it is promoted.
+ *
+ * `satisfies Record<SpecId, OwningLayer>` makes the map total at compile
+ * time; `specLayerProblems` makes it injective and root-coherent at load
+ * time: two ids may not share a layer, every mapped layer must be a
+ * `SPEC_*` layer whose single root is exactly `src/specs/<class>/<spec>/`
+ * for that id, and no `SPEC_*` layer may exist without an id.
+ */
+export const SPEC_LAYER_OF = {
+  "rogue/assassination": "SPEC_ASSASSINATION",
+  "paladin/protection": "SPEC_PROTECTION_PALADIN",
+} as const satisfies Record<SpecId, OwningLayer>;
+
+/** The specialization-owned layers: exactly those a `SpecId` maps to. */
+export const SPEC_OWNED_LAYERS: readonly OwningLayer[] = Object.freeze(
+  OWNING_LAYER_IDS.filter((layer) => layer.startsWith("SPEC_")),
+);
+
+/** The canonical tree of a specialization: `src/specs/<class>/<spec>/`. */
+export function specTreeRoot(specId: string): string {
+  return `src/specs/${specId}/`;
+}
+
+/**
+ * Refuses a `SPEC_LAYER_OF` that is not an injective, root-coherent join
+ * onto the `SPEC_*` layers. Returns problems so a test can pin the messages.
+ */
+export function specLayerProblems(
+  layerOf: Readonly<Record<string, string>> = SPEC_LAYER_OF,
+  layers: Readonly<Record<string, readonly string[]>> = OWNING_LAYERS,
+): readonly string[] {
+  const problems: string[] = [];
+  const owners = new Map<string, string>();
+  for (const [specId, layer] of Object.entries(layerOf)) {
+    const roots = layers[layer];
+    if (roots === undefined) {
+      problems.push(`${specId} maps to ${layer}, which is not an owning layer`);
+      continue;
+    }
+    if (!layer.startsWith("SPEC_")) problems.push(`${specId} maps to ${layer}, which is not a SPEC_ layer`);
+    const previous = owners.get(layer);
+    if (previous !== undefined) problems.push(`${layer} is owned by both ${previous} and ${specId}`);
+    owners.set(layer, specId);
+    const expected = specTreeRoot(specId);
+    if (roots.length !== 1 || roots[0] !== expected) {
+      problems.push(`${layer} roots [${roots.join(", ")}] are not exactly [${expected}]`);
+    }
+  }
+  for (const layer of Object.keys(layers)) {
+    if (layer.startsWith("SPEC_") && !owners.has(layer)) problems.push(`${layer} has no SpecId`);
+  }
+  return problems;
+}
+
+export function assertSpecLayersCoherent(): void {
+  const problems = specLayerProblems();
+  if (problems.length > 0) throw new Error(`SPEC_LAYER_OF is not coherent: ${problems.join("; ")}`);
+}
+assertSpecLayersCoherent();
 
 /**
  * Refuses an ownership map in which any root is repeated, or is a prefix of

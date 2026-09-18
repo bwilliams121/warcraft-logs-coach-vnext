@@ -37,10 +37,8 @@
 
 import { pinnedAssassinationAuthority } from "../../../simc/pinned-authority.js";
 import rogueAssassinationArtifact from "../../../simc/data/rogue-assassination.apl.json";
-import {
-  defineAnalyzerRegistration,
-  type AnalyzerRegistration,
-} from "../../../findings/analyzer-registration.js";
+import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
+import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import type { AuthorityDomainBinding } from "../../../findings/authority-domain.js";
 import type { DecisionCapability } from "../../../findings/decision-capability.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
@@ -146,13 +144,33 @@ export function assassinationObservedDecisionView(
   };
 }
 
-export const ASSASSINATION_REGISTRATION: AnalyzerRegistration = defineAnalyzerRegistration({
-  analyzerId: ASSASSINATION_ANALYZER_ID,
-  specId: ASSASSINATION_SPEC_ID,
-  displayName: ASSASSINATION_DISPLAY_NAME,
+/**
+ * The Assassination specialization module (M11-A2).
+ *
+ * Built through the specialization module factory, which checks the identity
+ * coheres with the pinned roster and builds the registration row through
+ * `defineAnalyzerRegistration` exactly as before — the facade, the view, the
+ * capability and the binding below are the same objects M10 registered. The
+ * WCL identity strings are the ones the committed A7R6 fight-context capture
+ * reports for actor 19 (`subType` Rogue, `friendlySpecs` Assassination);
+ * the conformance suite pins them against that artifact.
+ *
+ * No specialization-specific limitation paragraph is published for
+ * Assassination on either surface: its supported surface is the generic
+ * observed-decision statement the descriptions already make.
+ */
+export const ASSASSINATION_MODULE: SpecModule = defineSpecModule({
+  identity: {
+    specId: ASSASSINATION_SPEC_ID,
+    analyzerId: ASSASSINATION_ANALYZER_ID,
+    displayName: ASSASSINATION_DISPLAY_NAME,
+    wclClassName: "Rogue",
+    wclSpecName: "Assassination",
+  },
   exposure: "PUBLIC",
   capabilities: [ASSASSINATION_ROTATION_CAPABILITY],
   authorityBindings: [ASSASSINATION_OFFENSIVE_AUTHORITY],
+  limitsProse: { analysis: "", raidNight: "" },
   analyze: (input, authority) => {
     // The facade accepts `authority: null` to mean "no usable authority" and
     // answers AUTHORITY_NOT_AVAILABLE; every non-available resolution maps to
@@ -167,3 +185,6 @@ export const ASSASSINATION_REGISTRATION: AnalyzerRegistration = defineAnalyzerRe
   },
   observedDecisionView: assassinationObservedDecisionView,
 });
+
+/** The row the production catalog lists. The module owns it; this name is the M10 export, unchanged. */
+export const ASSASSINATION_REGISTRATION: AnalyzerRegistration = ASSASSINATION_MODULE.registration;

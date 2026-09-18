@@ -711,7 +711,10 @@ Expect 200 and confirm all of:
 ## M10-5. REST single fight — unsupported (Arms Warrior)
 
 Costs **1** unit. Same report and fight, actor **4** — Warrior/Arms per the
-same committed context artifact. (Part II's M8-5 used fight 6 actor 5 and
+same committed context artifact. Since M11-A2 this is the CURRENT
+UNSUPPORTED SUBJECT centralized in `tests/support/unsupported-subject.ts`
+(`A7R6kxPJ1hC8YQ4w` / fight 7 / actor 4 / Warrior / Arms); if that fixture
+has been migrated, use its current coordinates here. (Part II's M8-5 used fight 6 actor 5 and
 called it a Protection Paladin; the committed master data has actor 5 as an
 Evoker. Either way it was unsupported. Use actor 4 now, whose identity is
 machine-pinned.)

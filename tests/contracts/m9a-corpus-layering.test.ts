@@ -486,8 +486,11 @@ describe("assertion execution matches the registry exactly", () => {
       (roots as readonly string[]).includes("src/simc/"),
     );
     expect(owners.map(([layer]) => layer)).toEqual(["SHARED_DECISION_ENGINE"]);
-    expect(OWNING_LAYERS.SPEC_ASSASSINATION).toEqual(["src/specs/rogue/"]);
-    expect(OWNING_LAYERS.SPEC_PROTECTION_PALADIN).toEqual(["src/specs/paladin/"]);
+    // M11-A2: specialization layers are rooted at the SPEC tree, never the
+    // class directory, so a second specialization of either class is owned
+    // by its own layer rather than counted as its sibling's coverage.
+    expect(OWNING_LAYERS.SPEC_ASSASSINATION).toEqual(["src/specs/rogue/assassination/"]);
+    expect(OWNING_LAYERS.SPEC_PROTECTION_PALADIN).toEqual(["src/specs/paladin/protection/"]);
     expect(
       ownershipRootProblems({ A: ["src/simc/"], B: ["src/simc/", "src/specs/"], C: ["src/specs/rogue/"] }),
     ).toEqual([

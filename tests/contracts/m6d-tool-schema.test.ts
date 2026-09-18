@@ -25,16 +25,20 @@ import {
   ANALYZE_TOOL_NAME,
   ANALYZE_TOOL_TITLE,
 } from "../../src/mcp/tools/analyze-warcraft-log.js";
-import { SUPPORTED_SPECIALIZATIONS_SENTENCE } from "../../src/services/analyzer-registry.js";
+import {
+  PUBLIC_SPECIALIZATION_DESCRIPTIONS,
+  SUPPORTED_SPECIALIZATIONS_SENTENCE,
+} from "../../src/services/analyzer-registry.js";
 
 /**
  * The description as production publishes it: the tool's own prose with the
- * supported-specialization sentence the composition root derives from the
- * production catalog (M11-A1). Tests read the same derivation, so a
+ * supported-specialization sentence and each public specialization's
+ * limitation prose, both derived by the composition root from the
+ * production catalog (M11-A1, M11-A2). Tests read the same derivation, so a
  * specialization that becomes public changes this text without anyone
  * editing a literal.
  */
-const ANALYZE_TOOL_DESCRIPTION = analyzeToolDescription(SUPPORTED_SPECIALIZATIONS_SENTENCE);
+const ANALYZE_TOOL_DESCRIPTION = analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
 import {
   PUBLIC_ANALYSIS_SCHEMA_VERSION,
   PublicAnalysisResultSchema,

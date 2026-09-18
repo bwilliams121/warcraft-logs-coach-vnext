@@ -40,6 +40,7 @@ import {
   workerDepsFor,
 } from "../support/analysis-transports.js";
 import type { RateLimiterPort } from "../../src/runtime/rate-limit.js";
+import { UNSUPPORTED_WCL_IDENTITY } from "../support/unsupported-subject.js";
 
 function post(body: unknown, raw?: string): Request {
   return new Request("https://coach.test/v1/analysis", {
@@ -145,7 +146,7 @@ describe("every analysis-domain status is a successful response", () => {
   const statuses = [
     {
       name: "SPEC_NOT_SUPPORTED",
-      runner: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
+      runner: fixtureAnalysisRunner(UNSUPPORTED_WCL_IDENTITY),
     },
   ] as const;
 
@@ -168,7 +169,7 @@ describe("every analysis-domain status is a successful response", () => {
     // mistakes found".
     const body = (await (
       await callRest(D2_REQUEST, {
-        analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
+        analyze: fixtureAnalysisRunner(UNSUPPORTED_WCL_IDENTITY),
       })
     ).json()) as Record<string, unknown>;
 
@@ -357,7 +358,7 @@ describe("no secret leaves through the live REST route", () => {
       name: "an unsupported spec",
       run: async () =>
         await callRest(D2_REQUEST, {
-          analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
+          analyze: fixtureAnalysisRunner(UNSUPPORTED_WCL_IDENTITY),
         }),
     },
     {

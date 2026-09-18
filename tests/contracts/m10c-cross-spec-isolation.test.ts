@@ -6,6 +6,15 @@
  * directions and the spec-neutrality of the shared SimC layer by name, so a
  * convenient cross-import or a "paladin" branch in shared code fails a test
  * rather than a review.
+ *
+ * M11-A2: the PAIRWISE, hand-listed parts of this file — the exact Paladin
+ * module list, the list of Paladin-only data modules, and the list of
+ * class-named data modules — were retired in favour of the structural,
+ * N-tree sweep in `m11a2-cross-spec-isolation.test.ts`, which discovers
+ * every `src/specs/<class>/<spec>/` tree and proves the same properties for
+ * all of them. What stays here is what is genuinely about the M10-C seam:
+ * the two trees' directional prohibitions by name, the Rogue loader
+ * exception, and the SimC layer's freedom from any Paladin concept.
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
@@ -58,28 +67,6 @@ const SHARED_FINDINGS = tsUnder("src/findings");
 const ALL_SRC = tsUnder("src");
 
 describe("the Paladin tree", () => {
-  it("exists and is the expected set of modules", () => {
-    expect(PALADIN_TREE.map((path) => path.slice("src/specs/paladin/protection/".length))).toEqual([
-      "action-profile.ts",
-      "armament-state.ts",
-      "aura-bindings.ts",
-      "authority-bindings.ts",
-      "build-absences.ts",
-      "cooldown-bindings.ts",
-      "domains.ts",
-      "first-gcd-adapter.ts",
-      "first-gcd-state.ts",
-      "observed-action-gate.ts",
-      "observed-analysis.ts",
-      "pinned-authority.ts",
-      "registration.ts",
-      "resolver.ts",
-      "spec.ts",
-      "subaction-candidates.ts",
-      "vocabulary.ts",
-    ]);
-  });
-
   it.each(PALADIN_TREE)(
     "%s imports no Rogue module, Rogue data, Rogue authority or the Rogue loader",
     (path) => {
@@ -103,34 +90,6 @@ describe("the Paladin tree", () => {
       "rogue/assassination",
     ]) {
       expect(code, `${path} names ${forbidden}`).not.toContain(forbidden);
-    }
-  });
-
-  it("the Paladin artifact, vocabulary and data modules are reached only from the Paladin tree", () => {
-    const PALADIN_ONLY = [
-      "src/simc/data/paladin-protection.apl.json",
-      "src/specs/paladin/protection/vocabulary.js",
-      "src/specs/paladin/protection/resolver.js",
-      "src/data/game/paladin-protection-gcd-semantics.js",
-      "src/data/game/paladin-protection-talents.js",
-      "src/data/game/paladin-protection-transition-authority.js",
-      "src/data/game/paladin-protection-item-effects.js",
-      "src/data/game/paladin-protection-enchant-effects.js",
-      "src/data/game/paladin-protection-spender-costs.js",
-      "src/data/game/paladin-protection-cooldowns.js",
-      "src/data/game/paladin-protection-aura-authority.js",
-    ];
-    // The Paladin data modules may also reach one another (the aura authority
-    // reuses the transition authority's measured hashes); nothing else may.
-    for (const path of ALL_SRC) {
-      if (path.startsWith("src/specs/paladin/protection/")) continue;
-      if (/^src\/data\/game\/paladin-protection-/.test(path)) continue;
-      for (const specifier of importSpecifiersOf(path)) {
-        const resolved = resolveSpecifier(path, specifier);
-        for (const guarded of PALADIN_ONLY) {
-          expect(resolved, `${path} imports ${guarded}`).not.toBe(guarded);
-        }
-      }
     }
   });
 });
@@ -211,28 +170,5 @@ describe("shared code reaches the two trees only through the registry", () => {
         ),
     );
     expect(importers).toEqual(["src/services/analyzer-registry.ts"]);
-  });
-
-  it("the Paladin data modules under src/data/game are the only class-named modules besides the Rogue ones", () => {
-    const classNamed = filesUnder("src/data/game")
-      .map((path) => path.slice("src/data/game/".length))
-      .filter((name) => /^(paladin|rogue)-/.test(name));
-    expect(classNamed.filter((name) => name.startsWith("paladin-"))).toEqual([
-      "paladin-protection-armament-authority.ts",
-      "paladin-protection-aura-authority.ts",
-      "paladin-protection-cooldowns.json",
-      "paladin-protection-cooldowns.ts",
-      "paladin-protection-enchant-effects.json",
-      "paladin-protection-enchant-effects.ts",
-      "paladin-protection-gcd-semantics.json",
-      "paladin-protection-gcd-semantics.ts",
-      "paladin-protection-item-effects.json",
-      "paladin-protection-item-effects.ts",
-      "paladin-protection-spender-costs.json",
-      "paladin-protection-spender-costs.ts",
-      "paladin-protection-talents.json",
-      "paladin-protection-talents.ts",
-      "paladin-protection-transition-authority.ts",
-    ]);
   });
 });

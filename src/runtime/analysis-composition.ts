@@ -29,7 +29,10 @@
 
 import type { Env } from "../config/env.js";
 import { analyzeFight } from "../services/analysis-service.js";
-import { SUPPORTED_SPECIALIZATIONS_SENTENCE } from "../services/analyzer-registry.js";
+import {
+  PUBLIC_SPECIALIZATION_DESCRIPTIONS,
+  type PublicSpecializationDescriptions,
+} from "../services/analyzer-registry.js";
 import type { AnalysisRunner } from "../services/analysis-runner.js";
 import { createPreflight } from "../wcl/preflight.js";
 import { createFightCoreIngestor, createFightIngestor } from "../wcl/ingest-fight.js";
@@ -148,15 +151,20 @@ export function createProductionEncounterContextRunner(env: Env): EncounterConte
 }
 
 /**
- * The "Supported specializations: …" sentence the production MCP tool
- * descriptions publish (M11-A1).
+ * What the production MCP tool descriptions say about specializations
+ * (M11-A1, widened in M11-A2): the derived "Supported specializations: …"
+ * sentence and each PUBLIC specialization's own limitation prose, in one
+ * deterministic order.
  *
  * Re-exported from the application layer HERE, at the composition root,
  * because the transports may not import the analyzer registry (they hold no
- * catalog and compose no analysis) and the MCP layer may not compute the
- * sentence for itself. It is derived from the PUBLIC registrations of the
- * production catalog — the same set the dispatcher selects from — and is
+ * catalog and compose no analysis) and the MCP layer may not compute these
+ * for itself. Both are derived from the PUBLIC registrations of the
+ * production catalog — the same set the dispatcher selects from — and are
  * handed to the MCP handler by `src/api/worker.ts` exactly as the runners
  * are. There is no second source of this wording.
  */
-export const PRODUCTION_SUPPORTED_SPECIALIZATIONS: string = SUPPORTED_SPECIALIZATIONS_SENTENCE;
+export const PRODUCTION_PUBLIC_SPECIALIZATIONS: PublicSpecializationDescriptions =
+  PUBLIC_SPECIALIZATION_DESCRIPTIONS;
+
+export type { PublicSpecializationDescriptions };

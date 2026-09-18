@@ -39,6 +39,7 @@ import {
   fixtureAnalysisRunner,
   m5aRequest,
 } from "../support/analysis-transports.js";
+import { UNSUPPORTED_WCL_IDENTITY } from "../support/unsupported-subject.js";
 
 const HOST = "warcraft-logs-coach-vnext.brandon-williams-323.workers.dev";
 const TOKEN = "fake-analysis-token-not-real";
@@ -204,7 +205,7 @@ describe("every analysis status is a successful tool result", () => {
     // retry or discard it, and would read as "the tool broke" rather than
     // "this build does not analyze that specialization".
     const result = await callTool(IDS_ARGS, {
-      analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
+      analyze: fixtureAnalysisRunner(UNSUPPORTED_WCL_IDENTITY),
     });
 
     expect(result.isError).toBeUndefined();
@@ -401,7 +402,7 @@ describe("the analysis tool is metered", () => {
     // though no gameplay analysis followed.
     const limiter = countingLimiter(10);
     await callTool(IDS_ARGS, {
-      analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
+      analyze: fixtureAnalysisRunner(UNSUPPORTED_WCL_IDENTITY),
       rateLimiter: limiter,
     });
 
@@ -616,7 +617,7 @@ describe("no secret leaves through the analysis tool", () => {
       name: "an unsupported spec",
       run: async () =>
         await callTool(IDS_ARGS, {
-          analyze: fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
+          analyze: fixtureAnalysisRunner(UNSUPPORTED_WCL_IDENTITY),
         }),
     },
     {

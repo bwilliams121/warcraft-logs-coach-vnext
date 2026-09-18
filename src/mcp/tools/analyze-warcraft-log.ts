@@ -56,20 +56,36 @@ export const ANALYZE_TOOL_TITLE = "Analyze Warcraft Logs observed rotational dec
  * author-written because they are claims about what an analyzer refuses to
  * judge, which no registry field can generate.
  */
-export function analyzeToolDescription(supportedSpecializations: string): string {
+/**
+ * What the composition root hands the tools about specializations (M11-A2):
+ * the derived support sentence, and each PUBLIC specialization's own
+ * limitation prose per surface, in the sentence's order. Declared here as a
+ * STRUCTURAL type — this layer imports no registry — and satisfied by the
+ * application layer's `PublicSpecializationDescriptions`.
+ */
+export interface PublicSpecializationDescriptions {
+  readonly sentence: string;
+  readonly limits: readonly { readonly analysis: string; readonly raidNight: string }[];
+}
+
+/** Each non-empty limitation paragraph followed by a blank line, in order. */
+export function limitsParagraphs(
+  descriptions: PublicSpecializationDescriptions,
+  surface: "analysis" | "raidNight",
+): readonly string[] {
+  return descriptions.limits.flatMap((limits) => (limits[surface].length === 0 ? [] : [limits[surface], ""]));
+}
+
+export function analyzeToolDescription(descriptions: PublicSpecializationDescriptions): string {
   return [
     "Verifies the rotational decisions a player ACTUALLY MADE in one Warcraft Logs raid fight, by",
     "comparing each observed cast against a pinned SimulationCraft action priority list.",
     "",
-    `${supportedSpecializations} Any other specialization`,
+    `${descriptions.sentence} Any other specialization`,
     "returns status SPEC_NOT_SUPPORTED with no decision analysis, which is a complete and truthful",
     "result — it is not evidence of clean play.",
     "",
-    "Protection Paladin analysis compares only observed OFFENSIVE global-cooldown decisions against",
-    "pinned authority. It does NOT evaluate defensive cooldowns, active mitigation, self-healing,",
-    "interrupts, or survival. Off-global-cooldown actions such as Shield of the Righteous are excluded,",
-    "not judged.",
-    "",
+    ...limitsParagraphs(descriptions, "analysis"),
     "Each observed decision resolves to MATCH, REJECTED or UNKNOWN.",
     "MATCH means authority-compatible only: the supported analysis resolved the same action that was",
     "observed. MATCH does NOT mean correct, optimal, ideal, best, recommended or mistake-free.",
@@ -160,10 +176,10 @@ export interface AnalyzeToolDeps {
   /** Absent means unmetered, which this tool treats as a refusal. See `../rate-limit.ts`. */
   readonly rateLimiter?: RateLimiterPort | undefined;
   /**
-   * The derived "Supported specializations: …" sentence, from the composition
-   * root. See `analyzeToolDescription`.
+   * The derived support sentence and per-specialization limitation prose,
+   * from the composition root. See `analyzeToolDescription`.
    */
-  readonly supportedSpecializations: string;
+  readonly publicSpecializations: PublicSpecializationDescriptions;
 }
 
 /**
@@ -202,7 +218,7 @@ export function registerAnalyzeWarcraftLogTool(server: McpServer, deps: AnalyzeT
     ANALYZE_TOOL_NAME,
     {
       title: ANALYZE_TOOL_TITLE,
-      description: analyzeToolDescription(deps.supportedSpecializations),
+      description: analyzeToolDescription(deps.publicSpecializations),
       inputSchema: AnalyzeWarcraftLogInputSchema,
       // The M6-C public contract, unchanged. There is no MCP-shaped analysis
       // DTO: the SDK validates `structuredContent` against this before the

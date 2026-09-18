@@ -28,6 +28,7 @@ import {
   ANALYZER_REGISTRATIONS,
   AnalyzerCatalogIntegrityError,
   ENABLED_ANALYZERS,
+  PUBLIC_SPECIALIZATION_DESCRIPTIONS,
   SUPPORTED_SPECIALIZATIONS_SENTENCE,
   ENABLED_ANALYSIS_REQUIREMENTS,
   validateAnalyzerCatalog,
@@ -45,6 +46,7 @@ import {
   productionCatalogWith,
   productionRegistrationFor,
 } from "../support/catalog.js";
+import { CURRENT_UNSUPPORTED_SUBJECT } from "../support/unsupported-subject.js";
 
 function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
   const validation = validateAnalyzerCatalog(rows);
@@ -136,7 +138,7 @@ describe("the complete-catalog helper", () => {
   it("refuses a replacement for a specialization the production catalog does not carry", () => {
     const foreign = {
       ...productionRegistrationFor("paladin/protection"),
-      specId: "warrior/arms" as AnalyzerRegistration["specId"],
+      specId: CURRENT_UNSUPPORTED_SUBJECT.observedSpecId as AnalyzerRegistration["specId"],
     };
     expect(() => productionCatalogWith(foreign)).toThrow(/no production registration to replace/);
   });
@@ -171,8 +173,8 @@ describe("the public descriptions state Protection's limits and claim nothing be
   // derivation, and `m11a-supported-specializations-derivation` pins what the
   // derivation itself must say.
   const SUPPORT_SENTENCE = SUPPORTED_SPECIALIZATIONS_SENTENCE;
-  const ANALYZE_TOOL_DESCRIPTION = analyzeToolDescription(SUPPORT_SENTENCE);
-  const RAID_NIGHT_TOOL_DESCRIPTION = raidNightToolDescription(SUPPORT_SENTENCE);
+  const ANALYZE_TOOL_DESCRIPTION = analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
+  const RAID_NIGHT_TOOL_DESCRIPTION = raidNightToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
   const REQUIRED_MEANINGS = [
     "OFFENSIVE global-cooldown decisions",
     // Grammar differs by tool ("It does NOT" / "They do NOT"); the meaning does not.

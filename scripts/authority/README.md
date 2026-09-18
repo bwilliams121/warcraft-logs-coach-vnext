@@ -1,5 +1,42 @@
 # SimulationCraft authority extraction
 
+## Specialization roster — pinned at M11-A2
+
+`extract-simc-roster.mjs` produces `src/data/game/spec-roster.json`
+(`SIMC_SPECIALIZATION_ROSTER`, revision `simc-33622e9d-1`): every PLAYABLE
+specialization at the pinned commit, derived mechanically from three
+sources — never from a remembered list.
+
+| Source | Role | SHA-256 |
+| --- | --- | --- |
+| `engine/dbc/generated/specialization_spells.inc` | every (class, spec) row group; the spec passive named as the display name; the `Stat Negation Aura - <Stat> <Role>` passive | `514d7a509a3b95f130aadccb6a6f1a28c6f5f2568f211cd5139bb567b712e4fc` |
+| `engine/util/util.cpp` | `spec_map[]` (enumerator ↔ display name), `translate_class_id`, `player_type_string(_long)` | `30737d317fa5d312985952fa2945093c523b583033b75d855dcf104141c14e4d` |
+| `engine/dbc/generated/client_data_version.inc` | build `12.1.0.69587`, hotfix 2026-09-10 / 69587 | `226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293` |
+
+Playable = class id ≠ 0 (pet families excluded), no `Initial <Class>`
+placeholder in the group, exactly one `spec_map` display name in the
+group. Result at the pin: **40** playable specializations (25 DPS, 6 tank,
+6 healer, 3 role-UNKNOWN — the Evoker specializations carry no role
+passive), 3 pet families and 8 placeholders excluded and recorded. Role is
+pinned only from the passive; nothing fills the Evoker gap. Deterministic:
+two runs over identical bytes are byte-identical.
+
+```bash
+node scripts/authority/extract-simc-roster.mjs --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+  --extracted-on 2026-09-18 \
+  --local-specializationSpells <checkout>/engine/dbc/generated/specialization_spells.inc \
+  --local-util <checkout>/engine/util/util.cpp \
+  --local-clientDataVersion <checkout>/engine/dbc/generated/client_data_version.inc
+```
+
+Then `npx prettier --write src/data/game/spec-roster.json`, exactly as the
+corpus manifest is regenerated: the committed artifact is the extractor's
+byte-identical output after the repository's formatter, and prettier is
+idempotent, so regeneration is a no-op diff.
+
+CI validates the committed artifact (`tests/contracts/m11a2-spec-roster.test.ts`)
+and never needs the checkout. The roster is reference data, not support.
+
 The analyzer has **no runtime dependency** on GitHub, the SimulationCraft site,
 or the moving `midnight` branch. It imports committed JSON artifacts generated
 from one exact commit. This directory holds the generators and the procedures.

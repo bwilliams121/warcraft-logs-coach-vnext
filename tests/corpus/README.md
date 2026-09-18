@@ -121,8 +121,11 @@ Capture timestamps are corpus metadata. They never appear in analyzer output.
   is never duplicated
 - `owningLayer` — one of `WCL_TRANSPORT`, `NORMALIZATION`, `COMBAT_STATE`,
   `SHARED_DECISION_ENGINE` (M10-C correction: `src/simc/`),
-  `SPEC_ASSASSINATION` (`src/specs/rogue/`), `SPEC_PROTECTION_PALADIN`
-  (M10-C; `src/specs/paladin/`), `APPLICATION_SERVICE`, `PUBLIC_CONTRACT`.
+  `SPEC_ASSASSINATION` (`src/specs/rogue/assassination/`),
+  `SPEC_PROTECTION_PALADIN` (M10-C; `src/specs/paladin/protection/`),
+  `APPLICATION_SERVICE`, `PUBLIC_CONTRACT`. Specialization layers are rooted
+  at the SPEC tree since M11-A2, and `SPEC_LAYER_OF` in `contract.ts` is the
+  test-owned, total, injective join from every `SpecId` to its layer.
   Each maps to real source roots in `contract.ts`; the roots form a
   PARTITION — no root is listed twice or nested under another
   (`ownershipRootProblems`, checked at load and pinned by

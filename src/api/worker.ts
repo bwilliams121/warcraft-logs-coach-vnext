@@ -12,7 +12,8 @@ import { handleMcpRequest } from "../mcp/server.js";
 import {
   createProductionAnalysisRunner,
   createProductionRaidNightRunner,
-  PRODUCTION_SUPPORTED_SPECIALIZATIONS,
+  PRODUCTION_PUBLIC_SPECIALIZATIONS,
+  type PublicSpecializationDescriptions,
 } from "../runtime/analysis-composition.js";
 import { UNAUTHORIZED_MESSAGE, verifyAnalysisBearer } from "../runtime/bearer-auth.js";
 import { checkAnalysisRateLimit, type RateLimiterPort } from "../runtime/rate-limit.js";
@@ -87,14 +88,15 @@ export interface WorkerDeps {
   readonly mcp: (request: Request, env: Env, deps: WorkerDeps) => Promise<Response>;
   readonly version: string;
   /**
-   * The derived "Supported specializations: …" sentence the MCP tool
-   * descriptions publish (M11-A1). Bound from the composition root in
+   * The derived "Supported specializations: …" sentence and each PUBLIC
+   * specialization's limitation prose the MCP tool descriptions publish
+   * (M11-A1, widened in M11-A2). Bound from the composition root in
    * production; a test that does not read descriptions may omit it, and the
    * MCP layer then publishes its fail-closed "unbound" sentinel rather than a
-   * hand-written list. This transport never composes the sentence itself —
+   * hand-written list. This transport never composes the wording itself —
    * it holds no registry — it only passes it on, like the runners.
    */
-  readonly supportedSpecializations?: string | undefined;
+  readonly publicSpecializations?: PublicSpecializationDescriptions | undefined;
 }
 
 /**
@@ -126,7 +128,7 @@ const defaultMcp: WorkerDeps["mcp"] = async (request, env, deps) =>
     rateLimiter: deps.rateLimiter(env),
     // Derived from the PUBLIC registrations of the production catalog — the
     // same set the dispatcher selects from — never hand-listed (M11-A1).
-    supportedSpecializations: deps.supportedSpecializations,
+    publicSpecializations: deps.publicSpecializations,
   });
 
 const DEFAULT_DEPS: WorkerDeps = {
@@ -136,7 +138,7 @@ const DEFAULT_DEPS: WorkerDeps = {
   rateLimiter: (env) => env.ANALYSIS_RATE_LIMITER,
   mcp: defaultMcp,
   version: SERVICE_VERSION,
-  supportedSpecializations: PRODUCTION_SUPPORTED_SPECIALIZATIONS,
+  publicSpecializations: PRODUCTION_PUBLIC_SPECIALIZATIONS,
 };
 
 function methodNotAllowed(allowed: string): Response {

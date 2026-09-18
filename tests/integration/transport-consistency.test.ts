@@ -48,6 +48,7 @@ import {
   m5aRequest,
   workerDepsFor,
 } from "../support/analysis-transports.js";
+import { UNSUPPORTED_WCL_IDENTITY } from "../support/unsupported-subject.js";
 
 const HOST = "warcraft-logs-coach-vnext.brandon-williams-323.workers.dev";
 const TOKEN = "fake-analysis-token-not-real";
@@ -208,7 +209,7 @@ describe("every analysis-domain status is identical across transports", () => {
   it("agrees on SPEC_NOT_SUPPORTED", async () => {
     const body = (await expectTransportsAgree(
       D2_REQUEST,
-      fixtureAnalysisRunner({ className: "Warrior", specName: "Arms" }),
+      fixtureAnalysisRunner(UNSUPPORTED_WCL_IDENTITY),
     )) as Record<string, unknown>;
 
     expect(body["status"]).toBe("SPEC_NOT_SUPPORTED");

@@ -31,7 +31,9 @@ import { raidNightToolDescription } from "../../src/mcp/tools/analyze-raid-night
 import {
   ANALYZER_REGISTRATIONS,
   PRODUCTION_CATALOG,
+  PUBLIC_SPECIALIZATION_DESCRIPTIONS,
   publicAnalyzers,
+  publicSpecializationDescriptions,
   requireValidatedCatalog,
   SUPPORTED_SPECIALIZATIONS_SENTENCE,
   supportedSpecializationsSentence,
@@ -113,27 +115,61 @@ describe("display names are registration data the registry validates", () => {
   });
 });
 
+describe("the production descriptions object carries the sentence and per-spec limits in one order", () => {
+  it("is the sentence plus one limits entry per PUBLIC registration, in display-name order", () => {
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.sentence).toBe(SUPPORTED_SPECIALIZATIONS_SENTENCE);
+    const ordered = [...publicAnalyzers(PRODUCTION_CATALOG)].sort((left, right) =>
+      left.displayName < right.displayName ? -1 : left.displayName > right.displayName ? 1 : 0,
+    );
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toEqual(
+      ordered.map((registration) => ({
+        analysis: registration.publicLimits.analysis,
+        raidNight: registration.publicLimits.raidNight,
+      })),
+    );
+  });
+
+  it("is a pure function of the catalog: reversing registration order changes nothing", () => {
+    const reversed = requireValidatedCatalog([...ANALYZER_REGISTRATIONS].reverse());
+    expect(publicSpecializationDescriptions(reversed)).toEqual(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
+  });
+});
+
 describe("both tool descriptions carry the derived sentence and nothing hand-listed", () => {
   it("analyze_warcraft_log embeds the injected sentence verbatim", () => {
-    const description = analyzeToolDescription(SUPPORTED_SPECIALIZATIONS_SENTENCE);
+    const description = analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
     expect(description).toContain(SUPPORTED_SPECIALIZATIONS_SENTENCE);
     expect(description.split(SUPPORTED_SPECIALIZATIONS_SENTENCE)).toHaveLength(2);
   });
 
   it("analyze_raid_night embeds the injected sentence verbatim", () => {
-    const description = raidNightToolDescription(SUPPORTED_SPECIALIZATIONS_SENTENCE);
+    const description = raidNightToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
     expect(description).toContain(SUPPORTED_SPECIALIZATIONS_SENTENCE);
     expect(description.split(SUPPORTED_SPECIALIZATIONS_SENTENCE)).toHaveLength(2);
   });
 
-  it("an injected sentence is the only way a specialization list reaches either description", () => {
+  it("an injected description is the only way a specialization list or limit reaches either tool", () => {
     // A different sentence produces a different description and no residue of
-    // the production names: proof the modules hold no list of their own.
-    const probe = "Supported specializations: Probe One and Probe Two.";
-    for (const description of [analyzeToolDescription(probe), raidNightToolDescription(probe)]) {
-      expect(description).toContain(probe);
+    // the production names or the production limits: proof the modules hold
+    // no list and no limitation paragraph of their own.
+    const probe = {
+      sentence: "Supported specializations: Probe One and Probe Two.",
+      limits: [
+        { analysis: "Probe One limits (analysis).", raidNight: "Probe One limits (raid night)." },
+        { analysis: "", raidNight: "" },
+      ],
+    };
+    const analysis = analyzeToolDescription(probe);
+    const raidNight = raidNightToolDescription(probe);
+    for (const description of [analysis, raidNight]) {
+      expect(description).toContain(probe.sentence);
       expect(description).not.toContain("Assassination Rogue and Protection Paladin");
+      expect(description).not.toContain("Shield of the Righteous");
     }
+    expect(analysis).toContain("Probe One limits (analysis).\n\n");
+    expect(analysis).not.toContain("raid night");
+    expect(raidNight).toContain("Probe One limits (raid night).\n\n");
+    expect(raidNight).not.toContain("(analysis)");
   });
 
   it("no tool module names the support sentence or a display name as a literal in code", () => {

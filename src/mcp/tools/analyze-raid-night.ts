@@ -34,6 +34,7 @@ import {
 } from "../../services/raid-night-request.js";
 import type { RaidNightRunner } from "../../services/raid-night-runner.js";
 import { toolErrorBody, toolErrorForServiceCode, transportToolError } from "../tool-errors.js";
+import { limitsParagraphs, type PublicSpecializationDescriptions } from "./analyze-warcraft-log.js";
 
 export const RAID_NIGHT_TOOL_NAME = "analyze_raid_night";
 
@@ -53,7 +54,7 @@ export const RAID_NIGHT_TOOL_TITLE = "Analyze a Warcraft Logs raid night across 
  * the two descriptions cannot name different sets. See
  * `analyzeToolDescription` in `./analyze-warcraft-log.ts` for the reasoning.
  */
-export function raidNightToolDescription(supportedSpecializations: string): string {
+export function raidNightToolDescription(descriptions: PublicSpecializationDescriptions): string {
   return [
     "Aggregates FACTUAL evidence across an explicit, bounded set of fights from ONE Warcraft Logs",
     `report: who was present, what they played, which fight/player results exist, and integer decision`,
@@ -62,15 +63,11 @@ export function raidNightToolDescription(supportedSpecializations: string): stri
     `Requires an explicit list of 1 to ${String(MAX_RAID_NIGHT_FIGHTS)} fight IDs. There is no "whole report" form, because its cost`,
     `cannot be bounded in advance. At most ${String(MAX_RAID_NIGHT_PLAYERS)} players are analyzed per request.`,
     "",
-    `Gameplay support depends on registered analyzers. ${supportedSpecializations}`,
+    `Gameplay support depends on registered analyzers. ${descriptions.sentence}`,
     "Every other specialization appears as a factual SPEC_NOT_SUPPORTED cell —",
     "a limit of this build's coverage, NOT a statement that the player did badly.",
     "",
-    "Protection Paladin cells count only observed OFFENSIVE global-cooldown decisions compared against",
-    "pinned authority. They do NOT evaluate defensive cooldowns, active mitigation, self-healing,",
-    "interrupts, or survival; off-global-cooldown actions such as Shield of the Righteous are excluded,",
-    "not judged.",
-    "",
+    ...limitsParagraphs(descriptions, "raidNight"),
     "Cell kinds are distinct and must not be conflated. ABSENT means the player was not in that pull.",
     "SPEC_NOT_SUPPORTED means no analyzer exists for their specialization. ANALYSIS_UNAVAILABLE means",
     "nothing was attempted, because the fight's evidence did not arrive or Warcraft Logs supplied no",
@@ -169,8 +166,8 @@ export interface RaidNightToolDeps {
   readonly analyzeRaidNight: RaidNightRunner;
   /** Absent means unmetered, which this tool treats as a refusal. */
   readonly rateLimiter?: RateLimiterPort | undefined;
-  /** The derived "Supported specializations: …" sentence, from the composition root. */
-  readonly supportedSpecializations: string;
+  /** The derived support sentence and per-specialization limitation prose, from the composition root. */
+  readonly publicSpecializations: PublicSpecializationDescriptions;
 }
 
 /**
@@ -217,7 +214,7 @@ export function registerAnalyzeRaidNightTool(server: McpServer, deps: RaidNightT
     RAID_NIGHT_TOOL_NAME,
     {
       title: RAID_NIGHT_TOOL_TITLE,
-      description: raidNightToolDescription(deps.supportedSpecializations),
+      description: raidNightToolDescription(deps.publicSpecializations),
       inputSchema: AnalyzeRaidNightInputSchema,
       // The M7-E public contract, unchanged. There is no MCP-shaped raid-night
       // DTO: the SDK validates `structuredContent` against this before the result

@@ -42,6 +42,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import { isSpecModule } from "../../src/findings/spec-module.js";
 import { INTERNAL_ONLY_SPEC_IDS, PUBLIC_SPEC_IDS, SPEC_IDS } from "../../src/findings/spec-id.js";
 import {
   ANALYZER_REGISTRATIONS,
@@ -149,6 +150,22 @@ describe("the specialization tree", () => {
     }
   });
 
+  it("every registration module exports exactly one specialization module, which owns the registration (M11-A2)", () => {
+    // `defineSpecModule` builds the row; the exported registration must BE
+    // the module's row, so the module identity and the listed row cannot
+    // drift apart, and a registration built without the factory is refused.
+    for (const [key, module] of Object.entries(REGISTRATION_MODULES)) {
+      const path = repoPath(key);
+      const modules = Object.entries(module).filter(([, value]) => isSpecModule(value));
+      expect(modules, `${path} exports ${String(modules.length)} specialization modules`).toHaveLength(1);
+      const [, specModule] = modules[0] as [string, { registration: unknown }];
+      const found = DISCOVERED.find((candidate) => candidate.path === path);
+      expect(found?.registration, `${path}: the exported registration is not the module's own`).toBe(
+        specModule.registration,
+      );
+    }
+  });
+
   it("no registration is built anywhere except a canonical registration.ts", () => {
     // Comments stripped: the prohibition is on CODE. The call is the only way
     // a frozen, ownership-checked row comes into being, so any other call
@@ -160,7 +177,7 @@ describe("the specialization tree", () => {
         const code = (SPEC_SOURCES[`../../${path}`] ?? "")
           .replace(/\/\*[\s\S]*?\*\//g, "")
           .replace(/^\s*\/\/.*$/gm, "");
-        return /defineAnalyzerRegistration\s*\(/.test(code);
+        return /define(?:AnalyzerRegistration|SpecModule)\s*\(/.test(code);
       });
     expect(offenders).toEqual([]);
   });

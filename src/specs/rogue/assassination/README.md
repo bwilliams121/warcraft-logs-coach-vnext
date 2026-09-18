@@ -150,7 +150,10 @@ no field whose name could be printed as "percent correct".
 
 **PUBLIC.** The facade is bound at the single production composition root
 (M6-E) through `registration.ts` (`rogue-assassination-observed-decisions`,
-`rogue/assassination`, exposure `PUBLIC`) and is selected by the application
+`rogue/assassination`, exposure `PUBLIC`; since M11-A2 built by the
+specialization module factory as `ASSASSINATION_MODULE`, pinned to roster
+row `simcSpecId` 259 / role `DPS`, with no limitation prose and zero
+supplemental analyses) and is selected by the application
 service, raid-night orchestration, REST (`POST /v1/analysis`) and MCP
 (`analyze_warcraft_log`) for a resolved `Rogue/Assassination` identity. The
 published document is `warcraft-logs-coach.analysis/1`, projected from the

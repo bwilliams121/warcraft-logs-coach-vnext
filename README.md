@@ -432,6 +432,18 @@ state.
 
 ---
 
+## Onboarding foundation (M11-A)
+
+A third specialization registers through the specialization module factory
+(`src/findings/spec-module.ts`), which checks identity coherence against the
+pinned forty-specialization roster (`src/data/game/spec-roster.json`) and
+builds the registration row; it owns no gameplay meaning. New
+specializations enter `INTERNAL_ONLY` and are promoted to public only
+through a test-owned evidence gate that requires at least one real
+sanitized-capture `MATCH` or `REJECTED`. No third specialization exists yet
+and none has been selected; the roster lists what the game has, not what
+this project analyzes. See `agent/architecture.md`, "M11-A".
+
 ## Second Specialization
 
 Protection Paladin is the second specialization, public since M10-D.
