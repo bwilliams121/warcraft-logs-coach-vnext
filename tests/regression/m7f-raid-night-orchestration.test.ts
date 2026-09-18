@@ -388,7 +388,10 @@ describe("revision integrity fails closed at every stage", () => {
 
   it("aborts when the final confirmation could not be completed", async () => {
     // UNVERIFIED is not a softer MATCHES. Nothing was established.
-    const ports = fakePorts({ snapshot, finalRevision: { outcome: "UNVERIFIED" } });
+    const ports = fakePorts({
+      snapshot,
+      finalRevision: { outcome: "UNVERIFIED", cause: { kind: "REPORT_NOT_SERVED" } },
+    });
     expect(errorOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1, 2] }, ports))).toBe(
       "REPORT_REVISION_UNVERIFIED",
     );

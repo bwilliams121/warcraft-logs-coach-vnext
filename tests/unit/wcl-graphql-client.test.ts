@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { WclCredentials } from "../../src/config/env.js";
 import { createGraphqlClient, type DecodeOutcome } from "../../src/wcl/graphql-client.js";
 import { createTokenCache, createTokenProvider } from "../../src/wcl/token-provider.js";
+import { countOutbound, THROWN_ERROR_NAMES } from "../../src/wcl/types.js";
 import { preflightBody } from "../fixtures/wcl/preflight-payloads.js";
 import {
   createWclFetch,
@@ -214,6 +215,150 @@ describe("wcl graphql client", () => {
 
     expect(outcome.ok === false && outcome.failure.reason).toBe("UPSTREAM_AUTH_FAILED");
     expect(fake.graphqlCalls()).toHaveLength(0);
+  });
+
+  // ---- M11-A5 diagnostics: fixed-shape facts about a failed attempt ----
+  //
+  // These exist because a production raid night failed at its final revision
+  // read with every distinction below already known to this client and then
+  // discarded. The rules: a thrown fetch keeps its closed-vocabulary NAME and a
+  // timeout flag, never its message; every failure keeps the outbound ordinal
+  // when the bound fetch counts; existing classifications do not move.
+
+  function thrower(error: unknown): FakeFetch {
+    return createWclFetch({
+      graphql: () => {
+        throw error;
+      },
+    });
+  }
+
+  it("a_timeout_of_the_clients_own_abort_signal_is_distinguishable_from_a_generic_fetch_failure", async () => {
+    const timeout = new Error("The operation was aborted due to timeout");
+    timeout.name = "TimeoutError";
+    const timedOut = await execute(thrower(timeout));
+    expect(timedOut.ok).toBe(false);
+    if (timedOut.ok) return;
+    expect(timedOut.failure.reason).toBe("UPSTREAM_UNAVAILABLE");
+    expect(timedOut.failure.diagnostics).toMatchObject({
+      stage: "TRANSPORT",
+      httpStatus: undefined,
+      errorName: "TimeoutError",
+      isTimeout: true,
+    });
+
+    const network = await execute(thrower(new TypeError("network failure (simulated)")));
+    expect(network.ok).toBe(false);
+    if (network.ok) return;
+    expect(network.failure.reason).toBe("UPSTREAM_UNAVAILABLE");
+    expect(network.failure.diagnostics).toMatchObject({ errorName: "TypeError", isTimeout: false });
+
+    // The older AbortError spelling of a timeout is a timeout too.
+    const aborted = new Error("aborted");
+    aborted.name = "AbortError";
+    const abortedOutcome = await execute(thrower(aborted));
+    expect(abortedOutcome.ok === false && abortedOutcome.failure.diagnostics.isTimeout).toBe(true);
+  });
+
+  it("a_thrown_error_keeps_only_a_closed_vocabulary_name_and_never_its_message", async () => {
+    // An error whose NAME and MESSAGE both carry secret-shaped text: the name
+    // is outside the vocabulary and becomes OTHER; the message is never read.
+    const hostile = new Error(`leaked ${SENTINEL_SECRET} ${SENTINEL_TOKEN}`);
+    hostile.name = `Bearer ${SENTINEL_TOKEN}`;
+    const outcome = await execute(thrower(hostile));
+    expect(outcome.ok).toBe(false);
+    if (outcome.ok) return;
+    expect(outcome.failure.diagnostics.errorName).toBe("OTHER");
+    expect(outcome.failure.diagnostics.isTimeout).toBe(false);
+    const serialized = JSON.stringify(outcome);
+    expect(serialized).not.toContain(SENTINEL_SECRET);
+    expect(serialized).not.toContain(SENTINEL_TOKEN);
+    expect(serialized).not.toContain("leaked");
+    expect(serialized).not.toContain("Bearer");
+    // Non-Error throws are OTHER as well, and the thrown value never rides along.
+    const primitive = await execute(thrower(`thrown string ${SENTINEL_SECRET}`));
+    expect(primitive.ok === false && primitive.failure.diagnostics.errorName).toBe("OTHER");
+    expect(JSON.stringify(primitive)).not.toContain(SENTINEL_SECRET);
+    // Every recordable name is a member of the closed list.
+    for (const name of THROWN_ERROR_NAMES) expect(name).toMatch(/^[A-Za-z]+$/);
+  });
+
+  it("http_403_429_and_other_statuses_keep_their_classification_and_gain_the_outbound_ordinal", async () => {
+    for (const [status, reason] of [
+      [403, "UPSTREAM_AUTH_FAILED"],
+      [429, "UPSTREAM_RATE_LIMITED"],
+      [500, "UPSTREAM_UNAVAILABLE"],
+      [502, "UPSTREAM_UNAVAILABLE"],
+    ] as const) {
+      const fake = createWclFetch({ graphql: () => jsonResponse(status, {}) });
+      const counting = countOutbound(fake.fetch);
+      const tokens = createTokenProvider({
+        credentials,
+        fetch: counting,
+        now: () => 1_000_000,
+        cache: createTokenCache(),
+      });
+      const outcome = await createGraphqlClient({ tokens, fetch: counting }).execute({
+        query: "query {}",
+        variables: { code: "abc" },
+        decode: passthrough,
+      });
+      expect(outcome.ok).toBe(false);
+      if (outcome.ok) continue;
+      expect(outcome.failure.reason).toBe(reason);
+      expect(outcome.failure.diagnostics.httpStatus).toBe(status);
+      // Token request first (1), then this GraphQL request (2).
+      expect(outcome.failure.diagnostics.outboundIndex).toBe(2);
+      expect(outcome.failure.diagnostics.errorName).toBeUndefined();
+      expect(outcome.failure.diagnostics.isTimeout).toBeUndefined();
+      expect(fake.graphqlCalls()).toHaveLength(1);
+    }
+  });
+
+  it("graphql_errors_and_decode_failures_keep_their_classification_and_stage", async () => {
+    const errors = await execute(
+      createWclFetch({ graphql: () => jsonResponse(200, { errors: [{ message: "x" }, { message: "y" }] }) }),
+    );
+    expect(errors.ok === false && errors.failure.reason).toBe("UPSTREAM_DATA_INVALID");
+    expect(errors.ok === false && errors.failure.diagnostics).toMatchObject({
+      stage: "TRANSPORT",
+      httpStatus: 200,
+      graphqlErrorCount: 2,
+      errorName: undefined,
+      isTimeout: undefined,
+    });
+    const decode = await execute(createWclFetch({ graphql: () => jsonResponse(200, { data: {} }) }), () => ({
+      ok: false,
+    }));
+    expect(decode.ok === false && decode.failure.reason).toBe("UPSTREAM_DATA_INVALID");
+    expect(decode.ok === false && decode.failure.diagnostics.stage).toBe("DECODE");
+    const malformed = await execute(createWclFetch({ graphql: () => rawResponse(200, "{ not json") }));
+    expect(malformed.ok === false && malformed.failure.reason).toBe("UPSTREAM_DATA_INVALID");
+  });
+
+  it("the_outbound_ordinal_is_absent_when_the_bound_fetch_does_not_count_and_counts_every_request_when_it_does", async () => {
+    const plain = await execute(thrower(new TypeError("no")));
+    expect(plain.ok === false && plain.failure.diagnostics.outboundIndex).toBeUndefined();
+
+    const fake = createWclFetch({ graphql: networkFailure });
+    const counting = countOutbound(fake.fetch);
+    const tokens = createTokenProvider({
+      credentials,
+      fetch: counting,
+      now: () => 1_000_000,
+      cache: createTokenCache(),
+    });
+    const client = createGraphqlClient({ tokens, fetch: counting });
+    const first = await client.execute({ query: "query {}", variables: {}, decode: passthrough });
+    const second = await client.execute({ query: "query {}", variables: {}, decode: passthrough });
+    // Token (1), GraphQL (2), GraphQL (3): the cached token is not re-minted.
+    expect(first.ok === false && first.failure.diagnostics.outboundIndex).toBe(2);
+    expect(second.ok === false && second.failure.diagnostics.outboundIndex).toBe(3);
+    expect(counting.outboundCount()).toBe(3);
+    // Counting changes nothing about what was sent.
+    expect(fake.calls.map((call) => call.url)).toEqual(fake.calls.map((call) => call.url));
+    expect(fake.tokenCalls()).toHaveLength(1);
+    expect(fake.graphqlCalls()).toHaveLength(2);
   });
 
   it("upstream_text_and_credentials_never_appear_in_a_failure", async () => {

@@ -21,6 +21,37 @@ import type { WclCredentials } from "../config/env.js";
 export type FetchLike = (input: string, init: RequestInit) => Promise<Response>;
 
 /**
+ * A `FetchLike` that counts the outbound requests made through it.
+ *
+ * DIAGNOSTIC ONLY (M11-A5 post-deploy). A raid night makes dozens of outbound
+ * requests through one bound `fetch`; when one of them fails, knowing WHICH
+ * ordinal it was (the 3rd or the 55th) is the difference between "the upstream
+ * refused this query" and "something happened after N subrequests". The count
+ * is read by the GraphQL client at failure time and recorded in the failure's
+ * fixed-shape diagnostics. It changes nothing about what is sent.
+ */
+export interface OutboundCountingFetch extends FetchLike {
+  /** How many requests have been issued through this function so far. */
+  readonly outboundCount: () => number;
+}
+
+export function countOutbound(fetch: FetchLike): OutboundCountingFetch {
+  let count = 0;
+  const counting = ((input: string, init: RequestInit): Promise<Response> => {
+    count += 1;
+    return fetch(input, init);
+  }) as OutboundCountingFetch;
+  Object.defineProperty(counting, "outboundCount", { value: () => count, enumerable: true });
+  return counting;
+}
+
+/** The ordinal of the most recent outbound request, when the fetch counts; else undefined. */
+export function outboundIndexOf(fetch: FetchLike): number | undefined {
+  const candidate = (fetch as Partial<OutboundCountingFetch>).outboundCount;
+  return typeof candidate === "function" ? candidate() : undefined;
+}
+
+/**
  * Why a Warcraft Logs preflight did not produce an identity.
  *
  * These are factual retrieval/identity outcomes. None of them is a gameplay
@@ -61,16 +92,72 @@ export const WCL_FAILURE_REASONS = [
 export type WclFailureStage = "TOKEN" | "TRANSPORT" | "DECODE" | "IDENTITY";
 
 /**
+ * The CLOSED vocabulary of thrown-error names a diagnostic may record.
+ *
+ * An error's `name` is a class name, not upstream prose — but nothing stops a
+ * runtime (or a wrapped fetch) from throwing an object whose `name` carries
+ * arbitrary text. So the name is admitted only when it is one of these, and
+ * anything else is recorded as `OTHER`. The distinction that matters most is
+ * `TimeoutError` (the client's own `AbortSignal.timeout`) versus everything
+ * else: a query that ran out of its budget and a fetch the platform refused
+ * are different conditions with different remedies.
+ */
+export const THROWN_ERROR_NAMES = [
+  "TimeoutError",
+  "AbortError",
+  "TypeError",
+  "DOMException",
+  "NetworkError",
+  "RangeError",
+  "SyntaxError",
+  "Error",
+  "OTHER",
+] as const;
+
+export type ThrownErrorName = (typeof THROWN_ERROR_NAMES)[number];
+
+export interface ThrownFetchDiagnostics {
+  readonly errorName: ThrownErrorName;
+  /** `AbortSignal.timeout` rejects with TimeoutError (older runtimes: AbortError). */
+  readonly isTimeout: boolean;
+}
+
+/**
+ * Reduces a caught value to its closed-vocabulary name and a timeout flag.
+ *
+ * Reads `name` ONLY. The message, the stack, the cause and any other property
+ * are never read, so nothing an upstream or a platform put into an exception
+ * can travel further than this function.
+ */
+export function describeThrown(error: unknown): ThrownFetchDiagnostics {
+  const raw =
+    typeof error === "object" && error !== null && typeof (error as { name?: unknown }).name === "string"
+      ? (error as { name: string }).name
+      : "OTHER";
+  const errorName: ThrownErrorName = (THROWN_ERROR_NAMES as readonly string[]).includes(raw)
+    ? (raw as ThrownErrorName)
+    : "OTHER";
+  return { errorName, isTimeout: errorName === "TimeoutError" || errorName === "AbortError" };
+}
+
+/**
  * Fixed-shape diagnostics.
  *
  * Deliberately holds no free text: no upstream message, no caught exception, no
  * header, no body. Upstream prose could carry anything, and this project's rule
- * is that only author-written strings reach a caller.
+ * is that only author-written strings reach a caller. The three fields added in
+ * M11-A5 keep that rule: a closed-vocabulary error name, a boolean, an integer.
  */
 export interface WclDiagnostics {
   readonly stage: WclFailureStage;
   readonly httpStatus: number | undefined;
   readonly graphqlErrorCount: number | undefined;
+  /** Set only when `fetch` itself threw; the name is from `THROWN_ERROR_NAMES`. */
+  readonly errorName: ThrownErrorName | undefined;
+  /** Set only when `fetch` itself threw. */
+  readonly isTimeout: boolean | undefined;
+  /** The ordinal of the failing outbound request, when the bound fetch counts (see `countOutbound`). */
+  readonly outboundIndex: number | undefined;
 }
 
 export interface WclFailure {
@@ -81,7 +168,12 @@ export interface WclFailure {
 export function wclFailure(
   reason: WclFailureReason,
   stage: WclFailureStage,
-  detail?: { readonly httpStatus?: number | undefined; readonly graphqlErrorCount?: number | undefined },
+  detail?: {
+    readonly httpStatus?: number | undefined;
+    readonly graphqlErrorCount?: number | undefined;
+    readonly thrown?: ThrownFetchDiagnostics | undefined;
+    readonly outboundIndex?: number | undefined;
+  },
 ): WclFailure {
   return {
     reason,
@@ -89,6 +181,9 @@ export function wclFailure(
       stage,
       httpStatus: detail?.httpStatus,
       graphqlErrorCount: detail?.graphqlErrorCount,
+      errorName: detail?.thrown?.errorName,
+      isTimeout: detail?.thrown?.isTimeout,
+      outboundIndex: detail?.outboundIndex,
     },
   };
 }

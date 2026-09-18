@@ -114,6 +114,10 @@ describe("orchestration holds no wire contract and no transport", () => {
       "../wcl/report-url.js",
       "../wcl/retrieval-plan.js",
       "../wcl/roster-snapshot.js",
+      // M11-A5: the fixed failure vocabularies (`WclFailureReason`,
+      // `WclFailureStage`, `ThrownErrorName`) the raid-night diagnostic record
+      // is typed over. Types only — still no client, no fetch, no transport.
+      "../wcl/types.js",
       "../findings/finding.js",
       // M8-C fact TYPES, for the optional observer M8-G reads them through.
       // Types only: the seam hands out two values the loop already holds, and

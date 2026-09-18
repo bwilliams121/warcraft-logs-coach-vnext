@@ -12,7 +12,14 @@
 
 import { isFiniteNumber, isRecord } from "./decode.js";
 import type { WclAccessToken, WclTokenProvider } from "./token-provider.js";
-import { wclFailure, type FetchLike, type RateLimitSnapshot, type WclFailure } from "./types.js";
+import {
+  describeThrown,
+  outboundIndexOf,
+  wclFailure,
+  type FetchLike,
+  type RateLimitSnapshot,
+  type WclFailure,
+} from "./types.js";
 
 const GRAPHQL_ENDPOINT = "https://www.warcraftlogs.com/api/v2/client";
 const GRAPHQL_TIMEOUT_MS = 20_000;
@@ -81,17 +88,17 @@ function readRateLimit(data: unknown): RateLimitSnapshot | undefined {
   return { limitPerHour, pointsSpentThisHour, pointsResetIn };
 }
 
-function classifyGraphqlStatus(status: number): WclFailure {
+function classifyGraphqlStatus(status: number, outboundIndex: number | undefined): WclFailure {
   if (status === 403) {
     // Authorized-but-forbidden. Minting a new token cannot change this, so it
     // is never retried.
-    return wclFailure("UPSTREAM_AUTH_FAILED", "TRANSPORT", { httpStatus: status });
+    return wclFailure("UPSTREAM_AUTH_FAILED", "TRANSPORT", { httpStatus: status, outboundIndex });
   }
   if (status === 429) {
     // Retrying a rate limit just spends more points.
-    return wclFailure("UPSTREAM_RATE_LIMITED", "TRANSPORT", { httpStatus: status });
+    return wclFailure("UPSTREAM_RATE_LIMITED", "TRANSPORT", { httpStatus: status, outboundIndex });
   }
-  return wclFailure("UPSTREAM_UNAVAILABLE", "TRANSPORT", { httpStatus: status });
+  return wclFailure("UPSTREAM_UNAVAILABLE", "TRANSPORT", { httpStatus: status, outboundIndex });
 }
 
 export function createGraphqlClient(deps: GraphqlClientDeps): WclGraphqlClient {
@@ -108,16 +115,27 @@ export function createGraphqlClient(deps: GraphqlClientDeps): WclGraphqlClient {
         body: JSON.stringify({ query: operation.query, variables: operation.variables }),
         signal: AbortSignal.timeout(GRAPHQL_TIMEOUT_MS),
       });
-    } catch {
-      return { kind: "FAILURE", failure: wclFailure("UPSTREAM_UNAVAILABLE", "TRANSPORT") };
+    } catch (error: unknown) {
+      // A thrown fetch is still UPSTREAM_UNAVAILABLE. What is kept about it is
+      // fixed-shape only: the closed-vocabulary error NAME (so a timeout of our
+      // own `AbortSignal.timeout` is distinguishable from a fetch the platform
+      // refused) and which outbound request this was. Never the message.
+      return {
+        kind: "FAILURE",
+        failure: wclFailure("UPSTREAM_UNAVAILABLE", "TRANSPORT", {
+          thrown: describeThrown(error),
+          outboundIndex: outboundIndexOf(deps.fetch),
+        }),
+      };
     }
+    const outboundIndex = outboundIndexOf(deps.fetch);
 
     if (response.status === 401) {
       return { kind: "AUTH_RETRYABLE", httpStatus: response.status };
     }
 
     if (!response.ok) {
-      return { kind: "FAILURE", failure: classifyGraphqlStatus(response.status) };
+      return { kind: "FAILURE", failure: classifyGraphqlStatus(response.status, outboundIndex) };
     }
 
     let body: unknown;
@@ -126,14 +144,20 @@ export function createGraphqlClient(deps: GraphqlClientDeps): WclGraphqlClient {
     } catch {
       return {
         kind: "FAILURE",
-        failure: wclFailure("UPSTREAM_DATA_INVALID", "TRANSPORT", { httpStatus: response.status }),
+        failure: wclFailure("UPSTREAM_DATA_INVALID", "TRANSPORT", {
+          httpStatus: response.status,
+          outboundIndex,
+        }),
       };
     }
 
     if (!isRecord(body)) {
       return {
         kind: "FAILURE",
-        failure: wclFailure("UPSTREAM_DATA_INVALID", "TRANSPORT", { httpStatus: response.status }),
+        failure: wclFailure("UPSTREAM_DATA_INVALID", "TRANSPORT", {
+          httpStatus: response.status,
+          outboundIndex,
+        }),
       };
     }
 
@@ -151,6 +175,7 @@ export function createGraphqlClient(deps: GraphqlClientDeps): WclGraphqlClient {
         failure: wclFailure("UPSTREAM_DATA_INVALID", "TRANSPORT", {
           httpStatus: response.status,
           graphqlErrorCount: errors.length,
+          outboundIndex,
         }),
       };
     }
@@ -159,7 +184,10 @@ export function createGraphqlClient(deps: GraphqlClientDeps): WclGraphqlClient {
     if (!decoded.ok) {
       return {
         kind: "FAILURE",
-        failure: wclFailure("UPSTREAM_DATA_INVALID", "DECODE", { httpStatus: response.status }),
+        failure: wclFailure("UPSTREAM_DATA_INVALID", "DECODE", {
+          httpStatus: response.status,
+          outboundIndex,
+        }),
       };
     }
 

@@ -472,7 +472,7 @@ describe("revision integrity is reported before topology", () => {
       ],
     });
     const verification = verifyRaidNightInput(
-      { outcome: "UNVERIFIED" },
+      { outcome: "UNVERIFIED", cause: { kind: "REPORT_NOT_SERVED" } },
       {
         snapshot,
         fightOutcomes: [],

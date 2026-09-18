@@ -19,6 +19,8 @@
 
 import { describe, expect, it } from "vitest";
 
+import { jsonResponse } from "../support/fake-fetch.js";
+
 import { discoverReportRoster } from "../../src/wcl/report-roster.js";
 import { checkReportRevision } from "../../src/wcl/report-revision.js";
 import { ingestFight, ingestFightCore } from "../../src/wcl/ingest-fight.js";
@@ -272,9 +274,70 @@ describe("the final batch revision guard", () => {
 
   it("reports UNVERIFIED rather than agreement when the report cannot be read", async () => {
     // A caller that could not ask has not confirmed anything. UNVERIFIED must
-    // never be treated as MATCHES, which is why it is its own outcome.
+    // never be treated as MATCHES, which is why it is its own outcome. Since
+    // M11-A5 it also says WHY: here, the request succeeded and the report was
+    // not served.
     const { client } = createTestGraphqlClient(() => jsonResponseFor({ reportData: { report: null } }));
-    expect(await checkReportRevision(client, REPORT, R0)).toEqual({ outcome: "UNVERIFIED" });
+    expect(await checkReportRevision(client, REPORT, R0)).toEqual({
+      outcome: "UNVERIFIED",
+      cause: { kind: "REPORT_NOT_SERVED" },
+    });
+  });
+
+  it("UNVERIFIED preserves the transport's own failure instead of collapsing it (M11-A5)", async () => {
+    // Rate-limited, forbidden, unavailable, invalid, and a thrown fetch — each
+    // keeps its reason and fixed-shape diagnostics on the cause, so the layer
+    // that refuses to publish can also say what happened.
+    for (const [status, reason] of [
+      [429, "UPSTREAM_RATE_LIMITED"],
+      [403, "UPSTREAM_AUTH_FAILED"],
+      [500, "UPSTREAM_UNAVAILABLE"],
+    ] as const) {
+      const { client } = createTestGraphqlClient(() => jsonResponse(status, {}));
+      const check = await checkReportRevision(client, REPORT, R0);
+      expect(check).toMatchObject({
+        outcome: "UNVERIFIED",
+        cause: {
+          kind: "UPSTREAM",
+          failure: { reason, diagnostics: { stage: "TRANSPORT", httpStatus: status } },
+        },
+      });
+    }
+    const errors = createTestGraphqlClient(() => jsonResponse(200, { errors: [{ message: "x" }] }));
+    expect(await checkReportRevision(errors.client, REPORT, R0)).toMatchObject({
+      outcome: "UNVERIFIED",
+      cause: {
+        kind: "UPSTREAM",
+        failure: { reason: "UPSTREAM_DATA_INVALID", diagnostics: { graphqlErrorCount: 1 } },
+      },
+    });
+    const undecodable = createTestGraphqlClient(() =>
+      jsonResponseFor({ reportData: { report: { revision: "thirty" } } }),
+    );
+    expect(await checkReportRevision(undecodable.client, REPORT, R0)).toMatchObject({
+      outcome: "UNVERIFIED",
+      cause: {
+        kind: "UPSTREAM",
+        failure: { reason: "UPSTREAM_DATA_INVALID", diagnostics: { stage: "DECODE" } },
+      },
+    });
+    const timeout = new Error("timed out");
+    timeout.name = "TimeoutError";
+    const thrown = createTestGraphqlClient(() => {
+      throw timeout;
+    });
+    expect(await checkReportRevision(thrown.client, REPORT, R0)).toMatchObject({
+      outcome: "UNVERIFIED",
+      cause: {
+        kind: "UPSTREAM",
+        failure: {
+          reason: "UPSTREAM_UNAVAILABLE",
+          diagnostics: { errorName: "TimeoutError", isTimeout: true },
+        },
+      },
+    });
+    // The public reading of every one of these is still "not confirmed":
+    // MATCHES and CHANGED are the only outcomes that establish anything.
   });
 
   it("costs one cheap request that retrieves nothing else", async () => {

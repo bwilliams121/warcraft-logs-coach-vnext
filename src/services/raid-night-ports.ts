@@ -14,6 +14,7 @@ import type { WclCredentials } from "../config/env.js";
 import type { FightCoreIngestionRequest, FightCoreIngestionResult } from "../wcl/ingest-fight.js";
 import type { RevisionCheck } from "../wcl/report-revision.js";
 import type { ReportRosterRequest, ReportRosterResult } from "../wcl/report-roster.js";
+import type { ThrownErrorName, WclFailureReason, WclFailureStage } from "../wcl/types.js";
 
 /** M7-C roster discovery. One call per raid-night request. */
 export type RosterDiscoveryPort = (
@@ -44,3 +45,30 @@ export type ReportRevisionPort = (
   expectedRevision: number,
   credentials: WclCredentials,
 ) => Promise<RevisionCheck>;
+
+/**
+ * The one structured diagnostic a raid night may emit (M11-A5).
+ *
+ * FIXED VOCABULARY ONLY. Every field is an enum member, an integer, a boolean
+ * or null. There is no free-text field, so no upstream message, exception text,
+ * header, token or evidence can be carried by construction. It exists because
+ * the public `REPORT_REVISION_UNVERIFIED` document is deliberately opaque, and
+ * production needed one sanctioned place to say WHY the final revision read
+ * failed.
+ */
+export interface RaidNightDiagnosticRecord {
+  readonly event: "RAID_NIGHT_REVISION_UNVERIFIED";
+  readonly stage: "FINAL_REVISION_CHECK";
+  /** Which side failed: the transport, the report not being served, or a MATCHES for some other revision. */
+  readonly cause: "UPSTREAM" | "REPORT_NOT_SERVED" | "REVISION_MISMATCH";
+  readonly reason: WclFailureReason | null;
+  readonly wclStage: WclFailureStage | null;
+  readonly httpStatus: number | null;
+  readonly graphqlErrorCount: number | null;
+  readonly errorName: ThrownErrorName | null;
+  readonly isTimeout: boolean | null;
+  readonly outboundIndex: number | null;
+}
+
+/** Receives the diagnostic record. Production writes it to the Worker log; tests capture it. */
+export type RaidNightDiagnosticsPort = (record: RaidNightDiagnosticRecord) => void;

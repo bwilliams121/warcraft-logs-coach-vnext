@@ -35,7 +35,7 @@ import type { WclCredentials } from "../config/env.js";
 import { isRecord, readInteger, readRecord } from "./decode.js";
 import { createGraphqlClient, type DecodeOutcome, type WclGraphqlClient } from "./graphql-client.js";
 import { createTokenProvider, type TokenCache } from "./token-provider.js";
-import type { FetchLike } from "./types.js";
+import type { FetchLike, WclFailure } from "./types.js";
 
 /**
  * The revision-only read.
@@ -76,13 +76,30 @@ export function decodeReportRevision(data: unknown): DecodeOutcome<number | null
 }
 
 /**
+ * Why a revision read established nothing.
+ *
+ * `UPSTREAM` keeps the transport's own fixed-shape failure — RATE_LIMITED,
+ * UNAVAILABLE (with the thrown error's closed-vocabulary name, if any),
+ * AUTH_FAILED, DATA_INVALID — instead of collapsing it. `REPORT_NOT_SERVED` is
+ * the decoder's `null`: the request succeeded and Warcraft Logs served no such
+ * report. The two are different questions ("could we ask?" versus "was it
+ * there?") and the M11-A5 production diagnosis needed them kept apart.
+ *
+ * INTERNAL. No caller publishes this; the public code stays
+ * `REPORT_REVISION_UNVERIFIED` with its sanitized wording.
+ */
+export type RevisionUnverifiedCause =
+  { readonly kind: "UPSTREAM"; readonly failure: WclFailure } | { readonly kind: "REPORT_NOT_SERVED" };
+
+/**
  * What one revision read established.
  *
  * Three outcomes, kept apart because they demand different responses:
  *
  *     MATCHES       the report is still the one we started from
  *     CHANGED       it was re-exported; evidence now spans two worlds
- *     UNVERIFIED    we could not ask, or the report was not served
+ *     UNVERIFIED    we could not ask, or the report was not served — which of
+ *                   the two, and why, is on `cause`
  *
  * `UNVERIFIED` is NOT `MATCHES`. A caller that cannot confirm the revision has
  * not confirmed anything, and treating an unanswerable check as agreement is the
@@ -91,7 +108,7 @@ export function decodeReportRevision(data: unknown): DecodeOutcome<number | null
 export type RevisionCheck =
   | { readonly outcome: "MATCHES"; readonly revision: number }
   | { readonly outcome: "CHANGED"; readonly expected: number; readonly observed: number }
-  | { readonly outcome: "UNVERIFIED" };
+  | { readonly outcome: "UNVERIFIED"; readonly cause: RevisionUnverifiedCause };
 
 /**
  * Reads the report's current revision and compares it against an expectation.
@@ -118,8 +135,11 @@ export async function checkReportRevision(
     decode: decodeReportRevision,
   });
 
-  if (!outcome.ok || outcome.data === null) {
-    return { outcome: "UNVERIFIED" };
+  if (!outcome.ok) {
+    return { outcome: "UNVERIFIED", cause: { kind: "UPSTREAM", failure: outcome.failure } };
+  }
+  if (outcome.data === null) {
+    return { outcome: "UNVERIFIED", cause: { kind: "REPORT_NOT_SERVED" } };
   }
   return outcome.data === expectedRevision
     ? { outcome: "MATCHES", revision: outcome.data }

@@ -39,6 +39,8 @@ import { createFightCoreIngestor, createFightIngestor } from "../wcl/ingest-figh
 import { createReportRevisionReader } from "../wcl/report-revision.js";
 import { createReportRoster } from "../wcl/report-roster.js";
 import { createTokenCache } from "../wcl/token-provider.js";
+import { countOutbound } from "../wcl/types.js";
+import type { RaidNightDiagnosticRecord } from "../services/raid-night-ports.js";
 import { analyzeRaidNight } from "../services/raid-night-service.js";
 import type { RaidNightRunner } from "../services/raid-night-runner.js";
 import { analyzeEncounterContext } from "../services/encounter-context-service.js";
@@ -99,7 +101,9 @@ export function createProductionAnalysisRunner(env: Env): AnalysisRunner {
  * a runner built exactly once.
  */
 export function createProductionRaidNightRunner(env: Env): RaidNightRunner {
-  const boundFetch = (input: string, init: RequestInit): Promise<Response> => fetch(input, init);
+  // Counted (M11-A5): the same bound fetch, with an outbound ordinal the
+  // GraphQL client can record on a failure. Nothing about what is sent changes.
+  const boundFetch = countOutbound((input: string, init: RequestInit) => fetch(input, init));
   const tokenCache = createTokenCache();
 
   const discoverRoster = createReportRoster({ fetch: boundFetch, tokenCache });
@@ -107,7 +111,27 @@ export function createProductionRaidNightRunner(env: Env): RaidNightRunner {
   const checkRevision = createReportRevisionReader({ fetch: boundFetch, tokenCache });
 
   return async (request) =>
-    await analyzeRaidNight(request, { env, discoverRoster, ingestFightCore, checkRevision });
+    await analyzeRaidNight(request, {
+      env,
+      discoverRoster,
+      ingestFightCore,
+      checkRevision,
+      diagnostics: logRaidNightDiagnostic,
+    });
+}
+
+/**
+ * The one production log line a raid night may write (M11-A5).
+ *
+ * The record is fixed-vocabulary by type (`RaidNightDiagnosticRecord`): enum
+ * members, integers, booleans, nulls. It is serialized as-is and nothing is
+ * appended, so the line cannot carry upstream text, an exception message, a
+ * header, a token or evidence. Read with `wrangler tail` or the Workers Logs
+ * view; it exists so a `REPORT_REVISION_UNVERIFIED` refusal, which is
+ * deliberately opaque to callers, is not opaque to the operator.
+ */
+export function logRaidNightDiagnostic(record: RaidNightDiagnosticRecord): void {
+  console.log(JSON.stringify(record));
 }
 
 /**
@@ -132,7 +156,7 @@ export function createProductionRaidNightRunner(env: Env): RaidNightRunner {
  * charged.
  */
 export function createProductionEncounterContextRunner(env: Env): EncounterContextRunner {
-  const boundFetch = (input: string, init: RequestInit): Promise<Response> => fetch(input, init);
+  const boundFetch = countOutbound((input: string, init: RequestInit) => fetch(input, init));
   const tokenCache = createTokenCache();
 
   const discoverRoster = createReportRoster({ fetch: boundFetch, tokenCache });
@@ -142,7 +166,7 @@ export function createProductionEncounterContextRunner(env: Env): EncounterConte
   return async (request) =>
     await analyzeEncounterContext(request, {
       env,
-      raidNight: { discoverRoster, ingestFightCore, checkRevision },
+      raidNight: { discoverRoster, ingestFightCore, checkRevision, diagnostics: logRaidNightDiagnostic },
       external: {
         rankingPage: createRankingPagePort({ fetch: boundFetch, tokenCache }),
         candidateMetadata: createCandidateMetadataPort({ fetch: boundFetch, tokenCache }),

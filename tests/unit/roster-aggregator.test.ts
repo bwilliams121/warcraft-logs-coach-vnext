@@ -831,7 +831,10 @@ describe("the revision gate admits only a verified snapshot", () => {
   it("refuses UNVERIFIED rather than treating it as probably fine", () => {
     // A check that returned no answer establishes nothing. Accepting on
     // "probably unchanged" is exactly how a mixed-revision aggregate is built.
-    const verification = verifyRaidNightInput({ outcome: "UNVERIFIED" }, facts);
+    const verification = verifyRaidNightInput(
+      { outcome: "UNVERIFIED", cause: { kind: "REPORT_NOT_SERVED" } },
+      facts,
+    );
     expect(verification.ok).toBe(false);
     if (verification.ok) return;
     expect(verification.reason).toBe("REPORT_REVISION_UNVERIFIED");

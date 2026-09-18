@@ -38,7 +38,14 @@ describe("wcl preflight port contract", () => {
       ok: false,
       failure: {
         reason: "FIGHT_NOT_FOUND",
-        diagnostics: { stage: "IDENTITY", httpStatus: undefined, graphqlErrorCount: undefined },
+        diagnostics: {
+          stage: "IDENTITY",
+          httpStatus: undefined,
+          graphqlErrorCount: undefined,
+          errorName: undefined,
+          isTimeout: undefined,
+          outboundIndex: undefined,
+        },
       },
     }));
 
@@ -61,7 +68,14 @@ describe("wcl preflight port contract", () => {
         ok: false,
         failure: {
           reason: "UPSTREAM_UNAVAILABLE",
-          diagnostics: { stage: "TRANSPORT", httpStatus: undefined, graphqlErrorCount: undefined },
+          diagnostics: {
+            stage: "TRANSPORT",
+            httpStatus: undefined,
+            graphqlErrorCount: undefined,
+            errorName: undefined,
+            isTimeout: undefined,
+            outboundIndex: undefined,
+          },
         },
       });
 
@@ -82,7 +96,14 @@ describe("wcl preflight port contract", () => {
         ok: false,
         failure: {
           reason,
-          diagnostics: { stage: "TRANSPORT", httpStatus: undefined, graphqlErrorCount: undefined },
+          diagnostics: {
+            stage: "TRANSPORT",
+            httpStatus: undefined,
+            graphqlErrorCount: undefined,
+            errorName: undefined,
+            isTimeout: undefined,
+            outboundIndex: undefined,
+          },
         },
       });
 

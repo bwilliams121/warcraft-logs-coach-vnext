@@ -81,7 +81,13 @@ import {
   type ValidatedAnalyzerCatalog,
 } from "./analyzer-registry.js";
 import { deriveIngestionScopeFor } from "./ingestion-scope.js";
-import type { FightCoreIngestionPort, ReportRevisionPort, RosterDiscoveryPort } from "./raid-night-ports.js";
+import type {
+  FightCoreIngestionPort,
+  RaidNightDiagnosticRecord,
+  RaidNightDiagnosticsPort,
+  ReportRevisionPort,
+  RosterDiscoveryPort,
+} from "./raid-night-ports.js";
 import { MAX_RAID_NIGHT_CELLS, MAX_RAID_NIGHT_PLAYERS, type RaidNightRequest } from "./raid-night-request.js";
 import type { RaidNightRunResult } from "./raid-night-runner.js";
 import { resolveSpecIdentity } from "./spec-identity.js";
@@ -115,6 +121,13 @@ export interface RaidNightServiceDeps {
    * result is unchanged.
    */
   readonly observeEncounterFacts?: EncounterFactsObserver | undefined;
+  /**
+   * Optional sink for the ONE structured diagnostic this service emits: why the
+   * final revision confirmation failed (M11-A5). Fixed vocabulary only — see
+   * `RaidNightDiagnosticRecord`. Absent by default; the public result is the
+   * same with or without it.
+   */
+  readonly diagnostics?: RaidNightDiagnosticsPort | undefined;
 }
 
 /**
@@ -589,6 +602,9 @@ export async function analyzeRaidNight(
   const finalCheck = await deps.checkRevision(request.reportCode, r0, credentials);
   const revisionFailure = describeRevisionCheck(finalCheck, r0);
   if (revisionFailure !== null) {
+    // The public answer is unchanged and deliberately opaque; the diagnostic
+    // record is the sanctioned, fixed-vocabulary account of what happened.
+    emitDiagnostic(deps.diagnostics, diagnosticRecordOf(finalCheck));
     return failure(revisionFailure.code, revisionFailure.message);
   }
 
@@ -623,6 +639,67 @@ export async function analyzeRaidNight(
 
 const REVISION_UNVERIFIED_MESSAGE =
   "The Warcraft Logs report revision could not be confirmed after analysis, so the raid night was refused rather than published from evidence that might span two versions of the report. Try again.";
+
+/**
+ * Hands the record to the diagnostics port, if any, and swallows whatever the
+ * port does with it.
+ *
+ * NON-AUTHORITATIVE BY CONSTRUCTION. The port is an observer of a decision the
+ * service has already made; a logger that throws (a serializer quirk, a
+ * platform log limit, a test double) must not turn a refused raid night into
+ * an INTERNAL_ERROR, a thrown request or a different document. Nothing is
+ * retried and nothing is recorded about the throw — a diagnostic about the
+ * diagnostic would need the same guard again.
+ */
+function emitDiagnostic(
+  port: RaidNightDiagnosticsPort | undefined,
+  record: RaidNightDiagnosticRecord | null,
+): void {
+  if (port === undefined || record === null) return;
+  try {
+    port(record);
+  } catch {
+    // Diagnostics must never alter the raid-night result.
+  }
+}
+
+/**
+ * The fixed-vocabulary account of a failed final revision check, or `null` for
+ * CHANGED (which has its own public code and needs no diagnosis). Copies enum
+ * members, integers and booleans by name; nothing else exists to copy.
+ */
+export function diagnosticRecordOf(check: RevisionCheck): RaidNightDiagnosticRecord | null {
+  const empty = {
+    event: "RAID_NIGHT_REVISION_UNVERIFIED" as const,
+    stage: "FINAL_REVISION_CHECK" as const,
+    reason: null,
+    wclStage: null,
+    httpStatus: null,
+    graphqlErrorCount: null,
+    errorName: null,
+    isTimeout: null,
+    outboundIndex: null,
+  };
+  switch (check.outcome) {
+    case "CHANGED":
+      return null;
+    case "MATCHES":
+      return { ...empty, cause: "REVISION_MISMATCH" };
+    case "UNVERIFIED":
+      if (check.cause.kind === "REPORT_NOT_SERVED") return { ...empty, cause: "REPORT_NOT_SERVED" };
+      return {
+        ...empty,
+        cause: "UPSTREAM",
+        reason: check.cause.failure.reason,
+        wclStage: check.cause.failure.diagnostics.stage,
+        httpStatus: check.cause.failure.diagnostics.httpStatus ?? null,
+        graphqlErrorCount: check.cause.failure.diagnostics.graphqlErrorCount ?? null,
+        errorName: check.cause.failure.diagnostics.errorName ?? null,
+        isTimeout: check.cause.failure.diagnostics.isTimeout ?? null,
+        outboundIndex: check.cause.failure.diagnostics.outboundIndex ?? null,
+      };
+  }
+}
 
 /** What a final revision check permits. `null` means the night may be published. */
 function describeRevisionCheck(
