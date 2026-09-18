@@ -1,0 +1,480 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_PALADIN_RETRIBUTION_TALENTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "talentDataMethod": "MACHINE_EXTRACTED_TRAIT_RECORD",
+    "extractedOn": "2026-09-18",
+    "extractorVersion": 1,
+    "wclIdSpaceNote": "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeId }. In the supported captures (report A7R6kxPJ1hC8YQ4w revision 30 and gtKb2xHn87pNcFfW revision 22, logVersion 17, gameVersion 1) `id` equals trait_data_t::id_trait_node_entry and `nodeId` equals trait_data_t::id_node, the same equivalence M10-C recorded for the Protection subject of the same A7R6 capture. It is recorded for those captures and parser version; it is not claimed for Warcraft Logs in general.",
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, so a gate against 12.1.0.69587 would always pass while appearing rigorous. A client build or talent-tree revision moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "talents": [
+    {
+      "simcName": "art_of_war",
+      "displayNameEn": "Art of War",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81523,
+      "traitEntryId": 102493,
+      "talentSpellId": 406064,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 102494,
+          "displayNameEn": "Righteous Cause",
+          "talentSpellId": 402912
+        }
+      ],
+      "binding": "sc_paladin_retribution.cpp:1194 talents.art_of_war = find_talent_spell( talent_tree::SPECIALIZATION, \"Art of War\" )"
+    },
+    {
+      "simcName": "avenging_wrath",
+      "displayNameEn": "Avenging Wrath",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81544,
+      "traitEntryId": 102519,
+      "talentSpellId": 31884,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin.cpp:4244 talents.avenging_wrath = find_talent_spell( talent_tree::SPECIALIZATION, \"Avenging Wrath\" )"
+    },
+    {
+      "simcName": "blade_of_justice",
+      "displayNameEn": "Blade of Justice",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81526,
+      "traitEntryId": 102498,
+      "talentSpellId": 184575,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1185 talents.blade_of_justice = find_talent_spell( talent_tree::SPECIALIZATION, \"Blade of Justice\" )"
+    },
+    {
+      "simcName": "crusade",
+      "displayNameEn": "Crusade",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109369,
+      "traitEntryId": 135565,
+      "talentSpellId": 1253598,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1221 talents.crusade = find_talent_spell( talent_tree::SPECIALIZATION, \"Crusade\" )"
+    },
+    {
+      "simcName": "crusading_strikes",
+      "displayNameEn": "Crusading Strikes",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109374,
+      "traitEntryId": 136809,
+      "talentSpellId": 404542,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 115473,
+          "displayNameEn": "Templar Strikes",
+          "talentSpellId": 406646
+        }
+      ],
+      "binding": "sc_paladin_retribution.cpp:1209 talents.crusading_strikes = find_talent_spell( talent_tree::SPECIALIZATION, \"Crusading Strikes\" )"
+    },
+    {
+      "simcName": "divine_purpose",
+      "displayNameEn": "Divine Purpose",
+      "tree": "CLASS",
+      "traitNodeId": 81618,
+      "traitEntryId": 128243,
+      "talentSpellId": 408459,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 102608,
+          "displayNameEn": "Sacred Strength",
+          "talentSpellId": 469337
+        }
+      ],
+      "binding": "sc_paladin.cpp:4219 talents.divine_purpose = find_talent_spell( talent_tree::CLASS, \"Divine Purpose\" )"
+    },
+    {
+      "simcName": "divine_storm",
+      "displayNameEn": "Divine Storm",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81527,
+      "traitEntryId": 102499,
+      "talentSpellId": 53385,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1186 talents.divine_storm = find_talent_spell( talent_tree::SPECIALIZATION, \"Divine Storm\" )"
+    },
+    {
+      "simcName": "divine_toll",
+      "displayNameEn": "Divine Toll",
+      "tree": "CLASS",
+      "traitNodeId": 109368,
+      "traitEntryId": 135564,
+      "talentSpellId": 375576,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin.cpp:4201 talents.divine_toll = find_talent_spell( talent_tree::CLASS, \"Divine Toll\" )"
+    },
+    {
+      "simcName": "empyrean_legacy",
+      "displayNameEn": "Empyrean Legacy",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 93173,
+      "traitEntryId": 115453,
+      "talentSpellId": 387170,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1217 talents.empyrean_legacy = find_talent_spell( talent_tree::SPECIALIZATION, \"Empyrean Legacy\" )"
+    },
+    {
+      "simcName": "execution_sentence",
+      "displayNameEn": "Execution Sentence",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109373,
+      "traitEntryId": 115435,
+      "talentSpellId": 343527,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1215 talents.execution_sentence = find_talent_spell( talent_tree::SPECIALIZATION, \"Execution Sentence\" )"
+    },
+    {
+      "simcName": "final_verdict",
+      "displayNameEn": "Final Verdict",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81532,
+      "traitEntryId": 102504,
+      "talentSpellId": 383328,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1191 talents.final_verdict = find_talent_spell( talent_tree::SPECIALIZATION, \"Final Verdict\" )"
+    },
+    {
+      "simcName": "hammer_of_wrath",
+      "displayNameEn": "Hammer of Wrath",
+      "tree": "CLASS",
+      "traitNodeId": 81510,
+      "traitEntryId": 133481,
+      "talentSpellId": 1241288,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin.cpp:4174 talents.hammer_of_wrath = find_talent_spell( talent_tree::CLASS, \"Hammer of Wrath\" )"
+    },
+    {
+      "simcName": "holy_flames",
+      "displayNameEn": "Holy Flames",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109371,
+      "traitEntryId": 115438,
+      "talentSpellId": 406545,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1200 talents.holy_flames = find_talent_spell( talent_tree::SPECIALIZATION, \"Holy Flames\" )"
+    },
+    {
+      "simcName": "radiant_glory",
+      "displayNameEn": "Radiant Glory",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81549,
+      "traitEntryId": 102525,
+      "talentSpellId": 458359,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1219 talents.radiant_glory = find_talent_spell( talent_tree::SPECIALIZATION, \"Radiant Glory\" )"
+    },
+    {
+      "simcName": "righteous_cause",
+      "displayNameEn": "Righteous Cause",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81523,
+      "traitEntryId": 102494,
+      "talentSpellId": 402912,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 102493,
+          "displayNameEn": "Art of War",
+          "talentSpellId": 406064
+        }
+      ],
+      "binding": "sc_paladin_retribution.cpp:1195 talents.righteous_cause = find_talent_spell( talent_tree::SPECIALIZATION, \"Righteous Cause\" )"
+    },
+    {
+      "simcName": "templar_strikes",
+      "displayNameEn": "Templar Strikes",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 109374,
+      "traitEntryId": 115473,
+      "talentSpellId": 406646,
+      "nodeType": "CHOICE",
+      "alternativeEntries": [
+        {
+          "traitEntryId": 136809,
+          "displayNameEn": "Crusading Strikes",
+          "talentSpellId": 404542
+        }
+      ],
+      "binding": "sc_paladin_retribution.cpp:1208 talents.templar_strikes = find_talent_spell( talent_tree::SPECIALIZATION, \"Templar Strikes\" )"
+    },
+    {
+      "simcName": "wake_of_ashes",
+      "displayNameEn": "Wake of Ashes",
+      "tree": "SPECIALIZATION",
+      "traitNodeId": 81525,
+      "traitEntryId": 102497,
+      "talentSpellId": 255937,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin_retribution.cpp:1213 talents.wake_of_ashes = find_talent_spell( talent_tree::SPECIALIZATION, \"Wake of Ashes\" )"
+    },
+    {
+      "simcName": "walk_into_light",
+      "displayNameEn": "Walk Into Light",
+      "tree": "HERO",
+      "traitNodeId": 95094,
+      "traitEntryId": 117691,
+      "talentSpellId": 1263782,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_paladin.cpp:4305 talents.herald_of_the_sun.walk_into_light = find_talent_spell( talent_tree::HERO, \"Walk Into Light\" )"
+    }
+  ],
+  "heroTrees": [
+    {
+      "simcName": "templar",
+      "subTreeId": 48,
+      "entries": [
+        {
+          "traitEntryId": 117810,
+          "traitNodeId": 95177,
+          "displayNameEn": "Wrathful Descent",
+          "talentSpellId": 431551
+        },
+        {
+          "traitEntryId": 117811,
+          "traitNodeId": 95178,
+          "displayNameEn": "Higher Calling",
+          "talentSpellId": 431687
+        },
+        {
+          "traitEntryId": 117812,
+          "traitNodeId": 95179,
+          "displayNameEn": "Sacrosanct Crusade",
+          "talentSpellId": 431730
+        },
+        {
+          "traitEntryId": 117813,
+          "traitNodeId": 95180,
+          "displayNameEn": "Light's Guidance",
+          "talentSpellId": 427445
+        },
+        {
+          "traitEntryId": 117814,
+          "traitNodeId": 95181,
+          "displayNameEn": "Bonds of Fellowship",
+          "talentSpellId": 432992
+        },
+        {
+          "traitEntryId": 117815,
+          "traitNodeId": 95182,
+          "displayNameEn": "Light's Deliverance",
+          "talentSpellId": 425518
+        },
+        {
+          "traitEntryId": 117816,
+          "traitNodeId": 95183,
+          "displayNameEn": "Zealous Vindication",
+          "talentSpellId": 431463
+        },
+        {
+          "traitEntryId": 117818,
+          "traitNodeId": 95184,
+          "displayNameEn": "Hammerfall",
+          "talentSpellId": 432463
+        },
+        {
+          "traitEntryId": 117819,
+          "traitNodeId": 95185,
+          "displayNameEn": "Sanctification",
+          "talentSpellId": 432977
+        },
+        {
+          "traitEntryId": 117820,
+          "traitNodeId": 95185,
+          "displayNameEn": "Endless Wrath",
+          "talentSpellId": 432615
+        },
+        {
+          "traitEntryId": 117822,
+          "traitNodeId": 95186,
+          "displayNameEn": "Undisputed Ruling",
+          "talentSpellId": 432626
+        },
+        {
+          "traitEntryId": 117823,
+          "traitNodeId": 95187,
+          "displayNameEn": "Shake the Heavens",
+          "talentSpellId": 431533
+        },
+        {
+          "traitEntryId": 117858,
+          "traitNodeId": 95181,
+          "displayNameEn": "Unrelenting Charger",
+          "talentSpellId": 432990
+        },
+        {
+          "traitEntryId": 136003,
+          "traitNodeId": 109745,
+          "displayNameEn": "Divine Exaction",
+          "talentSpellId": 1260429
+        },
+        {
+          "traitEntryId": 136004,
+          "traitNodeId": 109746,
+          "displayNameEn": "Light's Judicator",
+          "talentSpellId": 1261525
+        },
+        {
+          "traitEntryId": 136005,
+          "traitNodeId": 109747,
+          "displayNameEn": "Divine Hammer",
+          "talentSpellId": 432929
+        },
+        {
+          "traitEntryId": 136184,
+          "traitNodeId": 109745,
+          "displayNameEn": "Seal of the Templar",
+          "talentSpellId": 1263252
+        }
+      ]
+    },
+    {
+      "simcName": "herald_of_the_sun",
+      "subTreeId": 50,
+      "entries": [
+        {
+          "traitEntryId": 117666,
+          "traitNodeId": 95069,
+          "displayNameEn": "Aurora",
+          "talentSpellId": 439760
+        },
+        {
+          "traitEntryId": 117668,
+          "traitNodeId": 95071,
+          "displayNameEn": "Blessing of An'she",
+          "talentSpellId": 445200
+        },
+        {
+          "traitEntryId": 117669,
+          "traitNodeId": 95072,
+          "displayNameEn": "Sun Sear",
+          "talentSpellId": 431413
+        },
+        {
+          "traitEntryId": 117670,
+          "traitNodeId": 95073,
+          "displayNameEn": "Morning Star",
+          "talentSpellId": 431482
+        },
+        {
+          "traitEntryId": 117677,
+          "traitNodeId": 95080,
+          "displayNameEn": "Luminosity",
+          "talentSpellId": 431402
+        },
+        {
+          "traitEntryId": 117683,
+          "traitNodeId": 95086,
+          "displayNameEn": "Second Sunrise",
+          "talentSpellId": 431474
+        },
+        {
+          "traitEntryId": 117691,
+          "traitNodeId": 95094,
+          "displayNameEn": "Walk Into Light",
+          "talentSpellId": 1263782
+        },
+        {
+          "traitEntryId": 117692,
+          "traitNodeId": 95095,
+          "displayNameEn": "Eternal Flame",
+          "talentSpellId": 156322
+        },
+        {
+          "traitEntryId": 117695,
+          "traitNodeId": 95098,
+          "displayNameEn": "Illumine",
+          "talentSpellId": 431423
+        },
+        {
+          "traitEntryId": 117696,
+          "traitNodeId": 95099,
+          "displayNameEn": "Dawnlight",
+          "talentSpellId": 431377
+        },
+        {
+          "traitEntryId": 117702,
+          "traitNodeId": 95105,
+          "displayNameEn": "Sun's Avatar",
+          "talentSpellId": 431425
+        },
+        {
+          "traitEntryId": 117777,
+          "traitNodeId": 95098,
+          "displayNameEn": "Will of the Dawn",
+          "talentSpellId": 431406
+        },
+        {
+          "traitEntryId": 117778,
+          "traitNodeId": 95073,
+          "displayNameEn": "Gleaming Rays",
+          "talentSpellId": 431480
+        },
+        {
+          "traitEntryId": 117779,
+          "traitNodeId": 95071,
+          "displayNameEn": "Lingering Radiance",
+          "talentSpellId": 431407
+        },
+        {
+          "traitEntryId": 136006,
+          "traitNodeId": 109748,
+          "displayNameEn": "Endless Gleam",
+          "talentSpellId": 1263787
+        },
+        {
+          "traitEntryId": 136007,
+          "traitNodeId": 109749,
+          "displayNameEn": "Born in Sunlight",
+          "talentSpellId": 1263920
+        },
+        {
+          "traitEntryId": 136008,
+          "traitNodeId": 109750,
+          "displayNameEn": "Solar Grace",
+          "talentSpellId": 431404
+        }
+      ]
+    }
+  ]
+}

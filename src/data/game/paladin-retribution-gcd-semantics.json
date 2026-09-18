@@ -1,0 +1,515 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_PALADIN_RETRIBUTION_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "byteLength": 185639
+      },
+      {
+        "path": "engine/class_modules/paladin/sc_paladin_retribution.cpp",
+        "sha256": "ea2e9c704ff6b5f1d67b9d5017a1362a3f8bd6e9d9cf96ebcf571dc43f70cfd9",
+        "byteLength": 43269
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-09-18",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 633,
+      "baseGcdMs": 0,
+      "displayNameEn": "Lay on Hands"
+    },
+    {
+      "abilityGameId": 1044,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blessing of Freedom"
+    },
+    {
+      "abilityGameId": 6940,
+      "baseGcdMs": 0,
+      "displayNameEn": "Blessing of Sacrifice"
+    },
+    {
+      "abilityGameId": 20271,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Judgment"
+    },
+    {
+      "abilityGameId": 24275,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Hammer of Wrath"
+    },
+    {
+      "abilityGameId": 31884,
+      "baseGcdMs": 0,
+      "displayNameEn": "Avenging Wrath"
+    },
+    {
+      "abilityGameId": 35395,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Crusader Strike"
+    },
+    {
+      "abilityGameId": 53385,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Divine Storm"
+    },
+    {
+      "abilityGameId": 85256,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Templar's Verdict"
+    },
+    {
+      "abilityGameId": 85673,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Word of Glory"
+    },
+    {
+      "abilityGameId": 96231,
+      "baseGcdMs": 0,
+      "displayNameEn": "Rebuke"
+    },
+    {
+      "abilityGameId": 155145,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Torrent"
+    },
+    {
+      "abilityGameId": 184575,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blade of Justice"
+    },
+    {
+      "abilityGameId": 184662,
+      "baseGcdMs": 0,
+      "displayNameEn": "Shield of Vengeance"
+    },
+    {
+      "abilityGameId": 190784,
+      "baseGcdMs": 0,
+      "displayNameEn": "Divine Steed"
+    },
+    {
+      "abilityGameId": 255647,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Light's Judgment"
+    },
+    {
+      "abilityGameId": 255937,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Wake of Ashes"
+    },
+    {
+      "abilityGameId": 265221,
+      "baseGcdMs": 0,
+      "displayNameEn": "Fireblood"
+    },
+    {
+      "abilityGameId": 343527,
+      "baseGcdMs": 750,
+      "displayNameEn": "Execution Sentence"
+    },
+    {
+      "abilityGameId": 375576,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Divine Toll"
+    },
+    {
+      "abilityGameId": 383328,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Final Verdict"
+    },
+    {
+      "abilityGameId": 383926,
+      "baseGcdMs": 0,
+      "displayNameEn": "Bound by Fire and Blaze"
+    },
+    {
+      "abilityGameId": 403876,
+      "baseGcdMs": 0,
+      "displayNameEn": "Divine Protection"
+    },
+    {
+      "abilityGameId": 406647,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Templar Slash"
+    },
+    {
+      "abilityGameId": 407480,
+      "baseGcdMs": 1000,
+      "displayNameEn": "Templar Strike"
+    },
+    {
+      "abilityGameId": 408385,
+      "baseGcdMs": 0,
+      "displayNameEn": "Crusading Strikes"
+    },
+    {
+      "abilityGameId": 427453,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Hammer of Light"
+    },
+    {
+      "abilityGameId": 1236616,
+      "baseGcdMs": 0,
+      "displayNameEn": "Light's Potential"
+    },
+    {
+      "abilityGameId": 1297761,
+      "baseGcdMs": 0,
+      "displayNameEn": "Voracious Heart of Ula'tek"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "crusader_strike",
+      "candidateAbilityGameIds": [35395],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / crusader_strike_t",
+        "startLine": 3389,
+        "endLine": 3390,
+        "sourceNote": "create_action dispatches \"crusader_strike\" to crusader_strike_t, whose base is paladin_melee_attack_t( \"crusader_strike\", p, p->find_class_spell( \"Crusader Strike\" ) ) at sc_paladin.cpp:1061-1062. class_spells.inc row { 2, 0, 35395 } confirms the id. The action is background when Crusading Strikes or Templar Strikes is taken (sc_paladin.cpp:1072-1075).",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "judgment",
+      "candidateAbilityGameIds": [20271],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / judgment_ret_t",
+        "startLine": 3414,
+        "endLine": 3419,
+        "sourceNote": "create_action dispatches \"judgment\" for PALADIN_RETRIBUTION to judgment_ret_t( this, \"judgment\", options_str, find_spell( 20271 ) ). class_spells.inc row { 2, 0, 20271 } confirms the id as the class Judgment. The Protection branch (275779) is a different record and is not a candidate for this specialization.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "hammer_of_wrath",
+      "candidateAbilityGameIds": [24275],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / hammer_of_wrath_t",
+        "startLine": 3407,
+        "endLine": 3412,
+        "sourceNote": "create_action dispatches \"hammer_of_wrath\" for PALADIN_RETRIBUTION to hammer_of_wrath_t( this, \"hammer_of_wrath\", options_str, find_spell( 24275 ) ). The Protection branch (1241413) is a different record and is not a candidate for this specialization.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "blade_of_justice",
+      "candidateAbilityGameIds": [184575],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_retribution.cpp",
+        "sourceSha256": "ea2e9c704ff6b5f1d67b9d5017a1362a3f8bd6e9d9cf96ebcf571dc43f70cfd9",
+        "symbol": "paladin_t::create_action_retribution / blade_of_justice_t",
+        "startLine": 1133,
+        "endLine": 1133,
+        "sourceNote": "create_action_retribution dispatches \"blade_of_justice\" to blade_of_justice_t, whose base is paladin_melee_attack_t( \"blade_of_justice\", p, p->talents.blade_of_justice ) at sc_paladin_retribution.cpp:370; talents.blade_of_justice = find_talent_spell( SPECIALIZATION, \"Blade of Justice\" ) at :1185, whose Retribution trait row carries spell 184575.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "wake_of_ashes",
+      "candidateAbilityGameIds": [255937],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_retribution.cpp",
+        "sourceSha256": "ea2e9c704ff6b5f1d67b9d5017a1362a3f8bd6e9d9cf96ebcf571dc43f70cfd9",
+        "symbol": "paladin_t::create_action_retribution / wake_of_ashes_t",
+        "startLine": 1136,
+        "endLine": 1136,
+        "sourceNote": "create_action_retribution dispatches \"wake_of_ashes\" to wake_of_ashes_t, whose base is paladin_spell_t( \"wake_of_ashes\", p, p->talents.wake_of_ashes ) at sc_paladin_retribution.cpp:803-804; talents.wake_of_ashes = find_talent_spell( SPECIALIZATION, \"Wake of Ashes\" ) at :1213, whose trait row carries spell 255937. Background when the talent is not taken (:807-808).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "divine_toll",
+      "candidateAbilityGameIds": [375576],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / divine_toll_t",
+        "startLine": 3423,
+        "endLine": 3424,
+        "sourceNote": "create_action dispatches \"divine_toll\" to divine_toll_t, whose base is paladin_spell_t( \"divine_toll\", p, p->talents.divine_toll ) at sc_paladin.cpp:1823; talents.divine_toll = find_talent_spell( talent_tree::CLASS, \"Divine Toll\" ) at sc_paladin.cpp:4201, whose Retribution trait row carries spell 375576.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "execution_sentence",
+      "candidateAbilityGameIds": [343527],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_retribution.cpp",
+        "sourceSha256": "ea2e9c704ff6b5f1d67b9d5017a1362a3f8bd6e9d9cf96ebcf571dc43f70cfd9",
+        "symbol": "paladin_t::create_action_retribution / execution_sentence_t",
+        "startLine": 1139,
+        "endLine": 1139,
+        "sourceNote": "create_action_retribution dispatches \"execution_sentence\" to execution_sentence_t, whose base is paladin_melee_attack_t( \"execution_sentence\", p, p->talents.execution_sentence ) at sc_paladin_retribution.cpp:216-217; talents.execution_sentence = find_talent_spell( SPECIALIZATION, \"Execution Sentence\" ) at :1215, whose trait row carries spell 343527. Background when the talent is not taken (:221-222). The DBC record carries `_gcd` 750: GCD-consuming to the first-GCD question.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "avenging_wrath",
+      "candidateAbilityGameIds": [31884],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / avenging_wrath_t",
+        "startLine": 3381,
+        "endLine": 3382,
+        "sourceNote": "create_action dispatches \"avenging_wrath\" to avenging_wrath_t( p, options_str ) : paladin_spell_t( \"avenging_wrath\", p, p->find_spell( 31884 ) ) at sc_paladin.cpp:282-283. Retribution has no Sentinel substitution (create_action_retribution names no avenging_wrath, :1131-1140); the action is background under Radiant Glory (:290-291) and without the Avenging Wrath talent (:286-287). Under Crusade the BUFF spell changes (spells.crusade 231895, sc_paladin_retribution.cpp:1246) but the action record the log reports as cast stays 31884 — the two M11-A4 subjects both take Crusade and both log 31884 casts.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "templars_verdict",
+      "candidateAbilityGameIds": [85256, 383328],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_retribution.cpp",
+        "sourceSha256": "ea2e9c704ff6b5f1d67b9d5017a1362a3f8bd6e9d9cf96ebcf571dc43f70cfd9",
+        "symbol": "paladin_t::create_action_retribution / templars_verdict_t",
+        "startLine": 1135,
+        "endLine": 1135,
+        "sourceNote": "create_action_retribution dispatches \"templars_verdict\" to templars_verdict_t, whose base is holy_power_consumer_t( talents.final_verdict->ok() ? \"final_verdict\" : \"templars_verdict\", p, talents.final_verdict->ok() ? find_spell( 383328 ) : find_specialization_spell( \"Templar's Verdict\" ) ) at sc_paladin_retribution.cpp:662-669. class_spells.inc row { 2, 70, 85256 } is the specialization spell; 383328 is the Final Verdict record. The action is background unless the main hand is a two-handed weapon (:675-676).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "divine_storm",
+      "candidateAbilityGameIds": [53385],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_retribution.cpp",
+        "sourceSha256": "ea2e9c704ff6b5f1d67b9d5017a1362a3f8bd6e9d9cf96ebcf571dc43f70cfd9",
+        "symbol": "paladin_t::create_action_retribution / divine_storm_t",
+        "startLine": 1134,
+        "endLine": 1134,
+        "sourceNote": "create_action_retribution dispatches \"divine_storm\" to divine_storm_t, whose base is holy_power_consumer_t( \"divine_storm\", p, p->talents.divine_storm ) at sc_paladin_retribution.cpp:545; talents.divine_storm = find_talent_spell( SPECIALIZATION, \"Divine Storm\" ) at :1186, whose trait row carries spell 53385. Background when the talent is not taken (:549-550).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "hammer_of_light",
+      "candidateAbilityGameIds": [427453],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / hammer_of_light_t",
+        "startLine": 3431,
+        "endLine": 3432,
+        "sourceNote": "create_action dispatches \"hammer_of_light\" to hammer_of_light_t, whose base is holy_power_consumer_t( \"hammer_of_light\", p, p->spells.templar.hammer_of_light_driver ) at sc_paladin.cpp:2143; spells.templar.hammer_of_light_driver = find_spell( 427453 ) at sc_paladin.cpp:4336. Background unless the Templar tree is active (:2149).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "templar_strike",
+      "candidateAbilityGameIds": [407480],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_retribution.cpp",
+        "sourceSha256": "ea2e9c704ff6b5f1d67b9d5017a1362a3f8bd6e9d9cf96ebcf571dc43f70cfd9",
+        "symbol": "paladin_t::create_action_retribution / templar_strike_t",
+        "startLine": 1137,
+        "endLine": 1137,
+        "sourceNote": "create_action_retribution dispatches \"templar_strike\" to templar_strike_t : base_templar_strike_t( \"templar_strike\", p, options_str, p->find_spell( 407480 ) ) at sc_paladin_retribution.cpp:988-989. Background without the Templar Strikes talent (:962-963).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "templar_slash",
+      "candidateAbilityGameIds": [406647],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin_retribution.cpp",
+        "sourceSha256": "ea2e9c704ff6b5f1d67b9d5017a1362a3f8bd6e9d9cf96ebcf571dc43f70cfd9",
+        "symbol": "paladin_t::create_action_retribution / templar_slash_t",
+        "startLine": 1138,
+        "endLine": 1138,
+        "sourceNote": "create_action_retribution dispatches \"templar_slash\" to templar_slash_t : base_templar_strike_t( \"templar_slash\", p, options_str, p->find_spell( 406647 ) ) at sc_paladin_retribution.cpp:1008-1009. Background without the Templar Strikes talent (:962-963).",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "rebuke",
+      "candidateAbilityGameIds": [96231],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "paladin_t::create_action / rebuke_t",
+        "startLine": 3399,
+        "endLine": 3400,
+        "sourceNote": "create_action dispatches \"rebuke\" to rebuke_t, whose base is paladin_melee_attack_t( \"rebuke\", p, p->find_class_spell( \"Rebuke\" ) ) at sc_paladin.cpp:1944-1945. The pinned spell table carries one Rebuke record for class mask 0x2, 96231, with `_gcd` 0. target_ready requires the target to be casting (:1956-1961): usability is never claimed either way.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "arcane_torrent",
+      "candidateAbilityGameIds": [155145],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / arcane_torrent_t",
+        "startLine": 11056,
+        "endLine": 11057,
+        "sourceNote": "player_t::create_action dispatches \"arcane_torrent\" to arcane_torrent_t, whose base is racial_spell_t( p, \"arcane_torrent\", p->find_racial_spell( \"Arcane Torrent\" ) ) at player.cpp:9050-9051. racial_spells.inc row { 0x0200 (Blood Elf), 0x00000002 (Paladin), 155145 } is the only row a Paladin can resolve. OUTSIDE the Retribution rotational decision domain (racial action).",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    },
+    {
+      "simcToken": "fireblood",
+      "candidateAbilityGameIds": [265221],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / fireblood_t",
+        "startLine": 11064,
+        "endLine": 11065,
+        "sourceNote": "player_t::create_action dispatches \"fireblood\" to fireblood_t, whose base is racial_spell_t( p, \"fireblood\", p->find_racial_spell( \"Fireblood\" ) ) at player.cpp:9400-9401. racial_spells.inc: { 0x0800 (Dark Iron Dwarf), 0x3fff, 265221, \"Fireblood\" }. OUTSIDE the Retribution rotational decision domain (racial action).",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    },
+    {
+      "simcToken": "lights_judgment",
+      "candidateAbilityGameIds": [255647],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / lights_judgment_t",
+        "startLine": 11070,
+        "endLine": 11071,
+        "sourceNote": "player_t::create_action dispatches \"lights_judgment\" to lights_judgment_t, whose base is racial_spell_t( p, \"lights_judgment\", p->find_racial_spell( \"Light's Judgment\" ) ) at player.cpp:9251-9252. racial_spells.inc: { 0x20000000 (Lightforged Draenei), 0x3fff, 255647, \"Light's Judgment\" }; the record carries `_gcd` 1500. OUTSIDE the Retribution rotational decision domain (racial action): the lane is recorded for provenance and the entry is classified non-domain before selection.",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/paladin/sc_paladin.cpp",
+        "sourceSha256": "519e69485c0efa9c9b51b2828a13c944b622c0c42f3f170b39e30b6ea5b36a85",
+        "symbol": "auto_melee_attack_t::auto_melee_attack_t",
+        "line": 1034,
+        "sourceNote": "auto_melee_attack_t's constructor (struct opens at sc_paladin.cpp:1024) is built on spell_data_t::nil() and assigns trigger_gcd = 0_ms. No spell record backs the APL token; its ready() is `!is_moving() && main_hand_attack->execute_event == nullptr` (sc_paladin.cpp:1046-1052)."
+      }
+    },
+    {
+      "simcToken": "use_item",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "use_item_t::use_item_t",
+        "line": 9999,
+        "sourceNote": "use_item_t's constructor (struct opens at player.cpp:9847) assigns trigger_gcd = timespan_t::zero(). No spell record backs the APL token. OUTSIDE the Retribution rotational decision domain (item use)."
+      }
+    },
+    {
+      "simcToken": "use_items",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "use_items_t::use_items_t",
+        "line": 10232,
+        "sourceNote": "use_items_t's constructor (struct opens at player.cpp:10216) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the Retribution rotational decision domain (item use)."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the Retribution rotational decision domain (consumable)."
+      }
+    },
+    {
+      "simcToken": "invoke_external_buff",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "invoke_external_buff_t::invoke_external_buff_t",
+        "line": 10915,
+        "sourceNote": "invoke_external_buff_t's constructor (struct opens at player.cpp:10889) assigns trigger_gcd = timespan_t::zero(). Its action type is ACTION_OTHER, not a spell. OUTSIDE the Retribution rotational decision domain (externally supplied buff)."
+      }
+    }
+  ]
+}

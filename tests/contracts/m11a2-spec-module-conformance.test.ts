@@ -103,6 +103,8 @@ const IDENTITY_EVIDENCE: Readonly<
 > = {
   "rogue/assassination": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 19 },
   "paladin/protection": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 7 },
+  // M11-A4: actor 6 of the same fight, the Retribution Paladin the committed context reports.
+  "paladin/retribution": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 6 },
 };
 
 function wclIdentityOf(evidence: {
@@ -309,10 +311,12 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the two public modules, each with zero supplemental analyses", () => {
+  it("is exactly the two public modules and the one INTERNAL_ONLY module, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
-    // count-independent. A third module changes this line in the same commit
-    // as the five-site identity move.
+    // count-independent. The third module (M11-A4) changed this line WITHOUT
+    // the five-site identity move — it is INTERNAL_ONLY, and the partition
+    // entry it carries is the internal one. Its `supplementalAnalyses` is
+    // empty by decision (agent/m11-a4-first-spec-contract.md section 8).
     expect(
       MODULES.map(({ exportName, module }) => [
         exportName,
@@ -322,6 +326,7 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
+      ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "INTERNAL_ONLY", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
     ]);
   });

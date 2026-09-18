@@ -237,6 +237,34 @@
       "payloadKind": "WCL_EVENT_ARRAY",
       "provenanceKind": "SANITIZED_CAPTURE",
       "sha256": "7c13a171a49a7e482842adcb0914f2efc929b7ece59f28d4acd7b33680ec3007"
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "byteLength": 140409,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "0853c250203577f9d90bf1b01aad7a3c7a7a18f4cb0fbb2902f1d7a5759ae0a8"
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+      "byteLength": 171891,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "05f93f2ccf150207769ac3d3df67eb0b6c782d4f64806d69d5b12ab64222ce69"
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "byteLength": 163354,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "76c54636510c474de55202ebd56a8127b4fe9eee4e99b3b901ddac70a18eda52"
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-gtkb-opener",
+      "byteLength": 109931,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "ffe79c87fcb50f6a517660efc9c6439861a36b13d1027ce424bf8d98f2435676"
     }
   ],
   "byLayer": [
@@ -255,8 +283,8 @@
       "passed": 24
     },
     {
-      "assertions": 103,
-      "cases": 30,
+      "assertions": 119,
+      "cases": 34,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
@@ -276,7 +304,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 103
+      "passed": 119
     },
     {
       "assertions": 62,
@@ -350,13 +378,37 @@
       "passed": 110
     },
     {
-      "assertions": 7,
-      "cases": 6,
+      "assertions": 50,
+      "cases": 11,
+      "failed": 0,
+      "kindsExercised": [
+        "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS",
+        "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+        "SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE",
+        "SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION",
+        "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+        "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",
+        "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+        "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+        "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+        "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+        "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES",
+        "SPEC_RETRIBUTION_PALADIN.SPEC_GATE",
+        "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+        "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "passed": 50
+    },
+    {
+      "assertions": 9,
+      "cases": 7,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 7
+      "passed": 9
     },
     {
       "assertions": 10,
@@ -443,6 +495,25 @@
       "caseId": "application-service.protection-paladin-subject-is-analyzed-under-player-context",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.retribution-paladin-subject-is-not-publicly-supported-on-its-own-evidence",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -1641,6 +1712,126 @@
       "caseId": "normalization.real-master-data-catalogs-every-actor-including-pets-and-the-sentinel-entry",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-fight-context-a7r6-fight-7"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.retribution-paladin-165s-bundle-composes-three-parts-into-one-complete-fight",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": [
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+        "wcl-retribution-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.retribution-paladin-rotational-165s-seg-105-165-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.retribution-paladin-rotational-165s-seg-45-105-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.retribution-paladin-rotational-45s-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
     },
     {
       "artifactId": "wcl-midfight-window",
@@ -3172,6 +3363,469 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.a-segment-alone-has-no-profile",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.an-active-art-of-war-leaves-the-stack-atom-unbound-and-the-decision-unknown",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-retribution-paladin.assassination-is-refused-at-the-spec-gate",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+          "ordinal": 6,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.authority-build-boundary-and-domains-on-the-first-slice",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.divine-storm-under-the-arbiter-storm-buff-is-rejected-two-ways",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+        "wcl-retribution-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.ds-castable-resolves-only-when-the-arbiter-auras-settle-it",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+        "wcl-retribution-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.gap-bundle-carries-no-state-across-the-declared-hole",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+        "wcl-retribution-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 7,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.rejected-by-unselectability-alone-before-any-cooldown-is-anchored",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.spender-population-over-165s-is-sixty-nine-with-one-real-match-and-ten-real-rejected",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+        "wcl-retribution-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "ordinal": 7,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 8,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 9,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "ordinal": 10,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.the-real-match-final-verdict-at-2108996",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+        "wcl-retribution-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,415,042 for actor 23 (specID 70)",
+          "every COMPLETE cast by actor 23 in the slice, in canonical order",
+          "every aura transition on actor 23 sourced by actor 23, in canonical order"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.the-second-subject-opener-is-the-fail-closed-population",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": ["wcl-retribution-paladin-gtkb-opener"]
+    },
+    {
       "artifactId": "synthetic.graphql-page-sequence-two-pages",
       "assertions": [
         {
@@ -3502,6 +4156,7 @@
   ],
   "pinnedAuthorities": {
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
+    "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
     "SIMC_DBC_ROGUE_DOT_DURATIONS": "simc-33622e9d-1"
   },
@@ -3509,15 +4164,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 3364052,
-    "artifacts": 34,
-    "assertions": 339,
-    "cases": 112,
+    "artifactBytes": 3949637,
+    "artifacts": 38,
+    "assertions": 407,
+    "cases": 128,
     "declared": 0,
-    "executable": 339,
+    "executable": 407,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 339
+    "passed": 407
   }
 }

@@ -415,9 +415,72 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
 // ---------------------------------------------------------------------------
 
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("there is no production INTERNAL_ONLY registration in M11-A2", () => {
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
-    expect(PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY")).toEqual([]);
+  it("the one production INTERNAL_ONLY registration is Retribution Paladin (M11-A4)", () => {
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/retribution"]);
+    expect(
+      PRODUCTION_CATALOG.registrations
+        .filter((row) => row.exposure === "INTERNAL_ONLY")
+        .map((row) => row.specId),
+    ).toEqual(["paladin/retribution"]);
+  });
+
+  it("Retribution Paladin's readiness is REPORTED from real evidence paired against its own WCL identity, and authorizes nothing", async () => {
+    // The real INTERNAL_ONLY module, the real corpus, the real committed
+    // report. The public identity table REFUSES Paladin/Retribution, which is
+    // exactly what the internal pairing requires; the A7R6 and gtKb
+    // fight-context artifacts prove actors 6 and 23 are Paladin/Retribution.
+    const corpus = await corpusPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "paladin/retribution");
+    expect(module).toBeDefined();
+    if (module === undefined) return;
+    expect(module.exposure).toBe("INTERNAL_ONLY");
+    expect(resolveSpecIdentity({ className: "Paladin", specName: "Retribution" }).ok).toBe(false);
+
+    const readiness = evaluate(
+      corpus,
+      committedReport(),
+      module.identity.specId,
+      "INTERNAL_ONLY",
+      internalPairing(module),
+    );
+    expect(readiness.exposure).toBe("INTERNAL_ONLY");
+    expect(readiness.layer).toBe("SPEC_RETRIBUTION_PALADIN");
+    // At least one real MATCH and one real REJECTED, reproduced through the
+    // production path over SANITIZED_CAPTURE evidence — the M11-A4 G7 gate.
+    const outcomes = readiness.qualifyingAssertions.map((q) => q.expectedOutcome);
+    expect(outcomes).toContain("MATCH");
+    expect(outcomes).toContain("REJECTED");
+    for (const q of readiness.qualifyingAssertions) {
+      expect(q.kind).toBe("SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE");
+      expect(q.evidenceSet.every((entry) => entry.kind === "SANITIZED_CAPTURE")).toBe(true);
+      expect(q.evidenceIdentity).toEqual({ className: "Paladin", specName: "Retribution" });
+      expect(q.reportStatus).toBe("PASSED");
+    }
+    // A report, not an authorization: the id stays outside the public
+    // partition whatever the readiness says.
+    expect(readiness.evidenceReady).toBe(true);
+    expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("paladin/retribution");
+  });
+
+  it("the reviewed snapshot: which real cases qualify Retribution Paladin today", async () => {
+    const corpus = await corpusPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "paladin/retribution");
+    if (module === undefined) throw new Error("no Retribution module");
+    const snapshot = evaluate(
+      corpus,
+      committedReport(),
+      "paladin/retribution",
+      "INTERNAL_ONLY",
+      internalPairing(module),
+    )
+      .qualifyingAssertions.map((q) => `${q.caseId}[${String(q.ordinal)}] -> ${q.expectedOutcome}`)
+      .sort();
+    expect(snapshot).toEqual([
+      "spec-retribution-paladin.divine-storm-under-the-arbiter-storm-buff-is-rejected-two-ways[0] -> REJECTED",
+      "spec-retribution-paladin.divine-storm-under-the-arbiter-storm-buff-is-rejected-two-ways[3] -> REJECTED",
+      "spec-retribution-paladin.rejected-by-unselectability-alone-before-any-cooldown-is-anchored[0] -> REJECTED",
+      "spec-retribution-paladin.the-real-match-final-verdict-at-2108996[0] -> MATCH",
+    ]);
   });
 
   it("a synthetic internal module's readiness is a report, and its identity is refused by the public table", async () => {

@@ -146,10 +146,142 @@ Unselectability proof: a Retribution-owned generalization of
 no `run_action_list`/`swap_action_list`; A4 re-checks that from the artifact,
 never trusts the extractor's note).
 
-Race worlds: `{ LIGHTFORGED_DRAENEI, DARK_IRON_DWARF, BLOOD_ELF, OTHER }`,
-converged per the Protection pattern. §5 says what excludes a world.
+Race worlds: NONE (superseded by §4a). The adapter explores one world; no
+race is hypothesized, inferred or excluded.
 
-## 5. Identity dependency A4 must resolve or state: race / faction
+## 4a. Amendment (2026-09-18) — the class/spec authority boundary
+
+Adopted by the product owner during A4. The analyzer evaluates
+class/spec/hero-talent rotational gameplay; the following entry categories
+of the pinned list are OUTSIDE THE ROTATIONAL DECISION DOMAIN and cannot
+preempt a supported class/spec action:
+
+- racial actions (`lights_judgment`, `fireblood`, `arcane_torrent`, any other
+  race-specific action);
+- potions;
+- trinket / `use_item` / `use_items` actions;
+- profession actions;
+- `invoke_external_buff` and other externally supplied actions;
+- other non-class/spec preparation actions already outside the slice.
+
+They stay in the pinned artifact for provenance and are classified as
+non-domain BEFORE rotational authority selection, generically (no
+race-specific or actor-specific special case). This is a domain-boundary
+decision, not a claim that those actions were unavailable, and it removes
+race/faction as an A4 dependency: no race or faction is inferred, §5 below
+is superseded, and the one authorized `gameData.factions` lookup (run once
+by a temporary probe, since removed from the tree; its outputs remain under
+`.probe/m11a4-game-factions*.json` and `.probe/m11a4-faction-anchor-*`)
+established only that the API's faction ids (1 Alliance, 2 Horde) are not
+the encoding the `combatantinfo` event carries (0/1), and the two named
+anchors contradicted each other — nothing was pinned from it, and
+race/faction is NOT a promotion blocker (§9).
+
+MATCH for this analyzer therefore means: the observed class/spec action is
+compatible with the pinned Retribution class/spec rotational authority after
+actions explicitly outside the supported rotational domain are excluded. It
+is NOT "the exact next action the complete SimulationCraft profile would
+execute including racials, items and consumables".
+
+### Residual blocker found when the amended slice was re-derived
+
+With the non-domain filter applied, every entry above the unconditional
+`generators[5] call finishers` that can still preempt a spender is class/spec:
+`cooldowns[9] execution_sentence`, `cooldowns[10] avenging_wrath`,
+`generators[1] wake_of_ashes`, `generators[2] divine_toll` (all provable NOT
+READY from observed casts under the pinned census —
+`src/data/game/paladin-retribution-cooldowns.json`), and two that are not:
+
+- `generators[3] blade_of_justice,if=(buff.art_of_war.stack=2|buff.righteous_cause.stack=2)&(!talent.walk_into_light|!buff.avenging_wrath.up)`
+  — outside wings the gate is UNKNOWN because `buff.<x>.stack` is a shared
+  built-in with NO binding field (always UNKNOWN), and its cooldown cannot
+  be proven running because the census shows it HASTED (spec passive
+  `A_HASTED_COOLDOWN` / `A_HASTED_CATEGORY` on category 2128) with an
+  optional second charge (Improved Blade of Justice) — both refused by the
+  cooldown bindings, as for Protection's hasted abilities;
+- `generators[4] hammer_of_wrath,if=talent.walk_into_light&cooldown.hammer_of_wrath.charges=2`
+  — under wings Hammer of Wrath is usable and its charge state is not
+  soundly derivable (Final Verdict resets it on an unobservable proc,
+  `sc_paladin_retribution.cpp:720-729`).
+
+Both evidence subjects (A7R6 actor 6, gtKb actor 23) take Walk Into Light
+and Crusade. So outside wings the Blade of Justice line competes and inside
+wings the Hammer of Wrath line competes: no spender decision can reach a
+definite scan under the shared evaluator as it stood, and MATCH is not
+reproducible. The race-independent unselectability route (13 REJECTED on
+actor 6 in the hand audit) is unaffected. The smallest principled unlock is
+a GENERIC evaluator binding field for `buff.<x>.stack` (symmetric to
+`knownBuffs`), which a specialization may bind to 0 for an aura M4 proves
+INACTIVE or a build proves absent, never to a positive count — recorded
+here for the owner's decision, and adopted as §4b.
+
+## 4b. Amendment (2026-09-18) — the exact-known buff-stack binding
+
+Adopted by the product owner after the residual blocker above was reported.
+The shared evaluator gained `AtomBindings.knownBuffStacks`: a caller may
+state a `buff.<name>.stack` value it has PROVEN exactly; the evaluator reads
+it through the same lookup shape as `knownCooldownRemainsSeconds` and
+compares it with the existing semantics. An unbound stack atom stays
+UNKNOWN_NUMBER as before, no count is inferred from any other binding, and
+no arithmetic or enumeration rule changed (`m11a4-known-buff-stacks`
+pins the generic contract; the existing analyzers' outcomes are unchanged).
+
+Retribution binds ONLY exact zero (`aura-bindings.ts`
+`bindRetributionStackZero`), under two proofs:
+
+- `PROVEN_INACTIVE` — M4's presence at the decision is EXACT INACTIVE (an
+  observed removal under coverage; silence never reaches here);
+- `TALENT_NOT_SELECTED` — the pinned build resolves the talent that
+  PRODUCES the aura as NOT_SELECTED (an alternative entry at its choice
+  node was observed), so the aura is impossible in the build.
+
+An ACTIVE aura leaves the atom UNBOUND (no positive count is ever bound);
+an UNKNOWN presence with an UNKNOWN or SELECTED talent leaves it UNBOUND.
+Applied to `generators[3] blade_of_justice`'s gate: with Art of War proven
+INACTIVE and Righteous Cause disproved at choice node 81523, the gate is
+FALSE outside wings. Hammer of Wrath's charge count stays unbindable, so
+inside-wings decisions remain UNKNOWN.
+
+### A second open reading, and how it was settled
+
+With race gone and the stacks bound, the next blocker was
+`cooldowns[10] avenging_wrath`: its applicability depends on Radiant Glory,
+a NORMAL node the three-way talent rule cannot disprove when absent
+(UNKNOWN, never NOT_SELECTED), and an UNKNOWN applicability blocks the scan
+before usability is consulted. The first implementation settled this with
+a generic "observed cast of a bound ability ⇒ foreground" rule; the A4
+review REJECTED it (a background or triggered action executes and may log a
+cast — the generic statement is not universally true) and required the
+implication to be established from pinned mechanics. It is, for this one
+action: `paladin-retribution-foreground-execution-authority.ts` pins that
+spell 31884 is executed only by the foreground constructor
+(sc_paladin.cpp:282-294), the sole background/triggered wings action being
+the distinct record 454351 (:275-280, :3304-3307; Wake of Ashes under
+Radiant Glory, sc_paladin_retribution.cpp:846-851). An observed 31884 cast
+is therefore a foreground execution under the pinned mechanics, and the
+constructor's guards were false. The rule refines UNKNOWN → APPLICABLE only
+for a token with such a fact and only on a cast of exactly the record the
+fact names; a BACKGROUND reading is never converted (an observed
+foreground-only cast under it is a contradiction and stays UNKNOWN); a token
+without a fact keeps its reading whatever was cast. Dedicated tests pin
+each case (`m11a4-retribution-bindings`). The production-path proof was
+rerun without the generic rule: unchanged (1 MATCH, 10 REJECTED).
+
+### Outcome of the G7 rerun through the production path
+
+A7R6 fight 7 actor 6, 165 s, through `RETRIBUTION_PALADIN_REGISTRATION`:
+69 eligible spender decisions — **1 MATCH** (Final Verdict at +104,407 ms,
+`finishers[3]` exact entry), **10 REJECTED** (unselectability, two of them
+also scan-selected `templars_verdict`), 58 UNKNOWN with the stopping entry
+named. gtKb fight 22 actor 23, 20 s: 15 eligible, 15 UNKNOWN. The hand
+audit's counts in §6 (6 MATCH, 2 scan-REJECTED, 13 unselectability-REJECTED)
+assumed race worlds and positive stack facts the implementation does not
+make; the production figures supersede them.
+
+## 5. Identity dependency A4 must resolve or state: race / faction (SUPERSEDED by §4a)
+
+This section is retained for the record; §4a removed race and faction as an
+A4 dependency, and §9 no longer lists it as a promotion blocker.
 
 `cooldowns[7] lights_judgment,if=!raid_event.adds.exists|…` is a
 GCD-CONSUMING racial with an unparseable gate above every rotational entry.
@@ -180,7 +312,9 @@ landing; it is not acceptable for promotion.
 | gtKb fight 22 actor 23 (Paladin/Retribution, Herald of the Sun) | `+0` .. `+20 s` from `.probe/m9c2-opener-pages.json` | actor-23 opener slice |
 
 Expected resolvable decisions (from the A3 audit walk; A4 must reproduce
-with the real engine, not assume):
+with the real engine, not assume). SUPERSEDED — the production-path result
+is recorded in §4b: 1 MATCH (`+104.407`), 10 REJECTED, 58 UNKNOWN; the
+list below is the historical prediction:
 
 - `REJECTED` by unselectability, race-independent: Divine Storm at `+1.604`
   and `+63.778` (Empyrean Legacy up); Divine Storm at `+37.582`, `+77.210`,
@@ -212,12 +346,12 @@ REPORTS (does not fail) for the INTERNAL_ONLY registration.
 | --- | --- |
 | `raid_event.*` on Wake of Ashes / Divine Toll / Execution Sentence / Avenging Wrath / Light's Judgment | never evaluated; the line is eliminated by proven readiness or the scan BLOCKS (`UNSUPPORTED_AUTHORITY_EXPRESSION`) |
 | `active_enemies` | never bound; `ds_castable` resolves only when another conjunct settles it |
-| `buff.*.stack`, `buff.*.remains` (Art of War, Righteous Cause, Avenging Wrath stacks under Crusade, Templar buffs) | shared built-ins with no binding field — UNKNOWN; lines reading them compete unless eliminated by readiness or another conjunct |
+| `buff.*.stack` (Art of War, Righteous Cause) | bound to EXACT ZERO under §4b's two proofs; otherwise UNKNOWN (never a positive count). `buff.*.remains` and Avenging Wrath stacks under Crusade stay UNKNOWN |
 | `generators[0]` gate | UNKNOWN by construction (bounded bare truth + unbindable remains); `finishers` is entered definitively through `generators[5]` only |
 | Templar hero-tree builds | `hammer_of_light` applicable with unbindable `remains` atoms → spender decisions UNKNOWN; the slice does not claim Templar |
 | Divine Purpose free casts | Holy Power not on the wire; usability rests on the Divine Purpose aura proof; `holy_power` atom UNKNOWN |
 | Cooldown state before the first observed cast | UNKNOWN usability (no "ready at pull" assumption) |
-| Race world not excluded | scan route UNKNOWN; unselectability route unaffected |
+| Race / faction | not read, not inferred, not a dependency (§4a): racial entries are outside the rotational decision domain |
 | AoE | no target count; nothing about AoE is claimed |
 | Movement, encounter actionability | inherited from the shared model; no Retribution-specific claim |
 
@@ -238,19 +372,24 @@ engine work.
 ## 9. Promotion evidence implications
 
 Promotion to PUBLIC is NOT part of A4. It will require: committed
-`SANITIZED_CAPTURE` decision cases with `MATCH` and `REJECTED` (§6 supplies
-both); the race/faction dependency (§5) closed so that scan-route `MATCH`
-exists on committed evidence; the five-site public move; parity, schema and
-invariance checks; a limits prose (`limitsProse`) that states the slice
-honestly (spender decisions only; Herald builds; no AoE; cooldown decisions
-unjudged); and — only after committed CI — separately authorized smoke.
+`SANITIZED_CAPTURE` decision cases with `MATCH` and `REJECTED` (A4 committed
+both, and the promotion evidence gate reports the INTERNAL_ONLY module's
+readiness from them); the five-site public move; a public projection
+decision for `OUTSIDE_FIRST_SLICE` (an internal exclusion reason with no
+public schema name); parity, schema and invariance checks; a limits prose
+(`limitsProse`, drafted in `registration.ts` and not published) that states
+the slice honestly (spender decisions only; Herald builds; no AoE; cooldown
+decisions unjudged; racials, items and consumables outside the domain); and
+— only after committed CI — separately authorized smoke. Race and faction
+are NOT a promotion blocker (§4a).
 
 ## 10. What A4 must not do
 
-No shared-engine change (`run_action_list`, target count, `raid_event`,
-generic variables, charges, cast anchors, bounded-truth or bounded-arithmetic
-semantics, `buff.*.stack`/`remains` binding fields) — each is a separate
-engine milestone; no public exposure; no schema change; no Warcraft Logs
+No shared-engine change beyond the two amendments (`OUTSIDE_SUPPORTED_DECISION_DOMAIN`
+as a shared applicability reason, §4a; `knownBuffStacks`, §4b):
+`run_action_list`, target count, `raid_event`, generic variables, charges,
+cast anchors, bounded-truth or bounded-arithmetic semantics and `remains`
+binding fields each remain a separate engine milestone; no public exposure; no schema change; no Warcraft Logs
 request beyond what §5 may explicitly authorize; no sentinel migration; no
 Protection tree import; no Templar-build claim; no AoE claim; no Holy Power
 reconstruction; no Ritual work.

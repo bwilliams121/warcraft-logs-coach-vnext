@@ -67,6 +67,7 @@ import { validateCapabilities, type CapabilityDefectRecord } from "../findings/d
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { isPublicSpecId, isSpecId, PUBLIC_SPEC_IDS, type SpecId } from "../findings/spec-id.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
+import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
 import type { AnalyzerRequirement } from "./ingestion-scope.js";
 import { SUPPORTED_SPEC_IDENTITIES } from "./spec-identity.js";
@@ -418,15 +419,19 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Two rows, both PUBLIC. An unsupported specialization is represented by
- * ABSENCE from this list, which is why there is no "unsupported" placeholder
- * entry: a row that cannot analyze anything would still be something a lookup
- * could select.
+ * Three rows: two PUBLIC, one INTERNAL_ONLY. A publicly unsupported
+ * specialization is represented by ABSENCE from the PUBLIC set — an
+ * INTERNAL_ONLY row is in the catalog and reachable by internal lookup and
+ * tests, and is never selected for a public request — which is why there is
+ * no "unsupported" placeholder entry: a row that cannot analyze anything
+ * would still be something a lookup could select.
  */
 export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.freeze([
   ASSASSINATION_REGISTRATION,
   // INTERNAL_ONLY from M10-C; PUBLIC since M10-D.
   PROTECTION_PALADIN_REGISTRATION,
+  // INTERNAL_ONLY from M11-A4. Not public; promotion is a separate, reviewed milestone.
+  RETRIBUTION_PALADIN_REGISTRATION,
 ]);
 
 /**

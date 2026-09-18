@@ -182,8 +182,13 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 }
 
 describe("the production catalog", () => {
-  it("is exactly the two PUBLIC registrations, and both lookups answer alike", () => {
-    expect(ANALYZER_REGISTRATIONS).toHaveLength(2);
+  it("is exactly the two PUBLIC registrations plus the INTERNAL_ONLY Retribution row (M11-A4), and both lookups answer alike for the public ones", () => {
+    expect(ANALYZER_REGISTRATIONS).toHaveLength(3);
+    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(2);
+    expect(analyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)).toBeNull();
+    expect(internalAnalyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)?.exposure).toBe(
+      "INTERNAL_ONLY",
+    );
     expect(analyzerForSpec("paladin/protection", PRODUCTION_CATALOG)?.analyzerId).toBe(
       PROTECTION_PALADIN_ANALYZER_ID,
     );

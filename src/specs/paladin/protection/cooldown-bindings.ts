@@ -291,6 +291,15 @@ export function dynamicMutationsAbsent(
     if (signature === undefined || anchorEvent === null || queryEvent === null) {
       return { ok: false, reason: `${mutation.member} in ${mutation.site} has no observable signature` };
     }
+    // Protection's pinned mutations declare application signatures only; the
+    // stack-change kind (M11-A4) is another specialization's, and this
+    // module does not read it rather than guessing what it would mean here.
+    if (signature.kind !== "AURA_APPLICATION_ON_ACTOR") {
+      return {
+        ok: false,
+        reason: `${mutation.member} in ${mutation.site} declares a ${signature.kind} signature this module does not model`,
+      };
+    }
     const range = inclusiveRange(anchorEvent.reportTimeMs, queryEvent.reportTimeMs);
     const gate = gateAbsenceClaim({
       completeness: state.fight.completeness,

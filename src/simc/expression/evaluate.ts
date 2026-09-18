@@ -239,6 +239,26 @@ export interface AtomBindings {
   /** Buffs whose state IS established. Everything else becomes an unresolved atom. */
   readonly knownBuffs: readonly { readonly name: string; readonly up: boolean }[];
   /**
+   * `buff.<name>.stack` values that are EXACTLY established (M11-A4).
+   *
+   * A BINDING SEAM, NOT A STACK MODEL. This project reconstructs no stack
+   * count: M4 deliberately has no `stacksAt`, because a plain application
+   * carries no count, a refresh's effect on the count is unpinned and decay
+   * is unobserved. What a specialization CAN prove exactly is narrower, and
+   * this field carries only that. The first consumer binds ZERO, and only in
+   * two situations — the aura is proven INACTIVE at the decision by the M4
+   * presence machinery (an observed removal under coverage), or the pinned
+   * resolved build proves the talent that produces the aura absent, so the
+   * aura is impossible. Silence, elapsed time and expected play prove nothing
+   * and bind nothing.
+   *
+   * Same shape and same rule as `knownCooldownRemainsSeconds`: keyed by
+   * name, absent is UNKNOWN_NUMBER (never zero), and the comparison semantics
+   * are the existing ones — `buff.x.stack=2` against a bound 0 is FALSE by
+   * `compareWithBounds`, exactly as any other exact magnitude.
+   */
+  readonly knownBuffStacks?: readonly { readonly name: string; readonly stack: number }[];
+  /**
    * `stealthed.rogue`, and ONLY when it is positively proven.
    *
    * THE TYPE IS `true`, NOT `boolean`, AND THAT IS THE POINT.
@@ -677,10 +697,14 @@ function evaluateInWorld(
     case "BUFF_REMAINS":
       // Understood syntax; this build reconstructs no aura duration.
       return UNKNOWN;
-    case "BUFF_STACK":
-      // Understood syntax; this build reconstructs no aura stack count. NEVER
-      // zero: an unobserved aura is not an aura observed at zero stacks.
-      return UNKNOWN;
+    case "BUFF_STACK": {
+      // No stack count is reconstructed here. A value arrives only through an
+      // EXACT binding a specialization proved (M11-A4); absent, UNKNOWN. NEVER
+      // zero by default: an unobserved aura is not an aura observed at zero
+      // stacks.
+      const known = (bindings.knownBuffStacks ?? []).find((entry) => entry.name === node.buffName);
+      return known === undefined ? UNKNOWN : known.stack;
+    }
     case "BUFF_REACT": {
       // Its own key, so it never reads a `buff.<name>.up` assignment. There is
       // no binding field, so it is always enumerated.
@@ -883,9 +907,19 @@ function resolveAtom(
     };
   }
 
+  const stack = /^buff\.(.+)\.stack$/.exec(key);
+  const stackName = stack?.[1];
+  if (stackName !== undefined) {
+    // Through the SAME lookup `evaluateInWorld` uses. Absent is
+    // STATE_NOT_ESTABLISHED, never zero: a stack model does not exist, but an
+    // exact-zero proof does, and the remedy for a missing one is evidence.
+    const knownStack = (bindings.knownBuffStacks ?? []).find((entry) => entry.name === stackName);
+    return knownStack === undefined ? unknownNumeric("STATE_NOT_ESTABLISHED") : known(knownStack.stack);
+  }
+
   if (shape === "NUMERIC") {
-    // `buff.<name>.remains`, `buff.<name>.stack`, and anything numeric added
-    // later without a binding. STATE_NOT_MODELLED, and emphatically not zero.
+    // `buff.<name>.remains` and anything numeric added later without a
+    // binding. STATE_NOT_MODELLED, and emphatically not zero.
     return unknownNumeric("STATE_NOT_MODELLED");
   }
 

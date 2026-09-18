@@ -50,6 +50,7 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       "SHARED_DECISION_ENGINE",
       "SPEC_ASSASSINATION",
       "SPEC_PROTECTION_PALADIN",
+      "SPEC_RETRIBUTION_PALADIN",
       "APPLICATION_SERVICE",
     ]);
   });

@@ -182,14 +182,18 @@ describe("cross-spec authority access is refused structurally", () => {
     expect(Object.isFrozen(PROTECTION_PALADIN_REGISTRATION.authority)).toBe(true);
   });
 
-  it("the production catalog holds both registrations, each citing only its own authority", () => {
+  it("the production catalog holds the three registrations, each citing only its own authority", () => {
     const cited = PRODUCTION_CATALOG.registrations.map((registration) => [
       registration.specId,
       registration.authorityBindings.map((binding) => binding.authorityId),
     ]);
+    // M11-A4: the two Paladin specializations pin the SAME file and commit
+    // under DISTINCT authority ids; the duplicate-binding rule keys on the id
+    // and the domain, so the pairing is legal and each row cites its own.
     expect(cited).toEqual([
       ["rogue/assassination", ["SIMC_APL_ROGUE_ASSASSINATION"]],
       ["paladin/protection", ["SIMC_APL_PALADIN_PROTECTION"]],
+      ["paladin/retribution", ["SIMC_APL_PALADIN_RETRIBUTION"]],
     ]);
   });
 });

@@ -82,6 +82,9 @@ const TIME_HORIZONS = [
 ] as const;
 const READINESS = [
   "READY_FOR_SPEC_MILESTONE",
+  // M11-A4: the selected specialization's A4_REQUIRED question, landed as an
+  // INTERNAL_ONLY analyzer with committed sanitized evidence. Not public.
+  "IMPLEMENTED_INTERNAL_ONLY",
   "NEEDS_AUTHORITY",
   "NEEDS_EVIDENCE",
   "NEEDS_ENGINE_CAPABILITY",
@@ -253,9 +256,14 @@ describe("question shape", () => {
         ).toBeGreaterThan(0);
       }
       if (spec.realEvidenceStatus === "REAL_SANITIZED_EVIDENCE_AVAILABLE") {
-        throw new Error(
-          `${spec.specId}: no committed sanitized evidence exists for an ordinary M11 spec at A3`,
-        );
+        // Only a REGISTERED specialization may claim committed sanitized
+        // evidence, and the claim is checked against the production
+        // partition rather than taken from the row (M11-A4: Retribution).
+        expect(
+          (INTERNAL_ONLY_SPEC_IDS as readonly string[]).includes(spec.specId) ||
+            (PUBLIC_SPEC_IDS as readonly string[]).includes(spec.specId),
+          `${spec.specId}: no committed sanitized evidence exists for an unregistered M11 spec`,
+        ).toBe(true);
       }
     }
   });

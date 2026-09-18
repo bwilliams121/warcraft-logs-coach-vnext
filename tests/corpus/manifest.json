@@ -3101,6 +3101,507 @@
           "Cannot prove any absence, continuity or pagination behaviour."
         ]
       }
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "path": "artifacts/wcl-events/wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "0853c250203577f9d90bf1b01aad7a3c7a7a18f4cb0fbb2902f1d7a5759ae0a8",
+      "byteLength": 140409,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-18",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2049589,
+            "endTimeMs": 2169589
+          },
+          "completeness": {
+            "eventsReturned": 68870,
+            "pagesRetrieved": 7,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589]."
+          },
+          "captureTooling": {
+            "name": ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165.json --actor-slice 6 2169589 --from 2109589 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seven page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 6 with --from 2109589 (exclusive) and the bound 2169589 (inclusive), restricted by --families to the same thirteen raw types. In place and order preserved. 547 of 68,870 events (first 2,110,024, last 2,169,440): the third Avenging Wrath at 2,127,413 and the last twenty spender decisions of the window, plus nothing after the capture's end.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [6],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2109590,
+                  "toReportTimeMs": 2169589
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 6 over [2,109,590 .. 2,169,589] by the predicate 'every event actor 6 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent."
+        },
+        "retainedFor": "M11-A4: one chronological segment of the Retribution subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer. History for every evaluated decision begins at the pull through the 45 s slice; the whole 165 s bundle is the evaluation window.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+      "path": "artifacts/wcl-events/wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "05f93f2ccf150207769ac3d3df67eb0b6c782d4f64806d69d5b12ab64222ce69",
+      "byteLength": 171891,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-18",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2049589,
+            "endTimeMs": 2169589
+          },
+          "completeness": {
+            "eventsReturned": 68870,
+            "pagesRetrieved": 7,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589]."
+          },
+          "captureTooling": {
+            "name": ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105.json --actor-slice 6 2109589 --from 2049581 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seven page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 6 with --from 2049581 (exclusive) and the bound 2109589 (inclusive), restricted by --families to the same thirteen raw types. In place and order preserved. 641 of 68,870 events (first 2,049,747, last 2,109,527). This segment's --from equals the 45 s slice's grant end (2,049,581): the two share no event, and the millisecond interval between that grant and this capture's window start is certified empty below. It holds the second Avenging Wrath at 2,067,930, the Divine Toll at 2,075,677, the Execution Sentence at 2,073,829, the Wake of Ashes at 2,103,923 and the Divine Purpose consumption at 2,105,158; the real MATCH at 2,108,996 and the scan-selected REJECTED at 2,105,158 / 2,106,382 lie in it.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [6],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2049589,
+                  "toReportTimeMs": 2109589
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 6 over [2,049,589 .. 2,109,589] by the predicate 'every event actor 6 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent.",
+          "certifiedEmpty": [
+            {
+              "fromReportTimeMs": 2049582,
+              "toReportTimeMs": 2049588,
+              "precedingArtifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+              "basis": "The M10-B capture requested [2,004,589 .. 2,049,589) — an EXCLUSIVE end of 2,049,589 — and paginated to a terminal page whose last event is 2,049,581, so every event the report holds before 2,049,589 was retrieved and the 45 s slice (every actor-6 event of the retained families in that capture) retained none in [2,049,582 .. 2,049,588]; this capture begins at 2,049,589 and its first event is 2,049,590. The loader re-checks both captures' recorded windows and completeness and that neither artifact retains an event inside the interval."
+            }
+          ]
+        },
+        "retainedFor": "M11-A4: one chronological segment of the Retribution subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer. History for every evaluated decision begins at the pull through the 45 s slice; the whole 165 s bundle is the evaluation window.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "path": "artifacts/wcl-events/wcl-retribution-paladin-a7r6-rotational-45s.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "76c54636510c474de55202ebd56a8127b4fe9eee4e99b3b901ddac70a18eda52",
+      "byteLength": 163354,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-16",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2004589,
+            "endTimeMs": 2049589
+          },
+          "completeness": {
+            "eventsReturned": 30588,
+            "pagesRetrieved": 4,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Four pages (10,007 / 10,000 / 10,009 / 572 events; cursors 2,021,544, 2,034,579, 2,048,380, then null): the whole 45-second window was retrieved inside the 10-page cap. The fight's first event (the encounterstart at 2,004,589 = the fight start) is on page 1, so coverage runs from the pull. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first, so no page straddles two exports (.probe/m10b-request-count.json)."
+          },
+          "captureTooling": {
+            "name": ".probe/m10b-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R5 opener window: EVENTS_QUERY over [2,004,589 .. 2,049,589] (the pull's first 45 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10b-capture-plan.md before running, run once by hand on 2026-09-16 (6 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10b-pages.json wcl-retribution-paladin-a7r6-rotational-45s.json --actor-slice 6 2049581 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The same four page envelopes as the Protection opener, concatenated in page order, then the --actor-slice predicate for ACTOR 6 bounded at the capture's last timestamp (2,049,581) and restricted by --families to the same thirteen raw types. In place and order preserved, 514 of 30,588 events: 91 casts (84 by actor 6, 7 targeting it), 64 resourcechange (all targeting 6), 458 aura transitions (211 targeting 6, 247 sourced by 6 on others), actor 6's combatantinfo at the fight start; first event 2,004,589, last 2,048,895. Damage, healing, absorb and summon events involving actor 6 were FILTERED OUT by family, not trimmed within a family.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [6],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2004589,
+                  "toReportTimeMs": 2049581
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 6 over [2,004,589 .. 2,049,581] by the predicate 'every event actor 6 sources or is targeted by, of a retained family, at or before the bound' over a window the capture retrieved COMPLETE with NO actor filter (four pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The window begins at the fight start. Nothing is granted to any other actor, and nothing after the bound."
+        },
+        "retainedFor": "M11-A4: the first 45 seconds of the Retribution Paladin subject (A7R6 fight 7 actor 6 — Herald of the Sun, Final Verdict, Crusading Strikes, Divine Purpose, Art of War, a two-handed main hand), as the spender slice needs it — every cast, every Holy Power change and every aura transition on or by the subject from the pull, with the combatantinfo. It carries the first Avenging Wrath at 2,005,300, the Empyrean Legacy, Divine Arbiter, Divine Purpose and Hammer of Wrath readiness auras, and 28 Holy Power spender casts; the first part of the 165 s bundle.",
+        "limitations": [
+          "Forty-five seconds of a 424-second kill: nothing about the fight's later cooldown cycles or its ending.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log: nothing here says whether any ability was on cooldown when the fight began.",
+          "The subject's race is not in the evidence and is not inferred; racial entries of the pinned list are outside the rotational decision domain (M11-A4 boundary).",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-gtkb-opener",
+      "path": "artifacts/wcl-events/wcl-retribution-paladin-gtkb-opener.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "ffe79c87fcb50f6a517660efc9c6439861a36b13d1027ce424bf8d98f2435676",
+      "byteLength": 109931,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "gtKb2xHn87pNcFfW",
+          "fightId": 22,
+          "reportRevision": 22,
+          "sourceActorId": 25,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-15",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2415041,
+            "endTimeMs": 2435041
+          },
+          "completeness": {
+            "eventsReturned": 18318,
+            "pagesRetrieved": 2,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Two pages (10,004 then 8,314 events), the second terminal (nextPageTimestamp null): the whole 20-second window was retrieved. The fight's first event, the subject's combatantinfo, is at 2,415,041 = the fight start, so coverage runs from the pull."
+          },
+          "captureTooling": {
+            "name": ".probe/m9c2-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R3–R4 opener window: EVENTS_QUERY over [2,415,041 .. 2,435,041] (the pull's first 20 s) at limit 10,000 with resources; bounded to 5 pages in advance, run once by hand on 2026-09-15 (4 requests in total for the whole capture, bound 8)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m9c2-opener-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[22]) — the report's own per-fight rankings, one request; the subject was selected as row 0 of the Sszorak heroic Assassination dps board page captured by scripts/probe/wcl-rankings-shape.probe.ts",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 25,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 100,
+                "bracketPercent": 100,
+                "bracket": 18,
+                "bracketData": 325,
+                "totalParses": 8606
+              },
+              {
+                "actorId": 8,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 8,
+                "bracketPercent": 17,
+                "bracket": 10,
+                "bracketData": 299,
+                "totalParses": 8606
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 284791
+          }
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m9c2-opener-pages.json wcl-retribution-paladin-gtkb-opener.json --actor-slice 23 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The two page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 23 (the second Retribution Paladin subject: same build as actor 6, faction value 0, a different two-handed main hand) unbounded, restricted by --families to the same thirteen raw types. In place and order preserved, 289 of 18,318 events: 50 casts (48 by actor 23, 2 targeting it), 38 resourcechange, 200 aura transitions, actor 23's combatantinfo at 2,415,042; first event 2,415,042, last 2,434,906.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [23],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2415041,
+                  "toReportTimeMs": 2435041
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 23 over [2,415,041 .. 2,435,041] by the predicate 'every event actor 23 sources or is targeted by, of a retained family' over a window the capture retrieved COMPLETE with NO actor filter (two pages, terminal). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The window begins at the fight start."
+        },
+        "retainedFor": "M11-A4: the second Retribution subject on a different report, pull and boss (Sszorak heroic), cut by the same predicate as the A7R6 subject so the same executors run over it. Twenty seconds of opener: every spender decision in it lies inside the first Avenging Wrath or before any cooldown is anchored, so the population is the fail-closed one — 15 eligible, 15 UNKNOWN — with its Holy Power observations and aura bindings recorded.",
+        "limitations": [
+          "The first 20 seconds only: nothing about the rest of the pull, its cooldown cycles or its ending.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log.",
+          "Sszorak has adds; nothing about target count is claimed here or anywhere in the corpus.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
     }
   ],
   "cases": [
@@ -3282,6 +3783,53 @@
       "relatedTests": [
         "tests/regression/m10d-public-second-registration-invariance.test.ts",
         "tests/contracts/m10d-public-registration.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.retribution-paladin-subject-is-not-publicly-supported-on-its-own-evidence",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts INTERNAL_ONLY_SPEC_IDS",
+      "purpose": "The real Retribution Paladin subject, over its own captured evidence, yields SPEC_NOT_SUPPORTED from the public application service with no spec, no analyzer and a null scope — exactly the Arms Warrior answer — while the validated catalog resolves paladin/retribution to the INTERNAL_ONLY registration for an internal lookup and to nothing for the public one, and the public identity table does not resolve the pair. Same answers over the reversed catalog.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "params": {
+            "subject": {
+              "actorId": 6,
+              "className": "Paladin",
+              "specName": "Retribution"
+            },
+            "expected": {
+              "status": "SPEC_NOT_SUPPORTED",
+              "specId": null,
+              "analyzerId": null,
+              "scope": null
+            }
+          }
+        },
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "paladin/retribution",
+            "expected": {
+              "internalAnalyzerId": "paladin-retribution-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "INTERNAL_ONLY means exactly this: real to the internal lookup and the corpus, invisible to every public path. Promotion is a separate reviewed milestone with its own evidence gate; nothing in M11-A4 moves the id into the public partition, the public contract, the identity table or the exposure."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/contracts/m11-promotion-evidence-gate.test.ts"
       ]
     },
     {
@@ -6136,6 +6684,218 @@
         "Whether a pet's events should be attributed to its owner for any analysis is a specialization question and is not decided here."
       ],
       "relatedTests": ["tests/unit/normalization-actors.test.ts"]
+    },
+    {
+      "caseId": "normalization.retribution-paladin-165s-bundle-composes-three-parts-into-one-complete-fight",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "tests/support/corpus/fight.ts bundleOverEvidence; loader.ts certificateErrors; scripts/corpus/build-manifest.mjs certifiedEmpty",
+      "purpose": "The three parts — the 45 s slice (its grant ending at 2,049,581), then the segments granted from 2,049,589 and 2,109,590 — compose into one 1,702-event fight over [2,004,589 .. 2,169,440] with CASTS, AURAS, RESOURCES, COMBATANT_INFO and GEAR each COMPLETE over ONE joined range [2,004,589 .. 2,169,589]. The seven milliseconds [2,049,582 .. 2,049,588] between the first two parts are bridged only by the seg-45-105 record's zero-event certificate.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "params": {
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "actorId": 6,
+            "expected": {
+              "events": 1702,
+              "coverage": {
+                "CASTS": "COMPLETE",
+                "AURAS": "COMPLETE",
+                "RESOURCES": "COMPLETE",
+                "COMBATANT_INFO": "COMPLETE",
+                "GEAR": "COMPLETE",
+                "DAMAGE": "ABSENT",
+                "HEALING": "ABSENT",
+                "ABSORBS": "ABSENT",
+                "SUMMONS": "ABSENT"
+              },
+              "castRanges": [
+                {
+                  "fromReportTimeMs": 2004589,
+                  "toReportTimeMs": 2169589
+                }
+              ],
+              "windowFromReportTimeMs": 2004589,
+              "windowToReportTimeMs": 2169440
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "Composition is a claim about coverage, and coverage is never inferred from the bytes: the same composer, certificate validation and refusals the Protection bundle proved, over a second subject cut from the same two captures."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/m10c5b-corpus-bundle.test.ts", "tests/unit/m9b-corpus-loader.test.ts"]
+    },
+    {
+      "caseId": "normalization.retribution-paladin-rotational-165s-seg-105-165-normalizes-whole-and-in-order",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+      "purpose": "The 547-event family-filtered actor-6 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE 63 casts, 52 Holy Power changes, 321 aura transitions; as TARGET 7 casts, 52 resource changes, 227 aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. The third Avenging Wrath (2,127,413) lies in it.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 547
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 6,
+            "side": "SOURCE",
+            "expected": {
+              "CAST": 63,
+              "RESOURCE_CHANGE": 52,
+              "AURA": 321
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 6,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 7,
+              "RESOURCE_CHANGE": 52,
+              "AURA": 227
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
+      "caseId": "normalization.retribution-paladin-rotational-165s-seg-45-105-normalizes-whole-and-in-order",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+      "purpose": "The 641-event family-filtered actor-6 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE 89 casts, 64 Holy Power changes, 377 aura transitions; as TARGET 7 casts, 64 resource changes, 229 aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. The second Avenging Wrath (2,067,930), the Divine Toll (2,075,677), the Execution Sentence (2,073,829) and the Wake of Ashes (2,103,923) lie in it.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 641
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 6,
+            "side": "SOURCE",
+            "expected": {
+              "CAST": 89,
+              "RESOURCE_CHANGE": 64,
+              "AURA": 377
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 6,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 7,
+              "RESOURCE_CHANGE": 64,
+              "AURA": 229
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
+      "caseId": "normalization.retribution-paladin-rotational-45s-normalizes-whole-and-in-order",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --families",
+      "purpose": "The 514-event family-filtered actor-6 slice normalizes with every raw type recognised and every event kept in capture order: as SOURCE the combatantinfo, 84 casts, 64 Holy Power changes and 267 aura transitions; as TARGET 7 casts, 64 resource changes and 211 aura transitions.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 514
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 6,
+            "side": "SOURCE",
+            "expected": {
+              "COMBATANT_INFO": 1,
+              "CAST": 84,
+              "RESOURCE_CHANGE": 64,
+              "AURA": 267
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 6,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 7,
+              "RESOURCE_CHANGE": 64,
+              "AURA": 211
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "A census of what the slice holds for the actor, never of the fight: exactly the families the --families option retained, at or before the recorded bound. The same predicate that cut the Protection subject from the same stream cut this one; the stream had no actor filter, so it is complete for both."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts"]
     },
     {
       "caseId": "normalization.target-sentinel-and-input-order.midfight-window",
@@ -10352,6 +11112,1326 @@
         "tests/unit/m10c-protection-resolver.test.ts",
         "tests/regression/m10c-internal-registration-invariance.test.ts",
         "tests/unit/m10c-protection-meta-actions.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.a-segment-alone-has-no-profile",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/observed-analysis.ts (profile gate)",
+      "purpose": "Analyzed on its own, the 105–165 s segment holds no combatantinfo for actor 6 and the registration reports PROFILE_NOT_RESOLVED — no build, no applicability, no decisions — rather than a smaller population that would read as clean play.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS",
+          "params": {
+            "actorId": 6,
+            "expected": "PROFILE_NOT_RESOLVED"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "Absence of a profile is a refusal, never an empty result: the correct answer to 'what build was this' with no combatantinfo is that it was not resolved."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.an-active-art-of-war-leaves-the-stack-atom-unbound-and-the-decision-unknown",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/aura-bindings.ts bindRetributionStackZero; src/simc/expression/evaluate.ts knownBuffStacks",
+      "purpose": "At the Final Verdict at 2,043,066 (+38,477 ms, 5 Holy Power, ds_castable BOUND false, every censused cooldown proven running, Hammer of Wrath proven unusable) Art of War is ACTIVE — applied at 2,041,391, removed only at 2,044,554 — so its stack atom is UNBOUND (AURA_ACTIVE): no positive count is ever bound, blade_of_justice's gate stays undecided, and the decision is UNKNOWN. The same decision with the aura proven INACTIVE is the MATCH pattern at 2,108,996.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2043066,
+              "abilityGameId": 383328
+            },
+            "atomName": "art_of_war",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 406086,
+              "reason": "AURA_ACTIVE"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2043066,
+              "abilityGameId": 383328
+            },
+            "atomName": "righteous_cause",
+            "expected": {
+              "state": "BOUND_ZERO",
+              "stack": 0,
+              "proof": "TALENT_NOT_SELECTED",
+              "abilityGameId": 402916,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2043066,
+              "abilityGameId": 383328
+            },
+            "expected": {
+              "state": "BOUND",
+              "value": false,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 6,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2043066,
+              "abilityGameId": 383328
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The amendment bound exactly zero under two proofs and nothing else. An ACTIVE aura has at least one stack and this project has no stack model, so the atom stays unbound and the shared evaluator enumerates it; a decision that hinges on it is UNKNOWN, not guessed."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.assassination-is-refused-at-the-spec-gate",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/observed-analysis.ts (spec gate)",
+      "purpose": "Asked about rogue/assassination over this artifact, the Retribution facade refuses with SPEC_NOT_SUPPORTED naming that specialization, before any Retribution rule, authority load or profile resolution runs.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.SPEC_GATE",
+          "params": {
+            "actorId": 6,
+            "specId": "rogue/assassination"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A facade owns one specialization and answers for no other. Ownership is also enforced at runtime by the registration and the registry."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m10a-analyzer-result-ownership.test.ts",
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.authority-build-boundary-and-domains-on-the-first-slice",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/registration.ts; authority-bindings.ts; pinned-authority.ts; observed-analysis.ts (build); action-profile.ts; domain-boundary.ts; domains.ts",
+      "purpose": "Over the 45 s slice the INTERNAL_ONLY registration analyzes actor 6 under exactly the pinned SIMC_APL_PALADIN_RETRIBUTION artifact, resolves the build from the observed tree (17 of 18 modelled talents three-way, Radiant Glory UNKNOWN because its NORMAL node is absent — never NOT_SELECTED; hero tree herald_of_the_sun; main hand 251230 pinned two-handed), classifies exactly eleven pinned entries OUTSIDE the rotational decision domain by token category (seven item uses including the precombat one, one potion, one external buff, three racials — Light's Judgment, Fireblood, Arcane Torrent), and represents the six domains: OFFENSIVE_ROTATION under the authority; RESOURCE_SPENDING, DEFENSIVE_COOLDOWN and INTERRUPT declared with no pinned authority; ACTIVE_MITIGATION and SELF_HEALING not declared.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE",
+          "params": {
+            "actorId": 6,
+            "expected": {
+              "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+              "artifactRevision": "simc-33622e9d-1",
+              "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+              "sourcePath": "engine/class_modules/apl/apl_paladin.cpp",
+              "sourceSha256": "ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION",
+          "params": {
+            "actorId": 6,
+            "expected": {
+              "talents": {
+                "art_of_war": "SELECTED",
+                "avenging_wrath": "SELECTED",
+                "blade_of_justice": "SELECTED",
+                "crusade": "SELECTED",
+                "crusading_strikes": "SELECTED",
+                "divine_purpose": "SELECTED",
+                "divine_storm": "SELECTED",
+                "divine_toll": "SELECTED",
+                "empyrean_legacy": "SELECTED",
+                "execution_sentence": "SELECTED",
+                "final_verdict": "SELECTED",
+                "hammer_of_wrath": "SELECTED",
+                "holy_flames": "SELECTED",
+                "radiant_glory": "UNKNOWN",
+                "righteous_cause": "NOT_SELECTED",
+                "templar_strikes": "NOT_SELECTED",
+                "wake_of_ashes": "SELECTED",
+                "walk_into_light": "SELECTED"
+              },
+              "heroTree": "herald_of_the_sun",
+              "twoHandedWeaponItemId": 251230
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES",
+          "params": {
+            "actorId": 6,
+            "expected": [
+              "precombat[6] use_item",
+              "cooldowns[0] use_item",
+              "cooldowns[1] potion",
+              "cooldowns[2] use_item",
+              "cooldowns[3] use_item",
+              "cooldowns[4] use_item",
+              "cooldowns[5] use_item",
+              "cooldowns[6] invoke_external_buff",
+              "cooldowns[7] lights_judgment",
+              "cooldowns[8] fireblood",
+              "generators[13] arcane_torrent"
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 6,
+            "domain": "OFFENSIVE_ROTATION",
+            "expected": {
+              "resolution": "AUTHORITY_AVAILABLE",
+              "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+              "offensiveAuthorityGoverns": null,
+              "evidenceFamily": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 6,
+            "domain": "RESOURCE_SPENDING",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 6,
+            "domain": "ACTIVE_MITIGATION",
+            "expected": {
+              "resolution": "DOMAIN_NOT_DECLARED",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+          "params": {
+            "actorId": 6,
+            "domain": "INTERRUPT",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": "UNVERIFIED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The domain boundary is a decision about what the class/spec authority governs, taken by TOKEN CATEGORY before any build fact is read: a racial, a potion, an item use or an external buff cannot preempt a class/spec action, and nothing about race, faction, gear use effects or consumables is read or inferred. Radiant Glory stays UNKNOWN by the three-way rule; the Avenging Wrath entry is settled applicable by the actor's OBSERVED wings casts instead (action-profile.ts), never by reading the absence as false."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.divine-storm-under-the-arbiter-storm-buff-is-rejected-two-ways",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/observed-action-gate.ts; first-gcd-adapter.ts; holy-power.ts (free-cast route)",
+      "purpose": "Two Divine Storms cast while divine_arbiter_divine_storm was proven UP (application 2,102,703): at 2,105,158 a Divine Purpose FREE cast (no Holy Power on the wire; Divine Purpose proven up from its application at 2,103,923, so the spenders are usable through the free route) and at 2,106,382 a costed cast at 5 Holy Power. At both, variable.ds_castable is BOUND false, so the single entry naming divine_storm (finishers[2]) is gated FALSE in every world and the nested unselectability proof REJECTS the observed action; independently, the first-GCD scan selects finishers[3] templars_verdict by the exact entry. Both routes agree.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2105158,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "OBSERVED_ACTION_REJECTED_BY_AUTHORITY",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "templars_verdict",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": true,
+              "unselectabilityProven": true,
+              "unselectabilityRefusal": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "cast": {
+              "reportTimeMs": 2105158,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "state": "NO_OBSERVATION",
+              "amount": null,
+              "max": null,
+              "cost": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2105158,
+              "abilityGameId": 53385
+            },
+            "atomName": "divine_purpose",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 408458,
+              "anchorReportTimeMs": 2103923,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2106382,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "OBSERVED_ACTION_REJECTED_BY_AUTHORITY",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "templars_verdict",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": true,
+              "unselectabilityProven": true,
+              "unselectabilityRefusal": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "cast": {
+              "reportTimeMs": 2106382,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "state": "EXACT_PRE_COST",
+              "amount": 5,
+              "max": 5,
+              "cost": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2106382,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "state": "BOUND",
+              "value": false,
+              "reason": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "REJECTED rests on a proof, not on a replacement: the authority could not have selected divine_storm here whatever else it selected. That the scan also selects templars_verdict with the competitor PROVEN usable — Holy Power on the wire or the free route proven — is the second, independent route, and the two are checked against each other (a MATCH and an unselectability proof on the same decision would be INCONSISTENT_AUTHORITY_RESULTS, never a verdict)."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.ds-castable-resolves-only-when-the-arbiter-auras-settle-it",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/resolver.ts resolveDsCastable; vocabulary.ts DS_CASTABLE_VALUE_EXPRESSION",
+      "purpose": "variable.ds_castable is the pinned finishers[0] expression evaluated by the shared evaluator with active_enemies UNKNOWN. At the Divine Storm at 2,074,658 it is BOUND true: divine_arbiter_verdict proven UP (2,072,765) settles the disjunction, Empyrean Legacy and divine_arbiter_divine_storm proven down. At the Final Verdict at 2,009,638 it is UNBOUND (VALUE_EXPRESSION_UNRESOLVED): divine_arbiter_verdict is proven down but divine_arbiter_divine_storm has no observed transition yet, so one enumeration makes the value TRUE and another FALSE.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2074658,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "state": "BOUND",
+              "value": true,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2074658,
+              "abilityGameId": 53385
+            },
+            "atomName": "divine_arbiter_verdict",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 1306161,
+              "anchorReportTimeMs": 2072765,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2009638,
+              "abilityGameId": 383328
+            },
+            "expected": {
+              "state": "UNBOUND",
+              "value": null,
+              "reason": "VALUE_EXPRESSION_UNRESOLVED"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2009638,
+              "abilityGameId": 383328
+            },
+            "atomName": "divine_arbiter_divine_storm",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 1306162,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "One named variable, one pinned expression, no assignment engine: the value is bound only when every enumeration of the unbound atoms agrees, and active_enemies is never bound, so the disjunction it opens resolves only through the arbiter aura or the conjunction's other members."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.gap-bundle-carries-no-state-across-the-declared-hole",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "tests/support/corpus/fight.ts bundleOverEvidence (declared holes); src/specs/paladin/retribution/cooldown-bindings.ts; aura-bindings.ts",
+      "purpose": "Over the gap bundle — the 45 s slice and the 105–165 s segment with [2,049,582 .. 2,109,589] declared missing — the 19 decisions in [2,109,590 .. 2,169,589] resolve to 0 MATCH, 5 REJECTED, 14 UNKNOWN: the MATCH at 2,108,996 and the two scan-selected REJECTED lie inside the hole and are not in evidence; no cooldown anchor or aura transition before the hole is carried across it; the five REJECTED are unselectability proofs resting only on arbiter and Empyrean Legacy transitions observed AFTER the hole. The exclusion counts in the window are exactly the segment's own (29 NON_GCD, 15 outside the first slice).",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"],
+            "declaredHoles": [
+              {
+                "fromReportTimeMs": 2049582,
+                "toReportTimeMs": 2109589
+              }
+            ],
+            "evaluationWindow": {
+              "fromReportTimeMs": 2109590,
+              "toReportTimeMs": 2169589
+            },
+            "expected": {
+              "eligibleDecisions": 19,
+              "match": 0,
+              "rejected": 5,
+              "unknown": 14,
+              "exclusions": {
+                "NON_GCD_ACTION": 29,
+                "OUTSIDE_FIRST_SLICE": 15
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A hole is admissible only when declared exactly, and inside it the fight is PARTIAL: every claim that spans it fails its gate downstream. No state carries across a declared hole; what an observed transition after it proves, it still proves."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts",
+        "tests/unit/m10c5b-corpus-bundle.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.rejected-by-unselectability-alone-before-any-cooldown-is-anchored",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/observed-action-gate.ts; aura-bindings.ts; cooldown-bindings.ts",
+      "purpose": "The first Divine Storm of the fight, at 2,006,193 (+1,604 ms, 3 Holy Power on the wire), is REJECTED by the unselectability proof alone: Empyrean Legacy is proven UP from the Avenging Wrath at 2,005,300, so !buff.empyrean_legacy.up is FALSE and variable.ds_castable is BOUND false whatever the arbiter auras are. The scan itself is UNKNOWN — Wake of Ashes, Divine Toll and Execution Sentence have no observed cast yet (NO_OBSERVED_CAST) and inside wings Hammer of Wrath's charges are unbindable — and Art of War's stack atom is UNBOUND (TALENT_NOT_DISPROVED: the talent is taken and no transition has been observed), so no state is invented to reach the verdict.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 6,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2006193,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "OBSERVED_ACTION_REJECTED_BY_AUTHORITY",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": null,
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": true,
+              "unselectabilityProven": true,
+              "unselectabilityRefusal": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 6,
+            "cast": {
+              "reportTimeMs": 2006193,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "state": "EXACT_PRE_COST",
+              "amount": 3,
+              "max": 5,
+              "cost": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2006193,
+              "abilityGameId": 53385
+            },
+            "expected": {
+              "state": "BOUND",
+              "value": false,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2006193,
+              "abilityGameId": 53385
+            },
+            "atomName": "empyrean_legacy",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 387178,
+              "anchorReportTimeMs": 2005300,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2006193,
+              "abilityGameId": 53385
+            },
+            "atomName": "divine_arbiter_verdict",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 1306161,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2006193,
+              "abilityGameId": 53385
+            },
+            "atomName": "art_of_war",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 406086,
+              "reason": "TALENT_NOT_DISPROVED"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2006193,
+              "abilityGameId": 53385
+            },
+            "simcToken": "wake_of_ashes",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "NO_OBSERVED_CAST"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 6,
+            "observedCast": {
+              "reportTimeMs": 2006193,
+              "abilityGameId": 53385
+            },
+            "simcToken": "avenging_wrath",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 59107,
+              "anchorReportTimeMs": 2005300,
+              "anchorAbilityGameId": 31884,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The unselectability route needs no replacement action and no usability proof for any other entry, so it can hold where the scan cannot. An aura is UNBOUND until its first observed transition and a cooldown UNKNOWN until its first observed cast: silence proves nothing, in either direction."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.spender-population-over-165s-is-sixty-nine-with-one-real-match-and-ten-real-rejected",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/observed-analysis.ts analyzeObservedRetributionPaladinDecisions; first-gcd-adapter.ts; observed-action-gate.ts",
+      "purpose": "Over the composed 165 s fight the evaluator finds 69 eligible spender decisions — every Final Verdict and Divine Storm cast — and excludes 167 casts by name: 1 melee swing, 112 NON_GCD presses (Crusading Strikes' auto-attack strikes, Avenging Wrath, Rebuke, the defensives), 54 in-domain GCD casts outside the first slice (Judgment, Blade of Justice, Hammer of Wrath, Wake of Ashes, Divine Toll, Execution Sentence). Of the 69: 1 MATCH, 10 REJECTED, 58 UNKNOWN. The engine names default[0] auto_attack as every UNKNOWN's earliest unresolved candidate; the root scan itself stopped at generators[0] call_action_list for 46 (the finishers callee ambiguous because variable.ds_castable did not resolve), default[3] call_action_list for 5, cooldowns[10] avenging_wrath for 3 (wings off cooldown, its raid_event gate unreadable), generators[1] wake_of_ashes for 2 and generators[2] divine_toll for 2 (cooldown elapsed, gate unreadable).",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "expected": {
+              "eligibleDecisions": 69,
+              "match": 1,
+              "rejected": 10,
+              "unknown": 58,
+              "exclusions": {
+                "MELEE_SWING": 1,
+                "NON_GCD_ACTION": 112,
+                "OUTSIDE_FIRST_SLICE": 54
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "expected": {
+              "match": 1,
+              "rejected": 10,
+              "blockedAt": {
+                "default[0] auto_attack": 58
+              },
+              "rootScanBlockedAt": {
+                "generators[0] call_action_list": 46,
+                "default[3] call_action_list": 5,
+                "cooldowns[10] avenging_wrath": 3,
+                "generators[1] wake_of_ashes": 2,
+                "generators[2] divine_toll": 2
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The coverage disclosure is the honest measure of the slice: 11 of 69 decisions resolve, and every one of the 58 that do not names the entry the evidence could not decide. The Divine Arbiter auras are proven only from their first observed transition, so ds_castable — and with it the finishers callee — is undecided for most of the early window; inside wings the Hammer of Wrath charge count is unbindable by design. Nothing here converts an UNKNOWN into a verdict."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.the-real-match-final-verdict-at-2108996",
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/first-gcd-adapter.ts; action-profile.ts; aura-bindings.ts (exact-zero stacks); cooldown-bindings.ts; resolver.ts; holy-power.ts",
+      "purpose": "The Final Verdict at 2,108,996 (+104,407 ms) MATCHES by the exact entry finishers[3] templars_verdict: Holy Power 4 of 5 on the wire (cost 3), Divine Purpose proven down (removal 2,105,158), so both spenders are PROVEN usable and cooldown-free; variable.ds_castable BOUND false because divine_arbiter_divine_storm is proven UP (application 2,102,703) — Divine Storm is eliminated by its gate; Art of War proven INACTIVE (removal before the decision) and Righteous Cause disproved at the choice node bind both stack atoms to exactly zero, so blade_of_justice's gate is FALSE; Hammer of Wrath is unusable with its readiness aura proven down (2,091,947); Wake of Ashes, Divine Toll, Execution Sentence and Avenging Wrath are proven on cooldown from their observed casts; Blade of Justice's hasted cooldown is REFUSED and stays UNKNOWN. The unselectability proof does not hold (templars_verdict's entry is unconditional), as it never can for a Verdict.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "templars_verdict",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "cast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "expected": {
+              "state": "EXACT_PRE_COST",
+              "amount": 4,
+              "max": 5,
+              "cost": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "expected": {
+              "state": "BOUND",
+              "value": false,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "atomName": "divine_arbiter_divine_storm",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 1306162,
+              "anchorReportTimeMs": 2102703,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "atomName": "divine_purpose",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 408458,
+              "anchorReportTimeMs": 2105158,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "atomName": "hammer_of_wrath",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 1241410,
+              "anchorReportTimeMs": 2091947,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "atomName": "art_of_war",
+            "expected": {
+              "state": "BOUND_ZERO",
+              "stack": 0,
+              "proof": "PROVEN_INACTIVE",
+              "abilityGameId": 406086,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "atomName": "righteous_cause",
+            "expected": {
+              "state": "BOUND_ZERO",
+              "stack": 0,
+              "proof": "TALENT_NOT_SELECTED",
+              "abilityGameId": 402916,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "simcToken": "wake_of_ashes",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 24927,
+              "anchorReportTimeMs": 2103923,
+              "anchorAbilityGameId": 255937,
+              "effectiveBaseMs": 30000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "simcToken": "avenging_wrath",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 18934,
+              "anchorReportTimeMs": 2067930,
+              "anchorAbilityGameId": 31884,
+              "effectiveBaseMs": 60000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 6,
+            "historyArtifactIds": [
+              "wcl-retribution-paladin-a7r6-rotational-45s",
+              "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2108996,
+              "abilityGameId": 383328
+            },
+            "simcToken": "blade_of_justice",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "MODIFIERS_NOT_PROVEN_ABSENT"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The one real MATCH of the first slice, reproduced through the production path and resting on nothing but observed evidence and pinned facts: the wire's own Holy Power, auras from observed transitions, cooldowns from observed casts, and the two exact-zero stack proofs the M11-A4 amendment authorized. A MATCH means the observed spender is compatible with the pinned class/spec authority after the non-domain exclusion — not that it was the best play."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-retribution-paladin.the-second-subject-opener-is-the-fail-closed-population",
+      "artifactId": "wcl-retribution-paladin-gtkb-opener",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/retribution/observed-analysis.ts; first-gcd-adapter.ts; holy-power.ts",
+      "purpose": "Over the 20 s opener of the second subject (gtKb fight 22 actor 23 — the same build as actor 6, main hand 237846 pinned two-handed, faction value 0 on the wire and not read) the evaluator finds 15 spender decisions and excludes 33 casts (24 NON_GCD, 9 outside the first slice); all 15 are UNKNOWN. Every decision lies inside the first Avenging Wrath or before Wake of Ashes, Divine Toll and Execution Sentence have an observed cast, so the root scan stops at generators[0] call_action_list for 14 and generators[2] divine_toll for 1. The first Final Verdict at 2,418,608 is a Divine Purpose free cast with no Holy Power on the wire.",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 23,
+            "expected": {
+              "eligibleDecisions": 15,
+              "match": 0,
+              "rejected": 0,
+              "unknown": 15,
+              "exclusions": {
+                "NON_GCD_ACTION": 24,
+                "OUTSIDE_FIRST_SLICE": 9
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+          "params": {
+            "actorId": 23,
+            "expected": {
+              "match": 0,
+              "rejected": 0,
+              "blockedAt": {
+                "default[0] auto_attack": 15
+              },
+              "rootScanBlockedAt": {
+                "generators[0] call_action_list": 14,
+                "generators[2] divine_toll": 1
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION",
+          "params": {
+            "actorId": 23,
+            "expected": {
+              "talents": {
+                "art_of_war": "SELECTED",
+                "avenging_wrath": "SELECTED",
+                "blade_of_justice": "SELECTED",
+                "crusade": "SELECTED",
+                "crusading_strikes": "SELECTED",
+                "divine_purpose": "SELECTED",
+                "divine_storm": "SELECTED",
+                "divine_toll": "SELECTED",
+                "empyrean_legacy": "SELECTED",
+                "execution_sentence": "SELECTED",
+                "final_verdict": "SELECTED",
+                "hammer_of_wrath": "SELECTED",
+                "holy_flames": "SELECTED",
+                "radiant_glory": "UNKNOWN",
+                "righteous_cause": "NOT_SELECTED",
+                "templar_strikes": "NOT_SELECTED",
+                "wake_of_ashes": "SELECTED",
+                "walk_into_light": "SELECTED"
+              },
+              "heroTree": "herald_of_the_sun",
+              "twoHandedWeaponItemId": 237846
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+          "params": {
+            "actorId": 23,
+            "cast": {
+              "reportTimeMs": 2418608,
+              "abilityGameId": 383328
+            },
+            "expected": {
+              "state": "NO_OBSERVATION",
+              "amount": null,
+              "max": null,
+              "cost": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES",
+          "params": {
+            "actorId": 23,
+            "expected": [
+              "precombat[6] use_item",
+              "cooldowns[0] use_item",
+              "cooldowns[1] potion",
+              "cooldowns[2] use_item",
+              "cooldowns[3] use_item",
+              "cooldowns[4] use_item",
+              "cooldowns[5] use_item",
+              "cooldowns[6] invoke_external_buff",
+              "cooldowns[7] lights_judgment",
+              "cooldowns[8] fireblood",
+              "generators[13] arcane_torrent"
+            ]
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A second real subject, a different report and boss, and the same rules: every decision the evidence cannot decide is UNKNOWN with its stopping point named, and nothing about the opener is scored. The domain boundary is the same list of entries for both subjects because it reads token categories, not the actor."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,415,042 for actor 23 (specID 70)",
+          "every COMPLETE cast by actor 23 in the slice, in canonical order",
+          "every aura transition on actor 23 sourced by actor 23, in canonical order"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11a4-retribution-evaluator.test.ts",
+        "tests/contracts/m11a4-retribution-registration.test.ts",
+        "tests/unit/m11a4-retribution-bindings.test.ts",
+        "tests/contracts/m11a4-known-buff-stacks.test.ts"
       ]
     },
     {

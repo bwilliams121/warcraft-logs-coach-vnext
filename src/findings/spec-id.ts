@@ -49,11 +49,12 @@
  */
 
 /** Every specialization this build has an internal name for. */
-export type SpecId = "rogue/assassination" | "paladin/protection";
+export type SpecId = "rogue/assassination" | "paladin/protection" | "paladin/retribution";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
   "paladin/protection",
+  "paladin/retribution",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -72,9 +73,18 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * move was one reviewed edit to five places that must agree: this partition,
  * the public contract's own `specId` enum, the identity table, the
  * `satisfies` on the specialization's id constant, and the registration's
- * exposure. The set is EMPTY until the next specialization is built.
+ * exposure.
+ *
+ * Retribution Paladin arrived here in M11-A4 as the first M11 analyzer: a
+ * real, registered, INTERNAL_ONLY evaluator of one bounded slice (observed
+ * Holy Power spender decisions), reachable only through the internal
+ * lookup and the test/corpus seams. The public identity table does not
+ * name it, so the public service, REST, MCP and raid-night keep returning
+ * SPEC_NOT_SUPPORTED for a Paladin/Retribution identity exactly as before.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
+  "paladin/retribution",
+] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

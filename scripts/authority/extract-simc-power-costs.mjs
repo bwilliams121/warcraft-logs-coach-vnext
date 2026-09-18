@@ -51,6 +51,27 @@ const SOURCES = {
 const POWER_ENUMERATORS = ["POWER_MANA", "POWER_HOLY_POWER"];
 
 export const TARGETS = {
+  "paladin-retribution": {
+    datasetId: "SIMC_DBC_PALADIN_RETRIBUTION_SPENDER_COSTS",
+    defaultOut: "src/data/game/paladin-retribution-spender-costs.json",
+    spells: [
+      {
+        simcToken: "divine_storm",
+        spellId: 53_385,
+        why: "finishers[2]: the Holy Power spender the pinned list gates on variable.ds_castable",
+      },
+      {
+        simcToken: "templars_verdict",
+        spellId: 85_256,
+        why: "finishers[3]: the unconditional spender, on the specialization spell without Final Verdict",
+      },
+      {
+        simcToken: "templars_verdict",
+        spellId: 383_328,
+        why: "finishers[3]: the same action built on the Final Verdict record when the talent is taken (sc_paladin_retribution.cpp:662-669)",
+      },
+    ],
+  },
   "paladin-protection": {
     datasetId: "SIMC_DBC_PALADIN_PROTECTION_SPENDER_COSTS",
     defaultOut: "src/data/game/paladin-protection-spender-costs.json",

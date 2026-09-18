@@ -110,6 +110,44 @@ const TARGETS = {
       exactlyOnceInDefault: ["shield_of_the_righteous", "word_of_glory"],
     },
   },
+  "paladin-retribution": {
+    sourcePath: "engine/class_modules/apl/apl_paladin.cpp",
+    regionStart: "//retribution_apl_start",
+    regionEnd: "//retribution_apl_end",
+    functionHeader: "void retribution( player_t* p )",
+    regionName: "retribution",
+    authorityId: "SIMC_APL_PALADIN_RETRIBUTION",
+    spec: { className: "paladin", specName: "retribution" },
+    defaultOut: "src/simc/data/paladin-retribution.apl.json",
+    // The facts the M11-A4 spender slice rests on (agent/m11-a4-first-spec-contract.md
+    // section 2): every one is structural and read off the pinned text.
+    requiredFacts: {
+      kind: "RETRIBUTION_CALL_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "cooldowns", "generators", "finishers"],
+      defaultOrder: ["cooldowns", "generators"],
+      // `finishers` is reachable from `generators` exactly twice: a gated call
+      // the shared evaluator cannot decide, and an UNCONDITIONAL call further
+      // down, which is the definitive entry to the spender decision.
+      finishersCalls: [
+        {
+          list: "generators",
+          ordinal: 0,
+          condition: "holy_power=5&cooldown.wake_of_ashes.remains|buff.hammer_of_light_free.remains<gcd*2",
+        },
+        { list: "generators", ordinal: 5, condition: null },
+      ],
+      // The two spenders: one entry each, both in `finishers`, in this order.
+      finishersSpenders: [
+        { token: "divine_storm", condition: "variable.ds_castable" },
+        { token: "templars_verdict", condition: null },
+      ],
+      dsCastableValue:
+        "(active_enemies>=2|buff.divine_arbiter_verdict.up)&!buff.empyrean_legacy.up&!buff.divine_arbiter_divine_storm.up",
+      // `pre_es_wake` is reset in precombat and never assigned in combat.
+      resetOnlyVariables: ["pre_es_wake"],
+    },
+  },
 };
 
 const args = parseArgs(process.argv.slice(2));
@@ -389,6 +427,116 @@ function verifyRequiredFacts(artifact) {
       ).length;
       if (count !== 1)
         problems.push(`'${required}' appears ${count} times in default, expected exactly once`);
+    }
+    return problems;
+  }
+
+  if (REQUIRED_FACTS.kind === "RETRIBUTION_CALL_GRAPH") {
+    for (const list of artifact.lists) {
+      for (const action of list.actions) {
+        const token = actionTokenOf(action.actionStringVerbatim);
+        if (token === "run_action_list" || token === "swap_action_list") {
+          problems.push(`unmodelled dispatch '${token}' found in '${list.listName}'`);
+        }
+        if (/(?:^|,)(?:target_if|cycle_targets)=/.test(action.actionStringVerbatim)) {
+          problems.push(`targeting option found in '${list.listName}': ${action.actionStringVerbatim}`);
+        }
+      }
+    }
+    const defaults = byName.get("default");
+    const calls = (defaults?.actions ?? [])
+      .map((action) => callsListOf(action.actionStringVerbatim))
+      .filter((name) => name !== null);
+    if (calls.join(",") !== REQUIRED_FACTS.defaultOrder.join(",")) {
+      problems.push(
+        `default list calls [${calls.join(", ")}], expected [${REQUIRED_FACTS.defaultOrder.join(", ")}]`,
+      );
+    }
+    // Every call into `finishers`, anywhere, must be one of the two pinned ones.
+    const finisherCalls = [];
+    for (const list of artifact.lists) {
+      list.actions.forEach((action, ordinal) => {
+        if (callsListOf(action.actionStringVerbatim) === "finishers") {
+          finisherCalls.push({
+            list: list.listName,
+            ordinal,
+            condition: conditionOf(action.actionStringVerbatim),
+          });
+        }
+      });
+    }
+    const expectedCalls = REQUIRED_FACTS.finishersCalls;
+    if (JSON.stringify(finisherCalls) !== JSON.stringify(expectedCalls)) {
+      problems.push(
+        `finishers is called as ${JSON.stringify(finisherCalls)}, expected ${JSON.stringify(expectedCalls)}`,
+      );
+    }
+    // The spenders appear ONLY in `finishers`, once each, in order, with the pinned gates.
+    for (const spender of REQUIRED_FACTS.finishersSpenders) {
+      const occurrences = [];
+      for (const list of artifact.lists) {
+        for (const action of list.actions) {
+          if (actionTokenOf(action.actionStringVerbatim) === spender.token) {
+            occurrences.push({ list: list.listName, condition: conditionOf(action.actionStringVerbatim) });
+          }
+        }
+      }
+      if (
+        occurrences.length !== 1 ||
+        occurrences[0].list !== "finishers" ||
+        occurrences[0].condition !== spender.condition
+      ) {
+        problems.push(
+          `'${spender.token}' occurrences ${JSON.stringify(occurrences)}, expected once in finishers with condition ${JSON.stringify(spender.condition)}`,
+        );
+      }
+    }
+    const finishers = byName.get("finishers");
+    const spenderTokens = (finishers?.actions ?? [])
+      .map((action) => actionTokenOf(action.actionStringVerbatim))
+      .filter((token) => REQUIRED_FACTS.finishersSpenders.some((spender) => spender.token === token));
+    if (
+      spenderTokens.join(",") !== REQUIRED_FACTS.finishersSpenders.map((spender) => spender.token).join(",")
+    ) {
+      problems.push(`finishers spender order is [${spenderTokens.join(", ")}]`);
+    }
+    // `variable.ds_castable` is assigned exactly once, in `finishers`, with the pinned value.
+    const dsAssignments = [];
+    for (const list of artifact.lists) {
+      for (const action of list.actions) {
+        if (/^variable,name=ds_castable(?:,|$)/.test(action.actionStringVerbatim)) {
+          const value = /(?:^|,)value=(.*)$/.exec(action.actionStringVerbatim)?.[1] ?? null;
+          dsAssignments.push({ list: list.listName, value });
+        }
+      }
+    }
+    if (
+      dsAssignments.length !== 1 ||
+      dsAssignments[0].list !== "finishers" ||
+      dsAssignments[0].value !== REQUIRED_FACTS.dsCastableValue
+    ) {
+      problems.push(`variable ds_castable assignments ${JSON.stringify(dsAssignments)}`);
+    }
+    // Reset-only variables: assigned in precombat with op=reset and nowhere else.
+    for (const name of REQUIRED_FACTS.resetOnlyVariables) {
+      const assignments = [];
+      for (const list of artifact.lists) {
+        for (const action of list.actions) {
+          if (new RegExp(`^variable,name=${name}(?:,|$)`).test(action.actionStringVerbatim)) {
+            assignments.push({ list: list.listName, action: action.actionStringVerbatim });
+          }
+        }
+      }
+      const only = assignments[0];
+      if (
+        assignments.length !== 1 ||
+        only.list !== "precombat" ||
+        !/,op=reset,default=0$/.test(only.action)
+      ) {
+        problems.push(
+          `variable '${name}' assignments ${JSON.stringify(assignments)}, expected one precombat reset`,
+        );
+      }
     }
     return problems;
   }

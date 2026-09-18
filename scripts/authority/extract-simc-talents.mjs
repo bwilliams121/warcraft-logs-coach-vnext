@@ -232,7 +232,172 @@ const ROGUE_ASSASSINATION_TARGET = {
   apexTraits: false,
 };
 
+/**
+ * M11-A4: the `talent.<name>` questions, hero sub-trees and tiered apex
+ * traits the pinned RETRIBUTION spender slice reads
+ * (agent/m11-a4-first-spec-contract.md section 2). Build-dependent
+ * `background` rules read the specialization tree (Final Verdict renames the
+ * spender; Crusading Strikes / Templar Strikes background Crusader Strike;
+ * Radiant Glory backgrounds Avenging Wrath; Divine Storm, Wake of Ashes and
+ * Execution Sentence are their own talents); the class tree supplies Hammer
+ * of Wrath (the readiness aura's trigger), Divine Toll and Divine Purpose
+ * (the free-cast route); the Herald of the Sun sub-tree supplies Walk Into
+ * Light (the Hammer of Wrath charge line and the Blade of Justice gate).
+ */
+const PALADIN_RETRIBUTION_TARGET = {
+  datasetId: "SIMC_TRAIT_PALADIN_RETRIBUTION_TALENTS",
+  classId: 2,
+  specId: 70,
+  className: "Paladin",
+  defaultOut: "src/data/game/paladin-retribution-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeId }. In the supported captures " +
+    "(report A7R6kxPJ1hC8YQ4w revision 30 and gtKb2xHn87pNcFfW revision 22, logVersion 17, gameVersion 1) " +
+    "`id` equals trait_data_t::id_trait_node_entry and `nodeId` equals trait_data_t::id_node, the same " +
+    "equivalence M10-C recorded for the Protection subject of the same A7R6 capture. It is recorded for " +
+    "those captures and parser version; it is not claimed for Warcraft Logs in general.",
+  requiredTalents: [
+    {
+      simcName: "final_verdict",
+      displayNameEn: "Final Verdict",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1191 talents.final_verdict = find_talent_spell( talent_tree::SPECIALIZATION, "Final Verdict" )',
+    },
+    {
+      simcName: "crusading_strikes",
+      displayNameEn: "Crusading Strikes",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1209 talents.crusading_strikes = find_talent_spell( talent_tree::SPECIALIZATION, "Crusading Strikes" )',
+    },
+    {
+      simcName: "templar_strikes",
+      displayNameEn: "Templar Strikes",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1208 talents.templar_strikes = find_talent_spell( talent_tree::SPECIALIZATION, "Templar Strikes" )',
+    },
+    {
+      simcName: "divine_storm",
+      displayNameEn: "Divine Storm",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1186 talents.divine_storm = find_talent_spell( talent_tree::SPECIALIZATION, "Divine Storm" )',
+    },
+    {
+      simcName: "blade_of_justice",
+      displayNameEn: "Blade of Justice",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1185 talents.blade_of_justice = find_talent_spell( talent_tree::SPECIALIZATION, "Blade of Justice" )',
+    },
+    {
+      simcName: "wake_of_ashes",
+      displayNameEn: "Wake of Ashes",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1213 talents.wake_of_ashes = find_talent_spell( talent_tree::SPECIALIZATION, "Wake of Ashes" )',
+    },
+    {
+      simcName: "execution_sentence",
+      displayNameEn: "Execution Sentence",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1215 talents.execution_sentence = find_talent_spell( talent_tree::SPECIALIZATION, "Execution Sentence" )',
+    },
+    {
+      simcName: "empyrean_legacy",
+      displayNameEn: "Empyrean Legacy",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1217 talents.empyrean_legacy = find_talent_spell( talent_tree::SPECIALIZATION, "Empyrean Legacy" )',
+    },
+    {
+      simcName: "radiant_glory",
+      displayNameEn: "Radiant Glory",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1219 talents.radiant_glory = find_talent_spell( talent_tree::SPECIALIZATION, "Radiant Glory" )',
+    },
+    {
+      simcName: "holy_flames",
+      displayNameEn: "Holy Flames",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1200 talents.holy_flames = find_talent_spell( talent_tree::SPECIALIZATION, "Holy Flames" )',
+    },
+    {
+      simcName: "crusade",
+      displayNameEn: "Crusade",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1221 talents.crusade = find_talent_spell( talent_tree::SPECIALIZATION, "Crusade" )',
+    },
+    {
+      simcName: "avenging_wrath",
+      displayNameEn: "Avenging Wrath",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin.cpp:4244 talents.avenging_wrath = find_talent_spell( talent_tree::SPECIALIZATION, "Avenging Wrath" )',
+    },
+    {
+      simcName: "hammer_of_wrath",
+      displayNameEn: "Hammer of Wrath",
+      tree: "CLASS",
+      binding:
+        'sc_paladin.cpp:4174 talents.hammer_of_wrath = find_talent_spell( talent_tree::CLASS, "Hammer of Wrath" )',
+    },
+    {
+      simcName: "divine_toll",
+      displayNameEn: "Divine Toll",
+      tree: "CLASS",
+      binding:
+        'sc_paladin.cpp:4201 talents.divine_toll = find_talent_spell( talent_tree::CLASS, "Divine Toll" )',
+    },
+    {
+      simcName: "divine_purpose",
+      displayNameEn: "Divine Purpose",
+      tree: "CLASS",
+      binding:
+        'sc_paladin.cpp:4219 talents.divine_purpose = find_talent_spell( talent_tree::CLASS, "Divine Purpose" )',
+    },
+    // The two auras `generators[3] blade_of_justice` reads by STACK. A build
+    // without the talent cannot hold the aura, which is the second of the
+    // two authorized exact-zero proofs (`aura-bindings.ts`).
+    {
+      simcName: "art_of_war",
+      displayNameEn: "Art of War",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1194 talents.art_of_war = find_talent_spell( talent_tree::SPECIALIZATION, "Art of War" )',
+    },
+    {
+      simcName: "righteous_cause",
+      displayNameEn: "Righteous Cause",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_paladin_retribution.cpp:1195 talents.righteous_cause = find_talent_spell( talent_tree::SPECIALIZATION, "Righteous Cause" )',
+    },
+    {
+      simcName: "walk_into_light",
+      displayNameEn: "Walk Into Light",
+      tree: "HERO",
+      binding:
+        'sc_paladin.cpp:4305 talents.herald_of_the_sun.walk_into_light = find_talent_spell( talent_tree::HERO, "Walk Into Light" )',
+    },
+  ],
+  heroTrees: [
+    // `hero_tree_e` values, sc_enums.hpp:320-322. Retribution chooses between
+    // Templar (48, shared with Protection) and Herald of the Sun (50).
+    { simcName: "templar", subTreeId: 48 },
+    { simcName: "herald_of_the_sun", subTreeId: 50 },
+  ],
+  apexTraits: false,
+};
+
 export const TARGETS = {
+  "paladin-retribution": PALADIN_RETRIBUTION_TARGET,
   "rogue-assassination": ROGUE_ASSASSINATION_TARGET,
   "paladin-protection": PALADIN_PROTECTION_TARGET,
 };

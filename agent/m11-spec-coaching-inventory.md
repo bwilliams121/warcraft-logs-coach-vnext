@@ -33,7 +33,7 @@ Every entry states, in the record's own fields:
 | `evidenceNeeded` | the Warcraft Logs events/state the answer rests on |
 | `authorityNeeded` | what permits calling the result good/bad/compatible/clipped: a pinned APL line, pinned mechanics/game data, an explicitly defined spec-owned invariant, or a future separately pinned rule authority. A guide is human context, never decision authority |
 | `normalizedStateNeeded` | the normalized/reconstructed state the analysis reads |
-| `implementationReadiness` | `READY_FOR_SPEC_MILESTONE`, `NEEDS_AUTHORITY`, `NEEDS_EVIDENCE`, `NEEDS_ENGINE_CAPABILITY`, `NEEDS_REPORT_CONTRACT`, `UNASSESSED` — a statement about INPUTS |
+| `implementationReadiness` | `READY_FOR_SPEC_MILESTONE`, `IMPLEMENTED_INTERNAL_ONLY` (M11-A4: the selected specialization's required question, landed as an INTERNAL_ONLY analyzer with committed sanitized evidence), `NEEDS_AUTHORITY`, `NEEDS_EVIDENCE`, `NEEDS_ENGINE_CAPABILITY`, `NEEDS_REPORT_CONTRACT`, `UNASSESSED` — a statement about INPUTS |
 | `unknownConditions` | what missing evidence or state makes the answer unknowable. Absence of an event is never evidence of failure |
 | `outputNeed` | `EXISTING_INTERNAL_FINDINGS`, `SUPPLEMENTAL_RESULT_ONLY`, `REPORT_PROJECTION`, `PUBLIC_CONTRACT_EVOLUTION`, `UNASSESSED` — no schema changes now |
 | `a4Classification` | only on the selected specialization: `A4_REQUIRED`, `A4_OPTIONAL`, `LATER_M11`, `BLOCKED` |
@@ -60,7 +60,7 @@ row).
 
 | specId | Cohort | Evidence | Authority audit | Inventory status | Questions |
 | --- | --- | --- | --- | --- | --- |
-| `paladin/retribution` | SELECTED | local raw | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `spender-choice` (A4_REQUIRED), `holy-power-waste` (A4_OPTIONAL), `empyrean-legacy-consumption`, `divine-arbiter-alternation`, `wake-of-ashes-cooldown-drift`, `execution-sentence-wake-alignment`, `avenging-wrath-usage` (LATER_M11), `wings-hammer-of-wrath-window` (BLOCKED) |
+| `paladin/retribution` | SELECTED — INTERNAL_ONLY since M11-A4 | committed sanitized (A7R6 actor 6, 165 s; gtKb actor 23, 20 s) | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `spender-choice` (A4_REQUIRED — IMPLEMENTED_INTERNAL_ONLY), `holy-power-waste` (A4_OPTIONAL), `empyrean-legacy-consumption`, `divine-arbiter-alternation`, `wake-of-ashes-cooldown-drift`, `execution-sentence-wake-alignment`, `avenging-wrath-usage` (LATER_M11), `wings-hammer-of-wrath-window` (BLOCKED) |
 | `demonhunter/havoc` | B | local raw | audited | SPECIFIC_QUESTIONS_IDENTIFIED | `essence-break-window-fill`, `fury-cap` |
 | `hunter/beast_mastery` | B | local raw | blocked | PARTIAL | `barbed-shot-charge-capping` |
 | `druid/feral` | B | local raw | blocked | PARTIAL | `rip-rake-snapshot-refresh` |
@@ -136,7 +136,7 @@ actor 23 evidence:
 
 | Question | Class | Why |
 | --- | --- | --- |
-| `spender-choice` | A4_REQUIRED | the first truthful rotational vertical slice (see the A4 contract) |
+| `spender-choice` | A4_REQUIRED | the first truthful rotational vertical slice (see the A4 contract). IMPLEMENTED at M11-A4 as `paladin-retribution-observed-decisions`, INTERNAL_ONLY: over the committed A7R6 actor-6 bundle, 69 eligible spender decisions — 1 MATCH, 10 REJECTED, 58 UNKNOWN with the stopping entry named; the opener subject 15 of 15 UNKNOWN |
 | `holy-power-waste` | A4_OPTIONAL | same normalized evidence as the slice; the `waste` field is an observed fact (`resourcechange` at `+59.841` waste=1, `+73.326` waste=2, …); no APL line; the lowest-risk way to exercise the supplemental seam end-to-end. Not required for promotion |
 | `empyrean-legacy-consumption` | LATER_M11 | ready on evidence and authority, but its decision half is already covered by the slice's REJECTED route |
 | `divine-arbiter-alternation` | LATER_M11 | season-bound set bonus; mostly subsumed by the slice |

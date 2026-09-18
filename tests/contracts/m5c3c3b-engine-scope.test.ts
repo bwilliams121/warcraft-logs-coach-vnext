@@ -109,12 +109,14 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
   // adapting Protection state TO the same engine. Still one adapter per
   // specialization, still one direction.
   const PALADIN_ADAPTER_PATH = "src/specs/paladin/protection/first-gcd-adapter.ts";
+  /** M11-A4: the Retribution Paladin adapter, the third and only other wiring of the engine. */
+  const RETRIBUTION_ADAPTER_PATH = "src/specs/paladin/retribution/first-gcd-adapter.ts";
 
   it("wires the engine into exactly one adapter module per specialization tree", () => {
     const wiring = filesUnder("src/specs").filter((path) =>
       codeOf(path).includes("firstGcdSelectionAcrossRescans"),
     );
-    expect(wiring.sort()).toEqual([PALADIN_ADAPTER_PATH, ADAPTER_PATH].sort());
+    expect(wiring.sort()).toEqual([PALADIN_ADAPTER_PATH, RETRIBUTION_ADAPTER_PATH, ADAPTER_PATH].sort());
   });
 
   it("keeps the dependency pointing one way", () => {

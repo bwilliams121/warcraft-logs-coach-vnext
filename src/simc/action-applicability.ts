@@ -78,13 +78,27 @@ export type NotApplicableReason =
    * `pinnedBehaviour`. An UNKNOWN build fact never lands here — the action
    * stays applicable, because there is a world in which it exists.
    */
-  | "BACKGROUND_UNDER_PROVEN_BUILD";
+  | "BACKGROUND_UNDER_PROVEN_BUILD"
+  /**
+   * An entry OUTSIDE the decision domain the specialization's authority
+   * governs (M11-A4): a racial action, a potion, an item use, a profession
+   * action, an externally supplied buff, or another non-class/spec
+   * preparation entry. A DOMAIN-BOUNDARY DECISION, not an availability
+   * claim — the entry may well have been usable; the analyzer evaluates
+   * class/spec rotational gameplay and such an entry cannot preempt a
+   * class/spec action in it. The specialization names the category and the
+   * policy in `pinnedBehaviour`; the scan skips the entry before reading its
+   * condition exactly as it skips any background action, and the step
+   * records this reason so the trace says why.
+   */
+  | "OUTSIDE_SUPPORTED_DECISION_DOMAIN";
 
 export const NOT_APPLICABLE_REASONS = [
   "ITEM_NOT_EQUIPPED",
   "NO_ON_USE_EFFECT",
   "RACIAL_NOT_AVAILABLE_TO_RACE",
   "BACKGROUND_UNDER_PROVEN_BUILD",
+  "OUTSIDE_SUPPORTED_DECISION_DOMAIN",
 ] as const satisfies readonly NotApplicableReason[];
 
 /** Numeric evidence behind an applicability verdict. Never a display name. */

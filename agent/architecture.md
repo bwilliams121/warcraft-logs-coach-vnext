@@ -5351,11 +5351,13 @@ engine-gap inventory, and the G1–G7 matrix. Outcome:
 
 Retribution is the only audited list with no `run_action_list`, no
 `target_if`, no cast times and a target count read exactly once inside one
-variable; its spender decisions resolve on real evidence (A7R6 actor 6:
-13 `REJECTED` by unselectability alone, 6 `MATCH` + 2 `REJECTED` through the
-definite scan, 48 `UNKNOWN` with named blockers). The one identity
-dependency is race for the GCD-consuming `lights_judgment` line, closable
-by a pinned faction fact. `agent/m11-a4-first-spec-contract.md` is the
+variable; its spender decisions resolve on real evidence (A7R6 actor 6, by the A3
+hand walk: 13 `REJECTED` by unselectability alone, 6 `MATCH` + 2 `REJECTED`
+through the definite scan, 48 `UNKNOWN` with named blockers — figures
+SUPERSEDED by the M11-A4 production-path result below: 1 MATCH, 10
+REJECTED, 58 UNKNOWN). The one identity dependency was race for the
+GCD-consuming `lights_judgment` line, thought closable by a pinned faction
+fact; M11-A4 removed it instead (the class/spec authority boundary). `agent/m11-a4-first-spec-contract.md` is the
 bounded A4 scope; `agent/m11-spec-coaching-inventory.md` and the
 test-owned `tests/support/m11/coaching-inventory.json` (proven by
 `m11a3-coaching-inventory`) carry the deep-dive question framework, the
@@ -5363,6 +5365,108 @@ thirty-spec backlog in structural cohorts, and the Ritual Clipping
 requirement under its unresolved Diabolist ownership. The fifteen lists
 behind `run_action_list` and the eleven casters wait on named engine
 milestones, not on spec work.
+
+### M11-A4 — the Retribution Paladin INTERNAL_ONLY vertical slice
+
+The first M11 analyzer, landed INTERNAL_ONLY exactly as the onboarding
+foundation intended: `src/specs/paladin/retribution/` is a specialization
+module (`RETRIBUTION_PALADIN_MODULE`, through `defineSpecModule`) registered
+in the production catalog with `exposure: "INTERNAL_ONLY"`,
+`supplementalAnalyses: []`, and `paladin/retribution` in
+`INTERNAL_ONLY_SPEC_IDS`. The public partition, the public contract's
+`specId` enum, the identity table, the enabled-analyzer set, the derived
+"Supported specializations" prose and the MCP `tools/list` document are
+unchanged; a public request for a Paladin/Retribution identity still receives
+`SPEC_NOT_SUPPORTED`. The analyzer is reached by the internal lookup, the
+corpus and tests only. Promotion remains a separate reviewed milestone.
+
+**The slice.** Observed Holy Power SPENDER decisions — every Divine Storm and
+Templar's/Final Verdict cast — compared against the pinned
+`SIMC_APL_PALADIN_RETRIBUTION` artifact (the retribution region of
+`apl_paladin.cpp` at the one Paladin commit, a distinct authority id from
+Protection's) through the nested unselectability proof (every entry naming
+the token, in every list) and the shared first-GCD query. Every other
+in-domain GCD press is observed and excluded as `OUTSIDE_FIRST_SLICE`, never
+judged. Holy Power is read from the decision cast's own PRE_COST entry and
+never replayed; a Divine Purpose free cast carries no entry and stays
+UNKNOWN.
+
+**Two contract amendments, both adopted by the product owner on 2026-09-18
+after the first evidence rerun stopped:**
+
+1. *The class/spec authority boundary.* Racial actions, potions, item uses,
+   external buffs and other non-class/spec preparation entries are OUTSIDE
+   the rotational decision domain, classified by token category before
+   selection (`domain-boundary.ts`, the shared
+   `OUTSIDE_SUPPORTED_DECISION_DOMAIN` applicability reason). Race and
+   faction are not read, not inferred and not an A4 dependency; the
+   faction/race closure attempted first (one authorized `gameData.factions`
+   query, two named actors) produced contradictory wire evidence and was
+   stopped rather than inferred, and its outputs stay in `.probe/` only.
+   MATCH means "compatible with the pinned class/spec authority after the
+   non-domain exclusion".
+2. *The exact-known buff-stack binding.* `AtomBindings.knownBuffStacks` is
+   the smallest generic seam the shared evaluator gained: a caller may state
+   a `buff.<name>.stack` value it has PROVEN exactly; an unbound stack atom
+   stays UNKNOWN_NUMBER as before, no count is inferred from any other
+   binding, and no arithmetic or enumeration rule changed. Retribution binds
+   ONLY exact zero, under `PROVEN_INACTIVE` (M4's EXACT INACTIVE from an
+   observed removal) or `TALENT_NOT_SELECTED` (the producing talent disproved
+   at its choice node); an ACTIVE aura leaves the atom unbound. That is what
+   decides `generators[3] blade_of_justice`'s gate outside wings.
+
+**What settles an open constructor reading.** The three-way talent rule
+cannot disprove a NORMAL node absent from the tree (Radiant Glory), which
+left the Avenging Wrath entry's applicability UNKNOWN and blocked every
+scan. A generic "the actor cast an ability the token binds to, so the
+action is foreground" inference was tried and REJECTED at review: a
+background or triggered action executes and can log a cast too (Crusading
+Strikes 408385 does), so an observed spell id alone is not selectability.
+What settles it is a hand-reviewed FOREGROUND-ONLY execution fact for this
+one action (`paladin-retribution-foreground-execution-authority.ts`): the
+pinned module executes 31884 only through the foreground constructor
+(sc_paladin.cpp:282-294), the only background/triggered wings being the
+distinct record 454351 (:275-280, :3304-3307; Wake of Ashes under Radiant
+Glory, sc_paladin_retribution.cpp:846-851), so an observed 31884 cast is a
+foreground execution under the pinned mechanics and the constructor's
+guards were false. The rule refines UNKNOWN → APPLICABLE only, for tokens
+with such a fact only; it never converts a BACKGROUND reading (a
+contradiction stays UNKNOWN), and a token without a fact keeps its
+reading whatever was cast. Templar's
+Verdict is APPLICABLE only when a worn item is pinned as a two-handed weapon
+(a two-hander equips only in the main hand, so no slot-index convention is
+assumed).
+
+**Diagnostics the shared engine does not give.** The engine reports a
+blocked root scan at its EARLIEST unresolved candidate, which for this list
+is always the NON_GCD `default[0] auto_attack`. The adapter also records the
+root scan's innermost BLOCKED step (`rootScanBlockedAt`) so the coverage
+disclosure can name the entry the evidence could not decide. A diagnostic,
+never a verdict.
+
+**Real evidence, committed.** Four sanitized slices cut from captures the
+corpus already held (no new Warcraft Logs request): A7R6 fight 7 actor 6 over
+165 s as three bundle-composed parts, and gtKb fight 22 actor 23 over 20 s.
+Through the production path: 69 eligible spender decisions — 1 MATCH (Final
+Verdict at +104,407 ms, exact entry), 10 REJECTED (unselectability; two
+also scan-selected), 58 UNKNOWN with the stopping entry named (46 at the
+finishers callee because `variable.ds_castable` is undecided until the
+arbiter auras' first observed transition; the rest at wings, Wake of Ashes or
+Divine Toll possibly ready with their `raid_event` gates unreadable) — and
+15 of 15 UNKNOWN on the opener subject. The corpus grew from 34 artifacts /
+112 cases to 38 / 128 with `SPEC_RETRIBUTION_PALADIN` as its own owning
+layer; the promotion evidence gate now REPORTS the INTERNAL_ONLY module's
+readiness (real MATCH and REJECTED, paired against its own WCL identity)
+and authorizes nothing.
+
+**Still UNKNOWN by design.** Inside wings, Hammer of Wrath's charge count is
+unbindable (Final Verdict resets its cooldown on an unobservable proc);
+Blade of Justice's hasted, charge-modified cooldown is refused; a positive
+Art of War stack is never bound; Judgment's complementary readiness
+(unusable while the readiness aura is up) is not proven — it would need a
+new shared reason and is never decisive on the spender path; `gcd` has no
+model. Each is recorded on the payload, in the coaching inventory and in
+`agent/m11-a4-first-spec-contract.md`.
 
 ---
 

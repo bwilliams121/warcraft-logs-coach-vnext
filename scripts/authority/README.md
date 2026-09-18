@@ -206,6 +206,67 @@ Reproduce:
 node scripts/authority/extract-simc-apl.mjs --target paladin-protection   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9   --commit-date 2026-09-12   --expect-sha256 ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02   --out src/simc/data/paladin-protection.apl.json
 ```
 
+## Retribution Paladin APL and game data — pinned at M11-A3/A4, INTERNAL_ONLY
+
+The `//retribution_apl_start .. //retribution_apl_end` region of the SAME
+`apl_paladin.cpp` at the SAME commit (`void retribution( player_t* p )`,
+five lists: `default` 4, `precombat` 8, `cooldowns` 11, `finishers` 4,
+`generators` 14; `call_action_list` only — no `run_action_list`, no
+`swap_action_list`, no `target_if`).
+
+| | |
+| --- | --- |
+| Source file | `engine/class_modules/apl/apl_paladin.cpp` |
+| Source SHA-256 | `ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02` |
+| Artifact | `src/simc/data/paladin-retribution.apl.json` (`SIMC_APL_PALADIN_RETRIBUTION`, revision `simc-33622e9d-1`) |
+| Extracted | 2026-09-18, `--target paladin-retribution` (`RETRIBUTION_CALL_GRAPH` facts verified: `finishers` is called at `generators[0]` under a gate and at `generators[5]` unconditionally; each spender appears once; `ds_castable`'s value expression and `pre_es_wake`'s reset-only assignment are pinned) |
+| Bound to | `OFFENSIVE_ROTATION` only, by `src/specs/paladin/retribution/registration.ts` through the tree's own `pinned-authority.ts`. A DISTINCT authority id from Protection's over the same file and commit; the registry's duplicate rule keys on the id and the domain. INTERNAL_ONLY. |
+
+The game data, all `--target paladin-retribution` at the same pin:
+
+| Artifact | Dataset id | Contents |
+| --- | --- | --- |
+| `src/data/game/paladin-retribution-gcd-semantics.json` | `SIMC_DBC_PALADIN_RETRIBUTION_GCD_SEMANTICS` | 29 `_gcd` records (every APL action and the observed-only abilities of the two subjects), 17 hand-reviewed token bindings (`templars_verdict` → {85256, 383328 Final Verdict}, `judgment` 20271, `hammer_of_wrath` 24275, `rebuke` 96231 gcd 0, the racials, …), 5 meta lanes (`auto_attack`, `use_item`, `use_items`, `potion`, `invoke_external_buff`) |
+| `src/data/game/paladin-retribution-talents.json` | `SIMC_TRAIT_PALADIN_RETRIBUTION_TALENTS` | 18 talents including the Art of War / Righteous Cause choice node (81523), Radiant Glory (a NORMAL node — UNKNOWN when absent, never NOT_SELECTED), and the Templar (48) / Herald of the Sun (50) hero sub-trees for spec 70; no apex traits |
+| `src/data/game/paladin-retribution-cooldowns.json` | `SIMC_DBC_PALADIN_RETRIBUTION_ABILITY_COOLDOWNS` | Wake of Ashes, Divine Toll, Execution Sentence, Avenging Wrath (constructor-only; the spec passive's −60,000 ms makes the effective base exactly 60 s) and Blade of Justice (HASTED, optional second charge — REFUSED by the bindings), with the machine census and three DECLARED Blade of Justice reset mutations under `AURA_APPLICATION_ON_ACTOR` / `AURA_STACK_CHANGE_ON_ACTOR` signatures; the extractor reads the spec module through a per-target `sourceOverrides` |
+| `src/data/game/paladin-retribution-spender-costs.json` | `SIMC_DBC_PALADIN_RETRIBUTION_SPENDER_COSTS` | Divine Storm 53385, Templar's Verdict 85256 and Final Verdict 383328 — Holy Power cost 3 each, no cooldown of any kind (which is what lets a non-observed spender be PROVEN usable when the pool is KNOWN affordable) |
+| `src/data/game/paladin-retribution-item-effects.json` | `SIMC_DBC_PALADIN_RETRIBUTION_ITEM_USE_EFFECTS` | the two subjects' main-hand weapons only (251230, 237846; `INVTYPE_2HWEAPON` = 17) — `templars_verdict_t` is background without a two-hander, and item USE effects are outside the rotational decision domain, so no trinket is pinned |
+
+Hand-reviewed and hashed beside them:
+`src/data/game/paladin-retribution-aura-authority.ts` (the eight aura
+identities, including the Hammer of Wrath readiness aura the log emits as
+1241410 where the module builds 1277026, and the producing talent of each
+stack atom), `paladin-retribution-transition-authority.ts` (`auto_attack`,
+`rebuke`) and `paladin-retribution-foreground-execution-authority.ts` (the
+one FOREGROUND-ONLY execution fact: spell 31884 is executed only by the
+foreground `avenging_wrath` constructor, the background/triggered wings
+being 454351 — what lets an observed 31884 cast settle the Radiant Glory
+guard that the three-way talent rule cannot). The shared parsers `spender-cost-artifact.ts` and
+`ability-cooldown-artifact.ts` were factored out of the Protection modules
+at A4 so both Paladin trees read one implementation; the Protection
+artifacts regenerate byte for byte.
+
+```bash
+node scripts/authority/extract-simc-apl.mjs --target paladin-retribution \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --commit-date 2026-09-12 \
+  --expect-sha256 ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02 \
+  --out src/simc/data/paladin-retribution.apl.json
+node scripts/authority/extract-simc-gcd.mjs --target paladin-retribution \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+node scripts/authority/extract-simc-talents.mjs --target paladin-retribution \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+node scripts/authority/extract-simc-ability-cooldowns.mjs --target paladin-retribution \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+node scripts/authority/extract-simc-power-costs.mjs --target paladin-retribution \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+node scripts/authority/extract-simc-item-effects.mjs --target paladin-retribution \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+```
+
+Every file was supplied from the local pinned copies (`--file`,
+`--file-<key>`, `--local-<key>`); no file outside the A3-named set was
+fetched.
+
 ## What the extractor guarantees
 
 **It fails closed.** It is not a general C++ parser and does not pretend to be.

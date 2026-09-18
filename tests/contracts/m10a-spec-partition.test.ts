@@ -52,15 +52,19 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("paladin/protection")).toBe(true);
   });
 
-  it("the internal-only set is empty since M10-D, and its machinery is dormant rather than removed", () => {
-    // Deliberate and pinned. The next specialization is expected to arrive
-    // here first, as Protection Paladin did in M10-A; the partition proofs,
-    // the narrowing boundary and the registry's exposure rules all still
-    // exist and still type-check over an empty set.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
-    expect(typeof requirePublicSpecId).toBe("function");
-    expect(typeof InternalSpecExposureError).toBe("function");
-    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
+  it("the internal-only set is exactly Retribution Paladin since M11-A4, and the narrowing boundary refuses it", () => {
+    // Deliberate and pinned. The set was empty from M10-D to M11-A3 with its
+    // machinery dormant; M11-A4 landed the next specialization here first,
+    // exactly as Protection Paladin arrived in M10-A. The partition proofs,
+    // the narrowing boundary and the registry's exposure rules are the same
+    // code, now exercised over a non-empty set.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["paladin/retribution"]);
+    expect(isSpecId("paladin/retribution")).toBe(true);
+    expect(isPublicSpecId("paladin/retribution")).toBe(false);
+    expect(() => requirePublicSpecId("paladin/retribution")).toThrow(InternalSpecExposureError);
+    for (const id of SPEC_IDS) {
+      expect(isPublicSpecId(id), id).toBe(!(INTERNAL_ONLY_SPEC_IDS as readonly string[]).includes(id));
+    }
   });
 
   it("an unknown string is not a spec id at all", () => {
@@ -70,7 +74,7 @@ describe("the known specialization ids are exactly partitioned", () => {
       "rogue/outlaw",
       "Rogue/Assassination",
       "Paladin/Protection",
-      "paladin/retribution",
+      "Paladin/Retribution",
       "warrior/arms",
       "constructor",
     ]) {

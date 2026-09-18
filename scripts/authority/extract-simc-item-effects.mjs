@@ -377,7 +377,37 @@ const CLASS_NEUTRAL_ACTION_SEMANTICS_CHECKS = ACTION_SEMANTICS_CHECKS.filter(
   (check) => check.claim !== "NO_ROGUE_MODIFIER_APPLIES_TO_AN_ITEM_USE_COOLDOWN",
 );
 
+/**
+ * M11-A4: the Retribution profile pins ONE class of item fact — the main-hand
+ * weapon's inventory type — because `templars_verdict_t` is background unless
+ * the main hand is a two-handed weapon (sc_paladin_retribution.cpp:675-676).
+ * Item USE effects are outside the Retribution rotational decision domain,
+ * so no trinket or on-use item is pinned here.
+ */
+const PALADIN_RETRIBUTION_ITEMS = [
+  {
+    itemId: 251_230,
+    displayNameEn: "Charonic Crescent",
+    simcToken: null,
+    inventoryType: 17,
+    why: "worn: main hand of the A7R6kxPJ1hC8YQ4w fight-7 actor-6 subject; INVTYPE_2HWEAPON (data_enums.hh:403)",
+  },
+  {
+    itemId: 237_846,
+    displayNameEn: "Blood Knight's Warblade",
+    simcToken: null,
+    inventoryType: 17,
+    why: "worn: main hand of the gtKb2xHn87pNcFfW fight-22 actor-23 subject; INVTYPE_2HWEAPON (data_enums.hh:403)",
+  },
+];
+
 export const TARGETS = {
+  "paladin-retribution": {
+    datasetId: "SIMC_DBC_PALADIN_RETRIBUTION_ITEM_USE_EFFECTS",
+    requiredItems: PALADIN_RETRIBUTION_ITEMS,
+    actionSemanticsChecks: CLASS_NEUTRAL_ACTION_SEMANTICS_CHECKS,
+    defaultOut: "src/data/game/paladin-retribution-item-effects.json",
+  },
   "rogue-assassination": {
     datasetId: DATASET_ID,
     requiredItems: REQUIRED_ITEMS,

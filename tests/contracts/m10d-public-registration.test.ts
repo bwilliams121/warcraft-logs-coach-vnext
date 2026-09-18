@@ -54,10 +54,10 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: both known ids; internal-only: none", () => {
+  it("public partition: the two public ids; internal-only: Retribution Paladin since M11-A4", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual(["rogue/assassination", "paladin/protection"]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
-    expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS].sort());
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/retribution"]);
+    expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
   it("the contract enum equals the partition", () => {
@@ -79,9 +79,12 @@ describe("the five sites agree", () => {
   it("the registration is PUBLIC and the catalog carries exactly two enabled analyzers", () => {
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
     expect(ASSASSINATION_REGISTRATION.exposure).toBe("PUBLIC");
+    // M11-A4: a third, INTERNAL_ONLY row is in the catalog and NOT among the
+    // enabled (public) analyzers.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
+      ["paladin/retribution", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -162,6 +165,7 @@ describe("the complete-catalog helper", () => {
     expect(counted.calls).toEqual({
       [ASSASSINATION_REGISTRATION.analyzerId]: 0,
       [PROTECTION_PALADIN_ANALYZER_ID]: 0,
+      "paladin-retribution-observed-decisions": 0,
     });
   });
 });

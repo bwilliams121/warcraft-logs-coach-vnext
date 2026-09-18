@@ -43,10 +43,12 @@ import { RETRIEVAL_OUTCOME_REASONS } from "../../../src/engine/evidence/coverage
 import pinnedAssassinationApl from "../../../src/simc/data/rogue-assassination.apl.json";
 import pinnedRogueDotDurations from "../../../src/data/game/rogue-dot-durations.json";
 import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.json";
+import pinnedRetributionApl from "../../../src/simc/data/paladin-retribution.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
 import { PUBLIC_EXCLUSION_REASONS } from "../../../src/contracts/analysis-contract.js";
 import { PROTECTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/protection/observed-analysis.js";
+import { RETRIBUTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/retribution/observed-analysis.js";
 
 // --------------------------------------------------------------------------
 // Version and limits
@@ -289,6 +291,8 @@ export const OWNING_LAYERS = {
   SPEC_ASSASSINATION: ["src/specs/rogue/assassination/"],
   /** M10-C. The Protection Paladin evaluator and nothing else. */
   SPEC_PROTECTION_PALADIN: ["src/specs/paladin/protection/"],
+  /** M11-A4. The INTERNAL_ONLY Retribution Paladin evaluator and nothing else. */
+  SPEC_RETRIBUTION_PALADIN: ["src/specs/paladin/retribution/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -315,6 +319,7 @@ export const OWNING_LAYER_IDS = Object.keys(OWNING_LAYERS) as readonly OwningLay
 export const SPEC_LAYER_OF = {
   "rogue/assassination": "SPEC_ASSASSINATION",
   "paladin/protection": "SPEC_PROTECTION_PALADIN",
+  "paladin/retribution": "SPEC_RETRIBUTION_PALADIN",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -1443,6 +1448,349 @@ export const ASSERTION_KINDS = {
       "The registration's analysis, read through its own view and projected by the real public projection, validates against warcraft-logs-coach.analysis/1 and carries exactly these totals; every excluded cast's reason and the coverage tally are mapped onto the public vocabulary (MELEE_SWING → NON_GCD_ACTION, rows merged), the tally sums to the excluded count, and no internal-only reason string or withheld field (raw blocker, domains, Holy Power, build, resolver diagnostics) reaches the document.",
   },
 
+  // ---- SPEC_RETRIBUTION_PALADIN (M11-A4) -----------------------------------
+  //
+  // The INTERNAL_ONLY Retribution Paladin evaluator, reached through its
+  // registration. Nothing here is public: no kind below drives a transport,
+  // and the application-service kinds prove the public path answers
+  // SPEC_NOT_SUPPORTED for the same subject.
+  "SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            authorityId: z.literal(pinnedRetributionApl.authorityId),
+            artifactRevision: z.literal(pinnedRetributionApl.artifactRevision),
+            commitSha: z.literal(pinnedRetributionApl.provenance.commitSha),
+            sourcePath: z.literal(pinnedRetributionApl.provenance.sourcePath),
+            sourceSha256: z.literal(pinnedRetributionApl.provenance.sourceSha256),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Retribution Paladin analysis cites exactly the committed pinned authority — id, revision, commit, source path and source digest — and none other. The literals are read from the committed artifact, so a re-pin fails this kind's schema before any case runs.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        targetActorId: z.number().int().nullable(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            outcome: z.enum(COMPARISON_OUTCOMES),
+            basis: z.enum(COMPARISON_BASES),
+            authorityCoverage: z.enum(DECISION_COVERAGES),
+            authorityToken: z.string().nullable(),
+            selectionPrecision: z.enum(["EXACT_ENTRY", "TOKEN_CONVERGED"]).nullable(),
+            decisiveBlocker: z.enum(DECISION_BLOCKER_CLASSES).nullable(),
+            rawBlocker: z.string().nullable(),
+            observedActionRejected: z.boolean(),
+            /** Whether the nested unselectability proof held for the observed token. */
+            unselectabilityProven: z.boolean(),
+            /** The proof's refusal when it did not hold, else null. */
+            unselectabilityRefusal: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Retribution Paladin evaluator, under the committed pinned authority, compares this observed spender cast exactly so — the shared first-GCD comparison AND the nested unselectability proof. MATCH means AUTHORITY_COMPATIBLE_ONLY after the non-domain exclusion; UNKNOWN carries the engine's own blocker verbatim; REJECTED is preserved as the evaluator produced it.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            eligibleDecisions: z.number().int().nonnegative(),
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            unknown: z.number().int().nonnegative(),
+            exclusions: z.partialRecord(z.enum(RETRIBUTION_EXCLUSION_REASONS), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator's coverage disclosure over this actor's every completed cast: the eligible SPENDER-decision denominator, the three outcomes that partition it, and each excluded cast counted under its named reason — including OUTSIDE_FIRST_SLICE for the in-domain casts A4 observes but does not judge. A cast is never dropped silently.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            /** Every UNKNOWN decision's engine blocker, `list[ordinal] token` -> count. Exact and exhaustive. */
+            blockedAt: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every UNKNOWN decision's ROOT-scan innermost BLOCKED step -> count (`(root scan resolved)` when none). Exact and exhaustive. */
+            rootScanBlockedAt: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "Every UNKNOWN spender decision of this actor retains an exact engine blocker at a named authority entry, and the blockers distribute exactly so; together with the resolved counts this partitions the eligible population. The engine names the EARLIEST unresolved candidate (for this list always the NON_GCD default[0] auto_attack), so the root scan's own innermost BLOCKED step — the entry the evidence could not decide — is distributed beside it.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        cast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            state: z.enum(["EXACT_PRE_COST", "NO_OBSERVATION"]),
+            amount: z.number().int().nonnegative().nullable(),
+            max: z.number().int().positive().nullable(),
+            cost: z.number().int().nonnegative().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator records exactly this Holy Power observation on this cast: the PRE_COST amount the wire carried, or NO_OBSERVATION when the cast carried no Holy Power entry (a Divine Purpose free cast). An observation, never a derived or replayed state.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        atomName: z.string().min(1),
+        expected: z
+          .object({
+            state: z.enum(["BOUND", "UNBOUND"]),
+            up: z.boolean().nullable(),
+            abilityGameId: z.number().int().nullable(),
+            anchorReportTimeMs: z.number().int().nullable(),
+            reason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this spender decision the Retribution aura bindings bind (or refuse to bind) this buff atom exactly so, from a transition M4 OBSERVED strictly before the decision on the actor's own aura, under the pinned identity the actor's build selects. Never inactive from silence, never from a later transition.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        atomName: z.string().min(1),
+        expected: z
+          .object({
+            state: z.enum(["BOUND_ZERO", "UNBOUND"]),
+            /** Only zero is ever bound. */
+            stack: z.literal(0).nullable(),
+            proof: z.enum(["PROVEN_INACTIVE", "TALENT_NOT_SELECTED"]).nullable(),
+            abilityGameId: z.number().int().nullable(),
+            reason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this spender decision the exact-zero stack binding for this buff.<name>.stack atom is exactly so: BOUND_ZERO only under PROVEN_INACTIVE (an observed removal M4 proved) or TALENT_NOT_SELECTED (the producing talent disproved at its choice node); UNBOUND — never a positive count — when the aura is ACTIVE or its state is unknown.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            state: z.enum(["BOUND", "UNBOUND"]),
+            value: z.boolean().nullable(),
+            reason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this spender decision variable.ds_castable — the pinned finishers[0] value expression evaluated by the SHARED evaluator over the same aura bindings the scan uses, with active_enemies unbound — resolves exactly so: BOUND only when every enumeration agrees, else UNBOUND with the reason.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        simcToken: z.string().min(1),
+        expected: z
+          .object({
+            readiness: z.enum(["PROVEN_NOT_READY", "UNKNOWN"]),
+            provenRemainingAtLeastMs: z.number().int().nonnegative().nullable(),
+            anchorReportTimeMs: z.number().int().nullable(),
+            anchorAbilityGameId: z.number().int().nullable(),
+            effectiveBaseMs: z.number().int().positive().nullable(),
+            unknownReason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this spender decision the Retribution cooldown bindings derive this token's readiness exactly so, from the actor's last OBSERVED cast strictly before the decision under the pinned base and the reviewed modifier census. Only PROVEN_NOT_READY is ever claimed; a hasted or charge-modified base is REFUSED and stays UNKNOWN.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        domain: z.enum(AUTHORITY_DOMAINS),
+        expected: z
+          .object({
+            resolution: z.enum(AUTHORITY_RESOLUTION_OUTCOMES),
+            authorityId: z.string().nullable(),
+            offensiveAuthorityGoverns: z.boolean().nullable(),
+            evidenceFamily: z.enum(["OBSERVABLE", "NOT_OBSERVABLE", "UNVERIFIED"]).nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator represents this decision domain exactly so: the registration's own authority resolution for it (NO_PINNED_AUTHORITY_FOR_DOMAIN for the three declared-and-unbound domains, DOMAIN_NOT_DECLARED for the two a Retribution Paladin does not ask about), whether the offensive authority may govern it (never, outside OFFENSIVE_ROTATION), and for INTERRUPT the evidence family's capability stated separately from the missing standard.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            talents: z.record(z.string().min(1), z.enum(TALENT_SELECTIONS)),
+            heroTree: z.string().min(1).nullable(),
+            twoHandedWeaponItemId: z.number().int().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator resolves the actor's build from the observed talent tree and gear against the pinned Retribution datasets exactly so: every modelled talent's three-way selection (a NORMAL node absent from the tree is UNKNOWN, never NOT_SELECTED), the hero sub-tree by entry membership, and the worn item pinned as a two-handed weapon. Never inferred from a cast.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        /** Every `list[ordinal] token` classified OUTSIDE_SUPPORTED_DECISION_DOMAIN, in authority order. Exact and exhaustive. */
+        expected: z.array(z.string().min(1)),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "Under this actor's resolved build, the Retribution applicability rules classify exactly these pinned entries OUTSIDE the rotational decision domain — racial actions, potions, item uses and external buffs — by token category, before any build fact is read; every other player action is decided by the constructor readings. No race, faction, gear use effect or consumable is read or inferred.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.SPEC_GATE": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Retribution facade refuses this specialization with SPEC_NOT_SUPPORTED before any Retribution rule runs: no comparisons, no domains, no authority.",
+  },
+  "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z.enum(["PROFILE_NOT_RESOLVED", "AUTHORITY_NOT_AVAILABLE", "INSUFFICIENT_EVIDENCE"]),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "Over this artifact (or bundle) the registration refuses to analyze the actor with exactly this status — a segment with no combatant profile is PROFILE_NOT_RESOLVED, never a smaller population that reads as clean play.",
+  },
+
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------
   //
   // Driven directly over a SYNTHETIC authority artifact (JSON_VALUE) with every
@@ -1717,7 +2065,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "The validated production catalog answers the internal and the public lookup for this known specialization exactly so, and the public identity table agrees; catalog order changes neither answer. An INTERNAL_ONLY registration would be real to the first lookup and invisible to the second (none exists since M10-D); a PUBLIC one answers both.",
+      "The validated production catalog answers the internal and the public lookup for this known specialization exactly so, and the public identity table agrees; catalog order changes neither answer. An INTERNAL_ONLY registration is real to the first lookup and invisible to the second (Retribution Paladin since M11-A4); a PUBLIC one answers both.",
   },
 
   // ---- PUBLIC_CONTRACT -----------------------------------------------------
@@ -1880,6 +2228,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedAssassinationApl.authorityId]: pinnedAssassinationApl.artifactRevision,
   [pinnedRogueDotDurations.datasetId]: pinnedRogueDotDurations.artifactRevision,
   [pinnedProtectionApl.authorityId]: pinnedProtectionApl.artifactRevision,
+  [pinnedRetributionApl.authorityId]: pinnedRetributionApl.artifactRevision,
 };
 
 // --------------------------------------------------------------------------

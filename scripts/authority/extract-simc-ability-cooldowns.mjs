@@ -291,8 +291,154 @@ const PALADIN_PROTECTION_TARGET = {
   },
 };
 
+/**
+ * M11-A4: the cooldowns the Retribution SPENDER slice must prove NOT READY
+ * for an observed spender decision to resolve — the class/spec entries that
+ * sit above the unconditional `finishers` call in the pinned list
+ * (`cooldowns[9] execution_sentence`, `cooldowns[10] avenging_wrath`,
+ * `generators[1] wake_of_ashes`, `generators[2] divine_toll`,
+ * `generators[3] blade_of_justice`). Hammer of Wrath and Judgment are NOT
+ * here: Final Verdict resets both on an unobservable proc
+ * (sc_paladin_retribution.cpp:720-729), so no cooldown claim about them is
+ * sound and the slice never makes one (Hammer of Wrath is gated by its
+ * readiness aura instead).
+ *
+ * The spec module this target reads is `sc_paladin_retribution.cpp`; the
+ * shared class module and header are the same files Protection pins.
+ */
+const PALADIN_RETRIBUTION_TARGET = {
+  datasetId: "SIMC_DBC_PALADIN_RETRIBUTION_ABILITY_COOLDOWNS",
+  classId: 2,
+  className: "Paladin",
+  specId: 70,
+  defaultOut: "src/data/game/paladin-retribution-cooldowns.json",
+  sourceOverrides: { specModule: "engine/class_modules/paladin/sc_paladin_retribution.cpp" },
+  abilities: [
+    {
+      simcToken: "wake_of_ashes",
+      abilityGameId: 255937,
+      aliasGroup: null,
+      createAction:
+        'sc_paladin_retribution.cpp:1136 if ( name == "wake_of_ashes" ) return new wake_of_ashes_t( this, options_str )',
+      specBinding:
+        'sc_paladin_retribution.cpp:803-804 wake_of_ashes_t : paladin_spell_t( "wake_of_ashes", p, p->talents.wake_of_ashes ); :1213 talents.wake_of_ashes = find_talent_spell( talent_tree::SPECIALIZATION, "Wake of Ashes" )',
+      actionStruct: { file: "specModule", name: "wake_of_ashes_t" },
+      cooldownHandle: "cooldowns.wake_of_ashes",
+      cooldownName: "wake_of_ashes",
+    },
+    {
+      simcToken: "divine_toll",
+      abilityGameId: 375576,
+      aliasGroup: null,
+      createAction:
+        'sc_paladin.cpp:3423-3424 if ( name == "divine_toll" ) return new divine_toll_t( this, options_str )',
+      specBinding:
+        'sc_paladin.cpp:4201 talents.divine_toll = find_talent_spell( talent_tree::CLASS, "Divine Toll" )',
+      actionStruct: { file: "classModule", name: "divine_toll_t" },
+      cooldownHandle: "cooldowns.divine_toll",
+      cooldownName: "divine_toll",
+    },
+    {
+      simcToken: "execution_sentence",
+      abilityGameId: 343527,
+      aliasGroup: null,
+      createAction:
+        'sc_paladin_retribution.cpp:1139 if ( name == "execution_sentence" ) return new execution_sentence_t( this, options_str )',
+      specBinding:
+        'sc_paladin_retribution.cpp:216-217 execution_sentence_t : paladin_melee_attack_t( "execution_sentence", p, p->talents.execution_sentence ); :1215 talents.execution_sentence = find_talent_spell( talent_tree::SPECIALIZATION, "Execution Sentence" )',
+      actionStruct: { file: "specModule", name: "execution_sentence_t" },
+      cooldownHandle: "cooldowns.execution_sentence",
+      cooldownName: "execution_sentence",
+      /**
+       * The constructor re-assigns the action's own cooldown from its own DBC
+       * record (`cooldown->duration = data().cooldown()`, :229): a no-op
+       * restatement, not an override of the pinned value.
+       */
+      knownStructCooldownReferences: {
+        count: 1,
+        note: "cooldown->duration = data().cooldown() in the constructor (:229) re-reads the same DBC field the base action reads; no other value is ever assigned",
+      },
+    },
+    {
+      simcToken: "avenging_wrath",
+      abilityGameId: 31884,
+      aliasGroup: null,
+      createAction:
+        'sc_paladin.cpp:3381-3382 if ( name == "avenging_wrath" ) return new avenging_wrath_t( this, options_str )',
+      specBinding:
+        'sc_paladin.cpp:282-283 avenging_wrath_t : paladin_spell_t( "avenging_wrath", p, p->find_spell( 31884 ) ); background under Radiant Glory (:290-291) — Retribution has no Sentinel substitution',
+      actionStruct: { file: "classModule", name: "avenging_wrath_t", constructorOnly: true },
+      cooldownHandle: "cooldowns.avenging_wrath",
+      cooldownName: "avenging_wrath",
+    },
+    {
+      simcToken: "blade_of_justice",
+      abilityGameId: 184575,
+      aliasGroup: null,
+      createAction:
+        'sc_paladin_retribution.cpp:1133 if ( name == "blade_of_justice" ) return new blade_of_justice_t( this, options_str )',
+      specBinding:
+        'sc_paladin_retribution.cpp:370 blade_of_justice_t : paladin_melee_attack_t( "blade_of_justice", p, p->talents.blade_of_justice ); :1185 talents.blade_of_justice = find_talent_spell( talent_tree::SPECIALIZATION, "Blade of Justice" )',
+      actionStruct: { file: "specModule", name: "blade_of_justice_t" },
+      cooldownHandle: "cooldowns.blade_of_justice",
+      cooldownName: "blade_of_justice",
+      /**
+       * THREE reset sites, each observable through an aura on the actor. A
+       * consumer may claim Blade of Justice NOT READY only while no Art of War
+       * (406086) application/refresh and no Righteous Cause (402916) aura
+       * event lies between the anchoring cast and the decision.
+       */
+      knownDynamicMutations: [
+        {
+          member: "reset",
+          site: "paladin_melee_attack_t::impact Art of War proc (sc_paladin.cpp:1005-1015)",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "AURA_APPLICATION_ON_ACTOR",
+            abilityGameId: 406086,
+            basis:
+              'buffs.art_of_war->trigger() (sc_paladin.cpp:1011) precedes the reset on the same proc; buffs.art_of_war = make_buff( this, "art_of_war", find_spell( 406086 ) ) (sc_paladin_retribution.cpp:1164)',
+          },
+        },
+        {
+          member: "reset",
+          site: "blade_of_justice_t::execute, Light Within stacking branch on an Art of War / Righteous Cause stack decrease (sc_paladin_retribution.cpp:398-405)",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "AURA_STACK_CHANGE_ON_ACTOR",
+            abilityGameIds: [406086, 402916],
+            basis:
+              "the branch fires only when buffs.art_of_war or buffs.righteous_cause lost a stack during this execute; both are auras the log reports on the actor",
+          },
+        },
+        {
+          member: "reset",
+          site: "blade_of_justice_t::execute, Light Within Righteous Cause decrement (sc_paladin_retribution.cpp:416-423)",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "AURA_STACK_CHANGE_ON_ACTOR",
+            abilityGameIds: [402916],
+            basis:
+              'buffs.righteous_cause->decrement() precedes the reset; buffs.righteous_cause = make_buff( this, "righteous_cause", find_spell( 402916 ) ) (sc_paladin_retribution.cpp:1165)',
+          },
+        },
+      ],
+      /**
+       * The nested Light Within child (light_within_t, :328-368) zeroes ITS
+       * OWN cooldown; the parent's cooldown is untouched.
+       */
+      knownStructCooldownReferences: {
+        count: 1,
+        note: "cooldown->duration = 0_ms in the nested light_within_t constructor (:368) is the background child's cooldown, not blade_of_justice_t's",
+      },
+    },
+  ],
+  aliasGroups: {},
+};
+
 export const TARGETS = {
   "paladin-protection": PALADIN_PROTECTION_TARGET,
+  "paladin-retribution": PALADIN_RETRIBUTION_TARGET,
 };
 
 function fail(message) {
@@ -966,15 +1112,18 @@ async function main() {
   if (extractedOn === null || !/^\d{4}-\d{2}-\d{2}$/.test(extractedOn))
     fail("--extracted-on YYYY-MM-DD is required");
 
+  // A target may name a different SPEC module (Retribution's own file); the
+  // class module, header and DBC tables are the same for every Paladin target.
+  const SOURCE_PATHS = { ...SOURCES, ...(target.sourceOverrides ?? {}) };
   const loaded = {};
   const sources = [];
-  for (const [key, path] of Object.entries(SOURCES)) {
+  for (const [key, path] of Object.entries(SOURCE_PATHS)) {
     const buffer = await loadSource(args, key, path);
     const sha256 = createHash("sha256").update(buffer).digest("hex");
     loaded[key] = buffer.toString("utf8");
     sources.push({ path, sha256, byteLength: buffer.length });
   }
-  const sourceFor = (key) => sources.find((s) => s.path === SOURCES[key]);
+  const sourceFor = (key) => sources.find((s) => s.path === SOURCE_PATHS[key]);
 
   const build = parseClientDataVersion(loaded.clientDataVersion);
   if (!build.ok) fail(build.error);
@@ -1114,7 +1263,7 @@ async function main() {
         : { knownDynamicMutations: ability.knownDynamicMutations }),
       binding: {
         method: "MACHINE_EXTRACTED_DBC_RECORD",
-        sourcePath: SOURCES.spellData,
+        sourcePath: SOURCE_PATHS.spellData,
         createAction: ability.createAction,
         specBinding: ability.specBinding,
       },
@@ -1133,7 +1282,7 @@ async function main() {
       dynamicModifierPolicy: {
         method: "HAND_REVIEWED_CPP_ABSENCE_PROOF",
         appliesTo: ability.simcToken,
-        sourcePaths: [SOURCES.classModule, SOURCES.specModule, SOURCES.classHeader],
+        sourcePaths: [SOURCE_PATHS.classModule, SOURCE_PATHS.specModule, SOURCE_PATHS.classHeader],
         sourceSha256: {
           classModule: sourceFor("classModule").sha256,
           specModule: sourceFor("specModule").sha256,

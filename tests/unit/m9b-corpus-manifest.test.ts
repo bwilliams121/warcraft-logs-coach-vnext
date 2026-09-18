@@ -47,9 +47,13 @@ describe("the committed corpus loads", () => {
     // (the Arms Warrior through the service and both transports over the
     // opener slice, and the mixed roster raid night over the same slice),
     // and repurposed four cases whose premise — Protection internal-only —
-    // ended. Measured, then pinned.
-    expect(loaded.artifacts).toHaveLength(34);
-    expect(loaded.cases).toHaveLength(112);
+    // ended; M11-A4 added the four Retribution Paladin slices (cut from the
+    // M10-B, M10-C5 Phase B and M9-C2 captures already recorded, no new
+    // request) and sixteen cases (four normalization, one bundle
+    // composition, ten evaluator, one application-service). Measured, then
+    // pinned.
+    expect(loaded.artifacts).toHaveLength(38);
+    expect(loaded.cases).toHaveLength(128);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -62,7 +66,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds twenty-four sanitized captures, four derivations and six synthetics", async () => {
+  it("holds twenty-eight sanitized captures, four derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -96,6 +100,10 @@ describe("the committed corpus loads", () => {
       "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
       "wcl-protection-paladin-a7r6-rotational-45s",
       "wcl-pull-window-with-resources",
+      "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+      "wcl-retribution-paladin-a7r6-rotational-45s",
+      "wcl-retribution-paladin-gtkb-opener",
     ]);
     expect(byKind.get("DERIVED_FROM_CAPTURE")).toEqual([
       "wcl-no-actor-sentinel-source.unusable-negative",
@@ -211,7 +219,9 @@ describe("provenance is honest about lineage", () => {
         }
       }
     }
-    expect(captured).toBe(7);
+    // Seven M9-C captures, plus the M11-A4 Retribution opener slice cut from
+    // the M9-C2 opener capture (same capturedOn, sanitizer revision 6).
+    expect(captured).toBe(8);
   });
 
   it("marks unrecorded tooling revisions UNAVAILABLE rather than inventing them", async () => {
@@ -275,6 +285,12 @@ describe("retained coverage is granted only where the capture predicate supports
     "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
     "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
     "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+    // M11-A4: the same predicate for actor 6 over the same two captures, and
+    // for actor 23 over the M9-C2 opener capture.
+    "wcl-retribution-paladin-a7r6-rotational-45s",
+    "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+    "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+    "wcl-retribution-paladin-gtkb-opener",
   ];
 
   it("grants nothing on any property-based or index-based selection", async () => {

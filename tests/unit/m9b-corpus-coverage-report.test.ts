@@ -63,6 +63,10 @@ describe("coverage is measured from the corpus", () => {
       "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
       "wcl-protection-paladin-a7r6-rotational-45s",
       "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
+      "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+      "wcl-retribution-paladin-a7r6-rotational-45s",
+      "wcl-retribution-paladin-gtkb-opener",
     ]);
   });
 

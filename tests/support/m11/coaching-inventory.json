@@ -50,8 +50,8 @@
     {
       "specId": "paladin/retribution",
       "cohort": "SELECTED",
-      "currentAnalyzerStatus": "UNREGISTERED",
-      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
+      "realEvidenceStatus": "REAL_SANITIZED_EVIDENCE_AVAILABLE",
       "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",
       "questions": [
@@ -78,17 +78,17 @@
             "talent selection",
             "gear"
           ],
-          "implementationReadiness": "READY_FOR_SPEC_MILESTONE",
+          "implementationReadiness": "IMPLEMENTED_INTERNAL_ONLY",
           "unknownConditions": [
-            "no arbiter or Empyrean Legacy aura is up (active_enemies is unbound, so ds_castable is undecidable)",
-            "Wake of Ashes / Divine Toll / Execution Sentence / Avenging Wrath possibly ready (raid_event-gated lines block the scan)",
+            "no arbiter or Empyrean Legacy aura transition has been observed yet (the atoms are unbound until their first observed transition; active_enemies is never bound, so ds_castable is undecidable)",
+            "Wake of Ashes / Divine Toll / Execution Sentence / Avenging Wrath possibly ready (no observed cast inside the pinned base; the raid_event-gated lines then block the scan)",
             "a Walk Into Light build under Avenging Wrath with Hammer of Wrath charge state unproven",
-            "the Lightforged race world cannot be excluded (scan route only; the unselectability route is race-independent)",
+            "Art of War ACTIVE at the decision (only an exact ZERO stack is ever bound; a positive count is unbound, so the blade_of_justice gate stays undecided)",
             "Templar hero-tree builds (hammer_of_light lines read unbindable buff remains)"
           ],
           "outputNeed": "EXISTING_INTERNAL_FINDINGS",
           "a4Classification": "A4_REQUIRED",
-          "notes": "This is the first truthful rotational vertical slice, not a supplemental analysis. Audit walk over A7R6 actor 6: 13 REJECTED by unselectability, 6 MATCH + 2 REJECTED by definite scan, 48 UNKNOWN with named reasons."
+          "notes": "This is the first truthful rotational vertical slice, not a supplemental analysis. IMPLEMENTED at M11-A4 as the INTERNAL_ONLY paladin-retribution-observed-decisions analyzer (src/specs/paladin/retribution/), under the class/spec authority boundary (racials, potions, item uses and external buffs are outside the rotational decision domain; race and faction are not read) and the exact-zero buff-stack binding. Production result over the committed A7R6 actor-6 bundle (165 s): 69 eligible spender decisions, 1 MATCH (Final Verdict at +104,407 ms), 10 REJECTED (unselectability; two also scan-selected), 58 UNKNOWN with the stopping entry named; gtKb actor 23 opener (20 s): 15 eligible, all UNKNOWN. The A3 hand audit's 6 MATCH / 2 scan-REJECTED counted race worlds and positive stack assumptions the implementation does not make."
         },
         {
           "id": "paladin/retribution.holy-power-waste",

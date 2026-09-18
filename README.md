@@ -440,9 +440,17 @@ pinned forty-specialization roster (`src/data/game/spec-roster.json`) and
 builds the registration row; it owns no gameplay meaning. New
 specializations enter `INTERNAL_ONLY` and are promoted to public only
 through a test-owned evidence gate that requires at least one real
-sanitized-capture `MATCH` or `REJECTED`. No third specialization exists yet
-and none has been selected; the roster lists what the game has, not what
-this project analyzes. See `agent/architecture.md`, "M11-A".
+sanitized-capture `MATCH` or `REJECTED`. The first M11 specialization,
+Retribution Paladin, landed `INTERNAL_ONLY` at M11-A4 (`src/specs/paladin/
+retribution/`, `paladin-retribution-observed-decisions`): it is in the
+production catalog for the internal lookup, the corpus and tests, and is
+NOT public — a Paladin/Retribution request still returns
+`SPEC_NOT_SUPPORTED`. Its first slice judges observed Holy Power spender
+decisions (Divine Storm versus Templar's/Final Verdict) only, under the
+class/spec authority boundary (racials, potions, item uses and external
+buffs are outside the rotational decision domain; race and faction are not
+read). The roster lists what the game has, not what this project analyzes.
+See `agent/architecture.md`, "M11-A" and "M11-A4", and the tree's README.
 
 ## Second Specialization
 

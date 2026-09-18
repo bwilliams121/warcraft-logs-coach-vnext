@@ -65,10 +65,14 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // assertions; M10-D's public Protection integration added three cases
     // and four assertions (the Arms Warrior through the service and both
     // transports, the mixed-roster raid night, and actor 4's identity) and
-    // repurposed four cases in place. Measured, then pinned.
-    expect(result.summary.cases).toBe(112);
-    expect(result.summary.assertions).toBe(339);
-    expect(result.summary.passed).toBe(339);
+    // repurposed four cases in place; M11-A4 added the four Retribution
+    // Paladin slices and sixteen cases with sixty-eight assertions (the
+    // INTERNAL_ONLY analyzer through its registration, the bundle, the
+    // exact-zero stack proofs, the domain boundary, the public refusal on
+    // the same subject). Measured, then pinned.
+    expect(result.summary.cases).toBe(128);
+    expect(result.summary.assertions).toBe(407);
+    expect(result.summary.passed).toBe(407);
   });
 
   it("covers every layer", async () => {

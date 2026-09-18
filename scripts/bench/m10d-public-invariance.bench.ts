@@ -95,6 +95,11 @@ const SUBJECTS: readonly Subject[] = [
   { label: "prot-45s", artifactId: PROT_45S, actorId: 7, className: "Paladin", specName: "Protection" },
   // A7R6 fight 7 actor 4, per the committed fight-context artifact.
   { label: "arms", artifactId: PROT_OPENER, actorId: 4, className: "Warrior", specName: "Arms" },
+  // A7R6 fight 7 actor 6 (Paladin/Retribution), per the committed fight-context
+  // artifact. Added at M11-A4 as the dedicated public-unsupported baseline:
+  // Retribution is INTERNAL_ONLY, so the public service must refuse it before
+  // and after the analyzer exists. Compare across M11-A4 captures only.
+  { label: "ret", artifactId: PROT_OPENER, actorId: 6, className: "Paladin", specName: "Retribution" },
 ];
 
 interface Timing {
@@ -305,6 +310,44 @@ describe(`M10-D invariance capture -> ${CAPTURE_DIR}`, () => {
     expect(run.ok).toBe(true);
     if (!run.ok) return;
     write("raid-night-mixed.public.json", projectRaidNightResult(run.aggregate));
+  });
+
+  it("raid-night: the mixed A7R6 roster with the Retribution actor (M11-A4 public-unsupported baseline)", async () => {
+    // Actors 7 (Paladin/Protection), 19 (Rogue/Assassination), 6
+    // (Paladin/Retribution) per the committed fight-context artifact. A
+    // separate file from `raid-night-mixed.public.json` so that capture stays
+    // comparable with pre-M11-A4 baselines. Retribution is INTERNAL_ONLY and
+    // must appear here exactly as any unsupported participant does.
+    const CLASS_OF: Readonly<Record<number, string>> = { 7: "Paladin", 19: "Rogue", 6: "Paladin" };
+    const SPEC_OF: Readonly<Record<number, string>> = {
+      7: "Protection",
+      19: "Assassination",
+      6: "Retribution",
+    };
+    const catalog = countingCatalog();
+    const ports = fakePorts({
+      snapshot: assassinationSnapshot({
+        fightIds: [7],
+        sourceIds: [7, 19, 6],
+        classNameFor: (sourceId) => CLASS_OF[sourceId] ?? "Rogue",
+        specNameFor: (_fightId, sourceId) => SPEC_OF[sourceId] ?? null,
+      }),
+      coreFor: (fightId, participants) =>
+        corpusArtifactCore(
+          PROT_OPENER,
+          fightId,
+          participants.map((sourceId) => ({ sourceId, className: CLASS_OF[sourceId] ?? "Rogue" })),
+        ),
+    });
+    const run = await timed("raidNight:a7r6-mixed-ret", catalog.calls, () =>
+      runNight(
+        { reportCode: REPORT_CODE, fightIds: [7] },
+        { ...ports, deps: { ...ports.deps, registry: catalog.registry } },
+      ),
+    );
+    expect(run.ok).toBe(true);
+    if (!run.ok) return;
+    write("raid-night-mixed-ret.public.json", projectRaidNightResult(run.aggregate));
   });
 
   it("writes the report-only timings", () => {

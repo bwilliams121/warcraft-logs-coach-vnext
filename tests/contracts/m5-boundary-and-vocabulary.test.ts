@@ -199,6 +199,14 @@ describe("M5 invents no combat state", () => {
     // removal under coverage, never from silence; its companion test below
     // pins that the UNKNOWN branch binds nothing.
     "src/specs/paladin/protection/aura-bindings.ts",
+    // M11-A4. The Retribution Paladin's buff atoms and its EXACT-ZERO stack
+    // proofs, read through `presenceAt` under pinned identities. It may bind
+    // FALSE only from M4's EXACT INACTIVE, and it may bind a stack count only
+    // when that count is exactly zero — from the same EXACT INACTIVE or from a
+    // producing talent disproved at its choice node; never a positive count,
+    // never from silence. Its companion test is
+    // tests/unit/m11a4-retribution-bindings.test.ts.
+    "src/specs/paladin/retribution/aura-bindings.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];
@@ -406,6 +414,9 @@ describe("M5 forms no unearned verdict", () => {
       "src/findings/observed-comparison.ts",
       "src/specs/paladin/protection/observed-analysis.ts",
       "src/specs/paladin/protection/domains.ts",
+      // M11-A4: the third specialization's facade and domain vocabulary.
+      "src/specs/paladin/retribution/observed-analysis.ts",
+      "src/specs/paladin/retribution/domains.ts",
     ];
     for (const path of M5_FILES) {
       const code = codeOf(path);

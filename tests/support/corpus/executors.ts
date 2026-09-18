@@ -25,6 +25,7 @@ import type { ParamsOf } from "./executors/params.js";
 import * as publicContract from "./executors/public-contract.js";
 import * as spec from "./executors/spec-assassination.js";
 import * as protection from "./executors/spec-protection-paladin.js";
+import * as retribution from "./executors/spec-retribution-paladin.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
@@ -249,6 +250,112 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE":
+      return retribution.authorityProvenance(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE":
+      return retribution.decisionCoverage(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY":
+      return retribution.coverageSummary(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION":
+      return retribution.unknownBlockerDistribution(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION":
+      return retribution.holyPowerObservation(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT":
+      return retribution.auraBindingAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT":
+      return retribution.stackBindingAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT":
+      return retribution.dsCastableAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT":
+      return retribution.cooldownReadinessAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT":
+      return retribution.domainResult(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION":
+      return retribution.buildResolution(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES":
+      return retribution.nonDomainEntries(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS":
+      return retribution.analysisStatus(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_RETRIBUTION_PALADIN.SPEC_GATE":
+      return retribution.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "APPLICATION_SERVICE.INTERNAL_REGISTRATION":
       return applicationService.internalRegistration(params as ParamsOf<typeof assertion.kind>);
     case "PUBLIC_CONTRACT.REST_MCP_PARITY":
@@ -308,6 +415,20 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
   "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY",
   "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION",
+  "SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE",
+  "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
+  "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",
+  "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION",
+  "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
+  "SPEC_RETRIBUTION_PALADIN.AURA_BINDING_AT",
+  "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
+  "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
+  "SPEC_RETRIBUTION_PALADIN.COOLDOWN_READINESS_AT",
+  "SPEC_RETRIBUTION_PALADIN.DOMAIN_RESULT",
+  "SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION",
+  "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES",
+  "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS",
+  "SPEC_RETRIBUTION_PALADIN.SPEC_GATE",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",
 ];
