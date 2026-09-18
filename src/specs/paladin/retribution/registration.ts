@@ -1,5 +1,5 @@
 /**
- * Retribution Paladin's analyzer registration (M11-A4).
+ * Retribution Paladin's analyzer registration (M11-A4; PUBLIC since M11-A5).
  *
  * THIS IS WHERE RETRIBUTION STATES WHAT IT IS, AND THE ONLY PLACE.
  *
@@ -10,17 +10,20 @@
  * its result shared code may read. `src/services/analyzer-registry.ts` lists
  * this row and reads nothing else from this directory.
  *
- * INTERNAL_ONLY, ON PURPOSE
+ * PUBLIC SINCE M11-A5, AND WHAT THAT CHANGED
  *
- * The row is in the production catalog with INTERNAL_ONLY exposure: the
- * application service, raid-night orchestration, REST and MCP never select
- * it, `paladin/retribution` stays outside `PUBLIC_SPEC_IDS`, the public
- * contract's `specId` enum and the public identity table, and a public
- * request for a Retribution Paladin still receives SPEC_NOT_SUPPORTED. The
- * `satisfies InternalOnlySpecId` on `spec.ts` is the compile-time side of
- * that: promoting the id without touching every one of the five public
- * sites fails to build. Promotion is a SEPARATE, reviewed milestone with its
- * own evidence gate; nothing in this file does it.
+ * The row was INTERNAL_ONLY from M11-A4: in the production catalog, reachable
+ * by the internal lookup, the corpus and tests, never selected by the
+ * application service, raid-night orchestration, REST or MCP. M11-A5 moved
+ * it to PUBLIC by the five-site edit (the partition, the public contract's
+ * `specId` enum, the identity table, the `satisfies PublicSpecId` on
+ * `spec.ts`, and `exposure` below) after the test-owned promotion evidence
+ * gate reported real MATCH and REJECTED evidence for it. Promotion changed
+ * REACHABILITY and nothing else: the facade, its slice, its proofs and its
+ * fail-closed edges are exactly M11-A4's, and a public request for a
+ * Paladin/Retribution identity now dispatches this row and receives the
+ * same analysis the internal lookup always produced, projected through the
+ * shared public contract.
  *
  * THE AUTHORITY, BOUND TO ONE DOMAIN
  *
@@ -31,14 +34,21 @@
  * THE VIEW, AND WHAT IT KEEPS INTERNAL
  *
  * The registration must supply an observed-decision view for shared code.
- * Retribution's carries every internal exclusion reason VERBATIM except the
- * one Protection also projects (`MELEE_SWING` → `NON_GCD_ACTION`, for the
- * reason recorded there). `OUTSIDE_FIRST_SLICE` is NOT a public reason: it
- * has no name in the public schema, and giving it one is a schema decision
- * this milestone does not take. While the module is INTERNAL_ONLY the view
- * is read by nothing public; a future promotion would first have to decide
- * that projection, and a contract test pins that today the reason never
- * reaches a public document.
+ * Retribution's projects two internal exclusion reasons and carries the rest
+ * verbatim: `MELEE_SWING` → `NON_GCD_ACTION` (as Protection does, for the
+ * reason recorded there), and `OUTSIDE_FIRST_SLICE` → the public
+ * `OUTSIDE_SUPPORTED_SLICE`. The internal name says what it is to this
+ * evaluator — the first slice is spender decisions, and the in-domain,
+ * authority-bound GCD casts it does not judge (Judgment, Blade of Justice,
+ * Hammer of Wrath, Wake of Ashes, Divine Toll, Execution Sentence, the
+ * strikes, Hammer of Light) are named under it — and the public name says
+ * what it is to a reader: intentionally outside the supported decision
+ * slice, not judged, not a mistake, not an UNKNOWN. That public value was
+ * the one schema decision M11-A5 took (one additive `analysis/1` widening;
+ * see `PUBLIC_EXCLUSION_REASONS`). Everything else in the payload — the
+ * domain results, the Holy Power observations, the build resolution, the
+ * resolver diagnostics, the root-scan stopping entries — stays INSIDE the
+ * payload and never reaches the view.
  */
 
 import type { AnalyzerRegistration } from "../../../findings/analyzer-registration.js";
@@ -58,16 +68,18 @@ import {
 } from "./spec.js";
 
 /**
- * The view projection of every internal exclusion reason. Total by
- * construction. `OUTSIDE_FIRST_SLICE` is carried verbatim and is NOT a
- * public schema reason — see the module header.
+ * The view projection of every internal exclusion reason onto the PUBLIC
+ * vocabulary. Total by construction, and pinned inside
+ * `PUBLIC_EXCLUSION_REASONS` by `m11a5-retribution-public-projection`.
+ * `OUTSIDE_FIRST_SLICE` → `OUTSIDE_SUPPORTED_SLICE` is the one M11-A5
+ * projection decision; see the module header.
  */
 export const RETRIBUTION_EXCLUSION_VIEW_PROJECTION = {
   MELEE_SWING: "NON_GCD_ACTION",
   NON_GCD_ACTION: "NON_GCD_ACTION",
   EXECUTION_LANE_NOT_ESTABLISHED: "EXECUTION_LANE_NOT_ESTABLISHED",
   NO_AUTHORITY_TOKEN_BINDING: "NO_AUTHORITY_TOKEN_BINDING",
-  OUTSIDE_FIRST_SLICE: "OUTSIDE_FIRST_SLICE",
+  OUTSIDE_FIRST_SLICE: "OUTSIDE_SUPPORTED_SLICE",
 } as const satisfies Record<RetributionExclusionReason, string>;
 
 export type RetributionViewExclusionReason =
@@ -151,32 +163,42 @@ export function retributionObservedDecisionView(
 
 /**
  * The limitation prose. Owned here because it is a claim about what this
- * evaluator refuses to judge. NOT PUBLISHED: the module is INTERNAL_ONLY, so
- * the tool descriptions never compose it; it is kept so the row is whole and
- * so a promotion could not ship without reviewed wording.
+ * evaluator refuses to judge, and PUBLISHED since M11-A5: the MCP tool
+ * descriptions compose it through `publicSpecializationDescriptions`, in the
+ * same position and by the same mechanism as Protection's. It names the
+ * slice, says what is not evaluated, and says that the in-domain decisions
+ * outside the slice are reported as excluded — observed, not judged — so a
+ * reader cannot mistake a narrow denominator for a full rotation review or
+ * an UNKNOWN for a fault. No implementation detail (list indexes,
+ * constructor facts, stack bindings) belongs here.
  */
 export const RETRIBUTION_LIMITS = Object.freeze({
   analysis: [
-    "Retribution Paladin analysis compares only observed Holy Power SPENDER decisions (Divine Storm versus",
-    "Templar's/Final Verdict) against pinned class/spec authority, after excluding racial, potion, item-use",
-    "and external-buff entries as outside the rotational decision domain. It does NOT evaluate generators,",
-    "cooldown usage, defensive cooldowns, interrupts, or survival, and it does not read race, faction, gear",
-    "use effects or consumables.",
+    "Retribution Paladin analysis currently evaluates only observed Holy Power SPENDER decisions (Divine",
+    "Storm versus Templar's/Final Verdict) against pinned class/spec rotational authority, when the",
+    "necessary state can be established. Other rotational decisions — generators, Wake of Ashes, Divine",
+    "Toll, Execution Sentence and the other cooldown branches — are reported as excluded",
+    "OUTSIDE_SUPPORTED_SLICE: observed, not judged. It does NOT evaluate defensive cooldowns, interrupts,",
+    "or survival, and it does not read race, faction, gear use effects or consumables; racial, potion,",
+    "item-use and external-buff entries are outside the rotational decision domain. A spender decision",
+    "whose required state cannot be reconstructed remains UNKNOWN, which is expected and is not a fault.",
   ].join("\n"),
   raidNight: [
     "Retribution Paladin cells count only observed Holy Power SPENDER decisions compared against pinned",
-    "class/spec authority. They do NOT evaluate generators, cooldown usage, defensive cooldowns, interrupts,",
-    "or survival.",
+    "class/spec authority; other rotational decisions are excluded as OUTSIDE_SUPPORTED_SLICE, not judged.",
+    "They do NOT evaluate generators, cooldown usage, defensive cooldowns, interrupts, or survival.",
   ].join("\n"),
 });
 
 /**
- * The Retribution Paladin specialization module (M11-A4), INTERNAL_ONLY.
+ * The Retribution Paladin specialization module (M11-A4), PUBLIC since M11-A5.
  *
  * `supplementalAnalyses` is EMPTY by decision: the seam's first exercise is
- * not this milestone's (`agent/m11-a4-first-spec-contract.md` §8). The WCL
- * identity strings are the ones the local A7R6 fight-7 capture reports for
- * actor 6 (`subType` Paladin, `friendlySpecs` Retribution).
+ * not this milestone's (`agent/m11-a4-first-spec-contract.md` §8), and
+ * M11-A5 is exposure only. The WCL identity strings are the ones the local
+ * A7R6 fight-7 capture reports for actor 6 (`subType` Paladin,
+ * `friendlySpecs` Retribution), and they are the canonical identity the
+ * public table resolves.
  */
 export const RETRIBUTION_PALADIN_MODULE: SpecModule = defineSpecModule({
   identity: {
@@ -186,7 +208,7 @@ export const RETRIBUTION_PALADIN_MODULE: SpecModule = defineSpecModule({
     wclClassName: "Paladin",
     wclSpecName: "Retribution",
   },
-  exposure: "INTERNAL_ONLY",
+  exposure: "PUBLIC",
   capabilities: RETRIBUTION_CAPABILITIES,
   authorityBindings: RETRIBUTION_AUTHORITY_BINDINGS,
   limitsProse: RETRIBUTION_LIMITS,

@@ -30,12 +30,15 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * SINCE M10-D THE INTERNAL-ONLY SET IS EMPTY. Both known specializations are
- * public. The partition, the narrowing boundary and the registry's exposure
- * rules are retained as DORMANT architecture: the next specialization is
- * expected to arrive here first, as Protection Paladin did, and the compile
- * time proofs below hold over an empty set exactly as they held over one
- * member. Nothing here should be deleted merely because it is unexercised.
+ * THE INTERNAL-ONLY SET IS EMPTY AGAIN SINCE M11-A5. It was empty from M10-D
+ * (Protection public) until M11-A4 (Retribution Paladin arrived internal), and
+ * M11-A5 moved Retribution to the public half after its promotion evidence
+ * gate passed. The partition, the narrowing boundary and the registry's
+ * exposure rules are retained as DORMANT architecture: the next specialization
+ * is expected to arrive here first, as both Paladin specializations did, and
+ * the compile-time proofs below hold over an empty set exactly as they held
+ * over one member. Nothing here should be deleted merely because it is
+ * unexercised.
  *
  * THE NARROWING BOUNDARY, AND WHY IT THROWS
  *
@@ -61,6 +64,7 @@ export const SPEC_IDS = Object.freeze([
 export const PUBLIC_SPEC_IDS = Object.freeze([
   "rogue/assassination",
   "paladin/protection",
+  "paladin/retribution",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -78,13 +82,13 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * Retribution Paladin arrived here in M11-A4 as the first M11 analyzer: a
  * real, registered, INTERNAL_ONLY evaluator of one bounded slice (observed
  * Holy Power spender decisions), reachable only through the internal
- * lookup and the test/corpus seams. The public identity table does not
- * name it, so the public service, REST, MCP and raid-night keep returning
- * SPEC_NOT_SUPPORTED for a Paladin/Retribution identity exactly as before.
+ * lookup and the test/corpus seams. M11-A5 moved it to `PUBLIC_SPEC_IDS` by
+ * the same five-site edit after the test-owned promotion evidence gate
+ * reported real MATCH and REJECTED evidence for it. The slice it publishes
+ * is exactly the slice it had: promotion changed reachability, not the
+ * analyzer.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
-  "paladin/retribution",
-] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

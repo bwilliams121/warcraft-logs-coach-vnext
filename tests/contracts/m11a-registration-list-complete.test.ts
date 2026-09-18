@@ -236,15 +236,16 @@ describe("the production catalog and the tree name the same registrations", () =
 // ---------------------------------------------------------------------------
 
 describe("what the tree registers today", () => {
-  it("is exactly Assassination Rogue and Protection Paladin (PUBLIC) and, since M11-A4, Retribution Paladin (INTERNAL_ONLY)", () => {
+  it("is exactly Assassination Rogue, Protection Paladin and, since M11-A5, Retribution Paladin — all PUBLIC", () => {
     // A reviewed list, not the rule: the rules above scale to any number of
     // registrations. This snapshot exists so that a new registration module
     // is a VISIBLE change to this file, reviewed alongside the five-site
     // identity move it must accompany — or, for an INTERNAL_ONLY row, the
-    // partition entry it must NOT accompany.
+    // partition entry it must NOT accompany. Retribution arrived here
+    // INTERNAL_ONLY at M11-A4 and became PUBLIC at M11-A5.
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
       ["src/specs/paladin/protection/registration.ts", "PROTECTION_PALADIN_REGISTRATION", "PUBLIC"],
-      ["src/specs/paladin/retribution/registration.ts", "RETRIBUTION_PALADIN_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/paladin/retribution/registration.ts", "RETRIBUTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],
     ]);
   });

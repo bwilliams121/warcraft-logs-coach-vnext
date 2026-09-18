@@ -1,16 +1,26 @@
-# Retribution Paladin — observed spender-decision evaluator (M11-A4, INTERNAL_ONLY)
+# Retribution Paladin — observed spender-decision evaluator (M11-A4; PUBLIC since M11-A5)
 
-**Exposure: `INTERNAL_ONLY`.** This evaluator is registered in the production
-catalog (`paladin-retribution-observed-decisions`, `paladin/retribution`) and
-is reachable by the internal lookup, the corpus and tests only. The
-application service, raid-night orchestration, REST and MCP never select it:
-`paladin/retribution` is in `INTERNAL_ONLY_SPEC_IDS`, absent from
-`PUBLIC_SPEC_IDS`, from the public contract's `specId` enum and from
-`SUPPORTED_SPEC_IDENTITIES`, and a public request for a Paladin/Retribution
-identity receives `SPEC_NOT_SUPPORTED` exactly as before M11-A4. The
-`satisfies InternalOnlySpecId` on `spec.ts` fails the build if the id is
-moved without the five public sites. Promotion is a separate, reviewed
-milestone with its own evidence gate; nothing in this tree does it.
+**Exposure: `PUBLIC`.** This evaluator is registered in the production
+catalog (`paladin-retribution-observed-decisions`, `paladin/retribution`)
+and, since M11-A5, is selected by the application service, raid-night
+orchestration, REST and MCP for a Paladin/Retribution identity:
+`paladin/retribution` is in `PUBLIC_SPEC_IDS`, the public contract's
+`specId` enum and `SUPPORTED_SPEC_IDENTITIES`, and the registration's
+`exposure` is `PUBLIC` (the five public sites; `satisfies PublicSpecId` on
+`spec.ts`). It was `INTERNAL_ONLY` from M11-A4 until the test-owned
+promotion evidence gate reported a real `MATCH` and real `REJECTED` for it
+over committed sanitized evidence. **Promotion changed reachability, not the
+analyzer**: the slice, the proofs and the fail-closed edges below are
+exactly M11-A4's.
+
+**This is a NARROW slice, and the public prose says so.** Only observed Holy
+Power spender decisions are judged. Every other rotational cast the actor
+made is published as excluded `OUTSIDE_SUPPORTED_SLICE` — observed, not
+judged, never a mistake, never an UNKNOWN — and most spender decisions
+resolve UNKNOWN on current evidence. The limits paragraph
+(`RETRIBUTION_LIMITS` in `registration.ts`) is composed into both MCP tool
+descriptions through the same seam as Protection's; there is no supplemental
+analysis and no performance scoring.
 
 The registration is built by the specialization module factory
 (`RETRIBUTION_PALADIN_MODULE` in `registration.ts`, through
@@ -67,8 +77,13 @@ Every COMPLETE cast by the actor, classified by pinned data:
 | GCD lane, in-domain, not a spender (Judgment, Blade of Justice, Hammer of Wrath, Wake of Ashes, Divine Toll, Execution Sentence, the strikes, Hammer of Light) | excluded `OUTSIDE_FIRST_SLICE` |
 | `divine_storm`, `templars_verdict` | eligible → unselectability proof + first-GCD query → comparison |
 
-`OUTSIDE_FIRST_SLICE` has no name in the public schema; the view carries it
-verbatim and a promotion would first have to decide its projection.
+`OUTSIDE_FIRST_SLICE` is the internal name; the view projects it onto the
+public `OUTSIDE_SUPPORTED_SLICE` (the one spec-neutral value M11-A5 added to
+`PUBLIC_EXCLUSION_REASONS` under `warcraft-logs-coach.analysis/1`, additive
+like the M10-D `specId` widening), and `MELEE_SWING` onto `NON_GCD_ACTION`
+as Protection does. Nothing else in the payload — domains, Holy Power
+observations, build resolution, resolver diagnostics, root-scan stopping
+entries, the foreground-execution proof — reaches a public document.
 
 ## What is bound, and from what
 
@@ -129,5 +144,6 @@ pinned as regression evidence, never as a definition of correctness.
 No generator or cooldown-usage evaluation, no Holy Power replay or waste
 model, no positive stack model, no charge model, no GCD-length model, no
 target count, no race or faction, no item use effects, no supplemental
-analyses, no public projection. Templar hero-tree builds keep
-`hammer_of_light` live with unbindable `remains` atoms and resolve UNKNOWN.
+analyses. Templar hero-tree builds keep `hammer_of_light` live with
+unbindable `remains` atoms and resolve UNKNOWN. M11-A5 added none of these:
+it is exposure only.

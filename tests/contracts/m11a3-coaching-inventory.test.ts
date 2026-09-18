@@ -17,11 +17,14 @@
  *
  *   1. POPULATION. The ordinary M11 population is DERIVED from the pinned
  *      roster: every playable row whose DBC role is DPS or TANK, minus the
- *      public specializations, plus whichever role-UNKNOWN Evoker rows the
- *      inventory's own declared classification places in M11. The inventory
- *      must list exactly that set — no healer, no Augmentation, no duplicate,
- *      no missing Devourer — and the declared Evoker classification must
- *      cover exactly the three role-UNKNOWN rows and nothing else.
+ *      specializations that were public BEFORE M11 (Assassination Rogue,
+ *      Protection Paladin — M11 onboards the rest, and a specialization
+ *      M11 itself promotes stays in its population), plus whichever
+ *      role-UNKNOWN Evoker rows the inventory's own declared classification
+ *      places in M11. The inventory must list exactly that set — no healer,
+ *      no Augmentation, no duplicate, no missing Devourer — and the declared
+ *      Evoker classification must cover exactly the three role-UNKNOWN rows
+ *      and nothing else.
  *   2. NO STALE CLAIM. Each row's `currentAnalyzerStatus` must agree with
  *      the production partition (`PUBLIC_SPEC_IDS`, `INTERNAL_ONLY_SPEC_IDS`,
  *      `SPEC_IDS`). The day a milestone registers one of these
@@ -80,11 +83,22 @@ const TIME_HORIZONS = [
   "PRE_PULL_AND_COMBAT",
   "CROSS_PLAYER",
 ] as const;
+/**
+ * The specializations that were PUBLIC when M11 began. M11's population is
+ * everything ordinary except these; a specialization M11 promotes (Retribution
+ * Paladin, M11-A5) remains an M11 row with its status updated, never removed.
+ */
+const PRE_M11_PUBLIC: readonly string[] = ["rogue/assassination", "paladin/protection"];
+
 const READINESS = [
   "READY_FOR_SPEC_MILESTONE",
   // M11-A4: the selected specialization's A4_REQUIRED question, landed as an
   // INTERNAL_ONLY analyzer with committed sanitized evidence. Not public.
   "IMPLEMENTED_INTERNAL_ONLY",
+  // M11-A5: the same question, now reachable publicly through the rotational
+  // analyzer — implemented as part of the analyzer, not as a supplemental
+  // analysis. Its row's `currentAnalyzerStatus` must be PUBLIC.
+  "IMPLEMENTED_PUBLIC",
   "NEEDS_AUTHORITY",
   "NEEDS_EVIDENCE",
   "NEEDS_ENGINE_CAPABILITY",
@@ -113,7 +127,7 @@ function derivedOrdinaryM11(): readonly string[] {
   const evoker = inventory.evokerClassification as Record<string, string>;
   const ordinary = rows
     .filter((row) => {
-      if ((PUBLIC_SPEC_IDS as readonly string[]).includes(row.rosterKey)) return false;
+      if (PRE_M11_PUBLIC.includes(row.rosterKey)) return false;
       if (row.role === "DPS" || row.role === "TANK") return true;
       if (row.role === "UNKNOWN") return evoker[row.rosterKey] === "M11";
       return false;
@@ -154,19 +168,25 @@ describe("population: every ordinary M11 specialization exactly once, no healer,
     expect(new Set(listed).size).toBe(listed.length);
   });
 
-  it("lists no HEALER row, no Preservation, no Augmentation, and no public specialization", () => {
+  it("lists no HEALER row, no Preservation, no Augmentation, and no specialization public before M11", () => {
     const healers = roster()
       .specializations.filter((row) => row.role === "HEALER")
       .map((row) => row.rosterKey);
     expect(healers).toHaveLength(6);
-    for (const key of [...healers, "evoker/preservation", "evoker/augmentation", ...PUBLIC_SPEC_IDS]) {
+    for (const key of [...healers, "evoker/preservation", "evoker/augmentation", ...PRE_M11_PUBLIC]) {
       expect(listed, key).not.toContain(key);
     }
+    // The pre-M11 public set is exactly the production public set minus what
+    // M11 has promoted so far, so this constant cannot silently drift.
+    for (const key of PRE_M11_PUBLIC) expect(PUBLIC_SPEC_IDS as readonly string[]).toContain(key);
+    expect((PUBLIC_SPEC_IDS as readonly string[]).filter((id) => !PRE_M11_PUBLIC.includes(id))).toEqual([
+      "paladin/retribution",
+    ]);
   });
 
-  it("holds thirty ordinary + seven healers + one Augmentation + two public = the forty-row roster", () => {
+  it("holds thirty ordinary + seven healers + one Augmentation + two pre-M11 public = the forty-row roster", () => {
     const healerCount = roster().specializations.filter((row) => row.role === "HEALER").length + 1;
-    expect(listed.length + healerCount + 1 + PUBLIC_SPEC_IDS.length).toBe(roster().specializations.length);
+    expect(listed.length + healerCount + 1 + PRE_M11_PUBLIC.length).toBe(roster().specializations.length);
   });
 });
 
@@ -196,10 +216,21 @@ describe("cohorts: every ordinary specialization in exactly one cohort, the sele
     expect(new Set(members).size).toBe(members.length);
   });
 
-  it("SELECTED holds exactly the selected first specialization, which is one of the thirty", () => {
+  it("SELECTED holds exactly the selected first specialization, which is one of the thirty and is PUBLIC since M11-A5", () => {
     expect(cohorts["SELECTED"]).toEqual([inventory.selectedFirstSpec]);
     expect(derivedOrdinaryM11()).toContain(inventory.selectedFirstSpec);
     expect(inventory.selectedFirstSpec).toBe("paladin/retribution");
+    const selected = inventory.specs.find((spec) => spec.specId === inventory.selectedFirstSpec);
+    expect(selected?.currentAnalyzerStatus).toBe("PUBLIC");
+    expect(
+      selected?.questions.map((question) => [question.id, question.implementationReadiness]),
+    ).toContainEqual(["paladin/retribution.spender-choice", "IMPLEMENTED_PUBLIC"]);
+    // A5 is exposure only: no other Retribution question moved.
+    for (const question of selected?.questions ?? []) {
+      if (question.id !== "paladin/retribution.spender-choice") {
+        expect(question.implementationReadiness, question.id).not.toMatch(/^IMPLEMENTED/);
+      }
+    }
   });
 
   it("each row names the cohort that lists it, and 29 remain after selection", () => {

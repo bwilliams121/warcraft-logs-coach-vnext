@@ -206,7 +206,7 @@ Reproduce:
 node scripts/authority/extract-simc-apl.mjs --target paladin-protection   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9   --commit-date 2026-09-12   --expect-sha256 ed3fb1ac5b1c6c83bf21abbcaff5afe282678a69d51bdc953cc9897dca94bc02   --out src/simc/data/paladin-protection.apl.json
 ```
 
-## Retribution Paladin APL and game data — pinned at M11-A3/A4, INTERNAL_ONLY
+## Retribution Paladin APL and game data — pinned at M11-A3/A4 (analyzer PUBLIC since M11-A5)
 
 The `//retribution_apl_start .. //retribution_apl_end` region of the SAME
 `apl_paladin.cpp` at the SAME commit (`void retribution( player_t* p )`,

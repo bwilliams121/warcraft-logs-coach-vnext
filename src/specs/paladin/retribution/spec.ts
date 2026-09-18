@@ -1,17 +1,18 @@
 /**
- * Retribution Paladin's identity constants (M11-A4).
+ * Retribution Paladin's identity constants (M11-A4; PUBLIC since M11-A5).
  *
  * One place for the id the registration, the facade, the corpus executor and
- * every test agree on. It is an INTERNAL_ONLY id from `src/findings/spec-id.ts`:
- * the `satisfies` is the compile-time side of the exposure — promoting the id
- * to `PUBLIC_SPEC_IDS` without touching this file (and the four other public
- * sites) fails at the registry, and moving this constant without moving the
- * partition fails here.
+ * every test agree on. It is a PUBLIC id from `src/findings/spec-id.ts`: the
+ * `satisfies` is the compile-time side of the exposure — it was
+ * `InternalOnlySpecId` from M11-A4 until the M11-A5 promotion moved the id
+ * across the partition, and it changed here in the same reviewed edit as the
+ * four other public sites (the partition, the public contract's `specId`
+ * enum, the identity table and the registration's exposure).
  */
 
-import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
+import type { PublicSpecId } from "../../../findings/spec-id.js";
 
-export const RETRIBUTION_PALADIN_SPEC_ID = "paladin/retribution" satisfies InternalOnlySpecId;
+export const RETRIBUTION_PALADIN_SPEC_ID = "paladin/retribution" satisfies PublicSpecId;
 
 export const RETRIBUTION_PALADIN_ANALYZER_ID = "paladin-retribution-observed-decisions";
 

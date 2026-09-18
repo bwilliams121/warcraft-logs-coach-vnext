@@ -47,6 +47,8 @@ import {
 } from "../../src/specs/rogue/assassination/registration.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protection/registration.js";
 import { PROTECTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/protection/spec.js";
+import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
+import { RETRIBUTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/retribution/spec.js";
 import { MCP_TEST_ENV } from "../support/analysis-transports.js";
 import { analyzedFightAnalysis } from "../support/aggregation-fixture.js";
 import { productionCatalogWith } from "../support/catalog.js";
@@ -80,7 +82,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries two PUBLIC registrations — Assassination and Protection Paladin — and, since M11-A4, one INTERNAL_ONLY: Retribution Paladin", () => {
+  it("carries three PUBLIC registrations — Assassination, Protection Paladin and, since M11-A5, Retribution Paladin — and no INTERNAL_ONLY row", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -90,22 +92,27 @@ describe("the production catalog", () => {
     ).toEqual([
       [ASSASSINATION_ANALYZER_ID, "rogue/assassination", "PUBLIC"],
       [PROTECTION_PALADIN_ANALYZER_ID, "paladin/protection", "PUBLIC"],
-      ["paladin-retribution-observed-decisions", "paladin/retribution", "INTERNAL_ONLY"],
+      [RETRIBUTION_PALADIN_ANALYZER_ID, "paladin/retribution", "PUBLIC"],
     ]);
-    // The public set is DERIVED, and the INTERNAL_ONLY row is not in it.
+    // The public set is DERIVED, and since M11-A5 it is the whole catalog.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
-    expect(ENABLED_ANALYZERS).toHaveLength(2);
+    expect(ENABLED_ANALYZERS).toHaveLength(3);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
       "rogue/assassination",
       "paladin/protection",
+      "paladin/retribution",
     ]);
   });
 
-  it("both lookups resolve the Protection Paladin analyzer, and to the same row", () => {
+  it("both lookups resolve each Paladin analyzer, and to the same row", () => {
     expect(internalAnalyzerForSpec("paladin/protection")?.exposure).toBe("PUBLIC");
     expect(analyzerForSpec("paladin/protection")?.analyzerId).toBe(PROTECTION_PALADIN_ANALYZER_ID);
     expect(analyzerForSpec("paladin/protection")).toBe(internalAnalyzerForSpec("paladin/protection"));
     expect(analyzerForSpec("rogue/assassination")).toBe(internalAnalyzerForSpec("rogue/assassination"));
+    // M11-A5: the internal lookup was the only one that found Retribution in M11-A4.
+    expect(internalAnalyzerForSpec("paladin/retribution")?.exposure).toBe("PUBLIC");
+    expect(analyzerForSpec("paladin/retribution")?.analyzerId).toBe(RETRIBUTION_PALADIN_ANALYZER_ID);
+    expect(analyzerForSpec("paladin/retribution")).toBe(internalAnalyzerForSpec("paladin/retribution"));
   });
 
   it("is frozen at every level a validation depends on", () => {
@@ -197,7 +204,11 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     // The adversary's copy is mutable; the validated catalog was built from a
     // snapshot of it and never reads it again.
     const original = mutableCopy(PROTECTION_PALADIN_REGISTRATION);
-    const rows: AnalyzerRegistration[] = [ASSASSINATION_REGISTRATION, original];
+    const rows: AnalyzerRegistration[] = [
+      ASSASSINATION_REGISTRATION,
+      original,
+      RETRIBUTION_PALADIN_REGISTRATION,
+    ];
     const validated = requireValidatedCatalog(rows);
 
     (original as { exposure: string }).exposure = "INTERNAL_ONLY";
@@ -208,7 +219,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     expect(analyzerForSpec("paladin/protection", validated)?.exposure).toBe("PUBLIC");
     expect(analyzerForSpec("paladin/protection", validated)?.requirement.includeResources).toBe(true);
     expect(analyzerForSpec("paladin/protection", validated)?.authorityBindings).toHaveLength(1);
-    expect(validated.registrations).toHaveLength(2);
+    expect(validated.registrations).toHaveLength(3);
     // And re-validating the mutated rows now refuses them: a duplicate, and a
     // demoted Protection row that leaves the public set incomplete.
     const defects = defectsOf(rows);
@@ -240,6 +251,7 @@ describe("every lookup requires a validated catalog", () => {
     ASSASSINATION_REGISTRATION,
     { ...ASSASSINATION_REGISTRATION, analyzerId: "second" },
     PROTECTION_PALADIN_REGISTRATION,
+    RETRIBUTION_PALADIN_REGISTRATION,
   ];
   const DUPLICATE_ANALYZER = [
     ASSASSINATION_REGISTRATION,
@@ -250,6 +262,7 @@ describe("every lookup requires a validated catalog", () => {
   const IDENTITY_DISAGREEMENT = [
     { ...ASSASSINATION_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
     PROTECTION_PALADIN_REGISTRATION,
+    RETRIBUTION_PALADIN_REGISTRATION,
   ];
   const AUTHORITY_MISMATCH = [
     {
@@ -315,22 +328,36 @@ describe("the public set is one promise across the partition, the identity table
     // way to observe one analyzer; it is an incomplete dispatch table over
     // which a request for the missing specialization would read
     // SPEC_NOT_SUPPORTED. The registry refuses it before a request is served.
-    for (const rows of [[ASSASSINATION_REGISTRATION], [PROTECTION_PALADIN_REGISTRATION]]) {
+    for (const rows of [
+      [ASSASSINATION_REGISTRATION],
+      [PROTECTION_PALADIN_REGISTRATION],
+      [RETRIBUTION_PALADIN_REGISTRATION],
+      [ASSASSINATION_REGISTRATION, PROTECTION_PALADIN_REGISTRATION],
+      [ASSASSINATION_REGISTRATION, RETRIBUTION_PALADIN_REGISTRATION],
+      [PROTECTION_PALADIN_REGISTRATION, RETRIBUTION_PALADIN_REGISTRATION],
+    ]) {
       const defects = defectsOf(rows);
       expect(defects).toContain("PUBLIC_SET_DISAGREES_WITH_PARTITION");
       expect(defects).toContain("PUBLIC_SET_DISAGREES_WITH_IDENTITY_TABLE");
     }
   });
 
-  it("demoting either public registration to INTERNAL_ONLY is refused", () => {
+  it("demoting any public registration to INTERNAL_ONLY is refused", () => {
     for (const demoted of [
       [
         { ...ASSASSINATION_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
         PROTECTION_PALADIN_REGISTRATION,
+        RETRIBUTION_PALADIN_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
         { ...PROTECTION_PALADIN_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
+        RETRIBUTION_PALADIN_REGISTRATION,
+      ],
+      [
+        ASSASSINATION_REGISTRATION,
+        PROTECTION_PALADIN_REGISTRATION,
+        { ...RETRIBUTION_PALADIN_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
       ],
     ]) {
       const defects = defectsOf(demoted);
@@ -340,14 +367,21 @@ describe("the public set is one promise across the partition, the identity table
   });
 
   it("lookup is independent of registration order", () => {
-    const reversed = requireValidatedCatalog([PROTECTION_PALADIN_REGISTRATION, ASSASSINATION_REGISTRATION]);
+    const reversed = requireValidatedCatalog([
+      RETRIBUTION_PALADIN_REGISTRATION,
+      PROTECTION_PALADIN_REGISTRATION,
+      ASSASSINATION_REGISTRATION,
+    ]);
     expect(analyzerForSpec("rogue/assassination", reversed)?.analyzerId).toBe(ASSASSINATION_ANALYZER_ID);
     expect(analyzerForSpec("paladin/protection", reversed)?.analyzerId).toBe(PROTECTION_PALADIN_ANALYZER_ID);
+    expect(analyzerForSpec("paladin/retribution", reversed)?.analyzerId).toBe(
+      RETRIBUTION_PALADIN_ANALYZER_ID,
+    );
     expect(
       publicAnalyzers(reversed)
         .map((registration) => registration.specId)
         .sort(),
-    ).toEqual(["paladin/protection", "rogue/assassination"].sort());
+    ).toEqual(["paladin/protection", "paladin/retribution", "rogue/assassination"].sort());
   });
 
   it("the exposure vocabulary is dormant, not gone: a PUBLIC row for an unknown id is still refused by name", () => {

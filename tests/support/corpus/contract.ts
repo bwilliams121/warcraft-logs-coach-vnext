@@ -46,7 +46,14 @@ import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.j
 import pinnedRetributionApl from "../../../src/simc/data/paladin-retribution.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
-import { PUBLIC_EXCLUSION_REASONS } from "../../../src/contracts/analysis-contract.js";
+import {
+  PUBLIC_AUTHORITY_COVERAGES,
+  PUBLIC_COMPARISON_BASES,
+  PUBLIC_COMPARISON_OUTCOMES,
+  PUBLIC_DECISION_BLOCKER_CLASSES,
+  PUBLIC_EXCLUSION_REASONS,
+  PUBLIC_SELECTION_PRECISIONS,
+} from "../../../src/contracts/analysis-contract.js";
 import { PROTECTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/protection/observed-analysis.js";
 import { RETRIBUTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/retribution/observed-analysis.js";
 
@@ -1435,8 +1442,13 @@ export const ASSERTION_KINDS = {
             rejected: z.number().int().nonnegative(),
             unknown: z.number().int().nonnegative(),
             excludedCastCount: z.number().int().nonnegative(),
-            /** The PROJECTED tally, keyed by public reason. Rows sharing a public reason are merged. */
-            exclusions: z.record(z.enum(PUBLIC_EXCLUSION_REASONS), z.number().int().positive()),
+            /**
+             * The PROJECTED tally, keyed by public reason. Rows sharing a
+             * public reason are merged; a reason with no casts is absent, as
+             * the projection omits zero rows (a partial record, so widening
+             * the public vocabulary does not invalidate an older case).
+             */
+            exclusions: z.partialRecord(z.enum(PUBLIC_EXCLUSION_REASONS), z.number().int().positive()),
           })
           .strict(),
       })
@@ -1448,12 +1460,13 @@ export const ASSERTION_KINDS = {
       "The registration's analysis, read through its own view and projected by the real public projection, validates against warcraft-logs-coach.analysis/1 and carries exactly these totals; every excluded cast's reason and the coverage tally are mapped onto the public vocabulary (MELEE_SWING → NON_GCD_ACTION, rows merged), the tally sums to the excluded count, and no internal-only reason string or withheld field (raw blocker, domains, Holy Power, build, resolver diagnostics) reaches the document.",
   },
 
-  // ---- SPEC_RETRIBUTION_PALADIN (M11-A4) -----------------------------------
+  // ---- SPEC_RETRIBUTION_PALADIN (M11-A4; PUBLIC since M11-A5) --------------
   //
-  // The INTERNAL_ONLY Retribution Paladin evaluator, reached through its
-  // registration. Nothing here is public: no kind below drives a transport,
-  // and the application-service kinds prove the public path answers
-  // SPEC_NOT_SUPPORTED for the same subject.
+  // The Retribution Paladin evaluator, reached through its registration.
+  // INTERNAL_ONLY in M11-A4, when the application-service kinds proved the
+  // public path answered SPEC_NOT_SUPPORTED for the same subject; PUBLIC since
+  // M11-A5, when `PUBLIC_PROJECTION` below and the PUBLIC_CONTRACT parity
+  // cases prove the same analysis reaches a public document unchanged.
   "SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE": {
     owningLayer: "SPEC_RETRIBUTION_PALADIN",
     outcomeClass: "POSITIVE_FACT",
@@ -1790,6 +1803,64 @@ export const ASSERTION_KINDS = {
     description:
       "Over this artifact (or bundle) the registration refuses to analyze the actor with exactly this status — a segment with no combatant profile is PROFILE_NOT_RESOLVED, never a smaller population that reads as clean play.",
   },
+  "SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION": {
+    owningLayer: "SPEC_RETRIBUTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            specId: z.enum(SPEC_IDS),
+            analyzerId: z.string().min(1),
+            eligibleDecisions: z.number().int().nonnegative(),
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            unknown: z.number().int().nonnegative(),
+            excludedCastCount: z.number().int().nonnegative(),
+            /** The PROJECTED tally, keyed by public reason; zero rows are absent. */
+            exclusions: z.partialRecord(z.enum(PUBLIC_EXCLUSION_REASONS), z.number().int().positive()),
+            /** Named decisions, each read from the PROJECTED document by its cast. */
+            decisions: z
+              .array(
+                z
+                  .object({
+                    reportTimeMs: z.number(),
+                    abilityGameId: z.number().int(),
+                    outcome: z.enum(PUBLIC_COMPARISON_OUTCOMES),
+                    basis: z.enum(PUBLIC_COMPARISON_BASES),
+                    authorityCoverage: z.enum(PUBLIC_AUTHORITY_COVERAGES),
+                    authorityToken: z.string().min(1).nullable(),
+                    selectionPrecision: z.enum(PUBLIC_SELECTION_PRECISIONS).nullable(),
+                    decisiveBlocker: z.enum(PUBLIC_DECISION_BLOCKER_CLASSES).nullable(),
+                  })
+                  .strict(),
+              )
+              .min(1),
+            /** Named excluded casts, each read from the PROJECTED document by its cast. */
+            excluded: z
+              .array(
+                z
+                  .object({
+                    reportTimeMs: z.number(),
+                    abilityGameId: z.number().int(),
+                    reason: z.enum(PUBLIC_EXCLUSION_REASONS),
+                  })
+                  .strict(),
+              )
+              .min(1),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "M11-A5: the registration's analysis over this artifact (or bundle), read through its own view and projected by the real public projection, validates against warcraft-logs-coach.analysis/1 (the version string unchanged) and carries exactly these totals; every excluded cast's reason and the coverage tally are mapped onto the public vocabulary (MELEE_SWING → NON_GCD_ACTION, OUTSIDE_FIRST_SLICE → OUTSIDE_SUPPORTED_SLICE, rows merged), the tally sums to the excluded count; each named decision — a real MATCH, a real REJECTED, a real UNKNOWN — projects with exactly the pinned outcome, basis, coverage, token, precision and blocker class; each named excluded cast projects with exactly the pinned public reason; and no internal-only reason string or withheld field (raw blocker, root-scan stopping entry, domains, Holy Power, build resolution, resolver diagnostics, the foreground-execution proof) reaches the document.",
+  },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------
   //
@@ -2065,7 +2136,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "The validated production catalog answers the internal and the public lookup for this known specialization exactly so, and the public identity table agrees; catalog order changes neither answer. An INTERNAL_ONLY registration is real to the first lookup and invisible to the second (Retribution Paladin since M11-A4); a PUBLIC one answers both.",
+      "The validated production catalog answers the internal and the public lookup for this known specialization exactly so, and the public identity table agrees; catalog order changes neither answer. An INTERNAL_ONLY registration is real to the first lookup and invisible to the second (Protection Paladin from M10-C to M10-D, Retribution Paladin from M11-A4 to M11-A5); a PUBLIC one answers both.",
   },
 
   // ---- PUBLIC_CONTRACT -----------------------------------------------------

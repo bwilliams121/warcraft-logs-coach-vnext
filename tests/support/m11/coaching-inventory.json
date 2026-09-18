@@ -50,7 +50,7 @@
     {
       "specId": "paladin/retribution",
       "cohort": "SELECTED",
-      "currentAnalyzerStatus": "INTERNAL_ONLY",
+      "currentAnalyzerStatus": "PUBLIC",
       "realEvidenceStatus": "REAL_SANITIZED_EVIDENCE_AVAILABLE",
       "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",
@@ -78,7 +78,7 @@
             "talent selection",
             "gear"
           ],
-          "implementationReadiness": "IMPLEMENTED_INTERNAL_ONLY",
+          "implementationReadiness": "IMPLEMENTED_PUBLIC",
           "unknownConditions": [
             "no arbiter or Empyrean Legacy aura transition has been observed yet (the atoms are unbound until their first observed transition; active_enemies is never bound, so ds_castable is undecidable)",
             "Wake of Ashes / Divine Toll / Execution Sentence / Avenging Wrath possibly ready (no observed cast inside the pinned base; the raid_event-gated lines then block the scan)",
@@ -88,7 +88,7 @@
           ],
           "outputNeed": "EXISTING_INTERNAL_FINDINGS",
           "a4Classification": "A4_REQUIRED",
-          "notes": "This is the first truthful rotational vertical slice, not a supplemental analysis. IMPLEMENTED at M11-A4 as the INTERNAL_ONLY paladin-retribution-observed-decisions analyzer (src/specs/paladin/retribution/), under the class/spec authority boundary (racials, potions, item uses and external buffs are outside the rotational decision domain; race and faction are not read) and the exact-zero buff-stack binding. Production result over the committed A7R6 actor-6 bundle (165 s): 69 eligible spender decisions, 1 MATCH (Final Verdict at +104,407 ms), 10 REJECTED (unselectability; two also scan-selected), 58 UNKNOWN with the stopping entry named; gtKb actor 23 opener (20 s): 15 eligible, all UNKNOWN. The A3 hand audit's 6 MATCH / 2 scan-REJECTED counted race worlds and positive stack assumptions the implementation does not make."
+          "notes": "This is the first truthful rotational vertical slice, not a supplemental analysis. IMPLEMENTED at M11-A4 as the INTERNAL_ONLY paladin-retribution-observed-decisions analyzer (src/specs/paladin/retribution/), under the class/spec authority boundary (racials, potions, item uses and external buffs are outside the rotational decision domain; race and faction are not read) and the exact-zero buff-stack binding. Production result over the committed A7R6 actor-6 bundle (165 s): 69 eligible spender decisions, 1 MATCH (Final Verdict at +104,407 ms), 10 REJECTED (unselectability; two also scan-selected), 58 UNKNOWN with the stopping entry named; gtKb actor 23 opener (20 s): 15 eligible, all UNKNOWN. The A3 hand audit's 6 MATCH / 2 scan-REJECTED counted race worlds and positive stack assumptions the implementation does not make. PUBLIC at M11-A5: the same analyzer, unchanged, is reachable through the application service, REST, MCP and raid-night for a Paladin/Retribution identity; the in-domain casts outside the spender slice project as the spec-neutral public exclusion reason OUTSIDE_SUPPORTED_SLICE (the one additive analysis/1 vocabulary change of the promotion). Still no supplemental analysis: the other questions below are unchanged."
         },
         {
           "id": "paladin/retribution.holy-power-waste",

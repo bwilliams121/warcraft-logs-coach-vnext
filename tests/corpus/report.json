@@ -378,8 +378,8 @@
       "passed": 110
     },
     {
-      "assertions": 50,
-      "cases": 11,
+      "assertions": 51,
+      "cases": 12,
       "failed": 0,
       "kindsExercised": [
         "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS",
@@ -393,13 +393,14 @@
         "SPEC_RETRIBUTION_PALADIN.DS_CASTABLE_AT",
         "SPEC_RETRIBUTION_PALADIN.HOLY_POWER_OBSERVATION",
         "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES",
+        "SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION",
         "SPEC_RETRIBUTION_PALADIN.SPEC_GATE",
         "SPEC_RETRIBUTION_PALADIN.STACK_BINDING_AT",
         "SPEC_RETRIBUTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION"
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_RETRIBUTION_PALADIN",
-      "passed": 50
+      "passed": 51
     },
     {
       "assertions": 9,
@@ -411,13 +412,13 @@
       "passed": 9
     },
     {
-      "assertions": 10,
-      "cases": 10,
+      "assertions": 12,
+      "cases": 12,
       "failed": 0,
       "kindsExercised": ["PUBLIC_CONTRACT.REST_MCP_PARITY"],
       "notExecuted": 0,
       "owningLayer": "PUBLIC_CONTRACT",
-      "passed": 10
+      "passed": 12
     }
   ],
   "cases": [
@@ -511,7 +512,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.retribution-paladin-subject-is-not-publicly-supported-on-its-own-evidence",
+      "caseId": "application-service.retribution-paladin-subject-is-analyzed-under-player-context",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
     },
@@ -1968,6 +1969,20 @@
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-for-the-retribution-paladin-subject",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
+    },
+    {
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "assertions": [
         {
@@ -2056,6 +2071,20 @@
       "caseId": "public-contract.raid-night-parity-mixed-roster-over-the-a7r6-opener",
       "owningLayer": "PUBLIC_CONTRACT",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.raid-night-parity-mixed-roster-with-retribution-over-its-own-evidence",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -3425,6 +3454,34 @@
       "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
     },
     {
+      "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_RETRIBUTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 6 (specID 70), carried by the first part",
+          "every COMPLETE cast by actor 6 across the composed parts, in canonical order",
+          "every aura transition on actor 6 sourced by actor 6 across the composed parts, in canonical order",
+          "the Holy Power entry on each costed spender cast, and its absence on each Divine Purpose free cast",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-retribution-paladin.analysis-projects-publicly-with-the-slice-boundary-named",
+      "owningLayer": "SPEC_RETRIBUTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
+        "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
+        "wcl-retribution-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
       "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
       "assertions": [
         {
@@ -4166,13 +4223,13 @@
   "totals": {
     "artifactBytes": 3949637,
     "artifacts": 38,
-    "assertions": 407,
-    "cases": 128,
+    "assertions": 410,
+    "cases": 131,
     "declared": 0,
-    "executable": 407,
+    "executable": 410,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 407
+    "passed": 410
   }
 }

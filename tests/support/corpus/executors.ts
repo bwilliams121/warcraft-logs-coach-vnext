@@ -356,6 +356,14 @@ export async function executeAssertion(
       );
     case "SPEC_RETRIBUTION_PALADIN.SPEC_GATE":
       return retribution.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION":
+      return retribution.publicProjection(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "APPLICATION_SERVICE.INTERNAL_REGISTRATION":
       return applicationService.internalRegistration(params as ParamsOf<typeof assertion.kind>);
     case "PUBLIC_CONTRACT.REST_MCP_PARITY":
@@ -429,6 +437,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_RETRIBUTION_PALADIN.NON_DOMAIN_ENTRIES",
   "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS",
   "SPEC_RETRIBUTION_PALADIN.SPEC_GATE",
+  "SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",
 ];

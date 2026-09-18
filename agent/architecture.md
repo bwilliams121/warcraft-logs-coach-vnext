@@ -5164,8 +5164,9 @@ Moving any one alone fails at compile time or at catalog validation.
 
 Rules the tests pin:
 
-- Both known specializations are PUBLIC; `INTERNAL_ONLY_SPEC_IDS` is EMPTY.
-  The internal-only partition, `requirePublicSpecId`,
+- Every known specialization is PUBLIC; `INTERNAL_ONLY_SPEC_IDS` is EMPTY
+  (from M10-D to M11-A3, held Retribution Paladin from M11-A4, empty again
+  since M11-A5). The internal-only partition, `requirePublicSpecId`,
   `InternalSpecExposureError` and the registry's exposure rules are retained
   as dormant architecture for the next specialization, and the emptiness is
   pinned explicitly rather than left to look accidental.
@@ -5221,9 +5222,11 @@ Do not batch all specializations before shared architecture proves stable.
 ## M11-A — the onboarding foundation
 
 M11-A1 (guards) and M11-A2 (foundation, factory, proof) built the machinery
-a third specialization registers against. No third specialization exists;
-the two public analyzers are unchanged, and no first M11 specialization has
-been selected. Healers remain M12 and Augmentation Evoker remains M13.
+a third specialization registers against; M11-A3 selected Retribution
+Paladin, M11-A4 landed it INTERNAL_ONLY, and M11-A5 promoted it PUBLIC —
+the first complete pass through the onboarding slice. M11-A is complete;
+M11 is not: twenty-nine ordinary specializations remain in the coaching
+inventory. Healers remain M12 and Augmentation Evoker remains M13.
 
 ### The specialization module and its factory
 
@@ -5375,10 +5378,11 @@ in the production catalog with `exposure: "INTERNAL_ONLY"`,
 `supplementalAnalyses: []`, and `paladin/retribution` in
 `INTERNAL_ONLY_SPEC_IDS`. The public partition, the public contract's
 `specId` enum, the identity table, the enabled-analyzer set, the derived
-"Supported specializations" prose and the MCP `tools/list` document are
-unchanged; a public request for a Paladin/Retribution identity still receives
-`SPEC_NOT_SUPPORTED`. The analyzer is reached by the internal lookup, the
-corpus and tests only. Promotion remains a separate reviewed milestone.
+"Supported specializations" prose and the MCP `tools/list` document were
+unchanged; a public request for a Paladin/Retribution identity still received
+`SPEC_NOT_SUPPORTED`. The analyzer was reached by the internal lookup, the
+corpus and tests only. (M11-A5 then promoted it; see below. The rest of this
+section describes the analyzer, which the promotion did not change.)
 
 **The slice.** Observed Holy Power SPENDER decisions — every Divine Storm and
 Templar's/Final Verdict cast — compared against the pinned
@@ -5467,6 +5471,85 @@ Art of War stack is never bound; Judgment's complementary readiness
 new shared reason and is never decisive on the spender path; `gcd` has no
 model. Each is recorded on the payload, in the coaching inventory and in
 `agent/m11-a4-first-spec-contract.md`.
+
+### M11-A5 — Retribution Paladin public promotion (M11-A complete)
+
+Exposure only. The M11-A4 analyzer — its slice, its proofs, its fail-closed
+edges, the class/spec authority boundary, the exact-zero stack binding and
+the token-specific foreground-execution fact — is unchanged; what changed is
+that a public request reaches it. The five-site move from M10-D, repeated:
+`paladin/retribution` into `PUBLIC_SPEC_IDS` (leaving `INTERNAL_ONLY_SPEC_IDS`
+empty again), into the public contract's `specId` enum, into the identity
+table (`Paladin`/`Retribution`, the module's canonical `wclClassName` /
+`wclSpecName`), `satisfies PublicSpecId` on `spec.ts`, and
+`exposure: "PUBLIC"` on the registration. The catalog is three PUBLIC rows;
+the derived sentence is "Supported specializations: Assassination Rogue,
+Protection Paladin and Retribution Paladin." and Retribution's limits
+paragraph is composed into both tool descriptions through the A2 seam, in
+the same position and by the same mechanism as Protection's — nothing
+hand-lists a name.
+
+**The pre-promotion audit.** The test-owned promotion evidence gate reported
+`evidenceReady: true` for the INTERNAL_ONLY module from four qualifying
+assertions — one real MATCH (`the-real-match-final-verdict-at-2108996[0]`)
+and three real REJECTED (`divine-storm-under-the-arbiter-storm-buff-is-
+rejected-two-ways[0]`, `[3]`; `rejected-by-unselectability-alone-before-any-
+cooldown-is-anchored[0]`) — every referenced artifact SANITIZED_CAPTURE, the
+actor mechanically Paladin/Retribution, the committed report PASSED. After
+the move the same four qualify in PUBLIC mode, paired through the identity
+table, and the gate keeps the stronger M11-A4 standard for Retribution
+explicitly: at least one real MATCH AND at least one real REJECTED.
+
+**The one schema decision.** Retribution's population has an exclusion the
+M6 vocabulary could not name truthfully: in-domain, authority-bound GCD
+casts the slice observes and does not judge (Judgment, Blade of Justice,
+Hammer of Wrath, Wake of Ashes, Divine Toll, Execution Sentence, the
+strikes, Hammer of Light — 54 of the 167 excluded casts over the 165 s
+subject). Mapping them onto an existing reason would have been false,
+dropping them would cherry-pick the denominator, and reclassifying them as
+UNKNOWN decisions would change the analyzer. With the product owner's
+explicit authorization, ONE spec-neutral value was appended to
+`PUBLIC_EXCLUSION_REASONS` under `warcraft-logs-coach.analysis/1` —
+`OUTSIDE_SUPPORTED_SLICE`: the observed action is intentionally outside the
+analyzer's currently supported decision slice; not a rotational judgment,
+not MATCH, not REJECTED, not UNKNOWN-for-missing-state, not a performance
+error. Additive, by the M10-D precedent of widening the `specId` enum; the
+version string, every existing value and every field are unchanged, no
+Assassination or Protection document changes byte for byte, and the
+Retribution view projects its internal `OUTSIDE_FIRST_SLICE` onto it (and
+`MELEE_SWING` onto `NON_GCD_ACTION`, as Protection does). No other public
+concept was added; had one been needed, A5 would have stopped.
+
+**What was proven.** The real Retribution subject over its own evidence is
+ANALYZED on REST and MCP with deeply equal documents (`m11a5-retribution-
+public-transports`); the public projection is total over every vocabulary,
+withholds every payload field (domains, Holy Power, build, resolver
+diagnostics, root-scan stopping entries, the foreground-execution proof) and
+carries the internal outcomes decision for decision (`m11a5-retribution-
+public-projection`); the application service's ANALYZED envelope equals the
+internal lookup's analysis projected — the public path runs no different
+semantics; raid-night orchestration analyzes a Retribution player alone and
+in a roster with Assassination, Protection and Arms with one roster query,
+one ingestion and each analyzer once, and no Retribution branch
+(`m11a5-mixed-raid-night`); the Arms sentinel is unchanged. The corpus grew
+from 128 cases / 407 assertions to 131 / 410 (a `PUBLIC_PROJECTION` case
+naming the MATCH, two REJECTED, an UNKNOWN and seven excluded casts with
+their public reasons; REST/MCP parity for the subject; a mixed raid night
+over the Retribution slice), and the M11-A4 application-service case was
+repurposed in place from SPEC_NOT_SUPPORTED to ANALYZED; no existing
+Assassination or Protection expectation changed. Before/after captures of
+the invariance harness are byte-identical for every Assassination,
+Protection, Arms and internal-registration file; the deltas are the
+Retribution documents (SPEC_NOT_SUPPORTED → ANALYZED over its own slice,
+SPEC_NOT_SUPPORTED → PROFILE_NOT_RESOLVED over the Protection opener that
+holds none of its evidence), the two tool descriptions, and the Retribution
+cell of the mixed raid night.
+
+**Not done, on purpose.** No supplemental analysis (`supplementalAnalyses`
+stays empty), no analyzer improvement, no other specialization, no new
+authority or evidence, no shared-engine capability, no schema v2, no
+deployment. Production deployment and smoke remain a separately authorized
+post-CI step (`agent/deployment-smoke.md`).
 
 ---
 

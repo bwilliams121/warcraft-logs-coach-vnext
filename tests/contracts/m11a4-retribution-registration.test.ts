@@ -1,12 +1,16 @@
 /**
- * M11-A4: the Retribution Paladin registration is INTERNAL_ONLY, coheres
- * with the pinned roster, binds exactly one authority to one domain, loads
- * every pinned dataset at the one commit, and is invisible to every public
- * path — while the internal lookup and the facade analyze a real subject.
+ * M11-A4: the Retribution Paladin registration coheres with the pinned
+ * roster, binds exactly one authority to one domain, loads every pinned
+ * dataset at the one commit, and — INTERNAL_ONLY in M11-A4 — was invisible to
+ * every public path while the internal lookup and the facade analyzed a real
+ * subject. Since M11-A5 it is PUBLIC: the same five sites that kept it
+ * internal now agree it is public, and the public path runs the same
+ * analyzer over the same subject and projects it.
  *
  * NO CENTRAL SPEC SWITCH. The registry reaches the tree through its
  * registration and nothing else; no service, transport or shared module
- * names the specialization. The sweep at the end pins that.
+ * names the specialization beyond the five public sites. The sweep at the
+ * end pins that.
  */
 
 import { describe, expect, it } from "vitest";
@@ -96,45 +100,62 @@ describe("identity and partition", () => {
     });
   });
 
-  it("is INTERNAL_ONLY in the partition, the public contract and the identity table", () => {
+  it("is PUBLIC in the partition, the public contract and the identity table (M11-A5), with no supplemental analysis", () => {
     expect(isSpecId("paladin/retribution")).toBe(true);
-    expect(isPublicSpecId("paladin/retribution")).toBe(false);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/retribution"]);
-    expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("paladin/retribution");
-    expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).not.toContain("paladin/retribution");
-    expect(() => requirePublicSpecId("paladin/retribution")).toThrow(InternalSpecExposureError);
-    expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).not.toContain("paladin/retribution");
-    expect(resolveSpecIdentity({ className: "Paladin", specName: "Retribution" })).toMatchObject({
-      ok: false,
-      reason: "UNSUPPORTED_SPECIALIZATION",
+    expect(isPublicSpecId("paladin/retribution")).toBe(true);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("paladin/retribution");
+    expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("paladin/retribution");
+    expect(requirePublicSpecId("paladin/retribution")).toBe("paladin/retribution");
+    expect(typeof InternalSpecExposureError).toBe("function");
+    expect(SUPPORTED_SPEC_IDENTITIES["paladin/retribution"]).toBe("paladin/retribution");
+    expect(resolveSpecIdentity({ className: "Paladin", specName: "Retribution" })).toEqual({
+      ok: true,
+      specId: "paladin/retribution",
     });
-    expect(RETRIBUTION_PALADIN_MODULE.exposure).toBe("INTERNAL_ONLY");
-    expect(RETRIBUTION_PALADIN_REGISTRATION.exposure).toBe("INTERNAL_ONLY");
+    expect(RETRIBUTION_PALADIN_MODULE.exposure).toBe("PUBLIC");
+    expect(RETRIBUTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
     expect(RETRIBUTION_PALADIN_MODULE.supplementalAnalyses).toEqual([]);
   });
 
-  it("is in the validated catalog for the internal lookup and absent from every public derivation", () => {
+  it("is in the validated catalog for BOTH lookups and in every public derivation", () => {
     expect(internalAnalyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)?.analyzerId).toBe(
       RETRIBUTION_PALADIN_ANALYZER_ID,
     );
-    expect(internalAnalyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)?.exposure).toBe(
-      "INTERNAL_ONLY",
+    expect(internalAnalyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
+    expect(analyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)).toBe(
+      internalAnalyzerForSpec("paladin/retribution", PRODUCTION_CATALOG),
     );
-    expect(analyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)).toBeNull();
     expect(publicAnalyzers(PRODUCTION_CATALOG).map((row) => row.specId)).toEqual([
       "rogue/assassination",
       "paladin/protection",
+      "paladin/retribution",
     ]);
-    expect(ENABLED_ANALYZERS.map((row) => row.specId)).not.toContain("paladin/retribution");
-    expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).not.toContain(
+    expect(ENABLED_ANALYZERS.map((row) => row.specId)).toContain("paladin/retribution");
+    expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
       RETRIBUTION_PALADIN_ANALYZER_ID,
     );
-    // The public prose is derived from the PUBLIC set and does not move.
+    // The public prose is derived from the PUBLIC set and moved with it: the
+    // sentence, and the limits paragraph composed through the A2 seam on
+    // both tools, in the same position and by the same mechanism as
+    // Protection's. Nothing hand-lists the third name.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue and Protection Paladin.",
+      "Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin.",
     );
-    expect(analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS)).not.toMatch(/retribution/i);
-    expect(raidNightToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS)).not.toMatch(/retribution/i);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(3);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits[2]).toEqual(
+      RETRIBUTION_PALADIN_REGISTRATION.publicLimits,
+    );
+    const analysisDescription = analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
+    const raidNightDescription = raidNightToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
+    expect(analysisDescription).toContain(RETRIBUTION_PALADIN_REGISTRATION.publicLimits.analysis);
+    expect(raidNightDescription).toContain(RETRIBUTION_PALADIN_REGISTRATION.publicLimits.raidNight);
+    for (const description of [analysisDescription, raidNightDescription]) {
+      expect(description).not.toMatch(/full Retribution rotation/i);
+      expect(description).not.toMatch(/Retribution[^.]*optimal/i);
+      // No implementation detail reaches the public prose.
+      expect(description).not.toMatch(/cooldowns\[|generators\[|finishers\[|constructor|31884|454351/);
+    }
   });
 });
 
@@ -255,7 +276,7 @@ describe("authority and datasets", () => {
   });
 });
 
-describe("the public path refuses, the internal path analyzes", () => {
+describe("the public path analyzes (M11-A5), and the internal path analyzes the same", () => {
   function identityFor(fight: CombatFight) {
     return {
       report: {
@@ -277,7 +298,9 @@ describe("the public path refuses, the internal path analyzes", () => {
     };
   }
 
-  it("the application service answers SPEC_NOT_SUPPORTED for the real Retribution subject, runs no analyzer, and the public document validates", async () => {
+  it("the application service dispatches the Retribution analyzer once for the real subject, and the public document validates with its coverage", async () => {
+    // Until M11-A5 this pinned SPEC_NOT_SUPPORTED, a null spec and analyzer,
+    // and zero analyzer calls.
     const fight = corpusFight(RET45);
     const counted = countedProductionCatalog();
     const deps: AnalysisServiceDeps = {
@@ -292,19 +315,42 @@ describe("the public path refuses, the internal path analyzes", () => {
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(result.analysis.specId).toBeNull();
-    expect(result.analysis.analyzerId).toBeNull();
-    expect(counted.calls[RETRIBUTION_PALADIN_ANALYZER_ID]).toBe(0);
-    // The public document carries the WCL identity it was asked about and the
-    // refusal; no specId, no analyzer, no gameplay.
+    expect(result.analysis.analysis.status).toBe("ANALYZED");
+    expect(result.analysis.specId).toBe("paladin/retribution");
+    expect(result.analysis.analyzerId).toBe(RETRIBUTION_PALADIN_ANALYZER_ID);
+    expect(result.analysis.scope).toBe("PLAYER_CONTEXT");
+    expect(counted.calls).toEqual({
+      "rogue-assassination-observed-decisions": 0,
+      "paladin-protection-observed-decisions": 0,
+      [RETRIBUTION_PALADIN_ANALYZER_ID]: 1,
+    });
     const document = projectAnalysisResult(result.analysis);
     expect(document).toMatchObject({
-      specialization: { specId: null, gameplaySupported: false },
-      analyzerId: null,
-      status: "SPEC_NOT_SUPPORTED",
+      schemaVersion: "warcraft-logs-coach.analysis/1",
+      specialization: { specId: "paladin/retribution", gameplaySupported: true },
+      analyzerId: RETRIBUTION_PALADIN_ANALYZER_ID,
+      status: "ANALYZED",
+      capability: { matchMeaning: "AUTHORITY_COMPATIBLE_ONLY", scoresPerformance: false },
     });
-    expect(JSON.stringify(document)).not.toContain(RETRIBUTION_PALADIN_ANALYZER_ID);
+    if (document.status !== "ANALYZED") return;
+    expect(document.coverage).toMatchObject({ eligibleDecisions: 26, match: 0, rejected: 1, unknown: 25 });
+    expect(document.coverage.exclusions).toEqual([
+      { key: "NON_GCD_ACTION", count: 38 },
+      { key: "OUTSIDE_SUPPORTED_SLICE", count: 20 },
+    ]);
+    // Nothing internal leaks: no internal reason string, no withheld payload field.
+    const json = JSON.stringify(document);
+    for (const internal of [
+      "OUTSIDE_FIRST_SLICE",
+      "MELEE_SWING",
+      "rootScanBlockedAt",
+      "rawBlocker",
+      "holyPower",
+      "domains",
+      "foregroundProvenByObservedExecution",
+    ]) {
+      expect(json, internal).not.toContain(internal);
+    }
   });
 
   it("the internal lookup runs the real analyzer over the real subject and it ANALYZES", () => {
@@ -327,7 +373,7 @@ describe("the public path refuses, the internal path analyzes", () => {
 });
 
 describe("no central specialization switch", () => {
-  it("nothing outside the Retribution tree names the specialization except the partition, the registry's registration import and pinned data", () => {
+  it("nothing outside the Retribution tree names the specialization except the five public sites, the registry's registration import and pinned data", () => {
     const offenders = Object.entries(SOURCES)
       .filter(([path, code]) => /retribution/i.test(code) && !path.includes("/specs/paladin/retribution/"))
       .map(([path]) => path.replace(/^.*\/src\//, "src/"))
@@ -338,22 +384,37 @@ describe("no central specialization switch", () => {
       )
       .sort();
     expect(offenders).toEqual([
+      // The public contract's `specId` enum (M11-A5, one of the five public sites).
+      "src/contracts/analysis-contract.ts",
       // The dated wire contract's prose names the Paladin specializations Holy Power belongs to.
       "src/data/wcl-wire/resource-types.ts",
       // The partition.
       "src/findings/spec-id.ts",
       // The registration import and the catalog row.
       "src/services/analyzer-registry.ts",
+      // The identity table (M11-A5, one of the five public sites).
+      "src/services/spec-identity.ts",
     ]);
     const registry =
       SOURCES[
         Object.keys(SOURCES).find((path) => path.endsWith("src/services/analyzer-registry.ts")) ?? ""
       ] ?? "";
-    expect(registry.match(/retribution/gi)?.length).toBeLessThanOrEqual(3);
+    // The import line (two: the symbol and the path), the catalog row, and
+    // the header's one-sentence exposure history. No branch.
+    expect(registry.match(/retribution/gi)?.length).toBeLessThanOrEqual(4);
+    // The identity table and the contract name the id ONLY as table/enum
+    // entries and the prose that records when they joined — never as a
+    // branch: no service, transport, aggregation or projection module
+    // reads the name.
     for (const path of [
       "src/services/analysis-service.ts",
-      "src/services/spec-identity.ts",
-      "src/contracts/analysis-contract.ts",
+      "src/services/raid-night-service.ts",
+      "src/contracts/analysis-projection.ts",
+      "src/contracts/raid-night-projection.ts",
+      "src/aggregation/cell-projection.ts",
+      "src/aggregation/raid-night.ts",
+      "src/api/worker.ts",
+      "src/mcp/server.ts",
     ]) {
       const code = SOURCES[Object.keys(SOURCES).find((candidate) => candidate.endsWith(path)) ?? ""] ?? "";
       expect(code, path).not.toMatch(/retribution/i);

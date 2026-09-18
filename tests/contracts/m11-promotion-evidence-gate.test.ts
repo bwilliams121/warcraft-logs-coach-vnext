@@ -37,9 +37,12 @@
  *                  asserted to REFUSE it. `evidenceReady: true` authorizes
  *                  nothing by itself.
  *
- * No production INTERNAL_ONLY registration exists in M11-A2, so the internal
- * branch is exercised over a synthetic, test-built module that never enters
- * a validated catalog and is never listed anywhere in production.
+ * No production INTERNAL_ONLY registration existed in M11-A2; Retribution
+ * Paladin was one from M11-A4 until M11-A5 promoted it (this gate reported
+ * its readiness in INTERNAL_ONLY mode from the same four assertions that now
+ * qualify it in PUBLIC mode). The internal branch is exercised over a
+ * synthetic, test-built module that never enters a validated catalog and is
+ * never listed anywhere in production.
  */
 
 import { describe, expect, it } from "vitest";
@@ -402,6 +405,15 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
         "spec-protection-paladin.the-avengers-shield-press-under-vanguard-is-a-real-exact-entry-match[0] -> MATCH",
         "spec-protection-paladin.the-divine-toll-press-is-a-real-exact-entry-match[0] -> MATCH",
       ],
+      // M11-A5: the same four assertions that reported Retribution's
+      // INTERNAL_ONLY readiness in M11-A4 now qualify it in PUBLIC mode,
+      // paired THROUGH the identity table.
+      "paladin/retribution": [
+        "spec-retribution-paladin.divine-storm-under-the-arbiter-storm-buff-is-rejected-two-ways[0] -> REJECTED",
+        "spec-retribution-paladin.divine-storm-under-the-arbiter-storm-buff-is-rejected-two-ways[3] -> REJECTED",
+        "spec-retribution-paladin.rejected-by-unselectability-alone-before-any-cooldown-is-anchored[0] -> REJECTED",
+        "spec-retribution-paladin.the-real-match-final-verdict-at-2108996[0] -> MATCH",
+      ],
       "rogue/assassination": [
         "spec-assassination.low-combo-point-envenom-is-rejected[0] -> REJECTED",
         "spec-assassination.observed-garrote-at-q-is-authority-compatible[0] -> MATCH",
@@ -414,73 +426,77 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
 // INTERNAL_ONLY mode
 // ---------------------------------------------------------------------------
 
-describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("the one production INTERNAL_ONLY registration is Retribution Paladin (M11-A4)", () => {
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/retribution"]);
-    expect(
-      PRODUCTION_CATALOG.registrations
-        .filter((row) => row.exposure === "INTERNAL_ONLY")
-        .map((row) => row.specId),
-    ).toEqual(["paladin/retribution"]);
-  });
-
-  it("Retribution Paladin's readiness is REPORTED from real evidence paired against its own WCL identity, and authorizes nothing", async () => {
-    // The real INTERNAL_ONLY module, the real corpus, the real committed
-    // report. The public identity table REFUSES Paladin/Retribution, which is
-    // exactly what the internal pairing requires; the A7R6 and gtKb
-    // fight-context artifacts prove actors 6 and 23 are Paladin/Retribution.
+describe("PUBLIC mode — the M11-A5 promotion standard for Retribution Paladin: real MATCH AND real REJECTED", () => {
+  it("Retribution Paladin is PUBLIC, paired THROUGH the identity table, with at least one real MATCH and one real REJECTED", async () => {
+    // The generic gate requires one qualifying resolved assertion; M11-A5
+    // kept the stronger M11-A4 standard — both outcomes must remain, from
+    // genuine Retribution evidence, so a regression that collapsed the
+    // analyzer to one-sided outcomes could not be promoted or stay promoted.
     const corpus = await corpusPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "paladin/retribution");
     expect(module).toBeDefined();
     if (module === undefined) return;
-    expect(module.exposure).toBe("INTERNAL_ONLY");
-    expect(resolveSpecIdentity({ className: "Paladin", specName: "Retribution" }).ok).toBe(false);
-
+    expect(module.exposure).toBe("PUBLIC");
+    expect(resolveSpecIdentity({ className: "Paladin", specName: "Retribution" })).toEqual({
+      ok: true,
+      specId: "paladin/retribution",
+    });
     const readiness = evaluate(
       corpus,
       committedReport(),
-      module.identity.specId,
-      "INTERNAL_ONLY",
-      internalPairing(module),
+      "paladin/retribution",
+      "PUBLIC",
+      publicPairing("paladin/retribution"),
     );
-    expect(readiness.exposure).toBe("INTERNAL_ONLY");
+    expect(readiness.exposure).toBe("PUBLIC");
     expect(readiness.layer).toBe("SPEC_RETRIBUTION_PALADIN");
-    // At least one real MATCH and one real REJECTED, reproduced through the
-    // production path over SANITIZED_CAPTURE evidence — the M11-A4 G7 gate.
+    expect(readiness.evidenceReady).toBe(true);
     const outcomes = readiness.qualifyingAssertions.map((q) => q.expectedOutcome);
-    expect(outcomes).toContain("MATCH");
-    expect(outcomes).toContain("REJECTED");
+    expect(outcomes.filter((outcome) => outcome === "MATCH").length).toBeGreaterThanOrEqual(1);
+    expect(outcomes.filter((outcome) => outcome === "REJECTED").length).toBeGreaterThanOrEqual(1);
     for (const q of readiness.qualifyingAssertions) {
       expect(q.kind).toBe("SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE");
       expect(q.evidenceSet.every((entry) => entry.kind === "SANITIZED_CAPTURE")).toBe(true);
       expect(q.evidenceIdentity).toEqual({ className: "Paladin", specName: "Retribution" });
+      expect(q.evidenceActor).toEqual({ reportCode: "A7R6kxPJ1hC8YQ4w", fightId: 7, actorId: 6 });
       expect(q.reportStatus).toBe("PASSED");
     }
-    // A report, not an authorization: the id stays outside the public
-    // partition whatever the readiness says.
-    expect(readiness.evidenceReady).toBe(true);
-    expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("paladin/retribution");
+    // The gtKb subject (actor 23, all UNKNOWN) contributes nothing, as it must.
+    expect(readiness.qualifyingAssertions.some((q) => q.evidenceActor.actorId === 23)).toBe(false);
+    expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("paladin/retribution");
+  });
+});
+
+describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
+  it("no production INTERNAL_ONLY registration exists since M11-A5 (Retribution Paladin was one from M11-A4)", () => {
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect(
+      PRODUCTION_CATALOG.registrations
+        .filter((row) => row.exposure === "INTERNAL_ONLY")
+        .map((row) => row.specId),
+    ).toEqual([]);
   });
 
-  it("the reviewed snapshot: which real cases qualify Retribution Paladin today", async () => {
+  it("the internal pairing finds nothing for a specialization the identity table resolves — Retribution Paladin since M11-A5", async () => {
+    // The internal pairing REQUIRES the public table to refuse the identity.
+    // Now that it resolves Paladin/Retribution, the internal-mode search over
+    // the same evidence qualifies nothing and reports evidenceReady false;
+    // that is informational, not a failure, and the PUBLIC mode above is
+    // where the same assertions count.
     const corpus = await corpusPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "paladin/retribution");
     if (module === undefined) throw new Error("no Retribution module");
-    const snapshot = evaluate(
+    const readiness = evaluate(
       corpus,
       committedReport(),
       "paladin/retribution",
       "INTERNAL_ONLY",
       internalPairing(module),
-    )
-      .qualifyingAssertions.map((q) => `${q.caseId}[${String(q.ordinal)}] -> ${q.expectedOutcome}`)
-      .sort();
-    expect(snapshot).toEqual([
-      "spec-retribution-paladin.divine-storm-under-the-arbiter-storm-buff-is-rejected-two-ways[0] -> REJECTED",
-      "spec-retribution-paladin.divine-storm-under-the-arbiter-storm-buff-is-rejected-two-ways[3] -> REJECTED",
-      "spec-retribution-paladin.rejected-by-unselectability-alone-before-any-cooldown-is-anchored[0] -> REJECTED",
-      "spec-retribution-paladin.the-real-match-final-verdict-at-2108996[0] -> MATCH",
-    ]);
+    );
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+    expect(readiness.disqualified.length).toBeGreaterThan(0);
+    for (const d of readiness.disqualified) expect(d.reason).toContain("not this specialization");
   });
 
   it("a synthetic internal module's readiness is a report, and its identity is refused by the public table", async () => {

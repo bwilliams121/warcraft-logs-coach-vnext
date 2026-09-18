@@ -38,6 +38,8 @@ import {
   DECISION_BLOCKER_CLASSES,
   DECISION_COVERAGES,
 } from "../../src/specs/rogue/assassination/decision-coverage.js";
+import { PROTECTION_EXCLUSION_PUBLIC_PROJECTION } from "../../src/specs/paladin/protection/registration.js";
+import { RETRIBUTION_EXCLUSION_VIEW_PROJECTION } from "../../src/specs/paladin/retribution/registration.js";
 import {
   ANALYSIS_STATUSES,
   DECISION_EXCLUSION_REASONS,
@@ -80,7 +82,6 @@ describe("the public vocabularies match the internal ones exactly", () => {
     { name: "comparison bases", pub: PUBLIC_COMPARISON_BASES, internal: COMPARISON_BASES },
     { name: "authority coverages", pub: PUBLIC_AUTHORITY_COVERAGES, internal: DECISION_COVERAGES },
     { name: "blocker classes", pub: PUBLIC_DECISION_BLOCKER_CLASSES, internal: DECISION_BLOCKER_CLASSES },
-    { name: "exclusion reasons", pub: PUBLIC_EXCLUSION_REASONS, internal: DECISION_EXCLUSION_REASONS },
     { name: "analysis statuses", pub: PUBLIC_ANALYSIS_STATUSES, internal: ANALYSIS_STATUSES },
   ];
 
@@ -89,6 +90,28 @@ describe("the public vocabularies match the internal ones exactly", () => {
       expect([...pair.pub].sort()).toEqual([...pair.internal].sort());
     });
   }
+
+  it("publishes exactly the union of every registered module's projected exclusion reasons", () => {
+    // Until M11-A5 this pair was `PUBLIC_EXCLUSION_REASONS == Assassination's
+    // DECISION_EXCLUSION_REASONS`, and Protection's view projected onto that
+    // set without adding to it. M11-A5 added ONE spec-neutral value under
+    // analysis/1, OUTSIDE_SUPPORTED_SLICE, which Retribution's view projects
+    // its internal OUTSIDE_FIRST_SLICE onto. The rule is now stated over
+    // every module: every value a registered view can emit is public, and
+    // nothing is public that no registered view emits — so a public value
+    // cannot exist merely because somebody added it to the enum.
+    const emitted = new Set<string>([
+      ...DECISION_EXCLUSION_REASONS,
+      ...Object.values(PROTECTION_EXCLUSION_PUBLIC_PROJECTION),
+      ...Object.values(RETRIBUTION_EXCLUSION_VIEW_PROJECTION),
+    ]);
+    expect([...PUBLIC_EXCLUSION_REASONS].sort()).toEqual([...emitted].sort());
+    // The three M6 values keep their exact position and meaning; the M11-A5
+    // value is appended, never inserted, so the order a consumer saw is
+    // preserved.
+    expect([...PUBLIC_EXCLUSION_REASONS].slice(0, 3)).toEqual([...DECISION_EXCLUSION_REASONS]);
+    expect(PUBLIC_EXCLUSION_REASONS[3]).toBe("OUTSIDE_SUPPORTED_SLICE");
+  });
 
   it("publishes the two selection precisions", () => {
     // No internal const array exists for this union, so the values are pinned
@@ -103,10 +126,15 @@ describe("the public vocabularies match the internal ones exactly", () => {
     expect([...PUBLIC_USABILITY_PROVENANCES]).toEqual(["OBSERVED_EXECUTION", "NOT_ESTABLISHED"]);
   });
 
-  it("publishes exactly the two supported specializations", () => {
-    // Widened in M10-D under analysis/1: growing this enum is how supported
-    // specializations arrive, and narrowing it is what would need a version.
-    expect([...PUBLIC_SPEC_IDS]).toEqual(["rogue/assassination", "paladin/protection"]);
+  it("publishes exactly the three supported specializations", () => {
+    // Widened in M10-D and again in M11-A5 under analysis/1: growing this
+    // enum is how supported specializations arrive, and narrowing it is what
+    // would need a version.
+    expect([...PUBLIC_SPEC_IDS]).toEqual([
+      "rogue/assassination",
+      "paladin/protection",
+      "paladin/retribution",
+    ]);
   });
 
   it("keeps outcome and precision as separate vocabularies", () => {
@@ -252,12 +280,18 @@ describe("the schema is strict rather than permissive", () => {
     expect(PublicAnalysisResultSchema.safeParse(fabricated).success).toBe(false);
   });
 
-  it("accepts both public specialization ids and nothing else", () => {
-    for (const specId of ["rogue/assassination", "paladin/protection"]) {
+  it("accepts the three public specialization ids and nothing else", () => {
+    for (const specId of ["rogue/assassination", "paladin/protection", "paladin/retribution"]) {
       const supported = { ...MINIMAL_UNANALYZED, specialization: { specId, gameplaySupported: true } };
       expect(PublicAnalysisResultSchema.safeParse(supported).success, specId).toBe(true);
     }
-    for (const specId of ["Paladin/Protection", "paladin/retribution", "warrior/protection", ""]) {
+    for (const specId of [
+      "Paladin/Protection",
+      "Paladin/Retribution",
+      "paladin/holy",
+      "warrior/protection",
+      "",
+    ]) {
       const rejected = { ...MINIMAL_UNANALYZED, specialization: { specId, gameplaySupported: false } };
       expect(PublicAnalysisResultSchema.safeParse(rejected).success, specId).toBe(false);
     }

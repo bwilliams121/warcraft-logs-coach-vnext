@@ -188,6 +188,12 @@ milestone that adds the next id must re-prove the internal-only path over its
 real registration before exposing it (the M10-C pattern) — nothing here should
 be deleted on the grounds that it is unexercised.
 
+**Update (M11-A4/A5, 2026-09-18):** exactly that happened. Retribution Paladin
+arrived INTERNAL_ONLY at M11-A4 (the partition, the narrowing boundary and the
+gate's internal mode exercised over a real registration) and was promoted
+PUBLIC at M11-A5; the set is empty again and the on-ramp is intact for the
+next specialization.
+
 Two identity/evidence caveats M10-D surfaced, both outside its scope:
 
 - A Warcraft Logs identity naming a supported specialization over another

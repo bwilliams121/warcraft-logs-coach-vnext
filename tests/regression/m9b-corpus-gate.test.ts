@@ -69,10 +69,14 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // Paladin slices and sixteen cases with sixty-eight assertions (the
     // INTERNAL_ONLY analyzer through its registration, the bundle, the
     // exact-zero stack proofs, the domain boundary, the public refusal on
-    // the same subject). Measured, then pinned.
-    expect(result.summary.cases).toBe(128);
-    expect(result.summary.assertions).toBe(407);
-    expect(result.summary.passed).toBe(407);
+    // the same subject); M11-A5's public Retribution promotion added three
+    // cases and three assertions over the same slices (the public
+    // projection with the slice boundary named, REST/MCP parity for the
+    // subject, a mixed raid night over its own evidence) and repurposed the
+    // application-service case in place. Measured, then pinned.
+    expect(result.summary.cases).toBe(131);
+    expect(result.summary.assertions).toBe(410);
+    expect(result.summary.passed).toBe(410);
   });
 
   it("covers every layer", async () => {

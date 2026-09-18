@@ -166,13 +166,14 @@ describe("an unsupported specialization", () => {
   it("refuses every unsupported specialization the same way", async () => {
     // Warrior/Arms is the canonical captured unsupported identity (A7R6 fight 7,
     // actor 4); the others are stated names. Paladin/Protection is NOT in this
-    // list: it has been supported since M10-D.
+    // list: it has been supported since M10-D. Paladin/Retribution is NOT in
+    // it either, since M11-A5; Paladin/Holy stands in as the Paladin miss.
     for (const [className, specName] of [
       ["Rogue", "Outlaw"],
       ["Rogue", "Subtlety"],
       ["Evoker", "Augmentation"],
       ["Warrior", "Arms"],
-      ["Paladin", "Retribution"],
+      ["Paladin", "Holy"],
       ["Priest", "Discipline"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);

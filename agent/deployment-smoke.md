@@ -799,3 +799,107 @@ descriptions to make a smoke step pass.
   real analyzer; `IDENTITY_CONFLICT` remains M15's. The identities above are
   machine-pinned from the committed context artifact precisely so this cannot
   happen here.
+
+---
+
+# Part IV — Milestone 11-A5
+
+The deployed surface is unchanged in routes and tools. What changed: a third
+public analyzer, `paladin-retribution-observed-decisions`, selected for
+`Paladin/Retribution`; the public `specId` enum of
+`warcraft-logs-coach.analysis/1` now carries `paladin/retribution`; the public
+exclusion-reason enum carries a fourth, spec-neutral value
+`OUTSIDE_SUPPORTED_SLICE`; and the `analyze_warcraft_log` /
+`analyze_raid_night` descriptions name all three supported specializations
+and Retribution's limits. No schema version moved.
+
+**Run Part IV only after M11-A5 is reviewed, committed, pushed, CI-green and
+deployment is separately authorized. Nothing below is executed by an agent.**
+
+Preconditions, unchanged from Part III. Secret handling as in Part II.
+
+## M11-1. Deploy, M11-2. Health
+
+As M10-1 and M10-2.
+
+## M11-3. REST single fight — Assassination and Protection (invariance)
+
+As M10-3 and M10-4: both documents must be what Part III recorded, byte for
+byte where the report revision has not moved. Neither may carry
+`OUTSIDE_SUPPORTED_SLICE` (their slices are their authorities' whole GCD action
+sets).
+
+## M11-4. REST single fight — Retribution Paladin (newly public)
+
+Costs **1** unit. Same report and fight, actor **6** — the Retribution Paladin
+the committed corpus evidence was captured from (`wcl-fight-context-a7r6-fight-7`
+proves the identity: masterData subType Paladin, friendlySpecs "Retribution").
+Same request shape as M10-4 with `sourceId = 6`. Expect 200 and confirm all
+of:
+
+- `status` is `ANALYZED` — **not** `SPEC_NOT_SUPPORTED`;
+- `specialization` is `{ "specId": "paladin/retribution", "gameplaySupported": true }`;
+- `analyzerId` is `paladin-retribution-observed-decisions`;
+- `authority.authorityId` is `SIMC_APL_PALADIN_RETRIBUTION`,
+  `authority.artifactRevision` is `simc-33622e9d-1`,
+  `authority.commitSha` is `33622e9d1662ff0e451691edf85a6b49cc9d11d9`;
+- `capability.matchMeaning` is `AUTHORITY_COMPATIBLE_ONLY` and
+  `capability.scoresPerformance` is `false`;
+- Part I step 10's arithmetic holds;
+- every `decisions[].observedToken` is `divine_storm` or `templars_verdict`;
+- `coverage.exclusions` contains a `NON_GCD_ACTION` row and an
+  `OUTSIDE_SUPPORTED_SLICE` row (Judgment, Blade of Justice, Hammer of Wrath,
+  Wake of Ashes, Divine Toll, Execution Sentence land there), and the strings
+  `OUTSIDE_FIRST_SLICE` and `MELEE_SWING` appear **nowhere** in the body;
+- none of `rawBlocker`, `rootScanBlockedAt`, `domains`, `holyPower`, `build`,
+  `resolved`, `foregroundProvenByObservedExecution` appears as a key;
+- `eligibleDecisions` is plausible for the whole pull — the committed 165 s
+  bundle over the same subject yields 69 eligible / 1 MATCH / 10 REJECTED /
+  58 UNKNOWN, so the whole pull is expected to be UNKNOWN-heavy. Do not read
+  that as a grade. The committed MATCH (Final Verdict at report time
+  2,108,996, `EXACT_ENTRY` `templars_verdict`) and the committed REJECTED
+  Divine Storms (2,006,193; 2,105,158 and 2,106,382 with `EXACT_ENTRY`
+  `templars_verdict`) should appear as such if the whole-pull evidence agrees
+  with the committed slices; if any differs, record it — that is a finding
+  about whole-fight evidence, not something to adjust.
+
+## M11-5. REST single fight — unsupported (Arms Warrior)
+
+As M10-5, unchanged: actor 4 is still `SPEC_NOT_SUPPORTED`.
+
+## M11-6. MCP `tools/list`
+
+As M10-6, with the sentence now
+`Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin`
+and, in addition to the Protection lines, each description containing
+verbatim modulo line wrapping:
+
+- `only observed Holy Power SPENDER decisions`
+- `OUTSIDE_SUPPORTED_SLICE`
+- `does NOT evaluate` … `defensive cooldowns, interrupts`
+
+and neither saying `full Retribution rotation`. The `analyze_warcraft_log`
+**outputSchema** advertises `specId` with exactly the three enum members and
+the exclusion `reason` with exactly the four.
+
+## M11-7. MCP `tools/call` — Retribution and Arms
+
+As M10-7 with `sourceId` 6 and 4.
+
+## M11-8. Transport parity, decoded from raw bytes
+
+As M10-8, applied to the Retribution pair and the Arms pair.
+
+## M11-9. Raid night with all three
+
+As M10-9 over fight 7: the actor-6 cell is `ANALYZED` under
+`paladin/retribution`, the actor-7 cell is what Part III recorded, the
+actor-4 cell is `SPEC_NOT_SUPPORTED`; one roster discovery, one ingestion.
+
+## M11-10. Unauthorized and leakage sweep, M11-11. Completion
+
+As M10-11 and M10-12. If a step surfaces a problem — a Retribution request
+answering `SPEC_NOT_SUPPORTED`, `OUTSIDE_FIRST_SLICE` or an internal field on
+the wire, an Assassination or Protection document that moved — M11-A5 is
+**not** complete: record exactly what was observed and stop. Do not adjust the
+analyzer, the projection or the descriptions to make a smoke step pass.

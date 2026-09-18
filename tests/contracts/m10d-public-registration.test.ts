@@ -54,9 +54,13 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the two public ids; internal-only: Retribution Paladin since M11-A4", () => {
-    expect([...PUBLIC_SPEC_IDS]).toEqual(["rogue/assassination", "paladin/protection"]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/retribution"]);
+  it("public partition: the three public ids; internal-only: empty again since M11-A5", () => {
+    expect([...PUBLIC_SPEC_IDS]).toEqual([
+      "rogue/assassination",
+      "paladin/protection",
+      "paladin/retribution",
+    ]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -68,6 +72,7 @@ describe("the five sites agree", () => {
     expect(Object.entries(SUPPORTED_SPEC_IDENTITIES)).toEqual([
       ["rogue/assassination", "rogue/assassination"],
       ["paladin/protection", "paladin/protection"],
+      ["paladin/retribution", "paladin/retribution"],
     ]);
   });
 
@@ -76,19 +81,21 @@ describe("the five sites agree", () => {
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain(PROTECTION_PALADIN_SPEC_ID);
   });
 
-  it("the registration is PUBLIC and the catalog carries exactly two enabled analyzers", () => {
+  it("the registration is PUBLIC and the catalog carries exactly three enabled analyzers", () => {
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
     expect(ASSASSINATION_REGISTRATION.exposure).toBe("PUBLIC");
-    // M11-A4: a third, INTERNAL_ONLY row is in the catalog and NOT among the
-    // enabled (public) analyzers.
+    // M11-A4 put a third, INTERNAL_ONLY row in the catalog, NOT among the
+    // enabled (public) analyzers; M11-A5 made it PUBLIC by the same
+    // five-site move this file pins for Protection.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
-      ["paladin/retribution", "INTERNAL_ONLY"],
+      ["paladin/retribution", "PUBLIC"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
       PROTECTION_PALADIN_ANALYZER_ID,
+      "paladin-retribution-observed-decisions",
     ]);
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toEqual(
       ENABLED_ANALYZERS.map((row) => row.analyzerId),

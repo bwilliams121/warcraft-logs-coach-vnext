@@ -39,6 +39,7 @@ import type { SpecId } from "../../src/findings/spec-id.js";
 import { ANALYZER_REGISTRATIONS, validateAnalyzerCatalog } from "../../src/services/analyzer-registry.js";
 import { ASSASSINATION_REGISTRATION } from "../../src/specs/rogue/assassination/registration.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protection/registration.js";
+import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
 
 const PINNED_COMMIT = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 const PINNED_REVISION = "simc-33622e9d-1";
@@ -99,13 +100,19 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
   const shared = unloadableBinding("SIMC_APL_SHARED_PROBE");
   const rogue = row("rogue/assassination", "probe-rogue-owner", "Assassination Rogue", [shared]);
   const paladin = row("paladin/protection", "probe-paladin-owner", "Protection Paladin", [shared]);
+  // The third public row (M11-A5), binding its own authority, so every
+  // catalog below is complete and the partition rule stays out of the way.
+  const retribution = row("paladin/retribution", "probe-retribution-owner", "Retribution Paladin", [
+    unloadableBinding("SIMC_APL_RETRIBUTION_PROBE"),
+  ]);
 
   it("the two rows are otherwise valid: each validates alone, and the pair differs in spec id and analyzer id", () => {
     expect(rogue.specId).not.toBe(paladin.specId);
     expect(rogue.analyzerId).not.toBe(paladin.analyzerId);
-    // Alone, each row's only problem would be the public set (one of two public
-    // ids missing) — which is exactly the partition rule, not the authority rule.
-    for (const alone of [rogue, paladin]) {
+    // Alone, each row's only problem would be the public set (two of three
+    // public ids missing) — which is exactly the partition rule, not the
+    // authority rule.
+    for (const alone of [rogue, paladin, retribution]) {
       const validation = validateAnalyzerCatalog([alone]);
       expect(validation.ok).toBe(false);
       if (!validation.ok) {
@@ -118,7 +125,7 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
   });
 
   it("together, the ONLY defect is DUPLICATE_DECISION_AUTHORITY_BINDING, on the second owner, naming the first", () => {
-    const validation = validateAnalyzerCatalog([rogue, paladin]);
+    const validation = validateAnalyzerCatalog([rogue, paladin, retribution]);
     expect(validation.ok).toBe(false);
     if (validation.ok) return;
     expect(validation.defects).toEqual([
@@ -131,7 +138,7 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
   });
 
   it("is order-independent in substance: reversing the rows moves the blame, not the verdict", () => {
-    const validation = validateAnalyzerCatalog([paladin, rogue]);
+    const validation = validateAnalyzerCatalog([paladin, rogue, retribution]);
     expect(validation.ok).toBe(false);
     if (validation.ok) return;
     expect(validation.defects.map((defect) => defect.defect)).toEqual([
@@ -149,7 +156,7 @@ describe("DUPLICATE_DECISION_AUTHORITY_BINDING — two analyzers may not own one
     const other = row("paladin/protection", "probe-other", "Protection Paladin", [
       unloadableBinding("SIMC_APL_OTHER_PROBE"),
     ]);
-    const validation = validateAnalyzerCatalog([single, other]);
+    const validation = validateAnalyzerCatalog([single, other, retribution]);
     expect(validation.ok).toBe(true);
   });
 });
@@ -162,10 +169,14 @@ describe("control — shared provenance is legal; only the decision-authority id
     const paladin = row("paladin/protection", "probe-paladin", "Protection Paladin", [
       unloadableBinding("SIMC_APL_PROBE_PALADIN"),
     ]);
-    // Same provenance on both bindings, by construction.
+    const retribution = row("paladin/retribution", "probe-retribution", "Retribution Paladin", [
+      unloadableBinding("SIMC_APL_PROBE_RETRIBUTION"),
+    ]);
+    // Same provenance on every binding, by construction.
     expect(rogue.authorityBindings[0]?.commitSha).toBe(paladin.authorityBindings[0]?.commitSha);
     expect(rogue.authorityBindings[0]?.artifactRevision).toBe(paladin.authorityBindings[0]?.artifactRevision);
-    expect(validateAnalyzerCatalog([rogue, paladin])).toMatchObject({ ok: true });
+    expect(retribution.authorityBindings[0]?.commitSha).toBe(paladin.authorityBindings[0]?.commitSha);
+    expect(validateAnalyzerCatalog([rogue, paladin, retribution])).toMatchObject({ ok: true });
   });
 
   it("the REAL production rows already share the pinned commit and revision and validate together", () => {
@@ -181,23 +192,37 @@ describe("control — shared provenance is legal; only the decision-authority id
   });
 
   it("the same upstream source FILE is shared provenance, not a shared decision authority", () => {
-    // Protection's artifact cites `apl_paladin.cpp`; a future Retribution
-    // artifact would cite the SAME file (its own region) under its OWN
-    // authority id. The rule keys on `authorityId` + domain and never reads a
-    // source path, so this is the mechanical statement of that legality:
-    // two bindings whose loaded identity would share every provenance field
-    // except the authority id are not duplicates.
+    // Protection's artifact cites `apl_paladin.cpp`, and since M11-A4 the
+    // REAL Retribution artifact cites the SAME file (its own region) under
+    // its OWN authority id. The rule keys on `authorityId` + domain and never
+    // reads a source path, so this is the mechanical statement of that
+    // legality: two bindings whose loaded identity shares every provenance
+    // field except the authority id are not duplicates.
     const loaded = PROTECTION_PALADIN_REGISTRATION.authorityBindings[0]?.load();
     expect(loaded?.ok).toBe(true);
     if (loaded === undefined || !loaded.ok) return;
     expect(loaded.authority.artifact.provenance.sourcePath).toBe("engine/class_modules/apl/apl_paladin.cpp");
+    const retLoaded = RETRIBUTION_PALADIN_REGISTRATION.authorityBindings[0]?.load();
+    expect(retLoaded?.ok).toBe(true);
+    if (retLoaded === undefined || !retLoaded.ok) return;
+    expect(retLoaded.authority.artifact.provenance.sourcePath).toBe(
+      "engine/class_modules/apl/apl_paladin.cpp",
+    );
+    expect(retLoaded.authority.artifact.provenance.commitSha).toBe(
+      loaded.authority.artifact.provenance.commitSha,
+    );
+    expect(RETRIBUTION_PALADIN_REGISTRATION.authorityBindings[0]?.authorityId).not.toBe(
+      PROTECTION_PALADIN_REGISTRATION.authorityBindings[0]?.authorityId,
+    );
     const sharedFileBinding = Object.freeze({
       ...unloadableBinding("SIMC_APL_PALADIN_PROBE_SIBLING"),
       artifactRevision: loaded.authority.artifact.artifactRevision,
       commitSha: loaded.authority.artifact.provenance.commitSha,
     });
     const sibling = row("rogue/assassination", "probe-sibling", "Assassination Rogue", [sharedFileBinding]);
-    // Paired with the REAL Protection row (whose binding really loads).
-    expect(validateAnalyzerCatalog([PROTECTION_PALADIN_REGISTRATION, sibling])).toMatchObject({ ok: true });
+    // Paired with the REAL Paladin rows (whose bindings really load).
+    expect(
+      validateAnalyzerCatalog([PROTECTION_PALADIN_REGISTRATION, sibling, RETRIBUTION_PALADIN_REGISTRATION]),
+    ).toMatchObject({ ok: true });
   });
 });

@@ -182,12 +182,12 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 }
 
 describe("the production catalog", () => {
-  it("is exactly the two PUBLIC registrations plus the INTERNAL_ONLY Retribution row (M11-A4), and both lookups answer alike for the public ones", () => {
+  it("is exactly the three PUBLIC registrations (Retribution PUBLIC since M11-A5), and both lookups answer alike for every one", () => {
     expect(ANALYZER_REGISTRATIONS).toHaveLength(3);
-    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(2);
-    expect(analyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)).toBeNull();
-    expect(internalAnalyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)?.exposure).toBe(
-      "INTERNAL_ONLY",
+    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(3);
+    expect(analyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
+    expect(internalAnalyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)).toBe(
+      analyzerForSpec("paladin/retribution", PRODUCTION_CATALOG),
     );
     expect(analyzerForSpec("paladin/protection", PRODUCTION_CATALOG)?.analyzerId).toBe(
       PROTECTION_PALADIN_ANALYZER_ID,
@@ -199,10 +199,14 @@ describe("the production catalog", () => {
     expect(analyzerForSpec("rogue/assassination", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
   });
 
-  it("public identity resolution accepts Paladin/Protection and still rejects Warrior/Arms", () => {
+  it("public identity resolution accepts Paladin/Protection and Paladin/Retribution and still rejects Warrior/Arms", () => {
     expect(resolveSpecIdentity({ className: "Paladin", specName: "Protection" })).toEqual({
       ok: true,
       specId: "paladin/protection",
+    });
+    expect(resolveSpecIdentity({ className: "Paladin", specName: "Retribution" })).toEqual({
+      ok: true,
+      specId: "paladin/retribution",
     });
     expect(resolveSpecIdentity(UNSUPPORTED_WCL_IDENTITY)).toMatchObject({
       ok: false,

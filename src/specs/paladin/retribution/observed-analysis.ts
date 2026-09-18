@@ -1,5 +1,5 @@
 /**
- * The internal Retribution Paladin observed-decision facade (M11-A4).
+ * The Retribution Paladin observed-decision facade (M11-A4; PUBLIC since M11-A5).
  *
  * WHAT IT IS
  *
@@ -8,8 +8,9 @@
  * Holy Power SPENDER cast against the pinned offensive authority through the
  * nested unselectability proof and the shared first-GCD query, records what
  * Holy Power each cast observed, and reports the decision domains
- * separately. INTERNAL_ONLY: the application service never selects it, and
- * nothing here is projected to a public document.
+ * separately. Since M11-A5 the application service selects it for a
+ * Paladin/Retribution identity; what reaches a public document is the
+ * registration's VIEW (`registration.ts`) and nothing else in this result.
  *
  * WHAT IT DELIBERATELY IS NOT
  *

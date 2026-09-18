@@ -45,21 +45,38 @@ describe("the supported identities", () => {
     expect(outcome("PALADIN", "PROTECTION")).toBe("paladin/protection");
   });
 
-  it("recognizes exactly two specializations", () => {
+  it("resolves Paladin/Retribution to paladin/retribution (M11-A5)", () => {
+    // The canonical module identity (`wclClassName`/`wclSpecName` of
+    // RETRIBUTION_PALADIN_MODULE), under the same normalization as the others.
+    expect(outcome("Paladin", "Retribution")).toBe("paladin/retribution");
+    expect(outcome("paladin", "retribution")).toBe("paladin/retribution");
+    expect(outcome("  Paladin ", " Retribution")).toBe("paladin/retribution");
+    expect(outcome("PALADIN", "RETRIBUTION")).toBe("paladin/retribution");
+  });
+
+  it("recognizes exactly three specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
-    expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual(["rogue/assassination", "paladin/protection"]);
+    expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
+      "rogue/assassination",
+      "paladin/protection",
+      "paladin/retribution",
+    ]);
   });
 
   it("does not let one Paladin specialization stand for another", () => {
-    // Same class, different spec: a Retribution or Holy Paladin is not a
-    // Protection Paladin, and there is no nearest-match.
-    expect(outcome("Paladin", "Retribution")).toBe("UNSUPPORTED_SPECIALIZATION");
+    // Same class, different spec: each supported Paladin spec resolves only to
+    // itself, a Holy Paladin is neither, and there is no nearest-match.
+    expect(outcome("Paladin", "Retribution")).toBe("paladin/retribution");
+    expect(outcome("Paladin", "Protection")).toBe("paladin/protection");
     expect(outcome("Paladin", "Holy")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Paladin", "Protection ")).toBe("paladin/protection");
     expect(outcome("Paladin", "Protectionn")).toBe("UNSUPPORTED_SPECIALIZATION");
-    // Right spec name, wrong class: a Protection Warrior is not a Paladin.
+    expect(outcome("Paladin", "Retributionn")).toBe("UNSUPPORTED_SPECIALIZATION");
+    // Right spec name, wrong class: a Protection Warrior is not a Paladin, and
+    // no other class has a Retribution spec.
     expect(outcome("Warrior", "Protection")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Warrior", "Retribution")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
   it("maps the id to itself, never to a different spec", () => {
@@ -131,8 +148,7 @@ describe("no unsupported identity falls through to a supported specialization", 
     // The other two Rogue specs — the nearest misses, sharing a class.
     ["Rogue", "Outlaw"],
     ["Rogue", "Subtlety"],
-    // The other Paladin specs — the same nearest miss for the second spec.
-    ["Paladin", "Retribution"],
+    // The remaining Paladin spec — the nearest miss for both Paladin specs.
     ["Paladin", "Holy"],
     // The canonical captured unsupported identity: A7R6 fight 7, actor 4.
     ["Warrior", "Arms"],
@@ -146,6 +162,8 @@ describe("no unsupported identity falls through to a supported specialization", 
     ["Mage", "Assassination"],
     ["Warrior", "Protection"],
     ["Rogue", "Protection"],
+    ["Rogue", "Retribution"],
+    ["Evoker", "Retribution"],
     // Right class, no spec that exists.
     ["Rogue", "Assassinationn"],
     ["Rogue", "Assassin"],

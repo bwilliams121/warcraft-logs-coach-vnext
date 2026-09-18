@@ -442,15 +442,21 @@ specializations enter `INTERNAL_ONLY` and are promoted to public only
 through a test-owned evidence gate that requires at least one real
 sanitized-capture `MATCH` or `REJECTED`. The first M11 specialization,
 Retribution Paladin, landed `INTERNAL_ONLY` at M11-A4 (`src/specs/paladin/
-retribution/`, `paladin-retribution-observed-decisions`): it is in the
-production catalog for the internal lookup, the corpus and tests, and is
-NOT public — a Paladin/Retribution request still returns
-`SPEC_NOT_SUPPORTED`. Its first slice judges observed Holy Power spender
-decisions (Divine Storm versus Templar's/Final Verdict) only, under the
-class/spec authority boundary (racials, potions, item uses and external
-buffs are outside the rotational decision domain; race and faction are not
-read). The roster lists what the game has, not what this project analyzes.
-See `agent/architecture.md`, "M11-A" and "M11-A4", and the tree's README.
+retribution/`, `paladin-retribution-observed-decisions`) and was promoted
+to PUBLIC at M11-A5 after that gate reported both a real `MATCH` and real
+`REJECTED` evidence for it — completing M11-A, the first reusable
+onboarding slice (M11 as a whole is NOT complete: twenty-nine ordinary
+specializations remain, healers are M12, Augmentation is M13). Its slice
+judges observed Holy Power spender decisions (Divine Storm versus
+Templar's/Final Verdict) only, under the class/spec authority boundary
+(racials, potions, item uses and external buffs are outside the rotational
+decision domain; race and faction are not read); every other rotational
+cast is reported as excluded `OUTSIDE_SUPPORTED_SLICE` — observed, not
+judged. There is no supplemental analysis and no performance scoring; a
+decision whose state cannot be reconstructed remains `UNKNOWN`, which is
+expected. The roster lists what the game has, not what this project
+analyzes. See `agent/architecture.md`, "M11-A", "M11-A4" and "M11-A5", and
+the tree's README.
 
 ## Second Specialization
 
@@ -570,7 +576,8 @@ transport — a test asserts the two payloads are deeply equal.
 ### What the analysis actually is
 
 **Observed-decision authority verification for the publicly supported
-specializations: Assassination Rogue and Protection Paladin.**
+specializations: Assassination Rogue, Protection Paladin and Retribution
+Paladin.**
 
 It takes the rotational decisions a player *already made* and checks each one
 against that specialization's pinned SimulationCraft action priority list.
@@ -603,7 +610,19 @@ or survival; off-global-cooldown actions such as Shield of the Righteous are
 excluded from the decision population, not judged. See the
 [Second Specialization](#second-specialization) section.
 
-Any specialization other than those two returns `status: "SPEC_NOT_SUPPORTED"`
+Retribution Paladin analysis (public since M11-A5) evaluates only observed
+Holy Power SPENDER decisions — Divine Storm versus Templar's/Final Verdict —
+against the pinned Retribution APL, when the necessary state can be
+established. Generators, Wake of Ashes, Divine Toll, Execution Sentence and
+the other cooldown branches are reported as excluded `OUTSIDE_SUPPORTED_SLICE`
+(a spec-neutral exclusion reason added to schema v1 at M11-A5: observed, not
+judged, never a mistake and never an UNKNOWN); defensive cooldowns,
+interrupts, survival, race, faction, gear use effects and consumables are not
+evaluated. Most spender decisions resolve `UNKNOWN` on current evidence, and
+the coverage block says so. See the
+[Onboarding foundation](#onboarding-foundation-m11-a) section.
+
+Any specialization other than those three returns `status: "SPEC_NOT_SUPPORTED"`
 with no decisions and no coverage. That is a complete, truthful answer — not
 evidence of clean play. The canonical list of supported specializations is
 derived at runtime from the production analyzer catalog (the PUBLIC

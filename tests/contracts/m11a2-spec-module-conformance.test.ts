@@ -311,12 +311,13 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the two public modules and the one INTERNAL_ONLY module, each with zero supplemental analyses", () => {
+  it("is exactly the three public modules, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
-    // count-independent. The third module (M11-A4) changed this line WITHOUT
-    // the five-site identity move — it is INTERNAL_ONLY, and the partition
-    // entry it carries is the internal one. Its `supplementalAnalyses` is
-    // empty by decision (agent/m11-a4-first-spec-contract.md section 8).
+    // count-independent. The third module (M11-A4) first changed this line
+    // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
+    // internal partition entry — and M11-A5 changed it again WITH the move.
+    // Its `supplementalAnalyses` is empty by decision
+    // (agent/m11-a4-first-spec-contract.md section 8); M11-A5 is exposure only.
     expect(
       MODULES.map(({ exportName, module }) => [
         exportName,
@@ -326,16 +327,19 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
-      ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "INTERNAL_ONLY", 0],
+      ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
     ]);
   });
 
   it("the public exclusion vocabulary is closed, so a module's view cannot publish an unmapped reason", () => {
+    // M11-A5 added OUTSIDE_SUPPORTED_SLICE, the one spec-neutral value a
+    // module whose slice is narrower than its authority projects onto.
     expect([...PUBLIC_EXCLUSION_REASONS].sort()).toEqual([
       "EXECUTION_LANE_NOT_ESTABLISHED",
       "NON_GCD_ACTION",
       "NO_AUTHORITY_TOKEN_BINDING",
+      "OUTSIDE_SUPPORTED_SLICE",
     ]);
   });
 });

@@ -144,16 +144,23 @@ describe("the exclusion-reason projection is total and lands inside the public e
       EXECUTION_LANE_NOT_ESTABLISHED: "EXECUTION_LANE_NOT_ESTABLISHED",
       NO_AUTHORITY_TOKEN_BINDING: "NO_AUTHORITY_TOKEN_BINDING",
     });
-    // The public vocabulary itself is unchanged by M10-D.
+    // The public vocabulary itself was unchanged by M10-D; M11-A5 widened
+    // it by ONE spec-neutral value under analysis/1, which Protection never
+    // emits — its slice is its authority's whole GCD action set.
     expect(PUBLIC_EXCLUSION_REASONS).toEqual([
       "NON_GCD_ACTION",
       "EXECUTION_LANE_NOT_ESTABLISHED",
       "NO_AUTHORITY_TOKEN_BINDING",
+      "OUTSIDE_SUPPORTED_SLICE",
     ]);
+    expect(Object.values(PROTECTION_EXCLUSION_PUBLIC_PROJECTION)).not.toContain("OUTSIDE_SUPPORTED_SLICE");
   });
 
-  it("emits the projected tally in one deterministic order that equals the public order", () => {
-    expect(PROTECTION_PUBLIC_EXCLUSION_ORDER).toEqual([...PUBLIC_EXCLUSION_REASONS]);
+  it("emits the projected tally in one deterministic order that is a prefix of the public order", () => {
+    expect(PROTECTION_PUBLIC_EXCLUSION_ORDER).toEqual([...PUBLIC_EXCLUSION_REASONS].slice(0, 3));
+    for (const reason of PROTECTION_PUBLIC_EXCLUSION_ORDER) {
+      expect(PUBLIC_EXCLUSION_REASONS as readonly string[]).toContain(reason);
+    }
   });
 
   it("merges rows sharing a public reason by summing, preserves the total, and omits zero rows", () => {

@@ -70,6 +70,7 @@ export const PUBLIC_ANALYSIS_SCHEMA_VERSION = "warcraft-logs-coach.analysis/1";
 export const PUBLIC_SPEC_IDS = [
   "rogue/assassination",
   "paladin/protection",
+  "paladin/retribution",
 ] as const satisfies readonly SpecId[];
 
 type ListedSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -117,10 +118,31 @@ export const PUBLIC_DECISION_BLOCKER_CLASSES = [
 
 export const PUBLIC_USABILITY_PROVENANCES = ["OBSERVED_EXECUTION", "NOT_ESTABLISHED"] as const;
 
+/**
+ * Why an observed cast was not an eligible decision.
+ *
+ * The first three are the M6 vocabulary and keep their exact meaning: the
+ * cast does not consume a global cooldown; the pinned data establishes no
+ * execution lane for it; it has a lane but binds to no authority token.
+ *
+ * `OUTSIDE_SUPPORTED_SLICE` joined under `analysis/1` in M11-A5, by the same
+ * additive-widening precedent as `paladin/protection` joining the `specId`
+ * enum in M10-D: no existing document changes, no field changes meaning, and
+ * a consumer holding the older list sees a new value only in documents of an
+ * analyzer whose slice is narrower than its authority. It means: the observed
+ * action is a rotational, authority-bound, global-cooldown decision that is
+ * INTENTIONALLY outside the analyzer's currently supported decision slice.
+ * It is not a rotational judgment. It must not be read as MATCH, as REJECTED,
+ * as UNKNOWN-for-missing-state, or as a performance error — the analyzer did
+ * not evaluate it, by design, and says so. The value is spec-neutral: any
+ * analyzer whose documented slice is narrower than its authority's action set
+ * publishes it for the in-domain decisions it does not judge.
+ */
 export const PUBLIC_EXCLUSION_REASONS = [
   "NON_GCD_ACTION",
   "EXECUTION_LANE_NOT_ESTABLISHED",
   "NO_AUTHORITY_TOKEN_BINDING",
+  "OUTSIDE_SUPPORTED_SLICE",
 ] as const;
 
 export const PUBLIC_ANALYSIS_STATUSES = [
@@ -242,12 +264,13 @@ export const IdentitySchema = z
  * recognition the engine does not have.
  *
  * WIDENING THIS ENUM IS NOT A SCHEMA VERSION CHANGE. `paladin/protection`
- * joined it in M10-D under `analysis/1`: the shape is unchanged, the meaning
- * of both fields is unchanged, the `status` discriminant is unchanged, and no
- * document a consumer had already received changes — the only documents that
- * differ are those of the newly supported specialization, which previously
- * carried `SPEC_NOT_SUPPORTED`. The versioning rule above forbids NARROWING
- * an enum; growing this one is how supported specializations arrive.
+ * joined it in M10-D and `paladin/retribution` in M11-A5, both under
+ * `analysis/1`: the shape is unchanged, the meaning of both fields is
+ * unchanged, the `status` discriminant is unchanged, and no document a
+ * consumer had already received changes — the only documents that differ are
+ * those of the newly supported specialization, which previously carried
+ * `SPEC_NOT_SUPPORTED`. The versioning rule above forbids NARROWING an enum;
+ * growing this one is how supported specializations arrive.
  */
 export const SpecializationSchema = z
   .object({

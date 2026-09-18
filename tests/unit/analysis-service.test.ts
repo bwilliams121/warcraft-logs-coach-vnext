@@ -231,9 +231,10 @@ describe("analyzeFight", () => {
     }
   });
 
-  it("enables_exactly_the_two_public_analyzers", () => {
-    // Superseded `milestone_2_enables_no_analyzers` and, in M10-D,
-    // `enables_exactly_the_assassination_analyzer`. Pinned exactly, because
+  it("enables_exactly_the_three_public_analyzers", () => {
+    // Superseded `milestone_2_enables_no_analyzers`, in M10-D
+    // `enables_exactly_the_assassination_analyzer`, and in M11-A5
+    // `enables_exactly_the_two_public_analyzers`. Pinned exactly, because
     // this list is build capability metadata and a silent addition would
     // misstate what the deployment supports.
     expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
@@ -244,6 +245,11 @@ describe("analyzeFight", () => {
       },
       {
         analyzerId: "paladin-protection-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
+      },
+      {
+        analyzerId: "paladin-retribution-observed-decisions",
         requiredScope: "PLAYER_CONTEXT",
         includeResources: true,
       },

@@ -50,10 +50,13 @@ describe("the committed corpus loads", () => {
     // ended; M11-A4 added the four Retribution Paladin slices (cut from the
     // M10-B, M10-C5 Phase B and M9-C2 captures already recorded, no new
     // request) and sixteen cases (four normalization, one bundle
-    // composition, ten evaluator, one application-service). Measured, then
-    // pinned.
+    // composition, ten evaluator, one application-service); M11-A5 added
+    // three public-contract cases over the same slices (the Retribution
+    // public projection, its REST/MCP parity, a mixed raid night over its
+    // own evidence) and repurposed the application-service case in place.
+    // Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(38);
-    expect(loaded.cases).toHaveLength(128);
+    expect(loaded.cases).toHaveLength(131);
     expect(loaded.coverage.declared).toBe(0);
   });
 

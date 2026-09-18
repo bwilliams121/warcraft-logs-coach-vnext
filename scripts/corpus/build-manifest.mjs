@@ -1613,7 +1613,7 @@ const ARTIFACTS = [
     2169589,
     "875 of 68,870 events (first 2,124,603, last 2,169,554): the whole fixed evaluation window [+120,000 .. +165,000] ms, plus nothing after the capture's end.",
   ),
-  // ---- M11-A4: the Retribution Paladin subjects (INTERNAL_ONLY) -------------
+  // ---- M11-A4: the Retribution Paladin subjects (PUBLIC since M11-A5) -------
   //
   // No new Warcraft Logs request. Both subjects are cut from captures the
   // corpus already records: A7R6 fight 7 actor 6 from the M10-B (0–45 s) and
@@ -2516,12 +2516,15 @@ const SE_RELATED = [
 const se_entry = (listName, priorityOrdinal, actionToken) => ({ listName, priorityOrdinal, actionToken });
 
 // --------------------------------------------------------------------------
-// M11-A4: the Retribution Paladin cases. The analyzer is INTERNAL_ONLY; every
-// SPEC_RETRIBUTION_PALADIN kind reaches it through its registration, and the
-// APPLICATION_SERVICE kinds prove the public path still answers
-// SPEC_NOT_SUPPORTED for the same subject. Expected values were read from
-// the production facade over the same evidence on 2026-09-18 and are pinned
-// here as regression evidence, never as a definition of correctness.
+// M11-A4: the Retribution Paladin cases. Every SPEC_RETRIBUTION_PALADIN kind
+// reaches the analyzer through its registration. The analyzer was
+// INTERNAL_ONLY in M11-A4, when the APPLICATION_SERVICE kinds proved the
+// public path still answered SPEC_NOT_SUPPORTED for the same subject; since
+// M11-A5 it is PUBLIC, and the same kinds plus PUBLIC_PROJECTION and the
+// PUBLIC_CONTRACT parity cases prove the public path carries the same
+// analysis. Expected values were read from the production facade over the
+// same evidence on 2026-09-18 and are pinned here as regression evidence,
+// never as a definition of correctness.
 // --------------------------------------------------------------------------
 
 const RET_ANALYZER = "paladin-retribution-observed-decisions";
@@ -2806,7 +2809,7 @@ const RET_CASES = [
     RET45,
     "SPEC_RETRIBUTION_PALADIN",
     "src/specs/paladin/retribution/registration.ts; authority-bindings.ts; pinned-authority.ts; observed-analysis.ts (build); action-profile.ts; domain-boundary.ts; domains.ts",
-    "Over the 45 s slice the INTERNAL_ONLY registration analyzes actor 6 under exactly the pinned SIMC_APL_PALADIN_RETRIBUTION artifact, resolves the build from the observed tree (17 of 18 modelled talents three-way, Radiant Glory UNKNOWN because its NORMAL node is absent — never NOT_SELECTED; hero tree herald_of_the_sun; main hand 251230 pinned two-handed), classifies exactly eleven pinned entries OUTSIDE the rotational decision domain by token category (seven item uses including the precombat one, one potion, one external buff, three racials — Light's Judgment, Fireblood, Arcane Torrent), and represents the six domains: OFFENSIVE_ROTATION under the authority; RESOURCE_SPENDING, DEFENSIVE_COOLDOWN and INTERRUPT declared with no pinned authority; ACTIVE_MITIGATION and SELF_HEALING not declared.",
+    "Over the 45 s slice the registration analyzes actor 6 under exactly the pinned SIMC_APL_PALADIN_RETRIBUTION artifact, resolves the build from the observed tree (17 of 18 modelled talents three-way, Radiant Glory UNKNOWN because its NORMAL node is absent — never NOT_SELECTED; hero tree herald_of_the_sun; main hand 251230 pinned two-handed), classifies exactly eleven pinned entries OUTSIDE the rotational decision domain by token category (seven item uses including the precombat one, one potion, one external buff, three racials — Light's Judgment, Fireblood, Arcane Torrent), and represents the six domains: OFFENSIVE_ROTATION under the authority; RESOURCE_SPENDING, DEFENSIVE_COOLDOWN and INTERRUPT declared with no pinned authority; ACTIVE_MITIGATION and SELF_HEALING not declared.",
     [
       a("SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE", { actorId: RET, expected: RET_PROVENANCE }),
       a("SPEC_RETRIBUTION_PALADIN.BUILD_RESOLUTION", {
@@ -3176,33 +3179,180 @@ const RET_CASES = [
     { related: ["tests/regression/m10a-analyzer-result-ownership.test.ts", ...RET_RELATED] },
   ),
   kase(
-    "application-service.retribution-paladin-subject-is-not-publicly-supported-on-its-own-evidence",
+    "application-service.retribution-paladin-subject-is-analyzed-under-player-context",
     RET45,
     "APPLICATION_SERVICE",
-    "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts INTERNAL_ONLY_SPEC_IDS",
-    "The real Retribution Paladin subject, over its own captured evidence, yields SPEC_NOT_SUPPORTED from the public application service with no spec, no analyzer and a null scope — exactly the Arms Warrior answer — while the validated catalog resolves paladin/retribution to the INTERNAL_ONLY registration for an internal lookup and to nothing for the public one, and the public identity table does not resolve the pair. Same answers over the reversed catalog.",
+    "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts PUBLIC_SPEC_IDS (M11-A5 public catalog)",
+    "The real Retribution Paladin subject, over its own captured evidence, is recognized as paladin/retribution, dispatched to the Retribution analyzer, ingested at PLAYER_CONTEXT with resources, and reported ANALYZED; the validated catalog resolves paladin/retribution to the same PUBLIC registration for both lookups, in either catalog order, and the public identity table resolves Paladin/Retribution. (In M11-A4 this case pinned SPEC_NOT_SUPPORTED, a null public lookup and INTERNAL_ONLY exposure; M11-A5 moved the id into the public partition, the public contract, the identity table and the exposure together.)",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
         subject: { actorId: RET, className: "Paladin", specName: "Retribution" },
-        expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: null },
+        expected: {
+          status: "ANALYZED",
+          specId: "paladin/retribution",
+          analyzerId: RET_ANALYZER,
+          scope: "PLAYER_CONTEXT",
+        },
       }),
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "paladin/retribution",
         expected: {
           internalAnalyzerId: RET_ANALYZER,
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: RET_ANALYZER,
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-    "INTERNAL_ONLY means exactly this: real to the internal lookup and the corpus, invisible to every public path. Promotion is a separate reviewed milestone with its own evidence gate; nothing in M11-A4 moves the id into the public partition, the public contract, the identity table or the exposure.",
+    "An evaluator has to exist, be registered and be exercised BEFORE it is safe to expose; M11-A4 did that internally and M11-A5 exposed it after the promotion evidence gate reported real MATCH and REJECTED evidence. The registry validates that the public set, the identity table and the partition agree, so the three could not have moved separately. ANALYZED maps to the PARTIAL service state: 26 eligible decisions over the 45 s slice, one resolved, is disclosed as coverage rather than read as clean play.",
     {
       related: [
         "tests/contracts/m11a4-retribution-registration.test.ts",
         "tests/contracts/m11-promotion-evidence-gate.test.ts",
+        "tests/contracts/m11a5-retribution-public-projection.test.ts",
       ],
+    },
+  ),
+  kase(
+    "spec-retribution-paladin.analysis-projects-publicly-with-the-slice-boundary-named",
+    RET_105_165,
+    "SPEC_RETRIBUTION_PALADIN",
+    "src/specs/paladin/retribution/registration.ts (retributionObservedDecisionView, RETRIBUTION_EXCLUSION_VIEW_PROJECTION); src/contracts/analysis-projection.ts; src/contracts/analysis-contract.ts PUBLIC_EXCLUSION_REASONS",
+    "The composed 165 s analysis, read through the registration's view and projected by the real public projection, validates under warcraft-logs-coach.analysis/1 with the same totals the internal facade reports (69 eligible: 1 MATCH, 10 REJECTED, 58 UNKNOWN; 167 excluded). The one melee swing and the 112 NON_GCD presses project as 113 NON_GCD_ACTION; the 54 in-domain GCD casts the first slice does not judge project as OUTSIDE_SUPPORTED_SLICE — the public value M11-A5 added under analysis/1 for exactly this: observed, not judged, not an UNKNOWN. The real MATCH (Final Verdict 2,108,996: AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN, EXACT_ENTRY templars_verdict), a REJECTED by both routes (Divine Storm 2,105,158: EXACT_ENTRY templars_verdict), a REJECTED by unselectability alone (Divine Storm 2,006,193: authority coverage UNKNOWN, no token) and an UNKNOWN (Final Verdict 2,008,783: AUTHORITY_SELECTION_UNRESOLVED, OBSERVED_STATE_MISSING) project with exactly the internal outcome and basis. Avenging Wrath 2,005,300 projects NON_GCD_ACTION; Execution Sentence 2,007,120, Wake of Ashes 2,007,870, Divine Toll 2,011,286, Hammer of Wrath 2,012,897, Blade of Justice 2,018,755 and Judgment 2,030,059 project OUTSIDE_SUPPORTED_SLICE. No raw blocker, root-scan stopping entry, domain result, Holy Power observation, build resolution, resolver diagnostic or foreground-execution proof reaches the document.",
+    [
+      a("SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION", {
+        actorId: RET,
+        ...RET_FULL,
+        expected: {
+          specId: "paladin/retribution",
+          analyzerId: RET_ANALYZER,
+          eligibleDecisions: 69,
+          match: 1,
+          rejected: 10,
+          unknown: 58,
+          excludedCastCount: 167,
+          exclusions: { NON_GCD_ACTION: 113, OUTSIDE_SUPPORTED_SLICE: 54 },
+          decisions: [
+            {
+              reportTimeMs: 2108996,
+              abilityGameId: RET_FV,
+              outcome: "MATCH",
+              basis: "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              authorityCoverage: "EXACT_ENTRY",
+              authorityToken: "templars_verdict",
+              selectionPrecision: "EXACT_ENTRY",
+              decisiveBlocker: null,
+            },
+            {
+              reportTimeMs: 2105158,
+              abilityGameId: RET_DS,
+              outcome: "REJECTED",
+              basis: "OBSERVED_ACTION_REJECTED_BY_AUTHORITY",
+              authorityCoverage: "EXACT_ENTRY",
+              authorityToken: "templars_verdict",
+              selectionPrecision: "EXACT_ENTRY",
+              decisiveBlocker: null,
+            },
+            {
+              reportTimeMs: 2006193,
+              abilityGameId: RET_DS,
+              outcome: "REJECTED",
+              basis: "OBSERVED_ACTION_REJECTED_BY_AUTHORITY",
+              authorityCoverage: "UNKNOWN",
+              authorityToken: null,
+              selectionPrecision: null,
+              decisiveBlocker: null,
+            },
+            {
+              reportTimeMs: 2008783,
+              abilityGameId: RET_FV,
+              outcome: "UNKNOWN",
+              basis: "AUTHORITY_SELECTION_UNRESOLVED",
+              authorityCoverage: "UNKNOWN",
+              authorityToken: null,
+              selectionPrecision: null,
+              decisiveBlocker: "OBSERVED_STATE_MISSING",
+            },
+          ],
+          excluded: [
+            { reportTimeMs: 2005300, abilityGameId: 31884, reason: "NON_GCD_ACTION" },
+            { reportTimeMs: 2007120, abilityGameId: 343527, reason: "OUTSIDE_SUPPORTED_SLICE" },
+            { reportTimeMs: 2007870, abilityGameId: 255937, reason: "OUTSIDE_SUPPORTED_SLICE" },
+            { reportTimeMs: 2011286, abilityGameId: 375576, reason: "OUTSIDE_SUPPORTED_SLICE" },
+            { reportTimeMs: 2012897, abilityGameId: 24275, reason: "OUTSIDE_SUPPORTED_SLICE" },
+            { reportTimeMs: 2018755, abilityGameId: 184575, reason: "OUTSIDE_SUPPORTED_SLICE" },
+            { reportTimeMs: 2030059, abilityGameId: 20271, reason: "OUTSIDE_SUPPORTED_SLICE" },
+          ],
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "Promotion changed reachability, not the analyzer: the public document carries the internal outcomes unchanged and withholds the machinery. OUTSIDE_SUPPORTED_SLICE is the only public value M11-A5 added, spec-neutral, and it is the difference between a narrow honest denominator and a cherry-picked one — a reader sees 54 rotational casts the analyzer observed and did not judge, and cannot mistake them for mistakes, for UNKNOWNs or for absence.",
+    {
+      authority: RET_AUTHORITY,
+      related: [...RET_RELATED, "tests/contracts/m11a5-retribution-public-projection.test.ts"],
+    },
+  ),
+  kase(
+    "public-contract.analysis-parity-for-the-retribution-paladin-subject",
+    RET45,
+    "PUBLIC_CONTRACT",
+    "src/contracts/analysis-projection.ts; src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
+    "The real Retribution Paladin subject over its own 45 s evidence is ANALYZED on both transports — one document naming paladin/retribution and the Retribution analyzer, identical on REST and MCP (structuredContent and text), schema-valid under warcraft-logs-coach.analysis/1, publishing MATCH as AUTHORITY_COMPATIBLE_ONLY. (Before M11-A5 the same subject answered SPEC_NOT_SUPPORTED on both transports.)",
+    [
+      a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
+        document: "ANALYSIS",
+        subject: { actorId: RET, className: "Paladin", specName: "Retribution" },
+        expected: { status: "ANALYZED", specId: "paladin/retribution", analyzerId: RET_ANALYZER },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "The schema version is unchanged: growing the public specId enum, and the exclusion-reason enum by the one spec-neutral value the slice boundary needs, is how supported specializations arrive, and no document a consumer had already received changed. Every decision UNKNOWN is carried as coverage, not hidden.",
+    {
+      related: [
+        "tests/integration/m11a5-retribution-public-transports.test.ts",
+        "tests/contracts/m10a-spec-partition.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "public-contract.raid-night-parity-mixed-roster-with-retribution-over-its-own-evidence",
+    RET45,
+    "PUBLIC_CONTRACT",
+    "src/contracts/raid-night-contract.ts; src/services/raid-night-service.ts; /v1/raid-night; analyze_raid_night",
+    "One raid-night request over the Retribution 45 s slice served as ONE core, with a roster of four real participants of A7R6 fight 7: the Retribution Paladin (actor 6) is ANALYZED under paladin/retribution; the Protection Paladin (actor 7) and the Assassination Rogue (actor 19) have none of their evidence in the slice and their analyzers answer PROFILE_NOT_RESOLVED; the Arms Warrior (actor 4) is SPEC_NOT_SUPPORTED. One document on REST and MCP, one ingestion per transport.",
+    [
+      a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
+        document: "RAID_NIGHT",
+        fightIds: [7],
+        subject: { actorId: RET },
+        composition: {
+          participants: [
+            { sourceId: RET, className: "Paladin", specName: "Retribution", absent: false },
+            { sourceId: TANK, className: "Paladin", specName: "Protection", absent: false },
+            { sourceId: 19, className: "Rogue", specName: "Assassination", absent: false },
+            { sourceId: ARMS, className: "Warrior", specName: "Arms", absent: false },
+          ],
+        },
+        expected: {
+          analyzedCells: 1,
+          cells: [
+            { sourceId: RET, kind: "ANALYZED", specId: "paladin/retribution" },
+            { sourceId: TANK, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
+            { sourceId: 19, kind: "NOT_ANALYZED", status: "PROFILE_NOT_RESOLVED" },
+            { sourceId: ARMS, kind: "NOT_ANALYZED", status: "SPEC_NOT_SUPPORTED" },
+          ],
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "All three public analyzers dispatch from one ingestion with no Retribution branch in the orchestration: each participant's cell is its own analyzer's truthful answer over a slice that describes actor 6 only, and the unsupported player costs nothing. Nothing is relabelled and no evidence is manufactured for the two Paladins' neighbour.",
+    {
+      limitations: [
+        "The roster identities are the committed fight-context artifact's; the core is the Retribution 45 s slice, which describes actor 6 only, so no other participant can be ANALYZED over it.",
+      ],
+      related: ["tests/regression/m11a5-mixed-raid-night.test.ts"],
     },
   ),
   kase(
@@ -6228,7 +6378,7 @@ const CASES = [
       ],
     },
   ),
-  // ---- M11-A4: Retribution Paladin (INTERNAL_ONLY) ------------------------
+  // ---- M11-A4: Retribution Paladin (PUBLIC since M11-A5) ------------------
   ...RET_CASES,
 ];
 

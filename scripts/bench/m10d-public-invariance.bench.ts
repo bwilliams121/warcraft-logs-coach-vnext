@@ -14,13 +14,18 @@
  *     <subject>.ingest.json     every ingestion request the service issued
  *     raid-night.public.json    a single-Assassination raid night
  *     raid-night-mixed.public.json  the mixed A7R6 roster (post-M10-D only)
+ *     raid-night-mixed-ret.public.json  the same roster with the Retribution
+ *                               actor over the Protection opener (M11-A4+)
+ *     raid-night-mixed-ret-45s.public.json  all three supported specs plus
+ *                               Arms over the Retribution 45 s slice (M11-A5+)
  *     timings.json              wall-clock and CPU per request, invocation
  *                               counts — REPORT ONLY, nothing is asserted
  *
  * Run it once at a baseline commit and once after a change; byte-compare the
  * two directories. That is how M10-D proves Assassination did not move when
- * Protection Paladin became public, and how the Protection internal outcomes
- * are shown unchanged by exposure.
+ * Protection Paladin became public, how M11-A5 proves neither Assassination
+ * nor Protection moved when Retribution Paladin became public, and how each
+ * internal outcome is shown unchanged by exposure.
  *
  * WHY THE TIMINGS ASSERT NOTHING
  *
@@ -48,6 +53,7 @@ import { ANALYZER_REGISTRATIONS, type AnalyzerRegistration } from "../../src/ser
 import type { CombatIngestionPort } from "../../src/services/ingestion-port.js";
 import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protection/registration.js";
+import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
 import { MCP_TEST_ENV } from "../../tests/support/analysis-transports.js";
 import {
   corpusBundleState,
@@ -78,6 +84,9 @@ const PROT_BUNDLE = [
   `${SEG}.seg-90-120`,
   `${SEG}.seg-120-165`,
 ];
+const RET_45S = "wcl-retribution-paladin-a7r6-rotational-45s";
+const RET_SEG = "wcl-retribution-paladin-a7r6-rotational-165s";
+const RET_BUNDLE = [RET_45S, `${RET_SEG}.seg-45-105`, `${RET_SEG}.seg-105-165`];
 
 interface Subject {
   readonly label: string;
@@ -96,10 +105,15 @@ const SUBJECTS: readonly Subject[] = [
   // A7R6 fight 7 actor 4, per the committed fight-context artifact.
   { label: "arms", artifactId: PROT_OPENER, actorId: 4, className: "Warrior", specName: "Arms" },
   // A7R6 fight 7 actor 6 (Paladin/Retribution), per the committed fight-context
-  // artifact. Added at M11-A4 as the dedicated public-unsupported baseline:
-  // Retribution is INTERNAL_ONLY, so the public service must refuse it before
-  // and after the analyzer exists. Compare across M11-A4 captures only.
+  // artifact, over the PROTECTION opener slice (which holds none of actor 6's
+  // evidence). Added at M11-A4 as the public-unsupported baseline
+  // (SPEC_NOT_SUPPORTED); since M11-A5 the public service dispatches the
+  // Retribution analyzer, which truthfully answers PROFILE_NOT_RESOLVED over
+  // this slice. An EXPECTED promotion delta between the A5 captures.
   { label: "ret", artifactId: PROT_OPENER, actorId: 6, className: "Paladin", specName: "Retribution" },
+  // The same actor over its OWN committed 45 s slice: SPEC_NOT_SUPPORTED
+  // before M11-A5, a real ANALYZED public document after. Added at M11-A5.
+  { label: "ret-45s", artifactId: RET_45S, actorId: 6, className: "Paladin", specName: "Retribution" },
 ];
 
 interface Timing {
@@ -234,6 +248,39 @@ describe(`M10-D invariance capture -> ${CAPTURE_DIR}`, () => {
     },
   ];
 
+  /** The Retribution registration directly over each internal evidence input (M11-A5). */
+  const RET_INTERNAL_INPUTS: readonly {
+    readonly label: string;
+    readonly parts: readonly string[];
+    readonly holes: readonly BundleHole[];
+  }[] = [
+    { label: "ret-45s", parts: [RET_45S], holes: [] },
+    { label: "ret-bundle", parts: RET_BUNDLE, holes: [] },
+  ];
+
+  for (const input of RET_INTERNAL_INPUTS) {
+    it(`${input.label}: the Retribution registration's own analysis`, async () => {
+      const state =
+        input.parts.length === 1
+          ? corpusState(input.parts[0] ?? "")
+          : corpusBundleState(input.parts, input.holes);
+      const analysis = await timed(
+        `registration.analyze:${input.label}`,
+        {},
+        () =>
+          RETRIBUTION_PALADIN_REGISTRATION.analyze({
+            state,
+            actorId: 6,
+            specId: "paladin/retribution",
+            targetActorId: null,
+          }),
+        "state construction excluded",
+      );
+      expect(analysis.status).toBe("ANALYZED");
+      write(`${input.label}.registration.json`, analysis);
+    });
+  }
+
   for (const input of INTERNAL_INPUTS) {
     it(`${input.label}: the Protection registration's own analysis`, async () => {
       const state =
@@ -348,6 +395,51 @@ describe(`M10-D invariance capture -> ${CAPTURE_DIR}`, () => {
     expect(run.ok).toBe(true);
     if (!run.ok) return;
     write("raid-night-mixed-ret.public.json", projectRaidNightResult(run.aggregate));
+  });
+
+  it("raid-night: all three supported specializations plus Arms over the Retribution 45 s slice (M11-A5)", async () => {
+    // Actors 6 (Paladin/Retribution), 7 (Paladin/Protection), 19
+    // (Rogue/Assassination) and 4 (Warrior/Arms) per the committed
+    // fight-context artifact, over the slice that describes actor 6 only: the
+    // Retribution cell is ANALYZED, the other two supported players answer
+    // PROFILE_NOT_RESOLVED truthfully, Arms is SPEC_NOT_SUPPORTED. Not
+    // present in a pre-M11-A5 baseline.
+    const CLASS_OF: Readonly<Record<number, string>> = {
+      6: "Paladin",
+      7: "Paladin",
+      19: "Rogue",
+      4: "Warrior",
+    };
+    const SPEC_OF: Readonly<Record<number, string>> = {
+      6: "Retribution",
+      7: "Protection",
+      19: "Assassination",
+      4: "Arms",
+    };
+    const catalog = countingCatalog();
+    const ports = fakePorts({
+      snapshot: assassinationSnapshot({
+        fightIds: [7],
+        sourceIds: [6, 7, 19, 4],
+        classNameFor: (sourceId) => CLASS_OF[sourceId] ?? "Rogue",
+        specNameFor: (_fightId, sourceId) => SPEC_OF[sourceId] ?? null,
+      }),
+      coreFor: (fightId, participants) =>
+        corpusArtifactCore(
+          RET_45S,
+          fightId,
+          participants.map((sourceId) => ({ sourceId, className: CLASS_OF[sourceId] ?? "Rogue" })),
+        ),
+    });
+    const run = await timed("raidNight:a7r6-mixed-ret-45s", catalog.calls, () =>
+      runNight(
+        { reportCode: REPORT_CODE, fightIds: [7] },
+        { ...ports, deps: { ...ports.deps, registry: catalog.registry } },
+      ),
+    );
+    expect(run.ok).toBe(true);
+    if (!run.ok) return;
+    write("raid-night-mixed-ret-45s.public.json", projectRaidNightResult(run.aggregate));
   });
 
   it("writes the report-only timings", () => {

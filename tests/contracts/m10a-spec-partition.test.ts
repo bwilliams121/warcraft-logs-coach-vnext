@@ -45,26 +45,27 @@ describe("the known specialization ids are exactly partitioned", () => {
     for (const id of PUBLIC_SPEC_IDS) expect(INTERNAL_ONLY_SPEC_IDS as readonly string[]).not.toContain(id);
   });
 
-  it("Assassination and Protection Paladin are public", () => {
-    expect(PUBLIC_SPEC_IDS).toEqual(["rogue/assassination", "paladin/protection"]);
+  it("Assassination, Protection Paladin and Retribution Paladin are public", () => {
+    expect(PUBLIC_SPEC_IDS).toEqual(["rogue/assassination", "paladin/protection", "paladin/retribution"]);
     expect(isPublicSpecId("rogue/assassination")).toBe(true);
     expect(isPublicSpecId("paladin/protection")).toBe(true);
+    expect(isPublicSpecId("paladin/retribution")).toBe(true);
     expect(isSpecId("paladin/protection")).toBe(true);
+    expect(isSpecId("paladin/retribution")).toBe(true);
   });
 
-  it("the internal-only set is exactly Retribution Paladin since M11-A4, and the narrowing boundary refuses it", () => {
-    // Deliberate and pinned. The set was empty from M10-D to M11-A3 with its
-    // machinery dormant; M11-A4 landed the next specialization here first,
-    // exactly as Protection Paladin arrived in M10-A. The partition proofs,
-    // the narrowing boundary and the registry's exposure rules are the same
-    // code, now exercised over a non-empty set.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["paladin/retribution"]);
-    expect(isSpecId("paladin/retribution")).toBe(true);
-    expect(isPublicSpecId("paladin/retribution")).toBe(false);
-    expect(() => requirePublicSpecId("paladin/retribution")).toThrow(InternalSpecExposureError);
-    for (const id of SPEC_IDS) {
-      expect(isPublicSpecId(id), id).toBe(!(INTERNAL_ONLY_SPEC_IDS as readonly string[]).includes(id));
-    }
+  it("the internal-only set is empty again since M11-A5, and its machinery is dormant rather than removed", () => {
+    // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
+    // Retribution Paladin from M11-A4 (the partition proofs, the narrowing
+    // boundary and the registry's exposure rules exercised over one member),
+    // and is empty again since M11-A5 moved that id across. The next
+    // specialization is expected to arrive here first, as both Paladin
+    // specializations did; everything still exists and still type-checks
+    // over an empty set.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
+    expect(typeof requirePublicSpecId).toBe("function");
+    expect(typeof InternalSpecExposureError).toBe("function");
+    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
   });
 
   it("an unknown string is not a spec id at all", () => {
@@ -75,6 +76,7 @@ describe("the known specialization ids are exactly partitioned", () => {
       "Rogue/Assassination",
       "Paladin/Protection",
       "Paladin/Retribution",
+      "paladin/holy",
       "warrior/arms",
       "constructor",
     ]) {
@@ -88,7 +90,7 @@ describe("the public contract names exactly the public half", () => {
     expect([...CONTRACT_PUBLIC_SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS].sort());
   });
 
-  it("accepts both public ids as a specialization value and rejects an unknown one", () => {
+  it("accepts every public id as a specialization value and rejects an unknown one", () => {
     const minimal = {
       schemaVersion: "warcraft-logs-coach.analysis/1",
       identity: {
@@ -120,7 +122,7 @@ describe("the public contract names exactly the public half", () => {
         specialization: { specId: null, gameplaySupported: false },
       }).success,
     ).toBe(true);
-    // Both public ids are legitimate values.
+    // Every public id is a legitimate value.
     for (const specId of PUBLIC_SPEC_IDS) {
       expect(
         PublicAnalysisResultSchema.safeParse({
@@ -139,6 +141,10 @@ describe("the public contract names exactly the public half", () => {
       ok: true,
       specId: "paladin/protection",
     });
+    expect(resolveSpecIdentity({ className: "Paladin", specName: "Retribution" })).toEqual({
+      ok: true,
+      specId: "paladin/retribution",
+    });
     const arms = resolveSpecIdentity({ className: "Warrior", specName: "Arms" });
     expect(arms.ok).toBe(false);
     if (arms.ok) return;
@@ -150,6 +156,7 @@ describe("narrowing to a public id", () => {
   it("returns each public id unchanged", () => {
     expect(requirePublicSpecId("rogue/assassination")).toBe("rogue/assassination");
     expect(requirePublicSpecId("paladin/protection")).toBe("paladin/protection");
+    expect(requirePublicSpecId("paladin/retribution")).toBe("paladin/retribution");
   });
 
   it("still fails closed for an id outside the public set, and never returns null", () => {

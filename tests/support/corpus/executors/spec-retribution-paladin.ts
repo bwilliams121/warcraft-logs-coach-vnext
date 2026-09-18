@@ -1,5 +1,5 @@
 /**
- * SPEC_RETRIBUTION_PALADIN executors (M11-A4): the real INTERNAL_ONLY
+ * SPEC_RETRIBUTION_PALADIN executors (M11-A4; PUBLIC since M11-A5): the real
  * Retribution Paladin registration over a real corpus artifact.
  *
  * The analysis is obtained through the REGISTRATION — `registration.analyze`,
@@ -16,8 +16,16 @@
  * aggregate assertion counts.
  */
 
+import {
+  PUBLIC_ANALYSIS_SCHEMA_VERSION,
+  PublicAnalysisResultSchema,
+} from "../../../../src/contracts/analysis-contract.js";
+import { projectAnalysisResult } from "../../../../src/contracts/analysis-projection.js";
 import type { CombatState } from "../../../../src/engine/state/combat-state.js";
-import { RETRIBUTION_PALADIN_SPEC_ID } from "../../../../src/specs/paladin/retribution/spec.js";
+import {
+  RETRIBUTION_PALADIN_ANALYZER_ID,
+  RETRIBUTION_PALADIN_SPEC_ID,
+} from "../../../../src/specs/paladin/retribution/spec.js";
 import {
   analyzeObservedRetributionPaladinDecisions,
   summarizeRetributionDecisions,
@@ -724,6 +732,236 @@ export function analysisStatus(
       expected: { status: params.expected },
       actual: analysisFacts(derived.analysis),
     });
+  }
+  return pass();
+}
+
+// ---------------------------------------------------------------------------
+// SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION (M11-A5)
+// ---------------------------------------------------------------------------
+
+function keysOf(value: unknown, into = new Set<string>()): Set<string> {
+  if (Array.isArray(value)) value.forEach((entry) => keysOf(entry, into));
+  else if (value !== null && typeof value === "object") {
+    for (const [key, entry] of Object.entries(value)) {
+      into.add(key);
+      keysOf(entry, into);
+    }
+  }
+  return into;
+}
+
+/** Payload fields the view withholds; none may reach a public document. */
+const WITHHELD_KEYS = [
+  "rawBlocker",
+  "rootScanBlockedAt",
+  "rootScanBlocker",
+  "observedActionRejected",
+  "unselectability",
+  "actorId",
+  "domains",
+  "holyPower",
+  "build",
+  "resolved",
+  "diagnostics",
+  "foregroundProvenByObservedExecution",
+  "observedCastAbilityIds",
+  "scope",
+];
+/** Internal-only vocabulary; none may appear as a public value. */
+const INTERNAL_STRINGS = [
+  "MELEE_SWING",
+  "OUTSIDE_FIRST_SLICE",
+  "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+  "AUTHORITY_LOAD_FAILED",
+  "DOMAIN_NOT_DECLARED",
+  "AUTHORITY_HAS_UNMODELLED_DISPATCH",
+  "APPLICABILITY_UNKNOWN",
+  "CONDITION_NOT_PROVEN_FALSE",
+  "TALENT_NOT_DISPROVED",
+  "PROVEN_INACTIVE",
+];
+
+/**
+ * The registration's analysis through its own view and the real public
+ * projection — the envelope assembled exactly as the service assembles it,
+ * the projection and the schema the production ones — with the totals, the
+ * named decisions and the named excluded casts read back from the PROJECTED
+ * document, never from the payload.
+ */
+export function publicProjection(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const { state, analysis } = run;
+  const { fight } = state;
+  const envelope: Parameters<typeof projectAnalysisResult>[0] = {
+    identity: {
+      report: {
+        code: fight.report.code,
+        revision: fight.report.revision,
+        startTime: fight.report.startTimeUnixMs,
+        endTime: fight.report.endTimeUnixMs,
+      },
+      data: fight.data,
+      fight: {
+        id: fight.fight.id,
+        name: fight.fight.name,
+        encounterId: fight.fight.encounterId,
+        difficulty: fight.fight.difficulty,
+        startTime: fight.fight.startTimeMs,
+        endTime: fight.fight.endTimeMs,
+      },
+      player: {
+        sourceId: params.actorId,
+        name: "Corpusplayer",
+        className: "Paladin",
+        specName: "Retribution",
+      },
+    },
+    specId: RETRIBUTION_PALADIN_SPEC_ID,
+    analyzerId: RETRIBUTION_PALADIN_ANALYZER_ID,
+    scope: "PLAYER_CONTEXT",
+    analysis,
+    observedDecisions: RETRIBUTION_PALADIN_REGISTRATION.observedDecisionView(analysis),
+  };
+
+  let projected: ReturnType<typeof projectAnalysisResult>;
+  try {
+    projected = projectAnalysisResult(envelope);
+  } catch (error: unknown) {
+    return fail("the public projection threw", {
+      expected: { projected: true },
+      actual: { error: error instanceof Error ? error.message : String(error) },
+    });
+  }
+  const parsed = PublicAnalysisResultSchema.safeParse(projected);
+  if (!parsed.success) {
+    return fail("the projected document does not validate against the frozen public schema", {
+      expected: "schema-valid document",
+      actual: parsed.error.issues
+        .slice(0, 3)
+        .map((issue) => `${issue.path.map(String).join(".")}: ${issue.message}`),
+    });
+  }
+  if (projected.schemaVersion !== PUBLIC_ANALYSIS_SCHEMA_VERSION) {
+    return fail("the projected document carries a different schema version", {
+      expected: { schemaVersion: PUBLIC_ANALYSIS_SCHEMA_VERSION },
+      actual: { schemaVersion: projected.schemaVersion },
+    });
+  }
+  if (projected.status !== "ANALYZED") {
+    return fail("the projected document is not ANALYZED", {
+      expected: { status: "ANALYZED" },
+      actual: { status: projected.status },
+    });
+  }
+
+  const exclusions: Record<string, number> = {};
+  for (const row of projected.coverage.exclusions) exclusions[row.key] = row.count;
+  const { decisions: expectedDecisions, excluded: expectedExcluded, ...expectedTotals } = params.expected;
+  const actualTotals = {
+    specId: projected.specialization.specId,
+    analyzerId: projected.analyzerId,
+    eligibleDecisions: projected.coverage.eligibleDecisions,
+    match: projected.coverage.match,
+    rejected: projected.coverage.rejected,
+    unknown: projected.coverage.unknown,
+    excludedCastCount: projected.coverage.excludedCastCount,
+    exclusions,
+  };
+  if (JSON.stringify(actualTotals) !== JSON.stringify(expectedTotals)) {
+    return fail("the projected totals differ from what the case pins", {
+      expected: expectedTotals,
+      actual: actualTotals,
+    });
+  }
+  const tallySum = projected.coverage.exclusions.reduce((sum, row) => sum + row.count, 0);
+  if (tallySum !== projected.coverage.excludedCastCount || projected.exclusions.length !== tallySum) {
+    return fail("the projected exclusion tally does not reconcile with the excluded count", {
+      expected: {
+        tallySum: projected.coverage.excludedCastCount,
+        exclusions: projected.coverage.excludedCastCount,
+      },
+      actual: { tallySum, exclusions: projected.exclusions.length },
+    });
+  }
+
+  // Named decisions, read from the PROJECTED document by cast time and ability.
+  for (const expected of expectedDecisions) {
+    const found = projected.decisions.filter(
+      (decision) =>
+        decision.locator.reportTimeMs === expected.reportTimeMs &&
+        decision.observedAbilityGameId === expected.abilityGameId,
+    );
+    const decision = found[0];
+    if (found.length !== 1 || decision === undefined) {
+      return fail("the named cast is not exactly one projected decision", {
+        expected: {
+          reportTimeMs: expected.reportTimeMs,
+          abilityGameId: expected.abilityGameId,
+          decisions: 1,
+        },
+        actual: { decisions: found.length },
+      });
+    }
+    const actual = {
+      reportTimeMs: decision.locator.reportTimeMs,
+      abilityGameId: decision.observedAbilityGameId,
+      outcome: decision.outcome,
+      basis: decision.basis,
+      authorityCoverage: decision.authorityCoverage,
+      authorityToken: decision.authorityToken,
+      selectionPrecision: decision.selectionPrecision,
+      decisiveBlocker: decision.decisiveBlocker,
+    };
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      return fail("a named decision projects differently than the case pins", { expected, actual });
+    }
+  }
+  // Named excluded casts, the same way.
+  for (const expected of expectedExcluded) {
+    const found = projected.exclusions.filter(
+      (cast) => cast.reportTimeMs === expected.reportTimeMs && cast.abilityGameId === expected.abilityGameId,
+    );
+    const cast = found[0];
+    if (found.length !== 1 || cast === undefined) {
+      return fail("the named cast is not exactly one projected exclusion", {
+        expected: {
+          reportTimeMs: expected.reportTimeMs,
+          abilityGameId: expected.abilityGameId,
+          exclusions: 1,
+        },
+        actual: { exclusions: found.length },
+      });
+    }
+    const actual = {
+      reportTimeMs: cast.reportTimeMs,
+      abilityGameId: cast.abilityGameId,
+      reason: cast.reason,
+    };
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+      return fail("a named excluded cast projects differently than the case pins", { expected, actual });
+    }
+  }
+
+  const json = JSON.stringify(projected);
+  const leaked = INTERNAL_STRINGS.filter((internal) => json.includes(internal));
+  if (leaked.length > 0) {
+    return fail("an internal-only vocabulary string reached the public document", {
+      expected: [],
+      actual: leaked,
+    });
+  }
+  const keys = keysOf(projected);
+  const withheld = WITHHELD_KEYS.filter((key) => keys.has(key));
+  if (withheld.length > 0) {
+    return fail("a withheld payload field reached the public document", { expected: [], actual: withheld });
   }
   return pass();
 }

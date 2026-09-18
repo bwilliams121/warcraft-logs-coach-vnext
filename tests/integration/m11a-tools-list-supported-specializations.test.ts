@@ -70,12 +70,23 @@ describe("the deployed composition binds the derived supported-specialization se
     }
   });
 
-  it("the sentence names Assassination Rogue and Protection Paladin and nothing else", async () => {
+  it("the sentence names Assassination Rogue, Protection Paladin and Retribution Paladin and nothing else", async () => {
     // The reviewed snapshot, seen through the wire rather than the constant.
     const tools = await toolsList();
     const analyze = tools.find((candidate) => candidate.name === ANALYZE_TOOL_NAME);
     expect(analyze?.description).toContain(
-      "Supported specializations: Assassination Rogue and Protection Paladin.",
+      "Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin.",
     );
+    // M11-A5: the Retribution limits paragraph is composed through the same
+    // seam as Protection's, on both tools, and says what the slice is.
+    const raidNight = tools.find((candidate) => candidate.name === RAID_NIGHT_TOOL_NAME);
+    expect(analyze?.description).toContain(
+      "Retribution Paladin analysis currently evaluates only observed Holy Power SPENDER decisions",
+    );
+    expect(analyze?.description).toContain("OUTSIDE_SUPPORTED_SLICE");
+    expect(raidNight?.description).toContain(
+      "Retribution Paladin cells count only observed Holy Power SPENDER decisions",
+    );
+    expect(analyze?.description).not.toContain("full Retribution rotation");
   });
 });

@@ -12,6 +12,7 @@
 
 import { describe, expect, it } from "vitest";
 
+import { PUBLIC_EXCLUSION_REASONS } from "../../src/contracts/analysis-contract.js";
 import { WCL_GEAR_UI_SEMANTICS_REVISION } from "../../src/engine/normalization/normalized-events.js";
 import { loadAplAuthority } from "../../src/simc/apl-authority.js";
 import { unknownNumber, type AtomBindings } from "../../src/simc/expression/evaluate.js";
@@ -141,13 +142,19 @@ describe("the real subject through the registration", () => {
     }
   });
 
-  it("the view projects MELEE_SWING onto NON_GCD_ACTION and carries OUTSIDE_FIRST_SLICE verbatim, reconciling the excluded count", () => {
+  it("the view projects MELEE_SWING onto NON_GCD_ACTION and OUTSIDE_FIRST_SLICE onto OUTSIDE_SUPPORTED_SLICE (M11-A5), reconciling the excluded count", () => {
     const analysis = analyzed();
     const view = retributionObservedDecisionView(analysis);
     expect(view.coverage.exclusions).toEqual([
       { key: "NON_GCD_ACTION", count: 113 },
-      { key: "OUTSIDE_FIRST_SLICE", count: 54 },
+      { key: "OUTSIDE_SUPPORTED_SLICE", count: 54 },
     ]);
+    // The internal name stays internal: every projected value is a public one.
+    for (const row of view.coverage.exclusions)
+      expect(PUBLIC_EXCLUSION_REASONS as readonly string[]).toContain(row.key);
+    for (const cast of view.exclusions)
+      expect(PUBLIC_EXCLUSION_REASONS as readonly string[]).toContain(cast.reason);
+    expect(view.exclusions.filter((cast) => cast.reason === "OUTSIDE_SUPPORTED_SLICE")).toHaveLength(54);
     expect(view.coverage.exclusions.reduce((sum, row) => sum + row.count, 0)).toBe(
       view.coverage.excludedCastCount,
     );

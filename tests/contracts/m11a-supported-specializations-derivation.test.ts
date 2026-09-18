@@ -48,11 +48,13 @@ const TOOL_SOURCES: Record<string, string> = import.meta.glob("../../src/mcp/too
 });
 
 describe("the production sentence", () => {
-  it("is the reviewed snapshot for the two public specializations", () => {
-    // Reviewed, not the rule. When a third specialization becomes public this
-    // line changes in the same commit as the five-site move.
+  it("is the reviewed snapshot for the three public specializations", () => {
+    // Reviewed, not the rule. The third specialization became public in
+    // M11-A5 and this line changed in the same commit as the five-site move,
+    // as the previous snapshot said it would; the "A, B and C" grammar is
+    // exercised for the first time by a real catalog.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue and Protection Paladin.",
+      "Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin.",
     );
   });
 
@@ -164,7 +166,9 @@ describe("both tool descriptions carry the derived sentence and nothing hand-lis
     for (const description of [analysis, raidNight]) {
       expect(description).toContain(probe.sentence);
       expect(description).not.toContain("Assassination Rogue and Protection Paladin");
+      expect(description).not.toContain("Protection Paladin and Retribution Paladin");
       expect(description).not.toContain("Shield of the Righteous");
+      expect(description).not.toContain("Holy Power SPENDER");
     }
     expect(analysis).toContain("Probe One limits (analysis).\n\n");
     expect(analysis).not.toContain("raid night");
@@ -176,9 +180,11 @@ describe("both tool descriptions carry the derived sentence and nothing hand-lis
     for (const [key, source] of Object.entries(TOOL_SOURCES)) {
       const code = source.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
       expect(code, key).not.toMatch(/Supported specializations:\s*[A-Z]/);
-      // Protection's LIMITS paragraph legitimately names Protection Paladin;
-      // what must never appear is the support LIST spelled by hand.
+      // A LIMITS paragraph legitimately names its own specialization; what
+      // must never appear is the support LIST spelled by hand.
       expect(code, key).not.toContain("Assassination Rogue and Protection Paladin");
+      expect(code, key).not.toContain("Protection Paladin and Retribution Paladin");
+      expect(code, key).not.toContain("Assassination Rogue, Protection Paladin");
     }
   });
 });

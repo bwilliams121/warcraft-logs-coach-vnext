@@ -383,6 +383,15 @@ decisions unjudged; racials, items and consumables outside the domain); and
 — only after committed CI — separately authorized smoke. Race and faction
 are NOT a promotion blocker (§4a).
 
+> **Done — M11-A5 (2026-09-18).** The promotion was implemented as
+> described: the gate reported `evidenceReady: true` from the four
+> assertions above; the five-site move was made; the projection decision
+> for `OUTSIDE_FIRST_SLICE` was the one authorized additive `analysis/1`
+> widening, the spec-neutral public reason `OUTSIDE_SUPPORTED_SLICE`; the
+> limits prose was reviewed, reworded to name the slice boundary, and is
+> composed into both tool descriptions. See `agent/architecture.md`
+> "M11-A5". Smoke remains separately authorized after committed CI.
+
 ## 10. What A4 must not do
 
 No shared-engine change beyond the two amendments (`OUTSIDE_SUPPORTED_DECISION_DOMAIN`

@@ -25,15 +25,18 @@
  * no nearest-match and no substring test. An identity either matches an entry
  * exactly or it does not resolve.
  *
- * WHY THE TABLE IS TWO ROWS
+ * WHY THE TABLE IS THREE ROWS
  *
- * Two specializations have PUBLIC evaluators today: Assassination Rogue and,
- * since M10-D, Protection Paladin. Enumerating the other thirty-eight would be
- * writing down claims we cannot honour — a table entry reads as "we know about
- * this", and for an unsupported spec the honest answer is the same whether or
- * not we could spell its name. Rows arrive with evaluators, and the registry
- * validates that this table, the public spec partition and the PUBLIC
- * registrations name exactly the same set.
+ * Three specializations have PUBLIC evaluators today: Assassination Rogue,
+ * Protection Paladin (since M10-D) and Retribution Paladin (since M11-A5).
+ * Enumerating the other thirty-seven would be writing down claims we cannot
+ * honour — a table entry reads as "we know about this", and for an
+ * unsupported spec the honest answer is the same whether or not we could
+ * spell its name. Rows arrive with evaluators, and the registry validates
+ * that this table, the public spec partition and the PUBLIC registrations
+ * name exactly the same set. Each row's key is the canonical module identity
+ * (`wclClassName`/`wclSpecName` of the specialization module), never a
+ * display string taken apart heuristically.
  */
 
 import type { SpecId } from "../findings/finding.js";
@@ -44,7 +47,7 @@ export type SpecIdentityFailure =
    * The class and spec are both well-formed, and together they name no
    * specialization this build knows.
    *
-   * The ordinary case for the thirty-eight specializations without an evaluator.
+   * The ordinary case for the thirty-seven specializations without an evaluator.
    * A truthful, expected answer — not a malfunction.
    */
   | "UNSUPPORTED_SPECIALIZATION"
@@ -78,6 +81,7 @@ export type SpecIdentityResolution =
 export const SUPPORTED_SPEC_IDENTITIES: Readonly<Record<string, SpecId>> = Object.freeze({
   "rogue/assassination": "rogue/assassination",
   "paladin/protection": "paladin/protection",
+  "paladin/retribution": "paladin/retribution",
 });
 
 /**
