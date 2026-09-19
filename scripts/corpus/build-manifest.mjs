@@ -3278,6 +3278,23 @@ const blood_unbound_stack = (abilityGameId, reason) => ({
   abilityGameId,
   reason,
 });
+/** M11-B6: Blood Debt's exact count, from the last stack-bearing transition (OBSERVATION) or a fresh plain application (APPLICATION, always 1). */
+const blood_debt_exact = (stack, proof = "EXACT_STACK_OBSERVATION") => ({
+  state: "BOUND",
+  stack,
+  proof,
+  abilityGameId: BLOOD_DEBT,
+  reason: null,
+});
+const BLOOD_HS_MATCH = {
+  ...BLOOD_DS_MATCH,
+  authorityToken: "heart_strike",
+};
+const BLOOD_HS_CONVERGED_MATCH = {
+  ...BLOOD_HS_MATCH,
+  authorityCoverage: "TOKEN_CONVERGED",
+  selectionPrecision: "TOKEN_CONVERGED",
+};
 const blood_cooldown = (t, ability, expected, extra = {}) =>
   a("SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT", {
     actorId: BLOOD,
@@ -3480,20 +3497,20 @@ const BLOOD_CASES = [
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
-    "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-twenty-five-resolved",
+    "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-thirty-seven-resolved",
     BLOOD_105_165,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/observed-analysis.ts analyzeObservedBloodDeathKnightDecisions; first-gcd-adapter.ts (stopping points, dispatch trace, undecided candidates); src/simc/nested-selection.ts (M11-B1 run_action_list semantics)",
-    "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 25 MATCH, 0 REJECTED, 98 UNKNOWN. THE MEASUREMENT AFTER M11-B5 (Runic Power carried; M11-B4 had 21 MATCH, all Death Strikes decided by their own PRE_COST amount, with the first undecided candidate on runic_power.deficit at 43 + 3): the 25 resolved are 21 Death Strikes (san_gift[1] runic_power.deficit<36 at 6, sanlayn[2] runic_power.deficit<20 at 15) and 4 Blood Boils at sanlayn[6] (buff.boiling_point.up) whose every higher entry is FALSE — sanlayn[2] from a Runic Power state CARRIED EXACT from the latest observed amount under RESOURCES and CASTS continuity (deficit 47, 31.9, 65.9 and 30.9 points against the 20 the gate asks). Runic Power at the 123 decisions: OWN_PRE_COST 44, CARRIED_EXACT 14, WINDOW_BOUNDED 59 (a Heart Strike's or Vampiric Strike's own Heartbreaker gain sits 0-1 ms AHEAD of it in the log, so only the deficit's lower bound both readings share is bound), POST_SPEND_NOT_OBSERVED 5 (a Blood Boil, Marrowrend or Death's Caress after a Death Strike with no observation between: the amount after the spend is not read), NO_ANCHOR 1 (the pull). The root scan RESOLVES at 79 decisions (25 to a selection, 54 divergent), BLOCKS at sanlayn[10] consumption for 43 and at the default[15] run gate for 1; the B1 dispatch semantics are unchanged from M11-B3. The first undecided GCD candidate in priority order is now sanlayn[7] marrowrend on buff.blood_debt.stack at 45 decisions, san_gift[0] on buff.essence_of_the_blood_queen.remains at 14 and sanlayn[1] on the same atom plus fight_remains at 11 (Essence window refusals), sanlayn[0] on Bone Shield at 7, sanlayn[5] any_dnd usability at 4, the Dancing Rune Weapon gate at 3, san_gift[3] on Essence's stack at 3, sanlayn[2] on runic_power.deficit at 3 (POST_SPEND) and on Death Strike's USABILITY at 3 (the gate is TRUE at a cast that is not Death Strike, and no affordability proof is built on the wire's cost), sanlayn[6] Blood Boil usability at 2 and buff.boiling_point.up at 1, san_gift[1] Death Strike usability at 1, sanlayn[9] fight_remains at 1; the full census is pinned below, and the remains and Runic Power evidence censuses in their own assertions.",
+    "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 37 MATCH, 0 REJECTED, 86 UNKNOWN. THE MEASUREMENT AFTER M11-B6 (Blood Debt's exact count read from its own transitions; M11-B5 had 25 MATCH — 21 Death Strikes and 4 Blood Boils — with the first undecided candidate on buff.blood_debt.stack at sanlayn[7] for 45 decisions): the 37 resolved are 27 Death Strikes (san_gift[1] runic_power.deficit<36 at 6, sanlayn[2] runic_power.deficit<20 at 15, and since M11-B6 sanlayn[9] runic_power.deficit<40 at 6 where the Blood Debt count below 10 makes sanlayn[7] FALSE and Vampiric Strike is proven down), 6 Heart Strikes (sanlayn[8] buff.vampiric_strike.up with every higher entry FALSE: 1 EXACT_ENTRY, 5 TOKEN_CONVERGED where sanlayn[1]'s Heart Strike stays undecided on fight_remains and every resolution of it still selects the heart_strike token) and 4 Blood Boils at sanlayn[6] (buff.boiling_point.up). Blood Debt at the 123 decisions: EXACT_STACK_OBSERVATION 107 (the absolute count of the last applybuffstack), EXACT_STACK_APPLICATION 7 (a plain applybuff preceded by a removal or by nothing: 1), PROVEN_INACTIVE 3 (after the Marrowrend consumption), AURA_STATE_UNKNOWN 6 (before the first observed transition); no pre-decision-window refusal, no ambiguous shape. Of the 45 decisions M11-B5 left first-undecided on the Blood Debt stack, 7 resolve to MATCH and 38 advance to a later obstacle — 16 to Marrowrend's USABILITY at sanlayn[7] (the count is exactly 10, the entry is TRUE, and no rune or affordability proof is built for an action that was not cast), 19 to fight_remains at sanlayn[9], 2 to buff.vampiric_strike.up and 1 to Heart Strike's usability at sanlayn[8]; none remains on the stack. Runic Power at the 123 decisions: OWN_PRE_COST 44, CARRIED_EXACT 14, WINDOW_BOUNDED 59 (a Heart Strike's or Vampiric Strike's own Heartbreaker gain sits 0-1 ms AHEAD of it in the log, so only the deficit's lower bound both readings share is bound), POST_SPEND_NOT_OBSERVED 5 (a Blood Boil, Marrowrend or Death's Caress after a Death Strike with no observation between: the amount after the spend is not read), NO_ANCHOR 1 (the pull). The root scan RESOLVES at 81 decisions (37 to a selection, 44 divergent), BLOCKS at sanlayn[10] consumption for 41 and at the default[15] run gate for 1; the B1 dispatch semantics are unchanged from M11-B3. The first undecided GCD candidate in priority order is now sanlayn[9] death_strike on fight_remains at 20 decisions, sanlayn[7] marrowrend on USABILITY:marrowrend at 16, san_gift[0] on buff.essence_of_the_blood_queen.remains at 14 and sanlayn[1] on the same atom plus fight_remains at 11 (Essence window refusals), sanlayn[0] on Bone Shield at 7, sanlayn[5] any_dnd usability at 4, the Dancing Rune Weapon gate at 3, san_gift[3] on Essence's stack at 3, sanlayn[2] on runic_power.deficit at 3 (POST_SPEND) and on Death Strike's USABILITY at 3, sanlayn[8] on buff.vampiric_strike.up at 2 and on Heart Strike's usability at 1, sanlayn[6] Blood Boil usability at 2 and buff.boiling_point.up at 1, san_gift[1] Death Strike usability at 1; the full census is pinned below, and the stack, remains and Runic Power evidence censuses in their own assertions.",
     [
       a("SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY", {
         actorId: BLOOD,
         ...BLOOD_FULL,
         expected: {
           eligibleDecisions: 123,
-          match: 25,
+          match: 37,
           rejected: 0,
-          unknown: 98,
+          unknown: 86,
           exclusions: {
             MELEE_SWING: 87,
             NON_GCD_ACTION: 47,
@@ -3506,16 +3523,16 @@ const BLOOD_CASES = [
         actorId: BLOOD,
         ...BLOOD_FULL,
         expected: {
-          match: 25,
+          match: 37,
           rejected: 0,
           stoppingEntries: {
             "default[15] run_action_list": 1,
-            "(root scan resolved)": 79,
-            "sanlayn[10] consumption": 43,
+            "(root scan resolved)": 81,
+            "sanlayn[10] consumption": 41,
           },
           stoppingAtoms: {
             "default[15] run_action_list | buff.gift_of_the_sanlayn.up": 1,
-            [`sanlayn[10] consumption | ${BLOOD_CONSUMPTION_TAG}`]: 43,
+            [`sanlayn[10] consumption | ${BLOOD_CONSUMPTION_TAG}`]: 41,
           },
           dispatchOutcomes: {
             "default[13] -> high_prio_actions : CALL_MAY_SELECT": 123,
@@ -3523,8 +3540,8 @@ const BLOOD_CASES = [
             "default[15] -> san_gift : BLOCKED": 1,
             "default[15] -> san_gift : RUN_ENTERED_SCAN_ENDS": 24,
             "default[15] -> san_gift : RUN_GATE_FALSE_SKIPPED": 98,
-            "default[16] -> sanlayn : BLOCKED": 43,
-            "default[16] -> sanlayn : RUN_ENTERED_SCAN_ENDS": 55,
+            "default[16] -> sanlayn : BLOCKED": 41,
+            "default[16] -> sanlayn : RUN_ENTERED_SCAN_ENDS": 57,
           },
           undecidedGcdCandidates: {
             "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up": 3,
@@ -3546,10 +3563,10 @@ const BLOOD_CASES = [
             "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 1,
             "sanlayn[5] any_dnd | USABILITY:any_dnd": 5,
             "sanlayn[6] blood_boil | buff.boiling_point.up": 1,
-            "sanlayn[7] marrowrend | buff.blood_debt.stack": 73,
+            "sanlayn[7] marrowrend | USABILITY:marrowrend": 25,
             "sanlayn[8] heart_strike | buff.vampiric_strike.up": 3,
             "sanlayn[9] death_strike | runic_power.deficit": 2,
-            "sanlayn[9] death_strike | fight_remains": 43,
+            "sanlayn[9] death_strike | fight_remains": 41,
             "sanlayn[0] deaths_caress | buff.bone_shield.up": 6,
             "sanlayn[0] deaths_caress | buff.bone_shield.stack": 7,
             "sanlayn[3] deaths_caress | buff.bone_shield.stack": 6,
@@ -3558,6 +3575,99 @@ const BLOOD_CASES = [
             "san_gift[5] blood_boil | USABILITY:blood_boil": 2,
             "sanlayn[8] heart_strike | USABILITY:heart_strike": 1,
           },
+        },
+      }),
+      a("SPEC_BLOOD_DEATH_KNIGHT.STACK_EVIDENCE_CENSUS", {
+        actorId: BLOOD,
+        ...BLOOD_FULL,
+        expected: {
+          stackEvidence: {
+            "bone_shield | EXACT_STACK_OBSERVATION": 114,
+            "bone_shield | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 1,
+            [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 8,
+            "essence_of_the_blood_queen | AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED": 96,
+            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 26,
+            "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
+            "blood_debt | EXACT_STACK_OBSERVATION": 107,
+            "blood_debt | EXACT_STACK_APPLICATION": 7,
+            "blood_debt | PROVEN_INACTIVE": 3,
+            "blood_debt | AURA_STATE_UNKNOWN": 6,
+          },
+          stackValues: {
+            "bone_shield | stack 5": 2,
+            "bone_shield | stack 6": 6,
+            "bone_shield | stack 7": 9,
+            "bone_shield | stack 8": 15,
+            "bone_shield | stack 9": 27,
+            "bone_shield | stack 10": 16,
+            "bone_shield | stack 11": 33,
+            "bone_shield | stack 12": 6,
+            "blood_debt | stack 0": 3,
+            "blood_debt | stack 1": 7,
+            "blood_debt | stack 2": 11,
+            "blood_debt | stack 3": 8,
+            "blood_debt | stack 4": 10,
+            "blood_debt | stack 5": 8,
+            "blood_debt | stack 6": 7,
+            "blood_debt | stack 7": 5,
+            "blood_debt | stack 8": 10,
+            "blood_debt | stack 9": 6,
+            "blood_debt | stack 10": 42,
+          },
+        },
+      }),
+      a("SPEC_BLOOD_DEATH_KNIGHT.BLOOD_DEBT_TRANSITION_CENSUS", {
+        actorId: BLOOD,
+        ...BLOOD_FULL,
+        expected: {
+          transitions: {
+            applybuff: 3,
+            applybuffstack: 26,
+            refreshbuff: 0,
+            removebuffstack: 0,
+            removebuff: 2,
+          },
+          stackValues: [
+            null,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            null,
+            null,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            null,
+            null,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+          ],
+          sameMillisecondPairs: 0,
+          // Every gain follows a Death Strike (49998) by 10-49 ms; both removals follow a Marrowrend (195182).
+          // The wire writes Blood Debt AFTER its cause — the opposite of Bone Shield's own-effect lead.
+          precedingOwnCast: { 49998: 29, 195182: 2 },
+          lagMs: { min: 10, max: 49 },
+          // The next eligible decision is at least a GCD away, so nothing sits inside the 50 ms window.
+          minGapToNextDecisionMs: 702,
+          validation: { points: 30, consistent: 30, inconsistent: 0 },
         },
       }),
       a("SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS", {
@@ -3617,7 +3727,7 @@ const BLOOD_CASES = [
       }),
     ],
     ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
-    "The coverage disclosure is the honest measure of the slice: 25 of 123 decisions resolve — 21 Death Strikes the pinned list selects from proven remainders, a proven count and the cast's own Runic Power, and 4 Blood Boils it selects once the Runic Power carried from the latest observed amount decides the Death Strike gate above them — and every other decision names the entry and the atom the shared machinery could not decide. M11-B5 carries Runic Power as a sequence of READ states under RESOURCES and CASTS continuity: a resourcechange replaces the state with its POST_CHANGE attachment, a costed cast leaves it unknown until the next observation, and a gain 0-1 ms ahead of the decision is not attributed — only the deficit's lower bound is bound. M11-B4 derived the remainders from observed gains and the pinned Blood durations (Essence 25 s, not the 20 s table value) under continuity from the gain, bound only the lower bound past a Bone Shield refresh of unpinned cause, refused every transition inside the 50 ms pre-decision window (the 0, 1 and 20 ms own-effect leads the audit measured), and refused nothing on threshold tolerance because no exact value fell within 50 ms of 1.5, 3 or 8 seconds. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one.",
+    "The coverage disclosure is the honest measure of the slice: 37 of 123 decisions resolve — 27 Death Strikes the pinned list selects from proven remainders, proven counts and the cast's own or carried Runic Power, 6 Heart Strikes it selects at sanlayn[8] once the Blood Debt count below 10 makes the Marrowrend entry FALSE, and 4 Blood Boils it selects once the carried Runic Power decides the Death Strike gate above them — and every other decision names the entry and the atom the shared machinery could not decide. M11-B6 reads Blood Debt's count from its own transitions only: the absolute count of the last applybuffstack, the pinned 1 of a fresh plain application, zero from an observed removal; never from a Death Strike, the set bonus's cooldown or the combatantinfo's silence, and the 16 decisions at exactly 10 stacks stop on Marrowrend's usability rather than becoming a REJECTED from a guessed rune count. M11-B5 carries Runic Power as a sequence of READ states under RESOURCES and CASTS continuity: a resourcechange replaces the state with its POST_CHANGE attachment, a costed cast leaves it unknown until the next observation, and a gain 0-1 ms ahead of the decision is not attributed — only the deficit's lower bound is bound. M11-B4 derived the remainders from observed gains and the pinned Blood durations (Essence 25 s, not the 20 s table value) under continuity from the gain, bound only the lower bound past a Bone Shield refresh of unpinned cause, refused every transition inside the 50 ms pre-decision window (the 0, 1 and 20 ms own-effect leads the audit measured), and refused nothing on threshold tolerance because no exact value fell within 50 ms of 1.5, 3 or 8 seconds. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one.",
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
@@ -3625,7 +3735,7 @@ const BLOOD_CASES = [
     BLOOD_GTKB,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/observed-analysis.ts; first-gcd-adapter.ts",
-    "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — after M11-B4, 15 inside the Gift window whose root scan RESOLVES (one of them, the Death Strike at 2,421,923, to a MATCH at san_gift[1]; the others with every san_gift candidate undecided, first san_gift[0] on buff.essence_of_the_blood_queen.remains at 8 where the cast's own Essence transition sits inside the window, san_gift[2] on the Crimson Scourge / Visceral Strength remainders at 6 where neither aura has been observed yet) and 6 after it that BLOCK at sanlayn[10] consumption (first undecided: sanlayn[7] on buff.blood_debt.stack at 5, sanlayn[5] any_dnd usability at 1; Bone Shield's remainder is EXACT at 20 of 21 decisions from the opener's first stack gain; since M11-B5 Runic Power is exact or bounded at every opener decision — OWN_PRE_COST 6, CARRIED_EXACT 5, WINDOW_BOUNDED 10 — so no runic_power.deficit gate is undecided there) — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); Dancing Rune Weapon is never a candidate, because the opener's cast at 2,417,020 proves the cooldown active for the whole window.",
+    "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — after M11-B4, 15 inside the Gift window whose root scan RESOLVES (one of them, the Death Strike at 2,421,923, to a MATCH at san_gift[1]; the others with every san_gift candidate undecided, first san_gift[0] on buff.essence_of_the_blood_queen.remains at 8 where the cast's own Essence transition sits inside the window, san_gift[2] on the Crimson Scourge / Visceral Strength remainders at 6 where neither aura has been observed yet) and 6 after it that BLOCK at sanlayn[10] consumption (first undecided since M11-B6: sanlayn[8] on buff.vampiric_strike.up at 5 — the Blood Debt count is exact at every one of them, 4 to 6, so sanlayn[7] is FALSE — and sanlayn[5] any_dnd usability at 1; Blood Debt over the opener: EXACT_STACK_OBSERVATION 14, EXACT_STACK_APPLICATION 1, AURA_STATE_UNKNOWN 6 before the first Death Strike's application; Bone Shield's remainder is EXACT at 20 of 21 decisions from the opener's first stack gain; since M11-B5 Runic Power is exact or bounded at every opener decision — OWN_PRE_COST 6, CARRIED_EXACT 5, WINDOW_BOUNDED 10 — so no runic_power.deficit gate is undecided there) — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); Dancing Rune Weapon is never a candidate, because the opener's cast at 2,417,020 proves the cooldown active for the whole window.",
     [
       a("SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY", {
         actorId: BLOOD_GTKB_ACTOR,
@@ -3661,10 +3771,46 @@ const BLOOD_CASES = [
             "san_gift[6] heart_strike | USABILITY:heart_strike": 3,
             "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
             "sanlayn[5] any_dnd | USABILITY:any_dnd": 1,
-            "sanlayn[7] marrowrend | buff.blood_debt.stack": 6,
             "sanlayn[8] heart_strike | buff.vampiric_strike.up": 6,
             "sanlayn[9] death_strike | fight_remains": 6,
           },
+        },
+      }),
+      a("SPEC_BLOOD_DEATH_KNIGHT.STACK_EVIDENCE_CENSUS", {
+        actorId: BLOOD_GTKB_ACTOR,
+        expected: {
+          stackEvidence: {
+            "bone_shield | EXACT_STACK_OBSERVATION": 20,
+            [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 1,
+            "essence_of_the_blood_queen | AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED": 13,
+            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 7,
+            "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
+            "blood_debt | EXACT_STACK_OBSERVATION": 14,
+            "blood_debt | EXACT_STACK_APPLICATION": 1,
+            "blood_debt | AURA_STATE_UNKNOWN": 6,
+          },
+          stackValues: {
+            "bone_shield | stack 7": 12,
+            "bone_shield | stack 12": 8,
+            "blood_debt | stack 1": 1,
+            "blood_debt | stack 2": 2,
+            "blood_debt | stack 3": 2,
+            "blood_debt | stack 4": 5,
+            "blood_debt | stack 5": 4,
+            "blood_debt | stack 6": 1,
+          },
+        },
+      }),
+      a("SPEC_BLOOD_DEATH_KNIGHT.BLOOD_DEBT_TRANSITION_CENSUS", {
+        actorId: BLOOD_GTKB_ACTOR,
+        expected: {
+          transitions: { applybuff: 1, applybuffstack: 5, refreshbuff: 0, removebuffstack: 0, removebuff: 0 },
+          stackValues: [null, 2, 3, 4, 5, 6],
+          sameMillisecondPairs: 0,
+          precedingOwnCast: { 49998: 6 },
+          lagMs: { min: 18, max: 53 },
+          minGapToNextDecisionMs: 711,
+          validation: { points: 5, consistent: 5, inconsistent: 0 },
         },
       }),
       a("SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS", {
@@ -3896,6 +4042,82 @@ const BLOOD_CASES = [
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
+    "spec-blood-death-knight.blood-debt-is-read-from-its-own-transitions-and-never-from-a-death-strike",
+    BLOOD_105_165,
+    "SPEC_BLOOD_DEATH_KNIGHT",
+    "src/specs/deathknight/blood/aura-bindings.ts (the exact-count rule and its fresh-application clause); src/data/game/deathknight-blood-aura-authority.ts (BLOOD_DEBT, exactCount)",
+    "Blood Debt (1310372) is the Blood MID2 two-piece aura: Death Strike triggers it under an internal cooldown, each trigger adds exactly one stack from an initial one up to ten, it never expires, and a Marrowrend at ten removes every stack at once (the pinned claims on the identity). Over the composed bundle the wire shows exactly that shape and nothing else — 3 applybuff, 26 applybuffstack carrying 2..10, 2 removebuff, no refreshbuff, no removebuffstack — so at every decision the count is read from the LAST transition of the identity: the Heart Strike at 2,050,290 reads 3 from the applybuffstack at 2,049,345; the Death Strike at 2,035,940 reads 10 from the applybuffstack at 2,033,650, which makes sanlayn[7] TRUE and the decision stop on Marrowrend's USABILITY rather than resolve, because no rune or affordability proof exists for an action that was not cast; the Heart Strike at 2,044,779 and the Death Strikes at 2,045,618 and 2,129,260 read 1 from the plain applybuff at 2,044,041 / 2,126,260, each preceded by the removebuff of the Marrowrend consumption (EXACT_STACK_APPLICATION); the Death Strike at 2,044,021 reads zero from the removebuff at 2,043,229 (PROVEN_INACTIVE, unchanged since M11-B2); the pull's Death's Caress at 2,004,615 reads nothing, because no transition precedes it and the combatantinfo's silence is not zero. Two of those decisions now MATCH: at 2,045,618 the count 1 makes sanlayn[7] FALSE, Vampiric Strike is proven down, and the list selects Death Strike at sanlayn[9] on the cast's own deficit; at 2,024,020 the count 6 does the same and the list selects Heart Strike at sanlayn[8] on the Vampiric Strike proc — the cast is the Vampiric Strike (433895) the proc turns Heart Strike into, and the slice's heart_strike token. Fifteen of the 44 bundle Death Strikes produce no transition (the internal cooldown, or the maximum); none of them adds a stack here.",
+    [
+      blood_stack(2050290, BLOOD_HS, "blood_debt", blood_debt_exact(3), BLOOD_FULL),
+      blood_stack(2035940, BLOOD_DS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_decision(
+        2035940,
+        BLOOD_DS,
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2044779,
+        BLOOD_HS,
+        "blood_debt",
+        blood_debt_exact(1, "EXACT_STACK_APPLICATION"),
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2045618,
+        BLOOD_DS,
+        "blood_debt",
+        blood_debt_exact(1, "EXACT_STACK_APPLICATION"),
+        BLOOD_FULL,
+      ),
+      blood_decision(
+        2045618,
+        BLOOD_DS,
+        { ...BLOOD_DS_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2129260,
+        BLOOD_DS,
+        "blood_debt",
+        blood_debt_exact(1, "EXACT_STACK_APPLICATION"),
+        BLOOD_FULL,
+      ),
+      // The unselectability proof refuses at deathbringer[0] (its gate is TRUE on this deficit) before reaching an
+      // unconditional entry — the cross-list limit M11-B2 measured at 2,044,021.
+      blood_decision(
+        2129260,
+        BLOOD_DS,
+        { ...BLOOD_DS_MATCH, unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE" },
+        BLOOD_FULL,
+      ),
+      blood_stack(2024020, BLOOD_VS, "blood_debt", blood_debt_exact(6), BLOOD_FULL),
+      blood_decision(
+        2024020,
+        BLOOD_VS,
+        { ...BLOOD_HS_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(2029599, BLOOD_VS, "blood_debt", blood_debt_exact(8), BLOOD_FULL),
+      blood_decision(
+        2029599,
+        BLOOD_VS,
+        { ...BLOOD_HS_CONVERGED_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2004615,
+        BLOOD_DC,
+        "blood_debt",
+        blood_unbound_stack(BLOOD_DEBT, "AURA_STATE_UNKNOWN"),
+        BLOOD_FULL,
+      ),
+    ],
+    ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "A stack count is a number Warcraft Logs wrote on a transition, or the one number the pinned module fixes for a fresh application; it is never previous + 1, never a Death Strike's expected proc, never zero from silence. Where the count is exactly ten the entry is TRUE and the analyzer says it cannot prove Marrowrend usable, which is the truthful stop.",
+    { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
+  ),
+  kase(
     "spec-blood-death-knight.vampiric-blood-and-the-second-dancing-rune-weapon-over-the-bundle",
     BLOOD_105_165,
     "SPEC_BLOOD_DEATH_KNIGHT",
@@ -4031,6 +4253,11 @@ const BLOOD_CASES = [
       blood_rp_state(2425794, BLOOD_DS, blood_rp_own(440, 81, 2425794)),
       // The first Blood Boil carries 220 of 1,250 from the melee swing 355 ms earlier.
       blood_rp_state(2417826, BLOOD_BB, blood_rp_carried(220, 103, 2417471, "EVENT_ASSOCIATED")),
+      // M11-B6: the opener's last Heart Strike reads Blood Debt 6 from the applybuffstack at 2,433,963 (31 ms after
+      // the Death Strike at 2,433,932 that caused it); the first Death Strike at 2,421,923 reads nothing, because
+      // the aura's first transition is its own application 33 ms later.
+      blood_stack(2434890, BLOOD_HS, "blood_debt", blood_debt_exact(6)),
+      blood_stack(2421923, BLOOD_DS, "blood_debt", blood_unbound_stack(BLOOD_DEBT, "AURA_STATE_UNKNOWN")),
       blood_cooldown(2429596, BLOOD_DS, blood_drw_not_ready(77424, 2417020)),
     ],
     ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],

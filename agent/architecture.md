@@ -6182,6 +6182,111 @@ byte-identical against HEAD (9e1f370) — every public consumer reads its own
 cast's PRE_COST and nothing else. Blood stays INTERNAL_ONLY; M11-B is not
 complete.
 
+### M11-B6 — Blood Debt stack state (exact count from the aura's own transitions)
+
+The largest first blocker after M11-B5 — `buff.blood_debt.stack` at
+`sanlayn[7] marrowrend` for 45 of 123 bundle decisions — answered from the
+aura's own observed transitions under the existing Blood exact-count rule,
+with one Blood-owned clause added and no shared-engine change.
+
+**The question.** Immediately before an observed Blood decision, what exact
+Blood Debt stack count is established by prior observed Blood Debt aura
+transitions under complete coverage? Not what a Death Strike should have
+added, not what the set bonus's internal cooldown allowed, not what the
+combatantinfo's silence suggests.
+
+**The pinned mechanics** (`src/data/game/deathknight-blood-aura-authority.ts`,
+`BLOOD_DEBT`, five claims against sc_death_knight.cpp at 33622e9d and the
+same commit's buff.cpp / spell data). Blood Debt (1310372) is the Blood
+MID2 two-piece SET-BONUS aura — no talent and no hero sub-tree produces it,
+so neither build proof applies and set-bonus ownership is not resolved.
+Death Strike is the only producer (`buffs.blood_debt->trigger()` under
+`cooldown.mid2_2pc`, 10120-10123); `trigger()` applies `_initial_stack`,
+which is 1 (buff.cpp 1043-1054, 2075-2080), and each further trigger adds
+exactly 1 up to `_max_stack` = 10 (spell data; buff.cpp 970-976,
+2649-2659). The duration is -1, so the aura is permanent (buff.cpp 877-880):
+no expiry, no decay, no one-at-a-time loss, no stack-duration dependency.
+Marrowrend is the only consumer, only at the maximum, and it removes every
+stack at once (11703-11705; a plain `removebuff` on the wire).
+
+**The rule** (`aura-bindings.ts`). The identity carries a structured
+`exactCount: { applicationStack: 1 }` (Bone Shield's is
+`{ applicationStack: null }`; every other identity's is `null`), and
+`EXACT_COUNT_ATOMS` is derived from the identities that carry one. Under
+EXACT ACTIVE presence with coverage: the absolute `stack` of the last
+stack-bearing transition when nothing but same-millisecond refresh
+companions follows it (`EXACT_STACK_OBSERVATION`, unchanged); the pinned
+`applicationStack` when the presence anchor is a PLAIN application and the
+transition of the identity before it is a plain removal or none exists
+(`EXACT_STACK_APPLICATION`, the M11-B6 clause); zero from an observed
+removal (`PROVEN_INACTIVE`, unchanged). A plain application whose preceding
+transition shows the aura already held — an application or a positive
+stack reading — is refused (`APPLICATION_WHILE_ACTIVE_UNPINNED`): not reset
+to 1, not carried, not incremented. A refresh after the count stays
+`COUNT_AMBIGUOUS_SINCE_OBSERVATION`; before the first transition and across
+an AURAS gap the atom is `AURA_STATE_UNKNOWN`; a transition inside the
+Blood-wide 50 ms pre-decision window is `PRE_DECISION_WINDOW_TRANSITION`
+(no Blood Debt-specific window). Every exact binding records its anchor
+(position, locator, operation, report time). The generic engine learned
+nothing: `knownBuffStacks` is unchanged, and the only reachable pinned
+expression, `buff.blood_debt.stack=10`, compares an exact integer.
+
+**The wire, measured** (`tests/support/m11/blood-debt-census.ts`, corpus
+kind `SPEC_BLOOD_DEATH_KNIGHT.BLOOD_DEBT_TRANSITION_CENSUS`). Over the 165 s
+bundle the actor's own track holds 3 `applybuff`, 26 `applybuffstack`
+(2..10, three cycles), 2 `removebuff`, no `refreshbuff`, no
+`removebuffstack`, never two in one millisecond; every gain follows a Death
+Strike and every removal a Marrowrend, by 10-49 ms (the opener: 1 / 5 / 0,
+18-53 ms) — the wire writes Blood Debt AFTER its cause, the opposite of Bone
+Shield's own-effect lead, so `BEFORE_EVENT` at the producing decision reads
+the pre-cast count and the smallest gap to the next eligible decision is
+702 ms (opener 711). The retrospective walk of the pinned model — an
+application follows zero, a count reads previous + 1, a removal follows 10 —
+is consistent at 30 of 30 bundle and 5 of 5 opener validation points; it
+runs in test support only and never feeds the evaluator. Fifteen of the
+bundle's 44 Death Strikes produce no transition; none adds a stack.
+
+**Measured.** Bundle **37 MATCH / 0 REJECTED / 86 UNKNOWN** (B5: 25 / 0 /
+98): 27 Death Strikes (6 new at `sanlayn[9]` `runic_power.deficit<40`), 6
+Heart Strikes (Vampiric Strike casts at `sanlayn[8]`
+`buff.vampiric_strike.up`, 1 EXACT_ENTRY + 5 TOKEN_CONVERGED past an
+undecided `sanlayn[1]`) and 4 Blood Boils. The 45 s slice 15 / 0 / 33 (B5
+10); the opener 1 / 0 / 20 unchanged. Blood Debt evidence over the 123:
+EXACT_STACK_OBSERVATION 107, EXACT_STACK_APPLICATION 7, PROVEN_INACTIVE 3,
+AURA_STATE_UNKNOWN 6; counts 0 ×3, 1 ×7, 2 ×11, 3 ×8, 4 ×10, 5 ×8, 6 ×7,
+7 ×5, 8 ×10, 9 ×6, 10 ×42 (opener 14 / 1 / 0 / 6). Of the 45 decisions B5
+left on the stack, 7 MATCH and 38 advance — 16 to `USABILITY:marrowrend`
+at the same entry (the count is exactly 10, the entry is TRUE, and no rune
+or affordability proof exists for an action that was not cast, so the
+decision stops there rather than becoming a REJECTED), 19 to
+`fight_remains` at `sanlayn[9]`, 2 to `buff.vampiric_strike.up` and 1 to
+`USABILITY:heart_strike` at `sanlayn[8]`; none remains on the stack. The
+new first-blocker ranking: `sanlayn[9]` `fight_remains` 20, Marrowrend
+usability 16, Essence window refusals 14 + 11, Bone Shield window 7,
+`any_dnd` usability 4, the Dancing Rune Weapon gate 3, Essence stack 3,
+Runic Power after a spend 3, Death Strike usability 3 + 1, Blood Boil
+usability 2, `buff.vampiric_strike.up` 2, Boiling Point 1, Heart Strike
+usability 1.
+
+**Not built, on purpose.** No stack from a Death Strike cast or the
+internal cooldown, no `previous + 1`, no cap arithmetic, no decay, no
+bounded stack, no set-bonus resolution from equipped items, no zero from
+the combatantinfo snapshot, no Marrowrend usability or Rune affordability,
+no `fight_remains`, no second pre-decision window.
+
+**Proven.** `tests/unit/m11b6-blood-debt-stack.test.ts` (explicit counts
+read verbatim, the fresh-application clause and its refusal, removal zero,
+the ambiguous shapes, the zero-valued stack removal failing closed, the
+coverage gap, the inclusive window at leads 0 / 50 / 51, Bone Shield and
+Essence unchanged, a source guard against stack arithmetic and cast-based
+inference, the corpus pins and both censuses), the re-pinned
+`m11b2-blood-*` tests, two new corpus kinds
+(`SPEC_BLOOD_DEATH_KNIGHT.STACK_EVIDENCE_CENSUS`,
+`BLOOD_DEBT_TRANSITION_CENSUS`) and one new case (the corpus is 43
+artifacts / 157 cases / 570 assertions), and the invariance harness: 33 of
+33 non-timing captures byte-identical against HEAD (af76660). Blood stays
+INTERNAL_ONLY; M11-B is not complete.
+
 ---
 
 # Milestone 12 — Healer Foundation

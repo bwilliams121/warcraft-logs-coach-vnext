@@ -234,6 +234,15 @@ export interface BloodDecisionCoverage {
   readonly runicPowerEvidence: readonly CountOf<string>[];
   /** Every window observation's lead across the eligible decisions, as `lead <ms>` -> count (M11-B5). */
   readonly runicPowerWindowLeads: readonly CountOf<string>[];
+  /**
+   * Every eligible decision's `buff.<name>.stack` evidence, per modelled
+   * stack atom, as `atom | <proof> / <unbound reason>` -> count (M11-B6).
+   * The census the Blood Debt slice exists to take; each atom's rows sum to
+   * the eligible population.
+   */
+  readonly stackEvidence: readonly CountOf<string>[];
+  /** Every BOUND stack value across the eligible decisions, as `atom | stack <n>` -> count (M11-B6). */
+  readonly stackValues: readonly CountOf<string>[];
 }
 
 /** The build facts the evaluator resolved once from the actor's combatant info. */
@@ -705,6 +714,8 @@ export function summarizeBloodDecisions(
   const preDecisionWindowRefusals = new Map<string, number>();
   const runicPowerEvidence = new Map<string, number>();
   const runicPowerWindowLeads = new Map<string, number>();
+  const stackEvidence = new Map<string, number>();
+  const stackValues = new Map<string, number>();
 
   for (const comparison of comparisons) {
     precision.set(comparison.authorityCoverage, (precision.get(comparison.authorityCoverage) ?? 0) + 1);
@@ -756,6 +767,12 @@ export function summarizeBloodDecisions(
       }
     }
     for (const binding of entry.stacks) {
+      bump(
+        stackEvidence,
+        `${binding.atomName} | ${binding.state === "BOUND" ? binding.proof : binding.reason}`,
+      );
+      if (binding.state === "BOUND")
+        bump(stackValues, `${binding.atomName} | stack ${String(binding.stack)}`);
       if (binding.state === "UNBOUND" && binding.windowTransition !== null) {
         bump(
           preDecisionWindowRefusals,
@@ -792,6 +809,8 @@ export function summarizeBloodDecisions(
     preDecisionWindowRefusals: tallyOpen(preDecisionWindowRefusals),
     runicPowerEvidence: tallyOpen(runicPowerEvidence),
     runicPowerWindowLeads: tallyOpen(runicPowerWindowLeads),
+    stackEvidence: tallyOpen(stackEvidence),
+    stackValues: tallyOpen(stackValues),
   };
 }
 

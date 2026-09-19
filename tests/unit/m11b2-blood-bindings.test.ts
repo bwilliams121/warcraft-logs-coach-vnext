@@ -276,8 +276,9 @@ describe("the Bone Shield exact-count rule", () => {
     expect(stack).toMatchObject({ state: "BOUND", stack: 0, proof: "PROVEN_INACTIVE" });
   });
 
-  it("reconstructs a positive count for bone_shield ONLY; an ACTIVE Essence or Blood Debt stays unbound", () => {
-    expect(EXACT_COUNT_ATOMS).toEqual(["bone_shield"]);
+  it("reconstructs a positive count for the atoms with an exact-count rule; an ACTIVE Essence stays unbound", () => {
+    // RE-POINTED for M11-B6: Blood Debt joined Bone Shield (tests/unit/m11b6-blood-debt-stack.test.ts).
+    expect(EXACT_COUNT_ATOMS).toEqual(["bone_shield", "blood_debt"]);
     const state = stateOf([
       auraEvent({
         ordinal: 0,

@@ -10,9 +10,16 @@
  *     transitions strictly before the decision (`aura-bindings.ts`);
  *   - an EXACT STACK reading (`buff.<name>.stack`): exact zero under the two
  *     authorized proofs (PROVEN_INACTIVE, or the producing talent /
- *     hero tree disproved), and — for Bone Shield ONLY — the exact count the
- *     last stack-bearing transition reported, under the Blood-owned
- *     reconstruction rule in `aura-bindings.ts`;
+ *     hero tree disproved), and — for the identities carrying an
+ *     `exactCount` rule (Bone Shield since M11-B2, Blood Debt since M11-B6)
+ *     — the exact count the last stack-bearing transition reported, under
+ *     the Blood-owned reconstruction rule in `aura-bindings.ts`. The rule's
+ *     one pinned number, `applicationStack`, is the count a PLAIN application
+ *     (an `applybuff` carrying no `stack`) establishes: 1 for Blood Debt
+ *     (`buff_t::trigger()` from zero applies `_initial_stack`, which is 1 —
+ *     the claims below), and `null` for Bone Shield, whose applications
+ *     carry a count the pinned module does not fix (Marrowrend and Death's
+ *     Caress trigger different numbers);
  *   - a HERO-TREE OWNERSHIP fact: an aura every producer of which is a
  *     talent of ONE hero sub-tree, so a build resolved to the OTHER sub-tree
  *     cannot hold it (one hero tree is active at a time —
@@ -39,6 +46,17 @@ export interface BloodAuraClaim {
 
 export type BloodHeroTreeName = "sanlayn" | "deathbringer";
 
+/**
+ * The Blood-owned exact-count rule for one stack atom (M11-B6). Its presence
+ * on an identity is what admits the exact POSITIVE count; its one number is
+ * the count a plain application establishes, or `null` when the pinned
+ * module fixes none. Nothing here says how stacks are gained or lost between
+ * observed transitions: no transition is ever synthesized from it.
+ */
+export interface BloodExactCountRule {
+  readonly applicationStack: number | null;
+}
+
 export interface BloodAuraIdentity {
   /** The buff name as the pinned APL writes it after `buff.` / `debuff.`. */
   readonly atomName: string;
@@ -57,6 +75,8 @@ export interface BloodAuraIdentity {
    * a build resolved to the other sub-tree cannot hold it. `null` otherwise.
    */
   readonly ownedByHeroTree: BloodHeroTreeName | null;
+  /** The exact-count rule for `buff.<name>.stack`, or `null`: an ACTIVE aura without one binds no positive count. */
+  readonly exactCount: BloodExactCountRule | null;
   readonly claims: readonly BloodAuraClaim[];
 }
 
@@ -79,6 +99,7 @@ const GIFT_OF_THE_SANLAYN: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: "gift_of_the_sanlayn",
   ownedByHeroTree: "sanlayn",
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -104,6 +125,7 @@ const DANCING_RUNE_WEAPON: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: "dancing_rune_weapon",
   ownedByHeroTree: null,
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -125,6 +147,7 @@ const DEATH_AND_DECAY: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: null,
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -144,6 +167,7 @@ const BONE_SHIELD: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: null,
+  exactCount: { applicationStack: null },
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -170,6 +194,7 @@ const VAMPIRIC_STRIKE: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: "vampiric_strike",
   ownedByHeroTree: "sanlayn",
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -189,6 +214,7 @@ const ESSENCE_OF_THE_BLOOD_QUEEN: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: "vampiric_strike",
   ownedByHeroTree: "sanlayn",
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -208,6 +234,7 @@ const CRIMSON_SCOURGE: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: null,
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -229,6 +256,7 @@ const BOILING_POINT: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: null,
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -242,6 +270,8 @@ const BOILING_POINT: BloodAuraIdentity = {
 
 /** `buff.blood_debt`: 1310372, the Midnight season 2 two-piece aura. */
 export const BLOOD_DEBT_BUFF_SPELL_ID = 1310372;
+/** Blood Debt's maximum stack, from the pinned spell data (`_max_stack` of 1310372). The only count the pinned list asks about. */
+export const BLOOD_DEBT_MAX_STACK = 10;
 const BLOOD_DEBT: BloodAuraIdentity = {
   atomName: "blood_debt",
   auraClass: "BUFF",
@@ -249,13 +279,51 @@ const BLOOD_DEBT: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: null,
+  exactCount: { applicationStack: 1 },
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
       "15246; 16250",
       "`spell.blood_debt_buff = conditional_spell_lookup( sets->has_set_bonus( DEATH_KNIGHT_BLOOD, MID2, B2 ), 1310372 )` and " +
         '`buffs.blood_debt = make_fallback( sets->has_set_bonus( DEATH_KNIGHT_BLOOD, MID2, B2 ), this, "blood_debt", spell.blood_debt_buff )`. ' +
-        "Set-bonus ownership is not resolved by this slice; the stack atom binds only under PROVEN_INACTIVE.",
+        "A SET-BONUS aura: no talent and no hero sub-tree produces it, so neither build proof applies and set-bonus " +
+        "ownership is not resolved by this slice (no equipped-item reading is made). Exact zero comes only from an " +
+        "observed removal (PROVEN_INACTIVE).",
+    ),
+    claim(
+      "death_strike_t::execute",
+      "10120-10123",
+      "`if ( p()->sets->has_set_bonus( DEATH_KNIGHT_BLOOD, MID2, B2 ) && p()->cooldown.mid2_2pc->up() ) { p()->buffs.blood_debt->trigger(); " +
+        "p()->cooldown.mid2_2pc->start(); }` — Death Strike is the ONLY producer, under an internal cooldown " +
+        "(`cooldown.mid2_2pc->duration = sets->set( DEATH_KNIGHT_BLOOD, MID2, B2 )->internal_cooldown()`, 15499-15500). " +
+        "The Blood rule reads the transitions Warcraft Logs reports and never infers a gain from a Death Strike cast or " +
+        "from the cooldown: 15 of the corpus bundle's 44 Death Strikes produce no transition.",
+    ),
+    claim(
+      "buff_t::trigger / _resolve_stacks / set_initial_stack / bump (engine/buff.cpp at the same commit)",
+      "buff.cpp 2082-2085, 2075-2080, 1043-1054, 2649-2659",
+      "`trigger()` passes `stacks = -1`, which `_resolve_stacks` maps to `_initial_stack`; `_initial_stack` is 1 because " +
+        "the spell's `_proc_charges` (initial_stacks) is 0; `bump` adds the stacks and caps at `max_stack()`, discarding " +
+        "the overflow. So a plain application establishes EXACTLY 1 stack, every further trigger adds exactly 1 up to " +
+        "the maximum, and a trigger at the maximum changes nothing. The count is read from each transition's absolute " +
+        "`stack`, never computed as previous + 1.",
+    ),
+    claim(
+      "spell data 1310372 (sc_spell_data.inc); buff_t::set_max_stack; buff_t::set_duration",
+      "sc_spell_data.inc 31624; buff.cpp 970-976; buff.cpp 877-880",
+      "`_max_stack = 10` (read by `set_max_stack` from `data().max_stacks()`), `_duration = -1` (a negative duration " +
+        "becomes `base_buff_duration = zero`: the aura is PERMANENT, with no expiry event and no decay), " +
+        "`_proc_charges = 0`. No stack is lost one at a time, nothing ties the count to a duration, and no talent or the " +
+        "four-piece bonus (11707-11711, which adds Bone Shield and Bloody Demise on consumption) changes the stack behaviour.",
+    ),
+    claim(
+      "marrowrend_t::execute",
+      "11703-11705",
+      "`if ( p()->sets->has_set_bonus( DEATH_KNIGHT_BLOOD, MID2, B2 ) && p()->buffs.blood_debt->at_max_stacks() ) { " +
+        "p()->buffs.blood_debt->expire(); p()->buffs.relentless_riders_strength->trigger(); … }` — Marrowrend is the ONLY " +
+        "consumer, only at the maximum (`at_max_stacks` is `check() + mod >= max_stack()`, buff.hpp:255), and it removes " +
+        "EVERY stack at once; Warcraft Logs reports that as a plain `removebuff`. A Marrowrend below the maximum leaves " +
+        "the aura untouched (the corpus's Marrowrends at 2,015,770, 2,085,352 and 2,151,502, at 2, 9 and 8 stacks, did).",
     ),
   ],
 };
@@ -269,6 +337,7 @@ const VISCERAL_STRENGTH: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: "visceral_strength",
   ownedByHeroTree: "sanlayn",
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -289,6 +358,7 @@ const EXTERMINATE: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: "deathbringer",
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -309,6 +379,7 @@ const VAMPIRIC_BLOOD: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: "vampiric_blood",
   ownedByHeroTree: null,
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::create_buffs; vampiric_blood_t::execute",
@@ -328,6 +399,7 @@ const REAPERS_MARK_DEBUFF: BloodAuraIdentity = {
   selfApplied: false,
   producedByTalent: "reapers_mark",
   ownedByHeroTree: "deathbringer",
+  exactCount: null,
   claims: [
     claim(
       "death_knight_t::init_spells",

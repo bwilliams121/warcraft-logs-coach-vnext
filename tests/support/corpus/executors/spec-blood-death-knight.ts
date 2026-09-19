@@ -29,6 +29,7 @@ import {
   type BloodBuildFacts,
 } from "../../../../src/specs/deathknight/blood/action-profile.js";
 import { pinnedBloodDeathKnightAuthority } from "../../../../src/specs/deathknight/blood/pinned-authority.js";
+import { bloodDebtTransitionCensus } from "../../m11/blood-debt-census.js";
 import type { CorpusExecutionContext } from "../execution-context.js";
 import { BundleCompositionError, positionOfCast, stateOf, stateOfBundle, type BundleHole } from "../fight.js";
 import type { LoadedArtifact, LoadedCase, LoadedCorpus } from "../loader.js";
@@ -686,6 +687,93 @@ export function runicPowerEvidenceCensus(
     return fail("the Runic Power evidence does not cover the eligible population", {
       expected: { total: comparisons.length },
       actual: { total },
+    });
+  }
+  return pass();
+}
+
+export function stackEvidenceCensus(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_BLOOD_DEATH_KNIGHT.STACK_EVIDENCE_CENSUS">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const window = params.evaluationWindow ?? null;
+  const comparisons =
+    window === null
+      ? run.analysis.comparisons
+      : run.analysis.comparisons.filter((entry) => insideWindow(entry.decision.reportTimeMs, window));
+  const resolved = run.analysis.resolved.filter((entry) =>
+    comparisons.some((comparison) => comparison.decision.position === entry.position),
+  );
+  const coverage = summarizeBloodDecisions(params.actorId, comparisons, [], resolved);
+  const actual = {
+    stackEvidence: sorted(coverage.stackEvidence.map((row) => [row.key, row.count])),
+    stackValues: sorted(coverage.stackValues.map((row) => [row.key, row.count])),
+  };
+  const expected = {
+    stackEvidence: sorted(Object.entries(params.expected.stackEvidence)),
+    stackValues: sorted(Object.entries(params.expected.stackValues)),
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    return fail("the stack evidence distributes differently than the case pins", { expected, actual });
+  }
+  // Each atom's rows sum to the eligible population: no decision is uncounted.
+  const perAtom = new Map<string, number>();
+  for (const [key, count] of Object.entries(actual.stackEvidence)) {
+    const atom = key.split(" | ")[0] ?? key;
+    perAtom.set(atom, (perAtom.get(atom) ?? 0) + count);
+  }
+  for (const [atom, total] of perAtom) {
+    if (total !== comparisons.length) {
+      return fail("the stack evidence does not cover the eligible population", {
+        expected: { atom, total: comparisons.length },
+        actual: { atom, total },
+      });
+    }
+  }
+  return pass();
+}
+
+export function bloodDebtTransitionCensusCase(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_BLOOD_DEATH_KNIGHT.BLOOD_DEBT_TRANSITION_CENSUS">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const window = params.evaluationWindow ?? null;
+  const comparisons =
+    window === null
+      ? run.analysis.comparisons
+      : run.analysis.comparisons.filter((entry) => insideWindow(entry.decision.reportTimeMs, window));
+  const census = bloodDebtTransitionCensus(
+    run.state,
+    params.actorId,
+    comparisons.map((entry) => entry.decision.reportTimeMs),
+  );
+  const actual = {
+    transitions: census.transitions,
+    stackValues: census.stackValues,
+    sameMillisecondPairs: census.sameMillisecondPairs,
+    precedingOwnCast: census.precedingOwnCast,
+    lagMs: census.lagMs,
+    minGapToNextDecisionMs: census.minGapToNextDecisionMs,
+    validation: {
+      points: census.validation.points,
+      consistent: census.validation.consistent,
+      inconsistent: census.validation.inconsistent.length,
+    },
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the Blood Debt transition census differs from the case", {
+      expected: params.expected,
+      actual: { ...actual, inconsistentDetail: census.validation.inconsistent },
     });
   }
   return pass();

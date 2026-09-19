@@ -2152,6 +2152,7 @@ export const ASSERTION_KINDS = {
                 "OBSERVED",
                 "PROVEN_INACTIVE",
                 "EXACT_STACK_OBSERVATION",
+                "EXACT_STACK_APPLICATION",
               ])
               .nullable(),
             abilityGameId: z.number().int().nullable(),
@@ -2164,7 +2165,77 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: true,
     description:
-      "At this decision the stack binding for this buff.<name>.stack atom is exactly so: zero under PROVEN_INACTIVE or a build proof; for bone_shield ONLY, the exact positive count the last stack-bearing transition reported, when every later transition up to the decision is its same-millisecond refresh companion and M4 proves the aura ACTIVE under coverage; UNBOUND with the reason otherwise — a lone refresh or an initial application after the last count is COUNT_AMBIGUOUS_SINCE_OBSERVATION, never a guess.",
+      "At this decision the stack binding for this buff.<name>.stack atom is exactly so: zero under PROVEN_INACTIVE or a build proof; for the atoms carrying a Blood exact-count rule (bone_shield since M11-B2, blood_debt since M11-B6), the exact positive count the last stack-bearing transition reported, when every later transition up to the decision is its same-millisecond refresh companion and M4 proves the aura ACTIVE under coverage (EXACT_STACK_OBSERVATION) — or, for blood_debt only, the pinned count 1 of a plain application preceded by a removal or by nothing (EXACT_STACK_APPLICATION); UNBOUND with the reason otherwise — a lone refresh or an initial application after the last count is COUNT_AMBIGUOUS_SINCE_OBSERVATION, an application to an aura already held is APPLICATION_WHILE_ACTIVE_UNPINNED, never a guess.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.STACK_EVIDENCE_CENSUS": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            /** Every eligible decision's stack evidence per modelled stack atom, `atom | <proof> / <unbound reason>` -> count. Exact and exhaustive: each atom's rows sum to the eligible population. */
+            stackEvidence: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every BOUND stack value, `atom | stack <n>` -> count. Exact and exhaustive. */
+            stackValues: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "THE M11-B6 MEASUREMENT. Every eligible decision's buff.<name>.stack evidence for every modelled Blood stack atom distributes exactly so, and every bound count is counted by its value. Nothing here is a verdict; the census is what the Blood Debt slice exists to take.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.BLOOD_DEBT_TRANSITION_CENSUS": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            /** Every transition of the actor's own Blood Debt track by raw operation. Exact; zero rows are pinned too. */
+            transitions: z
+              .object({
+                applybuff: z.number().int().nonnegative(),
+                applybuffstack: z.number().int().nonnegative(),
+                refreshbuff: z.number().int().nonnegative(),
+                removebuffstack: z.number().int().nonnegative(),
+                removebuff: z.number().int().nonnegative(),
+              })
+              .strict(),
+            /** Every transition's absolute `stack` in canonical order; null where none is carried. */
+            stackValues: z.array(z.number().int().nonnegative().nullable()),
+            sameMillisecondPairs: z.number().int().nonnegative(),
+            /** `<abilityGameId>` (or "none") -> count of transitions by the nearest own COMPLETE cast preceding within 100 ms. A description of the wire's order, not an attribution the evaluator makes. */
+            precedingOwnCast: z.record(z.string().min(1), z.number().int().positive()),
+            lagMs: z.object({ min: z.number().int().nullable(), max: z.number().int().nullable() }).strict(),
+            /** The smallest gap from a transition to the next eligible decision at or after it, in ms; null when no decision follows any transition. */
+            minGapToNextDecisionMs: z.number().int().nonnegative().nullable(),
+            /** The prospective walk: from the state bound after each transition, the next transition is consistent with the pinned model (application after zero, count = previous + 1, removal at the maximum). */
+            validation: z
+              .object({
+                points: z.number().int().nonnegative(),
+                consistent: z.number().int().nonnegative(),
+                inconsistent: z.number().int().nonnegative(),
+              })
+              .strict(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "M11-B6. The actor's own Blood Debt (1310372) track over the evaluation window is exactly so: how many transitions of each raw shape, every absolute count in order, no two in one millisecond, the lag of each behind the own cast that precedes it, the smallest gap to the next eligible decision (a lead inside Blood's 50 ms window would be refused), and the retrospective walk of the pinned model against every later observation — validation of the rule from the future, which the evaluator never reads. Population pins for this corpus and game version, not correctness rules.",
   },
   "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT": {
     owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",

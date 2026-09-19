@@ -62,8 +62,9 @@
  *
  * STACKS. `buff.<name>.stack` binds EXACTLY ZERO under the two build proofs
  * above and under PROVEN_INACTIVE (the same three routes), for every pinned
- * stack atom. For BONE SHIELD ONLY it also binds the EXACT POSITIVE count
- * under the Blood-owned reconstruction rule:
+ * stack atom. For the identities carrying an `exactCount` rule in the
+ * authority data — BONE SHIELD (M11-B2) and BLOOD DEBT (M11-B6) — it also
+ * binds the EXACT POSITIVE count under the Blood-owned reconstruction rule:
  *
  *     the aura is EXACT ACTIVE at the decision (M4, with coverage), the last
  *     transition carrying a `stack` number strictly before the decision
@@ -71,7 +72,7 @@
  *     and the decision is a `refreshbuff` at the SAME MILLISECOND as it —
  *     the companion refresh Warcraft Logs emits beside a stack change.
  *
- * Why exactly this: Warcraft Logs reports a Bone Shield stack change as an
+ * Why exactly this: Warcraft Logs reports a stack change as an
  * `applybuffstack` / `removebuffstack` carrying the ABSOLUTE resulting count
  * (M4's stack contract), and nothing between two such transitions changes
  * the count EXCEPT a plain `applybuff` (an initial application, which
@@ -82,6 +83,32 @@
  * UNKNOWN presence, or a stack observation the coverage cannot connect to
  * the decision all leave the atom UNBOUND. No count is ever inferred from
  * silence, from a cast, or from expected play.
+ *
+ * THE FRESH-APPLICATION CLAUSE (M11-B6). An identity whose rule pins
+ * `applicationStack` — Blood Debt, 1 — ALSO binds that count when the
+ * presence anchor itself is a PLAIN application (an `applybuff` carrying no
+ * `stack`, so nothing of the identity follows it before the decision) and
+ * the transition of the identity immediately before it is a plain
+ * `removebuff`, or none exists in the track. The number is the pinned
+ * module's (`buff_t::trigger()` from zero applies `_initial_stack` = 1),
+ * and the shape is Warcraft Logs' (`applybuff` is written for an aura newly
+ * applied; a change to an aura already held is an `applybuffstack`). The
+ * corpus corroborates it 4 of 4 times: every Blood Debt `applybuff` follows
+ * a `removebuff` or opens the track, and the next transition is always
+ * `applybuffstack` 2. When the transition before the application shows the
+ * aura ALREADY ACTIVE — an application or a positive stack reading — the
+ * shape contradicts the semantics the clause rests on, and the atom is
+ * refused: `APPLICATION_WHILE_ACTIVE_UNPINNED`, never reset to 1, never
+ * carried, never incremented. Bone Shield's rule pins no application count
+ * (Marrowrend and Death's Caress apply different numbers), so its plain
+ * application stays ambiguous exactly as before.
+ *
+ * WHAT THE RULE NEVER DOES. It never adds 1 for a Death Strike, never reads
+ * the set bonus's internal cooldown, never subtracts for a Marrowrend, never
+ * reads equipped items for the set bonus, and never takes the combatantinfo
+ * aura snapshot's silence for zero. Only observed transitions of the
+ * identity establish the count; the pinned producer/consumer mechanics say
+ * what the observed SHAPES mean, not what should have happened.
  */
 
 import { sourceRef, targetRef } from "../../../engine/normalization/normalized-events.js";
@@ -91,6 +118,7 @@ import type { CombatState } from "../../../engine/state/combat-state.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type { UnknownReason } from "../../../engine/state/state-result.js";
 import {
+  BLOOD_AURA_IDENTITIES,
   bloodAuraIdentityFor,
   type BloodAuraIdentity,
 } from "../../../data/game/deathknight-blood-aura-authority.js";
@@ -160,7 +188,22 @@ export interface BloodWindowTransition {
   readonly leadMs: number;
 }
 
-export type BloodStackProof = BloodAuraProof | "PROVEN_INACTIVE" | "EXACT_STACK_OBSERVATION";
+export type BloodStackProof =
+  | BloodAuraProof
+  | "PROVEN_INACTIVE"
+  /** The last stack-bearing transition's absolute count, with nothing but same-millisecond companions after it. */
+  | "EXACT_STACK_OBSERVATION"
+  /** The identity's pinned `applicationStack`, from a plain application preceded by a removal or by nothing (M11-B6). */
+  | "EXACT_STACK_APPLICATION";
+
+/** The anchor an exact count was read at: the observation the rule bound from. */
+export interface BloodStackAnchor {
+  readonly position: number;
+  readonly locator: EvidenceLocator;
+  readonly operation: AuraObservation["operation"];
+  readonly isStackChange: boolean;
+  readonly reportTimeMs: number;
+}
 
 /** An exact stack proof, or the reason none holds. */
 export type BloodStackBinding =
@@ -170,6 +213,8 @@ export type BloodStackBinding =
       readonly stack: number;
       readonly abilityGameId: number;
       readonly proof: BloodStackProof;
+      /** The observation the count was read at, for the two exact proofs; null for the zero proofs. */
+      readonly anchor: BloodStackAnchor | null;
       readonly basis: string;
     }
   | {
@@ -184,7 +229,9 @@ export type BloodStackBinding =
         /** ACTIVE, but no transition carrying a count precedes the decision. */
         | "NO_STACK_OBSERVATION"
         /** ACTIVE, but an initial application or a lone refresh sits between the last count and the decision. */
-        | "COUNT_AMBIGUOUS_SINCE_OBSERVATION";
+        | "COUNT_AMBIGUOUS_SINCE_OBSERVATION"
+        /** ACTIVE from a plain application, but the transition before it shows the aura already held (M11-B6). */
+        | "APPLICATION_WHILE_ACTIVE_UNPINNED";
       readonly abilityGameId: number | null;
       readonly detail: string | null;
       /** The refused transition and its lead, for PRE_DECISION_WINDOW_TRANSITION; null otherwise. */
@@ -210,8 +257,10 @@ export const SUPPORTED_BLOOD_STACK_ATOMS = [
   "blood_debt",
 ] as const;
 
-/** The ONE atom whose exact positive count the Blood rule reconstructs. */
-export const EXACT_COUNT_ATOMS: readonly string[] = ["bone_shield"];
+/** The atoms whose exact positive count the Blood rule reconstructs: those whose pinned identity carries an `exactCount` rule. */
+export const EXACT_COUNT_ATOMS: readonly string[] = BLOOD_AURA_IDENTITIES.filter(
+  (identity) => identity.exactCount !== null,
+).map((identity) => identity.atomName);
 
 /** The build proof that makes an aura impossible for this actor, or `null`. */
 export function impossibleByBuild(
@@ -358,21 +407,81 @@ function isCompanionRefresh(transition: AuraObservation, stackObservation: AuraO
   );
 }
 
+function anchorOf(observation: AuraObservation): BloodStackAnchor {
+  return {
+    position: observation.position,
+    locator: observation.locator,
+    operation: observation.operation,
+    isStackChange: observation.isStackChange,
+    reportTimeMs: observation.reportTimeMs,
+  };
+}
+
+/** Whether a transition is a plain application: applied, no stack change, no count. */
+function isPlainApplication(transition: AuraObservation): boolean {
+  return (
+    transition.operation === "APPLIED" && !transition.isStackChange && transition.observedStacks === null
+  );
+}
+
 /**
- * The exact positive Bone Shield count at the decision under the Blood rule,
- * given a presence already proven EXACT ACTIVE, or the reason none holds.
+ * The exact positive count at the decision under the Blood rule, given a
+ * presence already proven EXACT ACTIVE, or the reason none holds.
  */
 function exactCountFromObservation(
   input: BloodAuraInput,
   identity: BloodAuraIdentity,
+  rule: NonNullable<BloodAuraIdentity["exactCount"]>,
   presenceAnchor: AuraObservation,
 ):
-  | { readonly stack: number; readonly basis: string }
   | {
-      readonly reason: "NO_STACK_OBSERVATION" | "COUNT_AMBIGUOUS_SINCE_OBSERVATION";
+      readonly stack: number;
+      readonly proof: "EXACT_STACK_OBSERVATION" | "EXACT_STACK_APPLICATION";
+      readonly anchor: BloodStackAnchor;
+      readonly basis: string;
+    }
+  | {
+      readonly reason:
+        "NO_STACK_OBSERVATION" | "COUNT_AMBIGUOUS_SINCE_OBSERVATION" | "APPLICATION_WHILE_ACTIVE_UNPINNED";
       readonly detail: string;
     } {
   const query = identityQuery(input, identity);
+  // The fresh-application clause (M11-B6), for a rule that pins the count a
+  // plain application establishes. The presence anchor is the LAST transition
+  // of the identity before the decision (M4 anchors on it and earned coverage
+  // from it), so when it is a plain application nothing of the identity
+  // follows it; the transition before it decides whether the application was
+  // fresh.
+  if (rule.applicationStack !== null && isPlainApplication(presenceAnchor)) {
+    const track = input.state.auras.trackFor(query);
+    const earlier = (track?.positions ?? []).filter((position) => position < presenceAnchor.position);
+    const previousPosition = earlier[earlier.length - 1];
+    const previous =
+      previousPosition === undefined ? null : input.state.auras.observationAt(previousPosition);
+    if (previous !== null && !(previous.operation === "REMOVED" && !previous.isStackChange)) {
+      return {
+        reason: "APPLICATION_WHILE_ACTIVE_UNPINNED",
+        detail:
+          `the presence anchor is a plain application at report time ${String(presenceAnchor.reportTimeMs)}, but the ` +
+          `transition of this identity before it is a ${previous.operation}${previous.isStackChange ? " (stack change)" : ""} ` +
+          `at ${String(previous.reportTimeMs)} that shows the aura already held; an application to a held aura is not ` +
+          "the shape the pinned fresh-application count describes, so no count is bound",
+      };
+    }
+    return {
+      stack: rule.applicationStack,
+      proof: "EXACT_STACK_APPLICATION",
+      anchor: anchorOf(presenceAnchor),
+      basis:
+        `the presence anchor is a plain application (report time ${String(presenceAnchor.reportTimeMs)}) carrying no ` +
+        `count, ${
+          previous === null
+            ? "no transition of this identity precedes it in the track"
+            : `the transition before it is the removal at ${String(previous.reportTimeMs)}`
+        }, and the pinned mechanics apply exactly ${String(rule.applicationStack)} on a fresh application; M4 proves ` +
+        "the aura ACTIVE at the decision under coverage",
+    };
+  }
   const latest = input.state.auras.latestStackObservation({
     ...query,
     at: { anchor: "BEFORE_EVENT", position: input.position },
@@ -408,6 +517,8 @@ function exactCountFromObservation(
   }
   return {
     stack: observedStacks,
+    proof: "EXACT_STACK_OBSERVATION",
+    anchor: anchorOf(observation),
     basis:
       `the last stack-bearing transition before the decision (${observation.operation}, report time ` +
       `${String(observation.reportTimeMs)}) reports ${String(observation.observedStacks)}, every later transition ` +
@@ -418,8 +529,9 @@ function exactCountFromObservation(
 
 /**
  * Binds `buff.<name>.stack`: zero under the three impossibility/inactivity
- * proofs for every pinned stack atom, and the exact positive count for Bone
- * Shield under the Blood rule. Everything else is UNBOUND with the reason.
+ * proofs for every pinned stack atom, and the exact positive count for the
+ * identities carrying an `exactCount` rule under the Blood rule. Everything
+ * else is UNBOUND with the reason.
  */
 export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodStackBinding {
   const identity = bloodAuraIdentityFor(atomName);
@@ -454,16 +566,18 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
       stack: 0,
       abilityGameId: identity.abilityGameId,
       proof: presence.proof === "OBSERVED" ? "PROVEN_INACTIVE" : presence.proof,
+      anchor: null,
       basis: presence.basis,
     };
   }
-  if (!EXACT_COUNT_ATOMS.includes(atomName)) {
+  const rule = identity.exactCount;
+  if (rule === null) {
     return {
       atomName,
       state: "UNBOUND",
       reason: "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED",
       abilityGameId: identity.abilityGameId,
-      detail: "the aura is ACTIVE and the Blood exact-count rule is pinned for bone_shield only",
+      detail: `the aura is ACTIVE and no Blood exact-count rule is pinned for ${atomName} (${EXACT_COUNT_ATOMS.join(", ")} only)`,
       windowTransition: null,
     };
   }
@@ -479,7 +593,7 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
       windowTransition: null,
     };
   }
-  const count = exactCountFromObservation(input, identity, anchor);
+  const count = exactCountFromObservation(input, identity, rule, anchor);
   if ("reason" in count) {
     return {
       atomName,
@@ -495,7 +609,8 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
     state: "BOUND",
     stack: count.stack,
     abilityGameId: identity.abilityGameId,
-    proof: "EXACT_STACK_OBSERVATION",
+    proof: count.proof,
+    anchor: count.anchor,
     basis: count.basis,
   };
 }

@@ -60,7 +60,8 @@ PREDICTIVE state) and Consumption.
 | `time` | the decision's fight time | always |
 | `buff.<x>.up` (8 atoms) | M4 `presenceAt` FROM_SOURCE self, strictly before the decision | an observed transition; or DOWN by hero-tree exclusion / a disproved producing talent |
 | `buff.bone_shield.stack` | the last stack-bearing transition's absolute count | only across same-millisecond refresh companions under EXACT ACTIVE presence |
-| `buff.essence_of_the_blood_queen.stack`, `buff.blood_debt.stack` | the two build proofs and PROVEN_INACTIVE | exactly zero only |
+| `buff.blood_debt.stack` | the last stack-bearing transition's absolute count, or the pinned 1 of a plain application preceded by a removal or by nothing (M11-B6) | under EXACT ACTIVE presence; an application to an aura already held refuses |
+| `buff.essence_of_the_blood_queen.stack` | the two build proofs and PROVEN_INACTIVE | exactly zero only |
 | `cooldown.dancing_rune_weapon.remains` | the shared token-cooldown derivation over the pinned record | an observed cast within 90,000 ms (Insatiable Blade SELECTED) |
 
 Never bound: `buff.<x>.remains` (no binding field exists),
@@ -95,6 +96,15 @@ readiness (pet state).
    follows it. `runic-power-state.ts` refuses to attribute an observation
    inside `BLOOD_RESOURCE_PRE_DECISION_WINDOW_MS` = 1 ms and binds only the
    deficit's lower bound both readings share.
+4. **Blood Debt is written AFTER its cause** — every gain 10-49 ms after
+   the Death Strike that triggered it, every removal 20-35 ms after the
+   Marrowrend that consumed it (opener 18-53 ms) — the opposite of hazard 1.
+   `BEFORE_EVENT` at the producing decision therefore reads the pre-cast
+   count, and the next eligible decision is at least 702 ms away, so the 50
+   ms window never refuses a Blood Debt transition in this corpus. A
+   decision inside that lag would read a one-stale count and no window
+   would refuse it; the corpus census pins the minimum gap so a future
+   capture that breaks it is noticed (M11-B6).
 
 ## The measurement
 
@@ -152,8 +162,33 @@ window refusals at 14 + 11, Bone Shield window refusals at 7, `any_dnd`
 usability 4, the Dancing Rune Weapon gate 3, Essence stack 3, Runic Power
 after a spend 3, Death Strike usability 3 + 1 (the gate resolves TRUE at a
 cast that is not Death Strike and no affordability proof exists), Blood
-Boil usability 2, Boiling Point 1, `fight_remains` 1. The full census is in
-the corpus (`SPEC_BLOOD_DEATH_KNIGHT.*`) and `agent/architecture.md`.
+Boil usability 2, Boiling Point 1, `fight_remains` 1.
+
+M11-B6 read Blood Debt's count from the aura's own transitions
+(`aura-bindings.ts`, the identity's `exactCount: { applicationStack: 1 }`
+in `deathknight-blood-aura-authority.ts`): the absolute `stack` of the last
+`applybuffstack` (`EXACT_STACK_OBSERVATION`), the pinned 1 of a plain
+`applybuff` preceded by a `removebuff` or by nothing
+(`EXACT_STACK_APPLICATION`), zero from an observed removal
+(`PROVEN_INACTIVE`); an application to an aura already held refuses
+(`APPLICATION_WHILE_ACTIVE_UNPINNED`). Result: **37 of 123 resolved** (27
+Death Strikes, 6 Heart Strikes at `sanlayn[8]`, 4 Blood Boils; all MATCH, 0
+REJECTED), the 45 s slice 15 of 48, the opener unchanged at 1 of 21. Blood
+Debt evidence: EXACT_STACK_OBSERVATION 107, EXACT_STACK_APPLICATION 7,
+PROVEN_INACTIVE 3, AURA_STATE_UNKNOWN 6 (opener 14 / 1 / 0 / 6); the wire
+holds no `refreshbuff` and no `removebuffstack` of it, and the retrospective
+walk of the pinned model is consistent at 30 of 30 and 5 of 5 points. Of
+the 45 decisions B5 left on the stack, 7 MATCH and 38 advance — 16 to
+`USABILITY:marrowrend` (the count is exactly 10, the entry is TRUE, and no
+rune or affordability proof exists for an action that was not cast), 19 to
+`fight_remains` at `sanlayn[9]`, 3 to `sanlayn[8]`. The first undecided GCD
+candidate is now `sanlayn[9]` on `fight_remains` at 20, Marrowrend
+usability at 16, the Essence window refusals at 14 + 11, Bone Shield window
+refusals 7, `any_dnd` usability 4, the Dancing Rune Weapon gate 3, Essence
+stack 3, Runic Power after a spend 3, Death Strike usability 3 + 1, Blood
+Boil usability 2, Vampiric Strike presence 2, Boiling Point 1, Heart Strike
+usability 1. The full census is in the corpus (`SPEC_BLOOD_DEATH_KNIGHT.*`)
+and `agent/architecture.md`.
 
 ## What this module refuses on purpose
 
@@ -175,6 +210,11 @@ the corpus (`SPEC_BLOOD_DEATH_KNIGHT.*`) and `agent/architecture.md`.
   splitting, no generic variables, no pet state, no charge model, no
   generalized stack reconstruction, no new parser builtin, no new public
   reason enum, no public exposure (the M11-B2 hard boundary).
+- No Blood Debt count that was not read off a transition: no stack for a
+  Death Strike or the set bonus's internal cooldown, no `previous + 1`, no
+  cap arithmetic, no decay, no bounded stack, no set-bonus resolution from
+  equipped items, no zero from the combatantinfo snapshot, no reset to 1
+  for an application to an aura already held (the M11-B6 boundary).
 - No affordability proof, no Rune regeneration, no Vampiric Blood cooldown.
 - No reachability refinement in the unselectability proof (it still walks
   `precombat` and the Deathbringer list): recorded as a measured limit.
@@ -186,7 +226,8 @@ the corpus (`SPEC_BLOOD_DEATH_KNIGHT.*`) and `agent/architecture.md`.
 Files: `spec.ts` (identity), `pinned-authority.ts`, `authority-bindings.ts`
 (six capabilities, one binding), `vocabulary.ts`, `resolver.ts`,
 `resources.ts`, `runic-power-state.ts` (the Runic Power carry),
-`aura-bindings.ts`, `aura-remains.ts` (the remains derivation), `remains-thresholds.ts` (the pinned list's thresholds, read
+`aura-bindings.ts` (presence, the exact-count rule for Bone Shield and Blood
+Debt), `aura-remains.ts` (the remains derivation), `remains-thresholds.ts` (the pinned list's thresholds, read
 from the parsed authority), `cooldown-bindings.ts`,
 `domain-boundary.ts`, `domains.ts`, `action-profile.ts`,
 `first-gcd-state.ts`, `first-gcd-adapter.ts` (stopping points, dispatch
@@ -194,6 +235,7 @@ trace, undecided candidates), `observed-action-gate.ts`,
 `observed-analysis.ts` (the facade), `registration.ts`. Data:
 `src/data/game/deathknight-blood-*`, `src/simc/data/deathknight-blood.apl.json`.
 Tests: `tests/unit/m11b2-blood-*.test.ts`, `tests/unit/m11b4-*.test.ts`,
-`tests/unit/m11b5-*.test.ts`,
+`tests/unit/m11b5-*.test.ts`, `tests/unit/m11b6-blood-debt-stack.test.ts`
+(with `tests/support/m11/blood-debt-census.ts`),
 `tests/contracts/m11b2-blood-*.test.ts`, corpus cases
 `spec-blood-death-knight.*`.

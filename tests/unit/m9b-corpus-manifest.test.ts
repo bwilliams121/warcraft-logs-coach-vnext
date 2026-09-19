@@ -59,9 +59,10 @@ describe("the committed corpus loads", () => {
     // sixteen cases (four normalization, one bundle composition, ten
     // evaluator — the measurement cases — one application-service); M11-B5
     // added two COMBAT_STATE cases pinning the POST_CHANGE reconciliation over
-    // the Blood 45 s slice and the opener. Measured, then pinned.
+    // the Blood 45 s slice and the opener; M11-B6 added one evaluator case
+    // reading Blood Debt's count at the pinned decisions. Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(43);
-    expect(loaded.cases).toHaveLength(156);
+    expect(loaded.cases).toHaveLength(157);
     expect(loaded.coverage.declared).toBe(0);
   });
 

@@ -1800,6 +1800,65 @@ Strike gate as a confident verdict, in either direction.
 
 ---
 
+# Blood Debt Stack Tests (M11-B6)
+
+A stack count is a number Warcraft Logs wrote on a transition, or the one
+number the pinned module fixes for a fresh application. The tests must
+prove that the count is read verbatim from the last stack-bearing
+transition, that a plain application binds 1 only when the transition
+before it is a removal or nothing, that an application to an aura already
+held refuses, that a refresh, a gap, a window lead and a zero-valued stack
+removal all refuse, and that no Death Strike cast ever adds a stack.
+
+Required (`tests/unit/m11b6-blood-debt-stack.test.ts`):
+
+```text
+applybuffstack 2 / 7 / 10           -> exact 2 / 7 / 10, the absolute count, anchor recorded
+first-transition applybuff          -> exact 1, EXACT_STACK_APPLICATION
+removebuff then applybuff           -> exact 1, EXACT_STACK_APPLICATION
+applybuff after applybuffstack 4    -> APPLICATION_WHILE_ACTIVE_UNPINNED (not 1, not 4, not 5)
+applybuff after removebuffstack 3   -> APPLICATION_WHILE_ACTIVE_UNPINNED
+applybuff after applybuff           -> APPLICATION_WHILE_ACTIVE_UNPINNED
+removebuff                          -> exact 0, PROVEN_INACTIVE, no anchor
+refreshbuff after the count         -> COUNT_AMBIGUOUS_SINCE_OBSERVATION
+refreshbuff after the application   -> UNBOUND (the anchor is no longer the application)
+removebuffstack 0                   -> UNBOUND (neither zero nor a count)
+removebuffstack 3                   -> exact 3 (the M4 absolute-stack contract)
+two Death Strikes, no transition    -> the count before them, unchanged
+no prior transition                 -> AURA_STATE_UNKNOWN (silence is not zero)
+AURAS gap after the anchor          -> AURA_STATE_UNKNOWN / INSUFFICIENT_COVERAGE
+transition at lead 0 / 50 / 51 ms   -> refused / refused / bound (inclusive Blood window)
+Bone Shield plain application       -> COUNT_AMBIGUOUS_SINCE_OBSERVATION / NO_STACK_OBSERVATION, as before
+Essence ACTIVE                      -> AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED, as before
+source guard                        -> no `+ 1`, no `- 1`, no Math.min/max, no max-stack constant,
+                                       no Death Strike id, no set-bonus or combatantinfo reading
+```
+
+Required, corpus (`SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT`,
+`STACK_EVIDENCE_CENSUS`, `BLOOD_DEBT_TRANSITION_CENSUS`): the count at the
+pinned decisions (3 at 2,050,290; 10 at 2,035,940; 1 at 2,044,779 /
+2,045,618 / 2,129,260 from the plain applications; 0 at 2,044,021; nothing
+at 2,004,615 and at the opener's 2,421,923; 6 at the opener's 2,434,890),
+the per-atom evidence census summing to the eligible population, and the
+transition census with its retrospective walk (30 of 30 and 5 of 5
+consistent, lags 10-49 / 18-53 ms behind the producing cast, no two
+transitions in one millisecond, smallest gap to the next decision 702 /
+711 ms). The walk runs in `tests/support/m11/blood-debt-census.ts`, outside
+`src/`, and reads the future only to check the past.
+
+Failure this prevents:
+
+```text
+A Blood Debt count that was computed rather than read — one more for a
+Death Strike the cooldown "should" have let proc, one less for a Marrowrend
+below the maximum, 1 for an application to an aura already held, zero from
+a combatantinfo that lists no aura — reaching `buff.blood_debt.stack=10` as
+a confident TRUE or FALSE, and a REJECTED at ten stacks built on a
+Marrowrend usability nothing proved.
+```
+
+---
+
 # Spec-Owned Resolver Tests
 
 When a specialization supplies a resolver:

@@ -311,8 +311,8 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(run.analysis.specId).toBe("deathknight/blood");
     expect(run.analysis.authority.authorityId).toBe("SIMC_APL_DEATHKNIGHT_BLOOD");
     const view = registration.observedDecisionView(run.analysis);
-    // RE-POINTED for M11-B4 (9) and M11-B5 (10): 10 of the 45 s slice's 48 decisions resolve, all MATCH.
-    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 10, rejected: 0, unknown: 38 });
+    // RE-POINTED for M11-B4 (9), M11-B5 (10) and M11-B6 (15): 15 of the 45 s slice's 48 decisions resolve, all MATCH.
+    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 15, rejected: 0, unknown: 33 });
     // Every excluded cast is counted under a PUBLIC reason; nothing is dropped.
     const tallied = view.coverage.exclusions.reduce((sum, row) => sum + row.count, 0);
     expect(tallied).toBe(view.coverage.excludedCastCount);

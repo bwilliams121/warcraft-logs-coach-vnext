@@ -93,10 +93,14 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // (25 of 123 resolve) and added nineteen: thirteen Runic Power states at
     // the pinned decisions, a Blood Boil MATCH with its Boiling Point aura,
     // two Runic Power evidence censuses, and two COMBAT_STATE POST_CHANGE
-    // reconciliation cases. Measured, then pinned.
-    expect(result.summary.cases).toBe(156);
-    expect(result.summary.assertions).toBe(551);
-    expect(result.summary.passed).toBe(551);
+    // reconciliation cases; M11-B6's Blood Debt count re-pinned them again
+    // (37 of 123 resolve) and added nineteen: one new case with eleven stack
+    // bindings and four decisions at the pinned Blood Debt counts, two opener
+    // stack bindings, and the stack-evidence and Blood Debt transition
+    // censuses over the bundle and the opener. Measured, then pinned.
+    expect(result.summary.cases).toBe(157);
+    expect(result.summary.assertions).toBe(570);
+    expect(result.summary.passed).toBe(570);
   });
 
   it("covers every layer", async () => {

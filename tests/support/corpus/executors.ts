@@ -451,6 +451,22 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "SPEC_BLOOD_DEATH_KNIGHT.STACK_EVIDENCE_CENSUS":
+      return blood.stackEvidenceCensus(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.BLOOD_DEBT_TRANSITION_CENSUS":
+      return blood.bloodDebtTransitionCensusCase(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS":
       return blood.remainsEvidenceCensus(
         context,
@@ -578,6 +594,8 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
   "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
   "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS",
+  "SPEC_BLOOD_DEATH_KNIGHT.STACK_EVIDENCE_CENSUS",
+  "SPEC_BLOOD_DEATH_KNIGHT.BLOOD_DEBT_TRANSITION_CENSUS",
   "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
   "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
   "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION",
