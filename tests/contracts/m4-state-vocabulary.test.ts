@@ -20,15 +20,17 @@ import { UNKNOWN_REASONS } from "../../src/engine/state/state-result.js";
  *            stack-change event
  *   SETTLED  a COMPLETED cast's attached `amount` with a positive `cost` is the
  *            amount BEFORE that cost
- *   OPEN     whether a `resourcechange` attachment is pre-change or post-change.
- *            POST_CHANGE is empirically favoured and NOT ESTABLISHED: its
- *            evidence relies on same-timestamp retrieval adjacency standing in
- *            for causal order, which M3/M4-A do not guarantee.
+ *   SETTLED  a `resourcechange` attachment OF THE CHANGED TYPE is the amount
+ *            AFTER the change (M11-B5, POST_CHANGE). It was OPEN until the
+ *            Blood corpus settled it by whole-window reconciliation rather
+ *            than by same-timestamp adjacency: see
+ *            tests/unit/m11b5-resource-post-change-contract.test.ts.
  *
- * Settling two of them did not shorten this sweep, because most of what it bans
- * was never about those contracts. Three separate prohibitions survive:
+ * Settling three of them did not shorten this sweep much, because most of what
+ * it bans was never about those contracts. Three separate prohibitions survive:
  *
- * 1. the OPEN contract must not be decided by fiat — no `postChangeAmount`
+ * 1. a settled INSTANT must not be renamed into an accessor that computes its
+ *    neighbour — no `postChangeAmount` derived from a delta, no `PRE_CHANGE`
  * 2. a settled INSTANT must not become a reconstruction between instants — no
  *    `amountAfterCost`, no `stacksAt`, no `resourceAt`
  * 3. no gameplay or actionability verdict, which is M5's to make
@@ -56,12 +58,12 @@ function codeOf(path: string): string {
 
 describe("the state layer claims no unestablished evidence contract", () => {
   const FORBIDDEN = [
-    // The OPEN contract. A `resourcechange` attachment has no established
-    // before/after relationship to its own delta, so neither name may exist.
+    // POST_CHANGE is a TIMING TAG on an observed amount (M11-B5). Neither an
+    // accessor that would compute the amount on the other side of the delta
+    // nor the pre-change reading may exist.
     "preChangeAmount",
     "postChangeAmount",
     "PRE_CHANGE",
-    "POST_CHANGE",
     // Settled as PRE_COST, which says nothing about the amount AFTER the cost.
     // That number is never observed; it could only be computed, and computing it
     // is the delta replay this layer refuses.
@@ -105,10 +107,11 @@ describe("the state layer claims no unestablished evidence contract", () => {
     expect(code).not.toContain("preCastAmount");
   });
 
-  it("admits exactly two resource observation timings", () => {
-    // A type-level guard, so the open contract cannot be settled by adding a
-    // member. `POST_CHANGE` is the one that would look most reasonable.
-    expect([...RESOURCE_OBSERVATION_TIMINGS]).toEqual(["PRE_COST", "EVENT_ASSOCIATED"]);
+  it("admits exactly three resource observation timings", () => {
+    // A type-level guard: RE-POINTED for M11-B5, which settled POST_CHANGE from
+    // whole-window reconciliation. POST_COST stays unspellable — it is not
+    // observed anywhere and could only be computed.
+    expect([...RESOURCE_OBSERVATION_TIMINGS]).toEqual(["PRE_COST", "POST_CHANGE", "EVENT_ASSOCIATED"]);
   });
 });
 

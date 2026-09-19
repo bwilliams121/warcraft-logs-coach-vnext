@@ -342,8 +342,8 @@
       "passed": 140
     },
     {
-      "assertions": 62,
-      "cases": 19,
+      "assertions": 64,
+      "cases": 21,
       "failed": 0,
       "kindsExercised": [
         "COMBAT_STATE.ACTOR_INDEX_CENSUS",
@@ -353,11 +353,12 @@
         "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT",
         "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
         "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+        "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT",
         "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST"
       ],
       "notExecuted": 0,
       "owningLayer": "COMBAT_STATE",
-      "passed": 62
+      "passed": 64
     },
     {
       "assertions": 10,
@@ -440,7 +441,7 @@
       "passed": 51
     },
     {
-      "assertions": 92,
+      "assertions": 109,
       "cases": 10,
       "failed": 0,
       "kindsExercised": [
@@ -457,13 +458,15 @@
         "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
         "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
         "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+        "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS",
+        "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
         "SPEC_BLOOD_DEATH_KNIGHT.SPEC_GATE",
         "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
         "SPEC_BLOOD_DEATH_KNIGHT.STOPPING_POINT_DISTRIBUTION"
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
-      "passed": 92
+      "passed": 109
     },
     {
       "assertions": 11,
@@ -611,6 +614,20 @@
       "caseId": "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.a-resourcechange-attachment-of-the-changed-type-is-the-post-change-amount",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-blood-death-knight-a7r6-rotational-45s"]
     },
     {
       "artifactId": "wcl-aura-stack-absolute",
@@ -1040,6 +1057,20 @@
       "caseId": "combat-state.standalone-holy-power-changes-are-observed-never-replayed",
       "owningLayer": "COMBAT_STATE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.the-opener-reconciles-the-same-way",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-blood-death-knight-gtkb-opener"]
     },
     {
       "artifactId": "wcl-no-actor-sentinel-source",
@@ -2889,32 +2920,32 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
           "ordinal": 10,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
           "ordinal": 11,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
           "ordinal": 12,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
           "ordinal": 13,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
           "ordinal": 14,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
           "ordinal": 15,
           "status": "PASSED"
         },
@@ -2931,6 +2962,16 @@
         {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
           "ordinal": 18,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 19,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "ordinal": 20,
           "status": "PASSED"
         }
       ],
@@ -2993,27 +3034,27 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
           "ordinal": 8,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
           "ordinal": 9,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
           "ordinal": 10,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
           "ordinal": 11,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
           "ordinal": 12,
           "status": "PASSED"
         },
@@ -3023,13 +3064,43 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
           "ordinal": 14,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
           "ordinal": 15,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 16,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 17,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "ordinal": 18,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "ordinal": 19,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "ordinal": 20,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "ordinal": 21,
           "status": "PASSED"
         }
       ],
@@ -3106,8 +3177,13 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
           "ordinal": 8,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "ordinal": 9,
           "status": "PASSED"
         }
       ],
@@ -3140,13 +3216,18 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS",
           "ordinal": 2,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
           "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION",
+          "ordinal": 4,
           "status": "PASSED"
         }
       ],
@@ -3177,8 +3258,13 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS",
           "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
+          "ordinal": 3,
           "status": "PASSED"
         }
       ],
@@ -3193,7 +3279,7 @@
           "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
         ]
       },
-      "caseId": "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-twenty-one-resolved",
+      "caseId": "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-twenty-five-resolved",
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
       "referencedArtifactIds": [
         "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
@@ -3265,8 +3351,23 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
           "ordinal": 12,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "ordinal": 13,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "ordinal": 14,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "ordinal": 15,
           "status": "PASSED"
         }
       ],
@@ -3317,58 +3418,73 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
           "ordinal": 6,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
           "ordinal": 7,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
           "ordinal": 8,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
           "ordinal": 9,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
           "ordinal": 10,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
           "ordinal": 11,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
           "ordinal": 12,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
           "ordinal": 13,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
           "ordinal": 14,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
           "ordinal": 15,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
           "ordinal": 16,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "ordinal": 17,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "ordinal": 18,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "ordinal": 19,
           "status": "PASSED"
         }
       ],
@@ -5202,13 +5318,13 @@
   "totals": {
     "artifactBytes": 4792400,
     "artifacts": 43,
-    "assertions": 532,
-    "cases": 154,
+    "assertions": 551,
+    "cases": 156,
     "declared": 0,
-    "executable": 532,
+    "executable": 551,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 532
+    "passed": 551
   }
 }

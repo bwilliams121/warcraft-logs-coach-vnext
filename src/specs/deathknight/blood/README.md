@@ -84,8 +84,17 @@ readiness (pet state).
    `SAME_MILLISECOND_TRANSITION` was the 0 ms case. No causal attribution is
    attempted, even where the corpus suggests it.
 2. **The wire's `cost` is not the cost.** The gtKb subject cast Death Strike
-   with 440 and 390 Runic Power attached against a reported cost of 450. No
-   usability proof reads the field in either direction.
+   with 440 and 390 Runic Power attached against a reported cost of 450, and
+   the deduction the build pays is 350 (250 under Blood Draw). No usability
+   proof reads the field in either direction, and since M11-B5 no state is
+   computed from it either: after a costed cast the Runic Power is UNKNOWN
+   until the next observation reads it.
+3. **A cast's own proc gain precedes the cast in the log by 0-1 ms**
+   (Heartbreaker ahead of Heart Strike / Vampiric Strike, 78 of 78; Relish
+   in Blood ahead of Death and Decay, 9 of 9), while its principal gain
+   follows it. `runic-power-state.ts` refuses to attribute an observation
+   inside `BLOOD_RESOURCE_PRE_DECISION_WINDOW_MS` = 1 ms and binds only the
+   deficit's lower bound both readings share.
 
 ## The measurement
 
@@ -124,11 +133,36 @@ a cast that does not cost it), `sanlayn[7] marrowrend` on
 own Essence transition sits inside the window), `sanlayn[0]` on Bone Shield
 at 7 (window-refused Marrowrends), the Dancing Rune Weapon gate at 3
 (opener: `san_gift[0]` 8, `sanlayn[2]` 4, `san_gift[1]` 3, `san_gift[2]`
-3). The full census is in the corpus (`SPEC_BLOOD_DEATH_KNIGHT.*`) and
-`agent/architecture.md`.
+3).
+
+M11-B5 carried Runic Power to the decisions that carry no PRE_COST amount
+of it (`runic-power-state.ts`): the latest observed state — a
+`resourcechange`'s POST_CHANGE attachment or an uncosted snapshot — under
+RESOURCES and CASTS continuity from it, exact (`CARRIED_EXACT`); UNKNOWN
+after a costed cast until the next observation (`POST_SPEND_NOT_OBSERVED`);
+and a lower bound on the deficit when non-negative changes sit 0-1 ms ahead
+of the decision (`WINDOW_BOUNDED`). Result: **25 of 123 resolved** (21
+Death Strikes and 4 Blood Boils at `sanlayn[6]`, all MATCH, 0 REJECTED),
+opener unchanged at 1 of 21. Runic Power evidence: OWN_PRE_COST 44,
+CARRIED_EXACT 14, WINDOW_BOUNDED 59, POST_SPEND_NOT_OBSERVED 5, NO_ANCHOR 1
+(opener 6 / 5 / 10 / 0 / 0). Of the 43 + 3 decisions B4 left on
+`runic_power.deficit`, 40 + 3 advance. The first undecided GCD candidate is
+now `sanlayn[7] marrowrend` on `buff.blood_debt.stack` at 45, the Essence
+window refusals at 14 + 11, Bone Shield window refusals at 7, `any_dnd`
+usability 4, the Dancing Rune Weapon gate 3, Essence stack 3, Runic Power
+after a spend 3, Death Strike usability 3 + 1 (the gate resolves TRUE at a
+cast that is not Death Strike and no affordability proof exists), Blood
+Boil usability 2, Boiling Point 1, `fight_remains` 1. The full census is in
+the corpus (`SPEC_BLOOD_DEATH_KNIGHT.*`) and `agent/architecture.md`.
 
 ## What this module refuses on purpose
 
+- No Runic Power value that was not read off the wire: no `pre - cost`, no
+  pinned deduction, no summed `resourceChange`, no regeneration or decay,
+  no cap arithmetic, no pre-pull state, no upper bound on the deficit, no
+  attribution of an observation inside the 1 ms resource window, no carry
+  across a RESOURCES or CASTS gap, no re-anchoring around a snapshot that
+  disagrees (the M11-B5 boundary).
 - No remains model beyond `FIXED_DURATION_RESET_ON_GAIN` and `PERMANENT`
   (no pandemic, extend or tick refresh; no build-dependent duration
   modifier; no pre-pull remaining time; no upper bound), no choice between
@@ -151,8 +185,8 @@ at 7 (window-refused Marrowrends), the Dancing Rune Weapon gate at 3
 
 Files: `spec.ts` (identity), `pinned-authority.ts`, `authority-bindings.ts`
 (six capabilities, one binding), `vocabulary.ts`, `resolver.ts`,
-`resources.ts`, `aura-bindings.ts`, `aura-remains.ts` (the remains
-derivation), `remains-thresholds.ts` (the pinned list's thresholds, read
+`resources.ts`, `runic-power-state.ts` (the Runic Power carry),
+`aura-bindings.ts`, `aura-remains.ts` (the remains derivation), `remains-thresholds.ts` (the pinned list's thresholds, read
 from the parsed authority), `cooldown-bindings.ts`,
 `domain-boundary.ts`, `domains.ts`, `action-profile.ts`,
 `first-gcd-state.ts`, `first-gcd-adapter.ts` (stopping points, dispatch
@@ -160,5 +194,6 @@ trace, undecided candidates), `observed-action-gate.ts`,
 `observed-analysis.ts` (the facade), `registration.ts`. Data:
 `src/data/game/deathknight-blood-*`, `src/simc/data/deathknight-blood.apl.json`.
 Tests: `tests/unit/m11b2-blood-*.test.ts`, `tests/unit/m11b4-*.test.ts`,
+`tests/unit/m11b5-*.test.ts`,
 `tests/contracts/m11b2-blood-*.test.ts`, corpus cases
 `spec-blood-death-knight.*`.

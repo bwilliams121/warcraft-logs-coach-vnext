@@ -46,6 +46,9 @@
  *
  * Knowing that a costed cast's amount is PRE_COST does not soften this. It makes
  * one more INSTANT exactly knowable; it makes nothing BETWEEN instants knowable.
+ * Knowing that a `resourcechange` attachment is POST_CHANGE (M11-B5) does not
+ * soften it either: it makes THAT instant exactly knowable, from a number that
+ * was read, and the delta beside it is still never added to anything.
  *
  * OBSERVATIONAL QUERIES ARE NOT CONTINUITY CLAIMS
  *
@@ -60,12 +63,33 @@
  *
  * The stronger claim — "no later observation or change existed between the
  * anchor and the query" — is a continuity/absence claim and DOES require
- * coverage. It is not offered here, and must not be smuggled into this query by
- * a caller reading STALE as current state.
+ * coverage. It is not offered by that query, and must not be smuggled into it
+ * by a caller reading STALE as current state.
+ *
+ * CONTINUITY IS OFFERED IN EXACTLY ONE PLACE (M11-B5)
+ *
+ * `resourceHistoryAt` is the only query here that claims anything about the
+ * interval between an observation and the query position, and it claims only
+ * this: the observation is the latest one present, and the interval from it to
+ * the position is COMPLETE for RESOURCES for that actor — so every resource
+ * observation the log would have carried in between is in the list it returns.
+ * It hands back the observations, in order, EACH WITH ITS OWN OBSERVED AMOUNT
+ * and timing tag. It does not derive an amount at the position, does not add a
+ * delta, and does not say what any of the entries mean; a specialization that
+ * knows which entries are gains, which are spends and which are ambiguous reads
+ * the list under its own pinned semantics. A sequence of exact observed states
+ * under proven coverage is not a ledger, and the moment a caller adds two of
+ * these numbers together it has left what this layer establishes.
  */
 
 import type { EvidenceCategory } from "../../wcl/evidence-capability.js";
-import { exactObserved, staleObservation, unknownState, type StateResult } from "../state/state-result.js";
+import {
+  exactDerived,
+  exactObserved,
+  staleObservation,
+  unknownState,
+  type StateResult,
+} from "../state/state-result.js";
 import { gateContinuityClaim, type StateEnvironment } from "../state/state-environment.js";
 import { lastPositionAtOrBefore, type TemporalPosition } from "../state/temporal.js";
 import {
@@ -154,6 +178,77 @@ export interface ResourceStateView {
    * onto a snapshot amount to produce a later exact value.
    */
   standaloneChangeOnEvent(position: number): StateResult<StandaloneResourceChangeObservation>;
+
+  /**
+   * The latest attached observation of one actor's resource at or before a
+   * position, with every observation of that actor's resource since it, under
+   * a continuity claim FROM THE ANCHOR (M11-B5).
+   *
+   * The anchor is whichever attached observation is latest — PRE_COST,
+   * POST_CHANGE or EVENT_ASSOCIATED; its timing tag travels with it and the
+   * caller decides what the anchor's amount is good for. `since` holds every
+   * later observation up to the position in canonical order: an attached
+   * snapshot (with its timing), a standalone change (with its delta and, when
+   * the same event carries the changed type's snapshot, that POST_CHANGE
+   * observation beside it), or both on one event. The delta is carried for
+   * classification and corroboration; nothing here adds it to anything.
+   *
+   * CONTINUITY IS EARNED FROM THE ANCHOR: `[anchor.reportTimeMs, boundary]`
+   * must be COMPLETE for RESOURCES for the actor. A specialization that also
+   * needs to know no COSTED CAST was missed in the interval gates CASTS
+   * itself — a spend is a cast, not a resource event, and this layer does not
+   * compose the two categories.
+   *
+   * No anchor in the prefix is UNKNOWN: `NO_OBSERVATION` when coverage from
+   * the fight start proves the log carried none, otherwise the coverage
+   * reason.
+   */
+  resourceHistoryAt(query: ResourceObservationQuery): StateResult<ResourceHistory>;
+
+  /**
+   * The resource observations of one actor's resource that sit AHEAD of a
+   * position in canonical order and no more than `windowMs` before its report
+   * time (M11-B5). INCLUSIVE at both edges, exactly as the aura primitive.
+   * Evidence for a caller's ordering policy; the window is the caller's.
+   */
+  observationsWithinBefore(
+    actorId: number,
+    resourceType: number,
+    position: number,
+    windowMs: number,
+  ): readonly ResourcePrecedingObservation[];
+}
+
+/** One observation in a resource history (M11-B5). */
+export interface ResourceHistoryEntry {
+  readonly position: number;
+  /** The attached snapshot of the queried resource on this event, if it carries one. */
+  readonly snapshot: ResourceAmountObservation | null;
+  /** The standalone change of the queried resource on this event, if it is one. */
+  readonly change: StandaloneResourceChangeObservation | null;
+  /**
+   * The SIGN of the standalone change, or null when the event is not one.
+   *
+   * Offered so a consumer can classify a change as a gain or a loss without
+   * ever reading the delta's magnitude — the one thing about a delta that
+   * invites arithmetic. A gain of zero is NON_NEGATIVE: it lowers nothing.
+   */
+  readonly changeSign: "NON_NEGATIVE" | "NEGATIVE" | null;
+}
+
+/** What `resourceHistoryAt` found (M11-B5). */
+export interface ResourceHistory {
+  readonly anchor: ResourceAmountObservation;
+  /** Every observation of the actor's resource after the anchor, up to the position, in canonical order. */
+  readonly since: readonly ResourceHistoryEntry[];
+}
+
+/** One observation ahead of a position inside a caller's window (M11-B5). */
+export interface ResourcePrecedingObservation {
+  readonly entry: ResourceHistoryEntry;
+  /** `position.reportTimeMs - entry report time`, milliseconds; 0 for the same millisecond. */
+  readonly leadMs: number;
+  readonly reportTimeMs: number;
 }
 
 export function createResourceState(environment: StateEnvironment): ResourceStateView {
@@ -267,6 +362,117 @@ export function createResourceState(environment: StateEnvironment): ResourceStat
     return exactObserved(observation, [observation.locator], RESOURCES);
   }
 
+  /**
+   * The ascending positions at which this actor's resource is observed at all
+   * — an attached snapshot, a standalone change, or both on one event.
+   */
+  function observationPositionsFor(actorId: number, resourceType: number): readonly number[] {
+    const merged = new Set<number>([
+      ...snapshotPositionsFor(actorId, resourceType),
+      ...standaloneChangePositionsFor(actorId, resourceType),
+    ]);
+    return [...merged].sort((a, b) => a - b);
+  }
+
+  function entryAt(position: number, actorId: number, resourceType: number): ResourceHistoryEntry | null {
+    const snapshot = resourceObservationAt(fight, position, actorId, resourceType);
+    const change = standaloneChangeAt(fight, position);
+    const ownChange =
+      change !== null && change.resourceType === resourceType && change.source?.actorId === actorId
+        ? change
+        : null;
+    if (snapshot === null && ownChange === null) return null;
+    const changeSign =
+      ownChange === null
+        ? null
+        : ownChange.resourceChange < 0
+          ? ("NEGATIVE" as const)
+          : ("NON_NEGATIVE" as const);
+    return { position, snapshot, change: ownChange, changeSign };
+  }
+
+  function resourceHistoryAt(query: ResourceObservationQuery): StateResult<ResourceHistory> {
+    const resolution = environment.resolveTemporalPosition(query.at);
+    if (!resolution.ok) {
+      return unknownState(resolution.reason, [], RESOURCES);
+    }
+    const { lastIncludedPosition, boundaryReportTimeMs } = resolution.prefix;
+
+    const anchorPosition = lastPositionAtOrBefore(
+      snapshotPositionsFor(query.actorId, query.resourceType),
+      lastIncludedPosition,
+    );
+    if (anchorPosition === null) {
+      const gate = gateContinuityClaim(environment, {
+        category: RESOURCES,
+        fromReportTimeMs: fight.fight.startTimeMs,
+        toReportTimeMs: boundaryReportTimeMs,
+        actorId: query.actorId,
+      });
+      return unknownState(gate.ok ? "NO_OBSERVATION" : gate.reason, [], RESOURCES);
+    }
+    const anchor = resourceObservationAt(fight, anchorPosition, query.actorId, query.resourceType);
+    if (anchor === null) {
+      return unknownState("UNSUPPORTED_DERIVATION", [], RESOURCES);
+    }
+    // Continuity from the ANCHOR. The gate also refuses non-monotonic time and
+    // an inverted interval.
+    const gate = gateContinuityClaim(environment, {
+      category: RESOURCES,
+      fromReportTimeMs: anchor.reportTimeMs,
+      toReportTimeMs: boundaryReportTimeMs,
+      actorId: query.actorId,
+    });
+    if (!gate.ok) {
+      return unknownState(gate.reason, [anchor.locator], RESOURCES);
+    }
+    // An unattributed snapshot in the interval could have been this actor's.
+    const unattributed = lastPositionAtOrBefore(indexes.unattributedSnapshotPositions, lastIncludedPosition);
+    if (unattributed !== null && unattributed > anchorPosition) {
+      return unknownState("UNSUPPORTED_DERIVATION", [anchor.locator], RESOURCES);
+    }
+
+    const since: ResourceHistoryEntry[] = [];
+    for (const position of observationPositionsFor(query.actorId, query.resourceType)) {
+      if (position <= anchorPosition) continue;
+      if (position > lastIncludedPosition) break;
+      const entry = entryAt(position, query.actorId, query.resourceType);
+      if (entry === null) {
+        return unknownState("UNSUPPORTED_DERIVATION", [anchor.locator], RESOURCES);
+      }
+      since.push(entry);
+    }
+    const locators = [
+      anchor.locator,
+      ...since
+        .map((entry) => entry.snapshot?.locator ?? entry.change?.locator)
+        .filter((l) => l !== undefined),
+    ];
+    return exactDerived({ anchor, since }, locators, RESOURCES);
+  }
+
+  function observationsWithinBefore(
+    actorId: number,
+    resourceType: number,
+    position: number,
+    windowMs: number,
+  ): readonly ResourcePrecedingObservation[] {
+    const event = environment.eventAt(position);
+    if (event === null) return [];
+    const found: ResourcePrecedingObservation[] = [];
+    for (const candidate of observationPositionsFor(actorId, resourceType)) {
+      if (candidate >= position) break;
+      const entry = entryAt(candidate, actorId, resourceType);
+      if (entry === null) continue;
+      const reportTimeMs = entry.snapshot?.reportTimeMs ?? entry.change?.reportTimeMs;
+      if (reportTimeMs === undefined) continue;
+      const leadMs = event.reportTimeMs - reportTimeMs;
+      if (leadMs < 0 || leadMs > windowMs) continue;
+      found.push({ entry, leadMs, reportTimeMs });
+    }
+    return found;
+  }
+
   return {
     indexes,
     snapshotPositionsFor,
@@ -276,5 +482,7 @@ export function createResourceState(environment: StateEnvironment): ResourceStat
     healthObservationOnEvent,
     healthPositionsFor: (actorId) => indexes.healthPositionsByActor.get(actorId) ?? NO_POSITIONS,
     standaloneChangeOnEvent,
+    resourceHistoryAt,
+    observationsWithinBefore,
   };
 }

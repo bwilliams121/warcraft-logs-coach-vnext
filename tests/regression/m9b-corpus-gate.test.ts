@@ -89,10 +89,14 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // entered outside the Gift window; M11-B4's buff remainders re-pinned the
     // Blood cases again (21 of 123 now resolve) and added twenty assertions:
     // eighteen remains bindings at the pinned decisions and the two remains
-    // evidence censuses. Measured, then pinned.
-    expect(result.summary.cases).toBe(154);
-    expect(result.summary.assertions).toBe(532);
-    expect(result.summary.passed).toBe(532);
+    // evidence censuses; M11-B5's Runic Power state re-pinned them once more
+    // (25 of 123 resolve) and added nineteen: thirteen Runic Power states at
+    // the pinned decisions, a Blood Boil MATCH with its Boiling Point aura,
+    // two Runic Power evidence censuses, and two COMBAT_STATE POST_CHANGE
+    // reconciliation cases. Measured, then pinned.
+    expect(result.summary.cases).toBe(156);
+    expect(result.summary.assertions).toBe(551);
+    expect(result.summary.passed).toBe(551);
   });
 
   it("covers every layer", async () => {

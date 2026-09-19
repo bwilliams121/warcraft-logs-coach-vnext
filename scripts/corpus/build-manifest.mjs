@@ -3077,6 +3077,71 @@ const blood_remains_unbound = (reason, windowLeadMs = null) => ({
   reason,
   windowLeadMs,
 });
+const BLOOD_BOILING_POINT = 1265968;
+/** M11-B5: a Blood Boil the authority selects at sanlayn[6] once the Runic Power gate above it is exact. */
+const BLOOD_BB_MATCH = {
+  ...BLOOD_DS_MATCH,
+  authorityToken: "blood_boil",
+};
+const blood_rp_state = (t, ability, expected, extra = {}) =>
+  a("SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT", {
+    actorId: BLOOD,
+    ...extra,
+    observedCast: { reportTimeMs: t, abilityGameId: ability },
+    expected,
+  });
+const blood_rp_own = (currentWire, deficitPoints, t) => ({
+  state: "BOUND",
+  proof: "OWN_PRE_COST",
+  bindingState: "KNOWN_NUMBER",
+  deficitPoints,
+  currentWire,
+  atMostWire: null,
+  maxWire: 1250,
+  anchorReportTimeMs: t,
+  anchorTiming: "PRE_COST",
+  windowLeadsMs: [],
+  reason: null,
+});
+const blood_rp_carried = (currentWire, deficitPoints, anchorReportTimeMs, anchorTiming) => ({
+  state: "BOUND",
+  proof: "CARRIED_EXACT",
+  bindingState: "KNOWN_NUMBER",
+  deficitPoints,
+  currentWire,
+  atMostWire: null,
+  maxWire: 1250,
+  anchorReportTimeMs,
+  anchorTiming,
+  windowLeadsMs: [],
+  reason: null,
+});
+const blood_rp_window = (atMostWire, atLeastDeficit, anchorReportTimeMs, windowLeadsMs) => ({
+  state: "BOUND",
+  proof: "WINDOW_BOUNDED",
+  bindingState: "BOUNDED_NUMBER",
+  deficitPoints: atLeastDeficit,
+  currentWire: null,
+  atMostWire,
+  maxWire: 1250,
+  anchorReportTimeMs,
+  anchorTiming: "POST_CHANGE",
+  windowLeadsMs,
+  reason: null,
+});
+const blood_rp_unbound = (reason, anchorReportTimeMs = null, anchorTiming = null) => ({
+  state: "UNBOUND",
+  proof: null,
+  bindingState: null,
+  deficitPoints: null,
+  currentWire: null,
+  atMostWire: null,
+  maxWire: null,
+  anchorReportTimeMs,
+  anchorTiming,
+  windowLeadsMs: [],
+  reason,
+});
 const blood_decision = (t, ability, expected, extra = {}) =>
   a("SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE", {
     actorId: BLOOD,
@@ -3415,20 +3480,20 @@ const BLOOD_CASES = [
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
-    "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-twenty-one-resolved",
+    "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-twenty-five-resolved",
     BLOOD_105_165,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/observed-analysis.ts analyzeObservedBloodDeathKnightDecisions; first-gcd-adapter.ts (stopping points, dispatch trace, undecided candidates); src/simc/nested-selection.ts (M11-B1 run_action_list semantics)",
-    "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 21 MATCH, 0 REJECTED, 102 UNKNOWN. THE MEASUREMENT AFTER M11-B4 (buff.<name>.remains derived; M11-B3 had 0 resolved with the first undecided candidate on buff.bone_shield.remains at 96 and buff.essence_of_the_blood_queen.remains at 24): the 21 resolved are all Death Strike, selected at the EXACT entry — san_gift[1] (runic_power.deficit<36) inside the Gift window at 6, sanlayn[2] (runic_power.deficit<20) outside it at 15 — once sanlayn[0]/san_gift[0]/sanlayn[1] resolve FALSE from Bone Shield's remainder proven at least 1.5 s (exact, or a lower bound past a refresh of unpinned cause), its exact count above 1 and its presence, and Essence's remainder proven exactly at least 1.5 s. The root scan RESOLVES at 79 decisions (21 to a selection, 58 with every candidate undecided and the branch worlds DIVERGENT), BLOCKS at sanlayn[10] consumption for 43 (Consumption's NORMAL node is absent, so its applicability is UNKNOWN and the entry cannot be stepped past) and at the default[15] run gate for 1 (the Death's Caress at the pull, no Gift transition yet observed). The B1 dispatch semantics are unchanged from M11-B3: default[14] run deathbringer RUN_GATE_FALSE_SKIPPED 123 times; default[15] run san_gift ENTERED 24 times inside the Gift window, skipped 98 times outside it, blocked once; default[16] run sanlayn entered 55 times and blocked 43. The first undecided GCD candidate in priority order — the next truthful blocker — is now sanlayn[2] death_strike on runic_power.deficit at 43 decisions (a cast that does not cost Runic Power carries no PRE_COST observation), sanlayn[7] marrowrend on buff.blood_debt.stack at 15, san_gift[0] on buff.essence_of_the_blood_queen.remains at 14 and sanlayn[1] on the same atom plus fight_remains at 11 (the 25 Vampiric Strike decisions whose own Essence transition sits inside the 50 ms pre-decision window ahead of the cast), sanlayn[0] on Bone Shield at 7 (the Marrowrends whose own stack gains precede them), and the Dancing Rune Weapon gate at 3; the full census is pinned below, and the remains evidence census in its own assertion.",
+    "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 25 MATCH, 0 REJECTED, 98 UNKNOWN. THE MEASUREMENT AFTER M11-B5 (Runic Power carried; M11-B4 had 21 MATCH, all Death Strikes decided by their own PRE_COST amount, with the first undecided candidate on runic_power.deficit at 43 + 3): the 25 resolved are 21 Death Strikes (san_gift[1] runic_power.deficit<36 at 6, sanlayn[2] runic_power.deficit<20 at 15) and 4 Blood Boils at sanlayn[6] (buff.boiling_point.up) whose every higher entry is FALSE — sanlayn[2] from a Runic Power state CARRIED EXACT from the latest observed amount under RESOURCES and CASTS continuity (deficit 47, 31.9, 65.9 and 30.9 points against the 20 the gate asks). Runic Power at the 123 decisions: OWN_PRE_COST 44, CARRIED_EXACT 14, WINDOW_BOUNDED 59 (a Heart Strike's or Vampiric Strike's own Heartbreaker gain sits 0-1 ms AHEAD of it in the log, so only the deficit's lower bound both readings share is bound), POST_SPEND_NOT_OBSERVED 5 (a Blood Boil, Marrowrend or Death's Caress after a Death Strike with no observation between: the amount after the spend is not read), NO_ANCHOR 1 (the pull). The root scan RESOLVES at 79 decisions (25 to a selection, 54 divergent), BLOCKS at sanlayn[10] consumption for 43 and at the default[15] run gate for 1; the B1 dispatch semantics are unchanged from M11-B3. The first undecided GCD candidate in priority order is now sanlayn[7] marrowrend on buff.blood_debt.stack at 45 decisions, san_gift[0] on buff.essence_of_the_blood_queen.remains at 14 and sanlayn[1] on the same atom plus fight_remains at 11 (Essence window refusals), sanlayn[0] on Bone Shield at 7, sanlayn[5] any_dnd usability at 4, the Dancing Rune Weapon gate at 3, san_gift[3] on Essence's stack at 3, sanlayn[2] on runic_power.deficit at 3 (POST_SPEND) and on Death Strike's USABILITY at 3 (the gate is TRUE at a cast that is not Death Strike, and no affordability proof is built on the wire's cost), sanlayn[6] Blood Boil usability at 2 and buff.boiling_point.up at 1, san_gift[1] Death Strike usability at 1, sanlayn[9] fight_remains at 1; the full census is pinned below, and the remains and Runic Power evidence censuses in their own assertions.",
     [
       a("SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY", {
         actorId: BLOOD,
         ...BLOOD_FULL,
         expected: {
           eligibleDecisions: 123,
-          match: 21,
+          match: 25,
           rejected: 0,
-          unknown: 102,
+          unknown: 98,
           exclusions: {
             MELEE_SWING: 87,
             NON_GCD_ACTION: 47,
@@ -3441,7 +3506,7 @@ const BLOOD_CASES = [
         actorId: BLOOD,
         ...BLOOD_FULL,
         expected: {
-          match: 21,
+          match: 25,
           rejected: 0,
           stoppingEntries: {
             "default[15] run_action_list": 1,
@@ -3465,7 +3530,7 @@ const BLOOD_CASES = [
             "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up": 3,
             "high_prio_actions[1] dancing_rune_weapon | fight_remains": 3,
             "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 14,
-            "san_gift[1] death_strike | runic_power.deficit": 17,
+            "san_gift[1] death_strike | USABILITY:death_strike": 1,
             "san_gift[2] any_dnd | buff.crimson_scourge.remains": 4,
             "san_gift[2] any_dnd | buff.visceral_strength.remains": 5,
             "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 18,
@@ -3476,13 +3541,14 @@ const BLOOD_CASES = [
             "sanlayn[0] deaths_caress | buff.bone_shield.remains": 6,
             "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains": 11,
             "sanlayn[1] heart_strike | fight_remains": 11,
-            "sanlayn[2] death_strike | runic_power.deficit": 61,
+            "sanlayn[2] death_strike | runic_power.deficit": 5,
+            "sanlayn[2] death_strike | USABILITY:death_strike": 4,
             "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 1,
             "sanlayn[5] any_dnd | USABILITY:any_dnd": 5,
             "sanlayn[6] blood_boil | buff.boiling_point.up": 1,
             "sanlayn[7] marrowrend | buff.blood_debt.stack": 73,
             "sanlayn[8] heart_strike | buff.vampiric_strike.up": 3,
-            "sanlayn[9] death_strike | runic_power.deficit": 40,
+            "sanlayn[9] death_strike | runic_power.deficit": 2,
             "sanlayn[9] death_strike | fight_remains": 43,
             "sanlayn[0] deaths_caress | buff.bone_shield.up": 6,
             "sanlayn[0] deaths_caress | buff.bone_shield.stack": 7,
@@ -3492,6 +3558,20 @@ const BLOOD_CASES = [
             "san_gift[5] blood_boil | USABILITY:blood_boil": 2,
             "sanlayn[8] heart_strike | USABILITY:heart_strike": 1,
           },
+        },
+      }),
+      a("SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS", {
+        actorId: BLOOD,
+        ...BLOOD_FULL,
+        expected: {
+          runicPowerEvidence: {
+            OWN_PRE_COST: 44,
+            CARRIED_EXACT: 14,
+            WINDOW_BOUNDED: 59,
+            POST_SPEND_NOT_OBSERVED: 5,
+            NO_ANCHOR: 1,
+          },
+          runicPowerWindowLeads: { "lead 0": 72, "lead 1": 7 },
         },
       }),
       a("SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS", {
@@ -3537,7 +3617,7 @@ const BLOOD_CASES = [
       }),
     ],
     ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
-    "The coverage disclosure is the honest measure of the slice: 21 of 123 decisions resolve — every one a Death Strike the pinned list selects at its exact entry from proven remainders, a proven count and the cast's own Runic Power — and every other decision names the entry and the atom the shared machinery could not decide. M11-B4 derived the remainders from observed gains and the pinned Blood durations (Essence 25 s, not the 20 s table value) under continuity from the gain, bound only the lower bound past a Bone Shield refresh of unpinned cause, refused every transition inside the 50 ms pre-decision window (the 0, 1 and 20 ms own-effect leads the audit measured), and refused nothing on threshold tolerance because no exact value fell within 50 ms of 1.5, 3 or 8 seconds. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one.",
+    "The coverage disclosure is the honest measure of the slice: 25 of 123 decisions resolve — 21 Death Strikes the pinned list selects from proven remainders, a proven count and the cast's own Runic Power, and 4 Blood Boils it selects once the Runic Power carried from the latest observed amount decides the Death Strike gate above them — and every other decision names the entry and the atom the shared machinery could not decide. M11-B5 carries Runic Power as a sequence of READ states under RESOURCES and CASTS continuity: a resourcechange replaces the state with its POST_CHANGE attachment, a costed cast leaves it unknown until the next observation, and a gain 0-1 ms ahead of the decision is not attributed — only the deficit's lower bound is bound. M11-B4 derived the remainders from observed gains and the pinned Blood durations (Essence 25 s, not the 20 s table value) under continuity from the gain, bound only the lower bound past a Bone Shield refresh of unpinned cause, refused every transition inside the 50 ms pre-decision window (the 0, 1 and 20 ms own-effect leads the audit measured), and refused nothing on threshold tolerance because no exact value fell within 50 ms of 1.5, 3 or 8 seconds. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one.",
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
@@ -3545,7 +3625,7 @@ const BLOOD_CASES = [
     BLOOD_GTKB,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/observed-analysis.ts; first-gcd-adapter.ts",
-    "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — after M11-B4, 15 inside the Gift window whose root scan RESOLVES (one of them, the Death Strike at 2,421,923, to a MATCH at san_gift[1]; the others with every san_gift candidate undecided, first san_gift[0] on buff.essence_of_the_blood_queen.remains at 8 where the cast's own Essence transition sits inside the window, san_gift[2] on the Crimson Scourge / Visceral Strength remainders at 3 where neither aura has been observed yet, san_gift[1] on runic_power.deficit at 3) and 6 after it that BLOCK at sanlayn[10] consumption (first undecided: sanlayn[2] on runic_power.deficit at 4, sanlayn[7] on buff.blood_debt.stack at 1, sanlayn[5] any_dnd usability at 1; Bone Shield's remainder is EXACT at 20 of 21 decisions from the opener's first stack gain) — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); Dancing Rune Weapon is never a candidate, because the opener's cast at 2,417,020 proves the cooldown active for the whole window.",
+    "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — after M11-B4, 15 inside the Gift window whose root scan RESOLVES (one of them, the Death Strike at 2,421,923, to a MATCH at san_gift[1]; the others with every san_gift candidate undecided, first san_gift[0] on buff.essence_of_the_blood_queen.remains at 8 where the cast's own Essence transition sits inside the window, san_gift[2] on the Crimson Scourge / Visceral Strength remainders at 6 where neither aura has been observed yet) and 6 after it that BLOCK at sanlayn[10] consumption (first undecided: sanlayn[7] on buff.blood_debt.stack at 5, sanlayn[5] any_dnd usability at 1; Bone Shield's remainder is EXACT at 20 of 21 decisions from the opener's first stack gain; since M11-B5 Runic Power is exact or bounded at every opener decision — OWN_PRE_COST 6, CARRIED_EXACT 5, WINDOW_BOUNDED 10 — so no runic_power.deficit gate is undecided there) — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); Dancing Rune Weapon is never a candidate, because the opener's cast at 2,417,020 proves the cooldown active for the whole window.",
     [
       a("SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY", {
         actorId: BLOOD_GTKB_ACTOR,
@@ -3573,7 +3653,6 @@ const BLOOD_CASES = [
           },
           undecidedGcdCandidates: {
             "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 8,
-            "san_gift[1] death_strike | runic_power.deficit": 11,
             "san_gift[2] any_dnd | buff.crimson_scourge.remains": 14,
             "san_gift[2] any_dnd | buff.visceral_strength.remains": 14,
             "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 14,
@@ -3585,9 +3664,14 @@ const BLOOD_CASES = [
             "sanlayn[7] marrowrend | buff.blood_debt.stack": 6,
             "sanlayn[8] heart_strike | buff.vampiric_strike.up": 6,
             "sanlayn[9] death_strike | fight_remains": 6,
-            "sanlayn[2] death_strike | runic_power.deficit": 4,
-            "sanlayn[9] death_strike | runic_power.deficit": 4,
           },
+        },
+      }),
+      a("SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS", {
+        actorId: BLOOD_GTKB_ACTOR,
+        expected: {
+          runicPowerEvidence: { OWN_PRE_COST: 6, CARRIED_EXACT: 5, WINDOW_BOUNDED: 10 },
+          runicPowerWindowLeads: { "lead 0": 8, "lead 1": 2 },
         },
       }),
       a("SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS", {
@@ -3661,6 +3745,8 @@ const BLOOD_CASES = [
       ),
       blood_stack(2004615, BLOOD_DC, "bone_shield", blood_unbound_stack(BLOOD_BONE_SHIELD, BLOOD_WINDOW_TAG)),
       blood_remains(2004615, BLOOD_DC, "bone_shield", blood_remains_unbound(BLOOD_WINDOW_TAG, 20)),
+      // No Runic Power observation precedes the pull cast: no anchor, never a value.
+      blood_rp_state(2004615, BLOOD_DC, blood_rp_unbound("NO_ANCHOR")),
       blood_cooldown(2004615, BLOOD_DC, blood_drw_unknown("NO_OBSERVED_CAST")),
     ],
     ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
@@ -3702,15 +3788,18 @@ const BLOOD_CASES = [
       blood_remains(2012014, BLOOD_DS, "essence_of_the_blood_queen", blood_remains_exact(24127, 2011141)),
       blood_remains(2012014, BLOOD_DS, "bone_shield", blood_remains_bounded(25742, 2007756)),
       blood_remains(2012014, BLOOD_DS, "vampiric_strike", blood_remains_unbound("AURA_STATE_UNKNOWN")),
+      blood_rp_state(2012014, BLOOD_DS, blood_rp_own(990, 26, 2012014)),
       blood_cooldown(2012014, BLOOD_DS, blood_drw_not_ready(85743, 2007757)),
       blood_decision(2015770, BLOOD_MR, {
         ...BLOOD_DIVERGENT,
         unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
       }),
+      // RE-PINNED for M11-B5: the Marrowrend carries no Runic Power entry of its own (NO_OBSERVATION stands), and the
+      // resolver's exact deficit (43) now comes from the state CARRIED from the melee swing's attachment 143 ms earlier.
       blood_resources(2015770, BLOOD_MR, {
         runes: blood_runes(3, 2),
         runicPower: BLOOD_NO_RES,
-        runicPowerDeficit: null,
+        runicPowerDeficit: 43,
         rune: 3,
       }),
       blood_aura(
@@ -3724,6 +3813,8 @@ const BLOOD_CASES = [
       blood_remains(2015770, BLOOD_MR, "essence_of_the_blood_queen", blood_remains_exact(24259, 2015029)),
       blood_remains(2015770, BLOOD_MR, "visceral_strength", blood_remains_exact(9761, 2013531)),
       blood_remains(2015770, BLOOD_MR, "crimson_scourge", blood_remains_zero(2013542)),
+      // The Marrowrend's Runic Power is CARRIED EXACT from the melee swing's attachment 143 ms earlier (820 of 1,250).
+      blood_rp_state(2015770, BLOOD_MR, blood_rp_carried(820, 43, 2015627, "EVENT_ASSOCIATED")),
     ],
     ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
     "A TRUE run gate transfers and does not resume: the parent's default[16] is never visited once san_gift is entered, exactly as the pinned loop makes the child the active list. The first Blood MATCH rests on three proven facts and one observed one — an exact Essence remainder, a bounded Bone Shield remainder, an exact count, and the cast's own Runic Power — and on nothing inferred. The Bone Shield count is the number the wire wrote, carried only across same-millisecond companions and refused, with the count and the remainder, when the decision's own effects precede it in the array.",
@@ -3754,6 +3845,11 @@ const BLOOD_CASES = [
       blood_remains(2020278, BLOOD_HS, "bone_shield", blood_remains_bounded(25503, 2015781)),
       blood_remains(2020278, BLOOD_HS, "essence_of_the_blood_queen", blood_remains_exact(24485, 2019763)),
       blood_remains(2020278, BLOOD_HS, "visceral_strength", blood_remains_exact(5253, 2013531)),
+      // The Heart Strike's own Heartbreaker gain (930 after it) is logged at its own millisecond AHEAD of it:
+      // the deficit is bound below at 32 — whether the pre-decision amount was 910 or 930, it was at most 930.
+      blood_rp_state(2020278, BLOOD_HS, blood_rp_window(930, 32, 2020278, [0])),
+      // The Blood Boil at 2,021,775 follows the Death Strike at 2,021,024 (1,110 before its cost) with no observation between.
+      blood_rp_state(2021775, BLOOD_BB, blood_rp_unbound("POST_SPEND_NOT_OBSERVED", 2021024, "PRE_COST")),
       blood_decision(2044021, BLOOD_DS, {
         ...BLOOD_DIVERGENT,
         unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
@@ -3787,9 +3883,16 @@ const BLOOD_CASES = [
       // The three lone refreshes at 2,043,229 are full resets: the remainder is EXACT even though the count is not.
       blood_remains(2044021, BLOOD_DS, "bone_shield", blood_remains_exact(29208, 2043229)),
       blood_remains(2044021, BLOOD_DS, "vampiric_strike", blood_remains_zero(2036707)),
+      blood_rp_state(2044021, BLOOD_DS, blood_rp_own(1080, 17, 2044021)),
+      // M11-B5's first non-Death-Strike MATCH: the Blood Boil at 2,047,348 carries 780 of 1,250 from the
+      // Heartbreaker gain 101 ms earlier (deficit 47, so sanlayn[2] is FALSE) and the list selects Blood Boil at
+      // sanlayn[6] on Boiling Point — exactly what was cast.
+      blood_decision(2047348, BLOOD_BB, { ...BLOOD_BB_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" }),
+      blood_rp_state(2047348, BLOOD_BB, blood_rp_carried(780, 47, 2047247, "POST_CHANGE")),
+      blood_aura(2047348, BLOOD_BB, "boiling_point", blood_observed_aura(true, BLOOD_BOILING_POINT, 2046415)),
     ],
     ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
-    "A FALSE run gate is a skipped entry, nothing more: the parent walks on. A lone refresh proves the aura alive and says nothing pinned about its count, so the count is refused; a removal proves zero.",
+    "A FALSE run gate is a skipped entry, nothing more: the parent walks on. A lone refresh proves the aura alive and says nothing pinned about its count, so the count is refused; a removal proves zero. A Blood Boil resolves only when every entry above it is FALSE from proven state — here the Runic Power carried from the latest read amount — and never from a guess about what a Death Strike cost.",
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
@@ -3823,6 +3926,10 @@ const BLOOD_CASES = [
       ),
       blood_remains(2087470, BLOOD_VS, "vampiric_strike", blood_remains_permanent(2086414), BLOOD_FULL),
       blood_remains(2087470, BLOOD_VS, "bone_shield", blood_remains_bounded(27882, 2085352), BLOOD_FULL),
+      // Two Heartbreaker gains (941, 961) sit at the Vampiric Strike's own millisecond ahead of it: bounded from the last.
+      blood_rp_state(2087470, BLOOD_VS, blood_rp_window(961, 28.9, 2087470, [0, 0]), BLOOD_FULL),
+      blood_rp_state(2097796, BLOOD_HS, blood_rp_window(751, 49.9, 2097796, [0, 0]), BLOOD_FULL),
+      blood_rp_state(2100867, BLOOD_BB, blood_rp_carried(591, 65.9, 2099906, "POST_CHANGE"), BLOOD_FULL),
       blood_cooldown(2087470, BLOOD_VS, blood_drw_not_ready(10287, 2007757), BLOOD_FULL),
       blood_decision(
         2097796,
@@ -3876,7 +3983,7 @@ const BLOOD_CASES = [
     BLOOD_GTKB,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/resources.ts; src/data/wcl-wire/resource-types.ts (RUNES, RUNIC_POWER); aura-bindings.ts",
-    "The gtKb subject casts Death Strike at 2,425,794 with 440 Runic Power on the wire and at 2,429,596 with 390 — both BELOW the 450 the wire reports as the cost, because the field is the DBC base and this build's reductions are not folded in. The evaluator reads the PRE_COST amount as the observation it is (deficit 81 and 86 points), never the cost field as the cost paid, and makes no affordability claim in either direction. The first Blood Boil at 2,417,826 carries no resource entry of either kind (NO_OBSERVATION twice, never zero); the Vampiric Strike at 2,418,659 costs 1 Rune of 4. Inside the opener's Gift window (2,417,020 .. 2,429,050) every scan enters san_gift; the Death Strike at 2,429,596 follows the removal and stops in sanlayn with Bone Shield exactly 12 and its remainder EXACT 27,698 ms from the stack gain at 2,427,294 — the opener's Bone Shield is anchored by its first in-fight stack gain, never by the unobserved pre-pull application.",
+    "The gtKb subject casts Death Strike at 2,425,794 with 440 Runic Power on the wire and at 2,429,596 with 390 — both BELOW the 450 the wire reports as the cost, because the field is the DBC base and this build's reductions are not folded in. The evaluator reads the PRE_COST amount as the observation it is (deficit 81 and 86 points), never the cost field as the cost paid, and makes no affordability claim in either direction. The first Blood Boil at 2,417,826 carries no resource entry of either kind (NO_OBSERVATION twice, never zero) and since M11-B5 its deficit, 103, is carried from the melee swing 355 ms earlier; the Vampiric Strike at 2,418,659 costs 1 Rune of 4. Inside the opener's Gift window (2,417,020 .. 2,429,050) every scan enters san_gift; the Death Strike at 2,429,596 follows the removal and stops in sanlayn with Bone Shield exactly 12 and its remainder EXACT 27,698 ms from the stack gain at 2,427,294 — the opener's Bone Shield is anchored by its first in-fight stack gain, never by the unobserved pre-pull application.",
     [
       blood_resources(2425794, BLOOD_DS, {
         runes: BLOOD_NO_RES,
@@ -3890,10 +3997,12 @@ const BLOOD_CASES = [
         runicPowerDeficit: 86,
         rune: null,
       }),
+      // RE-PINNED for M11-B5: no entry of either kind on the cast itself (NO_OBSERVATION twice, never zero); the exact
+      // deficit (103) is CARRIED from the melee swing's attachment 355 ms earlier (220 of 1,250).
       blood_resources(2417826, BLOOD_BB, {
         runes: BLOOD_NO_RES,
         runicPower: BLOOD_NO_RES,
-        runicPowerDeficit: null,
+        runicPowerDeficit: 103,
         rune: null,
       }),
       blood_resources(2418659, BLOOD_VS, {
@@ -3918,6 +4027,10 @@ const BLOOD_CASES = [
       blood_stack(2429596, BLOOD_DS, "bone_shield", blood_exact_stack(12)),
       blood_remains(2429596, BLOOD_DS, "bone_shield", blood_remains_exact(27698, 2427294)),
       blood_remains(2429596, BLOOD_DS, "crimson_scourge", blood_remains_exact(14294, 2428890)),
+      blood_rp_state(2429596, BLOOD_DS, blood_rp_own(390, 86, 2429596)),
+      blood_rp_state(2425794, BLOOD_DS, blood_rp_own(440, 81, 2425794)),
+      // The first Blood Boil carries 220 of 1,250 from the melee swing 355 ms earlier.
+      blood_rp_state(2417826, BLOOD_BB, blood_rp_carried(220, 103, 2417471, "EVENT_ASSOCIATED")),
       blood_cooldown(2429596, BLOOD_DS, blood_drw_not_ready(77424, 2417020)),
     ],
     ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
@@ -5268,6 +5381,67 @@ const CASES = [
     ["OWNED_CONTRACT"],
     "The resource surface is an observation layer, not a simulator: no passive regeneration, no interpolation, no replay of a cost or a delta onto an earlier amount. STALE carries the age so a caller can see the gap it is being asked to tolerate.",
     { related: ["tests/regression/m4-resource-state-is-never-simulated.test.ts"] },
+  ),
+  kase(
+    "combat-state.a-resourcechange-attachment-of-the-changed-type-is-the-post-change-amount",
+    BLOOD45,
+    "COMBAT_STATE",
+    "src/engine/resources/resource-observations.ts timingOf (POST_CHANGE); resource-state.ts observationOnEvent, standaloneChangeOnEvent",
+    "M11-B5 settled the resourcechange attachment contract by whole-window reconciliation over actor 14's Runic Power (wire type 6, amounts in tenths, deltas in whole points): over the 45 s slice's 172 type-6 observations, carrying the latest READ amount forward — each of the 89 POST_CHANGE attachments REPLACING it, each costed cast leaving it unread until the next observation — reproduces all 16 later Death Strike PRE_COST amounts and all 58 later uncosted attachments with zero hidden changes. The delta is compared beside each attachment only to classify it: 73 integer gains sum exactly, 5 cap events read the reported max (1,250), and 4 Anti-Magic Shell gains show a rounded delta beside an exact attachment (610 + 0 -> 617). A pre-change reading matches none of them.",
+    [
+      a("COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT", {
+        actorId: BLOOD,
+        resourceWireType: 6,
+        deltaScale: 10,
+        expected: {
+          observations: 172,
+          postChange: 89,
+          integerReconciled: 73,
+          capEvents: 5,
+          deltaRoundedAttachmentExact: 4,
+          preCostMatches: 16,
+          uncostedMatches: 58,
+          hiddenChangeMismatches: 0,
+          maxValues: [1250],
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "POST_CHANGE is an OBSERVED state, read off the wire, on exactly one attachment shape. The delta beside it is a rounded number where the game moved a fraction; nothing anywhere adds it to a prior amount, and the reconciliation here is validation of the contract from later observations, never an input to an earlier state.",
+    {
+      related: [
+        "tests/unit/m11b5-resource-post-change-contract.test.ts",
+        "tests/unit/m11b5-resource-history.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "combat-state.the-opener-reconciles-the-same-way",
+    BLOOD_GTKB,
+    "COMBAT_STATE",
+    "src/engine/resources/resource-observations.ts timingOf (POST_CHANGE)",
+    "A second report, pull and boss: 84 type-6 observations, 45 POST_CHANGE attachments, 38 integer gains, no cap, 5 Anti-Magic Shell gains with a rounded delta and an exact attachment, 6 later PRE_COST and 28 later uncosted amounts reproduced, zero hidden changes.",
+    [
+      a("COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT", {
+        actorId: BLOOD_GTKB_ACTOR,
+        resourceWireType: 6,
+        deltaScale: 10,
+        expected: {
+          observations: 84,
+          postChange: 45,
+          integerReconciled: 38,
+          capEvents: 0,
+          deltaRoundedAttachmentExact: 5,
+          preCostMatches: 6,
+          uncostedMatches: 28,
+          hiddenChangeMismatches: 0,
+          maxValues: [1250],
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "The contract is a property of the wire, not of one fight.",
+    { related: ["tests/unit/m11b5-resource-post-change-contract.test.ts"] },
   ),
   kase(
     "combat-state.missing-combo-point-entry-is-no-observation-not-zero",

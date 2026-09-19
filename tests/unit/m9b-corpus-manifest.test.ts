@@ -57,10 +57,11 @@ describe("the committed corpus loads", () => {
     // M11-B2 added the four Blood Death Knight slices (cut from the same
     // three captures by the same predicate for actor 14, no new request) and
     // sixteen cases (four normalization, one bundle composition, ten
-    // evaluator — the measurement cases — one application-service).
-    // Measured, then pinned.
+    // evaluator — the measurement cases — one application-service); M11-B5
+    // added two COMBAT_STATE cases pinning the POST_CHANGE reconciliation over
+    // the Blood 45 s slice and the opener. Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(43);
-    expect(loaded.cases).toHaveLength(154);
+    expect(loaded.cases).toHaveLength(156);
     expect(loaded.coverage.declared).toBe(0);
   });
 

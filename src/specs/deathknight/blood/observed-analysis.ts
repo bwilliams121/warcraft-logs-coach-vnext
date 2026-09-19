@@ -112,6 +112,11 @@ import {
   type BloodRemainsBinding,
 } from "./aura-remains.js";
 import {
+  bindBloodRunicPower,
+  bloodRunicPowerDeficitBinding,
+  type BloodRunicPowerState,
+} from "./runic-power-state.js";
+import {
   bloodCooldownBindingsFrom,
   deriveSupportedBloodCooldowns,
   type BloodDerivedCooldown,
@@ -221,6 +226,14 @@ export interface BloodDecisionCoverage {
    * of the Blood window is visible (M11-B4).
    */
   readonly preDecisionWindowRefusals: readonly CountOf<string>[];
+  /**
+   * Every eligible decision's Runic Power evidence, as
+   * `OWN_PRE_COST / CARRIED_EXACT / WINDOW_BOUNDED / <unbound reason>` -> count
+   * (M11-B5). The census the Runic Power slice exists to take.
+   */
+  readonly runicPowerEvidence: readonly CountOf<string>[];
+  /** Every window observation's lead across the eligible decisions, as `lead <ms>` -> count (M11-B5). */
+  readonly runicPowerWindowLeads: readonly CountOf<string>[];
 }
 
 /** The build facts the evaluator resolved once from the actor's combatant info. */
@@ -292,6 +305,8 @@ export interface BloodDeathKnightPayload {
     readonly stacks: readonly BloodStackBinding[];
     /** The remains bindings at this decision, one per modelled aura (M11-B4). */
     readonly remains: readonly BloodRemainsBinding[];
+    /** The Runic Power state at this decision (M11-B5). */
+    readonly runicPower: BloodRunicPowerState;
     readonly cooldowns: readonly BloodCooldownDiagnostics[];
     readonly selection: BloodSelectionDiagnostics;
     readonly unselectability: BloodUnselectabilityDiagnostics;
@@ -597,7 +612,14 @@ export function analyzeObservedBloodDeathKnightDecisions(
       knownTalents,
       knownCooldownRemainsSeconds: bloodCooldownBindingsFrom(cooldowns),
     };
-    const resolution = resolveBloodAtoms({ runes, runicPower, heroTree, fightTimeMs: event.fightTimeMs });
+    const runicPowerState = bindBloodRunicPower({ state, actorId, position });
+    const resolution = resolveBloodAtoms({
+      runes,
+      runicPower,
+      runicPowerDeficit: bloodRunicPowerDeficitBinding(runicPowerState),
+      heroTree,
+      fightTimeMs: event.fightTimeMs,
+    });
     const bindings: AtomBindings = { ...sharedBindings, specAtoms: resolution.specAtoms };
 
     const readiness: BloodReadinessFact[] = cooldowns.map((entry) => ({
@@ -625,6 +647,7 @@ export function analyzeObservedBloodDeathKnightDecisions(
       auras,
       stacks,
       remains,
+      runicPower: runicPowerState,
       cooldowns: cooldowns.map(cooldownDiagnosticsOf),
       selection: selectionDiagnosticsOf(outcome),
       unselectability: unselectabilityDiagnosticsOf(unselectable),
@@ -680,6 +703,8 @@ export function summarizeBloodDecisions(
   const undecidedGcdCandidates = new Map<string, number>();
   const remainsEvidence = new Map<string, number>();
   const preDecisionWindowRefusals = new Map<string, number>();
+  const runicPowerEvidence = new Map<string, number>();
+  const runicPowerWindowLeads = new Map<string, number>();
 
   for (const comparison of comparisons) {
     precision.set(comparison.authorityCoverage, (precision.get(comparison.authorityCoverage) ?? 0) + 1);
@@ -738,6 +763,11 @@ export function summarizeBloodDecisions(
         );
       }
     }
+    const rp = entry.runicPower;
+    bump(runicPowerEvidence, rp.state === "BOUND" ? rp.proof : rp.reason);
+    if (rp.state === "BOUND") {
+      for (const item of rp.windowEntries) bump(runicPowerWindowLeads, `lead ${String(item.leadMs)}`);
+    }
   }
 
   return {
@@ -760,6 +790,8 @@ export function summarizeBloodDecisions(
     undecidedGcdCandidates: tallyOpen(undecidedGcdCandidates),
     remainsEvidence: tallyOpen(remainsEvidence),
     preDecisionWindowRefusals: tallyOpen(preDecisionWindowRefusals),
+    runicPowerEvidence: tallyOpen(runicPowerEvidence),
+    runicPowerWindowLeads: tallyOpen(runicPowerWindowLeads),
   };
 }
 

@@ -125,6 +125,12 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT":
+      return combatState.resourceChangePostChangeContract(
+        corpus,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "COMBAT_STATE.AURA_PRESENCE":
       return combatState.auraPresence(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "COMBAT_STATE.ACTOR_INDEX_CENSUS":
@@ -429,6 +435,22 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT":
+      return blood.runicPowerStateAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS":
+      return blood.runicPowerEvidenceCensus(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS":
       return blood.remainsEvidenceCensus(
         context,
@@ -500,6 +522,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "COMBAT_STATE.LAST_OBSERVED_CAST_AT",
   "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
   "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+  "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT",
   "COMBAT_STATE.AURA_PRESENCE",
   "COMBAT_STATE.ACTOR_INDEX_CENSUS",
   "COMBAT_STATE.AURA_STACK_OBSERVATION",
@@ -553,6 +576,8 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
   "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
   "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
+  "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+  "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS",
   "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
   "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
   "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION",

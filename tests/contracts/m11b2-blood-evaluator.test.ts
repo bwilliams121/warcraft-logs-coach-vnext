@@ -65,28 +65,33 @@ describe("the measurement over the composed 165 s fight", () => {
   const analysis = analyzed(corpusBundleState(BUNDLE, []));
   const { coverage } = analysis;
 
-  it("discloses 21 resolved decisions out of 123 — the first since the slice was onboarded — with every excluded cast counted", () => {
-    // RE-POINTED for M11-B4. Before it, 0 of 123 resolved: the first entry of
-    // both San'layn lists read a buff remainder no binding carried. With the
-    // Blood remains derivation, sanlayn[0] and sanlayn[1] (or san_gift[0])
-    // resolve FALSE where Bone Shield's remainder is proven at least 1.5 s
-    // (exact or bounded), Essence's is proven at least 1.5 s exactly, and the
-    // stack and presence are bound — and the Death Strike gate on the observed
-    // cast's own PRE_COST Runic Power then selects Death Strike. Every one of
-    // the 21 is a Death Strike matched at EXACT_ENTRY; none is REJECTED.
+  it("discloses 25 resolved decisions out of 123, with every excluded cast counted", () => {
+    // RE-POINTED for M11-B4 (21) and M11-B5 (25). B4's 21 are Death Strikes
+    // whose own PRE_COST Runic Power decided the Death Strike gate. B5 carries
+    // Runic Power to the other decisions — exact from the latest observed
+    // state under RESOURCES and CASTS continuity, or a lower bound on the
+    // deficit when the cast's own Heartbreaker gain sits 0-1 ms ahead of it —
+    // and four Blood Boils now resolve at sanlayn[6] (`buff.boiling_point.up`)
+    // with every entry above them FALSE. Every match is at EXACT_ENTRY; none
+    // is REJECTED.
     expect(coverage).toMatchObject({
       eligibleDecisions: 123,
-      match: 21,
+      match: 25,
       rejected: 0,
-      unknown: 102,
+      unknown: 98,
       excludedCastCount: 148,
     });
+    const matched = new Map<string, number>();
     for (const comparison of analysis.comparisons) {
       if (comparison.outcome !== "MATCH") continue;
-      expect(comparison.decision.observedToken).toBe("death_strike");
-      expect(comparison.authorityToken).toBe("death_strike");
+      expect(comparison.authorityToken).toBe(comparison.decision.observedToken);
       expect(comparison.selectionPrecision).toBe("EXACT_ENTRY");
+      matched.set(
+        comparison.decision.observedToken,
+        (matched.get(comparison.decision.observedToken) ?? 0) + 1,
+      );
     }
+    expect(Object.fromEntries(matched)).toEqual({ death_strike: 21, blood_boil: 4 });
     expect(coverage.match + coverage.rejected + coverage.unknown).toBe(coverage.eligibleDecisions);
     expect(coverage.exclusions.reduce((sum, row) => sum + row.count, 0)).toBe(coverage.excludedCastCount);
     // The population is exactly the completed non-melee casts, eligible plus excluded.
@@ -156,20 +161,65 @@ describe("the measurement over the composed 165 s fight", () => {
           : `${first.at} | ${first.atoms.join(",")}`;
       firstObstacle.set(key, (firstObstacle.get(key) ?? 0) + 1);
     }
+    // RE-POINTED for M11-B5. The Runic Power deficit was the first obstacle at
+    // 43 + 3 decisions; with the state carried, 40 + 3 of them advance — to the
+    // Blood Debt stack (sanlayn[7]) mostly — and 3 stay on it (a Blood Boil
+    // after a Death Strike with no observation between: the amount after the
+    // spend is not read). Where the gate resolves TRUE at a cast that is not
+    // Death Strike, Death Strike's USABILITY is the next obstacle (4): no
+    // affordability proof is built on the wire's cost, so no REJECTED follows.
     expect(Object.fromEntries(firstObstacle)).toEqual({
-      "(none)": 21,
-      "sanlayn[2] death_strike | runic_power.deficit": 43,
-      "sanlayn[7] marrowrend | buff.blood_debt.stack": 15,
+      "(none)": 25,
+      "sanlayn[7] marrowrend | buff.blood_debt.stack": 45,
       "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 14,
       "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains,fight_remains": 11,
       "sanlayn[0] deaths_caress | buff.bone_shield.up,buff.bone_shield.remains,buff.bone_shield.stack": 6,
       "sanlayn[0] deaths_caress | buff.bone_shield.stack": 1,
+      "sanlayn[5] any_dnd | USABILITY:any_dnd": 4,
       "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up,fight_remains": 3,
-      "san_gift[1] death_strike | runic_power.deficit": 3,
-      "sanlayn[5] any_dnd | USABILITY:any_dnd": 3,
+      "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 3,
+      "sanlayn[2] death_strike | runic_power.deficit": 3,
+      "sanlayn[2] death_strike | USABILITY:death_strike": 3,
       "sanlayn[6] blood_boil | USABILITY:blood_boil": 2,
-      "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 1,
+      "sanlayn[6] blood_boil | buff.boiling_point.up": 1,
+      "san_gift[1] death_strike | USABILITY:death_strike": 1,
+      "sanlayn[9] death_strike | fight_remains": 1,
     });
+  });
+
+  it("takes the M11-B5 Runic Power census: own PRE_COST, carried exact, window-bounded, and every refusal by name", () => {
+    expect(Object.fromEntries(coverage.runicPowerEvidence.map((row) => [row.key, row.count]))).toEqual({
+      OWN_PRE_COST: 44,
+      CARRIED_EXACT: 14,
+      WINDOW_BOUNDED: 59,
+      POST_SPEND_NOT_OBSERVED: 5,
+      NO_ANCHOR: 1,
+    });
+    expect(coverage.runicPowerEvidence.reduce((sum, row) => sum + row.count, 0)).toBe(123);
+    // The window is 1 ms: every ambiguous observation led its decision by 0 or 1 ms.
+    expect(Object.fromEntries(coverage.runicPowerWindowLeads.map((row) => [row.key, row.count]))).toEqual({
+      "lead 0": 72,
+      "lead 1": 7,
+    });
+    for (const entry of analysis.resolved) {
+      const rp = entry.runicPower;
+      if (rp.state !== "BOUND") continue;
+      expect(rp.maxWire).toBe(1250);
+      expect(rp.basis.length).toBeGreaterThan(20);
+      if (rp.proof === "WINDOW_BOUNDED") {
+        expect(rp.binding.state).toBe("BOUNDED_NUMBER");
+        expect(rp.currentWire).toBeNull();
+        expect(rp.windowEntries.length).toBeGreaterThan(0);
+        for (const item of rp.windowEntries) expect(item.changeSign).not.toBe("NEGATIVE");
+      } else {
+        expect(rp.binding.state).toBe("KNOWN_NUMBER");
+        expect(rp.currentWire).not.toBeNull();
+      }
+      if (rp.proof === "CARRIED_EXACT") {
+        expect(rp.carryMs).toBeLessThanOrEqual(4156);
+        expect(rp.carryEvents).toBeLessThanOrEqual(22);
+      }
+    }
   });
 
   it("takes the M11-B4 remains census: exact, bounded, zero-by-proof, permanent, and every refusal by name", () => {
@@ -399,7 +449,16 @@ describe("the second subject", () => {
   it("reproduces the same stopping points on a different report, pull and boss", () => {
     const analysis = analyzed(corpusState(GTKB));
     // RE-POINTED for M11-B4: one Death Strike (2,421,923) resolves in the opener.
+    // Unchanged by M11-B5: the opener's Runic Power is exact or bounded at every
+    // decision, and the next obstacle is the Blood Debt stack or an Essence window.
     expect(analysis.coverage).toMatchObject({ eligibleDecisions: 21, match: 1, rejected: 0, unknown: 20 });
+    expect(
+      Object.fromEntries(analysis.coverage.runicPowerEvidence.map((row) => [row.key, row.count])),
+    ).toEqual({
+      OWN_PRE_COST: 6,
+      CARRIED_EXACT: 5,
+      WINDOW_BOUNDED: 10,
+    });
     expect(Object.fromEntries(analysis.coverage.stoppingEntries.map((row) => [row.key, row.count]))).toEqual({
       "(root scan resolved)": 15,
       "sanlayn[10] consumption": 6,

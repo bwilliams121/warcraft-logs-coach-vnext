@@ -7,6 +7,7 @@
 import { anySource, fromSource } from "../../../../src/engine/auras/aura-state.js";
 import { sourceRef, targetRef } from "../../../../src/engine/normalization/normalized-events.js";
 import type { CombatState } from "../../../../src/engine/state/combat-state.js";
+import type { ResourceAmountObservation } from "../../../../src/engine/resources/resource-observations.js";
 import type { StateResult } from "../../../../src/engine/state/state-result.js";
 import { beforeEvent, endOfTimestamp, type TemporalPosition } from "../../../../src/engine/state/temporal.js";
 import { positionOfCast, stateOf } from "../fight.js";
@@ -167,6 +168,96 @@ export function resourceObservationOnCast(
       expected,
       actual,
       locator: result.certainty === "EXACT" ? result.value.locator : { position: found.position },
+    });
+  }
+  return pass();
+}
+
+/**
+ * M11-B5: the whole-window reconciliation behind POST_CHANGE, generic over
+ * actor and resource. The state is always the latest READ amount; the scaled
+ * delta is compared beside each POST_CHANGE attachment only to classify it.
+ */
+export function resourceChangePostChangeContract(
+  corpus: LoadedCorpus,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT">,
+): AssertionOutcome {
+  const state = stateOf(corpus, artifact);
+  const { actorId, resourceWireType: type, deltaScale } = params;
+  const positions = [
+    ...new Set([
+      ...state.resources.snapshotPositionsFor(actorId, type),
+      ...state.resources.standaloneChangePositionsFor(actorId, type),
+    ]),
+  ].sort((a, b) => a - b);
+  const counts = {
+    observations: positions.length,
+    postChange: 0,
+    integerReconciled: 0,
+    capEvents: 0,
+    deltaRoundedAttachmentExact: 0,
+    preCostMatches: 0,
+    uncostedMatches: 0,
+    hiddenChangeMismatches: 0,
+    maxValues: [] as number[],
+  };
+  const maxValues = new Set<number>();
+  let carried: number | null = null;
+  for (const position of positions) {
+    const snapshot: StateResult<ResourceAmountObservation> = state.resources.observationOnEvent(
+      position,
+      actorId,
+      type,
+    );
+    if (snapshot.certainty !== "EXACT") {
+      const change = state.resources.standaloneChangeOnEvent(position);
+      if (change.certainty === "EXACT") {
+        // A change with no attachment of its own type: the state after it is unread.
+        carried = null;
+        continue;
+      }
+      return fail("an indexed resource position carries neither a snapshot nor a change", {
+        locator: state.locatorAt(position) ?? undefined,
+      });
+    }
+    const { observedAmount: amount, observedMax: max, timing } = snapshot.value;
+    if (max !== null) maxValues.add(max);
+    if (timing === "POST_CHANGE") {
+      counts.postChange += 1;
+      const change = state.resources.standaloneChangeOnEvent(position);
+      if (change.certainty !== "EXACT") {
+        return fail("a POST_CHANGE attachment sits on an event that is not a standalone change", {
+          locator: snapshot.value.locator,
+        });
+      }
+      if (carried !== null && max !== null) {
+        const summed: number = carried + change.value.resourceChange * deltaScale;
+        if (summed > max && amount === max) counts.capEvents += 1;
+        else if (summed === amount) counts.integerReconciled += 1;
+        else if (Math.abs(amount - summed) < deltaScale) counts.deltaRoundedAttachmentExact += 1;
+        else counts.hiddenChangeMismatches += 1;
+      }
+      carried = amount;
+    } else if (timing === "PRE_COST") {
+      if (carried !== null) {
+        if (carried === amount) counts.preCostMatches += 1;
+        else counts.hiddenChangeMismatches += 1;
+      }
+      carried = null;
+    } else {
+      if (carried !== null) {
+        if (carried === amount) counts.uncostedMatches += 1;
+        else counts.hiddenChangeMismatches += 1;
+      }
+      carried = amount;
+    }
+  }
+  counts.maxValues = [...maxValues].sort((a, b) => a - b);
+  if (JSON.stringify(counts) !== JSON.stringify(params.expected)) {
+    return fail("the POST_CHANGE reconciliation does not match the case", {
+      expected: params.expected,
+      actual: counts,
     });
   }
   return pass();

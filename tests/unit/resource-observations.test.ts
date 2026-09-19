@@ -386,9 +386,11 @@ describe("standalone changes stay separate from attached snapshots", () => {
     if (change.certainty !== "EXACT" || snapshot.certainty !== "EXACT") return;
     expect(change.value.resourceChange).toBe(10);
     expect(snapshot.value.observedAmount).toBe(100);
-    // Never merged into one synthetic event. Whether 100 is the amount before or
-    // after the +10 is NOT ESTABLISHED, and merging would require choosing.
-    expect(snapshot.value.timing).toBe("EVENT_ASSOCIATED");
+    // Never merged into one synthetic event. 100 is the amount AFTER the +10
+    // (POST_CHANGE, settled by M11-B5's whole-window reconciliation), and it is
+    // READ: the change carries no amount and the snapshot carries no delta, so
+    // nothing can add the two.
+    expect(snapshot.value.timing).toBe("POST_CHANGE");
     expect(change.value).not.toHaveProperty("observedAmount");
     expect(snapshot.value).not.toHaveProperty("resourceChange");
   });

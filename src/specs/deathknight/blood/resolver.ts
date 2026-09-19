@@ -22,9 +22,13 @@
  *       `UNDECIDED_RUN_GATE`. Never inferred from a Vampiric Strike cast.
  *   runic_power.deficit
  *       KNOWN in POINTS from the decision cast's own PRE_COST Runic Power
- *       entry (`resources.ts`); UNKNOWN_NUMBER / STATE_NOT_ESTABLISHED on a
- *       cast whose Runic Power entry is uncosted (EVENT_ASSOCIATED) or
- *       absent. Never replayed.
+ *       entry (`resources.ts`), or — since M11-B5, when the caller supplies
+ *       the Blood Runic Power state (`runic-power-state.ts`) — that state's
+ *       binding: exact from an observation carried under RESOURCES and CASTS
+ *       continuity, a LOWER BOUND when the last observations sit inside the
+ *       1 ms resource window ahead of the decision, and an explicit
+ *       UNKNOWN_NUMBER / STATE_NOT_ESTABLISHED otherwise. Never replayed:
+ *       every carried value is a number the wire wrote.
  *   rune
  *       KNOWN from the decision cast's own PRE_COST Runes entry; UNKNOWN on
  *       a cast that costs no Runes (Death Strike). Never regenerated.
@@ -32,7 +36,7 @@
  *       KNOWN: the decision's fight time in seconds. An observed quantity.
  */
 
-import { knownNumber, unknownNumber } from "../../../simc/expression/evaluate.js";
+import { knownNumber, unknownNumber, type NumericBinding } from "../../../simc/expression/evaluate.js";
 import type { SpecAtomBinding, SpecAtomBindings } from "../../../simc/expression/spec-vocabulary.js";
 import type { HeroTreeResolution } from "../../../data/game/talent-selection.js";
 import { runeCount, runicPowerDeficitPoints, type BloodResourceObservation } from "./resources.js";
@@ -48,6 +52,12 @@ import {
 export interface BloodResolverInput {
   readonly runes: BloodResourceObservation;
   readonly runicPower: BloodResourceObservation;
+  /**
+   * The `runic_power.deficit` binding the Blood Runic Power state established
+   * (M11-B5). When supplied it is the binding, whatever `runicPower` says;
+   * when omitted the resolver falls back to the own-cast PRE_COST reading.
+   */
+  readonly runicPowerDeficit?: NumericBinding;
   readonly heroTree: HeroTreeResolution;
   /** The decision's fight time, milliseconds since the pull. */
   readonly fightTimeMs: number;
@@ -56,7 +66,7 @@ export interface BloodResolverInput {
 export interface BloodResolverDiagnostics {
   readonly runes: BloodResourceObservation;
   readonly runicPower: BloodResourceObservation;
-  /** The `runic_power.deficit` bound, in points, or null. */
+  /** The `runic_power.deficit` bound exactly, in points, or null (a bound or an unknown is null here; see the Runic Power state). */
   readonly runicPowerDeficit: number | null;
   /** The `rune` bound, or null. */
   readonly rune: number | null;
@@ -103,10 +113,24 @@ export function resolveBloodAtoms(input: BloodResolverInput): BloodResolution {
   }
 
   // ---- the resources: the observation, or nothing ----
-  const deficit = runicPowerDeficitPoints(input.runicPower);
-  bound.push(
-    deficit === null ? notEstablished(RUNIC_POWER_DEFICIT) : magnitude(RUNIC_POWER_DEFICIT, deficit),
-  );
+  const supplied = input.runicPowerDeficit;
+  const deficit =
+    supplied === undefined
+      ? runicPowerDeficitPoints(input.runicPower)
+      : supplied.state === "KNOWN_NUMBER"
+        ? supplied.value
+        : null;
+  if (supplied !== undefined) {
+    bound.push({
+      key: RUNIC_POWER_DEFICIT,
+      actionToken: null,
+      value: { kind: "MAGNITUDE", binding: supplied },
+    });
+  } else {
+    bound.push(
+      deficit === null ? notEstablished(RUNIC_POWER_DEFICIT) : magnitude(RUNIC_POWER_DEFICIT, deficit),
+    );
+  }
   const rune = runeCount(input.runes);
   bound.push(rune === null ? notEstablished(RUNE) : magnitude(RUNE, rune));
 

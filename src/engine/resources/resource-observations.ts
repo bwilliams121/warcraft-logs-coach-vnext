@@ -22,15 +22,18 @@
  *
  * They are indexed separately here and never merged into a synthetic combined
  * event. The same `resourcechange` event frequently carries BOTH — a captured
- * one has `resourceChange: 10` and an attached `classResources[{amount: 100}]` —
- * and whether that 100 is the amount before or after the change is an
- * UNESTABLISHED evidence contract. Merging them would require picking one.
+ * one has `resourceChange: 10` and an attached `classResources[{amount: 100}]`.
+ * Since M11-B5 the 100 is ESTABLISHED as the amount AFTER the change, for the
+ * one attachment whose type is the type being changed (`POST_CHANGE` below);
+ * the two observations are still kept apart, and the delta is never applied
+ * to anything.
  *
  * SAMPLING TIMING IS A TAG, NOT A NAME
  *
- * Exactly one sampling order is established: a COMPLETED cast carrying a
- * positive `cost` reports the amount BEFORE that cost. Every other attachment
- * — `resourcechange` included — has no established order.
+ * Exactly two sampling orders are established: a COMPLETED cast carrying a
+ * positive `cost` reports the amount BEFORE that cost, and a `resourcechange`
+ * whose attachment is of the changed resource's type reports the amount AFTER
+ * that change. Every other attachment has no established order.
  *
  * That distinction is carried as `ResourceObservationTiming` on the observation
  * rather than baked into accessor names. An accessor called
@@ -59,16 +62,23 @@ import type {
 /**
  * When an observed amount was sampled, relative to its own event.
  *
- * Two members, because exactly two states are honest. There is deliberately no
- * `POST_COST` and no `POST_CHANGE`:
+ * Three members, because exactly three states are honest. There is
+ * deliberately no `POST_COST`: it is not observed anywhere, it could only be
+ * computed, and computing it is the delta replay this layer refuses.
  *
- * - `POST_COST` is not observed anywhere. It could only be computed, and
- *   computing it is the delta replay this layer refuses.
- * - `POST_CHANGE` for a `resourcechange` attachment is EMPIRICALLY FAVOURED but
- *   NOT ESTABLISHED. The supporting evidence relies on same-timestamp retrieval
- *   adjacency standing in for causal order, which M3/M4-A deliberately do not
- *   guarantee, and whole-window reconciliation was incomplete. Adding the member
- *   would let that assumption spread by autocomplete.
+ * `POST_CHANGE` was withheld until M11-B5 because its evidence had rested on
+ * same-timestamp retrieval adjacency and an incomplete reconciliation. The
+ * Blood Death Knight corpus settled it by WHOLE-WINDOW reconciliation, not by
+ * adjacency: over 165 s + 20 s of one actor's Runic Power, the attached
+ * amount on every `resourcechange` equals the previous exact state plus the
+ * change (clamped at the reported max) at 246 of 246 integer gains, is the
+ * capped max at every cap event, and is exact even at the 20 Anti-Magic
+ * Shell gains whose `resourceChange` is a rounded whole number — and every
+ * later costed cast's PRE_COST amount (50 of 50) and every later uncosted
+ * attachment (175 of 175) equals the state so carried. A PRE_CHANGE reading
+ * matches none of them. Evidence: the Blood corpus artifacts and the
+ * `COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT` assertions
+ * (tests/corpus/manifest.json).
  */
 export type ResourceObservationTiming =
   /**
@@ -80,16 +90,33 @@ export type ResourceObservationTiming =
    */
   | "PRE_COST"
   /**
+   * The amount AFTER the event's own change was applied (M11-B5).
+   *
+   * Established for `gameVersion` 1 / `logVersion` 17, and used for exactly
+   * one case: an attachment on a `RESOURCE_CHANGE` event whose resource type
+   * IS the type that event changed. The attachment of any OTHER type riding
+   * on the same event (a snapshot of a second pool) establishes nothing about
+   * the change and stays EVENT_ASSOCIATED.
+   *
+   * THIS IS AN OBSERVED STATE, NOT A COMPUTED ONE. The amount is read; the
+   * `resourceChange` delta is never added to anything to produce it, and
+   * never may be — the delta is a rounded whole number where the game moved
+   * a fraction, and the attachment is exact where the delta is not.
+   */
+  | "POST_CHANGE"
+  /**
    * An exact observation associated with the event, with no established
    * before/after relationship to anything the event did.
    *
-   * The conservative default. Every attachment that is not a positively costed
-   * completed cast lands here, including `resourcechange`.
+   * The conservative default. Every attachment that is neither a positively
+   * costed completed cast nor the changed type on a `resourcechange` lands
+   * here.
    */
   | "EVENT_ASSOCIATED";
 
 export const RESOURCE_OBSERVATION_TIMINGS = [
   "PRE_COST",
+  "POST_CHANGE",
   "EVENT_ASSOCIATED",
 ] as const satisfies readonly ResourceObservationTiming[];
 
@@ -301,9 +328,16 @@ export function buildResourceIndexes(fight: CombatFight): ResourceIndexes {
  * observed cost of nothing, which establishes no ordering: there is no deduction
  * for the amount to precede.
  *
- * Everything else — `resourcechange`, `damage`, `heal` — is EVENT_ASSOCIATED,
- * and that is the DEFAULT rather than a listed set, so a raw type nobody has
- * considered yet cannot fall into PRE_COST.
+ * POST_CHANGE requires BOTH halves of its contract and nothing less (M11-B5):
+ *
+ *     a RESOURCE_CHANGE event   +   an entry whose type IS the changed type
+ *
+ * A second pool's snapshot riding on the same event is EVENT_ASSOCIATED: the
+ * event changed a different resource, and says nothing about this one.
+ *
+ * Everything else — `damage`, `heal`, an unconsidered raw type — is
+ * EVENT_ASSOCIATED, and that is the DEFAULT rather than a listed set, so a raw
+ * type nobody has considered yet cannot fall into either established timing.
  */
 function timingOf(event: CombatEvent, resource: ClassResourceObservation): ResourceObservationTiming {
   if (
@@ -313,6 +347,9 @@ function timingOf(event: CombatEvent, resource: ClassResourceObservation): Resou
     resource.cost > 0
   ) {
     return "PRE_COST";
+  }
+  if (event.kind === "RESOURCE_CHANGE" && resource.resourceType === event.resourceType) {
+    return "POST_CHANGE";
   }
   return "EVENT_ASSOCIATED";
 }

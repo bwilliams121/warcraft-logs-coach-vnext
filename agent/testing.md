@@ -1716,6 +1716,90 @@ confident verdict.
 
 ---
 
+# Runic Power State Tests (M11-B5)
+
+A resource state carried to a decision is a sequence of READ observed
+states under proven coverage, never a ledger. The tests must prove that the
+carried value is a number the wire wrote, that a costed cast leaves the
+state unread until the next observation, that a gain 0-1 ms ahead of the
+decision yields only the bound both readings share, and that every gap,
+contradiction and unpinned shape refuses.
+
+Required, wire contract (`tests/unit/m11b5-resource-post-change-contract.test.ts`):
+
+```text
+resourcechange attachment of the
+  changed type                 -> POST_CHANGE; a second pool's attachment on the
+                                same event EVENT_ASSOCIATED; casts unchanged
+timing enumeration           -> PRE_COST, POST_CHANGE, EVENT_ASSOCIATED; no
+                                POST_COST, no PRE_CHANGE
+whole-window reconciliation  -> carrying the latest read amount reproduces every
+                                later PRE_COST and uncosted amount (bundle 44 +
+                                147, opener 6 + 28) with zero hidden changes;
+                                integer gains sum exactly, cap events read the
+                                max, Anti-Magic Shell gains show a rounded delta
+                                beside an exact attachment — VALIDATION from
+                                later events, never an input to an earlier state
+```
+
+Required, engine (`tests/unit/m11b5-resource-history.test.ts`):
+
+```text
+resourceHistoryAt            -> the latest attached observation with its tag;
+                                every observation since, each with its own
+                                amount and the change's SIGN only; a change
+                                without an attachment of its type is listed,
+                                not resolved
+continuity FROM the anchor   -> a RESOURCES gap is UNKNOWN where
+                                latestObservedAtOrBefore is STALE; an
+                                unattributed snapshot in the interval is UNKNOWN
+observationsWithinBefore     -> leads 0, 1, 2 at windows 0, 1, 2 (inclusive);
+                                nothing at or after the position
+no synthesized state         -> no entry carries prev + delta anywhere
+```
+
+Required, Blood (`tests/unit/m11b5-blood-runic-power-state.test.ts`):
+
+```text
+OWN_PRE_COST                 -> the decision's own costed cast, unchanged
+CARRIED_EXACT                -> a POST_CHANGE anchor, an uncosted melee snapshot,
+                                through Runic Attenuation, Blood Mist, a
+                                fractional Anti-Magic Shell gain and a cap —
+                                each the READ amount; deficit = (max - amount)/10
+after a costed cast          -> POST_SPEND_NOT_OBSERVED until an observation;
+                                the first observation after it is the state
+                                (640 read, never 990 - 450 or 990 - 350)
+window                       -> leads 0 and 1 bound the deficit below from the
+                                last non-negative amount; lead 2 is an ordinary
+                                exact carry; several window gains bound from the
+                                last; a costed cast or negative change inside
+                                refuses; the bound holds even after a spend
+numeric                      -> the bound proves deficit<20, <36, <40 FALSE and
+                                never TRUE; the binding is the existing
+                                BOUNDED_NUMBER with no upper field
+refusals                     -> no anchor; RESOURCES gap; CASTS gap; a snapshot
+                                that disagrees with the carried state (never
+                                re-anchored); a missing max; a changed max; a
+                                change with no attachment of its type
+source guard                 -> the Blood module never mentions resourceChange,
+                                observedCost, or a cost subtraction
+corpus                       -> principal gains AFTER their cast (68 of 68);
+                                Heartbreaker and Relish in Blood 0-1 ms AHEAD
+                                (87 of 87); the pull cast has no anchor; the
+                                Heart Strike at 2,020,278 bounds at 930; the
+                                Blood Boil at 2,021,775 is POST_SPEND
+```
+
+Failure mode this prevents:
+
+A Runic Power value that was computed rather than read — `pre - cost` from a
+wire cost the build does not pay, a delta summed where the game moved a
+fraction, a state carried across a gap in which a spend was missed, or a
+cast's own proc gain read as its pre-decision state — reaching the Death
+Strike gate as a confident verdict, in either direction.
+
+---
+
 # Spec-Owned Resolver Tests
 
 When a specialization supplies a resolver:

@@ -4442,6 +4442,44 @@
       ]
     },
     {
+      "caseId": "combat-state.a-resourcechange-attachment-of-the-changed-type-is-the-post-change-amount",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-observations.ts timingOf (POST_CHANGE); resource-state.ts observationOnEvent, standaloneChangeOnEvent",
+      "purpose": "M11-B5 settled the resourcechange attachment contract by whole-window reconciliation over actor 14's Runic Power (wire type 6, amounts in tenths, deltas in whole points): over the 45 s slice's 172 type-6 observations, carrying the latest READ amount forward — each of the 89 POST_CHANGE attachments REPLACING it, each costed cast leaving it unread until the next observation — reproduces all 16 later Death Strike PRE_COST amounts and all 58 later uncosted attachments with zero hidden changes. The delta is compared beside each attachment only to classify it: 73 integer gains sum exactly, 5 cap events read the reported max (1,250), and 4 Anti-Magic Shell gains show a rounded delta beside an exact attachment (610 + 0 -> 617). A pre-change reading matches none of them.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT",
+          "params": {
+            "actorId": 14,
+            "resourceWireType": 6,
+            "deltaScale": 10,
+            "expected": {
+              "observations": 172,
+              "postChange": 89,
+              "integerReconciled": 73,
+              "capEvents": 5,
+              "deltaRoundedAttachmentExact": 4,
+              "preCostMatches": 16,
+              "uncostedMatches": 58,
+              "hiddenChangeMismatches": 0,
+              "maxValues": [1250]
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "POST_CHANGE is an OBSERVED state, read off the wire, on exactly one attachment shape. The delta beside it is a rounded number where the game moved a fraction; nothing anywhere adds it to a prior amount, and the reconciliation here is validation of the contract from later observations, never an input to an earlier state."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/unit/m11b5-resource-post-change-contract.test.ts",
+        "tests/unit/m11b5-resource-history.test.ts"
+      ]
+    },
+    {
       "caseId": "combat-state.aura-stack-is-the-absolute-resulting-count",
       "artifactId": "wcl-aura-stack-absolute",
       "owningLayer": "COMBAT_STATE",
@@ -5667,6 +5705,41 @@
         "tests/unit/m5-runtime-data-provenance.test.ts",
         "tests/regression/m4-resource-state-is-never-simulated.test.ts"
       ]
+    },
+    {
+      "caseId": "combat-state.the-opener-reconciles-the-same-way",
+      "artifactId": "wcl-blood-death-knight-gtkb-opener",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-observations.ts timingOf (POST_CHANGE)",
+      "purpose": "A second report, pull and boss: 84 type-6 observations, 45 POST_CHANGE attachments, 38 integer gains, no cap, 5 Anti-Magic Shell gains with a rounded delta and an exact attachment, 6 later PRE_COST and 28 later uncosted amounts reproduced, zero hidden changes.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT",
+          "params": {
+            "actorId": 14,
+            "resourceWireType": 6,
+            "deltaScale": 10,
+            "expected": {
+              "observations": 84,
+              "postChange": 45,
+              "integerReconciled": 38,
+              "capEvents": 0,
+              "deltaRoundedAttachmentExact": 5,
+              "preCostMatches": 6,
+              "uncostedMatches": 28,
+              "hiddenChangeMismatches": 0,
+              "maxValues": [1250]
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "The contract is a property of the wire, not of one fight."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/m11b5-resource-post-change-contract.test.ts"]
     },
     {
       "caseId": "combat-state.trimmed-slice-cannot-prove-absence",
@@ -9874,6 +9947,29 @@
           }
         },
         {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "OWN_PRE_COST",
+              "bindingState": "KNOWN_NUMBER",
+              "deficitPoints": 26,
+              "currentWire": 990,
+              "atMostWire": null,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2012014,
+              "anchorTiming": "PRE_COST",
+              "windowLeadsMs": [],
+              "reason": null
+            }
+          }
+        },
+        {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
           "params": {
             "actorId": 14,
@@ -9938,7 +10034,7 @@
                 "max": null,
                 "cost": null
               },
-              "runicPowerDeficit": null,
+              "runicPowerDeficit": 43,
               "rune": 3
             }
           }
@@ -10058,6 +10154,29 @@
               "anchorReportTimeMs": 2013542,
               "reason": null,
               "windowLeadMs": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2015770,
+              "abilityGameId": 195182
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "CARRIED_EXACT",
+              "bindingState": "KNOWN_NUMBER",
+              "deficitPoints": 43,
+              "currentWire": 820,
+              "atMostWire": null,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2015627,
+              "anchorTiming": "EVENT_ASSOCIATED",
+              "windowLeadsMs": [],
+              "reason": null
             }
           }
         }
@@ -10282,6 +10401,52 @@
           }
         },
         {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2020278,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "WINDOW_BOUNDED",
+              "bindingState": "BOUNDED_NUMBER",
+              "deficitPoints": 32,
+              "currentWire": null,
+              "atMostWire": 930,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2020278,
+              "anchorTiming": "POST_CHANGE",
+              "windowLeadsMs": [0],
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2021775,
+              "abilityGameId": 50842
+            },
+            "expected": {
+              "state": "UNBOUND",
+              "proof": null,
+              "bindingState": null,
+              "deficitPoints": null,
+              "currentWire": null,
+              "atMostWire": null,
+              "maxWire": null,
+              "anchorReportTimeMs": 2021024,
+              "anchorTiming": "PRE_COST",
+              "windowLeadsMs": [],
+              "reason": "POST_SPEND_NOT_OBSERVED"
+            }
+          }
+        },
+        {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
           "params": {
             "actorId": 14,
@@ -10465,11 +10630,102 @@
               "windowLeadMs": null
             }
           }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2044021,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "OWN_PRE_COST",
+              "bindingState": "KNOWN_NUMBER",
+              "deficitPoints": 17,
+              "currentWire": 1080,
+              "atMostWire": null,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2044021,
+              "anchorTiming": "PRE_COST",
+              "windowLeadsMs": [],
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2047348,
+              "abilityGameId": 50842
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "blood_boil",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2047348,
+              "abilityGameId": 50842
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "CARRIED_EXACT",
+              "bindingState": "KNOWN_NUMBER",
+              "deficitPoints": 47,
+              "currentWire": 780,
+              "atMostWire": null,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2047247,
+              "anchorTiming": "POST_CHANGE",
+              "windowLeadsMs": [],
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2047348,
+              "abilityGameId": 50842
+            },
+            "atomName": "boiling_point",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 1265968,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2046415,
+              "reason": null,
+              "auraReason": null
+            }
+          }
         }
       ],
       "rationale": {
         "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
-        "text": "A FALSE run gate is a skipped entry, nothing more: the parent walks on. A lone refresh proves the aura alive and says nothing pinned about its count, so the count is refused; a removal proves zero."
+        "text": "A FALSE run gate is a skipped entry, nothing more: the parent walks on. A lone refresh proves the aura alive and says nothing pinned about its count, so the count is refused; a removal proves zero. A Blood Boil resolves only when every entry above it is FALSE from proven state — here the Runic Power carried from the latest read amount — and never from a guess about what a Death Strike cost."
       },
       "authority": {
         "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
@@ -10709,6 +10965,29 @@
           }
         },
         {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "expected": {
+              "state": "UNBOUND",
+              "proof": null,
+              "bindingState": null,
+              "deficitPoints": null,
+              "currentWire": null,
+              "atMostWire": null,
+              "maxWire": null,
+              "anchorReportTimeMs": null,
+              "anchorTiming": null,
+              "windowLeadsMs": [],
+              "reason": "NO_ANCHOR"
+            }
+          }
+        },
+        {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
           "params": {
             "actorId": 14,
@@ -10756,7 +11035,7 @@
       "artifactId": "wcl-blood-death-knight-gtkb-opener",
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
       "contractUnderTest": "src/specs/deathknight/blood/observed-analysis.ts; first-gcd-adapter.ts",
-      "purpose": "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — after M11-B4, 15 inside the Gift window whose root scan RESOLVES (one of them, the Death Strike at 2,421,923, to a MATCH at san_gift[1]; the others with every san_gift candidate undecided, first san_gift[0] on buff.essence_of_the_blood_queen.remains at 8 where the cast's own Essence transition sits inside the window, san_gift[2] on the Crimson Scourge / Visceral Strength remainders at 3 where neither aura has been observed yet, san_gift[1] on runic_power.deficit at 3) and 6 after it that BLOCK at sanlayn[10] consumption (first undecided: sanlayn[2] on runic_power.deficit at 4, sanlayn[7] on buff.blood_debt.stack at 1, sanlayn[5] any_dnd usability at 1; Bone Shield's remainder is EXACT at 20 of 21 decisions from the opener's first stack gain) — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); Dancing Rune Weapon is never a candidate, because the opener's cast at 2,417,020 proves the cooldown active for the whole window.",
+      "purpose": "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — after M11-B4, 15 inside the Gift window whose root scan RESOLVES (one of them, the Death Strike at 2,421,923, to a MATCH at san_gift[1]; the others with every san_gift candidate undecided, first san_gift[0] on buff.essence_of_the_blood_queen.remains at 8 where the cast's own Essence transition sits inside the window, san_gift[2] on the Crimson Scourge / Visceral Strength remainders at 6 where neither aura has been observed yet) and 6 after it that BLOCK at sanlayn[10] consumption (first undecided: sanlayn[7] on buff.blood_debt.stack at 5, sanlayn[5] any_dnd usability at 1; Bone Shield's remainder is EXACT at 20 of 21 decisions from the opener's first stack gain; since M11-B5 Runic Power is exact or bounded at every opener decision — OWN_PRE_COST 6, CARRIED_EXACT 5, WINDOW_BOUNDED 10 — so no runic_power.deficit gate is undecided there) — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); Dancing Rune Weapon is never a candidate, because the opener's cast at 2,417,020 proves the cooldown active for the whole window.",
       "assertions": [
         {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY",
@@ -10798,7 +11077,6 @@
               },
               "undecidedGcdCandidates": {
                 "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 8,
-                "san_gift[1] death_strike | runic_power.deficit": 11,
                 "san_gift[2] any_dnd | buff.crimson_scourge.remains": 14,
                 "san_gift[2] any_dnd | buff.visceral_strength.remains": 14,
                 "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 14,
@@ -10809,9 +11087,24 @@
                 "sanlayn[5] any_dnd | USABILITY:any_dnd": 1,
                 "sanlayn[7] marrowrend | buff.blood_debt.stack": 6,
                 "sanlayn[8] heart_strike | buff.vampiric_strike.up": 6,
-                "sanlayn[9] death_strike | fight_remains": 6,
-                "sanlayn[2] death_strike | runic_power.deficit": 4,
-                "sanlayn[9] death_strike | runic_power.deficit": 4
+                "sanlayn[9] death_strike | fight_remains": 6
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS",
+          "params": {
+            "actorId": 14,
+            "expected": {
+              "runicPowerEvidence": {
+                "OWN_PRE_COST": 6,
+                "CARRIED_EXACT": 5,
+                "WINDOW_BOUNDED": 10
+              },
+              "runicPowerWindowLeads": {
+                "lead 0": 8,
+                "lead 1": 2
               }
             }
           }
@@ -10893,11 +11186,11 @@
       ]
     },
     {
-      "caseId": "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-twenty-one-resolved",
+      "caseId": "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-twenty-five-resolved",
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
       "contractUnderTest": "src/specs/deathknight/blood/observed-analysis.ts analyzeObservedBloodDeathKnightDecisions; first-gcd-adapter.ts (stopping points, dispatch trace, undecided candidates); src/simc/nested-selection.ts (M11-B1 run_action_list semantics)",
-      "purpose": "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 21 MATCH, 0 REJECTED, 102 UNKNOWN. THE MEASUREMENT AFTER M11-B4 (buff.<name>.remains derived; M11-B3 had 0 resolved with the first undecided candidate on buff.bone_shield.remains at 96 and buff.essence_of_the_blood_queen.remains at 24): the 21 resolved are all Death Strike, selected at the EXACT entry — san_gift[1] (runic_power.deficit<36) inside the Gift window at 6, sanlayn[2] (runic_power.deficit<20) outside it at 15 — once sanlayn[0]/san_gift[0]/sanlayn[1] resolve FALSE from Bone Shield's remainder proven at least 1.5 s (exact, or a lower bound past a refresh of unpinned cause), its exact count above 1 and its presence, and Essence's remainder proven exactly at least 1.5 s. The root scan RESOLVES at 79 decisions (21 to a selection, 58 with every candidate undecided and the branch worlds DIVERGENT), BLOCKS at sanlayn[10] consumption for 43 (Consumption's NORMAL node is absent, so its applicability is UNKNOWN and the entry cannot be stepped past) and at the default[15] run gate for 1 (the Death's Caress at the pull, no Gift transition yet observed). The B1 dispatch semantics are unchanged from M11-B3: default[14] run deathbringer RUN_GATE_FALSE_SKIPPED 123 times; default[15] run san_gift ENTERED 24 times inside the Gift window, skipped 98 times outside it, blocked once; default[16] run sanlayn entered 55 times and blocked 43. The first undecided GCD candidate in priority order — the next truthful blocker — is now sanlayn[2] death_strike on runic_power.deficit at 43 decisions (a cast that does not cost Runic Power carries no PRE_COST observation), sanlayn[7] marrowrend on buff.blood_debt.stack at 15, san_gift[0] on buff.essence_of_the_blood_queen.remains at 14 and sanlayn[1] on the same atom plus fight_remains at 11 (the 25 Vampiric Strike decisions whose own Essence transition sits inside the 50 ms pre-decision window ahead of the cast), sanlayn[0] on Bone Shield at 7 (the Marrowrends whose own stack gains precede them), and the Dancing Rune Weapon gate at 3; the full census is pinned below, and the remains evidence census in its own assertion.",
+      "purpose": "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 25 MATCH, 0 REJECTED, 98 UNKNOWN. THE MEASUREMENT AFTER M11-B5 (Runic Power carried; M11-B4 had 21 MATCH, all Death Strikes decided by their own PRE_COST amount, with the first undecided candidate on runic_power.deficit at 43 + 3): the 25 resolved are 21 Death Strikes (san_gift[1] runic_power.deficit<36 at 6, sanlayn[2] runic_power.deficit<20 at 15) and 4 Blood Boils at sanlayn[6] (buff.boiling_point.up) whose every higher entry is FALSE — sanlayn[2] from a Runic Power state CARRIED EXACT from the latest observed amount under RESOURCES and CASTS continuity (deficit 47, 31.9, 65.9 and 30.9 points against the 20 the gate asks). Runic Power at the 123 decisions: OWN_PRE_COST 44, CARRIED_EXACT 14, WINDOW_BOUNDED 59 (a Heart Strike's or Vampiric Strike's own Heartbreaker gain sits 0-1 ms AHEAD of it in the log, so only the deficit's lower bound both readings share is bound), POST_SPEND_NOT_OBSERVED 5 (a Blood Boil, Marrowrend or Death's Caress after a Death Strike with no observation between: the amount after the spend is not read), NO_ANCHOR 1 (the pull). The root scan RESOLVES at 79 decisions (25 to a selection, 54 divergent), BLOCKS at sanlayn[10] consumption for 43 and at the default[15] run gate for 1; the B1 dispatch semantics are unchanged from M11-B3. The first undecided GCD candidate in priority order is now sanlayn[7] marrowrend on buff.blood_debt.stack at 45 decisions, san_gift[0] on buff.essence_of_the_blood_queen.remains at 14 and sanlayn[1] on the same atom plus fight_remains at 11 (Essence window refusals), sanlayn[0] on Bone Shield at 7, sanlayn[5] any_dnd usability at 4, the Dancing Rune Weapon gate at 3, san_gift[3] on Essence's stack at 3, sanlayn[2] on runic_power.deficit at 3 (POST_SPEND) and on Death Strike's USABILITY at 3 (the gate is TRUE at a cast that is not Death Strike, and no affordability proof is built on the wire's cost), sanlayn[6] Blood Boil usability at 2 and buff.boiling_point.up at 1, san_gift[1] Death Strike usability at 1, sanlayn[9] fight_remains at 1; the full census is pinned below, and the remains and Runic Power evidence censuses in their own assertions.",
       "assertions": [
         {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY",
@@ -10910,9 +11203,9 @@
             "declaredHoles": [],
             "expected": {
               "eligibleDecisions": 123,
-              "match": 21,
+              "match": 25,
               "rejected": 0,
-              "unknown": 102,
+              "unknown": 98,
               "exclusions": {
                 "MELEE_SWING": 87,
                 "NON_GCD_ACTION": 47,
@@ -10932,7 +11225,7 @@
             ],
             "declaredHoles": [],
             "expected": {
-              "match": 21,
+              "match": 25,
               "rejected": 0,
               "stoppingEntries": {
                 "default[15] run_action_list": 1,
@@ -10956,7 +11249,7 @@
                 "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up": 3,
                 "high_prio_actions[1] dancing_rune_weapon | fight_remains": 3,
                 "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 14,
-                "san_gift[1] death_strike | runic_power.deficit": 17,
+                "san_gift[1] death_strike | USABILITY:death_strike": 1,
                 "san_gift[2] any_dnd | buff.crimson_scourge.remains": 4,
                 "san_gift[2] any_dnd | buff.visceral_strength.remains": 5,
                 "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 18,
@@ -10967,13 +11260,14 @@
                 "sanlayn[0] deaths_caress | buff.bone_shield.remains": 6,
                 "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains": 11,
                 "sanlayn[1] heart_strike | fight_remains": 11,
-                "sanlayn[2] death_strike | runic_power.deficit": 61,
+                "sanlayn[2] death_strike | runic_power.deficit": 5,
+                "sanlayn[2] death_strike | USABILITY:death_strike": 4,
                 "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 1,
                 "sanlayn[5] any_dnd | USABILITY:any_dnd": 5,
                 "sanlayn[6] blood_boil | buff.boiling_point.up": 1,
                 "sanlayn[7] marrowrend | buff.blood_debt.stack": 73,
                 "sanlayn[8] heart_strike | buff.vampiric_strike.up": 3,
-                "sanlayn[9] death_strike | runic_power.deficit": 40,
+                "sanlayn[9] death_strike | runic_power.deficit": 2,
                 "sanlayn[9] death_strike | fight_remains": 43,
                 "sanlayn[0] deaths_caress | buff.bone_shield.up": 6,
                 "sanlayn[0] deaths_caress | buff.bone_shield.stack": 7,
@@ -10982,6 +11276,30 @@
                 "sanlayn[6] blood_boil | USABILITY:blood_boil": 6,
                 "san_gift[5] blood_boil | USABILITY:blood_boil": 2,
                 "sanlayn[8] heart_strike | USABILITY:heart_strike": 1
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "expected": {
+              "runicPowerEvidence": {
+                "OWN_PRE_COST": 44,
+                "CARRIED_EXACT": 14,
+                "WINDOW_BOUNDED": 59,
+                "POST_SPEND_NOT_OBSERVED": 5,
+                "NO_ANCHOR": 1
+              },
+              "runicPowerWindowLeads": {
+                "lead 0": 72,
+                "lead 1": 7
               }
             }
           }
@@ -11037,7 +11355,7 @@
       ],
       "rationale": {
         "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
-        "text": "The coverage disclosure is the honest measure of the slice: 21 of 123 decisions resolve — every one a Death Strike the pinned list selects at its exact entry from proven remainders, a proven count and the cast's own Runic Power — and every other decision names the entry and the atom the shared machinery could not decide. M11-B4 derived the remainders from observed gains and the pinned Blood durations (Essence 25 s, not the 20 s table value) under continuity from the gain, bound only the lower bound past a Bone Shield refresh of unpinned cause, refused every transition inside the 50 ms pre-decision window (the 0, 1 and 20 ms own-effect leads the audit measured), and refused nothing on threshold tolerance because no exact value fell within 50 ms of 1.5, 3 or 8 seconds. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one."
+        "text": "The coverage disclosure is the honest measure of the slice: 25 of 123 decisions resolve — 21 Death Strikes the pinned list selects from proven remainders, a proven count and the cast's own Runic Power, and 4 Blood Boils it selects once the Runic Power carried from the latest observed amount decides the Death Strike gate above them — and every other decision names the entry and the atom the shared machinery could not decide. M11-B5 carries Runic Power as a sequence of READ states under RESOURCES and CASTS continuity: a resourcechange replaces the state with its POST_CHANGE attachment, a costed cast leaves it unknown until the next observation, and a gain 0-1 ms ahead of the decision is not attributed — only the deficit's lower bound is bound. M11-B4 derived the remainders from observed gains and the pinned Blood durations (Essence 25 s, not the 20 s table value) under continuity from the gain, bound only the lower bound past a Bone Shield refresh of unpinned cause, refused every transition inside the 50 ms pre-decision window (the 0, 1 and 20 ms own-effect leads the audit measured), and refused nothing on threshold tolerance because no exact value fell within 50 ms of 1.5, 3 or 8 seconds. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one."
       },
       "authority": {
         "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
@@ -11063,7 +11381,7 @@
       "artifactId": "wcl-blood-death-knight-gtkb-opener",
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
       "contractUnderTest": "src/specs/deathknight/blood/resources.ts; src/data/wcl-wire/resource-types.ts (RUNES, RUNIC_POWER); aura-bindings.ts",
-      "purpose": "The gtKb subject casts Death Strike at 2,425,794 with 440 Runic Power on the wire and at 2,429,596 with 390 — both BELOW the 450 the wire reports as the cost, because the field is the DBC base and this build's reductions are not folded in. The evaluator reads the PRE_COST amount as the observation it is (deficit 81 and 86 points), never the cost field as the cost paid, and makes no affordability claim in either direction. The first Blood Boil at 2,417,826 carries no resource entry of either kind (NO_OBSERVATION twice, never zero); the Vampiric Strike at 2,418,659 costs 1 Rune of 4. Inside the opener's Gift window (2,417,020 .. 2,429,050) every scan enters san_gift; the Death Strike at 2,429,596 follows the removal and stops in sanlayn with Bone Shield exactly 12 and its remainder EXACT 27,698 ms from the stack gain at 2,427,294 — the opener's Bone Shield is anchored by its first in-fight stack gain, never by the unobserved pre-pull application.",
+      "purpose": "The gtKb subject casts Death Strike at 2,425,794 with 440 Runic Power on the wire and at 2,429,596 with 390 — both BELOW the 450 the wire reports as the cost, because the field is the DBC base and this build's reductions are not folded in. The evaluator reads the PRE_COST amount as the observation it is (deficit 81 and 86 points), never the cost field as the cost paid, and makes no affordability claim in either direction. The first Blood Boil at 2,417,826 carries no resource entry of either kind (NO_OBSERVATION twice, never zero) and since M11-B5 its deficit, 103, is carried from the melee swing 355 ms earlier; the Vampiric Strike at 2,418,659 costs 1 Rune of 4. Inside the opener's Gift window (2,417,020 .. 2,429,050) every scan enters san_gift; the Death Strike at 2,429,596 follows the removal and stops in sanlayn with Bone Shield exactly 12 and its remainder EXACT 27,698 ms from the stack gain at 2,427,294 — the opener's Bone Shield is anchored by its first in-fight stack gain, never by the unobserved pre-pull application.",
       "assertions": [
         {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
@@ -11138,7 +11456,7 @@
                 "max": null,
                 "cost": null
               },
-              "runicPowerDeficit": null,
+              "runicPowerDeficit": 103,
               "rune": null
             }
           }
@@ -11371,6 +11689,75 @@
           }
         },
         {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2429596,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "OWN_PRE_COST",
+              "bindingState": "KNOWN_NUMBER",
+              "deficitPoints": 86,
+              "currentWire": 390,
+              "atMostWire": null,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2429596,
+              "anchorTiming": "PRE_COST",
+              "windowLeadsMs": [],
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2425794,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "OWN_PRE_COST",
+              "bindingState": "KNOWN_NUMBER",
+              "deficitPoints": 81,
+              "currentWire": 440,
+              "atMostWire": null,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2425794,
+              "anchorTiming": "PRE_COST",
+              "windowLeadsMs": [],
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2417826,
+              "abilityGameId": 50842
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "CARRIED_EXACT",
+              "bindingState": "KNOWN_NUMBER",
+              "deficitPoints": 103,
+              "currentWire": 220,
+              "atMostWire": null,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2417471,
+              "anchorTiming": "EVENT_ASSOCIATED",
+              "windowLeadsMs": [],
+              "reason": null
+            }
+          }
+        },
+        {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
           "params": {
             "actorId": 14,
@@ -11561,6 +11948,90 @@
               "anchorReportTimeMs": 2085352,
               "reason": null,
               "windowLeadMs": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2087470,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "WINDOW_BOUNDED",
+              "bindingState": "BOUNDED_NUMBER",
+              "deficitPoints": 28.9,
+              "currentWire": null,
+              "atMostWire": 961,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2087470,
+              "anchorTiming": "POST_CHANGE",
+              "windowLeadsMs": [0, 0],
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2097796,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "WINDOW_BOUNDED",
+              "bindingState": "BOUNDED_NUMBER",
+              "deficitPoints": 49.9,
+              "currentWire": null,
+              "atMostWire": 751,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2097796,
+              "anchorTiming": "POST_CHANGE",
+              "windowLeadsMs": [0, 0],
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2100867,
+              "abilityGameId": 50842
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "CARRIED_EXACT",
+              "bindingState": "KNOWN_NUMBER",
+              "deficitPoints": 65.9,
+              "currentWire": 591,
+              "atMostWire": null,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2099906,
+              "anchorTiming": "POST_CHANGE",
+              "windowLeadsMs": [],
+              "reason": null
             }
           }
         },

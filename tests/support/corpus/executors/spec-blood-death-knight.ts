@@ -597,6 +597,100 @@ export function remainsBindingAt(
   return pass();
 }
 
+export function runicPowerStateAt(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const found = resolvedAt(run, params.actorId, params.observedCast);
+  if (!found.ok) return found.outcome;
+  const rp = found.resolved.runicPower;
+  const actual =
+    rp.state === "BOUND"
+      ? {
+          state: rp.state,
+          proof: rp.proof,
+          bindingState: rp.binding.state === "UNKNOWN_NUMBER" ? null : rp.binding.state,
+          deficitPoints:
+            rp.binding.state === "KNOWN_NUMBER"
+              ? rp.binding.value
+              : rp.binding.state === "BOUNDED_NUMBER"
+                ? rp.binding.atLeast
+                : null,
+          currentWire: rp.currentWire,
+          atMostWire: rp.atMostWire,
+          maxWire: rp.maxWire,
+          anchorReportTimeMs: rp.anchor.reportTimeMs,
+          anchorTiming: rp.anchor.timing,
+          windowLeadsMs: rp.windowEntries.map((entry) => entry.leadMs),
+          reason: null,
+        }
+      : {
+          state: rp.state,
+          proof: null,
+          bindingState: null,
+          deficitPoints: null,
+          currentWire: null,
+          atMostWire: null,
+          maxWire: null,
+          anchorReportTimeMs: rp.anchor?.reportTimeMs ?? null,
+          anchorTiming: rp.anchor?.timing ?? null,
+          windowLeadsMs: [],
+          reason: rp.reason,
+        };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the Runic Power state at this decision differs from the case", {
+      expected: params.expected,
+      actual,
+      locator: run.state.locatorAt(found.position),
+    });
+  }
+  return pass();
+}
+
+export function runicPowerEvidenceCensus(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const window = params.evaluationWindow ?? null;
+  const comparisons =
+    window === null
+      ? run.analysis.comparisons
+      : run.analysis.comparisons.filter((entry) => insideWindow(entry.decision.reportTimeMs, window));
+  const resolved = run.analysis.resolved.filter((entry) =>
+    comparisons.some((comparison) => comparison.decision.position === entry.position),
+  );
+  const coverage = summarizeBloodDecisions(params.actorId, comparisons, [], resolved);
+  const actual = {
+    runicPowerEvidence: sorted(coverage.runicPowerEvidence.map((row) => [row.key, row.count])),
+    runicPowerWindowLeads: sorted(coverage.runicPowerWindowLeads.map((row) => [row.key, row.count])),
+  };
+  const expected = {
+    runicPowerEvidence: sorted(Object.entries(params.expected.runicPowerEvidence)),
+    runicPowerWindowLeads: sorted(Object.entries(params.expected.runicPowerWindowLeads)),
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    return fail("the Runic Power evidence distributes differently than the case pins", { expected, actual });
+  }
+  const total = Object.values(actual.runicPowerEvidence).reduce((sum, count) => sum + count, 0);
+  if (total !== comparisons.length) {
+    return fail("the Runic Power evidence does not cover the eligible population", {
+      expected: { total: comparisons.length },
+      actual: { total },
+    });
+  }
+  return pass();
+}
+
 export function remainsEvidenceCensus(
   context: CorpusExecutionContext,
   corpus: LoadedCorpus,

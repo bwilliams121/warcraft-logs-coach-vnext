@@ -382,31 +382,33 @@ describe("the resourcechange timing contract stays unestablished", () => {
     }),
   );
 
-  it("tags the attachment EVENT_ASSOCIATED rather than a change phase", () => {
+  it("tags the changed type's attachment POST_CHANGE (M11-B5) and never PRE_COST", () => {
+    // RE-POINTED for M11-B5: the reconciliation over the Blood corpus settled
+    // the contract (tests/unit/m11b5-resource-post-change-contract.test.ts).
     const result = state.resources.observationOnEvent(0, PLAYER, ENERGY);
 
     if (result.certainty !== "EXACT") return;
-    expect(result.value.timing).toBe("EVENT_ASSOCIATED");
+    expect(result.value.timing).toBe("POST_CHANGE");
     expect(result.value.timing).not.toBe("PRE_COST");
   });
 
-  it("commits to neither 50 nor 70 as the amount on the other side of the change", () => {
+  it("produces neither 50 nor 70: the amount is read as 60, and the delta is applied to nothing", () => {
     const snapshot = state.resources.observationOnEvent(0, PLAYER, ENERGY);
     const change = state.resources.standaloneChangeOnEvent(0);
 
     if (snapshot.certainty !== "EXACT" || change.certainty !== "EXACT") return;
     expect(snapshot.value.observedAmount).toBe(60);
     expect(change.value.resourceChange).toBe(10);
-    // Under POST_CHANGE the prior amount was 50; under PRE_CHANGE the resulting
-    // amount is 70. Choosing either would settle the open contract by fiat, so
-    // neither number is produced.
+    // 60 is the amount AFTER the change (POST_CHANGE). The amount before it,
+    // 50, is not derived — the delta is a rounded number where the game moved
+    // a fraction — and 70 is not a reading anything supports.
     const serialized = JSON.stringify(snapshot.value) + JSON.stringify(change.value);
     expect(serialized).not.toContain("50");
     expect(serialized).not.toContain("70");
   });
 
-  it("admits only the two timings the evidence supports", () => {
-    expect([...RESOURCE_OBSERVATION_TIMINGS]).toEqual(["PRE_COST", "EVENT_ASSOCIATED"]);
+  it("admits only the three timings the evidence supports", () => {
+    expect([...RESOURCE_OBSERVATION_TIMINGS]).toEqual(["PRE_COST", "POST_CHANGE", "EVENT_ASSOCIATED"]);
   });
 });
 

@@ -36,11 +36,11 @@ import { corpusState, normalizationFactsOf } from "../support/corpus/fight.js";
  * nothing observed. Live captures contain costed casts whose next observation
  * disagrees with it. See the no-simulation regression.
  *
- * Everything that is not a positively costed completed cast — `resourcechange`
- * included — stays `EVENT_ASSOCIATED`. `POST_CHANGE` is empirically favoured for
- * `resourcechange` and deliberately NOT ESTABLISHED, because its evidence rests
- * on same-timestamp retrieval adjacency standing in for causal order, which the
- * ingestion layer does not guarantee.
+ * Everything that is not a positively costed completed cast stays
+ * `EVENT_ASSOCIATED` — except, since M11-B5, the attachment OF THE CHANGED TYPE
+ * on a `resourcechange`, which is `POST_CHANGE`: established by whole-window
+ * reconciliation over the Blood corpus rather than by same-timestamp adjacency
+ * (tests/unit/m11b5-resource-post-change-contract.test.ts).
  */
 
 const CAPPED_DISCRETE = 4;
@@ -151,22 +151,22 @@ describe("everything without the established contract stays EVENT_ASSOCIATED", (
     expect(result.value.timing).toBe("EVENT_ASSOCIATED");
   });
 
-  it("tags a resourcechange attachment EVENT_ASSOCIATED", () => {
+  it("tags a resourcechange attachment of the changed type POST_CHANGE, and only that (M11-B5)", () => {
+    // RE-POINTED for M11-B5. The Rogue capture's energy `resourcechange`
+    // carries an energy attachment: POST_CHANGE. Any other type riding on it
+    // would stay EVENT_ASSOCIATED.
     const position = state.fight.events.findIndex((event) => event.kind === "RESOURCE_CHANGE");
     const result = state.resources.observationOnEvent(position, ROGUE, ENERGY);
 
     if (result.certainty !== "EXACT") return;
     expect(result.value.attachedToRawType).toBe("resourcechange");
-    // NOT POST_CHANGE. The evidence favours it and does not establish it.
-    expect(result.value.timing).toBe("EVENT_ASSOCIATED");
+    expect(result.value.timing).toBe("POST_CHANGE");
   });
 
-  it("offers no POST timing to acquire by accident", () => {
+  it("offers no POST_COST or PRE_CHANGE timing to acquire by accident", () => {
     // A behavioural guard rather than a text sweep: the runtime list of timings
-    // is the same union the type declares, so adding `POST_CHANGE` anywhere
-    // fails here.
-    expect([...RESOURCE_OBSERVATION_TIMINGS]).toEqual(["PRE_COST", "EVENT_ASSOCIATED"]);
-    expect(RESOURCE_OBSERVATION_TIMINGS).not.toContain("POST_CHANGE");
+    // is the same union the type declares.
+    expect([...RESOURCE_OBSERVATION_TIMINGS]).toEqual(["PRE_COST", "POST_CHANGE", "EVENT_ASSOCIATED"]);
     expect(RESOURCE_OBSERVATION_TIMINGS).not.toContain("POST_COST");
     expect(RESOURCE_OBSERVATION_TIMINGS).not.toContain("PRE_CHANGE");
   });

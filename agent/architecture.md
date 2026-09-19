@@ -6058,6 +6058,130 @@ lead; their captures showed the opposite ordering to the Death Knight's,
 and the ordering is not a contract. The cross-spec temporal-skew census is a
 follow-up before any promotion work that depends on it.
 
+### M11-B5 — Runic Power state (POST_CHANGE, a resource-history seam, Blood-owned carry)
+
+The largest first blocker after M11-B4 — `runic_power.deficit` at 43 + 3
+bundle decisions and 7 opener decisions, every one a cast that costs no
+Runic Power and therefore carries no PRE_COST amount of it — answered from
+causally prior OBSERVED resource states, never from arithmetic.
+
+**The question.** At an observed decision, what exact value or one-sided
+bound on Runic Power follows from prior observed states under proven
+coverage, without inventing a gain, a spend, a refund, a decay or an
+overflow? In-combat Runic Power has no passive term to model: decay runs
+only out of combat (`runic_power_decay_event_t` guards on `!in_combat`,
+sc_death_knight.cpp:6350-6375) and every in-combat change is a discrete
+`resource_gain` (a `resourcechange`) or an action cost (a costed cast).
+
+**The `POST_CHANGE` contract (owner decision 1).** M4's resource timing
+gained a third member: the attachment on a normalized `RESOURCE_CHANGE`
+whose resource type IS the type that event changed reports the amount
+AFTER the change. Nothing else moved — a second pool's snapshot on the same
+event, an uncosted cast, a damage event stay `EVENT_ASSOCIATED`; a costed
+completed cast stays `PRE_COST`. It was withheld until now because its
+evidence had rested on same-timestamp adjacency; the Blood corpus settled it
+by whole-window reconciliation: over 165 s + 20 s of one actor's Runic
+Power, carrying the latest read amount forward — each of the 290
+POST_CHANGE attachments REPLACING it, each costed cast leaving it unread —
+reproduces every later Death Strike PRE_COST amount (50 of 50) and every
+later uncosted attachment (175 of 175) with zero hidden changes; 238
+integer gains sum exactly beside their attachment, 8 cap events read the
+reported max, and the 20 Anti-Magic Shell gains show a ROUNDED delta beside
+an EXACT attachment (610 + 0 → 617). A pre-change reading matches none of
+them. The corpus pins it (`COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT`
+over the 45 s slice and the opener).
+
+**The M4 policy (owner decision 2).** The resource-state header no longer
+forbids continuity outright; it forbids it everywhere but one gated
+primitive. `resourceHistoryAt(query)` returns the latest attached
+observation of an actor's resource before a position — PRE_COST,
+POST_CHANGE or EVENT_ASSOCIATED, tag attached — and every observation of
+that resource since it, under a RESOURCES continuity claim FROM THE ANCHOR
+(COMPLETE coverage, no unattributed snapshot in between). Each entry
+carries its own OBSERVED amount and the standalone change's SIGN
+(`changeSign`), never a magnitude to add; `observationsWithinBefore`
+returns the observations ahead of a position inside a caller-supplied
+window, inclusive at both edges. Delta replay, regeneration, interpolation
+and a running ledger remain prohibited, and `latestObservedAtOrBefore` is
+still not a continuity claim. With an attachment on every event the anchor
+IS the latest read state; the list since it holds only a change with no
+attachment of its type — the one shape a caller cannot read a state from.
+
+**The Blood carry (`src/specs/deathknight/blood/runic-power-state.ts`).**
+In the fixed order: wire contract pinned; the decision's own PRE_COST
+(`OWN_PRE_COST`, the M11-B2 path untouched); the history under RESOURCES
+continuity; CASTS continuity over the same interval, gated by Blood because
+a spend is a cast and the generic layer composes no categories; an uncosted
+anchor corroborated against the exact state before it (a disagreement with
+no observed change between is `EVIDENCE_CONTRADICTS_CARRY`, never
+re-anchored around); `max` present at the anchor and unchanged since
+(`MAX_NOT_ESTABLISHED` / `MAX_CHANGED`); then the window. With nothing in
+the window the state is the anchor's read amount if it is POST_CHANGE or
+uncosted (`CARRIED_EXACT`, `deficit = (max − amount) / 10`), and UNKNOWN if
+it is a costed cast (`POST_SPEND_NOT_OBSERVED`, owner decision 4: the
+deduction is 350 or 250 under Blood Draw and is NOT on the wire, and neither
+`pre − cost` nor the pinned deduction is ever computed). A change with no
+attachment or a negative change refuses (`CHANGE_WITHOUT_POST_STATE`,
+`NEGATIVE_CHANGE_UNPINNED`).
+
+**The 1 ms resource window (owner decision 3).** The corpus shows the
+resource analogue of the aura hazard, narrowly: a Heart Strike's or
+Vampiric Strike's own Heartbreaker gain is logged 0 or 1 ms AHEAD of the
+cast (78 of 78), Relish in Blood ahead of Death and Decay (9 of 9), while
+every principal gain follows its cast and every independent gain lies 7 ms
+or more away. `BLOOD_RESOURCE_PRE_DECISION_WINDOW_MS = 1`, inclusive (leads
+0 and 1 inside, 2 outside), a separate constant from the 50 ms aura window
+and the 50 ms threshold tolerance. An observation inside the window is not
+attributed to either side of the decision. If every window observation is
+a non-negative change with an exact POST_CHANGE amount (or an uncosted
+snapshot), both readings agree the pre-decision Runic Power is AT MOST the
+last of those amounts — a gain cannot lower it — so the deficit is bound
+below: `BOUNDED_NUMBER { atLeast: (max − A) / 10 }` (`WINDOW_BOUNDED`),
+which the evaluator's existing rule turns into `deficit<20` FALSE when the
+bound is at least 20, and never TRUE. A costed cast or a negative change
+inside the window refuses (`WINDOW_SPEND_AMBIGUOUS`,
+`NEGATIVE_CHANGE_UNPINNED`). No upper bound was added; the cases it would
+decide (a window gain with the amount above 105 points) are counted, not
+guessed.
+
+**The remeasurement (bundle 123 / opener 21).** MATCH 25 / REJECTED 0 /
+UNKNOWN 98 (B4: 21 / 0 / 102); opener 1 / 0 / 20 (unchanged). The four new
+matches are Blood Boils at `sanlayn[6]` (`buff.boiling_point.up`) whose
+every higher entry is FALSE — `sanlayn[2]` from a CARRIED_EXACT deficit of
+47, 31.9, 65.9 and 30.9 points. Runic Power at the 123: OWN_PRE_COST 44,
+CARRIED_EXACT 14, WINDOW_BOUNDED 59 (leads 0 ×72, 1 ×7), POST_SPEND_NOT_
+OBSERVED 5, NO_ANCHOR 1 (the pull); opener 6 / 5 / 10 / 0 / 0. Every carry
+distance is at most 4,156 ms and 22 events; `max` is 1,250 at every
+observation. No REJECTED occurred: where the Death Strike gate resolves TRUE
+at a cast that is not Death Strike, Death Strike's USABILITY is undecided
+(M11-B2 builds no affordability proof on the wire's cost), so the scan
+stays UNKNOWN there rather than rejecting. The stopping entries and B1
+dispatch outcomes are unchanged from M11-B3. Of the 43 + 3 decisions B4 left
+on `runic_power.deficit`, 40 + 3 advance; 3 remain (Blood Boils after a
+Death Strike with no observation between, POST_SPEND). The first undecided
+GCD candidate is now `sanlayn[7] marrowrend` on `buff.blood_debt.stack` at
+45 (37%), the Essence window refusals at `san_gift[0]` 14 and `sanlayn[1]`
+11, `sanlayn[0]` Bone Shield window refusals 7, `sanlayn[5] any_dnd`
+usability 4, the Dancing Rune Weapon gate 3, `san_gift[3]` Essence stack 3,
+`sanlayn[2]` Runic Power (post-spend) 3 and Death Strike usability 3,
+`sanlayn[6]` Blood Boil usability 2 and Boiling Point 1, `san_gift[1]`
+Death Strike usability 1, `sanlayn[9]` `fight_remains` 1.
+
+**Proven.** `tests/unit/m11b5-resource-post-change-contract.test.ts` (the
+contract and the whole-window reconciliation, validation only),
+`m11b5-resource-history.test.ts`, `m11b5-blood-runic-power-state.test.ts`
+(exact carry, window bound, costed-cast invalidation, every refusal, the
+ordering census, a source guard that the Blood module never reads a delta's
+magnitude or subtracts a cost), the re-pointed M4 contract tests, the
+re-pinned `m11b2-blood-*` tests, three new corpus kinds
+(`COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT`,
+`SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT`,
+`RUNIC_POWER_EVIDENCE_CENSUS`; the corpus is 43 artifacts / 156 cases / 551
+assertions), and the invariance harness: 33 of 33 non-timing captures
+byte-identical against HEAD (9e1f370) — every public consumer reads its own
+cast's PRE_COST and nothing else. Blood stays INTERNAL_ONLY; M11-B is not
+complete.
+
 ---
 
 # Milestone 12 — Healer Foundation

@@ -867,6 +867,42 @@ export const ASSERTION_KINDS = {
     description:
       "The latest resource observation at or before the locator is the one at this report time with this verbatim amount — STALE when earlier than the query. Nothing is regenerated, interpolated or replayed to produce a later value.",
   },
+  "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT": {
+    owningLayer: "COMBAT_STATE",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        resourceWireType: z.number().int(),
+        /** How many attachment units one delta unit is (Runic Power: the delta is whole points, the amount is tenths). */
+        deltaScale: z.number().int().positive(),
+        expected: z
+          .object({
+            observations: z.number().int().nonnegative(),
+            postChange: z.number().int().nonnegative(),
+            /** POST_CHANGE amounts equal to the carried state plus the scaled delta. */
+            integerReconciled: z.number().int().nonnegative(),
+            /** POST_CHANGE amounts equal to the reported max where the scaled sum exceeds it. */
+            capEvents: z.number().int().nonnegative(),
+            /** POST_CHANGE amounts within one delta unit of the scaled sum: the delta was rounded, the attachment is exact. */
+            deltaRoundedAttachmentExact: z.number().int().nonnegative(),
+            /** Later costed casts whose PRE_COST amount equals the carried state. */
+            preCostMatches: z.number().int().nonnegative(),
+            /** Later uncosted attachments equal to the carried state. */
+            uncostedMatches: z.number().int().nonnegative(),
+            hiddenChangeMismatches: z.number().int().nonnegative(),
+            maxValues: z.array(z.number()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "M11-B5. Every attachment of this resource on this actor's resourcechange events is tagged POST_CHANGE, and carrying the latest exact observed amount forward — each POST_CHANGE attachment REPLACING the state, a costed cast leaving it unknown until the next observation — reproduces every later PRE_COST and uncosted amount with zero hidden changes. The scaled delta is compared beside each attachment only to classify it (reconciled, capped, or rounded where the attachment is exact); no state is ever produced from a delta.",
+  },
   "COMBAT_STATE.AURA_PRESENCE": {
     owningLayer: "COMBAT_STATE",
     outcomeClass: "POSITIVE_FACT",
@@ -2171,6 +2207,65 @@ export const ASSERTION_KINDS = {
     requiresAuthority: true,
     description:
       "M11-B4. At this decision the Blood remains derivation binds (or refuses to bind) this buff.<name>.remains atom exactly so: an EXACT remainder from the last application, stack gain or refresh under continuity from that gain and the pinned Blood duration; a LOWER BOUND past a Bone Shield refresh of unpinned cause; exactly zero from an observed removal or a build proof; SimulationCraft's permanent sentinel for an active Vampiric Strike; UNBOUND with the reason otherwise — a transition inside the 50 ms pre-decision window, a coverage gap from the gain, no gain observed, a contradiction, or an exact value within 50 ms of a pinned threshold. Never from silence, never from a later transition, never clamped.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            state: z.enum(["BOUND", "UNBOUND"]),
+            proof: z.enum(["OWN_PRE_COST", "CARRIED_EXACT", "WINDOW_BOUNDED"]).nullable(),
+            bindingState: z.enum(["KNOWN_NUMBER", "BOUNDED_NUMBER"]).nullable(),
+            /** `runic_power.deficit` in POINTS: the exact value, or the lower bound. */
+            deficitPoints: z.number().nullable(),
+            /** The exact current amount (wire tenths) for the exact proofs; null otherwise. */
+            currentWire: z.number().int().nullable(),
+            /** The proven upper limit (wire tenths) for WINDOW_BOUNDED; null otherwise. */
+            atMostWire: z.number().int().nullable(),
+            maxWire: z.number().int().nullable(),
+            anchorReportTimeMs: z.number().int().nullable(),
+            anchorTiming: z.enum(RESOURCE_OBSERVATION_TIMINGS).nullable(),
+            windowLeadsMs: z.array(z.number().int()),
+            reason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "M11-B5. At this decision the Blood Runic Power state is exactly so: the decision's own PRE_COST amount (OWN_PRE_COST); the latest observed amount carried under RESOURCES and CASTS continuity with nothing inside the 1 ms resource window (CARRIED_EXACT); a lower bound on the deficit from non-negative changes 0-1 ms ahead of the decision whose side of it is not pinned (WINDOW_BOUNDED); or UNBOUND with the reason — no anchor, a gap, a costed cast with no observation after it, a contradiction, a spend or negative change in the window, a missing or changed max. Never `pre - cost`, never a summed delta.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_EVIDENCE_CENSUS": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            /** Every eligible decision's Runic Power evidence, `OWN_PRE_COST / CARRIED_EXACT / WINDOW_BOUNDED / <reason>` -> count. Exact and exhaustive. */
+            runicPowerEvidence: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every window observation's lead, `lead <ms>` -> count. Exact and exhaustive. */
+            runicPowerWindowLeads: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "THE M11-B5 MEASUREMENT. Every eligible decision's Runic Power evidence distributes exactly so, and every observation inside the 1 ms resource window is counted by its lead. Nothing here is a verdict.",
   },
   "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS": {
     owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
