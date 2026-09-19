@@ -207,6 +207,15 @@ describe("M5 invents no combat state", () => {
     // never from silence. Its companion test is
     // tests/unit/m11a4-retribution-bindings.test.ts.
     "src/specs/paladin/retribution/aura-bindings.ts",
+    // M11-B2. The Blood Death Knight's buff atoms, its build-proof
+    // exclusions (a hero-tree-owned aura in a build resolved to the other
+    // tree, a producing talent disproved at its choice node) and its EXACT
+    // Bone Shield count — the last stack-bearing transition's number, carried
+    // only across same-millisecond refresh companions under an EXACT ACTIVE
+    // presence, refused across a lone refresh, an initial application or a
+    // transition at the decision's own millisecond. Never a count from
+    // silence. Its companion test is tests/unit/m11b2-blood-bindings.test.ts.
+    "src/specs/deathknight/blood/aura-bindings.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];
@@ -417,6 +426,9 @@ describe("M5 forms no unearned verdict", () => {
       // M11-A4: the third specialization's facade and domain vocabulary.
       "src/specs/paladin/retribution/observed-analysis.ts",
       "src/specs/paladin/retribution/domains.ts",
+      // M11-B2: the fourth (INTERNAL_ONLY) specialization's facade and domain vocabulary.
+      "src/specs/deathknight/blood/observed-analysis.ts",
+      "src/specs/deathknight/blood/domains.ts",
     ];
     for (const path of M5_FILES) {
       const code = codeOf(path);

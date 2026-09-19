@@ -26,6 +26,7 @@ import * as publicContract from "./executors/public-contract.js";
 import * as spec from "./executors/spec-assassination.js";
 import * as protection from "./executors/spec-protection-paladin.js";
 import * as retribution from "./executors/spec-retribution-paladin.js";
+import * as blood from "./executors/spec-blood-death-knight.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
@@ -368,6 +369,88 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "SPEC_BLOOD_DEATH_KNIGHT.AUTHORITY_PROVENANCE":
+      return blood.authorityProvenance(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE":
+      return blood.decisionCoverage(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY":
+      return blood.coverageSummary(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.STOPPING_POINT_DISTRIBUTION":
+      return blood.stoppingPointDistribution(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT":
+      return blood.dispatchTraceAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION":
+      return blood.resourceObservation(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT":
+      return blood.auraBindingAt(context, corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT":
+      return blood.stackBindingAt(context, corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT":
+      return blood.cooldownReadinessAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT":
+      return blood.domainResult(context, corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION":
+      return blood.buildResolution(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.NON_DOMAIN_ENTRIES":
+      return blood.nonDomainEntries(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.ANALYSIS_STATUS":
+      return blood.analysisStatus(context, corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_BLOOD_DEATH_KNIGHT.SPEC_GATE":
+      return blood.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "APPLICATION_SERVICE.INTERNAL_REGISTRATION":
       return applicationService.internalRegistration(params as ParamsOf<typeof assertion.kind>);
     case "PUBLIC_CONTRACT.REST_MCP_PARITY":
@@ -444,6 +527,20 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_RETRIBUTION_PALADIN.ANALYSIS_STATUS",
   "SPEC_RETRIBUTION_PALADIN.SPEC_GATE",
   "SPEC_RETRIBUTION_PALADIN.PUBLIC_PROJECTION",
+  "SPEC_BLOOD_DEATH_KNIGHT.AUTHORITY_PROVENANCE",
+  "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+  "SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY",
+  "SPEC_BLOOD_DEATH_KNIGHT.STOPPING_POINT_DISTRIBUTION",
+  "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+  "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+  "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+  "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+  "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+  "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
+  "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION",
+  "SPEC_BLOOD_DEATH_KNIGHT.NON_DOMAIN_ENTRIES",
+  "SPEC_BLOOD_DEATH_KNIGHT.ANALYSIS_STATUS",
+  "SPEC_BLOOD_DEATH_KNIGHT.SPEC_GATE",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",
 ];

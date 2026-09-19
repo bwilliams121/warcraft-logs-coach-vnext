@@ -72,7 +72,7 @@ row).
 | `warrior/arms` | C | local raw | blocked | PARTIAL | `colossus-smash-window-fill` |
 | `warrior/fury` | C | none | not yet | UNASSESSED | — |
 | `warrior/protection` | C | none | not yet | UNASSESSED | — |
-| `deathknight/blood` | C | local raw | blocked | SPECIFIC_QUESTIONS_IDENTIFIED | `coagulopathy-maintenance-clip`, `bone-shield-stack-maintenance` |
+| `deathknight/blood` | C — INTERNAL_ONLY measurement slice at M11-B2 | committed sanitized (A7R6 actor 14, 165 s; gtKb actor 14, 20 s) | audited (M11-B2: the 12.1.0 list extracted with its client-version guards evaluated; Coagulopathy line absent at this pin) | SPECIFIC_QUESTIONS_IDENTIFIED | `coagulopathy-maintenance-clip` (SUPERSEDED — no pinned line at 12.1.0), `bone-shield-stack-maintenance` (stack count bound at 114/123 decisions; `buff.bone_shield.remains` the open atom) |
 | `deathknight/frost` | C | local raw | blocked | PARTIAL | `rune-and-runic-power-pooling` |
 | `monk/brewmaster` | C | local raw | blocked | PARTIAL | `celestial-brew-charge-capping` |
 | `demonhunter/vengeance` | C | none | not yet | UNASSESSED | — |

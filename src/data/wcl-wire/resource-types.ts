@@ -74,6 +74,30 @@
  * events (+1, +2, +3 with `waste` 0–3 observed) remain observations that are
  * never replayed onto a snapshot.
  *
+ * RUNES AND RUNIC POWER (M11-B2) ARE CORROBORATED BY A BLOOD DEATH KNIGHT CAPTURE
+ *
+ * Types 5 and 6 were seen, in the first 45 s of the same complete 20-player
+ * fight, on exactly one actor — the Blood Death Knight subject — and on no
+ * other class. Type 5 appeared only ATTACHED to the subject's own casts,
+ * every entry costed at 1 or 2 against a stable `max` of 6; no standalone
+ * `resourcechange` of type 5 exists in the window at all, so Rune
+ * regeneration is not on the wire and nothing here models it. Type 6
+ * appeared attached to 172 events with a stable `max` of 1250, sixteen of
+ * them costed at exactly 450 — Death Strike's DBC `_cost`, in TENTHS of a
+ * Runic Power point — and on 89 standalone `resourcechange` events.
+ *
+ * TWO FACTS ABOUT THE TYPE-6 `cost` FIELD, RECORDED SO NO ONE RE-DISCOVERS THEM
+ *
+ * First, the attached amount is PRE_COST, exactly as M4's sampling contract
+ * says: every one of the subject's Death Strike casts is followed by a
+ * snapshot 350 lower (990 → 640, 980 → 650, 1040 → 690, …). Second, the
+ * `cost` on the wire is the spell's BASE cost, not the amount deducted: the
+ * observed deduction is 350 against a reported 450 — this build takes cost
+ * reductions the wire does not fold in — and the second subject cast Death
+ * Strike twice with an attached amount BELOW the reported cost (440 and 390
+ * against 450). A `cost` field is therefore identity corroboration for the
+ * resource and nothing else: no affordability proof may be built on it.
+ *
  * Outside the declared scope, `resourceWireTypeFor` fails closed. It does not
  * fall back, does not widen, and does not guess.
  */
@@ -86,9 +110,15 @@ import {
 } from "../provenance.js";
 
 /** Resource identities this project models. Deliberately not a full database. */
-export type ResourceId = "COMBO_POINTS" | "ENERGY" | "HOLY_POWER";
+export type ResourceId = "COMBO_POINTS" | "ENERGY" | "HOLY_POWER" | "RUNES" | "RUNIC_POWER";
 
-export const RESOURCE_IDS = ["COMBO_POINTS", "ENERGY", "HOLY_POWER"] as const satisfies readonly ResourceId[];
+export const RESOURCE_IDS = [
+  "COMBO_POINTS",
+  "ENERGY",
+  "HOLY_POWER",
+  "RUNES",
+  "RUNIC_POWER",
+] as const satisfies readonly ResourceId[];
 
 /** Evidence from a versioned game-data enumeration. Necessary, never sufficient. */
 export interface GameEnumEvidence {
@@ -223,6 +253,76 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "Righteous casts carrying no type-9 entry at all, which are the evidence that absence is " +
           "not zero. The earlier Retribution observation (A7R6 fight 7, actor 6, 4/5 cost 3) in " +
           "wcl-assassination-envenom-combo-points is consistent with all of it.",
+      },
+    },
+  },
+  {
+    wireType: 5,
+    resourceId: "RUNES",
+    scope: { gameVersion: 1, logVersion: 17 },
+    evidence: {
+      gameEnum: {
+        enumName: "Enum.PowerType",
+        memberName: "Runes",
+        value: 5,
+        expansion: "Midnight",
+        gameBuild: "12.0",
+        source: "World of Warcraft client power-type enumeration",
+        verifiedOn: "2026-09-18",
+      },
+      wireCorroboration: {
+        fixtureId: "wcl-blood-death-knight-a7r6-rotational-45s",
+        reportCode: "A7R6kxPJ1hC8YQ4w",
+        reportRevision: 30,
+        capturedOn: "2026-09-16",
+        observation:
+          "Across the first 45 s of the same complete 20-player fight (30,588 events in four pages, the " +
+          "last terminal, revision 30 before and after), wire type 5 appeared attached to 25 events on " +
+          "exactly one actor — the Blood Death Knight subject (actor 14) — and on no other class. Every " +
+          "attached entry was costed, at 1 (Heart Strike 206930, Vampiric Strike 433895, Death's Caress " +
+          "195292, Death and Decay 43265) or 2 (Marrowrend 195182), against a stable max of 6; observed " +
+          "amounts were 1 through 6; zero had amount above max, a null max, or amount below cost. No " +
+          "standalone resource-change event of type 5 exists in the window: Rune regeneration is not " +
+          "reported on the wire, and nothing in this project models it. The other three committed slices " +
+          "of the same subject (two later A7R6 segments and the gtKb opener) show the same shape: " +
+          "attached, costed 1 or 2, max 6, actor 14 only.",
+      },
+    },
+  },
+  {
+    wireType: 6,
+    resourceId: "RUNIC_POWER",
+    scope: { gameVersion: 1, logVersion: 17 },
+    evidence: {
+      gameEnum: {
+        enumName: "Enum.PowerType",
+        memberName: "RunicPower",
+        value: 6,
+        expansion: "Midnight",
+        gameBuild: "12.0",
+        source: "World of Warcraft client power-type enumeration",
+        verifiedOn: "2026-09-18",
+      },
+      wireCorroboration: {
+        fixtureId: "wcl-blood-death-knight-a7r6-rotational-45s",
+        reportCode: "A7R6kxPJ1hC8YQ4w",
+        reportRevision: 30,
+        capturedOn: "2026-09-16",
+        observation:
+          "Across the first 45 s of the same complete 20-player fight, wire type 6 appeared attached to " +
+          "172 events describing exactly one actor — the Blood Death Knight subject (actor 14; the one " +
+          "attached entry on a cast sourced by actor -1 is an environment cast TARGETING the subject, " +
+          "whose resourceActor field names the target) — and on no other class, with a stable max of 1250. " +
+          "Sixteen attached entries were costed, every one at exactly 450 on a Death Strike (49998) cast — " +
+          "the DBC `_cost` of that spell in tenths of a point, power_type_data.inc row 6 divisor 10 — and " +
+          "zero had amount above max, a null max, or amount below cost. Eighty-nine standalone " +
+          "resource-change events of type 6 occurred, all on actor 14, all with maximum 1250, changes of 0 " +
+          "to 20 and waste of 0 to 15; they are NOT in the attached encoding (a Heart Strike gain reports " +
+          "15 where the attached scale would say 150) and are never read as amounts. PRE_COST holds: each " +
+          "Death Strike cast's attached amount exceeds the next attached amount by 350, the deduction this " +
+          "build actually pays, which is LESS than the 450 the cost field reports; the gtKb subject cast " +
+          "Death Strike with attached amounts 440 and 390 against a reported cost of 450. The cost field " +
+          "corroborates identity only.",
       },
     },
   },

@@ -5672,6 +5672,160 @@ run entry is produced in B1, and the target profile that first needs one
 (M11-B2) will pin its call/run graph as target-specific data consumed by the
 generic checker.
 
+### M11-B2 — Blood Death Knight INTERNAL_ONLY measurement slice
+
+The cohort's representative specialization, onboarded exactly as the
+Paladin specializations were and for one purpose: to run the B1 dispatch
+semantics over a REAL hero-tree-gated `run_action_list` authority on real
+evidence and record where the shared machinery stops, and on which atom.
+Nothing was widened to force a resolved decision, and none resolved. The
+numbers below are the deliverable.
+
+**The onboarding (2026-09-18, uncommitted at the time of writing).**
+`deathknight/blood` joined `SpecId` and `INTERNAL_ONLY_SPEC_IDS`; the
+`BLOOD_DEATH_KNIGHT_REGISTRATION` row (`src/specs/deathknight/blood/`,
+`defineSpecModule`, exposure `INTERNAL_ONLY`, roster specID 250, TANK)
+joined the production catalog as its fourth row and its first INTERNAL_ONLY
+member since M11-A5. The five public sites are untouched: the public
+partition, the public contract's `specId` enum, the identity table
+(`DeathKnight/Blood` resolves to no `SpecId`), the `satisfies
+InternalOnlySpecId` on `spec.ts`, and the exposure. The application service
+answers `SPEC_NOT_SUPPORTED` for the real subject with zero analyzer calls
+and zero ingestion; the supported-specializations sentence, both MCP tool
+descriptions, `ENABLED_ANALYZERS` and the derived ingestion requirements did
+not move; the invariance harness's 33 non-timing captures are byte-identical
+between HEAD (2b6d77f) and the B2 tree.
+
+**The pinned authority and its guards.** `SIMC_APL_DEATHKNIGHT_BLOOD` is the
+`//blood_apl_start .. //blood_apl_end` region of
+`engine/class_modules/apl/apl_death_knight.cpp` at the shared pin 33622e9d
+— six lists, 56 actions, four dispatch entries (`default[13]` calls
+`high_prio_actions`; `default[14..16]` run `deathbringer`, `san_gift`,
+`sanlayn` under `hero_tree.*` and `buff.gift_of_the_sanlayn.up` gates). The
+region carries twelve `p->sim->dbc->wowv()` client-version guards; the APL
+extractor grew a generic guard evaluator (`--target deathknight-blood`
+declares `clientVersion: [12, 1, 0]`), dropped the nine pre-12.1 statements
+behind the five `< 12.1.0` branches, kept the eight behind the seven `>=`
+branches, and recorded every guard under
+`provenance.conditionalCompilation`, which `authority-artifact.ts` now
+validates (a malformed record is a failed load). The live 12.1 list has NO
+Coagulopathy Death Strike line: the inventory question that named it is
+superseded by the pinned list itself. The extractor also grew a generic
+`DISPATCH_GRAPH` required-facts verifier (list sizes, exact CALL/RUN edge
+list, forbidden tokens, no targeting options); the Blood graph is
+target-specific data consumed by that checker, and no blanket
+`ALLOW_RUN_ACTION_LIST` exists. The three existing APL artifacts regenerate
+byte-identically.
+
+**The datasets, all at the same pin.** GCD semantics (24 DBC `_gcd`
+records: Dancing Rune Weapon is `_gcd` 1500 — an answer, never a step;
+Raise Dead and Vampiric Blood are `_gcd` 0; `heart_strike` binds to BOTH
+206930 and its Vampiric Strike execution 433895; `any_dnd` is a pinned
+alias of `death_and_decay`, sc_death_knight.cpp:14424-14427), talents (13
+identities and the two hero sub-trees, San'layn 31 and Deathbringer 33),
+spender costs (Death Strike 450 tenths of Runic Power; the Rune spenders 1
+or 2 runes; Death's Caress on a 6 s cooldown), and ONE ability cooldown —
+Dancing Rune Weapon, 120,000 ms less Insatiable Blade's 30,000 ms; Vampiric
+Blood is deliberately unpinned because Red Thirst shortens it dynamically
+(sc_death_knight.cpp:13143-13147; the subject's two casts are 62 s apart
+against a 90 s base). The Rune (type 5) and Runic Power (type 6) wire
+contracts are corroborated by the committed 45 s slice. Two wire facts
+recorded there so no one rediscovers them: the attached Runic Power amount
+is PRE_COST (every Death Strike is followed by a snapshot exactly 350
+lower), and the `cost` field is the DBC BASE cost, not the amount paid (450
+reported, 350 paid; the gtKb subject cast Death Strike with 440 and 390
+attached against a reported 450). No affordability or
+`INSUFFICIENT_RESOURCE` proof exists for any Blood entry, and that is why.
+
+**What the Blood module binds, and how (all Blood-owned).** Hero-tree atoms
+from the resolved sub-tree; `runic_power.deficit` in points from a Death
+Strike's own PRE_COST entry (the wire's tenths converted once); `rune` from
+a Rune-costed cast's own entry; `time` from the decision's fight time.
+Presence for eight buff atoms through M4 `presenceAt`, with two build
+proofs the shared evaluator had no need of before: an aura whose every
+producer is a hero talent of the OTHER resolved sub-tree is bound DOWN
+(`HERO_TREE_EXCLUDED` — `buff.exterminate.up` for a San'layn build), and a
+producing talent disproved at its choice node binds DOWN
+(`TALENT_NOT_SELECTED`). The EXACT Bone Shield count through the existing
+`knownBuffStacks` seam under a Blood-owned rule: the last stack-bearing
+transition's absolute number, carried across nothing but same-millisecond
+`refreshbuff` companions under an EXACT ACTIVE presence — a lone refresh, an
+initial application, or any transition at the decision's own millisecond
+refuses (`COUNT_AMBIGUOUS_SINCE_OBSERVATION`, `NO_STACK_OBSERVATION`,
+`SAME_MILLISECOND_TRANSITION`). Bound at 114 of 123 bundle decisions and 20
+of 21 opener decisions. Three reviewed NON_GCD transition contracts
+(`auto_attack`, `vampiric_blood`, `raise_dead`), each writing nothing a
+later entry reads. The class/spec domain boundary is the M11-A4 policy
+restated in Blood's words over the token tables promoted to
+`src/simc/non-domain-tokens.ts`; the M11-A4 token-cooldown derivation was
+promoted verbatim to `src/findings/cooldowns/token-cooldown-derivation.ts`
+(it composes engine cooldown primitives with `NumericBinding`, so it lives
+in the M5 layer and not under `src/engine`), and both Paladin and Blood
+wrappers are thin over it. Death Strike's dual role is stated through the
+existing domain architecture: all six domains are DECLARED for a tank, five
+bound to nothing (`NO_PINNED_AUTHORITY_FOR_DOMAIN`, never
+`DOMAIN_NOT_DECLARED`), the offensive result carries
+`deathStrikeDualRole: true`, and ACTIVE_MITIGATION / SELF_HEALING carry
+`sharesActionWithOffensive: "death_strike"`.
+
+**A measured Warcraft Logs ordering hazard.** In these captures a cast's OWN
+aura effects are written BEFORE the cast at the same millisecond (a
+Marrowrend at 2,015,770 is preceded in the array by the three Bone Shield
+stack gains it caused; 28 of the 48 first-slice decisions have a same-ms
+self-aura transition ahead of them). `BEFORE_EVENT` at the cast position
+therefore includes them and would read the POST-cast state. The M11-A4
+slice recorded the opposite order for a Divine Storm consuming Divine
+Arbiter; the ordering is not a contract, and the Blood aura bindings refuse
+any identity with a transition at the decision's own millisecond ahead of
+it. The Paladin bindings do not yet make that refusal; it is a follow-up,
+not a B2 change.
+
+**The measurement (corpus cases, `SPEC_BLOOD_DEATH_KNIGHT.*`).** Over the
+composed 165 s A7R6 bundle (actor 14, San'layn): 123 eligible decisions
+(Death Strike, Heart Strike including its Vampiric Strike execution, Blood
+Boil, Marrowrend, Death's Caress), 148 excluded by name, 0 MATCH, 0
+REJECTED, 123 UNKNOWN. Root-scan stopping entries: `sanlayn[0]
+deaths_caress` 98, `san_gift[0] heart_strike` 24, `default[15]
+run_action_list` 1 — the first two on the DECIMAL LITERAL `1.5` the frozen
+parser refuses (`UNSUPPORTED_NUMERIC_LITERAL`), the last on an unobserved
+Gift at the pull. The B1 dispatch semantics held on every scan: `default[14]
+run deathbringer` `RUN_GATE_FALSE_SKIPPED` ×123 (hero tree bound FALSE),
+`default[15] run san_gift` entered-and-blocked ×24 inside the Gift window,
+skipped ×98 outside it, blocked-undecided ×1, `default[16] run sanlayn`
+entered-and-blocked in exactly those 98. Dancing Rune Weapon was a competing
+undecided GCD candidate at 3 decisions (cooldown not proven; gate on
+`debuff.reapers_mark_debuff.up`, unbindable, and `fight_remains`,
+PREDICTIVE). The gtKb opener (21 decisions) reproduces the same shape. The
+nested unselectability proof never holds — every supported token has an
+unconditional entry — and additionally refuses on `precombat[1]` (an
+unreachable list) and on `deathbringer[*]` entries (a list the resolved
+hero tree can never enter): two measured limits of the cross-list proof,
+recorded rather than repaired.
+
+**What lies behind the literal (a reverted experiment, not a change).**
+With decimal literals temporarily admitted, still 0 resolved: 43 decisions
+block at `sanlayn[10] consumption` (Consumption's NORMAL node is absent, so
+applicability is UNKNOWN by the three-way rule, and the entry also carries
+the unrecognised `empower_to=` option), and the rest end with competing
+undecided candidates on `buff.bone_shield.remains` (98), `buff.essence_of_
+the_blood_queen.remains` (122), `buff.vampiric_strike.remains` (98),
+`buff.crimson_scourge.remains` (101), `buff.visceral_strength.remains` (18),
+`buff.blood_debt.stack` (73), `runic_power.deficit` on non-Death-Strike
+casts (118), `fight_remains` (141), `buff.boiling_point.up` before its first
+transition (11). No single non-boundary capability resolves a decision on
+this list; the smallest next step and the ranking are in the M11-B2 report.
+
+**Proven.** `tests/unit/m11b2-blood-authority-data.test.ts`,
+`tests/unit/m11b2-blood-bindings.test.ts`,
+`tests/contracts/m11b2-blood-registration.test.ts`,
+`tests/contracts/m11b2-blood-evaluator.test.ts`, sixteen corpus cases over
+four SANITIZED_CAPTURE slices cut from the three existing captures (no WCL
+request), and the reviewed count updates in the catalog-shape tests. The
+corpus is 43 artifacts / 154 cases / 511 assertions, crossing the 4 MiB
+notice line deliberately (4,792,400 bytes; the line moves to 5 MiB, the
+6 MiB ceiling unchanged). Blood stays INTERNAL_ONLY; the promotion evidence
+gate reports it and would refuse it.
+
 ---
 
 # Milestone 12 — Healer Foundation

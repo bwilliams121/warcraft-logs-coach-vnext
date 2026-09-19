@@ -52,12 +52,14 @@
  */
 
 /** Every specialization this build has an internal name for. */
-export type SpecId = "rogue/assassination" | "paladin/protection" | "paladin/retribution";
+export type SpecId =
+  "rogue/assassination" | "paladin/protection" | "paladin/retribution" | "deathknight/blood";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
   "paladin/protection",
   "paladin/retribution",
+  "deathknight/blood",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -87,8 +89,17 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * reported real MATCH and REJECTED evidence for it. The slice it publishes
  * is exactly the slice it had: promotion changed reachability, not the
  * analyzer.
+ *
+ * Blood Death Knight arrived here in M11-B2 as the representative vertical
+ * slice for the `run_action_list` dispatch cohort: a real, registered,
+ * INTERNAL_ONLY evaluator whose purpose is MEASUREMENT — where the shared
+ * engine's traversal of a dispatch-heavy tank authority stops, and on which
+ * atom — not promotion. It stays here until the promotion evidence gate has
+ * real MATCH and REJECTED evidence for it, and no such evidence is claimed.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
+  "deathknight/blood",
+] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

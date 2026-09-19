@@ -1,0 +1,522 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "deathknight",
+    "specName": "blood"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "2026-09-12",
+    "sourcePath": "engine/class_modules/apl/apl_death_knight.cpp",
+    "sourceSha256": "e381da691875ceecb8357a76e90fef9e01f3a200c67da7024deff1ca7f728df6",
+    "sourceByteLength": 36557,
+    "regionStartMarker": "//blood_apl_start",
+    "regionEndMarker": "//blood_apl_end",
+    "extractedOn": "2026-09-18",
+    "extractorVersion": 1,
+    "conditionalCompilation": {
+      "clientVersion": "12.1.0",
+      "guards": [
+        {
+          "line": 141,
+          "form": "IF",
+          "comparison": "wowv() < 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": false,
+          "statementsEmitted": 0,
+          "statementsDropped": 2,
+          "endLine": 145
+        },
+        {
+          "line": 146,
+          "form": "ELSE_IF",
+          "comparison": "wowv() >= 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": true,
+          "statementsEmitted": 1,
+          "statementsDropped": 0,
+          "endLine": 147
+        },
+        {
+          "line": 164,
+          "form": "IF",
+          "comparison": "wowv() < 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": false,
+          "statementsEmitted": 0,
+          "statementsDropped": 2,
+          "endLine": 168
+        },
+        {
+          "line": 169,
+          "form": "ELSE_IF",
+          "comparison": "wowv() >= 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": true,
+          "statementsEmitted": 1,
+          "statementsDropped": 0,
+          "endLine": 170
+        },
+        {
+          "line": 173,
+          "form": "IF",
+          "comparison": "wowv() < 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": false,
+          "statementsEmitted": 0,
+          "statementsDropped": 1,
+          "endLine": 174
+        },
+        {
+          "line": 175,
+          "form": "ELSE_IF",
+          "comparison": "wowv() >= 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": true,
+          "statementsEmitted": 1,
+          "statementsDropped": 0,
+          "endLine": 176
+        },
+        {
+          "line": 181,
+          "form": "IF",
+          "comparison": "wowv() < 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": false,
+          "statementsEmitted": 0,
+          "statementsDropped": 2,
+          "endLine": 185
+        },
+        {
+          "line": 186,
+          "form": "ELSE_IF",
+          "comparison": "wowv() >= 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": true,
+          "statementsEmitted": 1,
+          "statementsDropped": 0,
+          "endLine": 187
+        },
+        {
+          "line": 192,
+          "form": "IF",
+          "comparison": "wowv() >= 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": true,
+          "statementsEmitted": 2,
+          "statementsDropped": 0,
+          "endLine": 196
+        },
+        {
+          "line": 198,
+          "form": "IF",
+          "comparison": "wowv() < 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": false,
+          "statementsEmitted": 0,
+          "statementsDropped": 2,
+          "endLine": 202
+        },
+        {
+          "line": 203,
+          "form": "ELSE_IF",
+          "comparison": "wowv() >= 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": true,
+          "statementsEmitted": 1,
+          "statementsDropped": 0,
+          "endLine": 204
+        },
+        {
+          "line": 209,
+          "form": "IF",
+          "comparison": "wowv() >= 12.1.0",
+          "clientVersion": "12.1.0",
+          "holds": true,
+          "statementsEmitted": 1,
+          "statementsDropped": 0,
+          "endLine": 210
+        }
+      ]
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "auto_attack",
+          "comment": null,
+          "sourceLine": 122
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_items",
+          "comment": null,
+          "sourceLine": 123
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,name=light_company_guidon,use_off_gcd=1,if=cooldown.dancing_rune_weapon.remains>78|fight_remains<15",
+          "comment": null,
+          "sourceLine": 124
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,name=algethar_puzzle_box,if=fight_remains>122|cooldown.dancing_rune_weapon.remains>78|fight_remains<25",
+          "comment": null,
+          "sourceLine": 125
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,name=voracious_heart_of_ulatek,use_off_gcd=1,if=cooldown.dancing_rune_weapon.remains>78|fight_remains<20",
+          "comment": null,
+          "sourceLine": 126
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_item,name=blazebinders_hoof,use_off_gcd=1,if=cooldown.dancing_rune_weapon.remains>78|fight_remains<20|fight_remains>120",
+          "comment": null,
+          "sourceLine": 127
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "use_item,name=vile_vial_of_volatile_venom,use_off_gcd=1,if=cooldown.dancing_rune_weapon.remains>78|fight_remains<20|fight_remains>120",
+          "comment": null,
+          "sourceLine": 128
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "fireblood,if=fight_remains>120|cooldown.dancing_rune_weapon.remains>78|fight_remains<8",
+          "comment": null,
+          "sourceLine": 129
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "blood_fury,if=fight_remains>120|cooldown.dancing_rune_weapon.remains>78|fight_remains<12",
+          "comment": null,
+          "sourceLine": 130
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "berserking,if=cooldown.dancing_rune_weapon.remains>78|fight_remains<=15",
+          "comment": null,
+          "sourceLine": 131
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "ancestral_call,if=fight_remains>120|cooldown.dancing_rune_weapon.remains>78|fight_remains<15",
+          "comment": null,
+          "sourceLine": 132
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "potion,if=cooldown.dancing_rune_weapon.remains>78|fight_remains<=30",
+          "comment": null,
+          "sourceLine": 133
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "vampiric_blood,if=!buff.vampiric_blood.up",
+          "comment": null,
+          "sourceLine": 134
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "call_action_list,name=high_prio_actions",
+          "comment": null,
+          "sourceLine": 135
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "run_action_list,name=deathbringer,if=hero_tree.deathbringer",
+          "comment": null,
+          "sourceLine": 136
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "run_action_list,name=san_gift,if=hero_tree.sanlayn&buff.gift_of_the_sanlayn.up",
+          "comment": null,
+          "sourceLine": 137
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "run_action_list,name=sanlayn,if=hero_tree.sanlayn",
+          "comment": null,
+          "sourceLine": 138
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 119
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "deaths_caress",
+          "comment": null,
+          "sourceLine": 120
+        }
+      ]
+    },
+    {
+      "listName": "high_prio_actions",
+      "receiverIdentifier": "high_prio_actions",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "raise_dead,use_off_gcd=1",
+          "comment": null,
+          "sourceLine": 140
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "dancing_rune_weapon,if=!buff.exterminate.up&!debuff.reapers_mark_debuff.up&(fight_remains>95|fight_remains<25|time>300)",
+          "comment": null,
+          "sourceLine": 147
+        }
+      ]
+    },
+    {
+      "listName": "deathbringer",
+      "receiverIdentifier": "deathbringer",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "death_strike,if=(runic_power.deficit<20|(runic_power.deficit<26&buff.dancing_rune_weapon.up))",
+          "comment": null,
+          "sourceLine": 149
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "death_and_decay,if=!buff.death_and_decay.up",
+          "comment": null,
+          "sourceLine": 150
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "reapers_mark",
+          "comment": null,
+          "sourceLine": 151
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "marrowrend,if=buff.exterminate.up",
+          "comment": null,
+          "sourceLine": 152
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "deaths_caress,if=(!buff.bone_shield.up|buff.bone_shield.remains<3|buff.bone_shield.stack<6)&rune<4",
+          "comment": null,
+          "sourceLine": 153
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "marrowrend,if=!buff.bone_shield.up|buff.bone_shield.remains<3|buff.bone_shield.stack<6",
+          "comment": null,
+          "sourceLine": 154
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "death_strike",
+          "comment": null,
+          "sourceLine": 155
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "blood_boil",
+          "comment": null,
+          "sourceLine": 156
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "consumption,empower_to=1,if=!buff.dancing_rune_weapon.up",
+          "comment": null,
+          "sourceLine": 157
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "heart_strike",
+          "comment": null,
+          "sourceLine": 158
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "consumption,empower_to=1",
+          "comment": null,
+          "sourceLine": 159
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "arcane_torrent,if=runic_power.deficit>20",
+          "comment": null,
+          "sourceLine": 160
+        }
+      ]
+    },
+    {
+      "listName": "san_gift",
+      "receiverIdentifier": "san_gift",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "heart_strike,if=buff.essence_of_the_blood_queen.remains<1.5&buff.essence_of_the_blood_queen.remains",
+          "comment": null,
+          "sourceLine": 162
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "death_strike,if=runic_power.deficit<36",
+          "comment": null,
+          "sourceLine": 163
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "any_dnd,if=buff.crimson_scourge.remains&!buff.visceral_strength.remains",
+          "comment": null,
+          "sourceLine": 170
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "heart_strike,if=buff.essence_of_the_blood_queen.stack<7",
+          "comment": null,
+          "sourceLine": 171
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "death_strike",
+          "comment": null,
+          "sourceLine": 172
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "blood_boil,if=buff.boiling_point.up",
+          "comment": null,
+          "sourceLine": 176
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "heart_strike",
+          "comment": null,
+          "sourceLine": 177
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "blood_boil",
+          "comment": null,
+          "sourceLine": 178
+        }
+      ]
+    },
+    {
+      "listName": "sanlayn",
+      "receiverIdentifier": "sanlayn",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "deaths_caress,if=!buff.bone_shield.up|buff.bone_shield.remains<1.5|buff.bone_shield.stack<=1",
+          "comment": null,
+          "sourceLine": 180
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "heart_strike,if=(buff.essence_of_the_blood_queen.remains<1.5&buff.essence_of_the_blood_queen.remains&buff.vampiric_strike.remains&fight_remains>buff.essence_of_the_blood_queen.remains+10)",
+          "comment": null,
+          "sourceLine": 187
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "death_strike,if=runic_power.deficit<20",
+          "comment": null,
+          "sourceLine": 188
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "deaths_caress,if=buff.bone_shield.stack<6",
+          "comment": null,
+          "sourceLine": 189
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "marrowrend,if=buff.bone_shield.stack<6",
+          "comment": null,
+          "sourceLine": 190
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "any_dnd,if=buff.crimson_scourge.remains",
+          "comment": null,
+          "sourceLine": 191
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "blood_boil,if=buff.boiling_point.up",
+          "comment": null,
+          "sourceLine": 194
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "marrowrend,if=buff.blood_debt.stack=10",
+          "comment": null,
+          "sourceLine": 195
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "heart_strike,if=buff.vampiric_strike.up",
+          "comment": null,
+          "sourceLine": 197
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "death_strike,if=runic_power.deficit<40|fight_remains<10|(buff.essence_of_the_blood_queen.remains&buff.essence_of_the_blood_queen.remains<8)",
+          "comment": null,
+          "sourceLine": 204
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "consumption,empower_to=1",
+          "comment": null,
+          "sourceLine": 205
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "heart_strike,if=rune>=2",
+          "comment": null,
+          "sourceLine": 206
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "blood_boil",
+          "comment": null,
+          "sourceLine": 207
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "heart_strike",
+          "comment": null,
+          "sourceLine": 208
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "death_strike",
+          "comment": null,
+          "sourceLine": 210
+        }
+      ]
+    }
+  ]
+}

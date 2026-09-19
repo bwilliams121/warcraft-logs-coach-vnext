@@ -103,7 +103,8 @@ describe("identity and partition", () => {
   it("is PUBLIC in the partition, the public contract and the identity table (M11-A5), with no supplemental analysis", () => {
     expect(isSpecId("paladin/retribution")).toBe(true);
     expect(isPublicSpecId("paladin/retribution")).toBe(true);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    // Blood Death Knight has held the internal-only set since M11-B2; Retribution is not in it.
+    expect(INTERNAL_ONLY_SPEC_IDS as readonly string[]).not.toContain("paladin/retribution");
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("paladin/retribution");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("paladin/retribution");
     expect(requirePublicSpecId("paladin/retribution")).toBe("paladin/retribution");
@@ -323,6 +324,7 @@ describe("the public path analyzes (M11-A5), and the internal path analyzes the 
       "rogue-assassination-observed-decisions": 0,
       "paladin-protection-observed-decisions": 0,
       [RETRIBUTION_PALADIN_ANALYZER_ID]: 1,
+      "deathknight-blood-observed-decisions": 0,
     });
     const document = projectAnalysisResult(result.analysis);
     expect(document).toMatchObject({

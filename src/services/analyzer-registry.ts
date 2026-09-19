@@ -67,6 +67,7 @@ import { providerMayGovern } from "../findings/authority-domain.js";
 import { validateCapabilities, type CapabilityDefectRecord } from "../findings/decision-capability.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { isPublicSpecId, isSpecId, PUBLIC_SPEC_IDS, type SpecId } from "../findings/spec-id.js";
+import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../specs/deathknight/blood/registration.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
@@ -420,12 +421,12 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Three rows, all PUBLIC. A publicly unsupported specialization is
- * represented by ABSENCE from the PUBLIC set — an INTERNAL_ONLY row, when one
- * exists, is in the catalog and reachable by internal lookup and tests, and
- * is never selected for a public request — which is why there is no
- * "unsupported" placeholder entry: a row that cannot analyze anything would
- * still be something a lookup could select.
+ * Four rows: three PUBLIC and one INTERNAL_ONLY. A publicly unsupported
+ * specialization is represented by ABSENCE from the PUBLIC set — an
+ * INTERNAL_ONLY row is in the catalog and reachable by internal lookup and
+ * tests, and is never selected for a public request — which is why there
+ * is no "unsupported" placeholder entry: a row that cannot analyze anything
+ * would still be something a lookup could select.
  */
 export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.freeze([
   ASSASSINATION_REGISTRATION,
@@ -433,6 +434,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   PROTECTION_PALADIN_REGISTRATION,
   // INTERNAL_ONLY from M11-A4; PUBLIC since M11-A5.
   RETRIBUTION_PALADIN_REGISTRATION,
+  // INTERNAL_ONLY from M11-B2: the run_action_list cohort's measurement slice.
+  BLOOD_DEATH_KNIGHT_REGISTRATION,
 ]);
 
 /**

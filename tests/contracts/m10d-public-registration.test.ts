@@ -54,13 +54,13 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the three public ids; internal-only: empty again since M11-A5", () => {
+  it("public partition: the three public ids; internal-only: Blood Death Knight since M11-B2", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["deathknight/blood"]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -86,11 +86,14 @@ describe("the five sites agree", () => {
     expect(ASSASSINATION_REGISTRATION.exposure).toBe("PUBLIC");
     // M11-A4 put a third, INTERNAL_ONLY row in the catalog, NOT among the
     // enabled (public) analyzers; M11-A5 made it PUBLIC by the same
-    // five-site move this file pins for Protection.
+    // five-site move this file pins for Protection. M11-B2 put a fourth,
+    // INTERNAL_ONLY row in — the Blood Death Knight measurement slice —
+    // again NOT among the enabled analyzers.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
       ["paladin/retribution", "PUBLIC"],
+      ["deathknight/blood", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -173,6 +176,7 @@ describe("the complete-catalog helper", () => {
       [ASSASSINATION_REGISTRATION.analyzerId]: 0,
       [PROTECTION_PALADIN_ANALYZER_ID]: 0,
       "paladin-retribution-observed-decisions": 0,
+      "deathknight-blood-observed-decisions": 0,
     });
   });
 });

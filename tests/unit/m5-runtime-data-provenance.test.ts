@@ -40,8 +40,8 @@ function contractFor(resourceId: string) {
 
 describe("the declared wire contracts", () => {
   it("declares exactly the modelled resources, each scoped to one parser version", () => {
-    expect(RESOURCE_IDS).toEqual(["COMBO_POINTS", "ENERGY", "HOLY_POWER"]);
-    expect(RESOURCE_WIRE_CONTRACTS).toHaveLength(3);
+    expect(RESOURCE_IDS).toEqual(["COMBO_POINTS", "ENERGY", "HOLY_POWER", "RUNES", "RUNIC_POWER"]);
+    expect(RESOURCE_WIRE_CONTRACTS).toHaveLength(5);
     for (const contract of RESOURCE_WIRE_CONTRACTS) {
       expect(contract.scope).toEqual({ gameVersion: 1, logVersion: 17 });
     }
@@ -49,6 +49,9 @@ describe("the declared wire contracts", () => {
     expect(contractFor("ENERGY").wireType).toBe(3);
     // M10-B: corroborated by a Protection Paladin capture, never by the enum alone.
     expect(contractFor("HOLY_POWER").wireType).toBe(9);
+    // M11-B2: corroborated by a Blood Death Knight capture, never by the enum alone.
+    expect(contractFor("RUNES").wireType).toBe(5);
+    expect(contractFor("RUNIC_POWER").wireType).toBe(6);
   });
 
   it("declares one wire type per resource and one resource per wire type", () => {
@@ -69,9 +72,11 @@ describe("the declared wire contracts", () => {
       expect(contract.evidence.gameEnum.enumName).toBe("Enum.PowerType");
       expect(contract.evidence.gameEnum.value).toBe(contract.wireType);
       expect(contract.evidence.gameEnum.gameBuild.length).toBeGreaterThan(0);
-      expect(["wcl-assassination-envenom-combo-points", "wcl-protection-paladin-a7r6-opener"]).toContain(
-        contract.evidence.wireCorroboration.fixtureId,
-      );
+      expect([
+        "wcl-assassination-envenom-combo-points",
+        "wcl-protection-paladin-a7r6-opener",
+        "wcl-blood-death-knight-a7r6-rotational-45s",
+      ]).toContain(contract.evidence.wireCorroboration.fixtureId);
       expect(contract.evidence.wireCorroboration.reportCode).toBe("A7R6kxPJ1hC8YQ4w");
       expect(contract.evidence.wireCorroboration.reportRevision).toBe(30);
       expect(contract.evidence.wireCorroboration.observation.length).toBeGreaterThan(0);
@@ -85,6 +90,21 @@ describe("the declared wire contracts", () => {
       "wcl-protection-paladin-a7r6-opener",
     );
     expect(contractFor("HOLY_POWER").evidence.wireCorroboration.observation).toContain("Protection Paladin");
+    // The Rune and Runic Power corroborations cite the Blood Death Knight
+    // slice, and the Runic Power one records the two wire facts a reader
+    // must not rediscover: PRE_COST holds, and `cost` is the BASE cost.
+    for (const resourceId of ["RUNES", "RUNIC_POWER"] as const) {
+      expect(contractFor(resourceId).evidence.wireCorroboration.fixtureId).toBe(
+        "wcl-blood-death-knight-a7r6-rotational-45s",
+      );
+      expect(contractFor(resourceId).evidence.wireCorroboration.observation).toContain("Blood Death Knight");
+    }
+    expect(contractFor("RUNES").evidence.gameEnum.memberName).toBe("Runes");
+    expect(contractFor("RUNIC_POWER").evidence.gameEnum.memberName).toBe("RunicPower");
+    expect(contractFor("RUNIC_POWER").evidence.wireCorroboration.observation).toContain("PRE_COST holds");
+    expect(contractFor("RUNIC_POWER").evidence.wireCorroboration.observation).toContain(
+      "corroborates identity only",
+    );
   });
 
   it("records the Hunter discriminator in the Energy corroboration", () => {

@@ -48,9 +48,49 @@ const SOURCES = {
 };
 
 /** The `power_e` enumerators recorded with their pinned values. */
-const POWER_ENUMERATORS = ["POWER_MANA", "POWER_HOLY_POWER"];
+const POWER_ENUMERATORS = ["POWER_MANA", "POWER_HOLY_POWER", "POWER_RUNE", "POWER_RUNIC_POWER"];
 
 export const TARGETS = {
+  "deathknight-blood": {
+    datasetId: "SIMC_DBC_DEATHKNIGHT_BLOOD_SPENDER_COSTS",
+    defaultOut: "src/data/game/deathknight-blood-spender-costs.json",
+    // M11-B2. The Rune and Runic Power rows of the tokens the Blood slice
+    // observes. `_cost` is verbatim DBC: Runic Power rows are in tenths of a
+    // point (power_type_data.inc row 6, divisor 10.0) and the wire reports the
+    // same encoding on cast snapshots; Rune rows are whole runes (divisor 1.0).
+    spells: [
+      {
+        simcToken: "death_strike",
+        spellId: 49_998,
+        why: "the Runic Power spender every Blood list names; its RP cost decides affordability",
+      },
+      {
+        simcToken: "heart_strike",
+        spellId: 206_930,
+        why: "the rune builder; one rune, no cooldown, so affordability alone proves usability",
+      },
+      {
+        simcToken: "heart_strike",
+        spellId: 433_895,
+        why: "the same token executing as Vampiric Strike under the San'layn buff (sc_death_knight.cpp:11350-11357)",
+      },
+      {
+        simcToken: "marrowrend",
+        spellId: 195_182,
+        why: "the Bone Shield builder; two runes, no cooldown",
+      },
+      {
+        simcToken: "deaths_caress",
+        spellId: 195_292,
+        why: "the ranged Bone Shield builder; one rune, on a 6 s cooldown",
+      },
+      {
+        simcToken: "death_and_decay",
+        spellId: 43_265,
+        why: "the ground effect both `death_and_decay` and `any_dnd` name; one rune, on a cooldown",
+      },
+    ],
+  },
   "paladin-retribution": {
     datasetId: "SIMC_DBC_PALADIN_RETRIBUTION_SPENDER_COSTS",
     defaultOut: "src/data/game/paladin-retribution-spender-costs.json",

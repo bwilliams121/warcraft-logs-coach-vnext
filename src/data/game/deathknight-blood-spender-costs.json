@@ -1,0 +1,292 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DEATHKNIGHT_BLOOD_SPENDER_COSTS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/sc_enums.hpp",
+        "sha256": "64e10c19d4b7e860b2d423342dc7cf13ad962477023d19e71c10b32adddc3c1f",
+        "byteLength": 35880
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "extractor": "scripts/authority/extract-simc-power-costs.mjs",
+    "extractorVersion": 1,
+    "extractedOn": "2026-09-18",
+    "method": "MACHINE_EXTRACTED_DBC_RECORD",
+    "powerTypes": {
+      "POWER_MANA": 0,
+      "POWER_HOLY_POWER": 9,
+      "POWER_RUNE": 5,
+      "POWER_RUNIC_POWER": 6
+    },
+    "costRule": "FIRST_ROW_OF_POWER_TYPE_IN_TABLE_ORDER"
+  },
+  "spells": [
+    {
+      "simcToken": "death_strike",
+      "spellId": 49998,
+      "displayNameEn": "Death Strike",
+      "why": "the Runic Power spender every Blood list names; its RP cost decides affordability",
+      "cooldownMs": 0,
+      "gcdMs": 1500,
+      "categoryCooldownMs": 0,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "castTimeMs": 0,
+      "powerRows": [
+        {
+          "powerRowId": 6268,
+          "auraSpellId": 0,
+          "powerType": 6,
+          "cost": 450,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        }
+      ]
+    },
+    {
+      "simcToken": "heart_strike",
+      "spellId": 206930,
+      "displayNameEn": "Heart Strike",
+      "why": "the rune builder; one rune, no cooldown, so affordability alone proves usability",
+      "cooldownMs": 0,
+      "gcdMs": 1500,
+      "categoryCooldownMs": 0,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "castTimeMs": 0,
+      "powerRows": [
+        {
+          "powerRowId": 11004,
+          "auraSpellId": 0,
+          "powerType": 5,
+          "cost": 1,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        },
+        {
+          "powerRowId": 11005,
+          "auraSpellId": 0,
+          "powerType": 6,
+          "cost": -150,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        },
+        {
+          "powerRowId": 11006,
+          "auraSpellId": 202846,
+          "powerType": -2,
+          "cost": 0,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 10,
+          "pctCostPerTick": 0
+        },
+        {
+          "powerRowId": 232320,
+          "auraSpellId": 356456,
+          "powerType": -2,
+          "cost": 0,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 3,
+          "pctCostPerTick": 0
+        }
+      ]
+    },
+    {
+      "simcToken": "heart_strike",
+      "spellId": 433895,
+      "displayNameEn": "Vampiric Strike",
+      "why": "the same token executing as Vampiric Strike under the San'layn buff (sc_death_knight.cpp:11350-11357)",
+      "cooldownMs": 0,
+      "gcdMs": 1500,
+      "categoryCooldownMs": 0,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "castTimeMs": 0,
+      "powerRows": [
+        {
+          "powerRowId": 305979,
+          "auraSpellId": 0,
+          "powerType": 5,
+          "cost": 1,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        },
+        {
+          "powerRowId": 305981,
+          "auraSpellId": 137008,
+          "powerType": 6,
+          "cost": -150,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        },
+        {
+          "powerRowId": 305982,
+          "auraSpellId": 137007,
+          "powerType": 6,
+          "cost": -100,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        }
+      ]
+    },
+    {
+      "simcToken": "marrowrend",
+      "spellId": 195182,
+      "displayNameEn": "Marrowrend",
+      "why": "the Bone Shield builder; two runes, no cooldown",
+      "cooldownMs": 0,
+      "gcdMs": 1500,
+      "categoryCooldownMs": 0,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "castTimeMs": 0,
+      "powerRows": [
+        {
+          "powerRowId": 10513,
+          "auraSpellId": 0,
+          "powerType": 5,
+          "cost": 2,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        },
+        {
+          "powerRowId": 10671,
+          "auraSpellId": 0,
+          "powerType": 6,
+          "cost": -200,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        }
+      ]
+    },
+    {
+      "simcToken": "deaths_caress",
+      "spellId": 195292,
+      "displayNameEn": "Death's Caress",
+      "why": "the ranged Bone Shield builder; one rune, on a 6 s cooldown",
+      "cooldownMs": 6000,
+      "gcdMs": 1500,
+      "categoryCooldownMs": 0,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "castTimeMs": 0,
+      "powerRows": [
+        {
+          "powerRowId": 10518,
+          "auraSpellId": 0,
+          "powerType": 5,
+          "cost": 1,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        },
+        {
+          "powerRowId": 10672,
+          "auraSpellId": 0,
+          "powerType": 6,
+          "cost": -100,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        }
+      ]
+    },
+    {
+      "simcToken": "death_and_decay",
+      "spellId": 43265,
+      "displayNameEn": "Death and Decay",
+      "why": "the ground effect both `death_and_decay` and `any_dnd` name; one rune, on a cooldown",
+      "cooldownMs": 0,
+      "gcdMs": 1500,
+      "categoryCooldownMs": 0,
+      "charges": 1,
+      "chargeCooldownMs": 30000,
+      "internalCooldownMs": 0,
+      "castTimeMs": 0,
+      "powerRows": [
+        {
+          "powerRowId": 5832,
+          "auraSpellId": 0,
+          "powerType": 5,
+          "cost": 1,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        },
+        {
+          "powerRowId": 10635,
+          "auraSpellId": 0,
+          "powerType": 6,
+          "cost": -100,
+          "costMax": 0,
+          "costPerTick": 0,
+          "pctCost": 0,
+          "pctCostMax": 0,
+          "pctCostPerTick": 0
+        }
+      ]
+    }
+  ]
+}

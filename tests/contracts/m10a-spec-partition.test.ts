@@ -54,18 +54,16 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("paladin/retribution")).toBe(true);
   });
 
-  it("the internal-only set is empty again since M11-A5, and its machinery is dormant rather than removed", () => {
+  it("the internal-only set holds Blood Death Knight since M11-B2, and its machinery is live over one member again", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
-    // Retribution Paladin from M11-A4 (the partition proofs, the narrowing
-    // boundary and the registry's exposure rules exercised over one member),
-    // and is empty again since M11-A5 moved that id across. The next
-    // specialization is expected to arrive here first, as both Paladin
-    // specializations did; everything still exists and still type-checks
-    // over an empty set.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
+    // Retribution Paladin from M11-A4, was empty again from M11-A5, and
+    // holds the Blood Death Knight measurement slice since M11-B2 — which
+    // arrived here first, as both Paladin specializations did.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["deathknight/blood"]);
     expect(typeof requirePublicSpecId).toBe("function");
     expect(typeof InternalSpecExposureError).toBe("function");
-    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
+    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(id !== "deathknight/blood");
+    expect(() => requirePublicSpecId("deathknight/blood")).toThrow(InternalSpecExposureError);
   });
 
   it("an unknown string is not a spec id at all", () => {

@@ -105,6 +105,8 @@ const IDENTITY_EVIDENCE: Readonly<
   "paladin/protection": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 7 },
   // M11-A4: actor 6 of the same fight, the Retribution Paladin the committed context reports.
   "paladin/retribution": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 6 },
+  // M11-B2: actor 14 of the same fight, the Blood Death Knight the committed context reports.
+  "deathknight/blood": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 14 },
 };
 
 function wclIdentityOf(evidence: {
@@ -326,6 +328,7 @@ describe("what the tree exports today", () => {
         module.supplementalAnalyses.length,
       ]),
     ).toEqual([
+      ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "INTERNAL_ONLY", 0],
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],

@@ -17,11 +17,26 @@
  * required facts, never a different parser.
  *
  * FAIL CLOSED IS THE WHOLE POINT. This is not a general C++ parser, and it does
- * not try to be. It understands exactly four constructs inside the bounded
- * region. Anything else inside that region is a hard failure with a line
+ * not try to be. It understands exactly five constructs inside the bounded
+ * region: the list declaration, `add_action`, braces, comments, and (M11-B2)
+ * a CLIENT-VERSION GUARD — `if ( p->sim->dbc->wowv() <op> wowv_t( a, b, c ) )`
+ * or its `else if` — over a `{ ... }` block or the single statement that
+ * follows. Anything else inside that region is a hard failure with a line
  * number, because an extractor that silently skipped a line it did not
  * understand would emit an artifact that LOOKS complete while missing an action
  * — and the reachability proof built on it would be worthless.
+ *
+ * VERSION GUARDS (M11-B2). SimulationCraft keeps both sides of a patch
+ * transition in one region and picks at runtime by the client build the DBC
+ * was generated from. A target that names a `clientVersion` has every guard
+ * EVALUATED against it: the statements under a guard that holds are emitted at
+ * their ordinal positions, the statements under one that does not are parsed
+ * (they must still be well-formed `add_action` lines) and DROPPED, and every
+ * guard — its line, its comparison, whether it held, how many statements it
+ * governed — is recorded in the artifact's provenance so a reader can see that
+ * a dead branch was excluded rather than never present. A target without
+ * `clientVersion` fails on the first guard, exactly as before: no target
+ * silently acquires branch selection. One level only; a nested guard fails.
  *
  * The artifact stores `actionStringVerbatim`: the exact first string argument
  * given to `add_action`. It deliberately does NOT store a synthesized
@@ -148,6 +163,59 @@ const TARGETS = {
       resetOnlyVariables: ["pre_es_wake"],
     },
   },
+  "deathknight-blood": {
+    sourcePath: "engine/class_modules/apl/apl_death_knight.cpp",
+    regionStart: "//blood_apl_start",
+    regionEnd: "//blood_apl_end",
+    functionHeader: "void blood( player_t* p )",
+    regionName: "blood",
+    authorityId: "SIMC_APL_DEATHKNIGHT_BLOOD",
+    spec: { className: "deathknight", specName: "blood" },
+    defaultOut: "src/simc/data/deathknight-blood.apl.json",
+    // The pinned region carries both sides of the 12.1.0 transition behind
+    // `p->sim->dbc->wowv()` guards; the roster pins the DBC at 12.1.0.69587,
+    // so the `>= 12.1.0` side is the authority and the `< 12.1.0` side is dead.
+    clientVersion: [12, 1, 0],
+    // M11-B2: a GENERIC pinned dispatch graph. The verifier below reads no
+    // Blood semantics; this data is the whole claim. Every dispatch entry in
+    // the artifact must be listed here with its kind, source, ordinal, target
+    // and verbatim gate — call and run are distinct kinds — and every list's
+    // entry count is pinned, so a moved, added, removed or re-gated dispatch
+    // line, or any change to a list's length, fails extraction.
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "high_prio_actions", "deathbringer", "san_gift", "sanlayn"],
+      listSizes: {
+        default: 17,
+        precombat: 2,
+        high_prio_actions: 2,
+        deathbringer: 12,
+        san_gift: 8,
+        sanlayn: 15,
+      },
+      edges: [
+        { from: "default", ordinal: 13, kind: "CALL", to: "high_prio_actions", condition: null },
+        {
+          from: "default",
+          ordinal: 14,
+          kind: "RUN",
+          to: "deathbringer",
+          condition: "hero_tree.deathbringer",
+        },
+        {
+          from: "default",
+          ordinal: 15,
+          kind: "RUN",
+          to: "san_gift",
+          condition: "hero_tree.sanlayn&buff.gift_of_the_sanlayn.up",
+        },
+        { from: "default", ordinal: 16, kind: "RUN", to: "sanlayn", condition: "hero_tree.sanlayn" },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+      noTargetingOptions: true,
+    },
+  },
 };
 
 const args = parseArgs(process.argv.slice(2));
@@ -267,6 +335,46 @@ function parseAddActionArguments(line, openParenIndex, lineNumber) {
   return { actionStringVerbatim: first.value, comment };
 }
 
+/**
+ * A client-version guard line, or `null`.
+ *
+ *     if ( p->sim->dbc->wowv() < wowv_t( 12, 1, 0 ) )
+ *     else if ( p->sim->dbc->wowv() >= wowv_t( 12, 1, 0 ) )
+ *
+ * Only this exact shape is a guard. Any other `if` is an unsupported construct
+ * and fails the region, as every unknown line always has.
+ */
+const VERSION_GUARD =
+  /^(else\s+)?if\s*\(\s*p->sim->dbc->wowv\(\)\s*(<=|>=|==|!=|<|>)\s*wowv_t\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*\)$/;
+
+function compareVersions(left, right) {
+  for (let i = 0; i < 3; i += 1) {
+    if (left[i] !== right[i]) return left[i] < right[i] ? -1 : 1;
+  }
+  return 0;
+}
+
+/** Whether `clientVersion <op> guardVersion` holds. Total over the six operators the regex admits. */
+function guardHolds(clientVersion, operator, guardVersion) {
+  const cmp = compareVersions(clientVersion, guardVersion);
+  switch (operator) {
+    case "<":
+      return cmp < 0;
+    case "<=":
+      return cmp <= 0;
+    case ">":
+      return cmp > 0;
+    case ">=":
+      return cmp >= 0;
+    case "==":
+      return cmp === 0;
+    case "!=":
+      return cmp !== 0;
+    default:
+      return fail(`unsupported version operator '${operator}'`);
+  }
+}
+
 function extract(sourceText) {
   const lines = sourceText.split(/\r?\n/);
   const startIndex = lines.findIndex((line) => line.trim() === REGION_START);
@@ -286,6 +394,18 @@ function extract(sourceText) {
   let sawFunctionHeader = false;
   let braceDepth = 0;
 
+  // ---- version guards (M11-B2) ----
+  //
+  // `pending` is a guard whose governed statement(s) have not started yet:
+  // the next line decides whether it governs a `{ ... }` block or one
+  // statement. `active` is a block guard until its closing brace. Both
+  // carry `taken`; a statement under a guard that did not hold is parsed
+  // for well-formedness and then dropped, and the guard's record counts it.
+  const guards = [];
+  let pending = null;
+  let active = null;
+  let lastGuard = null;
+
   for (let i = startIndex + 1; i < endIndex; i += 1) {
     const rawLine = lines[i];
     const lineNumber = i + 1;
@@ -304,14 +424,64 @@ function extract(sourceText) {
       );
     }
 
+    const guard = VERSION_GUARD.exec(line);
+    if (guard !== null) {
+      const [, elseKeyword, operator, a, b, c] = guard;
+      if (TARGET.clientVersion === undefined) {
+        fail(
+          `line ${lineNumber}: a client-version guard exists in the ${TARGET.regionName} region and the target declares no clientVersion to evaluate it against: ${line}`,
+        );
+      }
+      if (pending !== null)
+        fail(`line ${lineNumber}: a version guard follows another with no governed statement`);
+      if (active !== null) fail(`line ${lineNumber}: nested version guards are not supported`);
+      if (elseKeyword !== undefined && (lastGuard === null || lastGuard.endLine === null)) {
+        fail(`line ${lineNumber}: 'else if' with no preceding closed version guard`);
+      }
+      const guardVersion = [Number(a), Number(b), Number(c)];
+      const taken = guardHolds(TARGET.clientVersion, operator, guardVersion);
+      const record = {
+        line: lineNumber,
+        form: elseKeyword === undefined ? "IF" : "ELSE_IF",
+        comparison: `wowv() ${operator} ${guardVersion.join(".")}`,
+        clientVersion: TARGET.clientVersion.join("."),
+        holds: taken,
+        statementsEmitted: 0,
+        statementsDropped: 0,
+        endLine: null,
+      };
+      guards.push(record);
+      pending = record;
+      lastGuard = record;
+      continue;
+    }
+
     if (line === "{") {
       braceDepth += 1;
+      if (pending !== null) {
+        active = { record: pending, depth: braceDepth };
+        pending = null;
+      }
       continue;
     }
     if (line === "}") {
+      if (pending !== null) fail(`line ${lineNumber}: a version guard governs no statement`);
+      if (active !== null && active.depth === braceDepth) {
+        active.record.endLine = lineNumber;
+        active = null;
+      }
       braceDepth -= 1;
       if (braceDepth < 0) fail(`line ${lineNumber}: unbalanced closing brace`);
       continue;
+    }
+
+    // The guard governing THIS line, if any: a block guard, or a pending
+    // single-statement guard, which this line closes.
+    let governing = active === null ? null : active.record;
+    if (pending !== null) {
+      governing = pending;
+      governing.endLine = lineNumber;
+      pending = null;
     }
 
     const declared = declaration.exec(line);
@@ -338,6 +508,12 @@ function extract(sourceText) {
       }
       const openParen = line.indexOf("(", added[0].length - 1);
       const parsed = parseAddActionArguments(line, openParen, lineNumber);
+      if (governing !== null && !governing.holds) {
+        // Well-formed, parsed, and NOT the authority at this client version.
+        governing.statementsDropped += 1;
+        continue;
+      }
+      if (governing !== null) governing.statementsEmitted += 1;
       const bucket = actionsByList.get(listName);
       bucket.push({
         priorityOrdinal: bucket.length,
@@ -348,6 +524,10 @@ function extract(sourceText) {
       continue;
     }
 
+    if (governing !== null) {
+      fail(`line ${lineNumber}: a version guard may govern only add_action statements: ${line}`);
+    }
+
     // Reached only by a construct this extractor does not model. Failing here is
     // the contract: a silently skipped line produces a complete-looking artifact
     // with a missing action, and every reachability proof built on it is void.
@@ -356,6 +536,7 @@ function extract(sourceText) {
 
   if (!sawFunctionHeader) fail(`${TARGET.regionName} function header not found inside the region`);
   if (braceDepth !== 0) fail(`unbalanced braces inside the ${TARGET.regionName} region`);
+  if (pending !== null || active !== null) fail(`a version guard is left open at the end of the region`);
 
   return {
     lists: listOrder.map((listName) => ({
@@ -363,6 +544,7 @@ function extract(sourceText) {
       receiverIdentifier: [...listNameByReceiver.entries()].find(([, name]) => name === listName)[0],
       actions: actionsByList.get(listName),
     })),
+    guards,
   };
 }
 
@@ -427,6 +609,64 @@ function verifyRequiredFacts(artifact) {
       ).length;
       if (count !== 1)
         problems.push(`'${required}' appears ${count} times in default, expected exactly once`);
+    }
+    return problems;
+  }
+
+  if (REQUIRED_FACTS.kind === "DISPATCH_GRAPH") {
+    // GENERIC (M11-B2). The target supplies the whole expected topology —
+    // every list's size and every dispatch edge with its kind, coordinates and
+    // verbatim gate — and this block compares, in full, both ways. It reads
+    // no token semantics: which list a run enters or what a gate means is the
+    // target's data, never this code's opinion. A run edge and a call edge
+    // are different kinds and never match each other.
+    for (const [listName, size] of Object.entries(REQUIRED_FACTS.listSizes)) {
+      const actual = byName.get(listName)?.actions.length ?? null;
+      if (actual !== size) {
+        problems.push(`list '${listName}' has ${String(actual)} entries, expected ${String(size)}`);
+      }
+    }
+    for (const list of artifact.lists) {
+      if (!(list.listName in REQUIRED_FACTS.listSizes)) {
+        problems.push(`list '${list.listName}' is not in the pinned topology`);
+      }
+    }
+    const actualEdges = [];
+    for (const list of artifact.lists) {
+      list.actions.forEach((action, ordinal) => {
+        const token = actionTokenOf(action.actionStringVerbatim);
+        if ((REQUIRED_FACTS.forbiddenTokens ?? []).includes(token)) {
+          problems.push(`forbidden token '${token}' found in '${list.listName}'`);
+        }
+        if (
+          REQUIRED_FACTS.noTargetingOptions &&
+          /(?:^|,)(?:target_if|cycle_targets)=/.test(action.actionStringVerbatim)
+        ) {
+          problems.push(`targeting option found in '${list.listName}': ${action.actionStringVerbatim}`);
+        }
+        const kind = token === "call_action_list" ? "CALL" : token === "run_action_list" ? "RUN" : null;
+        if (kind === null) return;
+        actualEdges.push({
+          from: list.listName,
+          ordinal,
+          kind,
+          to: callsListOf(action.actionStringVerbatim),
+          condition: conditionOf(action.actionStringVerbatim),
+        });
+      });
+    }
+    const key = (edge) =>
+      `${edge.from}[${String(edge.ordinal)}] ${edge.kind} -> ${edge.to} if=${JSON.stringify(edge.condition)}`;
+    const expected = REQUIRED_FACTS.edges.map(key);
+    const actual = actualEdges.map(key);
+    if (expected.join("\n") !== actual.join("\n")) {
+      problems.push(
+        `dispatch graph differs from the pinned topology\n  expected:\n    ${expected.join("\n    ")}\n  actual:\n    ${actual.join("\n    ")}`,
+      );
+    }
+    for (const edge of actualEdges) {
+      if (!byName.has(edge.to))
+        problems.push(`dispatch edge ${key(edge)} names a list the region does not declare`);
     }
     return problems;
   }
@@ -625,8 +865,20 @@ const artifact = {
     sourceByteLength: sourceBuffer.length,
     regionStartMarker: REGION_START,
     regionEndMarker: REGION_END,
-    extractedOn: new Date().toISOString().slice(0, 10),
+    extractedOn:
+      typeof args["extracted-on"] === "string" ? args["extracted-on"] : new Date().toISOString().slice(0, 10),
     extractorVersion: EXTRACTOR_VERSION,
+    ...(TARGET.clientVersion === undefined
+      ? {}
+      : {
+          // M11-B2: what the extractor DECIDED about the region's version
+          // guards, so a reader of the artifact can see that a dead branch was
+          // excluded rather than absent from the source.
+          conditionalCompilation: {
+            clientVersion: TARGET.clientVersion.join("."),
+            guards: extracted.guards,
+          },
+        }),
   },
   lists: extracted.lists,
 };

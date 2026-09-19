@@ -396,7 +396,137 @@ const PALADIN_RETRIBUTION_TARGET = {
   apexTraits: false,
 };
 
+/**
+ * The Blood Death Knight profile (M11-B2).
+ *
+ * `requiredTalents` are the talents whose selection decides whether an APL
+ * TOKEN of the pinned Blood list is a foreground action for the actor — each
+ * a `find_talent_spell` the action's constructor is built on
+ * (`action.cpp:541-549`: an action built on `spell_data_t::not_found()` is
+ * background) — plus the hero talents whose absence makes an aura the list
+ * reads impossible for the build. `heroTrees` are the two sub-trees
+ * `hero_tree.<name>` can name for Blood: San'layn (31) and Deathbringer
+ * (33); Rider of the Apocalypse (32) is Frost/Unholy only at the pin. No
+ * `apex.N` atom appears in the pinned Blood list.
+ */
+const DEATHKNIGHT_BLOOD_TARGET = {
+  datasetId: "SIMC_TRAIT_DEATHKNIGHT_BLOOD_TALENTS",
+  classId: 6,
+  specId: 250,
+  defaultOut: "src/data/game/deathknight-blood-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. In the supported captures " +
+    "(report A7R6kxPJ1hC8YQ4w revision 30 and gtKb2xHn87pNcFfW revision 22, logVersion 17, gameVersion 1) " +
+    "`id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node for the Blood " +
+    "Death Knight subject (actor 14 on both), the same equivalence M10-C and M11-A4 recorded for the Paladin " +
+    "subjects of the same captures. It is recorded for those captures and parser version; it is not claimed " +
+    "for Warcraft Logs in general.",
+  requiredTalents: [
+    {
+      simcName: "death_strike",
+      displayNameEn: "Death Strike",
+      tree: "CLASS",
+      binding:
+        'sc_death_knight.cpp:14843 talent.death_strike = find_talent_spell( talent_tree::CLASS, "Death Strike" ); death_strike_t is built on it (:10017-10020)',
+    },
+    {
+      simcName: "raise_dead",
+      displayNameEn: "Raise Dead",
+      tree: "CLASS",
+      binding:
+        'sc_death_knight.cpp:14844 talent.raise_dead = find_talent_spell( talent_tree::CLASS, "Raise Dead" ); raise_dead_t is built on spec.raise_dead when that is ok, else on this talent (:12216-12220)',
+    },
+    {
+      simcName: "heart_strike",
+      displayNameEn: "Heart Strike",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14898 talent.blood.heart_strike = find_talent_spell( talent_tree::SPECIALIZATION, "Heart Strike" ); heart_strike_t is built on it (:11325-11328)',
+    },
+    {
+      simcName: "marrowrend",
+      displayNameEn: "Marrowrend",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14900 talent.blood.marrowrend = find_talent_spell( talent_tree::SPECIALIZATION, "Marrowrend" ); marrowrend_t is built on it (:11662-11667)',
+    },
+    {
+      simcName: "blood_boil",
+      displayNameEn: "Blood Boil",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14901 talent.blood.blood_boil = find_talent_spell( talent_tree::SPECIALIZATION, "Blood Boil" ); blood_boil_t is built on it (:9029-9032)',
+    },
+    {
+      simcName: "vampiric_blood",
+      displayNameEn: "Vampiric Blood",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14903 talent.blood.vampiric_blood = find_talent_spell( talent_tree::SPECIALIZATION, "Vampiric Blood" ); vampiric_blood_t is built on it (:12785-12788)',
+    },
+    {
+      simcName: "dancing_rune_weapon",
+      displayNameEn: "Dancing Rune Weapon",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14914 talent.blood.dancing_rune_weapon = find_talent_spell( talent_tree::SPECIALIZATION, "Dancing Rune Weapon" ); dancing_rune_weapon_t is built on it (:9476-9479)',
+    },
+    {
+      simcName: "consumption",
+      displayNameEn: "Consumption",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_death_knight.cpp:14942 talent.blood.consumption = find_talent_spell( talent_tree::SPECIALIZATION, "Consumption" ); consumption_t (:9325) is the empowered charge spell the list names with empower_to=1',
+    },
+    {
+      simcName: "reapers_mark",
+      displayNameEn: "Reaper's Mark",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15083 talent.deathbringer.reapers_mark = find_talent_spell( talent_tree::HERO, "Reaper\'s Mark" ); reapers_mark_t is built on it (:8488-8491); its debuff 434765 is the `debuff.reapers_mark_debuff` the list reads (:15391)',
+    },
+    {
+      simcName: "exterminate",
+      displayNameEn: "Exterminate",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15099 talent.deathbringer.exterminate = find_talent_spell( talent_tree::HERO, "Exterminate" ); the `buff.exterminate` aura 441416 exists only under it or Echoing Fury (:15403-15404)',
+    },
+    {
+      simcName: "vampiric_strike",
+      displayNameEn: "Vampiric Strike",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15102 talent.sanlayn.vampiric_strike = find_talent_spell( talent_tree::HERO, "Vampiric Strike" ); heart_strike_t executes the Vampiric Strike child while buffs.vampiric_strike is up (:11331-11357); the `buff.vampiric_strike` (433899, :15373) and `buff.essence_of_the_blood_queen` (433925, :15374) auras exist only under it',
+    },
+    {
+      simcName: "gift_of_the_sanlayn",
+      displayNameEn: "Gift of the San'layn",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15119 talent.sanlayn.gift_of_the_sanlayn = find_talent_spell( talent_tree::HERO, "Gift of the San\'layn" ); the `buff.gift_of_the_sanlayn` aura 434153 exists only under it (:15375, :15879-15880)',
+    },
+    {
+      simcName: "visceral_strength",
+      displayNameEn: "Visceral Strength",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15113 talent.sanlayn.visceral_strength = find_talent_spell( talent_tree::HERO, "Visceral Strength" ); the Blood `buff.visceral_strength` aura 461130 exists only under it (:15383-15384)',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data` (trait_data.inc:4398, :4400): San'layn is
+    // sub-tree 31 and Deathbringer 33, both class 6. `hero_tree.sanlayn`
+    // resolves through trait_data_t::get_hero_tree_id( "sanlayn" ), which
+    // tokenizes the sub-tree name (trait_data.cpp:225-238).
+    { simcName: "sanlayn", subTreeId: 31 },
+    { simcName: "deathbringer", subTreeId: 33 },
+  ],
+  apexTraits: false,
+};
+
 export const TARGETS = {
+  "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
   "paladin-retribution": PALADIN_RETRIBUTION_TARGET,
   "rogue-assassination": ROGUE_ASSASSINATION_TARGET,
   "paladin-protection": PALADIN_PROTECTION_TARGET,

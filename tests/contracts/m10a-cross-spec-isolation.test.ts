@@ -106,9 +106,10 @@ function classPrefixOfModule(resolved: string): string | null {
 }
 
 describe("the sweep has something to sweep", () => {
-  it("finds the Assassination tree, the Protection Paladin tree and, since M11-A4, the Retribution Paladin tree", () => {
+  it("finds the Assassination tree, the two Paladin trees and, since M11-B2, the Blood Death Knight tree", () => {
     const trees = new Set(SPEC_FILES.map(specTreeOf).filter((tree): tree is string => tree !== null));
     expect([...trees].sort()).toEqual([
+      "src/specs/deathknight/blood",
       "src/specs/paladin/protection",
       "src/specs/paladin/retribution",
       "src/specs/rogue/assassination",
@@ -173,12 +174,13 @@ describe("shared code reaches specializations only through the registration boun
       importSpecifiersOf(path).some((specifier) => resolveSpecifier(path, specifier).includes("src/specs/")),
     );
     expect(importers).toEqual(["src/services/analyzer-registry.ts"]);
-    // And it imports exactly the three registrations, nothing deeper.
+    // And it imports exactly the four registrations, nothing deeper.
     const specImports = importSpecifiersOf("src/services/analyzer-registry.ts")
       .map((specifier) => resolveSpecifier("src/services/analyzer-registry.ts", specifier))
       .filter((resolved) => resolved.includes("src/specs/"))
       .sort();
     expect(specImports).toEqual([
+      "src/specs/deathknight/blood/registration.js",
       "src/specs/paladin/protection/registration.js",
       "src/specs/paladin/retribution/registration.js",
       "src/specs/rogue/assassination/registration.js",

@@ -45,6 +45,7 @@ import pinnedAssassinationApl from "../../../src/simc/data/rogue-assassination.a
 import pinnedRogueDotDurations from "../../../src/data/game/rogue-dot-durations.json";
 import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.json";
 import pinnedRetributionApl from "../../../src/simc/data/paladin-retribution.apl.json";
+import pinnedBloodApl from "../../../src/simc/data/deathknight-blood.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
 import {
@@ -57,6 +58,7 @@ import {
 } from "../../../src/contracts/analysis-contract.js";
 import { PROTECTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/protection/observed-analysis.js";
 import { RETRIBUTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/retribution/observed-analysis.js";
+import { BLOOD_EXCLUSION_REASONS } from "../../../src/specs/deathknight/blood/observed-analysis.js";
 
 // --------------------------------------------------------------------------
 // Version and limits
@@ -301,6 +303,8 @@ export const OWNING_LAYERS = {
   SPEC_PROTECTION_PALADIN: ["src/specs/paladin/protection/"],
   /** M11-A4. The INTERNAL_ONLY Retribution Paladin evaluator and nothing else. */
   SPEC_RETRIBUTION_PALADIN: ["src/specs/paladin/retribution/"],
+  /** M11-B2. The INTERNAL_ONLY Blood Death Knight measurement evaluator and nothing else. */
+  SPEC_BLOOD_DEATH_KNIGHT: ["src/specs/deathknight/blood/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -328,6 +332,7 @@ export const SPEC_LAYER_OF = {
   "rogue/assassination": "SPEC_ASSASSINATION",
   "paladin/protection": "SPEC_PROTECTION_PALADIN",
   "paladin/retribution": "SPEC_RETRIBUTION_PALADIN",
+  "deathknight/blood": "SPEC_BLOOD_DEATH_KNIGHT",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -1863,6 +1868,394 @@ export const ASSERTION_KINDS = {
       "M11-A5: the registration's analysis over this artifact (or bundle), read through its own view and projected by the real public projection, validates against warcraft-logs-coach.analysis/1 (the version string unchanged) and carries exactly these totals; every excluded cast's reason and the coverage tally are mapped onto the public vocabulary (MELEE_SWING → NON_GCD_ACTION, OUTSIDE_FIRST_SLICE → OUTSIDE_SUPPORTED_SLICE, rows merged), the tally sums to the excluded count; each named decision — a real MATCH, a real REJECTED, a real UNKNOWN — projects with exactly the pinned outcome, basis, coverage, token, precision and blocker class; each named excluded cast projects with exactly the pinned public reason; and no internal-only reason string or withheld field (raw blocker, root-scan stopping entry, domains, Holy Power, build resolution, resolver diagnostics, the foreground-execution proof) reaches the document.",
   },
 
+  // ---- SPEC_BLOOD_DEATH_KNIGHT (M11-B2, INTERNAL_ONLY) --------------------
+  //
+  // The MEASUREMENT slice for the run_action_list dispatch cohort. The kinds
+  // mirror the Retribution ones where the shape is the same, and add the two
+  // this milestone exists to take: where every eligible decision's root scan
+  // stopped (STOPPING_POINT_DISTRIBUTION) and how every dispatch entry of the
+  // root scan was decided (DISPATCH_TRACE_AT).
+  "SPEC_BLOOD_DEATH_KNIGHT.AUTHORITY_PROVENANCE": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            authorityId: z.literal(pinnedBloodApl.authorityId),
+            artifactRevision: z.literal(pinnedBloodApl.artifactRevision),
+            commitSha: z.literal(pinnedBloodApl.provenance.commitSha),
+            sourcePath: z.literal(pinnedBloodApl.provenance.sourcePath),
+            sourceSha256: z.literal(pinnedBloodApl.provenance.sourceSha256),
+            /** The client-version guards the extractor evaluated; the count is read off the committed artifact. */
+            conditionalCompilationGuards: z.literal(
+              pinnedBloodApl.provenance.conditionalCompilation.guards.length,
+            ),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Blood Death Knight analysis cites exactly the committed pinned authority — id, revision, commit, source path and source digest — and none other, and that artifact records the client-version guards the extractor evaluated (the pre-12.1 lines it dropped). The literals are read from the committed artifact, so a re-pin fails this kind's schema before any case runs.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        targetActorId: z.number().int().nullable(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            outcome: z.enum(COMPARISON_OUTCOMES),
+            basis: z.enum(COMPARISON_BASES),
+            authorityCoverage: z.enum(DECISION_COVERAGES),
+            authorityToken: z.string().nullable(),
+            selectionPrecision: z.enum(["EXACT_ENTRY", "TOKEN_CONVERGED"]).nullable(),
+            decisiveBlocker: z.enum(DECISION_BLOCKER_CLASSES).nullable(),
+            rawBlocker: z.string().nullable(),
+            observedActionRejected: z.boolean(),
+            unselectabilityProven: z.boolean(),
+            unselectabilityRefusal: z.string().nullable(),
+            /** The ROOT scan's stopping entry as `list[ordinal] token`, or null when it resolved. */
+            stoppingAt: z.string().nullable(),
+            /** The atoms (or tagged reason) that made the stopping entry undecidable. Exact and ordered. */
+            stoppingAtoms: z.array(z.string().min(1)),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Blood Death Knight evaluator, under the committed pinned authority, compares this observed cast exactly so — the shared first-GCD comparison AND the nested unselectability proof — and its ROOT scan stopped at exactly this entry on exactly these atoms. MATCH means AUTHORITY_COMPATIBLE_ONLY after the non-domain exclusion; UNKNOWN carries the engine's own blocker verbatim; REJECTED is preserved as the evaluator produced it.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            eligibleDecisions: z.number().int().nonnegative(),
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            unknown: z.number().int().nonnegative(),
+            exclusions: z.partialRecord(z.enum(BLOOD_EXCLUSION_REASONS), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator's coverage disclosure over this actor's every completed cast: the eligible supported-decision denominator, the three outcomes that partition it, and each excluded cast counted under its named reason — including OUTSIDE_FIRST_SLICE for the in-domain casts the slice observes but does not judge. A cast is never dropped silently.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.STOPPING_POINT_DISTRIBUTION": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            /** Every eligible decision's ROOT-scan stopping entry -> count (`(root scan resolved)` when none). Exact and exhaustive. */
+            stoppingEntries: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every eligible decision's stopping entry AND atom, `list[ordinal] token | atom` -> count. Exact and exhaustive. */
+            stoppingAtoms: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every dispatch step of every eligible decision's ROOT scan, `list[ordinal] -> callee : outcome` -> count. Exact and exhaustive. */
+            dispatchOutcomes: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every GCD-consuming MAY_SELECT step of every eligible decision's ROOT scan, `list[ordinal] token | atom` -> count. Exact and exhaustive. */
+            undecidedGcdCandidates: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "THE M11-B2 MEASUREMENT. Every eligible decision of this actor retains a root-scan stopping entry with the atoms that made it undecidable, and the stopping entries, the stopping atoms and the dispatch outcomes distribute exactly so; together with the resolved counts this partitions the eligible population. The dispatch outcomes are the B1 run_action_list semantics observed on a real list: a FALSE run gate is RUN_GATE_FALSE_SKIPPED and the parent continues, a TRUE run gate enters the child and the scan ends there, an undecided one blocks.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        /** Every dispatch entry the ROOT scan visited at this decision, in visit order. Exact and exhaustive. */
+        expected: z.array(
+          z
+            .object({
+              at: z.string().min(1),
+              actionToken: z.enum(["call_action_list", "run_action_list"]),
+              calleeListName: z.string().min(1).nullable(),
+              outcome: z.string().min(1),
+              gate: z.string().min(1),
+            })
+            .strict(),
+        ),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the ROOT scan visited exactly these dispatch entries with exactly these outcomes and gate verdicts: the B1 control flow — call returns, run transfers, a FALSE run gate is skipped, an undecided run gate blocks — verified entry by entry on the pinned Blood list.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        cast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            runes: z
+              .object({
+                state: z.enum(["EXACT_PRE_COST", "NO_OBSERVATION"]),
+                amount: z.number().int().nonnegative().nullable(),
+                max: z.number().int().positive().nullable(),
+                cost: z.number().int().nonnegative().nullable(),
+              })
+              .strict(),
+            runicPower: z
+              .object({
+                state: z.enum(["EXACT_PRE_COST", "NO_OBSERVATION"]),
+                /** WIRE encoding (tenths of a point), verbatim. */
+                amount: z.number().int().nonnegative().nullable(),
+                max: z.number().int().positive().nullable(),
+                cost: z.number().int().nonnegative().nullable(),
+              })
+              .strict(),
+            /** `runic_power.deficit` in POINTS as the resolver bound it, or null. */
+            runicPowerDeficit: z.number().nullable(),
+            /** `rune` as the resolver bound it, or null. */
+            rune: z.number().int().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator records exactly these Rune and Runic Power observations on this cast — a PRE_COST amount only where the cast COSTS that resource; NO_OBSERVATION where the cast carries no entry for it, or only the uncosted (EVENT_ASSOCIATED) Runic Power pool an uncosted cast carries — and binds runic_power.deficit (points, converted once from the wire's tenths) and rune exactly so. Observations, never derived, replayed or regenerated state; the wire's cost field is never read as the cost paid.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        atomName: z.string().min(1),
+        expected: z
+          .object({
+            state: z.enum(["BOUND", "UNBOUND"]),
+            up: z.boolean().nullable(),
+            abilityGameId: z.number().int().nullable(),
+            proof: z.enum(["HERO_TREE_EXCLUDED", "TALENT_NOT_SELECTED", "OBSERVED"]).nullable(),
+            anchorReportTimeMs: z.number().int().nullable(),
+            reason: z.string().nullable(),
+            auraReason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the Blood aura bindings bind (or refuse to bind) this buff atom exactly so: from a transition M4 OBSERVED strictly before the decision on the actor's own aura, or from a build proof — the aura's every producer is a hero talent of the OTHER resolved sub-tree, or its producing talent is disproved at its choice node. Never inactive from silence, never from a later transition.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        atomName: z.string().min(1),
+        expected: z
+          .object({
+            state: z.enum(["BOUND", "UNBOUND"]),
+            stack: z.number().int().nonnegative().nullable(),
+            proof: z
+              .enum([
+                "HERO_TREE_EXCLUDED",
+                "TALENT_NOT_SELECTED",
+                "OBSERVED",
+                "PROVEN_INACTIVE",
+                "EXACT_STACK_OBSERVATION",
+              ])
+              .nullable(),
+            abilityGameId: z.number().int().nullable(),
+            reason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the stack binding for this buff.<name>.stack atom is exactly so: zero under PROVEN_INACTIVE or a build proof; for bone_shield ONLY, the exact positive count the last stack-bearing transition reported, when every later transition up to the decision is its same-millisecond refresh companion and M4 proves the aura ACTIVE under coverage; UNBOUND with the reason otherwise — a lone refresh or an initial application after the last count is COUNT_AMBIGUOUS_SINCE_OBSERVATION, never a guess.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        simcToken: z.string().min(1),
+        expected: z
+          .object({
+            readiness: z.enum(["PROVEN_NOT_READY", "UNKNOWN"]),
+            provenRemainingAtLeastMs: z.number().int().nonnegative().nullable(),
+            anchorReportTimeMs: z.number().int().nullable(),
+            anchorAbilityGameId: z.number().int().nullable(),
+            effectiveBaseMs: z.number().int().positive().nullable(),
+            unknownReason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the Blood cooldown bindings derive this token's readiness exactly so, through the shared token-cooldown derivation, from the actor's last OBSERVED cast strictly before the decision under the pinned base and the reviewed modifier census (Dancing Rune Weapon: 120,000 ms less Insatiable Blade's 30,000 ms when SELECTED). Only PROVEN_NOT_READY is ever claimed.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        domain: z.enum(AUTHORITY_DOMAINS),
+        expected: z
+          .object({
+            resolution: z.enum(AUTHORITY_RESOLUTION_OUTCOMES),
+            authorityId: z.string().nullable(),
+            offensiveAuthorityGoverns: z.boolean().nullable(),
+            evidenceFamily: z.enum(["OBSERVABLE", "NOT_OBSERVABLE", "UNVERIFIED"]).nullable(),
+            /** The Death Strike dual-role marker on the offensive result, else null. */
+            deathStrikeDualRole: z.boolean().nullable(),
+            /** The shared-button marker on the two survival domains, else null. */
+            sharesActionWithOffensive: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator represents this decision domain exactly so: the registration's own authority resolution (AUTHORITY_AVAILABLE for OFFENSIVE_ROTATION, NO_PINNED_AUTHORITY_FOR_DOMAIN for the five declared-and-unbound domains a tank asks about; never DOMAIN_NOT_DECLARED), whether the offensive authority may govern it (never, outside OFFENSIVE_ROTATION), the Death Strike dual-role and shared-button markers that keep the spender verdict from reading as a survival verdict, and for INTERRUPT the evidence family's capability stated separately from the missing standard.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            talents: z.record(z.string().min(1), z.enum(TALENT_SELECTIONS)),
+            heroTree: z.string().min(1).nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator resolves the actor's build from the observed talent tree against the pinned Blood talent dataset exactly so: every modelled talent's three-way selection (a NORMAL node absent from the tree — Consumption, Exterminate, Reaper's Mark here — is UNKNOWN, never NOT_SELECTED) and the hero sub-tree by entry membership. Never inferred from a cast.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.NON_DOMAIN_ENTRIES": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        /** Every `list[ordinal] token` classified OUTSIDE_SUPPORTED_DECISION_DOMAIN, in authority order. Exact and exhaustive. */
+        expected: z.array(z.string().min(1)),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "Under this actor's resolved build, the Blood applicability rules classify exactly these pinned entries OUTSIDE the rotational decision domain — the item uses, the racial actions (Arcane Torrent among them), the potion — by the shared token categories, before any build fact is read; every other player action is decided by the constructor readings. No race, faction, gear use effect or consumable is read or inferred.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.SPEC_GATE": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Blood facade refuses this specialization with SPEC_NOT_SUPPORTED before any Blood rule runs: no comparisons, no domains, no authority.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.ANALYSIS_STATUS": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z.enum(["PROFILE_NOT_RESOLVED", "AUTHORITY_NOT_AVAILABLE", "INSUFFICIENT_EVIDENCE"]),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "Over this artifact (or bundle) the registration refuses to analyze the actor with exactly this status — a segment with no combatant profile is PROFILE_NOT_RESOLVED, never a smaller population that reads as clean play.",
+  },
+
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------
   //
   // Driven directly over a SYNTHETIC authority artifact (JSON_VALUE) with every
@@ -2344,6 +2737,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedRogueDotDurations.datasetId]: pinnedRogueDotDurations.artifactRevision,
   [pinnedProtectionApl.authorityId]: pinnedProtectionApl.artifactRevision,
   [pinnedRetributionApl.authorityId]: pinnedRetributionApl.artifactRevision,
+  [pinnedBloodApl.authorityId]: pinnedBloodApl.artifactRevision,
 };
 
 // --------------------------------------------------------------------------

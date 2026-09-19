@@ -1044,6 +1044,507 @@
       }
     },
     {
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "ca1c65d0bf36fbdc112b6067f003775cbcb65a5f7e93a72e027002fc6250f10e",
+      "byteLength": 203455,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-18",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2049589,
+            "endTimeMs": 2169589
+          },
+          "completeness": {
+            "eventsReturned": 68870,
+            "pagesRetrieved": 7,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589]."
+          },
+          "captureTooling": {
+            "name": ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165.json --actor-slice 14 2169589 --from 2109589 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seven page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 14 with --from 2109589 (exclusive) and the bound 2169589 (inclusive), restricted by --families to the same thirteen raw types. In place and order preserved. 821 of 68,870 events (first 2,109,652, last 2,169,439): 106 casts (78 by actor 14, 28 targeting it), 67 resourcechange, 648 aura transitions (534 targeting 14, 114 sourced by 14 on others), no combatantinfo. It holds the second Gift removal at 2,111,891, the second Raise Dead at 2,128,448 and the second Vampiric Blood at 2,149,299 (aura removed 2,159,301); 39 supported decisions (13 Death Strike, 11 Heart Strike, 6 Vampiric Strike, 6 Blood Boil, 2 Marrowrend, 1 Death's Caress) and 3 Death and Decay casts, plus nothing after the capture's end.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [14],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2109590,
+                  "toReportTimeMs": 2169589
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 14 over [2,109,590 .. 2,169,589] by the predicate 'every event actor 14 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent."
+        },
+        "retainedFor": "M11-B2: one chronological segment of the Blood Death Knight subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer. History for every evaluated decision begins at the pull through the 45 s slice; the whole 165 s bundle is the evaluation window.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "5dbd8dbf082ea1f02f2390cb31ce83593f15c3b565d0b29460ed4174ba32f50b",
+      "byteLength": 246630,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-18",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2049589,
+            "endTimeMs": 2169589
+          },
+          "completeness": {
+            "eventsReturned": 68870,
+            "pagesRetrieved": 7,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seven pages (10,001 / 10,001 / 10,002 / 10,011 / 10,018 / 10,001 / 8,836 events; cursors 2,070,879, 2,085,324, 2,099,918, 2,116,424, 2,134,911, 2,149,639, then null): the whole 120-second window was retrieved inside the 10-page cap. The first event is at 2,049,590 and the last at 2,169,588. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first (.probe/m10c5-phase-b-request-count.json). Together with the M10-B capture's terminal page (last event 2,049,581 under an exclusive end of 2,049,589) this proves no event of the fight lies in [2,049,582 .. 2,049,589]."
+          },
+          "captureTooling": {
+            "name": ".probe/m10c5-phase-b-capture.probe.ts (temporary, gitignored; the M10-B probe with the window offsets and output names changed) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R8 steady-state window: EVENTS_QUERY over [2,049,589 .. 2,169,589] (the pull's +45 s .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10c5-phase-b-capture-plan.md before running, run once by hand on 2026-09-18 (9 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10c5-phase-b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10c5-phase-b-pages.json wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105.json --actor-slice 14 2109589 --from 2049581 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seven page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 14 with --from 2049581 (exclusive) and the bound 2109589 (inclusive), restricted by --families to the same thirteen raw types. In place and order preserved. 967 of 68,870 events (first 2,049,819, last 2,109,337): 124 casts (86 by actor 14, 38 targeting it), 89 resourcechange, 754 aura transitions (636 targeting 14, 118 sourced by 14 on others), no combatantinfo. This segment's --from equals the 45 s slice's grant end (2,049,581): the two share no event, and the millisecond interval between that grant and this capture's window start is certified empty below. It holds the first Vampiric Blood at 2,087,109 (aura 55233 applied 2,087,109, removed 2,097,114) and the second Dancing Rune Weapon at 2,099,885 with its Gift application; 36 supported decisions (15 Death Strike, 9 Heart Strike, 7 Vampiric Strike, 3 Blood Boil, 1 Marrowrend, 1 Death's Caress) and 4 Death and Decay casts.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [14],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2049589,
+                  "toReportTimeMs": 2109589
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 14 over [2,049,589 .. 2,109,589] by the predicate 'every event actor 14 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent.",
+          "certifiedEmpty": [
+            {
+              "fromReportTimeMs": 2049582,
+              "toReportTimeMs": 2049588,
+              "precedingArtifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+              "basis": "The M10-B capture requested [2,004,589 .. 2,049,589) — an EXCLUSIVE end of 2,049,589 — and paginated to a terminal page whose last event is 2,049,581, so every event the report holds before 2,049,589 was retrieved and the 45 s slice (every actor-14 event of the retained families in that capture) retained none in [2,049,582 .. 2,049,588]; this capture begins at 2,049,589 and its first event is 2,049,590. The loader re-checks both captures' recorded windows and completeness and that neither artifact retains an event inside the interval."
+            }
+          ]
+        },
+        "retainedFor": "M11-B2: one chronological segment of the Blood Death Knight subject's steady state, committed under the 512 KiB limit and composed with its neighbours by the bundle composer. History for every evaluated decision begins at the pull through the 45 s slice; the whole 165 s bundle is the evaluation window.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-a7r6-rotational-45s.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "6061a4458f17dddeffd3267edb3641be98975f06004506848248036b12f42223",
+      "byteLength": 257079,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-16",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2004589,
+            "endTimeMs": 2049589
+          },
+          "completeness": {
+            "eventsReturned": 30588,
+            "pagesRetrieved": 4,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Four pages (10,007 / 10,000 / 10,009 / 572 events; cursors 2,021,544, 2,034,579, 2,048,380, then null): the whole 45-second window was retrieved inside the 10-page cap. The fight's first event (the encounterstart at 2,004,589 = the fight start) is on page 1, so coverage runs from the pull. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first, so no page straddles two exports (.probe/m10b-request-count.json)."
+          },
+          "captureTooling": {
+            "name": ".probe/m10b-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R5 opener window: EVENTS_QUERY over [2,004,589 .. 2,049,589] (the pull's first 45 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10b-capture-plan.md before running, run once by hand on 2026-09-16 (6 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10b-pages.json wcl-blood-death-knight-a7r6-rotational-45s.json --actor-slice 14 2049581 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The same four page envelopes as the Protection opener, concatenated in page order, then the --actor-slice predicate for ACTOR 14 bounded at the capture's last timestamp (2,049,581) and restricted by --families to the same thirteen raw types. In place and order preserved, 913 of 30,588 events: 136 casts (107 by actor 14, 29 targeting it), 89 resourcechange (all targeting 14), 687 aura transitions (594 targeting 14, 93 sourced by 14 on others), actor 14's combatantinfo at the fight start; first event 2,004,589, last 2,049,534. Damage, healing, absorb and summon events involving actor 14 were FILTERED OUT by family, not trimmed within a family.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [14],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2004589,
+                  "toReportTimeMs": 2049581
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 14 over [2,004,589 .. 2,049,581] by the predicate 'every event actor 14 sources or is targeted by, of a retained family, at or before the bound' over a window the capture retrieved COMPLETE with NO actor filter (four pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The window begins at the fight start. Nothing is granted to any other actor, and nothing after the bound."
+        },
+        "retainedFor": "M11-B2: the first 45 seconds of the Blood Death Knight subject (A7R6 fight 7 actor 14 — San'layn, Vampiric Strike, Gift of the San'layn, Visceral Strength, Insatiable Blade, faction 1), as the measurement slice needs it — every cast, every Rune and Runic Power snapshot and every aura transition on or by the subject from the pull, with the combatantinfo. It carries the first Dancing Rune Weapon at 2,007,757 with its Gift of the San'layn window (2,007,757 .. 2,019,763), the first Raise Dead at 2,008,457, the Bone Shield stack stream (17 applybuffstack, 8 removebuffstack, 26 refreshbuff), and 48 supported decisions (16 Death Strike, 12 Heart Strike, 14 Vampiric Strike, 3 Blood Boil, 2 Marrowrend, 1 Death's Caress) plus 4 Death and Decay casts the slice observes and does not judge; the first part of the 165 s bundle. Also the wire corroboration for the RUNES and RUNIC_POWER contracts (src/data/wcl-wire/resource-types.ts).",
+        "limitations": [
+          "Forty-five seconds of a 424-second kill: nothing about the fight's later cooldown cycles or its ending.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log: nothing here says whether any ability was on cooldown when the fight began, and no Vampiric Blood transition occurs in the window, so buff.vampiric_blood.up is UNKNOWN at every decision of this slice on its own.",
+          "The subject's race is not in the evidence and is not inferred; racial entries of the pinned list are outside the rotational decision domain (M11-A4 boundary).",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-gtkb-opener",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-gtkb-opener.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "349811088a0f233d548758e092531ff8f615c440343f5f1b7a39ffd88dc8b983",
+      "byteLength": 132735,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "gtKb2xHn87pNcFfW",
+          "fightId": 22,
+          "reportRevision": 22,
+          "sourceActorId": 25,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-15",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2415041,
+            "endTimeMs": 2435041
+          },
+          "completeness": {
+            "eventsReturned": 18318,
+            "pagesRetrieved": 2,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Two pages (10,004 then 8,314 events), the second terminal (nextPageTimestamp null): the whole 20-second window was retrieved. The fight's first event, the subject's combatantinfo, is at 2,415,041 = the fight start, so coverage runs from the pull."
+          },
+          "captureTooling": {
+            "name": ".probe/m9c2-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R3–R4 opener window: EVENTS_QUERY over [2,415,041 .. 2,435,041] (the pull's first 20 s) at limit 10,000 with resources; bounded to 5 pages in advance, run once by hand on 2026-09-15 (4 requests in total for the whole capture, bound 8)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m9c2-opener-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[22]) — the report's own per-fight rankings, one request; the subject was selected as row 0 of the Sszorak heroic Assassination dps board page captured by scripts/probe/wcl-rankings-shape.probe.ts",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 25,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 100,
+                "bracketPercent": 100,
+                "bracket": 18,
+                "bracketData": 325,
+                "totalParses": 8606
+              },
+              {
+                "actorId": 8,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 8,
+                "bracketPercent": 17,
+                "bracket": 10,
+                "bracketData": 299,
+                "totalParses": 8606
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 284791
+          }
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m9c2-opener-pages.json wcl-blood-death-knight-gtkb-opener.json --actor-slice 14 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The two page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 14 (the second Blood Death Knight subject: the same San'layn build as the A7R6 subject, faction value 0, a different belt and legs) unbounded, restricted by --families to the same thirteen raw types. In place and order preserved, 355 of 18,318 events: 55 casts (51 by actor 14, 4 targeting it), 45 resourcechange, 254 aura transitions (228 targeting 14, 26 sourced by 14 on others), actor 14's combatantinfo at 2,415,042; first event 2,415,042, last 2,435,006.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [14],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2415041,
+                  "toReportTimeMs": 2435041
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 14 over [2,415,041 .. 2,435,041] by the predicate 'every event actor 14 sources or is targeted by, of a retained family' over a window the capture retrieved COMPLETE with NO actor filter (two pages, terminal). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The window begins at the fight start."
+        },
+        "retainedFor": "M11-B2: the second Blood Death Knight subject on a different report, pull and boss (Sszorak heroic), cut by the same predicate as the A7R6 subject so the same executors run over it. Twenty seconds of opener: the Dancing Rune Weapon, Raise Dead and on-use trinket all at 2,417,020 (+1,978 ms), the Gift of the San'layn window 2,417,020 .. 2,429,050, and 21 supported decisions (6 Death Strike, 3 Heart Strike, 7 Vampiric Strike, 4 Blood Boil, 1 Death's Caress) plus 2 Death and Decay casts. It also holds the two Death Strike casts whose attached Runic Power (440, 390) is BELOW the wire's reported cost (450), the evidence that the cost field is the base cost.",
+        "limitations": [
+          "The first 20 seconds only: nothing about the rest of the pull, its cooldown cycles or its ending.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; no Vampiric Blood transition occurs in the window.",
+          "Sszorak has adds; nothing about target count is claimed here or anywhere in the corpus.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-boss-sourced",
       "path": "artifacts/wcl-events/wcl-boss-sourced.json",
       "encoding": "JSON",
@@ -3665,6 +4166,54 @@
       ]
     },
     {
+      "caseId": "application-service.blood-death-knight-subject-is-internal-only-and-publicly-unsupported",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts INTERNAL_ONLY_SPEC_IDS",
+      "purpose": "The real Blood Death Knight subject, over its own captured evidence, is NOT recognized by the public identity table (DeathKnight/Blood resolves to no SpecId), so the application service reports SPEC_NOT_SUPPORTED with no analyzer and no ingestion — while the validated catalog's INTERNAL lookup resolves deathknight/blood to the Blood registration with INTERNAL_ONLY exposure and a null public lookup. The five public sites are untouched: the partition, the public contract's specId enum, the identity table, the `satisfies InternalOnlySpecId` on spec.ts, and the registration's exposure all agree that Blood is internal.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "params": {
+            "subject": {
+              "actorId": 14,
+              "className": "DeathKnight",
+              "specName": "Blood"
+            },
+            "expected": {
+              "status": "SPEC_NOT_SUPPORTED",
+              "specId": null,
+              "analyzerId": null,
+              "scope": null
+            }
+          }
+        },
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "params": {
+            "specId": "deathknight/blood",
+            "expected": {
+              "internalAnalyzerId": "deathknight-blood-observed-decisions",
+              "publicAnalyzerId": null,
+              "exposure": "INTERNAL_ONLY",
+              "identityResolvesPublicly": false
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "An evaluator has to exist, be registered and be exercised BEFORE it is safe to expose. M11-B2 does the first three for a MEASUREMENT slice with zero resolved decisions; the promotion evidence gate would refuse it, and nothing here asks it to."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/contracts/m11-promotion-evidence-gate.test.ts",
+        "tests/contracts/m10a-spec-partition.test.ts"
+      ]
+    },
+    {
       "caseId": "application-service.derives-player-context-scope-and-selects-the-assassination-analyzer",
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "owningLayer": "APPLICATION_SERVICE",
@@ -5353,6 +5902,273 @@
         "tests/regression/ingestion-preserves-event-order.test.ts",
         "tests/regression/m5c3a-garrote-remains-and-core-dot.test.ts"
       ]
+    },
+    {
+      "caseId": "normalization.blood-death-knight-165s-bundle-composes-three-parts-into-one-complete-fight",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "tests/support/corpus/fight.ts bundleOverEvidence; loader.ts certificateErrors; scripts/corpus/build-manifest.mjs certifiedEmpty",
+      "purpose": "The three parts — the 45 s slice (its grant ending at 2,049,581), then the segments granted from 2,049,589 and 2,109,590 — compose into one 2,701-event fight over [2,004,589 .. 2,169,439] with CASTS, AURAS, RESOURCES, COMBATANT_INFO and GEAR each COMPLETE over ONE joined range [2,004,589 .. 2,169,589]. The seven milliseconds [2,049,582 .. 2,049,588] between the first two parts are bridged only by the seg-45-105 record's zero-event certificate.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "params": {
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "actorId": 14,
+            "expected": {
+              "events": 2701,
+              "coverage": {
+                "CASTS": "COMPLETE",
+                "AURAS": "COMPLETE",
+                "RESOURCES": "COMPLETE",
+                "COMBATANT_INFO": "COMPLETE",
+                "GEAR": "COMPLETE",
+                "DAMAGE": "ABSENT",
+                "HEALING": "ABSENT",
+                "ABSORBS": "ABSENT",
+                "SUMMONS": "ABSENT"
+              },
+              "castRanges": [
+                {
+                  "fromReportTimeMs": 2004589,
+                  "toReportTimeMs": 2169589
+                }
+              ],
+              "windowFromReportTimeMs": 2004589,
+              "windowToReportTimeMs": 2169439
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "Composition is a claim about coverage, and coverage is never inferred from the bytes: the same composer, certificate validation and refusals the Paladin bundles proved, over a third subject cut from the same two captures."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/m10c5b-corpus-bundle.test.ts", "tests/unit/m9b-corpus-loader.test.ts"]
+    },
+    {
+      "caseId": "normalization.blood-death-knight-gtkb-opener-normalizes-whole-and-in-order",
+      "artifactId": "wcl-blood-death-knight-gtkb-opener",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --families",
+      "purpose": "The 355-event family-filtered actor-14 opener normalizes with every raw type recognised and every event kept in capture order: as SOURCE the combatantinfo, 51 casts, 45 Runic Power changes and 214 aura transitions; as TARGET 4 casts, 45 resource changes and 228 aura transitions.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 355
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 14,
+            "side": "SOURCE",
+            "expected": {
+              "COMBATANT_INFO": 1,
+              "CAST": 51,
+              "RESOURCE_CHANGE": 45,
+              "AURA": 214
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 14,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 4,
+              "RESOURCE_CHANGE": 45,
+              "AURA": 228
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "A census of what the opener holds for the actor, never of the fight."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts"]
+    },
+    {
+      "caseId": "normalization.blood-death-knight-rotational-165s-seg-105-165-normalizes-whole-and-in-order",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+      "purpose": "The 821-event family-filtered actor-14 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE 78 casts, 67 Runic Power changes, 542 aura transitions; as TARGET 28 casts, 67 resource changes, 534 aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. The second Raise Dead (2,128,448) and the second Vampiric Blood (2,149,299) lie in it.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 821
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 14,
+            "side": "SOURCE",
+            "expected": {
+              "CAST": 78,
+              "RESOURCE_CHANGE": 67,
+              "AURA": 542
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 14,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 28,
+              "RESOURCE_CHANGE": 67,
+              "AURA": 534
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
+      "caseId": "normalization.blood-death-knight-rotational-165s-seg-45-105-normalizes-whole-and-in-order",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+      "purpose": "The 967-event family-filtered actor-14 segment normalizes with every raw type recognised and every event kept in capture order: as SOURCE 86 casts, 89 Runic Power changes, 606 aura transitions; as TARGET 38 casts, 89 resource changes, 636 aura transitions. No combatantinfo: the segment starts strictly after the fight start, and the profile is carried by the first part of any bundle it joins. The first Vampiric Blood (2,087,109) and the second Dancing Rune Weapon (2,099,885) lie in it.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 967
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 14,
+            "side": "SOURCE",
+            "expected": {
+              "CAST": 86,
+              "RESOURCE_CHANGE": 89,
+              "AURA": 606
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 14,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 38,
+              "RESOURCE_CHANGE": 89,
+              "AURA": 636
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else. On its own a segment analyzes to PROFILE_NOT_RESOLVED — there is no combatant profile in it — which is the correct refusal, not a smaller population."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
+      "caseId": "normalization.blood-death-knight-rotational-45s-normalizes-whole-and-in-order",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --families",
+      "purpose": "The 913-event family-filtered actor-14 slice normalizes with every raw type recognised and every event kept in capture order: as SOURCE the combatantinfo, 107 casts, 89 Runic Power changes and 593 aura transitions; as TARGET 29 casts, 89 resource changes and 594 aura transitions.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 913
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 14,
+            "side": "SOURCE",
+            "expected": {
+              "COMBATANT_INFO": 1,
+              "CAST": 107,
+              "RESOURCE_CHANGE": 89,
+              "AURA": 593
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 14,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 29,
+              "RESOURCE_CHANGE": 89,
+              "AURA": 594
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "A census of what the slice holds for the actor, never of the fight: exactly the families the --families option retained, at or before the recorded bound. The same predicate that cut the two Paladin subjects from the same stream cut this one; the stream had no actor filter, so it is complete for all three."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts"]
     },
     {
       "caseId": "normalization.boss-sourced-events-survive-the-unfiltered-stream",
@@ -8609,6 +9425,1950 @@
       "relatedTests": [
         "tests/regression/m5c2-vanish-stealth-and-ambush-gate.test.ts",
         "tests/unit/rogue-talents.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.a-segment-alone-has-no-profile",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/observed-analysis.ts (profile gate)",
+      "purpose": "Analyzed on its own, the 105–165 s segment holds no combatantinfo for actor 14 and the registration reports PROFILE_NOT_RESOLVED — no build, no applicability, no decisions — rather than a smaller population that would read as clean play.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.ANALYSIS_STATUS",
+          "params": {
+            "actorId": 14,
+            "expected": "PROFILE_NOT_RESOLVED"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+        "text": "Absence of a profile is a refusal, never an empty result."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.authority-build-boundary-and-domains-on-the-first-slice",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/registration.ts; authority-bindings.ts; pinned-authority.ts; observed-analysis.ts (build); action-profile.ts; domain-boundary.ts; domains.ts",
+      "purpose": "Over the 45 s slice the registration analyzes actor 14 under exactly the pinned SIMC_APL_DEATHKNIGHT_BLOOD artifact (twelve client-version guards evaluated for 12.1.0, their pre-12.1 lines dropped), resolves the build from the observed tree (10 of 13 modelled talents SELECTED; Consumption, Exterminate and Reaper's Mark UNKNOWN because their NORMAL nodes are absent — never NOT_SELECTED; hero tree sanlayn by entry membership), classifies exactly twelve pinned entries OUTSIDE the rotational decision domain by the shared token categories (six item uses, five racials including Arcane Torrent, one potion), and represents all six domains: OFFENSIVE_ROTATION under the authority with the Death Strike dual-role marker; the five others declared with no pinned authority, ACTIVE_MITIGATION and SELF_HEALING carrying the shared-button marker for death_strike.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AUTHORITY_PROVENANCE",
+          "params": {
+            "actorId": 14,
+            "expected": {
+              "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+              "artifactRevision": "simc-33622e9d-1",
+              "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+              "sourcePath": "engine/class_modules/apl/apl_death_knight.cpp",
+              "sourceSha256": "e381da691875ceecb8357a76e90fef9e01f3a200c67da7024deff1ca7f728df6",
+              "conditionalCompilationGuards": 12
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION",
+          "params": {
+            "actorId": 14,
+            "expected": {
+              "talents": {
+                "blood_boil": "SELECTED",
+                "consumption": "UNKNOWN",
+                "dancing_rune_weapon": "SELECTED",
+                "death_strike": "SELECTED",
+                "exterminate": "UNKNOWN",
+                "gift_of_the_sanlayn": "SELECTED",
+                "heart_strike": "SELECTED",
+                "marrowrend": "SELECTED",
+                "raise_dead": "SELECTED",
+                "reapers_mark": "UNKNOWN",
+                "vampiric_blood": "SELECTED",
+                "vampiric_strike": "SELECTED",
+                "visceral_strength": "SELECTED"
+              },
+              "heroTree": "sanlayn"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.NON_DOMAIN_ENTRIES",
+          "params": {
+            "actorId": 14,
+            "expected": [
+              "default[1] use_items",
+              "default[2] use_item",
+              "default[3] use_item",
+              "default[4] use_item",
+              "default[5] use_item",
+              "default[6] use_item",
+              "default[7] fireblood",
+              "default[8] blood_fury",
+              "default[9] berserking",
+              "default[10] ancestral_call",
+              "default[11] potion",
+              "deathbringer[11] arcane_torrent"
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
+          "params": {
+            "actorId": 14,
+            "domain": "OFFENSIVE_ROTATION",
+            "expected": {
+              "resolution": "AUTHORITY_AVAILABLE",
+              "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+              "offensiveAuthorityGoverns": null,
+              "evidenceFamily": null,
+              "deathStrikeDualRole": true,
+              "sharesActionWithOffensive": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
+          "params": {
+            "actorId": 14,
+            "domain": "RESOURCE_SPENDING",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null,
+              "deathStrikeDualRole": null,
+              "sharesActionWithOffensive": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
+          "params": {
+            "actorId": 14,
+            "domain": "ACTIVE_MITIGATION",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null,
+              "deathStrikeDualRole": null,
+              "sharesActionWithOffensive": "death_strike"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
+          "params": {
+            "actorId": 14,
+            "domain": "DEFENSIVE_COOLDOWN",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null,
+              "deathStrikeDualRole": null,
+              "sharesActionWithOffensive": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
+          "params": {
+            "actorId": 14,
+            "domain": "SELF_HEALING",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": null,
+              "deathStrikeDualRole": null,
+              "sharesActionWithOffensive": "death_strike"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
+          "params": {
+            "actorId": 14,
+            "domain": "INTERRUPT",
+            "expected": {
+              "resolution": "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+              "authorityId": null,
+              "offensiveAuthorityGoverns": false,
+              "evidenceFamily": "UNVERIFIED",
+              "deathStrikeDualRole": null,
+              "sharesActionWithOffensive": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A tank declares the survival domains and binds nothing to them: the analyzer says it has no standard for Death Strike as mitigation or healing rather than pretending the offensive list's spender verdict is one. The domain boundary is a decision about what the class/spec authority governs, taken by TOKEN CATEGORY before any build fact is read. Consumption stays UNKNOWN by the three-way rule, which is why the two `consumption,empower_to=1` entries would BLOCK a scan that reached them — none does in this evidence, because every San'layn scan stops at the first entry of its list."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.inside-the-gift-window-the-scan-transfers-into-san-gift-and-stops-at-its-first-entry",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/first-gcd-adapter.ts; aura-bindings.ts (exact Bone Shield count); cooldown-bindings.ts; resources.ts",
+      "purpose": "The Death Strike at 2,012,014 (+7,425 ms) sits inside the first Gift window (applied 2,007,757 with the Dancing Rune Weapon cast): the run gate at default[15] is TRUE, the scan TRANSFERS into san_gift and stops at san_gift[0] heart_strike on the decimal literal. Runic Power 990 of 1,250 on the wire (base cost 450) binds runic_power.deficit=26 points; no Runes observation on a Runic Power-costed cast. Bone Shield is exactly 6 (last stack transition 2,010,192, every later transition a same-millisecond companion). Dancing Rune Weapon is proven on cooldown from its cast at 2,007,757 under the 90,000 ms effective base (Insatiable Blade SELECTED): 85,743 ms remaining. The Marrowrend at 2,015,770 shows the same-millisecond hazard: its own three Bone Shield stack gains are logged BEFORE the cast, so both the presence and the count are REFUSED (SAME_MILLISECOND_TRANSITION) rather than read post-cast.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": "san_gift[0] heart_strike",
+              "stoppingAtoms": ["UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1."]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "expected": [
+              {
+                "at": "default[13]",
+                "actionToken": "call_action_list",
+                "calleeListName": "high_prio_actions",
+                "outcome": "CALL_MAY_SELECT",
+                "gate": "UNCONDITIONAL"
+              },
+              {
+                "at": "default[14]",
+                "actionToken": "run_action_list",
+                "calleeListName": "deathbringer",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[15]",
+                "actionToken": "run_action_list",
+                "calleeListName": "san_gift",
+                "outcome": "BLOCKED",
+                "gate": "TRUE"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "runes": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPower": {
+                "state": "EXACT_PRE_COST",
+                "amount": 990,
+                "max": 1250,
+                "cost": 450
+              },
+              "runicPowerDeficit": 26,
+              "rune": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "atomName": "gift_of_the_sanlayn",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 434153,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2007757,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "atomName": "dancing_rune_weapon",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 81256,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2007757,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "atomName": "vampiric_blood",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 55233,
+              "proof": null,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN",
+              "auraReason": "AMBIGUOUS_INITIAL_STATE"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "BOUND",
+              "stack": 6,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 195181,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2012014,
+              "abilityGameId": 49998
+            },
+            "simcToken": "dancing_rune_weapon",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 85743,
+              "anchorReportTimeMs": 2007757,
+              "anchorAbilityGameId": 49028,
+              "effectiveBaseMs": 90000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2015770,
+              "abilityGameId": 195182
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "CONDITION_NOT_PROVEN_FALSE",
+              "stoppingAt": "san_gift[0] heart_strike",
+              "stoppingAtoms": ["UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1."]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2015770,
+              "abilityGameId": 195182
+            },
+            "expected": {
+              "runes": {
+                "state": "EXACT_PRE_COST",
+                "amount": 3,
+                "max": 6,
+                "cost": 2
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2015770,
+              "abilityGameId": 195182
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 195181,
+              "proof": null,
+              "anchorReportTimeMs": null,
+              "reason": "SAME_MILLISECOND_TRANSITION",
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2015770,
+              "abilityGameId": 195182
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 195181,
+              "reason": "SAME_MILLISECOND_TRANSITION"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A TRUE run gate transfers and does not resume: the parent's default[16] is never visited once san_gift is entered, exactly as the pinned loop makes the child the active list. The Bone Shield count is the number the wire wrote, carried only across same-millisecond companions and refused when the decision's own effects precede it in the array."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.outside-the-gift-window-the-scan-skips-san-gift-and-stops-in-sanlayn",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/first-gcd-adapter.ts; aura-bindings.ts; observed-action-gate.ts",
+      "purpose": "The Heart Strike at 2,020,278 (+15,689 ms) follows the Gift removal at 2,019,763: buff.gift_of_the_sanlayn.up binds FALSE from the observed removal, the run gate at default[15] is FALSE and is SKIPPED, the parent continues to default[16] run sanlayn, whose gate hero_tree.sanlayn is TRUE, and the scan stops at sanlayn[0] deaths_caress on the decimal literal. Runes 1 of 6 bind rune=1; Bone Shield exactly 11. The Death Strike at 2,044,021 shows the other Bone Shield refusal: three LONE refreshes at 2,043,229 (no stack transition beside them) sit between the last count and the decision, so the count is COUNT_AMBIGUOUS_SINCE_OBSERVATION; Blood Debt is bound to exactly zero from its removal at the same instant (PROVEN_INACTIVE); its Runic Power 1,080 binds deficit=17, which makes deathbringer[0]'s gate TRUE and the unselectability proof refuse with CONDITION_NOT_PROVEN_FALSE at an entry of a list the resolved hero tree can never enter — a second measured limit of the cross-list proof.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2020278,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": "sanlayn[0] deaths_caress",
+              "stoppingAtoms": ["UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1."]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2020278,
+              "abilityGameId": 206930
+            },
+            "expected": [
+              {
+                "at": "default[13]",
+                "actionToken": "call_action_list",
+                "calleeListName": "high_prio_actions",
+                "outcome": "CALL_MAY_SELECT",
+                "gate": "UNCONDITIONAL"
+              },
+              {
+                "at": "default[14]",
+                "actionToken": "run_action_list",
+                "calleeListName": "deathbringer",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[15]",
+                "actionToken": "run_action_list",
+                "calleeListName": "san_gift",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[16]",
+                "actionToken": "run_action_list",
+                "calleeListName": "sanlayn",
+                "outcome": "BLOCKED",
+                "gate": "TRUE"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2020278,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "runes": {
+                "state": "EXACT_PRE_COST",
+                "amount": 1,
+                "max": 6,
+                "cost": 1
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": 1
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2020278,
+              "abilityGameId": 206930
+            },
+            "atomName": "gift_of_the_sanlayn",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 434153,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2019763,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2020278,
+              "abilityGameId": 206930
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "BOUND",
+              "stack": 11,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 195181,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2044021,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "CONDITION_NOT_PROVEN_FALSE",
+              "stoppingAt": "sanlayn[0] deaths_caress",
+              "stoppingAtoms": ["UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1."]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2044021,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "runes": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPower": {
+                "state": "EXACT_PRE_COST",
+                "amount": 1080,
+                "max": 1250,
+                "cost": 450
+              },
+              "runicPowerDeficit": 17,
+              "rune": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2044021,
+              "abilityGameId": 49998
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 195181,
+              "reason": "COUNT_AMBIGUOUS_SINCE_OBSERVATION"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2044021,
+              "abilityGameId": 49998
+            },
+            "atomName": "blood_debt",
+            "expected": {
+              "state": "BOUND",
+              "stack": 0,
+              "proof": "PROVEN_INACTIVE",
+              "abilityGameId": 1310372,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2044021,
+              "abilityGameId": 49998
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 433925,
+              "reason": "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A FALSE run gate is a skipped entry, nothing more: the parent walks on. A lone refresh proves the aura alive and says nothing pinned about its count, so the count is refused; a removal proves zero."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.retribution-is-refused-at-the-spec-gate",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/observed-analysis.ts (spec gate)",
+      "purpose": "Asked about paladin/retribution over this artifact, the Blood facade refuses with SPEC_NOT_SUPPORTED naming that specialization, before any Blood rule, authority load or profile resolution runs.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.SPEC_GATE",
+          "params": {
+            "actorId": 14,
+            "specId": "paladin/retribution"
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "A facade owns one specialization and answers for no other. Ownership is also enforced at runtime by the registration and the registry."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/regression/m10a-analyzer-result-ownership.test.ts",
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.the-first-decision-at-the-pull-stops-at-the-undecided-gift-gate",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/first-gcd-adapter.ts; aura-bindings.ts; cooldown-bindings.ts; resources.ts; resolver.ts; src/simc/nested-selection.ts (UNDECIDED run gate)",
+      "purpose": "The Death's Caress at 2,004,615 (+26 ms) is UNKNOWN with its root scan stopped at default[15] run_action_list on buff.gift_of_the_sanlayn.up: no Gift transition has been observed yet (AMBIGUOUS_INITIAL_STATE, never 'not up'), so the run gate is undecided and the scan cannot choose between entering san_gift and continuing to sanlayn — the B1 fail-closed edge on real evidence. Runes 6 of 6 (cost 1) bind rune=6; no Runic Power observation on a Rune-costed cast. Bone Shield is proven UP from the pre-pull application at 2,004,595 but no count has been observed (NO_STACK_OBSERVATION). Exterminate is bound DOWN by hero-tree exclusion — a Deathbringer aura in a resolved San'layn build. Dancing Rune Weapon has no observed cast and is UNKNOWN, so its gate is a competing undecided GCD candidate as well. The unselectability proof refuses on precombat[1] deaths_caress, an unconditional entry of a list that is unreachable in combat — a measured limit of the cross-list proof, recorded rather than repaired.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": "default[15] run_action_list",
+              "stoppingAtoms": ["buff.gift_of_the_sanlayn.up"]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "expected": [
+              {
+                "at": "default[13]",
+                "actionToken": "call_action_list",
+                "calleeListName": "high_prio_actions",
+                "outcome": "CALL_MAY_SELECT",
+                "gate": "UNCONDITIONAL"
+              },
+              {
+                "at": "default[14]",
+                "actionToken": "run_action_list",
+                "calleeListName": "deathbringer",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[15]",
+                "actionToken": "run_action_list",
+                "calleeListName": "san_gift",
+                "outcome": "BLOCKED",
+                "gate": "UNKNOWN_STATE"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "expected": {
+              "runes": {
+                "state": "EXACT_PRE_COST",
+                "amount": 6,
+                "max": 6,
+                "cost": 1
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": 6
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "atomName": "gift_of_the_sanlayn",
+            "expected": {
+              "state": "UNBOUND",
+              "up": null,
+              "abilityGameId": 434153,
+              "proof": null,
+              "anchorReportTimeMs": null,
+              "reason": "AURA_STATE_UNKNOWN",
+              "auraReason": "AMBIGUOUS_INITIAL_STATE"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "atomName": "exterminate",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 441416,
+              "proof": "HERO_TREE_EXCLUDED",
+              "anchorReportTimeMs": null,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 195181,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2004595,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 195181,
+              "reason": "NO_STACK_OBSERVATION"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2004615,
+              "abilityGameId": 195292
+            },
+            "simcToken": "dancing_rune_weapon",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": "NO_OBSERVED_CAST"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "An undecided run gate is not a false one: the scan neither enters the child nor skips it, and the answer is UNKNOWN with the gate named. Silence about the Gift is not evidence it was down."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.the-first-slice-population-is-forty-eight-and-the-opener-twenty-one",
+      "artifactId": "wcl-blood-death-knight-gtkb-opener",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/observed-analysis.ts; first-gcd-adapter.ts",
+      "purpose": "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — 15 inside the Gift window stopped at san_gift[0], 6 after it stopped at sanlayn[0], all on the decimal literal — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); no decision carries an undecided GCD candidate, because the opener's Dancing Rune Weapon at 2,417,020 proves the cooldown active for the whole window.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 14,
+            "expected": {
+              "eligibleDecisions": 21,
+              "match": 0,
+              "rejected": 0,
+              "unknown": 21,
+              "exclusions": {
+                "MELEE_SWING": 16,
+                "NON_GCD_ACTION": 11,
+                "OUTSIDE_FIRST_SLICE": 3
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STOPPING_POINT_DISTRIBUTION",
+          "params": {
+            "actorId": 14,
+            "expected": {
+              "match": 0,
+              "rejected": 0,
+              "stoppingEntries": {
+                "san_gift[0] heart_strike": 15,
+                "sanlayn[0] deaths_caress": 6
+              },
+              "stoppingAtoms": {
+                "san_gift[0] heart_strike | UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1.": 15,
+                "sanlayn[0] deaths_caress | UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1.": 6
+              },
+              "dispatchOutcomes": {
+                "default[13] -> high_prio_actions : CALL_MAY_SELECT": 21,
+                "default[14] -> deathbringer : RUN_GATE_FALSE_SKIPPED": 21,
+                "default[15] -> san_gift : BLOCKED": 15,
+                "default[15] -> san_gift : RUN_GATE_FALSE_SKIPPED": 6,
+                "default[16] -> sanlayn : BLOCKED": 6
+              },
+              "undecidedGcdCandidates": {}
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION",
+          "params": {
+            "actorId": 14,
+            "expected": {
+              "talents": {
+                "blood_boil": "SELECTED",
+                "consumption": "UNKNOWN",
+                "dancing_rune_weapon": "SELECTED",
+                "death_strike": "SELECTED",
+                "exterminate": "UNKNOWN",
+                "gift_of_the_sanlayn": "SELECTED",
+                "heart_strike": "SELECTED",
+                "marrowrend": "SELECTED",
+                "raise_dead": "SELECTED",
+                "reapers_mark": "UNKNOWN",
+                "vampiric_blood": "SELECTED",
+                "vampiric_strike": "SELECTED",
+                "visceral_strength": "SELECTED"
+              },
+              "heroTree": "sanlayn"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A second report, pull and boss reproduces the same stopping points from the same list, which is what makes them a property of the shared machinery on this authority rather than of one fight."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,415,042 for actor 14 (specID 250)",
+          "every COMPLETE cast by actor 14 in the slice, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14, in canonical order, with the absolute stack count each stack transition carries"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.the-measurement-over-165s-is-one-hundred-twenty-three-decisions-all-unknown",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/observed-analysis.ts analyzeObservedBloodDeathKnightDecisions; first-gcd-adapter.ts (stopping points, dispatch trace, undecided candidates); src/simc/nested-selection.ts (M11-B1 run_action_list semantics)",
+      "purpose": "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 0 MATCH, 0 REJECTED, 123 UNKNOWN. THE MEASUREMENT: 98 root scans stopped at sanlayn[0] deaths_caress and 24 at san_gift[0] heart_strike, every one on the DECIMAL LITERAL `1.5` the frozen shared parser refuses (UNSUPPORTED_NUMERIC_LITERAL), and 1 — the Death's Caress at the pull — at the default[15] run gate on buff.gift_of_the_sanlayn.up (no transition yet observed). The B1 dispatch semantics held on every scan: default[14] run deathbringer was RUN_GATE_FALSE_SKIPPED 123 times (hero_tree.deathbringer bound FALSE from the resolved San'layn tree), default[15] run san_gift was entered and blocked 24 times inside the Gift window, skipped 98 times outside it and blocked once undecided, and default[16] run sanlayn was entered and blocked in exactly those 98. Three decisions also carried an undecided GCD candidate: Dancing Rune Weapon at high_prio_actions[1], its cooldown not proven, its gate reading debuff.reapers_mark_debuff.up (never bindable) and fight_remains (PREDICTIVE).",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "expected": {
+              "eligibleDecisions": 123,
+              "match": 0,
+              "rejected": 0,
+              "unknown": 123,
+              "exclusions": {
+                "MELEE_SWING": 87,
+                "NON_GCD_ACTION": 47,
+                "NO_AUTHORITY_TOKEN_BINDING": 1,
+                "OUTSIDE_FIRST_SLICE": 13
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STOPPING_POINT_DISTRIBUTION",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "expected": {
+              "match": 0,
+              "rejected": 0,
+              "stoppingEntries": {
+                "default[15] run_action_list": 1,
+                "san_gift[0] heart_strike": 24,
+                "sanlayn[0] deaths_caress": 98
+              },
+              "stoppingAtoms": {
+                "default[15] run_action_list | buff.gift_of_the_sanlayn.up": 1,
+                "san_gift[0] heart_strike | UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1.": 24,
+                "sanlayn[0] deaths_caress | UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1.": 98
+              },
+              "dispatchOutcomes": {
+                "default[13] -> high_prio_actions : CALL_MAY_SELECT": 123,
+                "default[14] -> deathbringer : RUN_GATE_FALSE_SKIPPED": 123,
+                "default[15] -> san_gift : BLOCKED": 25,
+                "default[15] -> san_gift : RUN_GATE_FALSE_SKIPPED": 98,
+                "default[16] -> sanlayn : BLOCKED": 98
+              },
+              "undecidedGcdCandidates": {
+                "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up": 3,
+                "high_prio_actions[1] dancing_rune_weapon | fight_remains": 3
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "The coverage disclosure is the honest measure of the slice: 0 of 123 decisions resolve, and every one names the entry and the atom the shared machinery could not decide. The first entry of BOTH San'layn lists compares a buff remainder against 1.5 seconds, and the parser's integer-only literal rule refuses the whole condition before any remainder question arises; behind it lie buff.bone_shield.remains and buff.essence_of_the_blood_queen.remains, which no binding field can carry. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.the-opener-subject-and-the-wire-cost-that-is-not-the-cost",
+      "artifactId": "wcl-blood-death-knight-gtkb-opener",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/resources.ts; src/data/wcl-wire/resource-types.ts (RUNES, RUNIC_POWER); aura-bindings.ts",
+      "purpose": "The gtKb subject casts Death Strike at 2,425,794 with 440 Runic Power on the wire and at 2,429,596 with 390 — both BELOW the 450 the wire reports as the cost, because the field is the DBC base and this build's reductions are not folded in. The evaluator reads the PRE_COST amount as the observation it is (deficit 81 and 86 points), never the cost field as the cost paid, and makes no affordability claim in either direction. The first Blood Boil at 2,417,826 carries no resource entry of either kind (NO_OBSERVATION twice, never zero); the Vampiric Strike at 2,418,659 costs 1 Rune of 4. Inside the opener's Gift window (2,417,020 .. 2,429,050) every scan enters san_gift; the Death Strike at 2,429,596 follows the removal and stops in sanlayn with Bone Shield exactly 12.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2425794,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "runes": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPower": {
+                "state": "EXACT_PRE_COST",
+                "amount": 440,
+                "max": 1250,
+                "cost": 450
+              },
+              "runicPowerDeficit": 81,
+              "rune": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2429596,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "runes": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPower": {
+                "state": "EXACT_PRE_COST",
+                "amount": 390,
+                "max": 1250,
+                "cost": 450
+              },
+              "runicPowerDeficit": 86,
+              "rune": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2417826,
+              "abilityGameId": 50842
+            },
+            "expected": {
+              "runes": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "cast": {
+              "reportTimeMs": 2418659,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "runes": {
+                "state": "EXACT_PRE_COST",
+                "amount": 4,
+                "max": 6,
+                "cost": 1
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": 4
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2425794,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": "san_gift[0] heart_strike",
+              "stoppingAtoms": ["UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1."]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2425794,
+              "abilityGameId": 49998
+            },
+            "expected": [
+              {
+                "at": "default[13]",
+                "actionToken": "call_action_list",
+                "calleeListName": "high_prio_actions",
+                "outcome": "CALL_MAY_SELECT",
+                "gate": "UNCONDITIONAL"
+              },
+              {
+                "at": "default[14]",
+                "actionToken": "run_action_list",
+                "calleeListName": "deathbringer",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[15]",
+                "actionToken": "run_action_list",
+                "calleeListName": "san_gift",
+                "outcome": "BLOCKED",
+                "gate": "TRUE"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2429596,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": "sanlayn[0] deaths_caress",
+              "stoppingAtoms": ["UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1."]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2429596,
+              "abilityGameId": 49998
+            },
+            "expected": [
+              {
+                "at": "default[13]",
+                "actionToken": "call_action_list",
+                "calleeListName": "high_prio_actions",
+                "outcome": "CALL_MAY_SELECT",
+                "gate": "UNCONDITIONAL"
+              },
+              {
+                "at": "default[14]",
+                "actionToken": "run_action_list",
+                "calleeListName": "deathbringer",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[15]",
+                "actionToken": "run_action_list",
+                "calleeListName": "san_gift",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[16]",
+                "actionToken": "run_action_list",
+                "calleeListName": "sanlayn",
+                "outcome": "BLOCKED",
+                "gate": "TRUE"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2429596,
+              "abilityGameId": 49998
+            },
+            "atomName": "gift_of_the_sanlayn",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 434153,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2429050,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2429596,
+              "abilityGameId": 49998
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "BOUND",
+              "stack": 12,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 195181,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 14,
+            "observedCast": {
+              "reportTimeMs": 2429596,
+              "abilityGameId": 49998
+            },
+            "simcToken": "dancing_rune_weapon",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 77424,
+              "anchorReportTimeMs": 2417020,
+              "anchorAbilityGameId": 49028,
+              "effectiveBaseMs": 90000,
+              "unknownReason": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A wire field named cost that is not the cost paid is exactly the kind of fact that must be pinned where the next reader will look. No INSUFFICIENT_RESOURCE proof and no affordability proof exists for any Blood entry, and this evidence is why."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,415,042 for actor 14 (specID 250)",
+          "every COMPLETE cast by actor 14 in the slice, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14, in canonical order, with the absolute stack count each stack transition carries"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-blood-death-knight.vampiric-blood-and-the-second-dancing-rune-weapon-over-the-bundle",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/aura-bindings.ts; cooldown-bindings.ts; first-gcd-adapter.ts (undecided candidates); src/data/game/deathknight-blood-transition-authority.ts",
+      "purpose": "Over the composed bundle: the Vampiric Strike at 2,087,470 lies inside the first Vampiric Blood window (aura applied 2,087,109), so buff.vampiric_blood.up binds TRUE and default[12]'s gate is FALSE — the entry is eliminated, not branched; Bone Shield is exactly 10; the Essence count is refused because its own stack gain precedes the cast at the same millisecond. The Heart Strike at 2,097,796 (+93,207 ms) follows the Vampiric Blood removal (2,097,114, so up=FALSE) and sits 39 ms past the first Dancing Rune Weapon's 90,000 ms effective base: readiness is UNKNOWN (neither proven active nor claimed ready), so high_prio_actions[1] is an undecided GCD candidate on debuff.reapers_mark_debuff.up and fight_remains while the scan still runs on to sanlayn[0]. The Blood Boil at 2,100,867 follows the second Dancing Rune Weapon at 2,099,885: the Gift is UP again, the scan re-enters san_gift, and the cooldown is proven active for 89,018 ms from the new anchor.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2087470,
+              "abilityGameId": 433895
+            },
+            "atomName": "vampiric_blood",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 55233,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2087109,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2087470,
+              "abilityGameId": 433895
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "BOUND",
+              "stack": 10,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 195181,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2087470,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 433925,
+              "reason": "SAME_MILLISECOND_TRANSITION"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2087470,
+              "abilityGameId": 433895
+            },
+            "simcToken": "dancing_rune_weapon",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 10287,
+              "anchorReportTimeMs": 2007757,
+              "anchorAbilityGameId": 49028,
+              "effectiveBaseMs": 90000,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2097796,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": "sanlayn[0] deaths_caress",
+              "stoppingAtoms": ["UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1."]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2097796,
+              "abilityGameId": 206930
+            },
+            "expected": [
+              {
+                "at": "default[13]",
+                "actionToken": "call_action_list",
+                "calleeListName": "high_prio_actions",
+                "outcome": "CALL_MAY_SELECT",
+                "gate": "UNCONDITIONAL"
+              },
+              {
+                "at": "default[14]",
+                "actionToken": "run_action_list",
+                "calleeListName": "deathbringer",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[15]",
+                "actionToken": "run_action_list",
+                "calleeListName": "san_gift",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[16]",
+                "actionToken": "run_action_list",
+                "calleeListName": "sanlayn",
+                "outcome": "BLOCKED",
+                "gate": "TRUE"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2097796,
+              "abilityGameId": 206930
+            },
+            "atomName": "vampiric_blood",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 55233,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2097114,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2097796,
+              "abilityGameId": 206930
+            },
+            "simcToken": "dancing_rune_weapon",
+            "expected": {
+              "readiness": "UNKNOWN",
+              "provenRemainingAtLeastMs": null,
+              "anchorReportTimeMs": null,
+              "anchorAbilityGameId": null,
+              "effectiveBaseMs": null,
+              "unknownReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "cast": {
+              "reportTimeMs": 2097796,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "runes": {
+                "state": "EXACT_PRE_COST",
+                "amount": 4,
+                "max": 6,
+                "cost": 1
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": 4
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2100867,
+              "abilityGameId": 50842
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "OBSERVED_STATE_MISSING",
+              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": "san_gift[0] heart_strike",
+              "stoppingAtoms": ["UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1."]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2100867,
+              "abilityGameId": 50842
+            },
+            "expected": [
+              {
+                "at": "default[13]",
+                "actionToken": "call_action_list",
+                "calleeListName": "high_prio_actions",
+                "outcome": "CALL_MAY_SELECT",
+                "gate": "UNCONDITIONAL"
+              },
+              {
+                "at": "default[14]",
+                "actionToken": "run_action_list",
+                "calleeListName": "deathbringer",
+                "outcome": "RUN_GATE_FALSE_SKIPPED",
+                "gate": "FALSE"
+              },
+              {
+                "at": "default[15]",
+                "actionToken": "run_action_list",
+                "calleeListName": "san_gift",
+                "outcome": "BLOCKED",
+                "gate": "TRUE"
+              }
+            ]
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2100867,
+              "abilityGameId": 50842
+            },
+            "atomName": "gift_of_the_sanlayn",
+            "expected": {
+              "state": "BOUND",
+              "up": true,
+              "abilityGameId": 434153,
+              "proof": "OBSERVED",
+              "anchorReportTimeMs": 2099885,
+              "reason": null,
+              "auraReason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2100867,
+              "abilityGameId": 50842
+            },
+            "atomName": "bone_shield",
+            "expected": {
+              "state": "BOUND",
+              "stack": 12,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 195181,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2100867,
+              "abilityGameId": 50842
+            },
+            "simcToken": "dancing_rune_weapon",
+            "expected": {
+              "readiness": "PROVEN_NOT_READY",
+              "provenRemainingAtLeastMs": 89018,
+              "anchorReportTimeMs": 2099885,
+              "anchorAbilityGameId": 49028,
+              "effectiveBaseMs": 90000,
+              "unknownReason": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "Vampiric Blood's cooldown is dynamic (Red Thirst) and is never derived: the entry is decided by its observed aura when one is, and branched over under its reviewed contract when none is. A cooldown that has elapsed its base is not thereby READY — nothing here claims it — but it is no longer proven active, and the gate it guards becomes a competing candidate the stopping entry alone would hide."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
       ]
     },
     {

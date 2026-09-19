@@ -44,6 +44,32 @@ export interface AuthorityArtifactProvenance {
   readonly regionEndMarker: string;
   readonly extractedOn: string;
   readonly extractorVersion: number;
+  /**
+   * What the extractor DECIDED about client-version guards in the region
+   * (M11-B2), when the target evaluated any. A pinned region may carry both
+   * sides of a patch transition; the artifact's lists hold only the side that
+   * holds at the target's client version, and this record says which lines
+   * were dropped and why, so an absent line is never mistaken for one that
+   * was never in the source. Absent on artifacts whose region has no guard.
+   */
+  readonly conditionalCompilation?: AuthorityConditionalCompilation;
+}
+
+export interface AuthorityVersionGuardRecord {
+  readonly line: number;
+  readonly form: "IF" | "ELSE_IF";
+  /** `wowv() <op> a.b.c`, verbatim from the extractor. */
+  readonly comparison: string;
+  readonly clientVersion: string;
+  readonly holds: boolean;
+  readonly statementsEmitted: number;
+  readonly statementsDropped: number;
+  readonly endLine: number | null;
+}
+
+export interface AuthorityConditionalCompilation {
+  readonly clientVersion: string;
+  readonly guards: readonly AuthorityVersionGuardRecord[];
 }
 
 export interface AuthorityArtifactAction {
@@ -137,7 +163,11 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
   if (!/^[0-9a-f]{40}$/.test(commitSha)) return null;
   if (!/^[0-9a-f]{64}$/.test(sourceSha256)) return null;
 
+  const conditionalCompilation = validateConditionalCompilation(value["conditionalCompilation"]);
+  if (conditionalCompilation === undefined) return null;
+
   return {
+    ...(conditionalCompilation === null ? {} : { conditionalCompilation }),
     repository,
     branch,
     commitSha,
@@ -150,6 +180,53 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
     extractedOn,
     extractorVersion,
   };
+}
+
+/**
+ * The guard record, when present. `null` when the field is absent (no guard
+ * in the region), `undefined` when it is present and malformed.
+ */
+function validateConditionalCompilation(value: unknown): AuthorityConditionalCompilation | null | undefined {
+  if (value === undefined) return null;
+  if (!isRecord(value)) return undefined;
+  const clientVersion = str(value, "clientVersion");
+  const guardsRaw = value["guards"];
+  if (clientVersion === null || !Array.isArray(guardsRaw)) return undefined;
+  const guards: AuthorityVersionGuardRecord[] = [];
+  for (const raw of guardsRaw) {
+    if (!isRecord(raw)) return undefined;
+    const line = num(raw, "line");
+    const form = str(raw, "form");
+    const comparison = str(raw, "comparison");
+    const guardClientVersion = str(raw, "clientVersion");
+    const holds = raw["holds"];
+    const statementsEmitted = num(raw, "statementsEmitted");
+    const statementsDropped = num(raw, "statementsDropped");
+    const endLine = raw["endLine"];
+    if (
+      line === null ||
+      (form !== "IF" && form !== "ELSE_IF") ||
+      comparison === null ||
+      guardClientVersion === null ||
+      typeof holds !== "boolean" ||
+      statementsEmitted === null ||
+      statementsDropped === null ||
+      !(endLine === null || (typeof endLine === "number" && Number.isFinite(endLine)))
+    ) {
+      return undefined;
+    }
+    guards.push({
+      line,
+      form,
+      comparison,
+      clientVersion: guardClientVersion,
+      holds,
+      statementsEmitted,
+      statementsDropped,
+      endLine,
+    });
+  }
+  return { clientVersion, guards };
 }
 
 /** Field names that must NOT appear on an action: they are derived, not stored. */

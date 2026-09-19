@@ -1492,6 +1492,72 @@ authority does not have.
 
 ---
 
+# INTERNAL_ONLY Measurement Slice Tests (M11-B2, Blood Death Knight)
+
+A measurement slice is an analyzer whose deliverable is where the shared
+machinery STOPS on real evidence, not how many decisions it resolves. Its
+tests must therefore pin the shape of the honest result and refuse the two
+easy corruptions: a resolved decision manufactured by widening shared state,
+and a stopping point hidden behind an earlier undecided candidate.
+
+Required, over the committed Blood corpus evidence
+(`tests/contracts/m11b2-blood-evaluator.test.ts`,
+`tests/unit/m11b2-blood-bindings.test.ts`,
+`tests/unit/m11b2-blood-authority-data.test.ts`,
+`tests/contracts/m11b2-blood-registration.test.ts`, and the
+`SPEC_BLOOD_DEATH_KNIGHT.*` corpus cases):
+
+```text
+every eligible decision      -> UNKNOWN with a named stopping entry AND the
+                                atoms (or tagged reason) that made it undecidable
+stopping tallies             -> partition the eligible population exactly
+undecided GCD candidates     -> recorded beside the stopping entry, so a
+                                competing candidate the entry hides is visible
+run gate FALSE on real list  -> RUN_GATE_FALSE_SKIPPED, parent continues (×123)
+run gate TRUE on real list   -> child entered, parent's later run never visited
+run gate undecided           -> BLOCKED at the gate, no world explored
+contracted NON_GCD entry     -> branched under its contract; never a stopping point
+```
+
+Required negative cases:
+
+```text
+no count from silence        -> Bone Shield stack UNBOUND, presence UNKNOWN
+lone refresh after a count   -> COUNT_AMBIGUOUS_SINCE_OBSERVATION, never carried
+initial application only     -> NO_STACK_OBSERVATION (an applybuff carries no count)
+same-ms transition ahead     -> SAME_MILLISECOND_TRANSITION: neither the pre- nor
+                                the post-cast state is read
+wire cost field              -> never an affordability or INSUFFICIENT_RESOURCE proof
+                                (450 reported, 350 paid; 440 and 390 attached below it)
+uncosted resource entry      -> NO_OBSERVATION (EVENT_ASSOCIATED), never a pre-cast amount
+Deathbringer aura, San'layn  -> bound DOWN by hero-tree exclusion; NOT when the
+                                tree is UNKNOWN or resolved to Deathbringer
+DEBUFF atom                  -> never bound (no debuff binding field exists)
+Death Strike's survival role -> ACTIVE_MITIGATION / SELF_HEALING NO_PINNED_AUTHORITY,
+                                never DOMAIN_NOT_DECLARED, never the offensive verdict
+public surfaces              -> SPEC_NOT_SUPPORTED for DeathKnight/Blood with zero
+                                analyzer calls; the public spec list, identity table,
+                                contract enum, sentence and MCP descriptions unchanged;
+                                the 33 invariance captures byte-identical
+```
+
+Also required: the pinned authority's client-version guard record loads and
+a malformed guard fails closed (mutation); every pinned condition parses
+under the Blood vocabulary except exactly the three carrying the decimal
+literal `1.5` — the measured stopping point, pinned as a list so a parser
+change that admits decimals is a VISIBLE change to this test rather than a
+silent widening.
+
+Failure mode this prevents:
+
+A measurement that reads as coverage — an INTERNAL_ONLY slice with 0 of 123
+decisions resolved presented, or promoted, as if the shared machinery had
+been exercised to an answer; or a "fix" to the dominant stopping point
+(decimal literals) that resolves nothing while making the next obstacle
+(`buff.<x>.remains`) invisible because no test names it.
+
+---
+
 # Spec-Owned Resolver Tests
 
 When a specialization supplies a resolver:

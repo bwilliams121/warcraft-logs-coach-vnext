@@ -82,7 +82,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries three PUBLIC registrations — Assassination, Protection Paladin and, since M11-A5, Retribution Paladin — and no INTERNAL_ONLY row", () => {
+  it("carries three PUBLIC registrations — Assassination, Protection Paladin and, since M11-A5, Retribution Paladin — and, since M11-B2, one INTERNAL_ONLY row (Blood Death Knight)", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -93,8 +93,9 @@ describe("the production catalog", () => {
       [ASSASSINATION_ANALYZER_ID, "rogue/assassination", "PUBLIC"],
       [PROTECTION_PALADIN_ANALYZER_ID, "paladin/protection", "PUBLIC"],
       [RETRIBUTION_PALADIN_ANALYZER_ID, "paladin/retribution", "PUBLIC"],
+      ["deathknight-blood-observed-decisions", "deathknight/blood", "INTERNAL_ONLY"],
     ]);
-    // The public set is DERIVED, and since M11-A5 it is the whole catalog.
+    // The public set is DERIVED: the three PUBLIC rows, never the INTERNAL_ONLY one.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
     expect(ENABLED_ANALYZERS).toHaveLength(3);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
@@ -148,7 +149,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(3);
+    expect(catalog.registrations).toHaveLength(4);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {

@@ -77,10 +77,16 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // control flow added one SYNTHETIC authority artifact and seven
     // SHARED_DECISION_ENGINE cases with seven assertions (FALSE skip, TRUE
     // transfer, child NO_ACTION, the call contrast, the undecided gate, a
-    // nested run, a run cycle). Measured, then pinned.
-    expect(result.summary.cases).toBe(138);
-    expect(result.summary.assertions).toBe(417);
-    expect(result.summary.passed).toBe(417);
+    // nested run, a run cycle); M11-B2's INTERNAL_ONLY Blood Death Knight
+    // measurement slice added four SANITIZED_CAPTURE slices of the same three
+    // captures and sixteen cases with ninety-four assertions (four
+    // normalization, one bundle composition, ten evaluator — the stopping
+    // points, the dispatch trace, the exact Bone Shield counts, the resource
+    // observations, the domains — and the public refusal on the same subject
+    // beside its internal registration). Measured, then pinned.
+    expect(result.summary.cases).toBe(154);
+    expect(result.summary.assertions).toBe(511);
+    expect(result.summary.passed).toBe(511);
   });
 
   it("covers every layer", async () => {

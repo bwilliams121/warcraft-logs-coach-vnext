@@ -267,6 +267,67 @@ Every file was supplied from the local pinned copies (`--file`,
 `--file-<key>`, `--local-<key>`); no file outside the A3-named set was
 fetched.
 
+## Blood Death Knight APL and game data — pinned at M11-B2 (analyzer INTERNAL_ONLY)
+
+The `C_RUN_ACTION_LIST_DISPATCH` cohort's representative specialization,
+pinned as a MEASUREMENT slice: the first authority with `run_action_list`
+entries the analyzer reads, and the first with client-version guards.
+
+| | |
+| --- | --- |
+| Source file | `engine/class_modules/apl/apl_death_knight.cpp` |
+| Source SHA-256 | `e381da691875ceecb8357a76e90fef9e01f3a200c67da7024deff1ca7f728df6` |
+| Artifact | `src/simc/data/deathknight-blood.apl.json` (`SIMC_APL_DEATHKNIGHT_BLOOD`, revision `simc-33622e9d-1`) |
+| Extracted | 2026-09-18, `--target deathknight-blood` from the local pinned copy under `.probe/m11a3-authority-audit/` (six lists, 56 actions; the `DISPATCH_GRAPH` facts verified: `default[13]` CALLS `high_prio_actions`, `default[14..16]` RUN `deathbringer` / `san_gift` / `sanlayn` under the pinned gates, no `swap_action_list`, no `target_if`) |
+| Client-version guards | The target declares `clientVersion: [12, 1, 0]`; the region's twelve `p->sim->dbc->wowv()` guards were EVALUATED — five `< 12.1.0` branches dropped (nine statements, the Coagulopathy Death Strike line among them), seven `>= 12.1.0` branches kept (eight statements) — and every guard is recorded under `provenance.conditionalCompilation`, which `src/simc/authority-artifact.ts` validates |
+| Bound to | `OFFENSIVE_ROTATION` only, by `src/specs/deathknight/blood/registration.ts` through the tree's own `pinned-authority.ts`. INTERNAL_ONLY: the five public sites are untouched. |
+
+The game data, all `--target deathknight-blood` at the same pin:
+
+| Artifact | Dataset id | Contents |
+| --- | --- | --- |
+| `src/data/game/deathknight-blood-gcd-semantics.json` | `SIMC_DBC_DEATHKNIGHT_BLOOD_GCD_SEMANTICS` | 24 `_gcd` records (every APL action and the observed-only abilities of the two subjects), 17 hand-reviewed token bindings (`heart_strike` → {206930, 433895 Vampiric Strike}, `any_dnd` → 43265 as the pinned alias of `death_and_decay`, `dancing_rune_weapon` 49028 gcd 1500, `raise_dead` 46585 gcd 0, `vampiric_blood` 55233 gcd 0, `consumption` 1263824 gcd 500, the racials, …), 4 meta lanes (`auto_attack`, `use_item`, `use_items`, `potion`); the extractor reads the class module only (no spec module exists for Death Knight) |
+| `src/data/game/deathknight-blood-talents.json` | `SIMC_TRAIT_DEATHKNIGHT_BLOOD_TALENTS` | 13 talents (the action-building class/spec talents and the hero talents whose absence makes an aura impossible), all NORMAL nodes (absent → UNKNOWN, never NOT_SELECTED), and the San'layn (31) / Deathbringer (33) hero sub-trees for spec 250; the Warcraft Logs `nodeID` ↔ `id_node` equivalence recorded for actor 14 of both captures |
+| `src/data/game/deathknight-blood-cooldowns.json` | `SIMC_DBC_DEATHKNIGHT_BLOOD_ABILITY_COOLDOWNS` | Dancing Rune Weapon ONLY: 120,000 ms, one censused passive (Insatiable Blade, −30,000 ms), no dynamic mutation; the extractor grew `moduleConventions` (no recharge-rate mechanism, no hasted-cooldown member) and nullable `sourceOverrides` so a class without a spec module is a generic target. Vampiric Blood is deliberately unpinned (Red Thirst adjusts it dynamically, sc_death_knight.cpp:13143-13147) |
+| `src/data/game/deathknight-blood-spender-costs.json` | `SIMC_DBC_DEATHKNIGHT_BLOOD_SPENDER_COSTS` | Death Strike 49998 (450 tenths of Runic Power), Heart Strike 206930 and Vampiric Strike 433895 (1 Rune each), Marrowrend 195182 (2 Runes), Death's Caress 195292 (1 Rune, 6 s cooldown), Death and Decay 43265 (1 Rune); `POWER_RUNE` and `POWER_RUNIC_POWER` joined the power enumerators |
+
+Hand-reviewed and hashed beside them:
+`src/data/game/deathknight-blood-aura-authority.ts` (thirteen aura
+identities — the eight bound presence atoms, the three stack atoms, the two
+`.remains`/debuff identities recorded so the measurement can name them — each
+with its producing talent and, where every producer is a hero talent of one
+sub-tree, the owning tree) and `deathknight-blood-transition-authority.ts`
+(`auto_attack`, `vampiric_blood`, `raise_dead`). The Rune (5) and Runic
+Power (6) wire contracts joined `src/data/wcl-wire/resource-types.ts`,
+corroborated by the committed 45 s slice.
+
+```bash
+node scripts/authority/extract-simc-apl.mjs --target deathknight-blood \
+  --file .probe/m11a3-authority-audit/apl_death_knight.cpp \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --commit-date 2026-09-12 \
+  --expect-sha256 e381da691875ceecb8357a76e90fef9e01f3a200c67da7024deff1ca7f728df6 \
+  --extracted-on 2026-09-18 --out src/simc/data/deathknight-blood.apl.json
+node scripts/authority/extract-simc-gcd.mjs --target deathknight-blood \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+node scripts/authority/extract-simc-talents.mjs --target deathknight-blood \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18 \
+  --file-traitData .probe/simc-33622e9d/trait_data.inc \
+  --file-traitLayout .probe/simc-33622e9d/trait_data.hpp \
+  --file-clientDataVersion .probe/simc-33622e9d/client_data_version.inc
+node scripts/authority/extract-simc-power-costs.mjs --target deathknight-blood \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+node scripts/authority/extract-simc-ability-cooldowns.mjs --target deathknight-blood \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+```
+
+The Death Knight class module (`engine/class_modules/sc_death_knight.cpp`,
+SHA-256 `beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39`),
+`engine/dbc/spell_data.cpp` and `engine/dbc/generated/power_type_data.inc`
+were fetched once at the pinned commit for the hand reviews and the
+extractors' local-file flags; they are not retained in the repository. The
+three existing APL artifacts and both Paladin cooldown artifacts regenerate
+byte for byte under the extended extractors.
+
 ## What the extractor guarantees
 
 **It fails closed.** It is not a general C++ parser and does not pretend to be.

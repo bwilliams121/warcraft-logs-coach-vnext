@@ -53,10 +53,14 @@ describe("the committed corpus loads", () => {
     // composition, ten evaluator, one application-service); M11-A5 added
     // three public-contract cases over the same slices (the Retribution
     // public projection, its REST/MCP parity, a mixed raid night over its
-    // own evidence) and repurposed the application-service case in place.
+    // own evidence) and repurposed the application-service case in place;
+    // M11-B2 added the four Blood Death Knight slices (cut from the same
+    // three captures by the same predicate for actor 14, no new request) and
+    // sixteen cases (four normalization, one bundle composition, ten
+    // evaluator — the measurement cases — one application-service).
     // Measured, then pinned.
-    expect(loaded.artifacts).toHaveLength(39);
-    expect(loaded.cases).toHaveLength(138);
+    expect(loaded.artifacts).toHaveLength(43);
+    expect(loaded.cases).toHaveLength(154);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -69,7 +73,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds twenty-eight sanitized captures, four derivations and six synthetics", async () => {
+  it("holds thirty-two sanitized captures, four derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -86,6 +90,10 @@ describe("the committed corpus loads", () => {
       "wcl-assassination-kingsbane-cooldown",
       "wcl-assassination-vanish-ambush-gate",
       "wcl-aura-stack-absolute",
+      "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
+      "wcl-blood-death-knight-a7r6-rotational-45s",
+      "wcl-blood-death-knight-gtkb-opener",
       "wcl-boss-sourced",
       "wcl-cast-resource-pre-cost",
       "wcl-encounter-rankings-sszorak-page-1",
@@ -151,10 +159,13 @@ describe("the committed corpus loads", () => {
     // Protection Paladin slice (deliberately bounded at 22 s to stay under the
     // per-artifact ceiling) and its 355 KB derivation. M10-C5 Phase B2 added
     // the four steady-state segments (43,545 + 172,085 + 153,998 + 182,066
-    // bytes), taking the total to 3,364,052 bytes. The notice line moves from
-    // half the ceiling to two thirds of it — still well inside 6 MiB, and
-    // still a line growth has to cross deliberately, not silently.
-    expect(loaded.totalArtifactBytes).toBeLessThan(4 * 1024 * 1024);
+    // bytes), taking the total to 3,364,052 bytes. M11-A4 added the four
+    // Retribution slices (3,952,501 bytes in total) and M11-B2 the four Blood
+    // Death Knight slices (257,079 + 246,630 + 203,455 + 132,735 bytes),
+    // taking the total to 4,792,400 bytes and crossing the 4 MiB notice line
+    // DELIBERATELY: the line moves to 5 MiB — five sixths of the 6 MiB
+    // ceiling, and still a line growth has to cross by hand, not silently.
+    expect(loaded.totalArtifactBytes).toBeLessThan(5 * 1024 * 1024);
     for (const entry of loaded.artifacts) {
       expect(entry.canonicalByteLength, entry.record.artifactId).toBeLessThan(512 * 1024);
     }
@@ -223,9 +234,10 @@ describe("provenance is honest about lineage", () => {
         }
       }
     }
-    // Seven M9-C captures, plus the M11-A4 Retribution opener slice cut from
-    // the M9-C2 opener capture (same capturedOn, sanitizer revision 6).
-    expect(captured).toBe(8);
+    // Seven M9-C captures, plus the M11-A4 Retribution and the M11-B2 Blood
+    // opener slices cut from the M9-C2 opener capture (same capturedOn,
+    // sanitizer revision 6).
+    expect(captured).toBe(9);
   });
 
   it("marks unrecorded tooling revisions UNAVAILABLE rather than inventing them", async () => {
@@ -295,6 +307,11 @@ describe("retained coverage is granted only where the capture predicate supports
     "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
     "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
     "wcl-retribution-paladin-gtkb-opener",
+    // M11-B2: the same predicate for actor 14 over the same three captures.
+    "wcl-blood-death-knight-a7r6-rotational-45s",
+    "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
+    "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+    "wcl-blood-death-knight-gtkb-opener",
   ];
 
   it("grants nothing on any property-based or index-based selection", async () => {

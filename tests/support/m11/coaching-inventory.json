@@ -430,9 +430,9 @@
     {
       "specId": "deathknight/blood",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "UNREGISTERED",
-      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
+      "realEvidenceStatus": "REAL_SANITIZED_EVIDENCE_AVAILABLE",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",
       "questions": [
         {
@@ -446,10 +446,11 @@
           "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
           "unknownConditions": [
             "buff.<x>.remains is unbindable in the shared evaluator",
-            "gcd not upper-bounded"
+            "gcd not upper-bounded",
+            "M11-B2: the pinned 12.1.0 list has NO Coagulopathy line — it sits behind a `< 12.1.0` client-version guard the extractor dropped — so this question has no pinned authority at the current pin"
           ],
           "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
-          "notes": "The clearest tank-side maintenance/clipping question found in the audit; reachable without run_action_list because high_prio_actions is called unconditionally."
+          "notes": "The clearest tank-side maintenance/clipping question found in the audit; reachable without run_action_list because high_prio_actions is called unconditionally. Superseded at M11-B2 by the extracted 12.1.0 list, in which the line does not exist."
         },
         {
           "id": "deathknight/blood.bone-shield-stack-maintenance",
@@ -460,9 +461,12 @@
           "authorityNeeded": ["pinned deathbringer/sanlayn lines (behind run_action_list)"],
           "normalizedStateNeeded": ["aura stack reconstruction"],
           "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
-          "unknownConditions": ["buff.<x>.stack unbindable", "run_action_list dispatch"],
+          "unknownConditions": [
+            "buff.bone_shield.remains unbindable (M11-B2 binds the exact stack count at 114 of 123 decisions; the remainder is the open atom)",
+            "run_action_list dispatch (modelled since M11-B1; measured on this list in M11-B2)"
+          ],
           "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
-          "notes": ""
+          "notes": "M11-B2 measured the pinned San'layn lists: every scan stops at the first entry of its list on the decimal literal 1.5 the shared parser refuses, and behind it on buff.bone_shield.remains / buff.essence_of_the_blood_queen.remains."
         }
       ]
     },

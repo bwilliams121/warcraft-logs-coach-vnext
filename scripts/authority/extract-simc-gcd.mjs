@@ -1144,6 +1144,370 @@ const PALADIN_RETRIBUTION_FACTS = {
   ],
 };
 
+/**
+ * The Blood Death Knight sources (M11-B2). One class module holds every
+ * specialization, so there is no separate spec module; the shared DBC tables,
+ * racial rows and the player/consumable modules are the same files the
+ * Paladin targets hash.
+ */
+const DEATHKNIGHT_BLOOD_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/sc_death_knight.cpp",
+  // HASHED, NEVER PARSED. The racial rows are class-mask readings of this table.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const DK = "engine/class_modules/sc_death_knight.cpp";
+
+/**
+ * The Blood Death Knight facts (M11-B2).
+ *
+ * `abilities` are the machine-extracted `_gcd` records the Blood analyzer's
+ * decision population needs: every spell the pinned Blood list names through
+ * a token (the eleven class/spec actions, the three racial tokens the list
+ * carries), the Vampiric Strike record the `heart_strike` token EXECUTES under
+ * the San'layn buff, and the observed-only abilities the two M11-B2 subjects
+ * cast that the list does not name (lane records only; they bind to no
+ * token). Every `baseGcdMs` here is a claim verified against the DBC row.
+ *
+ * Two facts a reader should not have to rediscover:
+ *
+ *   - DANCING RUNE WEAPON IS `_gcd` 1500 at the pin. It is a GCD-consuming
+ *     entry of `high_prio_actions`, not an off-GCD cooldown, so it competes
+ *     with the rotational GCD whenever it is not proven unusable.
+ *   - `heart_strike` BINDS TO TWO RECORDS (206930 and 433895): under the
+ *     San'layn Vampiric Strike talent, heart_strike_t::execute runs the
+ *     Vampiric Strike child instead of itself (sc_death_knight.cpp:11350-11357),
+ *     and the log reports that press as a Vampiric Strike cast. Both are lane
+ *     1500, so the lane holds without deciding the buff.
+ */
+const DEATHKNIGHT_BLOOD_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    // ---- actions the pinned Blood APL names ----
+    { abilityGameId: 49998, displayNameEn: "Death Strike", baseGcdMs: 1500 },
+    { abilityGameId: 206930, displayNameEn: "Heart Strike", baseGcdMs: 1500 },
+    { abilityGameId: 433895, displayNameEn: "Vampiric Strike", baseGcdMs: 1500 },
+    { abilityGameId: 50842, displayNameEn: "Blood Boil", baseGcdMs: 1500 },
+    { abilityGameId: 195182, displayNameEn: "Marrowrend", baseGcdMs: 1500 },
+    { abilityGameId: 195292, displayNameEn: "Death's Caress", baseGcdMs: 1500 },
+    { abilityGameId: 43265, displayNameEn: "Death and Decay", baseGcdMs: 1500 },
+    { abilityGameId: 49028, displayNameEn: "Dancing Rune Weapon", baseGcdMs: 1500 },
+    { abilityGameId: 46585, displayNameEn: "Raise Dead", baseGcdMs: 0 },
+    { abilityGameId: 55233, displayNameEn: "Vampiric Blood", baseGcdMs: 0 },
+    { abilityGameId: 1263824, displayNameEn: "Consumption", baseGcdMs: 500 },
+    { abilityGameId: 439843, displayNameEn: "Reaper's Mark", baseGcdMs: 1500 },
+    { abilityGameId: 50613, displayNameEn: "Arcane Torrent", baseGcdMs: 1500 },
+    { abilityGameId: 265221, displayNameEn: "Fireblood", baseGcdMs: 0 },
+    { abilityGameId: 20572, displayNameEn: "Blood Fury", baseGcdMs: 0 },
+    { abilityGameId: 26297, displayNameEn: "Berserking", baseGcdMs: 0 },
+    { abilityGameId: 274738, displayNameEn: "Ancestral Call", baseGcdMs: 0 },
+    // ---- abilities the two M11-B2 subjects cast that the APL does not name ----
+    // Lane records only: they classify the observed casts and bind to no token.
+    { abilityGameId: 56222, displayNameEn: "Dark Command", baseGcdMs: 0 },
+    { abilityGameId: 48707, displayNameEn: "Anti-Magic Shell", baseGcdMs: 0 },
+    { abilityGameId: 51052, displayNameEn: "Anti-Magic Zone", baseGcdMs: 1500 },
+    { abilityGameId: 48265, displayNameEn: "Death's Advance", baseGcdMs: 0 },
+    { abilityGameId: 434144, displayNameEn: "Infliction of Sorrow", baseGcdMs: 0 },
+    { abilityGameId: 1236994, displayNameEn: "Potion of Recklessness", baseGcdMs: 0 },
+    { abilityGameId: 1297761, displayNameEn: "Voracious Heart of Ula'tek", baseGcdMs: 0 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "death_strike",
+      candidateAbilityGameIds: [49998],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / death_strike_t",
+      startLine: 14343,
+      endLine: 14344,
+      sourceNote:
+        'create_action dispatches "death_strike" to death_strike_t, whose base is ' +
+        'death_knight_melee_attack_t( "death_strike", p, p->talent.death_strike ) at sc_death_knight.cpp:10017-10020; ' +
+        'talent.death_strike = find_talent_spell( talent_tree::CLASS, "Death Strike" ) at :14843, whose trait row ' +
+        "carries spell 49998. Background when the talent is not taken (action.cpp:541-549).",
+    },
+    {
+      simcToken: "heart_strike",
+      candidateAbilityGameIds: [206930, 433895],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / heart_strike_t",
+      startLine: 14369,
+      endLine: 14370,
+      sourceNote:
+        'create_action dispatches "heart_strike" to heart_strike_t( name, this, options_str ), whose base is ' +
+        "heart_strike_base_t( n, p, p->talent.blood.heart_strike ) at sc_death_knight.cpp:11325-11328; " +
+        'talent.blood.heart_strike = find_talent_spell( SPECIALIZATION, "Heart Strike" ) at :14898, trait row spell 206930. ' +
+        "Under the San'layn Vampiric Strike talent the constructor builds a vampiric_strike_blood_t child on " +
+        "spell.vampiric_strike (433895, :11288-11291, :15372) and execute() runs THAT child whenever buffs.vampiric_strike " +
+        "is up (:11350-11357), so an observed Vampiric Strike cast is this token executing.",
+    },
+    {
+      simcToken: "blood_boil",
+      candidateAbilityGameIds: [50842],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / blood_boil_t",
+      startLine: 14357,
+      endLine: 14358,
+      sourceNote:
+        'create_action dispatches "blood_boil" to blood_boil_t, whose base is ' +
+        'death_knight_spell_t( "blood_boil", p, p->talent.blood.blood_boil ) at sc_death_knight.cpp:9029-9032; ' +
+        'talent.blood.blood_boil = find_talent_spell( SPECIALIZATION, "Blood Boil" ) at :14901, trait row spell 50842. ' +
+        "The constructor sets cooldown->hasted = true (:9037): its charge cooldown is haste-scaled.",
+    },
+    {
+      simcToken: "marrowrend",
+      candidateAbilityGameIds: [195182],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / marrowrend_t",
+      startLine: 14371,
+      endLine: 14372,
+      sourceNote:
+        'create_action dispatches "marrowrend" to marrowrend_t, whose base is ' +
+        'death_knight_melee_attack_t( "marrowrend", p, p->talent.blood.marrowrend ) at sc_death_knight.cpp:11662-11667; ' +
+        'talent.blood.marrowrend = find_talent_spell( SPECIALIZATION, "Marrowrend" ) at :14900, trait row spell 195182.',
+    },
+    {
+      simcToken: "deaths_caress",
+      candidateAbilityGameIds: [195292],
+      crossCheck: "NONE_SPECIALIZATION_SPELL",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / deaths_caress_t",
+      startLine: 14365,
+      endLine: 14366,
+      sourceNote:
+        'create_action dispatches "deaths_caress" to deaths_caress_t, whose base is ' +
+        'death_knight_spell_t( "deaths_caress", p, p->spec.deaths_caress ) at sc_death_knight.cpp:9756-9759; ' +
+        'spec.deaths_caress = find_specialization_spell( "Death\'s Caress" ) at :14821, and specialization_spells.inc ' +
+        "row { 6, 250, 195292 } is the Blood record. A baseline specialization spell, not a talent.",
+    },
+    {
+      simcToken: "death_and_decay",
+      candidateAbilityGameIds: [43265],
+      crossCheck: "NONE_SPECIALIZATION_SPELL",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / death_and_decay_t",
+      startLine: 14405,
+      endLine: 14406,
+      sourceNote:
+        'create_action dispatches "death_and_decay" to death_and_decay_t, whose base is ' +
+        'death_and_decay_base_t( p, "death_and_decay", p->spec.death_and_decay ) at sc_death_knight.cpp:9722-9725; ' +
+        "spec.death_and_decay = find_spell( 43265 ) at :14810 — an unconditional lookup, never not_found().",
+    },
+    {
+      simcToken: "any_dnd",
+      candidateAbilityGameIds: [43265],
+      crossCheck: "NONE_SPECIALIZATION_SPELL",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / any_dnd alias",
+      startLine: 14424,
+      endLine: 14427,
+      sourceNote:
+        'create_action maps the "any_dnd" (and "dnd_any") token to create_action( "death_and_decay", options_str ) ' +
+        "unconditionally at sc_death_knight.cpp:14424-14427 (the comment mentions Defile; the code does not branch on it). " +
+        "The token is therefore the SAME action as death_and_decay, spell 43265, and an observed 43265 cast is " +
+        "either token's execution.",
+    },
+    {
+      simcToken: "dancing_rune_weapon",
+      candidateAbilityGameIds: [49028],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / dancing_rune_weapon_t",
+      startLine: 14361,
+      endLine: 14362,
+      sourceNote:
+        'create_action dispatches "dancing_rune_weapon" to dancing_rune_weapon_t, whose base is ' +
+        'death_knight_spell_t( "dancing_rune_weapon", p, p->talent.blood.dancing_rune_weapon ) at sc_death_knight.cpp:9476-9479; ' +
+        'talent.blood.dancing_rune_weapon = find_talent_spell( SPECIALIZATION, "Dancing Rune Weapon" ) at :14914, trait row spell 49028. ' +
+        "The DBC record carries `_gcd` 1500: a GCD-consuming press. execute() triggers gift_of_the_sanlayn under that " +
+        "hero talent (:9513-9514).",
+    },
+    {
+      simcToken: "raise_dead",
+      candidateAbilityGameIds: [46585],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / raise_dead_t",
+      startLine: 14349,
+      endLine: 14350,
+      sourceNote:
+        'create_action dispatches "raise_dead" to raise_dead_t, whose base is death_knight_summon_spell_t( "raise_dead", p, ' +
+        "p->spec.raise_dead->ok() ? p->spec.raise_dead : p->talent.raise_dead ) at sc_death_knight.cpp:12216-12220; " +
+        'talent.raise_dead = find_talent_spell( talent_tree::CLASS, "Raise Dead" ) at :14844, trait row spell 46585. ' +
+        "The DBC record carries `_gcd` 0. ready() is false while the ghoul pet is active (:12256-12264).",
+    },
+    {
+      simcToken: "vampiric_blood",
+      candidateAbilityGameIds: [55233],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / vampiric_blood_t",
+      startLine: 14373,
+      endLine: 14374,
+      sourceNote:
+        'create_action dispatches "vampiric_blood" to vampiric_blood_t, whose base is ' +
+        'death_knight_spell_t( "vampiric_blood", p, p->talent.blood.vampiric_blood ) at sc_death_knight.cpp:12785-12788; ' +
+        'talent.blood.vampiric_blood = find_talent_spell( SPECIALIZATION, "Vampiric Blood" ) at :14903, trait row spell 55233. ' +
+        "The DBC record carries `_gcd` 0. execute() triggers buffs.vampiric_blood and nothing else (:12797-12802).",
+    },
+    {
+      simcToken: "consumption",
+      candidateAbilityGameIds: [1263824],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / consumption_t",
+      startLine: 14359,
+      endLine: 14360,
+      sourceNote:
+        'create_action dispatches "consumption" to consumption_t, whose base is ' +
+        'death_knight_empowered_charge_spell_t( "consumption", p, p->talent.blood.consumption, options_str ) at ' +
+        'sc_death_knight.cpp:9445-9446; talent.blood.consumption = find_talent_spell( SPECIALIZATION, "Consumption" ) at ' +
+        ":14942, trait row spell 1263824. An empowered charge spell: the pinned list names it with empower_to=1, an " +
+        "action option this project does not model.",
+    },
+    {
+      simcToken: "reapers_mark",
+      candidateAbilityGameIds: [439843],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: DK,
+      symbol: "death_knight_t::create_action / reapers_mark_t",
+      startLine: 14331,
+      endLine: 14332,
+      sourceNote:
+        'create_action dispatches "reapers_mark" to reapers_mark_t, whose base is ' +
+        'death_knight_spell_t( "reapers_mark", p, p->talent.deathbringer.reapers_mark ) at sc_death_knight.cpp:8488-8491; ' +
+        'talent.deathbringer.reapers_mark = find_talent_spell( talent_tree::HERO, "Reaper\'s Mark" ) at :15083, trait row ' +
+        "spell 439843. A Deathbringer hero talent: background for a San'layn build.",
+    },
+    {
+      simcToken: "arcane_torrent",
+      candidateAbilityGameIds: [50613],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / arcane_torrent_t",
+      startLine: 11056,
+      endLine: 11057,
+      sourceNote:
+        'player_t::create_action dispatches "arcane_torrent" to arcane_torrent_t, whose base is ' +
+        'racial_spell_t( p, "arcane_torrent", p->find_racial_spell( "Arcane Torrent" ) ) at player.cpp:9050-9051. ' +
+        "racial_spells.inc row { 0x0200 (Blood Elf), 0x00000020 (Death Knight), 50613 } is the only row a Death Knight " +
+        "can resolve. OUTSIDE the Blood rotational decision domain (racial action).",
+    },
+    {
+      simcToken: "fireblood",
+      candidateAbilityGameIds: [265221],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / fireblood_t",
+      startLine: 11064,
+      endLine: 11065,
+      sourceNote:
+        'player_t::create_action dispatches "fireblood" to fireblood_t, whose base is ' +
+        'racial_spell_t( p, "fireblood", p->find_racial_spell( "Fireblood" ) ) at player.cpp:9400-9401. ' +
+        'racial_spells.inc: { 0x0800 (Dark Iron Dwarf), 0x3fff, 265221, "Fireblood" }. OUTSIDE the Blood rotational ' +
+        "decision domain (racial action).",
+    },
+    {
+      simcToken: "blood_fury",
+      candidateAbilityGameIds: [20572],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / blood_fury_t",
+      startLine: 11060,
+      endLine: 11061,
+      sourceNote:
+        'player_t::create_action dispatches "blood_fury" to blood_fury_t, built on p->find_racial_spell( "Blood Fury" ). ' +
+        "racial_spells.inc row { 0x0002 (Orc), 0x0000002d, 20572 } is the one whose class mask carries the Death Knight " +
+        "bit (0x20); the 33697 and 33702 rows are other classes' variants. OUTSIDE the Blood rotational decision domain " +
+        "(racial action).",
+    },
+    {
+      simcToken: "berserking",
+      candidateAbilityGameIds: [26297],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / berserking_t",
+      startLine: 11058,
+      endLine: 11059,
+      sourceNote:
+        'player_t::create_action dispatches "berserking" to berserking_t, built on p->find_racial_spell( "Berserking" ). ' +
+        'racial_spells.inc: { 0x0080 (Troll), 0x3fff, 26297, "Berserking" }. OUTSIDE the Blood rotational decision ' +
+        "domain (racial action).",
+    },
+    {
+      simcToken: "ancestral_call",
+      candidateAbilityGameIds: [274738],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / ancestral_call_t",
+      startLine: 11052,
+      endLine: 11053,
+      sourceNote:
+        'player_t::create_action dispatches "ancestral_call" to ancestral_call_t, built on p->find_racial_spell( ' +
+        '"Ancestral Call" ). racial_spells.inc: { 0x2000 (Mag\'har Orc), 0x3fff, 274738, "Ancestral Call" }. OUTSIDE ' +
+        "the Blood rotational decision domain (racial action).",
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: DK,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 7753,
+      sourceNote:
+        "auto_attack_t's constructor (struct opens at sc_death_knight.cpp:7728) is built on the spell-less " +
+        'death_knight_melee_attack_t( "auto_attack", p ) base (:6387, default spell_data_t::nil()) and assigns ' +
+        "trigger_gcd = 0_ms at :7753. execute() schedules the main-hand (and off-hand) swing (:7756-7763); ready() " +
+        "is `!is_moving() && main_hand_attack->execute_event == nullptr` (:7765-7771).",
+    },
+    {
+      simcToken: "use_item",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/player.cpp",
+      symbol: "use_item_t::use_item_t",
+      line: 9999,
+      sourceNote:
+        "use_item_t's constructor (struct opens at player.cpp:9847) assigns " +
+        "trigger_gcd = timespan_t::zero(). No spell record backs the APL token. OUTSIDE the Blood " +
+        "rotational decision domain (item use).",
+    },
+    {
+      simcToken: "use_items",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/player.cpp",
+      symbol: "use_items_t::use_items_t",
+      line: 10232,
+      sourceNote:
+        "use_items_t's constructor (struct opens at player.cpp:10216) assigns " +
+        "trigger_gcd = timespan_t::zero(). OUTSIDE the Blood rotational decision domain (item use).",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the Blood rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 export const TARGETS = {
   "rogue-assassination": {
     datasetId: DATASET_ID,
@@ -1171,6 +1535,21 @@ export const TARGETS = {
     ],
     requiredFacts: PALADIN_RETRIBUTION_FACTS,
     defaultOut: "src/data/game/paladin-retribution-gcd-semantics.json",
+  },
+  "deathknight-blood": {
+    datasetId: "SIMC_DBC_DEATHKNIGHT_BLOOD_GCD_SEMANTICS",
+    classId: 6,
+    className: "Death Knight",
+    sources: DEATHKNIGHT_BLOOD_SOURCES,
+    classModulePath: DEATHKNIGHT_BLOOD_SOURCES.classModule,
+    handReviewedPaths: [
+      DEATHKNIGHT_BLOOD_SOURCES.classModule,
+      DEATHKNIGHT_BLOOD_SOURCES.racialSpells,
+      DEATHKNIGHT_BLOOD_SOURCES.playerModule,
+      DEATHKNIGHT_BLOOD_SOURCES.consumableModule,
+    ],
+    requiredFacts: DEATHKNIGHT_BLOOD_FACTS,
+    defaultOut: "src/data/game/deathknight-blood-gcd-semantics.json",
   },
   "paladin-protection": {
     datasetId: "SIMC_DBC_PALADIN_PROTECTION_GCD_SEMANTICS",

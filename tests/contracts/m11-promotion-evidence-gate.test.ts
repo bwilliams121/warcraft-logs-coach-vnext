@@ -468,13 +468,13 @@ describe("PUBLIC mode — the M11-A5 promotion standard for Retribution Paladin:
 });
 
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("no production INTERNAL_ONLY registration exists since M11-A5 (Retribution Paladin was one from M11-A4)", () => {
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+  it("exactly one production INTERNAL_ONLY registration exists since M11-B2 — Blood Death Knight — and it is the partition's one member", () => {
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["deathknight/blood"]);
     expect(
       PRODUCTION_CATALOG.registrations
         .filter((row) => row.exposure === "INTERNAL_ONLY")
         .map((row) => row.specId),
-    ).toEqual([]);
+    ).toEqual(["deathknight/blood"]);
   });
 
   it("the internal pairing finds nothing for a specialization the identity table resolves — Retribution Paladin since M11-A5", async () => {

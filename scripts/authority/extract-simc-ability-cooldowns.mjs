@@ -436,7 +436,60 @@ const PALADIN_RETRIBUTION_TARGET = {
   aliasGroups: {},
 };
 
+/**
+ * The Blood Death Knight target (M11-B2): ONE ability, Dancing Rune Weapon.
+ *
+ * It is the only cooldown the M11-B2 measurement slice claims anything about:
+ * a GCD-consuming (`_gcd` 1500) entry of `high_prio_actions` whose gate
+ * reads `fight_remains` and therefore never resolves before +300 s, so the
+ * only way a scan gets past it is a PROVEN active cooldown from an observed
+ * cast. Vampiric Blood is deliberately NOT here — `cooldown.vampiric_blood->
+ * adjust( -sec )` under Red Thirst (sc_death_knight.cpp:13143-13147) shortens
+ * it dynamically by Runic Power spent, so no lower bound on its remaining
+ * time is sound; nor is Raise Dead, Blood Boil (hasted charges, a Plague
+ * Infusion adjust and a reset), Consumption (a reset) or Death and Decay.
+ * Each of those stays UNKNOWN and is measured as such.
+ *
+ * One class module holds every Death Knight specialization: there is no spec
+ * module and no class header, and the module conventions the Paladin targets
+ * verify (a Blessing-of-Autumn recharge multiplier, a `hasted_cd` base member)
+ * do not exist in it — declared absent below and checked generically.
+ */
+const DEATHKNIGHT_BLOOD_TARGET = {
+  datasetId: "SIMC_DBC_DEATHKNIGHT_BLOOD_ABILITY_COOLDOWNS",
+  classId: 6,
+  className: "Death Knight",
+  specId: 250,
+  defaultOut: "src/data/game/deathknight-blood-cooldowns.json",
+  sourceOverrides: {
+    classModule: "engine/class_modules/sc_death_knight.cpp",
+    specModule: null,
+    classHeader: null,
+  },
+  moduleConventions: {
+    moduleLabel: "sc_death_knight.cpp",
+    rechargeRateMechanism: null,
+    hastedCooldownMember: null,
+  },
+  abilities: [
+    {
+      simcToken: "dancing_rune_weapon",
+      abilityGameId: 49028,
+      aliasGroup: null,
+      createAction:
+        'sc_death_knight.cpp:14361-14362 if ( name == "dancing_rune_weapon" ) return new dancing_rune_weapon_t( this, options_str )',
+      specBinding:
+        'sc_death_knight.cpp:9476-9479 dancing_rune_weapon_t : death_knight_spell_t( "dancing_rune_weapon", p, p->talent.blood.dancing_rune_weapon ); :14914 talent.blood.dancing_rune_weapon = find_talent_spell( talent_tree::SPECIALIZATION, "Dancing Rune Weapon" ), whose Blood trait row carries spell 49028; the module handle cooldown.dancing_rune_weapon = get_cooldown( "dancing_rune_weapon" ) at :1948',
+      actionStruct: { file: "classModule", name: "dancing_rune_weapon_t" },
+      cooldownHandle: "cooldown.dancing_rune_weapon",
+      cooldownName: "dancing_rune_weapon",
+    },
+  ],
+  aliasGroups: {},
+};
+
 export const TARGETS = {
+  "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
   "paladin-protection": PALADIN_PROTECTION_TARGET,
   "paladin-retribution": PALADIN_RETRIBUTION_TARGET,
 };
@@ -911,13 +964,14 @@ export function groundEffectLifetimeChecks(ability, loaded) {
  * each REQUIRED to hold. A drifted module fails the extraction rather than
  * producing a policy that no longer describes it.
  */
-export function dynamicPolicyChecks(ability, loaded, traits) {
+export function dynamicPolicyChecks(ability, loaded, traits, conventions = undefined) {
   const modules = {
     classModule: loaded.classModule,
     specModule: loaded.specModule,
     classHeader: loaded.classHeader,
   };
   const moduleText = `${loaded.classModule}\n${loaded.specModule}`;
+  const moduleLabel = conventions?.moduleLabel ?? "sc_paladin.cpp + sc_paladin_protection.cpp";
   const checks = [];
   const problems = [];
   const require = (claim, search, holds, finding) => {
@@ -954,7 +1008,7 @@ export function dynamicPolicyChecks(ability, loaded, traits) {
   const declaredMissing = declared.filter((known) => !mutating.includes(known.member));
   require(declared.length === 0
     ? "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE"
-    : "EVERY_DYNAMIC_MUTATION_IS_DECLARED", `every '${handleArrow}<member>' in sc_paladin.cpp + sc_paladin_protection.cpp`, undeclared.length ===
+    : "EVERY_DYNAMIC_MUTATION_IS_DECLARED", `every '${handleArrow}<member>' in ${moduleLabel}`, undeclared.length ===
     0 && declaredMissing.length === 0, arrowUses.length === 0
     ? `no '${handleArrow}' use exists in the module`
     : `${String(arrowUses.length)} use(s): ${arrowUses.map((m) => `->${m}()`).join(", ")}` +
@@ -1001,21 +1055,34 @@ export function dynamicPolicyChecks(ability, loaded, traits) {
       : `exactly ${String(declared.length)} name(s) this cooldown, each declared: ${declared.map((known) => `${known.member}() in ${known.site}`).join("; ")}`));
 
   // 4. The one recharge-rate mechanism is a buff that is never constructed.
+  //
+  // A target may declare the Paladin mechanism ABSENT from its module
+  // (`moduleConventions.rechargeRateMechanism: null`), in which case the
+  // generic form of the claim is checked: no recharge-rate multiplier is
+  // adjusted anywhere in the module at all.
+  if (conventions !== undefined && conventions.rechargeRateMechanism === null) {
+    const rechargeSites = count(moduleText, "->adjust_recharge_multiplier(");
+    require("NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE", "'adjust_recharge_multiplier' sites in the module", rechargeSites ===
+      0, rechargeSites === 0
+      ? `no '->adjust_recharge_multiplier(' site exists in ${moduleLabel}`
+      : `${String(rechargeSites)} '->adjust_recharge_multiplier(' site(s) exist in ${moduleLabel}`);
+  }
   const autumnDefined = count(loaded.classModule, "struct blessing_of_autumn_t");
   const autumnConstructed =
     count(moduleText, "new blessing_of_autumn_t") + count(loaded.classHeader, "blessing_of_autumn_t");
   const autumnTrait = traits.filter((row) =>
     /Blessing of (Autumn|Summer|Winter|Spring|the Seasons)/i.test(row.displayNameEn),
   );
-  require("NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE", "'adjust_recharge_multiplier' sites; 'blessing_of_autumn_t' construction; Blessing of the Seasons traits in trait_data.inc", autumnDefined ===
-    1 &&
-    autumnConstructed === 0 &&
-    autumnTrait.length === 0 &&
-    mutators.filter((r) => r === "a->cooldown" || r === "a->internal_cooldown").length ===
-      count(
-        moduleText,
-        "->adjust_recharge_multiplier(",
-      ), `struct blessing_of_autumn_t is defined once (sc_paladin.cpp) and constructed nowhere (0 'new blessing_of_autumn_t', 0 references in sc_paladin.hpp); no Paladin trait row is named for Blessing of the Seasons; every '->adjust_recharge_multiplier(' call in the module sits inside that dead struct`);
+  if (conventions === undefined || conventions.rechargeRateMechanism !== null)
+    require("NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE", "'adjust_recharge_multiplier' sites; 'blessing_of_autumn_t' construction; Blessing of the Seasons traits in trait_data.inc", autumnDefined ===
+      1 &&
+      autumnConstructed === 0 &&
+      autumnTrait.length === 0 &&
+      mutators.filter((r) => r === "a->cooldown" || r === "a->internal_cooldown").length ===
+        count(
+          moduleText,
+          "->adjust_recharge_multiplier(",
+        ), `struct blessing_of_autumn_t is defined once (sc_paladin.cpp) and constructed nowhere (0 'new blessing_of_autumn_t', 0 references in sc_paladin.hpp); no Paladin trait row is named for Blessing of the Seasons; every '->adjust_recharge_multiplier(' call in the module sits inside that dead struct`);
 
   // 5. No action-level cooldown override in the ability's own action struct.
   const structFile = modules[ability.actionStruct.file];
@@ -1045,6 +1112,12 @@ export function dynamicPolicyChecks(ability, loaded, traits) {
           : ` (${String(knownReferences)} declared cooldown reference(s): ${ability.knownStructCooldownReferences.note})`));
 
   // 6. The hasted-cooldown flag is set only in other actions' structs.
+  //
+  // A target may declare that its base action carries no `hasted_cd`
+  // member at all (`moduleConventions.hastedCooldownMember: null`); the
+  // generic half of the claim — no `cooldown->hasted` site inside THIS
+  // ability's own struct — is then the whole check, and the member half is
+  // verified absent rather than initialised false.
   const hastedSites = [];
   for (const [file, text] of Object.entries(modules)) {
     for (const line of lineNumbersOf(text, "cooldown->hasted"))
@@ -1058,14 +1131,23 @@ ${loaded.classHeader}`;
   const hastedCdTrue =
     count(allText, "hasted_cd = true") + count(allText, "hasted_cd( true") + count(allText, "hasted_cd=true");
   const hastedCdInit = count(loaded.classHeader, "hasted_cd( false )");
-  require("NO_MODULE_HASTED_COOLDOWN_FLAG", "'cooldown->hasted' sites and their enclosing structs; every assignment of paladin_action_t::hasted_cd", hastedSites.every(
-    (site) => !site.endsWith(` in ${ability.actionStruct.name}`),
-  ) &&
-    hastedCdTrue === 0 &&
-    hastedCdInit === 1, (hastedSites.length === 0
-    ? "no site sets the flag"
-    : `${String(hastedSites.length)} site(s): ${hastedSites.join("; ")}; none is this ability's struct`) +
-    `; paladin_action_t::hasted_cd is initialised false once and assigned true nowhere (${String(hastedCdTrue)} assignment(s)), so the base init() forwards false`);
+  if (conventions !== undefined && conventions.hastedCooldownMember === null) {
+    const memberMentions = count(allText, "hasted_cd");
+    require("NO_MODULE_HASTED_COOLDOWN_FLAG", "'cooldown->hasted' sites and their enclosing structs; any 'hasted_cd' member", hastedSites.every(
+      (site) => !site.endsWith(` in ${ability.actionStruct.name}`),
+    ) && memberMentions === 0, (hastedSites.length === 0
+      ? "no site sets the flag"
+      : `${String(hastedSites.length)} site(s): ${hastedSites.join("; ")}; none is this ability's struct`) +
+      `; no 'hasted_cd' member exists in ${moduleLabel} (${String(memberMentions)} mention(s))`);
+  } else
+    require("NO_MODULE_HASTED_COOLDOWN_FLAG", "'cooldown->hasted' sites and their enclosing structs; every assignment of paladin_action_t::hasted_cd", hastedSites.every(
+      (site) => !site.endsWith(` in ${ability.actionStruct.name}`),
+    ) &&
+      hastedCdTrue === 0 &&
+      hastedCdInit === 1, (hastedSites.length === 0
+      ? "no site sets the flag"
+      : `${String(hastedSites.length)} site(s): ${hastedSites.join("; ")}; none is this ability's struct`) +
+      `; paladin_action_t::hasted_cd is initialised false once and assigned true nowhere (${String(hastedCdTrue)} assignment(s)), so the base init() forwards false`);
 
   // 7. The module's explicit passive affect-list registrations name other spells.
   const affectLists = lineNumbersOf(moduleText, "register_passive_affect_list(").map((line) => {
@@ -1118,6 +1200,13 @@ async function main() {
   const loaded = {};
   const sources = [];
   for (const [key, path] of Object.entries(SOURCE_PATHS)) {
+    if (path === null) {
+      // The target declares this source ABSENT (a class with one module has no
+      // spec module and no class header). Loaded as empty text so every
+      // module-wide search runs unchanged over what exists.
+      loaded[key] = "";
+      continue;
+    }
     const buffer = await loadSource(args, key, path);
     const sha256 = createHash("sha256").update(buffer).digest("hex");
     loaded[key] = buffer.toString("utf8");
@@ -1227,7 +1316,7 @@ async function main() {
       ability.groundEffect === undefined
         ? undefined
         : censusPassiveModifiers({ ...censusInput, property: "DURATION" });
-    const policy = dynamicPolicyChecks(ability, loaded, traits);
+    const policy = dynamicPolicyChecks(ability, loaded, traits, target.moduleConventions);
     problems.push(...policy.problems);
     const lifetime = ability.groundEffect === undefined ? null : groundEffectLifetimeChecks(ability, loaded);
     if (lifetime !== null) problems.push(...lifetime.problems);
@@ -1282,12 +1371,14 @@ async function main() {
       dynamicModifierPolicy: {
         method: "HAND_REVIEWED_CPP_ABSENCE_PROOF",
         appliesTo: ability.simcToken,
-        sourcePaths: [SOURCE_PATHS.classModule, SOURCE_PATHS.specModule, SOURCE_PATHS.classHeader],
-        sourceSha256: {
-          classModule: sourceFor("classModule").sha256,
-          specModule: sourceFor("specModule").sha256,
-          classHeader: sourceFor("classHeader").sha256,
-        },
+        sourcePaths: [SOURCE_PATHS.classModule, SOURCE_PATHS.specModule, SOURCE_PATHS.classHeader].filter(
+          (path) => path !== null,
+        ),
+        sourceSha256: Object.fromEntries(
+          ["classModule", "specModule", "classHeader"]
+            .filter((key) => SOURCE_PATHS[key] !== null)
+            .map((key) => [key, sourceFor(key).sha256]),
+        ),
         reviewedOn: extractedOn,
         checks: policy.checks,
       },

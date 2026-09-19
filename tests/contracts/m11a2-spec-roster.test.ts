@@ -191,11 +191,12 @@ describe("the roster and the analyzers", () => {
     expect(rosterSpecialization("paladin/protection")).toMatchObject({ simcSpecId: 66, role: "TANK" });
   });
 
-  it("the roster confers no support: thirty-seven rows have no registration (Retribution Paladin registered INTERNAL_ONLY at M11-A4)", () => {
+  it("the roster confers no support: thirty-six rows have no registration (Blood Death Knight registered INTERNAL_ONLY at M11-B2)", () => {
     const registered = new Set(ANALYZER_REGISTRATIONS.map((registration) => registration.specId as string));
     const unregistered = roster().specializations.filter((row) => !registered.has(row.rosterKey));
-    expect(unregistered).toHaveLength(37);
+    expect(unregistered).toHaveLength(36);
     expect(registered.has("paladin/retribution")).toBe(true);
+    expect(registered.has("deathknight/blood")).toBe(true);
   });
 
   it("an unknown key resolves to null, never to a nearest match", () => {
