@@ -19,6 +19,14 @@
  *                   (the priority short-circuit rule)
  *     BLOCKED       an unsupported expression refuses the scan with the exact
  *                   entry it stopped at, never evaluating as false or true
+ *
+ * M11-B1 added two shapes over a second synthetic artifact, for the generic
+ * `run_action_list` control flow:
+ *
+ *     NO_ACTION     a run entry transferred selection into a list that selects
+ *                   nothing, and the parent's later entries were never visited
+ *     BLOCKED_WITH  an undecided run gate, or a control-flow cycle through run
+ *                   lists, fails closed with the exact engine blocker
  */
 
 import { loadAplAuthority, type AplAction } from "../../../../src/simc/apl-authority.js";
@@ -162,6 +170,57 @@ export function scanRefusesUnsupportedExpression(
           ? { gate: gate.kind, reason: gate.reason, fragment: gate.fragment }
           : { gate: gate.kind },
     });
+  }
+  return pass();
+}
+
+/** `list[ordinal] token` for every visited step, compared as a whole. */
+function visitedOf(result: OneForegroundScanResult) {
+  return result.steps.map(entryOf);
+}
+
+export function scanSelectsNothing(
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SHARED_DECISION_ENGINE.SCAN_SELECTS_NOTHING">,
+): AssertionOutcome {
+  const run = scan(artifact, params);
+  if (!run.ok) return run.outcome;
+  const { result } = run;
+  if (result.kind !== "RESOLVED" || result.resolution.kind !== "NO_ACTION") {
+    return fail("the scan did not resolve to NO_ACTION", {
+      expected: { kind: "RESOLVED", resolution: "NO_ACTION" },
+      actual:
+        result.kind === "RESOLVED" ? { resolution: result.resolution.kind } : { blocker: result.blocker },
+    });
+  }
+  const visited = visitedOf(result);
+  if (JSON.stringify(visited) !== JSON.stringify(params.expectedVisited)) {
+    return fail("the visited entries differ", { expected: params.expectedVisited, actual: visited });
+  }
+  return pass();
+}
+
+export function scanBlockedWith(
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH">,
+): AssertionOutcome {
+  const run = scan(artifact, params);
+  if (!run.ok) return run.outcome;
+  const { result } = run;
+  if (result.kind !== "BLOCKED" || result.blocker !== params.expectedBlocker) {
+    return fail("the scan did not block with the expected blocker", {
+      expected: { kind: "BLOCKED", blocker: params.expectedBlocker },
+      actual:
+        result.kind === "BLOCKED" ? { blocker: result.blocker } : { resolution: result.resolution.kind },
+    });
+  }
+  const blockedAt = result.blockedAt === null ? null : entryOf(result.blockedAt);
+  if (JSON.stringify(blockedAt) !== JSON.stringify(params.expectedBlockedAt)) {
+    return fail("the blocking entry differs", { expected: params.expectedBlockedAt, actual: blockedAt });
+  }
+  const visited = visitedOf(result);
+  if (JSON.stringify(visited) !== JSON.stringify(params.expectedVisited)) {
+    return fail("the visited entries differ", { expected: params.expectedVisited, actual: visited });
   }
   return pass();
 }

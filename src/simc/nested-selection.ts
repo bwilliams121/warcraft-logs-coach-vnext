@@ -14,6 +14,26 @@
  *                       otherwise fall through and CONTINUE the same scan
  *     anything else     RETURN it — the scan is over
  *
+ * `run_action_list` IS "anything else" (M11-B1). It is not `ACTION_CALL` —
+ * `call_action_list_t` is the only `ACTION_CALL` — so a ready `run_action_list`
+ * entry is RETURNED by the loop (player.cpp:14264-14267) and executes at zero
+ * time: it remembers the list to restore and activates its child
+ * (action.cpp:4740-4754). The very next `execute_action` selects from the
+ * CHILD (player.cpp:7376-7377) and restores the parent only after that
+ * selection (player.cpp:7382-7386). Two consequences, both modelled below:
+ *
+ *     the parent's entries BELOW a fired run entry are never reached — the
+ *     selection that follows starts in the child, not at the next ordinal
+ *
+ *     a child that selects nothing yields NO action for this selection: there
+ *     is no fall-through back into the parent, unlike a call that returns
+ *     nothing
+ *
+ * A run entry whose gate is proven FALSE is skipped like any other not-ready
+ * entry (player.cpp:14235). A run entry whose gate cannot be decided BLOCKS:
+ * the two worlds (parent continues / child replaces the parent) are not
+ * explored in M11-B1, so the refusal is `UNDECIDED_RUN_GATE`.
+ *
  * Three consequences this module is built around:
  *
  * 1. THE GCD LANE IS NOT CONSULTED. There is no branch on `trigger_gcd` in the
@@ -46,7 +66,10 @@
  * parent at the next ordinal. Both worlds agree on the continuation, so the
  * undecided gate is not a blocker at all and the scan proceeds. This is the
  * single most valuable rule here, and it is why an unparseable gate above a
- * provably-empty list does not poison everything beneath it.
+ * provably-empty list does not poison everything beneath it. (One exception,
+ * since M11-B1: a callee that reached a certain `run_action_list` did NOT fall
+ * off its end — it transferred the selection — so that rule does not apply to
+ * it, and an undecided gate above such a callee blocks instead.)
  *
  * If instead the child might return an action, the two worlds disagree, and the
  * child's action becomes a POSSIBLE candidate while the scan continues to see
@@ -139,6 +162,39 @@ export type TraversalStepOutcome =
   | "CALL_MAY_SELECT"
   /** A call whose callee definitely returns an action, under a certain gate. */
   | "CALL_SELECTED"
+  /**
+   * A call whose gate is certain and whose callee TRANSFERRED selection through
+   * a `run_action_list` (M11-B1). The callee's candidates are carried verbatim
+   * and the caller's walk ends here — the run inside the callee was the action
+   * the call returned, so nothing below this call site is part of the
+   * selection. Distinct from `CALL_RETURNED_NO_ACTION_CONTINUE`: a callee that
+   * merely fell off its end lets the caller continue; one that transferred
+   * does not, even when it offers no candidate.
+   */
+  | "CALL_TRANSFERRED_SCAN_ENDS"
+  /**
+   * A `run_action_list` whose gate is proven FALSE (M11-B1). NOT entered; the
+   * parent continues at its next ordinal, exactly as for a not-ready entry.
+   */
+  | "RUN_GATE_FALSE_SKIPPED"
+  /**
+   * A `run_action_list` whose gate is certain and whose child offered at least
+   * one candidate (M11-B1). The child's candidates ARE this scan's remaining
+   * candidates, and the parent's later entries were never visited — the run
+   * transfers selection into the child for this scan and does not resume the
+   * parent. Distinct from `CALL_SELECTED`: a call returns to its caller, a run
+   * does not.
+   */
+  | "RUN_ENTERED_SCAN_ENDS"
+  /**
+   * A `run_action_list` whose gate is certain and whose child is PROVEN to
+   * select nothing (M11-B1). The scan ENDS here with no contribution: in the
+   * pinned loop the child list is the active list for the selection that
+   * follows the run, so a child that selects nothing is a selection of nothing.
+   * The parent's later entries are NOT consulted. Distinct from
+   * `CALL_RETURNED_NO_ACTION_CONTINUE`, which continues the caller.
+   */
+  | "RUN_RETURNED_NO_ACTION_SCAN_ENDS"
   /**
    * The entry is not a selectable action for this player at all.
    *
@@ -258,8 +314,17 @@ export type TargetingRefusal =
  *   actions remain possible.
  * - `NO_DEFINITE_WINNER` — actions might fire, none is proven to, and the scan
  *   might equally have returned nothing.
- * - `UNMODELLED_DISPATCH_IN_LIST` — `run_action_list`, whose control flow
- *   differs from `call_action_list` and is not modelled.
+ * - `UNMODELLED_DISPATCH_IN_LIST` — `run_action_list` in the SINGLE-LIST walker
+ *   (`list-selection.ts`), which models no dispatch at all. Retained in this
+ *   vocabulary because the two share it verbatim; since M11-B1 this module no
+ *   longer produces it — a run entry is modelled here (see the header).
+ * - `UNDECIDED_RUN_GATE` — a `run_action_list` gate that is neither proven TRUE
+ *   nor proven FALSE (M11-B1). The parent-continues and child-replaces-parent
+ *   worlds are not explored, so the scan cannot get past the entry.
+ * - `UNDECIDED_CALL_GATE_OVER_RUN` — a `call_action_list` whose gate is
+ *   undecided and whose callee transferred selection through a
+ *   `run_action_list` (M11-B1). The same two worlds, one level up; the same
+ *   deferral.
  * - `CALLED_LIST_ABSENT` — a call names a list the artifact does not contain.
  *   A hole in the model, never an empty list.
  * - `CONTROL_FLOW_CYCLE` — a list was re-entered while still on the call stack.
@@ -273,6 +338,8 @@ export type TraversalBlocker =
   | "COMPETING_POSSIBLE_ACTION"
   | "NO_DEFINITE_WINNER"
   | "UNMODELLED_DISPATCH_IN_LIST"
+  | "UNDECIDED_RUN_GATE"
+  | "UNDECIDED_CALL_GATE_OVER_RUN"
   | "CALLED_LIST_ABSENT"
   | "CONTROL_FLOW_CYCLE"
   | "UNSUPPORTED_ENTRY_KIND"
@@ -295,6 +362,8 @@ export const TRAVERSAL_BLOCKERS = [
   "COMPETING_POSSIBLE_ACTION",
   "NO_DEFINITE_WINNER",
   "UNMODELLED_DISPATCH_IN_LIST",
+  "UNDECIDED_RUN_GATE",
+  "UNDECIDED_CALL_GATE_OVER_RUN",
   "CALLED_LIST_ABSENT",
   "CONTROL_FLOW_CYCLE",
   "UNSUPPORTED_ENTRY_KIND",
@@ -533,7 +602,22 @@ export type ScanResolution =
   | { readonly kind: "AMBIGUOUS"; readonly candidates: readonly Candidate[] };
 
 type ScanOutcome =
-  | { readonly kind: "COMPLETED"; readonly candidates: readonly Candidate[] }
+  | {
+      readonly kind: "COMPLETED";
+      readonly candidates: readonly Candidate[];
+      /**
+       * Whether this walk ended because a `run_action_list` TRANSFERRED the
+       * selection (M11-B1) — directly, or inside a certainly-entered callee.
+       *
+       * The flag is what stops a run from being undone by the list that called
+       * it. A callee that completes WITHOUT transferring and offers nothing
+       * lets its caller continue (`CALL_RETURNED_NO_ACTION_CONTINUE`); a callee
+       * that transferred and offers nothing is a selection of NOTHING, and its
+       * caller ends too. `candidates` is complete either way: nothing below the
+       * transfer point in any enclosing list was visited.
+       */
+      readonly transferred: boolean;
+    }
   | {
       readonly kind: "BLOCKED";
       readonly blocker: TraversalBlocker;
@@ -677,6 +761,157 @@ function earliestObstacle(candidates: readonly Candidate[], blocked: ScanOutcome
   };
 }
 
+/**
+ * What a `run_action_list` entry did to the scan that reached it (M11-B1).
+ *
+ *     CONTINUE     the gate is proven FALSE; the parent scans its next ordinal
+ *     SCAN_ENDS    the gate is certain; the child was scanned and `contributed`
+ *                  is everything it offered (possibly nothing). The parent's
+ *                  later entries are NOT visited — the run replaced the parent
+ *                  for this selection and never returns to it
+ *     BLOCKED      the gate is undecided or unreadable, the entry carries an
+ *                  option this project does not model, or the child blocked
+ */
+type RunDispatchOutcome =
+  | { readonly kind: "CONTINUE" }
+  | { readonly kind: "SCAN_ENDS"; readonly contributed: readonly Candidate[] }
+  | { readonly kind: "BLOCKED"; readonly outcome: ScanOutcome };
+
+/**
+ * Models one `run_action_list` entry at its own priority position.
+ *
+ * THE PINNED SEMANTICS, AND WHY THEY ARE NOT THE CALL'S
+ *
+ * `run_action_list_t` is not `ACTION_CALL`, so `select_action` RETURNS it as
+ * the selected action once `action_ready()` holds (player.cpp:14235,
+ * 14264-14267). It executes at zero time, remembering the parent and
+ * activating the child (action.cpp:4740-4754); the next `execute_action`
+ * selects from the child (player.cpp:7376-7377) and only then restores the
+ * parent (player.cpp:7382-7386). So for the selection this scan models:
+ *
+ *   - a FALSE gate skips the entry and the parent continues — the same
+ *     `action_ready()` check every entry passes through;
+ *   - a certain gate ENDS the parent's walk here. Whatever the child selects
+ *     is what this selection selects, and a child that selects nothing is a
+ *     selection of NOTHING. There is no fall-through into the parent's later
+ *     entries; `call_action_list`'s "returns nothing, keep scanning" rule
+ *     (player.cpp:14255-14260) belongs to `ACTION_CALL` alone;
+ *   - an undecided gate BLOCKS. The parent-continues world and the
+ *     child-replaces-parent world could be explored and converged exactly as
+ *     the call's two worlds are, but that is deliberately NOT done in M11-B1:
+ *     the refusal is `UNDECIDED_RUN_GATE`, never TRUE, never FALSE, never
+ *     "as though the entry were absent".
+ *
+ * WHAT STAYS CONSERVATIVE, ON PURPOSE
+ *
+ *   - Options. A run entry carrying an option outside the supported set
+ *     (`target_if` on Arms' execute dispatch, for one) is refused with
+ *     `UNSUPPORTED_ACTION_OPTION` before its gate is read. No option key was
+ *     admitted for run entries; the existing classification applies.
+ *   - Cycles. The child is scanned under the same active-stack guard as a
+ *     callee, so `run X` inside X, or X ⇄ Y through runs, calls or a mix,
+ *     blocks with `CONTROL_FLOW_CYCLE`. The pinned `swap_action_list_t::ready`
+ *     (action.cpp:4725-4731) would instead make a run into the ALREADY ACTIVE
+ *     list not ready; blocking is the conservative reading of that and claims
+ *     nothing the pinned loop would not also refuse to select.
+ *   - Prior candidates. If entries above the run MIGHT fire, the run is
+ *     reached only in the world where none did. The child's candidates are
+ *     appended verbatim — their own `definite` flags intact — exactly as a
+ *     certain call's are, and the parent's earlier possibilities stay ahead of
+ *     them in priority order.
+ */
+function scanRunDispatch(
+  context: ScanContext,
+  action: AplAction,
+  target: string,
+  gate: LineCondition,
+  path: readonly TraversalPathEntry[],
+  nestedStack: readonly string[],
+  candidates: readonly Candidate[],
+): RunDispatchOutcome {
+  const blocked = (step: TraversalStep, blocker: TraversalBlocker, detail: string): RunDispatchOutcome => ({
+    kind: "BLOCKED",
+    outcome: earliestObstacle(candidates, { kind: "BLOCKED", blocker, blockedAt: step, detail }),
+  });
+
+  if (action.unsupportedOptions.length > 0) {
+    const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
+    const step = stepOf(
+      action,
+      path,
+      { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+      "UNKNOWN",
+      "BLOCKED",
+      {
+        targetingRefusal: {
+          kind: "REFUSED",
+          optionKeys,
+          failure: "NO_TARGET_INDEPENDENT_CONJUNCT",
+        },
+      },
+    );
+    context.steps.push(step);
+    return blocked(
+      step,
+      "UNSUPPORTED_ACTION_OPTION",
+      "the run_action_list entry carries an action option this project does not model, so " +
+        "whether it transfers selection cannot be established",
+    );
+  }
+
+  if (gate.kind === "UNSUPPORTED") {
+    const step = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
+    context.steps.push(step);
+    return blocked(
+      step,
+      "UNSUPPORTED_AUTHORITY_EXPRESSION",
+      "the run_action_list gate is outside the supported expression subset, so whether it " +
+        "transfers selection cannot be established",
+    );
+  }
+
+  if (gateIsCertainlyNotEntered(gate)) {
+    // Proven FALSE: not ready, not returned, not entered. The parent continues.
+    context.steps.push(stepOf(action, path, gate, "UNKNOWN", "RUN_GATE_FALSE_SKIPPED"));
+    return { kind: "CONTINUE" };
+  }
+
+  if (!gateIsCertainlyEntered(gate)) {
+    const step = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
+    context.steps.push(step);
+    return blocked(
+      step,
+      "UNDECIDED_RUN_GATE",
+      "the run_action_list gate is neither proven TRUE nor proven FALSE; the parent-continues and " +
+        "child-replaces-parent worlds are not explored",
+    );
+  }
+
+  // Certain gate. The run entry's own step is recorded BEFORE the child so the
+  // trace reads in visit order; its outcome is known once the child returns.
+  const runStepIndex = context.steps.length;
+  context.steps.push(stepOf(action, path, gate, "UNKNOWN", "BLOCKED"));
+  const finishRun = (outcome: TraversalStepOutcome): void => {
+    context.steps[runStepIndex] = stepOf(action, path, gate, "UNKNOWN", outcome);
+  };
+
+  const runPath = [...path, pathEntryOf(action)];
+  const child = scanList(context, target, 0, runPath, nestedStack);
+  if (child.kind === "BLOCKED") {
+    finishRun("BLOCKED");
+    return { kind: "BLOCKED", outcome: earliestObstacle(candidates, child) };
+  }
+  if (child.candidates.length === 0) {
+    // PROVEN to select nothing. This selection selects nothing: the pinned
+    // loop's next `select_action` ran over the child and found no ready entry,
+    // and the parent's later ordinals were never part of that selection.
+    finishRun("RUN_RETURNED_NO_ACTION_SCAN_ENDS");
+    return { kind: "SCAN_ENDS", contributed: [] };
+  }
+  finishRun("RUN_ENTERED_SCAN_ENDS");
+  return { kind: "SCAN_ENDS", contributed: child.candidates };
+}
+
 function scanList(
   context: ScanContext,
   listName: string,
@@ -709,22 +944,11 @@ function scanList(
 
   const nestedStack = [...callStack, listName];
   const candidates: Candidate[] = [];
+  /** Set when a run entry — here or in a certainly-entered callee — ended the walk. */
+  let transferred = false;
 
   for (const action of lookup.actions) {
     if (action.priorityOrdinal < startOrdinal) continue;
-
-    // `run_action_list` does not fall through the way `call_action_list` does,
-    // so no result written for one describes the other.
-    if (action.isUnmodelledDispatch) {
-      const step = stepOf(action, path, { kind: "UNCONDITIONAL" }, "UNKNOWN", "BLOCKED");
-      context.steps.push(step);
-      return earliestObstacle(candidates, {
-        kind: "BLOCKED",
-        blocker: "UNMODELLED_DISPATCH_IN_LIST",
-        blockedAt: step,
-        detail: "run_action_list does not return to its caller the way call_action_list does",
-      });
-    }
 
     const gate = evaluateCondition(action, context.bindings);
 
@@ -762,6 +986,18 @@ function scanList(
         });
       }
 
+      // ---- run_action_list: transfers selection, never returns (M11-B1) ----
+      if (action.isUnmodelledDispatch) {
+        const run = scanRunDispatch(context, action, target, gate, path, nestedStack, candidates);
+        if (run.kind === "CONTINUE") continue;
+        if (run.kind === "SCAN_ENDS") {
+          candidates.push(...run.contributed);
+          transferred = true;
+          break;
+        }
+        return run.outcome;
+      }
+
       if (gateIsCertainlyNotEntered(gate)) {
         // Proven FALSE: the callee is not entered, so it is not recursed into at
         // all. Recursing anyway would put its entries in the trace as though
@@ -788,6 +1024,36 @@ function scanList(
         // priority short-circuit this project forbids.
         finishCall("BLOCKED");
         return earliestObstacle(candidates, child);
+      }
+
+      if (child.transferred) {
+        // ---- the callee reached a run_action_list (M11-B1) ----
+        //
+        // The run was RETURNED as the selected action from inside the call
+        // (player.cpp:14255-14260 returns whatever the callee returns), so the
+        // selection that follows is the run's child's — not this caller's next
+        // ordinal. "Returned nothing, keep scanning" does not apply: the callee
+        // did return something, and what it returned ended the walk.
+        if (gateIsCertainlyEntered(gate)) {
+          finishCall("CALL_TRANSFERRED_SCAN_ENDS");
+          candidates.push(...child.candidates);
+          transferred = true;
+          break;
+        }
+        // Undecided call gate over a transferring callee: the FALSE world
+        // continues here, the TRUE world ended in the callee. Converging those
+        // is the run-gate world exploration M11-B1 defers, so this blocks.
+        finishCall("BLOCKED");
+        const callStep = context.steps[callStepIndex] ?? null;
+        return earliestObstacle(candidates, {
+          kind: "BLOCKED",
+          blocker: "UNDECIDED_CALL_GATE_OVER_RUN",
+          blockedAt: callStep,
+          detail:
+            "the called list transfers selection through run_action_list, but the call's own gate is " +
+            "neither proven TRUE nor proven FALSE; the parent-continues and child-replaces-parent " +
+            "worlds are not explored",
+        });
       }
 
       const childResolution = resolveScan(child.candidates);
@@ -1066,7 +1332,7 @@ function scanList(
     candidates.push({ identity: action.actionToken, step, definite: false });
   }
 
-  return { kind: "COMPLETED", candidates };
+  return { kind: "COMPLETED", candidates, transferred };
 }
 
 // --------------------------------------------------------------------------

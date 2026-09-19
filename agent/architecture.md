@@ -5580,6 +5580,98 @@ timed-out check
 Whether the retry recovers the production raid night is not yet known; it
 is proven offline only.
 
+## M11-B — the `C_RUN_ACTION_LIST_DISPATCH` cohort, in sub-stages
+
+The M11-B pre-flight audit (2026-09-18) adopted the A3 cohort C —
+`warrior/arms`, `warrior/fury`, `warrior/protection`, `deathknight/blood`,
+`deathknight/frost`, `monk/brewmaster`, `demonhunter/vengeance`,
+`demonhunter/devourer`, `rogue/outlaw` — as the working M11-B architectural
+cohort, and split it because its members share one engine blocker
+(`run_action_list`) and then divide by a second one: hero-tree-gated
+dispatch (Blood, Brewmaster, Vengeance, Devourer), target-count-gated
+dispatch (Arms, Fury, Protection Warrior, Frost DK) and variable-gated
+dispatch (Outlaw). Each sub-stage is authorized separately.
+
+### M11-B1 — generic `run_action_list` control flow (shared engine only)
+
+No specialization, no `SpecId`, no registration, no state binding, no
+option key, no parser builtin: the nested traversal (`src/simc/
+nested-selection.ts`) learned the pinned control flow of `run_action_list`
+and nothing else.
+
+**The pinned semantics, and where they are read.** A `run_action_list` entry
+is not `ACTION_CALL`, so `player_t::select_action` RETURNS it as the selected
+action once its gate holds (`player.cpp:14235`, `14264-14267`); it executes
+at zero time, remembering the list to restore and activating its child
+(`action.cpp:4740-4754`, `run_action_list_t::execute`); the very next
+`execute_action` selects from the CHILD (`player.cpp:7376-7377`) and restores
+the parent only after that selection (`player.cpp:7382-7386`). The
+consequences the engine now models, at the run entry's own priority position:
+
+| Gate | Behaviour | Trace |
+| --- | --- | --- |
+| proven FALSE | skipped like any not-ready entry; the parent continues at its next ordinal | `RUN_GATE_FALSE_SKIPPED` |
+| certain (TRUE or unconditional), child offers candidates | the child's candidates ARE the scan's remaining candidates, verbatim; the parent's later entries are never visited | `RUN_ENTERED_SCAN_ENDS` |
+| certain, child proven to select nothing | the selection is NOTHING; the parent's later entries are NOT fallen through to | `RUN_RETURNED_NO_ACTION_SCAN_ENDS` |
+| certain, child blocked | the child's blocker propagates | `BLOCKED` |
+| undecided | fail closed; neither world is explored | blocker `UNDECIDED_RUN_GATE` |
+| unreadable | the existing parser refusal | blocker `UNSUPPORTED_AUTHORITY_EXPRESSION` |
+| carries an unsupported option (`target_if=` on Arms' execute dispatch) | refused before the gate is read | blocker `UNSUPPORTED_ACTION_OPTION` |
+
+**A run is not a call, one level up too.** The transfer is carried on the
+scan outcome (`transferred`), so a run reached INSIDE a called list ends the
+whole selection: the call returned the run action (`player.cpp:14255-14260`
+returns whatever the callee selects), so the caller does not continue at its
+next ordinal even when the run's child selects nothing
+(`CALL_TRANSFERRED_SCAN_ENDS`). An undecided call gate above such a callee
+blocks (`UNDECIDED_CALL_GATE_OVER_RUN`) rather than converging the
+parent-continues and child-replaces-parent worlds. The empty-callee
+convergence rule — an undecided call gate above a provably-empty callee is
+harmless — still holds for callees that fell off their end; it does not apply
+to one that transferred.
+
+**Deliberately deferred, not forgotten.** World-union semantics for an
+undecided run gate (explore both worlds, mark every contribution
+non-definite, converge as calls do) are sound under the same Kleene rule the
+call already uses and are NOT implemented here; the refusal is named so the
+deferral is measurable. The active-stack cycle guard applies to run edges
+unchanged (`CONTROL_FLOW_CYCLE` for `run X` inside X, X ⇄ Y, or a mixed
+call/run cycle); the pinned `swap_action_list_t::ready`
+(`action.cpp:4725-4731`) would instead make a run into the already-active
+list not ready, and blocking is the conservative reading of that.
+
+**What stayed conservative.** The single-list walker (`list-selection.ts`)
+still refuses every dispatch, run or call, as it always has. The
+reachability proof `proveSoleGateTo` (`apl-authority.ts`) still returns
+`NOT_PROVABLE / UNMODELLED_DISPATCH` for any authority containing a run
+entry: a FALSE-gated run edge is skipped exactly as a FALSE-gated call edge
+is, so the sole-gate rule is very likely sound over a mixed graph, but it
+was not re-derived in this tranche and is left refusing. Retribution's
+nested unselectability proof (`observed-action-gate.ts`,
+`AUTHORITY_HAS_LIST_DISPATCH`) is spec-owned and unchanged. The
+`isUnmodelledDispatch` flag kept its name: it still reads truthfully for the
+two consumers that do not model a run, and every reader keeps its meaning.
+The decision classifier (`decision-coverage.ts`) reads the two new blockers
+like any undecided gate — a permanent atom on the line names the class,
+otherwise `OBSERVED_STATE_MISSING` — so the public blocker-class enum did not
+grow and no public field changed.
+
+**Proven.** `tests/unit/m11b1-run-action-list.test.ts` (FALSE / TRUE /
+child NO_ACTION / child BLOCKED / undecided / unreadable / unsupported
+option; the call-vs-run pairs; priority above and below a run; run → run,
+call → run, run → call; the three cycle shapes; determinism; the first-GCD
+root restart re-entering a run list through the one shared scan) and a
+SYNTHETIC corpus family (`synthetic.apl-run-action-list`, seven
+`SHARED_DECISION_ENGINE` cases, two new assertion kinds
+`SCAN_SELECTS_NOTHING` and `SCAN_BLOCKED_WITH`) — regression evidence only,
+never promotion evidence. The three PUBLIC artifacts contain no
+`run_action_list`; the invariance harness's 33 captures are byte-identical
+before and after, and the unsupported Arms sentinel is untouched. The
+extractor's `requiredFacts` profiles were not changed: no artifact with a
+run entry is produced in B1, and the target profile that first needs one
+(M11-B2) will pin its call/run graph as target-specific data consumed by the
+generic checker.
+
 ---
 
 # Milestone 12 — Healer Foundation

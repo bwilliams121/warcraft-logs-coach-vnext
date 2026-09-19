@@ -55,8 +55,8 @@ describe("the committed corpus loads", () => {
     // public projection, its REST/MCP parity, a mixed raid night over its
     // own evidence) and repurposed the application-service case in place.
     // Measured, then pinned.
-    expect(loaded.artifacts).toHaveLength(38);
-    expect(loaded.cases).toHaveLength(131);
+    expect(loaded.artifacts).toHaveLength(39);
+    expect(loaded.cases).toHaveLength(138);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -117,6 +117,7 @@ describe("the committed corpus loads", () => {
     expect(byKind.get("SYNTHETIC")).toEqual([
       "synthetic.actor-zero-cast",
       "synthetic.apl-priority-short-circuit",
+      "synthetic.apl-run-action-list",
       "synthetic.graphql-event-page-null-data",
       "synthetic.graphql-page-sequence-malformed-second-page",
       "synthetic.graphql-page-sequence-two-pages",

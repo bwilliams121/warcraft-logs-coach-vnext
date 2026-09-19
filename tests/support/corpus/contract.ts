@@ -40,6 +40,7 @@ import {
   DECISION_COVERAGES,
 } from "../../../src/specs/rogue/assassination/decision-coverage.js";
 import { RETRIEVAL_OUTCOME_REASONS } from "../../../src/engine/evidence/coverage.js";
+import { TRAVERSAL_BLOCKERS } from "../../../src/simc/nested-selection.js";
 import pinnedAssassinationApl from "../../../src/simc/data/rogue-assassination.apl.json";
 import pinnedRogueDotDurations from "../../../src/data/game/rogue-dot-durations.json";
 import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.json";
@@ -1925,6 +1926,49 @@ export const ASSERTION_KINDS = {
     requiresAuthority: false,
     description:
       "An entry whose condition the shared parser does not support BLOCKS the scan at that entry with UNSUPPORTED_AUTHORITY_EXPRESSION, naming the fragment; it is never evaluated as false or true and nothing below it is selected.",
+  },
+
+  "SHARED_DECISION_ENGINE.SCAN_SELECTS_NOTHING": {
+    owningLayer: "SHARED_DECISION_ENGINE",
+    outcomeClass: "NEGATIVE_FACT",
+    payloadKinds: ["JSON_VALUE"],
+    params: z
+      .object({
+        entryListName: z.string().min(1),
+        knownBuffs: z.array(z.object({ name: z.string().min(1), up: z.boolean() }).strict()),
+        knownTalents: z.array(z.object({ name: z.string().min(1), taken: z.boolean() }).strict()),
+        provenUsableTokens: z.array(z.string().min(1)),
+        /** Every entry the scan visited, in visit order — so an entry it must NOT have reached is provably absent. */
+        expectedVisited: z.array(aplEntryRef),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "M11-B1: one foreground scan under the stated bindings resolves NO_ACTION — a PROOF that every reachable entry was eliminated or that a run_action_list transferred selection into a list that selects nothing — and visited exactly these entries, so the parent's entries below a transferring run are provably not consulted.",
+  },
+  "SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH": {
+    owningLayer: "SHARED_DECISION_ENGINE",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["JSON_VALUE"],
+    params: z
+      .object({
+        entryListName: z.string().min(1),
+        knownBuffs: z.array(z.object({ name: z.string().min(1), up: z.boolean() }).strict()),
+        knownTalents: z.array(z.object({ name: z.string().min(1), taken: z.boolean() }).strict()),
+        provenUsableTokens: z.array(z.string().min(1)),
+        expectedBlocker: z.enum(TRAVERSAL_BLOCKERS),
+        /** `null` for a blocker recorded before any entry was read (a cycle on list entry). */
+        expectedBlockedAt: aplEntryRef.nullable(),
+        expectedVisited: z.array(aplEntryRef),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "M11-B1: one foreground scan under the stated bindings is BLOCKED with exactly this engine blocker at exactly this entry, having visited exactly these entries — an undecided run_action_list gate or a control-flow cycle fails closed, and nothing below the blocking point is selected.",
   },
 
   "WCL_PAGINATION.PAGE_ENVELOPE_FACTS": {

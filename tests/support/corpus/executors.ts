@@ -92,6 +92,10 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "SHARED_DECISION_ENGINE.SCAN_SELECTS_NOTHING":
+      return sharedEngine.scanSelectsNothing(artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH":
+      return sharedEngine.scanBlockedWith(artifact, params as ParamsOf<typeof assertion.kind>);
     case "APPLICATION_SERVICE.FIGHT_ANALYSIS":
       return await applicationService.fightAnalysis(
         corpus,
@@ -423,6 +427,8 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
   "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY",
   "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION",
+  "SHARED_DECISION_ENGINE.SCAN_SELECTS_NOTHING",
+  "SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH",
   "SPEC_RETRIBUTION_PALADIN.AUTHORITY_PROVENANCE",
   "SPEC_RETRIBUTION_PALADIN.DECISION_COVERAGE",
   "SPEC_RETRIBUTION_PALADIN.COVERAGE_SUMMARY",

@@ -32,10 +32,14 @@
  * it does not say the action's own conditions hold. That is why this module
  * supports rejection and refuses to express selection.
  *
- * `run_action_list` is treated as unmodelled dispatch and fails closed. It has
- * different control-flow semantics from `call_action_list` (it does not return),
- * and the pinned Assassination APL contains none — so supporting it would be
- * untested code guarding a proof.
+ * `run_action_list` is refused by THIS proof and fails closed here. Its
+ * control flow is modelled by the nested traversal since M11-B1
+ * (`nested-selection.ts`: a FALSE gate skips, a certain gate transfers
+ * selection into the child and never resumes the parent), but the reachability
+ * proof below was written over call edges only and has not been re-derived
+ * over a mixed call/run graph. Until it is, an authority containing a run entry
+ * yields `NOT_PROVABLE / UNMODELLED_DISPATCH` — conservative, never wrong in the
+ * laundering direction — and none of the pinned public artifacts contains one.
  */
 
 import {
@@ -212,7 +216,17 @@ export interface AplAction {
   readonly conditionRaw: string | null;
   /** The `name=` target for `call_action_list` / `run_action_list`, else `null`. */
   readonly callsListName: string | null;
-  /** True for `run_action_list`, whose control flow this project does not model. */
+  /**
+   * True for `run_action_list`.
+   *
+   * The name predates M11-B1, which taught the NESTED traversal its control
+   * flow (`nested-selection.ts`). It still reads truthfully for the two
+   * consumers that do not model it: the single-list walker
+   * (`list-selection.ts`, which models no dispatch of any kind) and the
+   * reachability proof below. Kept rather than renamed so every existing
+   * reader keeps its meaning; the flag says "this is a run entry" and each
+   * consumer decides what it can do with one.
+   */
   readonly isUnmodelledDispatch: boolean;
   /**
    * Structural family, derived from the verbatim string.

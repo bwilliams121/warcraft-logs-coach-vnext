@@ -15,6 +15,13 @@
       "sha256": "31b3996b528c0821596b60b364297bf3d3b4310195128a4d3d5b6405f05e587f"
     },
     {
+      "artifactId": "synthetic.apl-run-action-list",
+      "byteLength": 2864,
+      "payloadKind": "JSON_VALUE",
+      "provenanceKind": "SYNTHETIC",
+      "sha256": "f83b05d7bb751e45e0f88c6b24bf34e4a0a3e2ab2c042d00b4c4d0d28a9e26e3"
+    },
+    {
       "artifactId": "synthetic.graphql-event-page-null-data",
       "byteLength": 133,
       "payloadKind": "WCL_GRAPHQL_DATA",
@@ -325,17 +332,19 @@
       "passed": 62
     },
     {
-      "assertions": 3,
-      "cases": 3,
+      "assertions": 10,
+      "cases": 10,
       "failed": 0,
       "kindsExercised": [
+        "SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH",
         "SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION",
         "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+        "SHARED_DECISION_ENGINE.SCAN_SELECTS_NOTHING",
         "SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY"
       ],
       "notExecuted": 0,
       "owningLayer": "SHARED_DECISION_ENGINE",
-      "passed": 3
+      "passed": 10
     },
     {
       "assertions": 20,
@@ -2101,6 +2110,34 @@
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
     },
     {
+      "artifactId": "synthetic.apl-run-action-list",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.call-child-that-selects-nothing-continues-the-parent",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-run-action-list"]
+    },
+    {
+      "artifactId": "synthetic.apl-run-action-list",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.nested-run-transfers-selection-twice",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-run-action-list"]
+    },
+    {
       "artifactId": "synthetic.apl-priority-short-circuit",
       "assertions": [
         {
@@ -2115,6 +2152,62 @@
       "referencedArtifactIds": ["synthetic.apl-priority-short-circuit"]
     },
     {
+      "artifactId": "synthetic.apl-run-action-list",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_SELECTS_NOTHING",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.run-child-that-selects-nothing-is-nothing-not-the-parent",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-run-action-list"]
+    },
+    {
+      "artifactId": "synthetic.apl-run-action-list",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.run-cycle-fails-closed-under-the-active-stack-guard",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-run-action-list"]
+    },
+    {
+      "artifactId": "synthetic.apl-run-action-list",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.run-gate-false-skips-to-the-parents-next-entry",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-run-action-list"]
+    },
+    {
+      "artifactId": "synthetic.apl-run-action-list",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.run-gate-true-transfers-selection-into-the-child",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-run-action-list"]
+    },
+    {
       "artifactId": "synthetic.apl-priority-short-circuit",
       "assertions": [
         {
@@ -2127,6 +2220,20 @@
       "caseId": "shared-decision-engine.undecided-higher-priority-entry-is-not-fallen-through",
       "owningLayer": "SHARED_DECISION_ENGINE",
       "referencedArtifactIds": ["synthetic.apl-priority-short-circuit"]
+    },
+    {
+      "artifactId": "synthetic.apl-run-action-list",
+      "assertions": [
+        {
+          "kind": "SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "shared-decision-engine.undecided-run-gate-blocks-and-explores-no-world",
+      "owningLayer": "SHARED_DECISION_ENGINE",
+      "referencedArtifactIds": ["synthetic.apl-run-action-list"]
     },
     {
       "artifactId": "synthetic.apl-priority-short-circuit",
@@ -4221,15 +4328,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 3949637,
-    "artifacts": 38,
-    "assertions": 410,
-    "cases": 131,
+    "artifactBytes": 3952501,
+    "artifacts": 39,
+    "assertions": 417,
+    "cases": 138,
     "declared": 0,
-    "executable": 410,
+    "executable": 417,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 410
+    "passed": 417
   }
 }

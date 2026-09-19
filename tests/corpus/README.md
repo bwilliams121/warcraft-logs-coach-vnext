@@ -286,6 +286,8 @@ least one committed case:
 | `SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY` (M10-C correction) | SHARED_DECISION_ENGINE | POSITIVE_FACT — one foreground scan of a SYNTHETIC authority under stated bindings resolves DEFINITE to exactly this entry |
 | `SHARED_DECISION_ENGINE.SCAN_UNDECIDED_BY_HIGHER_PRIORITY` (M10-C correction) | SHARED_DECISION_ENGINE | UNKNOWN — the priority short-circuit: an undecided higher entry leaves the scan AMBIGUOUS between exactly these candidates |
 | `SHARED_DECISION_ENGINE.SCAN_REFUSES_UNSUPPORTED_EXPRESSION` (M10-C correction) | SHARED_DECISION_ENGINE | UNSUPPORTED — an unsupported identifier BLOCKS the scan at that entry with the fragment on its gate |
+| `SHARED_DECISION_ENGINE.SCAN_SELECTS_NOTHING` (M11-B1) | SHARED_DECISION_ENGINE | NEGATIVE_FACT — one foreground scan resolves NO_ACTION (a proof, not an absence) having visited exactly these entries; used to pin that a `run_action_list` into a list that selects nothing does NOT fall through to the parent |
+| `SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH` (M11-B1) | SHARED_DECISION_ENGINE | UNKNOWN — one foreground scan is BLOCKED with exactly this engine blocker at exactly this entry (or before any entry, for a cycle), having visited exactly these entries |
 | `SPEC_ASSASSINATION.DECISION_COVERAGE` | SPEC_ASSASSINATION | the facade's verdict, MATCH / REJECTED / UNKNOWN; authority-dependent |
 | `SPEC_ASSASSINATION.SPEC_GATE` | SPEC_ASSASSINATION | UNSUPPORTED |
 | `SPEC_ASSASSINATION.AUTHORITY_UNAVAILABLE_IS_NOT_REJECTION` | SPEC_ASSASSINATION | NO_AUTHORITY_AVAILABLE |
@@ -637,6 +639,28 @@ seed-cases test asserted each copy still equalled its original. M9-B migrated
 the remaining fixtures and their importers, after which the legacy events
 directory and that test were removed; the copies' identity is now proven by
 the digests in the manifest alone.
+
+---
+
+## Contents after M11-B1
+
+Contract version 2, unchanged. Thirty-nine artifacts, one hundred and
+thirty-eight cases, four hundred and seventeen assertions. One SYNTHETIC
+authority artifact was added, `synthetic.apl-run-action-list` (`JSON_VALUE`),
+for the shared decision engine's generic `run_action_list` control flow:
+`default` runs `child` on a buff gate with an unconditional `parent_filler`
+below the run, `call_default` is the same shape with `call_action_list`,
+`nested` runs `middle` which runs `child`, and `cycle_a`/`cycle_b` run each
+other. Two kinds joined the registry (`SCAN_SELECTS_NOTHING`,
+`SCAN_BLOCKED_WITH`) and seven `SHARED_DECISION_ENGINE` cases pin the
+contract: a FALSE run gate skips to the parent's next entry; a TRUE gate
+transfers selection into the child; a child that selects nothing is
+NO_ACTION with the parent's later entries provably unvisited; the same
+premises over `call_action_list` continue the parent (the contrast); an
+undecided run gate blocks with `UNDECIDED_RUN_GATE`; run → run transfers
+twice; a run cycle fails closed under the existing active-stack guard. No
+existing case, artifact or expectation changed. The artifact is regression
+evidence only — SYNTHETIC qualifies nothing for promotion.
 
 ---
 

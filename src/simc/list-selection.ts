@@ -321,9 +321,11 @@ export function selectWithinList(
   const lines: LineEvaluation[] = [];
 
   for (const action of lookup.actions) {
-    // Control-flow constructs this project does not model inside a sub-list.
-    // Both fail closed: an unmodelled construct anywhere in the list could
-    // change which action is reached, so no selection conclusion is available.
+    // Control-flow constructs THIS single-list walker does not follow. Both
+    // fail closed: a dispatch anywhere in the list could change which action
+    // is reached, so no selection conclusion is available here. The nested
+    // traversal models both (`call_action_list` since M5-C3b, `run_action_list`
+    // since M11-B1); this walker deliberately models neither.
     if (action.isUnmodelledDispatch) {
       return {
         kind: "INDETERMINATE",

@@ -1,0 +1,75 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_SYNTHETIC_SHARED_ENGINE_RUN_ACTION_LIST",
+  "artifactRevision": "synthetic-1",
+  "spec": { "className": "synthetic", "specName": "shared_engine" },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://example.invalid/simc",
+    "branch": "synthetic",
+    "commitSha": "0000000000000000000000000000000000000000",
+    "commitDate": "2026-01-01",
+    "sourcePath": "synthetic/apl-run-action-list",
+    "sourceSha256": "1111111111111111111111111111111111111111111111111111111111111111",
+    "sourceByteLength": 1,
+    "regionStartMarker": "//synthetic_apl_start",
+    "regionEndMarker": "//synthetic_apl_end",
+    "extractedOn": "2026-01-01",
+    "extractorVersion": 1
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "run_action_list,name=child,if=buff.gate.up", "comment": null, "sourceLine": 100 },
+        { "priorityOrdinal": 1, "actionStringVerbatim": "parent_filler", "comment": null, "sourceLine": 101 }
+      ]
+    },
+    {
+      "listName": "call_default",
+      "receiverIdentifier": "call_default",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "call_action_list,name=child,if=buff.gate.up", "comment": null, "sourceLine": 110 },
+        { "priorityOrdinal": 1, "actionStringVerbatim": "parent_filler", "comment": null, "sourceLine": 111 }
+      ]
+    },
+    {
+      "listName": "child",
+      "receiverIdentifier": "child",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "child_action,if=talent.opt", "comment": null, "sourceLine": 200 }
+      ]
+    },
+    {
+      "listName": "nested",
+      "receiverIdentifier": "nested",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "run_action_list,name=middle", "comment": null, "sourceLine": 300 },
+        { "priorityOrdinal": 1, "actionStringVerbatim": "parent_filler", "comment": null, "sourceLine": 301 }
+      ]
+    },
+    {
+      "listName": "middle",
+      "receiverIdentifier": "middle",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "run_action_list,name=child", "comment": null, "sourceLine": 310 },
+        { "priorityOrdinal": 1, "actionStringVerbatim": "middle_filler", "comment": null, "sourceLine": 311 }
+      ]
+    },
+    {
+      "listName": "cycle_a",
+      "receiverIdentifier": "cycle_a",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "run_action_list,name=cycle_b", "comment": null, "sourceLine": 400 }
+      ]
+    },
+    {
+      "listName": "cycle_b",
+      "receiverIdentifier": "cycle_b",
+      "actions": [
+        { "priorityOrdinal": 0, "actionStringVerbatim": "run_action_list,name=cycle_a", "comment": null, "sourceLine": 410 }
+      ]
+    }
+  ]
+}

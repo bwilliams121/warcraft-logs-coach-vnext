@@ -695,14 +695,24 @@ describe("control flow this module refuses to model", () => {
     expect(empty.kind).toBe("NO_ACTION_SELECTED");
   });
 
-  it("fails closed on run_action_list rather than treating it as a call", () => {
-    const result = traverse([
-      { listName: "default", actions: ["run_action_list,name=child"] },
-      { listName: "child", actions: [`envenom,if=${TRUE_COND}`] },
-    ]);
-    expect(result.kind).toBe("UNKNOWN");
-    if (result.kind !== "UNKNOWN") return;
-    expect(result.blocker).toBe("UNMODELLED_DISPATCH_IN_LIST");
+  it("models run_action_list since M11-B1 — and still never as a call", () => {
+    // Before M11-B1 this shape was refused whole (UNMODELLED_DISPATCH_IN_LIST).
+    // The run entry is now followed under the pinned semantics: an
+    // unconditional run transfers selection into the child, so the child's
+    // proven entry is the answer. The full contract — FALSE skips, TRUE never
+    // resumes the parent, child NO_ACTION stays NO_ACTION, undecided blocks —
+    // is pinned in `tests/unit/m11b1-run-action-list.test.ts`.
+    const result = traverse(
+      [
+        { listName: "default", actions: ["run_action_list,name=child"] },
+        { listName: "child", actions: [`envenom,if=${TRUE_COND}`] },
+      ],
+      ["envenom"],
+    );
+    expect(result.kind).toBe("SELECTED");
+    if (result.kind !== "SELECTED") return;
+    expect(result.actionToken).toBe("envenom");
+    expect(result.selectingStep.path.map((entry) => entry.listName)).toEqual(["default", "child"]);
   });
 
   it("fails closed on swap_action_list", () => {

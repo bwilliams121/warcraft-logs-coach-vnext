@@ -73,10 +73,14 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // cases and three assertions over the same slices (the public
     // projection with the slice boundary named, REST/MCP parity for the
     // subject, a mixed raid night over its own evidence) and repurposed the
-    // application-service case in place. Measured, then pinned.
-    expect(result.summary.cases).toBe(131);
-    expect(result.summary.assertions).toBe(410);
-    expect(result.summary.passed).toBe(410);
+    // application-service case in place; M11-B1's generic run_action_list
+    // control flow added one SYNTHETIC authority artifact and seven
+    // SHARED_DECISION_ENGINE cases with seven assertions (FALSE skip, TRUE
+    // transfer, child NO_ACTION, the call contrast, the undecided gate, a
+    // nested run, a run cycle). Measured, then pinned.
+    expect(result.summary.cases).toBe(138);
+    expect(result.summary.assertions).toBe(417);
+    expect(result.summary.passed).toBe(417);
   });
 
   it("covers every layer", async () => {

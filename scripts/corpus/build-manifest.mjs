@@ -1190,6 +1190,19 @@ const ARTIFACTS = [
     ],
   }),
 
+  artifact("synthetic.apl-run-action-list", synthetic("apl-run-action-list"), {
+    kind: "SYNTHETIC",
+    payloadKind: "JSON_VALUE",
+    coverageBasis: "Synthetic; there is no capture to retain coverage from.",
+    retainedFor:
+      "M11-B1. A labelled SYNTHETIC SimulationCraft authority artifact for the shared decision engine's generic `run_action_list` control flow: `default` runs `child` on a buff gate and holds an unconditional `parent_filler` below the run; `call_default` is the same shape with `call_action_list`, for the contrast; `child` holds one talent-gated entry; `nested` runs `middle`, which runs `child`; `cycle_a` and `cycle_b` run each other. Loaded through the real loader; exercised by the real one-scan engine under bindings stated in each case.",
+    limitations: [
+      "Hand-authored. The authority id names no class or specialization and is registered nowhere; it proves the engine's control-flow semantics, not any rotation.",
+      "Every premise (bindings, proven-usable tokens, entry list) is stated in the case parameters, not derived from any log.",
+      "Regression evidence only. A SYNTHETIC artifact qualifies nothing for promotion (tests/contracts/m11-promotion-evidence-gate.test.ts).",
+    ],
+  }),
+
   // ---- M9-C bounded captures ------------------------------------------
   artifact("wcl-page-sequence-limit-40", graphql("wcl-page-sequence-limit-40"), {
     kind: "SANITIZED_CAPTURE",
@@ -2515,6 +2528,17 @@ const SE_RELATED = [
 ];
 const se_entry = (listName, priorityOrdinal, actionToken) => ({ listName, priorityOrdinal, actionToken });
 
+/** M11-B1: the synthetic authority for generic `run_action_list` control flow. */
+const SER = "synthetic.apl-run-action-list";
+const SER_RELATED = [
+  "tests/unit/m11b1-run-action-list.test.ts",
+  "tests/unit/simc-nested-selection.test.ts",
+  "tests/contracts/m10c-cross-spec-isolation.test.ts",
+];
+const SER_LIMITS = [
+  "Synthetic authority; every premise is stated in the parameters. Regression evidence only, never promotion evidence.",
+];
+
 // --------------------------------------------------------------------------
 // M11-A4: the Retribution Paladin cases. Every SPEC_RETRIBUTION_PALADIN kind
 // reaches the analyzer through its registration. The analyzer was
@@ -3469,6 +3493,148 @@ const CASES = [
       limitations: ["Synthetic authority; every premise is stated in the parameters."],
       related: SE_RELATED,
     },
+  ),
+
+  // ---- SHARED_DECISION_ENGINE: run_action_list (M11-B1) -----------------
+  kase(
+    "shared-decision-engine.run-gate-false-skips-to-the-parents-next-entry",
+    SER,
+    "SHARED_DECISION_ENGINE",
+    "src/simc/nested-selection.ts scanRunDispatch (RUN_GATE_FALSE_SKIPPED)",
+    "With buff.gate bound DOWN, default[0]'s run_action_list gate is proven FALSE: the run entry is skipped like any not-ready entry, `child` is never entered, and the scan continues to default[1] parent_filler, which is proven usable and unconditional, so it is selected DEFINITE.",
+    [
+      a("SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY", {
+        entryListName: "default",
+        knownBuffs: [{ name: "gate", up: false }],
+        knownTalents: [{ name: "opt", taken: true }],
+        provenUsableTokens: ["child_action", "parent_filler"],
+        expected: se_entry("default", 1, "parent_filler"),
+      }),
+    ],
+    ["PINNED_AUTHORITY", "OWNED_CONTRACT"],
+    "player.cpp:14235 — an entry whose action_ready() is false is passed over and the loop reads the next ordinal. A run_action_list is no exception: its gate is its if_expr, and a FALSE gate means it is not returned, not executed and not entered.",
+    { limitations: SER_LIMITS, related: SER_RELATED },
+  ),
+  kase(
+    "shared-decision-engine.run-gate-true-transfers-selection-into-the-child",
+    SER,
+    "SHARED_DECISION_ENGINE",
+    "src/simc/nested-selection.ts scanRunDispatch (RUN_ENTERED_SCAN_ENDS)",
+    "With buff.gate UP and talent.opt taken, default[0]'s run gate is proven TRUE: selection transfers into `child`, whose child[0] child_action is TRUE and proven usable, so the scan resolves DEFINITE to child[0]. default[1] parent_filler — unconditional and usable — is below the run and is not part of this selection.",
+    [
+      a("SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY", {
+        entryListName: "default",
+        knownBuffs: [{ name: "gate", up: true }],
+        knownTalents: [{ name: "opt", taken: true }],
+        provenUsableTokens: ["child_action", "parent_filler"],
+        expected: se_entry("child", 0, "child_action"),
+      }),
+    ],
+    ["PINNED_AUTHORITY", "OWNED_CONTRACT"],
+    "player.cpp:14264-14267 returns a ready run_action_list as the selected action (it is not ACTION_CALL); action.cpp:4740-4754 activates the child at zero time; player.cpp:7376-7377 selects the next action from the child and player.cpp:7382-7386 restores the parent only afterwards. The selection that follows the run is the child's.",
+    { limitations: SER_LIMITS, related: SER_RELATED },
+  ),
+  kase(
+    "shared-decision-engine.run-child-that-selects-nothing-is-nothing-not-the-parent",
+    SER,
+    "SHARED_DECISION_ENGINE",
+    "src/simc/nested-selection.ts scanRunDispatch (RUN_RETURNED_NO_ACTION_SCAN_ENDS)",
+    "With buff.gate UP and talent.opt NOT taken, the run transfers into `child`, whose only entry is eliminated. The scan resolves NO_ACTION: the parent's default[1] parent_filler — unconditional and proven usable — is NOT fallen through to, and the visited entries are exactly default[0] and child[0].",
+    [
+      a("SHARED_DECISION_ENGINE.SCAN_SELECTS_NOTHING", {
+        entryListName: "default",
+        knownBuffs: [{ name: "gate", up: true }],
+        knownTalents: [{ name: "opt", taken: false }],
+        provenUsableTokens: ["child_action", "parent_filler"],
+        expectedVisited: [se_entry("default", 0, "run_action_list"), se_entry("child", 0, "child_action")],
+      }),
+    ],
+    ["PINNED_AUTHORITY", "OWNED_CONTRACT"],
+    "The critical run/call distinction. After the run executes, the next select_action runs over the CHILD (player.cpp:7376-7377); if the child has no ready entry the selection is null and the player waits — the parent list is restored afterwards (7382-7386) and is not scanned from the run's next ordinal. Reading the parent's later entries would invent a selection the pinned loop never makes.",
+    { limitations: SER_LIMITS, related: SER_RELATED },
+  ),
+  kase(
+    "shared-decision-engine.call-child-that-selects-nothing-continues-the-parent",
+    SER,
+    "SHARED_DECISION_ENGINE",
+    "src/simc/nested-selection.ts (CALL_RETURNED_NO_ACTION_CONTINUE) — the contrast to the run case",
+    "The same bindings as the run case (buff.gate UP, talent.opt NOT taken) over `call_default`, which differs from `default` only in using call_action_list: the callee returns nothing, the caller CONTINUES at call_default[1] parent_filler, and the scan resolves DEFINITE to it. Same premises, opposite control flow, by construct.",
+    [
+      a("SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY", {
+        entryListName: "call_default",
+        knownBuffs: [{ name: "gate", up: true }],
+        knownTalents: [{ name: "opt", taken: false }],
+        provenUsableTokens: ["child_action", "parent_filler"],
+        expected: se_entry("call_default", 1, "parent_filler"),
+      }),
+    ],
+    ["PINNED_AUTHORITY", "OWNED_CONTRACT"],
+    "player.cpp:14255-14260 — ACTION_CALL recurses and returns the callee's action only if there is one; otherwise the loop falls out of the branch and continues. That fall-through belongs to call_action_list alone, and the pair of cases pins that the engine never aliases one construct to the other.",
+    { limitations: SER_LIMITS, related: SER_RELATED },
+  ),
+  kase(
+    "shared-decision-engine.undecided-run-gate-blocks-and-explores-no-world",
+    SER,
+    "SHARED_DECISION_ENGINE",
+    "src/simc/nested-selection.ts scanRunDispatch (UNDECIDED_RUN_GATE)",
+    "With buff.gate UNBOUND, default[0]'s run gate is neither proven TRUE nor proven FALSE. The scan is BLOCKED with UNDECIDED_RUN_GATE at default[0]; `child` is not entered and default[1] parent_filler is not visited. Neither the parent-continues world nor the child-replaces-parent world is explored.",
+    [
+      a("SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH", {
+        entryListName: "default",
+        knownBuffs: [],
+        knownTalents: [{ name: "opt", taken: true }],
+        provenUsableTokens: ["child_action", "parent_filler"],
+        expectedBlocker: "UNDECIDED_RUN_GATE",
+        expectedBlockedAt: se_entry("default", 0, "run_action_list"),
+        expectedVisited: [se_entry("default", 0, "run_action_list")],
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Fail closed. An undecided run gate is not TRUE (which would select from the child), not FALSE (which would select parent_filler) and not absent. World-union semantics for run gates are deliberately deferred beyond M11-B1; until then the honest answer is that the scan cannot get past the entry.",
+    { limitations: SER_LIMITS, related: SER_RELATED },
+  ),
+  kase(
+    "shared-decision-engine.nested-run-transfers-selection-twice",
+    SER,
+    "SHARED_DECISION_ENGINE",
+    "src/simc/nested-selection.ts scanRunDispatch (run -> run)",
+    "Scanning `nested` with talent.opt taken: nested[0] runs `middle` unconditionally, middle[0] runs `child` unconditionally, and child[0] child_action is proven to fire. The scan resolves DEFINITE to child[0]; nested[1] parent_filler and middle[1] middle_filler are below their respective runs and are never consulted.",
+    [
+      a("SHARED_DECISION_ENGINE.SCAN_SELECTS_DEFINITELY", {
+        entryListName: "nested",
+        knownBuffs: [],
+        knownTalents: [{ name: "opt", taken: true }],
+        provenUsableTokens: ["child_action", "parent_filler", "middle_filler"],
+        expected: se_entry("child", 0, "child_action"),
+      }),
+    ],
+    ["PINNED_AUTHORITY", "OWNED_CONTRACT"],
+    "Each run activates its child for the selection that follows (action.cpp:4740-4754; restore_action_list is set only once, to the outermost parent). Two runs in sequence are two transfers; the selection ends in the innermost child.",
+    { limitations: SER_LIMITS, related: SER_RELATED },
+  ),
+  kase(
+    "shared-decision-engine.run-cycle-fails-closed-under-the-active-stack-guard",
+    SER,
+    "SHARED_DECISION_ENGINE",
+    "src/simc/nested-selection.ts scanList (CONTROL_FLOW_CYCLE through run lists)",
+    "Scanning `cycle_a`: cycle_a[0] runs `cycle_b`, cycle_b[0] runs `cycle_a`, which is still on the active stack. The scan is BLOCKED with CONTROL_FLOW_CYCLE on re-entry (recorded before any entry of the re-entered list is read, so blockedAt is null), having visited cycle_a[0] and cycle_b[0].",
+    [
+      a("SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH", {
+        entryListName: "cycle_a",
+        knownBuffs: [],
+        knownTalents: [],
+        provenUsableTokens: [],
+        expectedBlocker: "CONTROL_FLOW_CYCLE",
+        expectedBlockedAt: null,
+        expectedVisited: [
+          se_entry("cycle_a", 0, "run_action_list"),
+          se_entry("cycle_b", 0, "run_action_list"),
+        ],
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "The existing cycle policy, unchanged: a list re-entered while still on the call stack is refused. It applies to run edges exactly as to call edges, so mutually recursive run lists cannot recurse unboundedly. (The pinned swap_action_list_t::ready, action.cpp:4725-4731, would make a run into the already-active list not ready; blocking is the conservative reading of that.)",
+    { limitations: SER_LIMITS, related: SER_RELATED },
   ),
 
   // ---- NORMALIZATION (M3) ------------------------------------------------

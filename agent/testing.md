@@ -1435,6 +1435,63 @@ finding one layer above it.
 
 ---
 
+# APL `run_action_list` Control-Flow Tests (M11-B1)
+
+`run_action_list` is not `call_action_list`, and the tests must keep the two
+apart. Pinned at the project's SimulationCraft commit: a ready run entry is
+RETURNED by the selection loop (it is not `ACTION_CALL`; `player.cpp`
+`select_action`), executes at zero time by activating its child
+(`action.cpp` `run_action_list_t::execute`), the next selection runs over the
+child and the parent is restored only afterwards (`player.cpp`
+`execute_action`). A call that returns nothing falls through to the caller's
+next entry; a run never resumes the parent's later entries.
+
+Required regressions (`tests/unit/m11b1-run-action-list.test.ts`, with the
+corpus family under `synthetic.apl-run-action-list`):
+
+```text
+run gate FALSE      -> child not entered; parent continues at its next ordinal
+run gate TRUE       -> child entered; the child's answer is the answer; the
+                       parent's later entries are NOT visited, even a proven one
+run + child NOTHING -> NO_ACTION. NOT the parent's next entry
+run + child BLOCKED -> the child's blocker propagates
+run gate undecided  -> BLOCKED, UNDECIDED_RUN_GATE; no world is explored
+call -> run         -> a run reached inside a callee ends the WHOLE selection;
+                       the caller does not continue either
+undecided call over a transferring callee -> BLOCKED, UNDECIDED_CALL_GATE_OVER_RUN
+```
+
+Required negative pairs, same premises, different construct:
+
+```text
+call, callee selects nothing  -> caller's next entry is selected
+run,  child selects nothing   -> NO_ACTION
+```
+
+Also required: an undecided gate above an EMPTY callee is harmless for a call
+(both worlds continue) and blocking for a run (the worlds disagree); an entry
+above a certain run still wins normally; cycles through run edges, mutually
+recursive run lists and a mixed call/run cycle fail closed under the existing
+active-stack guard; a run entry carrying an unsupported option refuses before
+its gate is read; the first-GCD root restart re-enters a run list through the
+same one-scan engine (a NON_GCD action selected inside a run child, then a
+root restart that transfers again).
+
+Public invariance: the three PUBLIC artifacts contain no `run_action_list`,
+so every capture of `scripts/bench/m10d-public-invariance.bench.ts` must be
+byte-identical before and after an engine change here. The corpus family is
+SYNTHETIC and is regression evidence only; it qualifies nothing for
+promotion.
+
+Failure mode this prevents:
+
+A run gate read as FALSE, TRUE or absent when it could not be decided, or a
+child that selects nothing "falling through" to a parent entry the pinned
+loop never reaches — a confident finding manufactured from control flow the
+authority does not have.
+
+---
+
 # Spec-Owned Resolver Tests
 
 When a specialization supplies a resolver:

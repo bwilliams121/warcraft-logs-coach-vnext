@@ -208,6 +208,12 @@ function classifyBlocker(
     return lineClass(blockingLine) ?? "TARGETING_NOT_MODELLED";
   }
   if (scanBlocker === "UNSUPPORTED_AUTHORITY_EXPRESSION") return lineClass(blockingLine) ?? "OTHER";
+  if (scanBlocker === "UNDECIDED_RUN_GATE" || scanBlocker === "UNDECIDED_CALL_GATE_OVER_RUN") {
+    // The run entry's gate parsed and could not be decided (M11-B1). Read like
+    // an undecided player-action condition: a permanent atom on the line names
+    // the reason, otherwise it is state the evidence did not establish.
+    return lineClass(blockingLine) ?? "OBSERVED_STATE_MISSING";
+  }
   if (scanBlocker === "NO_DEFINITE_WINNER" || scanBlocker === "COMPETING_POSSIBLE_ACTION") {
     // The scan found candidates it could neither select nor eliminate. Whether
     // that is an evidence gap or the usability boundary is not decidable from
