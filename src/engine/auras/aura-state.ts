@@ -20,6 +20,14 @@
  * - `latestStackObservation` — "what stack number was last observed?" The
  *   number, verbatim, attached to its own observation. Never a stack count at
  *   the query position.
+ * - `gainHistoryAt` (M11-B4) — "what was the last APPLIED or REFRESHED
+ *   transition, and what happened to this identity between it and the
+ *   position?" HISTORY, under a continuity claim from that gain. It carries no
+ *   duration and draws no conclusion; a specialization with pinned refresh
+ *   semantics reads it.
+ * - `transitionsWithinBefore` (M11-B4) — "which transitions of this identity
+ *   sit ahead of a position inside a caller-supplied window?" Evidence for a
+ *   caller's ordering policy; the window is the caller's, never this module's.
  *
  * SOURCE IS PART OF THE IDENTITY, NOT A FILTER
  *
@@ -232,6 +240,75 @@ export interface AuraStateView {
    * the same reason.
    */
   latestStackObservation(query: AuraStateQuery): StateResult<AuraObservation>;
+
+  /**
+   * The most recent APPLIED or REFRESHED transition of one identity at or
+   * before a position, with every transition of that identity observed after
+   * it up to the position, under a continuity claim FROM THE GAIN (M11-B4).
+   *
+   * `FROM_SOURCE` only: a gain history is a fact about one identity, and the
+   * union has none. An `ANY_SOURCE` query is `UNSUPPORTED_DERIVATION`.
+   *
+   * WHAT IS AND IS NOT A GAIN. `APPLIED` (with or without a stack number) and
+   * `REFRESHED` are; `REMOVED` is not, whether or not it is a stack removal —
+   * a stack removal proves presence (`presenceAt`) but is not the thing a
+   * duration could be counted from. Which gains RESET a duration, and by how
+   * much, is a game fact this module does not hold: it reports the history
+   * and the caller applies its pinned semantics to `since`.
+   *
+   * CONTINUITY IS EARNED FROM THE GAIN, not from the last transition. The
+   * interval `[gain.reportTimeMs, boundary]` must be COMPLETE for the target,
+   * hold no unidentified aura observation on the target and no transition of
+   * uncertain ownership — the same three tests `presenceAt` applies from its
+   * own anchor, applied here from an earlier point. A `presenceAt` that
+   * carries a later stack removal forward proves nothing about the gap
+   * between the gain and that removal; this does.
+   *
+   * No gain in the prefix is UNKNOWN: `AMBIGUOUS_INITIAL_STATE` when the
+   * interval from the fight start could have shown one and did not (a
+   * pre-pull application leaves no gain inside the fight), or the coverage
+   * reason when it could not.
+   */
+  gainHistoryAt(query: AuraStateQuery): StateResult<AuraGainHistory>;
+
+  /**
+   * The transitions of one identity that sit AHEAD of `position` in canonical
+   * order and no more than `windowMs` before its report time (M11-B4).
+   *
+   * INCLUSIVE at both edges: a transition at the position's own millisecond
+   * (lead 0) is returned, and so is one exactly `windowMs` earlier. A window
+   * of 0 is therefore exactly "the same report millisecond, ahead in order".
+   *
+   * EVIDENCE, NOT A POLICY. The window is the caller's: this module has no
+   * opinion about how far ahead of a cast Warcraft Logs may write that cast's
+   * own effects. A caller that refuses to read state through such a
+   * transition supplies the window it validated and reads the lead off each
+   * result. An empty list for a position holding no event.
+   */
+  transitionsWithinBefore(
+    identity: AuraIdentityQuery,
+    position: number,
+    windowMs: number,
+  ): readonly AuraPrecedingTransition[];
+}
+
+/** What `gainHistoryAt` found (M11-B4). */
+export interface AuraGainHistory {
+  /** The most recent APPLIED or REFRESHED observation at or before the position. */
+  readonly gain: AuraObservation;
+  /**
+   * Every observation of the SAME identity after the gain, up to and including
+   * the last position the query admits, in canonical order. Stack removals,
+   * refreshes, anything — the caller classifies them.
+   */
+  readonly since: readonly AuraObservation[];
+}
+
+/** One transition ahead of a position inside a caller's window (M11-B4). */
+export interface AuraPrecedingTransition {
+  readonly observation: AuraObservation;
+  /** `position.reportTimeMs - observation.reportTimeMs`, in milliseconds; 0 for the same millisecond. */
+  readonly leadMs: number;
 }
 
 export function createAuraState(environment: StateEnvironment): AuraStateView {
@@ -627,6 +704,94 @@ export function createAuraState(environment: StateEnvironment): AuraStateView {
     return unknownState(gate.ok ? "NO_OBSERVATION" : gate.reason, [], AURAS);
   }
 
+  function gainHistoryAt(query: AuraStateQuery): StateResult<AuraGainHistory> {
+    const resolution = environment.resolveTemporalPosition(query.at);
+    if (!resolution.ok) {
+      return unknownState(resolution.reason, [], AURAS);
+    }
+    if (query.source.kind === "ANY_SOURCE") {
+      // The union has no single history to count from.
+      return unknownState("UNSUPPORTED_DERIVATION", [], AURAS);
+    }
+    const { lastIncludedPosition, boundaryReportTimeMs } = resolution.prefix;
+    const group = groupFor(query);
+    const track = trackFor(query);
+    if (group === null || track === null) {
+      return unknownState(noAnchorReason(query.target, boundaryReportTimeMs), [], AURAS);
+    }
+
+    // The last gain-type transition in the prefix, walking this track alone.
+    let gainPosition: number | null = null;
+    for (let index = track.positions.length - 1; index >= 0; index -= 1) {
+      const position = track.positions[index];
+      if (position === undefined || position > lastIncludedPosition) continue;
+      const observation = observationAt(position);
+      if (observation === null) {
+        return unknownState("UNSUPPORTED_DERIVATION", [], AURAS);
+      }
+      if (observation.operation === "APPLIED" || observation.operation === "REFRESHED") {
+        gainPosition = position;
+        break;
+      }
+    }
+    if (gainPosition === null) {
+      return unknownState(noAnchorReason(query.target, boundaryReportTimeMs), [], AURAS);
+    }
+    const gain = observationAt(gainPosition);
+    if (gain === null) {
+      return unknownState("UNSUPPORTED_DERIVATION", [], AURAS);
+    }
+
+    // Continuity from the GAIN. Monotonic time is required by the gate: the
+    // prefix is a range of positions read as a time interval.
+    const gate = gateContinuityClaim(environment, {
+      category: AURAS,
+      fromReportTimeMs: gain.reportTimeMs,
+      toReportTimeMs: boundaryReportTimeMs,
+      actorId: track.target.actorId,
+    });
+    if (!gate.ok) {
+      return unknownState(gate.reason, [gain.locator], AURAS);
+    }
+    if (unidentifiedObservationBetween(track.target, gainPosition, lastIncludedPosition)) {
+      return unknownState("UNSUPPORTED_DERIVATION", [gain.locator], AURAS);
+    }
+    if (ambiguousOwnershipBetween(group, track, gainPosition, lastIncludedPosition)) {
+      return unknownState("UNSUPPORTED_DERIVATION", [gain.locator], AURAS);
+    }
+
+    const since: AuraObservation[] = [];
+    for (const position of track.positions) {
+      if (position <= gainPosition) continue;
+      if (position > lastIncludedPosition) break;
+      const observation = observationAt(position);
+      if (observation === null) {
+        return unknownState("UNSUPPORTED_DERIVATION", [gain.locator], AURAS);
+      }
+      since.push(observation);
+    }
+    return exactDerived({ gain, since }, [gain.locator, ...since.map((entry) => entry.locator)], AURAS);
+  }
+
+  function transitionsWithinBefore(
+    identity: AuraIdentityQuery,
+    position: number,
+    windowMs: number,
+  ): readonly AuraPrecedingTransition[] {
+    const event = fight.events[position];
+    if (event === undefined) return [];
+    const found: AuraPrecedingTransition[] = [];
+    for (const candidate of candidatePositions(identity)) {
+      if (candidate >= position) break;
+      const observation = observationAt(candidate);
+      if (observation === null) continue;
+      const leadMs = event.reportTimeMs - observation.reportTimeMs;
+      if (leadMs < 0 || leadMs > windowMs) continue;
+      found.push({ observation, leadMs });
+    }
+    return found;
+  }
+
   return {
     indexes,
     groupFor,
@@ -635,5 +800,7 @@ export function createAuraState(environment: StateEnvironment): AuraStateView {
     lastObservedTransition,
     presenceAt,
     latestStackObservation,
+    gainHistoryAt,
+    transitionsWithinBefore,
   };
 }

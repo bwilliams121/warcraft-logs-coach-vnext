@@ -421,6 +421,22 @@ export async function executeAssertion(
       return blood.auraBindingAt(context, corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT":
       return blood.stackBindingAt(context, corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT":
+      return blood.remainsBindingAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS":
+      return blood.remainsEvidenceCensus(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT":
       return blood.cooldownReadinessAt(
         context,
@@ -535,6 +551,8 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
   "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
   "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+  "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+  "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
   "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT",
   "SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT",
   "SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION",

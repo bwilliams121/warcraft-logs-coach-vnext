@@ -72,12 +72,17 @@ readiness (pet state).
 
 ## Two measured hazards worth knowing before touching any binding
 
-1. **A cast's own aura effects precede the cast in the log at the same
-   millisecond** (a Marrowrend's Bone Shield gains, a Vampiric Strike's
-   Essence stack). `BEFORE_EVENT` at the cast position would read the
-   POST-cast state. The aura bindings refuse (`SAME_MILLISECOND_TRANSITION`)
-   whenever the queried identity has a transition at the decision's own
-   millisecond ahead of it.
+1. **A cast's own aura effects precede the cast in the log** (a
+   Marrowrend's Bone Shield gains, a Vampiric Strike's Essence stack) — at
+   the same millisecond mostly, 1 ms ahead for the Dancing Rune Weapon's
+   stacks and five Vampiric Strikes, 20 ms ahead for the pull Death's
+   Caress's application. `BEFORE_EVENT` at the cast position would read the
+   POST-cast state. Since M11-B4 the aura, stack and remains bindings all
+   refuse (`PRE_DECISION_WINDOW_TRANSITION`, lead recorded) whenever the
+   queried identity has a transition ahead of the decision within
+   `BLOOD_PRE_DECISION_WINDOW_MS` = 50 ms inclusive; M11-B2's
+   `SAME_MILLISECOND_TRANSITION` was the 0 ms case. No causal attribution is
+   attempted, even where the corpus suggests it.
 2. **The wire's `cost` is not the cost.** The gtKb subject cast Death Strike
    with 440 and 390 Runic Power attached against a reported cost of 450. No
    usability proof reads the field in either direction.
@@ -85,34 +90,53 @@ readiness (pet state).
 ## The measurement
 
 Over the composed 165 s A7R6 bundle (actor 14, San'layn) and the gtKb
-opener, still 0 of 123 and 0 of 21 resolved. M11-B2 measured root scans
-stopping at `sanlayn[0]` / `san_gift[0]` on the decimal literal `1.5` the
-parser then refused (122 of 123; 21 of 21). M11-B3 admitted `digits '.'
-digits` in the shared parser (syntax only; no Blood state changed) and
-remeasured: the root scan RESOLVES with every reached candidate undecided
-at 79 of 123 (branch worlds diverge, `DIVERGENT_GCD_OUTCOMES`), BLOCKS at
-`sanlayn[10] consumption` at 43 (applicability UNKNOWN — Consumption's
-NORMAL node is absent — and the unrecognised `empower_to=` option), and
-once at the `default[15]` run gate on an unobserved Gift at the pull
-(opener: 15 / 6 / 0). The first undecided GCD candidate in priority order is
-`sanlayn[0] deaths_caress` on `buff.bone_shield.remains` at 96, `san_gift[0]
-heart_strike` on `buff.essence_of_the_blood_queen.remains` at 24, and the
-Dancing Rune Weapon gate at 3 (opener 6 / 15 / 0). The B1 dispatch
-semantics held on every scan (`RUN_GATE_FALSE_SKIPPED` for the Deathbringer
-list ×123; `san_gift` entered inside the Gift window, skipped outside it,
-blocked-undecided once; `sanlayn` entered exactly where `san_gift` was
-skipped, 55 entered / 43 blocked). Behind the remainders lie
-`buff.vampiric_strike.remains`, `buff.crimson_scourge.remains`,
-`buff.visceral_strength.remains`, `buff.blood_debt.stack`,
-`runic_power.deficit` on non-Death-Strike casts, and `fight_remains`. The
-full ranking and the recommended next capability (`buff.<x>.remains` for
-fixed-duration self-auras, Bone Shield first) are in the M11-B3 report and
+opener, after M11-B4: **21 of 123 and 1 of 21 resolved**, every one a Death
+Strike the pinned list selects at its exact entry (`san_gift[1]`
+`runic_power.deficit<36` inside the Gift window, `sanlayn[2]`
+`runic_power.deficit<20` outside it) once the entries ahead of it resolve
+FALSE from proven remainders, a proven Bone Shield count and presence; 0
+REJECTED. M11-B2 measured root scans stopping on the decimal literal `1.5`
+(122 of 123); M11-B3 admitted decimals and measured the first undecided
+candidate on `buff.bone_shield.remains` at 96 and
+`buff.essence_of_the_blood_queen.remains` at 24 (opener 6 / 15); M11-B4
+derived the remainders (`aura-remains.ts`) from observed gains and the
+pinned Blood durations (`src/data/game/deathknight-blood-aura-durations.json`:
+Bone Shield 30 s, Essence 25 s — 20 s plus the specialization passive's
+5 s — Crimson Scourge 15 s, Visceral Strength 12 s, Vampiric Strike
+PERMANENT) under continuity from the gain, binding a lower bound only past
+a Bone Shield `refreshbuff` beside a charge removal (a refresh the pinned
+decrement does not produce), and refusing every transition inside the 50 ms
+pre-decision window. The remains census: Bone Shield EXACT 11 / BOUNDED 104
+/ window-refused 8; Essence EXACT 96 / window-refused 26 / unknown 1;
+Vampiric Strike PERMANENT 15 / zero 88 / unknown 20; Crimson Scourge EXACT
+8 / zero 108 / unknown 6 / window 1; Visceral Strength EXACT 96 / zero 20 /
+unknown 7; no gap, contradiction or threshold-tolerance refusal (opener:
+Bone Shield EXACT 20 / window 1, Essence EXACT 13 / window 7 / unknown 1).
+The stopping entries and the B1 dispatch semantics are unchanged from B3
+(root scan resolved 79 — 21 selections, 58 divergent — `sanlayn[10]
+consumption` 43, the `default[15]` gate 1; deathbringer skipped ×123,
+san_gift entered 24 / skipped 98 / blocked 1, sanlayn entered 55 / blocked
+43; opener 15 / 6). The first undecided GCD candidate is now `sanlayn[2]
+death_strike` on `runic_power.deficit` at 43 (no Runic Power observation on
+a cast that does not cost it), `sanlayn[7] marrowrend` on
+`buff.blood_debt.stack` at 15, `san_gift[0]` on Essence at 14 and
+`sanlayn[1]` on Essence plus `fight_remains` at 11 (Vampiric Strikes whose
+own Essence transition sits inside the window), `sanlayn[0]` on Bone Shield
+at 7 (window-refused Marrowrends), the Dancing Rune Weapon gate at 3
+(opener: `san_gift[0]` 8, `sanlayn[2]` 4, `san_gift[1]` 3, `san_gift[2]`
+3). The full census is in the corpus (`SPEC_BLOOD_DEATH_KNIGHT.*`) and
 `agent/architecture.md`.
 
 ## What this module refuses on purpose
 
-- No `knownBuffRemainsSeconds`, no generic buff-remains reconstruction, no
-  GCD numeric bounds, no `empower_to` support, no new action option, no
+- No remains model beyond `FIXED_DURATION_RESET_ON_GAIN` and `PERMANENT`
+  (no pandemic, extend or tick refresh; no build-dependent duration
+  modifier; no pre-pull remaining time; no upper bound), no choice between
+  the two readings of a Bone Shield refresh beside a charge removal, no
+  causal attribution of a transition inside the pre-decision window, no
+  exact verdict within `BLOOD_REMAINS_THRESHOLD_TOLERANCE_MS` = 50 ms of a
+  pinned threshold (the M11-B4 boundary).
+- No GCD numeric bounds, no `empower_to` support, no new action option, no
   target-count or enemy-roster model, no `target_if`, no undecided-run world
   splitting, no generic variables, no pet state, no charge model, no
   generalized stack reconstruction, no new parser builtin, no new public
@@ -127,12 +151,14 @@ fixed-duration self-auras, Bone Shield first) are in the M11-B3 report and
 
 Files: `spec.ts` (identity), `pinned-authority.ts`, `authority-bindings.ts`
 (six capabilities, one binding), `vocabulary.ts`, `resolver.ts`,
-`resources.ts`, `aura-bindings.ts`, `cooldown-bindings.ts`,
+`resources.ts`, `aura-bindings.ts`, `aura-remains.ts` (the remains
+derivation), `remains-thresholds.ts` (the pinned list's thresholds, read
+from the parsed authority), `cooldown-bindings.ts`,
 `domain-boundary.ts`, `domains.ts`, `action-profile.ts`,
 `first-gcd-state.ts`, `first-gcd-adapter.ts` (stopping points, dispatch
 trace, undecided candidates), `observed-action-gate.ts`,
 `observed-analysis.ts` (the facade), `registration.ts`. Data:
 `src/data/game/deathknight-blood-*`, `src/simc/data/deathknight-blood.apl.json`.
-Tests: `tests/unit/m11b2-blood-*.test.ts`,
+Tests: `tests/unit/m11b2-blood-*.test.ts`, `tests/unit/m11b4-*.test.ts`,
 `tests/contracts/m11b2-blood-*.test.ts`, corpus cases
 `spec-blood-death-knight.*`.

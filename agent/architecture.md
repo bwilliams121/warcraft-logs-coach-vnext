@@ -5893,6 +5893,171 @@ cases were re-pinned to the new distribution (one dispatch assertion added,
 the invariance harness's 33 non-timing captures are byte-identical against
 HEAD (565fe9a). Blood stays INTERNAL_ONLY; M11-B is not complete.
 
+### M11-B4 — `buff.<name>.remains` (generic seam, Blood-owned temporal derivation)
+
+The state capability M11-B3 measured as the first obstacle at 120 of 123
+bundle decisions and 21 of 21 opener decisions, built as the architecture
+prescribes: one aura-agnostic binding seam in the shared evaluator, two
+aura-agnostic history primitives in the engine, and every duration, refresh
+rule, ordering policy and tolerance in the Blood tree.
+
+**The question.** What can be proved about an aura's remaining duration at
+the instant immediately before an observed decision, from pinned mechanics
+and causally prior evidence only? Warcraft Logs never reports a remainder;
+it reports that an aura was applied, gained a stack, was refreshed, lost a
+stack or was removed, at a time.
+
+**The pinned semantics (33622e9d).** `buff_t::remains()` (buff.cpp:2018-
+2029) is 0 when inactive, the expiry minus now when an expiration event
+exists, and `timespan_t::min()` — a huge negative number, nonzero, so TRUE
+as a bare truth — when the aura is active with no expiration. The
+constructor resolves the duration through `get_passive_value( data(),
+"duration" )` (buff.cpp:852-880): the DBC `_duration` AS MODIFIED by parsed
+passives, and the Death Knight module parses all class and specialization
+passives (sc_death_knight.cpp:15162). Every `trigger` on an active buff of
+the default refresh behaviour reschedules the expiry to the FULL duration
+(buff.cpp:1900-1906, 2532-2578); `decrement` — a stack loss — never touches
+it (buff.cpp:2246-2290); a buff with a non-positive `_duration` schedules
+no expiry at all (buff.cpp:876-879, 2456-2458).
+
+**The generic seam (`src/simc/expression/evaluate.ts`).**
+`knownBuffRemainsSeconds?: { name; remainsSeconds: NumericBinding }[]`, the
+same shape and rule as `knownCooldownRemainsSeconds`. `BUFF_REMAINS` reads
+it; an absent name is `UNKNOWN_NUMBER` / `STATE_NOT_MODELLED` with a trace
+byte-identical to the one it produced before the field existed; an explicit
+`UNKNOWN_NUMBER` entry carries the spec's own reason; a bound flows through
+`compareWithBounds` unchanged; a bounded bare truth stays UNKNOWN; no bound
+rule, no arithmetic rule and no parser change was made. One shared constant,
+`SIMC_PERMANENT_BUFF_REMAINS_SECONDS = -9223372036854775808 / 1000`, is
+SimulationCraft's representation of a permanent active aura; the evaluator
+has no special case for it.
+
+**The engine primitives (`src/engine/auras/aura-state.ts`).**
+`gainHistoryAt` — the last APPLIED or REFRESHED transition of one identity
+before a position, every transition of that identity since, and a
+continuity claim FROM THE GAIN (COMPLETE coverage, no unidentified
+observation, no transition of uncertain ownership); a `presenceAt` that
+carries a later stack loss forward proves nothing about the gap between
+the gain and that loss, and this does. `transitionsWithinBefore` — the
+transitions of an identity ahead of a position within a CALLER-supplied
+window, inclusive at both edges, each with its lead. Neither knows a
+duration, a refresh rule or a policy.
+
+**The Blood duration authority.** `scripts/authority/extract-simc-blood-
+aura-durations.mjs` reads the pinned `sc_spell_data.inc` (the same bytes as
+the Rogue DoT artifact), `spell_data.hpp`, `data_enums.hh`,
+`specialization_spells.inc` and `client_data_version.inc`, hashes
+`sc_death_knight.cpp` and `buff.cpp`, and writes
+`src/data/game/deathknight-blood-aura-durations.json`: per atom the base
+`_duration`, every duration modifier matched the way `parse_passive_effects`
+matches (class-flag overlap within the family, or label), each modifier's
+applicability, the final Blood duration, `_max_stack`, `_internal_cooldown`,
+the refresh attributes and a remains model. Only `FIXED_DURATION_RESET_ON_
+GAIN` (no `SX_REFRESH_EXTENDS_DURATION`, no `SX_AURA_DOES_NOT_REFRESH`, no
+periodic effect) and `PERMANENT` (`_duration <= 0`) are emitted; an aura
+that would need PANDEMIC / EXTEND / TICK, or that carries a BUILD-DEPENDENT
+modifier (a talent's), fails extraction rather than being approximated.
+Essence of the Blood Queen is the case that justifies the pipeline: DBC
+20,000 ms + 5,000 ms from the Blood specialization aura 137008 (effect
+1187090, label 3134, an SX_PASSIVE entry of `specialization_spells.inc`
+for spec 250) = 25,000 ms, corroborated by the corpus (natural expiry
+25,006 ms after the last refresh). Bone Shield 30,000 (no modifier, stack-
+loss ICD 2,500), Crimson Scourge 15,000, Visceral Strength 12,000 (six
+natural expiries within −7..+12 ms), Vampiric Strike PERMANENT.
+
+**The Blood derivation (`src/specs/deathknight/blood/aura-remains.ts`).**
+In the fixed conservative order: identity pinned; duration modelled; build
+impossibility → exact 0; pre-decision window → refused; M4 presence EXACT;
+INACTIVE → exact 0; PERMANENT and ACTIVE → the sentinel; gain history under
+continuity from the gain; intervening transitions classified (a stack loss
+is walked through, anything else refuses); `remainsMs = gain + duration −
+decision`, converted to seconds once; a non-positive remainder while ACTIVE
+is `DURATION_MODEL_CONTRADICTS_EVIDENCE`, never clamped; then the threshold
+tolerance. THE ONE AMBIGUOUS SHAPE: the corpus shows a `refreshbuff` beside
+a Bone Shield `removebuffstack` at 7 of 25 charge consumptions (each at a
+melee hit, beside a Coagulating Blood dose) — a refresh the pinned decrement
+does not produce. Neither reading is chosen: both agree the expiry is at
+least the earlier unambiguous gain plus the duration (a DURATION refresh
+only moves an expiry later), so that is bound as `BOUNDED_NUMBER {
+atLeast }` and nothing more; when that bound has run out the answer is
+UNKNOWN, and "the aura is still active, so the refresh must have reset it"
+is a deduction this tranche does not make. Modelled-but-unestablished atoms
+are bound as an explicit `STATE_NOT_ESTABLISHED`, so the shared trace
+distinguishes "a model exists and the evidence fell short" from "no model".
+
+**The pre-decision window (owner decision).** The M11-B4 audit measured the
+lead of a cast's own aura effects ahead of the cast at 0 ms (most), 1 ms
+(the Dancing Rune Weapon's Bone Shield stacks, five Vampiric Strikes'
+Essence transitions) and 20 ms (the pull Death's Caress's Bone Shield
+application, absent from the combatantinfo aura snapshot). M11-B2's
+`SAME_MILLISECOND_TRANSITION` was the 0 ms case; `BLOOD_PRE_DECISION_
+WINDOW_MS = 50` refuses any transition of the queried identity ahead of the
+decision with a lead of 0..50 ms inclusive, for `.up`, `.stack` and
+`.remains` alike (`PRE_DECISION_WINDOW_TRANSITION`, lead recorded), with no
+causal attribution even where the corpus suggests it. The engine primitive
+takes the window as an argument; the 50 ms is Blood's, and no other
+specialization changed. It re-pinned one B2 expectation: the pull Death's
+Caress (2,004,615), whose Bone Shield presence read UP and count "not
+observed" under the 0 ms rule, is now refused with lead 20.
+
+**The threshold tolerance (owner decision).** `BLOOD_REMAINS_THRESHOLD_
+TOLERANCE_MS = 50`, a separate constant never aliased to the window: an
+EXACT remainder within 50 ms of a literal the pinned list compares THAT
+atom against — read off the parsed authority by `remains-thresholds.ts`,
+never typed: Bone Shield 1.5 and 3, Essence 1.5 and 8, the three bare-truth
+atoms none — is refused (`WITHIN_TIMING_TOLERANCE_OF_THRESHOLD`, margin
+recorded). A bound is not subject to it. Zero decisions in either capture
+fell within it.
+
+**The remeasurement (bundle 123 / opener 21).** MATCH 21 / REJECTED 0 /
+UNKNOWN 102 (B3: 0 / 0 / 123); opener 1 / 0 / 20 (B3: 0 / 0 / 21). Every
+match is a Death Strike selected at the EXACT entry — `san_gift[1]`
+(`runic_power.deficit<36`) inside the Gift window at 6, `sanlayn[2]`
+(`runic_power.deficit<20`) outside it at 15 — once `sanlayn[0]`/`sanlayn[1]`
+or `san_gift[0]` resolve FALSE from Bone Shield's remainder proven at least
+1.5 s (exact or bounded), its exact count above 1 and its presence, and
+Essence's remainder proven exactly at least 1.5 s; the Runic Power deficit
+is the cast's own PRE_COST observation. The remains census over the bundle:
+Bone Shield EXACT 11 / BOUNDED 104 / window-refused 8; Essence EXACT 96 /
+window-refused 26 / presence-unknown 1; Vampiric Strike PERMANENT 15 /
+zero 88 / unknown 20; Crimson Scourge EXACT 8 / zero 108 / unknown 6 /
+window 1; Visceral Strength EXACT 96 / zero 20 / unknown 7; no coverage
+gap, contradiction, missing gain or threshold refusal occurred. The
+stopping entries and every B1 dispatch outcome are unchanged from B3
+(resolved 79 — now 21 selections and 58 divergent — blocked at
+`sanlayn[10] consumption` 43, at the `default[15]` gate 1; deathbringer
+skipped ×123, san_gift entered 24 / skipped 98 / blocked 1, sanlayn entered
+55 / blocked 43). The first undecided GCD candidate moved: `sanlayn[2]
+death_strike` on `runic_power.deficit` 43 (a cast that costs no Runic
+Power carries no observation of it), `sanlayn[7] marrowrend` on
+`buff.blood_debt.stack` 15, `san_gift[0]` on Essence 14 and `sanlayn[1]`
+on Essence plus `fight_remains` 11 (the Vampiric Strikes whose own Essence
+transition sits inside the window), `sanlayn[0]` on Bone Shield 7 (the
+window-refused Marrowrends), the Dancing Rune Weapon gate 3, `san_gift[1]`
+3, `sanlayn[5] any_dnd` usability 3, `sanlayn[6]` usability 2, `san_gift[3]`
+Essence stack 1. Of the 96 bundle decisions B3 left on Bone Shield's
+remainder, 89 advanced past it; of the 24 on Essence's, 10 did (the other 14
+are the window refusals). Opener: 6 of 6 and 7 of 15.
+
+**Proven.** `tests/unit/m11b4-buff-remains-binding.test.ts`,
+`m11b4-aura-gain-history.test.ts`, `m11b4-blood-aura-durations.test.ts`,
+`m11b4-blood-aura-remains.test.ts` (including the expiry-consistency audit:
+every natural expiry of Essence and Visceral Strength in the bundle falls
+within 12 ms of the pinned duration after its last gain — validation only,
+read from events AFTER every decision they could have informed), the
+re-pinned `m11b2-blood-*` tests, two new corpus assertion kinds
+(`REMAINS_BINDING_AT`, `REMAINS_EVIDENCE_CENSUS`; the corpus is 43
+artifacts / 154 cases / 532 assertions), and the invariance harness: 33 of
+33 non-timing captures byte-identical against HEAD (24b42d1) for
+Assassination, Protection, Retribution, Arms-unsupported and the public
+Blood refusal. Blood stays INTERNAL_ONLY; M11-B is not complete.
+
+**Recorded, not changed.** The Paladin aura bindings and the Rogue DoT,
+stealth and engagement state read `BEFORE_EVENT` by position and refuse no
+lead; their captures showed the opposite ordering to the Death Knight's,
+and the ordering is not a contract. The cross-spec temporal-skew census is a
+follow-up before any promotion work that depends on it.
+
 ---
 
 # Milestone 12 — Healer Foundation

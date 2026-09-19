@@ -237,10 +237,20 @@ describe("the Bone Shield exact-count rule", () => {
       bs(3, 1900, "REFRESHED", null),
       cast(4, 1900, MARROWREND),
     ]);
+    // RE-POINTED for M11-B4: the 0 ms rule is the 0 ms case of the 50 ms
+    // pre-decision window, and the refusal records the measured lead.
     const stack = bindBloodStack(input(state, 4), "bone_shield");
-    expect(stack.state === "UNBOUND" && stack.reason).toBe("SAME_MILLISECOND_TRANSITION");
+    expect(stack).toMatchObject({
+      state: "UNBOUND",
+      reason: "PRE_DECISION_WINDOW_TRANSITION",
+      windowTransition: { leadMs: 0, reportTimeMs: 1900 },
+    });
     const presence = bindBloodAura(input(state, 4), "bone_shield");
-    expect(presence.state === "UNBOUND" && presence.reason).toBe("SAME_MILLISECOND_TRANSITION");
+    expect(presence).toMatchObject({
+      state: "UNBOUND",
+      reason: "PRE_DECISION_WINDOW_TRANSITION",
+      windowTransition: { leadMs: 0 },
+    });
     // Never the post-cast 7, never the pre-cast 5: neither is proven.
     expect(bloodStackBindingsFrom([stack])).toEqual([]);
   });
@@ -590,10 +600,15 @@ describe("over the committed evidence", () => {
   it("refuses the Bone Shield count at a Death's Caress whose own stack gain precedes it in the log", () => {
     const state = corpusState(BLOOD45);
     const position = at(state, 2004615, DEATHS_CARESS);
-    // At the pull the pre-pull application carries no count; the refusal is NO_STACK_OBSERVATION here.
+    // RE-POINTED for M11-B4. Under the 0 ms rule the application at 2,004,595
+    // read as a pre-pull application with no count (NO_STACK_OBSERVATION); the
+    // M11-B4 audit showed it is this cast's OWN application, logged 20 ms
+    // ahead of it (Bone Shield is absent from the combatantinfo aura
+    // snapshot), and the 50 ms window refuses it with the lead recorded.
     expect(bindBloodStack(input(state, position), "bone_shield")).toMatchObject({
       state: "UNBOUND",
-      reason: "NO_STACK_OBSERVATION",
+      reason: "PRE_DECISION_WINDOW_TRANSITION",
+      windowTransition: { leadMs: 20, reportTimeMs: 2004595, operation: "APPLIED" },
     });
   });
 });

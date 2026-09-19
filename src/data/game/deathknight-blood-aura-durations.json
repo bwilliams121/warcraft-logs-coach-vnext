@@ -1,0 +1,212 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DEATHKNIGHT_BLOOD_AURA_DURATIONS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/specialization_spells.inc",
+        "sha256": "514d7a509a3b95f130aadccb6a6f1a28c6f5f2568f211cd5139bb567b712e4fc",
+        "byteLength": 45852
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/dbc/data_enums.hh",
+        "sha256": "25a88c629f3d4ebb4ac966f3927307b28f756cf9cef9482dc77a79b197873ea4",
+        "byteLength": 75791
+      },
+      {
+        "path": "engine/class_modules/sc_death_knight.cpp",
+        "sha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "byteLength": 636861
+      },
+      {
+        "path": "engine/buff/buff.cpp",
+        "sha256": "e0645fc16c38a8ade1b23e07d91620d620a9eac2107a27e4e91b2bf6edc4addc",
+        "byteLength": 120881
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "durationFieldName": "_duration",
+    "durationFieldUnits": "MILLISECONDS",
+    "extractedOn": "2026-09-19",
+    "extractorVersion": 1,
+    "enumerators": {
+      "SX_REFRESH_EXTENDS_DURATION": 436,
+      "SX_AURA_DOES_NOT_REFRESH": 489,
+      "SX_PASSIVE": 6,
+      "E_APPLY_AURA": 6,
+      "E_APPLY_AREA_AURA_PET": 119,
+      "A_ADD_FLAT_MODIFIER": 107,
+      "A_ADD_PCT_MODIFIER": 108,
+      "A_ADD_PCT_LABEL_MODIFIER": 218,
+      "A_ADD_FLAT_LABEL_MODIFIER": 219,
+      "P_DURATION": 1,
+      "A_PERIODIC_ENERGIZE": 24,
+      "A_PERIODIC_TRIGGER_SPELL_WITH_VALUE": 227,
+      "A_PERIODIC_HEALTH_FUNNEL": 62,
+      "A_PERIODIC_MANA_LEECH": 64,
+      "A_PERIODIC_DAMAGE_PERCENT": 89,
+      "A_PERIODIC_DUMMY": 226,
+      "A_PERIODIC_TRIGGER_SPELL": 23
+    },
+    "durationSemanticsNote": "finalDurationMs is spell_data_t::_duration plus every duration modifier from an SX_PASSIVE spell of the Blood specialization (specialization_spells.inc, class 6 spec 250), which SimulationCraft applies through parse_all_class_passives (player.cpp:16363-16388) before buff_t::set_duration reads get_passive_value( data(), \"duration\" ) (buff.cpp:852-880). Not haste-scaled (no SX_DURATION_HASTED aura is modelled), not build-dependent: an aura carrying a modifier from any other spell fails extraction.",
+    "remainsModelNote": "FIXED_DURATION_RESET_ON_GAIN: buff_t::increment starts the buff with the full duration when inactive (buff.cpp:2428-2470) and otherwise calls refresh, whose DURATION behaviour reschedules the expiry to the full duration (buff.cpp:1900-1906, 2532-2578); decrement never touches the expiry (buff.cpp:2246-2290). The behaviour is DURATION when the spell carries neither SX_REFRESH_EXTENDS_DURATION nor SX_AURA_DOES_NOT_REFRESH (buff.cpp:725-757, 1635-1660) and no periodic effect makes it tick (buff.cpp:1204-1243). PERMANENT: a non-positive _duration clamps to zero (buff.cpp:876-879), no expiration is scheduled (buff.cpp:2456-2458) and remains() is timespan_t::min() while active (buff.cpp:2018-2029).",
+    "applicabilityNote": "Not version-gated at runtime: CombatFight exposes no client-build key. The build is recorded for traceability; a client build moving is a regeneration trigger for a human."
+  },
+  "auras": [
+    {
+      "atomName": "bone_shield",
+      "abilityGameId": 195181,
+      "displayNameEn": "Bone Shield",
+      "baseDurationMs": 30000,
+      "durationModifiers": [],
+      "finalDurationMs": 30000,
+      "maxStack": 10,
+      "internalCooldownMs": 2500,
+      "refreshAttributes": {
+        "refreshExtendsDuration": false,
+        "auraDoesNotRefresh": false,
+        "periodicEffectSubtypes": []
+      },
+      "refreshBehavior": "DURATION",
+      "remainsModel": "FIXED_DURATION_RESET_ON_GAIN",
+      "review": {
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "creation": "sc_death_knight.cpp:15905-15935 buffs.bone_shield = make_buff( this, \"bone_shield\", spell.bone_shield ) — no set_duration, no set_refresh_behavior; ->set_cooldown( 0_ms ) (the spell's internal cooldown governs STACK LOSS, not the buff)",
+        "producers": "marrowrend_t::impact :11720 trigger( effectN( 3 ) ); deaths_caress_t::execute :9770 trigger( stacks ); dancing_rune_weapon_t::execute :9498 trigger( bone_shield_stack_gain ); Bone Collector :8611/:11182 trigger(); Grim Reaper :8536; Blood Debt 4-piece :11709; rune-weapon pet copies :4206/:4258. Every one is buff_t::trigger, so every one is a start (full duration) or a DURATION refresh (full duration).",
+        "consumers": "death_knight_t::bone_shield_handler :16629-16643 — buffs.bone_shield->decrement() on a successful auto-attack taken under the 2,500 ms bone_shield_icd. buff_t::decrement (buff.cpp:2246-2290) changes current_stack only; the expiration event is not touched."
+      }
+    },
+    {
+      "atomName": "essence_of_the_blood_queen",
+      "abilityGameId": 433925,
+      "displayNameEn": "Essence of the Blood Queen",
+      "baseDurationMs": 20000,
+      "durationModifiers": [
+        {
+          "effectId": 1187090,
+          "spellId": 137008,
+          "spellDisplayNameEn": "Blood Death Knight",
+          "effectIndex": 16,
+          "effectSubtype": 219,
+          "kind": "FLAT_MS",
+          "valueMs": 5000,
+          "matchedBy": "LABEL",
+          "label": 3134,
+          "applicability": "BLOOD_SPECIALIZATION_PASSIVE",
+          "applicabilityBasis": "specialization_spells.inc { 6, 250, 137008, .. } with SX_PASSIVE; parsed by parse_all_class_passives (player.cpp:16363-16388)"
+        }
+      ],
+      "finalDurationMs": 25000,
+      "maxStack": 5,
+      "internalCooldownMs": 0,
+      "refreshAttributes": {
+        "refreshExtendsDuration": false,
+        "auraDoesNotRefresh": false,
+        "periodicEffectSubtypes": []
+      },
+      "refreshBehavior": "DURATION",
+      "remainsModel": "FIXED_DURATION_RESET_ON_GAIN",
+      "review": {
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "creation": "sc_death_knight.cpp:15876-15877 make_fallback<essence_of_the_blood_queen_buff_t>( talent.sanlayn.vampiric_strike.ok(), \"essence_of_the_blood_queen\", spell.essence_of_the_blood_queen_buff ); the class (:7382-7411) overrides value() and check_value() only — no duration, no refresh behaviour",
+        "producers": "death_knight_t::trigger_sanlayn_execute_talents :13804-13808 — buffs.essence_of_the_blood_queen->trigger() on every Vampiric Strike execution: +1 stack (or a refresh at max stacks) and a DURATION refresh to the full duration.",
+        "consumers": "None: the aura expires whole. No decrement call site exists in the pinned module."
+      }
+    },
+    {
+      "atomName": "vampiric_strike",
+      "abilityGameId": 433899,
+      "displayNameEn": "Vampiric Strike",
+      "baseDurationMs": -1,
+      "durationModifiers": [],
+      "finalDurationMs": 0,
+      "maxStack": 0,
+      "internalCooldownMs": 0,
+      "refreshAttributes": {
+        "refreshExtendsDuration": false,
+        "auraDoesNotRefresh": false,
+        "periodicEffectSubtypes": []
+      },
+      "refreshBehavior": "NONE",
+      "remainsModel": "PERMANENT",
+      "review": {
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "creation": "sc_death_knight.cpp:15882-15883 make_fallback( talent.sanlayn.vampiric_strike.ok(), this, \"vampiric_strike\", spell.vampiric_strike_buff ) — no duration override, so the DBC -1 clamps to zero and no expiration is scheduled",
+        "producers": "death_knight_t::trigger_vampiric_strike_proc :13782-13800 — buffs.vampiric_strike->trigger() on a proc roll.",
+        "consumers": "death_knight_t::trigger_sanlayn_execute_talents :13810-13811 — buffs.vampiric_strike->expire() on a Vampiric Strike execution unless Gift of the San'layn is up."
+      }
+    },
+    {
+      "atomName": "crimson_scourge",
+      "abilityGameId": 81141,
+      "displayNameEn": "Crimson Scourge",
+      "baseDurationMs": 15000,
+      "durationModifiers": [],
+      "finalDurationMs": 15000,
+      "maxStack": 0,
+      "internalCooldownMs": 0,
+      "refreshAttributes": {
+        "refreshExtendsDuration": false,
+        "auraDoesNotRefresh": false,
+        "periodicEffectSubtypes": []
+      },
+      "refreshBehavior": "DURATION",
+      "remainsModel": "FIXED_DURATION_RESET_ON_GAIN",
+      "review": {
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "creation": "sc_death_knight.cpp:15963-15964 make_buff( this, \"crimson_scourge\", spell.crimson_scourge_buff )->set_trigger_spell( spec.crimson_scourge ) — no duration override, no refresh behaviour override",
+        "producers": "blood_plague_t tick :7710-7716 — buffs.crimson_scourge->trigger() when Blood Plague ticks with no Death and Decay active; a trigger while up is a DURATION refresh.",
+        "consumers": "death_and_decay_base_t::execute :9695 — buffs.crimson_scourge->decrement() (single stack: expires)."
+      }
+    },
+    {
+      "atomName": "visceral_strength",
+      "abilityGameId": 461130,
+      "displayNameEn": "Visceral Strength",
+      "baseDurationMs": 12000,
+      "durationModifiers": [],
+      "finalDurationMs": 12000,
+      "maxStack": 0,
+      "internalCooldownMs": 0,
+      "refreshAttributes": {
+        "refreshExtendsDuration": false,
+        "auraDoesNotRefresh": false,
+        "periodicEffectSubtypes": []
+      },
+      "refreshBehavior": "DURATION",
+      "remainsModel": "FIXED_DURATION_RESET_ON_GAIN",
+      "review": {
+        "sourcePath": "engine/class_modules/sc_death_knight.cpp",
+        "sourceSha256": "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+        "creation": "sc_death_knight.cpp:15885-15889 make_fallback( talent.sanlayn.visceral_strength.ok(), this, \"visceral_strength\", spell.visceral_strength_buff ) — the Blood id (461130) chosen at :15383-15384; no duration override, no refresh behaviour override",
+        "producers": "death_and_decay_base_t::execute :9701 — buffs.visceral_strength->trigger() when the cast consumed Crimson Scourge; sudden_doom_execute_effects :13473-13476 (Unholy only).",
+        "consumers": "None: the aura expires whole."
+      }
+    }
+  ]
+}

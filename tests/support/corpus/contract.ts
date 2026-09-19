@@ -2130,6 +2130,72 @@ export const ASSERTION_KINDS = {
     description:
       "At this decision the stack binding for this buff.<name>.stack atom is exactly so: zero under PROVEN_INACTIVE or a build proof; for bone_shield ONLY, the exact positive count the last stack-bearing transition reported, when every later transition up to the decision is its same-millisecond refresh companion and M4 proves the aura ACTIVE under coverage; UNBOUND with the reason otherwise — a lone refresh or an initial application after the last count is COUNT_AMBIGUOUS_SINCE_OBSERVATION, never a guess.",
   },
+  "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        atomName: z.string().min(1),
+        expected: z
+          .object({
+            state: z.enum(["BOUND", "UNBOUND"]),
+            proof: z
+              .enum([
+                "HERO_TREE_EXCLUDED",
+                "TALENT_NOT_SELECTED",
+                "PROVEN_INACTIVE",
+                "PERMANENT_ACTIVE",
+                "GAIN_ANCHOR_EXACT",
+                "GAIN_ANCHOR_BOUNDED",
+              ])
+              .nullable(),
+            /** The binding's state: KNOWN_NUMBER / BOUNDED_NUMBER for BOUND; null for UNBOUND. */
+            bindingState: z.enum(["KNOWN_NUMBER", "BOUNDED_NUMBER"]).nullable(),
+            /** MILLISECONDS: the exact remainder or the lower bound; null for zero / permanent proofs and UNBOUND. */
+            remainsMs: z.number().int().nullable(),
+            /** The gain (or removal / presence anchor) report time the value rests on; null for build proofs and UNBOUND. */
+            anchorReportTimeMs: z.number().int().nullable(),
+            reason: z.string().nullable(),
+            /** The refused transition's lead, for PRE_DECISION_WINDOW_TRANSITION; null otherwise. */
+            windowLeadMs: z.number().int().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "M11-B4. At this decision the Blood remains derivation binds (or refuses to bind) this buff.<name>.remains atom exactly so: an EXACT remainder from the last application, stack gain or refresh under continuity from that gain and the pinned Blood duration; a LOWER BOUND past a Bone Shield refresh of unpinned cause; exactly zero from an observed removal or a build proof; SimulationCraft's permanent sentinel for an active Vampiric Strike; UNBOUND with the reason otherwise — a transition inside the 50 ms pre-decision window, a coverage gap from the gain, no gain observed, a contradiction, or an exact value within 50 ms of a pinned threshold. Never from silence, never from a later transition, never clamped.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            /** Every eligible decision's remains evidence per modelled aura, `atom | EXACT / BOUNDED / ZERO_BY_PROOF / PERMANENT / <reason>` -> count. Exact and exhaustive: each atom's rows sum to the eligible population. */
+            remainsEvidence: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every pre-decision-window refusal across the aura, stack and remains bindings, `atom | up / stack / remains | lead <ms>` -> count. Exact and exhaustive. */
+            preDecisionWindowRefusals: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "THE M11-B4 MEASUREMENT. Every eligible decision's buff.<name>.remains evidence for every modelled Blood aura distributes exactly so, and the cost of the 50 ms Blood pre-decision window is disclosed by lead. Nothing here is a verdict; the census is what the remains slice exists to take.",
+  },
   "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT": {
     owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
     outcomeClass: "POSITIVE_FACT",

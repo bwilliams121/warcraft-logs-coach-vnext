@@ -216,6 +216,18 @@ describe("M5 invents no combat state", () => {
     // transition at the decision's own millisecond. Never a count from
     // silence. Its companion test is tests/unit/m11b2-blood-bindings.test.ts.
     "src/specs/deathknight/blood/aura-bindings.ts",
+    // M11-B4. The Blood Death Knight's `buff.<name>.remains` derivation:
+    // presence through `presenceAt` under the same pinned identities, then the
+    // last gain and everything since through `gainHistoryAt` under continuity
+    // FROM THE GAIN, and the pinned Blood duration. It binds an EXACT
+    // remainder only from an application, stack gain or refresh of pinned
+    // full-reset semantics; a LOWER BOUND past a refresh of unpinned cause;
+    // exact zero from EXACT INACTIVE or a build proof; SimulationCraft's
+    // permanent sentinel for an active zero-duration aura — never a value
+    // from silence, through a coverage gap, inside the pre-decision window,
+    // or within the threshold tolerance. Its companion test is
+    // tests/unit/m11b4-blood-aura-remains.test.ts.
+    "src/specs/deathknight/blood/aura-remains.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];

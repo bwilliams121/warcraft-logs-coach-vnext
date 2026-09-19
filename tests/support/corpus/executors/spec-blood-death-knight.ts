@@ -549,6 +549,100 @@ export function stackBindingAt(
   return pass();
 }
 
+export function remainsBindingAt(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const found = resolvedAt(run, params.actorId, params.observedCast);
+  if (!found.ok) return found.outcome;
+  const remains = found.resolved.remains.find((entry) => entry.atomName === params.atomName);
+  if (remains === undefined) {
+    return fail("the evaluator bound no remains atom of this name at this decision", {
+      expected: { atomName: params.atomName },
+      locator: run.state.locatorAt(found.position),
+    });
+  }
+  const actual =
+    remains.state === "BOUND"
+      ? {
+          state: remains.state,
+          proof: remains.proof,
+          bindingState: remains.binding.state === "UNKNOWN_NUMBER" ? null : remains.binding.state,
+          remainsMs: remains.remainsMs,
+          anchorReportTimeMs: remains.anchor?.reportTimeMs ?? null,
+          reason: null,
+          windowLeadMs: null,
+        }
+      : {
+          state: remains.state,
+          proof: null,
+          bindingState: null,
+          remainsMs: null,
+          anchorReportTimeMs: null,
+          reason: remains.reason,
+          windowLeadMs: remains.windowTransition?.leadMs ?? null,
+        };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the remains binding at this decision differs from the case", {
+      expected: params.expected,
+      actual,
+      locator: run.state.locatorAt(found.position),
+    });
+  }
+  return pass();
+}
+
+export function remainsEvidenceCensus(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const window = params.evaluationWindow ?? null;
+  const comparisons =
+    window === null
+      ? run.analysis.comparisons
+      : run.analysis.comparisons.filter((entry) => insideWindow(entry.decision.reportTimeMs, window));
+  const resolved = run.analysis.resolved.filter((entry) =>
+    comparisons.some((comparison) => comparison.decision.position === entry.position),
+  );
+  const coverage = summarizeBloodDecisions(params.actorId, comparisons, [], resolved);
+  const actual = {
+    remainsEvidence: sorted(coverage.remainsEvidence.map((row) => [row.key, row.count])),
+    preDecisionWindowRefusals: sorted(coverage.preDecisionWindowRefusals.map((row) => [row.key, row.count])),
+  };
+  const expected = {
+    remainsEvidence: sorted(Object.entries(params.expected.remainsEvidence)),
+    preDecisionWindowRefusals: sorted(Object.entries(params.expected.preDecisionWindowRefusals)),
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    return fail("the remains evidence distributes differently than the case pins", { expected, actual });
+  }
+  // Each modelled atom's rows partition the eligible population.
+  const perAtom = new Map<string, number>();
+  for (const [key, count] of Object.entries(actual.remainsEvidence)) {
+    const atom = key.split(" | ")[0] ?? key;
+    perAtom.set(atom, (perAtom.get(atom) ?? 0) + count);
+  }
+  for (const [atom, total] of perAtom) {
+    if (total !== comparisons.length) {
+      return fail("a modelled aura's remains evidence does not cover the eligible population", {
+        expected: { atom, total: comparisons.length },
+        actual: { atom, total },
+      });
+    }
+  }
+  return pass();
+}
+
 export function cooldownReadinessAt(
   context: CorpusExecutionContext,
   corpus: LoadedCorpus,

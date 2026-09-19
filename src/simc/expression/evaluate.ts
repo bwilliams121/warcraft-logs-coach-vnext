@@ -200,6 +200,42 @@ export function unknownNumber(reason: UnknownNumberReason): NumericBinding {
   return { state: "UNKNOWN_NUMBER", reason };
 }
 
+/**
+ * What SimulationCraft reports as `buff.<name>.remains` for an ACTIVE aura that
+ * has NO expiration — a PERMANENT aura (M11-B4).
+ *
+ * Pinned at 33622e9d1662ff0e451691edf85a6b49cc9d11d9:
+ *
+ *     engine/buff/buff.cpp:2018-2029   buff_t::remains(): `current_stack <= 0`
+ *                                      -> zero; an expiration event -> its
+ *                                      time minus now; otherwise
+ *                                      `timespan_t::min()`
+ *     engine/buff/buff.cpp:369-376     the `remains` expression returns that
+ *                                      value unchanged
+ *     engine/sim/expressions.hpp:135   `coerce( timespan_t )` is
+ *                                      `total_seconds()`
+ *     engine/util/timespan.hpp:216-219 `timespan_t::min()` is the int64
+ *                                      minimum in MILLISECONDS; `total_seconds`
+ *                                      (:58-61) multiplies by 1/1000
+ *
+ * So the expression sees -9,223,372,036,854,775,808 ms / 1000: a huge NEGATIVE
+ * number of seconds. It is NONZERO, so as a bare truth it is TRUE (SimC has no
+ * boolean type; zero is false) — which is how the pinned lists use it — and it
+ * compares as that number, so `remains<1.5` on a permanent aura is TRUE. Note
+ * that `remains_gt` / `remains_lt` (buff.cpp:2048-2068) special-case the
+ * sentinel as infinite, but the expression path does NOT go through them.
+ *
+ * ONE constant, so no specialization types the sentinel by hand, and NO
+ * evaluator special case: the evaluator receives a known number. Not
+ * `-Infinity`, not a large positive duration, not a boolean — those would all
+ * be representations SimulationCraft does not use.
+ *
+ * The magnitude exceeds 2^53, so the double is the nearest representable
+ * value. Comparisons only ever need its sign and magnitude, which the rounding
+ * does not disturb.
+ */
+export const SIMC_PERMANENT_BUFF_REMAINS_SECONDS = -9223372036854775808 / 1000;
+
 /** The three-valued truth domain inside one world. */
 export type TruthValue = "TRUE" | "FALSE" | "UNKNOWN_STATE";
 
@@ -227,7 +263,9 @@ export const TRUTH_VALUES = ["TRUE", "FALSE", "UNKNOWN_STATE"] as const satisfie
  * `FALSE & combo_points>=5` still resolves FALSE, and an expression whose answer
  * does not depend on the unknown still gets one.
  *
- * There is no `fightRemains` and no `buffRemains`. See the module header.
+ * There is no `fightRemains`. See the module header. `buff.<name>.remains` has
+ * a binding seam since M11-B4 (`knownBuffRemainsSeconds`), and it is a SEAM:
+ * this module still reconstructs no aura duration of its own.
  */
 export interface AtomBindings {
   /** `combo_points`. Must be stated, even when it is unknown. */
@@ -321,6 +359,37 @@ export interface AtomBindings {
      * cooldown with a non-negative sampled lag delay. A bare number here would
      * have forced that bound to be flattened into a value nobody proved.
      */
+    readonly remainsSeconds: NumericBinding;
+  }[];
+  /**
+   * `buff.<name>.remains` values a specialization has ESTABLISHED, in
+   * SECONDS, keyed by name (M11-B4).
+   *
+   * A BINDING SEAM, NOT A DURATION MODEL — the same shape and the same rule
+   * as `knownCooldownRemainsSeconds`. This module knows no aura duration, no
+   * refresh behaviour and no talent; a specialization that has pinned those
+   * facts derives a value from OBSERVED transitions and states it here, as a
+   * full `NumericBinding`:
+   *
+   *     KNOWN_NUMBER     an exact remainder (a gain of pinned reset semantics
+   *                      under complete coverage), an exact ZERO the spec
+   *                      proved (an observed removal, a build proof), or the
+   *                      pinned SimulationCraft representation of a permanent
+   *                      aura (`SIMC_PERMANENT_BUFF_REMAINS_SECONDS`)
+   *     BOUNDED_NUMBER   a proven lower bound, decided by `compareWithBounds`
+   *                      exactly as a cooldown's is
+   *     UNKNOWN_NUMBER   the spec MODELS the aura and its evidence fell short,
+   *                      with the spec's reason
+   *
+   * An ABSENT name is `UNKNOWN_NUMBER` / `STATE_NOT_MODELLED`, byte-for-byte
+   * what it was before this field existed: a specialization that supplies no
+   * entry has no remains model, and the evaluator does not guess why. Never
+   * zero by default — zero reads as "expired", the most dangerous possible
+   * default for a `remains<` refresh gate.
+   */
+  readonly knownBuffRemainsSeconds?: readonly {
+    readonly name: string;
+    /** SECONDS, as a full `NumericBinding`. The adapter that fills it converts exactly once. */
     readonly remainsSeconds: NumericBinding;
   }[];
   /**
@@ -694,9 +763,13 @@ function evaluateInWorld(
       const entry = bindings.knownCooldownRemainsSeconds?.find((item) => item.name === node.cooldownName);
       return entry === undefined ? UNKNOWN : worldValueOf(entry.remainsSeconds);
     }
-    case "BUFF_REMAINS":
-      // Understood syntax; this build reconstructs no aura duration.
-      return UNKNOWN;
+    case "BUFF_REMAINS": {
+      // Understood syntax; this module reconstructs no aura duration. A value
+      // arrives only through a binding a specialization established (M11-B4);
+      // absent, UNKNOWN — never zero, never a bound nobody proved.
+      const entry = bindings.knownBuffRemainsSeconds?.find((item) => item.name === node.buffName);
+      return entry === undefined ? UNKNOWN : worldValueOf(entry.remainsSeconds);
+    }
     case "BUFF_STACK": {
       // No stack count is reconstructed here. A value arrives only through an
       // EXACT binding a specialization proved (M11-A4); absent, UNKNOWN. NEVER
@@ -917,9 +990,23 @@ function resolveAtom(
     return knownStack === undefined ? unknownNumeric("STATE_NOT_ESTABLISHED") : known(knownStack.stack);
   }
 
+  const remains = /^buff\.(.+)\.remains$/.exec(key);
+  const remainsName = remains?.[1];
+  if (remainsName !== undefined) {
+    // Through the SAME lookup `evaluateInWorld` uses. Absent is
+    // STATE_NOT_MODELLED — exactly the trace this atom produced before the
+    // seam existed, so a specialization that binds nothing is unchanged — and
+    // a spec that models the aura but could not establish it says so with its
+    // own UNKNOWN_NUMBER entry. Never zero.
+    const knownRemains = (bindings.knownBuffRemainsSeconds ?? []).find((entry) => entry.name === remainsName);
+    return knownRemains === undefined
+      ? unknownNumeric("STATE_NOT_MODELLED")
+      : fromBinding(knownRemains.remainsSeconds);
+  }
+
   if (shape === "NUMERIC") {
-    // `buff.<name>.remains` and anything numeric added later without a
-    // binding. STATE_NOT_MODELLED, and emphatically not zero.
+    // Anything numeric added later without a binding. STATE_NOT_MODELLED, and
+    // emphatically not zero.
     return unknownNumeric("STATE_NOT_MODELLED");
   }
 

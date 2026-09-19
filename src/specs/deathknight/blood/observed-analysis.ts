@@ -107,6 +107,11 @@ import {
   type BloodStackBinding,
 } from "./aura-bindings.js";
 import {
+  bindSupportedBloodRemains,
+  bloodRemainsBindingsFrom,
+  type BloodRemainsBinding,
+} from "./aura-remains.js";
+import {
   bloodCooldownBindingsFrom,
   deriveSupportedBloodCooldowns,
   type BloodDerivedCooldown,
@@ -204,6 +209,18 @@ export interface BloodDecisionCoverage {
    * reader needs before believing a stopping point is the ONLY obstacle.
    */
   readonly undecidedGcdCandidates: readonly CountOf<string>[];
+  /**
+   * Every eligible decision's `buff.<name>.remains` evidence, per modelled
+   * aura, as `atom | EXACT / BOUNDED / ZERO_BY_PROOF / PERMANENT / <unbound reason>`
+   * -> count (M11-B4). The census the remains slice exists to take.
+   */
+  readonly remainsEvidence: readonly CountOf<string>[];
+  /**
+   * Every pre-decision-window refusal across the aura, stack and remains
+   * bindings, as `atom | <binding kind> | lead <ms>` -> count, so the cost
+   * of the Blood window is visible (M11-B4).
+   */
+  readonly preDecisionWindowRefusals: readonly CountOf<string>[];
 }
 
 /** The build facts the evaluator resolved once from the actor's combatant info. */
@@ -273,6 +290,8 @@ export interface BloodDeathKnightPayload {
     readonly diagnostics: BloodResolverDiagnostics;
     readonly auras: readonly BloodAuraBinding[];
     readonly stacks: readonly BloodStackBinding[];
+    /** The remains bindings at this decision, one per modelled aura (M11-B4). */
+    readonly remains: readonly BloodRemainsBinding[];
     readonly cooldowns: readonly BloodCooldownDiagnostics[];
     readonly selection: BloodSelectionDiagnostics;
     readonly unselectability: BloodUnselectabilityDiagnostics;
@@ -566,6 +585,7 @@ export function analyzeObservedBloodDeathKnightDecisions(
     const auraInput = { state, actorId, position, talents, heroTree };
     const auras = bindSupportedBloodAuras(auraInput);
     const stacks = bindSupportedBloodStacks(auraInput);
+    const remains = bindSupportedBloodRemains(auraInput);
     const cooldowns = deriveSupportedBloodCooldowns({ state, actorId, position, observedTalents });
     const sharedBindings: Omit<AtomBindings, "specAtoms"> = {
       comboPoints: unknownNumber("STATE_NOT_MODELLED"),
@@ -573,6 +593,7 @@ export function analyzeObservedBloodDeathKnightDecisions(
       energyPct: unknownNumber("STATE_NOT_MODELLED"),
       knownBuffs: bloodBuffBindingsFrom(auras),
       knownBuffStacks: bloodStackBindingsFrom(stacks),
+      knownBuffRemainsSeconds: bloodRemainsBindingsFrom(remains),
       knownTalents,
       knownCooldownRemainsSeconds: bloodCooldownBindingsFrom(cooldowns),
     };
@@ -603,6 +624,7 @@ export function analyzeObservedBloodDeathKnightDecisions(
       diagnostics: resolution.diagnostics,
       auras,
       stacks,
+      remains,
       cooldowns: cooldowns.map(cooldownDiagnosticsOf),
       selection: selectionDiagnosticsOf(outcome),
       unselectability: unselectabilityDiagnosticsOf(unselectable),
@@ -656,6 +678,8 @@ export function summarizeBloodDecisions(
   const stoppingAtoms = new Map<string, number>();
   const dispatchOutcomes = new Map<string, number>();
   const undecidedGcdCandidates = new Map<string, number>();
+  const remainsEvidence = new Map<string, number>();
+  const preDecisionWindowRefusals = new Map<string, number>();
 
   for (const comparison of comparisons) {
     precision.set(comparison.authorityCoverage, (precision.get(comparison.authorityCoverage) ?? 0) + 1);
@@ -689,6 +713,31 @@ export function summarizeBloodDecisions(
       if (candidate.lane !== "GCD_CONSUMING") continue;
       for (const atom of candidate.atoms) bump(undecidedGcdCandidates, `${candidate.at} | ${atom}`);
     }
+    for (const binding of entry.remains) {
+      bump(remainsEvidence, `${binding.atomName} | ${remainsEvidenceClassOf(binding)}`);
+      if (binding.state === "UNBOUND" && binding.windowTransition !== null) {
+        bump(
+          preDecisionWindowRefusals,
+          `${binding.atomName} | remains | lead ${String(binding.windowTransition.leadMs)}`,
+        );
+      }
+    }
+    for (const binding of entry.auras) {
+      if (binding.state === "UNBOUND" && binding.windowTransition !== null) {
+        bump(
+          preDecisionWindowRefusals,
+          `${binding.atomName} | up | lead ${String(binding.windowTransition.leadMs)}`,
+        );
+      }
+    }
+    for (const binding of entry.stacks) {
+      if (binding.state === "UNBOUND" && binding.windowTransition !== null) {
+        bump(
+          preDecisionWindowRefusals,
+          `${binding.atomName} | stack | lead ${String(binding.windowTransition.leadMs)}`,
+        );
+      }
+    }
   }
 
   return {
@@ -709,5 +758,22 @@ export function summarizeBloodDecisions(
     stoppingAtoms: tallyOpen(stoppingAtoms),
     dispatchOutcomes: tallyOpen(dispatchOutcomes),
     undecidedGcdCandidates: tallyOpen(undecidedGcdCandidates),
+    remainsEvidence: tallyOpen(remainsEvidence),
+    preDecisionWindowRefusals: tallyOpen(preDecisionWindowRefusals),
   };
+}
+
+/** The evidence class of one remains binding, as the census keys it. */
+export function remainsEvidenceClassOf(binding: BloodRemainsBinding): string {
+  if (binding.state === "UNBOUND") return binding.reason;
+  switch (binding.proof) {
+    case "GAIN_ANCHOR_EXACT":
+      return "EXACT";
+    case "GAIN_ANCHOR_BOUNDED":
+      return "BOUNDED";
+    case "PERMANENT_ACTIVE":
+      return "PERMANENT";
+    default:
+      return "ZERO_BY_PROOF";
+  }
 }

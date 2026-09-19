@@ -65,29 +65,50 @@ describe("the measurement over the composed 165 s fight", () => {
   const analysis = analyzed(corpusBundleState(BUNDLE, []));
   const { coverage } = analysis;
 
-  it("discloses zero resolved decisions out of 123, with every excluded cast counted", () => {
+  it("discloses 21 resolved decisions out of 123 — the first since the slice was onboarded — with every excluded cast counted", () => {
+    // RE-POINTED for M11-B4. Before it, 0 of 123 resolved: the first entry of
+    // both San'layn lists read a buff remainder no binding carried. With the
+    // Blood remains derivation, sanlayn[0] and sanlayn[1] (or san_gift[0])
+    // resolve FALSE where Bone Shield's remainder is proven at least 1.5 s
+    // (exact or bounded), Essence's is proven at least 1.5 s exactly, and the
+    // stack and presence are bound — and the Death Strike gate on the observed
+    // cast's own PRE_COST Runic Power then selects Death Strike. Every one of
+    // the 21 is a Death Strike matched at EXACT_ENTRY; none is REJECTED.
     expect(coverage).toMatchObject({
       eligibleDecisions: 123,
-      match: 0,
+      match: 21,
       rejected: 0,
-      unknown: 123,
+      unknown: 102,
       excludedCastCount: 148,
     });
+    for (const comparison of analysis.comparisons) {
+      if (comparison.outcome !== "MATCH") continue;
+      expect(comparison.decision.observedToken).toBe("death_strike");
+      expect(comparison.authorityToken).toBe("death_strike");
+      expect(comparison.selectionPrecision).toBe("EXACT_ENTRY");
+    }
     expect(coverage.match + coverage.rejected + coverage.unknown).toBe(coverage.eligibleDecisions);
     expect(coverage.exclusions.reduce((sum, row) => sum + row.count, 0)).toBe(coverage.excludedCastCount);
     // The population is exactly the completed non-melee casts, eligible plus excluded.
     expect(analysis.comparisons.length + analysis.excluded.length).toBe(123 + 148);
   });
 
-  it("names, for EVERY decision, either a stopping entry with its atoms or a first undecided GCD candidate — never the decimal literal", () => {
-    // RE-POINTED for M11-B3. Before it, 122 of 123 root scans stopped at the
-    // first entry of a San'layn list on UNSUPPORTED_NUMERIC_LITERAL (`1.5`).
-    // Decimals parse now, so the scan walks the list: a scan that BLOCKS still
-    // names its entry and atoms; a scan that RESOLVES with every candidate
-    // undecided names the first competing GCD candidate instead, and the
-    // engine's branch worlds diverge. Both are UNKNOWN; neither is a verdict.
+  it("names, for EVERY decision, a selection, or a stopping entry with its atoms, or a first undecided GCD candidate — never the decimal literal", () => {
+    // RE-POINTED for M11-B3 and again for M11-B4. Before B3, 122 of 123 root
+    // scans stopped at the first entry of a San'layn list on
+    // UNSUPPORTED_NUMERIC_LITERAL (`1.5`). Decimals parse now, so the scan
+    // walks the list: a scan that BLOCKS still names its entry and atoms; a
+    // scan that RESOLVES with every candidate undecided names the first
+    // competing GCD candidate instead; and since B4 a scan may RESOLVE to a
+    // selection when the remainders are proven.
+    const matched = new Set(
+      analysis.comparisons.filter((c) => c.outcome === "MATCH").map((c) => c.decision.position),
+    );
     for (const entry of analysis.resolved) {
-      expect(entry.selection.kind).toBe("ROTATIONAL_GCD_UNKNOWN");
+      expect(entry.selection.kind).toBe(
+        matched.has(entry.position) ? "ROTATIONAL_GCD_SELECTED" : "ROTATIONAL_GCD_UNKNOWN",
+      );
+      if (matched.has(entry.position)) continue;
       const stop = entry.selection.stoppingPoint;
       const firstGcd = entry.selection.undecidedCandidates.find(
         (candidate) => candidate.lane === "GCD_CONSUMING",
@@ -112,11 +133,18 @@ describe("the measurement over the composed 165 s fight", () => {
     });
   });
 
-  it("the former decimal-literal stopping entries now traverse to the next truthful blocker: a buff remainder", () => {
-    // sanlayn[0] and san_gift[0] are no longer stopping entries at all; the
-    // first undecided GCD candidate of every scan that reaches them is that
-    // very entry, undecided on `buff.<x>.remains` (no binding field carries a
-    // remainder — the state limit M11-B3 deliberately does not touch).
+  it("the former remainder obstacles are passed where the evidence proves them, and the next truthful blockers are named", () => {
+    // RE-POINTED for M11-B4. Under B3 the first undecided GCD candidate was
+    // sanlayn[0] on buff.bone_shield.remains at 96 decisions and san_gift[0]
+    // on buff.essence_of_the_blood_queen.remains at 24. With the remainders
+    // derived, Bone Shield's entry is undecided only where the pre-decision
+    // window refused everything about it (the decision's own Marrowrend
+    // stack gains ahead of it) — 7 — and Essence's only where its own
+    // Vampiric Strike transition sits inside the window — 14 in the Gift
+    // window, 11 outside it (sanlayn[1], which then also carries
+    // fight_remains). The next blockers are the Runic Power deficit on a
+    // cast that does not cost Runic Power (sanlayn[2], 43) and the Blood
+    // Debt stack (sanlayn[7], 15).
     const firstObstacle = new Map<string, number>();
     for (const entry of analysis.resolved) {
       const first = entry.selection.undecidedCandidates.find(
@@ -129,12 +157,93 @@ describe("the measurement over the composed 165 s fight", () => {
       firstObstacle.set(key, (firstObstacle.get(key) ?? 0) + 1);
     }
     expect(Object.fromEntries(firstObstacle)).toEqual({
-      "sanlayn[0] deaths_caress | buff.bone_shield.remains": 89,
+      "(none)": 21,
+      "sanlayn[2] death_strike | runic_power.deficit": 43,
+      "sanlayn[7] marrowrend | buff.blood_debt.stack": 15,
+      "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 14,
+      "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains,fight_remains": 11,
       "sanlayn[0] deaths_caress | buff.bone_shield.up,buff.bone_shield.remains,buff.bone_shield.stack": 6,
-      "sanlayn[0] deaths_caress | buff.bone_shield.remains,buff.bone_shield.stack": 1,
-      "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 24,
+      "sanlayn[0] deaths_caress | buff.bone_shield.stack": 1,
       "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up,fight_remains": 3,
+      "san_gift[1] death_strike | runic_power.deficit": 3,
+      "sanlayn[5] any_dnd | USABILITY:any_dnd": 3,
+      "sanlayn[6] blood_boil | USABILITY:blood_boil": 2,
+      "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 1,
     });
+  });
+
+  it("takes the M11-B4 remains census: exact, bounded, zero-by-proof, permanent, and every refusal by name", () => {
+    expect(Object.fromEntries(coverage.remainsEvidence.map((row) => [row.key, row.count]))).toEqual({
+      "bone_shield | EXACT": 11,
+      "bone_shield | BOUNDED": 104,
+      "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 8,
+      "essence_of_the_blood_queen | EXACT": 96,
+      "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 26,
+      "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
+      "vampiric_strike | PERMANENT": 15,
+      "vampiric_strike | ZERO_BY_PROOF": 88,
+      "vampiric_strike | AURA_STATE_UNKNOWN": 20,
+      "crimson_scourge | EXACT": 8,
+      "crimson_scourge | ZERO_BY_PROOF": 108,
+      "crimson_scourge | AURA_STATE_UNKNOWN": 6,
+      "crimson_scourge | PRE_DECISION_WINDOW_TRANSITION": 1,
+      "visceral_strength | EXACT": 96,
+      "visceral_strength | ZERO_BY_PROOF": 20,
+      "visceral_strength | AURA_STATE_UNKNOWN": 7,
+    });
+    // Each aura's rows partition the 123 decisions.
+    for (const atom of [
+      "bone_shield",
+      "essence_of_the_blood_queen",
+      "vampiric_strike",
+      "crimson_scourge",
+      "visceral_strength",
+    ]) {
+      const total = coverage.remainsEvidence
+        .filter((row) => row.key.startsWith(`${atom} |`))
+        .reduce((sum, row) => sum + row.count, 0);
+      expect(total, atom).toBe(123);
+    }
+    // No exact remainder fell within 50 ms of a pinned threshold, no gap and no
+    // contradiction was met: every refusal is a window or a presence refusal.
+    expect(
+      coverage.remainsEvidence.some((row) => /TOLERANCE|CONTRADICTS|CONTINUITY|NO_GAIN/.test(row.key)),
+    ).toBe(false);
+    // The cost of the 50 ms window, by lead: the 0 ms leads M11-B2 already
+    // refused, plus the 1 ms and 20 ms leads it did not (and one 38 ms Crimson
+    // Scourge application ahead of a decision).
+    expect(Object.fromEntries(coverage.preDecisionWindowRefusals.map((row) => [row.key, row.count]))).toEqual(
+      {
+        "bone_shield | up | lead 0": 7,
+        "bone_shield | stack | lead 0": 7,
+        "bone_shield | remains | lead 0": 7,
+        "bone_shield | up | lead 20": 1,
+        "bone_shield | stack | lead 20": 1,
+        "bone_shield | remains | lead 20": 1,
+        "essence_of_the_blood_queen | stack | lead 0": 23,
+        "essence_of_the_blood_queen | remains | lead 0": 23,
+        "essence_of_the_blood_queen | stack | lead 1": 3,
+        "essence_of_the_blood_queen | remains | lead 1": 3,
+        "crimson_scourge | remains | lead 38": 1,
+        "death_and_decay | up | lead 0": 1,
+        "death_and_decay | up | lead 20": 1,
+        "death_and_decay | up | lead 21": 1,
+        "death_and_decay | up | lead 34": 1,
+      },
+    );
+    // Every bound value carries its anchor and basis; every bounded one is a lower bound.
+    for (const entry of analysis.resolved) {
+      for (const binding of entry.remains) {
+        if (binding.state !== "BOUND") continue;
+        expect(binding.basis.length).toBeGreaterThan(20);
+        if (binding.proof === "GAIN_ANCHOR_EXACT" || binding.proof === "GAIN_ANCHOR_BOUNDED") {
+          expect(binding.anchor).not.toBeNull();
+          expect(binding.remainsMs).toBeGreaterThan(0);
+        }
+        if (binding.proof === "GAIN_ANCHOR_BOUNDED") expect(binding.binding.state).toBe("BOUNDED_NUMBER");
+        if (binding.proof === "GAIN_ANCHOR_EXACT") expect(binding.binding.state).toBe("KNOWN_NUMBER");
+      }
+    }
   });
 
   it("shows the B1 run_action_list semantics on every root scan, driven by the Gift binding", () => {
@@ -208,16 +317,18 @@ describe("the measurement over the composed 165 s fight", () => {
       row.key.startsWith("high_prio_actions[1]"),
     );
     expect(drwRows.reduce((sum, row) => sum + row.count, 0)).toBe(6);
+    // The remainder candidates M11-B3 measured (98 and 24) are now only the
+    // window-refused decisions (6 and 14).
     expect(
       coverage.undecidedGcdCandidates.find(
         (row) => row.key === "sanlayn[0] deaths_caress | buff.bone_shield.remains",
       )?.count,
-    ).toBe(98);
+    ).toBe(6);
     expect(
       coverage.undecidedGcdCandidates.find(
         (row) => row.key === "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains",
       )?.count,
-    ).toBe(24);
+    ).toBe(14);
   });
 
   it("never proves unselectability for a token every list names unconditionally, and names the refusing entry", () => {
@@ -257,11 +368,13 @@ describe("the measurement over the composed 165 s fight", () => {
       tally.set(key, (tally.get(key) ?? 0) + 1);
       if (bone?.state === "BOUND") expect(bone.stack).toBeGreaterThan(0);
     }
+    // RE-POINTED for M11-B4: the pull Death's Caress (2,004,615), whose Bone
+    // Shield application is logged 20 ms BEFORE it, was NO_STACK_OBSERVATION
+    // under the 0 ms rule and is refused by the 50 ms window.
     expect(Object.fromEntries(tally)).toEqual({
       "BOUND/EXACT_STACK_OBSERVATION": 114,
-      "UNBOUND/NO_STACK_OBSERVATION": 1,
       "UNBOUND/COUNT_AMBIGUOUS_SINCE_OBSERVATION": 1,
-      "UNBOUND/SAME_MILLISECOND_TRANSITION": 7,
+      "UNBOUND/PRE_DECISION_WINDOW_TRANSITION": 8,
     });
   });
 
@@ -285,7 +398,8 @@ describe("the measurement over the composed 165 s fight", () => {
 describe("the second subject", () => {
   it("reproduces the same stopping points on a different report, pull and boss", () => {
     const analysis = analyzed(corpusState(GTKB));
-    expect(analysis.coverage).toMatchObject({ eligibleDecisions: 21, match: 0, rejected: 0, unknown: 21 });
+    // RE-POINTED for M11-B4: one Death Strike (2,421,923) resolves in the opener.
+    expect(analysis.coverage).toMatchObject({ eligibleDecisions: 21, match: 1, rejected: 0, unknown: 20 });
     expect(Object.fromEntries(analysis.coverage.stoppingEntries.map((row) => [row.key, row.count]))).toEqual({
       "(root scan resolved)": 15,
       "sanlayn[10] consumption": 6,
@@ -294,12 +408,27 @@ describe("the second subject", () => {
       analysis.coverage.undecidedGcdCandidates.find(
         (row) => row.key === "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains",
       )?.count,
-    ).toBe(15);
+    ).toBe(8);
+    // Bone Shield's remainder is EXACT at 20 of 21 opener decisions (the
+    // first in-fight stack gain anchors it) and window-refused at 1.
     expect(
-      analysis.coverage.undecidedGcdCandidates.find(
+      analysis.coverage.undecidedGcdCandidates.some(
         (row) => row.key === "sanlayn[0] deaths_caress | buff.bone_shield.remains",
-      )?.count,
-    ).toBe(6);
+      ),
+    ).toBe(false);
+    expect(Object.fromEntries(analysis.coverage.remainsEvidence.map((row) => [row.key, row.count]))).toEqual({
+      "bone_shield | EXACT": 20,
+      "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 1,
+      "essence_of_the_blood_queen | EXACT": 13,
+      "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 7,
+      "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
+      "vampiric_strike | AURA_STATE_UNKNOWN": 21,
+      "crimson_scourge | EXACT": 1,
+      "crimson_scourge | ZERO_BY_PROOF": 5,
+      "crimson_scourge | AURA_STATE_UNKNOWN": 15,
+      "visceral_strength | EXACT": 5,
+      "visceral_strength | AURA_STATE_UNKNOWN": 16,
+    });
     expect(
       analysis.coverage.undecidedGcdCandidates.some((row) => row.key.startsWith("high_prio_actions[1]")),
     ).toBe(false);

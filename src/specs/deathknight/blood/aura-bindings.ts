@@ -38,19 +38,27 @@
  * NO FUTURE ORACLE. The query is `BEFORE_EVENT` at the decision position: an
  * application at or after the decision is not consulted.
  *
- * NO SAME-MILLISECOND ORACLE EITHER — A MEASURED HAZARD. In the M11-B2
- * captures Warcraft Logs writes a cast's OWN aura effects BEFORE the cast
- * at the same millisecond: a Marrowrend at 2,015,770 is preceded in the
- * array by the three Bone Shield stack gains it caused, a Vampiric Strike
- * by the Essence stack it granted. `BEFORE_EVENT` at the cast position
- * therefore includes them, and would read the POST-cast state as the state
- * the decision was made in. (The M11-A4 Paladin slice recorded the opposite
- * order for a Divine Storm consuming Divine Arbiter; the ordering is not a
- * contract.) So a binding is REFUSED — `SAME_MILLISECOND_TRANSITION` —
- * whenever the queried identity has a transition at the decision's own
- * report millisecond ahead of the decision in canonical order. Which side
- * of the cast such a transition belongs to is not pinned, and this module
- * does not guess.
+ * NO PRE-DECISION-WINDOW ORACLE EITHER — A MEASURED HAZARD. In the M11-B2
+ * captures Warcraft Logs writes a cast's OWN aura effects BEFORE the cast:
+ * a Marrowrend at 2,015,770 is preceded in the array by the three Bone
+ * Shield stack gains it caused at the SAME millisecond, a Vampiric Strike
+ * by the Essence stack it granted — and the M11-B4 audit measured the lead
+ * at 0 ms (most), 1 ms (the Dancing Rune Weapon's five Bone Shield stacks,
+ * five Vampiric Strikes' Essence transitions) and 20 ms (the pull Death's
+ * Caress's Bone Shield application at 2,004,595 before its cast at
+ * 2,004,615, with no Bone Shield in the combatantinfo aura snapshot).
+ * `BEFORE_EVENT` at the cast position therefore includes them, and would
+ * read the POST-cast state as the state the decision was made in. (The
+ * M11-A4 Paladin slice recorded the opposite order for a Divine Storm
+ * consuming Divine Arbiter; the ordering is not a contract.) So a binding is
+ * REFUSED — `PRE_DECISION_WINDOW_TRANSITION` — whenever the queried identity
+ * has a transition ahead of the decision in canonical order and no more
+ * than `BLOOD_PRE_DECISION_WINDOW_MS` before it (inclusive at both edges;
+ * M11-B2's rule was the 0 ms window). Which side of the cast such a
+ * transition belongs to is not pinned, and this module does not guess —
+ * deliberately, even when the corpus suggests the answer. The window is a
+ * Blood policy over a shared, window-agnostic engine primitive
+ * (`transitionsWithinBefore`); no other specialization is changed by it.
  *
  * STACKS. `buff.<name>.stack` binds EXACTLY ZERO under the two build proofs
  * above and under PROVEN_INACTIVE (the same three routes), for every pinned
@@ -88,6 +96,18 @@ import {
 } from "../../../data/game/deathknight-blood-aura-authority.js";
 import type { HeroTreeResolution, TalentResolution } from "../../../data/game/talent-selection.js";
 
+/**
+ * How far ahead of an observed Blood decision a transition of the queried
+ * aura is refused as pre-decision evidence, in MILLISECONDS, inclusive.
+ *
+ * Validated on the Blood corpus (M11-B4 audit): the largest measured lead
+ * of a cast's own aura effect is 20 ms; 50 ms refuses every measured case
+ * with margin and costs one further Bone Shield and three further Essence
+ * refusals over the 123 bundle decisions. NOT a causal-attribution rule: a
+ * transition inside the window is refused whatever caused it.
+ */
+export const BLOOD_PRE_DECISION_WINDOW_MS = 50;
+
 export interface BloodAuraInput {
   readonly state: CombatState;
   readonly actorId: number;
@@ -122,11 +142,23 @@ export type BloodAuraBinding =
         | "DEBUFF_NOT_BINDABLE"
         /** M4 could not answer and no build proof applied. Carries M4's reason. */
         | "AURA_STATE_UNKNOWN"
-        /** A transition of this identity sits at the decision's own millisecond ahead of it; see the module header. */
-        | "SAME_MILLISECOND_TRANSITION";
+        /** A transition of this identity sits inside the pre-decision window ahead of the decision; see the module header. */
+        | "PRE_DECISION_WINDOW_TRANSITION";
       readonly abilityGameId: number | null;
       readonly auraReason: UnknownReason | null;
+      /** The refused transition and its lead, for PRE_DECISION_WINDOW_TRANSITION; null otherwise. */
+      readonly windowTransition: BloodWindowTransition | null;
     };
+
+/** One transition refused as pre-decision evidence, with its measured lead. */
+export interface BloodWindowTransition {
+  readonly position: number;
+  readonly reportTimeMs: number;
+  readonly operation: AuraObservation["operation"];
+  readonly isStackChange: boolean;
+  /** `decision.reportTimeMs - transition.reportTimeMs`, milliseconds; 0 for the same millisecond. */
+  readonly leadMs: number;
+}
 
 export type BloodStackProof = BloodAuraProof | "PROVEN_INACTIVE" | "EXACT_STACK_OBSERVATION";
 
@@ -146,7 +178,7 @@ export type BloodStackBinding =
       readonly reason:
         | "IDENTITY_NOT_PINNED"
         | "AURA_STATE_UNKNOWN"
-        | "SAME_MILLISECOND_TRANSITION"
+        | "PRE_DECISION_WINDOW_TRANSITION"
         /** ACTIVE, and this atom is not one the exact-count rule covers. */
         | "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED"
         /** ACTIVE, but no transition carrying a count precedes the decision. */
@@ -155,6 +187,8 @@ export type BloodStackBinding =
         | "COUNT_AMBIGUOUS_SINCE_OBSERVATION";
       readonly abilityGameId: number | null;
       readonly detail: string | null;
+      /** The refused transition and its lead, for PRE_DECISION_WINDOW_TRANSITION; null otherwise. */
+      readonly windowTransition: BloodWindowTransition | null;
     };
 
 /** The observed-aura atoms the slice reads as `buff.<name>.up`. */
@@ -180,7 +214,7 @@ export const SUPPORTED_BLOOD_STACK_ATOMS = [
 export const EXACT_COUNT_ATOMS: readonly string[] = ["bone_shield"];
 
 /** The build proof that makes an aura impossible for this actor, or `null`. */
-function impossibleByBuild(
+export function impossibleByBuild(
   identity: BloodAuraIdentity,
   input: BloodAuraInput,
 ): { readonly proof: "HERO_TREE_EXCLUDED" | "TALENT_NOT_SELECTED"; readonly basis: string } | null {
@@ -207,7 +241,7 @@ function impossibleByBuild(
   return null;
 }
 
-function identityQuery(input: BloodAuraInput, identity: BloodAuraIdentity) {
+export function identityQuery(input: BloodAuraInput, identity: BloodAuraIdentity) {
   return {
     target: targetRef(input.actorId, null),
     abilityGameId: identity.abilityGameId,
@@ -217,24 +251,29 @@ function identityQuery(input: BloodAuraInput, identity: BloodAuraIdentity) {
 }
 
 /**
- * Whether a transition of this identity sits at the decision's own report
- * millisecond AHEAD of the decision in canonical order. `null` when the
- * decision position holds no event (nothing to compare against).
+ * The LATEST transition of this identity inside the pre-decision window
+ * ahead of the decision in canonical order, or `null` when there is none
+ * (or the position holds no event). The engine primitive takes the window as
+ * an argument; the 50 ms is Blood's.
  */
-function sameMillisecondPrefixTransition(
+export function preDecisionWindowTransition(
   input: BloodAuraInput,
   identity: BloodAuraIdentity,
-): AuraObservation | null {
-  const decision = input.state.eventAt(input.position);
-  if (decision === null) return null;
-  const track = input.state.auras.trackFor(identityQuery(input, identity));
-  if (track === null) return null;
-  for (const position of track.positions) {
-    if (position >= input.position) break;
-    const transition = input.state.auras.observationAt(position);
-    if (transition !== null && transition.reportTimeMs === decision.reportTimeMs) return transition;
-  }
-  return null;
+): BloodWindowTransition | null {
+  const found = input.state.auras.transitionsWithinBefore(
+    identityQuery(input, identity),
+    input.position,
+    BLOOD_PRE_DECISION_WINDOW_MS,
+  );
+  const last = found[found.length - 1];
+  if (last === undefined) return null;
+  return {
+    position: last.observation.position,
+    reportTimeMs: last.observation.reportTimeMs,
+    operation: last.observation.operation,
+    isStackChange: last.observation.isStackChange,
+    leadMs: last.leadMs,
+  };
 }
 
 /** Binds one pinned buff atom's PRESENCE at a decision position. */
@@ -247,6 +286,7 @@ export function bindBloodAura(input: BloodAuraInput, atomName: string): BloodAur
       reason: "IDENTITY_NOT_PINNED",
       abilityGameId: null,
       auraReason: null,
+      windowTransition: null,
     };
   }
   if (identity.auraClass === "DEBUFF") {
@@ -256,6 +296,7 @@ export function bindBloodAura(input: BloodAuraInput, atomName: string): BloodAur
       reason: "DEBUFF_NOT_BINDABLE",
       abilityGameId: identity.abilityGameId,
       auraReason: null,
+      windowTransition: null,
     };
   }
   const impossible = impossibleByBuild(identity, input);
@@ -271,14 +312,15 @@ export function bindBloodAura(input: BloodAuraInput, atomName: string): BloodAur
       basis: impossible.basis,
     };
   }
-  const sameMillisecond = sameMillisecondPrefixTransition(input, identity);
-  if (sameMillisecond !== null) {
+  const windowTransition = preDecisionWindowTransition(input, identity);
+  if (windowTransition !== null) {
     return {
       atomName,
       state: "UNBOUND",
-      reason: "SAME_MILLISECOND_TRANSITION",
+      reason: "PRE_DECISION_WINDOW_TRANSITION",
       abilityGameId: identity.abilityGameId,
       auraReason: null,
+      windowTransition,
     };
   }
   const result = input.state.auras.presenceAt({
@@ -292,6 +334,7 @@ export function bindBloodAura(input: BloodAuraInput, atomName: string): BloodAur
       reason: "AURA_STATE_UNKNOWN",
       abilityGameId: identity.abilityGameId,
       auraReason: "reason" in result ? result.reason : null,
+      windowTransition: null,
     };
   }
   return {
@@ -381,7 +424,14 @@ function exactCountFromObservation(
 export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodStackBinding {
   const identity = bloodAuraIdentityFor(atomName);
   if (identity === null) {
-    return { atomName, state: "UNBOUND", reason: "IDENTITY_NOT_PINNED", abilityGameId: null, detail: null };
+    return {
+      atomName,
+      state: "UNBOUND",
+      reason: "IDENTITY_NOT_PINNED",
+      abilityGameId: null,
+      detail: null,
+      windowTransition: null,
+    };
   }
   const presence = bindBloodAura(input, atomName);
   if (presence.state === "UNBOUND") {
@@ -389,11 +439,12 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
       atomName,
       state: "UNBOUND",
       reason:
-        presence.reason === "SAME_MILLISECOND_TRANSITION"
-          ? "SAME_MILLISECOND_TRANSITION"
+        presence.reason === "PRE_DECISION_WINDOW_TRANSITION"
+          ? "PRE_DECISION_WINDOW_TRANSITION"
           : "AURA_STATE_UNKNOWN",
       abilityGameId: identity.abilityGameId,
       detail: presence.auraReason,
+      windowTransition: presence.windowTransition,
     };
   }
   if (!presence.up) {
@@ -413,6 +464,7 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
       reason: "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED",
       abilityGameId: identity.abilityGameId,
       detail: "the aura is ACTIVE and the Blood exact-count rule is pinned for bone_shield only",
+      windowTransition: null,
     };
   }
   const anchor =
@@ -424,6 +476,7 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
       reason: "AURA_STATE_UNKNOWN",
       abilityGameId: identity.abilityGameId,
       detail: "the presence anchor could not be read back",
+      windowTransition: null,
     };
   }
   const count = exactCountFromObservation(input, identity, anchor);
@@ -434,6 +487,7 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
       reason: count.reason,
       abilityGameId: identity.abilityGameId,
       detail: count.detail,
+      windowTransition: null,
     };
   }
   return {

@@ -291,6 +291,8 @@ The game data, all `--target deathknight-blood` at the same pin:
 | `src/data/game/deathknight-blood-cooldowns.json` | `SIMC_DBC_DEATHKNIGHT_BLOOD_ABILITY_COOLDOWNS` | Dancing Rune Weapon ONLY: 120,000 ms, one censused passive (Insatiable Blade, −30,000 ms), no dynamic mutation; the extractor grew `moduleConventions` (no recharge-rate mechanism, no hasted-cooldown member) and nullable `sourceOverrides` so a class without a spec module is a generic target. Vampiric Blood is deliberately unpinned (Red Thirst adjusts it dynamically, sc_death_knight.cpp:13143-13147) |
 | `src/data/game/deathknight-blood-spender-costs.json` | `SIMC_DBC_DEATHKNIGHT_BLOOD_SPENDER_COSTS` | Death Strike 49998 (450 tenths of Runic Power), Heart Strike 206930 and Vampiric Strike 433895 (1 Rune each), Marrowrend 195182 (2 Runes), Death's Caress 195292 (1 Rune, 6 s cooldown), Death and Decay 43265 (1 Rune); `POWER_RUNE` and `POWER_RUNIC_POWER` joined the power enumerators |
 
+| `src/data/game/deathknight-blood-aura-durations.json` (M11-B4) | `SIMC_DBC_DEATHKNIGHT_BLOOD_AURA_DURATIONS` | The five auras the pinned list reads as `buff.<name>.remains`: `_duration`, every duration modifier matched as `parse_passive_effects` matches (class flags within the family, or label) with its applicability, the FINAL Blood duration, `_max_stack`, `_internal_cooldown`, the refresh attributes (`SX_REFRESH_EXTENDS_DURATION`, `SX_AURA_DOES_NOT_REFRESH`, periodic effects) and the remains model — Bone Shield 30,000 ms, Essence of the Blood Queen 20,000 + 5,000 (spell 137008 "Blood Death Knight", an SX_PASSIVE `specialization_spells.inc` entry, effect 1187090 by label 3134) = 25,000 ms, Crimson Scourge 15,000, Visceral Strength 12,000, Vampiric Strike PERMANENT (`_duration` −1). `extract-simc-blood-aura-durations.mjs` emits only `FIXED_DURATION_RESET_ON_GAIN` and `PERMANENT`; a pandemic / non-refreshing / ticking aura or a build-dependent (talent) modifier fails extraction. The enumerators are read from `data_enums.hh`, the row layouts from `spell_data.hpp`, and the Garrote / Rupture durations the DoT artifact pinned are re-read as column anchors |
+
 Hand-reviewed and hashed beside them:
 `src/data/game/deathknight-blood-aura-authority.ts` (thirteen aura
 identities — the eight bound presence atoms, the three stack atoms, the two
@@ -318,13 +320,23 @@ node scripts/authority/extract-simc-power-costs.mjs --target deathknight-blood \
   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
 node scripts/authority/extract-simc-ability-cooldowns.mjs --target deathknight-blood \
   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-18
+# M11-B4 (2026-09-19); every source may also be supplied locally with --local-<key>
+# and pinned with --expect-<key>-sha256, as it was from the fetched pinned copies
+node scripts/authority/extract-simc-blood-aura-durations.mjs \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+  --out src/data/game/deathknight-blood-aura-durations.json
 ```
 
 The Death Knight class module (`engine/class_modules/sc_death_knight.cpp`,
 SHA-256 `beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39`),
 `engine/dbc/spell_data.cpp` and `engine/dbc/generated/power_type_data.inc`
 were fetched once at the pinned commit for the hand reviews and the
-extractors' local-file flags; they are not retained in the repository. The
+extractors' local-file flags; for M11-B4 `engine/buff/buff.cpp`,
+`engine/dbc/data_enums.hh`, `engine/dbc/generated/sc_spell_data.inc` and
+`engine/dbc/generated/specialization_spells.inc` were fetched the same way
+(their hashes are recorded in the duration artifact, and the two generated
+files' hashes equal the ones the Rogue DoT artifact records). None is
+retained in the repository. The
 three existing APL artifacts and both Paladin cooldown artifacts regenerate
 byte for byte under the extended extractors.
 

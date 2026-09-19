@@ -294,7 +294,7 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(Object.values(counted.calls).every((count) => count === 0)).toBe(true);
   });
 
-  it("the internal lookup runs the real analyzer over the real subject and it ANALYZES with zero resolved decisions disclosed", () => {
+  it("the internal lookup runs the real analyzer over the real subject and it ANALYZES with its resolved decisions disclosed", () => {
     const registration = internalAnalyzerForSpec("deathknight/blood", PRODUCTION_CATALOG);
     expect(registration).not.toBeNull();
     if (registration === null) return;
@@ -311,7 +311,8 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(run.analysis.specId).toBe("deathknight/blood");
     expect(run.analysis.authority.authorityId).toBe("SIMC_APL_DEATHKNIGHT_BLOOD");
     const view = registration.observedDecisionView(run.analysis);
-    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 0, rejected: 0, unknown: 48 });
+    // RE-POINTED for M11-B4: 9 of the 45 s slice's 48 decisions resolve (all Death Strike MATCH).
+    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 9, rejected: 0, unknown: 39 });
     // Every excluded cast is counted under a PUBLIC reason; nothing is dropped.
     const tallied = view.coverage.exclusions.reduce((sum, row) => sum + row.count, 0);
     expect(tallied).toBe(view.coverage.excludedCastCount);

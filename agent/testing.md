@@ -1603,6 +1603,119 @@ a bound, a negative threshold) with it; or one that admits a typo (`1.`,
 
 ---
 
+# Buff Remains Tests (M11-B4)
+
+A remaining duration is DERIVED — an observed gain plus a pinned duration
+under pinned refresh semantics — and the tests must prove both that the
+derivation is exact where the evidence and mechanics permit it and that it
+refuses everywhere else. The generic seam, the engine primitives, the
+duration authority and the Blood derivation are each tested at their own
+layer.
+
+Required, generic (`tests/unit/m11b4-buff-remains-binding.test.ts`):
+
+```text
+absent name                  -> UNKNOWN, STATE_NOT_MODELLED, trace byte-identical
+                                to the pre-seam trace (with and without the field)
+explicit UNKNOWN entry       -> UNKNOWN with the spec's reason, never zero
+KNOWN value                  -> exact comparisons, exact arithmetic, TRUE as a
+                                bare truth; KNOWN 0 FALSE as a bare truth
+BOUNDED value                -> decides only in the proven direction; UNKNOWN as
+                                a bare truth and under arithmetic (unchanged)
+wrong name                   -> never answers another atom
+permanent sentinel           -> -9223372036854775808 / 1000 exactly; nonzero;
+                                compares as that number, no evaluator special case
+```
+
+Required, engine (`tests/unit/m11b4-aura-gain-history.test.ts`):
+
+```text
+gainHistoryAt                -> last APPLIED / REFRESHED, the stack losses since,
+                                in order; REMOVED is never a gain; ANY_SOURCE is
+                                UNSUPPORTED_DERIVATION; nothing at or after the
+                                position is consulted
+continuity FROM the gain     -> a coverage gap between the gain and a later stack
+                                loss is UNKNOWN even where presenceAt is ACTIVE;
+                                an unowned transition in the interval is UNKNOWN
+transitionsWithinBefore      -> leads 0, 1, 20, 50 returned at a 50 ms window,
+                                51 not (inclusive both edges); by report time,
+                                not adjacency; nothing at or after the position
+```
+
+Required, duration authority (`tests/unit/m11b4-blood-aura-durations.test.ts`):
+
+```text
+committed artifact           -> validates; commit, build, MILLISECONDS, source
+                                hashes shared with the DoT artifact and the aura
+                                identities; Bone Shield 30 s, Essence 20 s + 5 s
+                                (label modifier from the Blood specialization
+                                passive, with provenance) = 25 s, Crimson 15 s,
+                                Visceral 12 s, Vampiric Strike PERMANENT
+validator refuses            -> any other remains model, any other unit, Essence
+                                without its modifier, a final duration that does
+                                not follow from base plus modifiers, a
+                                build-dependent / percentage / fractional
+                                modifier, a permanent aura with a duration, a
+                                DURATION aura with pandemic or periodic facts, a
+                                derived field baked in, a duplicate atom
+extractor matchers           -> class-flag match needs the same family and an
+                                overlapping word; label match needs the label;
+                                a MAX_STACKS modifier is not a duration modifier
+```
+
+Required, Blood (`tests/unit/m11b4-blood-aura-remains.test.ts`):
+
+```text
+exact                        -> apply, stack gain and lone refresh each start the
+                                full pinned duration; stack losses are walked
+                                through without moving the expiry; one /1000
+zero                         -> an observed full removal; a build proof; never
+                                silence (Bone Shield's silence is UNKNOWN)
+permanent                    -> Vampiric Strike ACTIVE binds the sentinel,
+                                INACTIVE binds 0
+ambiguous refresh            -> a refreshbuff beside a stack REMOVAL yields only
+                                the lower bound from the earlier gain; the bound
+                                still decides `<1.5` and `<3` FALSE; an expired
+                                bound is UNKNOWN (no inference from the aura
+                                still being active); beside a stack GAIN it is
+                                an ordinary companion
+contradiction                -> an expired remainder while ACTIVE is UNKNOWN,
+                                never clamped to zero
+coverage                     -> a gap from the gain is UNKNOWN though presence is
+                                ACTIVE; a later removal is never consulted
+pre-decision window          -> leads 0, 1, 20 and 50 refuse .up, .stack and
+                                .remains alike with the lead recorded; 51 binds;
+                                a removal inside the window is refused too
+threshold tolerance          -> exact values at threshold ±49 ms and at the
+                                threshold refuse with the margin; ±51 bind; only
+                                the atom's own pinned thresholds (none for the
+                                bare-truth atoms); a bound is never subject to it
+thresholds                   -> read off the parsed authority: Bone Shield 1.5
+                                and 3, Essence 1.5 and 8; Vampiric Strike is
+                                bare-truth only at the pinned revision
+corpus                       -> the pull Death's Caress refused at lead 20; a
+                                Vampiric Strike's Essence refused at lead 0; the
+                                Death Strike at 2,012,014 binds Essence exact
+                                24,127 ms and Bone Shield bounded 25,742 ms
+expiry-consistency audit     -> every natural expiry of Essence and Visceral
+                                Strength in the bundle falls within 50 ms of the
+                                pinned duration after its last gain (measured:
+                                +6, +12, +11, +8, +1, -7, -1 ms) — validation of
+                                the pinned durations from FUTURE events, never a
+                                decision-time input
+```
+
+Failure mode this prevents:
+
+A remainder that is a timer rather than a proof — counted from the wrong
+transition, through a gap in which a refresh was missed, from the decision's
+own effect logged ahead of it, from a duration typed from the table rather
+than resolved as SimulationCraft resolves it, or clamped to zero when the
+model and the evidence disagree — reaching a `remains<1.5` gate as a
+confident verdict.
+
+---
+
 # Spec-Owned Resolver Tests
 
 When a specialization supplies a resolver:

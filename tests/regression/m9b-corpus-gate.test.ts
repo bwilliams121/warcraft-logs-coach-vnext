@@ -86,10 +86,13 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // beside its internal registration); M11-B3's decimal literals moved the
     // Blood stopping points from syntax to state and re-pinned those cases
     // in place, adding one dispatch-trace assertion for the sanlayn list
-    // entered outside the Gift window. Measured, then pinned.
+    // entered outside the Gift window; M11-B4's buff remainders re-pinned the
+    // Blood cases again (21 of 123 now resolve) and added twenty assertions:
+    // eighteen remains bindings at the pinned decisions and the two remains
+    // evidence censuses. Measured, then pinned.
     expect(result.summary.cases).toBe(154);
-    expect(result.summary.assertions).toBe(512);
-    expect(result.summary.passed).toBe(512);
+    expect(result.summary.assertions).toBe(532);
+    expect(result.summary.passed).toBe(532);
   });
 
   it("covers every layer", async () => {

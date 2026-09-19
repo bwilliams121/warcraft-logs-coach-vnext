@@ -18,11 +18,12 @@
  *     cannot hold it (one hero tree is active at a time —
  *     `talent-selection.ts`, `resolveHeroTree`).
  *
- * WHAT IS NOT HERE. `buff.<name>.remains` has no binding field in the shared
- * evaluator and none is added; `debuff.reapers_mark_debuff.up` is a DEBUFF
- * atom the evaluator enumerates (no `knownDebuffs` field exists); both are
- * recorded below as identities so the measurement can name them, and neither
- * is bound.
+ * WHAT IS NOT HERE. Durations: `buff.<name>.remains` is derived (M11-B4) in
+ * `aura-remains.ts` from these identities plus the pinned duration artifact
+ * `deathknight-blood-aura-durations.json`, never from a number typed here.
+ * `debuff.reapers_mark_debuff.up` is a DEBUFF atom the evaluator enumerates
+ * (no `knownDebuffs` field exists); it is recorded below as an identity so
+ * the measurement can name it, and it is not bound.
  */
 
 /** Measured at M11-B2 from the pinned file (engine/class_modules/sc_death_knight.cpp at 33622e9d); recorded, never typed from memory. */
@@ -213,8 +214,8 @@ const CRIMSON_SCOURGE: BloodAuraIdentity = {
       "15229; 15963-15964",
       "`spell.crimson_scourge_buff = conditional_spell_lookup( spec.crimson_scourge->ok(), 81141 )` and " +
         '`make_buff( this, "crimson_scourge", spell.crimson_scourge_buff )->set_trigger_spell( spec.crimson_scourge )`. ' +
-        "The pinned list reads only `buff.crimson_scourge.remains`, which is never bound; the identity is recorded so " +
-        "the measurement can name the stopping atom.",
+        "The pinned list reads only `buff.crimson_scourge.remains`, derived since M11-B4 (`aura-remains.ts`) from " +
+        "this identity and the pinned 15,000 ms duration.",
     ),
   ],
 };
@@ -273,7 +274,8 @@ const VISCERAL_STRENGTH: BloodAuraIdentity = {
       "death_knight_t::init_spells; create_buffs",
       "15383-15384; 15886",
       "`spell.visceral_strength_buff = conditional_spell_lookup( talent.sanlayn.visceral_strength.ok(), specialization() == DEATH_KNIGHT_BLOOD ? 461130 : 434159 )`. " +
-        "The pinned list reads only `buff.visceral_strength.remains`, never bound.",
+        "The pinned list reads only `buff.visceral_strength.remains`, derived since M11-B4 from this identity and " +
+        "the pinned 12,000 ms duration.",
     ),
   ],
 };

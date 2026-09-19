@@ -462,11 +462,11 @@
           "normalizedStateNeeded": ["aura stack reconstruction"],
           "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
           "unknownConditions": [
-            "buff.bone_shield.remains unbindable (M11-B2 binds the exact stack count at 114 of 123 decisions; the remainder is the open atom)",
+            "buff.bone_shield.remains bound since M11-B4 at 115 of 123 decisions (11 exact, 104 lower-bounded past a refresh of unpinned cause); the exact stack count at 114 of 123 (M11-B2)",
             "run_action_list dispatch (modelled since M11-B1; measured on this list in M11-B2)"
           ],
           "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
-          "notes": "M11-B2 measured the pinned San'layn lists: every scan stopped at the first entry of its list on the decimal literal 1.5 the shared parser then refused. M11-B3 admitted decimals (syntax only) and remeasured: the first undecided GCD candidate is buff.bone_shield.remains at 96 of 123 and buff.essence_of_the_blood_queen.remains at 24; 43 scans block at sanlayn[10] consumption (applicability UNKNOWN, empower_to=). Still 0 resolved."
+          "notes": "M11-B2 measured the pinned San'layn lists: every scan stopped at the first entry of its list on the decimal literal 1.5 the shared parser then refused. M11-B3 admitted decimals (syntax only): the first undecided GCD candidate became buff.bone_shield.remains at 96 of 123 and buff.essence_of_the_blood_queen.remains at 24. M11-B4 derived both remainders (Bone Shield 30 s exact or lower-bounded past a refresh of unpinned cause, Essence 25 s exact) under the 50 ms pre-decision window: 21 of 123 resolve (all Death Strike MATCH, 0 REJECTED); the first undecided candidate is now runic_power.deficit at sanlayn[2] (43), buff.blood_debt.stack at sanlayn[7] (15) and the window-refused Essence/Bone Shield entries (25 / 7); 43 scans still block at sanlayn[10] consumption."
         }
       ]
     },
