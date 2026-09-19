@@ -189,7 +189,7 @@ describe("the Blood vocabulary and what parses", () => {
     ).toThrow();
   });
 
-  it("parses every pinned condition except the three carrying the decimal literal 1.5 — the measured stopping point", () => {
+  it("parses every pinned condition — the three carrying the decimal literal 1.5 were the M11-B2 stopping point, admitted by M11-B3", () => {
     const loaded = pinnedBloodDeathKnightAuthority();
     if (!loaded.ok) throw new Error("load failed");
     const refused: string[] = [];
@@ -198,11 +198,9 @@ describe("the Blood vocabulary and what parses", () => {
       const parsed = parseSimcExpression(action.conditionRaw, BLOOD_ATOM_VOCABULARY);
       if (!parsed.ok) refused.push(`${action.listName}[${String(action.priorityOrdinal)}] ${parsed.reason}`);
     }
-    expect(refused).toEqual([
-      "san_gift[0] UNSUPPORTED_NUMERIC_LITERAL",
-      "sanlayn[0] UNSUPPORTED_NUMERIC_LITERAL",
-      "sanlayn[1] UNSUPPORTED_NUMERIC_LITERAL",
-    ]);
+    // RE-POINTED for M11-B3: before it, exactly san_gift[0], sanlayn[0] and
+    // sanlayn[1] were refused with UNSUPPORTED_NUMERIC_LITERAL.
+    expect(refused).toEqual([]);
   });
 });
 

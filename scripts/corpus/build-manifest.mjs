@@ -2992,7 +2992,23 @@ const BLOOD_UNKNOWN = {
   observedActionRejected: false,
   unselectabilityProven: false,
 };
-const BLOOD_LITERAL = "UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1.";
+// M11-B3 admitted decimal literals; the B2 stopping tag
+// "UNSUPPORTED_EXPRESSION:UNSUPPORTED_NUMERIC_LITERAL:1." no longer occurs.
+const BLOOD_CONSUMPTION_TAG = "APPLICABILITY:consumption";
+/** A decision whose branches diverge: the root scan RESOLVED (every candidate undecided), the engine explored the NON_GCD prefixes and the worlds disagreed. */
+const BLOOD_DIVERGENT = {
+  outcome: "UNKNOWN",
+  basis: "AUTHORITY_SELECTION_UNRESOLVED",
+  authorityCoverage: "UNKNOWN",
+  authorityToken: null,
+  selectionPrecision: null,
+  decisiveBlocker: "DIVERGENT_WORLDS",
+  rawBlocker: "DIVERGENT_GCD_OUTCOMES",
+  observedActionRejected: false,
+  unselectabilityProven: false,
+  stoppingAt: null,
+  stoppingAtoms: [],
+};
 const blood_decision = (t, ability, expected, extra = {}) =>
   a("SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE", {
     actorId: BLOOD,
@@ -3029,13 +3045,6 @@ const D_SAN_GIFT_SKIPPED = {
   outcome: "RUN_GATE_FALSE_SKIPPED",
   gate: "FALSE",
 };
-const D_SAN_GIFT_ENTERED_BLOCKED = {
-  at: "default[15]",
-  actionToken: "run_action_list",
-  calleeListName: "san_gift",
-  outcome: "BLOCKED",
-  gate: "TRUE",
-};
 const D_SAN_GIFT_UNDECIDED = {
   at: "default[15]",
   actionToken: "run_action_list",
@@ -3050,7 +3059,29 @@ const D_SANLAYN_ENTERED_BLOCKED = {
   outcome: "BLOCKED",
   gate: "TRUE",
 };
-const BLOOD_IN_GIFT_DISPATCH = [D_CALL, D_DEATHBRINGER_SKIPPED, D_SAN_GIFT_ENTERED_BLOCKED];
+const D_SAN_GIFT_ENTERED = {
+  at: "default[15]",
+  actionToken: "run_action_list",
+  calleeListName: "san_gift",
+  outcome: "RUN_ENTERED_SCAN_ENDS",
+  gate: "TRUE",
+};
+const D_SANLAYN_ENTERED = {
+  at: "default[16]",
+  actionToken: "run_action_list",
+  calleeListName: "sanlayn",
+  outcome: "RUN_ENTERED_SCAN_ENDS",
+  gate: "TRUE",
+};
+/** Inside the Gift window since M11-B3: san_gift is ENTERED and offers candidates; the scan ends there. */
+const BLOOD_IN_GIFT_DISPATCH = [D_CALL, D_DEATHBRINGER_SKIPPED, D_SAN_GIFT_ENTERED];
+/** Outside the Gift window when sanlayn offers candidates and blocks at nothing before sanlayn[10]. */
+const BLOOD_OUT_OF_GIFT_ENTERED_DISPATCH = [
+  D_CALL,
+  D_DEATHBRINGER_SKIPPED,
+  D_SAN_GIFT_SKIPPED,
+  D_SANLAYN_ENTERED,
+];
 const BLOOD_OUT_OF_GIFT_DISPATCH = [
   D_CALL,
   D_DEATHBRINGER_SKIPPED,
@@ -3320,7 +3351,7 @@ const BLOOD_CASES = [
     BLOOD_105_165,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/observed-analysis.ts analyzeObservedBloodDeathKnightDecisions; first-gcd-adapter.ts (stopping points, dispatch trace, undecided candidates); src/simc/nested-selection.ts (M11-B1 run_action_list semantics)",
-    "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 0 MATCH, 0 REJECTED, 123 UNKNOWN. THE MEASUREMENT: 98 root scans stopped at sanlayn[0] deaths_caress and 24 at san_gift[0] heart_strike, every one on the DECIMAL LITERAL `1.5` the frozen shared parser refuses (UNSUPPORTED_NUMERIC_LITERAL), and 1 — the Death's Caress at the pull — at the default[15] run gate on buff.gift_of_the_sanlayn.up (no transition yet observed). The B1 dispatch semantics held on every scan: default[14] run deathbringer was RUN_GATE_FALSE_SKIPPED 123 times (hero_tree.deathbringer bound FALSE from the resolved San'layn tree), default[15] run san_gift was entered and blocked 24 times inside the Gift window, skipped 98 times outside it and blocked once undecided, and default[16] run sanlayn was entered and blocked in exactly those 98. Three decisions also carried an undecided GCD candidate: Dancing Rune Weapon at high_prio_actions[1], its cooldown not proven, its gate reading debuff.reapers_mark_debuff.up (never bindable) and fight_remains (PREDICTIVE).",
+    "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 0 MATCH, 0 REJECTED, 123 UNKNOWN. THE MEASUREMENT AFTER M11-B3 (decimal literals admitted; M11-B2 had 122 of these stop on the literal 1.5): the root scan now RESOLVES at 79 decisions — every candidate on the reached San'layn list undecided, the engine's branch worlds DIVERGENT — and BLOCKS at sanlayn[10] consumption for 43 (Consumption's NORMAL node is absent from the tree, so its applicability is UNKNOWN and the entry cannot be stepped past) and at the default[15] run gate for 1 (the Death's Caress at the pull, no Gift transition yet observed). The B1 dispatch semantics: default[14] run deathbringer RUN_GATE_FALSE_SKIPPED 123 times; default[15] run san_gift ENTERED (RUN_ENTERED_SCAN_ENDS) 24 times inside the Gift window, skipped 98 times outside it, blocked once undecided; default[16] run sanlayn entered 55 times and blocked 43. The first undecided GCD candidate in priority order — the next truthful blocker — is sanlayn[0] deaths_caress on buff.bone_shield.remains at 96 decisions, san_gift[0] heart_strike on buff.essence_of_the_blood_queen.remains at 24, and the Dancing Rune Weapon gate at 3; the full undecided-candidate census is pinned below.",
     [
       a("SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY", {
         actorId: BLOOD,
@@ -3346,30 +3377,59 @@ const BLOOD_CASES = [
           rejected: 0,
           stoppingEntries: {
             "default[15] run_action_list": 1,
-            "san_gift[0] heart_strike": 24,
-            "sanlayn[0] deaths_caress": 98,
+            "(root scan resolved)": 79,
+            "sanlayn[10] consumption": 43,
           },
           stoppingAtoms: {
             "default[15] run_action_list | buff.gift_of_the_sanlayn.up": 1,
-            [`san_gift[0] heart_strike | ${BLOOD_LITERAL}`]: 24,
-            [`sanlayn[0] deaths_caress | ${BLOOD_LITERAL}`]: 98,
+            [`sanlayn[10] consumption | ${BLOOD_CONSUMPTION_TAG}`]: 43,
           },
           dispatchOutcomes: {
             "default[13] -> high_prio_actions : CALL_MAY_SELECT": 123,
             "default[14] -> deathbringer : RUN_GATE_FALSE_SKIPPED": 123,
-            "default[15] -> san_gift : BLOCKED": 25,
+            "default[15] -> san_gift : BLOCKED": 1,
+            "default[15] -> san_gift : RUN_ENTERED_SCAN_ENDS": 24,
             "default[15] -> san_gift : RUN_GATE_FALSE_SKIPPED": 98,
-            "default[16] -> sanlayn : BLOCKED": 98,
+            "default[16] -> sanlayn : BLOCKED": 43,
+            "default[16] -> sanlayn : RUN_ENTERED_SCAN_ENDS": 55,
           },
           undecidedGcdCandidates: {
             "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up": 3,
             "high_prio_actions[1] dancing_rune_weapon | fight_remains": 3,
+            "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 24,
+            "san_gift[1] death_strike | runic_power.deficit": 17,
+            "san_gift[2] any_dnd | buff.crimson_scourge.remains": 18,
+            "san_gift[2] any_dnd | buff.visceral_strength.remains": 18,
+            "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 18,
+            "san_gift[4] death_strike | USABILITY:death_strike": 17,
+            "san_gift[5] blood_boil | buff.boiling_point.up": 10,
+            "san_gift[6] heart_strike | USABILITY:heart_strike": 1,
+            "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
+            "sanlayn[0] deaths_caress | buff.bone_shield.remains": 98,
+            "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains": 98,
+            "sanlayn[1] heart_strike | buff.vampiric_strike.remains": 98,
+            "sanlayn[1] heart_strike | fight_remains": 98,
+            "sanlayn[2] death_strike | runic_power.deficit": 61,
+            "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 83,
+            "sanlayn[6] blood_boil | buff.boiling_point.up": 1,
+            "sanlayn[7] marrowrend | buff.blood_debt.stack": 73,
+            "sanlayn[8] heart_strike | buff.vampiric_strike.up": 3,
+            "sanlayn[9] death_strike | runic_power.deficit": 40,
+            "sanlayn[9] death_strike | fight_remains": 43,
+            "sanlayn[9] death_strike | buff.essence_of_the_blood_queen.remains": 43,
+            "sanlayn[0] deaths_caress | buff.bone_shield.up": 6,
+            "sanlayn[0] deaths_caress | buff.bone_shield.stack": 7,
+            "sanlayn[3] deaths_caress | buff.bone_shield.stack": 6,
+            "sanlayn[4] marrowrend | buff.bone_shield.stack": 6,
+            "sanlayn[6] blood_boil | USABILITY:blood_boil": 6,
+            "san_gift[5] blood_boil | USABILITY:blood_boil": 2,
+            "sanlayn[8] heart_strike | USABILITY:heart_strike": 1,
           },
         },
       }),
     ],
     ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
-    "The coverage disclosure is the honest measure of the slice: 0 of 123 decisions resolve, and every one names the entry and the atom the shared machinery could not decide. The first entry of BOTH San'layn lists compares a buff remainder against 1.5 seconds, and the parser's integer-only literal rule refuses the whole condition before any remainder question arises; behind it lie buff.bone_shield.remains and buff.essence_of_the_blood_queen.remains, which no binding field can carry. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one.",
+    "The coverage disclosure is the honest measure of the slice: 0 of 123 decisions resolve, and every one names the entry and the atom the shared machinery could not decide. M11-B3 removed the parser's integer-only literal rule, and the first entry of BOTH San'layn lists now reads its buff remainder against 1.5 seconds — a magnitude no binding field can carry — so the obstacle moved from syntax to state, exactly as the M11-B2 experiment predicted. Nothing here converts an UNKNOWN into a verdict, and nothing here was widened to force one.",
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
@@ -3377,7 +3437,7 @@ const BLOOD_CASES = [
     BLOOD_GTKB,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/observed-analysis.ts; first-gcd-adapter.ts",
-    "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — 15 inside the Gift window stopped at san_gift[0], 6 after it stopped at sanlayn[0], all on the decimal literal — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); no decision carries an undecided GCD candidate, because the opener's Dancing Rune Weapon at 2,417,020 proves the cooldown active for the whole window.",
+    "The second subject (gtKb fight 22, the same San'layn build) yields 21 eligible decisions over its 20 s opener — after M11-B3, 15 inside the Gift window whose root scan RESOLVES with every san_gift candidate undecided (first: san_gift[0] on buff.essence_of_the_blood_queen.remains) and 6 after it that BLOCK at sanlayn[10] consumption (first undecided: sanlayn[0] on buff.bone_shield.remains) — and 30 excluded casts (16 melee swings, 11 NON_GCD, 3 outside the slice); Dancing Rune Weapon is never a candidate, because the opener's cast at 2,417,020 proves the cooldown active for the whole window.",
     [
       a("SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY", {
         actorId: BLOOD_GTKB_ACTOR,
@@ -3394,19 +3454,37 @@ const BLOOD_CASES = [
         expected: {
           match: 0,
           rejected: 0,
-          stoppingEntries: { "san_gift[0] heart_strike": 15, "sanlayn[0] deaths_caress": 6 },
-          stoppingAtoms: {
-            [`san_gift[0] heart_strike | ${BLOOD_LITERAL}`]: 15,
-            [`sanlayn[0] deaths_caress | ${BLOOD_LITERAL}`]: 6,
-          },
+          stoppingEntries: { "(root scan resolved)": 15, "sanlayn[10] consumption": 6 },
+          stoppingAtoms: { [`sanlayn[10] consumption | ${BLOOD_CONSUMPTION_TAG}`]: 6 },
           dispatchOutcomes: {
             "default[13] -> high_prio_actions : CALL_MAY_SELECT": 21,
             "default[14] -> deathbringer : RUN_GATE_FALSE_SKIPPED": 21,
-            "default[15] -> san_gift : BLOCKED": 15,
+            "default[15] -> san_gift : RUN_ENTERED_SCAN_ENDS": 15,
             "default[15] -> san_gift : RUN_GATE_FALSE_SKIPPED": 6,
             "default[16] -> sanlayn : BLOCKED": 6,
           },
-          undecidedGcdCandidates: {},
+          undecidedGcdCandidates: {
+            "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 15,
+            "san_gift[1] death_strike | runic_power.deficit": 11,
+            "san_gift[2] any_dnd | buff.crimson_scourge.remains": 14,
+            "san_gift[2] any_dnd | buff.visceral_strength.remains": 14,
+            "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 14,
+            "san_gift[4] death_strike | USABILITY:death_strike": 11,
+            "san_gift[5] blood_boil | buff.boiling_point.up": 10,
+            "san_gift[6] heart_strike | USABILITY:heart_strike": 3,
+            "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
+            "sanlayn[0] deaths_caress | buff.bone_shield.remains": 6,
+            "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains": 6,
+            "sanlayn[1] heart_strike | buff.vampiric_strike.remains": 6,
+            "sanlayn[1] heart_strike | fight_remains": 6,
+            "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 6,
+            "sanlayn[7] marrowrend | buff.blood_debt.stack": 6,
+            "sanlayn[8] heart_strike | buff.vampiric_strike.up": 6,
+            "sanlayn[9] death_strike | fight_remains": 6,
+            "sanlayn[9] death_strike | buff.essence_of_the_blood_queen.remains": 6,
+            "sanlayn[2] death_strike | runic_power.deficit": 4,
+            "sanlayn[9] death_strike | runic_power.deficit": 4,
+          },
         },
       }),
       a("SPEC_BLOOD_DEATH_KNIGHT.BUILD_RESOLUTION", {
@@ -3463,13 +3541,11 @@ const BLOOD_CASES = [
     BLOOD45,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/first-gcd-adapter.ts; aura-bindings.ts (exact Bone Shield count); cooldown-bindings.ts; resources.ts",
-    "The Death Strike at 2,012,014 (+7,425 ms) sits inside the first Gift window (applied 2,007,757 with the Dancing Rune Weapon cast): the run gate at default[15] is TRUE, the scan TRANSFERS into san_gift and stops at san_gift[0] heart_strike on the decimal literal. Runic Power 990 of 1,250 on the wire (base cost 450) binds runic_power.deficit=26 points; no Runes observation on a Runic Power-costed cast. Bone Shield is exactly 6 (last stack transition 2,010,192, every later transition a same-millisecond companion). Dancing Rune Weapon is proven on cooldown from its cast at 2,007,757 under the 90,000 ms effective base (Insatiable Blade SELECTED): 85,743 ms remaining. The Marrowrend at 2,015,770 shows the same-millisecond hazard: its own three Bone Shield stack gains are logged BEFORE the cast, so both the presence and the count are REFUSED (SAME_MILLISECOND_TRANSITION) rather than read post-cast.",
+    "The Death Strike at 2,012,014 (+7,425 ms) sits inside the first Gift window (applied 2,007,757 with the Dancing Rune Weapon cast): the run gate at default[15] is TRUE and the scan TRANSFERS into san_gift (RUN_ENTERED_SCAN_ENDS); since M11-B3 san_gift[0] parses, its buff.essence_of_the_blood_queen.remains is unbindable, every san_gift candidate stays undecided and the engine's branch worlds DIVERGE (DIVERGENT_GCD_OUTCOMES, no single stopping entry). Runic Power 990 of 1,250 on the wire (base cost 450) binds runic_power.deficit=26 points; no Runes observation on a Runic Power-costed cast. Bone Shield is exactly 6 (last stack transition 2,010,192, every later transition a same-millisecond companion). Dancing Rune Weapon is proven on cooldown from its cast at 2,007,757 under the 90,000 ms effective base (Insatiable Blade SELECTED): 85,743 ms remaining. The Marrowrend at 2,015,770 shows the same-millisecond hazard: its own three Bone Shield stack gains are logged BEFORE the cast, so both the presence and the count are REFUSED (SAME_MILLISECOND_TRANSITION) rather than read post-cast.",
     [
       blood_decision(2012014, BLOOD_DS, {
-        ...BLOOD_UNKNOWN,
+        ...BLOOD_DIVERGENT,
         unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
-        stoppingAt: "san_gift[0] heart_strike",
-        stoppingAtoms: [BLOOD_LITERAL],
       }),
       blood_dispatch(2012014, BLOOD_DS, BLOOD_IN_GIFT_DISPATCH),
       blood_resources(2012014, BLOOD_DS, {
@@ -3494,10 +3570,8 @@ const BLOOD_CASES = [
       blood_stack(2012014, BLOOD_DS, "bone_shield", blood_exact_stack(6)),
       blood_cooldown(2012014, BLOOD_DS, blood_drw_not_ready(85743, 2007757)),
       blood_decision(2015770, BLOOD_MR, {
-        ...BLOOD_UNKNOWN,
+        ...BLOOD_DIVERGENT,
         unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
-        stoppingAt: "san_gift[0] heart_strike",
-        stoppingAtoms: [BLOOD_LITERAL],
       }),
       blood_resources(2015770, BLOOD_MR, {
         runes: blood_runes(3, 2),
@@ -3527,13 +3601,13 @@ const BLOOD_CASES = [
     BLOOD45,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/first-gcd-adapter.ts; aura-bindings.ts; observed-action-gate.ts",
-    "The Heart Strike at 2,020,278 (+15,689 ms) follows the Gift removal at 2,019,763: buff.gift_of_the_sanlayn.up binds FALSE from the observed removal, the run gate at default[15] is FALSE and is SKIPPED, the parent continues to default[16] run sanlayn, whose gate hero_tree.sanlayn is TRUE, and the scan stops at sanlayn[0] deaths_caress on the decimal literal. Runes 1 of 6 bind rune=1; Bone Shield exactly 11. The Death Strike at 2,044,021 shows the other Bone Shield refusal: three LONE refreshes at 2,043,229 (no stack transition beside them) sit between the last count and the decision, so the count is COUNT_AMBIGUOUS_SINCE_OBSERVATION; Blood Debt is bound to exactly zero from its removal at the same instant (PROVEN_INACTIVE); its Runic Power 1,080 binds deficit=17, which makes deathbringer[0]'s gate TRUE and the unselectability proof refuse with CONDITION_NOT_PROVEN_FALSE at an entry of a list the resolved hero tree can never enter — a second measured limit of the cross-list proof.",
+    "The Heart Strike at 2,020,278 (+15,689 ms) follows the Gift removal at 2,019,763: buff.gift_of_the_sanlayn.up binds FALSE from the observed removal, the run gate at default[15] is FALSE and is SKIPPED, the parent continues to default[16] run sanlayn, whose gate hero_tree.sanlayn is TRUE, and since M11-B3 the scan walks the whole San'layn list — sanlayn[0] undecided on buff.bone_shield.remains — and BLOCKS at sanlayn[10] consumption, whose applicability is UNKNOWN (Consumption's NORMAL node absent) and whose entry cannot be stepped past. Runes 1 of 6 bind rune=1; Bone Shield exactly 11. The Death Strike at 2,044,021 shows the other Bone Shield refusal: three LONE refreshes at 2,043,229 (no stack transition beside them) sit between the last count and the decision, so the count is COUNT_AMBIGUOUS_SINCE_OBSERVATION; Blood Debt is bound to exactly zero from its removal at the same instant (PROVEN_INACTIVE); its Runic Power 1,080 binds deficit=17, which makes deathbringer[0]'s gate TRUE and the unselectability proof refuse with CONDITION_NOT_PROVEN_FALSE at an entry of a list the resolved hero tree can never enter — a second measured limit of the cross-list proof. At that decision the sanlayn run is ENTERED and offers candidates (its Blood Boil at sanlayn[6] is usable-unknown ahead of the Consumption entry), so the worlds DIVERGE instead of blocking.",
     [
       blood_decision(2020278, BLOOD_HS, {
         ...BLOOD_UNKNOWN,
         unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
-        stoppingAt: "sanlayn[0] deaths_caress",
-        stoppingAtoms: [BLOOD_LITERAL],
+        stoppingAt: "sanlayn[10] consumption",
+        stoppingAtoms: [BLOOD_CONSUMPTION_TAG],
       }),
       blood_dispatch(2020278, BLOOD_HS, BLOOD_OUT_OF_GIFT_DISPATCH),
       blood_resources(2020278, BLOOD_HS, {
@@ -3545,11 +3619,10 @@ const BLOOD_CASES = [
       blood_aura(2020278, BLOOD_HS, "gift_of_the_sanlayn", blood_observed_aura(false, BLOOD_GIFT, 2019763)),
       blood_stack(2020278, BLOOD_HS, "bone_shield", blood_exact_stack(11)),
       blood_decision(2044021, BLOOD_DS, {
-        ...BLOOD_UNKNOWN,
+        ...BLOOD_DIVERGENT,
         unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
-        stoppingAt: "sanlayn[0] deaths_caress",
-        stoppingAtoms: [BLOOD_LITERAL],
       }),
+      blood_dispatch(2044021, BLOOD_DS, BLOOD_OUT_OF_GIFT_ENTERED_DISPATCH),
       blood_resources(2044021, BLOOD_DS, {
         runes: BLOOD_NO_RES,
         runicPower: blood_rp(1080),
@@ -3609,8 +3682,8 @@ const BLOOD_CASES = [
         {
           ...BLOOD_UNKNOWN,
           unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
-          stoppingAt: "sanlayn[0] deaths_caress",
-          stoppingAtoms: [BLOOD_LITERAL],
+          stoppingAt: "sanlayn[10] consumption",
+          stoppingAtoms: [BLOOD_CONSUMPTION_TAG],
         },
         BLOOD_FULL,
       ),
@@ -3632,12 +3705,7 @@ const BLOOD_CASES = [
       blood_decision(
         2100867,
         BLOOD_BB,
-        {
-          ...BLOOD_UNKNOWN,
-          unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
-          stoppingAt: "san_gift[0] heart_strike",
-          stoppingAtoms: [BLOOD_LITERAL],
-        },
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
         BLOOD_FULL,
       ),
       blood_dispatch(2100867, BLOOD_BB, BLOOD_IN_GIFT_DISPATCH, BLOOD_FULL),
@@ -3687,17 +3755,15 @@ const BLOOD_CASES = [
         rune: 4,
       }),
       blood_decision(2425794, BLOOD_DS, {
-        ...BLOOD_UNKNOWN,
+        ...BLOOD_DIVERGENT,
         unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
-        stoppingAt: "san_gift[0] heart_strike",
-        stoppingAtoms: [BLOOD_LITERAL],
       }),
       blood_dispatch(2425794, BLOOD_DS, BLOOD_IN_GIFT_DISPATCH),
       blood_decision(2429596, BLOOD_DS, {
         ...BLOOD_UNKNOWN,
         unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
-        stoppingAt: "sanlayn[0] deaths_caress",
-        stoppingAtoms: [BLOOD_LITERAL],
+        stoppingAt: "sanlayn[10] consumption",
+        stoppingAtoms: [BLOOD_CONSUMPTION_TAG],
       }),
       blood_dispatch(2429596, BLOOD_DS, BLOOD_OUT_OF_GIFT_DISPATCH),
       blood_aura(2429596, BLOOD_DS, "gift_of_the_sanlayn", blood_observed_aura(false, BLOOD_GIFT, 2429050)),

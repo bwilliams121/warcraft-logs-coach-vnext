@@ -310,7 +310,10 @@ describe("unsupported syntax never enters the truth domain", () => {
     // so does UNARY minus — `>=-2` is a negative literal, not a subtraction.
     "combo_points>=6/2",
     "combo_points>=-2",
-    "combo_points>=5.5",
+    // RE-POINTED for M11-B3, which admitted digits '.' digits (`5.5`). An
+    // EMPTY fraction is still refused whole, and so is a leading point.
+    "combo_points>=5.",
+    "combo_points>=.5",
   ])("%s produces no AST, so it cannot become UNKNOWN_STATE", (source) => {
     const parsed = parseSimcExpression(source);
     expect(parsed.ok, `${source} must be refused`).toBe(false);

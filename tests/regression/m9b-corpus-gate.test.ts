@@ -83,10 +83,13 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // normalization, one bundle composition, ten evaluator — the stopping
     // points, the dispatch trace, the exact Bone Shield counts, the resource
     // observations, the domains — and the public refusal on the same subject
-    // beside its internal registration). Measured, then pinned.
+    // beside its internal registration); M11-B3's decimal literals moved the
+    // Blood stopping points from syntax to state and re-pinned those cases
+    // in place, adding one dispatch-trace assertion for the sanlayn list
+    // entered outside the Gift window. Measured, then pinned.
     expect(result.summary.cases).toBe(154);
-    expect(result.summary.assertions).toBe(511);
-    expect(result.summary.passed).toBe(511);
+    expect(result.summary.assertions).toBe(512);
+    expect(result.summary.passed).toBe(512);
   });
 
   it("covers every layer", async () => {

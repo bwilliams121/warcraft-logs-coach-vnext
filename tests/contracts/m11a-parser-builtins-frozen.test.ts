@@ -297,3 +297,53 @@ describe("the built-in reader in parse.ts returns exactly the pinned kinds", () 
     expect([...literals].sort()).toEqual([...Object.keys(EXACT_BUILTINS)].sort());
   });
 });
+
+// ---------------------------------------------------------------------------
+// The literal grammar (M11-B3)
+// ---------------------------------------------------------------------------
+//
+// M11-B3 admitted ONE literal form — digits '.' digits — as a reviewed
+// exception for SYNTAX, not a built-in. This block pins that the exception is
+// exactly that wide: an integer and a decimal are the same NUMBER node, no
+// identifier, operator, node kind or vocabulary door moved, and every other
+// numeric shape (empty fraction, leading point, second point, exponent,
+// negative) is still refused whole. Widening any of these is a visible
+// change to this file, reviewed like a built-in addition.
+
+describe("the literal grammar is frozen at digits '.' digits (M11-B3)", () => {
+  it("an integer and a decimal both parse to NUMBER, and NUMBER is not a built-in identifier kind", () => {
+    for (const [source, value] of [
+      ["42", 42],
+      ["1.5", 1.5],
+    ] as const) {
+      const parsed = parseSimcExpression(source);
+      expect(parsed.ok && parsed.ast).toEqual({ kind: "NUMBER", value });
+    }
+    expect(BUILTIN_NODE_KINDS).not.toContain("NUMBER");
+    expect(isBuiltinIdentifier("1.5")).toBe(false);
+  });
+
+  it("every other numeric shape is refused whole under an existing reason", () => {
+    for (const [source, reason] of [
+      ["1.", "UNSUPPORTED_NUMERIC_LITERAL"],
+      ["1.5.5", "UNSUPPORTED_NUMERIC_LITERAL"],
+      [".5", "UNEXPECTED_CHARACTER"],
+      ["1e3", "TRAILING_INPUT"],
+      ["-1.5", "UNSUPPORTED_OPERATOR"],
+    ] as const) {
+      const parsed = parseSimcExpression(source);
+      expect(parsed.ok, source).toBe(false);
+      if (!parsed.ok) expect(parsed.reason, source).toBe(reason);
+    }
+  });
+
+  it("the number reader consults only digits and one point: no exponent, sign or hex branch exists in it", () => {
+    const source = Object.values(PARSE_SOURCE)[0] ?? "";
+    const start = source.indexOf("function parseNumber(");
+    const end = source.indexOf("function parsePrimary(");
+    expect(start).toBeGreaterThan(0);
+    const body = source.slice(start, end);
+    expect(body).not.toMatch(/[eE]xponent|"e"|"E"|"x"|"X"|"-"|"\+"|parseFloat\(.*[eE]/);
+    expect(body.split('=== "."').length - 1).toBeGreaterThanOrEqual(1);
+  });
+});

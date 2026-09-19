@@ -79,22 +79,62 @@ describe("the measurement over the composed 165 s fight", () => {
     expect(analysis.comparisons.length + analysis.excluded.length).toBe(123 + 148);
   });
 
-  it("names a stopping entry and at least one atom for EVERY decision, and the tallies cover the population", () => {
+  it("names, for EVERY decision, either a stopping entry with its atoms or a first undecided GCD candidate — never the decimal literal", () => {
+    // RE-POINTED for M11-B3. Before it, 122 of 123 root scans stopped at the
+    // first entry of a San'layn list on UNSUPPORTED_NUMERIC_LITERAL (`1.5`).
+    // Decimals parse now, so the scan walks the list: a scan that BLOCKS still
+    // names its entry and atoms; a scan that RESOLVES with every candidate
+    // undecided names the first competing GCD candidate instead, and the
+    // engine's branch worlds diverge. Both are UNKNOWN; neither is a verdict.
     for (const entry of analysis.resolved) {
-      const stop = entry.selection.stoppingPoint;
-      expect(stop, String(entry.position)).not.toBeNull();
-      expect(stop?.atoms.length).toBeGreaterThan(0);
       expect(entry.selection.kind).toBe("ROTATIONAL_GCD_UNKNOWN");
+      const stop = entry.selection.stoppingPoint;
+      const firstGcd = entry.selection.undecidedCandidates.find(
+        (candidate) => candidate.lane === "GCD_CONSUMING",
+      );
+      if (stop !== null) {
+        expect(stop.atoms.length, String(entry.position)).toBeGreaterThan(0);
+        expect(stop.atoms.join(",")).not.toContain("UNSUPPORTED_NUMERIC_LITERAL");
+      } else {
+        expect(firstGcd, String(entry.position)).toBeDefined();
+      }
     }
     expect(coverage.stoppingEntries.reduce((sum, row) => sum + row.count, 0)).toBe(123);
-    expect(coverage.stoppingEntries.map((row) => row.key).sort()).toEqual([
-      "default[15] run_action_list",
-      "san_gift[0] heart_strike",
-      "sanlayn[0] deaths_caress",
-    ]);
-    // 122 of 123 stop on the decimal literal the frozen parser refuses.
-    const literal = coverage.stoppingAtoms.filter((row) => row.key.includes("UNSUPPORTED_NUMERIC_LITERAL"));
-    expect(literal.reduce((sum, row) => sum + row.count, 0)).toBe(122);
+    expect(Object.fromEntries(coverage.stoppingEntries.map((row) => [row.key, row.count]))).toEqual({
+      "default[15] run_action_list": 1,
+      "(root scan resolved)": 79,
+      "sanlayn[10] consumption": 43,
+    });
+    expect(coverage.stoppingAtoms.some((row) => row.key.includes("UNSUPPORTED_NUMERIC_LITERAL"))).toBe(false);
+    expect(Object.fromEntries(coverage.stoppingAtoms.map((row) => [row.key, row.count]))).toEqual({
+      "default[15] run_action_list | buff.gift_of_the_sanlayn.up": 1,
+      "sanlayn[10] consumption | APPLICABILITY:consumption": 43,
+    });
+  });
+
+  it("the former decimal-literal stopping entries now traverse to the next truthful blocker: a buff remainder", () => {
+    // sanlayn[0] and san_gift[0] are no longer stopping entries at all; the
+    // first undecided GCD candidate of every scan that reaches them is that
+    // very entry, undecided on `buff.<x>.remains` (no binding field carries a
+    // remainder — the state limit M11-B3 deliberately does not touch).
+    const firstObstacle = new Map<string, number>();
+    for (const entry of analysis.resolved) {
+      const first = entry.selection.undecidedCandidates.find(
+        (candidate) => candidate.lane === "GCD_CONSUMING",
+      );
+      const key =
+        first === undefined
+          ? (entry.selection.stoppingPoint?.at ?? "(none)")
+          : `${first.at} | ${first.atoms.join(",")}`;
+      firstObstacle.set(key, (firstObstacle.get(key) ?? 0) + 1);
+    }
+    expect(Object.fromEntries(firstObstacle)).toEqual({
+      "sanlayn[0] deaths_caress | buff.bone_shield.remains": 89,
+      "sanlayn[0] deaths_caress | buff.bone_shield.up,buff.bone_shield.remains,buff.bone_shield.stack": 6,
+      "sanlayn[0] deaths_caress | buff.bone_shield.remains,buff.bone_shield.stack": 1,
+      "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 24,
+      "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up,fight_remains": 3,
+    });
   });
 
   it("shows the B1 run_action_list semantics on every root scan, driven by the Gift binding", () => {
@@ -114,15 +154,20 @@ describe("the measurement over the composed 165 s fight", () => {
       const sanGift = byAt.get("default[15]");
       const sanlayn = byAt.get("default[16]");
       if (gift?.state === "BOUND" && gift.up) {
-        // TRUE gate: transfer, and the parent's default[16] is never visited.
-        expect(sanGift).toMatchObject({ outcome: "BLOCKED", gate: "TRUE" });
+        // TRUE gate: transfer — the child is ENTERED and offers candidates, and
+        // the parent's default[16] is never visited.
+        expect(sanGift).toMatchObject({ outcome: "RUN_ENTERED_SCAN_ENDS", gate: "TRUE" });
         expect(sanlayn).toBeUndefined();
-        expect(entry.selection.stoppingPoint?.at).toBe("san_gift[0] heart_strike");
+        expect(entry.selection.stoppingPoint).toBeNull();
       } else if (gift?.state === "BOUND") {
-        // FALSE gate: skipped, the parent continues into the sanlayn run.
+        // FALSE gate: skipped, the parent continues into the sanlayn run, which
+        // either offers candidates (entered) or blocks at sanlayn[10].
         expect(sanGift).toMatchObject({ outcome: "RUN_GATE_FALSE_SKIPPED", gate: "FALSE" });
-        expect(sanlayn).toMatchObject({ outcome: "BLOCKED", gate: "TRUE" });
-        expect(entry.selection.stoppingPoint?.at).toBe("sanlayn[0] deaths_caress");
+        expect(["RUN_ENTERED_SCAN_ENDS", "BLOCKED"]).toContain(sanlayn?.outcome);
+        expect(sanlayn?.gate).toBe("TRUE");
+        if (sanlayn?.outcome === "BLOCKED")
+          expect(entry.selection.stoppingPoint?.at).toBe("sanlayn[10] consumption");
+        else expect(entry.selection.stoppingPoint).toBeNull();
       } else {
         // Undecided gate: neither entered nor skipped; the scan stops here.
         expect(sanGift).toMatchObject({ outcome: "BLOCKED", gate: "UNKNOWN_STATE" });
@@ -157,7 +202,22 @@ describe("the measurement over the composed 165 s fight", () => {
       if (drw?.readiness.state === "PROVEN_NOT_READY") expect(candidate).toBeUndefined();
       else expect(candidate?.atoms).toEqual(["debuff.reapers_mark_debuff.up", "fight_remains"]);
     }
-    expect(coverage.undecidedGcdCandidates.reduce((sum, row) => sum + row.count, 0)).toBe(6);
+    // The Dancing Rune Weapon candidate is still exactly 3 + 3 atoms; the
+    // San'layn lists now contribute their own undecided candidates too.
+    const drwRows = coverage.undecidedGcdCandidates.filter((row) =>
+      row.key.startsWith("high_prio_actions[1]"),
+    );
+    expect(drwRows.reduce((sum, row) => sum + row.count, 0)).toBe(6);
+    expect(
+      coverage.undecidedGcdCandidates.find(
+        (row) => row.key === "sanlayn[0] deaths_caress | buff.bone_shield.remains",
+      )?.count,
+    ).toBe(98);
+    expect(
+      coverage.undecidedGcdCandidates.find(
+        (row) => row.key === "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains",
+      )?.count,
+    ).toBe(24);
   });
 
   it("never proves unselectability for a token every list names unconditionally, and names the refusing entry", () => {
@@ -227,10 +287,22 @@ describe("the second subject", () => {
     const analysis = analyzed(corpusState(GTKB));
     expect(analysis.coverage).toMatchObject({ eligibleDecisions: 21, match: 0, rejected: 0, unknown: 21 });
     expect(Object.fromEntries(analysis.coverage.stoppingEntries.map((row) => [row.key, row.count]))).toEqual({
-      "san_gift[0] heart_strike": 15,
-      "sanlayn[0] deaths_caress": 6,
+      "(root scan resolved)": 15,
+      "sanlayn[10] consumption": 6,
     });
-    expect(analysis.coverage.undecidedGcdCandidates).toEqual([]);
+    expect(
+      analysis.coverage.undecidedGcdCandidates.find(
+        (row) => row.key === "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains",
+      )?.count,
+    ).toBe(15);
+    expect(
+      analysis.coverage.undecidedGcdCandidates.find(
+        (row) => row.key === "sanlayn[0] deaths_caress | buff.bone_shield.remains",
+      )?.count,
+    ).toBe(6);
+    expect(
+      analysis.coverage.undecidedGcdCandidates.some((row) => row.key.startsWith("high_prio_actions[1]")),
+    ).toBe(false);
     expect(analysis.build.heroTree).toMatchObject({ state: "RESOLVED", simcName: "sanlayn" });
   });
 });

@@ -1543,10 +1543,10 @@ public surfaces              -> SPEC_NOT_SUPPORTED for DeathKnight/Blood with ze
 
 Also required: the pinned authority's client-version guard record loads and
 a malformed guard fails closed (mutation); every pinned condition parses
-under the Blood vocabulary except exactly the three carrying the decimal
-literal `1.5` — the measured stopping point, pinned as a list so a parser
-change that admits decimals is a VISIBLE change to this test rather than a
-silent widening.
+under the Blood vocabulary. Before M11-B3 exactly three were pinned as
+refused on the decimal literal `1.5`, so that admitting decimals was a
+VISIBLE change to this test rather than a silent widening; M11-B3 made that
+change and re-pinned the list empty.
 
 Failure mode this prevents:
 
@@ -1555,6 +1555,51 @@ decisions resolved presented, or promoted, as if the shared machinery had
 been exercised to an answer; or a "fix" to the dominant stopping point
 (decimal literals) that resolves nothing while making the next obstacle
 (`buff.<x>.remains`) invisible because no test names it.
+
+---
+
+# Decimal Literal Tests (M11-B3)
+
+A literal-grammar change to the shared parser is a change to every
+specialization's authority at once, so it is proven the way a built-in
+addition would be: positively for exactly the pinned form, negatively for
+every neighbouring form, and with the freeze contract widened by one pin
+rather than relaxed.
+
+Required (`tests/unit/m11b3-decimal-literals.test.ts`, the literal-grammar
+block of `tests/contracts/m11a-parser-builtins-frozen.test.ts`):
+
+```text
+digits '.' digits            -> the same NUMBER node an integer is, at its exact
+                                `number` value (1.5 is 1.5; 12.10 is 12.1)
+integer literals             -> unchanged: safe integers, no float path
+x < 1.5 with KNOWN x         -> decided by the ordinary comparison rule at
+                                1.4 / 1.5 / 1.6 exactly
+x < 1.5 with BOUNDED x       -> decided only in the proven direction
+x < 1.5 with UNKNOWN x       -> UNRESOLVED; the literal decides nothing alone
+every pinned Blood condition -> parses; san_gift[0], sanlayn[0], sanlayn[1]
+                                carry value 1.5
+```
+
+Required negative cases — each refused WHOLE under an EXISTING reason,
+never truncated to its integer prefix, never read as two tokens:
+
+```text
+1.  / 1.5.5                  -> UNSUPPORTED_NUMERIC_LITERAL
+.5                           -> UNEXPECTED_CHARACTER
+1e3 / 1.5abc                 -> TRAILING_INPUT
+-1.5                         -> UNSUPPORTED_OPERATOR (unary minus untouched)
+builtin table                -> no NUMBER entry; isBuiltinIdentifier("1.5") false
+parseNumber source           -> no exponent, sign, or hex branch
+Blood stopping atoms         -> no UNSUPPORTED_NUMERIC_LITERAL anywhere; the
+                                next truthful blocker (buff.<x>.remains) named
+```
+
+Failure mode this prevents:
+
+A syntax widening that quietly carries a state widening (a remainder,
+a bound, a negative threshold) with it; or one that admits a typo (`1.`,
+`1.5.5`) as a threshold the pinned list never wrote.
 
 ---
 

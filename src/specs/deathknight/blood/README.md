@@ -85,18 +85,28 @@ readiness (pet state).
 ## The measurement
 
 Over the composed 165 s A7R6 bundle (actor 14, San'layn) and the gtKb
-opener: root scans stop at `sanlayn[0]` / `san_gift[0]` on the decimal
-literal `1.5` the frozen parser refuses (122 of 123; 21 of 21), and once at
-the `default[15]` run gate on an unobserved Gift at the pull. The B1
-dispatch semantics held on every scan (`RUN_GATE_FALSE_SKIPPED` for the
-Deathbringer list ×123; `san_gift` entered inside the Gift window, skipped
-outside it, blocked-undecided once; `sanlayn` entered exactly where
-`san_gift` was skipped). Dancing Rune Weapon is a competing undecided GCD
-candidate at the 3 decisions where its cooldown is not proven. Behind the
-literal (a reverted experiment) lie `buff.<x>.remains` on five auras,
-`runic_power.deficit` on non-Death-Strike casts, `buff.blood_debt.stack`,
-`fight_remains`, and Consumption's unresolved applicability. The full
-ranking and the recommended next capability are in the M11-B2 report and
+opener, still 0 of 123 and 0 of 21 resolved. M11-B2 measured root scans
+stopping at `sanlayn[0]` / `san_gift[0]` on the decimal literal `1.5` the
+parser then refused (122 of 123; 21 of 21). M11-B3 admitted `digits '.'
+digits` in the shared parser (syntax only; no Blood state changed) and
+remeasured: the root scan RESOLVES with every reached candidate undecided
+at 79 of 123 (branch worlds diverge, `DIVERGENT_GCD_OUTCOMES`), BLOCKS at
+`sanlayn[10] consumption` at 43 (applicability UNKNOWN — Consumption's
+NORMAL node is absent — and the unrecognised `empower_to=` option), and
+once at the `default[15]` run gate on an unobserved Gift at the pull
+(opener: 15 / 6 / 0). The first undecided GCD candidate in priority order is
+`sanlayn[0] deaths_caress` on `buff.bone_shield.remains` at 96, `san_gift[0]
+heart_strike` on `buff.essence_of_the_blood_queen.remains` at 24, and the
+Dancing Rune Weapon gate at 3 (opener 6 / 15 / 0). The B1 dispatch
+semantics held on every scan (`RUN_GATE_FALSE_SKIPPED` for the Deathbringer
+list ×123; `san_gift` entered inside the Gift window, skipped outside it,
+blocked-undecided once; `sanlayn` entered exactly where `san_gift` was
+skipped, 55 entered / 43 blocked). Behind the remainders lie
+`buff.vampiric_strike.remains`, `buff.crimson_scourge.remains`,
+`buff.visceral_strength.remains`, `buff.blood_debt.stack`,
+`runic_power.deficit` on non-Death-Strike casts, and `fight_remains`. The
+full ranking and the recommended next capability (`buff.<x>.remains` for
+fixed-duration self-auras, Bone Shield first) are in the M11-B3 report and
 `agent/architecture.md`.
 
 ## What this module refuses on purpose

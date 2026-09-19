@@ -92,6 +92,9 @@ describe("the supported atoms, plus integer literals", () => {
     ["buff.envenom.remains", { kind: "BUFF_REMAINS", buffName: "envenom" }],
     ["0", { kind: "NUMBER", value: 0 }],
     ["42", { kind: "NUMBER", value: 42 }],
+    // M11-B3: a decimal literal is the same NUMBER node an integer is, at its
+    // exact value. Only digits '.' digits; see m11b3-decimal-literals.test.ts.
+    ["1.5", { kind: "NUMBER", value: 1.5 }],
   ])("parses %s", (source, expected) => {
     const parsed = parseSimcExpression(source);
     expect(parsed.ok).toBe(true);
@@ -169,7 +172,10 @@ describe("everything outside the subset is refused whole", () => {
     // UNARY minus stays refused even though the binary form is supported. A
     // negative literal is a mistake far more often than an authored threshold.
     ["combo_points>=-2", "UNSUPPORTED_OPERATOR"],
-    ["combo_points>=5.5", "UNSUPPORTED_NUMERIC_LITERAL"],
+    // RE-POINTED for M11-B3. `5.5` now parses (digits '.' digits is the one
+    // decimal form the pinned lexer and the pinned lists use); an EMPTY
+    // fraction is still refused whole, as is a leading point and an exponent.
+    ["combo_points>=5.", "UNSUPPORTED_NUMERIC_LITERAL"],
     ["(combo_points>=5", "UNBALANCED_PARENTHESIS"],
     ["", "EMPTY_EXPRESSION"],
   ])("refuses %s with %s", (source, reason) => {

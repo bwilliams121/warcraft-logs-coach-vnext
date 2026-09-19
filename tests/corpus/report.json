@@ -440,7 +440,7 @@
       "passed": 51
     },
     {
-      "assertions": 71,
+      "assertions": 72,
       "cases": 10,
       "failed": 0,
       "kindsExercised": [
@@ -461,7 +461,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
-      "passed": 71
+      "passed": 72
     },
     {
       "assertions": 11,
@@ -2946,12 +2946,12 @@
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DISPATCH_TRACE_AT",
           "ordinal": 6,
           "status": "PASSED"
         },
         {
-          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
           "ordinal": 7,
           "status": "PASSED"
         },
@@ -2963,6 +2963,11 @@
         {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
           "ordinal": 9,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "ordinal": 10,
           "status": "PASSED"
         }
       ],
@@ -5095,13 +5100,13 @@
   "totals": {
     "artifactBytes": 4792400,
     "artifacts": 43,
-    "assertions": 511,
+    "assertions": 512,
     "cases": 154,
     "declared": 0,
-    "executable": 511,
+    "executable": 512,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 511
+    "passed": 512
   }
 }

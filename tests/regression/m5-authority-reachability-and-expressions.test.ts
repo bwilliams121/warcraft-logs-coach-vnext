@@ -188,7 +188,9 @@ describe("unsupported authority syntax never becomes false", () => {
     // action's DoT — real pinned syntax, from `vanish[0]` verbatim.
     ["another action's snapshot multiplier", "dot.garrote.pmultiplier<=1&combo_points>=5"],
     ["an active-DoT count", "active_dot.garrote>1&combo_points>=5"],
-    ["a decimal literal", "combo_points>=5.5"],
+    // RE-POINTED for M11-B3: `5.5` parses now (digits '.' digits). A
+    // malformed decimal — an empty fraction — is still a whole-expression refusal.
+    ["a malformed decimal literal", "combo_points>=5."],
     ["!=", "combo_points!=5"],
     ["<?", "combo_points<?5"],
     // RE-POINTED for M5-C3c3c: `buff.<name>.stack`, `buff.<name>.react` and

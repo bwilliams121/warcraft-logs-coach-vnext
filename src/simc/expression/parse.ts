@@ -4,7 +4,8 @@
  * SUPPORTED, AND NOTHING ELSE:
  *
  *     operators     !   &   |   >=   >   =   <   <=   ( )
- *     literals      non-negative integers
+ *     literals      non-negative integers, and non-negative decimals of the
+ *                   form digits '.' digits (M11-B3)
  *     atoms         combo_points
  *                   combo_points.deficit
  *                   energy.pct
@@ -33,7 +34,8 @@
  *
  * FAIL CLOSED, WHOLE-EXPRESSION. Every rejection path returns a failure for the
  * ENTIRE expression. There is no partial parse, no skipped fragment and no
- * placeholder node. `!=`, `&&`, `||`, `>?`, `<?`, `==`, decimals, UNARY minus and
+ * placeholder node. `!=`, `&&`, `||`, `>?`, `<?`, `==`, UNARY minus, the
+ * decimal forms outside digits '.' digits (`.5`, `1.`, `1e3`) and
  * every unlisted identifier (`spell_targets.y`, `active_dot.z`,
  * `energy.regen_combined`, `main_hand.dagger`, `talent.x.rank`,
  * `variable.trinket_sync_slot`, `dot.z.pmultiplier`, `cooldown.y.ready`, …) are
@@ -364,22 +366,53 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
   throw new ParseError("UNSUPPORTED_IDENTIFIER", raw, start);
 }
 
-function parseNumber(cursor: Cursor): ExpressionNode {
-  const start = cursor.index;
+function readDigits(cursor: Cursor): void {
   while (cursor.index < cursor.text.length) {
     const char = cursor.text[cursor.index];
     if (char === undefined || !DIGIT.test(char)) break;
     cursor.index += 1;
   }
-  // A decimal point after digits means a non-integer literal, which is outside
-  // the supported subset. Refused rather than truncated.
+}
+
+/**
+ * A numeric literal: digits, optionally followed by '.' and digits (M11-B3).
+ *
+ * THE PINNED LEXER (engine/sim/expressions.cpp `next()` at 33622e9d) reads a
+ * number as digit+ then, on '.', digit*; the parser turns the token into a
+ * `const_expr_t` through `std::stod`, so `1.5` is the exact double 1.5 and
+ * the SAME kind of constant an integer literal is. This grammar admits the
+ * one form the pinned authorities write (`1.5`, `0.5`) and REFUSES, whole,
+ * every other decimal shape: an empty fraction (`1.` — the pinned lexer
+ * would accept it, no pinned list writes it, and a trailing point is far
+ * more often a typo than a threshold), a leading point (`.5`, not a number
+ * to the pinned lexer either), a second point (`1.5.5`) and exponents
+ * (`1e3`, which the pinned lexer splits into a number and an identifier).
+ * A literal is never truncated, rounded or turned into an atom; it is the
+ * evaluator's ordinary `number`, compared by the ordinary comparison rule.
+ */
+function parseNumber(cursor: Cursor): ExpressionNode {
+  const start = cursor.index;
+  readDigits(cursor);
+  let raw: string;
+  let value: number;
   if (peek(cursor) === ".") {
-    const end = cursor.index + 1;
-    throw new ParseError("UNSUPPORTED_NUMERIC_LITERAL", cursor.text.slice(start, end), start);
+    cursor.index += 1;
+    const fractionStart = cursor.index;
+    readDigits(cursor);
+    if (cursor.index === fractionStart || peek(cursor) === ".") {
+      const end = peek(cursor) === "." ? cursor.index + 1 : cursor.index;
+      throw new ParseError("UNSUPPORTED_NUMERIC_LITERAL", cursor.text.slice(start, end), start);
+    }
+    raw = cursor.text.slice(start, cursor.index);
+    value = Number.parseFloat(raw);
+  } else {
+    raw = cursor.text.slice(start, cursor.index);
+    value = Number.parseInt(raw, 10);
+    if (!Number.isSafeInteger(value)) {
+      throw new ParseError("UNSUPPORTED_NUMERIC_LITERAL", raw, start);
+    }
   }
-  const raw = cursor.text.slice(start, cursor.index);
-  const value = Number.parseInt(raw, 10);
-  if (!Number.isSafeInteger(value)) {
+  if (!Number.isFinite(value)) {
     throw new ParseError("UNSUPPORTED_NUMERIC_LITERAL", raw, start);
   }
   return { kind: "NUMBER", value };

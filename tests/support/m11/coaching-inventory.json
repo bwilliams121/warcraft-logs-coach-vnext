@@ -466,7 +466,7 @@
             "run_action_list dispatch (modelled since M11-B1; measured on this list in M11-B2)"
           ],
           "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
-          "notes": "M11-B2 measured the pinned San'layn lists: every scan stops at the first entry of its list on the decimal literal 1.5 the shared parser refuses, and behind it on buff.bone_shield.remains / buff.essence_of_the_blood_queen.remains."
+          "notes": "M11-B2 measured the pinned San'layn lists: every scan stopped at the first entry of its list on the decimal literal 1.5 the shared parser then refused. M11-B3 admitted decimals (syntax only) and remeasured: the first undecided GCD candidate is buff.bone_shield.remains at 96 of 123 and buff.essence_of_the_blood_queen.remains at 24; 43 scans block at sanlayn[10] consumption (applicability UNKNOWN, empower_to=). Still 0 resolved."
         }
       ]
     },

@@ -5826,6 +5826,73 @@ notice line deliberately (4,792,400 bytes; the line moves to 5 MiB, the
 6 MiB ceiling unchanged). Blood stays INTERNAL_ONLY; the promotion evidence
 gate reports it and would refuse it.
 
+### M11-B3 — decimal numeric literals (shared parser, syntax only)
+
+The one syntax limitation M11-B2 measured as unjustified, removed and
+nothing more. The parser's literal grammar was non-negative integers;
+M11-B2 showed 122 of 123 bundle decisions and 21 of 21 opener decisions
+stopping at the first entry of a San'layn list on `UNSUPPORTED_NUMERIC_LITERAL`
+(`1.5`).
+
+**The pinned grammar.** The pinned SimulationCraft lexer
+(`engine/sim/expressions.cpp` `next()` at 33622e9d) reads a number as
+digit+ then, on `.`, digit*, and the parser makes it a `const_expr_t`
+through `std::stod` — the same kind of constant an integer is, at its exact
+double value. Unary minus is folded into a number token only as a later
+token-level optimisation, and exponents are not lexed as numbers at all.
+The pinned lists write exactly `1.5` and `0.5`.
+
+**The change (`src/simc/expression/parse.ts`, `parseNumber`).** The literal
+grammar is now digits `'.'` digits, parsed with `Number.parseFloat` into the
+SAME `NUMBER` node an integer produces; the evaluator's `number`
+representation and comparison rule are untouched, so `1.5` is exactly 1.5
+and `x<1.5` decides by the ordinary `compareWithBounds`. Every other decimal
+shape fails closed under the parser's EXISTING reasons: an empty fraction
+`1.` and a second point `1.5.5` are `UNSUPPORTED_NUMERIC_LITERAL` (the pinned
+lexer would accept `1.`; no pinned list writes it, and a trailing point is a
+typo far more often than a threshold), a leading point `.5` is
+`UNEXPECTED_CHARACTER`, an exponent `1e3` is `TRAILING_INPUT`, and `-1.5`
+is still `UNSUPPORTED_OPERATOR` because unary minus is not part of this
+grammar. No built-in identifier, node kind, operator, state binding or
+vocabulary door moved; the parser-freeze contract
+(`tests/contracts/m11a-parser-builtins-frozen.test.ts`) is unchanged in what
+it pins and gained a literal-grammar pin so any later widening is a visible
+change reviewed like a built-in addition.
+
+**The remeasurement (Blood unchanged).** Bundle 123 eligible → still
+0 MATCH / 0 REJECTED / 123 UNKNOWN; opener 21 → 21 UNKNOWN. The root scan
+now walks the San'layn lists: it RESOLVES with every reached candidate
+undecided at 79 (the engine's branch worlds diverge —
+`DIVERGENT_GCD_OUTCOMES`), BLOCKS at `sanlayn[10] consumption` at 43
+(Consumption's NORMAL node is absent, so its applicability is UNKNOWN and
+the entry cannot be stepped past; it also carries the unrecognised
+`empower_to=` option), and blocks at the `default[15]` run gate at 1. The
+first undecided GCD candidate in priority order — the next truthful blocker —
+is `sanlayn[0] deaths_caress` on `buff.bone_shield.remains` at 96 of 123
+(78%), `san_gift[0] heart_strike` on `buff.essence_of_the_blood_queen.remains`
+at 24 (20%), and the Dancing Rune Weapon gate at 3 (2%); the opener splits
+6 / 15 / 0. The B1 dispatch outcomes moved from BLOCKED to
+`RUN_ENTERED_SCAN_ENDS` where the child now offers candidates (24 san_gift,
+55 sanlayn) and stayed `RUN_GATE_FALSE_SKIPPED` ×123 for the Deathbringer
+list. One diagnostic label was sharpened in the Blood adapter
+(`APPLICABILITY:<token>` for an entry whose applicability is UNKNOWN,
+whatever the scan's own blocker); no Blood state binding changed.
+
+**Next capability (recommendation, not implemented).** `buff.<x>.remains`
+for fixed-duration self-auras is the first obstacle at 120 of 123 decisions
+(Bone Shield 96, Essence of the Blood Queen 24); it is a state capability
+(the M11-B2 hard boundary), not syntax, and would need the
+same-millisecond ordering hazard resolved for the aura it reads.
+
+**Proven.** `tests/unit/m11b3-decimal-literals.test.ts` (parsing, exact
+evaluation, every refused shape, the Blood authority parsing whole), the
+literal-grammar pin in the parser-freeze contract, the re-pinned
+`m11b2-blood-evaluator` distribution, and the corpus: the Blood measurement
+cases were re-pinned to the new distribution (one dispatch assertion added,
+511 → 512), and every Assassination / Protection / Retribution artifact and
+the invariance harness's 33 non-timing captures are byte-identical against
+HEAD (565fe9a). Blood stays INTERNAL_ONLY; M11-B is not complete.
+
 ---
 
 # Milestone 12 — Healer Foundation

@@ -247,7 +247,14 @@ function stepLabel(step: TraversalStep): string {
 
 /** What made one step undecidable, from the step's own record. Tagged so a reader knows which layer to look at. */
 export function stoppingAtomsOf(step: TraversalStep, blocker: string): readonly string[] {
-  if (blocker === "APPLICABILITY_NOT_ESTABLISHED") return [`APPLICABILITY:${step.actionToken}`];
+  // An entry whose applicability could not be established is tagged by that
+  // fact whatever the SCAN's blocker says: when earlier candidates exist the
+  // engine reports NO_DEFINITE_WINNER for the scan, and the engine records the
+  // step's own gate as NOT_EVALUATED — which names the consequence, not the
+  // cause. (M11-B3 diagnostic labelling; the measurement is unchanged.)
+  if (blocker === "APPLICABILITY_NOT_ESTABLISHED" || step.applicability.kind === "UNKNOWN") {
+    return [`APPLICABILITY:${step.actionToken}`];
+  }
   if (blocker === "UNSUPPORTED_ACTION_OPTION") {
     const keys = step.targetingRefusal === null ? "?" : step.targetingRefusal.optionKeys.join(",");
     return [`ACTION_OPTION:${keys}`];
