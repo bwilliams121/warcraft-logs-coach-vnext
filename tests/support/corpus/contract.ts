@@ -2259,6 +2259,7 @@ export const ASSERTION_KINDS = {
                 "PERMANENT_ACTIVE",
                 "GAIN_ANCHOR_EXACT",
                 "GAIN_ANCHOR_BOUNDED",
+                "WINDOW_ORDER_INVARIANT_BOUNDED",
               ])
               .nullable(),
             /** The binding's state: KNOWN_NUMBER / BOUNDED_NUMBER for BOUND; null for UNBOUND. */
@@ -2268,8 +2269,29 @@ export const ASSERTION_KINDS = {
             /** The gain (or removal / presence anchor) report time the value rests on; null for build proofs and UNBOUND. */
             anchorReportTimeMs: z.number().int().nullable(),
             reason: z.string().nullable(),
-            /** The refused transition's lead, for PRE_DECISION_WINDOW_TRANSITION; null otherwise. */
+            /** The refused transition's lead, for PRE_DECISION_WINDOW_TRANSITION (and a window-refused tolerance refusal); null otherwise. */
             windowLeadMs: z.number().int().nullable(),
+            /** M11-B8: the two orderings a WINDOW_ORDER_INVARIANT_BOUNDED value is the minimum over; null for every other proof and for UNBOUND. */
+            windowOrderInvariance: z
+              .object({
+                cluster: z.array(
+                  z
+                    .object({
+                      reportTimeMs: z.number().int(),
+                      operation: z.enum(["APPLIED", "REFRESHED", "REMOVED"]),
+                      isStackChange: z.boolean(),
+                      leadMs: z.number().int(),
+                    })
+                    .strict(),
+                ),
+                /** H1, MILLISECONDS: the chain before the cluster projected to the decision. */
+                beforeClusterMs: z.number().int(),
+                beforeClusterProof: z.enum(["GAIN_ANCHOR_EXACT", "GAIN_ANCHOR_BOUNDED"]),
+                /** H2, MILLISECONDS: the pinned duration minus the latest transition's lead. */
+                resetInClusterMs: z.number().int(),
+              })
+              .strict()
+              .nullable(),
           })
           .strict(),
       })
@@ -2278,7 +2300,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: true,
     description:
-      "M11-B4. At this decision the Blood remains derivation binds (or refuses to bind) this buff.<name>.remains atom exactly so: an EXACT remainder from the last application, stack gain or refresh under continuity from that gain and the pinned Blood duration; a LOWER BOUND past a Bone Shield refresh of unpinned cause; exactly zero from an observed removal or a build proof; SimulationCraft's permanent sentinel for an active Vampiric Strike; UNBOUND with the reason otherwise — a transition inside the 50 ms pre-decision window, a coverage gap from the gain, no gain observed, a contradiction, or an exact value within 50 ms of a pinned threshold. Never from silence, never from a later transition, never clamped.",
+      "M11-B4 / M11-B8. At this decision the Blood remains derivation binds (or refuses to bind) this buff.<name>.remains atom exactly so: an EXACT remainder from the last application, stack gain or — for an identity whose policy reads a lone refresh as the pinned trigger — refresh, under continuity from that gain and the pinned Blood duration; a LOWER BOUND past a refresh of unpinned or unproven cause (a Bone Shield refresh beside a stack removal; any lone Essence of the Blood Queen refresh since M11-B8); the ORDER-INVARIANT lower bound inside the 50 ms pre-decision window for Essence, the minimum of the chain before the cluster and a reset in it, with both orderings recorded; exactly zero from an observed removal or a build proof; SimulationCraft's permanent sentinel for an active Vampiric Strike; UNBOUND with the reason otherwise — a transition inside the window with no order-invariant floor, a coverage gap from the gain, no gain observed, a bound that has run out, a contradiction, or an exact value or order-invariant edge within 50 ms of a pinned threshold. Never from silence, never from a later transition, never clamped, never an ordering chosen.",
   },
   "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT": {
     owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",

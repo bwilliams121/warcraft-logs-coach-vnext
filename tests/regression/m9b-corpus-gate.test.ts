@@ -102,10 +102,16 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // and added thirty-five: one new case with the seven REJECTED decisions
     // (each with its affordability fact and Blood Debt count), two divergent
     // and two no-observation decisions, and the Rune affordability censuses
-    // over the bundle and the opener. Measured, then pinned.
-    expect(result.summary.cases).toBe(158);
-    expect(result.summary.assertions).toBe(605);
-    expect(result.summary.passed).toBe(605);
+    // over the bundle and the opener; M11-B8 re-pinned them once more (37
+    // MATCH and 9 REJECTED of 123: Essence lone refreshes anchor nothing
+    // exact, and inside the pre-decision window only the floor both
+    // orderings share is bound) and added thirty-four: one new case with the
+    // two REJECTED decisions and their complete chains, the precision change
+    // at 2,029,599, the Gift-edge floors and the refusals that remain.
+    // Measured, then pinned.
+    expect(result.summary.cases).toBe(159);
+    expect(result.summary.assertions).toBe(639);
+    expect(result.summary.passed).toBe(639);
   });
 
   it("covers every layer", async () => {

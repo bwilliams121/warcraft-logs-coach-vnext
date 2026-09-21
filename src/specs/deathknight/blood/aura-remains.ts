@@ -53,23 +53,66 @@
  *         ACTIVE binds `SIMC_PERMANENT_BUFF_REMAINS_SECONDS`; nothing else
  *         is derived, because nothing else is defined.
  *
- * THE ONE AMBIGUOUS SHAPE, AND WHY IT IS A LOWER BOUND. The Blood corpus
- * shows a `refreshbuff` beside a Bone Shield `removebuffstack` at 7 of 25
- * charge consumptions (each at a melee hit taken, beside a Coagulating Blood
- * dose). The pinned decrement does not refresh, so what that refresh did to
- * the expiry is NOT pinned: either it reset the duration (expiry later) or it
- * did nothing (expiry unchanged). Under BOTH hypotheses the expiry is at least
- * the earlier unambiguous gain's time plus the duration — a DURATION refresh
- * can only move an expiry LATER — so that is bound as `BOUNDED_NUMBER
- * { atLeast }` and nothing more. No interpretation is chosen, and "the aura is
- * still active, so the refresh must have reset it" is a deduction this
- * tranche explicitly does NOT make: an `atLeast` that has already run out is
- * UNKNOWN.
+ * THE AMBIGUOUS REFRESH, AND WHY IT IS A LOWER BOUND. A `refreshbuff` is an
+ * exact observation that the aura was refreshed; what it did to the expiry
+ * is pinned only when the refresh is the pinned producer's trigger. Two
+ * shapes are NOT that, and each identity's `remainsPolicy` (the aura
+ * authority data) says which applies:
+ *
+ *   - PINNED_TRIGGER_RESET (M11-B4; Bone Shield, Crimson Scourge, Visceral
+ *     Strength): a lone refresh is the trigger's DURATION refresh and anchors
+ *     exactly — except beside a stack REMOVAL, a shape the pinned decrement
+ *     does not produce (7 of 25 Bone Shield charge consumptions in the
+ *     corpus, each at a melee hit taken).
+ *   - UNPROVEN_CAUSE (M11-B8; Essence of the Blood Queen): the wire carries
+ *     refreshes of this aura for a cause the pinned module has no producer
+ *     for (one at every Gift of the San'layn edge, with no Vampiric Strike
+ *     cast near it), so NO lone refresh — one without a same-millisecond
+ *     `applybuff` / `applybuffstack` companion — is assigned a cause, not by
+ *     the cast 0-1 ms after it, not by the Gift edge beside it, not by the
+ *     absence of any other visible producer. A refresh beside an exact gain
+ *     is that gain's companion; the gain anchors, exactly as before.
+ *
+ * Under EITHER shape the expiry is at least the earlier unambiguous gain's
+ * time plus the duration — the refresh either reset the duration (expiry
+ * later) or did nothing (expiry unchanged), and a DURATION refresh can only
+ * move an expiry LATER — so that is bound as `BOUNDED_NUMBER { atLeast }`
+ * and nothing more. No interpretation is chosen, and "the aura is still
+ * active, so the refresh must have reset it" is a deduction this module
+ * explicitly does NOT make: an `atLeast` that has already run out is
+ * UNKNOWN (`AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION`).
  *
  * NO FUTURE ORACLE, NO WINDOW ORACLE. Every query is `BEFORE_EVENT` at the
  * decision, and a transition of the identity inside the Blood pre-decision
- * window ahead of the decision refuses the binding outright — the same
+ * window ahead of the decision refuses every EXACT reading — the same
  * policy `.up` and `.stack` apply (`aura-bindings.ts`).
+ *
+ * THE ORDER-INVARIANT WINDOW BOUND (M11-B8, `.remains` only, identities whose
+ * policy admits it). The window exists because Warcraft Logs may write a
+ * cast's own aura effect 0-50 ms BEFORE the cast, so a transition inside it
+ * belongs to one of two orderings nobody can tell apart from the wire:
+ *
+ *     H1  the transition followed the decision (it is the decision's own
+ *         effect): the state that governed is the chain BEFORE the window
+ *         cluster, projected forward by the elapsed milliseconds — derived
+ *         by this module's ordinary rules at the cluster's first position,
+ *         so every refusal (coverage, ambiguous initial state, chain
+ *         exhaustion, non-monotonic time, unpinned shape, the lone-refresh
+ *         policy) applies to it unchanged;
+ *     H2  the transition preceded the decision: if it was a duration reset
+ *         the aura then had the full duration minus the lead; if it was a
+ *         refresh that reset nothing, the state is H1 again.
+ *
+ * When every transition in the cluster is a stack gain or a refresh — the
+ * shapes under which BOTH orderings leave the aura active — the remainder
+ * is at least `min(H1, H2)` whichever ordering is true. That is what is
+ * bound (`WINDOW_ORDER_INVARIANT_BOUNDED`, a `BOUNDED_NUMBER`), and it is
+ * not an ordering choice, not an attribution of the transition to the cast,
+ * and never a KNOWN value. A cluster holding a plain application (the two
+ * orderings are inactive versus fully active), any removal, or a shape this
+ * module does not foresee stays `PRE_DECISION_WINDOW_TRANSITION`; so does a
+ * cluster whose H1 the ordinary rules cannot establish, and a bound that has
+ * run out. The window constant is not touched.
  *
  * COVERAGE FROM THE GAIN. `presenceAt` earns continuity from its own anchor,
  * which may be a later stack loss; a missed refresh in the gap between the
@@ -82,9 +125,14 @@
  * `BLOOD_REMAINS_THRESHOLD_TOLERANCE_MS` of a literal the pinned list compares
  * THIS atom against is refused: the measured aura-versus-cast timestamp
  * skew (0 / 1 / 20 ms) and expiry jitter (-7..+12 ms) make a verdict resting
- * on a sub-tolerance margin unjustified. A BOUND is not subject to it: a
- * bound decides only when the whole undecided side lies beyond the
- * threshold, and the margin of a bound is not a distance nobody measured.
+ * on a sub-tolerance margin unjustified. The M11-B4 gain-anchored BOUND is
+ * not subject to it: a bound decides only when the whole undecided side lies
+ * beyond the threshold, and the margin of a bound is not a distance nobody
+ * measured. The order-invariant window bound IS subject to it (M11-B8): its
+ * edge is exact arithmetic on the same skewed timestamps, and an edge inside
+ * the tolerance of a threshold must not be the thing that decides that
+ * comparison, so the binding is refused (`WITHIN_TIMING_TOLERANCE_OF_
+ * THRESHOLD`, margin recorded) rather than narrowed.
  *
  * UNITS. Evidence and the artifact are MILLISECONDS; the expression is
  * SECONDS. The single `/ 1000` in this file is the only place they meet.
@@ -107,6 +155,7 @@ import {
   type NumericBinding,
 } from "../../../simc/expression/evaluate.js";
 import {
+  BLOOD_PRE_DECISION_WINDOW_MS,
   identityQuery,
   impossibleByBuild,
   preDecisionWindowTransition,
@@ -138,7 +187,9 @@ export type BloodRemainsProof =
   | "PROVEN_INACTIVE"
   | "PERMANENT_ACTIVE"
   | "GAIN_ANCHOR_EXACT"
-  | "GAIN_ANCHOR_BOUNDED";
+  | "GAIN_ANCHOR_BOUNDED"
+  /** The lower bound both orderings of the pre-decision window cluster agree on (M11-B8). */
+  | "WINDOW_ORDER_INVARIANT_BOUNDED";
 
 export type BloodRemainsUnboundReason =
   /** No pinned identity carries this atom name. */
@@ -161,7 +212,7 @@ export type BloodRemainsUnboundReason =
   | "DURATION_MODEL_CONTRADICTS_EVIDENCE"
   /** The decision precedes the gain in time; the capture's ordering cannot carry arithmetic. */
   | "NON_MONOTONIC_TIME"
-  /** The exact remainder lies within the tolerance of a threshold the pinned list compares this atom against. */
+  /** The exact remainder (or the order-invariant bound's exact edge) lies within the tolerance of a threshold the pinned list compares this atom against. */
   | "WITHIN_TIMING_TOLERANCE_OF_THRESHOLD";
 
 /** The gain a bound value rests on. */
@@ -171,6 +222,22 @@ export interface BloodRemainsAnchor {
   readonly operation: AuraObservation["operation"];
   readonly isStackChange: boolean;
   readonly reportTimeMs: number;
+}
+
+/**
+ * The two orderings an order-invariant window bound was taken over
+ * (M11-B8). Recorded so the evidence shows the value is the minimum of both,
+ * not a reading of either.
+ */
+export interface BloodWindowOrderInvariance {
+  /** Every transition of the identity inside the window, earliest first. */
+  readonly cluster: readonly BloodWindowTransition[];
+  /** H1: the chain before the cluster, projected to the decision, MILLISECONDS. */
+  readonly beforeClusterMs: number;
+  /** Whether H1 is itself an exact remainder or a lower bound. */
+  readonly beforeClusterProof: "GAIN_ANCHOR_EXACT" | "GAIN_ANCHOR_BOUNDED";
+  /** H2: the full duration minus the latest transition's lead, MILLISECONDS. */
+  readonly resetInClusterMs: number;
 }
 
 /** The refused threshold proximity, for WITHIN_TIMING_TOLERANCE_OF_THRESHOLD. */
@@ -189,7 +256,7 @@ export type BloodRemainsBinding =
       readonly proof: BloodRemainsProof;
       /** SECONDS: the one converted value, exactly what the expression binding carries. */
       readonly binding: NumericBinding;
-      /** MILLISECONDS, as derived: the exact remainder, or the lower bound for GAIN_ANCHOR_BOUNDED; null for zero/permanent proofs. */
+      /** MILLISECONDS, as derived: the exact remainder, or the lower bound for the two BOUNDED proofs; null for zero/permanent proofs. */
       readonly remainsMs: number | null;
       /** The pinned duration applied, MILLISECONDS; null for the build proofs. */
       readonly durationMs: number | null;
@@ -197,6 +264,8 @@ export type BloodRemainsBinding =
       readonly anchor: BloodRemainsAnchor | null;
       /** Observations walked through between the anchor and the decision (stack losses; an ambiguous refresh). */
       readonly walkedThrough: number;
+      /** The two orderings a WINDOW_ORDER_INVARIANT_BOUNDED value is the minimum over; null for every other proof. */
+      readonly windowOrderInvariance: BloodWindowOrderInvariance | null;
       readonly basis: string;
     }
   | {
@@ -244,12 +313,18 @@ function anchorOf(observation: AuraObservation): BloodRemainsAnchor {
 }
 
 /**
- * Whether a REFRESHED gain is of UNPINNED cause: a `refreshbuff` whose
- * same-millisecond companions on this identity's track include a stack
- * REMOVAL and no application. Beside a stack GAIN it is the ordinary
- * companion of a trigger; alone it is a trigger (an observed full reset:
- * three Visceral Strength expiries and one Essence expiry in the corpus
- * fall exactly one duration after a lone refresh).
+ * Whether a REFRESHED gain is of UNPROVEN cause under the identity's
+ * `remainsPolicy.loneRefresh`, read off its same-millisecond companions on
+ * the track (positions strictly before the query position):
+ *
+ *   - beside an APPLIED companion (an application or a stack gain) it is
+ *     that gain's companion under BOTH policies: never ambiguous, and the
+ *     gain is what anchors;
+ *   - PINNED_TRIGGER_RESET: ambiguous only beside a stack REMOVAL (M11-B4);
+ *     alone it is the pinned trigger's DURATION refresh;
+ *   - UNPROVEN_CAUSE: ambiguous whenever no APPLIED companion exists
+ *     (M11-B8) — the cast 0-1 ms after it, the Gift edge beside it, or the
+ *     absence of any other visible producer names no cause.
  */
 function isAmbiguousRefresh(
   input: BloodAuraInput,
@@ -272,7 +347,14 @@ function isAmbiguousRefresh(
     if (companion.operation === "APPLIED") return false;
     if (companion.operation === "REMOVED" && companion.isStackChange) removal = true;
   }
-  return removal;
+  return identity.remainsPolicy.loneRefresh === "UNPROVEN_CAUSE" || removal;
+}
+
+/** How the basis names an ambiguous refresh under the identity's policy. */
+function describeAmbiguousRefresh(identity: BloodAuraIdentity): string {
+  return identity.remainsPolicy.loneRefresh === "UNPROVEN_CAUSE"
+    ? "a refresh of unproven cause (no same-millisecond gain companion; this aura is refreshed by causes the pinned module has no producer for)"
+    : "a refresh of unpinned cause (beside a stack removal)";
 }
 
 /** Whether every observation walked through has a pinned "does not move the expiry" meaning. */
@@ -293,7 +375,8 @@ function unpinnedShapeAmong(since: readonly AuraObservation[]): AuraObservation 
  * the conservative proof order the M11-B4 design fixed:
  *
  *   1. identity pinned            2. duration modelled
- *   3. build impossibility -> 0   4. pre-decision window refusal
+ *   3. build impossibility -> 0   4. pre-decision window refusal, or the
+ *                                    order-invariant bound (M11-B8)
  *   5. M4 presence EXACT          6. INACTIVE -> 0
  *   7. PERMANENT + ACTIVE -> sentinel
  *   8. gain history under continuity from the gain
@@ -302,6 +385,20 @@ function unpinnedShapeAmong(since: readonly AuraObservation[]): AuraObservation 
  *  11. contradiction check       12. threshold tolerance
  */
 export function bindBloodRemains(input: BloodAuraInput, atomName: string): BloodRemainsBinding {
+  return bindBloodRemainsAt(input, atomName, true);
+}
+
+/**
+ * The binding proper. `windowBoundAdmitted` is true for the decision itself
+ * and FALSE for the H1 leg of the order-invariant window bound, so a cluster
+ * whose own chain runs into a second window is refused rather than bounded
+ * recursively: one disjunction over one cluster, never a chain of them.
+ */
+function bindBloodRemainsAt(
+  input: BloodAuraInput,
+  atomName: string,
+  windowBoundAdmitted: boolean,
+): BloodRemainsBinding {
   const identity = bloodAuraIdentityFor(atomName);
   if (identity === null || identity.auraClass === "DEBUFF") {
     return unbound(atomName, "IDENTITY_NOT_PINNED", identity?.abilityGameId ?? null);
@@ -329,14 +426,23 @@ export function bindBloodRemains(input: BloodAuraInput, atomName: string): Blood
       durationMs: null,
       anchor: null,
       walkedThrough: 0,
+      windowOrderInvariance: null,
       basis: `${impossible.basis}; an inactive aura's remains is 0 (buff.cpp:2020-2023)`,
     };
   }
 
-  // 4. The pre-decision window.
+  // 4. The pre-decision window: every exact reading is refused. For an
+  // identity whose policy admits it, the one fact true under both orderings
+  // of the cluster may still be bound (M11-B8); otherwise, or when that fact
+  // cannot be established, the refusal stands with the reason recorded.
   const windowTransition = preDecisionWindowTransition(input, identity);
   if (windowTransition !== null) {
-    return unbound(atomName, "PRE_DECISION_WINDOW_TRANSITION", identity.abilityGameId, { windowTransition });
+    if (!windowBoundAdmitted || !identity.remainsPolicy.windowOrderInvariantBound) {
+      return unbound(atomName, "PRE_DECISION_WINDOW_TRANSITION", identity.abilityGameId, {
+        windowTransition,
+      });
+    }
+    return orderInvariantWindowBound(input, identity, duration, windowTransition);
   }
 
   // 5-6. Presence, and the one zero path an observation can prove.
@@ -359,6 +465,7 @@ export function bindBloodRemains(input: BloodAuraInput, atomName: string): Blood
       durationMs: null,
       anchor: anchorOf(presence.value.anchor),
       walkedThrough: 0,
+      windowOrderInvariance: null,
       basis: `M4 presence EXACT INACTIVE, anchored on the removal observed at report time ${String(presence.value.anchor.reportTimeMs)}; an inactive aura's remains is 0 (buff.cpp:2020-2023)`,
     };
   }
@@ -375,6 +482,7 @@ export function bindBloodRemains(input: BloodAuraInput, atomName: string): Blood
       durationMs: 0,
       anchor: anchorOf(presence.value.anchor),
       walkedThrough: 0,
+      windowOrderInvariance: null,
       basis:
         `M4 presence EXACT ACTIVE (anchor at report time ${String(presence.value.anchor.reportTimeMs)}); the pinned ` +
         "_duration is non-positive, no expiration is scheduled, and remains() is timespan_t::min() (buff.cpp:2024-2028)",
@@ -387,6 +495,148 @@ export function bindBloodRemains(input: BloodAuraInput, atomName: string): Blood
     return unbound(atomName, "AURA_STATE_UNKNOWN", identity.abilityGameId, { auraReason: "NO_OBSERVATION" });
   }
   return deriveFromGain(input, identity, duration, decision.reportTimeMs, input.position, [], 0);
+}
+
+/** The shapes under which BOTH orderings of a window transition leave the aura active with a known floor. */
+function isOrderInvariantShape(observation: AuraObservation): boolean {
+  return (
+    (observation.operation === "APPLIED" && observation.isStackChange) ||
+    (observation.operation === "REFRESHED" && !observation.isStackChange)
+  );
+}
+
+/**
+ * The order-invariant lower bound inside the pre-decision window (M11-B8).
+ *
+ *     H1 = the ordinary derivation at the cluster's FIRST position (the state
+ *          before any transition of the cluster), minus the milliseconds from
+ *          that transition to the decision
+ *     H2 = the pinned duration minus the LATEST transition's lead
+ *     atLeast = min(H1, H2)
+ *
+ * H1 is computed with the window bound NOT admitted, so it carries every
+ * ordinary refusal and can only be an exact remainder or the gain-anchored
+ * bound. Nothing here decides which ordering happened; the value is what
+ * both leave.
+ */
+function orderInvariantWindowBound(
+  input: BloodAuraInput,
+  identity: BloodAuraIdentity,
+  duration: BloodAuraDurationIdentity,
+  latest: BloodWindowTransition,
+): BloodRemainsBinding {
+  const refuse = (detail: string): BloodRemainsBinding =>
+    unbound(identity.atomName, "PRE_DECISION_WINDOW_TRANSITION", identity.abilityGameId, {
+      windowTransition: latest,
+      detail,
+    });
+  if (duration.remainsModel !== "FIXED_DURATION_RESET_ON_GAIN") {
+    return refuse("the order-invariant bound is defined for the FIXED_DURATION_RESET_ON_GAIN model only");
+  }
+  const found = input.state.auras.transitionsWithinBefore(
+    identityQuery(input, identity),
+    input.position,
+    BLOOD_PRE_DECISION_WINDOW_MS,
+  );
+  const cluster: BloodWindowTransition[] = found.map((entry) => ({
+    position: entry.observation.position,
+    reportTimeMs: entry.observation.reportTimeMs,
+    operation: entry.observation.operation,
+    isStackChange: entry.observation.isStackChange,
+    leadMs: entry.leadMs,
+  }));
+  const first = found[0];
+  if (first === undefined) return refuse("no transition of the identity was found inside the window");
+  const offending = found.find((entry) => !isOrderInvariantShape(entry.observation));
+  if (offending !== undefined) {
+    const shape = `${offending.observation.operation}${offending.observation.isStackChange ? " (stack)" : ""}`;
+    return refuse(
+      `the window cluster holds a ${shape} transition at report time ${String(offending.observation.reportTimeMs)}; ` +
+        "the two orderings of that shape do not share a positive floor (inactive against active, or expired against active), so no order-invariant bound exists",
+    );
+  }
+  const decision = input.state.eventAt(input.position);
+  if (decision === null) return refuse("the decision position holds no event");
+
+  // H1: the ordinary derivation immediately before the cluster, window bound
+  // not admitted, then projected to the decision by the elapsed time.
+  const before = bindBloodRemainsAt(
+    { ...input, position: first.observation.position },
+    identity.atomName,
+    false,
+  );
+  if (before.state === "UNBOUND" && before.reason === "WITHIN_TIMING_TOLERANCE_OF_THRESHOLD") {
+    // H1 itself sits inside the tolerance band at the cluster's first
+    // transition (0-50 ms before the decision): the same refusal, carried.
+    return unbound(identity.atomName, "WITHIN_TIMING_TOLERANCE_OF_THRESHOLD", identity.abilityGameId, {
+      windowTransition: latest,
+      thresholdMargin: before.thresholdMargin,
+      detail: `the chain before the cluster: ${before.detail ?? "within tolerance of a pinned threshold"}`,
+    });
+  }
+  if (
+    before.state !== "BOUND" ||
+    (before.proof !== "GAIN_ANCHOR_EXACT" && before.proof !== "GAIN_ANCHOR_BOUNDED") ||
+    before.remainsMs === null
+  ) {
+    return refuse(
+      `the chain before the cluster does not establish the aura's remainder (${
+        before.state === "BOUND" ? before.proof : before.reason
+      }), so the ordering in which the cluster followed the decision has no floor`,
+    );
+  }
+  const elapsedMs = decision.reportTimeMs - first.observation.reportTimeMs;
+  if (elapsedMs < 0) {
+    return unbound(identity.atomName, "NON_MONOTONIC_TIME", identity.abilityGameId, {
+      auraReason: "NON_MONOTONIC_TIME",
+      windowTransition: latest,
+    });
+  }
+  const beforeClusterMs = before.remainsMs - elapsedMs;
+  // H2: a reset at the latest transition leaves the full duration minus its lead.
+  const resetInClusterMs = duration.finalDurationMs - latest.leadMs;
+  const atLeastMs = Math.min(beforeClusterMs, resetInClusterMs);
+  if (atLeastMs <= 0) {
+    return refuse(
+      `the floor shared by both orderings has run out (before the cluster ${String(beforeClusterMs)} ms, reset in the cluster ${String(resetInClusterMs)} ms)`,
+    );
+  }
+  // The edge is exact arithmetic on the same skewed timestamps an exact
+  // remainder is: inside the tolerance of a threshold it decides nothing.
+  for (const thresholdSeconds of pinnedRemainsThresholdSecondsFor(identity.atomName)) {
+    const marginMs = Math.abs(atLeastMs - thresholdSeconds * 1000);
+    if (marginMs <= BLOOD_REMAINS_THRESHOLD_TOLERANCE_MS) {
+      return unbound(identity.atomName, "WITHIN_TIMING_TOLERANCE_OF_THRESHOLD", identity.abilityGameId, {
+        windowTransition: latest,
+        thresholdMargin: { thresholdSeconds, remainsMs: atLeastMs, marginMs },
+        detail: `the order-invariant floor ${String(atLeastMs)} ms lies ${String(marginMs)} ms from the pinned ${String(thresholdSeconds)} s threshold; within the ${String(BLOOD_REMAINS_THRESHOLD_TOLERANCE_MS)} ms tolerance`,
+      });
+    }
+  }
+  return {
+    atomName: identity.atomName,
+    state: "BOUND",
+    abilityGameId: identity.abilityGameId,
+    proof: "WINDOW_ORDER_INVARIANT_BOUNDED",
+    // THE ONE MILLISECONDS -> SECONDS CONVERSION (order-invariant branch).
+    binding: boundedBelowNumber(atLeastMs / 1000, "STATE_NOT_ESTABLISHED"),
+    remainsMs: atLeastMs,
+    durationMs: duration.finalDurationMs,
+    anchor: before.anchor,
+    walkedThrough: before.walkedThrough + found.length,
+    windowOrderInvariance: {
+      cluster,
+      beforeClusterMs,
+      beforeClusterProof: before.proof,
+      resetInClusterMs,
+    },
+    basis:
+      `${String(found.length)} transition(s) of the identity (${cluster.map((entry) => `${entry.operation}${entry.isStackChange ? " (stack)" : ""} at ${String(entry.reportTimeMs)}`).join(", ")}) ` +
+      `sit inside the ${String(BLOOD_PRE_DECISION_WINDOW_MS)} ms pre-decision window and no ordering against the decision is chosen: ` +
+      `had they followed it, the chain before them gives ${before.proof === "GAIN_ANCHOR_EXACT" ? "exactly" : "at least"} ${String(beforeClusterMs)} ms at the decision; ` +
+      `had they preceded it, a duration reset at the latest leaves ${String(resetInClusterMs)} ms and a refresh that reset nothing leaves the former; ` +
+      `under every ordering remains >= ${String(atLeastMs)} ms`,
+  };
 }
 
 /**
@@ -418,7 +668,7 @@ function deriveFromGain(
         auraReason: reason,
         detail:
           ambiguousRefreshes.length > 0
-            ? "the last gain is a refresh of unpinned cause and no earlier gain is observed"
+            ? "the last gain is an ambiguous refresh and no earlier gain is observed"
             : "the aura is ACTIVE by a later observation, but no application or refresh precedes the decision in the observed history",
       });
     }
@@ -463,7 +713,7 @@ function deriveFromGain(
       return unbound(identity.atomName, "AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION", identity.abilityGameId, {
         detail:
           `the lower bound from the last unambiguous gain (report time ${String(gain.reportTimeMs)}) is ${String(remainsMs)} ms; ` +
-          `whether the refresh of unpinned cause at ${ambiguousRefreshes.map((r) => String(r.reportTimeMs)).join(", ")} reset the duration is not decided from later presence`,
+          `whether ${describeAmbiguousRefresh(identity)} at ${ambiguousRefreshes.map((r) => String(r.reportTimeMs)).join(", ")} reset the duration is not decided from later presence`,
       });
     }
     return {
@@ -477,9 +727,10 @@ function deriveFromGain(
       durationMs,
       anchor: anchorOf(gain),
       walkedThrough,
+      windowOrderInvariance: null,
       basis:
-        `${describeGain(gain)} under continuity; a refresh of unpinned cause at report time ` +
-        `${ambiguousRefreshes.map((r) => String(r.reportTimeMs)).join(", ")} (beside a stack removal) either reset the ` +
+        `${describeGain(gain)} under continuity; ${describeAmbiguousRefresh(identity)} at report time ` +
+        `${ambiguousRefreshes.map((r) => String(r.reportTimeMs)).join(", ")} either reset the ` +
         `${String(durationMs)} ms duration or did nothing, and under both the expiry is at least the gain plus the duration: ` +
         `remains >= ${String(remainsMs)} ms`,
     };
@@ -513,6 +764,7 @@ function deriveFromGain(
     durationMs,
     anchor: anchorOf(gain),
     walkedThrough,
+    windowOrderInvariance: null,
     basis:
       `${describeGain(gain)} under continuity to the decision, ${String(since.length)} stack loss(es) walked through ` +
       `(decrement never moves the expiry); the pinned ${String(durationMs)} ms duration resets on every gain: ` +

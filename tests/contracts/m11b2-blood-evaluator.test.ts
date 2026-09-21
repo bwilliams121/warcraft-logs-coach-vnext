@@ -48,8 +48,25 @@ const B7_REJECTED = [
   { t: 2115379, ability: HEART_STRIKE, runes: 3, bloodDebtAnchor: 2086445 },
 ] as const;
 
-/** The five decisions whose ROOT scan now selects marrowrend but whose worlds still diverge on a higher entry. */
-const B7_DIVERGENT = [2036692, 2087470, 2093667, 2097796, 2119480] as const;
+/**
+ * The two M11-B8 REJECTED decisions: Vampiric Strikes whose sanlayn[1] Heart
+ * Strike entry is FALSE from the order-invariant Essence floor, after which
+ * the same Marrowrend chain as B7 selects. Same shape as B7_REJECTED.
+ */
+const B8_REJECTED = [
+  { t: 2087470, ability: VAMPIRIC_STRIKE, runes: 3, bloodDebtAnchor: 2086445, essenceFloorMs: 11070 },
+  { t: 2093667, ability: VAMPIRIC_STRIKE, runes: 3, bloodDebtAnchor: 2086445, essenceFloorMs: 18803 },
+] as const;
+
+/** Every REJECTED after M11-B8, in canonical order: B7's seven plus B8's two. */
+const REJECTED_AFTER_B8 = [...B7_REJECTED, ...B8_REJECTED].sort((left, right) => left.t - right.t);
+
+/**
+ * The decisions whose ROOT scan selects marrowrend but whose worlds still
+ * diverge on a higher entry: B7's five minus the two B8 resolved (their
+ * higher entry was sanlayn[1] on the Essence remainder).
+ */
+const B7_DIVERGENT = [2036692, 2097796, 2119480] as const;
 
 /** The nine Marrowrend-usability blockers whose cast carries no Rune entry: 7 Death Strikes, 2 free Heart Strikes. */
 const B7_NO_RUNE_OBSERVATION = [
@@ -103,7 +120,7 @@ describe("the measurement over the composed 165 s fight", () => {
   const analysis = analyzed(corpusBundleState(BUNDLE, []));
   const { coverage } = analysis;
 
-  it("discloses 44 resolved decisions out of 123 — 37 MATCH and 7 REJECTED — with every excluded cast counted", () => {
+  it("discloses 46 resolved decisions out of 123 — 37 MATCH and 9 REJECTED — with every excluded cast counted", () => {
     // RE-POINTED for M11-B4 (21), M11-B5 (25), M11-B6 (37) and M11-B7 (37 + 7). B4's 21 are
     // Death Strikes whose own PRE_COST Runic Power decided the Death Strike
     // gate. B5 carries Runic Power to the other decisions, and four Blood
@@ -120,12 +137,16 @@ describe("the measurement over the composed 165 s fight", () => {
     // the observed Heart Strike or Vampiric Strike carried 3-5 Runes the
     // authority selects marrowrend instead — 7 REJECTED, each an
     // authority-selected-different-token divergence and not a score. The 37
-    // MATCH are untouched.
+    // MATCH are untouched. B8 reads no lone Essence refresh as an exact
+    // anchor and binds, inside the pre-decision window, only the floor both
+    // orderings share: two Vampiric Strikes whose sanlayn[1] entry is FALSE
+    // from that floor join the REJECTED through the same Marrowrend chain,
+    // and the 37 MATCH are still untouched.
     expect(coverage).toMatchObject({
       eligibleDecisions: 123,
       match: 37,
-      rejected: 7,
-      unknown: 79,
+      rejected: 9,
+      unknown: 77,
       excludedCastCount: 148,
     });
     const matched = new Map<string, number>();
@@ -143,7 +164,8 @@ describe("the measurement over the composed 165 s fight", () => {
       );
     }
     expect(Object.fromEntries(matched)).toEqual({ death_strike: 27, heart_strike: 6, blood_boil: 4 });
-    expect(Object.fromEntries(precision)).toEqual({ EXACT_ENTRY: 32, TOKEN_CONVERGED: 5 });
+    // M11-B8: the Vampiric Strike at 2,029,599 is EXACT_ENTRY — sanlayn[1] is FALSE from the Essence floor.
+    expect(Object.fromEntries(precision)).toEqual({ EXACT_ENTRY: 33, TOKEN_CONVERGED: 4 });
     // The MATCH population is exactly the M11-B6 one, decision by decision.
     const matchedAt = analysis.comparisons
       .filter((comparison) => comparison.outcome === "MATCH")
@@ -238,25 +260,40 @@ describe("the measurement over the composed 165 s fight", () => {
     // and the 9 whose cast carried no Rune entry — 7 Death Strikes and 2
     // Dance-of-Midnight-free Heart Strikes — stay exactly where they were.
     // Nothing else moves: no Rune value is carried into a decision that did
-    // not observe one.
+    // not observe one. RE-POINTED for M11-B8: the Essence window refusals
+    // (san_gift[0] 14, sanlayn[1] 11) become floors where both orderings of
+    // the cluster share one — the Gift-window Vampiric Strikes advance to
+    // san_gift[2] (4) and san_gift[3] on the Essence stack (12, positive
+    // counts deferred), the sanlayn ones to sanlayn[7] (1), sanlayn[5] (2)
+    // and two REJECTED; three clusters with no floor before them and the
+    // fresh application at 2,008,597 stay on the Essence remainder.
+    // sanlayn[9] now carries the Essence remainder beside fight_remains at
+    // 11 decisions whose remainder is UNKNOWN past every floor a lone
+    // refresh could keep — decisions already UNKNOWN on fight_remains, so
+    // nothing resolves and nothing regresses. The Marrowrend-usability
+    // blockers rise by one (2,035,179, released from sanlayn[1]).
     expect(Object.fromEntries(firstObstacle)).toEqual({
-      "(none)": 39,
-      "sanlayn[9] death_strike | fight_remains": 20,
-      "sanlayn[7] marrowrend | USABILITY:marrowrend": 9,
-      "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 14,
-      "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains,fight_remains": 11,
+      "(none)": 42,
+      "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 12,
+      "sanlayn[9] death_strike | fight_remains,buff.essence_of_the_blood_queen.remains": 11,
+      "sanlayn[7] marrowrend | USABILITY:marrowrend": 10,
+      "sanlayn[9] death_strike | fight_remains": 9,
       "sanlayn[0] deaths_caress | buff.bone_shield.up,buff.bone_shield.remains,buff.bone_shield.stack": 6,
-      "sanlayn[0] deaths_caress | buff.bone_shield.stack": 1,
-      "sanlayn[5] any_dnd | USABILITY:any_dnd": 4,
+      "sanlayn[5] any_dnd | USABILITY:any_dnd": 5,
+      "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains,fight_remains": 4,
       "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up,fight_remains": 3,
-      "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 3,
+      "san_gift[2] any_dnd | buff.crimson_scourge.remains,buff.visceral_strength.remains": 3,
       "sanlayn[2] death_strike | runic_power.deficit": 3,
       "sanlayn[2] death_strike | USABILITY:death_strike": 3,
       "sanlayn[8] heart_strike | buff.vampiric_strike.up": 2,
       "sanlayn[6] blood_boil | USABILITY:blood_boil": 2,
+      "sanlayn[1] heart_strike | fight_remains": 2,
+      "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 1,
+      "san_gift[2] any_dnd | buff.visceral_strength.remains": 1,
       "sanlayn[6] blood_boil | buff.boiling_point.up": 1,
+      "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 1,
+      "sanlayn[0] deaths_caress | buff.bone_shield.stack": 1,
       "san_gift[1] death_strike | USABILITY:death_strike": 1,
-      "sanlayn[8] heart_strike | USABILITY:heart_strike": 1,
     });
     expect([...firstObstacle.keys()].some((key) => key.includes("buff.blood_debt.stack"))).toBe(false);
   });
@@ -351,12 +388,22 @@ describe("the measurement over the composed 165 s fight", () => {
   });
 
   it("takes the M11-B4 remains census: exact, bounded, zero-by-proof, permanent, and every refusal by name", () => {
+    // RE-POINTED for M11-B8 (Essence only; every other aura's row is B4's).
+    // A lone Essence refresh anchors nothing exact: 96 EXACT become 24 (a
+    // gain or its same-millisecond companion), 40 BOUNDED (the earlier
+    // proven expiry kept as a floor past lone refreshes) and 32 UNKNOWN past
+    // every floor; the 26 window refusals become 20 order-invariant floors
+    // and 6 refusals (two fresh applications, the expiry at 2,071,379, and
+    // three clusters whose chain before them has run out).
     expect(Object.fromEntries(coverage.remainsEvidence.map((row) => [row.key, row.count]))).toEqual({
       "bone_shield | EXACT": 11,
       "bone_shield | BOUNDED": 104,
       "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 8,
-      "essence_of_the_blood_queen | EXACT": 96,
-      "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 26,
+      "essence_of_the_blood_queen | EXACT": 24,
+      "essence_of_the_blood_queen | BOUNDED": 40,
+      "essence_of_the_blood_queen | AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION": 32,
+      "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_BOUNDED": 20,
+      "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 6,
       "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
       "vampiric_strike | PERMANENT": 15,
       "vampiric_strike | ZERO_BY_PROOF": 88,
@@ -382,8 +429,9 @@ describe("the measurement over the composed 165 s fight", () => {
         .reduce((sum, row) => sum + row.count, 0);
       expect(total, atom).toBe(123);
     }
-    // No exact remainder fell within 50 ms of a pinned threshold, no gap and no
-    // contradiction was met: every refusal is a window or a presence refusal.
+    // No exact remainder or order-invariant edge fell within 50 ms of a pinned
+    // threshold, no gap and no contradiction was met: every refusal is a
+    // window refusal, a presence refusal, or an Essence floor that has run out.
     expect(
       coverage.remainsEvidence.some((row) => /TOLERANCE|CONTRADICTS|CONTINUITY|NO_GAIN/.test(row.key)),
     ).toBe(false);
@@ -399,9 +447,8 @@ describe("the measurement over the composed 165 s fight", () => {
         "bone_shield | stack | lead 20": 1,
         "bone_shield | remains | lead 20": 1,
         "essence_of_the_blood_queen | stack | lead 0": 23,
-        "essence_of_the_blood_queen | remains | lead 0": 23,
+        "essence_of_the_blood_queen | remains | lead 0": 6,
         "essence_of_the_blood_queen | stack | lead 1": 3,
-        "essence_of_the_blood_queen | remains | lead 1": 3,
         "crimson_scourge | remains | lead 38": 1,
         "death_and_decay | up | lead 0": 1,
         "death_and_decay | up | lead 20": 1,
@@ -420,6 +467,27 @@ describe("the measurement over the composed 165 s fight", () => {
         }
         if (binding.proof === "GAIN_ANCHOR_BOUNDED") expect(binding.binding.state).toBe("BOUNDED_NUMBER");
         if (binding.proof === "GAIN_ANCHOR_EXACT") expect(binding.binding.state).toBe("KNOWN_NUMBER");
+        // M11-B8: the order-invariant floor is a bound over both orderings, never a KNOWN value,
+        // never below either world, and only for the identity whose policy admits it.
+        if (binding.proof === "WINDOW_ORDER_INVARIANT_BOUNDED") {
+          expect(binding.atomName).toBe("essence_of_the_blood_queen");
+          expect(binding.binding.state).toBe("BOUNDED_NUMBER");
+          expect(binding.windowOrderInvariance).not.toBeNull();
+          if (binding.windowOrderInvariance !== null && binding.remainsMs !== null) {
+            const { beforeClusterMs, resetInClusterMs, cluster } = binding.windowOrderInvariance;
+            expect(binding.remainsMs).toBe(Math.min(beforeClusterMs, resetInClusterMs));
+            expect(binding.remainsMs).toBeGreaterThan(0);
+            expect(cluster.length).toBeGreaterThan(0);
+            for (const transition of cluster) {
+              expect(transition.leadMs).toBeGreaterThanOrEqual(0);
+              expect(transition.leadMs).toBeLessThanOrEqual(50);
+              expect(transition.operation === "REFRESHED" || transition.isStackChange).toBe(true);
+              expect(transition.operation).not.toBe("REMOVED");
+            }
+          }
+        } else {
+          expect(binding.windowOrderInvariance).toBeNull();
+        }
       }
     }
   });
@@ -496,7 +564,8 @@ describe("the measurement over the composed 165 s fight", () => {
     );
     expect(drwRows.reduce((sum, row) => sum + row.count, 0)).toBe(6);
     // The remainder candidates M11-B3 measured (98 and 24) are now only the
-    // window-refused decisions (6 and 14).
+    // window-refused decisions (6), and — since M11-B8 — the one Gift-window
+    // Vampiric Strike whose cluster is the fresh application at 2,008,597.
     expect(
       coverage.undecidedGcdCandidates.find(
         (row) => row.key === "sanlayn[0] deaths_caress | buff.bone_shield.remains",
@@ -506,7 +575,7 @@ describe("the measurement over the composed 165 s fight", () => {
       coverage.undecidedGcdCandidates.find(
         (row) => row.key === "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains",
       )?.count,
-    ).toBe(14);
+    ).toBe(1);
   });
 
   it("never proves unselectability for a token every list names unconditionally, and names the refusing entry", () => {
@@ -538,12 +607,12 @@ describe("the measurement over the composed 165 s fight", () => {
     }
   });
 
-  it("M11-B7: rejects exactly seven decisions, each from the cast's own exact Rune count, the pinned cost and a Blood Debt count of 10", () => {
+  it("M11-B7 / M11-B8: rejects exactly nine decisions, each from the cast's own exact Rune count, the pinned cost and a Blood Debt count of 10", () => {
     const rejected = analysis.comparisons.filter((comparison) => comparison.outcome === "REJECTED");
     expect(rejected.map((comparison) => comparison.decision.reportTimeMs)).toEqual(
-      B7_REJECTED.map((row) => row.t),
+      REJECTED_AFTER_B8.map((row) => row.t),
     );
-    for (const expected of B7_REJECTED) {
+    for (const expected of REJECTED_AFTER_B8) {
       const comparison = rejected.find((row) => row.decision.reportTimeMs === expected.t);
       expect(comparison, String(expected.t)).toBeDefined();
       if (comparison === undefined) continue;
@@ -593,12 +662,16 @@ describe("the measurement over the composed 165 s fight", () => {
       if (bloodDebt?.state === "BOUND") {
         expect(bloodDebt.anchor?.reportTimeMs).toBe(expected.bloodDebtAnchor);
         expect(bloodDebt.anchor?.locator.rawType).toBe("applybuffstack");
-        expect(expected.t - expected.bloodDebtAnchor).toBeGreaterThan(5000);
+        // Well outside the 10-49 ms write lag the B6 census measured (the B7
+        // seven sit 5-29 s past their anchor; B8's 2,087,470 sits 1,025 ms past
+        // the applybuffstack at 2,086,445, still beyond the 702 ms minimum
+        // decision gap that census pinned).
+        expect(expected.t - expected.bloodDebtAnchor).toBeGreaterThan(702);
       }
     }
   });
 
-  it("M11-B7: keeps the five decisions whose root scan selects marrowrend UNKNOWN while a higher entry diverges", () => {
+  it("M11-B7: keeps the three decisions whose root scan selects marrowrend UNKNOWN while a higher entry diverges (B8 resolved the other two)", () => {
     for (const t of B7_DIVERGENT) {
       const comparison = analysis.comparisons.find((row) => row.decision.reportTimeMs === t);
       expect(comparison, String(t)).toMatchObject({
@@ -723,6 +796,9 @@ describe("the second subject", () => {
     // decision, and the next obstacle is the Blood Debt stack or an Essence window.
     // Unchanged by M11-B7: no opener decision has Blood Debt at 10 with a
     // Rune-costed cast, so the Marrowrend proof selects nothing there.
+    // Unchanged in outcome by M11-B8: the six Gift-window Vampiric Strikes
+    // whose Essence remainder is now a floor advance to san_gift[2] on the
+    // Crimson Scourge / Visceral Strength remainders, still UNKNOWN.
     expect(analysis.coverage).toMatchObject({ eligibleDecisions: 21, match: 1, rejected: 0, unknown: 20 });
     expect(
       Object.fromEntries(analysis.coverage.runeAffordabilityEvidence.map((row) => [row.key, row.count])),
@@ -742,7 +818,7 @@ describe("the second subject", () => {
       analysis.coverage.undecidedGcdCandidates.find(
         (row) => row.key === "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains",
       )?.count,
-    ).toBe(8);
+    ).toBe(2);
     // Bone Shield's remainder is EXACT at 20 of 21 opener decisions (the
     // first in-fight stack gain anchors it) and window-refused at 1.
     expect(
@@ -753,8 +829,10 @@ describe("the second subject", () => {
     expect(Object.fromEntries(analysis.coverage.remainsEvidence.map((row) => [row.key, row.count]))).toEqual({
       "bone_shield | EXACT": 20,
       "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 1,
-      "essence_of_the_blood_queen | EXACT": 13,
-      "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 7,
+      "essence_of_the_blood_queen | EXACT": 6,
+      "essence_of_the_blood_queen | BOUNDED": 7,
+      "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_BOUNDED": 6,
+      "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 1,
       "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
       "vampiric_strike | AURA_STATE_UNKNOWN": 21,
       "crimson_scourge | EXACT": 1,

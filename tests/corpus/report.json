@@ -441,8 +441,8 @@
       "passed": 51
     },
     {
-      "assertions": 163,
-      "cases": 12,
+      "assertions": 197,
+      "cases": 13,
       "failed": 0,
       "kindsExercised": [
         "SPEC_BLOOD_DEATH_KNIGHT.ANALYSIS_STATUS",
@@ -470,7 +470,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
-      "passed": 163
+      "passed": 197
     },
     {
       "assertions": 11,
@@ -2951,6 +2951,199 @@
         ]
       },
       "caseId": "spec-blood-death-knight.blood-debt-is-read-from-its-own-transitions-and-never-from-a-death-strike",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "referencedArtifactIds": [
+        "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+        "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
+        "wcl-blood-death-knight-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "ordinal": 7,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT",
+          "ordinal": 8,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "ordinal": 9,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "ordinal": 10,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "ordinal": 11,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "ordinal": 12,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 13,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "ordinal": 14,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 15,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "ordinal": 16,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "ordinal": 17,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "ordinal": 18,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "ordinal": 19,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "ordinal": 20,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "ordinal": 21,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 22,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 23,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 24,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 25,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 26,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 27,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "ordinal": 28,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 29,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 30,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 31,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "ordinal": 32,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "ordinal": 33,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-and-the-window-bound-is-the-floor-both-orderings-share",
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
       "referencedArtifactIds": [
         "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
@@ -5638,13 +5831,13 @@
   "totals": {
     "artifactBytes": 4792400,
     "artifacts": 43,
-    "assertions": 605,
-    "cases": 158,
+    "assertions": 639,
+    "cases": 159,
     "declared": 0,
-    "executable": 605,
+    "executable": 639,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 605
+    "passed": 639
   }
 }

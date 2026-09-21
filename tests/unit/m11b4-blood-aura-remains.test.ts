@@ -10,6 +10,14 @@
  * the two readings of a refresh beside a stack removal — only the bound both
  * agree on, and UNKNOWN once that bound has run out; no exact verdict within
  * 50 ms of a pinned threshold; no later removal consulted.
+ *
+ * RE-PINNED for M11-B8 in two places: a lone Essence of the Blood Queen
+ * refresh is of unproven cause (a floor from the earlier gain, never an
+ * exact reset), and inside the window Essence's `.remains` binds the floor
+ * both orderings share while `.stack` stays refused. Everything else here —
+ * Bone Shield, Crimson Scourge, Visceral Strength, the window on `.up` and
+ * `.stack`, the tolerance — is unchanged; `m11b8-blood-ebq-remains.test.ts`
+ * carries the B8 cases.
  */
 
 import { describe, expect, it } from "vitest";
@@ -230,25 +238,33 @@ describe("exact remains under the FIXED_DURATION_RESET_ON_GAIN model", () => {
     });
   });
 
-  it("Essence of the Blood Queen: 25 s (20 s + the 5 s specialization modifier), from apply, stack gain and refresh", () => {
+  it("Essence of the Blood Queen: 25 s (20 s + the 5 s specialization modifier), from apply and stack gain; a lone refresh is not an anchor (M11-B8)", () => {
     const EBQ = ESSENCE_OF_THE_BLOOD_QUEEN_BUFF_SPELL_ID;
     const applied = stateOf([aura(0, 1000, EBQ, "APPLIED"), cast(1, 5000)]);
     expect(bindBloodRemains(input(applied, 1), "essence_of_the_blood_queen")).toMatchObject({
       state: "BOUND",
+      proof: "GAIN_ANCHOR_EXACT",
       remainsMs: 21_000,
       durationMs: 25_000,
     });
     const gained = stateOf([aura(0, 1000, EBQ, "APPLIED"), aura(1, 3000, EBQ, "APPLIED", 2), cast(2, 5000)]);
     expect(bindBloodRemains(input(gained, 2), "essence_of_the_blood_queen")).toMatchObject({
+      proof: "GAIN_ANCHOR_EXACT",
       remainsMs: 23_000,
     });
+    // A lone refresh is of unproven cause for this identity: the exact expiry
+    // stays the application's, and the refresh can only keep it as a floor.
     const refreshed = stateOf([
       aura(0, 1000, EBQ, "APPLIED"),
       aura(1, 4000, EBQ, "REFRESHED"),
       cast(2, 5000),
     ]);
     expect(bindBloodRemains(input(refreshed, 2), "essence_of_the_blood_queen")).toMatchObject({
-      remainsMs: 24_000,
+      state: "BOUND",
+      proof: "GAIN_ANCHOR_BOUNDED",
+      remainsMs: 21_000,
+      anchor: { reportTimeMs: 1000, operation: "APPLIED" },
+      binding: { state: "BOUNDED_NUMBER", atLeast: 21 },
     });
   });
 
@@ -608,14 +624,33 @@ describe("over the committed evidence", () => {
     expect(bindBloodRemains(input(state, position), "bone_shield")).toMatchObject(expected);
   });
 
-  it("refuses Essence at a Vampiric Strike whose own Essence transition precedes it by 1 ms", () => {
+  it("refuses every EXACT reading of Essence at a Vampiric Strike whose own Essence transition precedes it, and binds only the floor both orderings share (M11-B8)", () => {
     const state = corpusState(BLOOD45);
     const position = at(state, 2_010_375, VAMPIRIC_STRIKE);
-    // The corpus writes `applybuffstack 3` + `refreshbuff` at 2,010,375: lead 0 here …
-    expect(bindBloodRemains(input(state, position), "essence_of_the_blood_queen")).toMatchObject({
+    // The corpus writes `applybuffstack 3` + `refreshbuff` at 2,010,375, lead 0.
+    // The count and presence stay refused; the remainder is the minimum of the
+    // chain before the cluster (the stack gain at 2,009,578 + 25,000 - 2,010,375
+    // = 24,203 ms) and a reset inside it (25,000 ms) — never a KNOWN value.
+    expect(bindBloodStack(input(state, position), "essence_of_the_blood_queen")).toMatchObject({
       state: "UNBOUND",
       reason: "PRE_DECISION_WINDOW_TRANSITION",
       windowTransition: { leadMs: 0 },
+    });
+    expect(bindBloodRemains(input(state, position), "essence_of_the_blood_queen")).toMatchObject({
+      state: "BOUND",
+      proof: "WINDOW_ORDER_INVARIANT_BOUNDED",
+      remainsMs: 24_203,
+      binding: { state: "BOUNDED_NUMBER", atLeast: 24.203 },
+      anchor: { reportTimeMs: 2_009_578, operation: "APPLIED", isStackChange: true },
+      windowOrderInvariance: {
+        beforeClusterMs: 24_203,
+        beforeClusterProof: "GAIN_ANCHOR_EXACT",
+        resetInClusterMs: 25_000,
+        cluster: [
+          { reportTimeMs: 2_010_375, operation: "APPLIED", isStackChange: true, leadMs: 0 },
+          { reportTimeMs: 2_010_375, operation: "REFRESHED", isStackChange: false, leadMs: 0 },
+        ],
+      },
     });
   });
 

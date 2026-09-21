@@ -1,4 +1,4 @@
-# Blood Death Knight — INTERNAL_ONLY measurement slice (M11-B2)
+# Blood Death Knight — INTERNAL_ONLY measurement slice (M11-B2 … M11-B8)
 
 **Exposure: `INTERNAL_ONLY`.** This evaluator is registered in the
 production catalog (`deathknight-blood-observed-decisions`,
@@ -62,11 +62,11 @@ PREDICTIVE state) and Consumption.
 | `buff.<x>.up` (8 atoms) | M4 `presenceAt` FROM_SOURCE self, strictly before the decision | an observed transition; or DOWN by hero-tree exclusion / a disproved producing talent |
 | `buff.bone_shield.stack` | the last stack-bearing transition's absolute count | only across same-millisecond refresh companions under EXACT ACTIVE presence |
 | `buff.blood_debt.stack` | the last stack-bearing transition's absolute count, or the pinned 1 of a plain application preceded by a removal or by nothing (M11-B6) | under EXACT ACTIVE presence; an application to an aura already held refuses |
-| `buff.essence_of_the_blood_queen.stack` | the two build proofs and PROVEN_INACTIVE | exactly zero only |
+| `buff.essence_of_the_blood_queen.stack` | the two build proofs and PROVEN_INACTIVE | exactly zero only (the pinned `maxStack` 5 is contradicted by the observed 6 and 7 under Frenzied Bloodthirst, so no positive count and no `stack<7` from it) |
+| `buff.<x>.remains` (5 atoms, M11-B4/B8) | the last exact gain (an `applybuff` / `applybuffstack`, or a lone `refreshbuff` only where the identity's policy reads it as the pinned trigger) plus the pinned Blood duration, under continuity from the gain | exact from the gain; a lower bound past a refresh of unpinned or unproven cause; for Essence inside the 50 ms window, the floor both orderings of the cluster share (`WINDOW_ORDER_INVARIANT_BOUNDED`) |
 | `cooldown.dancing_rune_weapon.remains` | the shared token-cooldown derivation over the pinned record | an observed cast within 90,000 ms (Insatiable Blade SELECTED) |
 
-Never bound: `buff.<x>.remains` (no binding field exists),
-`debuff.reapers_mark_debuff.up` (no debuff field exists), `fight_remains`
+Never bound: `debuff.reapers_mark_debuff.up` (no debuff field exists), `fight_remains`
 (PREDICTIVE), any Runic Power affordability (the wire's `cost` field is the
 DBC base, not the amount paid — 450 reported, 350 paid), any Rune
 regeneration (not on the wire), Vampiric Blood's cooldown (dynamic under Red
@@ -253,6 +253,63 @@ usability 4, the Dancing Rune Weapon gate 3, Essence stack 3, Runic Power
 after a spend 3, Death Strike usability 3 + 1, Blood Boil usability 2,
 `buff.vampiric_strike.up` 2, Boiling Point 1, Heart Strike usability 1.
 
+M11-B8 stopped anchoring exact Essence remainders on lone refreshes and
+bound, inside the window, the floor both orderings share (see the Essence
+policy below). Result: **37 MATCH / 9 REJECTED / 77 UNKNOWN** — the 37
+MATCH unchanged decision for decision (33 EXACT_ENTRY, 4 TOKEN_CONVERGED:
+the Vampiric Strike at 2,029,599 became EXACT_ENTRY once `sanlayn[1]` was
+FALSE from its floor), the seven B7 REJECTED unchanged, and two more: the
+Vampiric Strikes at 2,087,470 (floor 11,070 ms from the application at
+2,073,540) and 2,093,667 (floor 18,803 ms past a 1 ms lead cluster), each
+at Blood Debt exactly 10 with 3 Runes, `sanlayn[7] marrowrend` selected
+and no competing candidate. The 45 s slice is 15 / 3 / 30; the opener 1 /
+0 / 20. Essence remainders over the 123: EXACT 24, BOUNDED 40,
+AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION 32, WINDOW_ORDER_INVARIANT_BOUNDED
+20, window-refused 6, presence-unknown 1 (opener 6 / 7 / 0 / 6 / 1 / 1);
+seventeen bundle and six opener decisions — five MATCH and three REJECTED
+among them — no longer rest on a Gift-edge refresh, and every one keeps its
+outcome on evidence that never read the Essence remainder. The
+first-blocker ranking after B8: `san_gift[3]` Essence stack 12,
+`sanlayn[9]` `fight_remains` 9 + 11 (the latter now also carrying the
+Essence remainder), Marrowrend usability 10, Bone Shield window 7,
+`any_dnd` usability 5, `san_gift[2]` 4, the Dancing Rune Weapon gate 3,
+Death Strike usability 3 + 1, Runic Power after a spend 3,
+`buff.vampiric_strike.up` 2, Blood Boil usability 2, `sanlayn[1]` 2,
+`san_gift[0]` 1, Boiling Point 1, Crimson Scourge 1.
+
+## The Essence of the Blood Queen policy (M11-B8)
+
+Essence (433925) lasts exactly 25,000 ms for every Blood actor — the DBC
+20,000 ms plus the specialization passive's 5,000 ms by label — under a
+DURATION refresh: a `buff_t::trigger` on the active aura reschedules the
+expiry to the full duration, and the pinned module's only producer is that
+trigger on a Vampiric Strike execution. The corpus, however, carries a lone
+`refreshbuff` of the aura at every Gift of the San'layn edge with no
+Vampiric Strike near it — an event the pinned module cannot write. So the
+identity's `remainsPolicy` (`deathknight-blood-aura-authority.ts`) reads
+a lone refresh as `UNPROVEN_CAUSE`: a `refreshbuff` with no
+same-millisecond `applybuff` / `applybuffstack` companion is never assigned
+a cause (not by the cast 0-1 ms after it, not by the Gift edge beside it,
+not by the absence of any other producer) and never anchors an exact
+remainder. It cannot shorten an expiry already proven, so the earlier gain's
+expiry survives as a lower bound (`GAIN_ANCHOR_BOUNDED`, walked back through
+consecutive lone refreshes), and once that has run out the remainder is
+UNKNOWN (`AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION`). A refresh beside an
+exact gain is that gain's companion; the gain anchors. Bone Shield, Crimson
+Scourge and Visceral Strength keep the M11-B4 reading
+(`PINNED_TRIGGER_RESET`).
+
+Inside the 50 ms pre-decision window every exact reading is still refused
+and `.up` / `.stack` are unchanged; for Essence's `.remains` only, the
+floor true under BOTH orderings of the cluster is bound: H1, the chain
+before the cluster (every ordinary refusal applies; no nested window) minus
+the elapsed time, had the cluster followed the decision; H2, 25,000 ms minus
+the latest lead, had a reset in it preceded the decision; `atLeast =
+min(H1, H2)`, a `BOUNDED_NUMBER`, with both worlds recorded on the binding.
+A cluster holding a plain application or any removal, an H1 the rules cannot
+establish, a floor that has run out, or an edge within the 50 ms tolerance
+of the pinned 1.5 s / 8 s thresholds is refused. No ordering is chosen.
+
 ## What this module refuses on purpose
 
 - No Runic Power value that was not read off the wire: no `pre - cost`, no
@@ -268,6 +325,13 @@ after a spend 3, Death Strike usability 3 + 1, Blood Boil usability 2,
   causal attribution of a transition inside the pre-decision window, no
   exact verdict within `BLOOD_REMAINS_THRESHOLD_TOLERANCE_MS` = 50 ms of a
   pinned threshold (the M11-B4 boundary).
+- No cause for any lone Essence refresh and no exact expiry from one, no
+  positive Essence count and no `stack<7` from the pinned `maxStack` the
+  wire contradicts, no ordering chosen inside the window, no bound from a
+  cluster holding an application or a removal, no nested window bound, no
+  order-invariant edge inside the threshold tolerance, no change to the
+  window or tolerance constants or to any other identity (the M11-B8
+  boundary).
 - No GCD numeric bounds, no `empower_to` support, no new action option, no
   target-count or enemy-roster model, no `target_if`, no undecided-run world
   splitting, no generic variables, no pet state, no charge model, no
@@ -298,7 +362,8 @@ Files: `spec.ts` (identity), `pinned-authority.ts`, `authority-bindings.ts`
 (six capabilities, one binding), `vocabulary.ts`, `resolver.ts`,
 `resources.ts`, `runic-power-state.ts` (the Runic Power carry),
 `aura-bindings.ts` (presence, the exact-count rule for Bone Shield and Blood
-Debt), `aura-remains.ts` (the remains derivation), `remains-thresholds.ts` (the pinned list's thresholds, read
+Debt), `aura-remains.ts` (the remains derivation; the Essence lone-refresh
+policy and the order-invariant window floor, M11-B8), `remains-thresholds.ts` (the pinned list's thresholds, read
 from the parsed authority), `rune-affordability.ts` (Marrowrend's Rune
 affordability fact, M11-B7), `cooldown-bindings.ts`,
 `domain-boundary.ts`, `domains.ts`, `action-profile.ts`,
@@ -312,5 +377,6 @@ Tests: `tests/unit/m11b2-blood-*.test.ts`, `tests/unit/m11b4-*.test.ts`,
 `tests/unit/m11b5-*.test.ts`, `tests/unit/m11b6-blood-debt-stack.test.ts`
 (with `tests/support/m11/blood-debt-census.ts`),
 `tests/unit/m11b7-blood-rune-affordability.test.ts`,
+`tests/unit/m11b8-blood-ebq-remains.test.ts`,
 `tests/contracts/m11b2-blood-*.test.ts`, corpus cases
 `spec-blood-death-knight.*`.

@@ -579,6 +579,20 @@ export function remainsBindingAt(
           anchorReportTimeMs: remains.anchor?.reportTimeMs ?? null,
           reason: null,
           windowLeadMs: null,
+          windowOrderInvariance:
+            remains.windowOrderInvariance === null
+              ? null
+              : {
+                  cluster: remains.windowOrderInvariance.cluster.map((entry) => ({
+                    reportTimeMs: entry.reportTimeMs,
+                    operation: entry.operation,
+                    isStackChange: entry.isStackChange,
+                    leadMs: entry.leadMs,
+                  })),
+                  beforeClusterMs: remains.windowOrderInvariance.beforeClusterMs,
+                  beforeClusterProof: remains.windowOrderInvariance.beforeClusterProof,
+                  resetInClusterMs: remains.windowOrderInvariance.resetInClusterMs,
+                },
         }
       : {
           state: remains.state,
@@ -588,6 +602,7 @@ export function remainsBindingAt(
           anchorReportTimeMs: null,
           reason: remains.reason,
           windowLeadMs: remains.windowTransition?.leadMs ?? null,
+          windowOrderInvariance: null,
         };
   if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
     return fail("the remains binding at this decision differs from the case", {

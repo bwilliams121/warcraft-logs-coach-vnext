@@ -221,7 +221,7 @@ export interface BloodDecisionCoverage {
   readonly undecidedGcdCandidates: readonly CountOf<string>[];
   /**
    * Every eligible decision's `buff.<name>.remains` evidence, per modelled
-   * aura, as `atom | EXACT / BOUNDED / ZERO_BY_PROOF / PERMANENT / <unbound reason>`
+   * aura, as `atom | EXACT / BOUNDED / WINDOW_ORDER_INVARIANT_BOUNDED / ZERO_BY_PROOF / PERMANENT / <unbound reason>`
    * -> count (M11-B4). The census the remains slice exists to take.
    */
   readonly remainsEvidence: readonly CountOf<string>[];
@@ -853,6 +853,8 @@ export function remainsEvidenceClassOf(binding: BloodRemainsBinding): string {
       return "EXACT";
     case "GAIN_ANCHOR_BOUNDED":
       return "BOUNDED";
+    case "WINDOW_ORDER_INVARIANT_BOUNDED":
+      return "WINDOW_ORDER_INVARIANT_BOUNDED";
     case "PERMANENT_ACTIVE":
       return "PERMANENT";
     default:

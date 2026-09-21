@@ -6435,6 +6435,180 @@ byte-identical against HEAD (d421981) — Assassination, Protection,
 Retribution, Arms, every raid night and every public document unchanged.
 Blood stays INTERNAL_ONLY; M11-B is not complete.
 
+### M11-B8 — Essence of the Blood Queen: lone refreshes of unproven cause, and the floor both orderings share
+
+Two changes to one Blood-owned module (`aura-remains.ts`) and one
+identity-owned policy (`deathknight-blood-aura-authority.ts`,
+`BloodRemainsPolicy`), no shared-engine change, no new public enum, Blood
+still INTERNAL_ONLY. One corrects an M11-B4 proof that the corpus had
+falsified; the other admits, inside the 50 ms pre-decision window, the one
+fact that is true under every ordering of the events in it.
+
+**The pinned mechanics, re-verified against 33622e9d / client
+12.1.0.69587.** Essence of the Blood Queen (433925) lasts 20,000 ms in the
+DBC plus 5,000 ms from the Blood specialization passive (137008 effect 16,
+`A_ADD_FLAT_LABEL_MODIFIER` P_DURATION on label 3134): exactly 25,000 ms,
+not haste-scaled, not pandemic, not additive, not stack-dependent, not
+altered by any supported talent or by the hero tree (Frenzied Bloodthirst
+434075 and Gift of the San'layn 434153 modify label 3134's max stacks and
+effect values, never P_DURATION). Refresh behaviour is DURATION: a
+`buff_t::trigger` on the active buff reschedules the expiry to the full
+duration. The module has exactly ONE producer —
+`buffs.essence_of_the_blood_queen->trigger()` in
+`trigger_sanlayn_execute_talents` (sc_death_knight.cpp:13808) on a Vampiric
+Strike execution — and no `expire()`, `extend_duration()` or
+`set_max_stack()` for it.
+
+**What the corpus showed that the model does not.** Both subjects' wires
+carry a lone `refreshbuff` of 433925 at every Gift of the San'layn edge with
+no Vampiric Strike cast anywhere near it: 2,019,763 and 2,111,891 (the two
+Gift removals), 2,099,885 (the second Dancing Rune Weapon), opener
+2,429,050. The pinned module cannot produce those events, so the wire
+refreshes this aura for a cause the model does not describe. M11-B4 read
+every lone refresh as the pinned trigger's full reset ("alone it is a
+trigger") and anchored an exact remainder on it — including on those four:
+17 bundle and 6 opener decisions, among them five MATCH and three of the
+seven B7 REJECTED, rested on an anchor the authority never established.
+Both subjects also carry Frenzied Bloodthirst (trait entry 117662), and the
+wire shows `applybuffstack 6` and `7` while the pinned artifact records
+`_max_stack` 5: the sim never applies the talent's +2 (434075 effect 1,
+P_MAX_STACKS by label). That is an authority-model gap, recorded on the
+identity and in the artifact's own review text, and no positive Essence
+count is bound from it.
+
+**G1 — a lone refresh is of unproven cause (owner decision, strict).** The
+identity's `remainsPolicy.loneRefresh` is `UNPROVEN_CAUSE` for Essence and
+`PINNED_TRIGGER_RESET` (the B4 reading) for every other identity. Under
+`UNPROVEN_CAUSE`, `isAmbiguousRefresh` treats every `REFRESHED` observation
+with no same-millisecond `APPLIED` companion as ambiguous — not identified
+by the Vampiric Strike 0–1 ms after it, not by the Gift edge beside it, not
+by the absence of any other visible producer; all three are circumstantial,
+and circumstantial attribution is what this project refuses. A refresh
+beside an `applybuff` / `applybuffstack` at the same millisecond is that
+gain's companion and the gain anchors exactly, as before (the refresh need
+not be the authority source). What an ambiguous refresh cannot do is
+shorten an expiry already proven, so the existing walk-back keeps the
+earlier proven expiry as a lower bound (`GAIN_ANCHOR_BOUNDED`, through
+consecutive lone refreshes to the last anchoring gain), and once that
+floor has run out the remainder is UNKNOWN
+(`AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION`) — never a fresh 25 s. Bone
+Shield, Crimson Scourge and Visceral Strength are untouched: their lone
+refreshes still anchor exactly, and the Bone Shield refresh beside a stack
+removal is still the one B4 ambiguity.
+
+**G2 — the order-invariant floor inside the window (owner decision).** The
+50 ms window stays: every EXACT reading of an identity with a transition
+0–50 ms ahead of the decision is refused, `.up` and `.stack` are unchanged,
+and the constant is untouched. For `.remains` of an identity whose policy
+sets `windowOrderInvariantBound` (Essence only), `orderInvariantWindowBound`
+computes what both orderings leave and binds their minimum:
+
+```text
+H1  the cluster followed the decision (it is the decision's own effect):
+    the ordinary derivation at the cluster's FIRST position — window bound
+    NOT admitted there, so a nested window is a refusal, and every ordinary
+    refusal (coverage, ambiguous initial state, chain exhaustion,
+    contradiction, non-monotonic time, unpinned shape, G1) applies —
+    projected to the decision by the elapsed milliseconds
+H2  the cluster preceded the decision: a duration reset at its LATEST
+    transition leaves 25,000 ms minus that lead; a refresh that reset
+    nothing leaves H1 again
+atLeast = min(H1, H2)         bound as BOUNDED_NUMBER, never KNOWN
+```
+
+The bound exists only when every transition in the cluster is an
+`applybuffstack` or a `refreshbuff` — the shapes under which both orderings
+leave the aura active with a floor. A plain `applybuff` (the orderings are
+inactive against fully active), any `removebuff` / `removebuffstack`, or a
+shape the module does not foresee refuses the cluster whole
+(`PRE_DECISION_WINDOW_TRANSITION`, the reason in `detail`); so does an H1
+the ordinary rules cannot establish, and a floor that has run out. The
+edge is exact arithmetic on the same skewed timestamps an exact remainder
+is, so an `atLeast` within `BLOOD_REMAINS_THRESHOLD_TOLERANCE_MS` of a
+pinned Essence threshold (1.5 s, 8 s) is refused
+(`WITHIN_TIMING_TOLERANCE_OF_THRESHOLD`, margin recorded) rather than
+narrowed — the B4 gain-anchored bound keeps its exemption. No ordering is
+chosen or inferred: the payload records both worlds
+(`windowOrderInvariance`: the cluster with each lead, H1 and its proof
+class, H2) beside the minimum. In a single cluster H1 is always the
+smaller world (a gain inside the window would be part of the cluster), so
+the value is the chain before the cluster, not the reset; the construction
+is still the minimum of both, and the tests prove it.
+
+**The measurement (bundle 123 / 45 s 48 / opener 21).** 37 MATCH / 9
+REJECTED / 77 UNKNOWN (B7: 37 / 7 / 79); 15 / 3 / 30 and 1 / 0 / 20
+unchanged. Decision for decision against B7: UNKNOWN → REJECTED 2, every
+other outcome and authority token identical, one precision upgrade. The
+two new REJECTED are Vampiric Strikes whose `sanlayn[1]` Heart Strike entry
+(`buff.essence_of_the_blood_queen.remains<1.5`) is now FALSE from the
+floor, after which the B7 Marrowrend chain selects: 2,087,470 (floor
+11,070 ms = the application at 2,073,540 + 25,000 − 2,087,470, or a reset
+in the cluster; Bone Shield 10 with a 27,882 ms floor; deficit at least
+28.9; Crimson Scourge and Boiling Point down; Blood Debt exactly 10 from
+the `applybuffstack` at 2,086,445; Marrowrend PROVEN_USABLE from the cast's
+own 3 Runes) and 2,093,667 (floor 18,803 ms past a 1 ms lead cluster of
+`applybuffstack 3` and its refresh; Bone Shield 9; deficit at least 46.9;
+Blood Debt 10; 3 Runes) — `sanlayn[7] marrowrend` at the exact entry, no
+competing undecided GCD candidate. The Vampiric Strike at 2,029,599 stays
+MATCH on `heart_strike` and becomes EXACT_ENTRY at `sanlayn[8]`: its floor
+(12,675 ms, itself a bound from the stack gain at 2,017,274 through the
+lone refreshes since) makes `sanlayn[1]` FALSE instead of an undecided
+same-token candidate. The Essence census over the 123: EXACT 24 (a gain or
+its companion), BOUNDED 40, AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION 32,
+WINDOW_ORDER_INVARIANT_BOUNDED 20, window-refused 6 (the fresh
+applications at 2,008,597 and 2,073,540, the expiry at 2,071,379, and
+three clusters — 2,046,373, 2,144,631, 2,149,490 — whose chain before them
+has run out), presence-unknown 1; opener 6 / 7 / 0 / 6 / 1 / 1. Twelve
+MATCH and three REJECTED whose Essence remainder is now a floor or UNKNOWN
+keep their outcome because their selection never read it: `sanlayn[1]` is
+FALSE on `buff.vampiric_strike.remains` = 0 or on a floor above 1.5 s, and
+the selection sits above `sanlayn[9]` — measured by the engine, not
+assumed. The first-blocker ranking: `san_gift[3]` Essence stack 12,
+`sanlayn[9]` `fight_remains` 9 plus 11 that now also carry the Essence
+remainder (their `sanlayn[9]` third disjunct can no longer be decided from
+a lone-refresh chain; all already UNKNOWN on `fight_remains`), Marrowrend
+usability 10, Bone Shield window 7, `any_dnd` usability 5, `san_gift[2]` 4,
+the Dancing Rune Weapon gate 3, Death Strike usability 3 + 1, Runic Power
+after a spend 3, `buff.vampiric_strike.up` 2, Blood Boil usability 2,
+`sanlayn[1]` 2 (a cluster with no floor before it; the fresh application),
+`san_gift[0]` 1, Boiling Point 1, Crimson Scourge 1. `fight_remains` stays
+unmodelled; the Essence stack stays unbound; no resource or usability
+blocker moved.
+
+**Not built, on purpose.** No cause for any lone refresh; no reset from a
+refresh at a Gift edge or beside a Vampiric Strike; no positive Essence
+count (the pinned max stack is contradicted by the wire); no `stack<7`
+from `maxStack: 5`; no ordering chosen inside the window; no upper bound;
+no bound from a cluster holding an application or a removal; no nested
+window bounds; no change to the window or the tolerance constant; no change
+to Bone Shield, Crimson Scourge, Visceral Strength, Vampiric Strike, `.up`
+or `.stack`; no `fight_remains`; no shared-engine change.
+
+**Proven.** `tests/unit/m11b8-blood-ebq-remains.test.ts` (the policy table;
+the constants; lone refresh → floor, 0–1 ms before a Vampiric Strike → the
+same floor, past the floor → UNKNOWN, consecutive lone refreshes walked
+back, the same-millisecond companion still exact, a refresh 1 ms after a
+stack gain not a companion, no earlier gain → NO_GAIN_OBSERVED, three
+identities unchanged; the window bound at leads 0 / 1 / 50 with both worlds
+recorded and the count still refused, 51 ms on the ordinary path, a lone
+refresh cluster, H1 below the threshold kept as the minimum, H1 from a
+bounded chain, the seconds binding; refusals for a plain application, a
+removal, a stack removal, a mixed cluster, H1 ambiguous-initial /
+run-out / contradiction / coverage gap, a floor that has run out, edges at
+1,451–1,549 and 7,950–8,050 ms, a Bone Shield cluster; no stack expansion;
+the committed 2,087,470 / 2,093,667 / 2,020,278 / 2,012,014 / 2,042,440 and
+the opener's 2,429,596), the re-pinned `m11b4-blood-aura-remains` (two
+cases), the re-pinned `m11b2-blood-evaluator` contract (37 / 9 / 77; the
+nine REJECTED individually; the three still-divergent; the first-obstacle
+map; the census with the order-invariant invariants checked on every
+binding; the opener), one new corpus case
+(`spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-…`) and the
+re-pinned measurement cases (the corpus is 43 artifacts / 159 cases; the
+`REMAINS_BINDING_AT` kind now carries `windowOrderInvariance`), and the
+invariance harness: Assassination, Protection, Retribution, every raid
+night and every public document unchanged. Blood stays INTERNAL_ONLY;
+M11-B is not complete.
+
 ---
 
 # Milestone 12 — Healer Foundation

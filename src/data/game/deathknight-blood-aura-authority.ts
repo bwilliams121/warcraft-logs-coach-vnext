@@ -23,7 +23,12 @@
  *   - a HERO-TREE OWNERSHIP fact: an aura every producer of which is a
  *     talent of ONE hero sub-tree, so a build resolved to the OTHER sub-tree
  *     cannot hold it (one hero tree is active at a time —
- *     `talent-selection.ts`, `resolveHeroTree`).
+ *     `talent-selection.ts`, `resolveHeroTree`);
+ *   - a REMAINS POLICY (M11-B8): what a lone `refreshbuff` of the identity
+ *     proves about its expiry, and whether `buff.<name>.remains` may bind
+ *     the order-invariant lower bound inside the Blood pre-decision window.
+ *     Both are Blood-owned readings of the pinned producer set against the
+ *     observed wire, applied by `aura-remains.ts`; see `BloodRemainsPolicy`.
  *
  * WHAT IS NOT HERE. Durations: `buff.<name>.remains` is derived (M11-B4) in
  * `aura-remains.ts` from these identities plus the pinned duration artifact
@@ -57,6 +62,43 @@ export interface BloodExactCountRule {
   readonly applicationStack: number | null;
 }
 
+/**
+ * The Blood-owned policy `aura-remains.ts` applies to one identity's
+ * `buff.<name>.remains` (M11-B8).
+ *
+ * `loneRefresh` says what a `refreshbuff` with NO same-millisecond `applybuff`
+ * / `applybuffstack` companion proves about the expiry:
+ *
+ *     PINNED_TRIGGER_RESET   the M11-B4 reading: the pinned module's only way
+ *                            to refresh the aura is a `buff_t::trigger`, a
+ *                            DURATION refresh to the full duration, so a lone
+ *                            refresh anchors an exact remainder — unless it
+ *                            sits beside a stack REMOVAL, the one shape the
+ *                            pinned decrement does not produce (Bone Shield).
+ *     UNPROVEN_CAUSE         the aura is observed to be refreshed by a cause
+ *                            the pinned module has no producer for, so a lone
+ *                            refresh is never assigned a cause and never
+ *                            anchors an exact remainder: it can only keep the
+ *                            earlier proven expiry as a lower bound. A refresh
+ *                            beside an exact gain is that gain's companion,
+ *                            and the gain anchors, as before.
+ *
+ * `windowOrderInvariantBound` admits, for `.remains` only, the lower bound
+ * that holds under BOTH orderings of a duration-resetting transition inside
+ * the pre-decision window (`aura-remains.ts`). Exact reads inside the window
+ * stay refused for every identity; `.up` and `.stack` read neither field.
+ */
+export interface BloodRemainsPolicy {
+  readonly loneRefresh: "PINNED_TRIGGER_RESET" | "UNPROVEN_CAUSE";
+  readonly windowOrderInvariantBound: boolean;
+}
+
+/** The M11-B4 reading, kept for every identity with no observed refresh of unmodelled cause. */
+export const B4_REMAINS_POLICY: BloodRemainsPolicy = {
+  loneRefresh: "PINNED_TRIGGER_RESET",
+  windowOrderInvariantBound: false,
+};
+
 export interface BloodAuraIdentity {
   /** The buff name as the pinned APL writes it after `buff.` / `debuff.`. */
   readonly atomName: string;
@@ -77,6 +119,8 @@ export interface BloodAuraIdentity {
   readonly ownedByHeroTree: BloodHeroTreeName | null;
   /** The exact-count rule for `buff.<name>.stack`, or `null`: an ACTIVE aura without one binds no positive count. */
   readonly exactCount: BloodExactCountRule | null;
+  /** How `aura-remains.ts` reads this identity's lone refreshes and the pre-decision window (M11-B8). */
+  readonly remainsPolicy: BloodRemainsPolicy;
   readonly claims: readonly BloodAuraClaim[];
 }
 
@@ -100,6 +144,7 @@ const GIFT_OF_THE_SANLAYN: BloodAuraIdentity = {
   producedByTalent: "gift_of_the_sanlayn",
   ownedByHeroTree: "sanlayn",
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -126,6 +171,7 @@ const DANCING_RUNE_WEAPON: BloodAuraIdentity = {
   producedByTalent: "dancing_rune_weapon",
   ownedByHeroTree: null,
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -148,6 +194,7 @@ const DEATH_AND_DECAY: BloodAuraIdentity = {
   producedByTalent: null,
   ownedByHeroTree: null,
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -168,6 +215,7 @@ const BONE_SHIELD: BloodAuraIdentity = {
   producedByTalent: null,
   ownedByHeroTree: null,
   exactCount: { applicationStack: null },
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -195,6 +243,7 @@ const VAMPIRIC_STRIKE: BloodAuraIdentity = {
   producedByTalent: "vampiric_strike",
   ownedByHeroTree: "sanlayn",
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -215,12 +264,32 @@ const ESSENCE_OF_THE_BLOOD_QUEEN: BloodAuraIdentity = {
   producedByTalent: "vampiric_strike",
   ownedByHeroTree: "sanlayn",
   exactCount: null,
+  // M11-B8. The pinned module has exactly ONE producer (below), and every
+  // corpus subject's wire also carries a lone `refreshbuff` of this aura at
+  // each Gift of the San'layn edge with no Vampiric Strike cast anywhere
+  // near it — a refresh the pinned module has no producer for. A lone
+  // refresh is therefore of unproven cause and anchors nothing exact; a
+  // refresh beside an `applybuffstack` is that gain's companion. The
+  // pinned `_max_stack` 5 is also contradicted by the observed 6 and 7
+  // (Frenzied Bloodthirst, 434075 effect 1, +2 P_MAX_STACKS by label 3134,
+  // which the pinned module never applies): no positive `.stack` is bound.
+  remainsPolicy: { loneRefresh: "UNPROVEN_CAUSE", windowOrderInvariantBound: true },
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
       "15374; 15876-15877",
       "`spell.essence_of_the_blood_queen_buff = conditional_spell_lookup( talent.sanlayn.vampiric_strike.ok(), 433925 )` and " +
         '`buffs.essence_of_the_blood_queen = make_fallback<essence_of_the_blood_queen_buff_t>( talent.sanlayn.vampiric_strike.ok(), this, "essence_of_the_blood_queen", … )`.',
+    ),
+    claim(
+      "death_knight_t::trigger_sanlayn_execute_talents",
+      "13802-13808",
+      "`buffs.essence_of_the_blood_queen->trigger()` on a Vampiric Strike execution is the ONLY call site that starts, " +
+        "stacks or refreshes the aura in the pinned module; `essence_of_the_blood_queen_buff_t` (:7382-7411) overrides " +
+        "`value()` / `check_value()` only, and no `expire()`, `extend_duration()` or `set_max_stack()` exists for it. " +
+        "The corpus shows a `refreshbuff` at every Gift of the San'layn application and removal with no Vampiric Strike " +
+        "cast (2,019,763 / 2,099,885 / 2,111,891; opener 2,429,050), so the wire refreshes the aura for a cause this " +
+        "module does not model: a lone refresh is never assigned a cause (M11-B8, `remainsPolicy.loneRefresh`).",
     ),
   ],
 };
@@ -235,6 +304,7 @@ const CRIMSON_SCOURGE: BloodAuraIdentity = {
   producedByTalent: null,
   ownedByHeroTree: null,
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -257,6 +327,7 @@ const BOILING_POINT: BloodAuraIdentity = {
   producedByTalent: null,
   ownedByHeroTree: null,
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -280,6 +351,7 @@ const BLOOD_DEBT: BloodAuraIdentity = {
   producedByTalent: null,
   ownedByHeroTree: null,
   exactCount: { applicationStack: 1 },
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -338,6 +410,7 @@ const VISCERAL_STRENGTH: BloodAuraIdentity = {
   producedByTalent: "visceral_strength",
   ownedByHeroTree: "sanlayn",
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -359,6 +432,7 @@ const EXTERMINATE: BloodAuraIdentity = {
   producedByTalent: null,
   ownedByHeroTree: "deathbringer",
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -380,6 +454,7 @@ const VAMPIRIC_BLOOD: BloodAuraIdentity = {
   producedByTalent: "vampiric_blood",
   ownedByHeroTree: null,
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::create_buffs; vampiric_blood_t::execute",
@@ -400,6 +475,7 @@ const REAPERS_MARK_DEBUFF: BloodAuraIdentity = {
   producedByTalent: "reapers_mark",
   ownedByHeroTree: "deathbringer",
   exactCount: null,
+  remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells",

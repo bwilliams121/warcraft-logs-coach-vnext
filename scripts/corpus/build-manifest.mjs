@@ -3040,6 +3040,7 @@ const blood_remains_exact = (remainsMs, anchorReportTimeMs) => ({
   anchorReportTimeMs,
   reason: null,
   windowLeadMs: null,
+  windowOrderInvariance: null,
 });
 const blood_remains_bounded = (atLeastMs, anchorReportTimeMs) => ({
   state: "BOUND",
@@ -3049,6 +3050,7 @@ const blood_remains_bounded = (atLeastMs, anchorReportTimeMs) => ({
   anchorReportTimeMs,
   reason: null,
   windowLeadMs: null,
+  windowOrderInvariance: null,
 });
 const blood_remains_zero = (anchorReportTimeMs) => ({
   state: "BOUND",
@@ -3058,6 +3060,7 @@ const blood_remains_zero = (anchorReportTimeMs) => ({
   anchorReportTimeMs,
   reason: null,
   windowLeadMs: null,
+  windowOrderInvariance: null,
 });
 const blood_remains_permanent = (anchorReportTimeMs) => ({
   state: "BOUND",
@@ -3067,6 +3070,7 @@ const blood_remains_permanent = (anchorReportTimeMs) => ({
   anchorReportTimeMs,
   reason: null,
   windowLeadMs: null,
+  windowOrderInvariance: null,
 });
 const blood_remains_unbound = (reason, windowLeadMs = null) => ({
   state: "UNBOUND",
@@ -3076,6 +3080,18 @@ const blood_remains_unbound = (reason, windowLeadMs = null) => ({
   anchorReportTimeMs: null,
   reason,
   windowLeadMs,
+  windowOrderInvariance: null,
+});
+/** M11-B8: the order-invariant lower bound inside the pre-decision window, with both orderings pinned. */
+const blood_remains_window_bound = (atLeastMs, anchorReportTimeMs, windowOrderInvariance) => ({
+  state: "BOUND",
+  proof: "WINDOW_ORDER_INVARIANT_BOUNDED",
+  bindingState: "BOUNDED_NUMBER",
+  remainsMs: atLeastMs,
+  anchorReportTimeMs,
+  reason: null,
+  windowLeadMs: null,
+  windowOrderInvariance,
 });
 const BLOOD_BOILING_POINT = 1265968;
 /** M11-B5: a Blood Boil the authority selects at sanlayn[6] once the Runic Power gate above it is exact. */
@@ -3552,7 +3568,7 @@ const BLOOD_CASES = [
     BLOOD_105_165,
     "SPEC_BLOOD_DEATH_KNIGHT",
     "src/specs/deathknight/blood/observed-analysis.ts analyzeObservedBloodDeathKnightDecisions; first-gcd-adapter.ts (stopping points, dispatch trace, undecided candidates); src/simc/nested-selection.ts (M11-B1 run_action_list semantics)",
-    "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 37 MATCH, 0 REJECTED, 86 UNKNOWN. THE MEASUREMENT AFTER M11-B6 (Blood Debt's exact count read from its own transitions; M11-B5 had 25 MATCH — 21 Death Strikes and 4 Blood Boils — with the first undecided candidate on buff.blood_debt.stack at sanlayn[7] for 45 decisions): the 37 resolved are 27 Death Strikes (san_gift[1] runic_power.deficit<36 at 6, sanlayn[2] runic_power.deficit<20 at 15, and since M11-B6 sanlayn[9] runic_power.deficit<40 at 6 where the Blood Debt count below 10 makes sanlayn[7] FALSE and Vampiric Strike is proven down), 6 Heart Strikes (sanlayn[8] buff.vampiric_strike.up with every higher entry FALSE: 1 EXACT_ENTRY, 5 TOKEN_CONVERGED where sanlayn[1]'s Heart Strike stays undecided on fight_remains and every resolution of it still selects the heart_strike token) and 4 Blood Boils at sanlayn[6] (buff.boiling_point.up). Blood Debt at the 123 decisions: EXACT_STACK_OBSERVATION 107 (the absolute count of the last applybuffstack), EXACT_STACK_APPLICATION 7 (a plain applybuff preceded by a removal or by nothing: 1), PROVEN_INACTIVE 3 (after the Marrowrend consumption), AURA_STATE_UNKNOWN 6 (before the first observed transition); no pre-decision-window refusal, no ambiguous shape. Of the 45 decisions M11-B5 left first-undecided on the Blood Debt stack, 7 resolve to MATCH and 38 advance to a later obstacle — 16 to Marrowrend's USABILITY at sanlayn[7] (the count is exactly 10, the entry is TRUE, and no rune or affordability proof is built for an action that was not cast), 19 to fight_remains at sanlayn[9], 2 to buff.vampiric_strike.up and 1 to Heart Strike's usability at sanlayn[8]; none remains on the stack. Runic Power at the 123 decisions: OWN_PRE_COST 44, CARRIED_EXACT 14, WINDOW_BOUNDED 59 (a Heart Strike's or Vampiric Strike's own Heartbreaker gain sits 0-1 ms AHEAD of it in the log, so only the deficit's lower bound both readings share is bound), POST_SPEND_NOT_OBSERVED 5 (a Blood Boil, Marrowrend or Death's Caress after a Death Strike with no observation between: the amount after the spend is not read), NO_ANCHOR 1 (the pull). The root scan RESOLVES at 81 decisions (37 to a selection, 44 divergent), BLOCKS at sanlayn[10] consumption for 41 and at the default[15] run gate for 1; the B1 dispatch semantics are unchanged from M11-B3. The first undecided GCD candidate in priority order is now sanlayn[9] death_strike on fight_remains at 20 decisions, sanlayn[7] marrowrend on USABILITY:marrowrend at 16, san_gift[0] on buff.essence_of_the_blood_queen.remains at 14 and sanlayn[1] on the same atom plus fight_remains at 11 (Essence window refusals), sanlayn[0] on Bone Shield at 7, sanlayn[5] any_dnd usability at 4, the Dancing Rune Weapon gate at 3, san_gift[3] on Essence's stack at 3, sanlayn[2] on runic_power.deficit at 3 (POST_SPEND) and on Death Strike's USABILITY at 3, sanlayn[8] on buff.vampiric_strike.up at 2 and on Heart Strike's usability at 1, sanlayn[6] Blood Boil usability at 2 and buff.boiling_point.up at 1, san_gift[1] Death Strike usability at 1; the full census is pinned below, and the stack, remains and Runic Power evidence censuses in their own assertions.",
+    "Over the composed 165 s fight the evaluator finds 123 eligible decisions — every Death Strike, Heart Strike, Vampiric Strike, Blood Boil, Marrowrend and Death's Caress cast — and excludes 148 casts by name: 87 melee swings, 47 NON_GCD presses (Infliction of Sorrow's 36 proc executions, Raise Dead, Vampiric Blood, Dark Command, Anti-Magic Shell, Death's Advance, the potion), 1 GCD cast with no authority token (Anti-Magic Zone), 13 in-domain GCD casts outside the slice (11 Death and Decay, 2 Dancing Rune Weapon). Of the 123: 37 MATCH, 0 REJECTED, 86 UNKNOWN. THE MEASUREMENT AFTER M11-B6 (Blood Debt's exact count read from its own transitions; M11-B5 had 25 MATCH — 21 Death Strikes and 4 Blood Boils — with the first undecided candidate on buff.blood_debt.stack at sanlayn[7] for 45 decisions): the 37 resolved are 27 Death Strikes (san_gift[1] runic_power.deficit<36 at 6, sanlayn[2] runic_power.deficit<20 at 15, and since M11-B6 sanlayn[9] runic_power.deficit<40 at 6 where the Blood Debt count below 10 makes sanlayn[7] FALSE and Vampiric Strike is proven down), 6 Heart Strikes (sanlayn[8] buff.vampiric_strike.up with every higher entry FALSE: 1 EXACT_ENTRY, 5 TOKEN_CONVERGED where sanlayn[1]'s Heart Strike stays undecided on fight_remains and every resolution of it still selects the heart_strike token) and 4 Blood Boils at sanlayn[6] (buff.boiling_point.up). Blood Debt at the 123 decisions: EXACT_STACK_OBSERVATION 107 (the absolute count of the last applybuffstack), EXACT_STACK_APPLICATION 7 (a plain applybuff preceded by a removal or by nothing: 1), PROVEN_INACTIVE 3 (after the Marrowrend consumption), AURA_STATE_UNKNOWN 6 (before the first observed transition); no pre-decision-window refusal, no ambiguous shape. Of the 45 decisions M11-B5 left first-undecided on the Blood Debt stack, 7 resolve to MATCH and 38 advance to a later obstacle — 16 to Marrowrend's USABILITY at sanlayn[7] (the count is exactly 10, the entry is TRUE, and no rune or affordability proof is built for an action that was not cast), 19 to fight_remains at sanlayn[9], 2 to buff.vampiric_strike.up and 1 to Heart Strike's usability at sanlayn[8]; none remains on the stack. Runic Power at the 123 decisions: OWN_PRE_COST 44, CARRIED_EXACT 14, WINDOW_BOUNDED 59 (a Heart Strike's or Vampiric Strike's own Heartbreaker gain sits 0-1 ms AHEAD of it in the log, so only the deficit's lower bound both readings share is bound), POST_SPEND_NOT_OBSERVED 5 (a Blood Boil, Marrowrend or Death's Caress after a Death Strike with no observation between: the amount after the spend is not read), NO_ANCHOR 1 (the pull). The root scan RESOLVES at 81 decisions (37 to a selection, 44 divergent), BLOCKS at sanlayn[10] consumption for 41 and at the default[15] run gate for 1; the B1 dispatch semantics are unchanged from M11-B3. The first undecided GCD candidate in priority order is now sanlayn[9] death_strike on fight_remains at 20 decisions, sanlayn[7] marrowrend on USABILITY:marrowrend at 16, san_gift[0] on buff.essence_of_the_blood_queen.remains at 14 and sanlayn[1] on the same atom plus fight_remains at 11 (Essence window refusals), sanlayn[0] on Bone Shield at 7, sanlayn[5] any_dnd usability at 4, the Dancing Rune Weapon gate at 3, san_gift[3] on Essence's stack at 3, sanlayn[2] on runic_power.deficit at 3 (POST_SPEND) and on Death Strike's USABILITY at 3, sanlayn[8] on buff.vampiric_strike.up at 2 and on Heart Strike's usability at 1, sanlayn[6] Blood Boil usability at 2 and buff.boiling_point.up at 1, san_gift[1] Death Strike usability at 1; the full census is pinned below, and the stack, remains and Runic Power evidence censuses in their own assertions. THE MEASUREMENT AFTER M11-B8 (Essence lone refreshes of unproven cause anchor nothing exact; the order-invariant floor inside the pre-decision window): 37 MATCH / 9 REJECTED / 77 UNKNOWN — the two Vampiric Strikes at 2,087,470 and 2,093,667 join the seven M11-B7 REJECTED (sanlayn[7] marrowrend at Blood Debt 10 once sanlayn[1] is FALSE from the Essence floor), every prior MATCH and REJECTED keeps its outcome and token, and the Vampiric Strike at 2,029,599 becomes EXACT_ENTRY. Essence remainders over the 123: EXACT 24 (a gain or its same-millisecond companion), BOUNDED 40 (a floor past lone refreshes), AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION 32 (the floor has run out), WINDOW_ORDER_INVARIANT_BOUNDED 20, window-refused 6 (two fresh applications, one expiry, three clusters with no floor before them), presence-unknown 1; the 26 remains window refusals of M11-B4 are now 6, the 26 stack refusals are unchanged. The undecided candidates move accordingly: san_gift[0] on Essence 14 to 1, sanlayn[1] on Essence 11 to 4 and on fight_remains 11 to 6, and sanlayn[9] now carries Essence at 15 beside fight_remains at 34 — decisions already UNKNOWN on fight_remains whose sanlayn[9] third disjunct (buff.essence_of_the_blood_queen.remains<8) can no longer be decided from a lone-refresh chain.",
     [
       a("SPEC_BLOOD_DEATH_KNIGHT.COVERAGE_SUMMARY", {
         actorId: BLOOD,
@@ -3560,8 +3576,8 @@ const BLOOD_CASES = [
         expected: {
           eligibleDecisions: 123,
           match: 37,
-          rejected: 7,
-          unknown: 79,
+          rejected: 9,
+          unknown: 77,
           exclusions: {
             MELEE_SWING: 87,
             NON_GCD_ACTION: 47,
@@ -3575,7 +3591,7 @@ const BLOOD_CASES = [
         ...BLOOD_FULL,
         expected: {
           match: 37,
-          rejected: 7,
+          rejected: 9,
           stoppingEntries: {
             "default[15] run_action_list": 1,
             "(root scan resolved)": 88,
@@ -3597,7 +3613,7 @@ const BLOOD_CASES = [
           undecidedGcdCandidates: {
             "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up": 3,
             "high_prio_actions[1] dancing_rune_weapon | fight_remains": 3,
-            "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 14,
+            "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 1,
             "san_gift[1] death_strike | USABILITY:death_strike": 1,
             "san_gift[2] any_dnd | buff.crimson_scourge.remains": 4,
             "san_gift[2] any_dnd | buff.visceral_strength.remains": 5,
@@ -3607,8 +3623,8 @@ const BLOOD_CASES = [
             "san_gift[6] heart_strike | USABILITY:heart_strike": 1,
             "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
             "sanlayn[0] deaths_caress | buff.bone_shield.remains": 6,
-            "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains": 11,
-            "sanlayn[1] heart_strike | fight_remains": 11,
+            "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains": 4,
+            "sanlayn[1] heart_strike | fight_remains": 6,
             "sanlayn[2] death_strike | runic_power.deficit": 5,
             "sanlayn[2] death_strike | USABILITY:death_strike": 4,
             "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 1,
@@ -3618,6 +3634,7 @@ const BLOOD_CASES = [
             "sanlayn[8] heart_strike | buff.vampiric_strike.up": 3,
             "sanlayn[9] death_strike | runic_power.deficit": 2,
             "sanlayn[9] death_strike | fight_remains": 34,
+            "sanlayn[9] death_strike | buff.essence_of_the_blood_queen.remains": 15,
             "sanlayn[0] deaths_caress | buff.bone_shield.up": 6,
             "sanlayn[0] deaths_caress | buff.bone_shield.stack": 7,
             "sanlayn[3] deaths_caress | buff.bone_shield.stack": 6,
@@ -3743,8 +3760,11 @@ const BLOOD_CASES = [
             "bone_shield | EXACT": 11,
             "bone_shield | BOUNDED": 104,
             [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 8,
-            "essence_of_the_blood_queen | EXACT": 96,
-            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 26,
+            "essence_of_the_blood_queen | EXACT": 24,
+            "essence_of_the_blood_queen | BOUNDED": 40,
+            "essence_of_the_blood_queen | AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION": 32,
+            "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_BOUNDED": 20,
+            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 6,
             "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
             "vampiric_strike | PERMANENT": 15,
             "vampiric_strike | ZERO_BY_PROOF": 88,
@@ -3765,9 +3785,8 @@ const BLOOD_CASES = [
             "bone_shield | stack | lead 20": 1,
             "bone_shield | remains | lead 20": 1,
             "essence_of_the_blood_queen | stack | lead 0": 23,
-            "essence_of_the_blood_queen | remains | lead 0": 23,
+            "essence_of_the_blood_queen | remains | lead 0": 6,
             "essence_of_the_blood_queen | stack | lead 1": 3,
-            "essence_of_the_blood_queen | remains | lead 1": 3,
             "crimson_scourge | remains | lead 38": 1,
             "death_and_decay | up | lead 0": 1,
             "death_and_decay | up | lead 20": 1,
@@ -3813,7 +3832,7 @@ const BLOOD_CASES = [
             "default[16] -> sanlayn : BLOCKED": 6,
           },
           undecidedGcdCandidates: {
-            "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 8,
+            "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 2,
             "san_gift[2] any_dnd | buff.crimson_scourge.remains": 14,
             "san_gift[2] any_dnd | buff.visceral_strength.remains": 14,
             "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 14,
@@ -3884,8 +3903,10 @@ const BLOOD_CASES = [
           remainsEvidence: {
             "bone_shield | EXACT": 20,
             [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 1,
-            "essence_of_the_blood_queen | EXACT": 13,
-            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 7,
+            "essence_of_the_blood_queen | EXACT": 6,
+            "essence_of_the_blood_queen | BOUNDED": 7,
+            "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_BOUNDED": 6,
+            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 1,
             "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
             "vampiric_strike | AURA_STATE_UNKNOWN": 21,
             "crimson_scourge | EXACT": 1,
@@ -3896,9 +3917,8 @@ const BLOOD_CASES = [
           },
           preDecisionWindowRefusals: {
             "essence_of_the_blood_queen | stack | lead 0": 6,
-            "essence_of_the_blood_queen | remains | lead 0": 6,
+            "essence_of_the_blood_queen | remains | lead 0": 1,
             "essence_of_the_blood_queen | stack | lead 1": 1,
-            "essence_of_the_blood_queen | remains | lead 1": 1,
             "bone_shield | up | lead 0": 1,
             "bone_shield | stack | lead 0": 1,
             "bone_shield | remains | lead 0": 1,
@@ -4047,7 +4067,8 @@ const BLOOD_CASES = [
       blood_aura(2020278, BLOOD_HS, "gift_of_the_sanlayn", blood_observed_aura(false, BLOOD_GIFT, 2019763)),
       blood_stack(2020278, BLOOD_HS, "bone_shield", blood_exact_stack(11)),
       blood_remains(2020278, BLOOD_HS, "bone_shield", blood_remains_bounded(25503, 2015781)),
-      blood_remains(2020278, BLOOD_HS, "essence_of_the_blood_queen", blood_remains_exact(24485, 2019763)),
+      // M11-B8: the lone refresh at the Gift removal (2,019,763) anchors nothing; the floor is the stack gain at 2,017,274.
+      blood_remains(2020278, BLOOD_HS, "essence_of_the_blood_queen", blood_remains_bounded(21996, 2017274)),
       blood_remains(2020278, BLOOD_HS, "visceral_strength", blood_remains_exact(5253, 2013531)),
       // The Heart Strike's own Heartbreaker gain (930 after it) is logged at its own millisecond AHEAD of it:
       // the deficit is bound below at 32 — whether the pre-decision amount was 910 or 930, it was at most 930.
@@ -4157,10 +4178,11 @@ const BLOOD_CASES = [
         BLOOD_FULL,
       ),
       blood_stack(2029599, BLOOD_VS, "blood_debt", blood_debt_exact(8), BLOOD_FULL),
+      // M11-B8: sanlayn[1] is FALSE from the Essence floor, so the same-token selection is now the exact entry.
       blood_decision(
         2029599,
         BLOOD_VS,
-        { ...BLOOD_HS_CONVERGED_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        { ...BLOOD_HS_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
         BLOOD_FULL,
       ),
       blood_stack(
@@ -4279,6 +4301,179 @@ const BLOOD_CASES = [
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
+    "spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-and-the-window-bound-is-the-floor-both-orderings-share",
+    BLOOD_105_165,
+    "SPEC_BLOOD_DEATH_KNIGHT",
+    "src/specs/deathknight/blood/aura-remains.ts (isAmbiguousRefresh under remainsPolicy.loneRefresh; orderInvariantWindowBound); src/data/game/deathknight-blood-aura-authority.ts (BloodRemainsPolicy on the Essence identity)",
+    "M11-B8. The pinned module has exactly one producer for Essence of the Blood Queen (433925) — buffs.essence_of_the_blood_queen->trigger() on a Vampiric Strike execution, sc_death_knight.cpp:13808 — and the wire also carries a lone refreshbuff of it at every Gift of the San'layn edge with no Vampiric Strike cast near it (2,019,763 and 2,111,891 at the two Gift removals, 2,099,885 at the second Dancing Rune Weapon; opener 2,429,050). A refresh the model cannot produce is a refresh of unproven cause, and no lone refresh of this aura is assigned one — not by the Vampiric Strike 0-1 ms after it, not by the Gift edge beside it, not by the absence of any other visible producer — so none anchors an exact remainder (identity policy loneRefresh: UNPROVEN_CAUSE). A refresh beside an applybuff / applybuffstack at the same millisecond is that gain's companion and the gain anchors as before. A lone refresh keeps the earlier proven expiry as a lower bound (GAIN_ANCHOR_BOUNDED, walked back through consecutive lone refreshes to the last gain) and, once that has run out, the remainder is UNKNOWN (AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION) — never a 25 s reset. Inside the 50 ms pre-decision window every exact reading stays refused (the window constant is untouched; .up and .stack are unchanged), and for Essence's .remains only the floor both orderings of the cluster share is bound (WINDOW_ORDER_INVARIANT_BOUNDED): H1, the chain before the cluster projected to the decision, had the cluster followed it; H2, the pinned 25,000 ms minus the latest lead, had a reset in it preceded it; atLeast = min(H1, H2), never a KNOWN value, never an ordering chosen, refused whole when the cluster holds a plain application or any removal, when H1 cannot be established, when the floor has run out, or when the edge lies within the 50 ms tolerance of a pinned threshold. Over the bundle the 26 Essence window refusals become 20 floors and 6 refusals (the fresh applications at 2,008,597 and 2,073,540, the expiry at 2,071,379, and three clusters whose chain before them has run out); the 96 exact remainders become 24 exact (a gain or its companion), 40 floors and 32 UNKNOWN. Two decisions resolve, both Vampiric Strikes whose sanlayn[1] heart_strike condition (buff.essence_of_the_blood_queen.remains<1.5) is now FALSE from the floor and whose remaining chain was already exact: 2,087,470 (floor 11,070 ms: the application at 2,073,540 + 25,000 - 2,087,470, or a reset in the cluster; Bone Shield 10 with a 27,882 ms floor, Runic Power deficit at least 28.9, Crimson Scourge and Boiling Point proven down, Blood Debt exactly 10 from the applybuffstack at 2,086,445, Marrowrend PROVEN_USABLE from the cast's own 3 Runes) and 2,093,667 (floor 18,803 ms past a 1 ms lead cluster of applybuffstack 3 and its refresh; Bone Shield 9; deficit at least 46.9; Blood Debt exactly 10; 3 Runes) — each selects sanlayn[7] marrowrend at the exact entry with no competing undecided GCD candidate: 37 MATCH / 9 REJECTED / 77 UNKNOWN. The Vampiric Strike at 2,029,599 stays a MATCH on heart_strike and becomes EXACT_ENTRY at sanlayn[8]: sanlayn[1] is FALSE from the floor (12,675 ms, itself a floor from the stack gain at 2,017,274 through the lone refreshes since) rather than an undecided same-token candidate. Every other MATCH and REJECTED keeps its outcome and token: the twelve MATCH and three REJECTED whose Essence remainder is now a floor or UNKNOWN never read it — sanlayn[1] is FALSE on buff.vampiric_strike.remains = 0 or on a floor above 1.5 s, and the selection sits above sanlayn[9]. Positive Essence stacks stay unbound: the pinned artifact's max_stack 5 is contradicted by the observed 6 and 7 (Frenzied Bloodthirst, 434075, +2 max stacks by label, which the pinned module never applies), so stack<7 is not evaluated from it.",
+    [
+      // The two new REJECTED, with the complete chain each rests on.
+      blood_decision(2087470, BLOOD_VS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_remains(
+        2087470,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_remains_window_bound(11070, 2073540, {
+          cluster: [{ reportTimeMs: 2087470, operation: "APPLIED", isStackChange: true, leadMs: 0 }],
+          beforeClusterMs: 11070,
+          beforeClusterProof: "GAIN_ANCHOR_EXACT",
+          resetInClusterMs: 25000,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2087470,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
+        BLOOD_FULL,
+      ),
+      blood_remains(2087470, BLOOD_VS, "vampiric_strike", blood_remains_permanent(2086414), BLOOD_FULL),
+      blood_remains(2087470, BLOOD_VS, "bone_shield", blood_remains_bounded(27882, 2085352), BLOOD_FULL),
+      blood_remains(2087470, BLOOD_VS, "crimson_scourge", blood_remains_zero(2072460), BLOOD_FULL),
+      blood_stack(2087470, BLOOD_VS, "bone_shield", blood_exact_stack(10), BLOOD_FULL),
+      blood_stack(2087470, BLOOD_VS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_aura(
+        2087470,
+        BLOOD_VS,
+        "boiling_point",
+        blood_observed_aura(false, BLOOD_BOILING_POINT, 2075688),
+        BLOOD_FULL,
+      ),
+      blood_rp_state(2087470, BLOOD_VS, blood_rp_window(961, 28.9, 2087470, [0, 0]), BLOOD_FULL),
+      blood_affordability(2087470, BLOOD_VS, blood_affordable(3), BLOOD_FULL),
+      blood_resources(
+        2087470,
+        BLOOD_VS,
+        { runes: blood_runes(3, 1), runicPower: BLOOD_NO_RES, runicPowerDeficit: null, rune: 3 },
+        BLOOD_FULL,
+      ),
+      blood_decision(2093667, BLOOD_VS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_remains(
+        2093667,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_remains_window_bound(18803, 2087470, {
+          cluster: [
+            { reportTimeMs: 2093666, operation: "APPLIED", isStackChange: true, leadMs: 1 },
+            { reportTimeMs: 2093666, operation: "REFRESHED", isStackChange: false, leadMs: 1 },
+          ],
+          beforeClusterMs: 18803,
+          beforeClusterProof: "GAIN_ANCHOR_EXACT",
+          resetInClusterMs: 24999,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2093667,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
+        BLOOD_FULL,
+      ),
+      blood_remains(2093667, BLOOD_VS, "vampiric_strike", blood_remains_permanent(2092650), BLOOD_FULL),
+      blood_stack(2093667, BLOOD_VS, "bone_shield", blood_exact_stack(9), BLOOD_FULL),
+      blood_stack(2093667, BLOOD_VS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_rp_state(2093667, BLOOD_VS, blood_rp_window(781, 46.9, 2093666, [1, 1]), BLOOD_FULL),
+      blood_affordability(2093667, BLOOD_VS, blood_affordable(3), BLOOD_FULL),
+      blood_resources(
+        2093667,
+        BLOOD_VS,
+        { runes: blood_runes(3, 1), runicPower: BLOOD_NO_RES, runicPowerDeficit: null, rune: 3 },
+        BLOOD_FULL,
+      ),
+      // The precision change: sanlayn[1] is now FALSE from a floor that is itself a floor.
+      blood_decision(
+        2029599,
+        BLOOD_VS,
+        { ...BLOOD_HS_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_remains(
+        2029599,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_remains_window_bound(12675, 2017274, {
+          cluster: [{ reportTimeMs: 2029599, operation: "REFRESHED", isStackChange: false, leadMs: 0 }],
+          beforeClusterMs: 12675,
+          beforeClusterProof: "GAIN_ANCHOR_BOUNDED",
+          resetInClusterMs: 25000,
+        }),
+        BLOOD_FULL,
+      ),
+      // G1 over the committed evidence: the Gift-edge refreshes anchor nothing.
+      blood_remains(
+        2020278,
+        BLOOD_HS,
+        "essence_of_the_blood_queen",
+        blood_remains_bounded(21996, 2017274),
+        BLOOD_FULL,
+      ),
+      blood_remains(
+        2112377,
+        BLOOD_DS,
+        "essence_of_the_blood_queen",
+        blood_remains_bounded(19261, 2106638),
+        BLOOD_FULL,
+      ),
+      blood_remains(
+        2100867,
+        BLOOD_BB,
+        "essence_of_the_blood_queen",
+        blood_remains_bounded(17799, 2093666),
+        BLOOD_FULL,
+      ),
+      // A companion refresh still anchors exactly; a chain past every floor is UNKNOWN, not a reset.
+      blood_remains(
+        2012014,
+        BLOOD_DS,
+        "essence_of_the_blood_queen",
+        blood_remains_exact(24127, 2011141),
+        BLOOD_FULL,
+      ),
+      blood_remains(
+        2042440,
+        BLOOD_HS,
+        "essence_of_the_blood_queen",
+        blood_remains_unbound("AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION"),
+        BLOOD_FULL,
+      ),
+      blood_decision(2042440, BLOOD_HS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_remains(2042440, BLOOD_HS, "vampiric_strike", blood_remains_zero(2036707), BLOOD_FULL),
+      // The refusals that remain: a fresh application and an expiry inside the window, and a cluster with no floor before it.
+      blood_remains(
+        2073540,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_remains_unbound(BLOOD_WINDOW_TAG, 0),
+        BLOOD_FULL,
+      ),
+      blood_remains(
+        2071379,
+        BLOOD_DS,
+        "essence_of_the_blood_queen",
+        blood_remains_unbound(BLOOD_WINDOW_TAG, 0),
+        BLOOD_FULL,
+      ),
+      blood_remains(
+        2144631,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_remains_unbound(BLOOD_WINDOW_TAG, 0),
+        BLOOD_FULL,
+      ),
+      blood_decision(
+        2144631,
+        BLOOD_VS,
+        { ...BLOOD_HS_CONVERGED_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+    ],
+    ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "A refresh the pinned model has no producer for is a refresh of unproven cause, and the analyzer names no cause for any lone refresh of the aura — the cast next to it, the Gift edge beside it and the absence of any other producer are circumstantial, and circumstantial attribution is exactly what this project refuses. What a lone refresh cannot do is shorten an expiry already proven, so the earlier proof survives as a floor and runs out honestly. Inside the window the analyzer still chooses no ordering: it binds only what both orderings leave, as a bound, and refuses when they leave nothing in common.",
+    { authority: BLOOD_AUTHORITY, related: [...BLOOD_RELATED, "tests/unit/m11b8-blood-ebq-remains.test.ts"] },
+  ),
+  kase(
     "spec-blood-death-knight.vampiric-blood-and-the-second-dancing-rune-weapon-over-the-bundle",
     BLOOD_105_165,
     "SPEC_BLOOD_DEATH_KNIGHT",
@@ -4300,11 +4495,17 @@ const BLOOD_CASES = [
         blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
         BLOOD_FULL,
       ),
+      // M11-B8: the count stays refused; the remainder is the floor both orderings of the stack gain share.
       blood_remains(
         2087470,
         BLOOD_VS,
         "essence_of_the_blood_queen",
-        blood_remains_unbound(BLOOD_WINDOW_TAG, 0),
+        blood_remains_window_bound(11070, 2073540, {
+          cluster: [{ reportTimeMs: 2087470, operation: "APPLIED", isStackChange: true, leadMs: 0 }],
+          beforeClusterMs: 11070,
+          beforeClusterProof: "GAIN_ANCHOR_EXACT",
+          resetInClusterMs: 25000,
+        }),
         BLOOD_FULL,
       ),
       blood_remains(2087470, BLOOD_VS, "vampiric_strike", blood_remains_permanent(2086414), BLOOD_FULL),

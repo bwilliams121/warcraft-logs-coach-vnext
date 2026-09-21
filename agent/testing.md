@@ -1924,6 +1924,87 @@ log never wrote.
 
 ---
 
+# Essence of the Blood Queen Remains Tests (M11-B8)
+
+A lone `refreshbuff` of Essence of the Blood Queen is an exact observation
+that the aura was refreshed and no evidence of what refreshed it: the pinned
+module has one producer, and the wire carries refreshes that producer cannot
+have written. The tests must prove that no lone refresh becomes an exact
+expiry — whatever cast or aura edge sits beside it — that the earlier proven
+expiry survives only as a floor and runs out honestly, that inside the 50 ms
+pre-decision window only the floor both orderings share is bound and never
+an ordering chosen, and that nothing else in the aura layer moved.
+
+Required (`tests/unit/m11b8-blood-ebq-remains.test.ts`):
+
+```text
+policy table                          -> Essence: loneRefresh UNPROVEN_CAUSE, windowOrderInvariantBound true; every other identity: PINNED_TRIGGER_RESET, false
+constants                             -> window 50, tolerance 50, Essence 20,000 + 5,000 = 25,000 ms, thresholds [1.5, 8]
+exact gain, lone refresh, before old expiry -> GAIN_ANCHOR_BOUNDED from the gain (never the refresh's 25 s), BOUNDED_NUMBER
+the same refresh 0-1 ms before a Vampiric Strike -> the same floor (cast proximity names no cause)
+lone refresh, decision past the old expiry -> AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION; presence still ACTIVE
+consecutive lone refreshes           -> walked back to the last anchoring gain, floor from it
+applybuffstack + same-ms refreshbuff -> GAIN_ANCHOR_EXACT from the gain (the companion invalidates nothing)
+applybuffstack, refreshbuff 1 ms later -> the gain anchors, the refresh keeps it as a floor
+lone refresh with no earlier gain    -> NO_GAIN_OBSERVED
+Bone Shield / Crimson Scourge / Visceral Strength lone refresh -> GAIN_ANCHOR_EXACT, unchanged
+window cluster (stack gain + refresh) at lead 0 / 1 / 50 -> WINDOW_ORDER_INVARIANT_BOUNDED, remainsMs = min(H1, H2), both worlds recorded, .stack still refused
+lead 51                              -> the ordinary path (GAIN_ANCHOR_EXACT), G2 does not apply
+lone refresh in the cluster          -> the floor is the chain before it
+H1 = 1,200 ms, H2 = 25,000 ms         -> atLeast 1.2 s (the minimum, never the larger world)
+H1 from a bounded chain              -> a valid floor, beforeClusterProof GAIN_ANCHOR_BOUNDED
+plain applybuff in the cluster (fresh, or after a removal) -> PRE_DECISION_WINDOW_TRANSITION
+removebuff / removebuffstack in the cluster -> PRE_DECISION_WINDOW_TRANSITION
+safe shape beside an unsafe one       -> refused whole
+H1: ambiguous initial state / run out past a lone refresh / contradiction / AURAS gap -> refused, the reason carried in detail
+the shared floor has run out         -> refused
+edge 1,451-1,549 ms or 7,950-8,050 ms -> WITHIN_TIMING_TOLERANCE_OF_THRESHOLD with the margin; 1,449 / 1,551 / 7,949 / 8,051 bind
+Bone Shield cluster inside the window -> refused (the policy does not admit the bound)
+EXACT_COUNT_ATOMS                     -> no Essence; ACTIVE binds no positive count
+committed 2,087,470                   -> floor 11,070 (H1 from the application at 2,073,540, H2 25,000), count refused
+committed 2,093,667                   -> floor 18,803 past a 1 ms lead cluster (applybuffstack 3 + refresh), H2 24,999
+committed 2,020,278                   -> GAIN_ANCHOR_BOUNDED 21,996 from the stack gain at 2,017,274, three lone refreshes walked through (two beside Vampiric Strikes, one at the Gift removal)
+committed 2,012,014                   -> still EXACT 24,127 from the companion refresh at 2,011,141
+committed 2,042,440                   -> AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION (still REJECTED on other evidence)
+committed opener 2,429,596            -> GAIN_ANCHOR_BOUNDED 23,499 from the stack gain at 2,428,095 (the refresh at the Gift removal anchors nothing)
+```
+
+Required, contract (`tests/contracts/m11b2-blood-evaluator.test.ts`): 37 /
+9 / 77 with 148 excluded; the nine REJECTED individually (B7's seven plus
+2,087,470 and 2,093,667 at 3 Runes each, Blood Debt 10 from 2,086,445) —
+outcome, basis, token `marrowrend`, EXACT_ENTRY, no undecided GCD
+candidate; the three still-divergent; the first-obstacle map; the Essence
+census (24 / 40 / 32 / 20 / 6 / 1) and the window-refusal census (remains
+lead 0: 6; stack unchanged at 23 + 3); on every binding: an order-invariant
+floor is Essence's, a BOUNDED_NUMBER, equal to `min(H1, H2)`, positive,
+over a cluster of leads 0..50 holding no removal, and every other proof
+carries no `windowOrderInvariance`; the precision split 33 / 4; the opener
+1 / 0 / 20 with its census (6 / 7 / 6 / 1 / 1).
+
+Required, corpus (`SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT` with
+`windowOrderInvariance`; `DECISION_COVERAGE`, `STACK_BINDING_AT`,
+`RUNIC_POWER_STATE_AT`, `RUNE_AFFORDABILITY_AT`, `RESOURCE_OBSERVATION`,
+`AURA_BINDING_AT` at the two new REJECTED; `DECISION_COVERAGE` at
+2,029,599 as EXACT_ENTRY; `REMAINS_EVIDENCE_CENSUS`,
+`STOPPING_POINT_DISTRIBUTION` and `COVERAGE_SUMMARY` re-pinned over the
+bundle and the opener): the case
+`spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-and-the-window-bound-is-the-floor-both-orderings-share`.
+
+Failure this prevents:
+
+```text
+An exact Essence remainder anchored on a refresh the pinned module never
+produced — the one at a Gift of the San'layn edge — feeding a confident
+`remains<1.5` or `remains<8` into a REJECTED; or the same refresh
+"identified" as a Vampiric Strike trigger because a Vampiric Strike sits
+1 ms after it; or, inside the window, one ordering picked because it
+resolves more decisions. Each is a verdict on state the authority did not
+establish. Equally: a floor of 1.2 s lifted to 25 s because the other world
+was larger, or an edge 30 ms above 1.5 s deciding `remains<1.5`.
+```
+
+---
+
 # Spec-Owned Resolver Tests
 
 When a specialization supplies a resolver:

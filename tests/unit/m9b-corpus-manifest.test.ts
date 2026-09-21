@@ -62,9 +62,11 @@ describe("the committed corpus loads", () => {
     // the Blood 45 s slice and the opener; M11-B6 added one evaluator case
     // reading Blood Debt's count at the pinned decisions; M11-B7 added one
     // evaluator case pinning the seven Marrowrend REJECTED decisions and the
-    // Rune affordability census. Measured, then pinned.
+    // Rune affordability census; M11-B8 added one evaluator case pinning the
+    // Essence lone-refresh floors, the order-invariant window bound and the
+    // two decisions it resolves. Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(43);
-    expect(loaded.cases).toHaveLength(158);
+    expect(loaded.cases).toHaveLength(159);
     expect(loaded.coverage.declared).toBe(0);
   });
 
