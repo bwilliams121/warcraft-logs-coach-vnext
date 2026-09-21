@@ -311,8 +311,19 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(run.analysis.specId).toBe("deathknight/blood");
     expect(run.analysis.authority.authorityId).toBe("SIMC_APL_DEATHKNIGHT_BLOOD");
     const view = registration.observedDecisionView(run.analysis);
-    // RE-POINTED for M11-B4 (9), M11-B5 (10) and M11-B6 (15): 15 of the 45 s slice's 48 decisions resolve, all MATCH.
-    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 15, rejected: 0, unknown: 33 });
+    // RE-POINTED for M11-B4 (9), M11-B5 (10), M11-B6 (15) and M11-B7 (15 + 3): 15 of the 45 s slice's 48
+    // decisions MATCH, and the three consecutive Heart Strikes at 4 Runes and Blood Debt 10 before the
+    // Marrowrend at 2,043,209 are REJECTED — the authority selects marrowrend at sanlayn[7].
+    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 15, rejected: 3, unknown: 30 });
+    const rejected = view.decisions
+      .filter((decision) => decision.outcome === "REJECTED")
+      .map((decision) => [decision.fightTimeMs, decision.observedAbilityGameId, decision.authorityToken]);
+    // Fight times of 2,039,813 / 2,040,797 / 2,042,440 against the 2,004,589 pull; the observed Heart Strike 206930.
+    expect(rejected).toEqual([
+      [35224, 206930, "marrowrend"],
+      [36208, 206930, "marrowrend"],
+      [37851, 206930, "marrowrend"],
+    ]);
     // Every excluded cast is counted under a PUBLIC reason; nothing is dropped.
     const tallied = view.coverage.exclusions.reduce((sum, row) => sum + row.count, 0);
     expect(tallied).toBe(view.coverage.excludedCastCount);

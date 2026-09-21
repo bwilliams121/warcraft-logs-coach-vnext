@@ -80,6 +80,7 @@ import {
   type BloodFirstGcdState,
   type ExecutedEntry,
 } from "./first-gcd-state.js";
+import { NO_RUNE_AFFORDABILITY, type BloodRuneAffordability } from "./rune-affordability.js";
 
 /** The list this query begins in. The ROOT, with nothing skipped. */
 export const BLOOD_FIRST_GCD_ROOT_LIST = "default";
@@ -93,6 +94,12 @@ export interface BloodFirstGcdQueryInput {
   readonly observedAbilityGameId: number;
   /** What is known about cooldown readiness at this decision. Defaults to nothing. */
   readonly readiness?: readonly BloodReadinessFact[];
+  /**
+   * Marrowrend's Rune affordability at this decision, from the decision
+   * cast's own PRE_COST Rune entry and the pinned authority (M11-B7).
+   * Defaults to no fact, which proves nothing.
+   */
+  readonly runeAffordability?: BloodRuneAffordability;
 }
 
 /** One dispatch entry the ROOT scan visited, with the outcome the engine recorded. */
@@ -187,7 +194,13 @@ export function bloodFirstGcdSelectionAt(input: BloodFirstGcdQueryInput): BloodF
     resolveBloodApplicability(input.buildFacts, action);
 
   const usabilityFor = (state: BloodFirstGcdState, action: AplAction): ActionUsabilityVerdict =>
-    resolveBloodUsability(state, action, input.observedAbilityGameId, input.readiness ?? NO_READINESS_FACTS);
+    resolveBloodUsability(
+      state,
+      action,
+      input.observedAbilityGameId,
+      input.readiness ?? NO_READINESS_FACTS,
+      input.runeAffordability ?? NO_RUNE_AFFORDABILITY,
+    );
 
   const scanFor = (state: BloodFirstGcdState): OneForegroundScanResult =>
     resolveOneForegroundScan({

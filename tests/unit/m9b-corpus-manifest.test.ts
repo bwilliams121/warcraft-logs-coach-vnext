@@ -60,9 +60,11 @@ describe("the committed corpus loads", () => {
     // evaluator — the measurement cases — one application-service); M11-B5
     // added two COMBAT_STATE cases pinning the POST_CHANGE reconciliation over
     // the Blood 45 s slice and the opener; M11-B6 added one evaluator case
-    // reading Blood Debt's count at the pinned decisions. Measured, then pinned.
+    // reading Blood Debt's count at the pinned decisions; M11-B7 added one
+    // evaluator case pinning the seven Marrowrend REJECTED decisions and the
+    // Rune affordability census. Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(43);
-    expect(loaded.cases).toHaveLength(157);
+    expect(loaded.cases).toHaveLength(158);
     expect(loaded.coverage.declared).toBe(0);
   });
 

@@ -10570,6 +10570,960 @@
       ]
     },
     {
+      "caseId": "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/specs/deathknight/blood/rune-affordability.ts; action-profile.ts (the marrowrend allowlist); src/data/game/deathknight-blood-rune-cost-authority.ts; deathknight-blood-spender-costs.json (row 10513)",
+      "purpose": "M11-B7. Marrowrend's Rune cost is the pinned DBC row 10513 — 2 Runes, no aura condition — on a record with no cooldown, charge, internal or category cooldown and no cast time; the only effect in the pinned client data whose class mask reaches that row is Exterminate (441416 / 447954, -50%), a Deathbringer hero talent, so under the subject's RESOLVED San'layn tree the row IS the cost. At a decision whose observed cast carries an exact PRE_COST Rune entry at or above 2, action_t::ready() cannot fail on cost or cooldown, and its remaining conjuncts (GCD, target, range, movement) are those of the melee GCD cast that fired: Marrowrend is PROVEN_USABLE by name, for no other token. Seven decisions resolve on it, every one at Blood Debt exactly 10 from an applybuffstack 5 to 29 s earlier, every one a REJECTED: the three Heart Strikes at 2,039,813 / 2,040,797 / 2,042,440 (4 Runes each, consecutive GCDs before the Marrowrend at 2,043,209), the Heart Strike at 2,091,626 (3), the Vampiric Strike at 2,113,271 (5) and the Heart Strikes at 2,114,293 (4) and 2,115,379 (3), before the Marrowrend at 2,124,183 — the authority selects marrowrend at sanlayn[7] with no competing undecided GCD candidate, an authority-selected-different-token divergence and not a score. Five decisions whose root scan now selects Marrowrend stay UNKNOWN because a higher entry still diverges (2,036,692, 2,087,470, 2,093,667, 2,097,796, 2,119,480). The nine Marrowrend blockers whose cast carries no Rune entry — seven Death Strikes and the two Dance-of-Midnight-free Heart Strikes at 2,039,056 and 2,117,422 — stay exactly where they were: no Rune value is carried from the Heart Strike at 4 one GCD earlier, no previous-minus-cost, no regeneration. The four decisions at exactly 1 Rune (OWN_PRE_COST_BELOW_COST) are recorded and prove nothing: no INSUFFICIENT_RESOURCE exists for Blood. Over the bundle: OWN_PRE_COST_AFFORDABLE 52, OWN_PRE_COST_BELOW_COST 4, NO_RUNE_OBSERVATION 67; opener 11 / 10, unchanged at 1 MATCH.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2039813,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "marrowrend",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": null,
+              "stoppingAtoms": []
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2039813,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 4,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "cast": {
+              "reportTimeMs": 2039813,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "runes": {
+                "state": "EXACT_PRE_COST",
+                "amount": 4,
+                "max": 6,
+                "cost": 1
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": 4
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2039813,
+              "abilityGameId": 206930
+            },
+            "atomName": "blood_debt",
+            "expected": {
+              "state": "BOUND",
+              "stack": 10,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 1310372,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2040797,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "marrowrend",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": null,
+              "stoppingAtoms": []
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2040797,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 4,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2040797,
+              "abilityGameId": 206930
+            },
+            "atomName": "blood_debt",
+            "expected": {
+              "state": "BOUND",
+              "stack": 10,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 1310372,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2042440,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "marrowrend",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": null,
+              "stoppingAtoms": []
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2042440,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 4,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2042440,
+              "abilityGameId": 206930
+            },
+            "atomName": "blood_debt",
+            "expected": {
+              "state": "BOUND",
+              "stack": 10,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 1310372,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2091626,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "marrowrend",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": null,
+              "stoppingAtoms": []
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2091626,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 3,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "cast": {
+              "reportTimeMs": 2091626,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "runes": {
+                "state": "EXACT_PRE_COST",
+                "amount": 3,
+                "max": 6,
+                "cost": 1
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": 3
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2091626,
+              "abilityGameId": 206930
+            },
+            "atomName": "blood_debt",
+            "expected": {
+              "state": "BOUND",
+              "stack": 10,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 1310372,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2113271,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "marrowrend",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": null,
+              "stoppingAtoms": []
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2113271,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 5,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "cast": {
+              "reportTimeMs": 2113271,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "runes": {
+                "state": "EXACT_PRE_COST",
+                "amount": 5,
+                "max": 6,
+                "cost": 1
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": 5
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2113271,
+              "abilityGameId": 433895
+            },
+            "atomName": "blood_debt",
+            "expected": {
+              "state": "BOUND",
+              "stack": 10,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 1310372,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2114293,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "marrowrend",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": null,
+              "stoppingAtoms": []
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2114293,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 4,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2114293,
+              "abilityGameId": 206930
+            },
+            "atomName": "blood_debt",
+            "expected": {
+              "state": "BOUND",
+              "stack": 10,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 1310372,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2115379,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "marrowrend",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
+              "stoppingAt": null,
+              "stoppingAtoms": []
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2115379,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 3,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2115379,
+              "abilityGameId": 206930
+            },
+            "atomName": "blood_debt",
+            "expected": {
+              "state": "BOUND",
+              "stack": 10,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 1310372,
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2036692,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2036692,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 4,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2097796,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2097796,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_AFFORDABLE",
+              "runes": 4,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2041571,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "evidence": "NO_RUNE_OBSERVATION",
+              "runes": null,
+              "runesMax": null,
+              "wireCost": null,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2041571,
+              "abilityGameId": 49998
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2039056,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "NO_RUNE_OBSERVATION",
+              "runes": null,
+              "runesMax": null,
+              "wireCost": null,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RESOURCE_OBSERVATION",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "cast": {
+              "reportTimeMs": 2039056,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "runes": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPower": {
+                "state": "NO_OBSERVATION",
+                "amount": null,
+                "max": null,
+                "cost": null
+              },
+              "runicPowerDeficit": null,
+              "rune": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2044779,
+              "abilityGameId": 206930
+            },
+            "expected": {
+              "evidence": "OWN_PRE_COST_BELOW_COST",
+              "runes": 1,
+              "runesMax": 6,
+              "wireCost": 1,
+              "pinnedRuneCost": 2,
+              "pinnedSpellId": 195182,
+              "cooldownFree": true,
+              "costModifiersExcluded": true,
+              "marrowrendProvenUsable": false
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_CENSUS",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "expected": {
+              "runeAffordabilityEvidence": {
+                "OWN_PRE_COST_AFFORDABLE": 52,
+                "OWN_PRE_COST_BELOW_COST": 4,
+                "NO_RUNE_OBSERVATION": 67
+              },
+              "runeCounts": {
+                "runes 1": 4,
+                "runes 2": 9,
+                "runes 3": 20,
+                "runes 4": 14,
+                "runes 5": 6,
+                "runes 6": 3
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "Marrowrend is proven usable from exactly three things: a Rune count the decision's own cast wrote, a cost the pinned DBC row states, and a modifier the resolved hero tree excludes. Nothing is carried, regenerated, subtracted or read off the wire's cost field, and a count below the cost proves nothing."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts"
+      ]
+    },
+    {
       "caseId": "spec-blood-death-knight.outside-the-gift-window-the-scan-skips-san-gift-and-stops-in-sanlayn",
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
@@ -11532,6 +12486,23 @@
           }
         },
         {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_CENSUS",
+          "params": {
+            "actorId": 14,
+            "expected": {
+              "runeAffordabilityEvidence": {
+                "OWN_PRE_COST_AFFORDABLE": 11,
+                "NO_RUNE_OBSERVATION": 10
+              },
+              "runeCounts": {
+                "runes 2": 5,
+                "runes 3": 4,
+                "runes 4": 2
+              }
+            }
+          }
+        },
+        {
           "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS",
           "params": {
             "actorId": 14,
@@ -11626,8 +12597,8 @@
             "expected": {
               "eligibleDecisions": 123,
               "match": 37,
-              "rejected": 0,
-              "unknown": 86,
+              "rejected": 7,
+              "unknown": 79,
               "exclusions": {
                 "MELEE_SWING": 87,
                 "NON_GCD_ACTION": 47,
@@ -11648,15 +12619,15 @@
             "declaredHoles": [],
             "expected": {
               "match": 37,
-              "rejected": 0,
+              "rejected": 7,
               "stoppingEntries": {
                 "default[15] run_action_list": 1,
-                "(root scan resolved)": 81,
-                "sanlayn[10] consumption": 41
+                "(root scan resolved)": 88,
+                "sanlayn[10] consumption": 34
               },
               "stoppingAtoms": {
                 "default[15] run_action_list | buff.gift_of_the_sanlayn.up": 1,
-                "sanlayn[10] consumption | APPLICABILITY:consumption": 41
+                "sanlayn[10] consumption | APPLICABILITY:consumption": 34
               },
               "dispatchOutcomes": {
                 "default[13] -> high_prio_actions : CALL_MAY_SELECT": 123,
@@ -11664,8 +12635,8 @@
                 "default[15] -> san_gift : BLOCKED": 1,
                 "default[15] -> san_gift : RUN_ENTERED_SCAN_ENDS": 24,
                 "default[15] -> san_gift : RUN_GATE_FALSE_SKIPPED": 98,
-                "default[16] -> sanlayn : BLOCKED": 41,
-                "default[16] -> sanlayn : RUN_ENTERED_SCAN_ENDS": 57
+                "default[16] -> sanlayn : BLOCKED": 34,
+                "default[16] -> sanlayn : RUN_ENTERED_SCAN_ENDS": 64
               },
               "undecidedGcdCandidates": {
                 "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up": 3,
@@ -11687,10 +12658,10 @@
                 "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 1,
                 "sanlayn[5] any_dnd | USABILITY:any_dnd": 5,
                 "sanlayn[6] blood_boil | buff.boiling_point.up": 1,
-                "sanlayn[7] marrowrend | USABILITY:marrowrend": 25,
+                "sanlayn[7] marrowrend | USABILITY:marrowrend": 13,
                 "sanlayn[8] heart_strike | buff.vampiric_strike.up": 3,
                 "sanlayn[9] death_strike | runic_power.deficit": 2,
-                "sanlayn[9] death_strike | fight_remains": 41,
+                "sanlayn[9] death_strike | fight_remains": 34,
                 "sanlayn[0] deaths_caress | buff.bone_shield.up": 6,
                 "sanlayn[0] deaths_caress | buff.bone_shield.stack": 7,
                 "sanlayn[3] deaths_caress | buff.bone_shield.stack": 6,
@@ -12651,13 +13622,13 @@
               "authorityCoverage": "UNKNOWN",
               "authorityToken": null,
               "selectionPrecision": null,
-              "decisiveBlocker": "OBSERVED_STATE_MISSING",
-              "rawBlocker": "ONE_SCAN_BLOCKED/NO_DEFINITE_WINNER",
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
               "observedActionRejected": false,
               "unselectabilityProven": false,
-              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
-              "stoppingAt": "sanlayn[10] consumption",
-              "stoppingAtoms": ["APPLICABILITY:consumption"]
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
             }
           }
         },
@@ -12700,7 +13671,7 @@
                 "at": "default[16]",
                 "actionToken": "run_action_list",
                 "calleeListName": "sanlayn",
-                "outcome": "BLOCKED",
+                "outcome": "RUN_ENTERED_SCAN_ENDS",
                 "gate": "TRUE"
               }
             ]

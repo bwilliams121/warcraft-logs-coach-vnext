@@ -97,10 +97,15 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // (37 of 123 resolve) and added nineteen: one new case with eleven stack
     // bindings and four decisions at the pinned Blood Debt counts, two opener
     // stack bindings, and the stack-evidence and Blood Debt transition
-    // censuses over the bundle and the opener. Measured, then pinned.
-    expect(result.summary.cases).toBe(157);
-    expect(result.summary.assertions).toBe(570);
-    expect(result.summary.passed).toBe(570);
+    // censuses over the bundle and the opener; M11-B7's Marrowrend Rune
+    // affordability re-pinned them again (37 MATCH and 7 REJECTED of 123)
+    // and added thirty-five: one new case with the seven REJECTED decisions
+    // (each with its affordability fact and Blood Debt count), two divergent
+    // and two no-observation decisions, and the Rune affordability censuses
+    // over the bundle and the opener. Measured, then pinned.
+    expect(result.summary.cases).toBe(158);
+    expect(result.summary.assertions).toBe(605);
+    expect(result.summary.passed).toBe(605);
   });
 
   it("covers every layer", async () => {

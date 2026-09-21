@@ -22,6 +22,7 @@
  */
 
 import artifact from "./deathknight-blood-spender-costs.json";
+import { POWER_RUNE_KEY } from "./deathknight-blood-rune-cost-authority.js";
 import {
   parseSpenderCostArtifact,
   type SpenderCostIdentity,
@@ -59,4 +60,32 @@ export function bloodSpenderCostsFor(simcToken: string): readonly SpenderCostIde
   const loaded = load();
   if (!loaded.ok) return [];
   return loaded.spells.filter((spell) => spell.simcToken === simcToken);
+}
+
+/**
+ * The power-type enumerator the artifact's provenance records for Runes
+ * (`powerTypes.POWER_RUNE`), or `null` when it is not recorded as an integer.
+ *
+ * Read from THIS artifact's provenance rather than assumed: the class-neutral
+ * parser surfaces Holy Power only, and the number 5 belongs to the pinned
+ * enumeration, not to Blood code (M11-B7).
+ */
+export function bloodRunePowerType(): number | null {
+  if (!load().ok) return null;
+  const powerTypes: unknown = artifact.provenance.powerTypes;
+  if (typeof powerTypes !== "object" || powerTypes === null) return null;
+  const value: unknown = (powerTypes as Record<string, unknown>)[POWER_RUNE_KEY];
+  return typeof value === "number" && Number.isInteger(value) ? value : null;
+}
+
+/**
+ * `spell_data_t::cost( POWER_RUNE )` for one pinned record: the FIRST Rune
+ * row in table order, per the artifact's own cost rule, or `null` when the
+ * record carries no Rune row. The base row only; no modifier is applied here.
+ */
+export function bloodRuneCostOf(spell: SpenderCostIdentity): number | null {
+  const runeType = bloodRunePowerType();
+  if (runeType === null) return null;
+  const first = spell.powerRows.find((row) => row.powerType === runeType);
+  return first === undefined ? null : first.cost;
 }

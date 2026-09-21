@@ -1857,6 +1857,71 @@ a confident TRUE or FALSE, and a REJECTED at ten stacks built on a
 Marrowrend usability nothing proved.
 ```
 
+# Marrowrend Rune Affordability Tests (M11-B7)
+
+A Rune count is a number the decision cast's own attached PRE_COST entry
+wrote; a Rune cost is the pinned DBC row; a modifier is excluded by a
+resolved hero tree. The tests must prove that Marrowrend is proven usable
+from exactly those three things, in the positive direction only, for the
+`marrowrend` token only, and that nothing is carried, regenerated,
+subtracted, read off a neighbouring event or read off the wire's cost field.
+
+Required (`tests/unit/m11b7-blood-rune-affordability.test.ts`):
+
+```text
+pinned record                        -> spell 195182, one Rune row at 2, every cooldown scalar 0, cast time 0
+Exterminate record                   -> 441416 / 447954, effects 1136665 / 1146159, -50%, Deathbringer-owned
+hero tree RESOLVED sanlayn           -> modifier excluded
+hero tree UNKNOWN / CONTRADICTORY / deathbringer -> MODIFIER_UNPROVEN, proof withheld
+own PRE_COST runes 2 / 3 / 6         -> OWN_PRE_COST_AFFORDABLE, marrowrend PROVEN_USABLE (sanlayn[4] and [7])
+own PRE_COST runes 0 / 1             -> OWN_PRE_COST_BELOW_COST, usability UNKNOWN, never PROVEN_UNUSABLE
+Death Strike / Blood Boil / free Heart Strike -> NO_RUNE_OBSERVATION, usability UNKNOWN
+type-5 entry EVENT_ASSOCIATED        -> refused (uncosted attachment)
+type-5 entry POST_CHANGE             -> refused (a resourcechange is not a cast's own PRE_COST)
+same-ms aura, change, other actor at 6 -> the own cast's 1 is read; the same-ms Death Strike observes nothing
+Heart Strike at 4, then Death Strike -> NO_RUNE_OBSERVATION (no carry: not 3, 4, 5 or 6)
+Marrowrend at 4 cost 2, then Death Strike -> NO_RUNE_OBSERVATION (no ledger: not 2)
+1 Rune, 30 s of silence, Death Strike -> NO_RUNE_OBSERVATION (no regeneration)
+heart_strike / deaths_caress / any_dnd at 6 Runes -> UNKNOWN (the allowlist is the token literal)
+4 Runes against wire cost 5          -> OWN_PRE_COST_AFFORDABLE at the pinned 2 (the wire's cost decides nothing)
+record with cooldown / charge / internal / category cooldown, cast time, wrong spell, no Rune row
+                                     -> AUTHORITY_NOT_PINNED, proof withheld (marrowrendPinOf; cache seam re-reads the committed shape)
+hand-tagged AFFORDABLE fact          -> every conjunct re-checked; NO_RUNE_AFFORDABILITY and the pre-B7 call shape prove nothing
+observed Marrowrend cast             -> PROVEN_USABLE ahead of the fact, as before
+```
+
+Required, contract (`tests/contracts/m11b2-blood-evaluator.test.ts`,
+`m11b2-blood-registration.test.ts`): the seven REJECTED decisions
+individually (2,039,813 / 2,040,797 / 2,042,440 at 4 Runes, 2,091,626 at 3,
+2,113,271 at 5, 2,114,293 at 4, 2,115,379 at 3) — outcome, basis
+`AUTHORITY_SELECTED_DIFFERENT_TOKEN`, token `marrowrend`, EXACT_ENTRY,
+`sanlayn[7]` selected with no undecided GCD candidate, the affordability
+fact, the own resource entry and its locator, Blood Debt exactly 10 from an
+`applybuffstack` more than 5 s earlier; the five divergent decisions still
+UNKNOWN with `DIVERGENT_GCD_OUTCOMES`; the nine no-observation Marrowrend
+blockers still first-undecided on `USABILITY:marrowrend`; the 37 MATCH
+report times unchanged; the census (52 / 4 / 67, counts 1 ×4 … 6 ×3); the
+45 s view 15 / 3 / 30; the opener 1 / 0 / 20 with 11 / 10.
+
+Required, corpus (`SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT`,
+`RUNE_AFFORDABILITY_CENSUS`, and `DECISION_COVERAGE` / `STACK_BINDING_AT`
+/ `RESOURCE_OBSERVATION` at the seven): the fact at the pinned decisions
+including the count's identity with the recorded own observation, two
+divergent and two no-observation decisions, one below-cost decision, and the
+censuses over the bundle and the opener.
+
+Failure this prevents:
+
+```text
+A Marrowrend "usable" from a Rune count the decision did not observe — the
+previous Heart Strike's 4, that 4 minus its cost, that 4 plus a regeneration
+guess, a neighbouring event's number — or from the wire's cost field, or
+under a Deathbringer build where the row is not the cost; or, in the other
+direction, an INSUFFICIENT_RESOURCE at 1 Rune that no owner decision
+authorised. Either one would be a REJECTED (or a MATCH) built on state the
+log never wrote.
+```
+
 ---
 
 # Spec-Owned Resolver Tests

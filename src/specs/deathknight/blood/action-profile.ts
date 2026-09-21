@@ -53,16 +53,28 @@
  * USABILITY: THE PROOFS, AND NOTHING IN BETWEEN
  *
  *     SIMULATED_PREFIX_EXECUTION   this branch already fired the entry (counterfactual, named so)
- *     PROVEN_USABLE                the observed cast itself
+ *     PROVEN_USABLE                the observed cast itself; or — M11-B7, the
+ *                                  `marrowrend` token ONLY — the decision
+ *                                  cast's own exact PRE_COST Rune count at or
+ *                                  above the pinned Marrowrend cost, under a
+ *                                  proven modifier exclusion and a pinned
+ *                                  cooldown-free record (`rune-affordability.ts`)
  *     ACTIVE_COOLDOWN              a derived cooldown proven past the tolerance
  *                                  (Dancing Rune Weapon only)
  *
- * NO RESOURCE PROOF IN EITHER DIRECTION. The wire's `cost` on a Death Strike
- * cast is the DBC base (450) while the deduction the build pays is 350
- * (`resources.ts`), and Rune regeneration is not on the wire at all. No
- * INSUFFICIENT_RESOURCE and no affordability-based PROVEN_USABLE is ever
- * claimed for any Blood entry; a spender's usability is UNKNOWN unless the
- * decision's own cast proves it.
+ * NO NEGATIVE RESOURCE PROOF, AND ONE POSITIVE ONE. The wire's `cost` on a
+ * Death Strike cast is the DBC base (450) while the deduction the build pays
+ * is 350 (`resources.ts`), and Rune regeneration is not on the wire at all.
+ * No INSUFFICIENT_RESOURCE is ever claimed for any Blood entry, and no
+ * Runic Power affordability is claimed in either direction. The one
+ * affordability-based PROVEN_USABLE is Marrowrend's, by an explicit token
+ * allowlist rather than a "runes >= cost" rule: the proof reads a Rune count
+ * that rode in on THIS decision's cast, a cost from the pinned DBC row (never
+ * the wire's cost field), a modifier exclusion from the resolved hero tree,
+ * and readiness scalars from the same pinned record — and it reasons about
+ * `action_t::ready()` for a cooldown-free instant melee attack whose
+ * remaining conjuncts are identical to the melee GCD cast that fired. A
+ * count BELOW the cost is recorded and proves nothing (Candidate B, deferred).
  */
 
 import type { AplAction } from "../../../simc/apl-authority.js";
@@ -80,6 +92,12 @@ import type { HeroTreeResolution, TalentResolution } from "../../../data/game/ta
 import { bloodTokenBinding } from "../../../data/game/deathknight-blood-gcd-semantics.js";
 import { bloodNonDomainApplicabilityFor } from "./domain-boundary.js";
 import { hasExecuted, type BloodFirstGcdState, type ExecutedEntry } from "./first-gcd-state.js";
+import {
+  MARROWREND_TOKEN,
+  marrowrendAffordabilityProven,
+  NO_RUNE_AFFORDABILITY,
+  type BloodRuneAffordability,
+} from "./rune-affordability.js";
 
 /** Token → the pinned talent whose absence makes the action `not_found()`-background (action.cpp:541-549). */
 export const TALENT_BUILT_TOKENS: Readonly<Record<string, string>> = Object.freeze({
@@ -178,6 +196,7 @@ export function resolveBloodUsability(
   action: AplAction,
   observedAbilityGameId: number,
   readiness: readonly BloodReadinessFact[] = NO_READINESS_FACTS,
+  runeAffordability: BloodRuneAffordability = NO_RUNE_AFFORDABILITY,
 ): ActionUsabilityVerdict {
   const entry: ExecutedEntry = {
     listName: action.listName,
@@ -223,6 +242,17 @@ export function resolveBloodUsability(
         "the pinned base and the reviewed modifier policy, is proven to exceed the queueing tolerance, so " +
         "action_t::ready cannot succeed. The bound is a LOWER bound and is compared as one.",
     });
+  }
+
+  // MARROWREND, BY NAME (M11-B7). The decision cast's own exact PRE_COST Rune
+  // count is at or above the pinned cost, the modifier is excluded by the
+  // resolved hero tree, and the pinned record is cooldown-free and instant:
+  // `ready()` cannot fail on cost or cooldown, and its other conjuncts are
+  // the observed melee GCD cast's own. The allowlist is the token literal;
+  // nothing here generalises to "any Rune spender". A count below the cost
+  // falls through to UNKNOWN: no negative resource proof exists for Blood.
+  if (action.actionToken === MARROWREND_TOKEN && marrowrendAffordabilityProven(runeAffordability)) {
+    return { kind: "PROVEN_USABLE" };
   }
 
   return unknownUsability();

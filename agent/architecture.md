@@ -6287,6 +6287,154 @@ artifacts / 157 cases / 570 assertions), and the invariance harness: 33 of
 33 non-timing captures byte-identical against HEAD (af76660). Blood stays
 INTERNAL_ONLY; M11-B is not complete.
 
+### M11-B7 — Marrowrend usability from the decision cast's own Rune count
+
+The second-largest first blocker after M11-B6 — `USABILITY:marrowrend` at
+`sanlayn[7]` for 16 of 123 bundle decisions — answered, where the evidence
+allows, from the decision cast's own exact PRE_COST Rune entry against the
+pinned Marrowrend cost, with one Blood-owned fact, one allowlisted proof
+and no shared-engine change. Candidate A of the pre-flight only: the
+positive direction. Candidate B (a count below the cost as
+`INSUFFICIENT_RESOURCE`) is deferred by owner decision.
+
+**The question.** At an observed Blood decision whose cast carries an exact
+PRE_COST Rune count, could Marrowrend have been selected at that same
+instant? Not at the previous decision plus regeneration, not from a
+previous count minus a cost, not from any event beside the cast.
+
+**The pinned mechanics** (`src/data/game/deathknight-blood-rune-cost-authority.ts`,
+claims against sc_death_knight.cpp at 33622e9d and the same commit's
+sc_spell_data.inc). Marrowrend's cost is DBC power row 10513 — power type 5,
+cost 2, no aura condition — on a record with cooldown, charge cooldown,
+internal cooldown, category cooldown and cast time all zero
+(`deathknight-blood-spender-costs.json`, read through the artifact's own
+`FIRST_ROW_OF_POWER_TYPE_IN_TABLE_ORDER` rule and its recorded
+`POWER_RUNE` enumerator; `bloodRuneCostOf`). `marrowrend_t` overrides
+neither `cost()` nor `ready()` and has no replacement action, so
+`action_t::ready()` is cooldown ∧ internal cooldown ∧ movement ∧
+`cost_affordable()`, and `resources.current[RESOURCE_RUNE]` is the count of
+fully recharged runes. The pre-flight scanned every family-15 effect in the
+pinned spell data for a resource-cost modifier reaching Marrowrend's class
+mask `{ 0, 2048, 0, 2149580800 }` and found exactly two, both Exterminate
+(441416 / 447954, effects 1136665 / 1146159, −50%), a Deathbringer hero
+talent whose buff is a `make_fallback` unless a Deathbringer talent is
+taken; the same scan reproduces every modifier the wire already showed on
+Death Strike (Ossuary, Improved Death Strike, Blood Draw: 450 → 350 → 250),
+Crimson Scourge's free Death and Decay and Dance of Midnight's free Heart
+Strike (the 11 uncosted Heart Strikes, each followed 19–29 ms later by
+`removebuff 1264568`). No Blood cast gains a Rune on its own execution:
+every instantaneous `replenish_rune` caller is Frost-owned or Army of the
+Dead's precombat regeneration. No cost-increasing effect exists.
+
+**The wire, measured.** Across the four Blood slices, 66 consecutive pairs
+of the subject's own Rune-costed casts (no Rune spend between them): 27
+have `B.amount < A.amount`, impossible under a POST_COST reading; 0 have
+`B.amount < A.amount − A.cost`, so the PRE_COST reading is never refuted;
+no snapshot is 0; four are exactly `amount == cost`. The attached count is
+the count before the cast's own cost — the reading the `rune` atom has used
+since B2 — and, for the positive direction, either reading gives
+decision-time runes ≥ the attached amount.
+
+**The fact** (`src/specs/deathknight/blood/rune-affordability.ts`).
+`bloodRuneAffordability(observation, heroTree)` is total over its inputs
+and lands on exactly one evidence class: `NO_RUNE_OBSERVATION` (the cast
+carries no EXACT / OBSERVED / PRE_COST Rune entry — Death Strike, Blood
+Boil, a free Heart Strike), `AUTHORITY_NOT_PINNED` (the artifact did not
+validate, has no single Marrowrend record, or the record is not spell 195182
+with a positive Rune row, cooldown-free and instant), `MODIFIER_UNPROVEN`
+(the hero tree is UNKNOWN, CONTRADICTORY or RESOLVED Deathbringer —
+`marrowrendRuneCostModifiersExcluded`, the same one-tree-at-a-time fact
+that backgrounds `reapers_mark`; never inferred from the absence of an
+Exterminate aura), `OWN_PRE_COST_AFFORDABLE` (count ≥ pinned cost) or
+`OWN_PRE_COST_BELOW_COST` (count < pinned cost, recorded and never acted
+on). The fact carries the count, its max, the wire's cost field (identity
+corroboration only; never the mechanical cost) and the pin it was compared
+to. It is computed per decision in `observed-analysis.ts` and carried
+nowhere: Runes have no standalone `resourcechange`, so there is nothing to
+carry, nothing to add a delta to, and no separate event whose ordering could
+need a window — no Rune safety window exists and none is needed.
+
+**The proof** (`action-profile.ts`, `resolveBloodUsability`). After the
+hypothetical-prefix and observed-cast proofs and the derived-cooldown
+elimination, for the token literal `marrowrend` only:
+`marrowrendAffordabilityProven(fact)` re-checks every conjunct — evidence
+`OWN_PRE_COST_AFFORDABLE`, an EXACT count, the modifier excluded, a PINNED
+record for spell 195182 that is cooldown-free and instant, count ≥ cost —
+and returns `PROVEN_USABLE`. The remaining `ready()` conjuncts are
+proven by parity with the observed melee GCD cast: Marrowrend, Heart Strike
+and Vampiric Strike carry the same max range (5), cast time (0) and
+`usable_moving()`, the GCD was ready because a GCD cast fired, and the
+target was in melee range because a melee cast hit it. Nothing generalises
+to "any Rune spender": `heart_strike`, `deaths_caress` and `any_dnd` stay
+UNKNOWN at 6 Runes. The fact is threaded through `BloodFirstGcdQueryInput`
+to the adapter; the generic scan learned nothing, and its priority
+short-circuit is untouched — a decision whose root scan now selects
+Marrowrend but whose higher entry (`sanlayn[1]`, `any_dnd`, the Dancing
+Rune Weapon gate) is still undecided remains `DIVERGENT_GCD_OUTCOMES`.
+
+**Measured.** Bundle **37 MATCH / 7 REJECTED / 79 UNKNOWN** (B6: 37 / 0 /
+86): the MATCH population is unchanged decision for decision (27 Death
+Strikes, 6 Heart Strikes, 4 Blood Boils; 32 EXACT_ENTRY, 5 TOKEN_CONVERGED,
+the 37 report times pinned in the contract), and the seven REJECTED are
+Blood's first — Heart Strikes at 2,039,813 / 2,040,797 / 2,042,440 (4 Runes
+each, three consecutive GCDs before the Marrowrend at 2,043,209), 2,091,626
+(3), 2,114,293 (4), 2,115,379 (3) and the Vampiric Strike at 2,113,271 (5),
+each at Blood Debt exactly 10 from an `applybuffstack` 5–29 s earlier,
+each with `sanlayn[7] marrowrend` selected at its exact entry, no
+competing undecided GCD candidate, `AUTHORITY_SELECTED_DIFFERENT_TOKEN`.
+A REJECTED is a divergence from the pinned list, not a performance score.
+The 45 s slice 15 / 3 / 30 (B6 15 / 0 / 33); the opener 1 / 0 / 20
+unchanged. Of the 16 decisions B6 left on `USABILITY:marrowrend`, the 7
+whose cast carried an exact count of 3–5 resolve and the 9 whose cast
+carried no Rune entry (7 Death Strikes, the 2 free Heart Strikes at
+2,039,056 and 2,117,422) stay exactly where they were; the five decisions
+whose root scan now selects Marrowrend under a diverging higher entry
+(2,036,692, 2,087,470, 2,093,667, 2,097,796, 2,119,480) stay UNKNOWN; the
+four decisions at exactly 1 Rune are `OWN_PRE_COST_BELOW_COST` and none is
+REJECTED. Rune evidence over the 123: OWN_PRE_COST_AFFORDABLE 52,
+OWN_PRE_COST_BELOW_COST 4, NO_RUNE_OBSERVATION 67 (opener 11 / 0 / 10);
+counts 1 ×4, 2 ×9, 3 ×20, 4 ×14, 5 ×6, 6 ×3. The root scan resolves at 88
+(B6 81) and blocks at `sanlayn[10]` for 34 (41): the seven REJECTED scans
+end at `sanlayn[7]` and never walk on. The first-blocker ranking:
+`sanlayn[9]` `fight_remains` 20, Marrowrend usability 9, Essence window
+refusals 14 + 11, Bone Shield window 7, `any_dnd` usability 4, the Dancing
+Rune Weapon gate 3, Essence stack 3, Runic Power after a spend 3, Death
+Strike usability 3 + 1, Blood Boil usability 2, `buff.vampiric_strike.up`
+2, Boiling Point 1, Heart Strike usability 1. `fight_remains` is
+unmodelled and its 20 + 11 + 3 stay UNKNOWN.
+
+**Not built, on purpose.** No Rune carry, no `previous − cost`, no
+regeneration, no delta, no reading of a nearby event, no Rune safety
+window, no trust in the wire's `cost` field, no proof for any token but
+`marrowrend`, no proof under an unresolved or Deathbringer tree, no
+`INSUFFICIENT_RESOURCE` (Candidate B), no generic cost-modifier framework,
+no public enum: `usabilityProvenance` keeps its two public members and the
+constant Blood writes (the Retribution precedent), and the reason for the
+proof lives in the Blood payload (`resolved[].runeAffordability`) and the
+`runeAffordabilityEvidence` / `runeCounts` census.
+
+**Proven.** `tests/unit/m11b7-blood-rune-affordability.test.ts` (the pin
+and its digests; affordable at 2 / 3 / 6; below cost at 0 / 1 proving
+nothing; no observation on a Death Strike, a Blood Boil and an uncosted
+Heart Strike; EVENT_ASSOCIATED and POST_CHANGE type-5 entries refused;
+same-millisecond aura, change and another actor's Runes never read; UNKNOWN
+/ CONTRADICTORY / Deathbringer trees withheld; no carry, no ledger, no
+regeneration; the token allowlist; wire cost 5 against 4 Runes still proved
+at the pinned 2; the authority guard against every non-zero cooldown
+scalar, a wrong spell id and a missing Rune row through
+`marrowrendPinOf` and the cache seam; a hand-tagged fact proving nothing),
+the re-pinned `m11b2-blood-evaluator` contract (the seven REJECTED
+individually with their fact, own entry, locator and Blood Debt anchor; the
+five divergent; the nine no-observation; the census; the 37 MATCH by report
+time) and `m11b2-blood-registration` (the 45 s view), two new corpus kinds
+(`SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT`,
+`RUNE_AFFORDABILITY_CENSUS`) and one new case (the corpus is 43 artifacts
+/ 158 cases / 605 assertions; the workerd gate byte-identical across two
+processes), and the invariance harness: 33 of 33 non-timing captures
+byte-identical against HEAD (d421981) — Assassination, Protection,
+Retribution, Arms, every raid night and every public document unchanged.
+Blood stays INTERNAL_ONLY; M11-B is not complete.
+
 ---
 
 # Milestone 12 — Healer Foundation

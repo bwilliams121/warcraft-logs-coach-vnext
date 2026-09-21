@@ -3329,6 +3329,57 @@ const blood_resources = (t, ability, expected, extra = {}) =>
 const BLOOD_NO_RES = { state: "NO_OBSERVATION", amount: null, max: null, cost: null };
 const blood_runes = (amount, cost) => ({ state: "EXACT_PRE_COST", amount, max: 6, cost });
 const blood_rp = (amount) => ({ state: "EXACT_PRE_COST", amount, max: 1250, cost: 450 });
+/** M11-B7: Marrowrend's Rune affordability at one decision, from the decision cast's own Rune entry. */
+const blood_affordability = (t, ability, expected, extra = {}) =>
+  a("SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT", {
+    actorId: BLOOD,
+    ...extra,
+    observedCast: { reportTimeMs: t, abilityGameId: ability },
+    expected,
+  });
+const BLOOD_MARROWREND_PIN = { pinnedRuneCost: 2, pinnedSpellId: BLOOD_MR, cooldownFree: true };
+const blood_affordable = (runes, wireCost = 1) => ({
+  evidence: "OWN_PRE_COST_AFFORDABLE",
+  runes,
+  runesMax: 6,
+  wireCost,
+  ...BLOOD_MARROWREND_PIN,
+  costModifiersExcluded: true,
+  marrowrendProvenUsable: true,
+});
+const blood_below_cost = (runes, wireCost = 1) => ({
+  evidence: "OWN_PRE_COST_BELOW_COST",
+  runes,
+  runesMax: 6,
+  wireCost,
+  ...BLOOD_MARROWREND_PIN,
+  costModifiersExcluded: true,
+  marrowrendProvenUsable: false,
+});
+const BLOOD_NO_RUNE_OBSERVATION = {
+  evidence: "NO_RUNE_OBSERVATION",
+  runes: null,
+  runesMax: null,
+  wireCost: null,
+  ...BLOOD_MARROWREND_PIN,
+  costModifiersExcluded: true,
+  marrowrendProvenUsable: false,
+};
+/** M11-B7: the authority selected marrowrend at sanlayn[7] against an observed Heart Strike / Vampiric Strike. */
+const BLOOD_MARROWREND_REJECTED = {
+  outcome: "REJECTED",
+  basis: "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+  authorityCoverage: "EXACT_ENTRY",
+  authorityToken: "marrowrend",
+  selectionPrecision: "EXACT_ENTRY",
+  decisiveBlocker: null,
+  rawBlocker: null,
+  observedActionRejected: false,
+  unselectabilityProven: false,
+  unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
+  stoppingAt: null,
+  stoppingAtoms: [],
+};
 const blood_domain = (domain, expected, extra = {}) =>
   a("SPEC_BLOOD_DEATH_KNIGHT.DOMAIN_RESULT", { actorId: BLOOD, ...extra, domain, expected });
 const BLOOD_NO_AUTHORITY_DOMAIN = {
@@ -3509,8 +3560,8 @@ const BLOOD_CASES = [
         expected: {
           eligibleDecisions: 123,
           match: 37,
-          rejected: 0,
-          unknown: 86,
+          rejected: 7,
+          unknown: 79,
           exclusions: {
             MELEE_SWING: 87,
             NON_GCD_ACTION: 47,
@@ -3524,15 +3575,15 @@ const BLOOD_CASES = [
         ...BLOOD_FULL,
         expected: {
           match: 37,
-          rejected: 0,
+          rejected: 7,
           stoppingEntries: {
             "default[15] run_action_list": 1,
-            "(root scan resolved)": 81,
-            "sanlayn[10] consumption": 41,
+            "(root scan resolved)": 88,
+            "sanlayn[10] consumption": 34,
           },
           stoppingAtoms: {
             "default[15] run_action_list | buff.gift_of_the_sanlayn.up": 1,
-            [`sanlayn[10] consumption | ${BLOOD_CONSUMPTION_TAG}`]: 41,
+            [`sanlayn[10] consumption | ${BLOOD_CONSUMPTION_TAG}`]: 34,
           },
           dispatchOutcomes: {
             "default[13] -> high_prio_actions : CALL_MAY_SELECT": 123,
@@ -3540,8 +3591,8 @@ const BLOOD_CASES = [
             "default[15] -> san_gift : BLOCKED": 1,
             "default[15] -> san_gift : RUN_ENTERED_SCAN_ENDS": 24,
             "default[15] -> san_gift : RUN_GATE_FALSE_SKIPPED": 98,
-            "default[16] -> sanlayn : BLOCKED": 41,
-            "default[16] -> sanlayn : RUN_ENTERED_SCAN_ENDS": 57,
+            "default[16] -> sanlayn : BLOCKED": 34,
+            "default[16] -> sanlayn : RUN_ENTERED_SCAN_ENDS": 64,
           },
           undecidedGcdCandidates: {
             "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up": 3,
@@ -3563,10 +3614,10 @@ const BLOOD_CASES = [
             "sanlayn[5] any_dnd | buff.crimson_scourge.remains": 1,
             "sanlayn[5] any_dnd | USABILITY:any_dnd": 5,
             "sanlayn[6] blood_boil | buff.boiling_point.up": 1,
-            "sanlayn[7] marrowrend | USABILITY:marrowrend": 25,
+            "sanlayn[7] marrowrend | USABILITY:marrowrend": 13,
             "sanlayn[8] heart_strike | buff.vampiric_strike.up": 3,
             "sanlayn[9] death_strike | runic_power.deficit": 2,
-            "sanlayn[9] death_strike | fight_remains": 41,
+            "sanlayn[9] death_strike | fight_remains": 34,
             "sanlayn[0] deaths_caress | buff.bone_shield.up": 6,
             "sanlayn[0] deaths_caress | buff.bone_shield.stack": 7,
             "sanlayn[3] deaths_caress | buff.bone_shield.stack": 6,
@@ -3818,6 +3869,13 @@ const BLOOD_CASES = [
         expected: {
           runicPowerEvidence: { OWN_PRE_COST: 6, CARRIED_EXACT: 5, WINDOW_BOUNDED: 10 },
           runicPowerWindowLeads: { "lead 0": 8, "lead 1": 2 },
+        },
+      }),
+      a("SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_CENSUS", {
+        actorId: BLOOD_GTKB_ACTOR,
+        expected: {
+          runeAffordabilityEvidence: { OWN_PRE_COST_AFFORDABLE: 11, NO_RUNE_OBSERVATION: 10 },
+          runeCounts: { "runes 2": 5, "runes 3": 4, "runes 4": 2 },
         },
       }),
       a("SPEC_BLOOD_DEATH_KNIGHT.REMAINS_EVIDENCE_CENSUS", {
@@ -4118,6 +4176,109 @@ const BLOOD_CASES = [
     { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
   ),
   kase(
+    "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes",
+    BLOOD_105_165,
+    "SPEC_BLOOD_DEATH_KNIGHT",
+    "src/specs/deathknight/blood/rune-affordability.ts; action-profile.ts (the marrowrend allowlist); src/data/game/deathknight-blood-rune-cost-authority.ts; deathknight-blood-spender-costs.json (row 10513)",
+    "M11-B7. Marrowrend's Rune cost is the pinned DBC row 10513 — 2 Runes, no aura condition — on a record with no cooldown, charge, internal or category cooldown and no cast time; the only effect in the pinned client data whose class mask reaches that row is Exterminate (441416 / 447954, -50%), a Deathbringer hero talent, so under the subject's RESOLVED San'layn tree the row IS the cost. At a decision whose observed cast carries an exact PRE_COST Rune entry at or above 2, action_t::ready() cannot fail on cost or cooldown, and its remaining conjuncts (GCD, target, range, movement) are those of the melee GCD cast that fired: Marrowrend is PROVEN_USABLE by name, for no other token. Seven decisions resolve on it, every one at Blood Debt exactly 10 from an applybuffstack 5 to 29 s earlier, every one a REJECTED: the three Heart Strikes at 2,039,813 / 2,040,797 / 2,042,440 (4 Runes each, consecutive GCDs before the Marrowrend at 2,043,209), the Heart Strike at 2,091,626 (3), the Vampiric Strike at 2,113,271 (5) and the Heart Strikes at 2,114,293 (4) and 2,115,379 (3), before the Marrowrend at 2,124,183 — the authority selects marrowrend at sanlayn[7] with no competing undecided GCD candidate, an authority-selected-different-token divergence and not a score. Five decisions whose root scan now selects Marrowrend stay UNKNOWN because a higher entry still diverges (2,036,692, 2,087,470, 2,093,667, 2,097,796, 2,119,480). The nine Marrowrend blockers whose cast carries no Rune entry — seven Death Strikes and the two Dance-of-Midnight-free Heart Strikes at 2,039,056 and 2,117,422 — stay exactly where they were: no Rune value is carried from the Heart Strike at 4 one GCD earlier, no previous-minus-cost, no regeneration. The four decisions at exactly 1 Rune (OWN_PRE_COST_BELOW_COST) are recorded and prove nothing: no INSUFFICIENT_RESOURCE exists for Blood. Over the bundle: OWN_PRE_COST_AFFORDABLE 52, OWN_PRE_COST_BELOW_COST 4, NO_RUNE_OBSERVATION 67; opener 11 / 10, unchanged at 1 MATCH.",
+    [
+      // The seven REJECTED, each with its own Rune entry, the pinned cost and the Blood Debt anchor.
+      blood_decision(2039813, BLOOD_HS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_affordability(2039813, BLOOD_HS, blood_affordable(4), BLOOD_FULL),
+      blood_resources(
+        2039813,
+        BLOOD_HS,
+        { runes: blood_runes(4, 1), runicPower: BLOOD_NO_RES, runicPowerDeficit: null, rune: 4 },
+        BLOOD_FULL,
+      ),
+      blood_stack(2039813, BLOOD_HS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_decision(2040797, BLOOD_HS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_affordability(2040797, BLOOD_HS, blood_affordable(4), BLOOD_FULL),
+      blood_stack(2040797, BLOOD_HS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_decision(2042440, BLOOD_HS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_affordability(2042440, BLOOD_HS, blood_affordable(4), BLOOD_FULL),
+      blood_stack(2042440, BLOOD_HS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_decision(2091626, BLOOD_HS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_affordability(2091626, BLOOD_HS, blood_affordable(3), BLOOD_FULL),
+      blood_resources(
+        2091626,
+        BLOOD_HS,
+        { runes: blood_runes(3, 1), runicPower: BLOOD_NO_RES, runicPowerDeficit: null, rune: 3 },
+        BLOOD_FULL,
+      ),
+      blood_stack(2091626, BLOOD_HS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_decision(2113271, BLOOD_VS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_affordability(2113271, BLOOD_VS, blood_affordable(5), BLOOD_FULL),
+      blood_resources(
+        2113271,
+        BLOOD_VS,
+        { runes: blood_runes(5, 1), runicPower: BLOOD_NO_RES, runicPowerDeficit: null, rune: 5 },
+        BLOOD_FULL,
+      ),
+      blood_stack(2113271, BLOOD_VS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_decision(2114293, BLOOD_HS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_affordability(2114293, BLOOD_HS, blood_affordable(4), BLOOD_FULL),
+      blood_stack(2114293, BLOOD_HS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_decision(2115379, BLOOD_HS, BLOOD_MARROWREND_REJECTED, BLOOD_FULL),
+      blood_affordability(2115379, BLOOD_HS, blood_affordable(3), BLOOD_FULL),
+      blood_stack(2115379, BLOOD_HS, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      // Affordable, and still UNKNOWN: a higher entry diverges, and the proof bypasses no priority.
+      blood_decision(
+        2036692,
+        BLOOD_VS,
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_affordability(2036692, BLOOD_VS, blood_affordable(4), BLOOD_FULL),
+      blood_decision(
+        2097796,
+        BLOOD_HS,
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_affordability(2097796, BLOOD_HS, blood_affordable(4), BLOOD_FULL),
+      // No Rune entry: the Death Strike one GCD after a 4-Rune Heart Strike observes nothing, and stays on Marrowrend's usability.
+      blood_affordability(2041571, BLOOD_DS, BLOOD_NO_RUNE_OBSERVATION, BLOOD_FULL),
+      blood_decision(
+        2041571,
+        BLOOD_DS,
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_affordability(2039056, BLOOD_HS, BLOOD_NO_RUNE_OBSERVATION, BLOOD_FULL),
+      blood_resources(
+        2039056,
+        BLOOD_HS,
+        { runes: BLOOD_NO_RES, runicPower: BLOOD_NO_RES, runicPowerDeficit: null, rune: null },
+        BLOOD_FULL,
+      ),
+      // Below the cost: recorded, never a negative proof.
+      blood_affordability(2044779, BLOOD_HS, blood_below_cost(1), BLOOD_FULL),
+      a("SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_CENSUS", {
+        actorId: BLOOD,
+        ...BLOOD_FULL,
+        expected: {
+          runeAffordabilityEvidence: {
+            OWN_PRE_COST_AFFORDABLE: 52,
+            OWN_PRE_COST_BELOW_COST: 4,
+            NO_RUNE_OBSERVATION: 67,
+          },
+          runeCounts: {
+            "runes 1": 4,
+            "runes 2": 9,
+            "runes 3": 20,
+            "runes 4": 14,
+            "runes 5": 6,
+            "runes 6": 3,
+          },
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "Marrowrend is proven usable from exactly three things: a Rune count the decision's own cast wrote, a cost the pinned DBC row states, and a modifier the resolved hero tree excludes. Nothing is carried, regenerated, subtracted or read off the wire's cost field, and a count below the cost proves nothing.",
+    { authority: BLOOD_AUTHORITY, related: BLOOD_RELATED },
+  ),
+  kase(
     "spec-blood-death-knight.vampiric-blood-and-the-second-dancing-rune-weapon-over-the-bundle",
     BLOOD_105_165,
     "SPEC_BLOOD_DEATH_KNIGHT",
@@ -4153,18 +4314,17 @@ const BLOOD_CASES = [
       blood_rp_state(2097796, BLOOD_HS, blood_rp_window(751, 49.9, 2097796, [0, 0]), BLOOD_FULL),
       blood_rp_state(2100867, BLOOD_BB, blood_rp_carried(591, 65.9, 2099906, "POST_CHANGE"), BLOOD_FULL),
       blood_cooldown(2087470, BLOOD_VS, blood_drw_not_ready(10287, 2007757), BLOOD_FULL),
+      // RE-POINTED for M11-B7: the cast carries 4 Runes and Blood Debt is 10, so the
+      // root scan now SELECTS marrowrend at sanlayn[7] and never walks to sanlayn[10];
+      // the Dancing Rune Weapon gate above it is still undecided, so the worlds
+      // diverge and the decision stays UNKNOWN.
       blood_decision(
         2097796,
         BLOOD_HS,
-        {
-          ...BLOOD_UNKNOWN,
-          unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
-          stoppingAt: "sanlayn[10] consumption",
-          stoppingAtoms: [BLOOD_CONSUMPTION_TAG],
-        },
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
         BLOOD_FULL,
       ),
-      blood_dispatch(2097796, BLOOD_HS, BLOOD_OUT_OF_GIFT_DISPATCH, BLOOD_FULL),
+      blood_dispatch(2097796, BLOOD_HS, BLOOD_OUT_OF_GIFT_ENTERED_DISPATCH, BLOOD_FULL),
       blood_aura(
         2097796,
         BLOOD_HS,

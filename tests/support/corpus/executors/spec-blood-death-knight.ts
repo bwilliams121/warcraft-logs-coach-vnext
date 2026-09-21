@@ -29,6 +29,7 @@ import {
   type BloodBuildFacts,
 } from "../../../../src/specs/deathknight/blood/action-profile.js";
 import { pinnedBloodDeathKnightAuthority } from "../../../../src/specs/deathknight/blood/pinned-authority.js";
+import { marrowrendAffordabilityProven } from "../../../../src/specs/deathknight/blood/rune-affordability.js";
 import { bloodDebtTransitionCensus } from "../../m11/blood-debt-census.js";
 import type { CorpusExecutionContext } from "../execution-context.js";
 import { BundleCompositionError, positionOfCast, stateOf, stateOfBundle, type BundleHole } from "../fight.js";
@@ -685,6 +686,91 @@ export function runicPowerEvidenceCensus(
   const total = Object.values(actual.runicPowerEvidence).reduce((sum, count) => sum + count, 0);
   if (total !== comparisons.length) {
     return fail("the Runic Power evidence does not cover the eligible population", {
+      expected: { total: comparisons.length },
+      actual: { total },
+    });
+  }
+  return pass();
+}
+
+export function runeAffordabilityAt(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const found = resolvedAt(run, params.actorId, params.observedCast);
+  if (!found.ok) return found.outcome;
+  const fact = found.resolved.runeAffordability;
+  const actual = {
+    evidence: fact.evidence,
+    runes: fact.runes.state === "EXACT" ? fact.runes.amount : null,
+    runesMax: fact.runes.state === "EXACT" ? fact.runes.max : null,
+    wireCost: fact.runes.state === "EXACT" ? fact.runes.wireCost : null,
+    pinnedRuneCost: fact.marrowrend.state === "PINNED" ? fact.marrowrend.runeCost : null,
+    pinnedSpellId: fact.marrowrend.state === "PINNED" ? fact.marrowrend.spellId : null,
+    cooldownFree: fact.marrowrend.state === "PINNED" ? fact.marrowrend.cooldownFree : null,
+    costModifiersExcluded: fact.costModifiersExcluded,
+    marrowrendProvenUsable: marrowrendAffordabilityProven(fact),
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the Rune affordability at this decision differs from the case", {
+      expected: params.expected,
+      actual,
+      locator: run.state.locatorAt(found.position),
+    });
+  }
+  // The count, when EXACT, is the decision cast's own recorded observation, verbatim.
+  const record = run.analysis.resources.find((entry) => entry.position === found.position);
+  const own = record?.runes.state === "EXACT_PRE_COST" ? record.runes.amount : null;
+  if (own !== actual.runes) {
+    return fail("the Rune affordability count is not the decision cast's own observation", {
+      expected: { runes: own },
+      actual: { runes: actual.runes },
+      locator: run.state.locatorAt(found.position),
+    });
+  }
+  return pass();
+}
+
+export function runeAffordabilityCensus(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_CENSUS">,
+): AssertionOutcome {
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
+  if (!run.ok) return run.outcome;
+  const window = params.evaluationWindow ?? null;
+  const comparisons =
+    window === null
+      ? run.analysis.comparisons
+      : run.analysis.comparisons.filter((entry) => insideWindow(entry.decision.reportTimeMs, window));
+  const resolved = run.analysis.resolved.filter((entry) =>
+    comparisons.some((comparison) => comparison.decision.position === entry.position),
+  );
+  const coverage = summarizeBloodDecisions(params.actorId, comparisons, [], resolved);
+  const actual = {
+    runeAffordabilityEvidence: sorted(coverage.runeAffordabilityEvidence.map((row) => [row.key, row.count])),
+    runeCounts: sorted(coverage.runeCounts.map((row) => [row.key, row.count])),
+  };
+  const expected = {
+    runeAffordabilityEvidence: sorted(Object.entries(params.expected.runeAffordabilityEvidence)),
+    runeCounts: sorted(Object.entries(params.expected.runeCounts)),
+  };
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    return fail("the Rune affordability evidence distributes differently than the case pins", {
+      expected,
+      actual,
+    });
+  }
+  const total = Object.values(actual.runeAffordabilityEvidence).reduce((sum, count) => sum + count, 0);
+  if (total !== comparisons.length) {
+    return fail("the Rune affordability evidence does not cover the eligible population", {
       expected: { total: comparisons.length },
       actual: { total },
     });

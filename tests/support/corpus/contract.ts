@@ -30,6 +30,7 @@ import { z } from "zod";
 
 import { UNKNOWN_REASONS } from "../../../src/engine/state/state-result.js";
 import { RESOURCE_OBSERVATION_TIMINGS } from "../../../src/engine/resources/resource-observations.js";
+import { BLOOD_RUNE_AFFORDABILITY_EVIDENCE } from "../../../src/specs/deathknight/blood/rune-affordability.js";
 import { TALENT_SELECTIONS } from "../../../src/data/game/rogue-talents.js";
 import {
   COMPARISON_BASES,
@@ -2361,6 +2362,67 @@ export const ASSERTION_KINDS = {
     requiresAuthority: true,
     description:
       "THE M11-B4 MEASUREMENT. Every eligible decision's buff.<name>.remains evidence for every modelled Blood aura distributes exactly so, and the cost of the 50 ms Blood pre-decision window is disclosed by lead. Nothing here is a verdict; the census is what the remains slice exists to take.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_AT": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            evidence: z.enum(BLOOD_RUNE_AFFORDABILITY_EVIDENCE),
+            /** The decision cast's own exact PRE_COST Rune count, or null when none is established. */
+            runes: z.number().int().nonnegative().nullable(),
+            runesMax: z.number().int().positive().nullable(),
+            /** The wire's cost field on the SAME entry: identity corroboration, never the mechanical cost. */
+            wireCost: z.number().int().nullable(),
+            /** The pinned Marrowrend Rune cost the count was compared to, or null when the record was not usable. */
+            pinnedRuneCost: z.number().int().positive().nullable(),
+            pinnedSpellId: z.number().int().positive().nullable(),
+            cooldownFree: z.boolean().nullable(),
+            costModifiersExcluded: z.boolean(),
+            /** Whether the fact proves Marrowrend usable at this decision. Never true below the cost. */
+            marrowrendProvenUsable: z.boolean(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "M11-B7. At this decision Marrowrend's Rune affordability is exactly so: the count is the decision cast's OWN exact PRE_COST Rune entry (never a carried, regenerated or delta-derived value; NO_RUNE_OBSERVATION on a cast that costs no Runes), the cost is the pinned DBC row (never the wire's cost field), the modifier is excluded only by a RESOLVED non-Deathbringer hero tree (MODIFIER_UNPROVEN otherwise), and the proof is one-directional: at or above the cost with a cooldown-free instant record proves Marrowrend usable; below it is OWN_PRE_COST_BELOW_COST, recorded and never a negative proof.",
+  },
+  "SPEC_BLOOD_DEATH_KNIGHT.RUNE_AFFORDABILITY_CENSUS": {
+    owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        expected: z
+          .object({
+            /** Every eligible decision's Rune affordability evidence class -> count. Exact and exhaustive. */
+            runeAffordabilityEvidence: z.partialRecord(
+              z.enum(BLOOD_RUNE_AFFORDABILITY_EVIDENCE),
+              z.number().int().positive(),
+            ),
+            /** Every EXACT own-cast Rune count, `runes <n>` -> count. Exact and exhaustive over the EXACT rows. */
+            runeCounts: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "THE M11-B7 MEASUREMENT. Every eligible decision's Marrowrend Rune-affordability evidence distributes exactly so, and every exact own-cast Rune count is tallied. Nothing here is a verdict.",
   },
   "SPEC_BLOOD_DEATH_KNIGHT.COOLDOWN_READINESS_AT": {
     owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",

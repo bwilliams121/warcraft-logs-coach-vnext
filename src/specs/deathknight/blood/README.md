@@ -57,6 +57,7 @@ PREDICTIVE state) and Consumption.
 | `hero_tree.sanlayn`, `hero_tree.deathbringer` | the observed talent tree by entry membership | the tree RESOLVES to one sub-tree (TRUE / FALSE together); never from a cast |
 | `runic_power.deficit` | the decision cast's own PRE_COST Runic Power entry, tenths → points once | Death Strike decisions only |
 | `rune` | the decision cast's own PRE_COST Runes entry | Rune-costed decisions only |
+| Marrowrend's usability (M11-B7) | the decision cast's own PRE_COST Runes entry against the pinned Rune cost, under a RESOLVED non-Deathbringer hero tree | `PROVEN_USABLE` only, at or above the cost; never a negative proof |
 | `time` | the decision's fight time | always |
 | `buff.<x>.up` (8 atoms) | M4 `presenceAt` FROM_SOURCE self, strictly before the decision | an observed transition; or DOWN by hero-tree exclusion / a disproved producing talent |
 | `buff.bone_shield.stack` | the last stack-bearing transition's absolute count | only across same-millisecond refresh companions under EXACT ACTIVE presence |
@@ -66,10 +67,44 @@ PREDICTIVE state) and Consumption.
 
 Never bound: `buff.<x>.remains` (no binding field exists),
 `debuff.reapers_mark_debuff.up` (no debuff field exists), `fight_remains`
-(PREDICTIVE), any affordability (the wire's `cost` field is the DBC base,
-not the amount paid — 450 reported, 350 paid), any Rune regeneration (not on
-the wire), Vampiric Blood's cooldown (dynamic under Red Thirst), Raise Dead's
-readiness (pet state).
+(PREDICTIVE), any Runic Power affordability (the wire's `cost` field is the
+DBC base, not the amount paid — 450 reported, 350 paid), any Rune
+regeneration (not on the wire), Vampiric Blood's cooldown (dynamic under Red
+Thirst), Raise Dead's readiness (pet state).
+
+## The Rune policy (M11-B7)
+
+Rune state is accepted from exactly one place: the decision cast's own
+attached entry, and only when M4 graded it EXACT / OBSERVED / PRE_COST
+(`resources.ts`, the same reading the `rune` atom has used since B2).
+Runes have no standalone `resourcechange` on the wire, so there is nothing
+to carry from one decision to the next and no separate event whose ordering
+against the cast could need a safety window: a Death Strike, a Blood Boil
+or a Dance-of-Midnight-free Heart Strike one GCD after a Heart Strike at 4
+Runes observes NO Runes — not 3, not 4, not "at least 3". No regeneration is
+modelled, no `previous - cost`, no delta, no later observation flows
+backwards, and nearby events are never read as Rune state.
+
+On that one number, `rune-affordability.ts` states one fact and
+`action-profile.ts` makes one proof, for the `marrowrend` token by name:
+when the count is at or above the pinned Rune cost of Marrowrend — the DBC
+row 10513, 2 Runes, read from `deathknight-blood-spender-costs.json`
+through the artifact's own cost rule and never from the wire's `cost`
+field — on a record whose cooldown, charge, internal and category cooldowns
+and cast time are all zero, and the only effect in the pinned client data
+that can change that row (Exterminate, 441416 / 447954, −50%, a
+Deathbringer hero talent; `deathknight-blood-rune-cost-authority.ts`) is
+excluded by a hero tree RESOLVED to a sub-tree that does not own it, then
+`action_t::ready()` cannot fail on cost or cooldown and its remaining
+conjuncts are the observed melee GCD cast's own: Marrowrend is
+`PROVEN_USABLE`. Under an UNKNOWN, CONTRADICTORY or Deathbringer tree the
+cost is unproven and the proof is withheld (`MODIFIER_UNPROVEN`). A count
+BELOW the cost is recorded (`OWN_PRE_COST_BELOW_COST`) and proves nothing:
+no `INSUFFICIENT_RESOURCE` exists for Blood, and Candidate B is deferred
+by owner decision. The evidence class of every eligible decision is
+censused as `runeAffordabilityEvidence` (`OWN_PRE_COST_AFFORDABLE`,
+`OWN_PRE_COST_BELOW_COST`, `NO_RUNE_OBSERVATION`, `MODIFIER_UNPROVEN`,
+`AUTHORITY_NOT_PINNED`), and the public schema is unchanged.
 
 ## Two measured hazards worth knowing before touching any binding
 
@@ -190,6 +225,34 @@ Boil usability 2, Vampiric Strike presence 2, Boiling Point 1, Heart Strike
 usability 1. The full census is in the corpus (`SPEC_BLOOD_DEATH_KNIGHT.*`)
 and `agent/architecture.md`.
 
+M11-B7 proved Marrowrend usable from the decision cast's own Rune count
+(`rune-affordability.ts`, the marrowrend allowlist in `action-profile.ts`).
+Result: **37 MATCH / 7 REJECTED / 79 UNKNOWN** over the bundle — the MATCH
+population is unchanged decision for decision (27 Death Strikes, 6 Heart
+Strikes, 4 Blood Boils; 32 EXACT_ENTRY, 5 TOKEN_CONVERGED) and the seven
+REJECTED are the first Blood produces: Heart Strikes at 2,039,813 /
+2,040,797 / 2,042,440 (4 Runes each, three consecutive GCDs before the
+Marrowrend at 2,043,209), 2,091,626 (3), 2,114,293 (4), 2,115,379 (3) and
+the Vampiric Strike at 2,113,271 (5), each at Blood Debt exactly 10 from an
+`applybuffstack` 5–29 s earlier, each with `sanlayn[7] marrowrend`
+selected and no competing undecided GCD candidate. A REJECTED is an
+authority-selected-different-token divergence — the pinned list picks
+Marrowrend where the player pressed Heart Strike — and not a performance
+score. The 45 s slice is 15 / 3 / 30; the opener 1 / 0 / 20 unchanged. Of
+the 16 decisions B6 left on `USABILITY:marrowrend`, the 7 whose cast
+carried an exact count of 3–5 resolve and the 9 whose cast carried no Rune
+entry (7 Death Strikes, 2 free Heart Strikes) stay exactly where they were;
+five decisions whose root scan now selects Marrowrend stay UNKNOWN because a
+higher entry (`sanlayn[1]`, `any_dnd`, the Dancing Rune Weapon gate)
+still diverges. Rune evidence over the 123: OWN_PRE_COST_AFFORDABLE 52,
+OWN_PRE_COST_BELOW_COST 4, NO_RUNE_OBSERVATION 67 (opener 11 / 0 / 10);
+counts 1 ×4, 2 ×9, 3 ×20, 4 ×14, 5 ×6, 6 ×3. The first-blocker ranking
+after B7: `sanlayn[9]` `fight_remains` 20, Marrowrend usability 9,
+Essence window refusals 14 + 11, Bone Shield window 7, `any_dnd`
+usability 4, the Dancing Rune Weapon gate 3, Essence stack 3, Runic Power
+after a spend 3, Death Strike usability 3 + 1, Blood Boil usability 2,
+`buff.vampiric_strike.up` 2, Boiling Point 1, Heart Strike usability 1.
+
 ## What this module refuses on purpose
 
 - No Runic Power value that was not read off the wire: no `pre - cost`, no
@@ -215,7 +278,15 @@ and `agent/architecture.md`.
   cap arithmetic, no decay, no bounded stack, no set-bonus resolution from
   equipped items, no zero from the combatantinfo snapshot, no reset to 1
   for an application to an aura already held (the M11-B6 boundary).
-- No affordability proof, no Rune regeneration, no Vampiric Blood cooldown.
+- No Rune value that was not the decision cast's own PRE_COST entry: no
+  carry between decisions, no `previous - cost`, no regeneration, no
+  reading of a nearby event, no trust in the wire's `cost` field, no
+  affordability for any token but `marrowrend`, no proof under an
+  unresolved or Deathbringer hero tree, and no negative resource proof — a
+  count below the cost is recorded, never an `INSUFFICIENT_RESOURCE` (the
+  M11-B7 boundary; Candidate B deferred).
+- No Runic Power affordability in either direction, no Rune regeneration, no
+  Vampiric Blood cooldown.
 - No reachability refinement in the unselectability proof (it still walks
   `precombat` and the Deathbringer list): recorded as a measured limit.
 - No verdict on Death Strike as mitigation or healing: those domains are
@@ -228,14 +299,18 @@ Files: `spec.ts` (identity), `pinned-authority.ts`, `authority-bindings.ts`
 `resources.ts`, `runic-power-state.ts` (the Runic Power carry),
 `aura-bindings.ts` (presence, the exact-count rule for Bone Shield and Blood
 Debt), `aura-remains.ts` (the remains derivation), `remains-thresholds.ts` (the pinned list's thresholds, read
-from the parsed authority), `cooldown-bindings.ts`,
+from the parsed authority), `rune-affordability.ts` (Marrowrend's Rune
+affordability fact, M11-B7), `cooldown-bindings.ts`,
 `domain-boundary.ts`, `domains.ts`, `action-profile.ts`,
 `first-gcd-state.ts`, `first-gcd-adapter.ts` (stopping points, dispatch
 trace, undecided candidates), `observed-action-gate.ts`,
 `observed-analysis.ts` (the facade), `registration.ts`. Data:
-`src/data/game/deathknight-blood-*`, `src/simc/data/deathknight-blood.apl.json`.
+`src/data/game/deathknight-blood-*` (including
+`deathknight-blood-rune-cost-authority.ts`, M11-B7),
+`src/simc/data/deathknight-blood.apl.json`.
 Tests: `tests/unit/m11b2-blood-*.test.ts`, `tests/unit/m11b4-*.test.ts`,
 `tests/unit/m11b5-*.test.ts`, `tests/unit/m11b6-blood-debt-stack.test.ts`
 (with `tests/support/m11/blood-debt-census.ts`),
+`tests/unit/m11b7-blood-rune-affordability.test.ts`,
 `tests/contracts/m11b2-blood-*.test.ts`, corpus cases
 `spec-blood-death-knight.*`.

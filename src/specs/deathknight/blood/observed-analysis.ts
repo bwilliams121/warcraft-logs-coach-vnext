@@ -117,6 +117,11 @@ import {
   type BloodRunicPowerState,
 } from "./runic-power-state.js";
 import {
+  bloodRuneAffordability,
+  pinnedMarrowrend,
+  type BloodRuneAffordability,
+} from "./rune-affordability.js";
+import {
   bloodCooldownBindingsFrom,
   deriveSupportedBloodCooldowns,
   type BloodDerivedCooldown,
@@ -243,6 +248,15 @@ export interface BloodDecisionCoverage {
   readonly stackEvidence: readonly CountOf<string>[];
   /** Every BOUND stack value across the eligible decisions, as `atom | stack <n>` -> count (M11-B6). */
   readonly stackValues: readonly CountOf<string>[];
+  /**
+   * Every eligible decision's Marrowrend Rune-affordability evidence, as
+   * `OWN_PRE_COST_AFFORDABLE / OWN_PRE_COST_BELOW_COST / NO_RUNE_OBSERVATION /
+   * MODIFIER_UNPROVEN / AUTHORITY_NOT_PINNED` -> count (M11-B7). The census
+   * the Rune slice exists to take; the rows sum to the eligible population.
+   */
+  readonly runeAffordabilityEvidence: readonly CountOf<string>[];
+  /** Every EXACT own-cast Rune count across the eligible decisions, as `runes <n>` -> count (M11-B7). */
+  readonly runeCounts: readonly CountOf<string>[];
 }
 
 /** The build facts the evaluator resolved once from the actor's combatant info. */
@@ -316,6 +330,8 @@ export interface BloodDeathKnightPayload {
     readonly remains: readonly BloodRemainsBinding[];
     /** The Runic Power state at this decision (M11-B5). */
     readonly runicPower: BloodRunicPowerState;
+    /** Marrowrend's Rune affordability at this decision, from the decision cast's own Rune entry (M11-B7). */
+    readonly runeAffordability: BloodRuneAffordability;
     readonly cooldowns: readonly BloodCooldownDiagnostics[];
     readonly selection: BloodSelectionDiagnostics;
     readonly unselectability: BloodUnselectabilityDiagnostics;
@@ -534,6 +550,7 @@ export function analyzeObservedBloodDeathKnightDecisions(
   const build: BloodBuildResolution = { talents, heroTree };
   const knownTalents = resolveBloodModelledTalents(observedTalents);
   const tokens = bloodTokenByAbilityId();
+  const marrowrendPin = pinnedMarrowrend();
 
   const comparisons: ObservedActionComparison[] = [];
   const excluded: ExcludedBloodCast[] = [];
@@ -636,6 +653,9 @@ export function analyzeObservedBloodDeathKnightDecisions(
       readiness: entry.readiness,
       abilityGameId: entry.readinessAbilityGameId,
     }));
+    // Marrowrend's affordability from THIS cast's own Rune entry and the
+    // resolved hero tree (M11-B7). Computed per decision, carried nowhere.
+    const runeAffordability = bloodRuneAffordability(runes, heroTree, marrowrendPin);
 
     const outcome = bloodFirstGcdSelectionAt({
       authority,
@@ -643,6 +663,7 @@ export function analyzeObservedBloodDeathKnightDecisions(
       buildFacts,
       observedAbilityGameId: abilityGameId,
       readiness,
+      runeAffordability,
     });
     const result = outcome.result;
 
@@ -657,6 +678,7 @@ export function analyzeObservedBloodDeathKnightDecisions(
       stacks,
       remains,
       runicPower: runicPowerState,
+      runeAffordability,
       cooldowns: cooldowns.map(cooldownDiagnosticsOf),
       selection: selectionDiagnosticsOf(outcome),
       unselectability: unselectabilityDiagnosticsOf(unselectable),
@@ -716,6 +738,8 @@ export function summarizeBloodDecisions(
   const runicPowerWindowLeads = new Map<string, number>();
   const stackEvidence = new Map<string, number>();
   const stackValues = new Map<string, number>();
+  const runeAffordabilityEvidence = new Map<string, number>();
+  const runeCounts = new Map<string, number>();
 
   for (const comparison of comparisons) {
     precision.set(comparison.authorityCoverage, (precision.get(comparison.authorityCoverage) ?? 0) + 1);
@@ -785,6 +809,11 @@ export function summarizeBloodDecisions(
     if (rp.state === "BOUND") {
       for (const item of rp.windowEntries) bump(runicPowerWindowLeads, `lead ${String(item.leadMs)}`);
     }
+    const affordability = entry.runeAffordability;
+    bump(runeAffordabilityEvidence, affordability.evidence);
+    if (affordability.runes.state === "EXACT") {
+      bump(runeCounts, `runes ${String(affordability.runes.amount)}`);
+    }
   }
 
   return {
@@ -811,6 +840,8 @@ export function summarizeBloodDecisions(
     runicPowerWindowLeads: tallyOpen(runicPowerWindowLeads),
     stackEvidence: tallyOpen(stackEvidence),
     stackValues: tallyOpen(stackValues),
+    runeAffordabilityEvidence: tallyOpen(runeAffordabilityEvidence),
+    runeCounts: tallyOpen(runeCounts),
   };
 }
 

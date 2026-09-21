@@ -25,6 +25,44 @@ const SEG_105_165 = "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165";
 const BUNDLE = [BLOOD45, "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105", SEG_105_165];
 const GTKB = "wcl-blood-death-knight-gtkb-opener";
 const ACTOR = 14;
+const HEART_STRIKE = 206930;
+const VAMPIRIC_STRIKE = 433895;
+const DEATH_STRIKE = 49998;
+
+/** The 37 MATCH decisions of M11-B6, by report time, in canonical order. Pinned so B7 can prove it moved none. */
+const B6_MATCH_REPORT_TIMES = [
+  2012014, 2014293, 2016527, 2018775, 2021024, 2024020, 2026293, 2028806, 2029599, 2031294, 2033630, 2045618,
+  2046373, 2047348, 2049304, 2066413, 2068394, 2073540, 2084304, 2086414, 2088527, 2094707, 2102831, 2108740,
+  2116405, 2123152, 2126219, 2129260, 2131282, 2134429, 2136481, 2138540, 2141616, 2143622, 2144631, 2150485,
+  2153775,
+];
+
+/** The seven M11-B7 REJECTED decisions: observed cast, its own exact PRE_COST Rune count, and the Blood Debt stack-10 anchor. */
+const B7_REJECTED = [
+  { t: 2039813, ability: HEART_STRIKE, runes: 4, bloodDebtAnchor: 2033650 },
+  { t: 2040797, ability: HEART_STRIKE, runes: 4, bloodDebtAnchor: 2033650 },
+  { t: 2042440, ability: HEART_STRIKE, runes: 4, bloodDebtAnchor: 2033650 },
+  { t: 2091626, ability: HEART_STRIKE, runes: 3, bloodDebtAnchor: 2086445 },
+  { t: 2113271, ability: VAMPIRIC_STRIKE, runes: 5, bloodDebtAnchor: 2086445 },
+  { t: 2114293, ability: HEART_STRIKE, runes: 4, bloodDebtAnchor: 2086445 },
+  { t: 2115379, ability: HEART_STRIKE, runes: 3, bloodDebtAnchor: 2086445 },
+] as const;
+
+/** The five decisions whose ROOT scan now selects marrowrend but whose worlds still diverge on a higher entry. */
+const B7_DIVERGENT = [2036692, 2087470, 2093667, 2097796, 2119480] as const;
+
+/** The nine Marrowrend-usability blockers whose cast carries no Rune entry: 7 Death Strikes, 2 free Heart Strikes. */
+const B7_NO_RUNE_OBSERVATION = [
+  { t: 2035940, ability: DEATH_STRIKE },
+  { t: 2038297, ability: DEATH_STRIKE },
+  { t: 2039056, ability: HEART_STRIKE },
+  { t: 2041571, ability: DEATH_STRIKE },
+  { t: 2090596, ability: DEATH_STRIKE },
+  { t: 2092650, ability: DEATH_STRIKE },
+  { t: 2112377, ability: DEATH_STRIKE },
+  { t: 2117422, ability: HEART_STRIKE },
+  { t: 2118444, ability: DEATH_STRIKE },
+] as const;
 
 function analyzed(state: CombatState) {
   // Through the REGISTRATION's own authority access, as the corpus executor does.
@@ -65,8 +103,8 @@ describe("the measurement over the composed 165 s fight", () => {
   const analysis = analyzed(corpusBundleState(BUNDLE, []));
   const { coverage } = analysis;
 
-  it("discloses 37 resolved decisions out of 123, with every excluded cast counted", () => {
-    // RE-POINTED for M11-B4 (21), M11-B5 (25) and M11-B6 (37). B4's 21 are
+  it("discloses 44 resolved decisions out of 123 — 37 MATCH and 7 REJECTED — with every excluded cast counted", () => {
+    // RE-POINTED for M11-B4 (21), M11-B5 (25), M11-B6 (37) and M11-B7 (37 + 7). B4's 21 are
     // Death Strikes whose own PRE_COST Runic Power decided the Death Strike
     // gate. B5 carries Runic Power to the other decisions, and four Blood
     // Boils resolve at sanlayn[6]. B6 reads Blood Debt's count from its own
@@ -76,14 +114,18 @@ describe("the measurement over the composed 165 s fight", () => {
     // because sanlayn[1]'s Heart Strike stays undecided on fight_remains and
     // every resolution of it still selects the heart_strike token, and six
     // more Death Strikes resolve at sanlayn[9]
-    // on `runic_power.deficit<40`. None is REJECTED: at exactly 10 stacks
-    // the Marrowrend entry is TRUE and its usability unproven, so the
-    // decision stops there instead.
+    // on `runic_power.deficit<40`. B7 proves Marrowrend usable from the
+    // decision cast's own exact PRE_COST Rune count against the pinned cost:
+    // at exactly 10 Blood Debt stacks the Marrowrend entry is TRUE, and where
+    // the observed Heart Strike or Vampiric Strike carried 3-5 Runes the
+    // authority selects marrowrend instead — 7 REJECTED, each an
+    // authority-selected-different-token divergence and not a score. The 37
+    // MATCH are untouched.
     expect(coverage).toMatchObject({
       eligibleDecisions: 123,
       match: 37,
-      rejected: 0,
-      unknown: 86,
+      rejected: 7,
+      unknown: 79,
       excludedCastCount: 148,
     });
     const matched = new Map<string, number>();
@@ -102,6 +144,11 @@ describe("the measurement over the composed 165 s fight", () => {
     }
     expect(Object.fromEntries(matched)).toEqual({ death_strike: 27, heart_strike: 6, blood_boil: 4 });
     expect(Object.fromEntries(precision)).toEqual({ EXACT_ENTRY: 32, TOKEN_CONVERGED: 5 });
+    // The MATCH population is exactly the M11-B6 one, decision by decision.
+    const matchedAt = analysis.comparisons
+      .filter((comparison) => comparison.outcome === "MATCH")
+      .map((comparison) => comparison.decision.reportTimeMs);
+    expect(matchedAt).toEqual(B6_MATCH_REPORT_TIMES);
     expect(coverage.match + coverage.rejected + coverage.unknown).toBe(coverage.eligibleDecisions);
     expect(coverage.exclusions.reduce((sum, row) => sum + row.count, 0)).toBe(coverage.excludedCastCount);
     // The population is exactly the completed non-melee casts, eligible plus excluded.
@@ -117,10 +164,12 @@ describe("the measurement over the composed 165 s fight", () => {
     // competing GCD candidate instead; and since B4 a scan may RESOLVE to a
     // selection when the remainders are proven.
     const matched = new Set(
-      analysis.comparisons.filter((c) => c.outcome === "MATCH").map((c) => c.decision.position),
+      analysis.comparisons.filter((c) => c.outcome !== "UNKNOWN").map((c) => c.decision.position),
     );
     for (const entry of analysis.resolved) {
-      // Since M11-B6 a MATCH may be TOKEN_CONVERGED (the five Heart Strikes at sanlayn[8]).
+      // Since M11-B6 a MATCH may be TOKEN_CONVERGED (the five Heart Strikes at
+      // sanlayn[8]); since M11-B7 a resolved decision may be REJECTED (a
+      // selection of marrowrend at sanlayn[7] against an observed Heart Strike).
       if (matched.has(entry.position)) {
         expect(["ROTATIONAL_GCD_SELECTED", "ROTATIONAL_GCD_TOKEN_CONVERGED"]).toContain(entry.selection.kind);
       } else {
@@ -139,15 +188,17 @@ describe("the measurement over the composed 165 s fight", () => {
       }
     }
     expect(coverage.stoppingEntries.reduce((sum, row) => sum + row.count, 0)).toBe(123);
+    // RE-POINTED for M11-B7: the seven REJECTED root scans end at sanlayn[7]
+    // with a definite winner and never reach sanlayn[10] (81 -> 88, 41 -> 34).
     expect(Object.fromEntries(coverage.stoppingEntries.map((row) => [row.key, row.count]))).toEqual({
       "default[15] run_action_list": 1,
-      "(root scan resolved)": 81,
-      "sanlayn[10] consumption": 41,
+      "(root scan resolved)": 88,
+      "sanlayn[10] consumption": 34,
     });
     expect(coverage.stoppingAtoms.some((row) => row.key.includes("UNSUPPORTED_NUMERIC_LITERAL"))).toBe(false);
     expect(Object.fromEntries(coverage.stoppingAtoms.map((row) => [row.key, row.count]))).toEqual({
       "default[15] run_action_list | buff.gift_of_the_sanlayn.up": 1,
-      "sanlayn[10] consumption | APPLICABILITY:consumption": 41,
+      "sanlayn[10] consumption | APPLICABILITY:consumption": 34,
     });
   });
 
@@ -181,11 +232,17 @@ describe("the measurement over the composed 165 s fight", () => {
     // entry is TRUE, and no rune or affordability proof exists for an action
     // that was not cast), 19 to fight_remains at sanlayn[9], 2 to
     // buff.vampiric_strike.up and 1 to Heart Strike's usability at
-    // sanlayn[8]. None remains on the stack; no REJECTED follows.
+    // sanlayn[8]. None remains on the stack. RE-POINTED for M11-B7: of the
+    // 16 on Marrowrend's usability, the 7 whose observed cast carried an
+    // exact PRE_COST Rune count of 3-5 resolve (REJECTED, "(none)" 32 -> 39)
+    // and the 9 whose cast carried no Rune entry — 7 Death Strikes and 2
+    // Dance-of-Midnight-free Heart Strikes — stay exactly where they were.
+    // Nothing else moves: no Rune value is carried into a decision that did
+    // not observe one.
     expect(Object.fromEntries(firstObstacle)).toEqual({
-      "(none)": 32,
+      "(none)": 39,
       "sanlayn[9] death_strike | fight_remains": 20,
-      "sanlayn[7] marrowrend | USABILITY:marrowrend": 16,
+      "sanlayn[7] marrowrend | USABILITY:marrowrend": 9,
       "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 14,
       "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains,fight_remains": 11,
       "sanlayn[0] deaths_caress | buff.bone_shield.up,buff.bone_shield.remains,buff.bone_shield.stack": 6,
@@ -481,6 +538,148 @@ describe("the measurement over the composed 165 s fight", () => {
     }
   });
 
+  it("M11-B7: rejects exactly seven decisions, each from the cast's own exact Rune count, the pinned cost and a Blood Debt count of 10", () => {
+    const rejected = analysis.comparisons.filter((comparison) => comparison.outcome === "REJECTED");
+    expect(rejected.map((comparison) => comparison.decision.reportTimeMs)).toEqual(
+      B7_REJECTED.map((row) => row.t),
+    );
+    for (const expected of B7_REJECTED) {
+      const comparison = rejected.find((row) => row.decision.reportTimeMs === expected.t);
+      expect(comparison, String(expected.t)).toBeDefined();
+      if (comparison === undefined) continue;
+      // The comparison: the authority selected marrowrend at its exact entry
+      // against an observed Heart Strike or Vampiric Strike. Not a score.
+      expect(comparison).toMatchObject({
+        outcome: "REJECTED",
+        basis: "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+        authorityToken: "marrowrend",
+        authorityCoverage: "EXACT_ENTRY",
+        selectionPrecision: "EXACT_ENTRY",
+        rawBlocker: null,
+        observedActionRejected: false,
+        usabilityProvenance: "OBSERVED_EXECUTION",
+      });
+      expect(comparison.decision.abilityGameId).toBe(expected.ability);
+      expect(comparison.decision.observedToken).toBe("heart_strike");
+      const resolved = analysis.resolved.find((entry) => entry.position === comparison.decision.position);
+      expect(resolved).toBeDefined();
+      if (resolved === undefined) continue;
+      // The selection: the ROOT scan resolved to sanlayn[7] with no competing
+      // undecided GCD candidate, so no priority short-circuit was bypassed.
+      expect(resolved.selection.kind).toBe("ROTATIONAL_GCD_SELECTED");
+      expect(resolved.selection.stoppingPoint).toBeNull();
+      expect(
+        resolved.selection.undecidedCandidates.filter((candidate) => candidate.lane === "GCD_CONSUMING"),
+      ).toEqual([]);
+      expect(resolved.unselectability.proven).toBe(false);
+      // The Rune evidence: the decision cast's OWN exact PRE_COST entry, the
+      // pinned cooldown-free record at cost 2, and the modifier excluded by
+      // the resolved San'layn tree. The wire's cost field on the entry is the
+      // observed cast's (1), and it decides nothing.
+      expect(resolved.runeAffordability).toEqual({
+        runes: { state: "EXACT", amount: expected.runes, max: 6, wireCost: 1 },
+        costModifiersExcluded: true,
+        marrowrend: { state: "PINNED", spellId: 195182, runeCost: 2, cooldownFree: true, castTimeMs: 0 },
+        evidence: "OWN_PRE_COST_AFFORDABLE",
+      });
+      const record = analysis.resources.find((row) => row.position === comparison.decision.position);
+      expect(record?.runes).toEqual({ state: "EXACT_PRE_COST", amount: expected.runes, max: 6, cost: 1 });
+      expect(record?.locator.reportTimeMs).toBe(expected.t);
+      // The gate: Blood Debt at exactly 10 from an observed applybuffstack
+      // seconds before the decision — never a window refusal, never an
+      // application read as a count.
+      const bloodDebt = resolved.stacks.find((stack) => stack.atomName === "blood_debt");
+      expect(bloodDebt).toMatchObject({ state: "BOUND", stack: 10, proof: "EXACT_STACK_OBSERVATION" });
+      if (bloodDebt?.state === "BOUND") {
+        expect(bloodDebt.anchor?.reportTimeMs).toBe(expected.bloodDebtAnchor);
+        expect(bloodDebt.anchor?.locator.rawType).toBe("applybuffstack");
+        expect(expected.t - expected.bloodDebtAnchor).toBeGreaterThan(5000);
+      }
+    }
+  });
+
+  it("M11-B7: keeps the five decisions whose root scan selects marrowrend UNKNOWN while a higher entry diverges", () => {
+    for (const t of B7_DIVERGENT) {
+      const comparison = analysis.comparisons.find((row) => row.decision.reportTimeMs === t);
+      expect(comparison, String(t)).toMatchObject({
+        outcome: "UNKNOWN",
+        basis: "AUTHORITY_SELECTION_UNRESOLVED",
+        rawBlocker: "DIVERGENT_GCD_OUTCOMES",
+      });
+      const resolved = analysis.resolved.find((entry) => entry.position === comparison?.decision.position);
+      expect(resolved?.runeAffordability.evidence).toBe("OWN_PRE_COST_AFFORDABLE");
+      expect(resolved?.selection.kind).toBe("ROTATIONAL_GCD_UNKNOWN");
+      // The competing candidate sits ABOVE sanlayn[7] in priority.
+      const undecided =
+        resolved?.selection.undecidedCandidates.filter((candidate) => candidate.lane === "GCD_CONSUMING") ??
+        [];
+      expect(undecided.length).toBeGreaterThan(0);
+      expect(undecided.some((candidate) => candidate.at === "sanlayn[7] marrowrend")).toBe(false);
+    }
+  });
+
+  it("M11-B7: carries no Rune count into the nine Marrowrend blockers whose cast observed none", () => {
+    for (const expected of B7_NO_RUNE_OBSERVATION) {
+      const comparison = analysis.comparisons.find((row) => row.decision.reportTimeMs === expected.t);
+      expect(comparison, String(expected.t)).toMatchObject({ outcome: "UNKNOWN" });
+      expect(comparison?.decision.abilityGameId).toBe(expected.ability);
+      const resolved = analysis.resolved.find((entry) => entry.position === comparison?.decision.position);
+      expect(resolved?.runeAffordability.evidence).toBe("NO_RUNE_OBSERVATION");
+      expect(resolved?.runeAffordability.runes.state).toBe("NOT_ESTABLISHED");
+      const first = resolved?.selection.undecidedCandidates.find(
+        (candidate) => candidate.lane === "GCD_CONSUMING",
+      );
+      expect(first).toMatchObject({ at: "sanlayn[7] marrowrend", atoms: ["USABILITY:marrowrend"] });
+      // A Death Strike carries Runic Power, never Runes; a free Heart Strike carries neither costed.
+      const record = analysis.resources.find((row) => row.position === comparison?.decision.position);
+      expect(record?.runes.state).toBe("NO_OBSERVATION");
+    }
+  });
+
+  it("M11-B7: takes the Rune affordability census — own exact counts only, below-cost recorded and never acted on", () => {
+    expect(Object.fromEntries(coverage.runeAffordabilityEvidence.map((row) => [row.key, row.count]))).toEqual(
+      {
+        OWN_PRE_COST_AFFORDABLE: 52,
+        OWN_PRE_COST_BELOW_COST: 4,
+        NO_RUNE_OBSERVATION: 67,
+      },
+    );
+    expect(coverage.runeAffordabilityEvidence.reduce((sum, row) => sum + row.count, 0)).toBe(123);
+    expect(Object.fromEntries(coverage.runeCounts.map((row) => [row.key, row.count]))).toEqual({
+      "runes 1": 4,
+      "runes 2": 9,
+      "runes 3": 20,
+      "runes 4": 14,
+      "runes 5": 6,
+      "runes 6": 3,
+    });
+    // MODIFIER_UNPROVEN and AUTHORITY_NOT_PINNED never occur: the tree is
+    // RESOLVED San'layn and the artifact validates.
+    expect(
+      coverage.runeAffordabilityEvidence.some((row) =>
+        /MODIFIER_UNPROVEN|AUTHORITY_NOT_PINNED/.test(row.key),
+      ),
+    ).toBe(false);
+    for (const entry of analysis.resolved) {
+      const fact = entry.runeAffordability;
+      const record = analysis.resources.find((row) => row.position === entry.position);
+      // Every exact count is the decision cast's own entry, verbatim.
+      if (fact.runes.state === "EXACT") {
+        expect(record?.runes).toMatchObject({ state: "EXACT_PRE_COST", amount: fact.runes.amount });
+      } else {
+        expect(record?.runes.state).toBe("NO_OBSERVATION");
+      }
+      // Below the cost: recorded, and the decision is never REJECTED on it.
+      if (fact.evidence === "OWN_PRE_COST_BELOW_COST") {
+        expect(fact.runes.state === "EXACT" && fact.runes.amount).toBe(1);
+        const comparison = analysis.comparisons.find((row) => row.decision.position === entry.position);
+        expect(comparison?.outcome).not.toBe("REJECTED");
+        const marrowrend = entry.selection.undecidedCandidates.find((c) => c.at === "sanlayn[7] marrowrend");
+        if (marrowrend !== undefined) expect(marrowrend.atoms).toEqual(["USABILITY:marrowrend"]);
+      }
+    }
+  });
+
   it("binds the exact Bone Shield count at 114 of 123 decisions and refuses the rest for a named reason", () => {
     const tally = new Map<string, number>();
     for (const entry of analysis.resolved) {
@@ -522,7 +721,12 @@ describe("the second subject", () => {
     // RE-POINTED for M11-B4: one Death Strike (2,421,923) resolves in the opener.
     // Unchanged by M11-B5: the opener's Runic Power is exact or bounded at every
     // decision, and the next obstacle is the Blood Debt stack or an Essence window.
+    // Unchanged by M11-B7: no opener decision has Blood Debt at 10 with a
+    // Rune-costed cast, so the Marrowrend proof selects nothing there.
     expect(analysis.coverage).toMatchObject({ eligibleDecisions: 21, match: 1, rejected: 0, unknown: 20 });
+    expect(
+      Object.fromEntries(analysis.coverage.runeAffordabilityEvidence.map((row) => [row.key, row.count])),
+    ).toEqual({ OWN_PRE_COST_AFFORDABLE: 11, NO_RUNE_OBSERVATION: 10 });
     expect(
       Object.fromEntries(analysis.coverage.runicPowerEvidence.map((row) => [row.key, row.count])),
     ).toEqual({
