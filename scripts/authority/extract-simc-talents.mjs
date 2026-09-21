@@ -513,6 +513,19 @@ const DEATHKNIGHT_BLOOD_TARGET = {
       binding:
         'sc_death_knight.cpp:15113 talent.sanlayn.visceral_strength = find_talent_spell( talent_tree::HERO, "Visceral Strength" ); the Blood `buff.visceral_strength` aura 461130 exists only under it (:15383-15384)',
     },
+    {
+      // M11-B9. Not read by any APL atom: pinned because its passive effect
+      // 1123818 (spell 434075, A_ADD_FLAT_LABEL_MODIFIER P_MAX_STACKS +2 on
+      // label 3134, carried only by 433925) is the modifier that lifts
+      // Essence of the Blood Queen's max stacks from the DBC 5 to 7, and the
+      // pinned module parses it (parse_all_passive_talents, :15163) without
+      // buff_t ever reading the parsed "max_stack" field.
+      simcName: "frenzied_bloodthirst",
+      displayNameEn: "Frenzied Bloodthirst",
+      tree: "HERO",
+      binding:
+        'sc_death_knight.cpp:15111 talent.sanlayn.frenzied_bloodthirst = find_talent_spell( talent_tree::HERO, "Frenzied Bloodthirst" ); the only other reference is the declaration (:1411) — no buff, action or expression reads it; its max-stack effect on 433925 is pinned Blood-side (deathknight-blood-stack-authority.ts)',
+    },
   ],
   heroTrees: [
     // `__trait_sub_tree_data` (trait_data.inc:4398, :4400): San'layn is

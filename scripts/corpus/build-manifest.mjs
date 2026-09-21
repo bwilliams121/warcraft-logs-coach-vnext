@@ -2934,6 +2934,7 @@ const BLOOD_TALENTS = {
   dancing_rune_weapon: "SELECTED",
   death_strike: "SELECTED",
   exterminate: "UNKNOWN",
+  frenzied_bloodthirst: "SELECTED",
   gift_of_the_sanlayn: "SELECTED",
   heart_strike: "SELECTED",
   marrowrend: "SELECTED",
@@ -3286,6 +3287,8 @@ const blood_exact_stack = (stack) => ({
   proof: "EXACT_STACK_OBSERVATION",
   abilityGameId: BLOOD_BONE_SHIELD,
   reason: null,
+  possibleStacks: null,
+  windowOrderInvariance: null,
 });
 const blood_unbound_stack = (abilityGameId, reason) => ({
   state: "UNBOUND",
@@ -3293,6 +3296,8 @@ const blood_unbound_stack = (abilityGameId, reason) => ({
   proof: null,
   abilityGameId,
   reason,
+  possibleStacks: null,
+  windowOrderInvariance: null,
 });
 /** M11-B6: Blood Debt's exact count, from the last stack-bearing transition (OBSERVATION) or a fresh plain application (APPLICATION, always 1). */
 const blood_debt_exact = (stack, proof = "EXACT_STACK_OBSERVATION") => ({
@@ -3301,6 +3306,28 @@ const blood_debt_exact = (stack, proof = "EXACT_STACK_OBSERVATION") => ({
   proof,
   abilityGameId: BLOOD_DEBT,
   reason: null,
+  possibleStacks: null,
+  windowOrderInvariance: null,
+});
+/** M11-B9: Essence's exact count from its own transitions (OBSERVATION) or the pinned fresh application (APPLICATION, always 1). */
+const blood_ebq_exact = (stack, proof = "EXACT_STACK_OBSERVATION") => ({
+  state: "BOUND",
+  stack,
+  proof,
+  abilityGameId: BLOOD_EBQ,
+  reason: null,
+  possibleStacks: null,
+  windowOrderInvariance: null,
+});
+/** M11-B9: the finite set of exact Essence counts both orderings of the window cluster leave, with both worlds pinned. */
+const blood_ebq_set = (possibleStacks, windowOrderInvariance) => ({
+  state: "BOUND_SET",
+  stack: null,
+  proof: "WINDOW_ORDER_INVARIANT_SET",
+  abilityGameId: BLOOD_EBQ,
+  reason: null,
+  possibleStacks,
+  windowOrderInvariance,
 });
 const BLOOD_HS_MATCH = {
   ...BLOOD_DS_MATCH,
@@ -3575,9 +3602,9 @@ const BLOOD_CASES = [
         ...BLOOD_FULL,
         expected: {
           eligibleDecisions: 123,
-          match: 37,
+          match: 40,
           rejected: 9,
-          unknown: 77,
+          unknown: 74,
           exclusions: {
             MELEE_SWING: 87,
             NON_GCD_ACTION: 47,
@@ -3590,7 +3617,7 @@ const BLOOD_CASES = [
         actorId: BLOOD,
         ...BLOOD_FULL,
         expected: {
-          match: 37,
+          match: 40,
           rejected: 9,
           stoppingEntries: {
             "default[15] run_action_list": 1,
@@ -3617,9 +3644,10 @@ const BLOOD_CASES = [
             "san_gift[1] death_strike | USABILITY:death_strike": 1,
             "san_gift[2] any_dnd | buff.crimson_scourge.remains": 4,
             "san_gift[2] any_dnd | buff.visceral_strength.remains": 5,
-            "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 18,
-            "san_gift[4] death_strike | USABILITY:death_strike": 17,
-            "san_gift[5] blood_boil | buff.boiling_point.up": 10,
+            "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 9,
+            "san_gift[3] heart_strike | USABILITY:heart_strike": 2,
+            "san_gift[4] death_strike | USABILITY:death_strike": 10,
+            "san_gift[5] blood_boil | buff.boiling_point.up": 5,
             "san_gift[6] heart_strike | USABILITY:heart_strike": 1,
             "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
             "sanlayn[0] deaths_caress | buff.bone_shield.remains": 6,
@@ -3653,8 +3681,11 @@ const BLOOD_CASES = [
             "bone_shield | EXACT_STACK_OBSERVATION": 114,
             "bone_shield | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 1,
             [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 8,
-            "essence_of_the_blood_queen | AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED": 96,
-            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 26,
+            "essence_of_the_blood_queen | EXACT_STACK_OBSERVATION": 15,
+            "essence_of_the_blood_queen | EXACT_STACK_APPLICATION": 9,
+            "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_SET": 12,
+            "essence_of_the_blood_queen | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 72,
+            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 14,
             "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
             "blood_debt | EXACT_STACK_OBSERVATION": 107,
             "blood_debt | EXACT_STACK_APPLICATION": 7,
@@ -3670,6 +3701,20 @@ const BLOOD_CASES = [
             "bone_shield | stack 10": 16,
             "bone_shield | stack 11": 33,
             "bone_shield | stack 12": 6,
+            "essence_of_the_blood_queen | stack 1": 9,
+            "essence_of_the_blood_queen | stack 2": 4,
+            "essence_of_the_blood_queen | stack 3": 4,
+            "essence_of_the_blood_queen | stack 4": 2,
+            "essence_of_the_blood_queen | stack 5": 2,
+            "essence_of_the_blood_queen | stack 6": 2,
+            "essence_of_the_blood_queen | stack 7": 1,
+            "essence_of_the_blood_queen | stack one of {0,1}": 1,
+            "essence_of_the_blood_queen | stack one of {1,2}": 2,
+            "essence_of_the_blood_queen | stack one of {2,3}": 2,
+            "essence_of_the_blood_queen | stack one of {3,4}": 1,
+            "essence_of_the_blood_queen | stack one of {4,5}": 2,
+            "essence_of_the_blood_queen | stack one of {5,6}": 2,
+            "essence_of_the_blood_queen | stack one of {6,7}": 2,
             "blood_debt | stack 0": 3,
             "blood_debt | stack 1": 7,
             "blood_debt | stack 2": 11,
@@ -3784,9 +3829,9 @@ const BLOOD_CASES = [
             "bone_shield | up | lead 20": 1,
             "bone_shield | stack | lead 20": 1,
             "bone_shield | remains | lead 20": 1,
-            "essence_of_the_blood_queen | stack | lead 0": 23,
+            "essence_of_the_blood_queen | stack | lead 0": 13,
             "essence_of_the_blood_queen | remains | lead 0": 6,
-            "essence_of_the_blood_queen | stack | lead 1": 3,
+            "essence_of_the_blood_queen | stack | lead 1": 1,
             "crimson_scourge | remains | lead 38": 1,
             "death_and_decay | up | lead 0": 1,
             "death_and_decay | up | lead 20": 1,
@@ -3835,9 +3880,10 @@ const BLOOD_CASES = [
             "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 2,
             "san_gift[2] any_dnd | buff.crimson_scourge.remains": 14,
             "san_gift[2] any_dnd | buff.visceral_strength.remains": 14,
-            "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 14,
-            "san_gift[4] death_strike | USABILITY:death_strike": 11,
-            "san_gift[5] blood_boil | buff.boiling_point.up": 10,
+            "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 4,
+            "san_gift[3] heart_strike | USABILITY:heart_strike": 5,
+            "san_gift[4] death_strike | USABILITY:death_strike": 6,
+            "san_gift[5] blood_boil | buff.boiling_point.up": 5,
             "san_gift[6] heart_strike | USABILITY:heart_strike": 3,
             "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
             "sanlayn[5] any_dnd | USABILITY:any_dnd": 1,
@@ -3852,8 +3898,10 @@ const BLOOD_CASES = [
           stackEvidence: {
             "bone_shield | EXACT_STACK_OBSERVATION": 20,
             [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 1,
-            "essence_of_the_blood_queen | AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED": 13,
-            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 7,
+            "essence_of_the_blood_queen | EXACT_STACK_OBSERVATION": 6,
+            "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_SET": 5,
+            "essence_of_the_blood_queen | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 7,
+            [`essence_of_the_blood_queen | ${BLOOD_WINDOW_TAG}`]: 2,
             "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
             "blood_debt | EXACT_STACK_OBSERVATION": 14,
             "blood_debt | EXACT_STACK_APPLICATION": 1,
@@ -3862,6 +3910,14 @@ const BLOOD_CASES = [
           stackValues: {
             "bone_shield | stack 7": 12,
             "bone_shield | stack 12": 8,
+            "essence_of_the_blood_queen | stack 4": 2,
+            "essence_of_the_blood_queen | stack 5": 1,
+            "essence_of_the_blood_queen | stack 6": 3,
+            "essence_of_the_blood_queen | stack one of {1,2}": 1,
+            "essence_of_the_blood_queen | stack one of {2,3}": 1,
+            "essence_of_the_blood_queen | stack one of {3,4}": 1,
+            "essence_of_the_blood_queen | stack one of {4,5}": 1,
+            "essence_of_the_blood_queen | stack one of {5,6}": 1,
             "blood_debt | stack 1": 1,
             "blood_debt | stack 2": 2,
             "blood_debt | stack 3": 2,
@@ -3916,9 +3972,8 @@ const BLOOD_CASES = [
             "visceral_strength | AURA_STATE_UNKNOWN": 16,
           },
           preDecisionWindowRefusals: {
-            "essence_of_the_blood_queen | stack | lead 0": 6,
+            "essence_of_the_blood_queen | stack | lead 0": 2,
             "essence_of_the_blood_queen | remains | lead 0": 1,
-            "essence_of_the_blood_queen | stack | lead 1": 1,
             "bone_shield | up | lead 0": 1,
             "bone_shield | stack | lead 0": 1,
             "bone_shield | remains | lead 0": 1,
@@ -4098,12 +4153,15 @@ const BLOOD_CASES = [
         proof: "PROVEN_INACTIVE",
         abilityGameId: BLOOD_DEBT,
         reason: null,
+        possibleStacks: null,
+        windowOrderInvariance: null,
       }),
+      // M11-B9: the last count (7 at 2,017,274) lies across lone refreshes; not carried (Q2 declined).
       blood_stack(
         2044021,
         BLOOD_DS,
         "essence_of_the_blood_queen",
-        blood_unbound_stack(BLOOD_EBQ, "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED"),
+        blood_unbound_stack(BLOOD_EBQ, "COUNT_AMBIGUOUS_SINCE_OBSERVATION"),
       ),
       // The three lone refreshes at 2,043,229 are full resets: the remainder is EXACT even though the count is not.
       blood_remains(2044021, BLOOD_DS, "bone_shield", blood_remains_exact(29208, 2043229)),
@@ -4321,11 +4379,17 @@ const BLOOD_CASES = [
         }),
         BLOOD_FULL,
       ),
+      // M11-B9: the count is the set { 1, 2 } both orderings of the stack gain leave, never one of them.
       blood_stack(
         2087470,
         BLOOD_VS,
         "essence_of_the_blood_queen",
-        blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
+        blood_ebq_set([1, 2], {
+          cluster: [{ reportTimeMs: 2087470, operation: "APPLIED", isStackChange: true, leadMs: 0 }],
+          beforeClusterStack: 1,
+          beforeClusterProof: "EXACT_STACK_APPLICATION",
+          afterClusterStack: 2,
+        }),
         BLOOD_FULL,
       ),
       blood_remains(2087470, BLOOD_VS, "vampiric_strike", blood_remains_permanent(2086414), BLOOD_FULL),
@@ -4368,7 +4432,15 @@ const BLOOD_CASES = [
         2093667,
         BLOOD_VS,
         "essence_of_the_blood_queen",
-        blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
+        blood_ebq_set([2, 3], {
+          cluster: [
+            { reportTimeMs: 2093666, operation: "APPLIED", isStackChange: true, leadMs: 1 },
+            { reportTimeMs: 2093666, operation: "REFRESHED", isStackChange: false, leadMs: 1 },
+          ],
+          beforeClusterStack: 2,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 3,
+        }),
         BLOOD_FULL,
       ),
       blood_remains(2093667, BLOOD_VS, "vampiric_strike", blood_remains_permanent(2092650), BLOOD_FULL),
@@ -4474,6 +4546,205 @@ const BLOOD_CASES = [
     { authority: BLOOD_AUTHORITY, related: [...BLOOD_RELATED, "tests/unit/m11b8-blood-ebq-remains.test.ts"] },
   ),
   kase(
+    "spec-blood-death-knight.essence-stacks-are-the-wires-absolute-counts-and-a-set-of-two-inside-the-window",
+    BLOOD_105_165,
+    "SPEC_BLOOD_DEATH_KNIGHT",
+    "src/data/game/deathknight-blood-stack-authority.ts (the Frenzied Bloodthirst max-stack modifier, bloodEffectiveMaxStack); src/data/game/deathknight-blood-talents.json (frenzied_bloodthirst, machine-extracted); src/specs/deathknight/blood/aura-bindings.ts (the Essence exact-count rule, the maximum guard, orderInvariantWindowStack); src/simc/expression/evaluate.ts (ONE_OF_NUMBERS)",
+    "M11-B9. Essence of the Blood Queen's positive count is read from the wire: the absolute count of the last applybuffstack (EXACT_STACK_OBSERVATION), the pinned 1 of a fresh applybuff (_proc_charges 0 -> buff_t _initial_stack 1; EXACT_STACK_APPLICATION), zero from a removal — never from a Vampiric Strike count, never incremented, and never carried across a lone refreshbuff (Q2 declined: COUNT_AMBIGUOUS_SINCE_OBSERVATION, 72 of 123 bundle decisions, because after the seventh stack every Essence transition until the expiry is a lone refresh). Every count is checked against the effective maximum the Blood stack authority resolves for the build: the DBC _max_stack 5 (the generated artifact's raw value, not reinterpreted) plus Frenzied Bloodthirst's +2 — effect 1123818 of spell 434075, A_ADD_FLAT_LABEL_MODIFIER P_MAX_STACKS on label 3134, which only 433925 carries — exactly when the talent is SELECTED, which both subjects prove by their own trait entry 117662 (node 95065, NORMAL, no alternative) through the machine-extracted talent artifact. The pinned SimulationCraft parses that talent (parse_all_passive_talents) but buff_t never reads the parsed max_stack field, so the sim caps the aura at 5: a runtime omission the wire's observed 6 and 7 corroborate and do not establish — a count above the effective maximum, or above 5 while the modifier is unproven, is COUNT_EXCEEDS_PINNED_MAX. Inside the 50 ms pre-decision window (unchanged) a cluster of exactly one stack gain (with its same-millisecond companion) binds the finite set of exact counts both orderings leave — H1 the exact count before the cluster by the ordinary rule, H2 the wire's count after it — as ONE_OF_NUMBERS, which the generic evaluator decides only when every member decides the comparison alike: { 5,6 } and { 4,5 } make san_gift[3]'s stack<7 TRUE, { 6,7 } leaves it UNRESOLVED, a lone-refresh or removal cluster refuses, an H1 across a lone refresh refuses, and a fresh application is { 0,1 } only when M4 proves the aura inactive before it from an observed removal (2,073,540) — the first application in a track (2,008,597; opener 2,418,659) refuses, because no aura event is not aura inactive. Three Vampiric Strikes resolve, each selected at san_gift[3] heart_strike — the observed action, proven usable by its execution — once san_gift[0] is FALSE from the M11-B8 floor, san_gift[1] FALSE from the Runic Power deficit and san_gift[2] FALSE from Crimson Scourge proven down: 2,015,029 ({ 5,6 }: applybuffstack 5 at 2,012,773 before, applybuffstack 6 at lead 0), 2,103,820 ({ 4,5 }: 4 at 2,101,867, 5 at lead 0) and 2,105,703 ({ 5,6 }: 5 at 2,103,820, 6 at 2,105,702, lead 1): 40 MATCH / 9 REJECTED / 74 UNKNOWN, the 45 s slice 16 / 3 / 29, the opener 1 / 0 / 20 (its six sets all sit behind san_gift[2]). Still UNKNOWN by construction: 2,017,274 and 2,106,638 ({ 6,7 }, the worlds disagree), 2,101,867 (its count before the cluster, 3 at 2,093,666, lies across the Gift-edge lone refresh at 2,099,885 and is not carried), and the exact counts outside the window — 6 at the Marrowrend 2,015,770, 5 at the Death Strike 2,104,758 — that make san_gift[3] TRUE and stop on Heart Strike's usability, an action that was not cast. Every prior MATCH and REJECTED keeps its outcome and token.",
+    [
+      // The three MATCH, each with the set, both worlds, the evaluator's verdict and no undecided candidate.
+      blood_decision(
+        2015029,
+        BLOOD_VS,
+        { ...BLOOD_HS_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2015029,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_ebq_set([5, 6], {
+          cluster: [
+            { reportTimeMs: 2015029, operation: "APPLIED", isStackChange: true, leadMs: 0 },
+            { reportTimeMs: 2015029, operation: "REFRESHED", isStackChange: false, leadMs: 0 },
+          ],
+          beforeClusterStack: 5,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 6,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_remains(2015029, BLOOD_VS, "crimson_scourge", blood_remains_zero(2013542), BLOOD_FULL),
+      blood_rp_state(2015029, BLOOD_VS, blood_rp_window(670, 58, 2015029, [0]), BLOOD_FULL),
+      blood_decision(
+        2103820,
+        BLOOD_VS,
+        { ...BLOOD_HS_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2103820,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_ebq_set([4, 5], {
+          cluster: [
+            { reportTimeMs: 2103820, operation: "APPLIED", isStackChange: true, leadMs: 0 },
+            { reportTimeMs: 2103820, operation: "REFRESHED", isStackChange: false, leadMs: 0 },
+          ],
+          beforeClusterStack: 4,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 5,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_remains(2103820, BLOOD_VS, "crimson_scourge", blood_remains_zero(2096763), BLOOD_FULL),
+      blood_decision(
+        2105703,
+        BLOOD_VS,
+        { ...BLOOD_HS_MATCH, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2105703,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_ebq_set([5, 6], {
+          cluster: [
+            { reportTimeMs: 2105702, operation: "APPLIED", isStackChange: true, leadMs: 1 },
+            { reportTimeMs: 2105702, operation: "REFRESHED", isStackChange: false, leadMs: 1 },
+          ],
+          beforeClusterStack: 5,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 6,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_remains(2105703, BLOOD_VS, "crimson_scourge", blood_remains_zero(2096763), BLOOD_FULL),
+      // Still UNKNOWN: the worlds disagree on stack<7.
+      blood_decision(
+        2017274,
+        BLOOD_VS,
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2017274,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_ebq_set([6, 7], {
+          cluster: [
+            { reportTimeMs: 2017274, operation: "APPLIED", isStackChange: true, leadMs: 0 },
+            { reportTimeMs: 2017274, operation: "REFRESHED", isStackChange: false, leadMs: 0 },
+          ],
+          beforeClusterStack: 6,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 7,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_decision(
+        2106638,
+        BLOOD_VS,
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2106638,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_ebq_set([6, 7], {
+          cluster: [
+            { reportTimeMs: 2106638, operation: "APPLIED", isStackChange: true, leadMs: 0 },
+            { reportTimeMs: 2106638, operation: "REFRESHED", isStackChange: false, leadMs: 0 },
+          ],
+          beforeClusterStack: 6,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 7,
+        }),
+        BLOOD_FULL,
+      ),
+      // Still UNKNOWN: Q2 declined — the count before the cluster lies across the Gift-edge refresh at 2,099,885.
+      blood_decision(
+        2101867,
+        BLOOD_VS,
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "UNCONDITIONAL_ENTRY" },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2101867,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
+        BLOOD_FULL,
+      ),
+      // Exact counts outside the window, which make san_gift[3] TRUE and stop on the usability of an action not cast.
+      blood_stack(2015770, BLOOD_MR, "essence_of_the_blood_queen", blood_ebq_exact(6), BLOOD_FULL),
+      // A Marrowrend: the unselectability walk refuses on a conditional entry it cannot prove FALSE, as before.
+      blood_decision(
+        2015770,
+        BLOOD_MR,
+        { ...BLOOD_DIVERGENT, unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE" },
+        BLOOD_FULL,
+      ),
+      blood_stack(2104758, BLOOD_DS, "essence_of_the_blood_queen", blood_ebq_exact(5), BLOOD_FULL),
+      blood_stack(
+        2084304,
+        BLOOD_DS,
+        "essence_of_the_blood_queen",
+        blood_ebq_exact(1, "EXACT_STACK_APPLICATION"),
+        BLOOD_FULL,
+      ),
+      // The lone-refresh rule (Q2 declined) and the lone-refresh cluster refusal.
+      blood_stack(
+        2100867,
+        BLOOD_BB,
+        "essence_of_the_blood_queen",
+        blood_unbound_stack(BLOOD_EBQ, "COUNT_AMBIGUOUS_SINCE_OBSERVATION"),
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2110550,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
+        BLOOD_FULL,
+      ),
+      // The first Essence application in the track, inside the window: NOT
+      // { 0, 1 }. No prior transition proves nothing (AMBIGUOUS_INITIAL_STATE
+      // before it); the zero world needs an observed removal.
+      blood_stack(
+        2008597,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
+        BLOOD_FULL,
+      ),
+      // A fresh application after an OBSERVED removal (2,071,379) is { 0, 1 }.
+      blood_stack(
+        2073540,
+        BLOOD_VS,
+        "essence_of_the_blood_queen",
+        blood_ebq_set([0, 1], {
+          cluster: [{ reportTimeMs: 2073540, operation: "APPLIED", isStackChange: false, leadMs: 0 }],
+          beforeClusterStack: 0,
+          beforeClusterProof: "PROVEN_INACTIVE_BEFORE_APPLICATION",
+          afterClusterStack: 1,
+        }),
+        BLOOD_FULL,
+      ),
+    ],
+    ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "A stack count is a number the wire wrote or a number the pinned module fixes for a fresh application; a maximum is the DBC row plus a modifier the observed talent tree proves; and inside the window the count is BOTH of the two exact values the orderings leave, handed to the evaluator as a set it may only decide unanimously. Nothing is counted, incremented, carried across a refresh nobody explained, or read off the very observation it would then be checked against — and the zero world of a fresh application is a state M4 must prove from an observed removal, never the silence before the first transition in the track.",
+    {
+      authority: BLOOD_AUTHORITY,
+      related: [
+        ...BLOOD_RELATED,
+        "tests/unit/m11b9-blood-ebq-stack.test.ts",
+        "tests/unit/simc-expression-one-of-numbers.test.ts",
+      ],
+    },
+  ),
+  kase(
     "spec-blood-death-knight.vampiric-blood-and-the-second-dancing-rune-weapon-over-the-bundle",
     BLOOD_105_165,
     "SPEC_BLOOD_DEATH_KNIGHT",
@@ -4488,11 +4759,17 @@ const BLOOD_CASES = [
         BLOOD_FULL,
       ),
       blood_stack(2087470, BLOOD_VS, "bone_shield", blood_exact_stack(10), BLOOD_FULL),
+      // M11-B9: the count is the set { 1, 2 } both orderings of the stack gain leave, never one of them.
       blood_stack(
         2087470,
         BLOOD_VS,
         "essence_of_the_blood_queen",
-        blood_unbound_stack(BLOOD_EBQ, BLOOD_WINDOW_TAG),
+        blood_ebq_set([1, 2], {
+          cluster: [{ reportTimeMs: 2087470, operation: "APPLIED", isStackChange: true, leadMs: 0 }],
+          beforeClusterStack: 1,
+          beforeClusterProof: "EXACT_STACK_APPLICATION",
+          afterClusterStack: 2,
+        }),
         BLOOD_FULL,
       ),
       // M11-B8: the count stays refused; the remainder is the floor both orderings of the stack gain share.

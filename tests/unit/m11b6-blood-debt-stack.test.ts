@@ -149,15 +149,28 @@ function analyzed(state: CombatState) {
 }
 
 describe("the pinned Blood Debt identity", () => {
-  it("carries the exact-count rule with an application stack of 1, and is the second atom the rule covers", () => {
+  it("carries the exact-count rule with an application stack of 1, and is one of the three atoms the rule covers", () => {
     const identity = bloodAuraIdentityFor("blood_debt");
-    expect(identity?.exactCount).toEqual({ applicationStack: 1 });
+    // M11-B9 added the two switches; both stay off for Blood Debt and Bone Shield.
+    expect(identity?.exactCount).toEqual({
+      applicationStack: 1,
+      maxStackGuard: false,
+      windowOrderInvariantSet: false,
+    });
     expect(identity?.producedByTalent).toBeNull();
     expect(identity?.ownedByHeroTree).toBeNull();
     expect(BLOOD_DEBT_MAX_STACK).toBe(10);
-    expect(EXACT_COUNT_ATOMS).toEqual(["bone_shield", "blood_debt"]);
-    expect(bloodAuraIdentityFor("bone_shield")?.exactCount).toEqual({ applicationStack: null });
-    expect(bloodAuraIdentityFor("essence_of_the_blood_queen")?.exactCount).toBeNull();
+    expect(EXACT_COUNT_ATOMS).toEqual(["bone_shield", "essence_of_the_blood_queen", "blood_debt"]);
+    expect(bloodAuraIdentityFor("bone_shield")?.exactCount).toEqual({
+      applicationStack: null,
+      maxStackGuard: false,
+      windowOrderInvariantSet: false,
+    });
+    expect(bloodAuraIdentityFor("essence_of_the_blood_queen")?.exactCount).toEqual({
+      applicationStack: 1,
+      maxStackGuard: true,
+      windowOrderInvariantSet: true,
+    });
     expect([...SUPPORTED_BLOOD_STACK_ATOMS]).toEqual([
       "bone_shield",
       "essence_of_the_blood_queen",
@@ -357,14 +370,14 @@ describe("coverage and the window", () => {
         expect(binding.reason).toBe("PRE_DECISION_WINDOW_TRANSITION");
         expect(binding.windowTransition?.leadMs).toBe(lead);
       } else {
-        expect(binding.stack).toBe(4);
+        expect(binding.state === "BOUND" && binding.stack).toBe(4);
       }
     }
   });
 });
 
 describe("isolation", () => {
-  it("leaves Essence unbound when ACTIVE and Bone Shield's count rule as it was", () => {
+  it("binds Essence's absolute count beside Blood Debt's, and Bone Shield's count rule as it was (M11-B9 re-pin)", () => {
     const state = stateOf([
       aura(0, 1000, "APPLIED", 4, ESSENCE_OF_THE_BLOOD_QUEEN_BUFF_SPELL_ID),
       aura(1, 1100, "APPLIED", 6, BONE_SHIELD_BUFF_SPELL_ID),
@@ -375,11 +388,13 @@ describe("isolation", () => {
     const bindings = bindSupportedBloodStacks(input(state, 4));
     expect(bloodStackBindingsFrom(bindings)).toEqual([
       { name: "bone_shield", stack: 6 },
+      { name: "essence_of_the_blood_queen", stack: 4 },
       { name: "blood_debt", stack: 5 },
     ]);
     expect(bindings.find((b) => b.atomName === "essence_of_the_blood_queen")).toMatchObject({
-      state: "UNBOUND",
-      reason: "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED",
+      state: "BOUND",
+      stack: 4,
+      proof: "EXACT_STACK_OBSERVATION",
     });
   });
 

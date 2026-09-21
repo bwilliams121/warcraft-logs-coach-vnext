@@ -276,9 +276,10 @@ describe("the Bone Shield exact-count rule", () => {
     expect(stack).toMatchObject({ state: "BOUND", stack: 0, proof: "PROVEN_INACTIVE" });
   });
 
-  it("reconstructs a positive count for the atoms with an exact-count rule; an ACTIVE Essence stays unbound", () => {
-    // RE-POINTED for M11-B6: Blood Debt joined Bone Shield (tests/unit/m11b6-blood-debt-stack.test.ts).
-    expect(EXACT_COUNT_ATOMS).toEqual(["bone_shield", "blood_debt"]);
+  it("reconstructs a positive count for the atoms with an exact-count rule; an ACTIVE Essence binds its absolute count since M11-B9", () => {
+    // RE-POINTED for M11-B6 (Blood Debt joined Bone Shield) and M11-B9 (Essence
+    // joined, tests/unit/m11b9-blood-ebq-stack.test.ts): the identity order is the authority's.
+    expect(EXACT_COUNT_ATOMS).toEqual(["bone_shield", "essence_of_the_blood_queen", "blood_debt"]);
     const state = stateOf([
       auraEvent({
         ordinal: 0,
@@ -294,7 +295,9 @@ describe("the Bone Shield exact-count rule", () => {
       cast(1, 1900, DEATH_STRIKE),
     ]);
     const stack = bindBloodStack(input(state, 1), "essence_of_the_blood_queen");
-    expect(stack.state === "UNBOUND" && stack.reason).toBe("AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED");
+    // The wire's absolute count, 4, under the DBC maximum 5: bound whatever the
+    // modifier talent's state (the synthetic build models no talents at all).
+    expect(stack).toMatchObject({ state: "BOUND", stack: 4, proof: "EXACT_STACK_OBSERVATION" });
   });
 });
 
@@ -578,7 +581,11 @@ describe("over the committed evidence", () => {
     });
     expect(known).not.toHaveProperty("vampiric_blood");
     const stacks = bloodStackBindingsFrom(bindSupportedBloodStacks(input(state, position)));
-    expect(stacks).toEqual([{ name: "bone_shield", stack: 6 }]);
+    // M11-B9: Essence's absolute count (applybuffstack 4 at 2,011,141, its companion refresh, nothing since) joins.
+    expect(stacks).toEqual([
+      { name: "bone_shield", stack: 6 },
+      { name: "essence_of_the_blood_queen", stack: 4 },
+    ]);
   });
 
   it("binds Vampiric Blood UP inside its window and DOWN after its removal over the bundle, never before its first transition", () => {

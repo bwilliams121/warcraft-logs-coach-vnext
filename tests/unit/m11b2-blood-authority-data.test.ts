@@ -240,7 +240,8 @@ describe("the Blood talent dataset", () => {
       ["sanlayn", 31],
       ["deathbringer", 33],
     ]);
-    expect(bloodModelledTalentNames()).toHaveLength(13);
+    // 13 through M11-B7; M11-B9 pinned frenzied_bloodthirst (the Essence max-stack modifier).
+    expect(bloodModelledTalentNames()).toHaveLength(14);
     expect(resolveBloodTalent([], "consumption").selection).toBe("UNKNOWN");
     expect(resolveBloodTalent([], "death_strike").selection).toBe("UNKNOWN");
     expect(resolveBloodHeroTree([]).state).toBe("UNKNOWN");

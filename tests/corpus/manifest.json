@@ -9570,6 +9570,7 @@
                 "dancing_rune_weapon": "SELECTED",
                 "death_strike": "SELECTED",
                 "exterminate": "UNKNOWN",
+                "frenzied_bloodthirst": "SELECTED",
                 "gift_of_the_sanlayn": "SELECTED",
                 "heart_strike": "SELECTED",
                 "marrowrend": "SELECTED",
@@ -9743,7 +9744,9 @@
               "stack": 3,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -9766,7 +9769,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -9819,7 +9824,9 @@
               "stack": 1,
               "proof": "EXACT_STACK_APPLICATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -9842,7 +9849,9 @@
               "stack": 1,
               "proof": "EXACT_STACK_APPLICATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -9895,7 +9904,9 @@
               "stack": 1,
               "proof": "EXACT_STACK_APPLICATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -9948,7 +9959,9 @@
               "stack": 6,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -10001,7 +10014,9 @@
               "stack": 8,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -10054,7 +10069,9 @@
               "stack": null,
               "proof": null,
               "abilityGameId": 1310372,
-              "reason": "AURA_STATE_UNKNOWN"
+              "reason": "AURA_STATE_UNKNOWN",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         }
@@ -10172,11 +10189,25 @@
             },
             "atomName": "essence_of_the_blood_queen",
             "expected": {
-              "state": "UNBOUND",
+              "state": "BOUND_SET",
               "stack": null,
-              "proof": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
               "abilityGameId": 433925,
-              "reason": "PRE_DECISION_WINDOW_TRANSITION"
+              "reason": null,
+              "possibleStacks": [1, 2],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2087470,
+                    "operation": "APPLIED",
+                    "isStackChange": true,
+                    "leadMs": 0
+                  }
+                ],
+                "beforeClusterStack": 1,
+                "beforeClusterProof": "EXACT_STACK_APPLICATION",
+                "afterClusterStack": 2
+              }
             }
           }
         },
@@ -10277,7 +10308,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 195181,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -10300,7 +10333,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -10503,11 +10538,31 @@
             },
             "atomName": "essence_of_the_blood_queen",
             "expected": {
-              "state": "UNBOUND",
+              "state": "BOUND_SET",
               "stack": null,
-              "proof": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
               "abilityGameId": 433925,
-              "reason": "PRE_DECISION_WINDOW_TRANSITION"
+              "reason": null,
+              "possibleStacks": [2, 3],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2093666,
+                    "operation": "APPLIED",
+                    "isStackChange": true,
+                    "leadMs": 1
+                  },
+                  {
+                    "reportTimeMs": 2093666,
+                    "operation": "REFRESHED",
+                    "isStackChange": false,
+                    "leadMs": 1
+                  }
+                ],
+                "beforeClusterStack": 2,
+                "beforeClusterProof": "EXACT_STACK_OBSERVATION",
+                "afterClusterStack": 3
+              }
             }
           }
         },
@@ -10556,7 +10611,9 @@
               "stack": 9,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 195181,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -10579,7 +10636,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -11056,6 +11115,782 @@
       ]
     },
     {
+      "caseId": "spec-blood-death-knight.essence-stacks-are-the-wires-absolute-counts-and-a-set-of-two-inside-the-window",
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
+      "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
+      "contractUnderTest": "src/data/game/deathknight-blood-stack-authority.ts (the Frenzied Bloodthirst max-stack modifier, bloodEffectiveMaxStack); src/data/game/deathknight-blood-talents.json (frenzied_bloodthirst, machine-extracted); src/specs/deathknight/blood/aura-bindings.ts (the Essence exact-count rule, the maximum guard, orderInvariantWindowStack); src/simc/expression/evaluate.ts (ONE_OF_NUMBERS)",
+      "purpose": "M11-B9. Essence of the Blood Queen's positive count is read from the wire: the absolute count of the last applybuffstack (EXACT_STACK_OBSERVATION), the pinned 1 of a fresh applybuff (_proc_charges 0 -> buff_t _initial_stack 1; EXACT_STACK_APPLICATION), zero from a removal — never from a Vampiric Strike count, never incremented, and never carried across a lone refreshbuff (Q2 declined: COUNT_AMBIGUOUS_SINCE_OBSERVATION, 72 of 123 bundle decisions, because after the seventh stack every Essence transition until the expiry is a lone refresh). Every count is checked against the effective maximum the Blood stack authority resolves for the build: the DBC _max_stack 5 (the generated artifact's raw value, not reinterpreted) plus Frenzied Bloodthirst's +2 — effect 1123818 of spell 434075, A_ADD_FLAT_LABEL_MODIFIER P_MAX_STACKS on label 3134, which only 433925 carries — exactly when the talent is SELECTED, which both subjects prove by their own trait entry 117662 (node 95065, NORMAL, no alternative) through the machine-extracted talent artifact. The pinned SimulationCraft parses that talent (parse_all_passive_talents) but buff_t never reads the parsed max_stack field, so the sim caps the aura at 5: a runtime omission the wire's observed 6 and 7 corroborate and do not establish — a count above the effective maximum, or above 5 while the modifier is unproven, is COUNT_EXCEEDS_PINNED_MAX. Inside the 50 ms pre-decision window (unchanged) a cluster of exactly one stack gain (with its same-millisecond companion) binds the finite set of exact counts both orderings leave — H1 the exact count before the cluster by the ordinary rule, H2 the wire's count after it — as ONE_OF_NUMBERS, which the generic evaluator decides only when every member decides the comparison alike: { 5,6 } and { 4,5 } make san_gift[3]'s stack<7 TRUE, { 6,7 } leaves it UNRESOLVED, a lone-refresh or removal cluster refuses, an H1 across a lone refresh refuses, and a fresh application is { 0,1 } only when M4 proves the aura inactive before it from an observed removal (2,073,540) — the first application in a track (2,008,597; opener 2,418,659) refuses, because no aura event is not aura inactive. Three Vampiric Strikes resolve, each selected at san_gift[3] heart_strike — the observed action, proven usable by its execution — once san_gift[0] is FALSE from the M11-B8 floor, san_gift[1] FALSE from the Runic Power deficit and san_gift[2] FALSE from Crimson Scourge proven down: 2,015,029 ({ 5,6 }: applybuffstack 5 at 2,012,773 before, applybuffstack 6 at lead 0), 2,103,820 ({ 4,5 }: 4 at 2,101,867, 5 at lead 0) and 2,105,703 ({ 5,6 }: 5 at 2,103,820, 6 at 2,105,702, lead 1): 40 MATCH / 9 REJECTED / 74 UNKNOWN, the 45 s slice 16 / 3 / 29, the opener 1 / 0 / 20 (its six sets all sit behind san_gift[2]). Still UNKNOWN by construction: 2,017,274 and 2,106,638 ({ 6,7 }, the worlds disagree), 2,101,867 (its count before the cluster, 3 at 2,093,666, lies across the Gift-edge lone refresh at 2,099,885 and is not carried), and the exact counts outside the window — 6 at the Marrowrend 2,015,770, 5 at the Death Strike 2,104,758 — that make san_gift[3] TRUE and stop on Heart Strike's usability, an action that was not cast. Every prior MATCH and REJECTED keeps its outcome and token.",
+      "assertions": [
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2015029,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "heart_strike",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2015029,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND_SET",
+              "stack": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": [5, 6],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2015029,
+                    "operation": "APPLIED",
+                    "isStackChange": true,
+                    "leadMs": 0
+                  },
+                  {
+                    "reportTimeMs": 2015029,
+                    "operation": "REFRESHED",
+                    "isStackChange": false,
+                    "leadMs": 0
+                  }
+                ],
+                "beforeClusterStack": 5,
+                "beforeClusterProof": "EXACT_STACK_OBSERVATION",
+                "afterClusterStack": 6
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2015029,
+              "abilityGameId": 433895
+            },
+            "atomName": "crimson_scourge",
+            "expected": {
+              "state": "BOUND",
+              "proof": "PROVEN_INACTIVE",
+              "bindingState": "KNOWN_NUMBER",
+              "remainsMs": null,
+              "anchorReportTimeMs": 2013542,
+              "reason": null,
+              "windowLeadMs": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.RUNIC_POWER_STATE_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2015029,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "state": "BOUND",
+              "proof": "WINDOW_BOUNDED",
+              "bindingState": "BOUNDED_NUMBER",
+              "deficitPoints": 58,
+              "currentWire": null,
+              "atMostWire": 670,
+              "maxWire": 1250,
+              "anchorReportTimeMs": 2015029,
+              "anchorTiming": "POST_CHANGE",
+              "windowLeadsMs": [0],
+              "reason": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2103820,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "heart_strike",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2103820,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND_SET",
+              "stack": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": [4, 5],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2103820,
+                    "operation": "APPLIED",
+                    "isStackChange": true,
+                    "leadMs": 0
+                  },
+                  {
+                    "reportTimeMs": 2103820,
+                    "operation": "REFRESHED",
+                    "isStackChange": false,
+                    "leadMs": 0
+                  }
+                ],
+                "beforeClusterStack": 4,
+                "beforeClusterProof": "EXACT_STACK_OBSERVATION",
+                "afterClusterStack": 5
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2103820,
+              "abilityGameId": 433895
+            },
+            "atomName": "crimson_scourge",
+            "expected": {
+              "state": "BOUND",
+              "proof": "PROVEN_INACTIVE",
+              "bindingState": "KNOWN_NUMBER",
+              "remainsMs": null,
+              "anchorReportTimeMs": 2096763,
+              "reason": null,
+              "windowLeadMs": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2105703,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "heart_strike",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2105703,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND_SET",
+              "stack": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": [5, 6],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2105702,
+                    "operation": "APPLIED",
+                    "isStackChange": true,
+                    "leadMs": 1
+                  },
+                  {
+                    "reportTimeMs": 2105702,
+                    "operation": "REFRESHED",
+                    "isStackChange": false,
+                    "leadMs": 1
+                  }
+                ],
+                "beforeClusterStack": 5,
+                "beforeClusterProof": "EXACT_STACK_OBSERVATION",
+                "afterClusterStack": 6
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.REMAINS_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2105703,
+              "abilityGameId": 433895
+            },
+            "atomName": "crimson_scourge",
+            "expected": {
+              "state": "BOUND",
+              "proof": "PROVEN_INACTIVE",
+              "bindingState": "KNOWN_NUMBER",
+              "remainsMs": null,
+              "anchorReportTimeMs": 2096763,
+              "reason": null,
+              "windowLeadMs": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2017274,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2017274,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND_SET",
+              "stack": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": [6, 7],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2017274,
+                    "operation": "APPLIED",
+                    "isStackChange": true,
+                    "leadMs": 0
+                  },
+                  {
+                    "reportTimeMs": 2017274,
+                    "operation": "REFRESHED",
+                    "isStackChange": false,
+                    "leadMs": 0
+                  }
+                ],
+                "beforeClusterStack": 6,
+                "beforeClusterProof": "EXACT_STACK_OBSERVATION",
+                "afterClusterStack": 7
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2106638,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2106638,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND_SET",
+              "stack": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": [6, 7],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2106638,
+                    "operation": "APPLIED",
+                    "isStackChange": true,
+                    "leadMs": 0
+                  },
+                  {
+                    "reportTimeMs": 2106638,
+                    "operation": "REFRESHED",
+                    "isStackChange": false,
+                    "leadMs": 0
+                  }
+                ],
+                "beforeClusterStack": 6,
+                "beforeClusterProof": "EXACT_STACK_OBSERVATION",
+                "afterClusterStack": 7
+              }
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2101867,
+              "abilityGameId": 433895
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2101867,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 433925,
+              "reason": "PRE_DECISION_WINDOW_TRANSITION",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2015770,
+              "abilityGameId": 195182
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND",
+              "stack": 6,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2015770,
+              "abilityGameId": 195182
+            },
+            "expected": {
+              "outcome": "UNKNOWN",
+              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": "DIVERGENT_WORLDS",
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": false,
+              "unselectabilityProven": false,
+              "stoppingAt": null,
+              "stoppingAtoms": [],
+              "unselectabilityRefusal": "CONDITION_NOT_PROVEN_FALSE"
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2104758,
+              "abilityGameId": 49998
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND",
+              "stack": 5,
+              "proof": "EXACT_STACK_OBSERVATION",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2084304,
+              "abilityGameId": 49998
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND",
+              "stack": 1,
+              "proof": "EXACT_STACK_APPLICATION",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2100867,
+              "abilityGameId": 50842
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 433925,
+              "reason": "COUNT_AMBIGUOUS_SINCE_OBSERVATION",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2110550,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 433925,
+              "reason": "PRE_DECISION_WINDOW_TRANSITION",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2008597,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "UNBOUND",
+              "stack": null,
+              "proof": null,
+              "abilityGameId": 433925,
+              "reason": "PRE_DECISION_WINDOW_TRANSITION",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
+            }
+          }
+        },
+        {
+          "kind": "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT",
+          "params": {
+            "actorId": 14,
+            "historyArtifactIds": [
+              "wcl-blood-death-knight-a7r6-rotational-45s",
+              "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2073540,
+              "abilityGameId": 433895
+            },
+            "atomName": "essence_of_the_blood_queen",
+            "expected": {
+              "state": "BOUND_SET",
+              "stack": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
+              "abilityGameId": 433925,
+              "reason": null,
+              "possibleStacks": [0, 1],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2073540,
+                    "operation": "APPLIED",
+                    "isStackChange": false,
+                    "leadMs": 0
+                  }
+                ],
+                "beforeClusterStack": 0,
+                "beforeClusterProof": "PROVEN_INACTIVE_BEFORE_APPLICATION",
+                "afterClusterStack": 1
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A stack count is a number the wire wrote or a number the pinned module fixes for a fresh application; a maximum is the DBC row plus a modifier the observed talent tree proves; and inside the window the count is BOTH of the two exact values the orderings leave, handed to the evaluator as a set it may only decide unanimously. Nothing is counted, incremented, carried across a refresh nobody explained, or read off the very observation it would then be checked against — and the zero world of a fresh application is a state M4 must prove from an observed removal, never the silence before the first transition in the track."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEATHKNIGHT_BLOOD",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 14 (specID 250), carried by the first part",
+          "every COMPLETE cast by actor 14 across the composed parts, in canonical order",
+          "every aura transition on actor 14 sourced by actor 14 across the composed parts, in canonical order, with the absolute stack count each stack transition carries",
+          "the Runes entry on each Rune-costed cast and the Runic Power entry on each Death Strike cast; the uncosted entry of the other resource is read as no observation",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m11b2-blood-evaluator.test.ts",
+        "tests/contracts/m11b2-blood-registration.test.ts",
+        "tests/unit/m11b2-blood-bindings.test.ts",
+        "tests/unit/m11b2-blood-authority-data.test.ts",
+        "tests/unit/m11b9-blood-ebq-stack.test.ts",
+        "tests/unit/simc-expression-one-of-numbers.test.ts"
+      ]
+    },
+    {
       "caseId": "spec-blood-death-knight.inside-the-gift-window-the-scan-transfers-into-san-gift-and-selects-death-strike",
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
       "owningLayer": "SPEC_BLOOD_DEATH_KNIGHT",
@@ -11220,7 +12055,9 @@
               "stack": 6,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 195181,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -11414,7 +12251,9 @@
               "stack": null,
               "proof": null,
               "abilityGameId": 195181,
-              "reason": "PRE_DECISION_WINDOW_TRANSITION"
+              "reason": "PRE_DECISION_WINDOW_TRANSITION",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -11662,7 +12501,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -11741,7 +12582,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -11820,7 +12663,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -11930,7 +12775,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -12040,7 +12887,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -12119,7 +12968,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -12198,7 +13049,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -12635,7 +13488,9 @@
               "stack": 11,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 195181,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -12853,7 +13708,9 @@
               "stack": null,
               "proof": null,
               "abilityGameId": 195181,
-              "reason": "COUNT_AMBIGUOUS_SINCE_OBSERVATION"
+              "reason": "COUNT_AMBIGUOUS_SINCE_OBSERVATION",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -12871,7 +13728,9 @@
               "stack": 0,
               "proof": "PROVEN_INACTIVE",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -12889,7 +13748,9 @@
               "stack": null,
               "proof": null,
               "abilityGameId": 433925,
-              "reason": "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED"
+              "reason": "COUNT_AMBIGUOUS_SINCE_OBSERVATION",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -13244,7 +14105,9 @@
               "stack": null,
               "proof": null,
               "abilityGameId": 195181,
-              "reason": "PRE_DECISION_WINDOW_TRANSITION"
+              "reason": "PRE_DECISION_WINDOW_TRANSITION",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -13384,9 +14247,10 @@
                 "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains": 2,
                 "san_gift[2] any_dnd | buff.crimson_scourge.remains": 14,
                 "san_gift[2] any_dnd | buff.visceral_strength.remains": 14,
-                "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 14,
-                "san_gift[4] death_strike | USABILITY:death_strike": 11,
-                "san_gift[5] blood_boil | buff.boiling_point.up": 10,
+                "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 4,
+                "san_gift[3] heart_strike | USABILITY:heart_strike": 5,
+                "san_gift[4] death_strike | USABILITY:death_strike": 6,
+                "san_gift[5] blood_boil | buff.boiling_point.up": 5,
                 "san_gift[6] heart_strike | USABILITY:heart_strike": 3,
                 "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
                 "sanlayn[5] any_dnd | USABILITY:any_dnd": 1,
@@ -13404,8 +14268,10 @@
               "stackEvidence": {
                 "bone_shield | EXACT_STACK_OBSERVATION": 20,
                 "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 1,
-                "essence_of_the_blood_queen | AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED": 13,
-                "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 7,
+                "essence_of_the_blood_queen | EXACT_STACK_OBSERVATION": 6,
+                "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_SET": 5,
+                "essence_of_the_blood_queen | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 7,
+                "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 2,
                 "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
                 "blood_debt | EXACT_STACK_OBSERVATION": 14,
                 "blood_debt | EXACT_STACK_APPLICATION": 1,
@@ -13414,6 +14280,14 @@
               "stackValues": {
                 "bone_shield | stack 7": 12,
                 "bone_shield | stack 12": 8,
+                "essence_of_the_blood_queen | stack 4": 2,
+                "essence_of_the_blood_queen | stack 5": 1,
+                "essence_of_the_blood_queen | stack 6": 3,
+                "essence_of_the_blood_queen | stack one of {1,2}": 1,
+                "essence_of_the_blood_queen | stack one of {2,3}": 1,
+                "essence_of_the_blood_queen | stack one of {3,4}": 1,
+                "essence_of_the_blood_queen | stack one of {4,5}": 1,
+                "essence_of_the_blood_queen | stack one of {5,6}": 1,
                 "blood_debt | stack 1": 1,
                 "blood_debt | stack 2": 2,
                 "blood_debt | stack 3": 2,
@@ -13509,9 +14383,8 @@
                 "visceral_strength | AURA_STATE_UNKNOWN": 16
               },
               "preDecisionWindowRefusals": {
-                "essence_of_the_blood_queen | stack | lead 0": 6,
+                "essence_of_the_blood_queen | stack | lead 0": 2,
                 "essence_of_the_blood_queen | remains | lead 0": 1,
-                "essence_of_the_blood_queen | stack | lead 1": 1,
                 "bone_shield | up | lead 0": 1,
                 "bone_shield | stack | lead 0": 1,
                 "bone_shield | remains | lead 0": 1
@@ -13530,6 +14403,7 @@
                 "dancing_rune_weapon": "SELECTED",
                 "death_strike": "SELECTED",
                 "exterminate": "UNKNOWN",
+                "frenzied_bloodthirst": "SELECTED",
                 "gift_of_the_sanlayn": "SELECTED",
                 "heart_strike": "SELECTED",
                 "marrowrend": "SELECTED",
@@ -13583,9 +14457,9 @@
             "declaredHoles": [],
             "expected": {
               "eligibleDecisions": 123,
-              "match": 37,
+              "match": 40,
               "rejected": 9,
-              "unknown": 77,
+              "unknown": 74,
               "exclusions": {
                 "MELEE_SWING": 87,
                 "NON_GCD_ACTION": 47,
@@ -13605,7 +14479,7 @@
             ],
             "declaredHoles": [],
             "expected": {
-              "match": 37,
+              "match": 40,
               "rejected": 9,
               "stoppingEntries": {
                 "default[15] run_action_list": 1,
@@ -13632,9 +14506,10 @@
                 "san_gift[1] death_strike | USABILITY:death_strike": 1,
                 "san_gift[2] any_dnd | buff.crimson_scourge.remains": 4,
                 "san_gift[2] any_dnd | buff.visceral_strength.remains": 5,
-                "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 18,
-                "san_gift[4] death_strike | USABILITY:death_strike": 17,
-                "san_gift[5] blood_boil | buff.boiling_point.up": 10,
+                "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 9,
+                "san_gift[3] heart_strike | USABILITY:heart_strike": 2,
+                "san_gift[4] death_strike | USABILITY:death_strike": 10,
+                "san_gift[5] blood_boil | buff.boiling_point.up": 5,
                 "san_gift[6] heart_strike | USABILITY:heart_strike": 1,
                 "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
                 "sanlayn[0] deaths_caress | buff.bone_shield.remains": 6,
@@ -13675,8 +14550,11 @@
                 "bone_shield | EXACT_STACK_OBSERVATION": 114,
                 "bone_shield | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 1,
                 "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 8,
-                "essence_of_the_blood_queen | AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED": 96,
-                "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 26,
+                "essence_of_the_blood_queen | EXACT_STACK_OBSERVATION": 15,
+                "essence_of_the_blood_queen | EXACT_STACK_APPLICATION": 9,
+                "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_SET": 12,
+                "essence_of_the_blood_queen | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 72,
+                "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 14,
                 "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
                 "blood_debt | EXACT_STACK_OBSERVATION": 107,
                 "blood_debt | EXACT_STACK_APPLICATION": 7,
@@ -13692,6 +14570,20 @@
                 "bone_shield | stack 10": 16,
                 "bone_shield | stack 11": 33,
                 "bone_shield | stack 12": 6,
+                "essence_of_the_blood_queen | stack 1": 9,
+                "essence_of_the_blood_queen | stack 2": 4,
+                "essence_of_the_blood_queen | stack 3": 4,
+                "essence_of_the_blood_queen | stack 4": 2,
+                "essence_of_the_blood_queen | stack 5": 2,
+                "essence_of_the_blood_queen | stack 6": 2,
+                "essence_of_the_blood_queen | stack 7": 1,
+                "essence_of_the_blood_queen | stack one of {0,1}": 1,
+                "essence_of_the_blood_queen | stack one of {1,2}": 2,
+                "essence_of_the_blood_queen | stack one of {2,3}": 2,
+                "essence_of_the_blood_queen | stack one of {3,4}": 1,
+                "essence_of_the_blood_queen | stack one of {4,5}": 2,
+                "essence_of_the_blood_queen | stack one of {5,6}": 2,
+                "essence_of_the_blood_queen | stack one of {6,7}": 2,
                 "blood_debt | stack 0": 3,
                 "blood_debt | stack 1": 7,
                 "blood_debt | stack 2": 11,
@@ -13837,9 +14729,9 @@
                 "bone_shield | up | lead 20": 1,
                 "bone_shield | stack | lead 20": 1,
                 "bone_shield | remains | lead 20": 1,
-                "essence_of_the_blood_queen | stack | lead 0": 23,
+                "essence_of_the_blood_queen | stack | lead 0": 13,
                 "essence_of_the_blood_queen | remains | lead 0": 6,
-                "essence_of_the_blood_queen | stack | lead 1": 3,
+                "essence_of_the_blood_queen | stack | lead 1": 1,
                 "crimson_scourge | remains | lead 38": 1,
                 "death_and_decay | up | lead 0": 1,
                 "death_and_decay | up | lead 20": 1,
@@ -14141,7 +15033,9 @@
               "stack": 12,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 195181,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -14270,7 +15164,9 @@
               "stack": 6,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 1310372,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -14288,7 +15184,9 @@
               "stack": null,
               "proof": null,
               "abilityGameId": 1310372,
-              "reason": "AURA_STATE_UNKNOWN"
+              "reason": "AURA_STATE_UNKNOWN",
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -14384,7 +15282,9 @@
               "stack": 10,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 195181,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },
@@ -14403,11 +15303,25 @@
             },
             "atomName": "essence_of_the_blood_queen",
             "expected": {
-              "state": "UNBOUND",
+              "state": "BOUND_SET",
               "stack": null,
-              "proof": null,
+              "proof": "WINDOW_ORDER_INVARIANT_SET",
               "abilityGameId": 433925,
-              "reason": "PRE_DECISION_WINDOW_TRANSITION"
+              "reason": null,
+              "possibleStacks": [1, 2],
+              "windowOrderInvariance": {
+                "cluster": [
+                  {
+                    "reportTimeMs": 2087470,
+                    "operation": "APPLIED",
+                    "isStackChange": true,
+                    "leadMs": 0
+                  }
+                ],
+                "beforeClusterStack": 1,
+                "beforeClusterProof": "EXACT_STACK_APPLICATION",
+                "afterClusterStack": 2
+              }
             }
           }
         },
@@ -14876,7 +15790,9 @@
               "stack": 12,
               "proof": "EXACT_STACK_OBSERVATION",
               "abilityGameId": 195181,
-              "reason": null
+              "reason": null,
+              "possibleStacks": null,
+              "windowOrderInvariance": null
             }
           }
         },

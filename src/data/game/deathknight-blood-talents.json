@@ -86,6 +86,17 @@
       "binding": "sc_death_knight.cpp:15099 talent.deathbringer.exterminate = find_talent_spell( talent_tree::HERO, \"Exterminate\" ); the `buff.exterminate` aura 441416 exists only under it or Echoing Fury (:15403-15404)"
     },
     {
+      "simcName": "frenzied_bloodthirst",
+      "displayNameEn": "Frenzied Bloodthirst",
+      "tree": "HERO",
+      "traitNodeId": 95065,
+      "traitEntryId": 117662,
+      "talentSpellId": 434075,
+      "nodeType": "NORMAL",
+      "alternativeEntries": [],
+      "binding": "sc_death_knight.cpp:15111 talent.sanlayn.frenzied_bloodthirst = find_talent_spell( talent_tree::HERO, \"Frenzied Bloodthirst\" ); the only other reference is the declaration (:1411) — no buff, action or expression reads it; its max-stack effect on 433925 is pinned Blood-side (deathknight-blood-stack-authority.ts)"
+    },
+    {
       "simcName": "gift_of_the_sanlayn",
       "displayNameEn": "Gift of the San'layn",
       "tree": "HERO",

@@ -57,9 +57,26 @@ export type BloodHeroTreeName = "sanlayn" | "deathbringer";
  * the count a plain application establishes, or `null` when the pinned
  * module fixes none. Nothing here says how stacks are gained or lost between
  * observed transitions: no transition is ever synthesized from it.
+ *
+ * M11-B9 adds two switches, both off for the M11-B2/B6 identities:
+ *
+ *   `maxStackGuard`            every observed count is checked against the
+ *                              effective maximum `deathknight-blood-stack-
+ *                              authority.ts` resolves for the build (the DBC
+ *                              maximum plus each pinned modifier whose talent
+ *                              is SELECTED); a count above it, or above the
+ *                              DBC maximum while the modifier is unproven,
+ *                              refuses (`COUNT_EXCEEDS_PINNED_MAX`). The log
+ *                              may corroborate a modifier, never establish it.
+ *   `windowOrderInvariantSet`  inside the pre-decision window, a cluster
+ *                              of stack gains binds the finite set of exact
+ *                              counts the two orderings leave — never a
+ *                              chosen one (`aura-bindings.ts`).
  */
 export interface BloodExactCountRule {
   readonly applicationStack: number | null;
+  readonly maxStackGuard: boolean;
+  readonly windowOrderInvariantSet: boolean;
 }
 
 /**
@@ -214,7 +231,7 @@ const BONE_SHIELD: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: null,
-  exactCount: { applicationStack: null },
+  exactCount: { applicationStack: null, maxStackGuard: false, windowOrderInvariantSet: false },
   remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(
@@ -263,16 +280,21 @@ const ESSENCE_OF_THE_BLOOD_QUEEN: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: "vampiric_strike",
   ownedByHeroTree: "sanlayn",
-  exactCount: null,
+  // M11-B9. The count is read from the wire's absolute stack events and the
+  // pinned fresh-application 1 (_proc_charges 0 -> _initial_stack 1), guarded
+  // by the effective maximum the stack authority resolves for the build; a
+  // lone refresh still breaks the carried count (Q2 declined).
+  exactCount: { applicationStack: 1, maxStackGuard: true, windowOrderInvariantSet: true },
   // M11-B8. The pinned module has exactly ONE producer (below), and every
   // corpus subject's wire also carries a lone `refreshbuff` of this aura at
   // each Gift of the San'layn edge with no Vampiric Strike cast anywhere
   // near it — a refresh the pinned module has no producer for. A lone
   // refresh is therefore of unproven cause and anchors nothing exact; a
   // refresh beside an `applybuffstack` is that gain's companion. The
-  // pinned `_max_stack` 5 is also contradicted by the observed 6 and 7
-  // (Frenzied Bloodthirst, 434075 effect 1, +2 P_MAX_STACKS by label 3134,
-  // which the pinned module never applies): no positive `.stack` is bound.
+  // raw `_max_stack` 5 is the DBC maximum; the supported build reaches 7
+  // through Frenzied Bloodthirst (434075 effect 1123818, +2 P_MAX_STACKS by
+  // label 3134), which the pinned sim parses but never applies to buff_t —
+  // pinned Blood-side in `deathknight-blood-stack-authority.ts` (M11-B9).
   remainsPolicy: { loneRefresh: "UNPROVEN_CAUSE", windowOrderInvariantBound: true },
   claims: [
     claim(
@@ -290,6 +312,14 @@ const ESSENCE_OF_THE_BLOOD_QUEEN: BloodAuraIdentity = {
         "The corpus shows a `refreshbuff` at every Gift of the San'layn application and removal with no Vampiric Strike " +
         "cast (2,019,763 / 2,099,885 / 2,111,891; opener 2,429,050), so the wire refreshes the aura for a cause this " +
         "module does not model: a lone refresh is never assigned a cause (M11-B8, `remainsPolicy.loneRefresh`).",
+    ),
+    claim(
+      "buff_t::set_initial_stack / bump (engine/buff/buff.cpp at the same commit)",
+      "buff.cpp 1043-1054; 2649-2660",
+      "433925 records _proc_charges 0, so spell_data_t::initial_stacks() is 0 and buff_t sets _initial_stack = 1: a " +
+        "trigger from inactive starts the aura at exactly 1 stack (M11-B9 `applicationStack`). While active, bump() adds " +
+        "one stack below the maximum and nothing at it; no decrement() call site exists, so the count only rises until " +
+        "the whole aura expires — every count between transitions is the wire's last absolute reading, never arithmetic.",
     ),
   ],
 };
@@ -350,7 +380,7 @@ const BLOOD_DEBT: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: null,
-  exactCount: { applicationStack: 1 },
+  exactCount: { applicationStack: 1, maxStackGuard: false, windowOrderInvariantSet: false },
   remainsPolicy: B4_REMAINS_POLICY,
   claims: [
     claim(

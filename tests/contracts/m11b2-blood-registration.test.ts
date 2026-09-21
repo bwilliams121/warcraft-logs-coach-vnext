@@ -311,10 +311,12 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(run.analysis.specId).toBe("deathknight/blood");
     expect(run.analysis.authority.authorityId).toBe("SIMC_APL_DEATHKNIGHT_BLOOD");
     const view = registration.observedDecisionView(run.analysis);
-    // RE-POINTED for M11-B4 (9), M11-B5 (10), M11-B6 (15) and M11-B7 (15 + 3): 15 of the 45 s slice's 48
-    // decisions MATCH, and the three consecutive Heart Strikes at 4 Runes and Blood Debt 10 before the
-    // Marrowrend at 2,043,209 are REJECTED — the authority selects marrowrend at sanlayn[7].
-    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 15, rejected: 3, unknown: 30 });
+    // RE-POINTED for M11-B4 (9), M11-B5 (10), M11-B6 (15), M11-B7 (15 + 3) and M11-B9 (16 + 3): 16 of
+    // the 45 s slice's 48 decisions MATCH (B9 added the Vampiric Strike at 2,015,029, whose Essence count
+    // is one of { 5,6 } and makes san_gift[3] TRUE either way), and the three consecutive Heart Strikes at
+    // 4 Runes and Blood Debt 10 before the Marrowrend at 2,043,209 are REJECTED — the authority selects
+    // marrowrend at sanlayn[7].
+    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 16, rejected: 3, unknown: 29 });
     const rejected = view.decisions
       .filter((decision) => decision.outcome === "REJECTED")
       .map((decision) => [decision.fightTimeMs, decision.observedAbilityGameId, decision.authorityToken]);

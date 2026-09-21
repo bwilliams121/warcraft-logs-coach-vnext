@@ -533,14 +533,38 @@ export function stackBindingAt(
           proof: stack.proof,
           abilityGameId: stack.abilityGameId,
           reason: null,
+          possibleStacks: null,
+          windowOrderInvariance: null,
         }
-      : {
-          state: stack.state,
-          stack: null,
-          proof: null,
-          abilityGameId: stack.abilityGameId,
-          reason: stack.reason,
-        };
+      : stack.state === "BOUND_SET"
+        ? {
+            state: stack.state,
+            stack: null,
+            proof: stack.proof,
+            abilityGameId: stack.abilityGameId,
+            reason: null,
+            possibleStacks: [...stack.possibleStacks],
+            windowOrderInvariance: {
+              cluster: stack.windowOrderInvariance.cluster.map((entry) => ({
+                reportTimeMs: entry.reportTimeMs,
+                operation: entry.operation,
+                isStackChange: entry.isStackChange,
+                leadMs: entry.leadMs,
+              })),
+              beforeClusterStack: stack.windowOrderInvariance.beforeClusterStack,
+              beforeClusterProof: stack.windowOrderInvariance.beforeClusterProof,
+              afterClusterStack: stack.windowOrderInvariance.afterClusterStack,
+            },
+          }
+        : {
+            state: stack.state,
+            stack: null,
+            proof: null,
+            abilityGameId: stack.abilityGameId,
+            reason: stack.reason,
+            possibleStacks: null,
+            windowOrderInvariance: null,
+          };
   if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
     return fail("the stack binding at this decision differs from the case", {
       expected: params.expected,

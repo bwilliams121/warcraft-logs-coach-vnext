@@ -29,7 +29,7 @@ const HEART_STRIKE = 206930;
 const VAMPIRIC_STRIKE = 433895;
 const DEATH_STRIKE = 49998;
 
-/** The 37 MATCH decisions of M11-B6, by report time, in canonical order. Pinned so B7 can prove it moved none. */
+/** The 37 MATCH decisions of M11-B6, by report time, in canonical order. Pinned so B7, B8 and B9 can prove they moved none. */
 const B6_MATCH_REPORT_TIMES = [
   2012014, 2014293, 2016527, 2018775, 2021024, 2024020, 2026293, 2028806, 2029599, 2031294, 2033630, 2045618,
   2046373, 2047348, 2049304, 2066413, 2068394, 2073540, 2084304, 2086414, 2088527, 2094707, 2102831, 2108740,
@@ -57,6 +57,9 @@ const B8_REJECTED = [
   { t: 2087470, ability: VAMPIRIC_STRIKE, runes: 3, bloodDebtAnchor: 2086445, essenceFloorMs: 11070 },
   { t: 2093667, ability: VAMPIRIC_STRIKE, runes: 3, bloodDebtAnchor: 2086445, essenceFloorMs: 18803 },
 ] as const;
+
+/** The three M11-B9 MATCH decisions: Gift-window Vampiric Strikes selected at san_gift[3] once the Essence stack set decides `stack<7` TRUE in both worlds. */
+const B9_MATCH_REPORT_TIMES = [2015029, 2103820, 2105703] as const;
 
 /** Every REJECTED after M11-B8, in canonical order: B7's seven plus B8's two. */
 const REJECTED_AFTER_B8 = [...B7_REJECTED, ...B8_REJECTED].sort((left, right) => left.t - right.t);
@@ -120,7 +123,7 @@ describe("the measurement over the composed 165 s fight", () => {
   const analysis = analyzed(corpusBundleState(BUNDLE, []));
   const { coverage } = analysis;
 
-  it("discloses 46 resolved decisions out of 123 — 37 MATCH and 9 REJECTED — with every excluded cast counted", () => {
+  it("discloses 49 resolved decisions out of 123 — 40 MATCH and 9 REJECTED — with every excluded cast counted", () => {
     // RE-POINTED for M11-B4 (21), M11-B5 (25), M11-B6 (37) and M11-B7 (37 + 7). B4's 21 are
     // Death Strikes whose own PRE_COST Runic Power decided the Death Strike
     // gate. B5 carries Runic Power to the other decisions, and four Blood
@@ -141,12 +144,17 @@ describe("the measurement over the composed 165 s fight", () => {
     // anchor and binds, inside the pre-decision window, only the floor both
     // orderings share: two Vampiric Strikes whose sanlayn[1] entry is FALSE
     // from that floor join the REJECTED through the same Marrowrend chain,
-    // and the 37 MATCH are still untouched.
+    // and the 37 MATCH are still untouched. B9 binds Essence's count from
+    // its own transitions and, inside the window, the set of the two counts
+    // both orderings leave: three Gift-window Vampiric Strikes whose
+    // san_gift[3] gate (stack<7) is TRUE for every member of { 5,6 } / { 4,5 }
+    // select the observed action at the exact entry. The 37 MATCH and the 9
+    // REJECTED are untouched again.
     expect(coverage).toMatchObject({
       eligibleDecisions: 123,
-      match: 37,
+      match: 40,
       rejected: 9,
-      unknown: 77,
+      unknown: 74,
       excludedCastCount: 148,
     });
     const matched = new Map<string, number>();
@@ -163,14 +171,18 @@ describe("the measurement over the composed 165 s fight", () => {
         (matched.get(comparison.decision.observedToken) ?? 0) + 1,
       );
     }
-    expect(Object.fromEntries(matched)).toEqual({ death_strike: 27, heart_strike: 6, blood_boil: 4 });
+    // M11-B9: three more Heart Strikes (Vampiric Strikes at 2,015,029, 2,103,820, 2,105,703), each EXACT_ENTRY at san_gift[3].
+    expect(Object.fromEntries(matched)).toEqual({ death_strike: 27, heart_strike: 9, blood_boil: 4 });
     // M11-B8: the Vampiric Strike at 2,029,599 is EXACT_ENTRY — sanlayn[1] is FALSE from the Essence floor.
-    expect(Object.fromEntries(precision)).toEqual({ EXACT_ENTRY: 33, TOKEN_CONVERGED: 4 });
-    // The MATCH population is exactly the M11-B6 one, decision by decision.
+    expect(Object.fromEntries(precision)).toEqual({ EXACT_ENTRY: 36, TOKEN_CONVERGED: 4 });
+    // The MATCH population is exactly the M11-B6 one plus the three M11-B9 Vampiric Strikes, decision by decision.
     const matchedAt = analysis.comparisons
       .filter((comparison) => comparison.outcome === "MATCH")
       .map((comparison) => comparison.decision.reportTimeMs);
-    expect(matchedAt).toEqual(B6_MATCH_REPORT_TIMES);
+    expect(matchedAt).toEqual(
+      [...B6_MATCH_REPORT_TIMES, ...B9_MATCH_REPORT_TIMES].sort((left, right) => left - right),
+    );
+    for (const t of B6_MATCH_REPORT_TIMES) expect(matchedAt, String(t)).toContain(t);
     expect(coverage.match + coverage.rejected + coverage.unknown).toBe(coverage.eligibleDecisions);
     expect(coverage.exclusions.reduce((sum, row) => sum + row.count, 0)).toBe(coverage.excludedCastCount);
     // The population is exactly the completed non-melee casts, eligible plus excluded.
@@ -272,12 +284,19 @@ describe("the measurement over the composed 165 s fight", () => {
     // refresh could keep — decisions already UNKNOWN on fight_remains, so
     // nothing resolves and nothing regresses. The Marrowrend-usability
     // blockers rise by one (2,035,179, released from sanlayn[1]).
+    // RE-POINTED for M11-B9: of the 12 on the Essence stack, 3 resolve
+    // (MATCH), 2 stay on it as { 6,7 } (2,017,274, 2,106,638), 3 stay on it
+    // as lone-refresh clusters (2,018,024, 2,019,524, 2,110,550), 1 as a
+    // cluster with no exact count before it (2,101,867), 1 as an ambiguous
+    // count (2,100,867), and 2 advance to Heart Strike's usability with an
+    // exact count that makes the gate TRUE for an action that was not cast
+    // (2,015,770 at 6, 2,104,758 at 5).
     expect(Object.fromEntries(firstObstacle)).toEqual({
-      "(none)": 42,
-      "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 12,
+      "(none)": 45,
       "sanlayn[9] death_strike | fight_remains,buff.essence_of_the_blood_queen.remains": 11,
       "sanlayn[7] marrowrend | USABILITY:marrowrend": 10,
       "sanlayn[9] death_strike | fight_remains": 9,
+      "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 7,
       "sanlayn[0] deaths_caress | buff.bone_shield.up,buff.bone_shield.remains,buff.bone_shield.stack": 6,
       "sanlayn[5] any_dnd | USABILITY:any_dnd": 5,
       "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains,fight_remains": 4,
@@ -285,6 +304,7 @@ describe("the measurement over the composed 165 s fight", () => {
       "san_gift[2] any_dnd | buff.crimson_scourge.remains,buff.visceral_strength.remains": 3,
       "sanlayn[2] death_strike | runic_power.deficit": 3,
       "sanlayn[2] death_strike | USABILITY:death_strike": 3,
+      "san_gift[3] heart_strike | USABILITY:heart_strike": 2,
       "sanlayn[8] heart_strike | buff.vampiric_strike.up": 2,
       "sanlayn[6] blood_boil | USABILITY:blood_boil": 2,
       "sanlayn[1] heart_strike | fight_remains": 2,
@@ -305,14 +325,60 @@ describe("the measurement over the composed 165 s fight", () => {
       "blood_debt | EXACT_STACK_APPLICATION": 7,
       "blood_debt | PROVEN_INACTIVE": 3,
       "blood_debt | AURA_STATE_UNKNOWN": 6,
-      // Unchanged by B6.
+      // Unchanged by B6 and B9.
       "bone_shield | EXACT_STACK_OBSERVATION": 114,
       "bone_shield | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 1,
       "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 8,
-      "essence_of_the_blood_queen | AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED": 96,
-      "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 26,
+      // RE-POINTED for M11-B9: Essence's 96 unreconstructed counts become 15
+      // exact observations, 9 pinned fresh applications and 72 ambiguous
+      // (a lone refresh since the last count — Q2 declined); the 26 window
+      // refusals become 12 finite sets and 14 refusals (lone-refresh
+      // clusters, a removal, clusters with no exact count before them, and
+      // the first application in the track at 2,008,597 — no prior
+      // transition is not a proven zero).
+      "essence_of_the_blood_queen | EXACT_STACK_OBSERVATION": 15,
+      "essence_of_the_blood_queen | EXACT_STACK_APPLICATION": 9,
+      "essence_of_the_blood_queen | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 72,
+      "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_SET": 12,
+      "essence_of_the_blood_queen | PRE_DECISION_WINDOW_TRANSITION": 14,
       "essence_of_the_blood_queen | AURA_STATE_UNKNOWN": 1,
     });
+    // M11-B9: every set is two exact members, censused as the set, never as either member.
+    expect(
+      Object.fromEntries(
+        coverage.stackValues.filter((row) => row.key.includes("one of")).map((row) => [row.key, row.count]),
+      ),
+    ).toEqual({
+      // The one { 0,1 } rests on the observed removal at 2,071,379; the track's
+      // first application at 2,008,597 is refused (silence is not a zero).
+      "essence_of_the_blood_queen | stack one of {0,1}": 1,
+      "essence_of_the_blood_queen | stack one of {1,2}": 2,
+      "essence_of_the_blood_queen | stack one of {2,3}": 2,
+      "essence_of_the_blood_queen | stack one of {3,4}": 1,
+      "essence_of_the_blood_queen | stack one of {4,5}": 2,
+      "essence_of_the_blood_queen | stack one of {5,6}": 2,
+      "essence_of_the_blood_queen | stack one of {6,7}": 2,
+    });
+    for (const entry of analysis.resolved) {
+      for (const binding of entry.stacks) {
+        if (binding.state !== "BOUND_SET") continue;
+        expect(binding.atomName).toBe("essence_of_the_blood_queen");
+        expect(binding.possibleStacks).toHaveLength(2);
+        expect(binding.possibleStacks[0]).toBeLessThan(binding.possibleStacks[1] ?? -1);
+        expect(binding.possibleStacks).toEqual(
+          [
+            binding.windowOrderInvariance.beforeClusterStack,
+            binding.windowOrderInvariance.afterClusterStack,
+          ].sort((left, right) => left - right),
+        );
+        for (const transition of binding.windowOrderInvariance.cluster) {
+          expect(transition.leadMs).toBeGreaterThanOrEqual(0);
+          expect(transition.leadMs).toBeLessThanOrEqual(50);
+          expect(transition.operation).not.toBe("REMOVED");
+        }
+        expect(binding.possibleStacks[1]).toBeLessThanOrEqual(7);
+      }
+    }
     for (const atom of ["bone_shield", "essence_of_the_blood_queen", "blood_debt"]) {
       const total = coverage.stackEvidence
         .filter((row) => row.key.startsWith(`${atom} |`))
@@ -446,9 +512,10 @@ describe("the measurement over the composed 165 s fight", () => {
         "bone_shield | up | lead 20": 1,
         "bone_shield | stack | lead 20": 1,
         "bone_shield | remains | lead 20": 1,
-        "essence_of_the_blood_queen | stack | lead 0": 23,
+        // M11-B9: 12 of the 26 Essence stack refusals became finite sets.
+        "essence_of_the_blood_queen | stack | lead 0": 13,
         "essence_of_the_blood_queen | remains | lead 0": 6,
-        "essence_of_the_blood_queen | stack | lead 1": 3,
+        "essence_of_the_blood_queen | stack | lead 1": 1,
         "crimson_scourge | remains | lead 38": 1,
         "death_and_decay | up | lead 0": 1,
         "death_and_decay | up | lead 20": 1,
@@ -757,7 +824,10 @@ describe("the measurement over the composed 165 s fight", () => {
     const tally = new Map<string, number>();
     for (const entry of analysis.resolved) {
       const bone = entry.stacks.find((stack) => stack.atomName === "bone_shield");
-      const key = bone?.state === "BOUND" ? `BOUND/${bone.proof}` : `UNBOUND/${bone?.reason ?? "?"}`;
+      const key =
+        bone?.state === "BOUND" || bone?.state === "BOUND_SET"
+          ? `${bone.state}/${bone.proof}`
+          : `UNBOUND/${bone?.reason ?? "?"}`;
       tally.set(key, (tally.get(key) ?? 0) + 1);
       if (bone?.state === "BOUND") expect(bone.stack).toBeGreaterThan(0);
     }
@@ -785,6 +855,142 @@ describe("the measurement over the composed 165 s fight", () => {
       });
     }
     for (const domain of analysis.domains) expect(domain.resolution).not.toBe("DOMAIN_NOT_DECLARED");
+  });
+
+  it("M11-B9: matches exactly three more decisions, each a Vampiric Strike selected at san_gift[3] on a two-member Essence set that decides `stack<7` TRUE in both worlds", () => {
+    const expectedSets: Record<
+      number,
+      { readonly set: readonly number[]; readonly before: number; readonly leadMs: number }
+    > = {
+      2015029: { set: [5, 6], before: 2012773, leadMs: 0 },
+      2103820: { set: [4, 5], before: 2101867, leadMs: 0 },
+      2105703: { set: [5, 6], before: 2103820, leadMs: 1 },
+    };
+    for (const t of B9_MATCH_REPORT_TIMES) {
+      const comparison = analysis.comparisons.find((row) => row.decision.reportTimeMs === t);
+      expect(comparison, String(t)).toMatchObject({
+        outcome: "MATCH",
+        basis: "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+        authorityToken: "heart_strike",
+        authorityCoverage: "EXACT_ENTRY",
+        selectionPrecision: "EXACT_ENTRY",
+        rawBlocker: null,
+      });
+      expect(comparison?.decision.abilityGameId).toBe(VAMPIRIC_STRIKE);
+      const resolved = analysis.resolved.find((entry) => entry.position === comparison?.decision.position);
+      expect(resolved).toBeDefined();
+      if (resolved === undefined) continue;
+      // The selection: san_gift[3] heart_strike, the observed action, with no
+      // competing undecided GCD candidate and the Gift window entered.
+      expect(resolved.selection.kind).toBe("ROTATIONAL_GCD_SELECTED");
+      expect(resolved.selection.stoppingPoint).toBeNull();
+      expect(
+        resolved.selection.undecidedCandidates.filter((candidate) => candidate.lane === "GCD_CONSUMING"),
+      ).toEqual([]);
+      expect(resolved.selection.dispatches.find((step) => step.at === "default[15]")).toMatchObject({
+        calleeListName: "san_gift",
+        outcome: "RUN_ENTERED_SCAN_ENDS",
+      });
+      // The stack evidence: the set of BOTH orderings, never one of them.
+      const expected = expectedSets[t];
+      const stack = resolved.stacks.find((entry) => entry.atomName === "essence_of_the_blood_queen");
+      expect(stack).toMatchObject({
+        state: "BOUND_SET",
+        proof: "WINDOW_ORDER_INVARIANT_SET",
+        possibleStacks: expected?.set,
+        anchor: { reportTimeMs: expected?.before },
+      });
+      if (stack?.state === "BOUND_SET") {
+        expect(stack.windowOrderInvariance.beforeClusterProof).toBe("EXACT_STACK_OBSERVATION");
+        expect(stack.windowOrderInvariance.cluster.map((entry) => entry.leadMs)).toEqual([
+          expected?.leadMs,
+          expected?.leadMs,
+        ]);
+        expect(stack.windowOrderInvariance.cluster.map((entry) => entry.operation)).toEqual([
+          "APPLIED",
+          "REFRESHED",
+        ]);
+        expect(stack.possibleStacks.every((member) => member < 7)).toBe(true);
+      }
+      // The entries above san_gift[3] were FALSE from evidence B8 and B5 already
+      // established: the Essence floor, the Runic Power deficit, Crimson Scourge down.
+      const remains = resolved.remains.find((entry) => entry.atomName === "essence_of_the_blood_queen");
+      expect(remains).toMatchObject({ state: "BOUND", proof: "WINDOW_ORDER_INVARIANT_BOUNDED" });
+      if (remains?.state === "BOUND") expect(remains.remainsMs ?? 0).toBeGreaterThan(1550);
+      expect(resolved.remains.find((entry) => entry.atomName === "crimson_scourge")).toMatchObject({
+        state: "BOUND",
+        proof: "PROVEN_INACTIVE",
+      });
+      expect(resolved.runicPower.state).toBe("BOUND");
+      if (resolved.runicPower.state === "BOUND" && resolved.runicPower.binding.state === "BOUNDED_NUMBER") {
+        expect(resolved.runicPower.binding.atLeast).toBeGreaterThanOrEqual(36);
+      }
+      expect(resolved.auras.find((entry) => entry.atomName === "gift_of_the_sanlayn")).toMatchObject({
+        state: "BOUND",
+        up: true,
+      });
+    }
+  });
+
+  it("M11-B9: keeps { 6,7 } UNKNOWN (the worlds disagree), 2,101,867 UNKNOWN (Q2 declined: no count across the Gift-edge refresh) and the exact counts outside the window on Heart Strike's usability", () => {
+    for (const t of [2017274, 2106638]) {
+      const comparison = analysis.comparisons.find((row) => row.decision.reportTimeMs === t);
+      expect(comparison, String(t)).toMatchObject({
+        outcome: "UNKNOWN",
+        rawBlocker: "DIVERGENT_GCD_OUTCOMES",
+      });
+      const resolved = analysis.resolved.find((entry) => entry.position === comparison?.decision.position);
+      expect(resolved?.stacks.find((entry) => entry.atomName === "essence_of_the_blood_queen")).toMatchObject(
+        {
+          state: "BOUND_SET",
+          possibleStacks: [6, 7],
+        },
+      );
+      const first = resolved?.selection.undecidedCandidates.find(
+        (candidate) => candidate.lane === "GCD_CONSUMING",
+      );
+      expect(first).toMatchObject({
+        at: "san_gift[3] heart_strike",
+        atoms: ["buff.essence_of_the_blood_queen.stack"],
+      });
+    }
+    const q2 = analysis.comparisons.find((row) => row.decision.reportTimeMs === 2101867);
+    expect(q2).toMatchObject({ outcome: "UNKNOWN" });
+    const q2Resolved = analysis.resolved.find((entry) => entry.position === q2?.decision.position);
+    const q2Stack = q2Resolved?.stacks.find((entry) => entry.atomName === "essence_of_the_blood_queen");
+    expect(q2Stack).toMatchObject({ state: "UNBOUND", reason: "PRE_DECISION_WINDOW_TRANSITION" });
+    expect(q2Stack?.state === "UNBOUND" && q2Stack.detail).toContain("2099885");
+    for (const [t, ability, stack] of [
+      [2015770, 195182, 6],
+      [2104758, DEATH_STRIKE, 5],
+    ] as const) {
+      const comparison = analysis.comparisons.find((row) => row.decision.reportTimeMs === t);
+      expect(comparison, String(t)).toMatchObject({ outcome: "UNKNOWN" });
+      expect(comparison?.decision.abilityGameId).toBe(ability);
+      const resolved = analysis.resolved.find((entry) => entry.position === comparison?.decision.position);
+      expect(resolved?.stacks.find((entry) => entry.atomName === "essence_of_the_blood_queen")).toMatchObject(
+        {
+          state: "BOUND",
+          stack,
+          proof: "EXACT_STACK_OBSERVATION",
+        },
+      );
+      const first = resolved?.selection.undecidedCandidates.find(
+        (candidate) => candidate.lane === "GCD_CONSUMING",
+      );
+      expect(first).toMatchObject({ at: "san_gift[3] heart_strike", atoms: ["USABILITY:heart_strike"] });
+    }
+    // The build proves the modifier talent by its own entry; no count above 7 was ever bound.
+    expect(analysis.build.talents["frenzied_bloodthirst"]).toMatchObject({
+      selection: "SELECTED",
+      reason: "OWN_ENTRY_SELECTED",
+      decidedByEntryId: 117662,
+    });
+    for (const entry of analysis.resolved) {
+      const stack = entry.stacks.find((binding) => binding.atomName === "essence_of_the_blood_queen");
+      if (stack?.state === "BOUND") expect(stack.stack).toBeLessThanOrEqual(7);
+      expect(stack?.state === "UNBOUND" && stack.reason).not.toBe("COUNT_EXCEEDS_PINNED_MAX");
+    }
   });
 });
 

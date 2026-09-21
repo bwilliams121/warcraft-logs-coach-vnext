@@ -2005,6 +2005,95 @@ was larger, or an edge 30 ms above 1.5 s deciding `remains<1.5`.
 
 ---
 
+# Essence of the Blood Queen Stack Tests (M11-B9)
+
+A positive Essence count is a number the wire wrote in an `applybuffstack`
+or the pinned 1 of a fresh `applybuff`; its maximum is the DBC row plus a
+modifier the observed talent tree proves; inside the pre-decision window it
+is BOTH of the two exact counts the orderings leave, handed to the shared
+evaluator as a finite set it may only decide unanimously. The tests must
+prove that nothing is counted, incremented, carried across a lone refresh,
+read off a count to establish the maximum it is then checked against, or
+narrowed to one ordering.
+
+Required (`tests/unit/simc-expression-one-of-numbers.test.ts`):
+
+```text
+oneOfNumbers([6,5,6])                -> { ONE_OF_NUMBERS, values [5,6] }; same content, same representation
+oneOfNumbers([7,7]) / ([3])          -> KNOWN_NUMBER (a set of one is not a set); [] throws
+{5,6} < 7 / {4,5} < 7                -> TRUE;  {6,7} < 7 -> UNRESOLVED;  {7,8} < 7 -> FALSE
+{1,2} >= 1 -> TRUE; {0,1} >= 1 -> UNRESOLVED; <=, >, = both ways; !( {0,1} = 0 ) -> UNRESOLVED (the parser refuses !=)
+7 > {5,6} -> TRUE; 7 > {6,7} -> UNRESOLVED (mirror operand order)
+{5,7} < 6 and > 6 -> UNRESOLVED (never min or max); {5,7} = 6 -> FALSE (nothing between members)
+set vs set, set vs bound             -> UNRESOLVED
+truth: {1,2} TRUE, {0,1} UNRESOLVED, !{0,1} UNRESOLVED; FALSE & {0,1} FALSE, TRUE | {0,1} TRUE
+{5,6}+1, *2, 8-{5,6}, {5,6}+{5,6}    -> UNRESOLVED (arithmetic refuses)
+trace                                -> binding ONE_OF, value null, atLeast null, oneOf [5,6] sorted; a plain number traces as before with no oneOf key
+knownBuffStacks stack: knownNumber(n) -> read as n; absent -> UNRESOLVED, never zero
+```
+
+Required (`tests/unit/m11b9-blood-ebq-stack.test.ts`):
+
+```text
+talent artifact                      -> frenzied_bloodthirst: HERO, node 95065, entry 117662, spell 434075, NORMAL, no alternative; trait_data.inc hash pinned; in the sanlayn sub-tree
+max-stack modifier                   -> effect 1123818, +2, label 3134, claims against the hashed spell/trait/module sources; none for Bone Shield / Blood Debt
+effective maximum                    -> 7 with the talent SELECTED (tree resolved or not); UNKNOWN when UNRESOLVED or unmodelled; 5 under a Deathbringer tree; the base when no modifier exists
+both committed subjects              -> SELECTED / OWN_ENTRY_SELECTED / 117662, tree RESOLVED sanlayn; a tree without the node -> UNKNOWN NODE_ABSENT
+identity switches                    -> Essence { 1, guard on, set on }; every other exact-count identity both off; the window is 50
+applybuff -> 1; applybuffstack 2..7 -> N; removebuff -> 0; application while held refused
+exact count, lone refresh, later decision -> COUNT_AMBIGUOUS_SINCE_OBSERVATION, near or far from a Vampiric Strike; the remainder is still a floor
+6 / 7 under SELECTED -> bind; 8 -> COUNT_EXCEEDS_PINNED_MAX; 6 under UNRESOLVED or unmodelled -> COUNT_EXCEEDS_PINNED_MAX (unproven); 5 -> binds
+Bone Shield 12, Blood Debt 11        -> bind (no guard for them)
+window cluster at lead 0 / 1 / 50    -> BOUND_SET { H1, H2 } with both worlds; .up still refused; the seam receives ONE_OF_NUMBERS
+lead 51                              -> the ordinary exact count
+{5,6}, {4,5}, {6,7}                  -> sets as such (the evaluator decides)
+fresh application after an OBSERVED removal -> { 0,1 } anchored on the removal; while held -> refused
+first application in the track (no prior EBQ transition) at lead 0 / 1 / 50 -> refused, detail names AMBIGUOUS_INITIAL_STATE, no ONE_OF reaches the seam (no aura event != aura inactive)
+lone refresh in the cluster, refresh 1 ms after the gain, removal, stack removal, mixed cluster, two gains -> refused
+no count before the cluster; a lone refresh before the cluster (Q2) -> refused
+a world above the maximum, or above 5 under an unresolved talent -> COUNT_EXCEEDS_PINNED_MAX
+Bone Shield / Blood Debt clusters    -> refused (no set for them)
+committed: 2,015,029 { 5,6 } from 2,012,773; 2,103,820 { 4,5 }; 2,105,703 { 5,6 } at lead 1; 2,017,274 and 2,106,638 { 6,7 }; 2,101,867 refused across 2,099,885; 2,015,770 exact 6; 2,104,758 exact 5; 2,084,304 exact 1 (application); 2,100,867 and 2,111,469 ambiguous; 45 s 2,008,597 refused (the track's first application; AMBIGUOUS_INITIAL_STATE before it) and 2,020,278 ambiguous; opener 2,425,025 { 5,6 }, 2,428,096 refused, 2,418,659 refused (first application)
+```
+
+Required, contract (`tests/contracts/m11b2-blood-evaluator.test.ts`,
+`m11b2-blood-registration.test.ts`): 40 / 9 / 74 with 148 excluded; the
+three MATCH individually — outcome, basis, token `heart_strike`,
+EXACT_ENTRY, `san_gift` entered, no undecided GCD candidate, the set with
+its anchor, leads and both worlds every member below 7, the Essence floor
+above 1.5 s, Crimson Scourge down, the deficit floor at or above 36, Gift
+up; 2,017,274 and 2,106,638 UNKNOWN on the stack atom with { 6,7 };
+2,101,867 UNKNOWN naming 2,099,885; 2,015,770 and 2,104,758 exact and on
+Heart Strike's usability; the modifier talent SELECTED by entry 117662; no
+bound count above 7 and no maximum refusal on the build; the B6 MATCH set
+plus the B9 three; the stack census (15 / 9 / 12 / 72 / 14 / 1; every set
+two sorted exact members); the first-obstacle map; the 45 s view 16 / 3 /
+29 with the same three REJECTED.
+
+Required, corpus (`SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT` with
+`possibleStacks` and `windowOrderInvariance`; `DECISION_COVERAGE`,
+`REMAINS_BINDING_AT`, `RUNIC_POWER_STATE_AT` at the three MATCH;
+`BUILD_RESOLUTION` with `frenzied_bloodthirst`; `STACK_EVIDENCE_CENSUS`,
+`STOPPING_POINT_DISTRIBUTION`, `COVERAGE_SUMMARY` and the window-refusal
+census re-pinned over the bundle and the opener): the case
+`spec-blood-death-knight.essence-stacks-are-the-wires-absolute-counts-and-a-set-of-two-inside-the-window`.
+
+Failure this prevents:
+
+```text
+An Essence count of 7 read as proof that Frenzied Bloodthirst is taken, and
+that proof then used to accept the 7; a `stack<7` decided TRUE because the
+count "was probably still 5" when the log wrote 6 at the cast's own
+millisecond; a { 6,7 } narrowed to whichever member the list prefers; a
+count of 3 carried across a refresh nobody explained so that a Vampiric
+Strike MATCHes at 2,101,867; a { 0,1 } at 2,008,597 whose zero world is
+nothing but the absence of any earlier Essence event in the capture; or a
+Bone Shield 12 refused against an artifact maximum nobody pinned for it. Each is a verdict on state the
+authority did not establish.
+```
+
+---
+
 # Spec-Owned Resolver Tests
 
 When a specialization supplies a resolver:

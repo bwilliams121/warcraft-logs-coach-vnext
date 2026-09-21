@@ -170,6 +170,20 @@ export const UNKNOWN_NUMBER_REASONS = [
  * supplies one — the lag delay is drawn from an unbounded gaussian — and an
  * unused field would invite inventing it. That also stops a reader mistaking
  * this for a two-sided interval.
+ *
+ * `ONE_OF_NUMBERS` (M11-B9) IS NOT AN INTERVAL EITHER. It is a finite set of
+ * EXACT values, each one mechanically established, of which exactly one is
+ * the magnitude — the shape unresolved event ORDERING produces: an aura's
+ * stack was 5 before a transition the log wrote at the decision's own
+ * millisecond and 6 after it, and nothing says which side of the decision
+ * the transition fell on, so the stack is one of { 5, 6 }. A comparison
+ * decides only when every member decides it the same way; a truth only when
+ * every member is zero or every member is non-zero; arithmetic refuses. No
+ * member is ever manufactured, no endpoint invented, and nothing between two
+ * members is admitted: { 5, 7 } is not "5 to 7". At least two distinct
+ * members — a set of one is a KNOWN value and `oneOfNumbers` returns it as
+ * such — and the members are stored sorted and deduplicated so two sets with
+ * the same content trace identically.
  */
 export type NumericBinding =
   | { readonly state: "KNOWN_NUMBER"; readonly value: number }
@@ -178,6 +192,13 @@ export type NumericBinding =
       /** A PROVEN lower bound. The true value is this or larger, never smaller. */
       readonly atLeast: number;
       /** Why an exact value was unavailable. */
+      readonly reason: UnknownNumberReason;
+    }
+  | {
+      readonly state: "ONE_OF_NUMBERS";
+      /** Every exact value the magnitude may be; sorted ascending, no duplicates, at least two. */
+      readonly values: readonly number[];
+      /** Why exactly one of them could not be picked. */
       readonly reason: UnknownNumberReason;
     }
   | { readonly state: "UNKNOWN_NUMBER"; readonly reason: UnknownNumberReason };
@@ -198,6 +219,23 @@ export function boundedBelowNumber(atLeast: number, reason: UnknownNumberReason)
 
 export function unknownNumber(reason: UnknownNumberReason): NumericBinding {
   return { state: "UNKNOWN_NUMBER", reason };
+}
+
+/**
+ * A magnitude that is exactly one of `values`, each of which the caller has
+ * ESTABLISHED as a possible exact value (M11-B9).
+ *
+ * Deduplicated and sorted, so the representation is canonical. A single
+ * distinct value is not a set — it is that value, returned as KNOWN_NUMBER,
+ * so no caller can dress a known magnitude as an uncertainty. An empty list
+ * is a programming error, not an unknown, and throws.
+ */
+export function oneOfNumbers(values: readonly number[], reason: UnknownNumberReason): NumericBinding {
+  const distinct = [...new Set(values)].sort((left, right) => left - right);
+  if (distinct.length === 0) throw new Error("oneOfNumbers: a set of possible values must not be empty");
+  const only = distinct[0];
+  if (distinct.length === 1 && only !== undefined) return knownNumber(only);
+  return { state: "ONE_OF_NUMBERS", values: distinct, reason };
 }
 
 /**
@@ -295,7 +333,16 @@ export interface AtomBindings {
    * are the existing ones — `buff.x.stack=2` against a bound 0 is FALSE by
    * `compareWithBounds`, exactly as any other exact magnitude.
    */
-  readonly knownBuffStacks?: readonly { readonly name: string; readonly stack: number }[];
+  readonly knownBuffStacks?: readonly {
+    readonly name: string;
+    /**
+     * An exact count, or (M11-B9) a `NumericBinding` — in practice
+     * `ONE_OF_NUMBERS`, the finite set of exact counts two event orderings
+     * leave. A plain number is read exactly as before; every existing caller
+     * passes one and is unchanged.
+     */
+    readonly stack: number | NumericBinding;
+  }[];
   /**
    * `stealthed.rogue`, and ONLY when it is positively proven.
    *
@@ -450,7 +497,7 @@ export interface AtomBindings {
   readonly specAtoms?: SpecAtomBindings;
 }
 
-export type TraceAtomBinding = "KNOWN" | "BOUNDED" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
+export type TraceAtomBinding = "KNOWN" | "BOUNDED" | "ONE_OF" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
 
 /** JSON-safe: arrays and records only, no Map, no undefined. */
 export interface TraceAtom {
@@ -467,8 +514,14 @@ export interface TraceAtom {
   readonly value: number | null;
   /** The proven lower bound when BOUNDED; `null` otherwise. */
   readonly atLeast: number | null;
-  /** Present for BOUNDED and UNKNOWN_NUMBER, so a finding can say which gap this was. */
+  /** Present for BOUNDED, ONE_OF and UNKNOWN_NUMBER, so a finding can say which gap this was. */
   readonly unknownNumberReason: UnknownNumberReason | null;
+  /**
+   * The finite set of exact possible values when ONE_OF (M11-B9), sorted
+   * ascending; ABSENT for every other binding, so every trace written before
+   * the state existed serialises byte-for-byte as it did.
+   */
+  readonly oneOf?: readonly number[];
 }
 
 export interface TraceWorld {
@@ -540,7 +593,19 @@ interface BoundedValue {
   readonly atLeastValue: number;
 }
 
-type WorldValue = number | BoundedValue | typeof UNKNOWN;
+/**
+ * A magnitude that is exactly one of these values, inside one world (M11-B9).
+ *
+ * Kept structurally distinct from `number` and from `BoundedValue`: a
+ * comparison decides only when every member decides it alike, a truth only
+ * when every member agrees, and arithmetic refuses. Never collapsed to its
+ * minimum or maximum.
+ */
+interface OneOfValue {
+  readonly oneOfValues: readonly number[];
+}
+
+type WorldValue = number | BoundedValue | OneOfValue | typeof UNKNOWN;
 
 function isUnknownValue(value: WorldValue): value is typeof UNKNOWN {
   return value === UNKNOWN;
@@ -548,6 +613,10 @@ function isUnknownValue(value: WorldValue): value is typeof UNKNOWN {
 
 function isBoundedValue(value: WorldValue): value is BoundedValue {
   return typeof value === "object" && value !== null && "atLeastValue" in value;
+}
+
+function isOneOfValue(value: WorldValue): value is OneOfValue {
+  return typeof value === "object" && value !== null && "oneOfValues" in value;
 }
 
 function isExactValue(value: WorldValue): value is number {
@@ -563,12 +632,26 @@ function isExactValue(value: WorldValue): value is number {
 function worldValueOf(binding: NumericBinding): WorldValue {
   if (binding.state === "KNOWN_NUMBER") return binding.value;
   if (binding.state === "BOUNDED_NUMBER") return { atLeastValue: binding.atLeast };
+  if (binding.state === "ONE_OF_NUMBERS") return { oneOfValues: binding.values };
   return UNKNOWN;
+}
+
+/** A stack binding as this world sees it: a plain number is the number; anything else goes through `worldValueOf`. */
+function stackWorldValueOf(stack: number | NumericBinding): WorldValue {
+  return typeof stack === "number" ? stack : worldValueOf(stack);
 }
 
 /** SimulationCraft has no boolean type: zero is false, everything else is true. */
 function truthOf(value: WorldValue): TruthValue {
   if (isUnknownValue(value)) return "UNKNOWN_STATE";
+  if (isOneOfValue(value)) {
+    // Every member non-zero -> TRUE; every member zero -> FALSE; a mix is a
+    // truth nobody established. { 0, 1 } is UNKNOWN, not "probably up".
+    const truths = value.oneOfValues.map((member) => member !== 0);
+    if (truths.every((truth) => truth)) return "TRUE";
+    if (truths.every((truth) => !truth)) return "FALSE";
+    return "UNKNOWN_STATE";
+  }
   if (isBoundedValue(value)) {
     // A bound could be used as a truth — "at least 57, so non-zero, so TRUE" —
     // and deliberately is not. SimulationCraft's zero-is-false coercion applies
@@ -646,6 +729,19 @@ function compareWithBounds(operator: ComparisonOperator, left: WorldValue, right
     return compare(operator, left, right);
   }
 
+  // A finite set of exact values against an exact value (either side): the
+  // comparison is made for EVERY member, and decides only when all agree.
+  // Never min/max, never a member dropped. A set against a bound or against
+  // another set is UNKNOWN — no pinned expression needs more, and no rule is
+  // added that nothing needs (M11-B9).
+  if (isOneOfValue(left) && isExactValue(right)) {
+    return agreedComparison(left.oneOfValues.map((member) => compare(operator, member, right)));
+  }
+  if (isExactValue(left) && isOneOfValue(right)) {
+    return agreedComparison(right.oneOfValues.map((member) => compare(operator, left, member)));
+  }
+  if (isOneOfValue(left) || isOneOfValue(right)) return UNKNOWN;
+
   // Only a bounded LEFT against an exact RIGHT is decidable, which is the shape
   // every pinned `cooldown.x.remains <= C` line takes.
   if (isBoundedValue(left) && isExactValue(right)) {
@@ -683,6 +779,13 @@ function compareWithBounds(operator: ComparisonOperator, left: WorldValue, right
   }
 
   return UNKNOWN;
+}
+
+/** The one truth every member produced, or UNKNOWN when they differ. */
+function agreedComparison(results: readonly number[]): WorldValue {
+  const first = results[0];
+  if (first === undefined) return UNKNOWN;
+  return results.every((result) => result === first) ? first : UNKNOWN;
 }
 
 function compare(operator: ComparisonOperator, left: number, right: number): number {
@@ -776,7 +879,7 @@ function evaluateInWorld(
       // zero by default: an unobserved aura is not an aura observed at zero
       // stacks.
       const known = (bindings.knownBuffStacks ?? []).find((entry) => entry.name === node.buffName);
-      return known === undefined ? UNKNOWN : known.stack;
+      return known === undefined ? UNKNOWN : stackWorldValueOf(known.stack);
     }
     case "BUFF_REACT": {
       // Its own key, so it never reads a `buff.<name>.up` assignment. There is
@@ -854,6 +957,10 @@ function evaluateInWorld(
       // expression does arithmetic on a bounded magnitude, so it fails closed.
       if (isUnknownValue(left) || isUnknownValue(right)) return UNKNOWN;
       if (isBoundedValue(left) || isBoundedValue(right)) return UNKNOWN;
+      // A finite set is refused too (M11-B9): distributing arithmetic across
+      // members would manufacture values nobody established. No pinned
+      // expression does arithmetic on a stack count, so it fails closed.
+      if (isOneOfValue(left) || isOneOfValue(right)) return UNKNOWN;
       // SimulationCraft has no boolean type: a truth operand is already 1 or 0
       // here, so `6*talent.razor_wire` needs no coercion rule of its own.
       if (node.kind === "MULTIPLY") return left * right;
@@ -910,10 +1017,25 @@ function resolveAtom(
     },
     enumerate: false,
   });
+  const oneOfNumeric = (values: readonly number[], reason: UnknownNumberReason): ResolvedAtom => ({
+    // `value` and `atLeast` stay null: the set is neither a magnitude nor a
+    // bound, and it is reported only in its own field.
+    trace: {
+      key,
+      shape,
+      binding: "ONE_OF",
+      value: null,
+      atLeast: null,
+      unknownNumberReason: reason,
+      oneOf: values,
+    },
+    enumerate: false,
+  });
   /** Routes any binding state to the right trace shape, so no site forgets one. */
   const fromBinding = (binding: NumericBinding): ResolvedAtom => {
     if (binding.state === "KNOWN_NUMBER") return known(binding.value);
     if (binding.state === "BOUNDED_NUMBER") return boundedNumeric(binding.atLeast, binding.reason);
+    if (binding.state === "ONE_OF_NUMBERS") return oneOfNumeric(binding.values, binding.reason);
     return unknownNumeric(binding.reason);
   };
 
@@ -987,7 +1109,8 @@ function resolveAtom(
     // STATE_NOT_ESTABLISHED, never zero: a stack model does not exist, but an
     // exact-zero proof does, and the remedy for a missing one is evidence.
     const knownStack = (bindings.knownBuffStacks ?? []).find((entry) => entry.name === stackName);
-    return knownStack === undefined ? unknownNumeric("STATE_NOT_ESTABLISHED") : known(knownStack.stack);
+    if (knownStack === undefined) return unknownNumeric("STATE_NOT_ESTABLISHED");
+    return typeof knownStack.stack === "number" ? known(knownStack.stack) : fromBinding(knownStack.stack);
   }
 
   const remains = /^buff\.(.+)\.remains$/.exec(key);

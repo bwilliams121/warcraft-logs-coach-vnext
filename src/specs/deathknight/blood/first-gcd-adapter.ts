@@ -275,8 +275,16 @@ export function stoppingAtomsOf(step: TraversalStep, blocker: string): readonly 
   const { gate } = step;
   if (gate.kind === "UNSUPPORTED") return [`UNSUPPORTED_EXPRESSION:${gate.reason}:${gate.fragment}`];
   if (gate.kind === "EVALUATED") {
+    // A finite-set atom (M11-B9) is named only when the gate itself stayed
+    // undecided: a set that decided its comparison is not a blocker, and a
+    // set that did not is exactly the one the trace cannot otherwise show.
     const unresolved = gate.trace.atoms
-      .filter((atom) => atom.binding === "UNRESOLVED_BOOLEAN" || atom.binding === "UNKNOWN_NUMBER")
+      .filter(
+        (atom) =>
+          atom.binding === "UNRESOLVED_BOOLEAN" ||
+          atom.binding === "UNKNOWN_NUMBER" ||
+          (atom.binding === "ONE_OF" && gate.truth === "UNKNOWN_STATE"),
+      )
       .map((atom) => atom.key);
     if (unresolved.length > 0) return unresolved;
     return [`USABILITY:${step.actionToken}`];

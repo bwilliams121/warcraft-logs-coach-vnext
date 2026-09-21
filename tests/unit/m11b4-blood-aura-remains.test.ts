@@ -631,10 +631,11 @@ describe("over the committed evidence", () => {
     // The count and presence stay refused; the remainder is the minimum of the
     // chain before the cluster (the stack gain at 2,009,578 + 25,000 - 2,010,375
     // = 24,203 ms) and a reset inside it (25,000 ms) — never a KNOWN value.
+    // The count is never exact inside the window: since M11-B9 it is the set
+    // { 2, 3 } both orderings leave (tests/unit/m11b9-blood-ebq-stack.test.ts).
     expect(bindBloodStack(input(state, position), "essence_of_the_blood_queen")).toMatchObject({
-      state: "UNBOUND",
-      reason: "PRE_DECISION_WINDOW_TRANSITION",
-      windowTransition: { leadMs: 0 },
+      state: "BOUND_SET",
+      possibleStacks: [2, 3],
     });
     expect(bindBloodRemains(input(state, position), "essence_of_the_blood_queen")).toMatchObject({
       state: "BOUND",

@@ -122,7 +122,13 @@ import {
   bloodAuraIdentityFor,
   type BloodAuraIdentity,
 } from "../../../data/game/deathknight-blood-aura-authority.js";
+import { bloodAuraDurationForAtom } from "../../../data/game/deathknight-blood-aura-durations.js";
+import {
+  bloodEffectiveMaxStack,
+  bloodMaxStackModifiersFor,
+} from "../../../data/game/deathknight-blood-stack-authority.js";
 import type { HeroTreeResolution, TalentResolution } from "../../../data/game/talent-selection.js";
+import { oneOfNumbers, type NumericBinding } from "../../../simc/expression/evaluate.js";
 
 /**
  * How far ahead of an observed Blood decision a transition of the queried
@@ -196,6 +202,26 @@ export type BloodStackProof =
   /** The identity's pinned `applicationStack`, from a plain application preceded by a removal or by nothing (M11-B6). */
   | "EXACT_STACK_APPLICATION";
 
+/** The proof of a finite-set stack binding: the exact counts both orderings of the window cluster leave (M11-B9). */
+export type BloodStackSetProof = "WINDOW_ORDER_INVARIANT_SET";
+
+/**
+ * The two orderings a WINDOW_ORDER_INVARIANT_SET was taken over (M11-B9).
+ * Recorded so the evidence shows the set is BOTH worlds, not a reading of
+ * either.
+ */
+export interface BloodStackOrderInvariance {
+  /** Every transition of the identity inside the window, earliest first. */
+  readonly cluster: readonly BloodWindowTransition[];
+  /** H1: the exact count before the cluster (the cluster followed the decision). */
+  readonly beforeClusterStack: number;
+  /** How H1 was established: the ordinary exact-count rule at the cluster's first position, or the proven-inactive zero of a fresh application. */
+  readonly beforeClusterProof:
+    "EXACT_STACK_OBSERVATION" | "EXACT_STACK_APPLICATION" | "PROVEN_INACTIVE_BEFORE_APPLICATION";
+  /** H2: the exact count after the cluster (the cluster preceded the decision): the wire's absolute count, or the pinned application count. */
+  readonly afterClusterStack: number;
+}
+
 /** The anchor an exact count was read at: the observation the rule bound from. */
 export interface BloodStackAnchor {
   readonly position: number;
@@ -205,7 +231,23 @@ export interface BloodStackAnchor {
   readonly reportTimeMs: number;
 }
 
-/** An exact stack proof, or the reason none holds. */
+/** The reasons a stack atom stays unbound. */
+export type BloodStackUnboundReason =
+  | "IDENTITY_NOT_PINNED"
+  | "AURA_STATE_UNKNOWN"
+  | "PRE_DECISION_WINDOW_TRANSITION"
+  /** ACTIVE, and this atom is not one the exact-count rule covers. */
+  | "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED"
+  /** ACTIVE, but no transition carrying a count precedes the decision. */
+  | "NO_STACK_OBSERVATION"
+  /** ACTIVE, but an initial application or a lone refresh sits between the last count and the decision. */
+  | "COUNT_AMBIGUOUS_SINCE_OBSERVATION"
+  /** ACTIVE from a plain application, but the transition before it shows the aura already held (M11-B6). */
+  | "APPLICATION_WHILE_ACTIVE_UNPINNED"
+  /** An observed count lies above the maximum the pinned authority establishes for this build — or above the DBC maximum while the modifier that could raise it is unproven (M11-B9). */
+  | "COUNT_EXCEEDS_PINNED_MAX";
+
+/** An exact stack proof, a finite set of exact counts, or the reason neither holds. */
 export type BloodStackBinding =
   | {
       readonly atomName: string;
@@ -219,19 +261,21 @@ export type BloodStackBinding =
     }
   | {
       readonly atomName: string;
+      /** The count is exactly one of `possibleStacks`; which one depends on an event ordering the wire does not fix (M11-B9). */
+      readonly state: "BOUND_SET";
+      /** Sorted ascending, no duplicates, at least two. */
+      readonly possibleStacks: readonly number[];
+      readonly abilityGameId: number;
+      readonly proof: BloodStackSetProof;
+      /** The transition H1 rests on (the last count before the cluster, or the observed removal before a fresh application). */
+      readonly anchor: BloodStackAnchor | null;
+      readonly windowOrderInvariance: BloodStackOrderInvariance;
+      readonly basis: string;
+    }
+  | {
+      readonly atomName: string;
       readonly state: "UNBOUND";
-      readonly reason:
-        | "IDENTITY_NOT_PINNED"
-        | "AURA_STATE_UNKNOWN"
-        | "PRE_DECISION_WINDOW_TRANSITION"
-        /** ACTIVE, and this atom is not one the exact-count rule covers. */
-        | "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED"
-        /** ACTIVE, but no transition carrying a count precedes the decision. */
-        | "NO_STACK_OBSERVATION"
-        /** ACTIVE, but an initial application or a lone refresh sits between the last count and the decision. */
-        | "COUNT_AMBIGUOUS_SINCE_OBSERVATION"
-        /** ACTIVE from a plain application, but the transition before it shows the aura already held (M11-B6). */
-        | "APPLICATION_WHILE_ACTIVE_UNPINNED";
+      readonly reason: BloodStackUnboundReason;
       readonly abilityGameId: number | null;
       readonly detail: string | null;
       /** The refused transition and its lead, for PRE_DECISION_WINDOW_TRANSITION; null otherwise. */
@@ -528,12 +572,74 @@ function exactCountFromObservation(
 }
 
 /**
+ * The maximum-consistency guard (M11-B9), for a rule with `maxStackGuard`.
+ *
+ * The DBC maximum is the duration artifact's `maxStack`; the effective
+ * maximum is that plus each pinned modifier whose talent is SELECTED
+ * (`deathknight-blood-stack-authority.ts`). An observed count above the
+ * effective maximum contradicts the authority; an observed count above the
+ * DBC maximum while the effective maximum is UNKNOWN would be accepted only
+ * by letting the log prove the modifier, which it may not. Either refuses.
+ * Returns `null` when the count is consistent (or the rule has no guard).
+ */
+function maxStackConflict(
+  input: BloodAuraInput,
+  identity: BloodAuraIdentity,
+  rule: NonNullable<BloodAuraIdentity["exactCount"]>,
+  count: number,
+): { readonly reason: "COUNT_EXCEEDS_PINNED_MAX"; readonly detail: string } | null {
+  if (!rule.maxStackGuard) return null;
+  const duration = bloodAuraDurationForAtom(identity.atomName);
+  if (duration === null) {
+    return {
+      reason: "COUNT_EXCEEDS_PINNED_MAX",
+      detail: `no DBC maximum is pinned for ${identity.atomName}; an observed count of ${String(count)} cannot be checked against authority`,
+    };
+  }
+  const effective = bloodEffectiveMaxStack({
+    baseMaxStack: duration.maxStack,
+    modifiers: bloodMaxStackModifiersFor(identity.atomName),
+    ownedByHeroTree: identity.ownedByHeroTree,
+    talents: input.talents,
+    heroTree: input.heroTree,
+  });
+  if (effective.state === "RESOLVED") {
+    if (count <= effective.maxStack) return null;
+    return {
+      reason: "COUNT_EXCEEDS_PINNED_MAX",
+      detail: `the wire reports ${String(count)} stacks, above the effective maximum ${String(effective.maxStack)} (${effective.basis})`,
+    };
+  }
+  if (count <= effective.baseMaxStack) return null;
+  return {
+    reason: "COUNT_EXCEEDS_PINNED_MAX",
+    detail:
+      `the wire reports ${String(count)} stacks, above the DBC maximum ${String(effective.baseMaxStack)}, and the modifier that ` +
+      `could raise it is unproven (${effective.basis}); the log may corroborate a modifier but may not establish it`,
+  };
+}
+
+/**
  * Binds `buff.<name>.stack`: zero under the three impossibility/inactivity
  * proofs for every pinned stack atom, and the exact positive count for the
  * identities carrying an `exactCount` rule under the Blood rule. Everything
  * else is UNBOUND with the reason.
  */
 export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodStackBinding {
+  return bindBloodStackAt(input, atomName, true);
+}
+
+/**
+ * The binding proper. `windowSetAdmitted` is true for the decision itself and
+ * FALSE for the H1 leg of the order-invariant set, so a cluster whose own
+ * chain runs into a second window is refused rather than nested: one
+ * disjunction over one cluster, never a chain of them.
+ */
+function bindBloodStackAt(
+  input: BloodAuraInput,
+  atomName: string,
+  windowSetAdmitted: boolean,
+): BloodStackBinding {
   const identity = bloodAuraIdentityFor(atomName);
   if (identity === null) {
     return {
@@ -547,6 +653,14 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
   }
   const presence = bindBloodAura(input, atomName);
   if (presence.state === "UNBOUND") {
+    if (
+      presence.reason === "PRE_DECISION_WINDOW_TRANSITION" &&
+      presence.windowTransition !== null &&
+      windowSetAdmitted &&
+      identity.exactCount?.windowOrderInvariantSet === true
+    ) {
+      return orderInvariantWindowStack(input, identity, identity.exactCount, presence.windowTransition);
+    }
     return {
       atomName,
       state: "UNBOUND",
@@ -604,6 +718,17 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
       windowTransition: null,
     };
   }
+  const conflict = maxStackConflict(input, identity, rule, count.stack);
+  if (conflict !== null) {
+    return {
+      atomName,
+      state: "UNBOUND",
+      reason: conflict.reason,
+      abilityGameId: identity.abilityGameId,
+      detail: conflict.detail,
+      windowTransition: null,
+    };
+  }
   return {
     atomName,
     state: "BOUND",
@@ -612,6 +737,203 @@ export function bindBloodStack(input: BloodAuraInput, atomName: string): BloodSt
     proof: count.proof,
     anchor: count.anchor,
     basis: count.basis,
+  };
+}
+
+/**
+ * The finite set of exact counts both orderings of the pre-decision window
+ * cluster leave (M11-B9), for a rule with `windowOrderInvariantSet`.
+ *
+ *     H1  the cluster followed the decision: the exact count BEFORE the
+ *         cluster, by the ordinary rule at the cluster's first position
+ *         (window set not admitted there; every ordinary refusal applies,
+ *         including the lone-refresh ambiguity and the maximum guard) — or
+ *         zero, when the cluster is a fresh application and the ordinary
+ *         presence binding at that position PROVES the aura inactive (M4
+ *         EXACT INACTIVE, anchored on an observed removal). A track with no
+ *         earlier transition proves nothing: `no aura event != aura
+ *         inactive`, and a first application inside the window refuses
+ *         (AMBIGUOUS_INITIAL_STATE) rather than yielding { 0, 1 } from
+ *         silence
+ *     H2  the cluster preceded the decision: the cluster's absolute count,
+ *         or the pinned application count for a fresh application
+ *
+ * The cluster must be exactly ONE `applybuff` / `applybuffstack`, with or
+ * without its same-millisecond `refreshbuff` companion(s). A lone refresh
+ * (no companion at its millisecond), any removal, more than one gain, or a
+ * shape this rule does not foresee refuses: their second world is not an
+ * exact count anyone established. Nothing here decides which ordering
+ * happened; the set is BOTH, and the evaluator decides a comparison only
+ * when both agree.
+ */
+function orderInvariantWindowStack(
+  input: BloodAuraInput,
+  identity: BloodAuraIdentity,
+  rule: NonNullable<BloodAuraIdentity["exactCount"]>,
+  latest: BloodWindowTransition,
+): BloodStackBinding {
+  const refuse = (detail: string): BloodStackBinding => ({
+    atomName: identity.atomName,
+    state: "UNBOUND",
+    reason: "PRE_DECISION_WINDOW_TRANSITION",
+    abilityGameId: identity.abilityGameId,
+    detail,
+    windowTransition: latest,
+  });
+  const found = input.state.auras.transitionsWithinBefore(
+    identityQuery(input, identity),
+    input.position,
+    BLOOD_PRE_DECISION_WINDOW_MS,
+  );
+  const cluster: BloodWindowTransition[] = found.map((entry) => ({
+    position: entry.observation.position,
+    reportTimeMs: entry.observation.reportTimeMs,
+    operation: entry.observation.operation,
+    isStackChange: entry.observation.isStackChange,
+    leadMs: entry.leadMs,
+  }));
+  const gains = found.filter((entry) => entry.observation.operation === "APPLIED");
+  const gain = gains[0];
+  if (gain === undefined || gains.length !== 1) {
+    return refuse(
+      `the window cluster holds ${String(gains.length)} application(s) (${cluster
+        .map(
+          (entry) =>
+            `${entry.operation}${entry.isStackChange ? " (stack)" : ""} at ${String(entry.reportTimeMs)}`,
+        )
+        .join(", ")}); the order-invariant set is defined for exactly one stack gain or fresh application`,
+    );
+  }
+  for (const entry of found) {
+    const observation = entry.observation;
+    if (observation.position === gain.observation.position) continue;
+    if (observation.operation === "REFRESHED" && !observation.isStackChange) {
+      if (observation.reportTimeMs === gain.observation.reportTimeMs) continue;
+      return refuse(
+        `the window cluster holds a refresh at report time ${String(observation.reportTimeMs)} that is not the ` +
+          `same-millisecond companion of the gain at ${String(gain.observation.reportTimeMs)}; what a lone refresh did to the count is not pinned`,
+      );
+    }
+    return refuse(
+      `the window cluster holds a ${observation.operation}${observation.isStackChange ? " (stack)" : ""} transition at ` +
+        `report time ${String(observation.reportTimeMs)}; its two orderings do not both leave an exact count`,
+    );
+  }
+
+  let before: {
+    readonly stack: number;
+    readonly proof: BloodStackOrderInvariance["beforeClusterProof"];
+    readonly anchor: BloodStackAnchor | null;
+    readonly basis: string;
+  };
+  let after: number;
+  if (isPlainApplication(gain.observation)) {
+    // A fresh application: the pinned count after it, and zero before it —
+    // but the zero is a state, and a state is proven only by the ordinary
+    // presence binding at the cluster's first position: M4 EXACT INACTIVE,
+    // anchored on an observed removal. A track with no earlier transition is
+    // silence (AMBIGUOUS_INITIAL_STATE) and refuses; an aura M4 proves held
+    // contradicts the applybuff and refuses; a nested window refuses.
+    if (rule.applicationStack === null) {
+      return refuse(
+        `a plain application sits in the window and ${identity.atomName} pins no application count`,
+      );
+    }
+    const presence = bindBloodAura(
+      { ...input, position: found[0]?.observation.position ?? gain.observation.position },
+      identity.atomName,
+    );
+    if (presence.state !== "BOUND" || presence.up || presence.proof !== "OBSERVED") {
+      return refuse(
+        `the aura is not proven inactive before the application in the window (${
+          presence.state === "BOUND"
+            ? `${presence.up ? "ACTIVE" : "INACTIVE"} by ${presence.proof}`
+            : `${presence.reason}${presence.auraReason === null ? "" : `: ${presence.auraReason}`}`
+        }); no aura event is not aura inactive, and the ordering in which the application followed the decision has no proven zero`,
+      );
+    }
+    const removal =
+      presence.anchorPosition === null ? null : input.state.auras.observationAt(presence.anchorPosition);
+    if (removal === null || removal.operation !== "REMOVED" || removal.isStackChange) {
+      return refuse(
+        `the inactive proof before the application in the window is not anchored on a plain removal`,
+      );
+    }
+    before = {
+      stack: 0,
+      proof: "PROVEN_INACTIVE_BEFORE_APPLICATION",
+      anchor: anchorOf(removal),
+      basis: `M4 presence EXACT INACTIVE before the application, anchored on the removal at ${String(removal.reportTimeMs)}; an applybuff is written only for an aura newly applied`,
+    };
+    after = rule.applicationStack;
+  } else {
+    if (gain.observation.observedStacks === null) {
+      return refuse("the stack gain in the window carries no count");
+    }
+    // H1 by the ordinary rule at the cluster's first position: window set NOT
+    // admitted there, so a nested window refuses.
+    const h1 = bindBloodStackAt(
+      { ...input, position: found[0]?.observation.position ?? gain.observation.position },
+      identity.atomName,
+      false,
+    );
+    if (
+      h1.state !== "BOUND" ||
+      (h1.proof !== "EXACT_STACK_OBSERVATION" && h1.proof !== "EXACT_STACK_APPLICATION")
+    ) {
+      return refuse(
+        `the count before the cluster is not exact (${
+          h1.state === "BOUND" ? h1.proof : h1.state === "BOUND_SET" ? h1.proof : h1.reason
+        }${h1.state === "UNBOUND" && h1.detail !== null ? `: ${h1.detail}` : ""}); the ordering in which the cluster followed the decision has no exact count`,
+      );
+    }
+    before = { stack: h1.stack, proof: h1.proof, anchor: h1.anchor, basis: h1.basis };
+    after = gain.observation.observedStacks;
+  }
+  // Each world is checked against the maximum on its own; no arithmetic joins them.
+  const conflict =
+    maxStackConflict(input, identity, rule, before.stack) ?? maxStackConflict(input, identity, rule, after);
+  if (conflict !== null) {
+    return {
+      atomName: identity.atomName,
+      state: "UNBOUND",
+      reason: conflict.reason,
+      abilityGameId: identity.abilityGameId,
+      detail: conflict.detail,
+      windowTransition: latest,
+    };
+  }
+  if (before.stack === after) {
+    return refuse(
+      `both orderings leave the count at ${String(after)}; a cluster that changes nothing is not the shape this rule was written for`,
+    );
+  }
+  const possibleStacks = [before.stack, after].sort((left, right) => left - right);
+  return {
+    atomName: identity.atomName,
+    state: "BOUND_SET",
+    possibleStacks,
+    abilityGameId: identity.abilityGameId,
+    proof: "WINDOW_ORDER_INVARIANT_SET",
+    anchor: before.anchor,
+    windowOrderInvariance: {
+      cluster,
+      beforeClusterStack: before.stack,
+      beforeClusterProof: before.proof,
+      afterClusterStack: after,
+    },
+    basis:
+      `${String(found.length)} transition(s) of the identity (${cluster
+        .map(
+          (entry) =>
+            `${entry.operation}${entry.isStackChange ? " (stack)" : ""} at ${String(entry.reportTimeMs)}`,
+        )
+        .join(
+          ", ",
+        )}) sit inside the ${String(BLOOD_PRE_DECISION_WINDOW_MS)} ms pre-decision window and no ordering ` +
+      `against the decision is chosen: had they followed it the count is ${String(before.stack)} (${before.basis}); had they ` +
+      `preceded it the count is ${String(after)} (${isPlainApplication(gain.observation) ? "the pinned fresh-application count" : "the wire's absolute count"}); ` +
+      `the count is exactly one of { ${possibleStacks.join(", ")} }`,
   };
 }
 
@@ -633,12 +955,22 @@ export function bloodBuffBindingsFrom(
   return known;
 }
 
-/** The `knownBuffStacks` shape: exactly the atoms proven, at exactly their proven count. */
+/**
+ * The `knownBuffStacks` shape: exactly the atoms proven, at exactly their
+ * proven count — or, for a BOUND_SET, the finite set of exact counts as an
+ * `ONE_OF_NUMBERS` binding the evaluator decides comparisons over (M11-B9).
+ */
 export function bloodStackBindingsFrom(
   bindings: readonly BloodStackBinding[],
-): readonly { readonly name: string; readonly stack: number }[] {
-  const known: { name: string; stack: number }[] = [];
-  for (const binding of bindings)
+): readonly { readonly name: string; readonly stack: number | NumericBinding }[] {
+  const known: { name: string; stack: number | NumericBinding }[] = [];
+  for (const binding of bindings) {
     if (binding.state === "BOUND") known.push({ name: binding.atomName, stack: binding.stack });
+    else if (binding.state === "BOUND_SET")
+      known.push({
+        name: binding.atomName,
+        stack: oneOfNumbers(binding.possibleStacks, "STATE_NOT_ESTABLISHED"),
+      });
+  }
   return known;
 }

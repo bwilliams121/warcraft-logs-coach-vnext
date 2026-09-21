@@ -64,9 +64,11 @@ describe("the committed corpus loads", () => {
     // evaluator case pinning the seven Marrowrend REJECTED decisions and the
     // Rune affordability census; M11-B8 added one evaluator case pinning the
     // Essence lone-refresh floors, the order-invariant window bound and the
-    // two decisions it resolves. Measured, then pinned.
+    // two decisions it resolves; M11-B9 added one evaluator case pinning the
+    // Essence stack authority, the exact counts and the finite sets inside the
+    // window with the three decisions they resolve. Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(43);
-    expect(loaded.cases).toHaveLength(159);
+    expect(loaded.cases).toHaveLength(160);
     expect(loaded.coverage.declared).toBe(0);
   });
 

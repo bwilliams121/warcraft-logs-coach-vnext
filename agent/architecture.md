@@ -6611,6 +6611,174 @@ M11-B is not complete.
 
 ---
 
+### M11-B9 — Essence of the Blood Queen: the stack authority, exact counts, and the finite set both orderings leave
+
+Three pieces: a Blood-owned max-stack authority (owner decision Q3), the
+existing exact-count machinery extended to Essence under a maximum guard,
+and — the one shared change — a generic finite-set numeric binding (owner
+decision Q1) that lets the pre-decision window yield the two exact counts
+its two orderings leave. Refresh-count carry was declined (Q2) and is not
+built. No public change; Blood stays INTERNAL_ONLY.
+
+**The authority.** The DBC row 433925 records `_max_stack` 5 and
+`_proc_charges` 0. The generated duration artifact carries that 5 raw and
+is not reinterpreted. Frenzied Bloodthirst — `trait_data.inc:2932`: HERO
+tree, class 6, trait node entry 117662 at node 95065, definition 122674,
+spell 434075, one rank, San'layn sub-tree 31, NORMAL node with no
+alternative — carries effect 1123818, `A_ADD_FLAT_LABEL_MODIFIER` (219)
+with misc_value 37 (`P_MAX_STACKS`) on label 3134, base value 2; label 3134
+is carried by exactly one spell (`__spelllabel_data { 433925, 3134 }`), and
+433925's class-family flags are zero, so no family-mask modifier reaches
+it. The effective maximum is 5 + 2 = **7** exactly when the talent is
+SELECTED. The talent enters the machine-extracted talent artifact through
+the existing extractor target (`frenzied_bloodthirst`, regenerated from the
+hash-verified pinned sources), and the three-way rule resolves it
+`SELECTED / OWN_ENTRY_SELECTED / 117662` on both committed subjects; a tree
+without the node is UNKNOWN (NODE_ABSENT), never NOT_SELECTED.
+`deathknight-blood-stack-authority.ts` records the modifier with claims
+against the hashed `sc_spell_data.inc`, `trait_data.inc` and
+`sc_death_knight.cpp`, and `bloodEffectiveMaxStack` resolves 7 / 5
+(Deathbringer) / UNKNOWN (modifier talent unresolved) — never from a count.
+
+**The runtime gap, stated exactly.** The pinned module parses the talent:
+`parse_all_passive_talents()` at sc_death_knight.cpp:15163 registers
+434075's passive effects and player.cpp:15125 / 15851 map `P_MAX_STACKS`
+to the passive field `"max_stack"`. `buff_t` never reads it:
+`set_max_stack( -1 )` takes `data().max_stacks()` raw (buff.cpp:974-976)
+and a buff reads passive values only for `"duration"` (:863) and `"period"`
+(:1227). So the sim's Essence caps at 5 and `san_gift[3]`'s literal
+`stack<7` — which the Unholy list writes as `stack<buff.essence_of_the_
+blood_queen.max_stack` — is vacuous in the sim and a real "not at max" test
+in game. That is a SimulationCraft omission; the wire's `applybuffstack 6`
+and `7` (both subjects, never 8) corroborate the DBC and are never used to
+establish it.
+
+**Exact counts.** Essence's identity now carries `exactCount:
+{ applicationStack: 1, maxStackGuard: true, windowOrderInvariantSet: true }`.
+The count is the last `applybuffstack`'s absolute value
+(`EXACT_STACK_OBSERVATION`) or the pinned 1 of a fresh `applybuff`
+(`_proc_charges` 0 → `_initial_stack` 1, buff.cpp:1043-1054;
+`EXACT_STACK_APPLICATION`) — the B6 rule unchanged, so a lone `refreshbuff`
+after the count leaves it `COUNT_AMBIGUOUS_SINCE_OBSERVATION` (Q2 declined:
+no wire contract that a refresh keeps a count is pinned, whatever the
+corpus corroborates), while the remainder survives the same refresh as a
+floor (M11-B8) — the two are decoupled. `maxStackConflict` checks every
+count against the effective maximum: above 7, or above the DBC 5 while the
+modifier is unproven, refuses as `COUNT_EXCEEDS_PINNED_MAX`. Bone Shield
+and Blood Debt carry both switches off: their observed 11 / 12 against an
+artifact maximum of 10 is the same class of gap, deliberately left alone.
+
+**The finite set (shared, Q1).** `NumericBinding` gains `ONE_OF_NUMBERS`
+(`oneOfNumbers(values, reason)`: deduplicated, sorted, at least two
+distinct members — a single distinct value is returned as KNOWN, an empty
+list throws). In a world it is `OneOfValue`; a comparison against an exact
+value is made for every member and decides only when all agree
+(`agreedComparison`), a set against a set or a bound is UNKNOWN, a truth
+is TRUE only when every member is non-zero and FALSE only when every
+member is zero, arithmetic refuses, and the trace carries `binding:
+"ONE_OF"` with the members in an `oneOf` field that is ABSENT on every
+other binding so no existing trace changes a byte. `knownBuffStacks[].stack`
+widens to `number | NumericBinding`; every existing caller passes a number
+and is untouched (Assassination, Protection, Retribution byte-identical in
+the corpus report). Not an interval, not a bound, never collapsed.
+
+**The window set (Blood).** When `.stack` is window-refused for an identity
+whose rule admits it, `orderInvariantWindowStack` requires the cluster to
+be exactly ONE `applybuff` / `applybuffstack` with or without its
+same-millisecond `refreshbuff` companion(s): H1 is the exact count before
+the cluster by `bindBloodStackAt` at the cluster's first position with the
+set NOT admitted (so every ordinary refusal applies, including the
+lone-refresh ambiguity, and a nested window refuses), or — for a fresh
+application — the zero the ordinary presence binding at that position
+PROVES (M4 EXACT INACTIVE anchored on an observed removal; the first
+application in a track has `AMBIGUOUS_INITIAL_STATE` before it and
+refuses, because no aura event is not aura inactive); H2 is the
+cluster's absolute count or the pinned application count. Each world is
+checked against the maximum on its own (no arithmetic joins them; the B6
+source guard still forbids `Math.max`). A lone refresh in the cluster, any
+removal, more than one gain, a shape not foreseen, an H1 that is not exact,
+or a cluster that changes nothing refuses. The binding is `BOUND_SET`
+(`WINDOW_ORDER_INVARIANT_SET`, `possibleStacks`, both worlds recorded),
+handed to the evaluator as `ONE_OF_NUMBERS`. Blood writes no `<7`; the
+list's literal and the generic evaluator decide. A stopping atom whose
+gate stayed undecided now names a ONE_OF atom too (`stoppingAtomsOf`), so
+{ 6,7 } is reported on the stack atom rather than on usability.
+
+**The measurement (bundle 123 / 45 s 48 / opener 21).** 40 MATCH / 9
+REJECTED / 74 UNKNOWN (B8: 37 / 9 / 77); 16 / 3 / 29 (15 / 3 / 30); 1 / 0 /
+20 unchanged. Decision for decision against B8: UNKNOWN → MATCH 3, every
+other outcome, token and precision identical (MATCH 36 EXACT_ENTRY / 4
+TOKEN_CONVERGED). The three: Vampiric Strikes at 2,015,029 ({ 5,6 }: 5 from
+`applybuffstack 5` at 2,012,773, 6 at lead 0), 2,103,820 ({ 4,5 }: 4 at
+2,101,867, 5 at lead 0) and 2,105,703 ({ 5,6 }: 5 at 2,103,820, 6 at
+2,105,702, lead 1) — `san_gift[0]` FALSE from the B8 floor (22,744 / 23,047
+/ 23,117 ms), `san_gift[1]` FALSE from the deficit floor (≥ 58 / 59.9 /
+67.9), `san_gift[2]` FALSE (Crimson Scourge PROVEN_INACTIVE),
+`san_gift[3]` TRUE for every member, the entry names the observed action
+(usable by execution), no undecided candidate. Still UNKNOWN by
+construction: 2,017,274 and 2,106,638 ({ 6,7 }), 2,101,867 (H1 = 3 at
+2,093,666 lies across the Gift-edge lone refresh at 2,099,885), the
+lone-refresh clusters 2,018,024 / 2,019,524 / 2,110,550, the track's first
+application 2,008,597 (and the opener's 2,418,659: silence before it,
+never { 0,1 }), and the exact
+counts at 2,015,770 (6) and 2,104,758 (5) that make `san_gift[3]` TRUE for
+a Heart Strike that was not cast (`USABILITY:heart_strike`). Essence stack
+census: EXACT_STACK_OBSERVATION 15, EXACT_STACK_APPLICATION 9,
+WINDOW_ORDER_INVARIANT_SET 12, COUNT_AMBIGUOUS_SINCE_OBSERVATION 72,
+PRE_DECISION_WINDOW_TRANSITION 14, AURA_STATE_UNKNOWN 1; sets {0,1} (after
+the observed removal at 2,071,379), {1,2} ×2, {2,3} ×2, {3,4}, {4,5} ×2,
+{5,6} ×2, {6,7} ×2; opener 6 / 0 / 5 / 7 / 2 / 1; no
+COUNT_EXCEEDS_PINNED_MAX on either subject. First blockers:
+`sanlayn[9]` `fight_remains` 9 + 11, Marrowrend usability 10, Essence stack
+7 (+ 2 on Heart Strike usability), Bone Shield window 7, `any_dnd` 5 + 1,
+`sanlayn[1]` 4 + 2, the Dancing Rune Weapon gate 3, `san_gift[2]` 3 + 1,
+Death Strike usability 3 + 1, Runic Power after a spend 3,
+`buff.vampiric_strike.up` 2, Blood Boil usability 2, `san_gift[0]` 1,
+Boiling Point 1. `fight_remains` unmodelled; no resource work.
+
+**Not built, on purpose.** No count from a Vampiric Strike tally, no
+increment, no carry across a lone refresh (Q2), no maximum from a count, no
+ordering chosen, no set from a lone-refresh / removal / multi-gain cluster,
+no { 0,1 } from the silence before a track's first transition, no nested
+window set, no `<7` in Blood code, no set collapsed to min or
+max, no arithmetic over a set, no interval, no upper-bound field, no set
+for Bone Shield or Blood Debt, no guard for their maxima, no extractor
+redesign, no public enum, no `fight_remains`.
+
+**Proven.** `tests/unit/simc-expression-one-of-numbers.test.ts` (construction,
+every operator both ways, min/max non-collapse, set-vs-set, truthiness,
+Kleene composition, arithmetic refusal, trace shape, plain-number
+invariance); `tests/unit/m11b9-blood-ebq-stack.test.ts` (the regenerated
+talent identity and hashes, the modifier, 7 / UNKNOWN / 5, both subjects
+SELECTED by entry, NODE_ABSENT → UNKNOWN, the switches; applybuff → 1,
+applybuffstack 2..7, removal → 0, held application refused, strict lone
+refresh near or far from a Vampiric Strike, 6/7 bind and 8 refuses under
+the talent, 6 refuses and 5 binds under an unresolved talent, Bone Shield
+12 and Blood Debt 11 unguarded; the set at leads 0 / 1 / 50, 51 ms on the
+ordinary path, { 5,6 } / { 4,5 } / { 6,7 }, { 0,1 } after an observed
+removal, the track's first application refused at leads 0 / 1 / 50 with no
+ONE_OF reaching the seam, refusals for lone refresh, 1 ms-late refresh, removals, mixed cluster, two
+gains, no count before, lone refresh before the cluster, maxima in either
+world, Bone Shield and Blood Debt clusters; the committed 2,015,029 /
+2,103,820 / 2,105,703 / 2,017,274 / 2,106,638 / 2,101,867 / 2,015,770 /
+2,104,758 / 2,084,304 / 2,100,867 / 2,111,469 / 2,008,597 (refused) /
+2,020,278 and the opener's 2,425,025 / 2,428,096 / 2,418,659 (refused)); the re-pinned `m11b2-blood-bindings`,
+`m11b2-blood-authority-data` (14 talents), `m11b6-blood-debt-stack`,
+`m11b4-blood-aura-remains` and `m11b8-blood-ebq-remains`; the
+`m11b2-blood-evaluator` contract (40 / 9 / 74; the three MATCH
+individually with set, worlds, floor, deficit and no candidate; the
+required UNKNOWNs; the B6 and B9 MATCH sets; the stack census with every
+set two exact sorted members ≤ 7; the first-obstacle map) and
+`m11b2-blood-registration` (16 / 3 / 29); one new corpus case
+(`spec-blood-death-knight.essence-stacks-are-the-wires-absolute-counts-…`,
+23 assertions) and the re-pinned measurement cases (the corpus is 43
+artifacts / 160 cases / 663 assertions; `STACK_BINDING_AT` carries
+`possibleStacks` and `windowOrderInvariance`); the invariance harness:
+Assassination, Protection, Retribution, every raid night and every public
+document unchanged. Blood stays INTERNAL_ONLY; M11-B is not complete.
+
+---
+
 # Milestone 12 — Healer Foundation
 
 Implement:

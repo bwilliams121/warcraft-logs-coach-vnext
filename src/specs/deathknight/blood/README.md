@@ -1,4 +1,4 @@
-# Blood Death Knight — INTERNAL_ONLY measurement slice (M11-B2 … M11-B8)
+# Blood Death Knight — INTERNAL_ONLY measurement slice (M11-B2 … M11-B9)
 
 **Exposure: `INTERNAL_ONLY`.** This evaluator is registered in the
 production catalog (`deathknight-blood-observed-decisions`,
@@ -62,7 +62,7 @@ PREDICTIVE state) and Consumption.
 | `buff.<x>.up` (8 atoms) | M4 `presenceAt` FROM_SOURCE self, strictly before the decision | an observed transition; or DOWN by hero-tree exclusion / a disproved producing talent |
 | `buff.bone_shield.stack` | the last stack-bearing transition's absolute count | only across same-millisecond refresh companions under EXACT ACTIVE presence |
 | `buff.blood_debt.stack` | the last stack-bearing transition's absolute count, or the pinned 1 of a plain application preceded by a removal or by nothing (M11-B6) | under EXACT ACTIVE presence; an application to an aura already held refuses |
-| `buff.essence_of_the_blood_queen.stack` | the two build proofs and PROVEN_INACTIVE | exactly zero only (the pinned `maxStack` 5 is contradicted by the observed 6 and 7 under Frenzied Bloodthirst, so no positive count and no `stack<7` from it) |
+| `buff.essence_of_the_blood_queen.stack` (M11-B9) | the last `applybuffstack`'s absolute count, or the pinned 1 of a fresh `applybuff`; inside the window, the finite set of the two counts both orderings of a single stack gain leave (`ONE_OF_NUMBERS`) | under EXACT ACTIVE presence with nothing but same-millisecond companions since the count — a lone refresh breaks it (Q2 declined); every count checked against the effective maximum (DBC 5, +2 under a SELECTED Frenzied Bloodthirst): above it, or above 5 with the modifier unproven, refuses |
 | `buff.<x>.remains` (5 atoms, M11-B4/B8) | the last exact gain (an `applybuff` / `applybuffstack`, or a lone `refreshbuff` only where the identity's policy reads it as the pinned trigger) plus the pinned Blood duration, under continuity from the gain | exact from the gain; a lower bound past a refresh of unpinned or unproven cause; for Essence inside the 50 ms window, the floor both orderings of the cluster share (`WINDOW_ORDER_INVARIANT_BOUNDED`) |
 | `cooldown.dancing_rune_weapon.remains` | the shared token-cooldown derivation over the pinned record | an observed cast within 90,000 ms (Insatiable Blade SELECTED) |
 
@@ -277,6 +277,76 @@ Death Strike usability 3 + 1, Runic Power after a spend 3,
 `buff.vampiric_strike.up` 2, Blood Boil usability 2, `sanlayn[1]` 2,
 `san_gift[0]` 1, Boiling Point 1, Crimson Scourge 1.
 
+M11-B9 read Essence's positive count from the wire and pinned the maximum
+it is checked against (see the stack policy below). Result: **40 MATCH / 9
+REJECTED / 74 UNKNOWN** — the 37 MATCH and 9 REJECTED unchanged decision
+for decision, and three more MATCH: the Gift-window Vampiric Strikes at
+2,015,029 ({ 5,6 }), 2,103,820 ({ 4,5 }) and 2,105,703 ({ 5,6 }), each
+selected at `san_gift[3] heart_strike` — the observed action — once the
+set makes `stack<7` TRUE in both worlds and the entries above it are FALSE
+from the B8 floor, the Runic Power deficit and Crimson Scourge proven down.
+The 45 s slice is 16 / 3 / 29; the opener 1 / 0 / 20 (its six sets all sit
+behind `san_gift[2]`). Essence stack evidence over the 123: EXACT
+observations 15, pinned fresh applications 9, finite sets 12 ({0,1},
+{1,2} ×2, {2,3} ×2, {3,4}, {4,5} ×2, {5,6} ×2, {6,7} ×2), ambiguous across a
+lone refresh 72, window-refused 14 (lone-refresh clusters, the expiry,
+clusters with no exact count before them, and the first application in the
+track at 2,008,597 — silence before it is not a proven zero),
+presence-unknown 1; no count
+was ever refused against the maximum on this build. Still UNKNOWN by
+construction: 2,017,274 and 2,106,638 ({ 6,7 } — the worlds disagree),
+2,101,867 (its count before the cluster lies across the Gift-edge lone
+refresh at 2,099,885; Q2 declined), and the exact counts at the Marrowrend
+2,015,770 (6) and the Death Strike 2,104,758 (5), which make `san_gift[3]`
+TRUE for a Heart Strike that was not cast and stop on its usability. The
+first-blocker ranking after B9: `sanlayn[9]` `fight_remains` 9 + 11,
+Marrowrend usability 10, `san_gift[3]` Essence stack 7 (+ 2 on Heart
+Strike usability), Bone Shield window 6 + 1, `any_dnd` usability 5 + 1,
+`sanlayn[1]` 4 + 2, the Dancing Rune Weapon gate 3, `san_gift[2]` 3 + 1,
+Death Strike usability 3 + 1, Runic Power after a spend 3,
+`buff.vampiric_strike.up` 2, Blood Boil usability 2, `san_gift[0]` 1,
+Boiling Point 1.
+
+## The Essence of the Blood Queen stack policy (M11-B9)
+
+The DBC maximum of 433925 is 5 — the generated artifact's raw `maxStack`,
+not reinterpreted. Frenzied Bloodthirst (talent 434075, trait entry 117662
+at node 95065, NORMAL, San'layn) adds exactly +2 through effect 1123818, an
+`A_ADD_FLAT_LABEL_MODIFIER` on `P_MAX_STACKS` for label 3134, which only
+433925 carries; the effective maximum is therefore 7 when the talent is
+SELECTED, which both subjects prove by their own entry through the
+machine-extracted talent artifact (never from a count). The pinned
+SimulationCraft parses that talent (`parse_all_passive_talents`) but
+`buff_t` never reads the parsed `max_stack` field, so the sim caps the aura
+at 5 and `san_gift[3]`'s `stack<7` is vacuous there: a runtime omission the
+wire's 6 and 7 corroborate and do not establish
+(`deathknight-blood-stack-authority.ts`). Positive counts come from the
+wire's absolute `applybuffstack` values and the pinned fresh-application 1
+(`_proc_charges` 0 → `_initial_stack` 1), under the B6 rule; a lone
+unexplained `refreshbuff` still breaks the carried count
+(`COUNT_AMBIGUOUS_SINCE_OBSERVATION`) even though the remainder survives
+it as a floor — Q2 was declined, and B9 pins no wire contract about what a
+refresh does to a count. A count above the effective maximum, or above 5
+while the modifier is unproven, is `COUNT_EXCEEDS_PINNED_MAX`.
+
+Inside the 50 ms window (unchanged) a cluster of exactly one stack gain
+(with its same-millisecond companion) or one fresh application after a
+proven removal binds `BOUND_SET`: the finite set { H1, H2 } of the exact
+counts both orderings leave — H1 by the ordinary rule at the cluster's
+first position (every refusal applies; no nested window), H2 the wire's
+count. For a fresh application the zero world is a STATE, and only the
+ordinary presence binding at that position proves it: M4 EXACT INACTIVE
+anchored on an observed removal (2,073,540 after the expiry at 2,071,379).
+The first application in a track (2,008,597; opener 2,418,659) has
+`AMBIGUOUS_INITIAL_STATE` before it and refuses — no aura event is not
+aura inactive, and { 0,1 } is never read from silence. The set reaches the shared evaluator as `ONE_OF_NUMBERS`
+(`src/simc/expression/evaluate.ts`): not a range, not a bound, never
+collapsed to a member — a comparison decides only when every member decides
+it alike, a truth only when every member is zero or every member is
+non-zero, arithmetic refuses, and the trace names the members. Blood
+supplies the possible exact values; the evaluator decides `stack<7`, with
+no `<7` written anywhere in Blood code.
+
 ## The Essence of the Blood Queen policy (M11-B8)
 
 Essence (433925) lasts exactly 25,000 ms for every Blood actor — the DBC
@@ -332,6 +402,14 @@ of the pinned 1.5 s / 8 s thresholds is refused. No ordering is chosen.
   order-invariant edge inside the threshold tolerance, no change to the
   window or tolerance constants or to any other identity (the M11-B8
   boundary).
+- No Essence count from a Vampiric Strike count, an increment, a carry
+  across a lone refresh, or a count read off the wire above the maximum the
+  build proves; no maximum read off a count; no ordering chosen for a stack
+  set, no set from a lone-refresh, removal or multi-gain cluster, no nested
+  window set, no `<7` special case, no set collapsed to a member, no
+  arithmetic over a set, no set for Bone Shield or Blood Debt, no { 0,1 }
+  from the silence before a track's first transition (the M11-B9 boundary;
+  Q2 declined).
 - No GCD numeric bounds, no `empower_to` support, no new action option, no
   target-count or enemy-roster model, no `target_if`, no undecided-run world
   splitting, no generic variables, no pet state, no charge model, no
@@ -371,12 +449,15 @@ affordability fact, M11-B7), `cooldown-bindings.ts`,
 trace, undecided candidates), `observed-action-gate.ts`,
 `observed-analysis.ts` (the facade), `registration.ts`. Data:
 `src/data/game/deathknight-blood-*` (including
-`deathknight-blood-rune-cost-authority.ts`, M11-B7),
+`deathknight-blood-rune-cost-authority.ts`, M11-B7, and
+`deathknight-blood-stack-authority.ts`, M11-B9),
 `src/simc/data/deathknight-blood.apl.json`.
 Tests: `tests/unit/m11b2-blood-*.test.ts`, `tests/unit/m11b4-*.test.ts`,
 `tests/unit/m11b5-*.test.ts`, `tests/unit/m11b6-blood-debt-stack.test.ts`
 (with `tests/support/m11/blood-debt-census.ts`),
 `tests/unit/m11b7-blood-rune-affordability.test.ts`,
 `tests/unit/m11b8-blood-ebq-remains.test.ts`,
+`tests/unit/m11b9-blood-ebq-stack.test.ts`,
+`tests/unit/simc-expression-one-of-numbers.test.ts`,
 `tests/contracts/m11b2-blood-*.test.ts`, corpus cases
 `spec-blood-death-knight.*`.

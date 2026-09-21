@@ -107,11 +107,17 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // exact, and inside the pre-decision window only the floor both
     // orderings share is bound) and added thirty-four: one new case with the
     // two REJECTED decisions and their complete chains, the precision change
-    // at 2,029,599, the Gift-edge floors and the refusals that remain.
-    // Measured, then pinned.
-    expect(result.summary.cases).toBe(159);
-    expect(result.summary.assertions).toBe(639);
-    expect(result.summary.passed).toBe(639);
+    // at 2,029,599, the Gift-edge floors and the refusals that remain; M11-B9
+    // re-pinned them again (40 MATCH and 9 REJECTED of 123: Essence's count is
+    // the wire's absolute count or the pinned fresh application, guarded by the
+    // Frenzied Bloodthirst maximum, and inside the window the set of the two
+    // counts both orderings leave) and added twenty-three: one new case with
+    // the three MATCH decisions and their sets, the { 6,7 } and Q2-declined
+    // decisions that stay UNKNOWN, the exact counts outside the window and the
+    // refusals that remain. Measured, then pinned.
+    expect(result.summary.cases).toBe(160);
+    expect(result.summary.assertions).toBe(663);
+    expect(result.summary.passed).toBe(663);
   });
 
   it("covers every layer", async () => {

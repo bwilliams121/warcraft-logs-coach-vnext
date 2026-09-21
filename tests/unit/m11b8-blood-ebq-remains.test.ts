@@ -335,11 +335,11 @@ describe("G2: the order-invariant bound inside the 50 ms window", () => {
         },
       });
       expect(binding.state === "BOUND" && binding.binding.state).not.toBe("KNOWN_NUMBER");
-      // The count and the presence-derived readings stay refused: only `.remains` gained a floor.
+      // The count is never exact inside the window either: since M11-B9 it is
+      // the finite set both orderings leave (tests/unit/m11b9-blood-ebq-stack.test.ts).
       expect(bindBloodStack(input(state, 3), EBQ_ATOM)).toMatchObject({
-        state: "UNBOUND",
-        reason: "PRE_DECISION_WINDOW_TRANSITION",
-        windowTransition: { leadMs },
+        state: "BOUND_SET",
+        possibleStacks: [1, 2],
       });
     },
   );
@@ -585,9 +585,9 @@ describe("G2: the order-invariant bound inside the 50 ms window", () => {
   });
 });
 
-describe("no Essence stack expansion", () => {
-  it("Essence is not an exact-count atom: ACTIVE binds no positive count, inside or outside the window", () => {
-    expect(EXACT_COUNT_ATOMS).not.toContain(EBQ_ATOM);
+describe("the Essence stack after M11-B9 (the B8 boundary, re-pinned)", () => {
+  it("Essence is an exact-count atom since M11-B9; a count above the DBC maximum needs the modifier talent SELECTED, which this synthetic build does not resolve", () => {
+    expect(EXACT_COUNT_ATOMS).toContain(EBQ_ATOM);
     const outside = stateOf([
       aura(0, 1000, "APPLIED"),
       aura(1, 2000, "APPLIED", 7),
@@ -595,7 +595,7 @@ describe("no Essence stack expansion", () => {
     ]);
     expect(bindBloodStack(input(outside, 2), EBQ_ATOM)).toMatchObject({
       state: "UNBOUND",
-      reason: "AURA_ACTIVE_COUNT_NOT_RECONSTRUCTED",
+      reason: "COUNT_EXCEEDS_PINNED_MAX",
     });
   });
 });
@@ -617,9 +617,11 @@ describe("over the committed evidence", () => {
         cluster: [{ reportTimeMs: 2_087_470, operation: "APPLIED", isStackChange: true, leadMs: 0 }],
       },
     });
+    // M11-B9: the count is the set { 1, 2 } — the pinned fresh-application 1
+    // before the cluster, the wire's 2 after it — never one of them.
     expect(bindBloodStack(input(state, position), EBQ_ATOM)).toMatchObject({
-      state: "UNBOUND",
-      reason: "PRE_DECISION_WINDOW_TRANSITION",
+      state: "BOUND_SET",
+      possibleStacks: [1, 2],
     });
   });
 

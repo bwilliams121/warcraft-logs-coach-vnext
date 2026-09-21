@@ -793,10 +793,13 @@ export function summarizeBloodDecisions(
     for (const binding of entry.stacks) {
       bump(
         stackEvidence,
-        `${binding.atomName} | ${binding.state === "BOUND" ? binding.proof : binding.reason}`,
+        `${binding.atomName} | ${binding.state === "UNBOUND" ? binding.reason : binding.proof}`,
       );
       if (binding.state === "BOUND")
         bump(stackValues, `${binding.atomName} | stack ${String(binding.stack)}`);
+      // M11-B9: a finite set is censused as the set, never as either member.
+      if (binding.state === "BOUND_SET")
+        bump(stackValues, `${binding.atomName} | stack one of {${binding.possibleStacks.join(",")}}`);
       if (binding.state === "UNBOUND" && binding.windowTransition !== null) {
         bump(
           preDecisionWindowRefusals,

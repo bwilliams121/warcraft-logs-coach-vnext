@@ -2144,7 +2144,7 @@ export const ASSERTION_KINDS = {
         atomName: z.string().min(1),
         expected: z
           .object({
-            state: z.enum(["BOUND", "UNBOUND"]),
+            state: z.enum(["BOUND", "BOUND_SET", "UNBOUND"]),
             stack: z.number().int().nonnegative().nullable(),
             proof: z
               .enum([
@@ -2154,10 +2154,36 @@ export const ASSERTION_KINDS = {
                 "PROVEN_INACTIVE",
                 "EXACT_STACK_OBSERVATION",
                 "EXACT_STACK_APPLICATION",
+                "WINDOW_ORDER_INVARIANT_SET",
               ])
               .nullable(),
             abilityGameId: z.number().int().nullable(),
             reason: z.string().nullable(),
+            /** M11-B9: the finite set of exact counts a BOUND_SET is one of (sorted, at least two); null otherwise. */
+            possibleStacks: z.array(z.number().int().nonnegative()).min(2).nullable(),
+            /** M11-B9: both orderings a BOUND_SET was taken over; null otherwise. */
+            windowOrderInvariance: z
+              .object({
+                cluster: z.array(
+                  z
+                    .object({
+                      reportTimeMs: z.number().int(),
+                      operation: z.enum(["APPLIED", "REFRESHED", "REMOVED"]),
+                      isStackChange: z.boolean(),
+                      leadMs: z.number().int(),
+                    })
+                    .strict(),
+                ),
+                beforeClusterStack: z.number().int().nonnegative(),
+                beforeClusterProof: z.enum([
+                  "EXACT_STACK_OBSERVATION",
+                  "EXACT_STACK_APPLICATION",
+                  "PROVEN_INACTIVE_BEFORE_APPLICATION",
+                ]),
+                afterClusterStack: z.number().int().nonnegative(),
+              })
+              .strict()
+              .nullable(),
           })
           .strict(),
       })
@@ -2166,7 +2192,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: true,
     description:
-      "At this decision the stack binding for this buff.<name>.stack atom is exactly so: zero under PROVEN_INACTIVE or a build proof; for the atoms carrying a Blood exact-count rule (bone_shield since M11-B2, blood_debt since M11-B6), the exact positive count the last stack-bearing transition reported, when every later transition up to the decision is its same-millisecond refresh companion and M4 proves the aura ACTIVE under coverage (EXACT_STACK_OBSERVATION) — or, for blood_debt only, the pinned count 1 of a plain application preceded by a removal or by nothing (EXACT_STACK_APPLICATION); UNBOUND with the reason otherwise — a lone refresh or an initial application after the last count is COUNT_AMBIGUOUS_SINCE_OBSERVATION, an application to an aura already held is APPLICATION_WHILE_ACTIVE_UNPINNED, never a guess.",
+      "At this decision the stack binding for this buff.<name>.stack atom is exactly so: zero under PROVEN_INACTIVE or a build proof; for the atoms carrying a Blood exact-count rule (bone_shield since M11-B2, blood_debt since M11-B6, essence_of_the_blood_queen since M11-B9), the exact positive count the last stack-bearing transition reported, when every later transition up to the decision is its same-millisecond refresh companion and M4 proves the aura ACTIVE under coverage (EXACT_STACK_OBSERVATION) — or, for blood_debt and essence_of_the_blood_queen, the pinned count 1 of a plain application preceded by a removal or by nothing (EXACT_STACK_APPLICATION); for essence_of_the_blood_queen inside the 50 ms pre-decision window, the finite set of exact counts both orderings of a single stack gain (or fresh application) leave, never one chosen (BOUND_SET / WINDOW_ORDER_INVARIANT_SET, with both worlds recorded); UNBOUND with the reason otherwise — a lone refresh or an initial application after the last count is COUNT_AMBIGUOUS_SINCE_OBSERVATION, an application to an aura already held is APPLICATION_WHILE_ACTIVE_UNPINNED, an observed count above the effective maximum the Blood stack authority resolves (or above the DBC maximum while the modifier talent is unproven) is COUNT_EXCEEDS_PINNED_MAX, never a guess.",
   },
   "SPEC_BLOOD_DEATH_KNIGHT.STACK_EVIDENCE_CENSUS": {
     owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",
