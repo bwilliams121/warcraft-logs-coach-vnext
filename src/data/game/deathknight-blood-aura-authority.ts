@@ -28,7 +28,10 @@
  *     proves about its expiry, and whether `buff.<name>.remains` may bind
  *     the order-invariant lower bound inside the Blood pre-decision window.
  *     Both are Blood-owned readings of the pinned producer set against the
- *     observed wire, applied by `aura-remains.ts`; see `BloodRemainsPolicy`.
+ *     observed wire, applied by `aura-remains.ts`; see `BloodRemainsPolicy`;
+ *   - a PRESENCE POLICY (M11-B10): whether `buff.<name>.up` may bind, inside
+ *     the pre-decision window, the presence M4 proves on BOTH sides of a
+ *     stack-gain cluster (`aura-bindings.ts`); see `BloodPresencePolicy`.
  *
  * WHAT IS NOT HERE. Durations: `buff.<name>.remains` is derived (M11-B4) in
  * `aura-remains.ts` from these identities plus the pinned duration artifact
@@ -70,8 +73,11 @@ export type BloodHeroTreeName = "sanlayn" | "deathbringer";
  *                              may corroborate a modifier, never establish it.
  *   `windowOrderInvariantSet`  inside the pre-decision window, a cluster
  *                              of stack gains binds the finite set of exact
- *                              counts the two orderings leave — never a
- *                              chosen one (`aura-bindings.ts`).
+ *                              counts EVERY ordering of the decision among
+ *                              them leaves — the count before the cluster
+ *                              and each gain's absolute count, in prefix
+ *                              order — never a chosen one (`aura-bindings.ts`;
+ *                              M11-B9 one gain, M11-B10 one or more).
  */
 export interface BloodExactCountRule {
   readonly applicationStack: number | null;
@@ -116,6 +122,25 @@ export const B4_REMAINS_POLICY: BloodRemainsPolicy = {
   windowOrderInvariantBound: false,
 };
 
+/**
+ * The Blood-owned policy `aura-bindings.ts` applies to one identity's
+ * `buff.<name>.up` inside the pre-decision window (M11-B10).
+ *
+ * `windowOrderInvariant` admits a presence binding when the window cluster
+ * is nothing but stack gains (with their same-millisecond refresh
+ * companions) and M4 proves the SAME exact presence immediately before the
+ * cluster and at the decision: whichever side of the decision the cluster
+ * fell, the aura was in that state. The proof reads M4 on both sides; it
+ * never reads a count, never infers presence from a gain, and never reads
+ * silence — a cluster whose before-side is AMBIGUOUS_INITIAL_STATE refuses.
+ */
+export interface BloodPresencePolicy {
+  readonly windowOrderInvariant: boolean;
+}
+
+/** The M11-B2 reading: every transition inside the window refuses the presence. */
+export const B2_PRESENCE_POLICY: BloodPresencePolicy = { windowOrderInvariant: false };
+
 export interface BloodAuraIdentity {
   /** The buff name as the pinned APL writes it after `buff.` / `debuff.`. */
   readonly atomName: string;
@@ -138,6 +163,8 @@ export interface BloodAuraIdentity {
   readonly exactCount: BloodExactCountRule | null;
   /** How `aura-remains.ts` reads this identity's lone refreshes and the pre-decision window (M11-B8). */
   readonly remainsPolicy: BloodRemainsPolicy;
+  /** Whether `aura-bindings.ts` may bind the presence M4 proves on both sides of a window stack-gain cluster (M11-B10). */
+  readonly presencePolicy: BloodPresencePolicy;
   readonly claims: readonly BloodAuraClaim[];
 }
 
@@ -162,6 +189,7 @@ const GIFT_OF_THE_SANLAYN: BloodAuraIdentity = {
   ownedByHeroTree: "sanlayn",
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -189,6 +217,7 @@ const DANCING_RUNE_WEAPON: BloodAuraIdentity = {
   ownedByHeroTree: null,
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -212,6 +241,7 @@ const DEATH_AND_DECAY: BloodAuraIdentity = {
   ownedByHeroTree: null,
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -231,8 +261,22 @@ const BONE_SHIELD: BloodAuraIdentity = {
   selfApplied: true,
   producedByTalent: null,
   ownedByHeroTree: null,
-  exactCount: { applicationStack: null, maxStackGuard: false, windowOrderInvariantSet: false },
-  remainsPolicy: B4_REMAINS_POLICY,
+  // M11-B10. Inside the pre-decision window a cluster of the aura's own
+  // stack gains (a Marrowrend's three, a Death's Caress's one, each an
+  // `applybuffstack` carrying the absolute resulting count) binds the finite
+  // set of every exact count the decision's position among them leaves;
+  // the presence M4 proves on both sides of such a cluster binds `.up`; and
+  // `.remains` admits the M11-B8 order-invariant floor, algorithm unchanged.
+  // `applicationStack` stays null (Marrowrend applies 3, Death's Caress 2 —
+  // the pinned module fixes no single number) and `maxStackGuard` stays off:
+  // the DBC `_max_stack` is 10 and Improved Bone Shield (374715, effect
+  // 1259987, +2 P_MAX_STACKS on the aura's family flags) raises it to 12 on
+  // the corpus builds, but that talent is not in the extracted artifact and
+  // the observed 11 / 12 may corroborate it, never establish it; the guard
+  // is deferred to promotion readiness rather than fed by the log.
+  exactCount: { applicationStack: null, maxStackGuard: false, windowOrderInvariantSet: true },
+  remainsPolicy: { loneRefresh: "PINNED_TRIGGER_RESET", windowOrderInvariantBound: true },
+  presencePolicy: { windowOrderInvariant: true },
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -246,6 +290,17 @@ const BONE_SHIELD: BloodAuraIdentity = {
       "Every stack gain is `buffs.bone_shield->trigger( n )` on the actor, which Warcraft Logs reports as an " +
         "`applybuffstack` carrying the absolute resulting count; every consumption is a `removebuffstack` carrying " +
         "the resulting count. The Blood reconstruction reads exactly those numbers and nothing between them.",
+    ),
+    claim(
+      "marrowrend_t::impact; deaths_caress_t::execute; death_knight_t::bone_shield_handler",
+      "11717-11721; 9766-9771; 16629-16643",
+      "Marrowrend triggers `data().effectN( 3 ).base_value()` = 3 stacks on impact and Death's Caress " +
+        "`spec.deaths_caress->effectN( 3 ).base_value()` = 2 on execute — each bump a DURATION refresh of the " +
+        "30 s aura that Warcraft Logs writes as one `applybuffstack` per stack with the absolute resulting count " +
+        "(a same-millisecond `refreshbuff` beside each after the first). The only consumption is " +
+        "`bone_shield_handler`'s `decrement()` on a successful auto-attack TAKEN under the 2.5 s internal " +
+        "cooldown: caused by another actor's hit, never by the player's own action. M11-B10 reads a cluster of the " +
+        "actor's own gains inside the pre-decision window as the finite set of exact counts and never a chosen ordering.",
     ),
   ],
 };
@@ -261,6 +316,7 @@ const VAMPIRIC_STRIKE: BloodAuraIdentity = {
   ownedByHeroTree: "sanlayn",
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -296,6 +352,7 @@ const ESSENCE_OF_THE_BLOOD_QUEEN: BloodAuraIdentity = {
   // label 3134), which the pinned sim parses but never applies to buff_t —
   // pinned Blood-side in `deathknight-blood-stack-authority.ts` (M11-B9).
   remainsPolicy: { loneRefresh: "UNPROVEN_CAUSE", windowOrderInvariantBound: true },
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -335,6 +392,7 @@ const CRIMSON_SCOURGE: BloodAuraIdentity = {
   ownedByHeroTree: null,
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -358,6 +416,7 @@ const BOILING_POINT: BloodAuraIdentity = {
   ownedByHeroTree: null,
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -382,6 +441,7 @@ const BLOOD_DEBT: BloodAuraIdentity = {
   ownedByHeroTree: null,
   exactCount: { applicationStack: 1, maxStackGuard: false, windowOrderInvariantSet: false },
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -441,6 +501,7 @@ const VISCERAL_STRENGTH: BloodAuraIdentity = {
   ownedByHeroTree: "sanlayn",
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -463,6 +524,7 @@ const EXTERMINATE: BloodAuraIdentity = {
   ownedByHeroTree: "deathbringer",
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells; create_buffs",
@@ -485,6 +547,7 @@ const VAMPIRIC_BLOOD: BloodAuraIdentity = {
   ownedByHeroTree: null,
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::create_buffs; vampiric_blood_t::execute",
@@ -506,6 +569,7 @@ const REAPERS_MARK_DEBUFF: BloodAuraIdentity = {
   ownedByHeroTree: "deathbringer",
   exactCount: null,
   remainsPolicy: B4_REMAINS_POLICY,
+  presencePolicy: B2_PRESENCE_POLICY,
   claims: [
     claim(
       "death_knight_t::init_spells",

@@ -311,12 +311,14 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(run.analysis.specId).toBe("deathknight/blood");
     expect(run.analysis.authority.authorityId).toBe("SIMC_APL_DEATHKNIGHT_BLOOD");
     const view = registration.observedDecisionView(run.analysis);
-    // RE-POINTED for M11-B4 (9), M11-B5 (10), M11-B6 (15), M11-B7 (15 + 3) and M11-B9 (16 + 3): 16 of
-    // the 45 s slice's 48 decisions MATCH (B9 added the Vampiric Strike at 2,015,029, whose Essence count
-    // is one of { 5,6 } and makes san_gift[3] TRUE either way), and the three consecutive Heart Strikes at
-    // 4 Runes and Blood Debt 10 before the Marrowrend at 2,043,209 are REJECTED — the authority selects
-    // marrowrend at sanlayn[7].
-    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 16, rejected: 3, unknown: 29 });
+    // RE-POINTED for M11-B4 (9), M11-B5 (10), M11-B6 (15), M11-B7 (15 + 3), M11-B9 (16 + 3) and
+    // M11-B10 (17 + 3): 17 of the 45 s slice's 48 decisions MATCH (B9 added the Vampiric Strike at
+    // 2,015,029, whose Essence count is one of { 5,6 } and makes san_gift[3] TRUE either way; B10 the
+    // Marrowrend at 2,043,209 itself, whose own three Bone Shield gains leave the count one of
+    // { 7,8,9,10 } — sanlayn[0], [3] and [4] FALSE in every world — and which sanlayn[7] selects at
+    // Blood Debt 10), and the three consecutive Heart Strikes at 4 Runes and Blood Debt 10 before that
+    // Marrowrend are REJECTED — the authority selects marrowrend at sanlayn[7].
+    expect(view.coverage).toMatchObject({ eligibleDecisions: 48, match: 17, rejected: 3, unknown: 28 });
     const rejected = view.decisions
       .filter((decision) => decision.outcome === "REJECTED")
       .map((decision) => [decision.fightTimeMs, decision.observedAbilityGameId, decision.authorityToken]);

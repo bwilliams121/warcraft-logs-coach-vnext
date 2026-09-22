@@ -2094,6 +2094,109 @@ authority did not establish.
 
 ---
 
+# Bone Shield Window Tests (M11-B10)
+
+Inside the 50 ms pre-decision window a Bone Shield count is EVERY exact
+value the decision's position among the aura's own gains leaves — the
+ordinary exact count before the cluster and each gain's absolute count in
+order, handed to the shared evaluator as `ONE_OF_NUMBERS`; the presence
+is M4's reading on BOTH sides of that cluster; the remainder is the
+M11-B8 floor, algorithm untouched. The tests must prove that no
+intermediate world is dropped, no ordering is chosen, no count is added,
+no presence comes from a count or from silence, no plain application
+binds a count the producer does not pin, no removal or lone refresh is
+read through, and nothing else moves.
+
+Required (`tests/unit/m11b10-blood-bone-shield-window.test.ts`):
+
+```text
+identity                              -> exactCount { null, guard off, set on }; remainsPolicy { PINNED_TRIGGER_RESET, bound on }; presencePolicy { on }; no other identity's presence policy is on; window 50, duration 30,000, artifact max 10
+1 / 2 / 3 gains at leads 0 / 1 / 50   -> BOUND_SET { H1, c1, ..., cn }, anchor on H1's observation, both ends recorded, every cluster lead equal, the seam receives ONE_OF_NUMBERS with the whole set
+three gains from 7                    -> { 7,8,9,10 }, never { 7,10 }
+51 ms                                 -> the ordinary exact count, OBSERVED presence, GAIN_ANCHOR_EXACT remainder
+gains without companions              -> the same set (companions permitted, not required)
+a Death's Caress gain 9 -> 11         -> { 9,11 }; no 10 invented
+H1 from applybuffstack / removebuffstack / a companion-refreshed gain -> bound, anchored there
+H1 across a lone refresh              -> refused (COUNT_AMBIGUOUS_SINCE_OBSERVATION named), nothing reaches the seam
+H1 from silence (first gain in track) -> refused, AMBIGUOUS_INITIAL_STATE named
+non-ascending gains; first gain not above H1 -> refused (stack and presence)
+removal (plain, stack, mixed with a gain); lone refresh; refresh 1 ms after the gain; plain application beside a gain -> refused (stack, presence, and remains where a removal sits)
+first Bone Shield application in the track inside the window -> stack refused (no application count pinned), presence refused (plain application), remains refused; nothing at either seam
+proven removal, then a plain application inside the window -> still no count (the producer's number is not pinned); presence refused
+outside the window a plain application -> NO_STACK_OBSERVATION (M11-B2 unchanged)
+presence ACTIVE / ACTIVE               -> up TRUE, WINDOW_ORDER_INVARIANT_PRESENCE, anchored on the before-side, "under every ordering the aura is ACTIVE"
+before-side AMBIGUOUS_INITIAL_STATE    -> refused, auraReason and detail name it
+INACTIVE before a plain application    -> refused (the orderings disagree)
+a nested window                        -> the outer cluster binds { 5,6,7 } and the presence; the inner decision binds { 5,6 }
+Essence presence inside its window     -> still refused (the policy is Bone Shield's); its stack set unchanged
+remains                                -> min(H1 projected, 30,000 - lead) as BOUNDED_NUMBER; H1 below the reset gives H1's projection; within 50 ms of 1.5 s / 3 s -> WITHIN_TIMING_TOLERANCE_OF_THRESHOLD
+evaluator over { 7,8,9,10 }            -> !up | remains<1.5 | stack<=1 FALSE; stack<6 FALSE
+evaluator over { 4,5,6,7 }             -> stack<6 UNRESOLVED; stack<=1 FALSE; up TRUE; sanlayn[0] FALSE
+evaluator over { 1,2 }                 -> stack<=1 UNRESOLVED; sanlayn[0] UNRESOLVED
+Blood Debt                             -> a gain inside the window still refused (stack and presence); exact outside it
+committed                              -> 2,043,209 { 7,8,9,10 } floor 2,572 from 2,038,654; 2,057,622 { 11,12 } 15,607; 2,085,352 { 8,9,10,11 } 2,270; 2,124,183 { 8,9,10,11 } 5,702; 2,151,502 { 6,7,8,9 } 2,716; 2,164,444 { 9,11 } 17,058; 2,015,770 { 5,6,7,8 } 21,986 — each presence order-invariant ACTIVE; 2,004,615 refused everywhere at lead 20; 2,044,021 ambiguous naming 2,043,229 with OBSERVED presence; no window refusal on either subject is a removal; opener 2,427,294 { 7,9 }, presence, floor 19,726
+```
+
+Required, re-pinned: `m11b2-blood-bindings` (the same-millisecond
+Marrowrend binds { 5,6,7 } and the presence, never 7 alone, never 5
+alone); `m11b4-blood-aura-remains` (at leads 0 / 1 / 20 / 50 the window
+binds only order-invariant state — presence, set, floor 26,000 — and
+never an exact read); `m11b6-blood-debt-stack` (Bone Shield's set switch
+on, application count still null, guard still off); `m11b8-blood-ebq-remains`
+(Essence and Bone Shield admit the bound, every other identity keeps
+B4's reading; a Bone Shield cluster binds the same floor Essence would;
+Crimson Scourge stays refused); `m11b9-blood-ebq-stack` (a two-gain
+Essence cluster is { H1, c1, c2 } and a descending one refuses; a Bone
+Shield cluster binds its own set; Blood Debt's stays refused).
+
+Required, contract (`tests/contracts/m11b2-blood-evaluator.test.ts`,
+`m11b2-blood-registration.test.ts`): 42 / 9 / 72 with 148 excluded and
+`marrowrend: 2` among the matched tokens, EXACT_ENTRY 38; the two MATCH
+individually — outcome, basis, token, precision, the sanlayn run entered
+and the Gift run skipped, no undecided candidate, the set with H1's
+`removebuffstack` anchor and both ends, the five-transition cluster at
+lead 0, every member above 1 and at or above 6, the presence proof, the
+floor, `vampiric_strike.remains` proven zero, the Essence remainder a
+floor or UNKNOWN, Runic Power bound, Crimson Scourge and Boiling Point
+down, Blood Debt exactly 10, the Gift down; the four still-UNKNOWN with
+Bone Shield passed (no candidate names a Bone Shield atom; the first
+candidate is `sanlayn[9] death_strike` or `sanlayn[2] death_strike`);
+2,044,021 on `sanlayn[0] | buff.bone_shield.stack` alone; 2,004,615
+refused at lead 20; no set rests on a removal; the B6, B9 and B10 MATCH
+sets; the stack census (114 / 7 / 1 / 1 with every set ascending from H1
+to the last gain and one member per gain plus one), the remains census
+(11 / 104 / 7 / 1), the window-refusal census (only the 20 ms first
+application), the first-obstacle map (`sanlayn[0]` 7 → 1); the 45 s view
+17 / 3 / 28 with the same three REJECTED; the opener's remains census (the
+one window cluster a floor).
+
+Required, corpus (`SPEC_BLOOD_DEATH_KNIGHT.AURA_BINDING_AT` admits
+`WINDOW_ORDER_INVARIANT_PRESENCE`; `STACK_BINDING_AT` sets of two to four
+members; `REMAINS_BINDING_AT` floors; `DECISION_COVERAGE`,
+`DISPATCH_SEQUENCE`, `RUNE_AFFORDABILITY_AT` at the two MATCH;
+`STACK_EVIDENCE_CENSUS`, `STOPPING_POINT_DISTRIBUTION`, `COVERAGE_SUMMARY`
+and the window-refusal census re-pinned over the bundle and the opener;
+the B4 case's 2,015,770 pins re-pointed to the set, the presence and the
+floor): the case
+`spec-blood-death-knight.bone-shield-is-every-exact-count-its-own-gains-leave-and-the-presence-proven-on-both-sides`.
+
+Failure this prevents:
+
+```text
+A Marrowrend at 7 stacks read as "10" because its own three gains sit
+ahead of it in the array, or as "7" because someone decided they came
+after; a { 7,10 } that forgot the decision could sit between the first
+gain and the second; `buff.bone_shield.up` TRUE because a count was
+positive, or because the log had no earlier Bone Shield event; a Death's
+Caress at 9 stacks given a "10" nobody wrote; a { 0,2 } for a first-seen
+application from a producer whose number is not pinned; a
+`removebuffstack` inside the window read as an ordering hazard it is not;
+or a maximum of 12 asserted from the 12 the wire happened to show. Each is
+a verdict on state the authority did not establish.
+```
+
+---
+
 # Spec-Owned Resolver Tests
 
 When a specialization supplies a resolver:

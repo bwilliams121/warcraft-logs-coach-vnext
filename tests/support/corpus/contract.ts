@@ -2118,7 +2118,14 @@ export const ASSERTION_KINDS = {
             state: z.enum(["BOUND", "UNBOUND"]),
             up: z.boolean().nullable(),
             abilityGameId: z.number().int().nullable(),
-            proof: z.enum(["HERO_TREE_EXCLUDED", "TALENT_NOT_SELECTED", "OBSERVED"]).nullable(),
+            proof: z
+              .enum([
+                "HERO_TREE_EXCLUDED",
+                "TALENT_NOT_SELECTED",
+                "OBSERVED",
+                "WINDOW_ORDER_INVARIANT_PRESENCE",
+              ])
+              .nullable(),
             anchorReportTimeMs: z.number().int().nullable(),
             reason: z.string().nullable(),
             auraReason: z.string().nullable(),
@@ -2130,7 +2137,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: true,
     description:
-      "At this decision the Blood aura bindings bind (or refuse to bind) this buff atom exactly so: from a transition M4 OBSERVED strictly before the decision on the actor's own aura, or from a build proof — the aura's every producer is a hero talent of the OTHER resolved sub-tree, or its producing talent is disproved at its choice node. Never inactive from silence, never from a later transition.",
+      "At this decision the Blood aura bindings bind (or refuse to bind) this buff atom exactly so: from a transition M4 OBSERVED strictly before the decision on the actor's own aura, or from a build proof — the aura's every producer is a hero talent of the OTHER resolved sub-tree, or its producing talent is disproved at its choice node — or (M11-B10, bone_shield only) inside the 50 ms pre-decision window, the presence M4 proves on BOTH sides of a cluster of the aura's own stack gains (WINDOW_ORDER_INVARIANT_PRESENCE; ACTIVE before the cluster and at the decision, so under every ordering). Never inactive from silence, never from a later transition, never from a count.",
   },
   "SPEC_BLOOD_DEATH_KNIGHT.STACK_BINDING_AT": {
     owningLayer: "SPEC_BLOOD_DEATH_KNIGHT",

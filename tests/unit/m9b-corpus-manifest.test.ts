@@ -66,9 +66,11 @@ describe("the committed corpus loads", () => {
     // Essence lone-refresh floors, the order-invariant window bound and the
     // two decisions it resolves; M11-B9 added one evaluator case pinning the
     // Essence stack authority, the exact counts and the finite sets inside the
-    // window with the three decisions they resolve. Measured, then pinned.
+    // window with the three decisions they resolve; M11-B10 added one pinning
+    // Bone Shield's window sets, presence and floor with the two Marrowrends
+    // they resolve. Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(43);
-    expect(loaded.cases).toHaveLength(160);
+    expect(loaded.cases).toHaveLength(161);
     expect(loaded.coverage.declared).toBe(0);
   });
 

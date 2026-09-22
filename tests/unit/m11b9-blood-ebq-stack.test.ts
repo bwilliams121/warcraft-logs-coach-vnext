@@ -290,7 +290,7 @@ describe("the Frenzied Bloodthirst authority", () => {
     });
   });
 
-  it("Essence is the third exact-count atom; its rule pins the application count 1 and both M11-B9 switches; no other identity's switches are on", () => {
+  it("Essence is the third exact-count atom; its rule pins the application count 1 and both M11-B9 switches; no other identity guards a maximum, and only Bone Shield (M11-B10) shares the window set", () => {
     expect(EXACT_COUNT_ATOMS).toEqual(["bone_shield", "essence_of_the_blood_queen", "blood_debt"]);
     expect(bloodAuraIdentityFor(EBQ_ATOM)?.exactCount).toEqual({
       applicationStack: 1,
@@ -300,7 +300,9 @@ describe("the Frenzied Bloodthirst authority", () => {
     for (const identity of BLOOD_AURA_IDENTITIES) {
       if (identity.atomName === EBQ_ATOM || identity.exactCount === null) continue;
       expect(identity.exactCount.maxStackGuard, identity.atomName).toBe(false);
-      expect(identity.exactCount.windowOrderInvariantSet, identity.atomName).toBe(false);
+      expect(identity.exactCount.windowOrderInvariantSet, identity.atomName).toBe(
+        identity.atomName === "bone_shield",
+      );
     }
     expect(BLOOD_PRE_DECISION_WINDOW_MS).toBe(50);
   });
@@ -560,7 +562,7 @@ describe("the finite set inside the 50 ms window", () => {
       ]);
       const binding = stackAt(state, 3);
       expect(binding).toMatchObject(refused);
-      expect(binding.state === "UNBOUND" && binding.detail).toContain("0 application(s)");
+      expect(binding.state === "UNBOUND" && binding.detail).toContain("no application or stack gain");
     });
 
     it("a refresh 1 ms after the stack gain is not its companion", () => {
@@ -598,16 +600,32 @@ describe("the finite set inside the 50 ms window", () => {
       expect(stackAt(mixed, 4)).toMatchObject(refused);
     });
 
-    it("two stack gains in one cluster", () => {
+    it("two stack gains in one cluster (re-pinned for M11-B10): every prefix world is a member — { H1, c1, c2 } — never { H1, c2 } alone; the wire never writes two Essence gains in one window, so no corpus result moves", () => {
       const state = stateOf([
         aura(0, 1000, "APPLIED"),
         aura(1, 4990, "APPLIED", 2),
         aura(2, 5000, "APPLIED", 3),
         cast(3, 5000, VAMPIRIC_STRIKE),
       ]);
-      const binding = stackAt(state, 3);
+      expect(stackAt(state, 3)).toMatchObject({
+        state: "BOUND_SET",
+        possibleStacks: [1, 2, 3],
+        windowOrderInvariance: {
+          beforeClusterStack: 1,
+          beforeClusterProof: "EXACT_STACK_APPLICATION",
+          afterClusterStack: 3,
+        },
+      });
+      // Not ascending: the shape is not a sequence of the aura's own gains.
+      const descending = stateOf([
+        aura(0, 1000, "APPLIED"),
+        aura(1, 4990, "APPLIED", 3),
+        aura(2, 5000, "APPLIED", 2),
+        cast(3, 5000, VAMPIRIC_STRIKE),
+      ]);
+      const binding = stackAt(descending, 3);
       expect(binding).toMatchObject(refused);
-      expect(binding.state === "UNBOUND" && binding.detail).toContain("2 application(s)");
+      expect(binding.state === "UNBOUND" && binding.detail).toContain("not ascending");
     });
 
     it("H1 unavailable: the cluster's stack gain is the first observation (no count before it)", () => {
@@ -653,15 +671,15 @@ describe("the finite set inside the 50 ms window", () => {
       expect(stackAt(six, 3, WITH_FRENZIED)).toMatchObject({ state: "BOUND_SET", possibleStacks: [5, 6] });
     });
 
-    it("identity isolation: a Bone Shield or Blood Debt cluster inside the window stays refused (no set for them)", () => {
+    it("identity isolation (re-pinned for M11-B10): a Bone Shield cluster binds its own set under its own policy; a Blood Debt cluster inside the window stays refused (no set for it)", () => {
       const bone = stateOf([
         aura(0, 1000, "APPLIED", 6, BONE_SHIELD_BUFF_SPELL_ID),
         aura(1, 5000, "APPLIED", 9, BONE_SHIELD_BUFF_SPELL_ID),
         cast(2, 5000, 195182),
       ]);
       expect(stackAt(bone, 2, BASE_TALENTS, "bone_shield")).toMatchObject({
-        ...refused,
-        windowTransition: { leadMs: 0 },
+        state: "BOUND_SET",
+        possibleStacks: [6, 9],
       });
       const debt = stateOf([
         aura(0, 1000, "APPLIED", null, BLOOD_DEBT_BUFF_SPELL_ID),

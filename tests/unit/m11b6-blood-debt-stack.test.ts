@@ -161,10 +161,12 @@ describe("the pinned Blood Debt identity", () => {
     expect(identity?.ownedByHeroTree).toBeNull();
     expect(BLOOD_DEBT_MAX_STACK).toBe(10);
     expect(EXACT_COUNT_ATOMS).toEqual(["bone_shield", "essence_of_the_blood_queen", "blood_debt"]);
+    // RE-POINTED for M11-B10: Bone Shield admits the window set; its
+    // application count stays unpinned and its maximum stays unguarded.
     expect(bloodAuraIdentityFor("bone_shield")?.exactCount).toEqual({
       applicationStack: null,
       maxStackGuard: false,
-      windowOrderInvariantSet: false,
+      windowOrderInvariantSet: true,
     });
     expect(bloodAuraIdentityFor("essence_of_the_blood_queen")?.exactCount).toEqual({
       applicationStack: 1,

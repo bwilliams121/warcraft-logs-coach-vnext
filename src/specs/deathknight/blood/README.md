@@ -1,4 +1,4 @@
-# Blood Death Knight — INTERNAL_ONLY measurement slice (M11-B2 … M11-B9)
+# Blood Death Knight — INTERNAL_ONLY measurement slice (M11-B2 … M11-B10)
 
 **Exposure: `INTERNAL_ONLY`.** This evaluator is registered in the
 production catalog (`deathknight-blood-observed-decisions`,
@@ -59,11 +59,11 @@ PREDICTIVE state) and Consumption.
 | `rune` | the decision cast's own PRE_COST Runes entry | Rune-costed decisions only |
 | Marrowrend's usability (M11-B7) | the decision cast's own PRE_COST Runes entry against the pinned Rune cost, under a RESOLVED non-Deathbringer hero tree | `PROVEN_USABLE` only, at or above the cost; never a negative proof |
 | `time` | the decision's fight time | always |
-| `buff.<x>.up` (8 atoms) | M4 `presenceAt` FROM_SOURCE self, strictly before the decision | an observed transition; or DOWN by hero-tree exclusion / a disproved producing talent |
-| `buff.bone_shield.stack` | the last stack-bearing transition's absolute count | only across same-millisecond refresh companions under EXACT ACTIVE presence |
+| `buff.<x>.up` (8 atoms) | M4 `presenceAt` FROM_SOURCE self, strictly before the decision; for Bone Shield inside the 50 ms window (M11-B10), M4's reading on BOTH sides of a cluster of its own stack gains | an observed transition; or DOWN by hero-tree exclusion / a disproved producing talent; or ACTIVE before the cluster and at the decision alike (`WINDOW_ORDER_INVARIANT_PRESENCE`) — never from a count, never from silence |
+| `buff.bone_shield.stack` | the last stack-bearing transition's absolute count; inside the window (M11-B10), the finite set of EVERY exact count the decision's position among the aura's own ascending `applybuffstack` gains leaves — { H1, c1, …, cn } as `ONE_OF_NUMBERS` | only across same-millisecond refresh companions under EXACT ACTIVE presence; the set only when H1 is exact by that same rule at the cluster's first position and the cluster is nothing but gains and their companions |
 | `buff.blood_debt.stack` | the last stack-bearing transition's absolute count, or the pinned 1 of a plain application preceded by a removal or by nothing (M11-B6) | under EXACT ACTIVE presence; an application to an aura already held refuses |
 | `buff.essence_of_the_blood_queen.stack` (M11-B9) | the last `applybuffstack`'s absolute count, or the pinned 1 of a fresh `applybuff`; inside the window, the finite set of the two counts both orderings of a single stack gain leave (`ONE_OF_NUMBERS`) | under EXACT ACTIVE presence with nothing but same-millisecond companions since the count — a lone refresh breaks it (Q2 declined); every count checked against the effective maximum (DBC 5, +2 under a SELECTED Frenzied Bloodthirst): above it, or above 5 with the modifier unproven, refuses |
-| `buff.<x>.remains` (5 atoms, M11-B4/B8) | the last exact gain (an `applybuff` / `applybuffstack`, or a lone `refreshbuff` only where the identity's policy reads it as the pinned trigger) plus the pinned Blood duration, under continuity from the gain | exact from the gain; a lower bound past a refresh of unpinned or unproven cause; for Essence inside the 50 ms window, the floor both orderings of the cluster share (`WINDOW_ORDER_INVARIANT_BOUNDED`) |
+| `buff.<x>.remains` (5 atoms, M11-B4/B8) | the last exact gain (an `applybuff` / `applybuffstack`, or a lone `refreshbuff` only where the identity's policy reads it as the pinned trigger) plus the pinned Blood duration, under continuity from the gain | exact from the gain; a lower bound past a refresh of unpinned or unproven cause; for Essence (M11-B8) and Bone Shield (M11-B10) inside the 50 ms window, the floor both orderings of the cluster share (`WINDOW_ORDER_INVARIANT_BOUNDED`, one algorithm) |
 | `cooldown.dancing_rune_weapon.remains` | the shared token-cooldown derivation over the pinned record | an observed cast within 90,000 ms (Insatiable Blade SELECTED) |
 
 Never bound: `debuff.reapers_mark_debuff.up` (no debuff field exists), `fight_remains`
@@ -307,6 +307,76 @@ Death Strike usability 3 + 1, Runic Power after a spend 3,
 `buff.vampiric_strike.up` 2, Blood Boil usability 2, `san_gift[0]` 1,
 Boiling Point 1.
 
+M11-B10 read Bone Shield's window state as what every ordering leaves (see
+the Bone Shield window policy below). Result: **42 MATCH / 9 REJECTED / 72
+UNKNOWN** — the 40 MATCH and 9 REJECTED unchanged decision for decision,
+and two more MATCH: the Marrowrends at 2,043,209 ({ 7,8,9,10 }, floor
+2,572 ms) and 2,124,183 ({ 8,9,10,11 }, floor 5,702 ms), each selected at
+`sanlayn[7] marrowrend` — the observed action, PROVEN_USABLE from its own
+Runes — at Blood Debt exactly 10, once `sanlayn[0]` (`!up`, `remains<1.5`,
+`stack<=1`) and `sanlayn[3]`/`[4]` (`stack<6`) are FALSE for every member
+and every entry between is FALSE on state already exact. The 45 s slice is
+17 / 3 / 28; the opener 1 / 0 / 20 (its one Bone Shield set, { 7,9 } at
+2,427,294, sits behind `san_gift[2]`). Bone Shield evidence over the 123:
+exact counts 114, finite sets 7 ({5,6,7,8}, {7,8,9,10}, {11,12},
+{8,9,10,11} ×2, {6,7,8,9}, {9,11}), ambiguous across lone refreshes 1
+(2,044,021 — the Dancing Rune Weapon mirror's at-cap refreshes at
+2,043,229), window-refused 1 (the track's first application at 2,004,615,
+20 ms ahead: AMBIGUOUS_INITIAL_STATE before it, no application count
+pinned); presence order-invariant 7; remainder floors 7. Still UNKNOWN once
+Bone Shield is passed: 2,057,622 and 2,085,352 on `sanlayn[9]`
+`fight_remains`, 2,151,502 and 2,164,444 on `sanlayn[2]`'s Runic Power
+deficit after a spend. The first-blocker ranking after B10: `sanlayn[9]`
+`fight_remains` 10 + 12, Marrowrend usability 10, `san_gift[3]` Essence
+stack 7 (+ 2 on Heart Strike usability), `any_dnd` usability 5 + 1, Runic
+Power after a spend 5, `sanlayn[1]` 4 + 2, the Dancing Rune Weapon gate 3,
+`san_gift[2]` 3 + 1, Death Strike usability 3 + 1,
+`buff.vampiric_strike.up` 2, Blood Boil usability 2, `san_gift[0]` 1,
+Bone Shield count (lone refresh) 1, Boiling Point 1.
+
+## The Bone Shield window policy (M11-B10)
+
+Warcraft Logs writes a Marrowrend's three Bone Shield stacks (`trigger(3)`,
+effect 286519) as three `applybuffstack` at the cast's own millisecond and
+AHEAD of it in the array — each carrying the absolute resulting count, each
+after the first beside a same-millisecond `refreshbuff` — and a Death's
+Caress's two (`trigger(2)`, effect 1000766) as one; the Dancing Rune Weapon
+mirrors land 10–35 ms AFTER the cast, and at the maximum a trigger writes
+only a refresh. Whether those gains preceded the decision, followed it, or
+straddled it the wire does not say, so inside the 50 ms window the count is
+EVERY exact value the decision's position among them leaves: the ordinary
+exact count immediately before the cluster (H1, by the M11-B2 rule at the
+cluster's first position with the set not admitted — the last
+`applybuffstack` or `removebuffstack`, carried only across same-millisecond
+companions, never across a lone refresh, never from silence) and each
+gain's absolute count in order, { H1, c1, …, cn } — never { H1, cn }, never
+`H1 + 3`. The set reaches the shared evaluator as `ONE_OF_NUMBERS`
+(unchanged since M11-B9), which decides `stack<=1` and `stack<6` only when
+every member decides them alike; Blood writes no threshold. A cluster
+holding a plain application, a removal, a lone refresh, a non-ascending
+count, or an H1 that is not exact refuses.
+
+The presence is proven the same way on both sides and never from the set:
+M4 `presenceAt` immediately before the cluster (the ordinary binding at
+its first position, window presence not admitted) and at the decision must
+both be EXACT ACTIVE — `WINDOW_ORDER_INVARIANT_PRESENCE`; a before-side M4
+cannot answer (the track's first application, 2,004,615: AMBIGUOUS_INITIAL_
+STATE) refuses. The remainder is the M11-B8 floor both orderings share,
+`windowOrderInvariantBound` switched on for the identity and the algorithm
+untouched (Bone Shield's chain before a cluster is often a lower bound past
+a refresh beside a charge removal; the floor is the smaller of that and the
+reset). Bone Shield's fresh application still pins no count (Marrowrend 3,
+Death's Caress 2, the Dancing Rune Weapon 5 — no single number), so a plain
+`applybuff` inside the window binds nothing even after a proven removal; a
+lone refresh still breaks the carried count (2,044,021); removals inside the
+window stay refused (none occur on either subject, and the corpus carries no
+damage-taken stream to corroborate their cause); and the maximum stays
+unguarded: the DBC `_max_stack` is 10, Improved Bone Shield (374715, effect
+1259987, +2 `P_MAX_STACKS` on the aura's family flags) makes it 12 on the
+corpus builds, but that talent is not in the extracted artifact and the
+observed 12 corroborates it without establishing it — deferred to
+promotion readiness, not fed by the log.
+
 ## The Essence of the Blood Queen stack policy (M11-B9)
 
 The DBC maximum of 433925 is 5 — the generated artifact's raw `maxStack`,
@@ -407,9 +477,17 @@ of the pinned 1.5 s / 8 s thresholds is refused. No ordering is chosen.
   build proves; no maximum read off a count; no ordering chosen for a stack
   set, no set from a lone-refresh, removal or multi-gain cluster, no nested
   window set, no `<7` special case, no set collapsed to a member, no
-  arithmetic over a set, no set for Bone Shield or Blood Debt, no { 0,1 }
-  from the silence before a track's first transition (the M11-B9 boundary;
-  Q2 declined).
+  arithmetic over a set, no set for Blood Debt, no { 0,1 } from the silence
+  before a track's first transition (the M11-B9 boundary; Q2 declined).
+- No Bone Shield world beyond the wire's own counts and the exact count
+  before them — no `H1 + 3`, no intermediate world dropped, no ordering
+  chosen, no set from a cluster holding a plain application, a removal or a
+  lone refresh, no count for a plain application even after a proven
+  removal (the producer's number is not pinned), no presence from a count
+  or from a gain's implication, no presence whose before-side M4 cannot
+  answer, no change to the M11-B8 bound algorithm, no removal-window
+  ambiguity model, no Improved Bone Shield guard fed by the observed 12
+  (the M11-B10 boundary).
 - No GCD numeric bounds, no `empower_to` support, no new action option, no
   target-count or enemy-roster model, no `target_if`, no undecided-run world
   splitting, no generic variables, no pet state, no charge model, no
@@ -458,6 +536,7 @@ Tests: `tests/unit/m11b2-blood-*.test.ts`, `tests/unit/m11b4-*.test.ts`,
 `tests/unit/m11b7-blood-rune-affordability.test.ts`,
 `tests/unit/m11b8-blood-ebq-remains.test.ts`,
 `tests/unit/m11b9-blood-ebq-stack.test.ts`,
+`tests/unit/m11b10-blood-bone-shield-window.test.ts`,
 `tests/unit/simc-expression-one-of-numbers.test.ts`,
 `tests/contracts/m11b2-blood-*.test.ts`, corpus cases
 `spec-blood-death-knight.*`.

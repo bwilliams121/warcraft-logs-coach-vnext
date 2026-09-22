@@ -238,21 +238,31 @@ describe("the Bone Shield exact-count rule", () => {
       cast(4, 1900, MARROWREND),
     ]);
     // RE-POINTED for M11-B4: the 0 ms rule is the 0 ms case of the 50 ms
-    // pre-decision window, and the refusal records the measured lead.
+    // pre-decision window. RE-POINTED for M11-B10: the exact count stays
+    // refused inside the window; what binds is the finite set of EVERY
+    // exact count the decision's position among its own gains leaves —
+    // never the post-cast 7 alone, never the pre-cast 5 alone.
     const stack = bindBloodStack(input(state, 4), "bone_shield");
     expect(stack).toMatchObject({
-      state: "UNBOUND",
-      reason: "PRE_DECISION_WINDOW_TRANSITION",
-      windowTransition: { leadMs: 0, reportTimeMs: 1900 },
+      state: "BOUND_SET",
+      proof: "WINDOW_ORDER_INVARIANT_SET",
+      possibleStacks: [5, 6, 7],
+      windowOrderInvariance: {
+        beforeClusterStack: 5,
+        afterClusterStack: 7,
+        cluster: [{ leadMs: 0, reportTimeMs: 1900 }, { leadMs: 0 }, { leadMs: 0 }],
+      },
     });
+    // The presence is M4's reading on both sides of the cluster, not a count.
     const presence = bindBloodAura(input(state, 4), "bone_shield");
-    expect(presence).toMatchObject({
-      state: "UNBOUND",
-      reason: "PRE_DECISION_WINDOW_TRANSITION",
-      windowTransition: { leadMs: 0 },
-    });
-    // Never the post-cast 7, never the pre-cast 5: neither is proven.
-    expect(bloodStackBindingsFrom([stack])).toEqual([]);
+    expect(presence).toMatchObject({ state: "BOUND", up: true, proof: "WINDOW_ORDER_INVARIANT_PRESENCE" });
+    // The evaluator seam receives the set, never a number.
+    expect(bloodStackBindingsFrom([stack])).toEqual([
+      {
+        name: "bone_shield",
+        stack: { state: "ONE_OF_NUMBERS", values: [5, 6, 7], reason: "STATE_NOT_ESTABLISHED" },
+      },
+    ]);
   });
 
   it("binds nothing from silence: no transition at all is UNKNOWN presence, not zero stacks", () => {

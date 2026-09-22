@@ -61,6 +61,11 @@ const B8_REJECTED = [
 /** The three M11-B9 MATCH decisions: Gift-window Vampiric Strikes selected at san_gift[3] once the Essence stack set decides `stack<7` TRUE in both worlds. */
 const B9_MATCH_REPORT_TIMES = [2015029, 2103820, 2105703] as const;
 
+/** The two M11-B10 MATCH decisions: Marrowrends selected at sanlayn[7] (Blood Debt 10) once sanlayn[0], [3] and [4] are FALSE over the Bone Shield set, presence and floor. */
+const B10_MATCH_REPORT_TIMES = [2043209, 2124183] as const;
+const MARROWREND = 195182;
+const DEATHS_CARESS = 195292;
+
 /** Every REJECTED after M11-B8, in canonical order: B7's seven plus B8's two. */
 const REJECTED_AFTER_B8 = [...B7_REJECTED, ...B8_REJECTED].sort((left, right) => left.t - right.t);
 
@@ -149,12 +154,16 @@ describe("the measurement over the composed 165 s fight", () => {
     // both orderings leave: three Gift-window Vampiric Strikes whose
     // san_gift[3] gate (stack<7) is TRUE for every member of { 5,6 } / { 4,5 }
     // select the observed action at the exact entry. The 37 MATCH and the 9
-    // REJECTED are untouched again.
+    // REJECTED are untouched again. B10 binds Bone Shield's window state as
+    // what every ordering leaves — the prefix set of exact counts, the
+    // presence M4 proves on both sides, the B8 floor — and two Marrowrends
+    // whose sanlayn[0], [3] and [4] are FALSE for every member reach
+    // sanlayn[7] at Blood Debt 10. The 40 MATCH and 9 REJECTED are untouched.
     expect(coverage).toMatchObject({
       eligibleDecisions: 123,
-      match: 40,
+      match: 42,
       rejected: 9,
-      unknown: 74,
+      unknown: 72,
       excludedCastCount: 148,
     });
     const matched = new Map<string, number>();
@@ -172,15 +181,23 @@ describe("the measurement over the composed 165 s fight", () => {
       );
     }
     // M11-B9: three more Heart Strikes (Vampiric Strikes at 2,015,029, 2,103,820, 2,105,703), each EXACT_ENTRY at san_gift[3].
-    expect(Object.fromEntries(matched)).toEqual({ death_strike: 27, heart_strike: 9, blood_boil: 4 });
+    // M11-B10: two Marrowrends (2,043,209, 2,124,183), each EXACT_ENTRY at sanlayn[7].
+    expect(Object.fromEntries(matched)).toEqual({
+      death_strike: 27,
+      heart_strike: 9,
+      blood_boil: 4,
+      marrowrend: 2,
+    });
     // M11-B8: the Vampiric Strike at 2,029,599 is EXACT_ENTRY — sanlayn[1] is FALSE from the Essence floor.
-    expect(Object.fromEntries(precision)).toEqual({ EXACT_ENTRY: 36, TOKEN_CONVERGED: 4 });
-    // The MATCH population is exactly the M11-B6 one plus the three M11-B9 Vampiric Strikes, decision by decision.
+    expect(Object.fromEntries(precision)).toEqual({ EXACT_ENTRY: 38, TOKEN_CONVERGED: 4 });
+    // The MATCH population is exactly the M11-B6 one plus the three M11-B9 Vampiric Strikes and the two M11-B10 Marrowrends, decision by decision.
     const matchedAt = analysis.comparisons
       .filter((comparison) => comparison.outcome === "MATCH")
       .map((comparison) => comparison.decision.reportTimeMs);
     expect(matchedAt).toEqual(
-      [...B6_MATCH_REPORT_TIMES, ...B9_MATCH_REPORT_TIMES].sort((left, right) => left - right),
+      [...B6_MATCH_REPORT_TIMES, ...B9_MATCH_REPORT_TIMES, ...B10_MATCH_REPORT_TIMES].sort(
+        (left, right) => left - right,
+      ),
     );
     for (const t of B6_MATCH_REPORT_TIMES) expect(matchedAt, String(t)).toContain(t);
     expect(coverage.match + coverage.rejected + coverage.unknown).toBe(coverage.eligibleDecisions);
@@ -291,18 +308,25 @@ describe("the measurement over the composed 165 s fight", () => {
     // count (2,100,867), and 2 advance to Heart Strike's usability with an
     // exact count that makes the gate TRUE for an action that was not cast
     // (2,015,770 at 6, 2,104,758 at 5).
+    // RE-POINTED for M11-B10: the six sanlayn[0] Bone Shield window blockers
+    // are passed (up TRUE on both sides of the cluster, the floor above 1.5 s,
+    // every member of the set above 1 and, as it happens, at or above 6):
+    // two resolve (MATCH at sanlayn[7]), two advance to sanlayn[9]
+    // fight_remains (2,057,622 with the Essence remainder, 2,085,352) and two
+    // to sanlayn[2] on the Runic Power deficit after a spend (2,151,502,
+    // 2,164,444). The one sanlayn[0] blocker left is 2,044,021, whose count
+    // the lone refreshes at 2,043,229 break — not a window case.
     expect(Object.fromEntries(firstObstacle)).toEqual({
-      "(none)": 45,
-      "sanlayn[9] death_strike | fight_remains,buff.essence_of_the_blood_queen.remains": 11,
+      "(none)": 47,
+      "sanlayn[9] death_strike | fight_remains,buff.essence_of_the_blood_queen.remains": 12,
       "sanlayn[7] marrowrend | USABILITY:marrowrend": 10,
-      "sanlayn[9] death_strike | fight_remains": 9,
+      "sanlayn[9] death_strike | fight_remains": 10,
       "san_gift[3] heart_strike | buff.essence_of_the_blood_queen.stack": 7,
-      "sanlayn[0] deaths_caress | buff.bone_shield.up,buff.bone_shield.remains,buff.bone_shield.stack": 6,
       "sanlayn[5] any_dnd | USABILITY:any_dnd": 5,
+      "sanlayn[2] death_strike | runic_power.deficit": 5,
       "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains,fight_remains": 4,
       "high_prio_actions[1] dancing_rune_weapon | debuff.reapers_mark_debuff.up,fight_remains": 3,
       "san_gift[2] any_dnd | buff.crimson_scourge.remains,buff.visceral_strength.remains": 3,
-      "sanlayn[2] death_strike | runic_power.deficit": 3,
       "sanlayn[2] death_strike | USABILITY:death_strike": 3,
       "san_gift[3] heart_strike | USABILITY:heart_strike": 2,
       "sanlayn[8] heart_strike | buff.vampiric_strike.up": 2,
@@ -325,10 +349,13 @@ describe("the measurement over the composed 165 s fight", () => {
       "blood_debt | EXACT_STACK_APPLICATION": 7,
       "blood_debt | PROVEN_INACTIVE": 3,
       "blood_debt | AURA_STATE_UNKNOWN": 6,
-      // Unchanged by B6 and B9.
+      // Unchanged by B6 and B9. RE-POINTED for M11-B10: seven of the eight
+      // window refusals are the aura's own gain clusters and bind the prefix
+      // set; the eighth is the track's first application (2,004,615).
       "bone_shield | EXACT_STACK_OBSERVATION": 114,
       "bone_shield | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 1,
-      "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 8,
+      "bone_shield | WINDOW_ORDER_INVARIANT_SET": 7,
+      "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 1,
       // RE-POINTED for M11-B9: Essence's 96 unreconstructed counts become 15
       // exact observations, 9 pinned fresh applications and 72 ambiguous
       // (a lone refresh since the last count — Q2 declined); the 26 window
@@ -349,6 +376,13 @@ describe("the measurement over the composed 165 s fight", () => {
         coverage.stackValues.filter((row) => row.key.includes("one of")).map((row) => [row.key, row.count]),
       ),
     ).toEqual({
+      // M11-B10: Bone Shield's sets are every prefix of its own gain cluster.
+      "bone_shield | stack one of {5,6,7,8}": 1,
+      "bone_shield | stack one of {7,8,9,10}": 1,
+      "bone_shield | stack one of {11,12}": 1,
+      "bone_shield | stack one of {8,9,10,11}": 2,
+      "bone_shield | stack one of {6,7,8,9}": 1,
+      "bone_shield | stack one of {9,11}": 1,
       // The one { 0,1 } rests on the observed removal at 2,071,379; the track's
       // first application at 2,008,597 is refused (silence is not a zero).
       "essence_of_the_blood_queen | stack one of {0,1}": 1,
@@ -362,21 +396,32 @@ describe("the measurement over the composed 165 s fight", () => {
     for (const entry of analysis.resolved) {
       for (const binding of entry.stacks) {
         if (binding.state !== "BOUND_SET") continue;
-        expect(binding.atomName).toBe("essence_of_the_blood_queen");
-        expect(binding.possibleStacks).toHaveLength(2);
-        expect(binding.possibleStacks[0]).toBeLessThan(binding.possibleStacks[1] ?? -1);
-        expect(binding.possibleStacks).toEqual(
-          [
-            binding.windowOrderInvariance.beforeClusterStack,
-            binding.windowOrderInvariance.afterClusterStack,
-          ].sort((left, right) => left - right),
+        expect(["essence_of_the_blood_queen", "bone_shield"]).toContain(binding.atomName);
+        // Every set is strictly ascending, runs from H1 to the last gain's
+        // count, and (M11-B10) holds every intermediate gain's count.
+        expect(binding.possibleStacks.length).toBeGreaterThanOrEqual(2);
+        for (let index = 1; index < binding.possibleStacks.length; index += 1) {
+          expect(binding.possibleStacks[index - 1]).toBeLessThan(binding.possibleStacks[index] ?? -1);
+        }
+        expect(binding.possibleStacks[0]).toBe(binding.windowOrderInvariance.beforeClusterStack);
+        expect(binding.possibleStacks[binding.possibleStacks.length - 1]).toBe(
+          binding.windowOrderInvariance.afterClusterStack,
         );
+        const gainCounts = binding.windowOrderInvariance.cluster.filter(
+          (transition) => transition.operation === "APPLIED" && transition.isStackChange,
+        );
+        if (binding.atomName === "bone_shield") {
+          expect(binding.possibleStacks).toHaveLength(gainCounts.length + 1);
+          expect(binding.possibleStacks[binding.possibleStacks.length - 1]).toBeLessThanOrEqual(12);
+        } else {
+          expect(binding.possibleStacks).toHaveLength(2);
+          expect(binding.possibleStacks[1]).toBeLessThanOrEqual(7);
+        }
         for (const transition of binding.windowOrderInvariance.cluster) {
           expect(transition.leadMs).toBeGreaterThanOrEqual(0);
           expect(transition.leadMs).toBeLessThanOrEqual(50);
           expect(transition.operation).not.toBe("REMOVED");
         }
-        expect(binding.possibleStacks[1]).toBeLessThanOrEqual(7);
       }
     }
     for (const atom of ["bone_shield", "essence_of_the_blood_queen", "blood_debt"]) {
@@ -462,9 +507,12 @@ describe("the measurement over the composed 165 s fight", () => {
     // and 6 refusals (two fresh applications, the expiry at 2,071,379, and
     // three clusters whose chain before them has run out).
     expect(Object.fromEntries(coverage.remainsEvidence.map((row) => [row.key, row.count]))).toEqual({
+      // RE-POINTED for M11-B10: Bone Shield admits the B8 floor; seven gain
+      // clusters bind it, the first application at 2,004,615 stays refused.
       "bone_shield | EXACT": 11,
       "bone_shield | BOUNDED": 104,
-      "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 8,
+      "bone_shield | WINDOW_ORDER_INVARIANT_BOUNDED": 7,
+      "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 1,
       "essence_of_the_blood_queen | EXACT": 24,
       "essence_of_the_blood_queen | BOUNDED": 40,
       "essence_of_the_blood_queen | AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION": 32,
@@ -506,9 +554,8 @@ describe("the measurement over the composed 165 s fight", () => {
     // Scourge application ahead of a decision).
     expect(Object.fromEntries(coverage.preDecisionWindowRefusals.map((row) => [row.key, row.count]))).toEqual(
       {
-        "bone_shield | up | lead 0": 7,
-        "bone_shield | stack | lead 0": 7,
-        "bone_shield | remains | lead 0": 7,
+        // M11-B10: the seven 0 ms Bone Shield gain clusters bind
+        // order-invariant state; only the 20 ms first application refuses.
         "bone_shield | up | lead 20": 1,
         "bone_shield | stack | lead 20": 1,
         "bone_shield | remains | lead 20": 1,
@@ -537,7 +584,8 @@ describe("the measurement over the composed 165 s fight", () => {
         // M11-B8: the order-invariant floor is a bound over both orderings, never a KNOWN value,
         // never below either world, and only for the identity whose policy admits it.
         if (binding.proof === "WINDOW_ORDER_INVARIANT_BOUNDED") {
-          expect(binding.atomName).toBe("essence_of_the_blood_queen");
+          // Essence since M11-B8; Bone Shield since M11-B10.
+          expect(["essence_of_the_blood_queen", "bone_shield"]).toContain(binding.atomName);
           expect(binding.binding.state).toBe("BOUNDED_NUMBER");
           expect(binding.windowOrderInvariance).not.toBeNull();
           if (binding.windowOrderInvariance !== null && binding.remainsMs !== null) {
@@ -630,14 +678,15 @@ describe("the measurement over the composed 165 s fight", () => {
       row.key.startsWith("high_prio_actions[1]"),
     );
     expect(drwRows.reduce((sum, row) => sum + row.count, 0)).toBe(6);
-    // The remainder candidates M11-B3 measured (98 and 24) are now only the
-    // window-refused decisions (6), and — since M11-B8 — the one Gift-window
-    // Vampiric Strike whose cluster is the fresh application at 2,008,597.
+    // The remainder candidates M11-B3 measured (98 and 24) are — since
+    // M11-B10 — none for Bone Shield (the six window clusters bind the B8
+    // floor), and the one Gift-window Vampiric Strike whose cluster is the
+    // fresh application at 2,008,597 for Essence.
     expect(
       coverage.undecidedGcdCandidates.find(
         (row) => row.key === "sanlayn[0] deaths_caress | buff.bone_shield.remains",
-      )?.count,
-    ).toBe(6);
+      ),
+    ).toBeUndefined();
     expect(
       coverage.undecidedGcdCandidates.find(
         (row) => row.key === "san_gift[0] heart_strike | buff.essence_of_the_blood_queen.remains",
@@ -834,10 +883,12 @@ describe("the measurement over the composed 165 s fight", () => {
     // RE-POINTED for M11-B4: the pull Death's Caress (2,004,615), whose Bone
     // Shield application is logged 20 ms BEFORE it, was NO_STACK_OBSERVATION
     // under the 0 ms rule and is refused by the 50 ms window.
+    // RE-POINTED for M11-B10: the seven own-gain clusters bind the prefix set.
     expect(Object.fromEntries(tally)).toEqual({
       "BOUND/EXACT_STACK_OBSERVATION": 114,
+      "BOUND_SET/WINDOW_ORDER_INVARIANT_SET": 7,
       "UNBOUND/COUNT_AMBIGUOUS_SINCE_OBSERVATION": 1,
-      "UNBOUND/PRE_DECISION_WINDOW_TRANSITION": 8,
+      "UNBOUND/PRE_DECISION_WINDOW_TRANSITION": 1,
     });
   });
 
@@ -992,6 +1043,188 @@ describe("the measurement over the composed 165 s fight", () => {
       expect(stack?.state === "UNBOUND" && stack.reason).not.toBe("COUNT_EXCEEDS_PINNED_MAX");
     }
   });
+
+  it("M11-B10: matches exactly two more decisions, each a Marrowrend selected at sanlayn[7] (Blood Debt 10) once the Bone Shield set, presence and floor make sanlayn[0], [3] and [4] FALSE in every world", () => {
+    const expected: Record<
+      number,
+      {
+        readonly set: readonly number[];
+        readonly before: number;
+        readonly floorMs: number;
+        readonly ebqRemains: string;
+      }
+    > = {
+      2043209: { set: [7, 8, 9, 10], before: 2038654, floorMs: 2572, ebqRemains: "UNKNOWN" },
+      2124183: { set: [8, 9, 10, 11], before: 2120436, floorMs: 5702, ebqRemains: "BOUNDED" },
+    };
+    for (const t of B10_MATCH_REPORT_TIMES) {
+      const comparison = analysis.comparisons.find((row) => row.decision.reportTimeMs === t);
+      expect(comparison, String(t)).toMatchObject({
+        outcome: "MATCH",
+        basis: "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+        authorityToken: "marrowrend",
+        authorityCoverage: "EXACT_ENTRY",
+        selectionPrecision: "EXACT_ENTRY",
+        rawBlocker: null,
+      });
+      expect(comparison?.decision.abilityGameId).toBe(MARROWREND);
+      const resolved = analysis.resolved.find((entry) => entry.position === comparison?.decision.position);
+      expect(resolved).toBeDefined();
+      if (resolved === undefined) continue;
+      // The selection: sanlayn[7] marrowrend, the observed action, with no
+      // competing undecided GCD candidate and the sanlayn list entered.
+      expect(resolved.selection.kind).toBe("ROTATIONAL_GCD_SELECTED");
+      expect(resolved.selection.stoppingPoint).toBeNull();
+      expect(
+        resolved.selection.undecidedCandidates.filter((candidate) => candidate.lane === "GCD_CONSUMING"),
+      ).toEqual([]);
+      expect(resolved.selection.dispatches.find((step) => step.at === "default[16]")).toMatchObject({
+        calleeListName: "sanlayn",
+        outcome: "RUN_ENTERED_SCAN_ENDS",
+      });
+      expect(resolved.selection.dispatches.find((step) => step.at === "default[15]")).toMatchObject({
+        outcome: "RUN_GATE_FALSE_SKIPPED",
+      });
+      // Bone Shield: the prefix set of the Marrowrend's own three gains, H1
+      // from the removebuffstack before them; presence by M4 on both sides;
+      // the B8 floor above 1.5 s and outside the tolerance of 3 s.
+      const pin = expected[t]!;
+      const stack = resolved.stacks.find((entry) => entry.atomName === "bone_shield");
+      expect(stack).toMatchObject({
+        state: "BOUND_SET",
+        proof: "WINDOW_ORDER_INVARIANT_SET",
+        possibleStacks: pin.set,
+        anchor: { reportTimeMs: pin.before, operation: "REMOVED", isStackChange: true },
+        windowOrderInvariance: {
+          beforeClusterStack: pin.set[0],
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: pin.set[pin.set.length - 1],
+        },
+      });
+      if (stack?.state === "BOUND_SET") {
+        expect(stack.windowOrderInvariance.cluster.map((entry) => entry.leadMs)).toEqual([0, 0, 0, 0, 0]);
+        expect(stack.windowOrderInvariance.cluster.map((entry) => entry.operation)).toEqual([
+          "APPLIED",
+          "APPLIED",
+          "REFRESHED",
+          "APPLIED",
+          "REFRESHED",
+        ]);
+        expect(stack.possibleStacks.every((member) => member > 1 && member >= 6)).toBe(true);
+      }
+      expect(resolved.auras.find((entry) => entry.atomName === "bone_shield")).toMatchObject({
+        state: "BOUND",
+        up: true,
+        proof: "WINDOW_ORDER_INVARIANT_PRESENCE",
+      });
+      const remains = resolved.remains.find((entry) => entry.atomName === "bone_shield");
+      expect(remains).toMatchObject({
+        state: "BOUND",
+        proof: "WINDOW_ORDER_INVARIANT_BOUNDED",
+        remainsMs: pin.floorMs,
+      });
+      // The entries above sanlayn[7]: [1] FALSE on vampiric_strike.remains = 0
+      // (the Essence remainder is a floor or UNKNOWN, never read for a
+      // verdict), [2] FALSE on the Runic Power deficit, [5] FALSE with
+      // Crimson Scourge proven down, [6] FALSE with Boiling Point down; [7]
+      // TRUE at Blood Debt exactly 10, the Marrowrend PROVEN_USABLE.
+      expect(resolved.remains.find((entry) => entry.atomName === "vampiric_strike")).toMatchObject({
+        state: "BOUND",
+        proof: "PROVEN_INACTIVE",
+      });
+      const ebq = resolved.remains.find((entry) => entry.atomName === "essence_of_the_blood_queen");
+      expect(ebq?.state === "BOUND" ? ebq.proof : ebq?.reason).toBe(
+        pin.ebqRemains === "BOUNDED" ? "GAIN_ANCHOR_BOUNDED" : "AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION",
+      );
+      expect(resolved.runicPower.state).toBe("BOUND");
+      expect(resolved.remains.find((entry) => entry.atomName === "crimson_scourge")).toMatchObject({
+        state: "BOUND",
+        proof: "PROVEN_INACTIVE",
+      });
+      expect(resolved.auras.find((entry) => entry.atomName === "boiling_point")).toMatchObject({
+        state: "BOUND",
+        up: false,
+      });
+      expect(resolved.stacks.find((entry) => entry.atomName === "blood_debt")).toMatchObject({
+        state: "BOUND",
+        stack: 10,
+      });
+      expect(resolved.auras.find((entry) => entry.atomName === "gift_of_the_sanlayn")).toMatchObject({
+        state: "BOUND",
+        up: false,
+      });
+    }
+  });
+
+  it("M11-B10: keeps the other Bone Shield window decisions UNKNOWN on their next exact blocker, and 2,044,021 on the lone refreshes that break its count", () => {
+    const still: Record<
+      number,
+      { readonly ability: number; readonly set: readonly number[]; readonly first: string }
+    > = {
+      2057622: { ability: DEATHS_CARESS, set: [11, 12], first: "sanlayn[9] death_strike" },
+      2085352: { ability: MARROWREND, set: [8, 9, 10, 11], first: "sanlayn[9] death_strike" },
+      2151502: { ability: MARROWREND, set: [6, 7, 8, 9], first: "sanlayn[2] death_strike" },
+      2164444: { ability: DEATHS_CARESS, set: [9, 11], first: "sanlayn[2] death_strike" },
+    };
+    for (const [key, pin] of Object.entries(still)) {
+      const t = Number(key);
+      const comparison = analysis.comparisons.find((row) => row.decision.reportTimeMs === t);
+      expect(comparison, key).toMatchObject({ outcome: "UNKNOWN" });
+      expect(comparison?.rawBlocker, key).not.toBeNull();
+      expect(comparison?.decision.abilityGameId).toBe(pin.ability);
+      const resolved = analysis.resolved.find((entry) => entry.position === comparison?.decision.position);
+      expect(resolved?.stacks.find((entry) => entry.atomName === "bone_shield")).toMatchObject({
+        state: "BOUND_SET",
+        possibleStacks: pin.set,
+      });
+      expect(resolved?.auras.find((entry) => entry.atomName === "bone_shield")).toMatchObject({
+        state: "BOUND",
+        up: true,
+        proof: "WINDOW_ORDER_INVARIANT_PRESENCE",
+      });
+      expect(resolved?.remains.find((entry) => entry.atomName === "bone_shield")).toMatchObject({
+        state: "BOUND",
+        proof: "WINDOW_ORDER_INVARIANT_BOUNDED",
+      });
+      // Bone Shield is passed: no undecided candidate names a Bone Shield atom.
+      const candidates =
+        resolved?.selection.undecidedCandidates.filter((c) => c.lane === "GCD_CONSUMING") ?? [];
+      expect(candidates.some((c) => c.atoms.some((atom) => atom.includes("bone_shield")))).toBe(false);
+      expect(candidates[0]?.at).toBe(pin.first);
+    }
+    // 2,044,021: not a window case — the count after the Marrowrend's 12 is
+    // broken by the three lone refreshes at 2,043,229 (the mirror at cap).
+    const q = analysis.comparisons.find((row) => row.decision.reportTimeMs === 2044021);
+    expect(q).toMatchObject({ outcome: "UNKNOWN" });
+    const qResolved = analysis.resolved.find((entry) => entry.position === q?.decision.position);
+    const qStack = qResolved?.stacks.find((entry) => entry.atomName === "bone_shield");
+    expect(qStack).toMatchObject({ state: "UNBOUND", reason: "COUNT_AMBIGUOUS_SINCE_OBSERVATION" });
+    expect(qStack?.state === "UNBOUND" && qStack.detail).toContain("2043229");
+    expect(qResolved?.selection.undecidedCandidates.find((c) => c.lane === "GCD_CONSUMING")).toMatchObject({
+      at: "sanlayn[0] deaths_caress",
+      atoms: ["buff.bone_shield.stack"],
+    });
+    // 2,004,615: the track's first application, 20 ms ahead — refused on
+    // every Bone Shield binding, AMBIGUOUS_INITIAL_STATE before it; no zero.
+    const first = analysis.comparisons.find((row) => row.decision.reportTimeMs === 2004615);
+    const firstResolved = analysis.resolved.find((entry) => entry.position === first?.decision.position);
+    expect(firstResolved?.stacks.find((entry) => entry.atomName === "bone_shield")).toMatchObject({
+      state: "UNBOUND",
+      reason: "PRE_DECISION_WINDOW_TRANSITION",
+      windowTransition: { leadMs: 20, operation: "APPLIED", isStackChange: false },
+    });
+    expect(firstResolved?.auras.find((entry) => entry.atomName === "bone_shield")).toMatchObject({
+      state: "UNBOUND",
+      reason: "PRE_DECISION_WINDOW_TRANSITION",
+    });
+    // No Bone Shield set or window presence anywhere rests on a removal in the cluster.
+    for (const entry of analysis.resolved) {
+      const stack = entry.stacks.find((binding) => binding.atomName === "bone_shield");
+      if (stack?.state === "BOUND_SET") {
+        expect(stack.windowOrderInvariance.cluster.every((t) => t.operation !== "REMOVED")).toBe(true);
+      }
+    }
+  });
 });
 
 describe("the second subject", () => {
@@ -1026,7 +1259,8 @@ describe("the second subject", () => {
       )?.count,
     ).toBe(2);
     // Bone Shield's remainder is EXACT at 20 of 21 opener decisions (the
-    // first in-fight stack gain anchors it) and window-refused at 1.
+    // first in-fight stack gain anchors it) and, since M11-B10, the B8 floor
+    // at the one window cluster (2,427,294).
     expect(
       analysis.coverage.undecidedGcdCandidates.some(
         (row) => row.key === "sanlayn[0] deaths_caress | buff.bone_shield.remains",
@@ -1034,7 +1268,7 @@ describe("the second subject", () => {
     ).toBe(false);
     expect(Object.fromEntries(analysis.coverage.remainsEvidence.map((row) => [row.key, row.count]))).toEqual({
       "bone_shield | EXACT": 20,
-      "bone_shield | PRE_DECISION_WINDOW_TRANSITION": 1,
+      "bone_shield | WINDOW_ORDER_INVARIANT_BOUNDED": 1,
       "essence_of_the_blood_queen | EXACT": 6,
       "essence_of_the_blood_queen | BOUNDED": 7,
       "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_BOUNDED": 6,

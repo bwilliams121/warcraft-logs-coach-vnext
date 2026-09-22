@@ -138,13 +138,17 @@ function at(state: CombatState, reportTimeMs: number, abilityGameId: number): nu
 }
 
 describe("the pinned policy and constants", () => {
-  it("Essence alone reads a lone refresh as UNPROVEN_CAUSE and admits the order-invariant window bound; every other identity keeps the M11-B4 reading", () => {
+  it("Essence alone reads a lone refresh as UNPROVEN_CAUSE; Essence and (since M11-B10) Bone Shield admit the order-invariant window bound; every other identity keeps the M11-B4 reading", () => {
     expect(bloodAuraIdentityFor(EBQ_ATOM)?.remainsPolicy).toEqual({
       loneRefresh: "UNPROVEN_CAUSE",
       windowOrderInvariantBound: true,
     });
+    expect(bloodAuraIdentityFor("bone_shield")?.remainsPolicy).toEqual({
+      loneRefresh: "PINNED_TRIGGER_RESET",
+      windowOrderInvariantBound: true,
+    });
     for (const identity of BLOOD_AURA_IDENTITIES) {
-      if (identity.atomName === EBQ_ATOM) continue;
+      if (identity.atomName === EBQ_ATOM || identity.atomName === "bone_shield") continue;
       expect(identity.remainsPolicy, identity.atomName).toEqual({
         loneRefresh: "PINNED_TRIGGER_RESET",
         windowOrderInvariantBound: false,
@@ -569,17 +573,33 @@ describe("G2: the order-invariant bound inside the 50 ms window", () => {
       },
     );
 
-    it("identity isolation: a Bone Shield cluster inside the window stays refused (the policy does not admit the bound)", () => {
+    it("identity isolation (re-pinned for M11-B10): a Bone Shield cluster inside the window binds the same B8 floor once its policy admits the bound — the algorithm is the one Essence uses", () => {
       const state = stateOf([
         aura(0, 1000, "APPLIED", 6, BONE_SHIELD_BUFF_SPELL_ID),
         aura(1, 5000, "APPLIED", 7, BONE_SHIELD_BUFF_SPELL_ID),
         aura(2, 5000, "REFRESHED", null, BONE_SHIELD_BUFF_SPELL_ID),
         cast(3, 5000, 195182),
       ]);
+      // H1: 30,000 - (5,000 - 1,000) = 26,000; H2: 30,000 - 0; the floor is the smaller.
       expect(remainsAt(state, 3, "bone_shield")).toMatchObject({
+        state: "BOUND",
+        proof: "WINDOW_ORDER_INVARIANT_BOUNDED",
+        remainsMs: 26_000,
+        windowOrderInvariance: {
+          beforeClusterMs: 26_000,
+          resetInClusterMs: 30_000,
+          beforeClusterProof: "GAIN_ANCHOR_EXACT",
+        },
+      });
+      // Crimson Scourge keeps the M11-B4 reading: refused inside the window.
+      const crimson = stateOf([
+        aura(0, 1000, "APPLIED", null, CRIMSON_SCOURGE_BUFF_SPELL_ID),
+        aura(1, 5000, "REFRESHED", null, CRIMSON_SCOURGE_BUFF_SPELL_ID),
+        cast(2, 5000, DEATH_STRIKE),
+      ]);
+      expect(remainsAt(crimson, 2, "crimson_scourge")).toMatchObject({
         ...refused,
         windowTransition: { leadMs: 0 },
-        detail: null,
       });
     });
   });

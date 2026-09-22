@@ -484,20 +484,43 @@ describe("the pre-decision window, applied to .up, .stack and .remains alike", (
     ]);
   }
 
-  it.each([0, 1, 20, 50])("refuses all three bindings at a %d ms lead, recording the lead", (leadMs) => {
-    const state = withLead(leadMs);
-    const expected = {
-      state: "UNBOUND",
-      reason: "PRE_DECISION_WINDOW_TRANSITION",
-      windowTransition: { leadMs },
-    };
-    expect(bindBloodAura(input(state, 3), "bone_shield")).toMatchObject(expected);
-    expect(bindBloodStack(input(state, 3), "bone_shield")).toMatchObject(expected);
-    expect(bindBloodRemains(input(state, 3), "bone_shield")).toMatchObject(expected);
-    expect(bloodRemainsBindingsFrom([bindBloodRemains(input(state, 3), "bone_shield")])).toEqual([
-      { name: "bone_shield", remainsSeconds: { state: "UNKNOWN_NUMBER", reason: "STATE_NOT_ESTABLISHED" } },
-    ]);
-  });
+  // RE-POINTED for M11-B10: inside the window every EXACT reading stays
+  // refused; what binds for Bone Shield is what BOTH orderings leave — the
+  // presence M4 proves on both sides, the finite set of exact counts, and
+  // the M11-B8 floor — each recording the cluster and its lead.
+  it.each([0, 1, 20, 50])(
+    "binds only order-invariant state at a %d ms lead, recording the lead",
+    (leadMs) => {
+      const state = withLead(leadMs);
+      expect(bindBloodAura(input(state, 3), "bone_shield")).toMatchObject({
+        state: "BOUND",
+        up: true,
+        proof: "WINDOW_ORDER_INVARIANT_PRESENCE",
+      });
+      expect(bindBloodStack(input(state, 3), "bone_shield")).toMatchObject({
+        state: "BOUND_SET",
+        proof: "WINDOW_ORDER_INVARIANT_SET",
+        possibleStacks: [5, 6],
+        windowOrderInvariance: { cluster: [{ leadMs }, { leadMs }] },
+      });
+      expect(bindBloodRemains(input(state, 3), "bone_shield")).toMatchObject({
+        state: "BOUND",
+        proof: "WINDOW_ORDER_INVARIANT_BOUNDED",
+        remainsMs: 26_000,
+        windowOrderInvariance: {
+          cluster: [{ leadMs }, { leadMs }],
+          beforeClusterMs: 26_000,
+          resetInClusterMs: 30_000 - leadMs,
+        },
+      });
+      expect(bloodRemainsBindingsFrom([bindBloodRemains(input(state, 3), "bone_shield")])).toEqual([
+        {
+          name: "bone_shield",
+          remainsSeconds: { state: "BOUNDED_NUMBER", atLeast: 26, reason: "STATE_NOT_ESTABLISHED" },
+        },
+      ]);
+    },
+  );
 
   it("accepts a 51 ms lead when otherwise valid", () => {
     const state = withLead(51);

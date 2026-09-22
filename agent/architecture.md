@@ -6779,6 +6779,146 @@ document unchanged. Blood stays INTERNAL_ONLY; M11-B is not complete.
 
 ---
 
+### M11-B10 — Bone Shield: every exact count its own gains leave, the presence proven on both sides, the floor switched on
+
+Three pieces, all Blood-owned, no shared change: the M11-B9 window set
+generalized from one gain to a cluster of one or more (owner decision Q1:
+the PREFIX set), an order-invariant presence proof read from M4 on both
+sides of the cluster, and the M11-B8 remains bound switched on for the
+identity (Q3; algorithm untouched). The maximum stays unguarded (Q2). No
+public change; Blood stays INTERNAL_ONLY.
+
+**The wire shape.** A Marrowrend's `trigger(3)` (effect 286519, base 3;
+sc_death_knight.cpp:11720) is written as THREE `applybuffstack` at the
+cast's own millisecond and ahead of it in the array, each carrying the
+absolute resulting count, each after the first beside a same-millisecond
+`refreshbuff`; a Death's Caress's `trigger(2)` (effect 1000766; :9770) as
+one `applybuffstack`; the Dancing Rune Weapon's mirrors 10–35 ms AFTER the
+cast; and at the maximum a trigger writes only a refresh. The only
+consumption is `bone_shield_handler`'s `decrement()` on an auto-attack
+TAKEN under the 2.5 s internal cooldown (:16629-16643) — another actor's
+event. Over the bundle: 103 transitions (`applybuff` 1, `applybuffstack`
+33, `refreshbuff` 44, `removebuffstack` 25 — every one with the absolute
+remaining count, 7 beside a same-millisecond refresh — `removebuff` 0);
+eight window clusters (seven own-gain clusters at lead 0, one plain
+first application at lead 20), no removal inside any window, and no
+damage-taken event targeting the actor anywhere in the corpus.
+
+**The prefix set (Q1).** The decision may sit before all of its own
+same-millisecond gains, between any two, or after all; a two-member
+{ H1, cn } would silently exclude the intermediate worlds. So
+`orderInvariantWindowStack` now admits a cluster of one or more ascending
+`applybuffstack` gains with their companions (`windowClusterOf` names the
+shape once, for the stack and the presence alike) and binds
+`ONE_OF_NUMBERS { H1, c1, …, cn }`: H1 by the ordinary rule at the
+cluster's first position with the set not admitted (the last
+`applybuffstack` or `removebuffstack` carried only across companions — a
+lone refresh before the cluster refuses, and a first gain in the track has
+`AMBIGUOUS_INITIAL_STATE` before it and refuses), each `c` the wire's own
+number, never `H1 + n`. A single gain yields the M11-B9 two-member set
+unchanged, so Essence's corpus results do not move (the wire never writes
+two Essence gains in one window). Each world is guarded separately (Bone
+Shield's guard is off); a plain application beside a gain, a removal, a
+lone refresh, a non-ascending count or a first gain not above H1 refuses.
+The evaluator decides `stack<=1` and `stack<6` over the set exactly as
+M11-B9 pinned; Blood writes no threshold.
+
+**The presence.** `buff.bone_shield.up` is a boolean in `knownBuffs`, not
+a reading of the set. For an identity whose new `presencePolicy` admits it
+(Bone Shield only), `orderInvariantWindowPresence` reads M4 twice: the
+ordinary binding at the cluster's first position (window presence not
+admitted, so a nested window and the track's first application refuse)
+and `presenceAt` at the decision; both EXACT ACTIVE binds `up: true` as
+`WINDOW_ORDER_INVARIANT_PRESENCE`, anchored on the before-side reading.
+Disagreement, either side UNKNOWN, or both INACTIVE (a shape a gain
+cluster cannot produce) refuses. The stack rule reads the window BEFORE
+the presence, so a window-proven presence never routes the count to the
+ordinary "latest count" path, which would read the cluster's own
+post-decision number.
+
+**The floor (Q3).** `remainsPolicy.windowOrderInvariantBound` is true for
+Bone Shield; `orderInvariantWindowBound` is byte-identical. Its H1 is
+usually `GAIN_ANCHOR_BOUNDED` (the chain before a Marrowrend runs through
+a refresh beside a charge removal); the floor is the smaller of that
+projection and the reset, and the 1.5 s / 3 s tolerance still applies.
+
+**The measurement (bundle 123 / 45 s 48 / opener 21).** 42 MATCH / 9
+REJECTED / 72 UNKNOWN (B9: 40 / 9 / 74); 17 / 3 / 28 (16 / 3 / 29); 1 / 0
+/ 20 unchanged. Decision for decision against B9: UNKNOWN → MATCH 2, every
+other outcome, token and precision identical (MATCH 38 EXACT_ENTRY / 4
+TOKEN_CONVERGED). The two: the Marrowrends at 2,043,209 ({ 7,8,9,10 } from
+the `removebuffstack 7` at 2,038,654; presence ACTIVE both sides; floor
+2,572 ms from the gains at 2,015,781) and 2,124,183 ({ 8,9,10,11 } from
+the 8 at 2,120,436; floor 5,702 ms from the Dancing Rune Weapon's gains at
+2,099,885) — `sanlayn[0]` FALSE (`up` 1, floor above 1.5 s, every member
+above 1), `[1]` FALSE on `vampiric_strike.remains` 0, `[2]` FALSE on the
+carried Runic Power deficit, `[3]`/`[4]` FALSE (every member at or above
+6), `[5]` FALSE (Crimson Scourge proven down), `[6]` FALSE (Boiling Point
+down), `[7] marrowrend,if=buff.blood_debt.stack=10` TRUE at Blood Debt
+exactly 10, PROVEN_USABLE from the cast's own 3 / 4 Runes; no undecided
+candidate. Still UNKNOWN once Bone Shield is passed: 2,057,622 ({ 11,12 })
+and 2,085,352 ({ 8,9,10,11 }) on `sanlayn[9]` `fight_remains`, 2,151,502
+({ 6,7,8,9 }) and 2,164,444 ({ 9,11 }) on `sanlayn[2]`'s Runic Power
+deficit after a spend; 2,015,770 ({ 5,6,7,8 }) and the opener's 2,427,294
+({ 7,9 }) inside the Gift window, where Bone Shield is never read; and
+2,044,021, whose count the three lone at-cap refreshes at 2,043,229 break
+(not a window case). The first `sanlayn[0]` blockers fall from 7 to 1.
+Bone Shield census: exact counts 114, sets 7, ambiguous 1, refused 1;
+presence order-invariant 7; floors 7. First blockers after B10:
+`sanlayn[9]` `fight_remains` 10 + 12, Marrowrend usability 10, Essence
+stack 7 (+ 2), `any_dnd` 5 + 1, Runic Power after a spend 5, `sanlayn[1]`
+4 + 2, the Dancing Rune Weapon gate 3, `san_gift[2]` 3 + 1, Death Strike
+usability 3 + 1, `buff.vampiric_strike.up` 2, Blood Boil usability 2,
+`san_gift[0]` 1, Bone Shield lone refresh 1, Boiling Point 1.
+`fight_remains` unmodelled; no resource work.
+
+**Not built, on purpose.** No `H1 + 3`, no intermediate world dropped, no
+ordering chosen, no set from a plain application, a removal or a lone
+refresh, no count for a plain Bone Shield application even after a proven
+removal (the producer's number is not pinned — Q2's sibling), no presence
+from a count or from a gain's implication, no presence whose before-side
+is silence, no change to the B8 bound, no removal-window model (no corpus
+demand and no damage-taken stream to corroborate the cause), no Improved
+Bone Shield extraction or guard (the observed 12 proves nothing), no
+refresh-count carry, no `fight_remains`, no shared primitive.
+
+**Proven.** `tests/unit/m11b10-blood-bone-shield-window.test.ts` (the
+identity's three switches and nobody else's presence policy; one-, two-
+and three-gain prefix sets at leads 0 / 1 / 50 with both ends and the
+seam's `ONE_OF_NUMBERS`; the intermediate worlds kept; 51 ms on the
+ordinary path; companions permitted not required; a Death's Caress { 9,11 }
+with no invented 10; H1 from an `applybuffstack`, a `removebuffstack` and
+a companion-refreshed gain; H1 across a lone refresh and H1 from silence
+refused; non-ascending, not-above-H1, removal (plain, stack, mixed), lone
+refresh, late refresh and plain-beside-gain clusters refused for the stack
+and the presence alike; the track's first application and a proven
+removal before a plain application binding nothing; presence ACTIVE /
+ACTIVE bound, before-side `AMBIGUOUS_INITIAL_STATE` refused, the disagreeing
+plain application refused, the nested window; Essence's presence still
+refused; the floor at min(H1, reset) and the tolerance edge; the evaluator
+over { 7,8,9,10 } (all FALSE), { 4,5,6,7 } (`stack<6` UNRESOLVED, the
+rest decided) and { 1,2 } (`stack<=1` UNRESOLVED); Blood Debt untouched;
+the committed seven clusters, 2,004,615, 2,044,021, the no-removal
+invariant over both subjects and the opener's 2,427,294); the re-pinned
+`m11b2-blood-bindings`, `m11b4-blood-aura-remains` (the window binds
+order-invariant state, never an exact read), `m11b6-blood-debt-stack`,
+`m11b8-blood-ebq-remains` (Bone Shield admits the same bound; Crimson
+Scourge does not) and `m11b9-blood-ebq-stack` (a two-gain Essence cluster
+is now { H1, c1, c2 }; a Bone Shield cluster binds its own set); the
+`m11b2-blood-evaluator` contract (42 / 9 / 72; the two MATCH individually
+with set, both ends, presence, floor, the entries above and Blood Debt 10;
+the still-UNKNOWN four with Bone Shield passed; 2,044,021; 2,004,615; the
+censuses; the first-obstacle map) and `m11b2-blood-registration` (17 / 3
+/ 28); one new corpus case
+(`spec-blood-death-knight.bone-shield-is-every-exact-count-its-own-gains-leave-…`,
+28 assertions) and the re-pinned measurement cases (the corpus is 43
+artifacts / 161 cases / 691 assertions; `AURA_BINDING_AT` admits the new
+proof); the invariance harness: Assassination, Protection, Retribution,
+every raid night and every public document unchanged. Blood stays
+INTERNAL_ONLY; M11-B is not complete.
+
+---
+
 # Milestone 12 — Healer Foundation
 
 Implement:

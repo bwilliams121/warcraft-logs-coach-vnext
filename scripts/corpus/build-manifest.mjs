@@ -3255,6 +3255,16 @@ const blood_observed_aura = (up, abilityGameId, anchorReportTimeMs) => ({
   reason: null,
   auraReason: null,
 });
+/** M11-B10: the presence M4 proves on BOTH sides of a window stack-gain cluster (ACTIVE before it and at the decision). */
+const blood_window_presence = (abilityGameId, anchorReportTimeMs) => ({
+  state: "BOUND",
+  up: true,
+  abilityGameId,
+  proof: "WINDOW_ORDER_INVARIANT_PRESENCE",
+  anchorReportTimeMs,
+  reason: null,
+  auraReason: null,
+});
 const blood_excluded_aura = (abilityGameId) => ({
   state: "BOUND",
   up: false,
@@ -3320,6 +3330,24 @@ const blood_ebq_exact = (stack, proof = "EXACT_STACK_OBSERVATION") => ({
   windowOrderInvariance: null,
 });
 /** M11-B9: the finite set of exact Essence counts both orderings of the window cluster leave, with both worlds pinned. */
+/** M11-B10: Bone Shield's finite set of every exact count the decision's position among its own gains leaves. */
+const blood_bs_set = (possibleStacks, windowOrderInvariance) => ({
+  state: "BOUND_SET",
+  stack: null,
+  proof: "WINDOW_ORDER_INVARIANT_SET",
+  abilityGameId: BLOOD_BONE_SHIELD,
+  reason: null,
+  possibleStacks,
+  windowOrderInvariance,
+});
+/** A Marrowrend's own three gains at one millisecond ahead of the cast, as the wire writes them. */
+const blood_marrowrend_cluster = (t, leadMs = 0) => [
+  { reportTimeMs: t, operation: "APPLIED", isStackChange: true, leadMs },
+  { reportTimeMs: t, operation: "APPLIED", isStackChange: true, leadMs },
+  { reportTimeMs: t, operation: "REFRESHED", isStackChange: false, leadMs },
+  { reportTimeMs: t, operation: "APPLIED", isStackChange: true, leadMs },
+  { reportTimeMs: t, operation: "REFRESHED", isStackChange: false, leadMs },
+];
 const blood_ebq_set = (possibleStacks, windowOrderInvariance) => ({
   state: "BOUND_SET",
   stack: null,
@@ -3602,9 +3630,9 @@ const BLOOD_CASES = [
         ...BLOOD_FULL,
         expected: {
           eligibleDecisions: 123,
-          match: 40,
+          match: 42,
           rejected: 9,
-          unknown: 74,
+          unknown: 72,
           exclusions: {
             MELEE_SWING: 87,
             NON_GCD_ACTION: 47,
@@ -3617,7 +3645,7 @@ const BLOOD_CASES = [
         actorId: BLOOD,
         ...BLOOD_FULL,
         expected: {
-          match: 40,
+          match: 42,
           rejected: 9,
           stoppingEntries: {
             "default[15] run_action_list": 1,
@@ -3650,7 +3678,6 @@ const BLOOD_CASES = [
             "san_gift[5] blood_boil | buff.boiling_point.up": 5,
             "san_gift[6] heart_strike | USABILITY:heart_strike": 1,
             "san_gift[7] blood_boil | USABILITY:blood_boil": 1,
-            "sanlayn[0] deaths_caress | buff.bone_shield.remains": 6,
             "sanlayn[1] heart_strike | buff.essence_of_the_blood_queen.remains": 4,
             "sanlayn[1] heart_strike | fight_remains": 6,
             "sanlayn[2] death_strike | runic_power.deficit": 5,
@@ -3663,10 +3690,7 @@ const BLOOD_CASES = [
             "sanlayn[9] death_strike | runic_power.deficit": 2,
             "sanlayn[9] death_strike | fight_remains": 34,
             "sanlayn[9] death_strike | buff.essence_of_the_blood_queen.remains": 15,
-            "sanlayn[0] deaths_caress | buff.bone_shield.up": 6,
-            "sanlayn[0] deaths_caress | buff.bone_shield.stack": 7,
-            "sanlayn[3] deaths_caress | buff.bone_shield.stack": 6,
-            "sanlayn[4] marrowrend | buff.bone_shield.stack": 6,
+            "sanlayn[0] deaths_caress | buff.bone_shield.stack": 1,
             "sanlayn[6] blood_boil | USABILITY:blood_boil": 6,
             "san_gift[5] blood_boil | USABILITY:blood_boil": 2,
             "sanlayn[8] heart_strike | USABILITY:heart_strike": 1,
@@ -3680,7 +3704,8 @@ const BLOOD_CASES = [
           stackEvidence: {
             "bone_shield | EXACT_STACK_OBSERVATION": 114,
             "bone_shield | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 1,
-            [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 8,
+            "bone_shield | WINDOW_ORDER_INVARIANT_SET": 7,
+            [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 1,
             "essence_of_the_blood_queen | EXACT_STACK_OBSERVATION": 15,
             "essence_of_the_blood_queen | EXACT_STACK_APPLICATION": 9,
             "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_SET": 12,
@@ -3701,6 +3726,12 @@ const BLOOD_CASES = [
             "bone_shield | stack 10": 16,
             "bone_shield | stack 11": 33,
             "bone_shield | stack 12": 6,
+            "bone_shield | stack one of {5,6,7,8}": 1,
+            "bone_shield | stack one of {7,8,9,10}": 1,
+            "bone_shield | stack one of {11,12}": 1,
+            "bone_shield | stack one of {8,9,10,11}": 2,
+            "bone_shield | stack one of {6,7,8,9}": 1,
+            "bone_shield | stack one of {9,11}": 1,
             "essence_of_the_blood_queen | stack 1": 9,
             "essence_of_the_blood_queen | stack 2": 4,
             "essence_of_the_blood_queen | stack 3": 4,
@@ -3804,7 +3835,8 @@ const BLOOD_CASES = [
           remainsEvidence: {
             "bone_shield | EXACT": 11,
             "bone_shield | BOUNDED": 104,
-            [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 8,
+            "bone_shield | WINDOW_ORDER_INVARIANT_BOUNDED": 7,
+            [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 1,
             "essence_of_the_blood_queen | EXACT": 24,
             "essence_of_the_blood_queen | BOUNDED": 40,
             "essence_of_the_blood_queen | AMBIGUOUS_REFRESH_BEYOND_BASE_DURATION": 32,
@@ -3823,9 +3855,6 @@ const BLOOD_CASES = [
             "visceral_strength | AURA_STATE_UNKNOWN": 7,
           },
           preDecisionWindowRefusals: {
-            "bone_shield | up | lead 0": 7,
-            "bone_shield | stack | lead 0": 7,
-            "bone_shield | remains | lead 0": 7,
             "bone_shield | up | lead 20": 1,
             "bone_shield | stack | lead 20": 1,
             "bone_shield | remains | lead 20": 1,
@@ -3897,7 +3926,7 @@ const BLOOD_CASES = [
         expected: {
           stackEvidence: {
             "bone_shield | EXACT_STACK_OBSERVATION": 20,
-            [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 1,
+            "bone_shield | WINDOW_ORDER_INVARIANT_SET": 1,
             "essence_of_the_blood_queen | EXACT_STACK_OBSERVATION": 6,
             "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_SET": 5,
             "essence_of_the_blood_queen | COUNT_AMBIGUOUS_SINCE_OBSERVATION": 7,
@@ -3910,6 +3939,7 @@ const BLOOD_CASES = [
           stackValues: {
             "bone_shield | stack 7": 12,
             "bone_shield | stack 12": 8,
+            "bone_shield | stack one of {7,9}": 1,
             "essence_of_the_blood_queen | stack 4": 2,
             "essence_of_the_blood_queen | stack 5": 1,
             "essence_of_the_blood_queen | stack 6": 3,
@@ -3958,7 +3988,7 @@ const BLOOD_CASES = [
         expected: {
           remainsEvidence: {
             "bone_shield | EXACT": 20,
-            [`bone_shield | ${BLOOD_WINDOW_TAG}`]: 1,
+            "bone_shield | WINDOW_ORDER_INVARIANT_BOUNDED": 1,
             "essence_of_the_blood_queen | EXACT": 6,
             "essence_of_the_blood_queen | BOUNDED": 7,
             "essence_of_the_blood_queen | WINDOW_ORDER_INVARIANT_BOUNDED": 6,
@@ -3974,9 +4004,6 @@ const BLOOD_CASES = [
           preDecisionWindowRefusals: {
             "essence_of_the_blood_queen | stack | lead 0": 2,
             "essence_of_the_blood_queen | remains | lead 0": 1,
-            "bone_shield | up | lead 0": 1,
-            "bone_shield | stack | lead 0": 1,
-            "bone_shield | remains | lead 0": 1,
           },
         },
       }),
@@ -4081,14 +4108,33 @@ const BLOOD_CASES = [
         runicPowerDeficit: 43,
         rune: 3,
       }),
-      blood_aura(
+      // RE-POINTED for M11-B10: the Marrowrend's own three gains at its own
+      // millisecond bind what every ordering leaves — the presence M4 proves
+      // on both sides, the prefix set { 5,6,7,8 }, the B8 floor — never the
+      // exact post-cast 8 and never the pre-cast 5 alone.
+      blood_aura(2015770, BLOOD_MR, "bone_shield", blood_window_presence(BLOOD_BONE_SHIELD, 2013178)),
+      blood_stack(
         2015770,
         BLOOD_MR,
         "bone_shield",
-        blood_unbound_aura(BLOOD_BONE_SHIELD, BLOOD_WINDOW_TAG, null),
+        blood_bs_set([5, 6, 7, 8], {
+          cluster: blood_marrowrend_cluster(2015770),
+          beforeClusterStack: 5,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 8,
+        }),
       ),
-      blood_stack(2015770, BLOOD_MR, "bone_shield", blood_unbound_stack(BLOOD_BONE_SHIELD, BLOOD_WINDOW_TAG)),
-      blood_remains(2015770, BLOOD_MR, "bone_shield", blood_remains_unbound(BLOOD_WINDOW_TAG, 0)),
+      blood_remains(
+        2015770,
+        BLOOD_MR,
+        "bone_shield",
+        blood_remains_window_bound(21986, 2007756, {
+          cluster: blood_marrowrend_cluster(2015770),
+          beforeClusterMs: 21986,
+          beforeClusterProof: "GAIN_ANCHOR_BOUNDED",
+          resetInClusterMs: 30000,
+        }),
+      ),
       blood_remains(2015770, BLOOD_MR, "essence_of_the_blood_queen", blood_remains_exact(24259, 2015029)),
       blood_remains(2015770, BLOOD_MR, "visceral_strength", blood_remains_exact(9761, 2013531)),
       blood_remains(2015770, BLOOD_MR, "crimson_scourge", blood_remains_zero(2013542)),
@@ -4740,6 +4786,249 @@ const BLOOD_CASES = [
       related: [
         ...BLOOD_RELATED,
         "tests/unit/m11b9-blood-ebq-stack.test.ts",
+        "tests/unit/simc-expression-one-of-numbers.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "spec-blood-death-knight.bone-shield-is-every-exact-count-its-own-gains-leave-and-the-presence-proven-on-both-sides",
+    BLOOD_105_165,
+    "SPEC_BLOOD_DEATH_KNIGHT",
+    "src/data/game/deathknight-blood-aura-authority.ts (the Bone Shield identity's window policies); src/specs/deathknight/blood/aura-bindings.ts (windowClusterOf, orderInvariantWindowStack over one or more gains, orderInvariantWindowPresence); src/specs/deathknight/blood/aura-remains.ts (the M11-B8 order-invariant bound, switched on for Bone Shield, algorithm unchanged); src/simc/expression/evaluate.ts (ONE_OF_NUMBERS, unchanged)",
+    "M11-B10. Warcraft Logs writes a Marrowrend's three Bone Shield stacks as three applybuffstack — each carrying the absolute resulting count, each after the first beside a same-millisecond refreshbuff — at the cast's own millisecond and AHEAD of it in the array, and a Death's Caress's two as one applybuffstack; on which side of the decision they fell, or between which of them the decision sat, the wire does not say. Inside the 50 ms pre-decision window the count is therefore EVERY exact value the decision's position among those gains leaves — the ordinary exact count immediately before the cluster (H1, by the M11-B2/B6 rule at the cluster's first position: the last applybuffstack or removebuffstack, carried only across same-millisecond companions, never across a lone refresh, never from silence) and each gain's absolute count in order — as ONE_OF_NUMBERS: { 7,8,9,10 } at 2,043,209, never { 7,10 }, never 10, never 7. The presence is M4's reading on BOTH sides of the cluster (EXACT ACTIVE before it, anchored on the removebuffstack, and EXACT ACTIVE at the decision) — WINDOW_ORDER_INVARIANT_PRESENCE, never a count's implication; the remainder is the M11-B8 floor both orderings share, the algorithm untouched. The generic evaluator decides sanlayn[0] (!up | remains<1.5 | stack<=1) FALSE and sanlayn[3]/[4] (stack<6) FALSE for every member; Blood writes no threshold. Two Marrowrends resolve, each selected at sanlayn[7] marrowrend at Blood Debt exactly 10, PROVEN_USABLE from the cast's own Runes, with no undecided candidate: 2,043,209 ({ 7,8,9,10 } from the removebuffstack 7 at 2,038,654; floor 2,572 ms from the gains at 2,015,781 past the refresh of unpinned cause at 2,016,785) and 2,124,183 ({ 8,9,10,11 } from the 8 at 2,120,436; floor 5,702 ms from the Dancing Rune Weapon's gains at 2,099,885): 42 MATCH / 9 REJECTED / 72 UNKNOWN, the 45 s slice 17 / 3 / 28, the opener 1 / 0 / 20. Still UNKNOWN once Bone Shield is passed: 2,057,622 ({ 11,12 }) and 2,085,352 ({ 8,9,10,11 }) on sanlayn[9] fight_remains, 2,151,502 ({ 6,7,8,9 }) and 2,164,444 ({ 9,11 }) on sanlayn[2]'s Runic Power deficit after a spend — and 2,044,021, whose count the three lone refreshes at 2,043,229 break (not a window case; no refresh-count carry). The track's first application (2,004,615, 20 ms ahead) binds nothing: AMBIGUOUS_INITIAL_STATE before it, no application count pinned for Bone Shield, no zero from silence. No removal ever sits inside a window on either subject; the removal rule is untouched. Improved Bone Shield's +2 (374715) is not in the extracted artifact, the guard stays off, and the observed 12 proves nothing. Every prior MATCH and REJECTED keeps its outcome and token.",
+    [
+      // The two MATCH, each with the set, both ends, the presence, the floor, Blood Debt 10 and the cast's own Runes.
+      blood_decision(
+        2043209,
+        BLOOD_MR,
+        {
+          ...BLOOD_DS_MATCH,
+          authorityToken: "marrowrend",
+          unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
+        },
+        BLOOD_FULL,
+      ),
+      blood_dispatch(2043209, BLOOD_MR, BLOOD_OUT_OF_GIFT_ENTERED_DISPATCH, BLOOD_FULL),
+      blood_aura(
+        2043209,
+        BLOOD_MR,
+        "bone_shield",
+        blood_window_presence(BLOOD_BONE_SHIELD, 2038654),
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2043209,
+        BLOOD_MR,
+        "bone_shield",
+        blood_bs_set([7, 8, 9, 10], {
+          cluster: blood_marrowrend_cluster(2043209),
+          beforeClusterStack: 7,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 10,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_remains(
+        2043209,
+        BLOOD_MR,
+        "bone_shield",
+        blood_remains_window_bound(2572, 2015781, {
+          cluster: blood_marrowrend_cluster(2043209),
+          beforeClusterMs: 2572,
+          beforeClusterProof: "GAIN_ANCHOR_BOUNDED",
+          resetInClusterMs: 30000,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_stack(2043209, BLOOD_MR, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_affordability(2043209, BLOOD_MR, blood_affordable(3, 2), BLOOD_FULL),
+      blood_decision(
+        2124183,
+        BLOOD_MR,
+        {
+          ...BLOOD_DS_MATCH,
+          authorityToken: "marrowrend",
+          unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
+        },
+        BLOOD_FULL,
+      ),
+      blood_dispatch(2124183, BLOOD_MR, BLOOD_OUT_OF_GIFT_ENTERED_DISPATCH, BLOOD_FULL),
+      blood_aura(
+        2124183,
+        BLOOD_MR,
+        "bone_shield",
+        blood_window_presence(BLOOD_BONE_SHIELD, 2120436),
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2124183,
+        BLOOD_MR,
+        "bone_shield",
+        blood_bs_set([8, 9, 10, 11], {
+          cluster: blood_marrowrend_cluster(2124183),
+          beforeClusterStack: 8,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 11,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_remains(
+        2124183,
+        BLOOD_MR,
+        "bone_shield",
+        blood_remains_window_bound(5702, 2099885, {
+          cluster: blood_marrowrend_cluster(2124183),
+          beforeClusterMs: 5702,
+          beforeClusterProof: "GAIN_ANCHOR_BOUNDED",
+          resetInClusterMs: 30000,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_stack(2124183, BLOOD_MR, "blood_debt", blood_debt_exact(10), BLOOD_FULL),
+      blood_affordability(2124183, BLOOD_MR, blood_affordable(4, 2), BLOOD_FULL),
+      // Still UNKNOWN on the next exact blocker, Bone Shield passed.
+      blood_decision(
+        2057622,
+        BLOOD_DC,
+        {
+          ...BLOOD_UNKNOWN,
+          unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
+          stoppingAt: "sanlayn[10] consumption",
+          stoppingAtoms: [BLOOD_CONSUMPTION_TAG],
+        },
+        BLOOD_FULL,
+      ),
+      blood_aura(
+        2057622,
+        BLOOD_DC,
+        "bone_shield",
+        blood_window_presence(BLOOD_BONE_SHIELD, 2044077),
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2057622,
+        BLOOD_DC,
+        "bone_shield",
+        blood_bs_set([11, 12], {
+          cluster: [{ reportTimeMs: 2057622, operation: "APPLIED", isStackChange: true, leadMs: 0 }],
+          beforeClusterStack: 11,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 12,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_decision(
+        2085352,
+        BLOOD_MR,
+        {
+          ...BLOOD_UNKNOWN,
+          unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
+          stoppingAt: "sanlayn[10] consumption",
+          stoppingAtoms: [BLOOD_CONSUMPTION_TAG],
+        },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2085352,
+        BLOOD_MR,
+        "bone_shield",
+        blood_bs_set([8, 9, 10, 11], {
+          cluster: blood_marrowrend_cluster(2085352),
+          beforeClusterStack: 8,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 11,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_stack(2085352, BLOOD_MR, "blood_debt", blood_debt_exact(9), BLOOD_FULL),
+      blood_decision(
+        2151502,
+        BLOOD_MR,
+        {
+          ...BLOOD_UNKNOWN,
+          unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
+          stoppingAt: "sanlayn[10] consumption",
+          stoppingAtoms: [BLOOD_CONSUMPTION_TAG],
+        },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2151502,
+        BLOOD_MR,
+        "bone_shield",
+        blood_bs_set([6, 7, 8, 9], {
+          cluster: blood_marrowrend_cluster(2151502),
+          beforeClusterStack: 6,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 9,
+        }),
+        BLOOD_FULL,
+      ),
+      blood_decision(
+        2164444,
+        BLOOD_DC,
+        {
+          ...BLOOD_UNKNOWN,
+          unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
+          stoppingAt: "sanlayn[10] consumption",
+          stoppingAtoms: [BLOOD_CONSUMPTION_TAG],
+        },
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2164444,
+        BLOOD_DC,
+        "bone_shield",
+        blood_bs_set([9, 11], {
+          cluster: [
+            { reportTimeMs: 2164444, operation: "APPLIED", isStackChange: true, leadMs: 0 },
+            { reportTimeMs: 2164444, operation: "REFRESHED", isStackChange: false, leadMs: 0 },
+          ],
+          beforeClusterStack: 9,
+          beforeClusterProof: "EXACT_STACK_OBSERVATION",
+          afterClusterStack: 11,
+        }),
+        BLOOD_FULL,
+      ),
+      // Not a window case: the lone refreshes at 2,043,229 break the count; the presence is M4's ordinary reading.
+      blood_stack(
+        2044021,
+        BLOOD_DS,
+        "bone_shield",
+        blood_unbound_stack(BLOOD_BONE_SHIELD, "COUNT_AMBIGUOUS_SINCE_OBSERVATION"),
+        BLOOD_FULL,
+      ),
+      blood_aura(
+        2044021,
+        BLOOD_DS,
+        "bone_shield",
+        blood_observed_aura(true, BLOOD_BONE_SHIELD, 2043229),
+        BLOOD_FULL,
+      ),
+      // The track's first application, 20 ms ahead: nothing bound, nothing from silence.
+      blood_aura(
+        2004615,
+        BLOOD_DC,
+        "bone_shield",
+        blood_unbound_aura(BLOOD_BONE_SHIELD, BLOOD_WINDOW_TAG, null),
+        BLOOD_FULL,
+      ),
+      blood_stack(
+        2004615,
+        BLOOD_DC,
+        "bone_shield",
+        blood_unbound_stack(BLOOD_BONE_SHIELD, BLOOD_WINDOW_TAG),
+        BLOOD_FULL,
+      ),
+    ],
+    ["OWNED_CONTRACT", "PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "Inside the window a Bone Shield count is every exact value the wire's own gains and the count before them leave, never one chosen; the presence is M4's reading on both sides of the cluster, never a count's implication; the remainder is the floor both orderings share. Nothing is counted, incremented, carried across a lone refresh, read from the silence before a track's first transition, or checked against a maximum the build does not prove.",
+    {
+      authority: BLOOD_AUTHORITY,
+      related: [
+        ...BLOOD_RELATED,
+        "tests/unit/m11b10-blood-bone-shield-window.test.ts",
+        "tests/unit/m11b8-blood-ebq-remains.test.ts",
         "tests/unit/simc-expression-one-of-numbers.test.ts",
       ],
     },
