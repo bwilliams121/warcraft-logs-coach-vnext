@@ -34,6 +34,7 @@ import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
 import { ASSASSINATION_REGISTRATION } from "../../src/specs/rogue/assassination/registration.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
+import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../../src/specs/deathknight/blood/registration.js";
 import { analyzeObservedProtectionPaladinDecisions } from "../../src/specs/paladin/protection/observed-analysis.js";
 import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
 import {
@@ -253,13 +254,15 @@ describe("a mismatched result cannot reach observedDecisionViewOf", () => {
     // Rogue analysis no longer reaches any view at all (the previous test).
     const rogueView = vi.fn(ASSASSINATION_REGISTRATION.observedDecisionView);
     const paladinView = vi.fn(PROTECTION_PALADIN_REGISTRATION.observedDecisionView);
-    // M11-A5: the third public row completes the catalog; its view must
-    // never be reached by either neighbour's analysis.
+    // M11-A5: the third public row completes the catalog; M11-B12 the
+    // fourth. Neither view may be reached by any neighbour's analysis.
     const retributionView = vi.fn(RETRIBUTION_PALADIN_REGISTRATION.observedDecisionView);
+    const bloodView = vi.fn(BLOOD_DEATH_KNIGHT_REGISTRATION.observedDecisionView);
     const catalog = requireValidatedCatalog([
       { ...ASSASSINATION_REGISTRATION, observedDecisionView: rogueView },
       { ...PROTECTION_PALADIN_REGISTRATION, observedDecisionView: paladinView },
       { ...RETRIBUTION_PALADIN_REGISTRATION, observedDecisionView: retributionView },
+      { ...BLOOD_DEATH_KNIGHT_REGISTRATION, observedDecisionView: bloodView },
     ]);
     const real = realAssassinationAnalysis();
     if (real.status !== "ANALYZED") throw new Error("expected ANALYZED");
@@ -273,6 +276,7 @@ describe("a mismatched result cannot reach observedDecisionViewOf", () => {
 
     expect(observedDecisionViewOf(catalog, paladin).decisions.length).toBeGreaterThan(0);
     expect(rogueView).not.toHaveBeenCalled();
+    expect(bloodView).not.toHaveBeenCalled();
     expect(paladinView).toHaveBeenCalledTimes(1);
 
     expect(observedDecisionViewOf(catalog, real).decisions.length).toBeGreaterThan(0);

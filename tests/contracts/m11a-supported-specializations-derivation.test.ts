@@ -48,13 +48,14 @@ const TOOL_SOURCES: Record<string, string> = import.meta.glob("../../src/mcp/too
 });
 
 describe("the production sentence", () => {
-  it("is the reviewed snapshot for the three public specializations", () => {
+  it("is the reviewed snapshot for the four public specializations", () => {
     // Reviewed, not the rule. The third specialization became public in
-    // M11-A5 and this line changed in the same commit as the five-site move,
-    // as the previous snapshot said it would; the "A, B and C" grammar is
-    // exercised for the first time by a real catalog.
+    // M11-A5 and the fourth in M11-B12; each time this line changed in the
+    // same commit as the five-site move, as the previous snapshot said it
+    // would. The display names are in code-point order, which is why Blood
+    // Death Knight sits second and not last.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Blood Death Knight, Protection Paladin and Retribution Paladin.",
     );
   });
 

@@ -430,7 +430,7 @@
     {
       "specId": "deathknight/blood",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "INTERNAL_ONLY",
+      "currentAnalyzerStatus": "PUBLIC",
       "realEvidenceStatus": "REAL_SANITIZED_EVIDENCE_AVAILABLE",
       "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",

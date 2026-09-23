@@ -6919,6 +6919,95 @@ INTERNAL_ONLY; M11-B is not complete.
 
 ---
 
+### M11-B12 — Blood Death Knight becomes publicly supported
+
+The five-site move, two promotion-layer gates, and nothing else. No gameplay
+rule, binding, authority reading or verdict changed: the bundle is still 42
+MATCH / 9 REJECTED / 72 UNKNOWN, the 45 s slice 17 / 3 / 28, the opener
+1 / 0 / 20, decision for decision.
+
+**The five sites, in one reviewed edit.** `src/findings/spec-id.ts` (the
+partition — `deathknight/blood` moves to `PUBLIC_SPEC_IDS`, the internal-only
+set is empty again and its machinery stays dormant), the public contract's
+own `specId` enum, `src/services/spec-identity.ts` (the table now resolves
+`DeathKnight`/`Blood`, matched exactly: neither `Death Knight` nor
+`Death-Knight` is the canonical string), the `satisfies PublicSpecId` on the
+specialization's `spec.ts`, and the registration's `exposure`. The registry
+validates that those sites agree; a catalog missing any of them fails closed.
+
+**The one schema decision.** `warcraft-logs-coach.analysis/1` is unchanged
+except for the additive `specId` widening, by the M10-D / M11-A5 precedent.
+No outcome, basis, blocker class, exclusion reason, status or capability
+value moved for a fourth specialization — Blood's view already projected
+`MELEE_SWING` → `NON_GCD_ACTION` and `OUTSIDE_FIRST_SLICE` →
+`OUTSIDE_SUPPORTED_SLICE`, both older than this milestone. Every Blood
+evidence class built across M11-B4 … M11-B10 (order-invariant stack sets,
+the presence proof, remains floors, Rune affordability, Blood Debt counts,
+the censuses, the dispatch trace) stays INSIDE the payload;
+`m11b12-blood-public-projection` scans every committed input for each of
+them by name and for every withheld key.
+
+**The validated-profile gate (owner decision T2).** Blood's evidence is two
+sanitized San'layn captures. The pinned authority also carries a
+Deathbringer list and the engine dispatches it correctly, but no Deathbringer
+verdict has ever been measured, so `supported-profile.ts` admits exactly one
+hero tree and the analyzer fails closed on anything else BEFORE reading a
+decision: a resolved Deathbringer build is `AUTHORITY_NOT_AVAILABLE` (the
+build is known; no validated authority applies), an unresolved or
+contradictory tree is `PROFILE_NOT_RESOLVED`. Both are existing public
+statuses — promotion added no status — and the gate reads the three-way
+talent rule's resolution only: never the actions cast, never the aura set,
+never the corpus.
+
+**The wire-version guard (owner decision T3).** `resources.ts` resolved Runes
+and Runic Power by scanning `RESOURCE_WIRE_CONTRACTS` directly, which was
+invisible while the corpus was one parser version and wrong the moment a
+capture was not. It now resolves both through the shared
+`resourceWireTypeFor` with the capture's own `gameVersion` / `logVersion`
+(`bloodWireKeys`), and a version no contract covers is `INSUFFICIENT_EVIDENCE`
+with no fallback: a wire type read from the wrong parser version is a
+different field, and every Rune and Runic Power fact downstream would be
+fabricated from it. Protection and Retribution share the old unkeyed read;
+that is recorded in `agent/follow-ups.md` and deliberately NOT fixed here.
+
+**What promotion exposed.** REST `/v1/analysis` and the MCP
+`analyze_warcraft_log` tool both dispatch the same row through the same
+service (no Blood branch exists in either transport, the raid-night service,
+the projections or the aggregation); `tools/list`, the supported-
+specializations sentence and both tool descriptions are DERIVED from the
+PUBLIC registrations and moved on their own. Raid night gained a Blood cell
+with no orchestration change. The promotion evidence gate qualifies Blood in
+PUBLIC mode with twenty-three assertions over six sanitized-capture cases —
+real MATCH and real REJECTED, each recorded PASSED in the committed report,
+paired THROUGH the identity table.
+
+**Proven.** `m11b12-blood-supported-profile` (the four hero-tree answers and
+their statuses; both real subjects San'layn; the wire types for the captures'
+version; four foreign version keys refusing without naming a wire type; a
+relabelled fight refusing as INSUFFICIENT_EVIDENCE with no resource evidence);
+`m11b12-blood-public-projection` (schema v1 unchanged, the enum widened by one
+id, the projection total, the pinned public totals, the slice's five tokens,
+the cell reconciliation, three committed inputs scanned for thirty-plus
+internal strings and twenty-two withheld keys, decision-for-decision
+equivalence, the service/internal equality, the refusal documents);
+`m11b12-blood-public-transports` (REST 200 with the scoped semantics and the
+three REJECTED; the Arms Warrior and a Frost Death Knight still
+SPEC_NOT_SUPPORTED; the bearer behaviour unchanged and leaking neither token;
+MCP `structuredContent`, text and REST body deeply equal; the derived
+description naming the validated hero tree and refusing "full rotation");
+`m11b12-mixed-raid-night` (Blood alone and in a four-spec roster, one
+discovery, one ingestion, one revision check, each analyzer once, every
+neighbour's truthful PROFILE_NOT_RESOLVED, Arms SPEC_NOT_SUPPORTED, the cell
+identical alone and in company); the re-pinned partition, registry,
+capability, identity, contract, service, coaching-inventory, registration-list,
+module-conformance, authority-ownership, second-registration and tools-list
+suites; the corpus (162 cases / 692 assertions, a new PUBLIC_CONTRACT parity
+case and the re-pinned APPLICATION_SERVICE case, two byte-identical workerd
+runs). Assassination, Protection and Retribution are unchanged in the
+committed report, row for row.
+
+---
+
 # Milestone 12 — Healer Foundation
 
 Implement:

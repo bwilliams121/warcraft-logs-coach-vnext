@@ -445,8 +445,13 @@ Retribution Paladin, landed `INTERNAL_ONLY` at M11-A4 (`src/specs/paladin/
 retribution/`, `paladin-retribution-observed-decisions`) and was promoted
 to PUBLIC at M11-A5 after that gate reported both a real `MATCH` and real
 `REJECTED` evidence for it — completing M11-A, the first reusable
-onboarding slice (M11 as a whole is NOT complete: twenty-nine ordinary
-specializations remain, healers are M12, Augmentation is M13). Its slice
+onboarding slice. The second M11 specialization, Blood Death Knight, took
+the same path over a longer road: `INTERNAL_ONLY` at M11-B2 as a measurement
+slice for the `run_action_list` dispatch cohort, ten evidence slices
+(M11-B2 … M11-B10), a promotion-readiness audit at M11-B11, and PUBLIC at
+M11-B12 with twenty-three qualifying real sanitized-capture assertions
+(M11 as a whole is NOT complete: twenty-eight ordinary specializations
+remain, healers are M12, Augmentation is M13). Its slice
 judges observed Holy Power spender decisions (Divine Storm versus
 Templar's/Final Verdict) only, under the class/spec authority boundary
 (racials, potions, item uses and external buffs are outside the rotational
@@ -576,8 +581,8 @@ transport — a test asserts the two payloads are deeply equal.
 ### What the analysis actually is
 
 **Observed-decision authority verification for the publicly supported
-specializations: Assassination Rogue, Protection Paladin and Retribution
-Paladin.**
+specializations: Assassination Rogue, Protection Paladin, Retribution
+Paladin and Blood Death Knight.**
 
 It takes the rotational decisions a player *already made* and checks each one
 against that specialization's pinned SimulationCraft action priority list.
@@ -622,7 +627,28 @@ evaluated. Most spender decisions resolve `UNKNOWN` on current evidence, and
 the coverage block says so. See the
 [Onboarding foundation](#onboarding-foundation-m11-a) section.
 
-Any specialization other than those three returns `status: "SPEC_NOT_SUPPORTED"`
+Blood Death Knight analysis (public since M11-B12) evaluates observed
+offensive global-cooldown decisions — Death Strike, Heart Strike (including
+its Vampiric Strike execution), Blood Boil, Marrowrend and Death's Caress —
+against the pinned Blood APL, when the necessary state can be established.
+It is **validated for the San'layn hero tree only**: a build whose observed
+talent tree resolves to Deathbringer, to no hero tree, or to more than one is
+refused rather than judged (`AUTHORITY_NOT_AVAILABLE` or
+`PROFILE_NOT_RESOLVED`), because no Deathbringer evidence has been measured.
+Death and Decay, Dancing Rune Weapon and Consumption are reported as excluded
+`OUTSIDE_SUPPORTED_SLICE` — observed, not judged. It does not evaluate active
+mitigation, self-healing, defensive cooldowns, interrupts or survival (Death
+Strike is judged only as the offensive list's spender), does not model
+`fight_remains`, does not reconstruct Rune regeneration or Runic Power across
+an unobserved spend, and does not read race, faction, gear use effects or
+consumables. Most decisions resolve `UNKNOWN` on current evidence — 72 of 123
+on the committed 165 s subject — and the coverage block says so. One authority
+gap is deliberately deferred: Bone Shield's DBC maximum is 10 and Improved
+Bone Shield raises the in-game maximum to 12, but no supported predicate reads
+that maximum, so the analyzer neither enforces nor infers it. See
+`agent/architecture.md`, "M11-B", and `src/specs/deathknight/blood/README.md`.
+
+Any specialization other than those four returns `status: "SPEC_NOT_SUPPORTED"`
 with no decisions and no coverage. That is a complete, truthful answer — not
 evidence of clean play. The canonical list of supported specializations is
 derived at runtime from the production analyzer catalog (the PUBLIC

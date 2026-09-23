@@ -141,7 +141,13 @@ import {
   type ObservedActionUnselectability,
 } from "./observed-action-gate.js";
 import { resolveBloodAtoms, type BloodResolverDiagnostics } from "./resolver.js";
-import { bloodResourceOn, bloodResourceWireTypes, type BloodCastResources } from "./resources.js";
+import {
+  bloodResourceOn,
+  bloodResourceWireTypes,
+  bloodWireKeys,
+  type BloodCastResources,
+} from "./resources.js";
+import { bloodValidatedProfile } from "./supported-profile.js";
 import { BLOOD_DEATH_KNIGHT_SPEC_ID } from "./spec.js";
 
 // ---------------------------------------------------------------------------
@@ -533,12 +539,15 @@ export function analyzeObservedBloodDeathKnightDecisions(
     );
   }
 
-  const wireTypes = bloodResourceWireTypes();
-  if (wireTypes === null) {
+  // M11-B12: the wire contracts must hold for THIS capture's parser version.
+  // An unsupported gameVersion/logVersion fails closed rather than reading
+  // Runes and Runic Power out of a field this log does not use that way.
+  const wireTypes = bloodResourceWireTypes(bloodWireKeys(state));
+  if (!wireTypes.ok) {
     return unsupported(
       "INSUFFICIENT_EVIDENCE",
       specId,
-      "The version-scoped resource wire contracts required to read Runes and Runic Power are not available.",
+      `The version-scoped resource wire contracts required to read Runes and Runic Power are not available: ${wireTypes.reason}.`,
     );
   }
 
@@ -546,6 +555,19 @@ export function analyzeObservedBloodDeathKnightDecisions(
   const observedTalents = snapshot.talents;
   const talents = resolveAllModelledTalents(observedTalents);
   const heroTree = resolveBloodHeroTree(observedTalents);
+
+  // ---- the validated-profile gate (M11-B12), before any decision is read ----
+  //
+  // Blood's supported slice is validated against San'layn evidence only. A
+  // build the observed talent tree resolves to the other sub-tree, or resolves
+  // to neither, fails closed here rather than producing MATCH/REJECTED
+  // verdicts for a decision surface no real evidence backs. The APL's
+  // Deathbringer list stays where it is: the authority may describe it, this
+  // analyzer does not claim to have validated it.
+  const profile = bloodValidatedProfile(heroTree);
+  if (!profile.supported) {
+    return unsupported(profile.status, specId, profile.detail);
+  }
   const buildFacts: BloodBuildFacts = { talents, heroTree };
   const build: BloodBuildResolution = { talents, heroTree };
   const knownTalents = resolveBloodModelledTalents(observedTalents);

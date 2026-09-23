@@ -70,13 +70,19 @@ describe("the deployed composition binds the derived supported-specialization se
     }
   });
 
-  it("the sentence names Assassination Rogue, Protection Paladin and Retribution Paladin and nothing else", async () => {
+  it("the sentence names Assassination Rogue, Blood Death Knight, Protection Paladin and Retribution Paladin and nothing else", async () => {
     // The reviewed snapshot, seen through the wire rather than the constant.
     const tools = await toolsList();
     const analyze = tools.find((candidate) => candidate.name === ANALYZE_TOOL_NAME);
     expect(analyze?.description).toContain(
-      "Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Blood Death Knight, Protection Paladin and Retribution Paladin.",
     );
+    // M11-B12: Blood's limits paragraph is composed through the same seam,
+    // on both tools, and names the validated hero tree rather than a rotation.
+    expect(analyze?.description).toContain(
+      "Blood Death Knight analysis evaluates observed offensive global-cooldown decisions",
+    );
+    expect(analyze?.description).toContain("VALIDATED FOR THE SAN'LAYN HERO TREE ONLY");
     // M11-A5: the Retribution limits paragraph is composed through the same
     // seam as Protection's, on both tools, and says what the slice is.
     const raidNight = tools.find((candidate) => candidate.name === RAID_NIGHT_TOOL_NAME);

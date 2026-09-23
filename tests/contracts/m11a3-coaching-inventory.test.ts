@@ -181,6 +181,7 @@ describe("population: every ordinary M11 specialization exactly once, no healer,
     for (const key of PRE_M11_PUBLIC) expect(PUBLIC_SPEC_IDS as readonly string[]).toContain(key);
     expect((PUBLIC_SPEC_IDS as readonly string[]).filter((id) => !PRE_M11_PUBLIC.includes(id))).toEqual([
       "paladin/retribution",
+      "deathknight/blood",
     ]);
   });
 

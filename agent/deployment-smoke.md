@@ -903,3 +903,132 @@ answering `SPEC_NOT_SUPPORTED`, `OUTSIDE_FIRST_SLICE` or an internal field on
 the wire, an Assassination or Protection document that moved — M11-A5 is
 **not** complete: record exactly what was observed and stop. Do not adjust the
 analyzer, the projection or the descriptions to make a smoke step pass.
+
+---
+
+# Part V — Milestone 11-B12
+
+The deployed surface is unchanged in routes, tools and schema version. What
+changed: a fourth public analyzer, `deathknight-blood-observed-decisions`,
+selected for `DeathKnight/Blood`; the public `specId` enum of
+`warcraft-logs-coach.analysis/1` now carries `deathknight/blood`; and the
+`analyze_warcraft_log` / `analyze_raid_night` descriptions name all four
+supported specializations and Blood's limits. **No other public value moved**
+— no outcome, basis, blocker class, exclusion reason, status or capability —
+and no schema version moved.
+
+Two promotion-layer gates are new and both are refusals rather than
+capabilities: Blood is validated for the **San'layn** hero tree only (a
+Deathbringer build receives `AUTHORITY_NOT_AVAILABLE`, an unresolved or
+contradictory one `PROFILE_NOT_RESOLVED`), and Blood's Rune / Runic Power
+reads now fail closed on a parser version no wire contract covers
+(`INSUFFICIENT_EVIDENCE`).
+
+**Run Part V only after M11-B12 is reviewed, committed, pushed, CI-green and
+deployment is separately authorized. Nothing below is executed by an agent.**
+
+Preconditions, unchanged from Part III. Secret handling as in Part II. Use
+only the sanitized report codes this repository already names.
+
+## M11B12-1. Deploy, M11B12-2. Health
+
+As M11-1 and M11-2.
+
+## M11B12-3. REST single fight — the three earlier specializations (invariance)
+
+As M11-3 and M11-4: the Assassination, Protection and Retribution documents
+must be what Part III and Part IV recorded, byte for byte where the report
+revision has not moved. None may mention Blood, `deathknight/blood` or any
+Blood evidence class.
+
+## M11B12-4. REST single fight — Blood Death Knight (newly public)
+
+Costs **1** unit. Report `A7R6kxPJ1hC8YQ4w`, fight **7**, actor **14** — the
+Blood Death Knight the committed corpus evidence was captured from
+(`wcl-fight-context-a7r6-fight-7` proves the identity: masterData subType
+DeathKnight, friendlySpecs "Blood"). Same request shape as M11-4 with
+`sourceId = 14`. Expect 200 and confirm all of:
+
+- `status` is `ANALYZED` — **not** `SPEC_NOT_SUPPORTED`;
+- `specialization` is `{ "specId": "deathknight/blood", "gameplaySupported": true }`;
+- `analyzerId` is `deathknight-blood-observed-decisions`;
+- `schemaVersion` is `warcraft-logs-coach.analysis/1`;
+- `authority.authorityId` is `SIMC_APL_DEATHKNIGHT_BLOOD` at commit
+  `33622e9d1662ff0e451691edf85a6b49cc9d11d9`;
+- `capability.scoresPerformance` is `false` and `capability.unknownIsFirstClass`
+  is `true`;
+- every `decisions[].observedToken` is one of `death_strike`, `heart_strike`,
+  `blood_boil`, `marrowrend`, `deaths_caress`;
+- the coverage block carries a known **MATCH**, a known **REJECTED** and a
+  known **UNKNOWN** (see M11B12-5);
+- `coverage.exclusions` names `OUTSIDE_SUPPORTED_SLICE` for Death and Decay,
+  Dancing Rune Weapon and Consumption casts — observed, not judged;
+- **no** internal string anywhere in the body: `WINDOW_ORDER_INVARIANT_SET`,
+  `WINDOW_ORDER_INVARIANT_PRESENCE`, `WINDOW_ORDER_INVARIANT_BOUNDED`,
+  `EXACT_STACK_OBSERVATION`, `COUNT_AMBIGUOUS_SINCE_OBSERVATION`,
+  `OWN_PRE_COST_AFFORDABLE`, `OUTSIDE_FIRST_SLICE`, `MELEE_SWING`,
+  `rawBlocker`, `bone_shield`, `blood_debt`, `essence_of_the_blood_queen`,
+  `sanlayn[`, `run_action_list`, `fight_remains`.
+
+## M11B12-5. The three named decisions
+
+Over the whole fight-7 document (the full fight, not a slice), confirm the
+three decision classes are all published and all truthful:
+
+- a **MATCH**: a Death Strike whose `basis` is
+  `AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN` and whose `authorityToken`
+  equals its `observedToken`;
+- a **REJECTED**: a Heart Strike whose `basis` is
+  `AUTHORITY_SELECTED_DIFFERENT_TOKEN` and whose `authorityToken` is
+  `marrowrend` — a rejection names what the authority selected, never a fault;
+- an **UNKNOWN**: any decision whose `basis` is
+  `AUTHORITY_SELECTION_UNRESOLVED` with `authorityToken: null`. Most decisions
+  are UNKNOWN and that is expected; the coverage block must say so.
+
+## M11B12-6. REST single fight — unsupported, and the unvalidated hero tree
+
+Two requests, both 200:
+
+- the Arms Warrior (actor 4) is still `SPEC_NOT_SUPPORTED` with
+  `specId: null` — unchanged;
+- if the roster of any sanctioned report contains a **Deathbringer** Blood
+  Death Knight, request it and confirm `AUTHORITY_NOT_AVAILABLE` with a detail
+  naming the hero tree and no decisions. If no such actor is available, record
+  that the case was not exercised in production — do **not** relabel a
+  San'layn actor to manufacture one.
+
+## M11B12-7. MCP `tools/list`
+
+As M11-6, and confirm:
+
+- the sentence reads `Supported specializations: Assassination Rogue, Blood
+  Death Knight, Protection Paladin and Retribution Paladin.`;
+- the `analyze_warcraft_log` description carries Blood's limits paragraph,
+  including `VALIDATED FOR THE SAN'LAYN HERO TREE ONLY`;
+- neither description says "full rotation" or names an APL list, a list index
+  or a spell id.
+
+## M11B12-8. MCP `tools/call` — Blood and Arms
+
+As M11-7 with `sourceId` 14 and 4.
+
+## M11B12-9. Transport parity, decoded from raw bytes
+
+As M11-8, applied to the Blood pair and the Arms pair: `structuredContent`,
+the JSON in the text block and the REST body must be deeply equal.
+
+## M11B12-10. Raid night with all four
+
+As M11-9 over fight 7: the actor-14 cell is `ANALYZED` under
+`deathknight/blood`, the actor-6, actor-7 and actor-19 cells are what Part IV
+recorded, the actor-4 cell is `SPEC_NOT_SUPPORTED`; one roster discovery, one
+ingestion, deterministic cell order.
+
+## M11B12-11. Unauthorized and leakage sweep, M11B12-12. Completion
+
+As M11-10 and M11-11. If a step surfaces a problem — a Blood request
+answering `SPEC_NOT_SUPPORTED`, a Deathbringer request being ANALYZED, an
+internal Blood evidence class on the wire, or an Assassination, Protection or
+Retribution document that moved — M11-B12 is **not** complete: record exactly
+what was observed and stop. Do not adjust the analyzer, the gates, the
+projection or the descriptions to make a smoke step pass.

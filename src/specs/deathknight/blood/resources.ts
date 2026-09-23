@@ -48,7 +48,8 @@
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
-import { RESOURCE_WIRE_CONTRACTS } from "../../../data/wcl-wire/resource-types.js";
+import { resourceWireTypeFor } from "../../../data/wcl-wire/resource-types.js";
+import type { FightCompatibilityKeys } from "../../../data/provenance.js";
 import { RUNES_RESOURCE_ID, RUNIC_POWER_RESOURCE_ID } from "./spec.js";
 
 /** power_type_data.inc row 6: Runic Power's DBC and wire encoding is tenths of a point. */
@@ -77,14 +78,57 @@ export interface BloodCastResources {
   readonly runicPower: BloodResourceObservation;
 }
 
-/** The version-scoped wire types of the two resources, or `null` when a contract is not pinned. */
-export function bloodResourceWireTypes(): { readonly runes: number; readonly runicPower: number } | null {
-  const runes = RESOURCE_WIRE_CONTRACTS.find((entry) => entry.resourceId === RUNES_RESOURCE_ID)?.wireType;
-  const runicPower = RESOURCE_WIRE_CONTRACTS.find(
-    (entry) => entry.resourceId === RUNIC_POWER_RESOURCE_ID,
-  )?.wireType;
-  if (runes === undefined || runicPower === undefined) return null;
-  return { runes, runicPower };
+/** The fight's parser-version keys, read from ingestion provenance and nowhere else. */
+export function bloodWireKeys(state: CombatState): FightCompatibilityKeys {
+  return {
+    gameVersion: state.fight.provenance.gameVersion,
+    logVersion: state.fight.provenance.logVersion,
+  };
+}
+
+export type BloodResourceWireTypes =
+  | { readonly ok: true; readonly runes: number; readonly runicPower: number }
+  | { readonly ok: false; readonly reason: string };
+
+/**
+ * The wire types carrying Runes and Runic Power FOR THIS FIGHT'S PARSER
+ * VERSION (M11-B12).
+ *
+ * Both resources resolve through the shared version-scoped resolver, with the
+ * capture's own `gameVersion` / `logVersion`. A contract that is not pinned
+ * for the resource, or is pinned for a version this capture is not, FAILS
+ * CLOSED: there is no fallback to the contract's number, because a wire type
+ * read from the wrong parser version would not be an approximation of this
+ * log's encoding — it would be a different field, and every Rune and Runic
+ * Power fact downstream (affordability, deficits, the decisions they decide)
+ * would be fabricated from it. M11-B2 through M11-B10 read the contract list
+ * directly, which was invisible while the corpus was one parser version and
+ * wrong the moment a capture was not; promotion is where that stopped being
+ * acceptable.
+ */
+export function bloodResourceWireTypes(keys: FightCompatibilityKeys): BloodResourceWireTypes {
+  const runes = resourceWireTypeFor(RUNES_RESOURCE_ID, keys);
+  const runicPower = resourceWireTypeFor(RUNIC_POWER_RESOURCE_ID, keys);
+  for (const [resourceId, resolution] of [
+    [RUNES_RESOURCE_ID, runes],
+    [RUNIC_POWER_RESOURCE_ID, runicPower],
+  ] as const) {
+    if (!resolution.ok) {
+      return {
+        ok: false,
+        reason:
+          resolution.reason === "NO_CONTRACT_FOR_RESOURCE"
+            ? `no wire contract is declared for ${resourceId}`
+            : `the ${resourceId} wire contract is not established for this log's gameVersion/logVersion`,
+      };
+    }
+  }
+  if (!runes.ok || !runicPower.ok) {
+    // Unreachable: the loop above returns first. Present so the narrowing is
+    // established by the compiler rather than by a comment.
+    return { ok: false, reason: "a wire contract is not established for this log" };
+  }
+  return { ok: true, runes: runes.wireType, runicPower: runicPower.wireType };
 }
 
 /** One resource a cast carried, read once through M4's observation accessor. */

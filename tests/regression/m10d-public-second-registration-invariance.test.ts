@@ -182,12 +182,14 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 }
 
 describe("the production catalog", () => {
-  it("is exactly the three PUBLIC registrations (Retribution PUBLIC since M11-A5) plus the INTERNAL_ONLY Blood row (M11-B2), and both lookups answer alike for every public one", () => {
+  it("is exactly the four PUBLIC registrations (Blood PUBLIC since M11-B12), and both lookups answer alike for every one", () => {
     expect(ANALYZER_REGISTRATIONS).toHaveLength(4);
-    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(3);
-    expect(
-      ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY").map((row) => row.specId),
-    ).toEqual(["deathknight/blood"]);
+    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(4);
+    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY")).toEqual([]);
+    expect(analyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
+    expect(internalAnalyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)).toBe(
+      analyzerForSpec("deathknight/blood", PRODUCTION_CATALOG),
+    );
     expect(analyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
     expect(internalAnalyzerForSpec("paladin/retribution", PRODUCTION_CATALOG)).toBe(
       analyzerForSpec("paladin/retribution", PRODUCTION_CATALOG),
@@ -202,7 +204,7 @@ describe("the production catalog", () => {
     expect(analyzerForSpec("rogue/assassination", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
   });
 
-  it("public identity resolution accepts Paladin/Protection and Paladin/Retribution and still rejects Warrior/Arms", () => {
+  it("public identity resolution accepts both Paladins and DeathKnight/Blood, and still rejects Warrior/Arms", () => {
     expect(resolveSpecIdentity({ className: "Paladin", specName: "Protection" })).toEqual({
       ok: true,
       specId: "paladin/protection",
@@ -210,6 +212,10 @@ describe("the production catalog", () => {
     expect(resolveSpecIdentity({ className: "Paladin", specName: "Retribution" })).toEqual({
       ok: true,
       specId: "paladin/retribution",
+    });
+    expect(resolveSpecIdentity({ className: "DeathKnight", specName: "Blood" })).toEqual({
+      ok: true,
+      specId: "deathknight/blood",
     });
     expect(resolveSpecIdentity(UNSUPPORTED_WCL_IDENTITY)).toMatchObject({
       ok: false,

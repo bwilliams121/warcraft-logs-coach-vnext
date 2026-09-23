@@ -25,12 +25,12 @@
  * no nearest-match and no substring test. An identity either matches an entry
  * exactly or it does not resolve.
  *
- * WHY THE TABLE IS THREE ROWS
+ * WHY THE TABLE IS FOUR ROWS
  *
- * Three specializations have PUBLIC evaluators today: Assassination Rogue,
- * Protection Paladin (since M10-D) and Retribution Paladin (since M11-A5).
- * Enumerating the other thirty-seven would be writing down claims we cannot
- * honour — a table entry reads as "we know about this", and for an
+ * Four specializations have PUBLIC evaluators today: Assassination Rogue,
+ * Protection Paladin (since M10-D), Retribution Paladin (since M11-A5) and
+ * Blood Death Knight (since M11-B12). Enumerating the other thirty-six would
+ * be writing down claims we cannot honour — a table entry reads as "we know about this", and for an
  * unsupported spec the honest answer is the same whether or not we could
  * spell its name. Rows arrive with evaluators, and the registry validates
  * that this table, the public spec partition and the PUBLIC registrations
@@ -82,6 +82,7 @@ export const SUPPORTED_SPEC_IDENTITIES: Readonly<Record<string, SpecId>> = Objec
   "rogue/assassination": "rogue/assassination",
   "paladin/protection": "paladin/protection",
   "paladin/retribution": "paladin/retribution",
+  "deathknight/blood": "deathknight/blood",
 });
 
 /**

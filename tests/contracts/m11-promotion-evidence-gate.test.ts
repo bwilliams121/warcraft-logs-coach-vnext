@@ -399,6 +399,35 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
       ]),
     );
     expect(snapshot).toEqual({
+      // M11-B12: Blood Death Knight's promotion evidence — twenty-three
+      // qualifying assertions across six sanitized-capture cases, MATCH and
+      // REJECTED both, every one recorded PASSED in the committed report and
+      // paired THROUGH the identity table (DeathKnight/Blood -> the id).
+      "deathknight/blood": [
+        "spec-blood-death-knight.blood-debt-is-read-from-its-own-transitions-and-never-from-a-death-strike[11] -> MATCH",
+        "spec-blood-death-knight.blood-debt-is-read-from-its-own-transitions-and-never-from-a-death-strike[5] -> MATCH",
+        "spec-blood-death-knight.blood-debt-is-read-from-its-own-transitions-and-never-from-a-death-strike[7] -> MATCH",
+        "spec-blood-death-knight.blood-debt-is-read-from-its-own-transitions-and-never-from-a-death-strike[9] -> MATCH",
+        "spec-blood-death-knight.bone-shield-is-every-exact-count-its-own-gains-leave-and-the-presence-proven-on-both-sides[0] -> MATCH",
+        "spec-blood-death-knight.bone-shield-is-every-exact-count-its-own-gains-leave-and-the-presence-proven-on-both-sides[7] -> MATCH",
+        "spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-and-the-window-bound-is-the-floor-both-orderings-share[0] -> REJECTED",
+        "spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-and-the-window-bound-is-the-floor-both-orderings-share[12] -> REJECTED",
+        "spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-and-the-window-bound-is-the-floor-both-orderings-share[21] -> MATCH",
+        "spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-and-the-window-bound-is-the-floor-both-orderings-share[28] -> REJECTED",
+        "spec-blood-death-knight.essence-lone-refreshes-anchor-nothing-and-the-window-bound-is-the-floor-both-orderings-share[33] -> MATCH",
+        "spec-blood-death-knight.essence-stacks-are-the-wires-absolute-counts-and-a-set-of-two-inside-the-window[0] -> MATCH",
+        "spec-blood-death-knight.essence-stacks-are-the-wires-absolute-counts-and-a-set-of-two-inside-the-window[4] -> MATCH",
+        "spec-blood-death-knight.essence-stacks-are-the-wires-absolute-counts-and-a-set-of-two-inside-the-window[7] -> MATCH",
+        "spec-blood-death-knight.inside-the-gift-window-the-scan-transfers-into-san-gift-and-selects-death-strike[0] -> MATCH",
+        "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes[0] -> REJECTED",
+        "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes[10] -> REJECTED",
+        "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes[14] -> REJECTED",
+        "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes[18] -> REJECTED",
+        "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes[21] -> REJECTED",
+        "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes[4] -> REJECTED",
+        "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes[7] -> REJECTED",
+        "spec-blood-death-knight.outside-the-gift-window-the-scan-skips-san-gift-and-stops-in-sanlayn[19] -> MATCH",
+      ],
       "paladin/protection": [
         "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura[1] -> MATCH",
         "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura[6] -> MATCH",
@@ -467,14 +496,83 @@ describe("PUBLIC mode — the M11-A5 promotion standard for Retribution Paladin:
   });
 });
 
+describe("M11-B12: Blood Death Knight's promotion evidence, through the identity table", () => {
+  it("is PUBLIC with real MATCH and real REJECTED evidence from sanitized captures, each recorded PASSED", async () => {
+    const corpus = await corpusPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "deathknight/blood");
+    expect(module).toBeDefined();
+    if (module === undefined) return;
+    expect(module.exposure).toBe("PUBLIC");
+    expect(resolveSpecIdentity({ className: "DeathKnight", specName: "Blood" })).toEqual({
+      ok: true,
+      specId: "deathknight/blood",
+    });
+    const readiness = evaluate(
+      corpus,
+      committedReport(),
+      "deathknight/blood",
+      "PUBLIC",
+      publicPairing("deathknight/blood"),
+    );
+    expect(readiness.exposure).toBe("PUBLIC");
+    expect(readiness.layer).toBe("SPEC_BLOOD_DEATH_KNIGHT");
+    expect(readiness.evidenceReady).toBe(true);
+    const outcomes = readiness.qualifyingAssertions.map((q) => q.expectedOutcome);
+    expect(outcomes.filter((outcome) => outcome === "MATCH").length).toBeGreaterThanOrEqual(1);
+    expect(outcomes.filter((outcome) => outcome === "REJECTED").length).toBeGreaterThanOrEqual(1);
+    for (const q of readiness.qualifyingAssertions) {
+      expect(q.kind).toBe("SPEC_BLOOD_DEATH_KNIGHT.DECISION_COVERAGE");
+      expect(q.evidenceSet.every((entry) => entry.kind === "SANITIZED_CAPTURE")).toBe(true);
+      expect(q.evidenceIdentity).toEqual({ className: "DeathKnight", specName: "Blood" });
+      expect(q.reportStatus).toBe("PASSED");
+    }
+    // Every qualifying assertion is the A7R6 subject, actor 14: the opener
+    // capture (gtKb, actor 25) carries Blood evidence too, but its one
+    // resolved decision is not pinned as a DECISION_COVERAGE MATCH/REJECTED,
+    // so it contributes nothing HERE and is not claimed to.
+    const reports = new Set(readiness.qualifyingAssertions.map((q) => q.evidenceActor.reportCode));
+    expect([...reports]).toEqual(["A7R6kxPJ1hC8YQ4w"]);
+    for (const q of readiness.qualifyingAssertions) {
+      expect(q.evidenceActor.actorId).toBe(14);
+      expect(q.evidenceActor.fightId).toBe(7);
+    }
+    expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
+  });
+});
+
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("exactly one production INTERNAL_ONLY registration exists since M11-B2 — Blood Death Knight — and it is the partition's one member", () => {
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["deathknight/blood"]);
+  it("no production INTERNAL_ONLY registration exists since M11-B12, and the partition agrees", () => {
+    // The branch below is exercised over a synthetic module for exactly this
+    // reason: Blood Death Knight held this half from M11-B2 until M11-B12
+    // promoted it, and the machinery must keep working over an empty set.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect(
       PRODUCTION_CATALOG.registrations
         .filter((row) => row.exposure === "INTERNAL_ONLY")
         .map((row) => row.specId),
-    ).toEqual(["deathknight/blood"]);
+    ).toEqual([]);
+  });
+
+  it("the internal pairing finds nothing for Blood Death Knight now that the identity table resolves it (M11-B12)", async () => {
+    // The mirror of the Retribution case above: the internal pairing REQUIRES
+    // the public table to refuse the identity, and the table now resolves
+    // DeathKnight/Blood, so the internal-mode search over the same real
+    // evidence qualifies nothing. Informational, not a failure — the PUBLIC
+    // mode above is where those assertions count.
+    const corpus = await corpusPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "deathknight/blood");
+    if (module === undefined) throw new Error("no Blood module");
+    const readiness = evaluate(
+      corpus,
+      committedReport(),
+      "deathknight/blood",
+      "INTERNAL_ONLY",
+      internalPairing(module),
+    );
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+    expect(readiness.disqualified.length).toBeGreaterThan(0);
+    for (const d of readiness.disqualified) expect(d.reason).toContain("not this specialization");
   });
 
   it("the internal pairing finds nothing for a specialization the identity table resolves — Retribution Paladin since M11-A5", async () => {

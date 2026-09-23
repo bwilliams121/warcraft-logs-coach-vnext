@@ -53,6 +53,7 @@ import { resolveBloodAtoms } from "../../src/specs/deathknight/blood/resolver.js
 import {
   bloodResourceOn,
   bloodResourceWireTypes,
+  bloodWireKeys,
   runeCount,
   runicPowerDeficitPoints,
   RUNIC_POWER_WIRE_DIVISOR,
@@ -411,8 +412,9 @@ describe("aura presence and the build proofs", () => {
 
 describe("the resource observations", () => {
   const state = corpusState(BLOOD45);
-  const wire = bloodResourceWireTypes();
-  if (wire === null) throw new Error("the Rune / Runic Power wire contracts must be pinned");
+  // M11-B12: the wire types are resolved FOR THIS CAPTURE'S parser version.
+  const wire = bloodResourceWireTypes(bloodWireKeys(state));
+  if (!wire.ok) throw new Error(`the Rune / Runic Power wire contracts must be pinned: ${wire.reason}`);
 
   it("reads Runic Power PRE_COST on a Death Strike and converts the deficit to points exactly once", () => {
     const position = at(state, 2012014, DEATH_STRIKE);

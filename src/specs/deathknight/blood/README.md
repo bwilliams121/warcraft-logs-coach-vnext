@@ -1,24 +1,48 @@
-# Blood Death Knight — INTERNAL_ONLY measurement slice (M11-B2 … M11-B10)
+# Blood Death Knight — publicly supported slice (M11-B2 … M11-B12)
 
-**Exposure: `INTERNAL_ONLY`.** This evaluator is registered in the
+**Exposure: `PUBLIC` since M11-B12.** This evaluator is registered in the
 production catalog (`deathknight-blood-observed-decisions`,
-`deathknight/blood`) and is NEVER selected by the application service,
-raid-night orchestration, REST or MCP: `deathknight/blood` is in
-`INTERNAL_ONLY_SPEC_IDS` and absent from `PUBLIC_SPEC_IDS`, the public
-contract's `specId` enum and `SUPPORTED_SPEC_IDENTITIES`; the registration's
-`exposure` is `INTERNAL_ONLY` and `spec.ts` says `satisfies
-InternalOnlySpecId`. A public request for the real subject answers
-`SPEC_NOT_SUPPORTED` with zero analyzer calls. The internal lookup, the
-corpus and tests reach it.
+`deathknight/blood`) and is selected by the application service, raid-night
+orchestration, REST and MCP for a `DeathKnight`/`Blood` identity:
+`deathknight/blood` is in `PUBLIC_SPEC_IDS`, the public contract's `specId`
+enum and `SUPPORTED_SPEC_IDENTITIES`; the registration's `exposure` is
+`PUBLIC` and `spec.ts` says `satisfies PublicSpecId`. It was
+`INTERNAL_ONLY` from M11-B2 through M11-B10 — reachable only by the internal
+lookup, the corpus and tests — and the move was the reviewed five-site edit,
+nothing else: promotion changed REACHABILITY, not the analyzer.
 
-**This is a MEASUREMENT, not a coach.** M11-B1 taught the shared traversal
-the pinned `run_action_list` control flow; this slice runs it over the first
-real hero-tree-gated dispatch authority on real evidence and records where
-the shared machinery stops, and on which atom. Nothing was widened to force
-a resolved decision, and none resolved: over the composed 165 s A7R6 fight,
-0 of 123 eligible decisions MATCH or REJECTED, every one UNKNOWN with a
-named stopping entry. That number is the deliverable, and the promotion
-evidence gate reports it and would refuse promotion on it.
+**It began as a MEASUREMENT, and the measurement is still what it publishes.**
+M11-B1 taught the shared traversal the pinned `run_action_list` control flow;
+M11-B2 ran it over the first real hero-tree-gated dispatch authority and
+recorded where the machinery stopped and on which atom — 0 of 123 eligible
+decisions resolved. Ten slices resolved the atoms that could be resolved
+honestly, one at a time and only from evidence, to **42 MATCH / 9 REJECTED /
+72 UNKNOWN**. Nothing was ever widened to force a resolved decision; the 72
+remain UNKNOWN because the evidence or the authority cannot decide them, and
+the coverage block says so.
+
+**Two gates guard the public slice (M11-B12).**
+
+- **The validated profile.** Blood's evidence is two sanitized *San'layn*
+  captures. The pinned authority also carries a Deathbringer list and the
+  engine dispatches it, but no Deathbringer verdict has ever been measured, so
+  `supported-profile.ts` admits one hero tree and refuses the rest BEFORE any
+  decision is read: a resolved Deathbringer build is
+  `AUTHORITY_NOT_AVAILABLE`, an unresolved or contradictory tree is
+  `PROFILE_NOT_RESOLVED`. Both are existing public statuses; the gate reads
+  the three-way talent rule's resolution and never the actions cast.
+- **The wire version.** Runes and Runic Power resolve through the shared
+  version-scoped resolver with the capture's own `gameVersion` /
+  `logVersion`; a version no contract covers is `INSUFFICIENT_EVIDENCE` with
+  no fallback to the contract's number.
+
+**What the public document carries, and what it does not.** Outcomes, bases,
+blocker classes, exclusion reasons and coverage — the same vocabulary the
+other three public specializations publish, with `deathknight/blood` the one
+additive `specId` this promotion added to `warcraft-logs-coach.analysis/1`.
+Everything this file describes below — the order-invariant stack sets, the
+presence proof, the remains floors, Rune affordability, Blood Debt counts,
+the censuses, the dispatch trace — is INTERNAL and never reaches the wire.
 
 The registration is built by the specialization module factory
 (`BLOOD_DEATH_KNIGHT_MODULE` in `registration.ts`, through

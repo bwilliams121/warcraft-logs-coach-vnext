@@ -30,15 +30,16 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET IS EMPTY AGAIN SINCE M11-A5. It was empty from M10-D
- * (Protection public) until M11-A4 (Retribution Paladin arrived internal), and
- * M11-A5 moved Retribution to the public half after its promotion evidence
- * gate passed. The partition, the narrowing boundary and the registry's
- * exposure rules are retained as DORMANT architecture: the next specialization
- * is expected to arrive here first, as both Paladin specializations did, and
- * the compile-time proofs below hold over an empty set exactly as they held
- * over one member. Nothing here should be deleted merely because it is
- * unexercised.
+ * THE INTERNAL-ONLY SET IS EMPTY AGAIN SINCE M11-B12. It was empty from
+ * M10-D (Protection public) until M11-A4 (Retribution arrived internal),
+ * empty again from M11-A5 until M11-B2 (Blood Death Knight arrived internal),
+ * and M11-B12 moved Blood to the public half after ten measurement slices and
+ * the M11-B11 promotion-readiness audit. The partition, the narrowing boundary
+ * and the registry's exposure rules are retained as DORMANT architecture: the
+ * next specialization is expected to arrive here first, as all three of its
+ * predecessors did, and the compile-time proofs below hold over an empty set
+ * exactly as they held over one member. Nothing here should be deleted merely
+ * because it is unexercised.
  *
  * THE NARROWING BOUNDARY, AND WHY IT THROWS
  *
@@ -67,6 +68,7 @@ export const PUBLIC_SPEC_IDS = Object.freeze([
   "rogue/assassination",
   "paladin/protection",
   "paladin/retribution",
+  "deathknight/blood",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -92,14 +94,16 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Blood Death Knight arrived here in M11-B2 as the representative vertical
  * slice for the `run_action_list` dispatch cohort: a real, registered,
- * INTERNAL_ONLY evaluator whose purpose is MEASUREMENT — where the shared
+ * INTERNAL_ONLY evaluator whose purpose was MEASUREMENT — where the shared
  * engine's traversal of a dispatch-heavy tank authority stops, and on which
- * atom — not promotion. It stays here until the promotion evidence gate has
- * real MATCH and REJECTED evidence for it, and no such evidence is claimed.
+ * atom. Ten slices (M11-B2 … M11-B10) made that measurement an evidence-backed
+ * decision surface, and M11-B12 moved the id to `PUBLIC_SPEC_IDS` by the same
+ * five-site edit after the test-owned promotion evidence gate reported real
+ * MATCH and REJECTED evidence for it. Promotion changed REACHABILITY, not the
+ * analyzer: the slice it publishes is exactly the slice it had, narrowed by
+ * one PUBLIC validation gate (San'layn hero tree — see the Blood module).
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
-  "deathknight/blood",
-] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

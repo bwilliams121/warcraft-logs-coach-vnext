@@ -115,9 +115,9 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // the three MATCH decisions and their sets, the { 6,7 } and Q2-declined
     // decisions that stay UNKNOWN, the exact counts outside the window and the
     // refusals that remain. Measured, then pinned.
-    expect(result.summary.cases).toBe(161);
-    expect(result.summary.assertions).toBe(691);
-    expect(result.summary.passed).toBe(691);
+    expect(result.summary.cases).toBe(162);
+    expect(result.summary.assertions).toBe(692);
+    expect(result.summary.passed).toBe(692);
   });
 
   it("covers every layer", async () => {

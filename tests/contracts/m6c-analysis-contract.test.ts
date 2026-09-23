@@ -126,14 +126,16 @@ describe("the public vocabularies match the internal ones exactly", () => {
     expect([...PUBLIC_USABILITY_PROVENANCES]).toEqual(["OBSERVED_EXECUTION", "NOT_ESTABLISHED"]);
   });
 
-  it("publishes exactly the three supported specializations", () => {
-    // Widened in M10-D and again in M11-A5 under analysis/1: growing this
-    // enum is how supported specializations arrive, and narrowing it is what
-    // would need a version.
+  it("publishes exactly the four supported specializations", () => {
+    // Widened in M10-D, again in M11-A5 and again in M11-B12 under
+    // analysis/1: growing this enum is how supported specializations arrive,
+    // and narrowing it is what would need a version. M11-B12 widened this
+    // enum and nothing else.
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
+      "deathknight/blood",
     ]);
   });
 

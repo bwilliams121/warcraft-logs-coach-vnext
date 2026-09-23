@@ -24,7 +24,11 @@ import {
 import { BLOOD_PRE_DECISION_WINDOW_MS } from "../../src/specs/deathknight/blood/aura-bindings.js";
 import { BLOOD_REMAINS_THRESHOLD_TOLERANCE_MS } from "../../src/specs/deathknight/blood/aura-remains.js";
 import { resolveBloodAtoms } from "../../src/specs/deathknight/blood/resolver.js";
-import { bloodResourceOn, bloodResourceWireTypes } from "../../src/specs/deathknight/blood/resources.js";
+import {
+  bloodResourceOn,
+  bloodResourceWireTypes,
+  bloodWireKeys,
+} from "../../src/specs/deathknight/blood/resources.js";
 import {
   bindBloodRunicPower,
   BLOOD_RESOURCE_PRE_DECISION_WINDOW_MS,
@@ -190,8 +194,8 @@ describe("OWN_PRE_COST — the M11-B2 path, unchanged", () => {
       carryMs: 0,
     });
     // The resolver's own reading agrees, so the M11-B2 corpus pins do not move.
-    const wire = bloodResourceWireTypes();
-    if (wire === null) throw new Error("no wire");
+    const wire = bloodResourceWireTypes(bloodWireKeys(state));
+    if (!wire.ok) throw new Error("no wire");
     const own = bloodResourceOn(state, 1, ACTOR, wire.runicPower);
     expect(own).toMatchObject({ state: "EXACT_PRE_COST", amount: 990 });
   });
@@ -562,8 +566,8 @@ describe("over the committed evidence", () => {
   const bundle = corpusBundleState(BUNDLE, []);
 
   it("measures the ordering the window rests on: own principal gains after the cast, Heartbreaker and Relish in Blood 0-1 ms ahead", () => {
-    const wire = bloodResourceWireTypes();
-    if (wire === null) throw new Error("no wire");
+    const wire = bloodResourceWireTypes(bloodWireKeys(bundle));
+    if (!wire.ok) throw new Error("no wire");
     const ahead = new Map<string, number>();
     const after = new Map<string, number>();
     const bump = (map: Map<string, number>, key: string) => map.set(key, (map.get(key) ?? 0) + 1);

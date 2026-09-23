@@ -49,8 +49,8 @@ const GTKB = "wcl-blood-death-knight-gtkb-opener";
 const AMS = 49088;
 
 function runicPowerWireType(): number {
-  const wire = bloodResourceWireTypes();
-  if (wire === null) throw new Error("no Runic Power wire contract");
+  const wire = bloodResourceWireTypes({ gameVersion: 1, logVersion: 17 });
+  if (!wire.ok) throw new Error(`no Runic Power wire contract: ${wire.reason}`);
   return wire.runicPower;
 }
 

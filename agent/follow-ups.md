@@ -194,6 +194,13 @@ gate's internal mode exercised over a real registration) and was promoted
 PUBLIC at M11-A5; the set is empty again and the on-ramp is intact for the
 next specialization.
 
+**Update (M11-B2 … M11-B12, 2026-09-22):** and again, over a much longer
+road. Blood Death Knight arrived INTERNAL_ONLY at M11-B2 as a MEASUREMENT
+slice, stayed there for ten evidence milestones while the partition and the
+internal lookup carried it, and was promoted PUBLIC at M11-B12 by the same
+five-site edit after the promotion gate reported twenty-three qualifying real
+assertions. The set is empty again; nothing here has been deleted.
+
 Two identity/evidence caveats M10-D surfaced, both outside its scope:
 
 - A Warcraft Logs identity naming a supported specialization over another
@@ -207,6 +214,66 @@ Two identity/evidence caveats M10-D surfaced, both outside its scope:
   Evoker (Preservation) and actor 7 as the Protection Paladin, and the step
   expects consumable categories schema v1 does not carry. Part III supersedes
   it with actors 7 (Protection) and 4 (Warrior/Arms).
+
+## After M11-B12: Protection and Retribution read the resource wire contracts unkeyed
+
+**Raised:** M11-B12 (2026-09-22).
+
+Blood's promotion made its Rune and Runic Power reads resolve through
+`resourceWireTypeFor(resourceId, { gameVersion, logVersion })` with the
+capture's own keys, so a log whose parser version no contract covers fails
+closed as `INSUFFICIENT_EVIDENCE` instead of reading the numbers out of a
+field that log does not use that way (`src/specs/deathknight/blood/
+resources.ts`, `bloodWireKeys`). Assassination already did this
+(`INCOMPATIBLE_RESOURCE_WIRE_VERSION`).
+
+Protection Paladin (`src/specs/paladin/protection/observed-analysis.ts`) and
+Retribution Paladin (`src/specs/paladin/retribution/holy-power.ts`) still scan
+`RESOURCE_WIRE_CONTRACTS` directly for their wire type, unkeyed. Today every
+committed capture is `gameVersion` 1 / `logVersion` 17, so the two readings
+agree and no shipped answer is wrong; the exposure is to a FUTURE capture at a
+parser version whose encoding differs, where both would read a wire type that
+is no longer theirs rather than refusing.
+
+Not fixed here because M11-B12's scope is Blood's promotion and its owner
+decision T3 named Blood only: changing two other public specializations'
+resource semantics in a promotion commit would put unrelated verdict-bearing
+code in a change reviewed for exposure.
+
+**Done looks like:** both Paladin modules resolve through the keyed resolver,
+each with its own fail-closed status, and each with the four negative tests
+Blood now has (foreign `logVersion`, older `logVersion`, foreign
+`gameVersion`, absent `gameVersion`).
+
+## After M11-B12: Blood's Deathbringer slice and the Improved Bone Shield maximum
+
+**Raised:** M11-B12 (2026-09-22).
+
+Two deliberate boundaries of the public Blood slice, both recorded here so
+neither is mistaken for an oversight.
+
+**Deathbringer is modelled but not validated.** The pinned APL carries the
+Deathbringer list, the shared engine dispatches into it, and the analyzer's
+hero-tree gate refuses it: every Blood conclusion this build publishes rests
+on two San'layn captures, and no Deathbringer verdict has ever been measured
+or reviewed (owner decision T2). A Deathbringer build receives
+`AUTHORITY_NOT_AVAILABLE`. **Done looks like:** a sanitized Deathbringer
+capture in the corpus, its decision surface measured the way M11-B2 … M11-B10
+measured San'layn's, an audited MATCH/REJECTED population, and then one entry
+added to `BLOOD_VALIDATED_HERO_TREES`.
+
+**Bone Shield's maximum is deferred authority.** The DBC row is 10; Improved
+Bone Shield (374715, effect 1259987) raises the in-game maximum to 12, which
+both corpus subjects reach. The talent is NOT in the extracted Blood talent
+artifact and `maxStackGuard` is off for Bone Shield, so the analyzer neither
+enforces a maximum nor infers one from the observed 12 (owner decision Q2 of
+M11-B10, re-affirmed at M11-B12). This is safe because NO supported predicate
+reads Bone Shield's maximum — the reachable APL conditions are `stack<=1` and
+`stack<6` — and M11-B11 traced every MATCH and REJECTED to confirm it.
+**Done looks like:** `improved_bone_shield` added to the extractor target and
+the artifact regenerated, a Blood-owned modifier beside Frenzied Bloodthirst's,
+and the guard switched on — required only if a future predicate reads the
+maximum.
 
 ## After M9-C: evidence the corpus still lacks
 

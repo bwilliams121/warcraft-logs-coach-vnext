@@ -54,13 +54,34 @@ describe("the supported identities", () => {
     expect(outcome("PALADIN", "RETRIBUTION")).toBe("paladin/retribution");
   });
 
-  it("recognizes exactly three specializations", () => {
+  it("resolves DeathKnight/Blood to deathknight/blood (M11-B12)", () => {
+    // The canonical module identity (`wclClassName`/`wclSpecName` of
+    // BLOOD_DEATH_KNIGHT_MODULE), under the same normalization as the others.
+    // The class string has no space and no hyphen: it is the one Warcraft
+    // Logs reports as `subType`, and the table matches it exactly.
+    expect(outcome("DeathKnight", "Blood")).toBe("deathknight/blood");
+    expect(outcome("deathknight", "blood")).toBe("deathknight/blood");
+    expect(outcome("  DeathKnight ", " Blood")).toBe("deathknight/blood");
+    expect(outcome("DEATHKNIGHT", "BLOOD")).toBe("deathknight/blood");
+    // Neither a spaced nor a hyphenated class name is the canonical string,
+    // and no other Death Knight specialization resolves.
+    expect(outcome("Death Knight", "Blood")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Death-Knight", "Blood")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("DeathKnight", "Frost")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("DeathKnight", "Unholy")).toBe("UNSUPPORTED_SPECIALIZATION");
+    // Right spec name, wrong class: a Blood Elf is not a specialization and a
+    // Warrior has no Blood spec.
+    expect(outcome("Warrior", "Blood")).toBe("UNSUPPORTED_SPECIALIZATION");
+  });
+
+  it("recognizes exactly four specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
+      "deathknight/blood",
     ]);
   });
 

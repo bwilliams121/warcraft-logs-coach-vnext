@@ -70,7 +70,7 @@ describe("the committed corpus loads", () => {
     // Bone Shield's window sets, presence and floor with the two Marrowrends
     // they resolve. Measured, then pinned.
     expect(loaded.artifacts).toHaveLength(43);
-    expect(loaded.cases).toHaveLength(161);
+    expect(loaded.cases).toHaveLength(162);
     expect(loaded.coverage.declared).toBe(0);
   });
 

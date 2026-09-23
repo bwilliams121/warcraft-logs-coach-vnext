@@ -236,16 +236,17 @@ describe("the production catalog and the tree name the same registrations", () =
 // ---------------------------------------------------------------------------
 
 describe("what the tree registers today", () => {
-  it("is exactly Assassination Rogue, the two Paladins (PUBLIC) and, since M11-B2, Blood Death Knight (INTERNAL_ONLY)", () => {
+  it("is exactly Assassination Rogue, the two Paladins and, since M11-B12, Blood Death Knight — all PUBLIC", () => {
     // A reviewed list, not the rule: the rules above scale to any number of
     // registrations. This snapshot exists so that a new registration module
     // is a VISIBLE change to this file, reviewed alongside the five-site
     // identity move it must accompany — or, for an INTERNAL_ONLY row, the
     // partition entry it must NOT accompany. Retribution arrived here
     // INTERNAL_ONLY at M11-A4 and became PUBLIC at M11-A5; Blood arrived
-    // INTERNAL_ONLY at M11-B2 as the run_action_list cohort's measurement.
+    // INTERNAL_ONLY at M11-B2 as the run_action_list cohort's measurement and
+    // became PUBLIC at M11-B12.
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
-      ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/protection/registration.ts", "PROTECTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/retribution/registration.ts", "RETRIBUTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],

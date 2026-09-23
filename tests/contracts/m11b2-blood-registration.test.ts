@@ -19,7 +19,6 @@ import { PUBLIC_SPEC_IDS as CONTRACT_PUBLIC_SPEC_IDS } from "../../src/contracts
 import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
 import {
   INTERNAL_ONLY_SPEC_IDS,
-  InternalSpecExposureError,
   isPublicSpecId,
   isSpecId,
   PUBLIC_SPEC_IDS,
@@ -100,50 +99,64 @@ describe("identity and partition", () => {
     });
   });
 
-  it("is INTERNAL_ONLY in the partition and ABSENT from the public contract and the identity table", () => {
+  it("is PUBLIC in the partition, the public contract and the identity table since M11-B12", () => {
+    // INVERTED at M11-B12. Every assertion here was the opposite from M11-B2
+    // through M11-B10, and the five sites moved in one reviewed edit.
     expect(isSpecId("deathknight/blood")).toBe(true);
-    expect(isPublicSpecId("deathknight/blood")).toBe(false);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["deathknight/blood"]);
-    expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("deathknight/blood");
-    expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).not.toContain("deathknight/blood");
-    expect(() => requirePublicSpecId("deathknight/blood")).toThrow(InternalSpecExposureError);
-    expect(SUPPORTED_SPEC_IDENTITIES).not.toHaveProperty("deathknight/blood");
-    expect(resolveSpecIdentity({ className: "DeathKnight", specName: "Blood" })).toMatchObject({
-      ok: false,
-      reason: "UNSUPPORTED_SPECIALIZATION",
+    expect(isPublicSpecId("deathknight/blood")).toBe(true);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
+    expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
+    expect(requirePublicSpecId("deathknight/blood")).toBe("deathknight/blood");
+    expect(SUPPORTED_SPEC_IDENTITIES).toHaveProperty("deathknight/blood");
+    expect(resolveSpecIdentity({ className: "DeathKnight", specName: "Blood" })).toEqual({
+      ok: true,
+      specId: "deathknight/blood",
     });
-    expect(BLOOD_DEATH_KNIGHT_MODULE.exposure).toBe("INTERNAL_ONLY");
-    expect(BLOOD_DEATH_KNIGHT_REGISTRATION.exposure).toBe("INTERNAL_ONLY");
+    expect(BLOOD_DEATH_KNIGHT_MODULE.exposure).toBe("PUBLIC");
+    expect(BLOOD_DEATH_KNIGHT_REGISTRATION.exposure).toBe("PUBLIC");
     expect(BLOOD_DEATH_KNIGHT_MODULE.supplementalAnalyses).toEqual([]);
   });
 
-  it("is in the validated catalog for the INTERNAL lookup only, and in no public derivation", () => {
+  it("is in the validated catalog for BOTH lookups and in every public derivation", () => {
+    // INVERTED at M11-B12: both lookups now find the SAME row, and every
+    // derived public surface carries it because it is derived, not listed.
     expect(internalAnalyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)?.analyzerId).toBe(
       BLOOD_DEATH_KNIGHT_ANALYZER_ID,
     );
-    expect(internalAnalyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)?.exposure).toBe("INTERNAL_ONLY");
-    expect(analyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)).toBeNull();
+    expect(internalAnalyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
+    expect(analyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)).toBe(
+      internalAnalyzerForSpec("deathknight/blood", PRODUCTION_CATALOG),
+    );
     expect(publicAnalyzers(PRODUCTION_CATALOG).map((row) => row.specId)).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
+      "deathknight/blood",
     ]);
-    expect(ENABLED_ANALYZERS.map((row) => row.specId)).not.toContain("deathknight/blood");
-    expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).not.toContain(
+    expect(ENABLED_ANALYZERS.map((row) => row.specId)).toContain("deathknight/blood");
+    expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
       BLOOD_DEATH_KNIGHT_ANALYZER_ID,
     );
-    // The public prose is unchanged by an INTERNAL_ONLY row.
+    // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Blood Death Knight, Protection Paladin and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(3);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(4);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
+      BLOOD_DEATH_KNIGHT_REGISTRATION.publicLimits,
+    );
     for (const description of [
       analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS),
       raidNightToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS),
     ]) {
-      expect(description).not.toMatch(/death knight|deathknight|blood death/i);
-      expect(description).not.toContain(BLOOD_LIMITS.analysis);
+      expect(description).toContain("Blood Death Knight");
     }
+    // The analysis tool composes Blood's own limits prose verbatim; the
+    // raid-night tool composes the raid-night one. Neither claims a rotation.
+    expect(analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS)).toContain(BLOOD_LIMITS.analysis);
+    expect(raidNightToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS)).toContain(BLOOD_LIMITS.raidNight);
+    expect(analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS)).not.toMatch(/full (blood )?rotation/i);
   });
 
   it("projects every internal exclusion reason onto an existing public one — no new public reason", () => {
@@ -268,7 +281,7 @@ describe("the public path refuses the real subject; the internal path analyzes i
     };
   }
 
-  it("the application service reports SPEC_NOT_SUPPORTED for DeathKnight/Blood and calls no analyzer", async () => {
+  it("the application service now resolves DeathKnight/Blood and runs exactly the Blood analyzer (M11-B12)", async () => {
     const fight = corpusFight(BLOOD45);
     const counted = countedProductionCatalog();
     let ingested = 0;
@@ -287,11 +300,17 @@ describe("the public path refuses the real subject; the internal path analyzes i
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(result.analysis.specId).toBeNull();
-    expect(result.analysis.analyzerId).toBeNull();
-    expect(ingested).toBe(0);
-    expect(Object.values(counted.calls).every((count) => count === 0)).toBe(true);
+    // INVERTED at M11-B12: the identity resolves, the public lookup finds the
+    // row, evidence is retrieved once and exactly one analyzer runs.
+    expect(result.analysis.analysis.status).toBe("ANALYZED");
+    expect(result.analysis.specId).toBe("deathknight/blood");
+    expect(result.analysis.analyzerId).toBe(BLOOD_DEATH_KNIGHT_ANALYZER_ID);
+    expect(ingested).toBe(1);
+    expect(counted.calls[BLOOD_DEATH_KNIGHT_ANALYZER_ID]).toBe(1);
+    for (const [analyzerId, count] of Object.entries(counted.calls)) {
+      if (analyzerId === BLOOD_DEATH_KNIGHT_ANALYZER_ID) continue;
+      expect(count, analyzerId).toBe(0);
+    }
   });
 
   it("the internal lookup runs the real analyzer over the real subject and it ANALYZES with its resolved decisions disclosed", () => {
@@ -353,7 +372,13 @@ describe("no central specialization switch", () => {
           !path.startsWith("src/simc/data/deathknight-blood"),
       )
       .sort();
+    // M11-B12 added exactly two names to this list, both of them SITES OF THE
+    // FIVE-SITE PROMOTION EDIT — the public contract's `specId` enum and the
+    // identity table — and neither is a switch on the specialization: each
+    // lists the id beside the other public ones, in the same shape.
     expect(offenders).toEqual([
+      // The public contract's specId enum and its widening note (M11-B12).
+      "src/contracts/analysis-contract.ts",
       // The dated wire contracts' prose names the class the Rune and Runic Power corroboration came from.
       "src/data/wcl-wire/resource-types.ts",
       // The POST_CHANGE timing's prose names the corpus that settled it (M11-B5).
@@ -364,12 +389,19 @@ describe("no central specialization switch", () => {
       "src/findings/spec-id.ts",
       // The registration import and the catalog row.
       "src/services/analyzer-registry.ts",
+      // The public identity table (M11-B12).
+      "src/services/spec-identity.ts",
     ]);
+    // Neither promotion site is a BRANCH: the id appears in a table literal
+    // and an enum literal, never in a conditional.
+    for (const path of ["src/services/spec-identity.ts", "src/contracts/analysis-contract.ts"]) {
+      const code = SOURCES[Object.keys(SOURCES).find((candidate) => candidate.endsWith(path)) ?? ""] ?? "";
+      expect(code, path).not.toMatch(/if\s*\([^)]*deathknight\/blood/);
+      expect(code, path).not.toMatch(/case\s+"deathknight\/blood"/);
+    }
     for (const path of [
       "src/services/analysis-service.ts",
       "src/services/raid-night-service.ts",
-      "src/services/spec-identity.ts",
-      "src/contracts/analysis-contract.ts",
       "src/contracts/analysis-projection.ts",
       "src/contracts/raid-night-projection.ts",
       "src/aggregation/cell-projection.ts",

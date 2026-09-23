@@ -63,8 +63,8 @@ const DEATH_STRIKE = 49998;
 const BLOOD_BOIL = 50842;
 const MARROWREND = MARROWREND_SPELL_ID;
 
-const WIRE = bloodResourceWireTypes();
-if (WIRE === null) throw new Error("the Blood resource wire contracts are not pinned");
+const WIRE = bloodResourceWireTypes({ gameVersion: 1, logVersion: 17 });
+if (!WIRE.ok) throw new Error(`the Blood resource wire contracts are not pinned: ${WIRE.reason}`);
 const RUNES = WIRE.runes;
 const RP = WIRE.runicPower;
 

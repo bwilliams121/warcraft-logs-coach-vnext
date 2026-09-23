@@ -5214,33 +5214,39 @@ const BLOOD_CASES = [
     { related: ["tests/regression/m10a-analyzer-result-ownership.test.ts", ...BLOOD_RELATED] },
   ),
   kase(
-    "application-service.blood-death-knight-subject-is-internal-only-and-publicly-unsupported",
+    "application-service.blood-death-knight-subject-is-publicly-supported-since-m11-b12",
     BLOOD45,
     "APPLICATION_SERVICE",
-    "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts INTERNAL_ONLY_SPEC_IDS",
-    "The real Blood Death Knight subject, over its own captured evidence, is NOT recognized by the public identity table (DeathKnight/Blood resolves to no SpecId), so the application service reports SPEC_NOT_SUPPORTED with no analyzer and no ingestion — while the validated catalog's INTERNAL lookup resolves deathknight/blood to the Blood registration with INTERNAL_ONLY exposure and a null public lookup. The five public sites are untouched: the partition, the public contract's specId enum, the identity table, the `satisfies InternalOnlySpecId` on spec.ts, and the registration's exposure all agree that Blood is internal.",
+    "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts PUBLIC_SPEC_IDS",
+    "RE-PINNED AT M11-B12, INVERTING THE M11-B2 CASE. The real Blood Death Knight subject, over its own captured evidence, is now recognized by the public identity table (DeathKnight/Blood -> deathknight/blood), so the application service retrieves the fight once and dispatches exactly the Blood registration: status ANALYZED, specId deathknight/blood, analyzerId deathknight-blood-observed-decisions, scope PLAYER_CONTEXT (the analyzer's own declared requirement, resources included). Both catalog lookups now answer with the SAME row, whose exposure is PUBLIC. The five public sites moved together in one reviewed edit: the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure.",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
         subject: { actorId: BLOOD, className: "DeathKnight", specName: "Blood" },
-        expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: null },
+        expected: {
+          status: "ANALYZED",
+          specId: "deathknight/blood",
+          analyzerId: BLOOD_ANALYZER,
+          scope: "PLAYER_CONTEXT",
+        },
       }),
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "deathknight/blood",
         expected: {
           internalAnalyzerId: BLOOD_ANALYZER,
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: BLOOD_ANALYZER,
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-    "An evaluator has to exist, be registered and be exercised BEFORE it is safe to expose. M11-B2 does the first three for a MEASUREMENT slice with zero resolved decisions; the promotion evidence gate would refuse it, and nothing here asks it to.",
+    "An evaluator has to exist, be registered, be exercised and be AUDITED before it is safe to expose. M11-B2 did the first three for a measurement slice with zero resolved decisions; ten slices resolved 51 of 123 decisions from real evidence, M11-B11 audited the promotion gates, and M11-B12 exposed exactly that slice — narrowed by the San'layn validated-profile gate — and nothing more.",
     {
       related: [
         "tests/contracts/m11b2-blood-registration.test.ts",
         "tests/contracts/m11-promotion-evidence-gate.test.ts",
         "tests/contracts/m10a-spec-partition.test.ts",
+        "tests/contracts/m11b12-blood-public-projection.test.ts",
       ],
     },
   ),
@@ -5810,6 +5816,29 @@ const RET_CASES = [
     {
       authority: RET_AUTHORITY,
       related: [...RET_RELATED, "tests/contracts/m11a5-retribution-public-projection.test.ts"],
+    },
+  ),
+  kase(
+    "public-contract.analysis-parity-for-the-blood-death-knight-subject",
+    BLOOD45,
+    "PUBLIC_CONTRACT",
+    "src/contracts/analysis-projection.ts; src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
+    "The real Blood Death Knight subject over its own 45 s evidence is ANALYZED on both transports — one document naming deathknight/blood and the Blood analyzer, identical on REST and MCP (structuredContent and text), schema-valid under warcraft-logs-coach.analysis/1, publishing MATCH as AUTHORITY_COMPATIBLE_ONLY. (Before M11-B12 the same subject answered SPEC_NOT_SUPPORTED on both transports.)",
+    [
+      a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
+        document: "ANALYSIS",
+        subject: { actorId: BLOOD, className: "DeathKnight", specName: "Blood" },
+        expected: { status: "ANALYZED", specId: "deathknight/blood", analyzerId: BLOOD_ANALYZER },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "The schema version is unchanged: M11-B12 widened the public specId enum and nothing else — no outcome, basis, blocker class, exclusion reason, status or capability value moved for the fourth specialization, and no document a consumer had already received changed. Blood's own evidence classes (order-invariant stack sets, presence proofs, remains floors, Rune affordability, Blood Debt counts) stay inside the payload; what the wire carries is the same vocabulary the other three publish.",
+    {
+      related: [
+        "tests/integration/m11b12-blood-public-transports.test.ts",
+        "tests/contracts/m11b12-blood-public-projection.test.ts",
+        "tests/contracts/m10a-spec-partition.test.ts",
+      ],
     },
   ),
   kase(

@@ -283,11 +283,16 @@ describe("the predeclared gap derivative restores UNKNOWN where its anchor was r
 });
 
 describe("Protection is public since M10-D", () => {
-  it("the analyzed result narrows to the public spec id, and the public set carries all three specializations", () => {
+  it("the analyzed result narrows to the public spec id, and the public set carries all four specializations", () => {
     const analysis = analyzeReal(ROTATIONAL);
     // Until M10-D this threw InternalSpecExposureError.
     expect(requirePublicSpecId(analysis.specId)).toBe("paladin/protection");
-    expect(PUBLIC_SPEC_IDS).toEqual(["rogue/assassination", "paladin/protection", "paladin/retribution"]);
+    expect(PUBLIC_SPEC_IDS).toEqual([
+      "rogue/assassination",
+      "paladin/protection",
+      "paladin/retribution",
+      "deathknight/blood",
+    ]);
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
   });
 

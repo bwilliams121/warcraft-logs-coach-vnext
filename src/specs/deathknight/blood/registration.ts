@@ -1,5 +1,5 @@
 /**
- * Blood Death Knight's analyzer registration (M11-B2, INTERNAL_ONLY).
+ * Blood Death Knight's analyzer registration (M11-B2; PUBLIC since M11-B12).
  *
  * THIS IS WHERE BLOOD STATES WHAT IT IS, AND THE ONLY PLACE.
  *
@@ -10,13 +10,28 @@
  * its result shared code may read. `src/services/analyzer-registry.ts` lists
  * this row and reads nothing else from this directory.
  *
- * INTERNAL_ONLY, AND WHAT THAT MEANS. The row is in the production catalog,
- * reachable by the internal lookup, the corpus and tests, and NEVER
+ * PUBLIC SINCE M11-B12, AND WHAT THAT CHANGED
+ *
+ * The row was INTERNAL_ONLY from M11-B2 through M11-B10: in the production
+ * catalog, reachable by the internal lookup, the corpus and tests, never
  * selected by the application service, raid-night orchestration, REST or
- * MCP: `src/findings/spec-id.ts` lists the id in `INTERNAL_ONLY_SPEC_IDS`,
- * and `spec.ts` says so at compile time. Promotion is the reviewed
- * five-site edit `agent/architecture.md` describes and is NOT part of
- * M11-B2, whose deliverable is a measurement, not a public analyzer.
+ * MCP. Ten measurement slices built the decision surface; M11-B11 audited it
+ * against the promotion gates; M11-B12 moved the id by the reviewed five-site
+ * edit (the partition, the public contract's `specId` enum, the identity
+ * table, the `satisfies PublicSpecId` on `spec.ts`, and `exposure` below).
+ * Promotion changed REACHABILITY and two things that guard it, both here in
+ * the specialization: the VALIDATED-PROFILE gate (`supported-profile.ts` —
+ * San'layn only, owner decision T2) and the version-scoped resource wire
+ * resolution (`resources.ts`). No gameplay rule, binding, authority reading
+ * or verdict moved: a public request for a DeathKnight/Blood identity now
+ * dispatches this row and receives exactly the analysis the internal lookup
+ * always produced, projected through the shared public contract.
+ *
+ * WHAT IS VALIDATED, AND WHAT IS ONLY MODELLED. The pinned authority carries
+ * both hero lists and the engine dispatches both; the EVIDENCE is San'layn
+ * (two sanitized captures). A Deathbringer build therefore fails closed as
+ * AUTHORITY_NOT_AVAILABLE rather than being judged against a list no
+ * measurement ever reviewed. That refusal is the honest answer, not a defect.
  *
  * THE AUTHORITY, BOUND TO ONE DOMAIN
  *
@@ -146,31 +161,43 @@ export function bloodObservedDecisionView(
 
 /**
  * The limitation prose. Owned here because it is a claim about what this
- * evaluator refuses to judge. NOT published: the row is INTERNAL_ONLY, so
+ * evaluator refuses to judge, and PUBLISHED since M11-B12: the MCP tool
+ * descriptions compose it through `publicSpecializationDescriptions`, in the
+ * same position and by the same mechanism as the Paladins'. It names the
+ * validated hero tree and the slice, says what is not evaluated, and says
+ * that UNKNOWN is the expected answer where evidence cannot establish state,
+ * so a reader cannot mistake a narrow denominator for a full rotation review
+ * or an UNKNOWN for a fault. NOT published: the row is INTERNAL_ONLY, so
  * no MCP description composes it and no public document carries it. It
  * exists so the row is complete and so promotion, if it ever comes, has the
  * text to review.
  */
 export const BLOOD_LIMITS = Object.freeze({
   analysis: [
-    "Blood Death Knight analysis is an INTERNAL measurement slice. It evaluates observed casts of Death",
-    "Strike, Heart Strike (including its Vampiric Strike execution), Blood Boil, Marrowrend and Death's",
-    "Caress against pinned class/spec rotational authority when the necessary state can be established,",
-    "and records where the authority traversal stops when it cannot. Death and Decay, Dancing Rune Weapon",
-    "and Consumption are reported as excluded OUTSIDE_SUPPORTED_SLICE: observed, not judged. It does NOT",
-    "evaluate active mitigation, self healing, defensive cooldowns, interrupts or survival — Death Strike",
-    "is judged only as the offensive list's spender — and it does not read race, faction, gear use effects",
-    "or consumables. A decision whose required state cannot be reconstructed remains UNKNOWN, which is",
-    "expected and is not a fault.",
+    "Blood Death Knight analysis evaluates observed offensive global-cooldown decisions — Death Strike,",
+    "Heart Strike (including its Vampiric Strike execution), Blood Boil, Marrowrend and Death's Caress —",
+    "against pinned class/spec rotational authority, when the necessary state can be established. It is",
+    "VALIDATED FOR THE SAN'LAYN HERO TREE ONLY: a build whose observed talent tree resolves to",
+    "Deathbringer, to no hero tree, or to more than one is refused rather than judged. Death and Decay,",
+    "Dancing Rune Weapon and Consumption are reported as excluded OUTSIDE_SUPPORTED_SLICE: observed, not",
+    "judged. It does NOT evaluate active mitigation, self-healing, defensive cooldowns, interrupts or",
+    "survival — Death Strike is judged only as the offensive list's spender — it does not score",
+    "performance, and it does not read race, faction, gear use effects or consumables. It does not model",
+    "fight_remains, does not reconstruct Rune regeneration, and does not reconstruct Runic Power across a",
+    "spend it did not observe; decisions needing that state, or needing cooldown, charge, proc or talent",
+    "evidence the log does not carry, remain UNKNOWN. UNKNOWN is expected here and is not a fault.",
   ].join("\n"),
   raidNight: [
-    "Blood Death Knight cells are not produced: the analyzer is INTERNAL_ONLY and raid-night orchestration",
-    "does not select it.",
+    "Blood Death Knight cells count only observed offensive global-cooldown decisions (Death Strike, Heart",
+    "Strike, Blood Boil, Marrowrend, Death's Caress) compared against pinned class/spec authority, and only",
+    "for San'layn builds; other rotational decisions are excluded as OUTSIDE_SUPPORTED_SLICE, not judged.",
+    "They do NOT evaluate mitigation, self-healing, defensive cooldowns, interrupts or survival, and they",
+    "do not score performance. Most decisions typically remain UNKNOWN, which is expected.",
   ].join("\n"),
 });
 
 /**
- * The Blood Death Knight specialization module (M11-B2), INTERNAL_ONLY.
+ * The Blood Death Knight specialization module (M11-B2), PUBLIC since M11-B12.
  *
  * `supplementalAnalyses` is EMPTY by decision. The WCL identity strings are
  * the ones the local A7R6 fight-7 and gtKb fight-22 captures report for
@@ -184,7 +211,7 @@ export const BLOOD_DEATH_KNIGHT_MODULE: SpecModule = defineSpecModule({
     wclClassName: "DeathKnight",
     wclSpecName: "Blood",
   },
-  exposure: "INTERNAL_ONLY",
+  exposure: "PUBLIC",
   capabilities: BLOOD_CAPABILITIES,
   authorityBindings: BLOOD_AUTHORITY_BINDINGS,
   limitsProse: BLOOD_LIMITS,

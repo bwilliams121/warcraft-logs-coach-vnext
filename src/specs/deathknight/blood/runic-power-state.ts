@@ -105,7 +105,12 @@ import {
   unknownNumber,
   type NumericBinding,
 } from "../../../simc/expression/evaluate.js";
-import { bloodResourceOn, bloodResourceWireTypes, RUNIC_POWER_WIRE_DIVISOR } from "./resources.js";
+import {
+  bloodResourceOn,
+  bloodResourceWireTypes,
+  bloodWireKeys,
+  RUNIC_POWER_WIRE_DIVISOR,
+} from "./resources.js";
 
 /**
  * How far ahead of an observed Blood decision a RESOURCE observation is of
@@ -327,8 +332,9 @@ export interface BloodRunicPowerInput {
  */
 export function bindBloodRunicPower(input: BloodRunicPowerInput): BloodRunicPowerState {
   const { state, actorId, position } = input;
-  const wire = bloodResourceWireTypes();
-  if (wire === null) return unbound("WIRE_CONTRACT_NOT_PINNED");
+  // M11-B12: the contract must be pinned FOR THIS CAPTURE'S parser version.
+  const wire = bloodResourceWireTypes(bloodWireKeys(state));
+  if (!wire.ok) return unbound("WIRE_CONTRACT_NOT_PINNED", { detail: wire.reason });
   const decision = state.eventAt(position);
   if (decision === null) return unbound("NO_ANCHOR", { detail: "the decision position holds no event" });
 

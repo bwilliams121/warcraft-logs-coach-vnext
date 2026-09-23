@@ -482,13 +482,13 @@
       "passed": 11
     },
     {
-      "assertions": 12,
-      "cases": 12,
+      "assertions": 13,
+      "cases": 13,
       "failed": 0,
       "kindsExercised": ["PUBLIC_CONTRACT.REST_MCP_PARITY"],
       "notExecuted": 0,
       "owningLayer": "PUBLIC_CONTRACT",
-      "passed": 12
+      "passed": 13
     }
   ],
   "cases": [
@@ -521,7 +521,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.blood-death-knight-subject-is-internal-only-and-publicly-unsupported",
+      "caseId": "application-service.blood-death-knight-subject-is-publicly-supported-since-m11-b12",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-blood-death-knight-a7r6-rotational-45s"]
     },
@@ -2224,6 +2224,20 @@
       "caseId": "public-contract.analysis-parity-for-the-arms-warrior-subject",
       "owningLayer": "PUBLIC_CONTRACT",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-a7r6-rotational-45s",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-for-the-blood-death-knight-subject",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-blood-death-knight-a7r6-rotational-45s"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -6137,13 +6151,13 @@
   "totals": {
     "artifactBytes": 4792400,
     "artifacts": 43,
-    "assertions": 691,
-    "cases": 161,
+    "assertions": 692,
+    "cases": 162,
     "declared": 0,
-    "executable": 691,
+    "executable": 692,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 691
+    "passed": 692
   }
 }

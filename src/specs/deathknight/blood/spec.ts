@@ -1,19 +1,19 @@
 /**
- * Blood Death Knight's identity constants (M11-B2, INTERNAL_ONLY).
+ * Blood Death Knight's identity constants (M11-B2; PUBLIC since M11-B12).
  *
  * One place for the id the registration, the facade, the corpus executor and
- * every test agree on. It is an INTERNAL_ONLY id from
- * `src/findings/spec-id.ts`: the `satisfies` is the compile-time side of the
- * exposure — moving the id across the partition is a reviewed five-site edit
- * (`agent/architecture.md`, M10-D), and M11-B2 makes no such edit. Blood is
- * a MEASUREMENT slice: reachable by the internal lookup, the corpus and
- * tests, never selected by the application service, raid-night
- * orchestration, REST or MCP.
+ * every test agree on. It is a PUBLIC id from `src/findings/spec-id.ts`: the
+ * `satisfies` is the compile-time side of the exposure — it was
+ * `InternalOnlySpecId` from M11-B2, while Blood was a MEASUREMENT slice
+ * reachable only by the internal lookup, the corpus and tests, and it changed
+ * here in the same reviewed five-site edit as the partition, the public
+ * contract's `specId` enum, the identity table and the registration's
+ * `exposure` (`agent/architecture.md`, M10-D's precedent).
  */
 
-import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
+import type { PublicSpecId } from "../../../findings/spec-id.js";
 
-export const BLOOD_DEATH_KNIGHT_SPEC_ID = "deathknight/blood" satisfies InternalOnlySpecId;
+export const BLOOD_DEATH_KNIGHT_SPEC_ID = "deathknight/blood" satisfies PublicSpecId;
 
 export const BLOOD_DEATH_KNIGHT_ANALYZER_ID = "deathknight-blood-observed-decisions";
 

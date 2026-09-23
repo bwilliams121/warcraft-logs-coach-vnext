@@ -48,6 +48,7 @@ import {
 import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protection/registration.js";
 import { PROTECTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/protection/spec.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
+import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../../src/specs/deathknight/blood/registration.js";
 import { RETRIBUTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/retribution/spec.js";
 import { MCP_TEST_ENV } from "../support/analysis-transports.js";
 import { analyzedFightAnalysis } from "../support/aggregation-fixture.js";
@@ -82,7 +83,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries three PUBLIC registrations — Assassination, Protection Paladin and, since M11-A5, Retribution Paladin — and, since M11-B2, one INTERNAL_ONLY row (Blood Death Knight)", () => {
+  it("carries four PUBLIC registrations — Assassination, both Paladins and, since M11-B12, Blood Death Knight — and no INTERNAL_ONLY row", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -93,15 +94,18 @@ describe("the production catalog", () => {
       [ASSASSINATION_ANALYZER_ID, "rogue/assassination", "PUBLIC"],
       [PROTECTION_PALADIN_ANALYZER_ID, "paladin/protection", "PUBLIC"],
       [RETRIBUTION_PALADIN_ANALYZER_ID, "paladin/retribution", "PUBLIC"],
-      ["deathknight-blood-observed-decisions", "deathknight/blood", "INTERNAL_ONLY"],
+      ["deathknight-blood-observed-decisions", "deathknight/blood", "PUBLIC"],
     ]);
-    // The public set is DERIVED: the three PUBLIC rows, never the INTERNAL_ONLY one.
+    // The public set is DERIVED from the rows' exposure, never hand-listed:
+    // all four are PUBLIC since M11-B12, and the derivation is what would
+    // drop a row the moment one went back to INTERNAL_ONLY.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
-    expect(ENABLED_ANALYZERS).toHaveLength(3);
+    expect(ENABLED_ANALYZERS).toHaveLength(4);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
+      "deathknight/blood",
     ]);
   });
 
@@ -209,6 +213,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
       ASSASSINATION_REGISTRATION,
       original,
       RETRIBUTION_PALADIN_REGISTRATION,
+      BLOOD_DEATH_KNIGHT_REGISTRATION,
     ];
     const validated = requireValidatedCatalog(rows);
 
@@ -220,7 +225,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     expect(analyzerForSpec("paladin/protection", validated)?.exposure).toBe("PUBLIC");
     expect(analyzerForSpec("paladin/protection", validated)?.requirement.includeResources).toBe(true);
     expect(analyzerForSpec("paladin/protection", validated)?.authorityBindings).toHaveLength(1);
-    expect(validated.registrations).toHaveLength(3);
+    expect(validated.registrations).toHaveLength(4);
     // And re-validating the mutated rows now refuses them: a duplicate, and a
     // demoted Protection row that leaves the public set incomplete.
     const defects = defectsOf(rows);
@@ -253,6 +258,7 @@ describe("every lookup requires a validated catalog", () => {
     { ...ASSASSINATION_REGISTRATION, analyzerId: "second" },
     PROTECTION_PALADIN_REGISTRATION,
     RETRIBUTION_PALADIN_REGISTRATION,
+    BLOOD_DEATH_KNIGHT_REGISTRATION,
   ];
   const DUPLICATE_ANALYZER = [
     ASSASSINATION_REGISTRATION,
@@ -264,6 +270,7 @@ describe("every lookup requires a validated catalog", () => {
     { ...ASSASSINATION_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
     PROTECTION_PALADIN_REGISTRATION,
     RETRIBUTION_PALADIN_REGISTRATION,
+    BLOOD_DEATH_KNIGHT_REGISTRATION,
   ];
   const AUTHORITY_MISMATCH = [
     {
@@ -349,16 +356,25 @@ describe("the public set is one promise across the partition, the identity table
         { ...ASSASSINATION_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
         PROTECTION_PALADIN_REGISTRATION,
         RETRIBUTION_PALADIN_REGISTRATION,
+        BLOOD_DEATH_KNIGHT_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
         { ...PROTECTION_PALADIN_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
         RETRIBUTION_PALADIN_REGISTRATION,
+        BLOOD_DEATH_KNIGHT_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
         PROTECTION_PALADIN_REGISTRATION,
         { ...RETRIBUTION_PALADIN_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
+        BLOOD_DEATH_KNIGHT_REGISTRATION,
+      ],
+      [
+        ASSASSINATION_REGISTRATION,
+        PROTECTION_PALADIN_REGISTRATION,
+        RETRIBUTION_PALADIN_REGISTRATION,
+        { ...BLOOD_DEATH_KNIGHT_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
       ],
     ]) {
       const defects = defectsOf(demoted);
@@ -369,6 +385,7 @@ describe("the public set is one promise across the partition, the identity table
 
   it("lookup is independent of registration order", () => {
     const reversed = requireValidatedCatalog([
+      BLOOD_DEATH_KNIGHT_REGISTRATION,
       RETRIBUTION_PALADIN_REGISTRATION,
       PROTECTION_PALADIN_REGISTRATION,
       ASSASSINATION_REGISTRATION,
@@ -378,11 +395,16 @@ describe("the public set is one promise across the partition, the identity table
     expect(analyzerForSpec("paladin/retribution", reversed)?.analyzerId).toBe(
       RETRIBUTION_PALADIN_ANALYZER_ID,
     );
+    expect(analyzerForSpec("deathknight/blood", reversed)?.analyzerId).toBe(
+      "deathknight-blood-observed-decisions",
+    );
     expect(
       publicAnalyzers(reversed)
         .map((registration) => registration.specId)
         .sort(),
-    ).toEqual(["paladin/protection", "paladin/retribution", "rogue/assassination"].sort());
+    ).toEqual(
+      ["paladin/protection", "paladin/retribution", "rogue/assassination", "deathknight/blood"].sort(),
+    );
   });
 
   it("the exposure vocabulary is dormant, not gone: a PUBLIC row for an unknown id is still refused by name", () => {

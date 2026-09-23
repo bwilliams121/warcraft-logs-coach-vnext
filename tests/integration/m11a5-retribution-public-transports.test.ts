@@ -268,10 +268,13 @@ describe("MCP: the same public semantics as REST", () => {
     // What tools/list publishes is derived from the PUBLIC catalog; the wire
     // form is pinned by m11a-tools-list-supported-specializations.
     const { sentence, limits } = PUBLIC_SPECIALIZATION_DESCRIPTIONS;
+    // M11-B12 added the fourth public specialization; the sentence is derived
+    // and the limits are ordered by the catalog, so Retribution is found by
+    // its own content rather than by a position this file would have to chase.
     expect(sentence).toBe(
-      "Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Blood Death Knight, Protection Paladin and Retribution Paladin.",
     );
-    const retribution = limits[2];
+    const retribution = limits.find((entry) => entry.analysis.includes("Retribution Paladin analysis"));
     expect(retribution?.analysis).toContain("only observed Holy Power SPENDER decisions");
     expect(retribution?.analysis).toContain("OUTSIDE_SUPPORTED_SLICE");
     expect(retribution?.analysis).toContain("remains UNKNOWN, which is expected and is not a fault");

@@ -72,7 +72,7 @@ row).
 | `warrior/arms` | C | local raw | blocked | PARTIAL | `colossus-smash-window-fill` |
 | `warrior/fury` | C | none | not yet | UNASSESSED | — |
 | `warrior/protection` | C | none | not yet | UNASSESSED | — |
-| `deathknight/blood` | C — INTERNAL_ONLY measurement slice at M11-B2 | committed sanitized (A7R6 actor 14, 165 s; gtKb actor 14, 20 s) | audited (M11-B2: the 12.1.0 list extracted with its client-version guards evaluated; Coagulopathy line absent at this pin) | SPECIFIC_QUESTIONS_IDENTIFIED | `coagulopathy-maintenance-clip` (SUPERSEDED — no pinned line at 12.1.0), `bone-shield-stack-maintenance` (stack count bound at 114/123 decisions; `buff.bone_shield.remains` the open atom) |
+| `deathknight/blood` | C — INTERNAL_ONLY measurement slice at M11-B2, PUBLIC since M11-B12 (San'layn-validated) | committed sanitized (A7R6 actor 14, 165 s; gtKb actor 14, 20 s) | audited (M11-B2: the 12.1.0 list extracted with its client-version guards evaluated; Coagulopathy line absent at this pin) | SPECIFIC_QUESTIONS_IDENTIFIED | `coagulopathy-maintenance-clip` (SUPERSEDED — no pinned line at 12.1.0), `bone-shield-stack-maintenance` (IMPLEMENTED_PUBLIC since M11-B12: the count is exact at 114 of 123 decisions, a finite set of exact counts at 7 more inside the pre-decision window, and `buff.bone_shield.remains` is the M11-B8 order-invariant floor; the whole observed offensive slice is 42 MATCH / 9 REJECTED / 72 UNKNOWN) |
 | `deathknight/frost` | C | local raw | blocked | PARTIAL | `rune-and-runic-power-pooling` |
 | `monk/brewmaster` | C | local raw | blocked | PARTIAL | `celestial-brew-charge-capping` |
 | `demonhunter/vengeance` | C | none | not yet | UNASSESSED | — |

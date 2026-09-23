@@ -131,6 +131,7 @@ describe("identity and partition", () => {
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
+      "deathknight/blood",
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.specId)).toContain("paladin/retribution");
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
@@ -141,10 +142,10 @@ describe("identity and partition", () => {
     // both tools, in the same position and by the same mechanism as
     // Protection's. Nothing hand-lists the third name.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Blood Death Knight, Protection Paladin and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(3);
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits[2]).toEqual(
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(4);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       RETRIBUTION_PALADIN_REGISTRATION.publicLimits,
     );
     const analysisDescription = analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);

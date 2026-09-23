@@ -71,6 +71,7 @@ export const PUBLIC_SPEC_IDS = [
   "rogue/assassination",
   "paladin/protection",
   "paladin/retribution",
+  "deathknight/blood",
 ] as const satisfies readonly SpecId[];
 
 type ListedSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -264,13 +265,15 @@ export const IdentitySchema = z
  * recognition the engine does not have.
  *
  * WIDENING THIS ENUM IS NOT A SCHEMA VERSION CHANGE. `paladin/protection`
- * joined it in M10-D and `paladin/retribution` in M11-A5, both under
- * `analysis/1`: the shape is unchanged, the meaning of both fields is
- * unchanged, the `status` discriminant is unchanged, and no document a
- * consumer had already received changes — the only documents that differ are
- * those of the newly supported specialization, which previously carried
- * `SPEC_NOT_SUPPORTED`. The versioning rule above forbids NARROWING an enum;
- * growing this one is how supported specializations arrive.
+ * joined it in M10-D, `paladin/retribution` in M11-A5 and `deathknight/blood`
+ * in M11-B12, all under `analysis/1`: the shape is unchanged, the meaning of
+ * both fields is unchanged, the `status` discriminant is unchanged, and no
+ * document a consumer had already received changes — the only documents that
+ * differ are those of the newly supported specialization, which previously
+ * carried `SPEC_NOT_SUPPORTED`. The versioning rule above forbids NARROWING
+ * an enum; growing this one is how supported specializations arrive. M11-B12
+ * widened this enum and NOTHING ELSE: no outcome, basis, blocker, exclusion
+ * reason, status or capability value moved for Blood.
  */
 export const SpecializationSchema = z
   .object({
