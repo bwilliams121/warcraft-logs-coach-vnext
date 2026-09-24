@@ -177,4 +177,6 @@ export interface GcdExtractionTarget {
   readonly defaultOut: string;
 }
 
-export const TARGETS: Readonly<Record<"rogue-assassination" | "paladin-protection", GcdExtractionTarget>>;
+export const TARGETS: Readonly<
+  Record<"rogue-assassination" | "paladin-protection" | "monk-brewmaster", GcdExtractionTarget>
+>;

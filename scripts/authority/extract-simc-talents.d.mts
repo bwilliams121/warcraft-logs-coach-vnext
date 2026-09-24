@@ -22,4 +22,6 @@ export interface TalentExtractionTarget {
   readonly apexTraits: boolean;
 }
 
-export const TARGETS: Readonly<Record<"rogue-assassination" | "paladin-protection", TalentExtractionTarget>>;
+export const TARGETS: Readonly<
+  Record<"rogue-assassination" | "paladin-protection" | "monk-brewmaster", TalentExtractionTarget>
+>;

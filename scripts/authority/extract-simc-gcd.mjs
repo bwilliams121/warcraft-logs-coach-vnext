@@ -1508,6 +1508,427 @@ const DEATHKNIGHT_BLOOD_FACTS = {
   ],
 };
 
+/**
+ * The Brewmaster Monk target's pinned inputs (M11-C1).
+ *
+ * Monk keeps its class module in its own directory
+ * (`engine/class_modules/monk/sc_monk.cpp`); there is no spec module. The
+ * racial rows and the player/consumable modules are the files every other
+ * target hashes. `talentModule` is hashed because the Fortifying Brew binding
+ * rests on `player_talent_t::find_override_spell` (engine/player/talent.cpp).
+ */
+const MONK_BREWMASTER_SOURCES = {
+  spellData: "engine/dbc/generated/sc_spell_data.inc",
+  classSpells: "engine/dbc/generated/class_spells.inc",
+  clientDataVersion: "engine/dbc/generated/client_data_version.inc",
+  spellDataLayout: "engine/dbc/spell_data.hpp",
+  // HASHED, NEVER PARSED — the class module every token binding is a hand-reviewed reading of.
+  classModule: "engine/class_modules/monk/sc_monk.cpp",
+  // HASHED, NEVER PARSED. `find_override_spell` returns the trait's override spell when the talent is enabled.
+  talentModule: "engine/player/talent.cpp",
+  // HASHED, NEVER PARSED. The racial rows are class-mask readings of this table.
+  racialSpells: "engine/dbc/generated/racial_spells.inc",
+  playerModule: "engine/player/player.cpp",
+  consumableModule: "engine/player/consumable.cpp",
+};
+
+const MONK = "engine/class_modules/monk/sc_monk.cpp";
+
+/**
+ * The Brewmaster Monk facts (M11-C1): authority data only, no analyzer.
+ *
+ * `abilities` are the machine-extracted `_gcd` records of every spell a token
+ * of the pinned Brewmaster list (apl_monk.cpp `namespace brewmaster`) can
+ * execute, plus ONE record that is deliberately NOT an execution candidate:
+ * the Empty the Cellar TALENT record 1262329. Observed-only abilities arrive
+ * with the evidence that observes them, not here.
+ *
+ * Facts a reader should not have to rediscover (all read off the pinned DBC):
+ *
+ *   - THE BREWS SPLIT. Celestial Brew 322507 and Celestial Infusion 1241059
+ *     are `_gcd` 1000 — GCD-consuming. Purifying Brew 119582, Black Ox Brew
+ *     115399 and Fortifying Brew 115203 are `_gcd` 0.
+ *   - `celestial_brew` BINDS TO TWO RECORDS. create_action builds
+ *     celestial_infusion_t when the Celestial Infusion talent is taken
+ *     (sc_monk.cpp:5349-5350), and monk_t::create_expression reads every
+ *     `cooldown|action|buff.celestial_brew.*` expression through the
+ *     celestial_infusion objects under the same talent (:7390-7400). Both are
+ *     lane 1000, so the token's lane holds without deciding the talent; the
+ *     executed ability id does not.
+ *   - `empty_the_cellar` EXECUTES THE DRIVER. The action is built on
+ *     talent.brewmaster.empty_the_cellar_driver = find_spell( 1263438 )
+ *     (`_gcd` 1000), not on the talent record 1262329 (`_gcd` 0). Recording
+ *     the talent id as a candidate would give the token the wrong lane. The
+ *     relation is a direct C++ binding, not an effect trigger, so no
+ *     `triggerResolutions` entry is declared for it.
+ */
+const MONK_BREWMASTER_FACTS = {
+  clientDataWowVersion: "12.1.0.69587",
+  clientDataHotfixBuild: 69587,
+  sanityAnchors: REQUIRED_FACTS.sanityAnchors,
+  abilities: [
+    // ---- class/spec actions the pinned Brewmaster list names ----
+    { abilityGameId: 100780, displayNameEn: "Tiger Palm", baseGcdMs: 1500 },
+    { abilityGameId: 205523, displayNameEn: "Blackout Kick", baseGcdMs: 1500 },
+    { abilityGameId: 322101, displayNameEn: "Expel Harm", baseGcdMs: 1000 },
+    { abilityGameId: 121253, displayNameEn: "Keg Smash", baseGcdMs: 1000 },
+    { abilityGameId: 115181, displayNameEn: "Breath of Fire", baseGcdMs: 1000 },
+    { abilityGameId: 322507, displayNameEn: "Celestial Brew", baseGcdMs: 1000 },
+    { abilityGameId: 1241059, displayNameEn: "Celestial Infusion", baseGcdMs: 1000 },
+    { abilityGameId: 119582, displayNameEn: "Purifying Brew", baseGcdMs: 0 },
+    { abilityGameId: 115399, displayNameEn: "Black Ox Brew", baseGcdMs: 0 },
+    { abilityGameId: 115203, displayNameEn: "Fortifying Brew", baseGcdMs: 0 },
+    { abilityGameId: 123986, displayNameEn: "Chi Burst", baseGcdMs: 1500 },
+    { abilityGameId: 132578, displayNameEn: "Invoke Niuzao, the Black Ox", baseGcdMs: 1000 },
+    { abilityGameId: 325153, displayNameEn: "Exploding Keg", baseGcdMs: 1000 },
+    { abilityGameId: 1263438, displayNameEn: "Empty the Cellar", baseGcdMs: 1000 },
+    { abilityGameId: 116847, displayNameEn: "Rushing Jade Wind", baseGcdMs: 1500 },
+    // ---- NOT an execution candidate: the Empty the Cellar talent record ----
+    // Recorded so the lane hazard is pinned mechanically: this record is
+    // `_gcd` 0, the executed driver 1263438 is `_gcd` 1000.
+    { abilityGameId: 1262329, displayNameEn: "Empty the Cellar", baseGcdMs: 0 },
+    // ---- the seven racial tokens of `race_actions`, as a Monk resolves them ----
+    { abilityGameId: 33697, displayNameEn: "Blood Fury", baseGcdMs: 0 },
+    { abilityGameId: 26297, displayNameEn: "Berserking", baseGcdMs: 0 },
+    { abilityGameId: 129597, displayNameEn: "Arcane Torrent", baseGcdMs: 1000 },
+    { abilityGameId: 255647, displayNameEn: "Light's Judgment", baseGcdMs: 1500 },
+    { abilityGameId: 265221, displayNameEn: "Fireblood", baseGcdMs: 0 },
+    { abilityGameId: 274738, displayNameEn: "Ancestral Call", baseGcdMs: 0 },
+    { abilityGameId: 312411, displayNameEn: "Bag of Tricks", baseGcdMs: 1500 },
+  ],
+  tokenBindings: [
+    {
+      simcToken: "tiger_palm",
+      candidateAbilityGameIds: [100780],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / tiger_palm_t",
+      startLine: 5329,
+      endLine: 5330,
+      sourceNote:
+        'create_action dispatches "tiger_palm" to tiger_palm_t, whose base is built on ' +
+        "player->baseline.monk.tiger_palm at sc_monk.cpp:836-837; baseline.monk.tiger_palm = find_spell( 100780 ) at " +
+        ":5571. class_spells.inc row { 10, 0, 100780 } confirms the id. tiger_palm_t::ready() returns false whenever " +
+        "talent.brewmaster.press_the_advantage is taken (:848-853).",
+    },
+    {
+      simcToken: "blackout_kick",
+      candidateAbilityGameIds: [205523],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / blackout_kick_t",
+      startLine: 5331,
+      endLine: 5332,
+      sourceNote:
+        'create_action dispatches "blackout_kick" to blackout_kick_t, whose base is built on ' +
+        "( player->specialization() == MONK_BREWMASTER ? player->baseline.brewmaster.blackout_kick : " +
+        "player->baseline.monk.blackout_kick ) at sc_monk.cpp:1368-1371; baseline.brewmaster.blackout_kick = " +
+        "find_spell( 205523 ) at :5587 — a literal lookup, carried by neither class_spells.inc nor " +
+        "specialization_spells.inc, so no table cross-check is available.",
+    },
+    {
+      simcToken: "expel_harm",
+      candidateAbilityGameIds: [322101],
+      crossCheck: "CLASS_SPELLS",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / expel_harm_t",
+      startLine: 5333,
+      endLine: 5334,
+      sourceNote:
+        'create_action dispatches "expel_harm" to expel_harm_t, whose base is built on ' +
+        "( talent.windwalker.combat_wisdom->ok() ? talent.windwalker.combat_wisdom_expel_harm : " +
+        "baseline.monk.expel_harm ) at sc_monk.cpp:4011-4014. Combat Wisdom is a Windwalker specialization talent, " +
+        "which a Brewmaster cannot resolve, so the Brewmaster action is baseline.monk.expel_harm = " +
+        "find_spell( 322101 ) at :5562. class_spells.inc row { 10, 0, 322101 } confirms the id.",
+    },
+    {
+      simcToken: "keg_smash",
+      candidateAbilityGameIds: [121253],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / keg_smash_t",
+      startLine: 5363,
+      endLine: 5364,
+      sourceNote:
+        'create_action dispatches "keg_smash" to keg_smash_t, whose base is ' +
+        "monk_melee_attack_t( player, name, player->talent.brewmaster.keg_smash ) at sc_monk.cpp:2509-2510; " +
+        'talent.brewmaster.keg_smash = _ST( "Keg Smash" ) at :5696, whose Brewmaster trait row carries spell 121253.',
+    },
+    {
+      simcToken: "breath_of_fire",
+      candidateAbilityGameIds: [115181],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / breath_of_fire_t",
+      startLine: 5347,
+      endLine: 5348,
+      sourceNote:
+        'create_action dispatches "breath_of_fire" to breath_of_fire_t, whose base is ' +
+        'monk_spell_t( player, "breath_of_fire", player->talent.brewmaster.breath_of_fire ) at sc_monk.cpp:3267-3268; ' +
+        'talent.brewmaster.breath_of_fire = _ST( "Breath of Fire" ) at :5726, trait row spell 115181.',
+    },
+    {
+      simcToken: "celestial_brew",
+      candidateAbilityGameIds: [322507, 1241059],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / celestial_brew_t / celestial_infusion_t",
+      startLine: 5349,
+      endLine: 5352,
+      sourceNote:
+        'create_action dispatches "celestial_brew" to celestial_infusion_t when talent.brewmaster.celestial_infusion->ok() ' +
+        "(:5349-5350), else to celestial_brew_t (:5351-5352). celestial_brew_t is absorb_brew_t( ..., " +
+        '"celestial_brew", talent.brewmaster.celestial_brew ) at :4113-4114 (_ST( "Celestial Brew" ) at :5716, spell ' +
+        '322507); celestial_infusion_t is absorb_brew_t( ..., "celestial_infusion", talent.brewmaster.celestial_infusion ) ' +
+        'at :4121-4122 (_ST( "Celestial Infusion" ) at :5717, spell 1241059). Under the same talent ' +
+        "monk_t::create_expression reads cooldown/action/buff.celestial_brew.* through the celestial_infusion " +
+        "objects (:7390-7400). Both records are lane 1000, so the token's lane holds without deciding the talent.",
+    },
+    {
+      simcToken: "purifying_brew",
+      candidateAbilityGameIds: [119582],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / purifying_brew_t",
+      startLine: 5365,
+      endLine: 5366,
+      sourceNote:
+        'create_action dispatches "purifying_brew" to purifying_brew_t, whose base is ' +
+        'brew_t<monk_spell_t>( player, "purifying_brew", player->talent.brewmaster.purifying_brew ) at sc_monk.cpp:3487-3488; ' +
+        'talent.brewmaster.purifying_brew = _ST( "Purifying Brew" ) at :5697, trait row spell 119582. The DBC record ' +
+        "carries `_gcd` 0. ready() is true only while Stagger is ticking (:3497-3502).",
+    },
+    {
+      simcToken: "black_ox_brew",
+      candidateAbilityGameIds: [115399],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / black_ox_brew_t",
+      startLine: 5369,
+      endLine: 5370,
+      sourceNote:
+        'create_action dispatches "black_ox_brew" to black_ox_brew_t, whose base is ' +
+        'brew_t<monk_spell_t>( player, "black_ox_brew", player->talent.brewmaster.black_ox_brew ) at sc_monk.cpp:3108-3109; ' +
+        'talent.brewmaster.black_ox_brew = _ST( "Black Ox Brew" ) at :5737, trait row spell 115399. The DBC record ' +
+        "carries `_gcd` 0. execute() resets the Purifying Brew, Celestial Brew and Celestial Infusion cooldowns " +
+        "(:3122-3130).",
+    },
+    {
+      simcToken: "fortifying_brew",
+      candidateAbilityGameIds: [115203],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / fortifying_brew_t",
+      startLine: 5341,
+      endLine: 5342,
+      sourceNote:
+        'create_action dispatches "fortifying_brew" to fortifying_brew_t, whose base is brew_t<monk_spell_t>( player, ' +
+        '"fortifying_brew", player->talent.monk.fortifying_brew.find_override_spell() ) at sc_monk.cpp:3334-3335; ' +
+        'talent.monk.fortifying_brew = _CT( "Fortifying Brew" ) at :5666, whose class trait row carries spell 388917 ' +
+        "and id_override_spell 115203. player_talent_t::find_override_spell() returns find_spell( id_override_spell ) " +
+        "when the talent is enabled and not_found() otherwise (engine/player/talent.cpp:28-31), so the executed " +
+        "record is 115203. The DBC record carries `_gcd` 0.",
+    },
+    {
+      simcToken: "chi_burst",
+      candidateAbilityGameIds: [123986],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / chi_burst_t",
+      startLine: 5367,
+      endLine: 5368,
+      sourceNote:
+        'create_action dispatches "chi_burst" to chi_burst_t, whose base is monk_spell_t( player, "chi_burst", ' +
+        "specialization() == MONK_WINDWALKER ? talent.monk.chi_burst_projectile : talent.monk.chi_burst ) at " +
+        'sc_monk.cpp:3022-3025; talent.monk.chi_burst = _CT( "Chi Burst" ) at :5643, trait row spell 123986. ' +
+        "chi_burst_t::ready() adds a buff gate for Windwalker only (:3036-3043).",
+    },
+    {
+      simcToken: "invoke_niuzao",
+      candidateAbilityGameIds: [132578],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / niuzao_spell_t",
+      startLine: 5359,
+      endLine: 5360,
+      sourceNote:
+        'create_action dispatches "invoke_niuzao" (and "invoke_niuzao_the_black_ox", :5361-5362) to niuzao_spell_t, ' +
+        'whose base is monk_spell_t( player, "invoke_niuzao_the_black_ox", talent.brewmaster.invoke_niuzao_the_black_ox ) ' +
+        "at sc_monk.cpp:3734-3735 — the ACTION is named invoke_niuzao_the_black_ox; talent.brewmaster." +
+        'invoke_niuzao_the_black_ox = _ST( "Invoke Niuzao, the Black Ox" ) at :5760, trait row spell 132578.',
+    },
+    {
+      simcToken: "exploding_keg",
+      candidateAbilityGameIds: [325153],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / exploding_keg_t",
+      startLine: 5357,
+      endLine: 5358,
+      sourceNote:
+        'create_action dispatches "exploding_keg" to exploding_keg_t, whose base is ' +
+        'monk_spell_t( player, "exploding_keg", player->talent.brewmaster.exploding_keg ) at sc_monk.cpp:3381-3382; ' +
+        'talent.brewmaster.exploding_keg = _ST( "Exploding Keg" ) at :5754, trait row spell 325153.',
+    },
+    {
+      simcToken: "empty_the_cellar",
+      candidateAbilityGameIds: [1263438],
+      crossCheck: "NONE_FIND_SPELL_LITERAL",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / empty_the_cellar_t",
+      startLine: 5355,
+      endLine: 5356,
+      sourceNote:
+        'create_action dispatches "empty_the_cellar" to empty_the_cellar_t, whose base is monk_spell_t( player, ' +
+        '"empty_the_cellar", player->talent.brewmaster.empty_the_cellar_driver ) at sc_monk.cpp:3438-3439; ' +
+        "talent.brewmaster.empty_the_cellar_driver = find_spell( 1263438 ) at :5768 (`_gcd` 1000). The talent " +
+        'record talent.brewmaster.empty_the_cellar = _ST( "Empty the Cellar" ) at :5766 is spell 1262329 (`_gcd` 0) ' +
+        "and is NOT what the action executes. empty_the_cellar_t::ready() returns buff.empty_the_cellar->up() " +
+        "(:3447-3450), the buff built from find_spell( 1262768 ) (:5767, :6288-6289).",
+    },
+    {
+      simcToken: "rushing_jade_wind",
+      candidateAbilityGameIds: [116847],
+      crossCheck: "NONE_TALENT_BOUND",
+      sourcePath: MONK,
+      symbol: "monk_t::create_action / rushing_jade_wind_t",
+      startLine: 5389,
+      endLine: 5390,
+      sourceNote:
+        'create_action dispatches "rushing_jade_wind" to rushing_jade_wind_t, whose base is ' +
+        'monk_melee_attack_t( player, "rushing_jade_wind", player->talent.brewmaster.rushing_jade_wind ) at ' +
+        'sc_monk.cpp:1476-1477; talent.brewmaster.rushing_jade_wind = _ST( "Rushing Jade Wind" ) at :5713, trait row ' +
+        "spell 116847.",
+    },
+    {
+      simcToken: "blood_fury",
+      candidateAbilityGameIds: [33697],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / blood_fury_t",
+      startLine: 11060,
+      endLine: 11061,
+      sourceNote:
+        'player_t::create_action dispatches "blood_fury" to blood_fury_t, built on p->find_racial_spell( "Blood Fury" ) ' +
+        "at player.cpp:9132. racial_spells.inc row { 0x0002 (Orc), 0x00000240, 33697 } is the one whose class mask " +
+        "carries the Monk bit (0x200); the 33702 and 20572 rows are other classes' variants. OUTSIDE the rotational " +
+        "decision domain (racial action).",
+    },
+    {
+      simcToken: "berserking",
+      candidateAbilityGameIds: [26297],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / berserking_t",
+      startLine: 11058,
+      endLine: 11059,
+      sourceNote:
+        'player_t::create_action dispatches "berserking" to berserking_t, built on p->find_racial_spell( "Berserking" ) ' +
+        'at player.cpp:9105. racial_spells.inc: { 0x0080 (Troll), 0x3fff, 26297, "Berserking" }. OUTSIDE the rotational ' +
+        "decision domain (racial action).",
+    },
+    {
+      simcToken: "arcane_torrent",
+      candidateAbilityGameIds: [129597],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / arcane_torrent_t",
+      startLine: 11056,
+      endLine: 11057,
+      sourceNote:
+        'player_t::create_action dispatches "arcane_torrent" to arcane_torrent_t, built on p->find_racial_spell( ' +
+        '"Arcane Torrent" ) at player.cpp:9051. racial_spells.inc row { 0x0200 (Blood Elf), 0x00000200 (Monk), 129597 } ' +
+        "is the only row a Monk can resolve. OUTSIDE the rotational decision domain (racial action).",
+    },
+    {
+      simcToken: "lights_judgment",
+      candidateAbilityGameIds: [255647],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / lights_judgment_t",
+      startLine: 11070,
+      endLine: 11071,
+      sourceNote:
+        'player_t::create_action dispatches "lights_judgment" to lights_judgment_t, built on p->find_racial_spell( ' +
+        '"Light\'s Judgment" ) at player.cpp:9252. racial_spells.inc: { 0x20000000 (Lightforged Draenei), 0x3fff, ' +
+        '255647, "Light\'s Judgment" }. OUTSIDE the rotational decision domain (racial action).',
+    },
+    {
+      simcToken: "fireblood",
+      candidateAbilityGameIds: [265221],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / fireblood_t",
+      startLine: 11064,
+      endLine: 11065,
+      sourceNote:
+        'player_t::create_action dispatches "fireblood" to fireblood_t, built on p->find_racial_spell( "Fireblood" ) at ' +
+        'player.cpp:9401. racial_spells.inc: { 0x0800 (Dark Iron Dwarf), 0x3fff, 265221, "Fireblood" }. OUTSIDE the ' +
+        "rotational decision domain (racial action).",
+    },
+    {
+      simcToken: "ancestral_call",
+      candidateAbilityGameIds: [274738],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / ancestral_call_t",
+      startLine: 11052,
+      endLine: 11053,
+      sourceNote:
+        'player_t::create_action dispatches "ancestral_call" to ancestral_call_t, built on p->find_racial_spell( ' +
+        '"Ancestral Call" ) at player.cpp:9360. racial_spells.inc: { 0x2000 (Mag\'har Orc), 0x3fff, 274738, ' +
+        '"Ancestral Call" }. OUTSIDE the rotational decision domain (racial action).',
+    },
+    {
+      simcToken: "bag_of_tricks",
+      candidateAbilityGameIds: [312411],
+      crossCheck: "NONE_RACE_BOUND",
+      sourcePath: "engine/player/player.cpp",
+      symbol: "player_t::create_action / bag_of_tricks_t",
+      startLine: 11078,
+      endLine: 11079,
+      sourceNote:
+        'player_t::create_action dispatches "bag_of_tricks" to bag_of_tricks_t, built on p->find_racial_spell( ' +
+        '"Bag of Tricks" ) at player.cpp:9465. racial_spells.inc: { 0x1000 (Vulpera), 0x3fff, 312411, ' +
+        '"Bag of Tricks" }. OUTSIDE the rotational decision domain (racial action).',
+    },
+  ],
+  metaActionLanes: [
+    {
+      simcToken: "auto_attack",
+      triggerGcdMs: 0,
+      sourcePath: MONK,
+      symbol: "auto_attack_t::auto_attack_t",
+      line: 2299,
+      sourceNote:
+        "auto_attack_t (struct opens at sc_monk.cpp:2034) is built on the spell-less " +
+        'monk_melee_attack_t( player, "auto_attack" ) base and its constructor (:2293) assigns trigger_gcd = 0_ms at ' +
+        ":2299.",
+    },
+    {
+      simcToken: "use_items",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/player.cpp",
+      symbol: "use_items_t::use_items_t",
+      line: 10232,
+      sourceNote:
+        "use_items_t's constructor (struct opens at player.cpp:10216) assigns " +
+        "trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (item use).",
+    },
+    {
+      simcToken: "potion",
+      triggerGcdMs: 0,
+      sourcePath: "engine/player/consumable.cpp",
+      symbol: "dbc_consumable_base_t::dbc_consumable_base_t",
+      line: 804,
+      sourceNote:
+        "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor " +
+        "(consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational " +
+        "decision domain (consumable).",
+    },
+  ],
+};
+
 export const TARGETS = {
   "rogue-assassination": {
     datasetId: DATASET_ID,
@@ -1566,6 +1987,22 @@ export const TARGETS = {
     ],
     requiredFacts: PALADIN_PROTECTION_FACTS,
     defaultOut: "src/data/game/paladin-protection-gcd-semantics.json",
+  },
+  "monk-brewmaster": {
+    datasetId: "SIMC_DBC_MONK_BREWMASTER_GCD_SEMANTICS",
+    classId: 10,
+    className: "Monk",
+    sources: MONK_BREWMASTER_SOURCES,
+    classModulePath: MONK_BREWMASTER_SOURCES.classModule,
+    handReviewedPaths: [
+      MONK_BREWMASTER_SOURCES.classModule,
+      MONK_BREWMASTER_SOURCES.talentModule,
+      MONK_BREWMASTER_SOURCES.racialSpells,
+      MONK_BREWMASTER_SOURCES.playerModule,
+      MONK_BREWMASTER_SOURCES.consumableModule,
+    ],
+    requiredFacts: MONK_BREWMASTER_FACTS,
+    defaultOut: "src/data/game/monk-brewmaster-gcd-semantics.json",
   },
 };
 

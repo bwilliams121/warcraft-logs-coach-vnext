@@ -47,10 +47,49 @@ const SOURCES = {
   enums: "engine/sc_enums.hpp",
 };
 
-/** The `power_e` enumerators recorded with their pinned values. */
+/**
+ * The `power_e` enumerators recorded with their pinned values. A target may
+ * list its own (`powerEnumerators`, M11-C1) so a resource its rows use is
+ * named in the artifact; every target that does not keeps this list.
+ */
 const POWER_ENUMERATORS = ["POWER_MANA", "POWER_HOLY_POWER", "POWER_RUNE", "POWER_RUNIC_POWER"];
 
 export const TARGETS = {
+  "monk-brewmaster": {
+    datasetId: "SIMC_DBC_MONK_BREWMASTER_SPENDER_COSTS",
+    defaultOut: "src/data/game/monk-brewmaster-spender-costs.json",
+    // M11-C1. Every Brewmaster APL action whose spell carries a
+    // `__spellpower_data` row; every other one (Blackout Kick, Breath of Fire,
+    // Chi Burst, Invoke Niuzao, Exploding Keg, Empty the Cellar, the brews)
+    // has none and costs nothing. POWER_ENERGY and POWER_CHI are named because
+    // these rows use them. Rows are verbatim, aura-conditioned variants
+    // included: action_t applies a row whose `_aura_id` the actor owns as a
+    // passive spell (action.cpp:733-745), and Expel Harm's Brewmaster row is
+    // keyed to the Brewmaster spec passive 137023.
+    powerEnumerators: [...POWER_ENUMERATORS, "POWER_ENERGY", "POWER_CHI"],
+    spells: [
+      {
+        simcToken: "tiger_palm",
+        spellId: 100_780,
+        why: "an Energy cost; affordability of the Tiger Palm lines of both hero-tree lists",
+      },
+      {
+        simcToken: "keg_smash",
+        spellId: 121_253,
+        why: "an Energy cost; affordability of the Keg Smash lines of both hero-tree lists",
+      },
+      {
+        simcToken: "expel_harm",
+        spellId: 322_101,
+        why: "three stance-keyed rows (Windwalker 137025, Mistweaver 137024, Brewmaster 137023)",
+      },
+      {
+        simcToken: "rushing_jade_wind",
+        spellId: 116_847,
+        why: "a Chi row with no aura key; which resource a Brewmaster press consumes is NOT established here",
+      },
+    ],
+  },
   "deathknight-blood": {
     datasetId: "SIMC_DBC_DEATHKNIGHT_BLOOD_SPENDER_COSTS",
     defaultOut: "src/data/game/deathknight-blood-spender-costs.json",
@@ -221,7 +260,7 @@ async function main() {
       fail(`spellpower_data_t member ${String(index)} is ${powerMembers[index]}, expected ${name}`);
   });
   const powerTypes = {};
-  for (const name of POWER_ENUMERATORS) {
+  for (const name of target.powerEnumerators ?? POWER_ENUMERATORS) {
     const value = readEnumerator(loaded.enums, name);
     if (value === null) fail(`sc_enums.hpp does not define ${name}`);
     powerTypes[name] = value;

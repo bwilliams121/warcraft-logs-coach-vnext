@@ -31,7 +31,57 @@
 /** The artifact schema version this build understands. */
 export const SUPPORTED_ARTIFACT_VERSION = 1;
 
-export interface AuthorityArtifactProvenance {
+/**
+ * How the extractor located the region, for a target that selects it by
+ * SOURCE COORDINATES rather than by marker lines (M11-C1a).
+ *
+ * The line `namespace <enclosingNamespace>` occurs once in the pinned file;
+ * the region is the body of the one function whose header line equals
+ * `functionHeader` inside that namespace; its list declarations are read on
+ * `playerIdentifier` (`player->get_action_priority_list`). No marker line
+ * exists in such a file, so none is recorded: this selector is the whole
+ * claim, and the source hash pins the bytes it was applied to.
+ */
+export interface AuthorityNamespaceFunctionSelector {
+  readonly kind: "NAMESPACE_FUNCTION";
+  readonly enclosingNamespace: string;
+  readonly functionHeader: string;
+  readonly playerIdentifier: string;
+}
+
+/** Every selector kind this build accepts. A marker-selected artifact carries NO selector. */
+export const AUTHORITY_REGION_SELECTOR_KINDS = [
+  "NAMESPACE_FUNCTION",
+] as const satisfies readonly AuthorityNamespaceFunctionSelector["kind"][];
+
+/**
+ * The region's provenance, in exactly ONE of two forms (M11-C1a):
+ *
+ *   MARKER LINES       `regionStartMarker` / `regionEndMarker` are the literal
+ *                      marker comment lines (`//blood_apl_start`, …) the
+ *                      region lay between. Every artifact before M11-C1a has
+ *                      this form, unchanged in meaning and in bytes.
+ *   NAMESPACE_FUNCTION `regionSelector` records the source coordinates, and
+ *                      NEITHER marker field is present — a namespace boundary
+ *                      is not a marker and is never written into one.
+ *
+ * An artifact carrying both, or a partial form of either, is malformed.
+ */
+export type AuthorityRegionProvenance =
+  | {
+      readonly regionStartMarker: string;
+      readonly regionEndMarker: string;
+      readonly regionSelector?: never;
+    }
+  | {
+      readonly regionSelector: AuthorityNamespaceFunctionSelector;
+      readonly regionStartMarker?: never;
+      readonly regionEndMarker?: never;
+    };
+
+export type AuthorityArtifactProvenance = AuthorityArtifactProvenanceCommon & AuthorityRegionProvenance;
+
+interface AuthorityArtifactProvenanceCommon {
   readonly repository: string;
   readonly branch: string;
   /** The exact pinned commit. Never a branch name at runtime. */
@@ -40,8 +90,6 @@ export interface AuthorityArtifactProvenance {
   readonly sourcePath: string;
   readonly sourceSha256: string;
   readonly sourceByteLength: number;
-  readonly regionStartMarker: string;
-  readonly regionEndMarker: string;
   readonly extractedOn: string;
   readonly extractorVersion: number;
   /**
@@ -137,8 +185,7 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
   const commitDate = str(value, "commitDate");
   const sourcePath = str(value, "sourcePath");
   const sourceSha256 = str(value, "sourceSha256");
-  const regionStartMarker = str(value, "regionStartMarker");
-  const regionEndMarker = str(value, "regionEndMarker");
+  const region = validateRegionProvenance(value);
   const extractedOn = str(value, "extractedOn");
   const sourceByteLength = num(value, "sourceByteLength");
   const extractorVersion = num(value, "extractorVersion");
@@ -150,8 +197,7 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
     commitDate === null ||
     sourcePath === null ||
     sourceSha256 === null ||
-    regionStartMarker === null ||
-    regionEndMarker === null ||
+    region === null ||
     extractedOn === null ||
     sourceByteLength === null ||
     extractorVersion === null
@@ -175,10 +221,44 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
     sourcePath,
     sourceSha256,
     sourceByteLength,
-    regionStartMarker,
-    regionEndMarker,
+    ...region,
     extractedOn,
     extractorVersion,
+  };
+}
+
+const NAMESPACE_FUNCTION_SELECTOR_KEYS = ["kind", "enclosingNamespace", "functionHeader", "playerIdentifier"];
+const CPP_IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
+/**
+ * The region provenance in exactly one of its two forms, or `null`.
+ *
+ * The form is decided by the PRESENCE of `regionSelector`: absent, both marker
+ * fields must be non-empty strings (the pre-M11-C1a form, unchanged); present,
+ * neither marker field may appear and the selector must be complete, of a
+ * known kind, and carry no other key. Mixed or partial provenance is refused
+ * rather than read as whichever half looks usable.
+ */
+function validateRegionProvenance(value: Record<string, unknown>): AuthorityRegionProvenance | null {
+  if (!("regionSelector" in value)) {
+    const regionStartMarker = str(value, "regionStartMarker");
+    const regionEndMarker = str(value, "regionEndMarker");
+    if (regionStartMarker === null || regionEndMarker === null) return null;
+    return { regionStartMarker, regionEndMarker };
+  }
+  if ("regionStartMarker" in value || "regionEndMarker" in value) return null;
+  const selector = value["regionSelector"];
+  if (!isRecord(selector)) return null;
+  if (Object.keys(selector).some((key) => !NAMESPACE_FUNCTION_SELECTOR_KEYS.includes(key))) return null;
+  if (selector["kind"] !== "NAMESPACE_FUNCTION") return null;
+  const enclosingNamespace = str(selector, "enclosingNamespace");
+  const functionHeader = str(selector, "functionHeader");
+  const playerIdentifier = str(selector, "playerIdentifier");
+  if (enclosingNamespace === null || functionHeader === null || playerIdentifier === null) return null;
+  if (!CPP_IDENTIFIER.test(enclosingNamespace) || !CPP_IDENTIFIER.test(playerIdentifier)) return null;
+  if (functionHeader.trim() !== functionHeader) return null;
+  return {
+    regionSelector: { kind: "NAMESPACE_FUNCTION", enclosingNamespace, functionHeader, playerIdentifier },
   };
 }
 
@@ -265,7 +345,7 @@ export function validateAuthorityArtifact(value: unknown): ArtifactValidation {
   if (provenance === null) {
     return invalid(
       "MALFORMED_PROVENANCE",
-      "provenance is incomplete, or commitSha/sourceSha256 is not a hash",
+      "provenance is incomplete, commitSha/sourceSha256 is not a hash, or the region provenance is not exactly one of the marker-line or namespace-function forms",
     );
   }
 

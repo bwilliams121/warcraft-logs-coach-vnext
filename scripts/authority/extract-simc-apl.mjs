@@ -38,6 +38,34 @@
  * `clientVersion` fails on the first guard, exactly as before: no target
  * silently acquires branch selection. One level only; a nested guard fails.
  *
+ * REGION SELECTION (M11-C1). A target locates its region in ONE of two ways:
+ *
+ *   MARKER LINES   `regionStart` / `regionEnd` — the literal comment lines
+ *                  (`//blood_apl_start` .. `//blood_apl_end`) every target
+ *                  used before M11-C1. Unchanged, still the default, and
+ *                  recorded exactly as before: `provenance.regionStartMarker`
+ *                  / `provenance.regionEndMarker` are those marker lines.
+ *   NAMESPACE_FUNCTION
+ *                  `enclosingNamespace` + `functionHeader` — source-coordinate
+ *                  selection for a pinned file that carries no markers
+ *                  (`apl_monk.cpp`). The line `namespace <name>` must occur
+ *                  exactly once; its brace-balanced body is scanned (comments,
+ *                  string and character literals do not count as braces) for
+ *                  exactly one line equal to the function header at namespace
+ *                  depth, and that function's own brace-balanced body is the
+ *                  region. A same-named function in another namespace is
+ *                  outside the span and cannot be selected. Recorded as
+ *                  `provenance.regionSelector` (M11-C1a) — kind, namespace,
+ *                  header and player identifier — and WITHOUT either marker
+ *                  field: a namespace boundary is not a marker.
+ *
+ * `playerIdentifier` names the parameter the list declarations and version
+ * guards are called on (`p->get_action_priority_list`, or
+ * `player->get_action_priority_list`); it defaults to `p`, must be the
+ * function header's own parameter name, and changes nothing else about what
+ * the region parser accepts. None of this reads gameplay: it decides WHICH
+ * lines are parsed, never what a parsed line means.
+ *
  * The artifact stores `actionStringVerbatim`: the exact first string argument
  * given to `add_action`. It deliberately does NOT store a synthesized
  * `actions+=/...` line, because the source does not contain one, and it does NOT
@@ -57,6 +85,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const REPOSITORY = "https://github.com/simulationcraft/simc";
 const EXTRACTOR_VERSION = 1;
@@ -75,7 +104,7 @@ const ARTIFACT_VERSION = 1;
  * the artifact without evaluating it; the facts a Protection evaluator will
  * rest on are M10-C's to state.
  */
-const TARGETS = {
+export const TARGETS = {
   "rogue-assassination": {
     sourcePath: "engine/class_modules/apl/apl_rogue.cpp",
     regionStart: "//assassination_apl_start",
@@ -216,25 +245,74 @@ const TARGETS = {
       noTargetingOptions: true,
     },
   },
+  "monk-brewmaster": {
+    sourcePath: "engine/class_modules/apl/apl_monk.cpp",
+    // M11-C1. The pinned file carries NO `//<spec>_apl_start` markers, and
+    // `void default_apl( monk_t* player )` is defined twice (once per
+    // namespace), so the region is the one function of that name inside
+    // `namespace brewmaster`. `monk_t::init_action_list` calls
+    // `brewmaster::default_apl( this )` unconditionally for MONK_BREWMASTER
+    // (apl_monk.cpp:542-556); unlike Windwalker there is no live/ptr split.
+    enclosingNamespace: "brewmaster",
+    functionHeader: "void default_apl( monk_t* player )",
+    playerIdentifier: "player",
+    regionName: "brewmaster",
+    authorityId: "SIMC_APL_MONK_BREWMASTER",
+    spec: { className: "monk", specName: "brewmaster" },
+    defaultOut: "src/simc/data/monk-brewmaster.apl.json",
+    // The M11-C0 dispatch graph, verbatim. The region has no client-version
+    // guard, so no `clientVersion` is declared and a guard would fail.
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "item_actions",
+        "race_actions",
+        "master_of_harmony",
+        "shado_pan",
+      ],
+      listSizes: {
+        precombat: 2,
+        default: 6,
+        item_actions: 1,
+        race_actions: 7,
+        master_of_harmony: 23,
+        shado_pan: 23,
+      },
+      edges: [
+        { from: "default", ordinal: 2, kind: "CALL", to: "race_actions", condition: null },
+        { from: "default", ordinal: 3, kind: "CALL", to: "item_actions", condition: null },
+        {
+          from: "default",
+          ordinal: 4,
+          kind: "RUN",
+          to: "master_of_harmony",
+          condition: "hero_tree.master_of_harmony",
+        },
+        { from: "default", ordinal: 5, kind: "RUN", to: "shado_pan", condition: "hero_tree.shadopan" },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+      noTargetingOptions: true,
+    },
+  },
 };
 
-const args = parseArgs(process.argv.slice(2));
-const targetName = typeof args.target === "string" ? args.target : "rogue-assassination";
-const TARGET = TARGETS[targetName];
-if (TARGET === undefined) {
-  console.error(
-    `EXTRACTION FAILED: unknown --target '${targetName}' (known: ${Object.keys(TARGETS).join(", ")})`,
-  );
-  process.exit(1);
+/**
+ * A fail-closed extraction stop. Thrown rather than exiting so the region
+ * selector and the fact verifier can be exercised by tests; the CLI prints
+ * `EXTRACTION FAILED: <message>` and exits 1, exactly as it always has.
+ */
+export class ExtractionError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "ExtractionError";
+  }
 }
-const SOURCE_PATH = TARGET.sourcePath;
-const REGION_START = TARGET.regionStart;
-const REGION_END = TARGET.regionEnd;
-const REQUIRED_FACTS = TARGET.requiredFacts;
 
 function fail(message) {
-  console.error(`EXTRACTION FAILED: ${message}`);
-  process.exit(1);
+  throw new ExtractionError(message);
 }
 
 function parseArgs(argv) {
@@ -250,14 +328,14 @@ function parseArgs(argv) {
   return args;
 }
 
-async function loadSource(args) {
+async function loadSource(args, sourcePath) {
   if (typeof args.file === "string") {
     return readFileSync(args.file);
   }
   if (typeof args.sha !== "string" || !/^[0-9a-f]{40}$/.test(args.sha)) {
     fail("--sha must be a full 40-character commit SHA (or pass --file for a local copy)");
   }
-  const url = `https://raw.githubusercontent.com/simulationcraft/simc/${args.sha}/${SOURCE_PATH}`;
+  const url = `https://raw.githubusercontent.com/simulationcraft/simc/${args.sha}/${sourcePath}`;
   const response = await fetch(url, { headers: { "User-Agent": "wlc-vnext-extractor" } });
   if (!response.ok) {
     fail(`could not fetch pinned source (HTTP ${response.status}) from ${url}`);
@@ -342,10 +420,15 @@ function parseAddActionArguments(line, openParenIndex, lineNumber) {
  *     else if ( p->sim->dbc->wowv() >= wowv_t( 12, 1, 0 ) )
  *
  * Only this exact shape is a guard. Any other `if` is an unsupported construct
- * and fails the region, as every unknown line always has.
+ * and fails the region, as every unknown line always has. `p` is the target's
+ * `playerIdentifier` (M11-C1); for every target that does not declare one it
+ * is `p`, and the pattern is the one it always was.
  */
-const VERSION_GUARD =
-  /^(else\s+)?if\s*\(\s*p->sim->dbc->wowv\(\)\s*(<=|>=|==|!=|<|>)\s*wowv_t\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*\)$/;
+function versionGuardPattern(playerIdentifier) {
+  return new RegExp(
+    `^(else\\s+)?if\\s*\\(\\s*${playerIdentifier}->sim->dbc->wowv\\(\\)\\s*(<=|>=|==|!=|<|>)\\s*wowv_t\\(\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\)\\s*\\)$`,
+  );
+}
 
 function compareVersions(left, right) {
   for (let i = 0; i < 3; i += 1) {
@@ -375,20 +458,180 @@ function guardHolds(clientVersion, operator, guardVersion) {
   }
 }
 
-function extract(sourceText) {
-  const lines = sourceText.split(/\r?\n/);
-  const startIndex = lines.findIndex((line) => line.trim() === REGION_START);
-  const endIndex = lines.findIndex((line) => line.trim() === REGION_END);
-  if (startIndex < 0 || endIndex < 0 || endIndex <= startIndex) {
-    fail(`could not locate the bounded region between ${REGION_START} and ${REGION_END}`);
+/** The first line at or after `from` that is neither blank nor a `//` comment, or -1. */
+function nextCodeLine(lines, from) {
+  for (let i = from; i < lines.length; i += 1) {
+    const line = lines[i].trim();
+    if (line.length > 0 && !line.startsWith("//")) return i;
   }
+  return -1;
+}
+
+/**
+ * Follows the brace opened on `openIndex` to the line holding the brace that
+ * closes it, recording the brace depth at the START of every line on the way.
+ *
+ * Braces inside `//` and block comments, string literals and character
+ * literals are not braces. A raw string literal, an unterminated literal or an
+ * unclosed brace fails: a span that cannot be delimited exactly is refused,
+ * never guessed.
+ */
+function braceSpan(lines, openIndex) {
+  const depthAtLineStart = new Map();
+  let depth = 0;
+  let inBlockComment = false;
+  for (let i = openIndex; i < lines.length; i += 1) {
+    depthAtLineStart.set(i, depth);
+    const line = lines[i];
+    let j = 0;
+    while (j < line.length) {
+      if (inBlockComment) {
+        const end = line.indexOf("*/", j);
+        if (end < 0) {
+          j = line.length;
+          continue;
+        }
+        inBlockComment = false;
+        j = end + 2;
+        continue;
+      }
+      const char = line[j];
+      if (char === "/" && line[j + 1] === "/") break;
+      if (char === "/" && line[j + 1] === "*") {
+        inBlockComment = true;
+        j += 2;
+        continue;
+      }
+      if (char === "R" && line[j + 1] === '"') {
+        fail(`line ${i + 1}: a raw string literal cannot be brace-matched by this extractor`);
+      }
+      if (char === '"' || char === "'") {
+        j += 1;
+        while (j < line.length && line[j] !== char) j += line[j] === "\\" ? 2 : 1;
+        if (j >= line.length) fail(`line ${i + 1}: unterminated literal while matching braces`);
+        j += 1;
+        continue;
+      }
+      if (char === "{") depth += 1;
+      else if (char === "}") {
+        depth -= 1;
+        if (depth === 0) return { closeIndex: i, depthAtLineStart };
+      }
+      j += 1;
+    }
+  }
+  fail(`line ${openIndex + 1}: the brace opened here is never closed`);
+  return { closeIndex: -1, depthAtLineStart };
+}
+
+/**
+ * Which source lines a target's region occupies (M11-C1).
+ *
+ * Returns `startIndex` / `endIndex` such that the region parser reads the
+ * lines strictly between them, and `provenance`: the region provenance the
+ * artifact records — the two marker lines for a MARKER target (located
+ * exactly as before), or the `regionSelector` for a NAMESPACE_FUNCTION target
+ * (M11-C1a). Source coordinates only: nothing here reads what an action
+ * string means.
+ */
+export function locateRegion(lines, target) {
+  const hasMarkers = target.regionStart !== undefined || target.regionEnd !== undefined;
+  const hasNamespace = target.enclosingNamespace !== undefined;
+  if (hasMarkers === hasNamespace) {
+    fail(
+      `target '${target.regionName}' must declare exactly one region selector: regionStart/regionEnd markers, or an enclosingNamespace`,
+    );
+  }
+
+  if (hasMarkers) {
+    const startIndex = lines.findIndex((line) => line.trim() === target.regionStart);
+    const endIndex = lines.findIndex((line) => line.trim() === target.regionEnd);
+    if (startIndex < 0 || endIndex < 0 || endIndex <= startIndex) {
+      fail(`could not locate the bounded region between ${target.regionStart} and ${target.regionEnd}`);
+    }
+    return {
+      startIndex,
+      endIndex,
+      provenance: { regionStartMarker: target.regionStart, regionEndMarker: target.regionEnd },
+    };
+  }
+
+  const namespaceLine = `namespace ${target.enclosingNamespace}`;
+  const openings = lines.flatMap((line, index) => (line.trim() === namespaceLine ? [index] : []));
+  if (openings.length !== 1) {
+    fail(`'${namespaceLine}' occurs ${String(openings.length)} times in the source; exactly one is required`);
+  }
+  const namespaceIndex = openings[0];
+  const namespaceBrace = nextCodeLine(lines, namespaceIndex + 1);
+  if (namespaceBrace < 0 || lines[namespaceBrace].trim() !== "{") {
+    fail(
+      `line ${namespaceIndex + 1}: '${namespaceLine}' is not followed by an opening brace on its own line`,
+    );
+  }
+  const namespaceSpan = braceSpan(lines, namespaceBrace);
+
+  const headers = [];
+  for (let i = namespaceBrace + 1; i < namespaceSpan.closeIndex; i += 1) {
+    if (lines[i].trim() === target.functionHeader) headers.push(i);
+  }
+  if (headers.length !== 1) {
+    fail(
+      `'${target.functionHeader}' occurs ${String(headers.length)} times inside '${namespaceLine}'; exactly one is required`,
+    );
+  }
+  const headerIndex = headers[0];
+  if (namespaceSpan.depthAtLineStart.get(headerIndex) !== 1) {
+    fail(`line ${headerIndex + 1}: '${target.functionHeader}' is not at the scope of '${namespaceLine}'`);
+  }
+  const functionBrace = nextCodeLine(lines, headerIndex + 1);
+  if (functionBrace < 0 || lines[functionBrace].trim() !== "{") {
+    fail(
+      `line ${headerIndex + 1}: the ${target.regionName} function header is not followed by '{' on its own line`,
+    );
+  }
+  const functionSpan = braceSpan(lines, functionBrace);
+  if (lines[functionSpan.closeIndex].trim() !== "}") {
+    fail(
+      `line ${functionSpan.closeIndex + 1}: the ${target.regionName} function must close with '}' on its own line`,
+    );
+  }
+  return {
+    startIndex: headerIndex - 1,
+    endIndex: functionSpan.closeIndex + 1,
+    provenance: {
+      regionSelector: {
+        kind: "NAMESPACE_FUNCTION",
+        enclosingNamespace: target.enclosingNamespace,
+        functionHeader: target.functionHeader,
+        playerIdentifier: target.playerIdentifier ?? "p",
+      },
+    },
+  };
+}
+
+export function extract(sourceText, target) {
+  const playerIdentifier = target.playerIdentifier ?? "p";
+  if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(playerIdentifier)) {
+    fail(`playerIdentifier '${playerIdentifier}' is not a C++ identifier`);
+  }
+  if (!new RegExp(`[\\s*&]${playerIdentifier}\\s*\\)$`).test(target.functionHeader)) {
+    fail(
+      `the ${target.regionName} function header does not take '${playerIdentifier}' as its parameter: ${target.functionHeader}`,
+    );
+  }
+  const lines = sourceText.split(/\r?\n/);
+  const region = locateRegion(lines, target);
+  const { startIndex, endIndex } = region;
+  const VERSION_GUARD = versionGuardPattern(playerIdentifier);
+  const TARGET = target;
 
   const listNameByReceiver = new Map();
   const actionsByList = new Map();
   const listOrder = [];
 
-  const declaration =
-    /^action_priority_list_t\*\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*p->get_action_priority_list\(\s*"([^"]+)"\s*\)\s*;$/;
+  const declaration = new RegExp(
+    `^action_priority_list_t\\*\\s+([A-Za-z_][A-Za-z0-9_]*)\\s*=\\s*${playerIdentifier}->get_action_priority_list\\(\\s*"([^"]+)"\\s*\\)\\s*;$`,
+  );
   const addActionHead = /^([A-Za-z_][A-Za-z0-9_]*)->add_action\s*\(/;
 
   let sawFunctionHeader = false;
@@ -545,6 +788,7 @@ function extract(sourceText) {
       actions: actionsByList.get(listName),
     })),
     guards,
+    regionProvenance: region.provenance,
   };
 }
 
@@ -576,7 +820,8 @@ function callsListOf(actionString) {
   return match[1];
 }
 
-function verifyRequiredFacts(artifact) {
+export function verifyRequiredFacts(artifact, target) {
+  const REQUIRED_FACTS = target.requiredFacts;
   const byName = new Map(artifact.lists.map((list) => [list.listName, list]));
   const problems = [];
 
@@ -839,65 +1084,114 @@ function verifyRequiredFacts(artifact) {
   return problems;
 }
 
-const sourceBuffer = await loadSource(args);
-const sourceSha256 = createHash("sha256").update(sourceBuffer).digest("hex");
-
-if (typeof args["expect-sha256"] === "string" && args["expect-sha256"] !== sourceSha256) {
-  fail(`source SHA-256 mismatch\n  expected ${args["expect-sha256"]}\n  actual   ${sourceSha256}`);
+/**
+ * The artifact, from an extracted region and the run's coordinates.
+ *
+ * Exported (M11-C1a) so the provenance form can be validated against the
+ * runtime schema without the pinned checkout. The region provenance sits
+ * exactly where the two marker fields always sat, so a MARKER target's
+ * artifact is byte-for-byte what it was; a NAMESPACE_FUNCTION target's
+ * carries `regionSelector` there instead, and no marker field.
+ */
+export function buildArtifact({
+  target,
+  extracted,
+  sourceSha256,
+  sourceByteLength,
+  sha,
+  branch,
+  commitDate,
+  extractedOn,
+}) {
+  return {
+    artifactVersion: ARTIFACT_VERSION,
+    authorityId: target.authorityId,
+    artifactRevision: `simc-${String(sha ?? "local").slice(0, 8)}-${EXTRACTOR_VERSION}`,
+    spec: target.spec,
+    entryListName: "default",
+    provenance: {
+      repository: REPOSITORY,
+      branch,
+      commitSha: sha ?? "UNKNOWN",
+      commitDate,
+      sourcePath: target.sourcePath,
+      sourceSha256,
+      sourceByteLength,
+      ...extracted.regionProvenance,
+      extractedOn,
+      extractorVersion: EXTRACTOR_VERSION,
+      ...(target.clientVersion === undefined
+        ? {}
+        : {
+            // M11-B2: what the extractor DECIDED about the region's version
+            // guards, so a reader of the artifact can see that a dead branch was
+            // excluded rather than absent from the source.
+            conditionalCompilation: {
+              clientVersion: target.clientVersion.join("."),
+              guards: extracted.guards,
+            },
+          }),
+    },
+    lists: extracted.lists,
+  };
 }
 
-const sourceText = sourceBuffer.toString("utf8");
-const extracted = extract(sourceText);
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  const targetName = typeof args.target === "string" ? args.target : "rogue-assassination";
+  const TARGET = TARGETS[targetName];
+  if (TARGET === undefined) {
+    fail(`unknown --target '${targetName}' (known: ${Object.keys(TARGETS).join(", ")})`);
+  }
 
-const artifact = {
-  artifactVersion: ARTIFACT_VERSION,
-  authorityId: TARGET.authorityId,
-  artifactRevision: `simc-${String(args.sha ?? "local").slice(0, 8)}-${EXTRACTOR_VERSION}`,
-  spec: TARGET.spec,
-  entryListName: "default",
-  provenance: {
-    repository: REPOSITORY,
-    branch: typeof args.branch === "string" ? args.branch : "midnight",
-    commitSha: typeof args.sha === "string" ? args.sha : "UNKNOWN",
-    commitDate: typeof args["commit-date"] === "string" ? args["commit-date"] : "UNKNOWN",
-    sourcePath: SOURCE_PATH,
+  const sourceBuffer = await loadSource(args, TARGET.sourcePath);
+  const sourceSha256 = createHash("sha256").update(sourceBuffer).digest("hex");
+
+  if (typeof args["expect-sha256"] === "string" && args["expect-sha256"] !== sourceSha256) {
+    fail(`source SHA-256 mismatch\n  expected ${args["expect-sha256"]}\n  actual   ${sourceSha256}`);
+  }
+
+  const sourceText = sourceBuffer.toString("utf8");
+  const extracted = extract(sourceText, TARGET);
+
+  const artifact = buildArtifact({
+    target: TARGET,
+    extracted,
     sourceSha256,
     sourceByteLength: sourceBuffer.length,
-    regionStartMarker: REGION_START,
-    regionEndMarker: REGION_END,
+    sha: typeof args.sha === "string" ? args.sha : null,
+    branch: typeof args.branch === "string" ? args.branch : "midnight",
+    commitDate: typeof args["commit-date"] === "string" ? args["commit-date"] : "UNKNOWN",
     extractedOn:
       typeof args["extracted-on"] === "string" ? args["extracted-on"] : new Date().toISOString().slice(0, 10),
-    extractorVersion: EXTRACTOR_VERSION,
-    ...(TARGET.clientVersion === undefined
-      ? {}
-      : {
-          // M11-B2: what the extractor DECIDED about the region's version
-          // guards, so a reader of the artifact can see that a dead branch was
-          // excluded rather than absent from the source.
-          conditionalCompilation: {
-            clientVersion: TARGET.clientVersion.join("."),
-            guards: extracted.guards,
-          },
-        }),
-  },
-  lists: extracted.lists,
-};
+  });
 
-const problems = verifyRequiredFacts(artifact);
-if (problems.length > 0) {
-  console.error("EXTRACTION FAILED: the pinned source does not exhibit the required authority facts.\n");
-  for (const problem of problems) console.error(`  - ${problem}`);
-  console.error("\nDo not rewrite expectations to match. Report the discrepancy.");
-  process.exit(1);
+  const problems = verifyRequiredFacts(artifact, TARGET);
+  if (problems.length > 0) {
+    console.error("EXTRACTION FAILED: the pinned source does not exhibit the required authority facts.\n");
+    for (const problem of problems) console.error(`  - ${problem}`);
+    console.error("\nDo not rewrite expectations to match. Report the discrepancy.");
+    process.exit(1);
+  }
+
+  const outPath = typeof args.out === "string" ? args.out : TARGET.defaultOut;
+  mkdirSync(dirname(outPath), { recursive: true });
+  writeFileSync(outPath, `${JSON.stringify(artifact, null, 2)}\n`, "utf8");
+
+  console.log(`Wrote ${outPath}`);
+  console.log(`  commit      ${artifact.provenance.commitSha}`);
+  console.log(`  sourceSha256 ${sourceSha256}`);
+  console.log(`  lists       ${artifact.lists.length}`);
+  console.log(`  actions     ${artifact.lists.reduce((n, l) => n + l.actions.length, 0)}`);
+  console.log("  required authority facts: VERIFIED");
 }
 
-const outPath = typeof args.out === "string" ? args.out : TARGET.defaultOut;
-mkdirSync(dirname(outPath), { recursive: true });
-writeFileSync(outPath, `${JSON.stringify(artifact, null, 2)}\n`, "utf8");
-
-console.log(`Wrote ${outPath}`);
-console.log(`  commit      ${artifact.provenance.commitSha}`);
-console.log(`  sourceSha256 ${sourceSha256}`);
-console.log(`  lists       ${artifact.lists.length}`);
-console.log(`  actions     ${artifact.lists.reduce((n, l) => n + l.actions.length, 0)}`);
-console.log("  required authority facts: VERIFIED");
+if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    await main();
+  } catch (error) {
+    if (!(error instanceof ExtractionError)) throw error;
+    console.error(`EXTRACTION FAILED: ${error.message}`);
+    process.exit(1);
+  }
+}

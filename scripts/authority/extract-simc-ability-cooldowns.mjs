@@ -488,8 +488,140 @@ const DEATHKNIGHT_BLOOD_TARGET = {
   aliasGroups: {},
 };
 
+/**
+ * The Brewmaster Monk target (M11-C1): authority data only, no analyzer.
+ *
+ * SIX abilities, each an APL action whose cooldown NOTHING in the pinned
+ * module mutates after it starts — verified by this extractor's mechanical
+ * policy AND by a hand review of the one mutation path that policy cannot
+ * see (below). Monk keeps one class module and a class header in its own
+ * directory; there is no spec module.
+ *
+ * DELIBERATELY NOT PINNED, each for a reason read at the pin:
+ *
+ *   - celestial_brew (322507), celestial_infusion (1241059), purifying_brew,
+ *     black_ox_brew, fortifying_brew: every one is a `brew_t<...>`, whose
+ *     constructor inserts the action's cooldown into
+ *     `baseline.brewmaster.brews` (sc_monk.cpp:4153-4156, :4168-4171). That
+ *     container is mutated through a GENERIC `cooldown->` receiver —
+ *     `brews_t::adjust` (:4178-4185, called from Tiger Palm :874-877, Press
+ *     the Advantage :2163-2164, Keg Smash :2606, Empty the Cellar :3432 and
+ *     Anvil & Stave on an avoided hit :7250-7251) and Black Ox Brew's resets
+ *     (:3122-3130) — which the handle
+ *     and name searches of `dynamicPolicyChecks` do not see. Run naively, the
+ *     policy PASSES Celestial Brew, Purifying Brew and Fortifying Brew; that
+ *     pass would be a false absence proof, so none of the five is pinned.
+ *   - keg_smash: reset by exploding_keg_t::execute (:3408) and by the Empty
+ *     Barrel buff trigger (:4514-4516). The first has no aura signature the
+ *     artifact schema can express (it is a cast), so no sound lower bound.
+ *     The mechanical policy fails it, correctly.
+ *   - breath_of_fire: reset by keg_smash_t::execute under Sal'salabim's
+ *     Strength (:2548-2549, :2588-2592) — again a cast, not an aura. The
+ *     mechanical policy fails it, correctly.
+ *   - empty_the_cellar: no DBC cooldown; its usability is the aura gate of
+ *     empty_the_cellar_t::ready() (:3447-3450), pinned beside the other
+ *     readiness facts, not here.
+ */
+const MONK_BREWMASTER_TARGET = {
+  datasetId: "SIMC_DBC_MONK_BREWMASTER_ABILITY_COOLDOWNS",
+  classId: 10,
+  className: "Monk",
+  specId: 268,
+  defaultOut: "src/data/game/monk-brewmaster-cooldowns.json",
+  sourceOverrides: {
+    classModule: "engine/class_modules/monk/sc_monk.cpp",
+    classHeader: "engine/class_modules/monk/sc_monk.hpp",
+    specModule: null,
+  },
+  moduleConventions: {
+    moduleLabel: "sc_monk.cpp",
+    rechargeRateMechanism: null,
+    hastedCooldownMember: null,
+  },
+  cooldownStartNote:
+    "Execution coincides with the observed cast event. Five of the six pinned abilities are instant; Chi Burst " +
+    "carries a 1,000 ms cast time, and its execute — hence update_ready() — happens at cast completion, which is " +
+    "when the log reports its cast.",
+  abilities: [
+    {
+      simcToken: "blackout_kick",
+      abilityGameId: 205523,
+      aliasGroup: null,
+      createAction:
+        'sc_monk.cpp:5331-5332 if ( name == "blackout_kick" ) return new blackout_kick_t( this, options_str )',
+      specBinding:
+        'sc_monk.cpp:1368-1371 blackout_kick_t : base_t( player, "blackout_kick", specialization() == MONK_BREWMASTER ? baseline.brewmaster.blackout_kick : baseline.monk.blackout_kick ); :5587 baseline.brewmaster.blackout_kick = find_spell( 205523 ); the module handle cooldown.blackout_kick = get_cooldown( "blackout_kick" ) at :5231',
+      actionStruct: { file: "classModule", name: "blackout_kick_t" },
+      cooldownHandle: "cooldown.blackout_kick",
+      cooldownName: "blackout_kick",
+    },
+    {
+      simcToken: "expel_harm",
+      abilityGameId: 322101,
+      aliasGroup: null,
+      createAction:
+        'sc_monk.cpp:5333-5334 if ( name == "expel_harm" ) return new expel_harm_t( this, options_str )',
+      specBinding:
+        'sc_monk.cpp:4011-4014 expel_harm_t : monk_heal_t( player, "expel_harm", talent.windwalker.combat_wisdom->ok() ? talent.windwalker.combat_wisdom_expel_harm : baseline.monk.expel_harm ); :5562 baseline.monk.expel_harm = find_spell( 322101 ); the header declares a cooldown.expel_harm handle (sc_monk.hpp:632) that the module never initialises',
+      actionStruct: { file: "classModule", name: "expel_harm_t" },
+      cooldownHandle: "cooldown.expel_harm",
+      cooldownName: "expel_harm",
+    },
+    {
+      simcToken: "chi_burst",
+      abilityGameId: 123986,
+      aliasGroup: null,
+      createAction:
+        'sc_monk.cpp:5367-5368 if ( name == "chi_burst" ) return new chi_burst_t( this, options_str )',
+      specBinding:
+        'sc_monk.cpp:3022-3025 chi_burst_t : monk_spell_t( player, "chi_burst", specialization() == MONK_WINDWALKER ? talent.monk.chi_burst_projectile : talent.monk.chi_burst ); :5643 talent.monk.chi_burst = _CT( "Chi Burst" ), whose class trait row carries spell 123986; no module handle names this cooldown',
+      actionStruct: { file: "classModule", name: "chi_burst_t" },
+      cooldownHandle: "cooldown.chi_burst",
+      cooldownName: "chi_burst",
+    },
+    {
+      simcToken: "invoke_niuzao",
+      abilityGameId: 132578,
+      aliasGroup: null,
+      createAction:
+        'sc_monk.cpp:5359-5360 if ( name == "invoke_niuzao" ) return new niuzao_spell_t( this, options_str )',
+      specBinding:
+        'sc_monk.cpp:3734-3735 niuzao_spell_t : monk_spell_t( player, "invoke_niuzao_the_black_ox", talent.brewmaster.invoke_niuzao_the_black_ox ) — the action, and so its cooldown, is named invoke_niuzao_the_black_ox; :5760 talent.brewmaster.invoke_niuzao_the_black_ox = _ST( "Invoke Niuzao, the Black Ox" ), trait row spell 132578',
+      actionStruct: { file: "classModule", name: "niuzao_spell_t" },
+      cooldownHandle: "cooldown.invoke_niuzao_the_black_ox",
+      cooldownName: "invoke_niuzao_the_black_ox",
+    },
+    {
+      simcToken: "exploding_keg",
+      abilityGameId: 325153,
+      aliasGroup: null,
+      createAction:
+        'sc_monk.cpp:5357-5358 if ( name == "exploding_keg" ) return new exploding_keg_t( this, options_str )',
+      specBinding:
+        'sc_monk.cpp:3381-3382 exploding_keg_t : monk_spell_t( player, "exploding_keg", talent.brewmaster.exploding_keg ); :5754 talent.brewmaster.exploding_keg = _ST( "Exploding Keg" ), trait row spell 325153',
+      actionStruct: { file: "classModule", name: "exploding_keg_t" },
+      cooldownHandle: "cooldown.exploding_keg",
+      cooldownName: "exploding_keg",
+    },
+    {
+      simcToken: "rushing_jade_wind",
+      abilityGameId: 116847,
+      aliasGroup: null,
+      createAction:
+        'sc_monk.cpp:5389-5390 if ( name == "rushing_jade_wind" ) return new rushing_jade_wind_t( this, options_str )',
+      specBinding:
+        'sc_monk.cpp:1476-1477 rushing_jade_wind_t : monk_melee_attack_t( player, "rushing_jade_wind", talent.brewmaster.rushing_jade_wind ); :5713 talent.brewmaster.rushing_jade_wind = _ST( "Rushing Jade Wind" ), trait row spell 116847',
+      actionStruct: { file: "classModule", name: "rushing_jade_wind_t" },
+      cooldownHandle: "cooldown.rushing_jade_wind",
+      cooldownName: "rushing_jade_wind",
+    },
+  ],
+  aliasGroups: {},
+};
+
 export const TARGETS = {
   "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
+  "monk-brewmaster": MONK_BREWMASTER_TARGET,
   "paladin-protection": PALADIN_PROTECTION_TARGET,
   "paladin-retribution": PALADIN_RETRIBUTION_TARGET,
 };
@@ -1389,7 +1521,10 @@ async function main() {
           "action.cpp:2333-2372 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
           "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier",
         ],
-        note: "For an instant, non-channelled ability, execution coincides with the observed cast. Divine Toll, Sentinel and Avenging Wrath are instant in the pinned data.",
+        // A target may state its own note (M11-C1); every earlier target keeps this text byte for byte.
+        note:
+          target.cooldownStartNote ??
+          "For an instant, non-channelled ability, execution coincides with the observed cast. Divine Toll, Sentinel and Avenging Wrath are instant in the pinned data.",
       },
     });
   }

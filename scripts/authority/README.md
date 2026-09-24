@@ -340,6 +340,124 @@ retained in the repository. The
 three existing APL artifacts and both Paladin cooldown artifacts regenerate
 byte for byte under the extended extractors.
 
+## Brewmaster Monk authority — pinned at M11-C1 (authority only, no analyzer)
+
+M11-C1 generated Brewmaster authority from the same pin and onboarded NO
+analyzer: no `SpecId`, no registration, no vocabulary, no resolver, and
+nothing under `src/` imports these files.
+
+### A second APL region selector
+
+`engine/class_modules/apl/apl_monk.cpp` (SHA-256
+`a8b7e2afe48425089cdc97a369fc4abe87784a818d0423ba0706fb60f1f53c20`, 39,549 B)
+carries no `//<spec>_apl_start` markers, defines `void default_apl( monk_t*
+player )` in both `namespace brewmaster` and `namespace windwalker`, keeps
+helper functions ahead of it, and declares its lists on `player->`. The
+extractor therefore gained one ADDITIVE selector: a target may name an
+`enclosingNamespace` + `functionHeader` instead of marker lines. The line
+`namespace <name>` must occur exactly once; its brace-balanced body (comments,
+string and character literals are not braces; a raw string literal fails) must
+hold exactly one line equal to the header at namespace depth; that function's
+brace-balanced body is the region. `playerIdentifier` (default `p`, and it
+must be the header's parameter) replaces the hard-coded `p` in the list
+declaration and version-guard patterns. The region parser is unchanged.
+
+**Two region provenance forms (M11-C1a).** An APL artifact records how its
+region was found in exactly one of two forms, and `src/simc/authority-artifact.ts`
+refuses anything else:
+
+| Selection | Provenance recorded | Meaning |
+| --- | --- | --- |
+| Marker lines (every target before M11-C1) | `regionStartMarker`, `regionEndMarker` | the literal marker comment lines the region lay between (`//blood_apl_start` / `//blood_apl_end`). Unchanged in meaning and in bytes |
+| Namespace/function (source coordinates) | `regionSelector: { kind: "NAMESPACE_FUNCTION", enclosingNamespace, functionHeader, playerIdentifier }` and NEITHER marker field | the namespace, the exact function header and the identifier the list declarations are read on |
+
+A namespace boundary is not a marker and is never written into a marker
+field. Mixed provenance (a selector beside either marker), a partial form of
+either, an empty coordinate, an unknown selector kind or an extra selector key
+is `MALFORMED_PROVENANCE`. The region fields are metadata: no consumer outside
+the validator reads them. Every marker target — Assassination, Protection,
+Retribution, Blood — regenerates BYTE FOR BYTE and carries no selector.
+
+`monk-brewmaster` carries the M11-C0 dispatch graph as `DISPATCH_GRAPH` facts:
+six lists (`precombat` 2, `default` 6, `item_actions` 1, `race_actions` 7,
+`master_of_harmony` 23, `shado_pan` 23; 62 actions), `default[2]` CALL
+`race_actions` and `default[3]` CALL `item_actions` ungated, `default[4]` RUN
+`master_of_harmony` if `hero_tree.master_of_harmony`, `default[5]` RUN
+`shado_pan` if `hero_tree.shadopan`, no `swap_action_list`, no targeting
+option. Extraction verifies them against the pinned file.
+
+**The APL artifact is NOT committed.** `tests/contracts/m11a2-cross-spec-
+isolation.test.ts` requires every `src/simc/data/<class>-<spec>.apl.json` to be
+loaded by that specialization's registered tree, and M11-C1 registers none.
+The command below reproduces it deterministically; committing it is the
+decision of the milestone that registers the Brewmaster tree (or of a reviewed
+change to that invariant).
+
+### The game data
+
+| Artifact | Dataset | Contents |
+| --- | --- | --- |
+| `src/data/game/monk-brewmaster-gcd-semantics.json` | `SIMC_DBC_MONK_BREWMASTER_GCD_SEMANTICS` | 23 `_gcd` records; 21 hand-reviewed token bindings citing `sc_monk.cpp`, `talent.cpp` and `player.cpp` by line; 3 meta lanes (`auto_attack`, `use_items`, `potion`). THE BREWS SPLIT: Celestial Brew 322507 and Celestial Infusion 1241059 are `_gcd` 1000; Purifying Brew 119582, Black Ox Brew 115399 and Fortifying Brew 115203 are `_gcd` 0. `celestial_brew` binds `{322507, 1241059}` (`create_action` builds `celestial_infusion_t` under that talent, `:5349-5352`, and `create_expression` reads `cooldown/action/buff.celestial_brew.*` through it, `:7390-7400`). `empty_the_cellar` binds the executed DRIVER 1263438 (`_gcd` 1000), not the talent record 1262329 (`_gcd` 0, carried as a non-candidate record so the hazard is pinned). `fortifying_brew` binds 115203, the class trait's `id_override_spell`, through `player_talent_t::find_override_spell` (`engine/player/talent.cpp:28-31`, hashed). The seven racials bind the rows a Monk (class mask 0x200) resolves |
+| `src/data/game/monk-brewmaster-talents.json` | `SIMC_TRAIT_MONK_BREWMASTER_TALENTS` | 14 talents (Blackout Combo ⇄ Press the Advantage, Celestial Brew ⇄ Celestial Infusion and four more choice nodes with their alternatives), the Shado-Pan (65, 17 entries) and Master of Harmony (66, 18 entries) hero sub-trees for spec 268 — Conduit of the Celestials (64) has no Brewmaster entry — and the three tiered "Bring Me Another" `apex.N` traits in table order (137075/1265129, 137074/1265138, 137073/1265141). EMPTY THE CELLAR IS NOT PINNED: the table has two Brewmaster rows of that name (entry 136150 on node 101198, shared with Fuel on the Fire; entry 125002 alone on node 101711). `trait_data_t::find` settles it as 125002 (`trait_data.cpp:87-137`), but this extractor never picks between rows of one name |
+| `src/data/game/monk-brewmaster-cooldowns.json` | `SIMC_DBC_MONK_BREWMASTER_ABILITY_COOLDOWNS` | Six abilities nothing in the pinned module mutates after their cooldown starts: Blackout Kick (charge 4,000 ms; Fluidity of Motion −1,000 ms), Expel Harm (15,000 ms; a passive −10,000 ms), Chi Burst (30,000 ms; 1,000 ms cast), Invoke Niuzao (120,000 ms; Efficient Training −25,000 ms, Shado-Pan), Exploding Keg (60,000 ms), Rushing Jade Wind (6,000 ms, hasted) — with the machine census and the mechanical policy. See the defect note below for what is deliberately absent |
+| `src/data/game/monk-brewmaster-spender-costs.json` | `SIMC_DBC_MONK_BREWMASTER_SPENDER_COSTS` | The only Brewmaster APL actions with `__spellpower_data` rows: Tiger Palm (50 Energy), Keg Smash (40 Energy), Expel Harm (three stance-keyed rows: 15 Energy @137025, 1.4% Mana @137024, 15 Energy @137023), Rushing Jade Wind (1 Chi, no aura key — which resource a Brewmaster press consumes is not established). `powerTypes` names POWER_ENERGY (3) and POWER_CHI (12) through a per-target enumerator list; the other targets keep theirs |
+
+Hand-reviewed beside them: `src/data/game/monk-brewmaster-readiness-
+authority.ts` — every `ready()` override on a Brewmaster action, hashed
+against `sc_monk.cpp`: Empty the Cellar is usable only while its buff (SimC
+spell 1262768; wire id NOT yet corroborated) is up (`:3447-3450`) — without it
+`buff.empty_the_cellar.remains<1.5` would read TRUE whenever the buff is down;
+Tiger Palm is never ready under Press the Advantage (`:848-853`); Purifying
+Brew only while Stagger ticks (`:3497-3502`, unmodelled); Chi Burst's gate is
+Windwalker-only (`:3036-3043`).
+
+### A defect the extractor has, and how M11-C1 stays clear of it
+
+`dynamicPolicyChecks` finds cooldown mutations by the module HANDLE and NAME.
+Monk's five `brew_t` actions (Celestial Brew, Celestial Infusion, Purifying
+Brew, Black Ox Brew, Fortifying Brew) put their cooldowns into a container,
+`baseline.brewmaster.brews` (`sc_monk.cpp:4153-4156`, `:4168-4171`), mutated
+through a GENERIC `cooldown->` receiver by `brews_t::adjust` (`:4178-4185`;
+called from Tiger Palm, Press the Advantage, Keg Smash, Empty the Cellar and
+Anvil & Stave) and by Black Ox Brew's resets (`:3122-3130`). Run on them, the
+policy PASSES Celestial Brew, Purifying Brew and Fortifying Brew — a false
+absence proof. None of the five is pinned, and a test holds the dataset to
+that; the policy itself was NOT changed in M11-C1. Keg Smash and Breath of
+Fire are also absent: each is reset by a CAST (Exploding Keg `:3408`; Keg
+Smash under Sal'salabim's Strength `:2588-2592`), and the artifact schema's
+observable signatures are aura events only. The policy fails both, correctly.
+
+### Reproduce
+
+Every source was supplied from local pinned copies (hashes as recorded in each
+artifact); `sc_monk.cpp`, `sc_monk.hpp`, `talent.cpp` and `apl_monk.cpp` were
+fetched once from the pinned commit into the ignored `.probe/` area.
+
+```bash
+node scripts/authority/extract-simc-apl.mjs --target monk-brewmaster \
+  --file <checkout>/engine/class_modules/apl/apl_monk.cpp \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --commit-date 2026-09-12 \
+  --expect-sha256 a8b7e2afe48425089cdc97a369fc4abe87784a818d0423ba0706fb60f1f53c20 \
+  --extracted-on 2026-09-23 --out <not src/ until a Brewmaster tree exists>
+node scripts/authority/extract-simc-gcd.mjs --target monk-brewmaster \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23   # --file-<key> for each source
+node scripts/authority/extract-simc-talents.mjs --target monk-brewmaster \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23
+node scripts/authority/extract-simc-ability-cooldowns.mjs --target monk-brewmaster \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23   # --local-<key> for each source
+node scripts/authority/extract-simc-power-costs.mjs --target monk-brewmaster \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23
+npx prettier --write src/data/game/monk-brewmaster-*.json
+```
+
+Two regeneration facts about EARLIER targets, measured at the M11-C1 baseline
+before any change and unchanged by it: the Blood cooldown artifact is the
+extractor's output after `prettier --write` (one single-element array
+collapses); and the two Paladin spender-cost artifacts do not regenerate byte
+for byte from the current extractor — they predate M11-B2 adding POWER_RUNE
+and POWER_RUNIC_POWER to the shared enumerator list and carry only POWER_MANA
+and POWER_HOLY_POWER. That drift is recorded, not fixed.
+
 ## What the extractor guarantees
 
 **It fails closed.** It is not a general C++ parser and does not pretend to be.

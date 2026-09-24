@@ -538,8 +538,155 @@ const DEATHKNIGHT_BLOOD_TARGET = {
   apexTraits: false,
 };
 
+/**
+ * The Brewmaster Monk profile (M11-C1): authority data only, no analyzer.
+ *
+ * `requiredTalents` are (a) the two talents the pinned Brewmaster list reads
+ * as `talent.<name>.enabled` — which `player_t::create_expression` answers
+ * with the SAME build-static constant as `talent.<name>` (player.cpp:
+ * 12355-12362) — (b) the talents each Brewmaster APL action's constructor is
+ * built on (an action on `not_found()` is background, action.cpp:541-549),
+ * and (c) Press the Advantage, under which `tiger_palm_t::ready()` is false
+ * (sc_monk.cpp:848-853). `heroTrees` are the two sub-trees
+ * `hero_tree.<name>` can name for Brewmaster: Shado-Pan (65) and Master of
+ * Harmony (66); Conduit of the Celestials (64) has no Brewmaster entry at
+ * the pin. `apexTraits` are the three tiered "Bring Me Another" entries
+ * `apex.N` indexes.
+ *
+ * DELIBERATELY ABSENT: Empty the Cellar. The pinned table carries TWO
+ * Brewmaster specialization rows of that name, both spell 1262329 (entry
+ * 136150 on node 101198, which it shares with Fuel on the Fire, and entry
+ * 125002 alone on node 101711). `find_talent_spell` settles the clash by the
+ * rules of trait_data_t::find (trait_data.cpp:87-137) — here, "the only entry
+ * on its node", i.e. 125002 — but this extractor never picks between rows of
+ * one name (a duplicate is a hard failure), so the talent is not pinned and
+ * the clash is recorded instead.
+ */
+const MONK_BREWMASTER_TARGET = {
+  datasetId: "SIMC_TRAIT_MONK_BREWMASTER_TALENTS",
+  classId: 10,
+  specId: 268,
+  defaultOut: "src/data/game/monk-brewmaster-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. The same equivalence M10-C, M11-A4 " +
+    "and M11-B2 recorded — `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals trait_data_t::id_node " +
+    "— is EXPECTED for Brewmaster but NOT yet corroborated: no Brewmaster capture is committed (M11-C1 pins " +
+    "authority only). The corroboration belongs to the milestone that commits Brewmaster evidence; until then " +
+    "it is not claimed.",
+  requiredTalents: [
+    {
+      simcName: "blackout_combo",
+      displayNameEn: "Blackout Combo",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5751 talent.brewmaster.blackout_combo = _ST( "Blackout Combo" ); the pinned list reads it as `talent.blackout_combo.enabled`, the same create_constant( _talent.enabled() ) as `talent.blackout_combo` (player.cpp:12355-12362)',
+    },
+    {
+      simcName: "press_the_advantage",
+      displayNameEn: "Press the Advantage",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5748 talent.brewmaster.press_the_advantage = _ST( "Press the Advantage" ); tiger_palm_t::ready() returns false while it is taken (:848-853). The alternative entry of Blackout Combo\'s choice node',
+    },
+    {
+      simcName: "salsalabims_strength",
+      displayNameEn: "Sal'salabim's Strength",
+      tree: "SPECIALIZATION",
+      binding:
+        "sc_monk.cpp:5734 talent.brewmaster.salsalabims_strength = _ST( \"Sal'salabim's Strength\" ); the pinned list reads it as `talent.salsalabims_strength.enabled` (player.cpp:12355-12362); keg_smash_t resets Breath of Fire under it (:2549, :2588-2592)",
+    },
+    {
+      simcName: "celestial_brew",
+      displayNameEn: "Celestial Brew",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5716 talent.brewmaster.celestial_brew = _ST( "Celestial Brew" ); celestial_brew_t is built on it (:4113-4114) when Celestial Infusion is not taken (:5349-5352)',
+    },
+    {
+      simcName: "celestial_infusion",
+      displayNameEn: "Celestial Infusion",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5717 talent.brewmaster.celestial_infusion = _ST( "Celestial Infusion" ); the `celestial_brew` token builds celestial_infusion_t on it (:4121-4122, :5349-5350) and reads cooldown/action/buff.celestial_brew.* through it (:7390-7400)',
+    },
+    {
+      simcName: "keg_smash",
+      displayNameEn: "Keg Smash",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5696 talent.brewmaster.keg_smash = _ST( "Keg Smash" ); keg_smash_t is built on it (:2509-2510)',
+    },
+    {
+      simcName: "purifying_brew",
+      displayNameEn: "Purifying Brew",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5697 talent.brewmaster.purifying_brew = _ST( "Purifying Brew" ); purifying_brew_t is built on it (:3487-3488)',
+    },
+    {
+      simcName: "rushing_jade_wind",
+      displayNameEn: "Rushing Jade Wind",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5713 talent.brewmaster.rushing_jade_wind = _ST( "Rushing Jade Wind" ); rushing_jade_wind_t is built on it (:1476-1477)',
+    },
+    {
+      simcName: "breath_of_fire",
+      displayNameEn: "Breath of Fire",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5726 talent.brewmaster.breath_of_fire = _ST( "Breath of Fire" ); breath_of_fire_t is built on it (:3267-3268)',
+    },
+    {
+      simcName: "black_ox_brew",
+      displayNameEn: "Black Ox Brew",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5737 talent.brewmaster.black_ox_brew = _ST( "Black Ox Brew" ); black_ox_brew_t is built on it (:3108-3109)',
+    },
+    {
+      simcName: "exploding_keg",
+      displayNameEn: "Exploding Keg",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5754 talent.brewmaster.exploding_keg = _ST( "Exploding Keg" ); exploding_keg_t is built on it (:3381-3382)',
+    },
+    {
+      simcName: "invoke_niuzao_the_black_ox",
+      displayNameEn: "Invoke Niuzao, the Black Ox",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_monk.cpp:5760 talent.brewmaster.invoke_niuzao_the_black_ox = _ST( "Invoke Niuzao, the Black Ox" ); niuzao_spell_t, the `invoke_niuzao` action, is built on it (:3734-3735)',
+    },
+    {
+      simcName: "chi_burst",
+      displayNameEn: "Chi Burst",
+      tree: "CLASS",
+      binding:
+        'sc_monk.cpp:5643 talent.monk.chi_burst = _CT( "Chi Burst" ); chi_burst_t is built on it for a non-Windwalker (:3022-3025)',
+    },
+    {
+      simcName: "fortifying_brew",
+      displayNameEn: "Fortifying Brew",
+      tree: "CLASS",
+      binding:
+        'sc_monk.cpp:5666 talent.monk.fortifying_brew = _CT( "Fortifying Brew" ); fortifying_brew_t is built on its find_override_spell() (:3334-3335), i.e. id_override_spell 115203 while it is enabled (engine/player/talent.cpp:28-31)',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data`: Shado-Pan is sub-tree 65 and Master of
+    // Harmony 66, both class 10. `hero_tree.shadopan` resolves through
+    // trait_data_t::get_hero_tree_id( "shadopan" ), which tokenizes the
+    // sub-tree name (trait_data.cpp:225-238; util.cpp:3234 drops the '-').
+    { simcName: "shadopan", subTreeId: 65 },
+    { simcName: "master_of_harmony", subTreeId: 66 },
+  ],
+  apexTraits: true,
+};
+
 export const TARGETS = {
   "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
+  "monk-brewmaster": MONK_BREWMASTER_TARGET,
   "paladin-retribution": PALADIN_RETRIBUTION_TARGET,
   "rogue-assassination": ROGUE_ASSASSINATION_TARGET,
   "paladin-protection": PALADIN_PROTECTION_TARGET,
