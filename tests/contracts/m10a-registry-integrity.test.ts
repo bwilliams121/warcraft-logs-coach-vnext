@@ -83,7 +83,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries four PUBLIC registrations — Assassination, both Paladins and, since M11-B12, Blood Death Knight — and no INTERNAL_ONLY row", () => {
+  it("carries four PUBLIC registrations — Assassination, both Paladins and, since M11-B12, Blood Death Knight — and, since M11-C2, one INTERNAL_ONLY row (Brewmaster Monk)", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -95,10 +95,12 @@ describe("the production catalog", () => {
       [PROTECTION_PALADIN_ANALYZER_ID, "paladin/protection", "PUBLIC"],
       [RETRIBUTION_PALADIN_ANALYZER_ID, "paladin/retribution", "PUBLIC"],
       ["deathknight-blood-observed-decisions", "deathknight/blood", "PUBLIC"],
+      ["monk-brewmaster-observed-decisions", "monk/brewmaster", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
-    // all four are PUBLIC since M11-B12, and the derivation is what would
-    // drop a row the moment one went back to INTERNAL_ONLY.
+    // the four PUBLIC rows, never the INTERNAL_ONLY Brewmaster row, and the
+    // derivation is what would drop a row the moment one went back to
+    // INTERNAL_ONLY.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
     expect(ENABLED_ANALYZERS).toHaveLength(4);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
@@ -153,7 +155,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(4);
+    expect(catalog.registrations).toHaveLength(5);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {

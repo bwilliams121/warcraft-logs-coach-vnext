@@ -182,10 +182,15 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 }
 
 describe("the production catalog", () => {
-  it("is exactly the four PUBLIC registrations (Blood PUBLIC since M11-B12), and both lookups answer alike for every one", () => {
-    expect(ANALYZER_REGISTRATIONS).toHaveLength(4);
+  it("is exactly the four PUBLIC registrations (Blood PUBLIC since M11-B12) plus the INTERNAL_ONLY Brewmaster row (M11-C2), and both lookups answer alike for every PUBLIC one", () => {
+    expect(ANALYZER_REGISTRATIONS).toHaveLength(5);
     expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(4);
-    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY")).toEqual([]);
+    expect(
+      ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY").map((row) => row.specId),
+    ).toEqual(["monk/brewmaster"]);
+    // The INTERNAL_ONLY row answers the internal lookup only.
+    expect(analyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)).toBeNull();
+    expect(internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)?.exposure).toBe("INTERNAL_ONLY");
     expect(analyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
     expect(internalAnalyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)).toBe(
       analyzerForSpec("deathknight/blood", PRODUCTION_CATALOG),

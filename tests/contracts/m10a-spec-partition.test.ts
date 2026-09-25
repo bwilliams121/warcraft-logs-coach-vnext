@@ -61,18 +61,19 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set is empty again since M11-B12, and its machinery is dormant rather than removed", () => {
+  it("the internal-only set holds Brewmaster Monk since M11-C2, and its machinery is live over one member again", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
-    // Blood Death Knight measurement slice from M11-B2 (the partition proofs,
-    // the narrowing boundary and the registry's exposure rules exercised over
-    // one member for ten slices), and is empty again since M11-B12 moved that
-    // id across. The next specialization is expected to arrive here first, as
-    // all three of its predecessors did.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
+    // Blood Death Knight measurement slice from M11-B2, was empty again from
+    // M11-B12 when that id moved across, and holds the Brewmaster Monk
+    // measurement slice since M11-C2 — which arrived here first, as all three
+    // of its predecessors did.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["monk/brewmaster"]);
     expect(typeof requirePublicSpecId).toBe("function");
     expect(typeof InternalSpecExposureError).toBe("function");
-    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
+    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(id !== "monk/brewmaster");
+    expect(isSpecId("monk/brewmaster")).toBe(true);
+    expect(() => requirePublicSpecId("monk/brewmaster")).toThrow(InternalSpecExposureError);
   });
 
   it("an unknown string is not a spec id at all", () => {

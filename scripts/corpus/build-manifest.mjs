@@ -774,6 +774,16 @@ const BLOOD45 = "wcl-blood-death-knight-a7r6-rotational-45s";
 const BLOOD_45_105 = "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105";
 const BLOOD_105_165 = "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165";
 const BLOOD_GTKB = "wcl-blood-death-knight-gtkb-opener";
+
+// --------------------------------------------------------------------------
+// M11-C2 (2026-09-24): the Brewmaster Monk subject (ACTOR 4 of gtKb fight 22),
+// cut from the SAME M9-C2 opener capture by the SAME predicate as the
+// Retribution and Blood gtKb subjects. No new capture was made; no WCL
+// request was issued.
+// --------------------------------------------------------------------------
+
+const BREWMASTER_GTKB_ACTOR = 4;
+const BREWMASTER_GTKB = "wcl-brewmaster-monk-gtkb-opener";
 const BLOOD_SEGMENT_BASIS = (fromMs, toMs) =>
   `The retained families are complete for actor 14 over [${fromMs.toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every event actor 14 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent.`;
 
@@ -1856,6 +1866,39 @@ const ARTIFACTS = [
       "The first 20 seconds only: nothing about the rest of the pull, its cooldown cycles or its ending.",
       "No damage, healing, absorb or summon event is retained.",
       "Cooldown state at the pull is outside the log; no Vampiric Blood transition occurs in the window.",
+      "Sszorak has adds; nothing about target count is claimed here or anywhere in the corpus.",
+      NO_NAMES,
+      VERSION_SCOPE,
+      WHITESPACE,
+    ],
+  }),
+  // ---- M11-C2: the Brewmaster Monk subject, same capture, same predicate ----
+  artifact(BREWMASTER_GTKB, wcl(BREWMASTER_GTKB), {
+    kind: "SANITIZED_CAPTURE",
+    source: HIGH_OPENER_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m9c2-opener-pages.json ${BREWMASTER_GTKB}.json --actor-slice 4 --families ${PPB_FAMILIES}`,
+        "The two page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 4 (the Brewmaster Monk of gtKb fight 22: specID 268, Shado-Pan, faction value 0) unbounded, restricted by --families to the same thirteen raw types. In place and order preserved, 305 of 18,318 events: 44 casts (33 by actor 4, 11 targeting it), no resourcechange (the capture holds none involving actor 4 in the window; Energy rides only on the casts' own resource snapshots), 260 aura transitions (222 targeting 4, 38 sourced by 4 on others), actor 4's combatantinfo at 2,415,041; first event 2,415,041, last 2,434,926.",
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_6),
+      credential_scan(SLICER_REVISION_6),
+    ],
+    grants: [
+      {
+        categories: PPB_CATEGORIES,
+        actorScope: [BREWMASTER_GTKB_ACTOR],
+        ranges: [{ fromReportTimeMs: HP_START, toReportTimeMs: HP_END }],
+      },
+    ],
+    coverageBasis:
+      "The retained families are complete for actor 4 over [2,415,041 .. 2,435,041] by the predicate 'every event actor 4 sources or is targeted by, of a retained family' over a window the capture retrieved COMPLETE with NO actor filter (two pages, terminal). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The window begins at the fight start.",
+    retainedFor:
+      "M11-C2: the Brewmaster Monk measurement subject (gtKb fight 22 actor 4 — Shado-Pan, Blackout Combo, Sal'salabim's Strength, Celestial Infusion, all three Bring Me Another tiers), cut by the same predicate as the Retribution and Blood gtKb subjects so the same executors run over it. Twenty seconds of opener: 15 supported decisions (4 Keg Smash, 4 Blackout Kick, 3 Tiger Palm, 3 Breath of Fire, 1 Invoke Niuzao at 2,419,027), 3 Purifying Brew casts, 7 melee swings, the Blackout Combo, Empty Barrel and Invoke Niuzao aura lifecycles that corroborate the pinned Brewmaster aura identities, and no Exploding Keg or Empty the Cellar cast or aura.",
+    limitations: [
+      "The first 20 seconds only: nothing about the rest of the pull, its cooldown cycles or its ending.",
+      "No damage, healing, absorb or summon event is retained.",
+      "Cooldown state at the pull is outside the log; no aura present at the pull is observed until its first in-fight transition.",
       "Sszorak has adds; nothing about target count is claimed here or anywhere in the corpus.",
       NO_NAMES,
       VERSION_SCOPE,
@@ -5247,6 +5290,590 @@ const BLOOD_CASES = [
         "tests/contracts/m11-promotion-evidence-gate.test.ts",
         "tests/contracts/m10a-spec-partition.test.ts",
         "tests/contracts/m11b12-blood-public-projection.test.ts",
+      ],
+    },
+  ),
+];
+
+// --------------------------------------------------------------------------
+// M11-C2: Brewmaster Monk (INTERNAL_ONLY measurement slice)
+// --------------------------------------------------------------------------
+
+const BREWMASTER = BREWMASTER_GTKB_ACTOR;
+const BREWMASTER_ANALYZER = "monk-brewmaster-observed-decisions";
+const BREWMASTER_SIMC = { authorityId: "SIMC_APL_MONK_BREWMASTER", artifactRevision: "simc-33622e9d-1" };
+const BREWMASTER_AUTHORITY = {
+  ...BREWMASTER_SIMC,
+  requiredStateEvidence: [
+    "the combatantinfo at 2,415,041 for actor 4 (specID 268)",
+    "every COMPLETE cast by actor 4 in the slice, in canonical order",
+    "every aura transition on actor 4 sourced by actor 4, in canonical order",
+  ],
+};
+const BREWMASTER_RELATED = [
+  "tests/contracts/m11c2-brewmaster-registration.test.ts",
+  "tests/contracts/m11c2-brewmaster-evaluator.test.ts",
+  "tests/unit/m11c2-brewmaster-bindings.test.ts",
+];
+const BREWMASTER_TALENTS = {
+  black_ox_brew: "SELECTED",
+  blackout_combo: "SELECTED",
+  breath_of_fire: "SELECTED",
+  celestial_brew: "NOT_SELECTED",
+  celestial_infusion: "SELECTED",
+  chi_burst: "SELECTED",
+  exploding_keg: "SELECTED",
+  fortifying_brew: "SELECTED",
+  invoke_niuzao_the_black_ox: "SELECTED",
+  keg_smash: "SELECTED",
+  press_the_advantage: "NOT_SELECTED",
+  purifying_brew: "SELECTED",
+  rushing_jade_wind: "NOT_SELECTED",
+  salsalabims_strength: "SELECTED",
+};
+const BREWMASTER_NON_DOMAIN = [
+  "precombat[1] potion",
+  "default[1] potion",
+  "item_actions[0] use_items",
+  "race_actions[0] blood_fury",
+  "race_actions[1] berserking",
+  "race_actions[2] arcane_torrent",
+  "race_actions[3] lights_judgment",
+  "race_actions[4] fireblood",
+  "race_actions[5] ancestral_call",
+  "race_actions[6] bag_of_tricks",
+];
+const BREWMASTER_DISPATCH = [
+  {
+    at: "default[2]",
+    actionToken: "call_action_list",
+    calleeListName: "race_actions",
+    outcome: "CALL_RETURNED_NO_ACTION_CONTINUE",
+    gate: "UNCONDITIONAL",
+  },
+  {
+    at: "default[3]",
+    actionToken: "call_action_list",
+    calleeListName: "item_actions",
+    outcome: "CALL_RETURNED_NO_ACTION_CONTINUE",
+    gate: "UNCONDITIONAL",
+  },
+  {
+    at: "default[4]",
+    actionToken: "run_action_list",
+    calleeListName: "master_of_harmony",
+    outcome: "RUN_GATE_FALSE_SKIPPED",
+    gate: "FALSE",
+  },
+  {
+    at: "default[5]",
+    actionToken: "run_action_list",
+    calleeListName: "shado_pan",
+    outcome: "RUN_ENTERED_SCAN_ENDS",
+    gate: "TRUE",
+  },
+];
+/** An UNKNOWN whose first-GCD query refused the NON_GCD Purifying Brew branch at shado_pan[2]: no reviewed contract. */
+const BREWMASTER_BREW_REFUSED = (refusal) => ({
+  outcome: "UNKNOWN",
+  basis: "AUTHORITY_SELECTION_UNRESOLVED",
+  authorityCoverage: "UNKNOWN",
+  authorityToken: null,
+  selectionPrecision: null,
+  decisiveBlocker: "OTHER",
+  rawBlocker: "TRANSITION_UNSUPPORTED",
+  unresolvedAt: "shado_pan[2] purifying_brew",
+  observedActionRejected: false,
+  unselectabilityProven: false,
+  unselectabilityRefusal: refusal,
+  stoppingAt: null,
+  stoppingAtoms: [],
+});
+/** An UNKNOWN whose worlds diverge: Breath of Fire's readiness is not established, so shado_pan[0] may or may not fire. */
+const BREWMASTER_DIVERGENT = (refusal) => ({
+  outcome: "UNKNOWN",
+  basis: "AUTHORITY_SELECTION_UNRESOLVED",
+  authorityCoverage: "UNKNOWN",
+  authorityToken: null,
+  selectionPrecision: null,
+  decisiveBlocker: "DIVERGENT_WORLDS",
+  rawBlocker: "DIVERGENT_GCD_OUTCOMES",
+  unresolvedAt: "shado_pan[0] breath_of_fire",
+  observedActionRejected: false,
+  unselectabilityProven: false,
+  unselectabilityRefusal: refusal,
+  stoppingAt: null,
+  stoppingAtoms: [],
+});
+const BREWMASTER_BOF_MATCH = {
+  outcome: "MATCH",
+  basis: "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+  authorityCoverage: "EXACT_ENTRY",
+  authorityToken: "breath_of_fire",
+  selectionPrecision: "EXACT_ENTRY",
+  decisiveBlocker: null,
+  rawBlocker: null,
+  unresolvedAt: null,
+  observedActionRejected: false,
+  unselectabilityProven: false,
+  unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
+  stoppingAt: null,
+  stoppingAtoms: [],
+};
+const bm_cast = (t, ability) => ({ reportTimeMs: t, abilityGameId: ability });
+const bm_observed_aura = (up, abilityGameId, anchorReportTimeMs) => ({
+  state: "BOUND",
+  up,
+  abilityGameId,
+  proof: "OBSERVED",
+  anchorReportTimeMs,
+  reason: null,
+  auraReason: null,
+});
+const bm_unknown_aura = (abilityGameId) => ({
+  state: "UNBOUND",
+  up: null,
+  abilityGameId,
+  proof: null,
+  anchorReportTimeMs: null,
+  reason: "AURA_STATE_UNKNOWN",
+  auraReason: "AMBIGUOUS_INITIAL_STATE",
+});
+const [BM_KS, BM_BOK, BM_TP, BM_BOF, BM_NIUZAO] = [121253, 205523, 100780, 115181, 132578];
+
+const BREWMASTER_CASES = [
+  kase(
+    "normalization.brewmaster-monk-gtkb-opener-normalizes-whole-and-in-order",
+    BREWMASTER_GTKB,
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --families",
+    "The 305-event family-filtered actor-4 opener normalizes with every raw type recognised and every event kept in capture order: as SOURCE the combatantinfo, 33 casts and 176 aura transitions; as TARGET 11 casts and 222 aura transitions. No resource change involves actor 4 in the window.",
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: 305 }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", {
+        actorId: BREWMASTER,
+        side: "SOURCE",
+        expected: { COMBATANT_INFO: 1, CAST: 33, AURA: 176 },
+      }),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", {
+        actorId: BREWMASTER,
+        side: "TARGET",
+        expected: { CAST: 11, AURA: 222 },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "A census of what the opener holds for the actor, never of the fight.",
+    { related: ["tests/unit/sanitize-probe.test.ts"] },
+  ),
+  kase(
+    "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-two-resolved",
+    BREWMASTER_GTKB,
+    "SPEC_BREWMASTER_MONK",
+    "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; resolver.ts",
+    "THE M11-C2 MEASUREMENT. The Brewmaster subject (gtKb fight 22 actor 4, Shado-Pan) yields 15 eligible decisions over its 20 s opener — 4 Keg Smash, 4 Blackout Kick, 3 Tiger Palm, 3 Breath of Fire, 1 Invoke Niuzao — and 18 excluded casts (7 melee swings, 3 NON_GCD Purifying Brews, 8 casts with no pinned lane: Provoke, five Gift of the Ox heals, a potion and an on-use item). Every root scan RESOLVES through the hero-tree dispatch (Master of Harmony skipped, Shado-Pan entered), so no decision is lost to the dispatch itself; 2 MATCH at EXACT_ENTRY (both later Breath of Fire casts, selected at shado_pan[0] under Sal'salabim's Strength and a proven Invoke Niuzao buff), 0 REJECTED, 13 UNKNOWN — 8 because the query must fire the NON_GCD Purifying Brew at shado_pan[2] and no reviewed transition contract exists for it, 5 because Breath of Fire's readiness at shado_pan[0] is not established and its worlds diverge from Keg Smash at shado_pan[1].",
+    [
+      a("SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY", {
+        actorId: BREWMASTER,
+        expected: {
+          eligibleDecisions: 15,
+          match: 2,
+          rejected: 0,
+          unknown: 13,
+          exclusions: { MELEE_SWING: 7, NON_GCD_ACTION: 3, EXECUTION_LANE_NOT_ESTABLISHED: 8 },
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION", {
+        actorId: BREWMASTER,
+        expected: {
+          match: 2,
+          rejected: 0,
+          exactEntryMatches: 2,
+          tokenConvergedMatches: 0,
+          eligibleTokens: {
+            keg_smash: 4,
+            breath_of_fire: 3,
+            blackout_kick: 4,
+            invoke_niuzao: 1,
+            tiger_palm: 3,
+          },
+          unresolvedAt: {
+            "TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew": 8,
+            "DIVERGENT_GCD_OUTCOMES @ shado_pan[0] breath_of_fire": 5,
+          },
+          unknownBlockerClasses: { DIVERGENT_WORLDS: 5, OTHER: 8 },
+          stoppingEntries: { "(root scan resolved)": 15 },
+          stoppingAtoms: {},
+          dispatchOutcomes: {
+            "default[2] -> race_actions : CALL_RETURNED_NO_ACTION_CONTINUE": 15,
+            "default[3] -> item_actions : CALL_RETURNED_NO_ACTION_CONTINUE": 15,
+            "default[4] -> master_of_harmony : RUN_GATE_FALSE_SKIPPED": 15,
+            "default[5] -> shado_pan : RUN_ENTERED_SCAN_ENDS": 15,
+          },
+          undecidedGcdCandidates: {
+            "shado_pan[0] breath_of_fire | buff.invoke_niuzao_the_black_ox.up": 3,
+            "shado_pan[0] breath_of_fire | USABILITY:breath_of_fire": 10,
+            "shado_pan[1] keg_smash | buff.invoke_niuzao_the_black_ox.up": 3,
+            "shado_pan[1] keg_smash | USABILITY:keg_smash": 7,
+            "shado_pan[4] celestial_brew | buff.empty_barrel.up": 1,
+            "shado_pan[4] celestial_brew | buff.invoke_niuzao_the_black_ox.up": 3,
+            "shado_pan[4] celestial_brew | USABILITY:celestial_brew": 5,
+            "shado_pan[5] exploding_keg | buff.invoke_niuzao_the_black_ox.up": 3,
+            "shado_pan[5] exploding_keg | USABILITY:exploding_keg": 7,
+            "shado_pan[7] blackout_kick | buff.blackout_combo.up": 3,
+            "shado_pan[9] invoke_niuzao | USABILITY:invoke_niuzao": 3,
+            "shado_pan[10] tiger_palm | buff.blackout_combo.up": 3,
+            "shado_pan[10] tiger_palm | cooldown.blackout_kick.remains": 3,
+            "shado_pan[10] tiger_palm | USABILITY:tiger_palm": 1,
+            "shado_pan[11] empty_the_cellar | buff.empty_the_cellar.remains": 7,
+            "shado_pan[12] tiger_palm | buff.blackout_combo.up": 3,
+            "shado_pan[12] tiger_palm | USABILITY:tiger_palm": 1,
+            "shado_pan[13] breath_of_fire | USABILITY:breath_of_fire": 3,
+            "shado_pan[14] keg_smash | USABILITY:keg_smash": 2,
+            "shado_pan[15] exploding_keg | USABILITY:exploding_keg": 2,
+            "shado_pan[16] celestial_brew | USABILITY:celestial_brew": 2,
+            "shado_pan[17] empty_the_cellar | USABILITY:empty_the_cellar": 2,
+            "shado_pan[18] chi_burst | USABILITY:chi_burst": 2,
+          },
+          undecidedNonGcdCandidates: {
+            "default[0] auto_attack | USABILITY:auto_attack": 15,
+            "shado_pan[2] purifying_brew | buff.empty_barrel.up": 1,
+            "shado_pan[2] purifying_brew | buff.invoke_niuzao_the_black_ox.up": 3,
+            "shado_pan[2] purifying_brew | USABILITY:purifying_brew": 5,
+            "shado_pan[3] black_ox_brew | buff.empty_barrel.up": 1,
+            "shado_pan[3] black_ox_brew | cooldown.celestial_brew.charges_fractional": 8,
+            "shado_pan[3] black_ox_brew | buff.invoke_niuzao_the_black_ox.up": 3,
+            "shado_pan[6] fortifying_brew | buff.empty_barrel.up": 1,
+            "shado_pan[6] fortifying_brew | buff.invoke_niuzao_the_black_ox.up": 3,
+            "shado_pan[6] fortifying_brew | USABILITY:fortifying_brew": 5,
+            "shado_pan[8] purifying_brew | buff.empty_barrel.up": 1,
+            "shado_pan[8] purifying_brew | USABILITY:purifying_brew": 6,
+          },
+          gcdDistribution: {
+            "GCD_CONSUMING | 1000 ms": 8,
+            "GCD_CONSUMING | 1500 ms": 7,
+            "NON_GCD | 0 ms": 3,
+            "UNKNOWN_LANE | no record": 8,
+          },
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS", {
+        actorId: BREWMASTER,
+        expected: {
+          auraEvidence: {
+            "blackout_combo | AURA_STATE_UNKNOWN": 3,
+            "blackout_combo | up true (OBSERVED)": 5,
+            "blackout_combo | up false (OBSERVED)": 7,
+            "empty_barrel | AURA_STATE_UNKNOWN": 1,
+            "empty_barrel | up false (OBSERVED)": 11,
+            "empty_barrel | up true (OBSERVED)": 3,
+            "invoke_niuzao_the_black_ox | AURA_STATE_UNKNOWN": 3,
+            "invoke_niuzao_the_black_ox | up true (OBSERVED)": 12,
+          },
+          readinessAuraEvidence: { "empty_the_cellar | WIRE_AURA_IDENTITY_NOT_CORROBORATED": 15 },
+          cooldownReadiness: {
+            "blackout_kick | COOLDOWN_STATE_UNKNOWN": 3,
+            "blackout_kick | PROVEN_NOT_READY": 9,
+            "blackout_kick | WITHIN_QUEUEING_TOLERANCE": 3,
+            "expel_harm | COOLDOWN_STATE_UNKNOWN": 15,
+            "chi_burst | COOLDOWN_STATE_UNKNOWN": 15,
+            "invoke_niuzao | COOLDOWN_STATE_UNKNOWN": 4,
+            "invoke_niuzao | PROVEN_NOT_READY": 11,
+            "exploding_keg | COOLDOWN_STATE_UNKNOWN": 15,
+            "rushing_jade_wind | COOLDOWN_STATE_UNKNOWN": 15,
+          },
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.BUILD_RESOLUTION", {
+        actorId: BREWMASTER,
+        expected: {
+          talents: BREWMASTER_TALENTS,
+          heroTree: "shadopan",
+          apex1: "SELECTED",
+          apex3: "SELECTED",
+          buildStaticAtoms: {
+            "hero_tree.master_of_harmony": false,
+            "hero_tree.shadopan": true,
+            "talent.blackout_combo.enabled": true,
+            "talent.salsalabims_strength.enabled": true,
+            "apex.1": true,
+            "apex.3": true,
+          },
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.AUTHORITY_PROVENANCE", {
+        actorId: BREWMASTER,
+        expected: {
+          authorityId: "SIMC_APL_MONK_BREWMASTER",
+          artifactRevision: "simc-33622e9d-1",
+          commitSha: "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+          sourcePath: "engine/class_modules/apl/apl_monk.cpp",
+          sourceSha256: "a8b7e2afe48425089cdc97a369fc4abe87784a818d0423ba0706fb60f1f53c20",
+          regionSelector: {
+            kind: "NAMESPACE_FUNCTION",
+            enclosingNamespace: "brewmaster",
+            functionHeader: "void default_apl( monk_t* player )",
+            playerIdentifier: "player",
+          },
+        },
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "The first real traversal of the Brewmaster authority: the hero-tree dispatch holds on every decision, and the residual UNKNOWN population is named — a NON_GCD brew the query may not fire without a reviewed contract, and a Breath of Fire whose cast-reset cooldown is not modelled. Nothing is widened to force a resolved decision.",
+    { authority: BREWMASTER_AUTHORITY, related: BREWMASTER_RELATED },
+  ),
+  kase(
+    "spec-brewmaster-monk.breath-of-fire-under-a-proven-niuzao-matches-and-the-rest-name-their-blocker",
+    BREWMASTER_GTKB,
+    "SPEC_BREWMASTER_MONK",
+    "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; observed-action-gate.ts; aura-bindings.ts; cooldown-bindings.ts",
+    "Per decision. The Breath of Fire casts at 2,427,076 and 2,431,304 MATCH at shado_pan[0] EXACT_ENTRY: Sal'salabim's Strength is SELECTED and the Invoke Niuzao buff (132578) is proven UP from its application at 2,419,027. The Keg Smash at the pull (2,415,223) is UNKNOWN: no aura has been observed yet, so Niuzao's buff is AMBIGUOUS_INITIAL_STATE, and the world in which Purifying Brew fires at shado_pan[2] has no reviewed contract. The Keg Smash at 2,425,704 is UNKNOWN by DIVERGENT_WORLDS: shado_pan[0] Breath of Fire may be ready (its cooldown is not pinned) and shado_pan[1] selects the observed Keg Smash otherwise. Invoke Niuzao's own cooldown is PROVEN_NOT_READY at 2,423,448 (95,000 ms base: 120,000 less Efficient Training, SELECTED), and Blackout Combo, removed by the Tiger Palm at 2,424,688, is still UP to that Tiger Palm.",
+    [
+      a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
+        actorId: BREWMASTER,
+        targetActorId: null,
+        observedCast: bm_cast(2427076, BM_BOF),
+        expected: BREWMASTER_BOF_MATCH,
+      }),
+      a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
+        actorId: BREWMASTER,
+        targetActorId: null,
+        observedCast: bm_cast(2431304, BM_BOF),
+        expected: BREWMASTER_BOF_MATCH,
+      }),
+      a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
+        actorId: BREWMASTER,
+        targetActorId: null,
+        observedCast: bm_cast(2415223, BM_KS),
+        expected: BREWMASTER_BREW_REFUSED("CONDITION_NOT_PROVEN_FALSE"),
+      }),
+      a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
+        actorId: BREWMASTER,
+        targetActorId: null,
+        observedCast: bm_cast(2419027, BM_NIUZAO),
+        expected: BREWMASTER_BREW_REFUSED("UNCONDITIONAL_ENTRY"),
+      }),
+      a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
+        actorId: BREWMASTER,
+        targetActorId: null,
+        observedCast: bm_cast(2424688, BM_TP),
+        expected: BREWMASTER_BREW_REFUSED("CONDITION_NOT_PROVEN_FALSE"),
+      }),
+      a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
+        actorId: BREWMASTER,
+        targetActorId: null,
+        observedCast: bm_cast(2425704, BM_KS),
+        expected: BREWMASTER_DIVERGENT("UNCONDITIONAL_ENTRY"),
+      }),
+      a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
+        actorId: BREWMASTER,
+        targetActorId: null,
+        observedCast: bm_cast(2432314, BM_BOK),
+        expected: BREWMASTER_DIVERGENT("CONDITION_NOT_PROVEN_FALSE"),
+      }),
+      a("SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2427076, BM_BOF),
+        expected: BREWMASTER_DISPATCH,
+      }),
+      a("SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2415223, BM_KS),
+        expected: BREWMASTER_DISPATCH,
+      }),
+      a("SPEC_BREWMASTER_MONK.AURA_BINDING_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2415223, BM_KS),
+        atomName: "invoke_niuzao_the_black_ox",
+        expected: bm_unknown_aura(132578),
+      }),
+      a("SPEC_BREWMASTER_MONK.AURA_BINDING_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2427076, BM_BOF),
+        atomName: "invoke_niuzao_the_black_ox",
+        expected: bm_observed_aura(true, 132578, 2419027),
+      }),
+      a("SPEC_BREWMASTER_MONK.AURA_BINDING_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2424688, BM_TP),
+        atomName: "blackout_combo",
+        expected: bm_observed_aura(true, 228563, 2423494),
+      }),
+      a("SPEC_BREWMASTER_MONK.AURA_BINDING_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2427076, BM_BOF),
+        atomName: "empty_barrel",
+        expected: bm_observed_aura(false, 1265307, 2415224),
+      }),
+      a("SPEC_BREWMASTER_MONK.AURA_BINDING_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2432314, BM_BOK),
+        atomName: "empty_barrel",
+        expected: bm_observed_aura(true, 1265307, 2431305),
+      }),
+      a("SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2423448, BM_BOK),
+        simcToken: "invoke_niuzao",
+        expected: {
+          readiness: "PROVEN_NOT_READY",
+          provenRemainingAtLeastMs: 90579,
+          anchorReportTimeMs: 2419027,
+          anchorAbilityGameId: 132578,
+          effectiveBaseMs: 95000,
+          unknownReason: null,
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2419027, BM_NIUZAO),
+        simcToken: "blackout_kick",
+        expected: {
+          readiness: "PROVEN_NOT_READY",
+          provenRemainingAtLeastMs: 2655,
+          anchorReportTimeMs: 2417682,
+          anchorAbilityGameId: 205523,
+          effectiveBaseMs: 4000,
+          unknownReason: null,
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2423448, BM_BOK),
+        simcToken: "blackout_kick",
+        expected: {
+          readiness: "UNKNOWN",
+          provenRemainingAtLeastMs: null,
+          anchorReportTimeMs: 2417682,
+          anchorAbilityGameId: 205523,
+          effectiveBaseMs: 4000,
+          unknownReason: "WITHIN_QUEUEING_TOLERANCE",
+        },
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "A MATCH here means only that the observed Breath of Fire is the entry the pinned authority selects under proven state; every UNKNOWN names the entry that kept it UNKNOWN, and no decision is REJECTED without a proof.",
+    { authority: BREWMASTER_AUTHORITY, related: BREWMASTER_RELATED },
+  ),
+  kase(
+    "spec-brewmaster-monk.domains-and-the-class-spec-boundary",
+    BREWMASTER_GTKB,
+    "SPEC_BREWMASTER_MONK",
+    "src/specs/monk/brewmaster/domains.ts; authority-bindings.ts; domain-boundary.ts",
+    "The offensive rotation is the one domain with authority (SIMC_APL_MONK_BREWMASTER). The five other domains a tank asks about are declared and bound to nothing — NO_PINNED_AUTHORITY_FOR_DOMAIN, never DOMAIN_NOT_DECLARED — and the three that share buttons with the offensive list name them (Purifying Brew, Celestial Brew and Black Ox Brew for active mitigation; Fortifying Brew for defensive cooldowns; Expel Harm for self healing). The potions, the item use and the seven racial actions are outside the rotational decision domain.",
+    [
+      a("SPEC_BREWMASTER_MONK.DOMAIN_RESULT", {
+        actorId: BREWMASTER,
+        domain: "OFFENSIVE_ROTATION",
+        expected: {
+          resolution: "AUTHORITY_AVAILABLE",
+          authorityId: "SIMC_APL_MONK_BREWMASTER",
+          offensiveAuthorityGoverns: null,
+          evidenceFamily: null,
+          sharesActionsWithOffensive: null,
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.DOMAIN_RESULT", {
+        actorId: BREWMASTER,
+        domain: "RESOURCE_SPENDING",
+        expected: {
+          resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+          authorityId: null,
+          offensiveAuthorityGoverns: false,
+          evidenceFamily: null,
+          sharesActionsWithOffensive: null,
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.DOMAIN_RESULT", {
+        actorId: BREWMASTER,
+        domain: "ACTIVE_MITIGATION",
+        expected: {
+          resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+          authorityId: null,
+          offensiveAuthorityGoverns: false,
+          evidenceFamily: null,
+          sharesActionsWithOffensive: ["purifying_brew", "celestial_brew", "black_ox_brew"],
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.DOMAIN_RESULT", {
+        actorId: BREWMASTER,
+        domain: "DEFENSIVE_COOLDOWN",
+        expected: {
+          resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+          authorityId: null,
+          offensiveAuthorityGoverns: false,
+          evidenceFamily: null,
+          sharesActionsWithOffensive: ["fortifying_brew"],
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.DOMAIN_RESULT", {
+        actorId: BREWMASTER,
+        domain: "SELF_HEALING",
+        expected: {
+          resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+          authorityId: null,
+          offensiveAuthorityGoverns: false,
+          evidenceFamily: null,
+          sharesActionsWithOffensive: ["expel_harm"],
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.DOMAIN_RESULT", {
+        actorId: BREWMASTER,
+        domain: "INTERRUPT",
+        expected: {
+          resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN",
+          authorityId: null,
+          offensiveAuthorityGoverns: false,
+          evidenceFamily: "UNVERIFIED",
+          sharesActionsWithOffensive: null,
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.NON_DOMAIN_ENTRIES", { actorId: BREWMASTER, expected: BREWMASTER_NON_DOMAIN }),
+    ],
+    ["PINNED_AUTHORITY", "OWNED_CONTRACT"],
+    "NO_AUTHORITY_AVAILABLE and UNKNOWN are different answers: the defensive domains have no standard at all, while an offensive decision the evidence cannot decide is UNKNOWN. Neither is a verdict about the player.",
+    { authority: BREWMASTER_AUTHORITY, related: BREWMASTER_RELATED },
+  ),
+  kase(
+    "spec-brewmaster-monk.blood-is-refused-at-the-spec-gate",
+    BREWMASTER_GTKB,
+    "SPEC_BREWMASTER_MONK",
+    "src/specs/monk/brewmaster/observed-analysis.ts (spec gate)",
+    "Asked about deathknight/blood over this artifact, the Brewmaster facade refuses with SPEC_NOT_SUPPORTED naming that specialization, before any Brewmaster rule, authority load or profile resolution runs.",
+    [a("SPEC_BREWMASTER_MONK.SPEC_GATE", { actorId: BREWMASTER, specId: "deathknight/blood" })],
+    ["OWNED_CONTRACT"],
+    "A facade owns one specialization and answers for no other. Ownership is also enforced at runtime by the registration and the registry.",
+    { related: ["tests/regression/m10a-analyzer-result-ownership.test.ts", ...BREWMASTER_RELATED] },
+  ),
+  kase(
+    "application-service.brewmaster-monk-subject-is-internal-only-and-publicly-unsupported",
+    BREWMASTER_GTKB,
+    "APPLICATION_SERVICE",
+    "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts INTERNAL_ONLY_SPEC_IDS",
+    "The real Brewmaster Monk subject, over its own captured evidence, is NOT recognized by the public identity table (Monk/Brewmaster resolves to nothing), so the application service answers SPEC_NOT_SUPPORTED with no analyzer, no specId and nothing retrieved. The internal lookup finds the INTERNAL_ONLY registration; the public lookup finds nothing.",
+    [
+      a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
+        subject: { actorId: BREWMASTER, className: "Monk", specName: "Brewmaster" },
+        expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: null },
+      }),
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "monk/brewmaster",
+        expected: {
+          internalAnalyzerId: BREWMASTER_ANALYZER,
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
+    "An evaluator has to exist, be registered, be exercised and be audited before it is safe to expose. M11-C2 does the first three for a measurement slice; nothing about it is public.",
+    {
+      related: [
+        "tests/contracts/m11c2-brewmaster-registration.test.ts",
+        "tests/contracts/m11-promotion-evidence-gate.test.ts",
+        "tests/contracts/m10a-spec-partition.test.ts",
       ],
     },
   ),
@@ -9130,8 +9757,10 @@ const CASES = [
   ),
   // ---- M11-A4: Retribution Paladin (PUBLIC since M11-A5) ------------------
   ...RET_CASES,
-  // ---- M11-B2: Blood Death Knight (INTERNAL_ONLY measurement slice) -------
+  // ---- M11-B2: Blood Death Knight (PUBLIC since M11-B12) -------------------
   ...BLOOD_CASES,
+  // ---- M11-C2: Brewmaster Monk (INTERNAL_ONLY measurement slice) ----------
+  ...BREWMASTER_CASES,
 ];
 
 // --------------------------------------------------------------------------

@@ -1,0 +1,4763 @@
+[
+  {
+    "timestamp": 2415041,
+    "type": "combatantinfo",
+    "fight": 22,
+    "sourceID": 4,
+    "gear": [
+      {
+        "id": 271519,
+        "quality": 4,
+        "icon": "inv_helm_leather_raidmonkulatek_d_01.jpg",
+        "itemLevel": 331,
+        "permanentEnchant": 7961,
+        "bonusIDs": [
+          6652,
+          13335,
+          13696,
+          13692,
+          13698,
+          12853
+        ],
+        "setID": 2061
+      },
+      {
+        "id": 268265,
+        "quality": 4,
+        "icon": "inv_121_jewelry_neck03_green.jpg",
+        "itemLevel": 318,
+        "bonusIDs": [
+          6652,
+          13668,
+          13334,
+          12849,
+          13987
+        ],
+        "gems": [
+          {
+            "id": 240910,
+            "itemLevel": 295,
+            "icon": "inv_12_profession_jewelcrafting_rare_gem_cut_frost_red.jpg"
+          },
+          {
+            "id": 240910,
+            "itemLevel": 295,
+            "icon": "inv_12_profession_jewelcrafting_rare_gem_cut_frost_red.jpg"
+          }
+        ]
+      },
+      {
+        "id": 271517,
+        "quality": 4,
+        "icon": "inv_shoulder_leather_raidmonkulatek_d_01.jpg",
+        "itemLevel": 334,
+        "permanentEnchant": 8031,
+        "bonusIDs": [
+          13334,
+          6652,
+          13694,
+          13697,
+          13696,
+          12854
+        ],
+        "setID": 2061
+      },
+      {
+        "id": 0,
+        "quality": 1,
+        "icon": "inv_axe_02.jpg",
+        "itemLevel": 0
+      },
+      {
+        "id": 271522,
+        "quality": 4,
+        "icon": "inv_chest_leather_raidmonkulatek_d_01.jpg",
+        "itemLevel": 321,
+        "permanentEnchant": 7987,
+        "bonusIDs": [
+          6652,
+          13440,
+          13690,
+          13698,
+          12846
+        ],
+        "setID": 2061
+      },
+      {
+        "id": 251235,
+        "quality": 3,
+        "icon": "inv_belt_leather_dungeonharronir_c_01.jpg",
+        "itemLevel": 321,
+        "bonusIDs": [
+          13440,
+          6652,
+          13696,
+          13662,
+          12699,
+          12846
+        ]
+      },
+      {
+        "id": 271518,
+        "quality": 4,
+        "icon": "inv_pant_leather_raidmonkulatek_d_01.jpg",
+        "itemLevel": 321,
+        "permanentEnchant": 8159,
+        "bonusIDs": [
+          6652,
+          13440,
+          13693,
+          13698,
+          12846
+        ],
+        "setID": 2061
+      },
+      {
+        "id": 159327,
+        "quality": 3,
+        "icon": "inv_boot_leather_zandalardungeon_c_01.jpg",
+        "itemLevel": 308,
+        "permanentEnchant": 7993,
+        "bonusIDs": [
+          13439,
+          6652,
+          13662,
+          12699,
+          12838
+        ]
+      },
+      {
+        "id": 268240,
+        "quality": 4,
+        "icon": "8095063.jpg",
+        "itemLevel": 318,
+        "bonusIDs": [
+          6652,
+          13696,
+          13662,
+          13335,
+          12849
+        ]
+      },
+      {
+        "id": 271520,
+        "quality": 4,
+        "icon": "inv_glove_leather_raidmonkulatek_d_01.jpg",
+        "itemLevel": 321,
+        "bonusIDs": [
+          6652,
+          13440,
+          13691,
+          13697,
+          12846
+        ],
+        "setID": 2061
+      },
+      {
+        "id": 251513,
+        "quality": 4,
+        "icon": "inv_12_profession_jewelcrafting_ring3_silver.jpg",
+        "itemLevel": 331,
+        "permanentEnchant": 7967,
+        "bonusIDs": [
+          12214,
+          13667,
+          8960,
+          12497,
+          13751,
+          14001,
+          13836
+        ],
+        "gems": [
+          {
+            "id": 240918,
+            "itemLevel": 295,
+            "icon": "inv_12_profession_jewelcrafting_rare_gem_cut_void_blue.jpg"
+          }
+        ]
+      },
+      {
+        "id": 272148,
+        "quality": 4,
+        "icon": "inv_121_jewelry_ring03_purple.jpg",
+        "itemLevel": 321,
+        "permanentEnchant": 8027,
+        "bonusIDs": [
+          6652,
+          13668,
+          12846
+        ],
+        "gems": [
+          {
+            "id": 240918,
+            "itemLevel": 295,
+            "icon": "inv_12_profession_jewelcrafting_rare_gem_cut_void_blue.jpg"
+          }
+        ]
+      },
+      {
+        "id": 270166,
+        "quality": 4,
+        "icon": "inv_11_0_raid_gruesomesyringe_blue.jpg",
+        "itemLevel": 321,
+        "bonusIDs": [
+          6652,
+          13334,
+          12846
+        ]
+      },
+      {
+        "id": 270168,
+        "quality": 4,
+        "icon": "inv_10_dungeonjewelry_dragon_trinket_3djardintrophy_green.jpg",
+        "itemLevel": 334,
+        "bonusIDs": [
+          6652,
+          13334,
+          13696,
+          12854
+        ]
+      },
+      {
+        "id": 279220,
+        "quality": 2,
+        "icon": "inv_cape_leather_outdooramaniloa_c_01.jpg",
+        "itemLevel": 295,
+        "bonusIDs": [
+          6652,
+          13662,
+          12830
+        ]
+      },
+      {
+        "id": 237847,
+        "quality": 4,
+        "icon": "inv_polearm_2h_questbloodelf_b_01.jpg",
+        "itemLevel": 331,
+        "permanentEnchant": 8039,
+        "temporaryEnchant": 8052,
+        "bonusIDs": [
+          12214,
+          12497,
+          13751,
+          14004,
+          12693,
+          8960,
+          8795,
+          13836
+        ]
+      },
+      {
+        "id": 0,
+        "quality": 1,
+        "icon": "inv_axe_02.jpg",
+        "itemLevel": 0
+      },
+      {
+        "id": 0,
+        "quality": 1,
+        "icon": "inv_axe_02.jpg",
+        "itemLevel": 0
+      }
+    ],
+    "auras": [
+      {
+        "source": 4,
+        "ability": 1303171,
+        "stacks": 1,
+        "icon": "inv_12_profession_inscriptions_vantusrune_gold.jpg",
+        "name": "Vantus Rune: Tides"
+      },
+      {
+        "source": 4,
+        "ability": 1303187,
+        "stacks": 1,
+        "icon": "inv_inscriptions_vantus_rune_orange.jpg",
+        "name": "Vantus Rune: Ula'tek"
+      },
+      {
+        "source": 4,
+        "ability": 1235057,
+        "stacks": 1,
+        "icon": "inv_12_profession_alchemy_flask_sindoreipotion_yellow.jpg",
+        "name": "Flask of Thalassian Resistance"
+      },
+      {
+        "source": 4,
+        "ability": 166646,
+        "stacks": 1,
+        "icon": "monk_stance_whitetiger.jpg",
+        "name": "Windwalking"
+      },
+      {
+        "source": 4,
+        "ability": 450552,
+        "stacks": 1,
+        "icon": "spell_lifegivingspeed.jpg",
+        "name": "Jade Walk"
+      },
+      {
+        "source": 4,
+        "ability": 450574,
+        "stacks": 1,
+        "icon": "ability_rogue_sprint_blue.jpg",
+        "name": "Flow of Chi"
+      },
+      {
+        "source": 4,
+        "ability": 383700,
+        "stacks": 1,
+        "icon": "inv_misc_beer_05.jpg",
+        "name": "Gai Plin's Imperial Brew"
+      },
+      {
+        "source": 4,
+        "ability": 383785,
+        "stacks": 1,
+        "icon": "ability_monk_palmstrike.jpg",
+        "name": "Counterstrike"
+      },
+      {
+        "source": 4,
+        "ability": 383697,
+        "stacks": 1,
+        "icon": "ability_warrior_unrelentingassault.jpg",
+        "name": "Sal'salabim's Strength"
+      },
+      {
+        "source": 24,
+        "ability": 21562,
+        "stacks": 1,
+        "icon": "spell_holy_wordfortitude.jpg",
+        "name": "Power Word: Fortitude"
+      },
+      {
+        "source": 1,
+        "ability": 1459,
+        "stacks": 1,
+        "icon": "spell_holy_magicalsentry.jpg",
+        "name": "Arcane Intellect"
+      },
+      {
+        "source": 31,
+        "ability": 462854,
+        "stacks": 1,
+        "icon": "achievement_raidprimalist_windelemental.jpg",
+        "name": "Skyfury"
+      },
+      {
+        "source": 24,
+        "ability": 41635,
+        "stacks": 3,
+        "icon": "spell_holy_prayerofmendingtga.jpg",
+        "name": "Prayer of Mending"
+      },
+      {
+        "source": 5,
+        "ability": 6673,
+        "stacks": 1,
+        "icon": "ability_warrior_battleshout.jpg",
+        "name": "Battle Shout"
+      },
+      {
+        "source": 23,
+        "ability": 465,
+        "stacks": 1,
+        "icon": "spell_holy_devotionaura.jpg",
+        "name": "Devotion Aura"
+      },
+      {
+        "source": 2,
+        "ability": 774,
+        "stacks": 1,
+        "icon": "spell_nature_rejuvenation.jpg",
+        "name": "Rejuvenation"
+      },
+      {
+        "source": 15,
+        "ability": 381751,
+        "stacks": 1,
+        "icon": "ability_evoker_blessingofthebronze.jpg",
+        "name": "Blessing of the Bronze"
+      },
+      {
+        "source": 4,
+        "ability": 1294727,
+        "stacks": 1,
+        "icon": "spell_misc_food.jpg",
+        "name": "Well Fed"
+      },
+      {
+        "source": 2,
+        "ability": 1126,
+        "stacks": 1,
+        "icon": "spell_nature_regeneration.jpg",
+        "name": "Mark of the Wild"
+      },
+      {
+        "source": 2,
+        "ability": 155777,
+        "stacks": 1,
+        "icon": "spell_druid_germination.jpg",
+        "name": "Rejuvenation (Germination)"
+      },
+      {
+        "source": 2,
+        "ability": 392103,
+        "stacks": 1,
+        "icon": "ability_druid_replenish.jpg",
+        "name": "Nurturing Dormancy"
+      },
+      {
+        "source": 2,
+        "ability": 474750,
+        "stacks": 1,
+        "icon": "ability_druid_focusedgrowth.jpg",
+        "name": "Symbiotic Relationship"
+      }
+    ],
+    "expansion": "dragonflight",
+    "faction": 0,
+    "specID": 268,
+    "strength": 268,
+    "agility": 2380,
+    "stamina": 61511,
+    "intellect": 635,
+    "dodge": 0,
+    "parry": 0,
+    "block": 0,
+    "armor": 1658,
+    "critMelee": 1309,
+    "critRanged": 1309,
+    "critSpell": 1309,
+    "hasteMelee": 190,
+    "hasteRanged": 190,
+    "hasteSpell": 190,
+    "speed": 0,
+    "leech": 249,
+    "avoidance": 0,
+    "mastery": 871,
+    "versatilityDamageDone": 770,
+    "versatilityHealingDone": 770,
+    "versatilityDamageReduction": 770,
+    "talentTree": [
+      {
+        "id": 124838,
+        "rank": 1,
+        "nodeID": 101064
+      },
+      {
+        "id": 124843,
+        "rank": 1,
+        "nodeID": 101069
+      },
+      {
+        "id": 124845,
+        "rank": 1,
+        "nodeID": 101071
+      },
+      {
+        "id": 124846,
+        "rank": 1,
+        "nodeID": 101072
+      },
+      {
+        "id": 124849,
+        "rank": 1,
+        "nodeID": 101075
+      },
+      {
+        "id": 124851,
+        "rank": 1,
+        "nodeID": 101077
+      },
+      {
+        "id": 124855,
+        "rank": 1,
+        "nodeID": 101080
+      },
+      {
+        "id": 124857,
+        "rank": 1,
+        "nodeID": 101082
+      },
+      {
+        "id": 124859,
+        "rank": 1,
+        "nodeID": 102004
+      },
+      {
+        "id": 124863,
+        "rank": 1,
+        "nodeID": 101086
+      },
+      {
+        "id": 124864,
+        "rank": 1,
+        "nodeID": 101087
+      },
+      {
+        "id": 124865,
+        "rank": 1,
+        "nodeID": 101088
+      },
+      {
+        "id": 124867,
+        "rank": 1,
+        "nodeID": 101090
+      },
+      {
+        "id": 124924,
+        "rank": 1,
+        "nodeID": 101135
+      },
+      {
+        "id": 124926,
+        "rank": 1,
+        "nodeID": 101136
+      },
+      {
+        "id": 124935,
+        "rank": 1,
+        "nodeID": 101145
+      },
+      {
+        "id": 124936,
+        "rank": 1,
+        "nodeID": 101146
+      },
+      {
+        "id": 124937,
+        "rank": 1,
+        "nodeID": 101147
+      },
+      {
+        "id": 124943,
+        "rank": 1,
+        "nodeID": 101152
+      },
+      {
+        "id": 124944,
+        "rank": 1,
+        "nodeID": 101153
+      },
+      {
+        "id": 124948,
+        "rank": 1,
+        "nodeID": 101156
+      },
+      {
+        "id": 124950,
+        "rank": 1,
+        "nodeID": 101158
+      },
+      {
+        "id": 124954,
+        "rank": 1,
+        "nodeID": 101160
+      },
+      {
+        "id": 124955,
+        "rank": 1,
+        "nodeID": 101161
+      },
+      {
+        "id": 124960,
+        "rank": 1,
+        "nodeID": 101165
+      },
+      {
+        "id": 124961,
+        "rank": 2,
+        "nodeID": 101166
+      },
+      {
+        "id": 124962,
+        "rank": 1,
+        "nodeID": 101167
+      },
+      {
+        "id": 124963,
+        "rank": 1,
+        "nodeID": 101168
+      },
+      {
+        "id": 124964,
+        "rank": 2,
+        "nodeID": 101169
+      },
+      {
+        "id": 124965,
+        "rank": 1,
+        "nodeID": 101170
+      },
+      {
+        "id": 124968,
+        "rank": 1,
+        "nodeID": 101173
+      },
+      {
+        "id": 124970,
+        "rank": 1,
+        "nodeID": 101174
+      },
+      {
+        "id": 124971,
+        "rank": 1,
+        "nodeID": 101175
+      },
+      {
+        "id": 124975,
+        "rank": 1,
+        "nodeID": 101178
+      },
+      {
+        "id": 124976,
+        "rank": 2,
+        "nodeID": 101179
+      },
+      {
+        "id": 124979,
+        "rank": 1,
+        "nodeID": 101181
+      },
+      {
+        "id": 124980,
+        "rank": 1,
+        "nodeID": 101182
+      },
+      {
+        "id": 124982,
+        "rank": 1,
+        "nodeID": 101183
+      },
+      {
+        "id": 124983,
+        "rank": 2,
+        "nodeID": 101184
+      },
+      {
+        "id": 124987,
+        "rank": 1,
+        "nodeID": 101187
+      },
+      {
+        "id": 124988,
+        "rank": 1,
+        "nodeID": 101188
+      },
+      {
+        "id": 124991,
+        "rank": 1,
+        "nodeID": 101190
+      },
+      {
+        "id": 124996,
+        "rank": 1,
+        "nodeID": 101193
+      },
+      {
+        "id": 124999,
+        "rank": 1,
+        "nodeID": 101195
+      },
+      {
+        "id": 125001,
+        "rank": 1,
+        "nodeID": 101197
+      },
+      {
+        "id": 125006,
+        "rank": 1,
+        "nodeID": 101201
+      },
+      {
+        "id": 125008,
+        "rank": 1,
+        "nodeID": 101202
+      },
+      {
+        "id": 125027,
+        "rank": 1,
+        "nodeID": 101219
+      },
+      {
+        "id": 126501,
+        "rank": 1,
+        "nodeID": 102433
+      },
+      {
+        "id": 136085,
+        "rank": 1,
+        "nodeID": 109826
+      },
+      {
+        "id": 136145,
+        "rank": 1,
+        "nodeID": 109882
+      },
+      {
+        "id": 136146,
+        "rank": 1,
+        "nodeID": 101067
+      },
+      {
+        "id": 124839,
+        "rank": 1,
+        "nodeID": 101065
+      },
+      {
+        "id": 136149,
+        "rank": 1,
+        "nodeID": 101196
+      },
+      {
+        "id": 136177,
+        "rank": 1,
+        "nodeID": 109910
+      },
+      {
+        "id": 137073,
+        "rank": 1,
+        "nodeID": 110435
+      },
+      {
+        "id": 137074,
+        "rank": 2,
+        "nodeID": 110435
+      },
+      {
+        "id": 137075,
+        "rank": 1,
+        "nodeID": 110435
+      },
+      {
+        "id": 136086,
+        "rank": 1,
+        "nodeID": 109827
+      },
+      {
+        "id": 124932,
+        "rank": 1,
+        "nodeID": 101142
+      },
+      {
+        "id": 125069,
+        "rank": 1,
+        "nodeID": 101248
+      },
+      {
+        "id": 124848,
+        "rank": 1,
+        "nodeID": 101074
+      },
+      {
+        "id": 124853,
+        "rank": 1,
+        "nodeID": 101078
+      },
+      {
+        "id": 124854,
+        "rank": 1,
+        "nodeID": 101079
+      },
+      {
+        "id": 124930,
+        "rank": 1,
+        "nodeID": 101140
+      },
+      {
+        "id": 125003,
+        "rank": 1,
+        "nodeID": 101198
+      },
+      {
+        "id": 125063,
+        "rank": 1,
+        "nodeID": 101244
+      },
+      {
+        "id": 125064,
+        "rank": 1,
+        "nodeID": 101245
+      },
+      {
+        "id": 125066,
+        "rank": 1,
+        "nodeID": 101246
+      },
+      {
+        "id": 125068,
+        "rank": 1,
+        "nodeID": 101247
+      },
+      {
+        "id": 125070,
+        "rank": 1,
+        "nodeID": 101249
+      },
+      {
+        "id": 125071,
+        "rank": 1,
+        "nodeID": 101250
+      },
+      {
+        "id": 125072,
+        "rank": 1,
+        "nodeID": 101251
+      },
+      {
+        "id": 125073,
+        "rank": 1,
+        "nodeID": 101252
+      },
+      {
+        "id": 125074,
+        "rank": 1,
+        "nodeID": 101253
+      },
+      {
+        "id": 125076,
+        "rank": 1,
+        "nodeID": 101254
+      },
+      {
+        "id": 125002,
+        "rank": 1,
+        "nodeID": 101711
+      },
+      {
+        "id": 135955,
+        "rank": 1,
+        "nodeID": 109697
+      },
+      {
+        "id": 135956,
+        "rank": 1,
+        "nodeID": 109698
+      },
+      {
+        "id": 135957,
+        "rank": 1,
+        "nodeID": 109699
+      }
+    ],
+    "talents": [],
+    "pvpTalents": [
+      {
+        "id": 0,
+        "icon": "inv_axe_02.jpg"
+      },
+      {
+        "id": 0,
+        "icon": "inv_axe_02.jpg"
+      },
+      {
+        "id": 0,
+        "icon": "inv_axe_02.jpg"
+      },
+      {
+        "id": 0,
+        "icon": "inv_axe_02.jpg"
+      }
+    ],
+    "customPowerSet": [],
+    "secondaryCustomPowerSet": [],
+    "tertiaryCustomPowerSet": []
+  },
+  {
+    "timestamp": 2415060,
+    "type": "removebuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 41635,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2415137,
+    "type": "cast",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 8936,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 229194,
+        "max": 250000,
+        "type": 0,
+        "cost": 6300
+      }
+    ],
+    "hitPoints": 847520,
+    "maxHitPoints": 847520,
+    "attackPower": 3168,
+    "spellPower": 3046,
+    "armor": 1083,
+    "absorb": 0,
+    "x": -43924,
+    "y": 35872,
+    "facing": -199,
+    "mapID": 2609,
+    "versatility": 962,
+    "avoidance": 163,
+    "itemLevel": 322,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2415137,
+    "type": "applybuff",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 8936,
+    "fight": 22,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2415223,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 121253,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 4510,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 504531,
+    "x": -43513,
+    "y": 37026,
+    "facing": -683,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2415224,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1265307,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2415224,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 392883,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2415625,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 113746,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2415755,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 115546,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 4510,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 504531,
+    "x": -43312,
+    "y": 37148,
+    "facing": -683,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2415755,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 116189,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2415776,
+    "type": "applybuff",
+    "sourceID": 19,
+    "targetID": 4,
+    "abilityGameID": 2825,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2415776,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 57724,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416064,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 121253,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2416076,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 215479,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416076,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287425,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416076,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416281,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287772,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416389,
+    "type": "cast",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 0,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 897593714,
+    "maxHitPoints": 898463700,
+    "attackPower": 0,
+    "spellPower": 0,
+    "armor": 1470,
+    "absorb": 0,
+    "x": -42815,
+    "y": 38083,
+    "facing": -384,
+    "mapID": 2609,
+    "versatility": 0,
+    "avoidance": 0,
+    "itemLevel": 93,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416401,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416401,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 124506,
+    "fight": 22,
+    "fake": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 4510,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 504531,
+    "x": -43760,
+    "y": 37042,
+    "facing": -196,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2416402,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124274,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416402,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 383733,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416402,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 31,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416402,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416413,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1265145,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416413,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1265140,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416413,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416424,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 450552,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416424,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 18545,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416448,
+    "type": "applydebuff",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1282873,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416677,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1301477,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416677,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 115181,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1155700,
+    "maxHitPoints": 1230220,
+    "attackPower": 4847,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 407737,
+    "x": -43974,
+    "y": 36937,
+    "facing": -188,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2416679,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 123725,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2416744,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1183950,
+    "maxHitPoints": 1230220,
+    "attackPower": 4847,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 407737,
+    "x": -44026,
+    "y": 36908,
+    "facing": -750,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2416783,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416794,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1183950,
+    "maxHitPoints": 1230220,
+    "attackPower": 4847,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 407737,
+    "x": -44072,
+    "y": 36883,
+    "facing": -682,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2416832,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "stack": 6,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2416902,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 30,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417066,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1260619,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417067,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 0,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417067,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 26,
+    "abilityGameID": 1265140,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417067,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 14,
+    "abilityGameID": 1265140,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 1
+  },
+  {
+    "timestamp": 2417089,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 26,
+    "abilityGameID": 1265145,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417089,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 14,
+    "abilityGameID": 1265145,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 1
+  },
+  {
+    "timestamp": 2417090,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 28105,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417243,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417243,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417323,
+    "type": "cast",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 33076,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 258020,
+        "max": 260000,
+        "type": 0,
+        "cost": 4375
+      }
+    ],
+    "hitPoints": 568229,
+    "maxHitPoints": 607720,
+    "attackPower": 240,
+    "spellPower": 2656,
+    "armor": 524,
+    "absorb": 0,
+    "x": -43756,
+    "y": 35549,
+    "facing": -210,
+    "mapID": 2609,
+    "versatility": 531,
+    "avoidance": 201,
+    "itemLevel": 286,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417323,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 1246768,
+    "fight": 22,
+    "absorb": 29003,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417323,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 65081,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417361,
+    "type": "refreshbuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417444,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417444,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417518,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "stack": 2,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417639,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417639,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417653,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 41635,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417682,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 205523,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 4847,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 406470,
+    "x": -44689,
+    "y": 36499,
+    "facing": -509,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417704,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1252488,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417704,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 228563,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417704,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "stack": 2,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417848,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417848,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2417885,
+    "type": "cast",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417885,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417885,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 383800,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417885,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451230,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2417907,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418015,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 393515,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418052,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2418052,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2418366,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 13173,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418413,
+    "type": "removebuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 1246768,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418413,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418413,
+    "type": "removebuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 41635,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418436,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287425,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418463,
+    "type": "refreshbuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418713,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1252488,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2418904,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 29,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419027,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 132578,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419027,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 132578,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1214625,
+    "maxHitPoints": 1230220,
+    "attackPower": 4909,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 366607,
+    "x": -45306,
+    "y": 36362,
+    "facing": -675,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2419028,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1262605,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419292,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5077,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 358598,
+    "x": -45141,
+    "y": 36445,
+    "facing": -675,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2419293,
+    "type": "refreshbuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419293,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 139,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419316,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "stack": 8,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419316,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1262605,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419409,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 28,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419441,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 18545,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419541,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1236994,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419541,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 1236994,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5077,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 373272,
+    "x": -44908,
+    "y": 36560,
+    "facing": -673,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2419596,
+    "type": "applybuff",
+    "sourceID": 15,
+    "targetID": 4,
+    "abilityGameID": 1307578,
+    "fight": 22,
+    "absorb": 409688,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419654,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 28322,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419700,
+    "type": "cast",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 0,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 888734224,
+    "maxHitPoints": 898463700,
+    "attackPower": 0,
+    "spellPower": 0,
+    "armor": 1470,
+    "absorb": 0,
+    "x": -44361,
+    "y": 36814,
+    "facing": -386,
+    "mapID": 2609,
+    "versatility": 0,
+    "avoidance": 0,
+    "itemLevel": 93,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419700,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1260619,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419700,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1260619,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419700,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419700,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419713,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419750,
+    "type": "applydebuffstack",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1282873,
+    "fight": 22,
+    "stack": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419789,
+    "type": "applybuff",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 439530,
+    "fight": 22,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419905,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "stack": 3,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419905,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124274,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419905,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124273,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2419919,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1297908,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1165857,
+    "maxHitPoints": 1230220,
+    "attackPower": 5246,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 604679,
+    "x": -44667,
+    "y": 36670,
+    "facing": -670,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2419919,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1297908,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2420330,
+    "type": "removebuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 65081,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2420410,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 21,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2420423,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 41635,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2420555,
+    "type": "applybuff",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 48438,
+    "fight": 22,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2420555,
+    "type": "applybuff",
+    "sourceID": 15,
+    "targetID": 4,
+    "abilityGameID": 355941,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2420902,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 20,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2420902,
+    "type": "removebuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 41635,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2420917,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 32442,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2420944,
+    "type": "refreshbuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2421060,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 0,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2421778,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 116189,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2421824,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2421896,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124273,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2421897,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124274,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2421909,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2421939,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1297908,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2422211,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 15089,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2422423,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2422440,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 21243,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2422920,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 19,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423053,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 0,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423125,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 119582,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5077,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 513507,
+    "x": -44694,
+    "y": 36762,
+    "facing": -656,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2423125,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 393515,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423125,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1260619,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423412,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124274,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423412,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124275,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423448,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 205523,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 4909,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 507291,
+    "x": -44694,
+    "y": 36762,
+    "facing": -642,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2423494,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287425,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423494,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 124503,
+    "fight": 22,
+    "fake": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 4909,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 507291,
+    "x": -44694,
+    "y": 36762,
+    "facing": -642,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2423494,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "stack": 4,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423494,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 228563,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423494,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "stack": 2,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423494,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 15089,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423646,
+    "type": "cast",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1277101,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 0,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 866447402,
+    "maxHitPoints": 898463700,
+    "attackPower": 0,
+    "spellPower": 0,
+    "armor": 1470,
+    "absorb": 0,
+    "x": -44361,
+    "y": 36814,
+    "facing": -330,
+    "mapID": 2609,
+    "versatility": 0,
+    "avoidance": 0,
+    "itemLevel": 93,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423647,
+    "type": "applydebuff",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1277105,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423647,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 124506,
+    "fight": 22,
+    "fake": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 4909,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 522380,
+    "x": -44694,
+    "y": 36762,
+    "facing": -642,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2423647,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1260619,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423647,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1260619,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423647,
+    "type": "cast",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1064,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 248813,
+        "max": 273000,
+        "type": 0
+      }
+    ],
+    "hitPoints": 872940,
+    "maxHitPoints": 872940,
+    "attackPower": 946,
+    "spellPower": 3130,
+    "armor": 2723,
+    "absorb": 0,
+    "x": -43538,
+    "y": 36263,
+    "facing": -168,
+    "mapID": 2609,
+    "versatility": 1692,
+    "avoidance": 222,
+    "itemLevel": 317,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423647,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423666,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 8,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423666,
+    "type": "applybuff",
+    "sourceID": 17,
+    "targetID": 4,
+    "abilityGameID": 119611,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423688,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287772,
+    "fight": 22,
+    "stack": 2,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423863,
+    "type": "applybuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423885,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451230,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423901,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124275,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423901,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124273,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2423902,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 7,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424282,
+    "type": "cast",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 8936,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 214215,
+        "max": 250000,
+        "type": 0,
+        "cost": 6300
+      }
+    ],
+    "hitPoints": 847520,
+    "maxHitPoints": 847520,
+    "attackPower": 3248,
+    "spellPower": 3123,
+    "armor": 1083,
+    "absorb": 242891,
+    "x": -43602,
+    "y": 35521,
+    "facing": -223,
+    "mapID": 2609,
+    "versatility": 962,
+    "avoidance": 163,
+    "itemLevel": 322,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424301,
+    "type": "refreshbuff",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 8936,
+    "fight": 22,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424426,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1265145,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424558,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5246,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 184189,
+    "x": -44694,
+    "y": 36762,
+    "facing": -642,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2424577,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "stack": 10,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424656,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2424656,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2424688,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 100780,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 100,
+        "max": 100,
+        "type": 3,
+        "cost": 50
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5246,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 184189,
+    "x": -44694,
+    "y": 36762,
+    "facing": -642,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2424688,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 228563,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424689,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1252488,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424723,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 383800,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424754,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 15162,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424827,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424895,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424908,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 6,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2424972,
+    "type": "refreshbuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425057,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 124503,
+    "fight": 22,
+    "fake": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 80,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5246,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 173352,
+    "x": -44694,
+    "y": 36762,
+    "facing": -642,
+    "mapID": 2609,
+    "versatility": 1725,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2425057,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1260619,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425080,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 5,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425080,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 26,
+    "abilityGameID": 1265145,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2425081,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 14,
+    "abilityGameID": 1265145,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 1
+  },
+  {
+    "timestamp": 2425299,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1317581,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425427,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 20979,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425704,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425704,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 121253,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 88,
+        "max": 100,
+        "type": 3,
+        "cost": 40
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5520,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 158698,
+    "x": -44694,
+    "y": 36762,
+    "facing": -637,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2425705,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1301477,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425705,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 392883,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425793,
+    "type": "removebuff",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 439530,
+    "fight": 22,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425794,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 121253,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2425813,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "stack": 5,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425813,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1301410,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2425905,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 4,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2425921,
+    "type": "applybuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 382024,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426030,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 32474,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426145,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 196733,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2426278,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287772,
+    "fight": 22,
+    "stack": 1,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426278,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287772,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426407,
+    "type": "removebuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426719,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "stack": 6,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426903,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124273,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426903,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124274,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426904,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2426967,
+    "type": "applybuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 14552,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427054,
+    "type": "removebuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427076,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1301477,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427076,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 115181,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 67,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5351,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 113201,
+    "x": -44281,
+    "y": 37370,
+    "facing": -592,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2427076,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 123725,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2427197,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 69,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5351,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 113201,
+    "x": -44281,
+    "y": 37370,
+    "facing": -526,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2427234,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427311,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 15031,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427399,
+    "type": "removebuff",
+    "sourceID": 17,
+    "targetID": 4,
+    "abilityGameID": 119611,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427418,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427418,
+    "type": "applybuff",
+    "sourceID": 17,
+    "targetID": 4,
+    "abilityGameID": 124682,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427436,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "stack": 3,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427549,
+    "type": "removebuff",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 48438,
+    "fight": 22,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427628,
+    "type": "cast",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1277031,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 0,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 838678903,
+    "maxHitPoints": 898463700,
+    "attackPower": 0,
+    "spellPower": 0,
+    "armor": 1470,
+    "absorb": 0,
+    "x": -44361,
+    "y": 36814,
+    "facing": -772,
+    "mapID": 2609,
+    "versatility": 0,
+    "avoidance": 0,
+    "itemLevel": 93,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427645,
+    "type": "applydebuff",
+    "sourceID": 235,
+    "targetID": 4,
+    "abilityGameID": 1277051,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427645,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 0,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427645,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1241059,
+    "fight": 22,
+    "absorb": 0,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427646,
+    "type": "removebuff",
+    "sourceID": 15,
+    "targetID": 4,
+    "abilityGameID": 1307578,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427698,
+    "type": "removebuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 139,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427916,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124274,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2427916,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124273,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428143,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 393515,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428219,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 205523,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 83,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5520,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44281,
+    "y": 37370,
+    "facing": -465,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2428220,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 119582,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 83,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5520,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44281,
+    "y": 37370,
+    "facing": -465,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2428237,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 393515,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428237,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1260619,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428254,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 124506,
+    "fight": 22,
+    "fake": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 83,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5520,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44281,
+    "y": 37370,
+    "facing": -465,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2428254,
+    "type": "removedebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124273,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428254,
+    "type": "applydebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 124275,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428254,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 228563,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428254,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "stack": 3,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428254,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428431,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 20877,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428431,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287425,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428586,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 15381,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428667,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428667,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 0,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428686,
+    "type": "applybuff",
+    "sourceID": 17,
+    "targetID": 4,
+    "abilityGameID": 119611,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428855,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "stack": 7,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428890,
+    "type": "removebuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2428945,
+    "type": "cast",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 1064,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 245709,
+        "max": 260000,
+        "type": 0
+      }
+    ],
+    "hitPoints": 898500,
+    "maxHitPoints": 898500,
+    "attackPower": 976,
+    "spellPower": 3283,
+    "armor": 2697,
+    "absorb": 9956,
+    "x": -43322,
+    "y": 37402,
+    "facing": -390,
+    "mapID": 2609,
+    "versatility": 831,
+    "avoidance": 453,
+    "itemLevel": 318,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429001,
+    "type": "applybuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 14552,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429052,
+    "type": "removebuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 1300642,
+    "fight": 22,
+    "absorb": 0,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429224,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 100780,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 96,
+        "max": 100,
+        "type": 3,
+        "cost": 50
+      }
+    ],
+    "hitPoints": 1226510,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44281,
+    "y": 37370,
+    "facing": -465,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2429224,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 228563,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429247,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287425,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429441,
+    "type": "applybuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429461,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287772,
+    "fight": 22,
+    "stack": 2,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429720,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429824,
+    "type": "removebuff",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 155777,
+    "fight": 22,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429840,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 80,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44216,
+    "y": 37822,
+    "facing": -466,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2429880,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "stack": 8,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429914,
+    "type": "applybuff",
+    "sourceID": 15,
+    "targetID": 4,
+    "abilityGameID": 364343,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2429950,
+    "type": "applybuff",
+    "sourceID": 15,
+    "targetID": 4,
+    "abilityGameID": 445740,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2430227,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2430227,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 121253,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 85,
+        "max": 100,
+        "type": 3,
+        "cost": 40
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44378,
+    "y": 37860,
+    "facing": -466,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2430227,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1301477,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2430227,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 392883,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2430426,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2430426,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1287663,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2430486,
+    "type": "applybuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2430574,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 121253,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2430613,
+    "type": "refreshbuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2430613,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 139,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2430613,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1301410,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2431258,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 196733,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2431304,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 119582,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 60,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44665,
+    "y": 37877,
+    "facing": -509,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2431304,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1301477,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2431304,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": -1,
+    "abilityGameID": 115181,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 60,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44665,
+    "y": 37877,
+    "facing": -509,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2431304,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 393515,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2431305,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1265307,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2431305,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 123725,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2431421,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 20979,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2431656,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 0,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432084,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "stack": 8,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432314,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 205523,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 74,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44578,
+    "y": 37909,
+    "facing": -505,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2432332,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "stack": 4,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432332,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432332,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 228563,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432332,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "stack": 5,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432332,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 195630,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432420,
+    "type": "cast",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 8936,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 220155,
+        "max": 250000,
+        "type": 0,
+        "cost": 6300
+      }
+    ],
+    "hitPoints": 847520,
+    "maxHitPoints": 847520,
+    "attackPower": 3513,
+    "spellPower": 3378,
+    "armor": 1083,
+    "absorb": 140307,
+    "x": -43042,
+    "y": 35768,
+    "facing": -259,
+    "mapID": 2609,
+    "versatility": 962,
+    "avoidance": 163,
+    "itemLevel": 322,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432421,
+    "type": "refreshbuff",
+    "sourceID": 2,
+    "targetID": 4,
+    "abilityGameID": 8936,
+    "fight": 22,
+    "sourceMarker": 8,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432441,
+    "type": "removebuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432482,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1,
+    "fight": 22,
+    "melee": true,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 76,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44578,
+    "y": 37909,
+    "facing": -504,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2432497,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2432621,
+    "type": "applybuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1303479,
+    "fight": 22,
+    "stack": 9,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433213,
+    "type": "removebuff",
+    "sourceID": 17,
+    "targetID": 4,
+    "abilityGameID": 119611,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433311,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 100780,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 87,
+        "max": 100,
+        "type": 3,
+        "cost": 50
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44578,
+    "y": 37909,
+    "facing": -503,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2433311,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 228563,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433420,
+    "type": "removebuff",
+    "sourceID": 17,
+    "targetID": 4,
+    "abilityGameID": 124682,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433500,
+    "type": "removebuff",
+    "sourceID": 16,
+    "targetID": 4,
+    "abilityGameID": 462568,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433695,
+    "type": "removebuffstack",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287772,
+    "fight": 22,
+    "stack": 1,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433695,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1287772,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433730,
+    "type": "applybuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 41635,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433914,
+    "type": "removebuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 41635,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2433963,
+    "type": "refreshbuff",
+    "sourceID": 24,
+    "targetID": 4,
+    "abilityGameID": 77489,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2434312,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 451021,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2434312,
+    "type": "cast",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 121253,
+    "fight": 22,
+    "resourceActor": 1,
+    "classResources": [
+      {
+        "amount": 76,
+        "max": 100,
+        "type": 3
+      }
+    ],
+    "hitPoints": 1230220,
+    "maxHitPoints": 1230220,
+    "attackPower": 5183,
+    "spellPower": 635,
+    "armor": 1658,
+    "absorb": 0,
+    "x": -44578,
+    "y": 37909,
+    "facing": -503,
+    "mapID": 2609,
+    "versatility": 1611,
+    "avoidance": 0,
+    "itemLevel": 322,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2434313,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1265307,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2434313,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 1301477,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2434313,
+    "type": "refreshbuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 392883,
+    "fight": 22,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2434331,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 196733,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2434425,
+    "type": "applybuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 20877,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2434530,
+    "type": "applybuff",
+    "sourceID": 5,
+    "targetID": 4,
+    "abilityGameID": 1229746,
+    "fight": 22,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2434662,
+    "type": "removebuff",
+    "sourceID": 4,
+    "targetID": 4,
+    "abilityGameID": 414143,
+    "fight": 22,
+    "absorb": 0,
+    "sourceMarker": 2,
+    "targetMarker": 2
+  },
+  {
+    "timestamp": 2434685,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 121253,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2434705,
+    "type": "refreshdebuff",
+    "sourceID": 4,
+    "targetID": 235,
+    "abilityGameID": 1301410,
+    "fight": 22,
+    "sourceMarker": 2
+  },
+  {
+    "timestamp": 2434926,
+    "type": "removebuff",
+    "sourceID": 31,
+    "targetID": 4,
+    "abilityGameID": 382024,
+    "fight": 22,
+    "targetMarker": 2
+  }
+]

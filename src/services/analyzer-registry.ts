@@ -68,6 +68,7 @@ import { validateCapabilities, type CapabilityDefectRecord } from "../findings/d
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { isPublicSpecId, isSpecId, PUBLIC_SPEC_IDS, type SpecId } from "../findings/spec-id.js";
 import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../specs/deathknight/blood/registration.js";
+import { BREWMASTER_MONK_REGISTRATION } from "../specs/monk/brewmaster/registration.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
@@ -421,7 +422,8 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Four rows, all PUBLIC since M11-B12. A publicly unsupported
+ * Five rows: four PUBLIC (since M11-B12) and, since M11-C2, one
+ * INTERNAL_ONLY. A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
  * internal lookup and tests, and is never selected for a public request —
@@ -436,6 +438,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   RETRIBUTION_PALADIN_REGISTRATION,
   // INTERNAL_ONLY from M11-B2; PUBLIC since M11-B12.
   BLOOD_DEATH_KNIGHT_REGISTRATION,
+  // INTERNAL_ONLY from M11-C2: the next cohort's measurement slice.
+  BREWMASTER_MONK_REGISTRATION,
 ]);
 
 /**

@@ -1,0 +1,437 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_MONK_BREWMASTER",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "monk",
+    "specName": "brewmaster"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "2026-09-12",
+    "sourcePath": "engine/class_modules/apl/apl_monk.cpp",
+    "sourceSha256": "a8b7e2afe48425089cdc97a369fc4abe87784a818d0423ba0706fb60f1f53c20",
+    "sourceByteLength": 39549,
+    "regionSelector": {
+      "kind": "NAMESPACE_FUNCTION",
+      "enclosingNamespace": "brewmaster",
+      "functionHeader": "void default_apl( monk_t* player )",
+      "playerIdentifier": "player"
+    },
+    "extractedOn": "2026-09-24",
+    "extractorVersion": 1
+  },
+  "lists": [
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "pre",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": "Precombat",
+          "sourceLine": 58
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "potion",
+          "comment": null,
+          "sourceLine": 59
+        }
+      ]
+    },
+    {
+      "listName": "default",
+      "receiverIdentifier": "def",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "auto_attack",
+          "comment": "Default List",
+          "sourceLine": 61
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "potion",
+          "comment": null,
+          "sourceLine": 62
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "call_action_list,name=race_actions",
+          "comment": null,
+          "sourceLine": 63
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "call_action_list,name=item_actions",
+          "comment": null,
+          "sourceLine": 64
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "run_action_list,name=master_of_harmony,if=hero_tree.master_of_harmony",
+          "comment": null,
+          "sourceLine": 65
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "run_action_list,name=shado_pan,if=hero_tree.shadopan",
+          "comment": null,
+          "sourceLine": 66
+        }
+      ]
+    },
+    {
+      "listName": "item_actions",
+      "receiverIdentifier": "ite",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "use_items",
+          "comment": "Items",
+          "sourceLine": 118
+        }
+      ]
+    },
+    {
+      "listName": "race_actions",
+      "receiverIdentifier": "rac",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "blood_fury",
+          "comment": "Racials",
+          "sourceLine": 120
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "berserking",
+          "comment": null,
+          "sourceLine": 121
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "arcane_torrent",
+          "comment": null,
+          "sourceLine": 122
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "lights_judgment",
+          "comment": null,
+          "sourceLine": 123
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "fireblood",
+          "comment": null,
+          "sourceLine": 124
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "ancestral_call",
+          "comment": null,
+          "sourceLine": 125
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "bag_of_tricks",
+          "comment": null,
+          "sourceLine": 126
+        }
+      ]
+    },
+    {
+      "listName": "master_of_harmony",
+      "receiverIdentifier": "moh",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "black_ox_brew,if=cooldown.celestial_brew.charges_fractional<1",
+          "comment": null,
+          "sourceLine": 69
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "celestial_brew,if=buff.aspect_of_harmony_spender.up&!buff.empty_barrel.up",
+          "comment": null,
+          "sourceLine": 70
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "keg_smash,if=buff.aspect_of_harmony_spender.up&buff.empty_barrel.up",
+          "comment": null,
+          "sourceLine": 71
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "blackout_kick,if=talent.blackout_combo.enabled&!buff.blackout_combo.up",
+          "comment": null,
+          "sourceLine": 72
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "celestial_brew,if=!(apex.3&buff.empty_barrel.up)&buff.aspect_of_harmony_accumulator.value>0.95*health.max&cooldown.celestial_brew.charges_fractional>1.9",
+          "comment": null,
+          "sourceLine": 73
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "celestial_brew,if=!(apex.3&buff.empty_barrel.up)&target.time_to_die<15&buff.aspect_of_harmony_accumulator.value>0.2*health.max",
+          "comment": null,
+          "sourceLine": 74
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "purifying_brew,if=!(apex.1&buff.empty_barrel.up)",
+          "comment": null,
+          "sourceLine": 75
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "fortifying_brew,if=!(apex.3&buff.empty_barrel.up)",
+          "comment": null,
+          "sourceLine": 76
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "chi_burst",
+          "comment": null,
+          "sourceLine": 77
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "invoke_niuzao",
+          "comment": null,
+          "sourceLine": 78
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "tiger_palm,if=buff.blackout_combo.up&cooldown.blackout_kick.remains<1.3",
+          "comment": null,
+          "sourceLine": 79
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "exploding_keg,if=cooldown.keg_smash.charges_fractional<1",
+          "comment": null,
+          "sourceLine": 80
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "empty_the_cellar,if=cooldown.celestial_brew.remains>15",
+          "comment": null,
+          "sourceLine": 81
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "breath_of_fire,if=cooldown.blackout_kick.remains>1.5&buff.blackout_combo.up",
+          "comment": null,
+          "sourceLine": 82
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "tiger_palm,if=buff.blackout_combo.up",
+          "comment": null,
+          "sourceLine": 83
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "breath_of_fire",
+          "comment": null,
+          "sourceLine": 84
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "keg_smash",
+          "comment": null,
+          "sourceLine": 85
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "empty_the_cellar",
+          "comment": null,
+          "sourceLine": 86
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "rushing_jade_wind",
+          "comment": null,
+          "sourceLine": 87
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "celestial_brew,if=!(apex.3&buff.empty_barrel.up)",
+          "comment": null,
+          "sourceLine": 88
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "blackout_kick",
+          "comment": null,
+          "sourceLine": 89
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "tiger_palm,if=energy>50-energy.regen*2",
+          "comment": null,
+          "sourceLine": 90
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "expel_harm",
+          "comment": null,
+          "sourceLine": 91
+        }
+      ]
+    },
+    {
+      "listName": "shado_pan",
+      "receiverIdentifier": "spm",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "breath_of_fire,if=talent.salsalabims_strength.enabled&buff.invoke_niuzao_the_black_ox.up",
+          "comment": null,
+          "sourceLine": 94
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "keg_smash,if=talent.salsalabims_strength.enabled&buff.invoke_niuzao_the_black_ox.up",
+          "comment": null,
+          "sourceLine": 95
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "purifying_brew,if=!(apex.1&buff.empty_barrel.up)&buff.invoke_niuzao_the_black_ox.up",
+          "comment": null,
+          "sourceLine": 96
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "black_ox_brew,if=!(apex.1&buff.empty_barrel.up)&cooldown.celestial_brew.charges_fractional<0.25&buff.invoke_niuzao_the_black_ox.up",
+          "comment": null,
+          "sourceLine": 97
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "celestial_brew,if=!(apex.3&buff.empty_barrel.up)&buff.invoke_niuzao_the_black_ox.up",
+          "comment": null,
+          "sourceLine": 98
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "exploding_keg,if=buff.invoke_niuzao_the_black_ox.up",
+          "comment": null,
+          "sourceLine": 99
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "fortifying_brew,if=!(apex.3&buff.empty_barrel.up)&buff.invoke_niuzao_the_black_ox.up",
+          "comment": null,
+          "sourceLine": 100
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "blackout_kick,if=talent.blackout_combo.enabled&!buff.blackout_combo.up",
+          "comment": null,
+          "sourceLine": 101
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "purifying_brew,if=!(apex.1&buff.empty_barrel.up)",
+          "comment": null,
+          "sourceLine": 102
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "invoke_niuzao",
+          "comment": null,
+          "sourceLine": 103
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "tiger_palm,if=buff.blackout_combo.up&cooldown.blackout_kick.remains<1.3",
+          "comment": null,
+          "sourceLine": 104
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "empty_the_cellar,if=buff.empty_the_cellar.remains<1.5",
+          "comment": null,
+          "sourceLine": 105
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "tiger_palm,if=buff.blackout_combo.up",
+          "comment": null,
+          "sourceLine": 106
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "breath_of_fire",
+          "comment": null,
+          "sourceLine": 107
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "keg_smash",
+          "comment": null,
+          "sourceLine": 108
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "exploding_keg",
+          "comment": null,
+          "sourceLine": 109
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "celestial_brew,if=!(apex.3&buff.empty_barrel.up)",
+          "comment": null,
+          "sourceLine": 110
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "empty_the_cellar",
+          "comment": null,
+          "sourceLine": 111
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "chi_burst",
+          "comment": null,
+          "sourceLine": 112
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "rushing_jade_wind",
+          "comment": null,
+          "sourceLine": 113
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "blackout_kick",
+          "comment": null,
+          "sourceLine": 114
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "tiger_palm,if=energy>65-energy.regen",
+          "comment": null,
+          "sourceLine": 115
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "expel_harm",
+          "comment": null,
+          "sourceLine": 116
+        }
+      ]
+    }
+  ]
+}

@@ -114,10 +114,18 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // counts both orderings leave) and added twenty-three: one new case with
     // the three MATCH decisions and their sets, the { 6,7 } and Q2-declined
     // decisions that stay UNKNOWN, the exact counts outside the window and the
-    // refusals that remain. Measured, then pinned.
-    expect(result.summary.cases).toBe(162);
-    expect(result.summary.assertions).toBe(692);
-    expect(result.summary.passed).toBe(692);
+    // refusals that remain; M11-C2 added six cases and thirty-seven
+    // assertions for the INTERNAL_ONLY Brewmaster Monk measurement slice (one
+    // normalization case, four evaluator cases over the Shado-Pan opener — the
+    // coverage, measurement distribution, state-evidence census, build and
+    // provenance; seven per-decision comparisons, two dispatch traces, five
+    // aura bindings and three cooldown readinesses; the six domains and the
+    // non-domain boundary; the spec gate — and one application-service case
+    // pinning the public refusal and the internal-only lookup). Measured,
+    // then pinned.
+    expect(result.summary.cases).toBe(168);
+    expect(result.summary.assertions).toBe(729);
+    expect(result.summary.passed).toBe(729);
   });
 
   it("covers every layer", async () => {

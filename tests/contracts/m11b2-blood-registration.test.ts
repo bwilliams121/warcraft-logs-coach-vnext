@@ -104,7 +104,8 @@ describe("identity and partition", () => {
     // through M11-B10, and the five sites moved in one reviewed edit.
     expect(isSpecId("deathknight/blood")).toBe(true);
     expect(isPublicSpecId("deathknight/blood")).toBe(true);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    // The internal-only half holds Brewmaster Monk since M11-C2, never Blood.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["monk/brewmaster"]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(requirePublicSpecId("deathknight/blood")).toBe("deathknight/blood");

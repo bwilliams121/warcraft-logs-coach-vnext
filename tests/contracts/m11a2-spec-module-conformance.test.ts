@@ -107,6 +107,8 @@ const IDENTITY_EVIDENCE: Readonly<
   "paladin/retribution": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 6 },
   // M11-B2: actor 14 of the same fight, the Blood Death Knight the committed context reports.
   "deathknight/blood": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 14 },
+  // M11-C2: actor 4 of gtKb fight 22, the Brewmaster Monk the committed context reports.
+  "monk/brewmaster": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 4 },
 };
 
 function wclIdentityOf(evidence: {
@@ -313,7 +315,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the four public modules, each with zero supplemental analyses", () => {
+  it("is exactly the four public modules and, since M11-C2, one INTERNAL_ONLY module, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -321,7 +323,8 @@ describe("what the tree exports today", () => {
     // Its `supplementalAnalyses` is empty by decision
     // (agent/m11-a4-first-spec-contract.md section 8); M11-A5 is exposure only.
     // The fourth module (M11-B2) followed the same two-step: INTERNAL_ONLY
-    // first, PUBLIC at M11-B12 by the five-site move.
+    // first, PUBLIC at M11-B12 by the five-site move. The fifth (M11-C2,
+    // Brewmaster Monk) is INTERNAL_ONLY, carrying the internal partition entry.
     expect(
       MODULES.map(({ exportName, module }) => [
         exportName,
@@ -331,6 +334,7 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "PUBLIC", 0],
+      ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "INTERNAL_ONLY", 0],
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],

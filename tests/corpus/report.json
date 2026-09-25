@@ -134,6 +134,13 @@
       "sha256": "294f90b89a3ce3085833413a2f3c2d8933c4228f09607f2edf89b157257f20b7"
     },
     {
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "byteLength": 91080,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "ae2cd1a1e08821ef45e9f8dc3d4a95a06bd32aebfb92a604db394281717a1b71"
+    },
+    {
       "artifactId": "wcl-cast-resource-pre-cost",
       "byteLength": 3045,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -318,8 +325,8 @@
       "passed": 24
     },
     {
-      "assertions": 140,
-      "cases": 39,
+      "assertions": 145,
+      "cases": 40,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
@@ -339,7 +346,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 140
+      "passed": 145
     },
     {
       "assertions": 64,
@@ -473,13 +480,35 @@
       "passed": 249
     },
     {
-      "assertions": 11,
-      "cases": 8,
+      "assertions": 30,
+      "cases": 4,
+      "failed": 0,
+      "kindsExercised": [
+        "SPEC_BREWMASTER_MONK.AURA_BINDING_AT",
+        "SPEC_BREWMASTER_MONK.AUTHORITY_PROVENANCE",
+        "SPEC_BREWMASTER_MONK.BUILD_RESOLUTION",
+        "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT",
+        "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
+        "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+        "SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT",
+        "SPEC_BREWMASTER_MONK.DOMAIN_RESULT",
+        "SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION",
+        "SPEC_BREWMASTER_MONK.NON_DOMAIN_ENTRIES",
+        "SPEC_BREWMASTER_MONK.SPEC_GATE",
+        "SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS"
+      ],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "passed": 30
+    },
+    {
+      "assertions": 13,
+      "cases": 9,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 11
+      "passed": 13
     },
     {
       "assertions": 13,
@@ -524,6 +553,25 @@
       "caseId": "application-service.blood-death-knight-subject-is-publicly-supported-since-m11-b12",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-blood-death-knight-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 1,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.brewmaster-monk-subject-is-internal-only-and-publicly-unsupported",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -1363,6 +1411,40 @@
       "caseId": "normalization.boss-sourced-events-survive-the-unfiltered-stream",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-boss-sourced"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.brewmaster-monk-gtkb-opener-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },
     {
       "artifactId": "wcl-assassination-high-parse-opener",
@@ -4341,6 +4423,216 @@
       ]
     },
     {
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_BREWMASTER_MONK.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-brewmaster-monk.blood-is-refused-at-the-spec-gate",
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 6,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT",
+          "ordinal": 7,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT",
+          "ordinal": 8,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.AURA_BINDING_AT",
+          "ordinal": 9,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.AURA_BINDING_AT",
+          "ordinal": 10,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.AURA_BINDING_AT",
+          "ordinal": 11,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.AURA_BINDING_AT",
+          "ordinal": 12,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.AURA_BINDING_AT",
+          "ordinal": 13,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT",
+          "ordinal": 14,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT",
+          "ordinal": 15,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT",
+          "ordinal": 16,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_MONK_BREWMASTER",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,415,041 for actor 4 (specID 268)",
+          "every COMPLETE cast by actor 4 in the slice, in canonical order",
+          "every aura transition on actor 4 sourced by actor 4, in canonical order"
+        ]
+      },
+      "caseId": "spec-brewmaster-monk.breath-of-fire-under-a-proven-niuzao-matches-and-the-rest-name-their-blocker",
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DOMAIN_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DOMAIN_RESULT",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DOMAIN_RESULT",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DOMAIN_RESULT",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DOMAIN_RESULT",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DOMAIN_RESULT",
+          "ordinal": 5,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.NON_DOMAIN_ENTRIES",
+          "ordinal": 6,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_MONK_BREWMASTER",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,415,041 for actor 4 (specID 268)",
+          "every COMPLETE cast by actor 4 in the slice, in canonical order",
+          "every aura transition on actor 4 sourced by actor 4, in canonical order"
+        ]
+      },
+      "caseId": "spec-brewmaster-monk.domains-and-the-class-spec-boundary",
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.BUILD_RESOLUTION",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.AUTHORITY_PROVENANCE",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_MONK_BREWMASTER",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,415,041 for actor 4 (specID 268)",
+          "every COMPLETE cast by actor 4 in the slice, in canonical order",
+          "every aura transition on actor 4 sourced by actor 4, in canonical order"
+        ]
+      },
+      "caseId": "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-two-resolved",
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-45s",
       "assertions": [
         {
@@ -6140,6 +6432,7 @@
   ],
   "pinnedAuthorities": {
     "SIMC_APL_DEATHKNIGHT_BLOOD": "simc-33622e9d-1",
+    "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
     "SIMC_APL_ROGUE_ASSASSINATION": "simc-33622e9d-1",
@@ -6149,15 +6442,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 4792400,
-    "artifacts": 43,
-    "assertions": 692,
-    "cases": 162,
+    "artifactBytes": 4883480,
+    "artifacts": 44,
+    "assertions": 729,
+    "cases": 168,
     "declared": 0,
-    "executable": 692,
+    "executable": 729,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 692
+    "passed": 729
   }
 }

@@ -13,12 +13,15 @@
  *   - the cooldown dataset pins only abilities no pinned code mutates, and
  *     none of the five `brew_t` cooldowns the mechanical policy cannot see;
  *   - the power-cost dataset names the resources its rows use;
- *   - the readiness facts agree with the other datasets;
- *   - nothing in the runtime knows any of it yet.
+ *   - the readiness facts agree with the other datasets.
  *
- * The APL ARTIFACT is not committed: `m11a2-cross-spec-isolation` requires
- * every `src/simc/data/<class>-<spec>.apl.json` to be loaded by that
- * specialization's registered tree, and M11-C1 registers none.
+ * Through M11-C1 nothing in the runtime knew any of it and the APL ARTIFACT
+ * was not committed (`m11a2-cross-spec-isolation` requires every
+ * `src/simc/data/<class>-<spec>.apl.json` to be loaded by that
+ * specialization's registered tree). M11-C2 added the INTERNAL_ONLY tree, the
+ * internal id and the artifact together; the scope block at the end of this
+ * file is re-pointed accordingly, and the Brewmaster tree's own tests live in
+ * the m11c2-* files.
  */
 
 import { existsSync } from "node:fs";
@@ -53,7 +56,7 @@ import {
   SC_MONK_CPP_SHA256,
 } from "../../src/data/game/monk-brewmaster-readiness-authority.js";
 import { isBuiltinIdentifier } from "../../src/simc/expression/parse.js";
-import { SPEC_IDS } from "../../src/findings/spec-id.js";
+import { INTERNAL_ONLY_SPEC_IDS, SPEC_IDS } from "../../src/findings/spec-id.js";
 
 const PINNED_COMMIT = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 const MONK_MODULE = "engine/class_modules/monk/sc_monk.cpp";
@@ -600,19 +603,32 @@ const PRODUCTION_SOURCES: Record<string, string> = import.meta.glob("../../src/*
   import: "default",
 });
 
-describe("M11-C1 onboards no analyzer", () => {
-  it("adds no SpecId, no specialization tree and no committed APL artifact", () => {
-    expect((SPEC_IDS as readonly string[]).includes("monk/brewmaster")).toBe(false);
-    expect(existsSync("src/specs/monk")).toBe(false);
-    // Blocked by m11a2-cross-spec-isolation R7 until a brewmaster tree exists.
-    expect(existsSync("src/simc/data/monk-brewmaster.apl.json")).toBe(false);
+describe("M11-C1 onboarded no analyzer; M11-C2 added one, INTERNAL_ONLY, inside its own boundary", () => {
+  it("the SpecId is INTERNAL_ONLY, the tree exists, and the APL artifact is committed (R7 satisfied by the tree)", () => {
+    // RE-POINTED AT M11-C2. Through M11-C1 each of these was absent; M11-C2
+    // added the internal id, the specialization tree and the canonical
+    // artifact together, so R7 (m11a2-cross-spec-isolation) holds naturally.
+    expect((SPEC_IDS as readonly string[]).includes("monk/brewmaster")).toBe(true);
+    expect((INTERNAL_ONLY_SPEC_IDS as readonly string[]).includes("monk/brewmaster")).toBe(true);
+    expect(existsSync("src/specs/monk/brewmaster/registration.ts")).toBe(true);
+    expect(existsSync("src/simc/data/monk-brewmaster.apl.json")).toBe(true);
   });
 
-  it("nothing in src imports a Brewmaster dataset or the readiness facts", () => {
+  it("only the Brewmaster tree and the Brewmaster data modules import a Brewmaster dataset or the readiness facts", () => {
     const paths = Object.keys(PRODUCTION_SOURCES);
     expect(paths.length).toBeGreaterThan(100);
+    const importers: string[] = [];
     for (const [path, code] of Object.entries(PRODUCTION_SOURCES)) {
-      expect(code, path).not.toMatch(/from\s+["'][^"']*monk-brewmaster[^"']*["']/);
+      if (/from\s+["'][^"']*monk-brewmaster[^"']*["']/.test(code)) {
+        importers.push(path.replace(/^.*\/src\//, "src/"));
+      }
+    }
+    expect(importers.length).toBeGreaterThan(0);
+    for (const path of importers) {
+      expect(
+        path.startsWith("src/specs/monk/brewmaster/") || path.startsWith("src/data/game/monk-brewmaster-"),
+        path,
+      ).toBe(true);
     }
   });
 

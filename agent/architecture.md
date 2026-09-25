@@ -5164,12 +5164,13 @@ Moving any one alone fails at compile time or at catalog validation.
 
 Rules the tests pin:
 
-- Every known specialization is PUBLIC; `INTERNAL_ONLY_SPEC_IDS` is EMPTY
-  (from M10-D to M11-A3, held Retribution Paladin from M11-A4, empty again
-  since M11-A5). The internal-only partition, `requirePublicSpecId`,
-  `InternalSpecExposureError` and the registry's exposure rules are retained
-  as dormant architecture for the next specialization, and the emptiness is
-  pinned explicitly rather than left to look accidental.
+- `INTERNAL_ONLY_SPEC_IDS` was EMPTY from M10-D to M11-A3, held Retribution
+  Paladin from M11-A4, was empty again from M11-A5, held Blood Death Knight
+  from M11-B2, was empty again from M11-B12, and holds Brewmaster Monk since
+  M11-C2. The internal-only partition, `requirePublicSpecId`,
+  `InternalSpecExposureError` and the registry's exposure rules are the
+  on-ramp every specialization since Protection has used, and the set's
+  current membership is pinned explicitly rather than left to look accidental.
 - An injected catalog must carry every public registration, exactly as the
   production catalog must; a test that observes or replaces one row builds the
   whole catalog (`tests/support/catalog.ts`). A catalog missing a public row

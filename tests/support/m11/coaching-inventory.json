@@ -496,9 +496,9 @@
     {
       "specId": "monk/brewmaster",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "UNREGISTERED",
-      "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
-      "authorityAuditStatus": "AUTHORITY_BLOCKED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
+      "realEvidenceStatus": "REAL_SANITIZED_EVIDENCE_AVAILABLE",
+      "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",
       "questions": [
         {
@@ -510,9 +510,12 @@
           "authorityNeeded": ["pinned charge data", "pinned hero-tree lists (behind run_action_list)"],
           "normalizedStateNeeded": ["a charge/recharge model"],
           "implementationReadiness": "NEEDS_ENGINE_CAPABILITY",
-          "unknownConditions": ["charge state unbounded", "run_action_list dispatch"],
+          "unknownConditions": [
+            "charge state unbounded (M11-C2 declares cooldown.celestial_brew.charges_fractional and leaves it UNKNOWN: the brews live in the module's brews container, which no pinned record models)",
+            "run_action_list dispatch (modelled since M11-B1; measured on this list in M11-C2 — the hero-tree run gates resolve at every decision of the Shado-Pan subject)"
+          ],
           "outputNeed": "SUPPLEMENTAL_RESULT_ONLY",
-          "notes": "Defensive value of the brews is a separate authority question the audit did not open."
+          "notes": "Defensive value of the brews is a separate authority question the audit did not open. M11-C2 measured the Shado-Pan list on one sanitized 20 s subject: 15 eligible offensive decisions, 2 MATCH, 0 REJECTED, 13 UNKNOWN — 8 refused at the NON_GCD Purifying Brew (no reviewed transition contract), 5 divergent on Breath of Fire readiness."
         }
       ]
     },

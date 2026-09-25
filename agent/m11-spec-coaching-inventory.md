@@ -74,7 +74,7 @@ row).
 | `warrior/protection` | C | none | not yet | UNASSESSED | — |
 | `deathknight/blood` | C — INTERNAL_ONLY measurement slice at M11-B2, PUBLIC since M11-B12 (San'layn-validated) | committed sanitized (A7R6 actor 14, 165 s; gtKb actor 14, 20 s) | audited (M11-B2: the 12.1.0 list extracted with its client-version guards evaluated; Coagulopathy line absent at this pin) | SPECIFIC_QUESTIONS_IDENTIFIED | `coagulopathy-maintenance-clip` (SUPERSEDED — no pinned line at 12.1.0), `bone-shield-stack-maintenance` (IMPLEMENTED_PUBLIC since M11-B12: the count is exact at 114 of 123 decisions, a finite set of exact counts at 7 more inside the pre-decision window, and `buff.bone_shield.remains` is the M11-B8 order-invariant floor; the whole observed offensive slice is 42 MATCH / 9 REJECTED / 72 UNKNOWN) |
 | `deathknight/frost` | C | local raw | blocked | PARTIAL | `rune-and-runic-power-pooling` |
-| `monk/brewmaster` | C | local raw | blocked | PARTIAL | `celestial-brew-charge-capping` |
+| `monk/brewmaster` | C — INTERNAL_ONLY measurement slice at M11-C2 | committed sanitized (gtKb actor 4, 20 s, Shado-Pan) | audited (M11-C0/C1: the namespace-selected 12.1.0 list, six lists and sixty-two actions) | PARTIAL | `celestial-brew-charge-capping` (charge state declared, UNKNOWN; the opener measures 2 MATCH / 0 REJECTED / 13 UNKNOWN over 15 offensive decisions) |
 | `demonhunter/vengeance` | C | none | not yet | UNASSESSED | — |
 | `demonhunter/devourer` | C | local raw | blocked | PARTIAL | `reap-soul-threshold` |
 | `rogue/outlaw` | C | none | not yet | UNASSESSED | — |

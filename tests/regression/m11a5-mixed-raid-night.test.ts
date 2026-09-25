@@ -172,6 +172,7 @@ describe("a Retribution Paladin alone", () => {
       [PROTECTION_PALADIN_ANALYZER_ID]: 0,
       [RETRIBUTION_PALADIN_ANALYZER_ID]: 1,
       "deathknight-blood-observed-decisions": 0,
+      "monk-brewmaster-observed-decisions": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
     expect(run.aggregate.coverage).toMatchObject({
@@ -204,6 +205,7 @@ describe("a mixed roster — Assassination, Protection, Retribution, Arms and an
       [PROTECTION_PALADIN_ANALYZER_ID]: 1,
       [RETRIBUTION_PALADIN_ANALYZER_ID]: 1,
       "deathknight-blood-observed-decisions": 0,
+      "monk-brewmaster-observed-decisions": 0,
     });
   });
 

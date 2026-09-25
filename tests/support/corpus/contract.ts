@@ -47,6 +47,7 @@ import pinnedRogueDotDurations from "../../../src/data/game/rogue-dot-durations.
 import pinnedProtectionApl from "../../../src/simc/data/paladin-protection.apl.json";
 import pinnedRetributionApl from "../../../src/simc/data/paladin-retribution.apl.json";
 import pinnedBloodApl from "../../../src/simc/data/deathknight-blood.apl.json";
+import pinnedBrewmasterApl from "../../../src/simc/data/monk-brewmaster.apl.json";
 import { AUTHORITY_DOMAINS, AUTHORITY_RESOLUTION_OUTCOMES } from "../../../src/findings/authority-domain.js";
 import { SPEC_IDS, type SpecId } from "../../../src/findings/spec-id.js";
 import {
@@ -60,6 +61,7 @@ import {
 import { PROTECTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/protection/observed-analysis.js";
 import { RETRIBUTION_EXCLUSION_REASONS } from "../../../src/specs/paladin/retribution/observed-analysis.js";
 import { BLOOD_EXCLUSION_REASONS } from "../../../src/specs/deathknight/blood/observed-analysis.js";
+import { BREWMASTER_EXCLUSION_REASONS } from "../../../src/specs/monk/brewmaster/observed-analysis.js";
 
 // --------------------------------------------------------------------------
 // Version and limits
@@ -306,6 +308,8 @@ export const OWNING_LAYERS = {
   SPEC_RETRIBUTION_PALADIN: ["src/specs/paladin/retribution/"],
   /** M11-B2. The INTERNAL_ONLY Blood Death Knight measurement evaluator and nothing else. */
   SPEC_BLOOD_DEATH_KNIGHT: ["src/specs/deathknight/blood/"],
+  /** M11-C2. The INTERNAL_ONLY Brewmaster Monk measurement evaluator and nothing else. */
+  SPEC_BREWMASTER_MONK: ["src/specs/monk/brewmaster/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -334,6 +338,7 @@ export const SPEC_LAYER_OF = {
   "paladin/protection": "SPEC_PROTECTION_PALADIN",
   "paladin/retribution": "SPEC_RETRIBUTION_PALADIN",
   "deathknight/blood": "SPEC_BLOOD_DEATH_KNIGHT",
+  "monk/brewmaster": "SPEC_BREWMASTER_MONK",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -2605,6 +2610,339 @@ export const ASSERTION_KINDS = {
       "Over this artifact (or bundle) the registration refuses to analyze the actor with exactly this status — a segment with no combatant profile is PROFILE_NOT_RESOLVED, never a smaller population that reads as clean play.",
   },
 
+  // ---- SPEC_BREWMASTER_MONK (M11-C2, INTERNAL_ONLY) -----------------------
+  //
+  // The MEASUREMENT slice for the next cohort's representative. The kinds
+  // mirror the Blood ones where the shape is the same, and add what this
+  // authority needs measured: why each UNKNOWN is UNKNOWN even when the root
+  // scan resolves (`unresolvedAt`), the NON_GCD candidates beside the GCD
+  // ones, and the state-evidence census (aura presence, the Empty the Cellar
+  // readiness aura, the pinned cooldown readiness).
+  "SPEC_BREWMASTER_MONK.AUTHORITY_PROVENANCE": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            authorityId: z.literal(pinnedBrewmasterApl.authorityId),
+            artifactRevision: z.literal(pinnedBrewmasterApl.artifactRevision),
+            commitSha: z.literal(pinnedBrewmasterApl.provenance.commitSha),
+            sourcePath: z.literal(pinnedBrewmasterApl.provenance.sourcePath),
+            sourceSha256: z.literal(pinnedBrewmasterApl.provenance.sourceSha256),
+            /** The namespace/function region selector; the artifact carries no marker field. */
+            regionSelector: z
+              .object({
+                kind: z.literal(pinnedBrewmasterApl.provenance.regionSelector.kind),
+                enclosingNamespace: z.literal(
+                  pinnedBrewmasterApl.provenance.regionSelector.enclosingNamespace,
+                ),
+                functionHeader: z.literal(pinnedBrewmasterApl.provenance.regionSelector.functionHeader),
+                playerIdentifier: z.literal(pinnedBrewmasterApl.provenance.regionSelector.playerIdentifier),
+              })
+              .strict(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Brewmaster Monk analysis cites exactly the committed pinned authority — id, revision, commit, source path and source digest — and none other, and that artifact's region is the NAMESPACE_FUNCTION selection (namespace, exact function header, player identifier) the extractor recorded, with no marker field. The literals are read from the committed artifact, so a re-pin fails this kind's schema before any case runs.",
+  },
+  "SPEC_BREWMASTER_MONK.DECISION_COVERAGE": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        targetActorId: z.number().int().nullable(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            outcome: z.enum(COMPARISON_OUTCOMES),
+            basis: z.enum(COMPARISON_BASES),
+            authorityCoverage: z.enum(DECISION_COVERAGES),
+            authorityToken: z.string().nullable(),
+            selectionPrecision: z.enum(["EXACT_ENTRY", "TOKEN_CONVERGED"]).nullable(),
+            decisiveBlocker: z.enum(DECISION_BLOCKER_CLASSES).nullable(),
+            rawBlocker: z.string().nullable(),
+            /** The entry the first-GCD query names in its refusal, as `list[ordinal] token`, or null. */
+            unresolvedAt: z.string().nullable(),
+            observedActionRejected: z.boolean(),
+            unselectabilityProven: z.boolean(),
+            unselectabilityRefusal: z.string().nullable(),
+            /** The ROOT scan's stopping entry as `list[ordinal] token`, or null when it resolved. */
+            stoppingAt: z.string().nullable(),
+            stoppingAtoms: z.array(z.string().min(1)),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The internal Brewmaster Monk evaluator, under the committed pinned authority, compares this observed cast exactly so — the shared first-GCD comparison AND the nested unselectability proof — and the query's refusal (when UNKNOWN) names exactly this entry. MATCH means AUTHORITY_COMPATIBLE_ONLY after the non-domain exclusion; UNKNOWN carries the engine's own blocker verbatim; a refused NON_GCD brew branch is never read as a selection.",
+  },
+  "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            eligibleDecisions: z.number().int().nonnegative(),
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            unknown: z.number().int().nonnegative(),
+            exclusions: z.partialRecord(z.enum(BREWMASTER_EXCLUSION_REASONS), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator's coverage disclosure over this actor's every completed cast: the eligible supported-decision denominator, the three outcomes that partition it, and each excluded cast counted under its named reason — EXECUTION_LANE_NOT_ESTABLISHED for the casts the pinned lane data has no record of, never a guessed lane. A cast is never dropped silently.",
+  },
+  "SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "UNKNOWN",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            match: z.number().int().nonnegative(),
+            rejected: z.number().int().nonnegative(),
+            exactEntryMatches: z.number().int().nonnegative(),
+            tokenConvergedMatches: z.number().int().nonnegative(),
+            /** Every eligible decision's observed token -> count. Exact and exhaustive. */
+            eligibleTokens: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every UNKNOWN decision's `<raw blocker> @ <entry>` -> count. Exact and exhaustive. */
+            unresolvedAt: z.record(z.string().min(1), z.number().int().positive()),
+            unknownBlockerClasses: z.partialRecord(
+              z.enum(DECISION_BLOCKER_CLASSES),
+              z.number().int().positive(),
+            ),
+            /** Every eligible decision's ROOT-scan stopping entry -> count. Exact and exhaustive. */
+            stoppingEntries: z.record(z.string().min(1), z.number().int().positive()),
+            stoppingAtoms: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every dispatch step of every eligible decision's ROOT scan -> count. Exact and exhaustive. */
+            dispatchOutcomes: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every GCD-consuming MAY_SELECT step, `list[ordinal] token | atom` -> count. Exact and exhaustive. */
+            undecidedGcdCandidates: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every NON_GCD MAY_SELECT step, same keying. Exact and exhaustive. */
+            undecidedNonGcdCandidates: z.record(z.string().min(1), z.number().int().positive()),
+            /** Every non-melee completed cast by lane and base GCD -> count. Exact and exhaustive. */
+            gcdDistribution: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "THE M11-C2 MEASUREMENT. Over this actor's eligible decisions, the resolved counts, the per-token population, WHY each UNKNOWN is UNKNOWN (the first-GCD query's refusal and the entry it names — a refused NON_GCD brew branch, or the head of diverging worlds), the root-scan stopping entries and atoms, every dispatch outcome (the hero-tree run gates: the other tree's list skipped as RUN_GATE_FALSE_SKIPPED, the resolved tree's entered), every undecided GCD and NON_GCD candidate, and the lane/GCD distribution of every non-melee cast distribute exactly so.",
+  },
+  "SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            /** `atom | up <bool> (<proof>)` or `atom | <unbound reason>` -> count. Exact and exhaustive. */
+            auraEvidence: z.record(z.string().min(1), z.number().int().positive()),
+            /** `token | <PROVEN_INACTIVE or reason>` -> count. Exact and exhaustive. */
+            readinessAuraEvidence: z.record(z.string().min(1), z.number().int().positive()),
+            /** `token | <PROVEN_NOT_READY or reason>` -> count. Exact and exhaustive. */
+            cooldownReadiness: z.record(z.string().min(1), z.number().int().positive()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "Over this actor's eligible decisions the Brewmaster state bindings distribute exactly so: each pinned buff atom's presence from an M4 transition strictly before the decision (or a talent disproof), or its refusal; the Empty the Cellar readiness aura, which stays NOT_ESTABLISHED while its wire identity is uncorroborated — never proven inactive from silence and never queried under the SimC buff id; and each of the six pinned cooldowns' readiness, PROVEN_NOT_READY only from an observed cast under the pinned base.",
+  },
+  "SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        /** Every dispatch entry the ROOT scan visited at this decision, in visit order. Exact and exhaustive. */
+        expected: z.array(
+          z
+            .object({
+              at: z.string().min(1),
+              actionToken: z.enum(["call_action_list", "run_action_list"]),
+              calleeListName: z.string().min(1).nullable(),
+              outcome: z.string().min(1),
+              gate: z.string().min(1),
+            })
+            .strict(),
+        ),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the ROOT scan visited exactly these dispatch entries with exactly these outcomes and gate verdicts: the two non-domain call lists return having selected nothing, the Master of Harmony run gate is FALSE and skipped, and the Shado-Pan run gate is TRUE and entered — the hero-tree dispatch confirmed entry by entry on the pinned Brewmaster list.",
+  },
+  "SPEC_BREWMASTER_MONK.AURA_BINDING_AT": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        atomName: z.string().min(1),
+        expected: z
+          .object({
+            state: z.enum(["BOUND", "UNBOUND"]),
+            up: z.boolean().nullable(),
+            abilityGameId: z.number().int().nullable(),
+            proof: z.enum(["OBSERVED", "TALENT_NOT_SELECTED"]).nullable(),
+            anchorReportTimeMs: z.number().int().nullable(),
+            reason: z.string().nullable(),
+            auraReason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the Brewmaster aura bindings bind (or refuse to bind) this buff atom exactly so: from a transition M4 OBSERVED strictly before the decision on the actor's own aura, or from a talent disproof. Never inactive from silence, never from a later transition, and never from the pull snapshot.",
+  },
+  "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        simcToken: z.string().min(1),
+        expected: z
+          .object({
+            readiness: z.enum(["PROVEN_NOT_READY", "UNKNOWN"]),
+            provenRemainingAtLeastMs: z.number().int().nonnegative().nullable(),
+            anchorReportTimeMs: z.number().int().nullable(),
+            anchorAbilityGameId: z.number().int().nullable(),
+            effectiveBaseMs: z.number().int().positive().nullable(),
+            unknownReason: z.string().nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this decision the Brewmaster cooldown bindings derive this token's readiness exactly so, through the shared token-cooldown derivation, from the actor's last OBSERVED cast strictly before the decision under the M11-C1 pinned base and modifier census (Invoke Niuzao: 120,000 ms less Efficient Training's 25,000 ms when SELECTED). Only PROVEN_NOT_READY is ever claimed.",
+  },
+  "SPEC_BREWMASTER_MONK.DOMAIN_RESULT": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        domain: z.enum(AUTHORITY_DOMAINS),
+        expected: z
+          .object({
+            resolution: z.enum(AUTHORITY_RESOLUTION_OUTCOMES),
+            authorityId: z.string().nullable(),
+            offensiveAuthorityGoverns: z.boolean().nullable(),
+            evidenceFamily: z.enum(["OBSERVABLE", "NOT_OBSERVABLE", "UNVERIFIED"]).nullable(),
+            /** The offensive-list tokens this defensive domain shares, else null. */
+            sharesActionsWithOffensive: z.array(z.string().min(1)).nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator represents this decision domain exactly so: the registration's own authority resolution (AUTHORITY_AVAILABLE for OFFENSIVE_ROTATION, NO_PINNED_AUTHORITY_FOR_DOMAIN for the five declared-and-unbound domains a tank asks about; never DOMAIN_NOT_DECLARED), whether the offensive authority may govern it (never, outside OFFENSIVE_ROTATION), the brews and Expel Harm named on the defensive domains they also serve, and for INTERRUPT the evidence family's capability stated separately from the missing standard.",
+  },
+  "SPEC_BREWMASTER_MONK.BUILD_RESOLUTION": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            talents: z.record(z.string().min(1), z.enum(TALENT_SELECTIONS)),
+            heroTree: z.string().min(1).nullable(),
+            apex1: z.enum(TALENT_SELECTIONS),
+            apex3: z.enum(TALENT_SELECTIONS),
+            /** The six build-static atoms as the resolver bound them; null = unbound. */
+            buildStaticAtoms: z.record(z.string().min(1), z.boolean().nullable()),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "The evaluator resolves the actor's build from the observed talent tree against the pinned Brewmaster talent dataset exactly so — every modelled talent's three-way selection, the hero sub-tree by entry membership, the two apex tiers the list reads by the shared positional rule — and binds the six build-static atoms truthfully from that resolution: the resolved tree TRUE and the other FALSE, never inferred from a cast.",
+  },
+  "SPEC_BREWMASTER_MONK.NON_DOMAIN_ENTRIES": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        /** Every `list[ordinal] token` classified OUTSIDE_SUPPORTED_DECISION_DOMAIN, in authority order. Exact and exhaustive. */
+        expected: z.array(z.string().min(1)),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "Under this actor's resolved build, the Brewmaster applicability rules classify exactly these pinned entries OUTSIDE the rotational decision domain — the potions, the item use and the seven racial actions — by the shared token categories, before any build fact is read. No race, faction, gear use effect or consumable is read or inferred.",
+  },
+  "SPEC_BREWMASTER_MONK.SPEC_GATE": {
+    owningLayer: "SPEC_BREWMASTER_MONK",
+    outcomeClass: "UNSUPPORTED",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z.object({ actorId: z.number().int(), specId: z.string().min(1) }).strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "The Brewmaster facade refuses this specialization with SPEC_NOT_SUPPORTED before any Brewmaster rule runs: no comparisons, no domains, no authority.",
+  },
+
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------
   //
   // Driven directly over a SYNTHETIC authority artifact (JSON_VALUE) with every
@@ -3087,6 +3425,7 @@ export const PINNED_AUTHORITY_REVISIONS: Readonly<Record<string, string>> = {
   [pinnedProtectionApl.authorityId]: pinnedProtectionApl.artifactRevision,
   [pinnedRetributionApl.authorityId]: pinnedRetributionApl.artifactRevision,
   [pinnedBloodApl.authorityId]: pinnedBloodApl.artifactRevision,
+  [pinnedBrewmasterApl.authorityId]: pinnedBrewmasterApl.artifactRevision,
 };
 
 // --------------------------------------------------------------------------

@@ -27,6 +27,7 @@ import * as spec from "./executors/spec-assassination.js";
 import * as protection from "./executors/spec-protection-paladin.js";
 import * as retribution from "./executors/spec-retribution-paladin.js";
 import * as blood from "./executors/spec-blood-death-knight.js";
+import * as brewmaster from "./executors/spec-brewmaster-monk.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
@@ -521,6 +522,96 @@ export async function executeAssertion(
       return blood.analysisStatus(context, corpus, kase, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_BLOOD_DEATH_KNIGHT.SPEC_GATE":
       return blood.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_BREWMASTER_MONK.AUTHORITY_PROVENANCE":
+      return brewmaster.authorityProvenance(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.DECISION_COVERAGE":
+      return brewmaster.decisionCoverage(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY":
+      return brewmaster.coverageSummary(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION":
+      return brewmaster.measurementDistribution(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS":
+      return brewmaster.stateEvidenceCensus(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT":
+      return brewmaster.dispatchTraceAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.AURA_BINDING_AT":
+      return brewmaster.auraBindingAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT":
+      return brewmaster.cooldownReadinessAt(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.DOMAIN_RESULT":
+      return brewmaster.domainResult(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.BUILD_RESOLUTION":
+      return brewmaster.buildResolution(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.NON_DOMAIN_ENTRIES":
+      return brewmaster.nonDomainEntries(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
+    case "SPEC_BREWMASTER_MONK.SPEC_GATE":
+      return brewmaster.specGate(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "APPLICATION_SERVICE.INTERNAL_REGISTRATION":
       return applicationService.internalRegistration(params as ParamsOf<typeof assertion.kind>);
     case "PUBLIC_CONTRACT.REST_MCP_PARITY":
@@ -620,6 +711,18 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_BLOOD_DEATH_KNIGHT.NON_DOMAIN_ENTRIES",
   "SPEC_BLOOD_DEATH_KNIGHT.ANALYSIS_STATUS",
   "SPEC_BLOOD_DEATH_KNIGHT.SPEC_GATE",
+  "SPEC_BREWMASTER_MONK.AUTHORITY_PROVENANCE",
+  "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+  "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
+  "SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION",
+  "SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS",
+  "SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT",
+  "SPEC_BREWMASTER_MONK.AURA_BINDING_AT",
+  "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT",
+  "SPEC_BREWMASTER_MONK.DOMAIN_RESULT",
+  "SPEC_BREWMASTER_MONK.BUILD_RESOLUTION",
+  "SPEC_BREWMASTER_MONK.NON_DOMAIN_ENTRIES",
+  "SPEC_BREWMASTER_MONK.SPEC_GATE",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",
 ];

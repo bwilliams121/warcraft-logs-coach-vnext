@@ -228,6 +228,13 @@ describe("M5 invents no combat state", () => {
     // or within the threshold tolerance. Its companion test is
     // tests/unit/m11b4-blood-aura-remains.test.ts.
     "src/specs/deathknight/blood/aura-remains.ts",
+    // M11-C2. The Brewmaster Monk's buff atoms through `presenceAt` under
+    // pinned, wire-corroborated identities — FALSE only from M4's EXACT
+    // INACTIVE or a producing talent disproved at its choice node, never
+    // from silence or the pull snapshot — and the Empty the Cellar readiness
+    // aura, queried only under a corroborated wire id (none today). Its
+    // companion test is tests/unit/m11c2-brewmaster-bindings.test.ts.
+    "src/specs/monk/brewmaster/aura-bindings.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];
@@ -441,6 +448,9 @@ describe("M5 forms no unearned verdict", () => {
       // M11-B2: the fourth (INTERNAL_ONLY) specialization's facade and domain vocabulary.
       "src/specs/deathknight/blood/observed-analysis.ts",
       "src/specs/deathknight/blood/domains.ts",
+      // M11-C2: the fifth (INTERNAL_ONLY) specialization's facade and domain vocabulary.
+      "src/specs/monk/brewmaster/observed-analysis.ts",
+      "src/specs/monk/brewmaster/domains.ts",
     ];
     for (const path of M5_FILES) {
       const code = codeOf(path);

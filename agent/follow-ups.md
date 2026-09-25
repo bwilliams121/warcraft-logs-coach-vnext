@@ -176,6 +176,8 @@ the most of the remaining M11 population (`agent/m11-a3-authority-audit.md`
 **Raised:** M10-D (2026-09-18).
 
 Both known specializations are PUBLIC and `INTERNAL_ONLY_SPEC_IDS` is empty.
+(Superseded: Retribution Paladin arrived internal-only at M11-A4, Blood Death
+Knight at M11-B2, and Brewmaster Monk at M11-C2, which holds the set today.)
 The partition, `requirePublicSpecId`, `InternalSpecExposureError`, the
 registry's `INTERNAL_ONLY` exposure and `internalAnalyzerForSpec` are kept as
 the on-ramp for the next specialization, which is expected to arrive as an

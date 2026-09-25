@@ -68,9 +68,12 @@ describe("the committed corpus loads", () => {
     // Essence stack authority, the exact counts and the finite sets inside the
     // window with the three decisions they resolve; M11-B10 added one pinning
     // Bone Shield's window sets, presence and floor with the two Marrowrends
-    // they resolve. Measured, then pinned.
-    expect(loaded.artifacts).toHaveLength(43);
-    expect(loaded.cases).toHaveLength(162);
+    // they resolve; M11-C2 added the Brewmaster Monk opener slice (cut from
+    // the M9-C2 opener capture by the same predicate for actor 4, no new
+    // request) and six cases (one normalization, four evaluator — the
+    // measurement cases — one application-service). Measured, then pinned.
+    expect(loaded.artifacts).toHaveLength(44);
+    expect(loaded.cases).toHaveLength(168);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -83,7 +86,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds thirty-two sanitized captures, four derivations and six synthetics", async () => {
+  it("holds thirty-three sanitized captures, four derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -105,6 +108,7 @@ describe("the committed corpus loads", () => {
       "wcl-blood-death-knight-a7r6-rotational-45s",
       "wcl-blood-death-knight-gtkb-opener",
       "wcl-boss-sourced",
+      "wcl-brewmaster-monk-gtkb-opener",
       "wcl-cast-resource-pre-cost",
       "wcl-encounter-rankings-sszorak-page-1",
       "wcl-fight-context-a7r6-fight-7",
@@ -244,10 +248,10 @@ describe("provenance is honest about lineage", () => {
         }
       }
     }
-    // Seven M9-C captures, plus the M11-A4 Retribution and the M11-B2 Blood
-    // opener slices cut from the M9-C2 opener capture (same capturedOn,
-    // sanitizer revision 6).
-    expect(captured).toBe(9);
+    // Seven M9-C captures, plus the M11-A4 Retribution, the M11-B2 Blood and
+    // the M11-C2 Brewmaster opener slices cut from the M9-C2 opener capture
+    // (same capturedOn, sanitizer revision 6).
+    expect(captured).toBe(10);
   });
 
   it("marks unrecorded tooling revisions UNAVAILABLE rather than inventing them", async () => {
@@ -322,6 +326,8 @@ describe("retained coverage is granted only where the capture predicate supports
     "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
     "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
     "wcl-blood-death-knight-gtkb-opener",
+    // M11-C2: the same predicate for actor 4 over the M9-C2 opener capture.
+    "wcl-brewmaster-monk-gtkb-opener",
   ];
 
   it("grants nothing on any property-based or index-based selection", async () => {

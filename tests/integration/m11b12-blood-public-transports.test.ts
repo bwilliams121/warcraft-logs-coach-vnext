@@ -172,6 +172,7 @@ describe("REST: a real Blood Death Knight identity resolves publicly", () => {
       "paladin-protection-observed-decisions": 0,
       "paladin-retribution-observed-decisions": 0,
       [BLOOD_DEATH_KNIGHT_ANALYZER_ID]: 1,
+      "monk-brewmaster-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
     expect(parsed.success).toBe(true);

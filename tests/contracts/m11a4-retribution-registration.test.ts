@@ -326,6 +326,7 @@ describe("the public path analyzes (M11-A5), and the internal path analyzes the 
       "paladin-protection-observed-decisions": 0,
       [RETRIBUTION_PALADIN_ANALYZER_ID]: 1,
       "deathknight-blood-observed-decisions": 0,
+      "monk-brewmaster-observed-decisions": 0,
     });
     const document = projectAnalysisResult(result.analysis);
     expect(document).toMatchObject({

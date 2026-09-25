@@ -4,12 +4,15 @@
  * the same pinned SimulationCraft commit as the other Brewmaster datasets,
  * with the measured hash of the file each reading was made against.
  *
- * AUTHORITY DATA ONLY. M11-C1 onboards no Brewmaster analyzer: nothing imports
- * this module, and no binding, resolver or applicability proof reads it yet.
- * It records the facts in the established hand-reviewed form (the readiness
- * gate records beside the other specializations' aura authorities, and
- * `stealth-readiness-authority.ts`, are the precedents) so the milestone that builds the
- * analyzer rests on a reviewed reading rather than on memory.
+ * AUTHORITY DATA. M11-C1 recorded the facts in the established hand-reviewed
+ * form (the readiness gate records beside the other specializations' aura
+ * authorities, and `stealth-readiness-authority.ts`, are the precedents) so
+ * the milestone that builds the analyzer rests on a reviewed reading rather
+ * than on memory. Since M11-C2 the Brewmaster action profile
+ * (`src/specs/monk/brewmaster/action-profile.ts`) reads them: the Tiger Palm
+ * gate as a build-static STATIC_READY_FALSE proof, and the Empty the Cellar
+ * gate as a REQUIRED_AURA_INACTIVE proof that stays DISABLED while the wire
+ * identity is uncorroborated.
  *
  * WHY THE EMPTY THE CELLAR FACT IS LOAD-BEARING. Both hero-tree lists name
  * `empty_the_cellar,if=buff.empty_the_cellar.remains<1.5` (Shado-Pan) or
@@ -23,12 +26,14 @@
  * aura is up.
  *
  * WHAT IS NOT CLAIMED. The aura's identity ON THE WIRE. SimulationCraft
- * builds the buff from spell 1262768; no committed Brewmaster capture exists
- * to show which id the log emits (a readiness aura pinned for an earlier
- * specialization is emitted as a DIFFERENT id from the one its module
- * builds). `wireAuraIdentity` is
- * therefore `NOT_YET_CORROBORATED`, and a consumer must treat the gate as
- * unusable-when-proven-inactive only after evidence corroborates the id.
+ * builds the buff from spell 1262768, and a readiness aura pinned for an
+ * earlier specialization is emitted as a DIFFERENT id from the one its module
+ * builds. The one committed Brewmaster capture (M11-C2,
+ * `wcl-brewmaster-monk-gtkb-opener`) holds no Exploding Keg cast, no Empty
+ * the Cellar cast and no aura transition of 1262768, so it corroborates
+ * nothing. `wireAuraIdentity` is therefore still `NOT_YET_CORROBORATED`, and
+ * a consumer must treat the gate as unusable-when-proven-inactive only after
+ * evidence corroborates the id.
  */
 
 /** Measured from the pinned file this milestone read; recorded, never typed from memory. */

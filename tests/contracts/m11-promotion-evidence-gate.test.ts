@@ -541,16 +541,46 @@ describe("M11-B12: Blood Death Knight's promotion evidence, through the identity
 });
 
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("no production INTERNAL_ONLY registration exists since M11-B12, and the partition agrees", () => {
-    // The branch below is exercised over a synthetic module for exactly this
-    // reason: Blood Death Knight held this half from M11-B2 until M11-B12
-    // promoted it, and the machinery must keep working over an empty set.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+  it("exactly one production INTERNAL_ONLY registration exists since M11-C2 — Brewmaster Monk — and it is the partition's one member", () => {
+    // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
+    // it; the set was empty from M11-B12 until Brewmaster Monk arrived in
+    // M11-C2. The synthetic module below still exercises the branch
+    // independently of whichever real row holds the half.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["monk/brewmaster"]);
     expect(
       PRODUCTION_CATALOG.registrations
         .filter((row) => row.exposure === "INTERNAL_ONLY")
         .map((row) => row.specId),
-    ).toEqual([]);
+    ).toEqual(["monk/brewmaster"]);
+  });
+
+  it("Brewmaster Monk (INTERNAL_ONLY since M11-C2) is REPORTED, never failed: two real MATCH, no REJECTED — not the promotion standard", async () => {
+    // Informational by construction. The internal pairing accepts the
+    // Monk/Brewmaster identity BECAUSE the public table refuses it, and the
+    // qualifying assertions are the two Breath of Fire MATCH decisions of the
+    // one sanitized Shado-Pan capture. The M11-A5 standard every promotion so
+    // far met — a real MATCH AND a real REJECTED — is NOT met: there is no
+    // REJECTED, and promotion is not on the table in M11-C2.
+    const corpus = await corpusPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "monk/brewmaster");
+    if (module === undefined) throw new Error("no Brewmaster module");
+    expect(module.exposure).toBe("INTERNAL_ONLY");
+    expect(resolveSpecIdentity({ className: "Monk", specName: "Brewmaster" })).toMatchObject({ ok: false });
+    const readiness = evaluate(
+      corpus,
+      committedReport(),
+      "monk/brewmaster",
+      "INTERNAL_ONLY",
+      internalPairing(module),
+    );
+    expect(readiness.exposure).toBe("INTERNAL_ONLY");
+    expect(readiness.qualifyingAssertions.map((q) => q.expectedOutcome)).toEqual(["MATCH", "MATCH"]);
+    expect(readiness.qualifyingAssertions.some((q) => q.expectedOutcome === "REJECTED")).toBe(false);
+    for (const q of readiness.qualifyingAssertions) {
+      expect(q.evidenceActor).toMatchObject({ reportCode: "gtKb2xHn87pNcFfW", fightId: 22, actorId: 4 });
+      expect(q.evidenceIdentity).toEqual({ className: "Monk", specName: "Brewmaster" });
+    }
+    expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("monk/brewmaster");
   });
 
   it("the internal pairing finds nothing for Blood Death Knight now that the identity table resolves it (M11-B12)", async () => {

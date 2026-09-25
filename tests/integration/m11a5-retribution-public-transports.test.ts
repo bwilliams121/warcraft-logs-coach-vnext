@@ -164,6 +164,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
       "paladin-protection-observed-decisions": 0,
       [RETRIBUTION_PALADIN_ANALYZER_ID]: 1,
       "deathknight-blood-observed-decisions": 0,
+      "monk-brewmaster-observed-decisions": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
     expect(parsed.success).toBe(true);

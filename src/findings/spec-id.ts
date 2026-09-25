@@ -30,16 +30,15 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET IS EMPTY AGAIN SINCE M11-B12. It was empty from
- * M10-D (Protection public) until M11-A4 (Retribution arrived internal),
+ * THE INTERNAL-ONLY SET HOLDS ONE MEMBER AGAIN SINCE M11-C2. It was empty
+ * from M10-D (Protection public) until M11-A4 (Retribution arrived internal),
  * empty again from M11-A5 until M11-B2 (Blood Death Knight arrived internal),
- * and M11-B12 moved Blood to the public half after ten measurement slices and
- * the M11-B11 promotion-readiness audit. The partition, the narrowing boundary
- * and the registry's exposure rules are retained as DORMANT architecture: the
- * next specialization is expected to arrive here first, as all three of its
- * predecessors did, and the compile-time proofs below hold over an empty set
- * exactly as they held over one member. Nothing here should be deleted merely
- * because it is unexercised.
+ * and empty again from M11-B12 (Blood moved to the public half after ten
+ * measurement slices and the M11-B11 promotion-readiness audit) until M11-C2,
+ * when Brewmaster Monk arrived here first, as all three of its predecessors
+ * did. The partition, the narrowing boundary and the registry's exposure
+ * rules are live over that one member, and the compile-time proofs below hold
+ * over any number of members, including none.
  *
  * THE NARROWING BOUNDARY, AND WHY IT THROWS
  *
@@ -54,13 +53,18 @@
 
 /** Every specialization this build has an internal name for. */
 export type SpecId =
-  "rogue/assassination" | "paladin/protection" | "paladin/retribution" | "deathknight/blood";
+  | "rogue/assassination"
+  | "paladin/protection"
+  | "paladin/retribution"
+  | "deathknight/blood"
+  | "monk/brewmaster";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
   "paladin/protection",
   "paladin/retribution",
   "deathknight/blood",
+  "monk/brewmaster",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -102,8 +106,15 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * MATCH and REJECTED evidence for it. Promotion changed REACHABILITY, not the
  * analyzer: the slice it publishes is exactly the slice it had, narrowed by
  * one PUBLIC validation gate (San'layn hero tree — see the Blood module).
+ *
+ * Brewmaster Monk arrived here in M11-C2 as the representative slice of the
+ * next cohort: a real, registered, INTERNAL_ONLY evaluator whose purpose is
+ * MEASUREMENT — where the shared engine's traversal of a hero-tree-dispatched
+ * tank authority with brew and Energy state stops, and on which atom. It is
+ * reachable only through the internal lookup and the test/corpus seams, and
+ * it remains `SPEC_NOT_SUPPORTED` on every public path.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze(["monk/brewmaster"] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

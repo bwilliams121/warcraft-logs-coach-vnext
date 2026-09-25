@@ -340,11 +340,15 @@ retained in the repository. The
 three existing APL artifacts and both Paladin cooldown artifacts regenerate
 byte for byte under the extended extractors.
 
-## Brewmaster Monk authority — pinned at M11-C1 (authority only, no analyzer)
+## Brewmaster Monk authority — pinned at M11-C1, consumed since M11-C2
 
 M11-C1 generated Brewmaster authority from the same pin and onboarded NO
 analyzer: no `SpecId`, no registration, no vocabulary, no resolver, and
-nothing under `src/` imports these files.
+nothing under `src/` imported these files. M11-C2 added the INTERNAL_ONLY
+Brewmaster tree (`src/specs/monk/brewmaster/`), which loads the talent, GCD
+and cooldown datasets through `src/data/game/monk-brewmaster-*.ts` loaders,
+reads the readiness facts, and commits the APL artifact below. The spender-cost
+dataset is not read by M11-C2 (no Energy is reconstructed).
 
 ### A second APL region selector
 
@@ -386,12 +390,15 @@ six lists (`precombat` 2, `default` 6, `item_actions` 1, `race_actions` 7,
 `shado_pan` if `hero_tree.shadopan`, no `swap_action_list`, no targeting
 option. Extraction verifies them against the pinned file.
 
-**The APL artifact is NOT committed.** `tests/contracts/m11a2-cross-spec-
-isolation.test.ts` requires every `src/simc/data/<class>-<spec>.apl.json` to be
-loaded by that specialization's registered tree, and M11-C1 registers none.
-The command below reproduces it deterministically; committing it is the
-decision of the milestone that registers the Brewmaster tree (or of a reviewed
-change to that invariant).
+**The APL artifact is committed since M11-C2.** `tests/contracts/m11a2-cross-
+spec-isolation.test.ts` requires every `src/simc/data/<class>-<spec>.apl.json`
+to be loaded by that specialization's registered tree; M11-C1 registered none
+and so committed nothing, and M11-C2 committed
+`src/simc/data/monk-brewmaster.apl.json` together with the tree that loads it
+(`src/specs/monk/brewmaster/pinned-authority.ts`), so the invariant holds
+without being touched. The committed bytes are the command below with
+`--extracted-on 2026-09-24`; they differ from the reviewed M11-C1a scratch
+output only in that date.
 
 ### The game data
 
@@ -438,7 +445,7 @@ node scripts/authority/extract-simc-apl.mjs --target monk-brewmaster \
   --file <checkout>/engine/class_modules/apl/apl_monk.cpp \
   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --commit-date 2026-09-12 \
   --expect-sha256 a8b7e2afe48425089cdc97a369fc4abe87784a818d0423ba0706fb60f1f53c20 \
-  --extracted-on 2026-09-23 --out <not src/ until a Brewmaster tree exists>
+  --extracted-on 2026-09-24 --out src/simc/data/monk-brewmaster.apl.json
 node scripts/authority/extract-simc-gcd.mjs --target monk-brewmaster \
   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23   # --file-<key> for each source
 node scripts/authority/extract-simc-talents.mjs --target monk-brewmaster \

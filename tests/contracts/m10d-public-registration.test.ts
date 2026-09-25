@@ -54,14 +54,14 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the four public ids since M11-B12; internal-only: empty", () => {
+  it("public partition: the four public ids since M11-B12; internal-only: Brewmaster Monk since M11-C2", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
       "deathknight/blood",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["monk/brewmaster"]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -92,11 +92,14 @@ describe("the five sites agree", () => {
     // INTERNAL_ONLY row in — the Blood Death Knight measurement slice —
     // again NOT among the enabled analyzers, and M11-B12 made it PUBLIC by
     // that same move after ten slices and a promotion-readiness audit.
+    // M11-C2 put a fifth, INTERNAL_ONLY row in — the Brewmaster Monk
+    // measurement slice — NOT among the enabled analyzers.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
       ["paladin/retribution", "PUBLIC"],
       ["deathknight/blood", "PUBLIC"],
+      ["monk/brewmaster", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -181,6 +184,7 @@ describe("the complete-catalog helper", () => {
       [PROTECTION_PALADIN_ANALYZER_ID]: 0,
       "paladin-retribution-observed-decisions": 0,
       "deathknight-blood-observed-decisions": 0,
+      "monk-brewmaster-observed-decisions": 0,
     });
   });
 });
