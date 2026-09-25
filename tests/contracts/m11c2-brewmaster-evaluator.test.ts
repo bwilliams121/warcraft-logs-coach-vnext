@@ -4,11 +4,13 @@
  *
  * What this pins is the SHAPE of the honest result over the one Shado-Pan
  * subject: the hero-tree dispatch holds at every decision (Master of Harmony
- * skipped, Shado-Pan entered); exactly the two Breath of Fire casts made under
- * a PROVEN Invoke Niuzao buff MATCH, at EXACT_ENTRY; every other decision is
- * UNKNOWN and names the entry that kept it so — the NON_GCD Purifying Brew
- * the query may not fire without a reviewed contract, or the Breath of Fire
- * whose readiness is not modelled; no decision is REJECTED; Empty the
+ * skipped, Shado-Pan entered); the two Breath of Fire casts made under a
+ * PROVEN Invoke Niuzao buff MATCH at EXACT_ENTRY, and — since M11-C3a, when
+ * Breath of Fire's cooldown is proven running with no Keg Smash reset in
+ * between — so do three Keg Smashes; every other decision is UNKNOWN and
+ * names the entry that kept it so — the NON_GCD Purifying Brew the query may
+ * not fire without a reviewed contract, or the Keg Smash whose readiness is
+ * not modelled; no decision is REJECTED; Empty the
  * Cellar's readiness aura is never proven inactive while its wire identity
  * is uncorroborated; the survival domains carry no authority and say so; and
  * nothing — no silence, no pull snapshot, no lower-priority fall-through —
@@ -39,15 +41,15 @@ const DECISIONS = [
   [2419027, INVOKE_NIUZAO, "UNKNOWN", "shado_pan[2] purifying_brew"],
   [2423448, BLACKOUT_KICK, "UNKNOWN", "shado_pan[2] purifying_brew"],
   [2424688, TIGER_PALM, "UNKNOWN", "shado_pan[2] purifying_brew"],
-  [2425704, KEG_SMASH, "UNKNOWN", "shado_pan[0] breath_of_fire"],
+  [2425704, KEG_SMASH, "MATCH", null],
   [2427076, BREATH_OF_FIRE, "MATCH", null],
   [2428219, BLACKOUT_KICK, "UNKNOWN", "shado_pan[2] purifying_brew"],
   [2429224, TIGER_PALM, "UNKNOWN", "shado_pan[2] purifying_brew"],
-  [2430227, KEG_SMASH, "UNKNOWN", "shado_pan[0] breath_of_fire"],
+  [2430227, KEG_SMASH, "MATCH", null],
   [2431304, BREATH_OF_FIRE, "MATCH", null],
-  [2432314, BLACKOUT_KICK, "UNKNOWN", "shado_pan[0] breath_of_fire"],
-  [2433311, TIGER_PALM, "UNKNOWN", "shado_pan[0] breath_of_fire"],
-  [2434312, KEG_SMASH, "UNKNOWN", "shado_pan[0] breath_of_fire"],
+  [2432314, BLACKOUT_KICK, "UNKNOWN", "shado_pan[1] keg_smash"],
+  [2433311, TIGER_PALM, "UNKNOWN", "shado_pan[1] keg_smash"],
+  [2434312, KEG_SMASH, "MATCH", null],
 ] as const;
 
 function analyzed(state: CombatState) {
@@ -93,14 +95,14 @@ describe("the gates", () => {
 describe("the measurement over the Shado-Pan opener", () => {
   const analysis = analyzed(corpusState(GTKB));
 
-  it("fifteen eligible decisions, two MATCH at EXACT_ENTRY, none REJECTED, thirteen UNKNOWN", () => {
+  it("fifteen eligible decisions, five MATCH at EXACT_ENTRY, none REJECTED, ten UNKNOWN (M11-C3a)", () => {
     expect(analysis.coverage).toMatchObject({
       eligibleDecisions: 15,
-      match: 2,
+      match: 5,
       rejected: 0,
-      unknown: 13,
-      resolvedComparisons: 2,
-      exactEntryMatches: 2,
+      unknown: 10,
+      resolvedComparisons: 5,
+      exactEntryMatches: 5,
       tokenConvergedMatches: 0,
     });
     expect(analysis.coverage.match + analysis.coverage.rejected + analysis.coverage.unknown).toBe(
@@ -119,11 +121,14 @@ describe("the measurement over the Shado-Pan opener", () => {
     ).toEqual(DECISIONS.map((row) => [...row]));
   });
 
-  it("only Breath of Fire MATCHES, selected at shado_pan[0] under a proven Invoke Niuzao buff", () => {
+  it("Breath of Fire and (M11-C3a) Keg Smash MATCH, each under a proven Invoke Niuzao buff", () => {
     const matches = analysis.comparisons.filter((comparison) => comparison.outcome === "MATCH");
     expect(matches.map((comparison) => [comparison.authorityToken, comparison.selectionPrecision])).toEqual([
+      ["keg_smash", "EXACT_ENTRY"],
       ["breath_of_fire", "EXACT_ENTRY"],
+      ["keg_smash", "EXACT_ENTRY"],
       ["breath_of_fire", "EXACT_ENTRY"],
+      ["keg_smash", "EXACT_ENTRY"],
     ]);
     for (const comparison of matches) {
       const resolved = analysis.resolved.find((entry) => entry.position === comparison.decision.position);
@@ -158,7 +163,7 @@ describe("the measurement over the Shado-Pan opener", () => {
 
   it("an UNKNOWN never falls through: every UNKNOWN carries the engine's refusal and names its entry", () => {
     const unknown = analysis.comparisons.filter((comparison) => comparison.outcome === "UNKNOWN");
-    expect(unknown).toHaveLength(13);
+    expect(unknown).toHaveLength(10);
     for (const comparison of unknown) {
       expect(comparison.authorityToken).toBeNull();
       expect(
@@ -168,7 +173,7 @@ describe("the measurement over the Shado-Pan opener", () => {
     }
     expect(analysis.coverage.unresolvedAt).toEqual([
       { key: "TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew", count: 8 },
-      { key: "DIVERGENT_GCD_OUTCOMES @ shado_pan[0] breath_of_fire", count: 5 },
+      { key: "DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash", count: 2 },
     ]);
   });
 

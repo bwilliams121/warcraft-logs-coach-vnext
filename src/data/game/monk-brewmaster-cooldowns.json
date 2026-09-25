@@ -85,7 +85,7 @@
     "classId": 10,
     "className": "Monk",
     "specId": 268,
-    "extractedOn": "2026-09-23",
+    "extractedOn": "2026-09-25",
     "extractorVersion": 1,
     "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned datasets: CombatFight exposes no client-build key. The build is recorded for traceability."
   },
@@ -201,7 +201,7 @@
           "classModule": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
           "classHeader": "f55e3971dd4ab454eb6e035359016e4d6c402d0a444cf89745c468bc34d32973"
         },
-        "reviewedOn": "2026-09-23",
+        "reviewedOn": "2026-09-25",
         "checks": [
           {
             "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
@@ -327,7 +327,7 @@
           "classModule": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
           "classHeader": "f55e3971dd4ab454eb6e035359016e4d6c402d0a444cf89745c468bc34d32973"
         },
-        "reviewedOn": "2026-09-23",
+        "reviewedOn": "2026-09-25",
         "checks": [
           {
             "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
@@ -431,7 +431,7 @@
           "classModule": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
           "classHeader": "f55e3971dd4ab454eb6e035359016e4d6c402d0a444cf89745c468bc34d32973"
         },
-        "reviewedOn": "2026-09-23",
+        "reviewedOn": "2026-09-25",
         "checks": [
           {
             "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
@@ -557,7 +557,7 @@
           "classModule": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
           "classHeader": "f55e3971dd4ab454eb6e035359016e4d6c402d0a444cf89745c468bc34d32973"
         },
-        "reviewedOn": "2026-09-23",
+        "reviewedOn": "2026-09-25",
         "checks": [
           {
             "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
@@ -661,7 +661,7 @@
           "classModule": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
           "classHeader": "f55e3971dd4ab454eb6e035359016e4d6c402d0a444cf89745c468bc34d32973"
         },
-        "reviewedOn": "2026-09-23",
+        "reviewedOn": "2026-09-25",
         "checks": [
           {
             "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
@@ -787,7 +787,7 @@
           "classModule": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
           "classHeader": "f55e3971dd4ab454eb6e035359016e4d6c402d0a444cf89745c468bc34d32973"
         },
-        "reviewedOn": "2026-09-23",
+        "reviewedOn": "2026-09-25",
         "checks": [
           {
             "claim": "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE",
@@ -823,6 +823,122 @@
             "claim": "NO_MODULE_AFFECT_LIST_NAMES_THIS_SPELL",
             "search": "'register_passive_affect_list(' calls and the spell ids they add",
             "finding": "5 call(s): register_passive_affect_list( baseline.brewmaster.aura_2, affect_list_t( 3 ).remove_label( 640 ) ); // Instant Spells with a reduced GCD | register_passive_affect_list( baseline.brewmaster.aura_4, affect_list_t( 7 ).remove_spell( 115098,  // Chi Wave Action | register_passive_affect_list( talent.brewmaster.fluidity_of_motion, affect_list_t( 2 ).remove_spell( 100784 ) );  // Blackout Kick | register_passive_affect_list( baseline.windwalker.aura_2, affect_list_t( 2 ).remove_label( 640 ) ); // Instant Spells with a reduced GCD | register_passive_affect_list( baseline.windwalker.aura_4, affect_list_t( 8 ).remove_spell( 115098,  // Chi Wave Action; none adds 116847"
+          }
+        ]
+      },
+      "cooldownStart": {
+        "anchor": "ACTION_EXECUTE",
+        "evidence": [
+          "action.cpp:1914 action_t::execute() calls update_ready()",
+          "action.cpp:2333-2372 action_t::update_ready() calls cooldown->start( this, cd_duration, delay )",
+          "action.cpp:2342-2358 the only start-time adjustment is a non-negative world-lag delay, which can only move the ready time LATER, never earlier"
+        ],
+        "note": "Execution coincides with the observed cast event. Five of the six pinned abilities are instant; Chi Burst carries a 1,000 ms cast time, and its execute — hence update_ready() — happens at cast completion, which is when the log reports its cast."
+      }
+    },
+    {
+      "simcToken": "breath_of_fire",
+      "abilityGameId": 115181,
+      "displayNameEn": "Breath of Fire",
+      "aliasGroup": null,
+      "baseCooldownMs": 15000,
+      "charges": 0,
+      "chargeCooldownMs": 0,
+      "internalCooldownMs": 0,
+      "category": 0,
+      "categoryCooldownMs": 0,
+      "categoryTypeMask": 0,
+      "baseGcdMs": 1000,
+      "classFamily": 53,
+      "classFlags": [524288, 0, 8, 128],
+      "labels": [16, 22, 292, 2925, 3566],
+      "knownDynamicMutations": [
+        {
+          "member": "reset",
+          "site": "keg_smash_t::execute under Sal'salabim's Strength (sc_monk.cpp:2548-2549, :2588-2592)",
+          "effect": "RESET_TO_READY",
+          "observableSignature": {
+            "kind": "CAST_BY_ACTOR",
+            "abilityGameIds": [121253],
+            "basis": "keg_smash_t::execute calls breath_of_fire->reset( true ) after monk_melee_attack_t::execute (sc_monk.cpp:2586-2592), unconditionally whenever the handle was assigned under talent.brewmaster.salsalabims_strength->ok() (:2548-2549); keg_smash_t is created only by create_action( \"keg_smash\" ) (:5363-5364), so the reset coincides with a completed Keg Smash (121253) cast by the actor"
+          }
+        }
+      ],
+      "binding": {
+        "method": "MACHINE_EXTRACTED_DBC_RECORD",
+        "sourcePath": "engine/dbc/generated/sc_spell_data.inc",
+        "createAction": "sc_monk.cpp:5347-5348 if ( name == \"breath_of_fire\" ) return new breath_of_fire_t( this, options_str )",
+        "specBinding": "sc_monk.cpp:3267-3268 breath_of_fire_t : monk_spell_t( player, \"breath_of_fire\", talent.brewmaster.breath_of_fire ); :5726 talent.brewmaster.breath_of_fire = _ST( \"Breath of Fire\" ), trait row spell 115181; the ONLY cooldown_t that names this cooldown is keg_smash_t's member breath_of_fire (:2502), assigned get_cooldown( \"breath_of_fire\" ) under Sal'salabim's Strength (:2548-2549)"
+      },
+      "passiveModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_PASSIVE_TRAIT_EFFECTS",
+        "classId": 10,
+        "traitRowsExamined": 317,
+        "traitSpellsExamined": 297,
+        "specPassiveSpellsExamined": 17,
+        "classPassiveSpellsExamined": 7,
+        "effectRowsExamined": 1335,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "173:A_MOD_RECHARGE_TIME_PCT_CATEGORY_MASK",
+          "205:A_MOD_RECHARGE_TIME_CATEGORY_MASK",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER",
+          "341:A_MODIFY_CATEGORY_COOLDOWN",
+          "411:A_MOD_MAX_CHARGES",
+          "416:A_HASTED_COOLDOWN",
+          "453:A_MOD_RECHARGE_TIME_CATEGORY",
+          "454:A_MOD_RECHARGE_TIME_PCT_CATEGORY",
+          "457:A_HASTED_CATEGORY"
+        ],
+        "rule": "player.cpp parse_all_class_passives (class passives from class_spells.inc __passive_spells_data; specialization spells with SX_PASSIVE from specialization_spells.inc) and parse_all_passive_talents -> parse_passive_effects (SX_PASSIVE spells; E_APPLY_AURA effects) -> register_passive_effect: A_ADD_FLAT/PCT_MODIFIER with misc_value1 == P_COOLDOWN (11) match by class family flags; the LABEL variants match by misc_value2 against __spelllabel_data; category subtypes match the spell's _category; category-mask subtypes match the spell's _category_type mask; A_HASTED_COOLDOWN matches by family flags. A matched flat value is added to the DBC cooldown field and a matched pct value scales it BEFORE action_t::init reads spell_data.cooldown() (dbc_override_->register_spell( id, \"cooldown\", value )).",
+        "modifiers": []
+      },
+      "dynamicModifierPolicy": {
+        "method": "HAND_REVIEWED_CPP_ABSENCE_PROOF",
+        "appliesTo": "breath_of_fire",
+        "sourcePaths": ["engine/class_modules/monk/sc_monk.cpp", "engine/class_modules/monk/sc_monk.hpp"],
+        "sourceSha256": {
+          "classModule": "61dae19dac3135925bafac351bd624a60fb710d01ff1a37802f43a9c68484aad",
+          "classHeader": "f55e3971dd4ab454eb6e035359016e4d6c402d0a444cf89745c468bc34d32973"
+        },
+        "reviewedOn": "2026-09-25",
+        "checks": [
+          {
+            "claim": "EVERY_DYNAMIC_MUTATION_IS_DECLARED",
+            "search": "every unqualified 'breath_of_fire-><member>' in sc_monk.cpp (not preceded by an identifier character, '.' or '>': a qualified 'breath_of_fire->' names another object)",
+            "finding": "1 use(s): ->reset(); the mutation(s) ->reset() in keg_smash_t::execute under Sal'salabim's Strength (sc_monk.cpp:2548-2549, :2588-2592) [RESET_TO_READY] are declared and nothing else mutates it"
+          },
+          {
+            "claim": "NO_MUTATION_THROUGH_A_NAMED_COOLDOWN_OBJECT",
+            "search": "every 'get_cooldown( \"breath_of_fire\" )' site",
+            "finding": "1 site(s): the constructor assignment to the handle and/or a read-only expression member initialiser (`<x>_cd( p.get_cooldown(...) )`, consulted through remains() only)"
+          },
+          {
+            "claim": "ONLY_DECLARED_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN",
+            "search": "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module",
+            "finding": "19 mutation site(s) in the module; receivers: cooldown.fists_of_fury, cooldown.rising_sun_kick, cooldown, accumulator, aspect_of_harmony->accumulator, rising_sun_kick, breath_of_fire, keg_smash, wisdom_of_the_wall, chp_cooldown, dbc_proc_cb->cooldown, cooldown.anvil_and_stave; exactly 1 name(s) this cooldown, each declared: reset() in keg_smash_t::execute under Sal'salabim's Strength (sc_monk.cpp:2548-2549, :2588-2592)"
+          },
+          {
+            "claim": "NO_RECHARGE_RATE_MULTIPLIER_MECHANISM_ACTIVE",
+            "search": "'adjust_recharge_multiplier' sites in the module",
+            "finding": "no '->adjust_recharge_multiplier(' site exists in sc_monk.cpp"
+          },
+          {
+            "claim": "NO_ACTION_LEVEL_COOLDOWN_OVERRIDE",
+            "search": "the body of breath_of_fire_t for 'cooldown->', 'update_ready' and 'cooldown_duration'",
+            "finding": "breath_of_fire_t (lines 3233-3316) declares no cooldown override and no update_ready; the base action_t::update_ready path applies unchanged"
+          },
+          {
+            "claim": "NO_MODULE_HASTED_COOLDOWN_FLAG",
+            "search": "'cooldown->hasted' sites and their enclosing structs; any 'hasted_cd' member",
+            "finding": "1 site(s): classModule:1999 in strike_of_the_windlord_t; none is this ability's struct; no 'hasted_cd' member exists in sc_monk.cpp (0 mention(s))"
+          },
+          {
+            "claim": "NO_MODULE_AFFECT_LIST_NAMES_THIS_SPELL",
+            "search": "'register_passive_affect_list(' calls and the spell ids they add",
+            "finding": "5 call(s): register_passive_affect_list( baseline.brewmaster.aura_2, affect_list_t( 3 ).remove_label( 640 ) ); // Instant Spells with a reduced GCD | register_passive_affect_list( baseline.brewmaster.aura_4, affect_list_t( 7 ).remove_spell( 115098,  // Chi Wave Action | register_passive_affect_list( talent.brewmaster.fluidity_of_motion, affect_list_t( 2 ).remove_spell( 100784 ) );  // Blackout Kick | register_passive_affect_list( baseline.windwalker.aura_2, affect_list_t( 2 ).remove_label( 640 ) ); // Instant Spells with a reduced GCD | register_passive_affect_list( baseline.windwalker.aura_4, affect_list_t( 8 ).remove_spell( 115098,  // Chi Wave Action; none adds 115181"
           }
         ]
       },

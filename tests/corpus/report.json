@@ -480,7 +480,7 @@
       "passed": 249
     },
     {
-      "assertions": 30,
+      "assertions": 32,
       "cases": 4,
       "failed": 0,
       "kindsExercised": [
@@ -499,7 +499,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_BREWMASTER_MONK",
-      "passed": 30
+      "passed": 32
     },
     {
       "assertions": 13,
@@ -4523,6 +4523,16 @@
           "kind": "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT",
           "ordinal": 16,
           "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT",
+          "ordinal": 17,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT",
+          "ordinal": 18,
+          "status": "PASSED"
         }
       ],
       "authority": {
@@ -4534,7 +4544,7 @@
           "every aura transition on actor 4 sourced by actor 4, in canonical order"
         ]
       },
-      "caseId": "spec-brewmaster-monk.breath-of-fire-under-a-proven-niuzao-matches-and-the-rest-name-their-blocker",
+      "caseId": "spec-brewmaster-monk.breath-of-fire-and-keg-smash-match-and-the-rest-name-their-blocker",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },
@@ -4628,7 +4638,7 @@
           "every aura transition on actor 4 sourced by actor 4, in canonical order"
         ]
       },
-      "caseId": "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-two-resolved",
+      "caseId": "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-five-resolved",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },
@@ -6444,13 +6454,13 @@
   "totals": {
     "artifactBytes": 4883480,
     "artifacts": 44,
-    "assertions": 729,
+    "assertions": 731,
     "cases": 168,
     "declared": 0,
-    "executable": 729,
+    "executable": 731,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 729
+    "passed": 731
   }
 }

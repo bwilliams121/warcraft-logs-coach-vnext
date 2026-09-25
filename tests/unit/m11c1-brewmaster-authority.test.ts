@@ -10,8 +10,10 @@
  *     the talent record, and `celestial_brew` to both build-dependent records;
  *   - the talent dataset carries exactly Brewmaster's two hero trees and the
  *     three apex traits in generated-table order;
- *   - the cooldown dataset pins only abilities no pinned code mutates, and
- *     none of the five `brew_t` cooldowns the mechanical policy cannot see;
+ *   - the cooldown dataset pins only abilities no pinned code mutates (plus,
+ *     since M11-C3a, Breath of Fire with its one declared cast-signature
+ *     reset), and none of the five `brew_t` cooldowns the mechanical policy
+ *     cannot see;
  *   - the power-cost dataset names the resources its rows use;
  *   - the readiness facts agree with the other datasets.
  *
@@ -457,7 +459,7 @@ describe("the Brewmaster cooldown dataset", () => {
     expect(cooldownArtifact.provenance.specId).toBe(268);
   });
 
-  it("pins exactly the six abilities no pinned code mutates after their cooldown starts", () => {
+  it("pins the six abilities no pinned code mutates, plus (M11-C3a) Breath of Fire with its one declared cast reset", () => {
     expect(cooldownArtifact.abilities.map((ability) => [ability.simcToken, ability.abilityGameId])).toEqual([
       ["blackout_kick", 205523],
       ["expel_harm", 322101],
@@ -465,12 +467,34 @@ describe("the Brewmaster cooldown dataset", () => {
       ["invoke_niuzao", 132578],
       ["exploding_keg", 325153],
       ["rushing_jade_wind", 116847],
+      ["breath_of_fire", 115181],
     ]);
     for (const ability of cooldownArtifact.abilities) {
       expect(ability.dynamicModifierPolicy.method, ability.simcToken).toBe("HAND_REVIEWED_CPP_ABSENCE_PROOF");
       expect(ability.dynamicModifierPolicy.sourcePaths, ability.simcToken).toContain(MONK_MODULE);
-      expect("knownDynamicMutations" in ability, ability.simcToken).toBe(false);
+      // Only Breath of Fire declares a dynamic mutation; the six others still carry none.
+      expect("knownDynamicMutations" in ability, ability.simcToken).toBe(
+        ability.simcToken === "breath_of_fire",
+      );
     }
+    const bof = cooldownArtifact.abilities.find(
+      (ability) => ability.simcToken === "breath_of_fire",
+    ) as unknown as {
+      baseCooldownMs: number;
+      charges: number;
+      chargeCooldownMs: number;
+      passiveModifierCensus: { modifiers: unknown[] };
+      knownDynamicMutations: unknown[];
+    };
+    expect([bof.baseCooldownMs, bof.charges, bof.chargeCooldownMs]).toEqual([15000, 0, 0]);
+    expect(bof.passiveModifierCensus.modifiers).toEqual([]);
+    expect(bof.knownDynamicMutations).toMatchObject([
+      {
+        member: "reset",
+        effect: "RESET_TO_READY",
+        observableSignature: { kind: "CAST_BY_ACTOR", abilityGameIds: [121253] },
+      },
+    ]);
   });
 
   it("pins none of the five brew_t cooldowns, and neither the target nor the artifact names one", () => {
@@ -484,9 +508,11 @@ describe("the Brewmaster cooldown dataset", () => {
       expect(BREW_CONTAINER_TOKENS, entry.simcToken).not.toContain(entry.simcToken);
       expect(BREW_CONTAINER_IDS, entry.simcToken).not.toContain(entry.abilityGameId);
     }
-    // Nor the two abilities reset by a cast the schema has no signature for.
-    for (const entry of cooldownArtifact.abilities)
-      expect(["keg_smash", "breath_of_fire"]).not.toContain(entry.simcToken);
+    // Nor Keg Smash: two charges under Stormstout's Last Keg, a hasted recharge
+    // and two reset paths — none modelled. (Breath of Fire is pinned since
+    // M11-C3a, its one reset carried as a CAST_BY_ACTOR signature.)
+    for (const entry of [...target.abilities, ...cooldownArtifact.abilities])
+      expect(entry.simcToken).not.toBe("keg_smash");
   });
 
   it("states a Monk-accurate cooldown-start note (Chi Burst has a cast time)", () => {

@@ -263,6 +263,7 @@ describe("authority and datasets", () => {
         "invoke_niuzao",
         "exploding_keg",
         "rushing_jade_wind",
+        "breath_of_fire",
       ]);
     }
   });
@@ -430,7 +431,7 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(Object.values(counted.calls).every((count) => count === 0)).toBe(true);
   });
 
-  it("the internal lookup runs the real analyzer over the real subject: 15 eligible, 2 MATCH, 0 REJECTED, 13 UNKNOWN", () => {
+  it("the internal lookup runs the real analyzer over the real subject: 15 eligible, 5 MATCH, 0 REJECTED, 10 UNKNOWN (M11-C3a)", () => {
     const registration = internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG);
     expect(registration).not.toBeNull();
     if (registration === null) return;
@@ -449,10 +450,10 @@ describe("the public path refuses the real subject; the internal path analyzes i
     const view = registration.observedDecisionView(run.analysis);
     expect(view.coverage).toMatchObject({
       eligibleDecisions: 15,
-      match: 2,
+      match: 5,
       rejected: 0,
-      unknown: 13,
-      exactEntryMatches: 2,
+      unknown: 10,
+      exactEntryMatches: 5,
       tokenConvergedMatches: 0,
     });
     const tallied = view.coverage.exclusions.reduce((sum, row) => sum + row.count, 0);

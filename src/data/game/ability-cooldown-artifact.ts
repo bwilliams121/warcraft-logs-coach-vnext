@@ -83,7 +83,14 @@ export interface KnownDynamicMutation {
  * one aura applied/refreshed on the actor (Grand Crusader -> 85416); a
  * STACK-CHANGE signature (M11-A4) is any aura event of one of several auras
  * on the actor (Blade of Justice's Light Within resets fire on an Art of War
- * or Righteous Cause stack decrease).
+ * or Righteous Cause stack decrease); a CAST signature (M11-C3a) is a
+ * COMPLETED cast, by the same actor, of one of several abilities (Breath of
+ * Fire is reset by every Keg Smash under Sal'salabim's Strength).
+ *
+ * A signature means only "an event of this shape MAY have mutated the
+ * cooldown". It never starts, re-anchors, replays or readies the cooldown;
+ * the only thing a consumer may do with it is refuse a lower bound when an
+ * event of that shape could lie between the anchoring cast and the query.
  */
 export type MutationObservableSignature =
   | {
@@ -95,7 +102,19 @@ export type MutationObservableSignature =
       readonly kind: "AURA_STACK_CHANGE_ON_ACTOR";
       readonly abilityGameIds: readonly number[];
       readonly basis: string;
+    }
+  | {
+      readonly kind: "CAST_BY_ACTOR";
+      readonly abilityGameIds: readonly number[];
+      readonly basis: string;
     };
+
+/** Every signature kind this build reads. Any other kind is a malformed artifact. */
+export const MUTATION_SIGNATURE_KINDS = [
+  "AURA_APPLICATION_ON_ACTOR",
+  "AURA_STACK_CHANGE_ON_ACTOR",
+  "CAST_BY_ACTOR",
+] as const satisfies readonly MutationObservableSignature["kind"][];
 
 /** A ground effect the APL reads as `<token>.up`: its pinned lifetime and the passives that change it. */
 /**
@@ -256,7 +275,7 @@ function readSignature(raw: unknown): MutationObservableSignature | undefined | 
     if (abilityGameId === null) return null;
     return { kind: "AURA_APPLICATION_ON_ACTOR", abilityGameId, basis: raw.basis as string };
   }
-  if (raw.kind === "AURA_STACK_CHANGE_ON_ACTOR") {
+  if (raw.kind === "AURA_STACK_CHANGE_ON_ACTOR" || raw.kind === "CAST_BY_ACTOR") {
     if (!Array.isArray(raw.abilityGameIds) || raw.abilityGameIds.length === 0) return null;
     const ids: number[] = [];
     for (const id of raw.abilityGameIds) {
@@ -264,7 +283,7 @@ function readSignature(raw: unknown): MutationObservableSignature | undefined | 
       if (read === null) return null;
       ids.push(read);
     }
-    return { kind: "AURA_STACK_CHANGE_ON_ACTOR", abilityGameIds: ids, basis: raw.basis as string };
+    return { kind: raw.kind, abilityGameIds: ids, basis: raw.basis as string };
   }
   return null;
 }

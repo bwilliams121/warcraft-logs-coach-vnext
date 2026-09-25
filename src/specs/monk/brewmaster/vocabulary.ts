@@ -35,9 +35,14 @@
  *
  *   cooldown.celestial_brew.charges_fractional,
  *   cooldown.keg_smash.charges_fractional
- *       brew-container and cast-reset cooldown state; no pinned cooldown record
- *       exists for either token (the brews live in the module's `brews`
- *       container; Keg Smash carries cast-driven resets).
+ *       charge state; no pinned cooldown record exists for either token. The
+ *       brews live in the module's `brews` container. Keg Smash is a charge
+ *       system (1 charge, 8,000 ms recharge in the DBC) that Stormstout's Last
+ *       Keg raises to 2 charges, whose recharge the Brewmaster specialization
+ *       passive (1258153, A_HASTED_CATEGORY on category 1490) hastes, and which
+ *       two paths reset (Exploding Keg, sc_monk.cpp:3408; the Empty Barrel
+ *       trigger under Bring Me Another tier 2, :4510-4516). None of that is
+ *       modelled (M11-C3a audit).
  *   buff.aspect_of_harmony_accumulator.value, health.max
  *       Master of Harmony accumulator state and a health magnitude; read only
  *       by the Master of Harmony list.

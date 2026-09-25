@@ -489,13 +489,15 @@ const DEATHKNIGHT_BLOOD_TARGET = {
 };
 
 /**
- * The Brewmaster Monk target (M11-C1): authority data only, no analyzer.
+ * The Brewmaster Monk target (M11-C1; Breath of Fire added in M11-C3a).
  *
- * SIX abilities, each an APL action whose cooldown NOTHING in the pinned
- * module mutates after it starts — verified by this extractor's mechanical
- * policy AND by a hand review of the one mutation path that policy cannot
- * see (below). Monk keeps one class module and a class header in its own
- * directory; there is no spec module.
+ * SIX abilities whose cooldown NOTHING in the pinned module mutates after it
+ * starts — verified by this extractor's mechanical policy AND by a hand review
+ * of the one mutation path that policy cannot see (below) — and, since
+ * M11-C3a, Breath of Fire, whose ONE mutation (the Keg Smash reset) is
+ * declared with a CAST_BY_ACTOR signature and verified by the same policy.
+ * Monk keeps one class module and a class header in its own directory; there
+ * is no spec module.
  *
  * DELIBERATELY NOT PINNED, each for a reason read at the pin:
  *
@@ -512,12 +514,10 @@ const DEATHKNIGHT_BLOOD_TARGET = {
  *     policy PASSES Celestial Brew, Purifying Brew and Fortifying Brew; that
  *     pass would be a false absence proof, so none of the five is pinned.
  *   - keg_smash: reset by exploding_keg_t::execute (:3408) and by the Empty
- *     Barrel buff trigger (:4514-4516). The first has no aura signature the
- *     artifact schema can express (it is a cast), so no sound lower bound.
- *     The mechanical policy fails it, correctly.
- *   - breath_of_fire: reset by keg_smash_t::execute under Sal'salabim's
- *     Strength (:2548-2549, :2588-2592) — again a cast, not an aura. The
- *     mechanical policy fails it, correctly.
+ *     Barrel buff trigger (:4514-4516); a charge system raised to two charges
+ *     by Stormstout's Last Keg; its recharge is hasted by the Brewmaster
+ *     specialization passive (1258153, A_HASTED_CATEGORY on category 1490).
+ *     No sound lower bound; the mechanical policy fails it, correctly.
  *   - empty_the_cellar: no DBC cooldown; its usability is the aura gate of
  *     empty_the_cellar_t::ready() (:3447-3450), pinned beside the other
  *     readiness facts, not here.
@@ -614,6 +614,45 @@ const MONK_BREWMASTER_TARGET = {
       actionStruct: { file: "classModule", name: "rushing_jade_wind_t" },
       cooldownHandle: "cooldown.rushing_jade_wind",
       cooldownName: "rushing_jade_wind",
+    },
+    {
+      simcToken: "breath_of_fire",
+      abilityGameId: 115181,
+      aliasGroup: null,
+      createAction:
+        'sc_monk.cpp:5347-5348 if ( name == "breath_of_fire" ) return new breath_of_fire_t( this, options_str )',
+      specBinding:
+        'sc_monk.cpp:3267-3268 breath_of_fire_t : monk_spell_t( player, "breath_of_fire", talent.brewmaster.breath_of_fire ); :5726 talent.brewmaster.breath_of_fire = _ST( "Breath of Fire" ), trait row spell 115181; the ONLY cooldown_t that names this cooldown is keg_smash_t\'s member breath_of_fire (:2502), assigned get_cooldown( "breath_of_fire" ) under Sal\'salabim\'s Strength (:2548-2549)',
+      actionStruct: { file: "classModule", name: "breath_of_fire_t" },
+      cooldownHandle: "breath_of_fire",
+      cooldownHandleUnqualified: true,
+      cooldownName: "breath_of_fire",
+      /**
+       * ONE reset site, observable as a CAST. Every Keg Smash execute resets
+       * Breath of Fire when Sal'salabim's Strength is taken; keg_smash_t is
+       * created only by the APL (:5363-5364), so each reset coincides with a
+       * completed player Keg Smash cast (121253). A consumer may claim Breath
+       * of Fire NOT READY only while no completed Keg Smash by the actor lies
+       * strictly between the anchoring cast and the decision.
+       *
+       * NOT TALENT-CONDITIONED, deliberately (M11-C3a): the signature applies
+       * whether or not Sal'salabim's Strength is taken. Without the talent an
+       * intervening Keg Smash withholds a proof it did not need to withhold;
+       * it can never produce one it should not.
+       */
+      knownDynamicMutations: [
+        {
+          member: "reset",
+          site: "keg_smash_t::execute under Sal'salabim's Strength (sc_monk.cpp:2548-2549, :2588-2592)",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "CAST_BY_ACTOR",
+            abilityGameIds: [121253],
+            basis:
+              'keg_smash_t::execute calls breath_of_fire->reset( true ) after monk_melee_attack_t::execute (sc_monk.cpp:2586-2592), unconditionally whenever the handle was assigned under talent.brewmaster.salsalabims_strength->ok() (:2548-2549); keg_smash_t is created only by create_action( "keg_smash" ) (:5363-5364), so the reset coincides with a completed Keg Smash (121253) cast by the actor',
+          },
+        },
+      ],
     },
   ],
   aliasGroups: {},
@@ -1115,15 +1154,36 @@ export function dynamicPolicyChecks(ability, loaded, traits, conventions = undef
   };
 
   // 1. Handle mutations: every `<handle>->` use must be a read.
+  //
+  // `cooldownHandleUnqualified` (M11-C3a, opt-in) is for a handle that is a
+  // bare struct MEMBER rather than a qualified module handle: Breath of
+  // Fire's only cooldown_t is keg_smash_t's member `breath_of_fire`, and the
+  // same spelling also names OTHER objects through a qualifier
+  // (`dot.breath_of_fire->`, `talent.brewmaster.breath_of_fire->`). With the
+  // flag, an occurrence counts only when it is not preceded by an identifier
+  // character, `.` or `>`. Without it — every other ability — the substring
+  // rule below is unchanged.
   const handleArrow = `${ability.cooldownHandle}->`;
-  const arrowLines = lineNumbersOf(moduleText, handleArrow);
   const arrowUses = [];
-  for (const line of arrowLines) {
-    const text = moduleText.split(/\r?\n/)[line - 1] ?? "";
-    const after = text.slice(text.indexOf(handleArrow) + handleArrow.length);
-    const member = /^([A-Za-z_][A-Za-z0-9_]*)/.exec(after)?.[1] ?? "?";
-    arrowUses.push(member);
+  if (ability.cooldownHandleUnqualified === true) {
+    const escaped = handleArrow.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const unqualified = new RegExp(`(?<![A-Za-z0-9_.>])${escaped}([A-Za-z_][A-Za-z0-9_]*)?`, "g");
+    for (const line of moduleText.split(/\r?\n/)) {
+      for (const match of line.matchAll(unqualified)) arrowUses.push(match[1] ?? "?");
+    }
+  } else {
+    const arrowLines = lineNumbersOf(moduleText, handleArrow);
+    for (const line of arrowLines) {
+      const text = moduleText.split(/\r?\n/)[line - 1] ?? "";
+      const after = text.slice(text.indexOf(handleArrow) + handleArrow.length);
+      const member = /^([A-Za-z_][A-Za-z0-9_]*)/.exec(after)?.[1] ?? "?";
+      arrowUses.push(member);
+    }
   }
+  const handleSearch =
+    ability.cooldownHandleUnqualified === true
+      ? `every unqualified '${handleArrow}<member>' in ${moduleLabel} (not preceded by an identifier character, '.' or '>': a qualified '${handleArrow}' names another object)`
+      : `every '${handleArrow}<member>' in ${moduleLabel}`;
   const READ_ONLY_MEMBERS = new Set([
     "up",
     "remains",
@@ -1140,8 +1200,8 @@ export function dynamicPolicyChecks(ability, loaded, traits, conventions = undef
   const declaredMissing = declared.filter((known) => !mutating.includes(known.member));
   require(declared.length === 0
     ? "NO_DYNAMIC_MUTATION_THROUGH_THE_MODULE_HANDLE"
-    : "EVERY_DYNAMIC_MUTATION_IS_DECLARED", `every '${handleArrow}<member>' in ${moduleLabel}`, undeclared.length ===
-    0 && declaredMissing.length === 0, arrowUses.length === 0
+    : "EVERY_DYNAMIC_MUTATION_IS_DECLARED", handleSearch, undeclared.length === 0 &&
+    declaredMissing.length === 0, arrowUses.length === 0
     ? `no '${handleArrow}' use exists in the module`
     : `${String(arrowUses.length)} use(s): ${arrowUses.map((m) => `->${m}()`).join(", ")}` +
         (declared.length === 0

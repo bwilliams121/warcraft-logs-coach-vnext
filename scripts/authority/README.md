@@ -406,7 +406,7 @@ output only in that date.
 | --- | --- | --- |
 | `src/data/game/monk-brewmaster-gcd-semantics.json` | `SIMC_DBC_MONK_BREWMASTER_GCD_SEMANTICS` | 23 `_gcd` records; 21 hand-reviewed token bindings citing `sc_monk.cpp`, `talent.cpp` and `player.cpp` by line; 3 meta lanes (`auto_attack`, `use_items`, `potion`). THE BREWS SPLIT: Celestial Brew 322507 and Celestial Infusion 1241059 are `_gcd` 1000; Purifying Brew 119582, Black Ox Brew 115399 and Fortifying Brew 115203 are `_gcd` 0. `celestial_brew` binds `{322507, 1241059}` (`create_action` builds `celestial_infusion_t` under that talent, `:5349-5352`, and `create_expression` reads `cooldown/action/buff.celestial_brew.*` through it, `:7390-7400`). `empty_the_cellar` binds the executed DRIVER 1263438 (`_gcd` 1000), not the talent record 1262329 (`_gcd` 0, carried as a non-candidate record so the hazard is pinned). `fortifying_brew` binds 115203, the class trait's `id_override_spell`, through `player_talent_t::find_override_spell` (`engine/player/talent.cpp:28-31`, hashed). The seven racials bind the rows a Monk (class mask 0x200) resolves |
 | `src/data/game/monk-brewmaster-talents.json` | `SIMC_TRAIT_MONK_BREWMASTER_TALENTS` | 14 talents (Blackout Combo ⇄ Press the Advantage, Celestial Brew ⇄ Celestial Infusion and four more choice nodes with their alternatives), the Shado-Pan (65, 17 entries) and Master of Harmony (66, 18 entries) hero sub-trees for spec 268 — Conduit of the Celestials (64) has no Brewmaster entry — and the three tiered "Bring Me Another" `apex.N` traits in table order (137075/1265129, 137074/1265138, 137073/1265141). EMPTY THE CELLAR IS NOT PINNED: the table has two Brewmaster rows of that name (entry 136150 on node 101198, shared with Fuel on the Fire; entry 125002 alone on node 101711). `trait_data_t::find` settles it as 125002 (`trait_data.cpp:87-137`), but this extractor never picks between rows of one name |
-| `src/data/game/monk-brewmaster-cooldowns.json` | `SIMC_DBC_MONK_BREWMASTER_ABILITY_COOLDOWNS` | Six abilities nothing in the pinned module mutates after their cooldown starts: Blackout Kick (charge 4,000 ms; Fluidity of Motion −1,000 ms), Expel Harm (15,000 ms; a passive −10,000 ms), Chi Burst (30,000 ms; 1,000 ms cast), Invoke Niuzao (120,000 ms; Efficient Training −25,000 ms, Shado-Pan), Exploding Keg (60,000 ms), Rushing Jade Wind (6,000 ms, hasted) — with the machine census and the mechanical policy. See the defect note below for what is deliberately absent |
+| `src/data/game/monk-brewmaster-cooldowns.json` | `SIMC_DBC_MONK_BREWMASTER_ABILITY_COOLDOWNS` | Six abilities nothing in the pinned module mutates after their cooldown starts: Blackout Kick (charge 4,000 ms; Fluidity of Motion −1,000 ms), Expel Harm (15,000 ms; a passive −10,000 ms), Chi Burst (30,000 ms; 1,000 ms cast), Invoke Niuzao (120,000 ms; Efficient Training −25,000 ms, Shado-Pan), Exploding Keg (60,000 ms), Rushing Jade Wind (6,000 ms, hasted) — with the machine census and the mechanical policy — and, since M11-C3a, Breath of Fire (15,000 ms) with its one declared Keg Smash reset as a `CAST_BY_ACTOR` signature. See the defect note and the M11-C3a section below |
 | `src/data/game/monk-brewmaster-spender-costs.json` | `SIMC_DBC_MONK_BREWMASTER_SPENDER_COSTS` | The only Brewmaster APL actions with `__spellpower_data` rows: Tiger Palm (50 Energy), Keg Smash (40 Energy), Expel Harm (three stance-keyed rows: 15 Energy @137025, 1.4% Mana @137024, 15 Energy @137023), Rushing Jade Wind (1 Chi, no aura key — which resource a Brewmaster press consumes is not established). `powerTypes` names POWER_ENERGY (3) and POWER_CHI (12) through a per-target enumerator list; the other targets keep theirs |
 
 Hand-reviewed beside them: `src/data/game/monk-brewmaster-readiness-
@@ -430,9 +430,43 @@ Anvil & Stave) and by Black Ox Brew's resets (`:3122-3130`). Run on them, the
 policy PASSES Celestial Brew, Purifying Brew and Fortifying Brew — a false
 absence proof. None of the five is pinned, and a test holds the dataset to
 that; the policy itself was NOT changed in M11-C1. Keg Smash and Breath of
-Fire are also absent: each is reset by a CAST (Exploding Keg `:3408`; Keg
-Smash under Sal'salabim's Strength `:2588-2592`), and the artifact schema's
-observable signatures are aura events only. The policy fails both, correctly.
+Fire were also absent at M11-C1: each is reset by a CAST (Exploding Keg
+`:3408`; Keg Smash under Sal'salabim's Strength `:2588-2592`), and the
+artifact schema's observable signatures were aura events only. The policy
+failed both, correctly. Keg Smash is still absent (see M11-C3a below).
+
+### M11-C3a — a CAST_BY_ACTOR signature, and Breath of Fire
+
+One additive signature kind: `{ kind: "CAST_BY_ACTOR", abilityGameIds, basis }`
+(`src/data/game/ability-cooldown-artifact.ts`). It means only that a COMPLETED
+cast by the same actor of one of those abilities MAY have mutated the cooldown.
+`token-cooldown-derivation` proves it ABSENT exactly as it proves an aura
+signature absent — COMPLETE coverage (here CASTS) over the inclusive report-time
+range [anchor, query], and no matching event at a canonical position strictly
+between the anchor and the query — and otherwise withdraws the lower bound. It
+never starts, re-anchors, replays or readies a cooldown.
+
+Breath of Fire is pinned with it (7th Brewmaster ability): 15,000 ms, no
+charges, not hasted, no census modifier — and a scan of the WHOLE pinned spell
+table (not only traits and passives) finds no effect modifying it. Its one
+mutation, `breath_of_fire->reset( true )` in `keg_smash_t::execute` under
+Sal'salabim's Strength, is declared with `CAST_BY_ACTOR [121253]`; only
+`create_action( "keg_smash" )` builds `keg_smash_t`, so every reset coincides
+with a completed Keg Smash cast. The signature is NOT talent-conditioned (by
+decision): without the talent an intervening Keg Smash withholds a proof it did
+not need to withhold, which can never produce a false verdict.
+
+The extractor gained ONE opt-in per-ability flag, `cooldownHandleUnqualified`,
+because Breath of Fire's only `cooldown_t` is `keg_smash_t`'s bare member
+`breath_of_fire`, and the same spelling names other objects through a
+qualifier (`dot.breath_of_fire->`, `talent.brewmaster.breath_of_fire->`). With
+the flag, the handle check counts an occurrence only when it is not preceded by
+an identifier character, `.` or `>`. No other ability sets it, and every other
+target regenerates byte for byte.
+
+Keg Smash stays unpinned: two charges under Stormstout's Last Keg, a recharge
+the Brewmaster specialization passive hastes (1258153, `A_HASTED_CATEGORY` on
+category 1490), and two reset paths (Exploding Keg, the Empty Barrel trigger).
 
 ### Reproduce
 
@@ -451,7 +485,7 @@ node scripts/authority/extract-simc-gcd.mjs --target monk-brewmaster \
 node scripts/authority/extract-simc-talents.mjs --target monk-brewmaster \
   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23
 node scripts/authority/extract-simc-ability-cooldowns.mjs --target monk-brewmaster \
-  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23   # --local-<key> for each source
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-25   # --local-<key> for each source (M11-C3a regeneration)
 node scripts/authority/extract-simc-power-costs.mjs --target monk-brewmaster \
   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23
 npx prettier --write src/data/game/monk-brewmaster-*.json

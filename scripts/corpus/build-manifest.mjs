@@ -5389,8 +5389,8 @@ const BREWMASTER_BREW_REFUSED = (refusal) => ({
   stoppingAt: null,
   stoppingAtoms: [],
 });
-/** An UNKNOWN whose worlds diverge: Breath of Fire's readiness is not established, so shado_pan[0] may or may not fire. */
-const BREWMASTER_DIVERGENT = (refusal) => ({
+/** An UNKNOWN whose worlds diverge at `at`: that entry's readiness is not established, so it may or may not fire. */
+const BREWMASTER_DIVERGENT = (refusal, at) => ({
   outcome: "UNKNOWN",
   basis: "AUTHORITY_SELECTION_UNRESOLVED",
   authorityCoverage: "UNKNOWN",
@@ -5398,18 +5398,19 @@ const BREWMASTER_DIVERGENT = (refusal) => ({
   selectionPrecision: null,
   decisiveBlocker: "DIVERGENT_WORLDS",
   rawBlocker: "DIVERGENT_GCD_OUTCOMES",
-  unresolvedAt: "shado_pan[0] breath_of_fire",
+  unresolvedAt: at,
   observedActionRejected: false,
   unselectabilityProven: false,
   unselectabilityRefusal: refusal,
   stoppingAt: null,
   stoppingAtoms: [],
 });
-const BREWMASTER_BOF_MATCH = {
+/** A MATCH at EXACT_ENTRY for `token`. */
+const BREWMASTER_MATCH = (token) => ({
   outcome: "MATCH",
   basis: "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
   authorityCoverage: "EXACT_ENTRY",
-  authorityToken: "breath_of_fire",
+  authorityToken: token,
   selectionPrecision: "EXACT_ENTRY",
   decisiveBlocker: null,
   rawBlocker: null,
@@ -5419,7 +5420,7 @@ const BREWMASTER_BOF_MATCH = {
   unselectabilityRefusal: "UNCONDITIONAL_ENTRY",
   stoppingAt: null,
   stoppingAtoms: [],
-};
+});
 const bm_cast = (t, ability) => ({ reportTimeMs: t, abilityGameId: ability });
 const bm_observed_aura = (up, abilityGameId, anchorReportTimeMs) => ({
   state: "BOUND",
@@ -5468,28 +5469,28 @@ const BREWMASTER_CASES = [
     { related: ["tests/unit/sanitize-probe.test.ts"] },
   ),
   kase(
-    "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-two-resolved",
+    "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-five-resolved",
     BREWMASTER_GTKB,
     "SPEC_BREWMASTER_MONK",
     "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; resolver.ts",
-    "THE M11-C2 MEASUREMENT. The Brewmaster subject (gtKb fight 22 actor 4, Shado-Pan) yields 15 eligible decisions over its 20 s opener — 4 Keg Smash, 4 Blackout Kick, 3 Tiger Palm, 3 Breath of Fire, 1 Invoke Niuzao — and 18 excluded casts (7 melee swings, 3 NON_GCD Purifying Brews, 8 casts with no pinned lane: Provoke, five Gift of the Ox heals, a potion and an on-use item). Every root scan RESOLVES through the hero-tree dispatch (Master of Harmony skipped, Shado-Pan entered), so no decision is lost to the dispatch itself; 2 MATCH at EXACT_ENTRY (both later Breath of Fire casts, selected at shado_pan[0] under Sal'salabim's Strength and a proven Invoke Niuzao buff), 0 REJECTED, 13 UNKNOWN — 8 because the query must fire the NON_GCD Purifying Brew at shado_pan[2] and no reviewed transition contract exists for it, 5 because Breath of Fire's readiness at shado_pan[0] is not established and its worlds diverge from Keg Smash at shado_pan[1].",
+    "THE M11-C2 MEASUREMENT. The Brewmaster subject (gtKb fight 22 actor 4, Shado-Pan) yields 15 eligible decisions over its 20 s opener — 4 Keg Smash, 4 Blackout Kick, 3 Tiger Palm, 3 Breath of Fire, 1 Invoke Niuzao — and 18 excluded casts (7 melee swings, 3 NON_GCD Purifying Brews, 8 casts with no pinned lane: Provoke, five Gift of the Ox heals, a potion and an on-use item). Every root scan RESOLVES through the hero-tree dispatch (Master of Harmony skipped, Shado-Pan entered), so no decision is lost to the dispatch itself; 5 MATCH at EXACT_ENTRY — both later Breath of Fire casts, selected at shado_pan[0] under Sal'salabim's Strength and a proven Invoke Niuzao buff, and since M11-C3a three Keg Smash casts (+10.7 s, +15.2 s, +19.3 s) selected at shado_pan[1] once Breath of Fire's 15,000 ms cooldown is proven running from the previous Breath of Fire with no Keg Smash reset (CAST_BY_ACTOR 121253) in between — 0 REJECTED, 10 UNKNOWN: 8 because the query must fire the NON_GCD Purifying Brew at shado_pan[2] and no reviewed transition contract exists for it, 2 (Blackout Kick +17.3 s, Tiger Palm +18.3 s) because Keg Smash's readiness at shado_pan[1] is not modelled (two charges, a hasted recharge, two reset paths) and its worlds diverge.",
     [
       a("SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY", {
         actorId: BREWMASTER,
         expected: {
           eligibleDecisions: 15,
-          match: 2,
+          match: 5,
           rejected: 0,
-          unknown: 13,
+          unknown: 10,
           exclusions: { MELEE_SWING: 7, NON_GCD_ACTION: 3, EXECUTION_LANE_NOT_ESTABLISHED: 8 },
         },
       }),
       a("SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION", {
         actorId: BREWMASTER,
         expected: {
-          match: 2,
+          match: 5,
           rejected: 0,
-          exactEntryMatches: 2,
+          exactEntryMatches: 5,
           tokenConvergedMatches: 0,
           eligibleTokens: {
             keg_smash: 4,
@@ -5500,9 +5501,9 @@ const BREWMASTER_CASES = [
           },
           unresolvedAt: {
             "TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew": 8,
-            "DIVERGENT_GCD_OUTCOMES @ shado_pan[0] breath_of_fire": 5,
+            "DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash": 2,
           },
-          unknownBlockerClasses: { DIVERGENT_WORLDS: 5, OTHER: 8 },
+          unknownBlockerClasses: { DIVERGENT_WORLDS: 2, OTHER: 8 },
           stoppingEntries: { "(root scan resolved)": 15 },
           stoppingAtoms: {},
           dispatchOutcomes: {
@@ -5512,8 +5513,7 @@ const BREWMASTER_CASES = [
             "default[5] -> shado_pan : RUN_ENTERED_SCAN_ENDS": 15,
           },
           undecidedGcdCandidates: {
-            "shado_pan[0] breath_of_fire | buff.invoke_niuzao_the_black_ox.up": 3,
-            "shado_pan[0] breath_of_fire | USABILITY:breath_of_fire": 10,
+            "shado_pan[0] breath_of_fire | buff.invoke_niuzao_the_black_ox.up": 2,
             "shado_pan[1] keg_smash | buff.invoke_niuzao_the_black_ox.up": 3,
             "shado_pan[1] keg_smash | USABILITY:keg_smash": 7,
             "shado_pan[4] celestial_brew | buff.empty_barrel.up": 1,
@@ -5529,7 +5529,7 @@ const BREWMASTER_CASES = [
             "shado_pan[11] empty_the_cellar | buff.empty_the_cellar.remains": 7,
             "shado_pan[12] tiger_palm | buff.blackout_combo.up": 3,
             "shado_pan[12] tiger_palm | USABILITY:tiger_palm": 1,
-            "shado_pan[13] breath_of_fire | USABILITY:breath_of_fire": 3,
+            "shado_pan[13] breath_of_fire | USABILITY:breath_of_fire": 1,
             "shado_pan[14] keg_smash | USABILITY:keg_smash": 2,
             "shado_pan[15] exploding_keg | USABILITY:exploding_keg": 2,
             "shado_pan[16] celestial_brew | USABILITY:celestial_brew": 2,
@@ -5582,6 +5582,8 @@ const BREWMASTER_CASES = [
             "invoke_niuzao | PROVEN_NOT_READY": 11,
             "exploding_keg | COOLDOWN_STATE_UNKNOWN": 15,
             "rushing_jade_wind | COOLDOWN_STATE_UNKNOWN": 15,
+            "breath_of_fire | COOLDOWN_STATE_UNKNOWN": 4,
+            "breath_of_fire | PROVEN_NOT_READY": 11,
           },
         },
       }),
@@ -5624,23 +5626,23 @@ const BREWMASTER_CASES = [
     { authority: BREWMASTER_AUTHORITY, related: BREWMASTER_RELATED },
   ),
   kase(
-    "spec-brewmaster-monk.breath-of-fire-under-a-proven-niuzao-matches-and-the-rest-name-their-blocker",
+    "spec-brewmaster-monk.breath-of-fire-and-keg-smash-match-and-the-rest-name-their-blocker",
     BREWMASTER_GTKB,
     "SPEC_BREWMASTER_MONK",
     "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; observed-action-gate.ts; aura-bindings.ts; cooldown-bindings.ts",
-    "Per decision. The Breath of Fire casts at 2,427,076 and 2,431,304 MATCH at shado_pan[0] EXACT_ENTRY: Sal'salabim's Strength is SELECTED and the Invoke Niuzao buff (132578) is proven UP from its application at 2,419,027. The Keg Smash at the pull (2,415,223) is UNKNOWN: no aura has been observed yet, so Niuzao's buff is AMBIGUOUS_INITIAL_STATE, and the world in which Purifying Brew fires at shado_pan[2] has no reviewed contract. The Keg Smash at 2,425,704 is UNKNOWN by DIVERGENT_WORLDS: shado_pan[0] Breath of Fire may be ready (its cooldown is not pinned) and shado_pan[1] selects the observed Keg Smash otherwise. Invoke Niuzao's own cooldown is PROVEN_NOT_READY at 2,423,448 (95,000 ms base: 120,000 less Efficient Training, SELECTED), and Blackout Combo, removed by the Tiger Palm at 2,424,688, is still UP to that Tiger Palm.",
+    "Per decision. The Breath of Fire casts at 2,427,076 and 2,431,304 MATCH at shado_pan[0] EXACT_ENTRY: Sal'salabim's Strength is SELECTED and the Invoke Niuzao buff (132578) is proven UP from its application at 2,419,027. The Keg Smash at the pull (2,415,223) is UNKNOWN: no aura has been observed yet, so Niuzao's buff is AMBIGUOUS_INITIAL_STATE, and the world in which Purifying Brew fires at shado_pan[2] has no reviewed contract. Since M11-C3a the Keg Smash at 2,425,704 MATCHES at shado_pan[1]: Breath of Fire's cooldown is proven running (at least 5,973 ms of 15,000 from the Breath of Fire at 2,416,677, with no Keg Smash reset in between), so shado_pan[0] is skipped; the Breath of Fire at 2,427,076 gets no such proof, because the Keg Smash at 2,425,704 may have reset it — and still MATCHES as the observed cast. The Blackout Kick at 2,432,314 is UNKNOWN by DIVERGENT_WORLDS at shado_pan[1]: Keg Smash's readiness is not modelled. Invoke Niuzao's own cooldown is PROVEN_NOT_READY at 2,423,448 (95,000 ms base: 120,000 less Efficient Training, SELECTED), and Blackout Combo, removed by the Tiger Palm at 2,424,688, is still UP to that Tiger Palm.",
     [
       a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
         actorId: BREWMASTER,
         targetActorId: null,
         observedCast: bm_cast(2427076, BM_BOF),
-        expected: BREWMASTER_BOF_MATCH,
+        expected: BREWMASTER_MATCH("breath_of_fire"),
       }),
       a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
         actorId: BREWMASTER,
         targetActorId: null,
         observedCast: bm_cast(2431304, BM_BOF),
-        expected: BREWMASTER_BOF_MATCH,
+        expected: BREWMASTER_MATCH("breath_of_fire"),
       }),
       a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
         actorId: BREWMASTER,
@@ -5664,13 +5666,13 @@ const BREWMASTER_CASES = [
         actorId: BREWMASTER,
         targetActorId: null,
         observedCast: bm_cast(2425704, BM_KS),
-        expected: BREWMASTER_DIVERGENT("UNCONDITIONAL_ENTRY"),
+        expected: BREWMASTER_MATCH("keg_smash"),
       }),
       a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
         actorId: BREWMASTER,
         targetActorId: null,
         observedCast: bm_cast(2432314, BM_BOK),
-        expected: BREWMASTER_DIVERGENT("CONDITION_NOT_PROVEN_FALSE"),
+        expected: BREWMASTER_DIVERGENT("CONDITION_NOT_PROVEN_FALSE", "shado_pan[1] keg_smash"),
       }),
       a("SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT", {
         actorId: BREWMASTER,
@@ -5749,6 +5751,32 @@ const BREWMASTER_CASES = [
           anchorAbilityGameId: 205523,
           effectiveBaseMs: 4000,
           unknownReason: "WITHIN_QUEUEING_TOLERANCE",
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2425704, BM_KS),
+        simcToken: "breath_of_fire",
+        expected: {
+          readiness: "PROVEN_NOT_READY",
+          provenRemainingAtLeastMs: 5973,
+          anchorReportTimeMs: 2416677,
+          anchorAbilityGameId: 115181,
+          effectiveBaseMs: 15000,
+          unknownReason: null,
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.COOLDOWN_READINESS_AT", {
+        actorId: BREWMASTER,
+        observedCast: bm_cast(2427076, BM_BOF),
+        simcToken: "breath_of_fire",
+        expected: {
+          readiness: "UNKNOWN",
+          provenRemainingAtLeastMs: null,
+          anchorReportTimeMs: null,
+          anchorAbilityGameId: null,
+          effectiveBaseMs: 15000,
+          unknownReason: "COOLDOWN_STATE_UNKNOWN",
         },
       }),
     ],

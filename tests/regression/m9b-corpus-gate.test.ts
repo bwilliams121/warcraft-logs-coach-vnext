@@ -122,10 +122,13 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // aura bindings and three cooldown readinesses; the six domains and the
     // non-domain boundary; the spec gate — and one application-service case
     // pinning the public refusal and the internal-only lookup). Measured,
-    // then pinned.
+    // then pinned. M11-C3a re-pinned the Brewmaster measurement (5 MATCH /
+    // 0 REJECTED / 10 UNKNOWN once Breath of Fire's Keg Smash reset is an
+    // observable CAST_BY_ACTOR signature) and added two assertions: Breath of
+    // Fire's readiness where the proof stands and where the reset withholds it.
     expect(result.summary.cases).toBe(168);
-    expect(result.summary.assertions).toBe(729);
-    expect(result.summary.passed).toBe(729);
+    expect(result.summary.assertions).toBe(731);
+    expect(result.summary.passed).toBe(731);
   });
 
   it("covers every layer", async () => {

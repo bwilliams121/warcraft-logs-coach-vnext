@@ -34,7 +34,11 @@
  * [anchor, query] only when M4 observed none of its signature events on the
  * actor in the interval under COMPLETE AURAS coverage: an APPLICATION
  * signature is an apply or refresh of one aura; a STACK-CHANGE signature is
- * ANY transition of any of its auras. Otherwise the derivation refuses.
+ * ANY transition of any of its auras. A CAST signature (M11-C3a) is the same
+ * rule over COMPLETE CASTS coverage: no COMPLETED cast by the actor of any of
+ * its abilities strictly between the anchor and the query. Otherwise the
+ * derivation refuses. A signature event only ever WITHDRAWS the bound; it is
+ * never read as a reset that happened, a new anchor, or readiness.
  *
  * MILLISECONDS TO SECONDS, EXACTLY ONCE, GRADE PRESERVED.
  */
@@ -54,6 +58,7 @@ import { inclusiveRange } from "../../engine/evidence/coverage.js";
 import { targetRef } from "../../engine/normalization/normalized-events.js";
 import { PINNED_DEFAULT_COOLDOWN_TOLERANCE_MS } from "../../data/game/external-buff-authority.js";
 import type {
+  MutationObservableSignature,
   PassiveCooldownModifier,
   PinnedCooldownAbility,
 } from "../../data/game/ability-cooldown-artifact.js";
@@ -239,6 +244,21 @@ export function dynamicMutationsAbsent(
       return { ok: false, reason: `${mutation.member} in ${mutation.site} has no observable signature` };
     }
     const range = inclusiveRange(anchorEvent.reportTimeMs, queryEvent.reportTimeMs);
+    if (signature.kind === "CAST_BY_ACTOR") {
+      const castAbsence = castSignatureAbsent(
+        state,
+        actorId,
+        anchorPosition,
+        queryPosition,
+        range,
+        signature,
+      );
+      if (!castAbsence.ok) return castAbsence;
+      claims.push(
+        `OBSERVABLE_RESET_ABSENT:${mutation.member}:CAST:${signature.abilityGameIds.join("/")}:[${String(range.fromReportTimeMs)}..${String(range.toReportTimeMs)}]`,
+      );
+      continue;
+    }
     const gate = gateAbsenceClaim({
       completeness: state.fight.completeness,
       category: "AURAS",
@@ -282,6 +302,58 @@ export function dynamicMutationsAbsent(
     );
   }
   return { ok: true, claims };
+}
+
+/**
+ * A CAST signature (M11-C3a) proven absent: the SAME rule as the aura
+ * signatures, over the CASTS family. The actor's CASTS coverage must be
+ * COMPLETE over the same inclusive report-time range [anchor, query], and no
+ * COMPLETED cast by the actor of a signature ability may sit at a canonical
+ * position strictly after the anchor and strictly before the query. A BEGIN
+ * phase never counts (the reset runs inside execute), another actor's cast
+ * never counts (the cooldown belongs to one actor), and a found cast only
+ * WITHDRAWS the proof — it is never read as a reset that happened, a new
+ * anchor, or readiness.
+ */
+function castSignatureAbsent(
+  state: CombatState,
+  actorId: number,
+  anchorPosition: number,
+  queryPosition: number,
+  range: ReturnType<typeof inclusiveRange>,
+  signature: Extract<MutationObservableSignature, { kind: "CAST_BY_ACTOR" }>,
+): { readonly ok: true } | { readonly ok: false; readonly reason: string } {
+  const ids = signature.abilityGameIds;
+  const gate = gateAbsenceClaim({
+    completeness: state.fight.completeness,
+    category: "CASTS",
+    range,
+    actorId,
+  });
+  if (!gate.ok) {
+    return {
+      ok: false,
+      reason: `CASTS coverage is ${gate.reason} over the interval, so the reset signature cast ${ids.join("/")} cannot be proven absent`,
+    };
+  }
+  const hits = state.positionsBySourceActor(actorId).filter((position) => {
+    if (position <= anchorPosition || position >= queryPosition) return false;
+    const event = state.eventAt(position);
+    return (
+      event?.kind === "CAST" &&
+      event.castPhase === "COMPLETE" &&
+      event.source?.actorId === actorId &&
+      event.abilityGameId !== null &&
+      ids.includes(event.abilityGameId)
+    );
+  });
+  if (hits.length > 0) {
+    return {
+      ok: false,
+      reason: `the reset signature cast ${ids.join("/")} fired ${String(hits.length)} time(s) between the anchor and the decision`,
+    };
+  }
+  return { ok: true };
 }
 
 function policyFor(

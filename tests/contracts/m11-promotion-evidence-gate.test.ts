@@ -554,13 +554,14 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     ).toEqual(["monk/brewmaster"]);
   });
 
-  it("Brewmaster Monk (INTERNAL_ONLY since M11-C2) is REPORTED, never failed: two real MATCH, no REJECTED — not the promotion standard", async () => {
+  it("Brewmaster Monk (INTERNAL_ONLY since M11-C2) is REPORTED, never failed: real MATCH evidence, no REJECTED — not the promotion standard", async () => {
     // Informational by construction. The internal pairing accepts the
     // Monk/Brewmaster identity BECAUSE the public table refuses it, and the
-    // qualifying assertions are the two Breath of Fire MATCH decisions of the
-    // one sanitized Shado-Pan capture. The M11-A5 standard every promotion so
+    // qualifying assertions are the MATCH decisions of the one sanitized
+    // Shado-Pan capture — the two Breath of Fire casts (M11-C2) and, since
+    // M11-C3a, the Keg Smash at +10.7 s. The M11-A5 standard every promotion so
     // far met — a real MATCH AND a real REJECTED — is NOT met: there is no
-    // REJECTED, and promotion is not on the table in M11-C2.
+    // REJECTED, and fewer UNKNOWNs are not promotion evidence.
     const corpus = await corpusPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "monk/brewmaster");
     if (module === undefined) throw new Error("no Brewmaster module");
@@ -574,7 +575,7 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       internalPairing(module),
     );
     expect(readiness.exposure).toBe("INTERNAL_ONLY");
-    expect(readiness.qualifyingAssertions.map((q) => q.expectedOutcome)).toEqual(["MATCH", "MATCH"]);
+    expect(readiness.qualifyingAssertions.map((q) => q.expectedOutcome)).toEqual(["MATCH", "MATCH", "MATCH"]);
     expect(readiness.qualifyingAssertions.some((q) => q.expectedOutcome === "REJECTED")).toBe(false);
     for (const q of readiness.qualifyingAssertions) {
       expect(q.evidenceActor).toMatchObject({ reportCode: "gtKb2xHn87pNcFfW", fightId: 22, actorId: 4 });
