@@ -141,6 +141,13 @@
       "sha256": "ae2cd1a1e08821ef45e9f8dc3d4a95a06bd32aebfb92a604db394281717a1b71"
     },
     {
+      "artifactId": "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+      "byteLength": 358207,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "35d6a8f871e576231ab7347568d052c3c05f75cf3989149dcf271cf505df11f6"
+    },
+    {
       "artifactId": "wcl-cast-resource-pre-cost",
       "byteLength": 3045,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -325,8 +332,8 @@
       "passed": 24
     },
     {
-      "assertions": 145,
-      "cases": 40,
+      "assertions": 151,
+      "cases": 42,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
@@ -346,7 +353,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 145
+      "passed": 151
     },
     {
       "assertions": 64,
@@ -480,8 +487,8 @@
       "passed": 249
     },
     {
-      "assertions": 32,
-      "cases": 4,
+      "assertions": 35,
+      "cases": 5,
       "failed": 0,
       "kindsExercised": [
         "SPEC_BREWMASTER_MONK.AURA_BINDING_AT",
@@ -499,7 +506,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_BREWMASTER_MONK",
-      "passed": 32
+      "passed": 35
     },
     {
       "assertions": 13,
@@ -1413,6 +1420,23 @@
       "referencedArtifactIds": ["wcl-boss-sourced"]
     },
     {
+      "artifactId": "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.brewmaster-monk-165s-bundle-composes-two-parts-into-one-complete-fight",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": [
+        "wcl-brewmaster-monk-gtkb-opener",
+        "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165"
+      ]
+    },
+    {
       "artifactId": "wcl-brewmaster-monk-gtkb-opener",
       "assertions": [
         {
@@ -1445,6 +1469,40 @@
       "caseId": "normalization.brewmaster-monk-gtkb-opener-normalizes-whole-and-in-order",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.brewmaster-monk-rotational-165s-seg-20-165-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165"]
     },
     {
       "artifactId": "wcl-assassination-high-parse-opener",
@@ -4601,6 +4659,41 @@
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },
     {
+      "artifactId": "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+      "assertions": [
+        {
+          "kind": "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_MONK_BREWMASTER",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,415,041 for actor 4 (specID 268)",
+          "every COMPLETE cast by actor 4 in the slice, in canonical order",
+          "every aura transition on actor 4 sourced by actor 4, in canonical order"
+        ]
+      },
+      "caseId": "spec-brewmaster-monk.the-165s-shado-pan-window-measures-one-hundred-thirteen-decisions-thirty-six-resolved",
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "referencedArtifactIds": [
+        "wcl-brewmaster-monk-gtkb-opener",
+        "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165"
+      ]
+    },
+    {
       "artifactId": "wcl-brewmaster-monk-gtkb-opener",
       "assertions": [
         {
@@ -6452,15 +6545,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 4883480,
-    "artifacts": 44,
-    "assertions": 731,
-    "cases": 168,
+    "artifactBytes": 5241687,
+    "artifacts": 45,
+    "assertions": 740,
+    "cases": 171,
     "declared": 0,
-    "executable": 731,
+    "executable": 740,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 731
+    "passed": 740
   }
 }

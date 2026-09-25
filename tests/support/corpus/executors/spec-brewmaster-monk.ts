@@ -11,7 +11,11 @@
  *
  * ONE REAL ANALYSIS PER INPUT PER RUN, memoised through the run's own
  * `CorpusExecutionContext` exactly as the other specialization executors do.
- * Single artifacts only: the one committed Brewmaster subject is one slice.
+ * The aggregate kinds (coverage summary, measurement distribution, state
+ * evidence census) also accept a bundle (`historyArtifactIds` +
+ * `declaredHoles`, M11-C4), composed through the shared bundle composer
+ * exactly as the Blood executors compose theirs; every other kind reads one
+ * artifact.
  */
 
 import type { CombatState } from "../../../../src/engine/state/combat-state.js";
@@ -27,7 +31,7 @@ import {
 } from "../../../../src/specs/monk/brewmaster/action-profile.js";
 import { pinnedBrewmasterMonkAuthority } from "../../../../src/specs/monk/brewmaster/pinned-authority.js";
 import type { CorpusExecutionContext } from "../execution-context.js";
-import { positionOfCast, stateOf } from "../fight.js";
+import { BundleCompositionError, positionOfCast, stateOf, stateOfBundle, type BundleHole } from "../fight.js";
 import type { LoadedArtifact, LoadedCase, LoadedCorpus } from "../loader.js";
 import { fail, pass, type AssertionOutcome } from "./outcome.js";
 import type { ParamsOf } from "./params.js";
@@ -44,25 +48,74 @@ function analysisFacts(analysis: BrewmasterMonkAnalysis): unknown {
     : { status: analysis.status, detail: analysis.detail };
 }
 
+interface BundleRequest {
+  readonly historyArtifactIds: readonly string[];
+  readonly declaredHoles: readonly BundleHole[];
+}
+
+function bundleRequestOf(params: {
+  readonly historyArtifactIds?: readonly string[] | undefined;
+  readonly declaredHoles?: readonly BundleHole[] | undefined;
+}): BundleRequest | null {
+  if (params.historyArtifactIds === undefined || params.historyArtifactIds.length === 0) return null;
+  return { historyArtifactIds: params.historyArtifactIds, declaredHoles: params.declaredHoles ?? [] };
+}
+
+function partsOf(
+  corpus: LoadedCorpus,
+  artifact: LoadedArtifact,
+  bundle: BundleRequest,
+): readonly LoadedArtifact[] {
+  const parts = bundle.historyArtifactIds.map((artifactId) => {
+    const part = corpus.artifacts.find((entry) => entry.record.artifactId === artifactId);
+    if (part === undefined) throw new BundleCompositionError(`unknown artifact ${artifactId}`);
+    return part;
+  });
+  return [...parts, artifact];
+}
+
 function analysisOf(
   context: CorpusExecutionContext,
   corpus: LoadedCorpus,
   artifact: LoadedArtifact,
   actorId: number,
   targetActorId: number | null,
+  bundle: BundleRequest | null = null,
 ): { readonly state: CombatState; readonly analysis: BrewmasterMonkAnalysis } {
-  const key = JSON.stringify({
-    derivation: "BREWMASTER_MONK_REGISTRATION.analyze",
-    analyzerId: BREWMASTER_MONK_REGISTRATION.analyzerId,
-    artifactId: artifact.record.artifactId,
-    artifactSha256: artifact.record.sha256,
-    provenance: artifact.record.provenance,
-    actorId,
-    specId: BREWMASTER_MONK_SPEC_ID,
-    targetActorId,
-  });
+  const key =
+    bundle === null
+      ? JSON.stringify({
+          derivation: "BREWMASTER_MONK_REGISTRATION.analyze",
+          analyzerId: BREWMASTER_MONK_REGISTRATION.analyzerId,
+          artifactId: artifact.record.artifactId,
+          artifactSha256: artifact.record.sha256,
+          provenance: artifact.record.provenance,
+          actorId,
+          specId: BREWMASTER_MONK_SPEC_ID,
+          targetActorId,
+        })
+      : JSON.stringify({
+          derivation: "BREWMASTER_MONK_REGISTRATION.analyze",
+          analyzerId: BREWMASTER_MONK_REGISTRATION.analyzerId,
+          parts: partsOf(corpus, artifact, bundle).map((part) => ({
+            artifactId: part.record.artifactId,
+            artifactSha256: part.record.sha256,
+            provenance: part.record.provenance,
+          })),
+          declaredHoles: bundle.declaredHoles,
+          actorId,
+          specId: BREWMASTER_MONK_SPEC_ID,
+          targetActorId,
+        });
   return context.memo.once(key, () => {
-    const state = stateOf(corpus, artifact);
+    const state =
+      bundle === null
+        ? stateOf(corpus, artifact)
+        : stateOfBundle(
+            corpus,
+            partsOf(corpus, artifact, bundle).map((part) => part.record.artifactId),
+            bundle.declaredHoles,
+          );
     const analysis = BREWMASTER_MONK_REGISTRATION.analyze({
       state,
       actorId,
@@ -80,10 +133,20 @@ function analyzedOrFail(
   artifact: LoadedArtifact,
   actorId: number,
   targetActorId: number | null = null,
+  bundle: BundleRequest | null = null,
 ):
   | { readonly ok: true; readonly state: CombatState; readonly analysis: Analyzed }
   | { readonly ok: false; readonly outcome: AssertionOutcome } {
-  const { state, analysis } = analysisOf(context, corpus, artifact, actorId, targetActorId);
+  let derived: ReturnType<typeof analysisOf>;
+  try {
+    derived = analysisOf(context, corpus, artifact, actorId, targetActorId, bundle);
+  } catch (error) {
+    if (error instanceof BundleCompositionError) {
+      return { ok: false, outcome: fail(error.message, { expected: { composed: true } }) };
+    }
+    throw error;
+  }
+  const { state, analysis } = derived;
   if (analysis.status !== "ANALYZED") {
     return {
       ok: false,
@@ -224,7 +287,7 @@ export function coverageSummary(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
   if (!run.ok) return run.outcome;
   const { coverage } = run.analysis;
   const actual = {
@@ -261,7 +324,7 @@ export function measurementDistribution(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
   if (!run.ok) return run.outcome;
   const { coverage, comparisons, resolved } = run.analysis;
   for (const comparison of comparisons) {
@@ -327,7 +390,7 @@ export function stateEvidenceCensus(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId);
+  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, null, bundleRequestOf(params));
   if (!run.ok) return run.outcome;
   const { coverage } = run.analysis;
   const actual = {

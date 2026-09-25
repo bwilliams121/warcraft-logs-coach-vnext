@@ -60,6 +60,7 @@ describe("coverage is measured from the corpus", () => {
       "wcl-blood-death-knight-a7r6-rotational-45s",
       "wcl-blood-death-knight-gtkb-opener",
       "wcl-brewmaster-monk-gtkb-opener",
+      "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
       "wcl-protection-paladin-a7r6-opener",
       "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
       "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",

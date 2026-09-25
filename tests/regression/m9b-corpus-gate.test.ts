@@ -126,9 +126,14 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // 0 REJECTED / 10 UNKNOWN once Breath of Fire's Keg Smash reset is an
     // observable CAST_BY_ACTOR signature) and added two assertions: Breath of
     // Fire's readiness where the proof stands and where the reset withholds it.
-    expect(result.summary.cases).toBe(168);
-    expect(result.summary.assertions).toBe(731);
-    expect(result.summary.passed).toBe(731);
+    // M11-C4 added three cases and nine assertions over the Brewmaster
+    // evidence-closure capture: the 20–165 s segment's normalization census
+    // (five), the two-part 165 s bundle composition (one) and the unchanged
+    // analyzer's measurement over the composed fight — coverage, distribution
+    // and state-evidence census (three). Measured, then pinned.
+    expect(result.summary.cases).toBe(171);
+    expect(result.summary.assertions).toBe(740);
+    expect(result.summary.passed).toBe(740);
   });
 
   it("covers every layer", async () => {

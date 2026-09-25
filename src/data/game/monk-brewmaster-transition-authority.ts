@@ -24,10 +24,17 @@
  * `cooldown.celestial_brew.charges_fractional` and `energy` read on the very
  * next root scan; Purifying Brew triggers Ox Stance and Aspect of Harmony and
  * purifies Stagger (:3505-3518), and a successful brew
- * cast procs Empty Barrel (:6911-6919), which `buff.empty_barrel.up` reads in
- * four Shado-Pan gates. A contract claiming "writes nothing later read" would
- * be false for all three, and modelling what they DO write is the brew
- * container this milestone does not build. A branch that selects one
+ * cast MAY proc Empty Barrel, which `buff.empty_barrel.up` reads in six
+ * Shado-Pan gates. MAY, not does: the Bring Me Another callback (:6911-6919)
+ * is built by `create_proc_callback`, which copies the driver's DBC proc
+ * chance (:6630ff), and the pinned driver 1265129 carries `_proc_chance` 20
+ * with no override — a 20% chance per brew cast, so the value after a
+ * hypothetical brew is one of two, never known. The committed capture agrees:
+ * of three Purifying Brews (+8,084, +13,179, +16,263) only the last is
+ * followed by an Empty Barrel application. A contract claiming "writes
+ * nothing later read" would be false for all three, and modelling what they
+ * DO write is the brew container this milestone does not build. A branch that
+ * selects one
  * therefore refuses, and the decision is UNKNOWN with the brew named.
  *
  * WHAT THE CONTRACT DOES NOT SAY: that the entry was USABLE. It says what

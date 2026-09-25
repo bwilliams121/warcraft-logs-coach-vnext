@@ -75,9 +75,14 @@ Why each UNKNOWN is UNKNOWN (`coverage.unresolvedAt`):
 
 - **8 × `TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew`.** The query must
   explore the world in which the NON_GCD Purifying Brew fires, and no reviewed
-  transition contract exists for it: a brew writes Empty Barrel (a proc on
-  brew casts), Stagger, Ox Stance and brew-container cooldown state that other
-  gates read.
+  transition contract exists for it: a brew may write Empty Barrel, Stagger,
+  Ox Stance and brew-container cooldown state that other gates read. Empty
+  Barrel is a 20% proc on a brew cast, not a certainty: the pinned Bring Me
+  Another driver (1265129) carries `_proc_chance` 20 and `create_proc_callback`
+  copies it (sc_monk.cpp:6630ff, :6911-6919). After a hypothetical brew,
+  `buff.empty_barrel.up` is therefore one of two values and is never bound as
+  up. The capture agrees: only the last of three Purifying Brews (+16.3 s) is
+  followed by an Empty Barrel application.
 - **2 × `DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash`** (Blackout Kick
   +17.3 s, Tiger Palm +18.3 s). Breath of Fire is proven on cooldown, so the
   scan reaches `shado_pan[1]`, and Keg Smash's readiness is not modelled: two

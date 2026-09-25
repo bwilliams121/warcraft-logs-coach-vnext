@@ -551,6 +551,16 @@ const BUNDLE_PARAMS = {
   evaluationWindow: reportTimeRange.optional(),
 } as const;
 
+/**
+ * The bundle half of `BUNDLE_PARAMS`, for the Brewmaster aggregate kinds
+ * (M11-C4). No `evaluationWindow`: the Brewmaster executors evaluate the whole
+ * composed fight, so a window they would not honour is not accepted.
+ */
+const BREWMASTER_BUNDLE_PARAMS = {
+  historyArtifactIds: BUNDLE_PARAMS.historyArtifactIds,
+  declaredHoles: BUNDLE_PARAMS.declaredHoles,
+} as const;
+
 export const ASSERTION_KINDS = {
   // ---- NORMALIZATION -------------------------------------------------------
   "NORMALIZATION.EVENT_COUNT_PRESERVED": {
@@ -2696,6 +2706,7 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BREWMASTER_BUNDLE_PARAMS,
         expected: z
           .object({
             eligibleDecisions: z.number().int().nonnegative(),
@@ -2720,6 +2731,7 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BREWMASTER_BUNDLE_PARAMS,
         expected: z
           .object({
             match: z.number().int().nonnegative(),
@@ -2762,6 +2774,7 @@ export const ASSERTION_KINDS = {
     params: z
       .object({
         actorId: z.number().int(),
+        ...BREWMASTER_BUNDLE_PARAMS,
         expected: z
           .object({
             /** `atom | up <bool> (<proof>)` or `atom | <unbound reason>` -> count. Exact and exhaustive. */
