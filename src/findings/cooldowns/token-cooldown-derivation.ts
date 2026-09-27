@@ -119,7 +119,7 @@ export interface TokenCooldown {
 }
 
 /** A TRAIT resolves by the three-way rule; a spec or class passive is always active. */
-function modifierSelection(
+export function modifierSelection(
   modifier: PassiveCooldownModifier,
   observedTalents: readonly ObservedTalentEntry[],
 ): TalentSelection {

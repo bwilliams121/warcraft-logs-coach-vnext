@@ -284,7 +284,7 @@ describe("GATE — the committed roots", () => {
     expect(readiness.discriminationGate.ready).toBe(true);
   });
 
-  it("Brewmaster passes observation and stays BLOCKED on discrimination", async () => {
+  it("Brewmaster passes observation and (since M11-C4i) discrimination on REAL REJECTED in both subjects — with no control", async () => {
     const { corpus, archive } = await committedTiers();
     const readiness = evaluatePromotionReadiness(
       [corpus, archive],
@@ -294,8 +294,12 @@ describe("GATE — the committed roots", () => {
     );
     expect(readiness.observationGate.ready).toBe(true);
     expect(readiness.observationGate.realMatches).toBe(5);
-    expect(readiness.discriminationGate).toEqual({ realRejected: [], controls: [], ready: false });
-    expect(readiness.evidenceReady).toBe(false);
+    expect(readiness.discriminationGate.controls).toEqual([]);
+    expect(new Set(readiness.discriminationGate.realRejected.map((q) => q.evidenceActor.reportCode))).toEqual(
+      new Set(["gtKb2xHn87pNcFfW", "rXAfw9t1q8YpmkKD"]),
+    );
+    expect(readiness.discriminationGate.ready).toBe(true);
+    expect(readiness.evidenceReady).toBe(true);
   });
 });
 

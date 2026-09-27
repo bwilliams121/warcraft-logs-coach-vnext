@@ -207,17 +207,16 @@ export const NO_READINESS_AURA_FACTS: readonly BrewmasterReadinessAuraFact[] = [
  * The wire aura id a readiness gate may be queried under, or `null` when the
  * pinned record does not corroborate one.
  *
- * The only state the readiness authority can represent today is
- * `NOT_YET_CORROBORATED`, so this returns `null` for every gate: the SimC buff
- * spell id is NEVER used as a stand-in for the id the log emits.
+ * `NOT_YET_CORROBORATED` returns `null`: the SimC buff spell id is NEVER used
+ * as a stand-in for the id the log emits. Only a CORROBORATED identity —
+ * committed evidence tying the buff to a wire id — is returned (M11-C4i:
+ * Empty the Cellar, 1262768).
  */
 export function corroboratedWireAuraIdFor(
   gate: Extract<BrewmasterReadinessGate, { kind: "REQUIRES_AURA_ACTIVE" }>,
 ): number | null {
-  switch (gate.wireAuraIdentity) {
-    case "NOT_YET_CORROBORATED":
-      return null;
-  }
+  if (gate.wireAuraIdentity === "NOT_YET_CORROBORATED") return null;
+  return gate.wireAuraIdentity.wireAuraId;
 }
 
 /**

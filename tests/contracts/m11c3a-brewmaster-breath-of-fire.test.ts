@@ -25,7 +25,10 @@ import { describe, expect, it } from "vitest";
 
 import { brewmasterCooldownAbilitiesFor } from "../../src/data/game/monk-brewmaster-cooldowns.js";
 import { brewmasterTransitionContractFor } from "../../src/data/game/monk-brewmaster-transition-authority.js";
-import { deriveBrewmasterCooldown } from "../../src/specs/monk/brewmaster/cooldown-bindings.js";
+import {
+  deriveBrewmasterCooldown,
+  SUPPORTED_BREWMASTER_COOLDOWN_TOKENS,
+} from "../../src/specs/monk/brewmaster/cooldown-bindings.js";
 import { dynamicMutationsAbsent } from "../../src/findings/cooldowns/token-cooldown-derivation.js";
 import { analyzeObservedBrewmasterMonkDecisions } from "../../src/specs/monk/brewmaster/observed-analysis.js";
 import { BREWMASTER_MONK_REGISTRATION } from "../../src/specs/monk/brewmaster/registration.js";
@@ -230,19 +233,38 @@ describe("movement from M11-C2", () => {
     expect(outcome(2433311, TIGER_PALM).at).toBe("shado_pan[1] keg_smash");
   });
 
-  it("the eight Purifying Brew refusals are untouched, and nothing becomes REJECTED", () => {
+  it("M11-C4i moves the eight Purifying Brew refusals: seven now stop at Black Ox Brew, and one decision is REJECTED by positive usability", () => {
+    // M11-C3a left eight Purifying Brew refusals and no REJECTED. M11-C4i gives
+    // Purifying Brew a reviewed transition, so the query stops at the next
+    // unreviewed brew, Black Ox Brew; and the Tiger Palm at 2,424,688 is
+    // REJECTED because the authority selects a Keg Smash proven usable in
+    // every dimension. The Keg Smash readiness refusals are untouched.
     expect(analysis.coverage.unresolvedAt).toEqual([
-      { key: "TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew", count: 8 },
+      { key: "TRANSITION_UNSUPPORTED @ shado_pan[3] black_ox_brew", count: 7 },
       { key: "DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash", count: 2 },
     ]);
-    expect(analysis.coverage.rejected).toBe(0);
-    expect(analysis.comparisons.every((comparison) => comparison.outcome !== "REJECTED")).toBe(true);
+    expect(analysis.coverage.rejected).toBe(1);
+    expect(
+      analysis.comparisons
+        .filter((comparison) => comparison.outcome === "REJECTED")
+        .map((comparison) => [comparison.decision.reportTimeMs, comparison.authorityToken]),
+    ).toEqual([[2424688, "keg_smash"]]);
   });
 });
 
 describe("scope: Keg Smash and the brews stay out", () => {
-  it("Keg Smash is not pinned and derives nothing", () => {
-    expect(brewmasterCooldownAbilitiesFor("keg_smash")).toEqual([]);
+  it("Keg Smash is pinned for the POSITIVE readiness proof only (M11-C4i): the cooldown bindings never derive it", () => {
+    // One record, its resets declared; the Empty Barrel reset has no observable
+    // signature, so no NOT_READY lower bound could ever be claimed from it.
+    const records = brewmasterCooldownAbilitiesFor("keg_smash");
+    expect(records.map((record) => [record.abilityGameId, record.charges, record.chargeCooldownMs])).toEqual([
+      [121253, 1, 8000],
+    ]);
+    expect(records[0]?.knownDynamicMutations.map((mutation) => mutation.effect)).toEqual([
+      "RESET_TO_READY",
+      "RESET_TO_READY",
+    ]);
+    expect(SUPPORTED_BREWMASTER_COOLDOWN_TOKENS as readonly string[]).not.toContain("keg_smash");
     expect(
       deriveBrewmasterCooldown(
         { state, actorId: ACTOR, position: casts[0]!.position, observedTalents },
@@ -257,13 +279,17 @@ describe("scope: Keg Smash and the brews stay out", () => {
     }
   });
 
-  it("no brew has a transition contract", () => {
-    for (const brew of ["purifying_brew", "black_ox_brew", "fortifying_brew"]) {
+  it("only Purifying Brew has a transition contract (M11-C4i); Black Ox Brew and Fortifying Brew still refuse", () => {
+    expect(brewmasterTransitionContractFor("purifying_brew")).toMatchObject({
+      writes: ["OWN_PREFIX_AVAILABILITY", "SHARED_INTERNAL_COOLDOWN", "FORGETS_UNOBSERVED_BUFFS"],
+      forgetsBuffsUnlessObservedUp: ["empty_barrel"],
+    });
+    for (const brew of ["black_ox_brew", "fortifying_brew"]) {
       expect(brewmasterTransitionContractFor(brew)).toBeNull();
     }
   });
 
-  it("the Breath of Fire record is the only Brewmaster cooldown with a declared dynamic mutation", () => {
+  it("Breath of Fire's one declared mutation is the Keg Smash reset (Keg Smash's own two resets are M11-C4i's)", () => {
     const [bof] = brewmasterCooldownAbilitiesFor("breath_of_fire");
     expect(bof?.knownDynamicMutations).toEqual([
       expect.objectContaining({

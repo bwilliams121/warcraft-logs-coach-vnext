@@ -464,9 +464,35 @@ the flag, the handle check counts an occurrence only when it is not preceded by
 an identifier character, `.` or `>`. No other ability sets it, and every other
 target regenerates byte for byte.
 
-Keg Smash stays unpinned: two charges under Stormstout's Last Keg, a recharge
-the Brewmaster specialization passive hastes (1258153, `A_HASTED_CATEGORY` on
-category 1490), and two reset paths (Exploding Keg, the Empty Barrel trigger).
+Keg Smash stayed unpinned at M11-C3a: two charges under Stormstout's Last Keg,
+a recharge the Brewmaster specialization passive hastes (1258153,
+`A_HASTED_CATEGORY` on category 1490), and two reset paths (Exploding Keg, the
+Empty Barrel trigger).
+
+### M11-C4i — Keg Smash's record, and the usability authority
+
+Keg Smash is now pinned (8th Brewmaster ability, handle `keg_smash`,
+unqualified) with its two reset paths declared as `RESET_TO_READY` mutations —
+Exploding Keg with `CAST_BY_ACTOR [325153]`, the Empty Barrel trigger with no
+signature. The record is consumed ONLY by the positive upper-bound proof
+(`src/findings/usability/cooldown-positive-readiness.ts`: the max of base,
+charge, category and internal cooldowns, refused by any lengthening or
+charge-removing modifier); `deriveBrewmasterCooldown` keeps no negative
+readiness for it. Every other record regenerates content-identical.
+
+`extract-simc-usability-authority.mjs` (new) writes
+`SIMC_DBC_MONK_BREWMASTER_USABILITY_AUTHORITY`
+(`src/data/game/monk-brewmaster-usability-authority.json`): per spell its
+range interval, target mode (from `data_enums.hh`: ENEMY_UNIT_TARGET,
+ENEMY_TARGET_DESTINATION or UNTARGETED — never guessed), cast time, the SimC
+`usable_moving()` restriction, power rows and a cost census; and the eight
+cost-formula claims (`REQUIRED_COST_FORMULA_CLAIMS`) checked mechanically
+against `action.cpp`, `player.cpp` and the class module (the cost formula,
+that flat modifiers only subtract a reduction, that the percent multiplier is
+one, that the class module overrides no cost term and applies no affecting
+aura, and the `usable_moving` rule). A claim that fails to match fails the
+extraction; `costCannotExceedBase` refuses a bound unless every claim is
+recorded verified and the spell's census holds no increasing effect.
 
 ### Reproduce
 
@@ -488,6 +514,8 @@ node scripts/authority/extract-simc-ability-cooldowns.mjs --target monk-brewmast
   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-25   # --local-<key> for each source (M11-C3a regeneration)
 node scripts/authority/extract-simc-power-costs.mjs --target monk-brewmaster \
   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-23
+node scripts/authority/extract-simc-ability-cooldowns.mjs --target monk-brewmaster   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-27   # --local-<key> for each source (M11-C4i regeneration, adds Keg Smash)
+node scripts/authority/extract-simc-usability-authority.mjs --target monk-brewmaster   --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-09-27   --local-spellData <simc>/engine/dbc/generated/sc_spell_data.inc   --local-spellDataLayout <simc>/engine/dbc/spell_data.hpp   --local-clientDataVersion <simc>/engine/dbc/generated/client_data_version.inc   --local-dataEnums <simc>/engine/dbc/data_enums.hh   --local-playerModule <simc>/engine/player/player.cpp   --local-actionModule <simc>/engine/action/action.cpp   --local-classModule <simc>/engine/class_modules/monk/sc_monk.cpp   --local-classHeader <simc>/engine/class_modules/monk/sc_monk.hpp
 npx prettier --write src/data/game/monk-brewmaster-*.json
 ```
 

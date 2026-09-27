@@ -467,14 +467,16 @@ describe("usability", () => {
 describe("the Empty the Cellar readiness gate fails closed", () => {
   const gate = BREWMASTER_READINESS_FACTS.find((fact) => fact.simcToken === "empty_the_cellar")?.gate;
 
-  it("its wire identity is uncorroborated, so no wire id is ever queried — least of all the SimC buff id", () => {
+  it("only a CORROBORATED wire identity is queried (M11-C4i): Empty the Cellar's is, and an uncorroborated gate still yields no id", () => {
     expect(gate).toMatchObject({
       kind: "REQUIRES_AURA_ACTIVE",
       simcBuffSpellId: EMPTY_THE_CELLAR_BUFF_SIMC_SPELL_ID,
-      wireAuraIdentity: "NOT_YET_CORROBORATED",
+      wireAuraIdentity: { state: "CORROBORATED", wireAuraId: 1262768 },
     });
     if (gate?.kind !== "REQUIRES_AURA_ACTIVE") return;
-    expect(corroboratedWireAuraIdFor(gate)).toBeNull();
+    expect(corroboratedWireAuraIdFor(gate)).toBe(1262768);
+    // The same gate WITHOUT corroboration: the SimC buff id is never a stand-in.
+    expect(corroboratedWireAuraIdFor({ ...gate, wireAuraIdentity: "NOT_YET_CORROBORATED" })).toBeNull();
   });
 
   it("with no corroborated id the fact is NOT_ESTABLISHED, and silence under a supplied id is never INACTIVE", () => {
@@ -581,12 +583,16 @@ describe("aura bindings", () => {
 });
 
 describe("pinned lanes, tokens, talents and contracts", () => {
-  it("exactly one NON_GCD transition contract exists — auto_attack — and the three NON_GCD brews have none", () => {
-    expect(BREWMASTER_NON_GCD_TRANSITIONS.map((contract) => contract.simcToken)).toEqual(["auto_attack"]);
+  it("two NON_GCD transition contracts exist — auto_attack and (M11-C4i) purifying_brew — and the two other NON_GCD brews have none", () => {
+    expect(BREWMASTER_NON_GCD_TRANSITIONS.map((contract) => contract.simcToken)).toEqual([
+      "auto_attack",
+      "purifying_brew",
+    ]);
     for (const brew of ["purifying_brew", "black_ox_brew", "fortifying_brew"]) {
       expect(brewmasterExecutionLaneForToken(brew)).toBe("NON_GCD");
-      expect(brewmasterTransitionContractFor(brew)).toBeNull();
     }
+    for (const brew of ["black_ox_brew", "fortifying_brew"])
+      expect(brewmasterTransitionContractFor(brew)).toBeNull();
     expect(brewmasterExecutionLaneForToken("celestial_brew")).toBe("GCD_CONSUMING");
   });
 

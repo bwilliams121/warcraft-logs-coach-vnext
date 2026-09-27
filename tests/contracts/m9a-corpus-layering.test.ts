@@ -438,6 +438,10 @@ describe("captured evidence receives coverage only through the shared corpus int
       "bundleOverEvidence",
       "committedEvidence",
       "ArtifactEvidence",
+      // M11-C4i: the loader-backed analogue of corpusBundleState, the only
+      // bundle entry that resolves an evidence-archive part (the composer
+      // still owns reading, normalization and composition).
+      "stateOfBundle",
     ]);
     for (const path of testPaths) {
       const source = sourceAt(path);

@@ -59,9 +59,10 @@ describe("the committed evidence archive executes clean under workerd", { timeou
     // M11-C4f added the neutral second subject's fixed 165 s window: the
     // 20–165 s segment census (five), the cross-root composition (one) and the
     // measurement — coverage, distribution and state census (three).
-    expect(result.summary.cases).toBe(8);
-    expect(result.summary.assertions).toBe(20);
-    expect(result.summary.passed).toBe(20);
+    // M11-C4i: plus the second subject's resolved REJECTED (one case, one assertion).
+    expect(result.summary.cases).toBe(9);
+    expect(result.summary.assertions).toBe(21);
+    expect(result.summary.passed).toBe(21);
   });
 
   it("is deterministic across runs", async () => {

@@ -127,6 +127,8 @@ import {
   type ObservedActionUnselectability,
 } from "./observed-action-gate.js";
 import { resolveBrewmasterAtoms, type BrewmasterResolverDiagnostics } from "./resolver.js";
+import { resolveBrewmasterPositiveUsability } from "./positive-usability.js";
+import type { PositiveUsability } from "../../../findings/usability/usability-completeness.js";
 import { BREWMASTER_MONK_SPEC_ID } from "./spec.js";
 
 // ---------------------------------------------------------------------------
@@ -222,6 +224,13 @@ export interface BrewmasterDecisionCoverage {
   /** Every eligible decision's cooldown readiness per pinned token, as `token | <readiness or reason>` -> count. */
   readonly cooldownReadiness: readonly CountOf<string>[];
   /**
+   * Every eligible decision's positive usability conclusion per supported
+   * unobserved token (M11-C4i), as `token | PROVEN_USABLE` or
+   * `token | NOT_PROVEN: <dimension>(<reason>)` naming the FIRST unresolved
+   * dimension -> count.
+   */
+  readonly positiveUsability: readonly CountOf<string>[];
+  /**
    * Every non-melee COMPLETE cast by the actor, by pinned execution lane and
    * base GCD, as `<lane> | <baseGcdMs> ms` (`no record` when the dataset has
    * none) -> count.
@@ -274,6 +283,10 @@ export interface BrewmasterSelectionDiagnostics {
   readonly stoppingPoint: BrewmasterStoppingPoint | null;
   /** Every MAY_SELECT step of the ROOT scan, in visit order. */
   readonly undecidedCandidates: readonly BrewmasterUndecidedCandidate[];
+  /** When the query SELECTED, the selecting authority entry as `list[ordinal] token`, else null (M11-C4i). */
+  readonly selectedEntry: string | null;
+  /** When the query SELECTED, the selecting entry's action string verbatim (its condition), else null. */
+  readonly selectedEntryAction: string | null;
 }
 
 /** The unselectability proof's outcome, reduced to what evidence needs. */
@@ -299,6 +312,12 @@ export interface BrewmasterMonkPayload {
     readonly cooldowns: readonly BrewmasterCooldownDiagnostics[];
     readonly selection: BrewmasterSelectionDiagnostics;
     readonly unselectability: BrewmasterUnselectabilityDiagnostics;
+    /**
+     * Every supported unobserved token's positive usability conclusion at this
+     * decision (M11-C4i), with every dimension's evidence: what a coaching
+     * layer needs to say WHY an alternative was definitely available.
+     */
+    readonly positiveUsability: readonly PositiveUsability[];
   }[];
 }
 
@@ -378,12 +397,18 @@ function stepLabel(step: { listName: string; priorityOrdinal: number; actionToke
 
 function selectionDiagnosticsOf(outcome: BrewmasterFirstGcdQueryOutcome): BrewmasterSelectionDiagnostics {
   const { result, rootScan } = outcome;
+  // Only a selection carries its selecting step (a converged token names no
+  // single entry); narrowing on the field keeps this module out of the
+  // enumerated readers of the result vocabulary.
+  const selectingStep = "selectingStep" in result ? result.selectingStep : null;
   const root = {
     rootScanBlockedAt: rootScan.blockedStep,
     rootScanBlocker: rootScan.blocker,
     dispatches: rootScan.dispatches,
     stoppingPoint: rootScan.stoppingPoint,
     undecidedCandidates: rootScan.undecidedCandidates,
+    selectedEntry: selectingStep === null ? null : stepLabel(selectingStep),
+    selectedEntryAction: selectingStep === null ? null : selectingStep.actionStringVerbatim,
   };
   if (result.kind !== "ROTATIONAL_GCD_UNKNOWN")
     return { kind: result.kind, blockedAt: null, detail: null, ...root };
@@ -586,6 +611,21 @@ export function analyzeObservedBrewmasterMonkDecisions(
     const auras = bindSupportedBrewmasterAuras({ state, actorId, position, talents });
     const cooldowns = deriveSupportedBrewmasterCooldowns({ state, actorId, position, observedTalents });
     const readinessAuras = resolveBrewmasterReadinessAuraFacts({ state, actorId, position });
+    const positiveUsability = resolveBrewmasterPositiveUsability(
+      {
+        state,
+        actorId,
+        position,
+        authority,
+        buildFacts,
+        observedTalents,
+        observedAbilityGameId: abilityGameId,
+        observedLocator: event.locator,
+        observedTargetActorId: event.target?.actorId ?? null,
+        decisionTargetActorId: targetActorId,
+      },
+      observedToken,
+    );
     const bindings: AtomBindings = {
       comboPoints: unknownNumber("STATE_NOT_MODELLED"),
       comboPointsDeficit: unknownNumber("STATE_NOT_MODELLED"),
@@ -609,6 +649,7 @@ export function analyzeObservedBrewmasterMonkDecisions(
       observedAbilityGameId: abilityGameId,
       readiness,
       readinessAuras,
+      positiveUsability,
     });
 
     // Brewmaster's own proof that the authority could not have selected the
@@ -623,6 +664,7 @@ export function analyzeObservedBrewmasterMonkDecisions(
       cooldowns: cooldowns.map(cooldownDiagnosticsOf),
       selection: selectionDiagnosticsOf(outcome),
       unselectability: unselectabilityDiagnosticsOf(unselectable),
+      positiveUsability: [...positiveUsability.values()],
     });
 
     comparisons.push(
@@ -663,6 +705,15 @@ export function readinessAuraEvidenceKeyOf(fact: BrewmasterReadinessAuraFact): s
   return `${fact.simcToken} | ${fact.state === "PROVEN_INACTIVE" ? fact.state : fact.reason}`;
 }
 
+/** The census key of one positive usability conclusion: PROVEN_USABLE, or the FIRST unresolved dimension. */
+export function positiveUsabilityKeyOf(conclusion: PositiveUsability): string {
+  if (conclusion.kind === "PROVEN_USABLE") return `${conclusion.simcToken} | PROVEN_USABLE`;
+  const first = conclusion.unresolved[0];
+  const resolution = first === undefined ? undefined : conclusion.dimensions[first];
+  const reason = resolution?.state === "UNKNOWN" ? resolution.reason : "?";
+  return `${conclusion.simcToken} | NOT_PROVEN: ${String(first)}(${reason})`;
+}
+
 /** The census key of one token's derived readiness. */
 export function cooldownReadinessKeyOf(entry: BrewmasterCooldownDiagnostics): string {
   return `${entry.simcToken} | ${entry.readiness.state === "PROVEN_NOT_READY" ? entry.readiness.state : entry.readiness.reason}`;
@@ -695,6 +746,7 @@ export function summarizeBrewmasterDecisions(
   const auraEvidence = new Map<string, number>();
   const readinessAuraEvidence = new Map<string, number>();
   const cooldownReadiness = new Map<string, number>();
+  const positiveUsability = new Map<string, number>();
 
   comparisons.forEach((comparison, index) => {
     bump(eligibleTokens, comparison.decision.observedToken);
@@ -734,6 +786,8 @@ export function summarizeBrewmasterDecisions(
     for (const binding of entry.auras) bump(auraEvidence, auraEvidenceKeyOf(binding));
     for (const fact of entry.readinessAuras) bump(readinessAuraEvidence, readinessAuraEvidenceKeyOf(fact));
     for (const cooldown of entry.cooldowns) bump(cooldownReadiness, cooldownReadinessKeyOf(cooldown));
+    for (const conclusion of entry.positiveUsability)
+      bump(positiveUsability, positiveUsabilityKeyOf(conclusion));
   }
 
   return {
@@ -760,6 +814,7 @@ export function summarizeBrewmasterDecisions(
     auraEvidence: tallyOpen(auraEvidence),
     readinessAuraEvidence: tallyOpen(readinessAuraEvidence),
     cooldownReadiness: tallyOpen(cooldownReadiness),
+    positiveUsability: tallyOpen(positiveUsability),
     gcdDistribution: tallyOpen(gcdDistribution),
   };
 }

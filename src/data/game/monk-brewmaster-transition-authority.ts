@@ -7,7 +7,14 @@
  * can check against the pinned source. No contract, no branch: the query
  * refuses rather than guessing what the action would have changed.
  *
- * ONE CONTRACT, DELIBERATELY. Under the class/spec authority boundary every
+ * M11-C4i ADDS `purifying_brew`, reopening the M11-C3b decision
+ * (KEEP_PURIFYING_BREW_UNKNOWN) only to model the DETERMINISTIC part of its
+ * transition, now that the audit shows it useful downstream: its own shared
+ * internal cooldown (both of its entries unusable at zero elapsed time) and
+ * the one probabilistic write, Empty Barrel, FORGOTTEN — never bound up. See
+ * the contract below. Black Ox Brew and Fortifying Brew still refuse.
+ *
+ * ONE CONTRACT, DELIBERATELY (M11-C2). Under the class/spec authority boundary every
  * racial, potion and item-use entry of the pinned list is OUTSIDE the
  * rotational decision domain and is classified non-applicable BEFORE
  * selection (`src/specs/monk/brewmaster/domain-boundary.ts`), so none of
@@ -44,7 +51,19 @@
 
 import { SC_MONK_CPP_SHA256 } from "./monk-brewmaster-readiness-authority.js";
 
-export type BrewmasterTransitionWrite = "OWN_PREFIX_AVAILABILITY";
+/**
+ * What a hypothetical execution writes, named so the adapter applies exactly
+ * these and nothing else:
+ *
+ *   OWN_PREFIX_AVAILABILITY    the executed entry cannot fire again at zero elapsed time
+ *   SHARED_INTERNAL_COOLDOWN   EVERY entry naming the token cannot fire again at zero
+ *                              elapsed time (a cooldown shared by name across entries)
+ *   FORGETS_UNOBSERVED_BUFFS   each buff in `forgetsBuffsUnlessObservedUp` becomes unknown
+ *                              unless the decision's own evidence already binds it UP: the
+ *                              execution MAY make it up, and nothing says it did
+ */
+export type BrewmasterTransitionWrite =
+  "OWN_PREFIX_AVAILABILITY" | "SHARED_INTERNAL_COOLDOWN" | "FORGETS_UNOBSERVED_BUFFS";
 
 export interface BrewmasterTransitionClaim {
   readonly sourcePath: string;
@@ -62,6 +81,8 @@ export interface BrewmasterNonGcdTransitionContract {
   readonly timeAdvanceMs: 0;
   /** Named, never defaulted. */
   readonly writes: readonly BrewmasterTransitionWrite[];
+  /** The `buff.<name>.up` atoms FORGETS_UNOBSERVED_BUFFS forgets. Empty unless that write is named. */
+  readonly forgetsBuffsUnlessObservedUp: readonly string[];
   readonly claims: readonly BrewmasterTransitionClaim[];
 }
 
@@ -80,6 +101,7 @@ const AUTO_ATTACK: BrewmasterNonGcdTransitionContract = {
   baseGcdMs: 0,
   timeAdvanceMs: 0,
   writes: ["OWN_PREFIX_AVAILABILITY"],
+  forgetsBuffsUnlessObservedUp: [],
   claims: [
     claim(
       "auto_attack_t::auto_attack_t",
@@ -105,8 +127,66 @@ const AUTO_ATTACK: BrewmasterNonGcdTransitionContract = {
   ],
 };
 
+/**
+ * `purifying_brew` (M11-C4i). What a hypothetical Purifying Brew writes that
+ * the pinned list reads, and nothing it does not:
+ *
+ *   - its OWN availability, across BOTH of its entries (`shado_pan[2]`,
+ *     `shado_pan[8]`, and the Master of Harmony entry): the DBC `_cooldown`
+ *     of 1,000 ms on a two-charge spell is an INTERNAL cooldown shared by name
+ *     (M11-C3b), so no entry can fire again at zero elapsed time;
+ *   - `buff.empty_barrel`: a brew cast MAY proc it (Bring Me Another, a 20%
+ *     proc — M11-C3b), so after the branch it is UNKNOWN unless the decision's
+ *     own evidence already binds it UP. It is NEVER bound up because the proc
+ *     could occur.
+ *
+ * Everything else it writes is read by no pinned gate of either list:
+ * Ox Stance, the Stagger purify, Elixir of Determination and the Gai Plin's
+ * heal, and `brew_t::execute`'s Swift as a Coursing River, Pretense of
+ * Instability and Special Delivery; Aspect of Harmony is read only through
+ * Master of Harmony atoms no binding supplies (they stay unknown). It costs no
+ * resource (no `__spellpower_data` row). The Empty Barrel proc can reset Keg
+ * Smash under Bring Me Another tier 2 — which only makes Keg Smash MORE ready,
+ * so no positive readiness proof is invalidated, and no NOT_READY fact for Keg
+ * Smash exists to invalidate.
+ *
+ * WHAT IT DOES NOT SAY: that Purifying Brew was usable. Its `ready()` needs
+ * Stagger ticking, which is not modelled; the query explores the world in
+ * which it fires beside the one in which it does not.
+ */
+const PURIFYING_BREW: BrewmasterNonGcdTransitionContract = {
+  simcToken: "purifying_brew",
+  baseGcdMs: 0,
+  timeAdvanceMs: 0,
+  writes: ["OWN_PREFIX_AVAILABILITY", "SHARED_INTERNAL_COOLDOWN", "FORGETS_UNOBSERVED_BUFFS"],
+  forgetsBuffsUnlessObservedUp: ["empty_barrel"],
+  claims: [
+    claim(
+      "purifying_brew_t::purifying_brew_t; purifying_brew_t::execute",
+      "3487-3496; 3505-3527",
+      "Built as brew_t<monk_spell_t>( player, \"purifying_brew\", talent.brewmaster.purifying_brew ) with use_off_gcd; execute calls brew_t::execute, then triggers ox_stance, adds to aspect_of_harmony, purifies Stagger, sets elixir_of_determination's value and may execute the Gai Plin's heal. No pinned gate of either hero-tree list reads any of those.",
+    ),
+    claim(
+      "brew_t<base_action_t>::execute",
+      "4158-4166",
+      "base execute, then swift_as_a_coursing_river, pretense_of_instability and action.special_delivery. No pinned gate reads any of them.",
+    ),
+    claim(
+      "Bring Me Another proc callback (M11-C3b)",
+      "6630ff; 6911-6919",
+      "A brew cast triggers buff.empty_barrel through a proc callback that copies the pinned driver's 20% proc chance: MAY, not does. After a hypothetical brew, buff.empty_barrel.up is one of two values and is never bound up; it is forgotten unless already observed up. Under Bring Me Another tier 2 the proc resets Keg Smash (:4508-4516), which only makes Keg Smash more ready.",
+    ),
+    claim(
+      "DBC _cooldown on a charge spell (M11-C3b)",
+      "action.cpp:710-720; player.cpp:8659",
+      "Purifying Brew carries _charges 2, _charge_cooldown 20000 and _cooldown 1000; the 1000 ms becomes an internal cooldown obtained by NAME, so it is shared by every APL entry naming purifying_brew and neither can fire again at zero elapsed time.",
+    ),
+  ],
+};
+
 export const BREWMASTER_NON_GCD_TRANSITIONS: readonly BrewmasterNonGcdTransitionContract[] = Object.freeze([
   AUTO_ATTACK,
+  PURIFYING_BREW,
 ]);
 
 /** The contract for a token, or `null` when this milestone reviewed none. */

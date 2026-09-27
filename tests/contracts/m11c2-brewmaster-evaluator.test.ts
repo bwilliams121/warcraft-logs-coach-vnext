@@ -8,11 +8,13 @@
  * PROVEN Invoke Niuzao buff MATCH at EXACT_ENTRY, and — since M11-C3a, when
  * Breath of Fire's cooldown is proven running with no Keg Smash reset in
  * between — so do three Keg Smashes; every other decision is UNKNOWN and
- * names the entry that kept it so — the NON_GCD Purifying Brew the query may
- * not fire without a reviewed contract, or the Keg Smash whose readiness is
- * not modelled; no decision is REJECTED; Empty the
- * Cellar's readiness aura is never proven inactive while its wire identity
- * is uncorroborated; the survival domains carry no authority and say so; and
+ * names the entry that kept it so — since M11-C4i the NON_GCD Black Ox Brew
+ * the query may not fire without a reviewed contract (Purifying Brew now has
+ * one), or the Keg Smash whose readiness is not proven; since M11-C4i exactly
+ * one decision is REJECTED — a Tiger Palm while the authority selects a Keg
+ * Smash proven usable in every dimension; Empty the Cellar's readiness aura is
+ * queried under its corroborated wire id and never proven inactive without an
+ * observed removal; the survival domains carry no authority and say so; and
  * nothing — no silence, no pull snapshot, no lower-priority fall-through —
  * turns an UNKNOWN into a verdict.
  */
@@ -35,16 +37,17 @@ const [KEG_SMASH, BLACKOUT_KICK, TIGER_PALM, BREATH_OF_FIRE, INVOKE_NIUZAO] = [
 
 /** Every eligible decision, in canonical order: report time, observed spell, outcome, and the entry the query refused at. */
 const DECISIONS = [
-  [2415223, KEG_SMASH, "UNKNOWN", "shado_pan[2] purifying_brew"],
-  [2416677, BREATH_OF_FIRE, "UNKNOWN", "shado_pan[2] purifying_brew"],
-  [2417682, BLACKOUT_KICK, "UNKNOWN", "shado_pan[2] purifying_brew"],
-  [2419027, INVOKE_NIUZAO, "UNKNOWN", "shado_pan[2] purifying_brew"],
-  [2423448, BLACKOUT_KICK, "UNKNOWN", "shado_pan[2] purifying_brew"],
-  [2424688, TIGER_PALM, "UNKNOWN", "shado_pan[2] purifying_brew"],
+  [2415223, KEG_SMASH, "UNKNOWN", "shado_pan[3] black_ox_brew"],
+  [2416677, BREATH_OF_FIRE, "UNKNOWN", "shado_pan[3] black_ox_brew"],
+  [2417682, BLACKOUT_KICK, "UNKNOWN", "shado_pan[3] black_ox_brew"],
+  [2419027, INVOKE_NIUZAO, "UNKNOWN", "shado_pan[3] black_ox_brew"],
+  [2423448, BLACKOUT_KICK, "UNKNOWN", "shado_pan[3] black_ox_brew"],
+  // M11-C4i: the authority selects Keg Smash (shado_pan[1]), proven usable in every dimension.
+  [2424688, TIGER_PALM, "REJECTED", null],
   [2425704, KEG_SMASH, "MATCH", null],
   [2427076, BREATH_OF_FIRE, "MATCH", null],
-  [2428219, BLACKOUT_KICK, "UNKNOWN", "shado_pan[2] purifying_brew"],
-  [2429224, TIGER_PALM, "UNKNOWN", "shado_pan[2] purifying_brew"],
+  [2428219, BLACKOUT_KICK, "UNKNOWN", "shado_pan[3] black_ox_brew"],
+  [2429224, TIGER_PALM, "UNKNOWN", "shado_pan[3] black_ox_brew"],
   [2430227, KEG_SMASH, "MATCH", null],
   [2431304, BREATH_OF_FIRE, "MATCH", null],
   [2432314, BLACKOUT_KICK, "UNKNOWN", "shado_pan[1] keg_smash"],
@@ -95,13 +98,13 @@ describe("the gates", () => {
 describe("the measurement over the Shado-Pan opener", () => {
   const analysis = analyzed(corpusState(GTKB));
 
-  it("fifteen eligible decisions, five MATCH at EXACT_ENTRY, none REJECTED, ten UNKNOWN (M11-C3a)", () => {
+  it("fifteen eligible decisions, five MATCH at EXACT_ENTRY, one REJECTED, nine UNKNOWN (M11-C4i)", () => {
     expect(analysis.coverage).toMatchObject({
       eligibleDecisions: 15,
       match: 5,
-      rejected: 0,
-      unknown: 10,
-      resolvedComparisons: 5,
+      rejected: 1,
+      unknown: 9,
+      resolvedComparisons: 6,
       exactEntryMatches: 5,
       tokenConvergedMatches: 0,
     });
@@ -138,11 +141,22 @@ describe("the measurement over the Shado-Pan opener", () => {
     }
   });
 
-  it("no decision is REJECTED, and no observed action is proven unselectable", () => {
-    for (const comparison of analysis.comparisons) {
-      expect(comparison.outcome).not.toBe("REJECTED");
-      expect(comparison.observedActionRejected).toBe(false);
-    }
+  it("exactly one decision is REJECTED (M11-C4i) — by the authority selecting a proven-usable Keg Smash, never by unselectability", () => {
+    const rejected = analysis.comparisons.filter((comparison) => comparison.outcome === "REJECTED");
+    expect(
+      rejected.map((comparison) => [
+        comparison.decision.reportTimeMs,
+        comparison.basis,
+        comparison.authorityToken,
+      ]),
+    ).toEqual([[2424688, "AUTHORITY_SELECTED_DIFFERENT_TOKEN", "keg_smash"]]);
+    const resolved = analysis.resolved.find((entry) => entry.position === rejected[0]?.decision.position);
+    expect(resolved?.selection.selectedEntry).toBe("shado_pan[1] keg_smash");
+    expect(resolved?.positiveUsability.find((conclusion) => conclusion.simcToken === "keg_smash")?.kind).toBe(
+      "PROVEN_USABLE",
+    );
+    // The observed action is never proven unselectable: the REJECTED is a scan selection, not a refutation.
+    for (const comparison of analysis.comparisons) expect(comparison.observedActionRejected).toBe(false);
     for (const entry of analysis.resolved) expect(entry.unselectability.proven).toBe(false);
   });
 
@@ -163,7 +177,7 @@ describe("the measurement over the Shado-Pan opener", () => {
 
   it("an UNKNOWN never falls through: every UNKNOWN carries the engine's refusal and names its entry", () => {
     const unknown = analysis.comparisons.filter((comparison) => comparison.outcome === "UNKNOWN");
-    expect(unknown).toHaveLength(10);
+    expect(unknown).toHaveLength(9);
     for (const comparison of unknown) {
       expect(comparison.authorityToken).toBeNull();
       expect(
@@ -171,8 +185,9 @@ describe("the measurement over the Shado-Pan opener", () => {
           comparison.rawBlocker === "DIVERGENT_GCD_OUTCOMES",
       ).toBe(true);
     }
+    // M11-C4i: Purifying Brew's reviewed transition moves the refusal to Black Ox Brew, which has none.
     expect(analysis.coverage.unresolvedAt).toEqual([
-      { key: "TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew", count: 8 },
+      { key: "TRANSITION_UNSUPPORTED @ shado_pan[3] black_ox_brew", count: 7 },
       { key: "DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash", count: 2 },
     ]);
   });
@@ -189,15 +204,15 @@ describe("the measurement over the Shado-Pan opener", () => {
     }
   });
 
-  it("Empty the Cellar's readiness aura is NOT_ESTABLISHED at every decision while its wire identity is uncorroborated", () => {
+  it("Empty the Cellar's readiness aura is queried under its corroborated wire id (M11-C4i) and stays NOT_ESTABLISHED over the opener: no transition of it precedes any decision", () => {
     for (const entry of analysis.resolved) {
       expect(entry.readinessAuras).toEqual([
         {
           simcToken: "empty_the_cellar",
           state: "NOT_ESTABLISHED",
-          reason: "WIRE_AURA_IDENTITY_NOT_CORROBORATED",
-          wireAuraId: null,
-          auraReason: null,
+          reason: "AURA_STATE_UNKNOWN",
+          wireAuraId: 1262768,
+          auraReason: "AMBIGUOUS_INITIAL_STATE",
         },
       ]);
     }

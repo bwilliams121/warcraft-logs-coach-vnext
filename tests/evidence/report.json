@@ -39,8 +39,8 @@
       "passed": 12
     },
     {
-      "assertions": 8,
-      "cases": 4,
+      "assertions": 9,
+      "cases": 5,
       "failed": 0,
       "kindsExercised": [
         "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
@@ -50,7 +50,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_BREWMASTER_MONK",
-      "passed": 8
+      "passed": 9
     }
   ],
   "cases": [
@@ -211,7 +211,7 @@
           "every aura transition on actor 4 sourced by actor 4, in canonical order"
         ]
       },
-      "caseId": "spec-brewmaster-monk.the-full-shado-pan-fight-measures-one-hundred-eighty-nine-decisions-fifty-five-resolved",
+      "caseId": "spec-brewmaster-monk.the-full-shado-pan-fight-measures-one-hundred-eighty-nine-decisions-one-hundred-nineteen-resolved",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "referencedArtifactIds": [
         "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",
@@ -272,7 +272,32 @@
           "every aura transition on actor 11 sourced by actor 11, in canonical order"
         ]
       },
-      "caseId": "spec-brewmaster-monk.the-second-subjects-fixed-165s-window-measures-one-hundred-thirty-nine-decisions-forty-seven-resolved",
+      "caseId": "spec-brewmaster-monk.the-second-subjects-fixed-165s-window-measures-one-hundred-thirty-nine-decisions-forty-eight-resolved",
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "referencedArtifactIds": [
+        "wcl-brewmaster-monk-rxaf-opener",
+        "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165"
+      ]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
+      "assertions": [
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_MONK_BREWMASTER",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,440,995 for actor 11 (specID 268)",
+          "every COMPLETE cast by actor 11 in the bundle, in canonical order",
+          "every aura transition on actor 11 sourced by actor 11, in canonical order"
+        ]
+      },
+      "caseId": "spec-brewmaster-monk.the-second-subjects-rejected-tiger-palm-over-its-fixed-165s-bundle",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "referencedArtifactIds": [
         "wcl-brewmaster-monk-rxaf-opener",
@@ -297,13 +322,13 @@
   "totals": {
     "artifactBytes": 1085841,
     "artifacts": 3,
-    "assertions": 20,
-    "cases": 8,
+    "assertions": 21,
+    "cases": 9,
     "declared": 0,
-    "executable": 20,
+    "executable": 21,
     "failed": 0,
     "largestArtifactBytes": 389605,
     "notExecuted": 0,
-    "passed": 20
+    "passed": 21
   }
 }

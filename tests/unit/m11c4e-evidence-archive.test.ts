@@ -81,7 +81,7 @@ describe("the committed evidence archive", () => {
       "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
       "wcl-fight-context-rxaf-fight-13",
     ]);
-    expect(loaded.archive.cases).toHaveLength(8);
+    expect(loaded.archive.cases).toHaveLength(9);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(308961 + 389605 + 387275);
     // Every archive artifact is real evidence.

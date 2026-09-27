@@ -523,16 +523,18 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     ).toEqual(["monk/brewmaster"]);
   });
 
-  it("Brewmaster Monk (INTERNAL_ONLY since M11-C2) is REPORTED, never failed: it passes observation and is BLOCKED on discrimination", async () => {
+  it("Brewmaster Monk (INTERNAL_ONLY since M11-C2) is REPORTED, never failed: since M11-C4i it passes BOTH gates on real evidence and stays INTERNAL_ONLY", async () => {
     // Informational by construction. The internal pairing accepts the
     // Monk/Brewmaster identity BECAUSE the public table refuses it. The
-    // qualifying real assertions are MATCH decisions of two independent,
-    // neutrally selected Shado-Pan subjects. M11-C4h: that passes the
-    // OBSERVATION gate; the DISCRIMINATION gate is not met — no real REJECTED
-    // and no negative control. That is structural, not bad luck: the slice's
-    // only positive usability proof is the observed cast, so no REJECTED is
-    // reachable (M11-C4g). Fewer UNKNOWNs and more subjects are not
-    // discrimination evidence.
+    // qualifying real MATCH decisions of two independent, neutrally selected
+    // Shado-Pan subjects pass the OBSERVATION gate (M11-C4h). Until M11-C4i the
+    // DISCRIMINATION gate was structurally unreachable: the only positive
+    // usability proof was the observed cast (M11-C4g). M11-C4i's positive
+    // usability completeness proof lets the authority DEFINITELY select an
+    // alternative the player did not cast, and each subject now carries one
+    // real, state/authority-driven REJECTED over SANITIZED_CAPTURE — no
+    // negative control is used. evidenceReady authorizes NOTHING by itself:
+    // promotion is a separate, reviewed decision, and Brewmaster is not PUBLIC.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "monk/brewmaster");
     if (module === undefined) throw new Error("no Brewmaster module");
@@ -545,7 +547,10 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // archive 165–285 s), recorded PASSED in the committed archive report.
     // M11-C4f: the neutral second subject contributes exactly one — its first
     // resolved MATCH by report time over its fixed 165 s cross-tier bundle —
-    // paired by its OWN committed fight context. Still no REJECTED anywhere.
+    // paired by its OWN committed fight context.
+    // M11-C4i: subject 1's Tiger Palm at 2,424,688 (corpus opener, against a
+    // proven-usable Keg Smash) and subject 2's at 2,573,516 (archive, against a
+    // proven-usable Blackout Kick) are REJECTED, each over its own capture.
     const bySubject = readiness.qualifyingAssertions.map(
       (q) =>
         `${q.rootId}:${q.expectedOutcome}:${q.evidenceActor.reportCode}/${q.evidenceActor.fightId}/${q.evidenceActor.actorId}`,
@@ -553,11 +558,16 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     expect([...bySubject].sort()).toEqual([
       "EVIDENCE_ARCHIVE:MATCH:gtKb2xHn87pNcFfW/22/4",
       "EVIDENCE_ARCHIVE:MATCH:rXAfw9t1q8YpmkKD/13/11",
+      "EVIDENCE_ARCHIVE:REJECTED:rXAfw9t1q8YpmkKD/13/11",
       "REGRESSION_CORPUS:MATCH:gtKb2xHn87pNcFfW/22/4",
       "REGRESSION_CORPUS:MATCH:gtKb2xHn87pNcFfW/22/4",
       "REGRESSION_CORPUS:MATCH:gtKb2xHn87pNcFfW/22/4",
+      "REGRESSION_CORPUS:REJECTED:gtKb2xHn87pNcFfW/22/4",
     ]);
-    expect(readiness.qualifyingAssertions.some((q) => q.expectedOutcome === "REJECTED")).toBe(false);
+    // Every qualifying assertion is real observation over SANITIZED_CAPTURE; no control qualifies anything.
+    for (const q of readiness.qualifyingAssertions) {
+      expect(q.evidenceSet.every((entry) => entry.kind === "SANITIZED_CAPTURE")).toBe(true);
+    }
     for (const q of readiness.qualifyingAssertions) {
       expect(q.evidenceIdentity).toEqual({ className: "Monk", specName: "Brewmaster" });
     }
@@ -565,8 +575,19 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     expect(readiness.observationGate.distinctResolvedAbilityIds.length).toBeGreaterThanOrEqual(
       MIN_DISTINCT_OBSERVED_ACTION_TOKENS,
     );
-    expect(readiness.discriminationGate).toEqual({ realRejected: [], controls: [], ready: false });
-    expect(readiness.evidenceReady).toBe(false);
+    expect(readiness.discriminationGate.controls).toEqual([]);
+    expect(
+      readiness.discriminationGate.realRejected
+        .map((q) => [q.evidenceActor.reportCode, q.observedCast.reportTimeMs])
+        .sort(),
+    ).toEqual([
+      ["gtKb2xHn87pNcFfW", 2424688],
+      ["rXAfw9t1q8YpmkKD", 2573516],
+    ]);
+    expect(readiness.discriminationGate.ready).toBe(true);
+    expect(readiness.evidenceReady).toBe(true);
+    // Readiness is a report: the module is still INTERNAL_ONLY and the identity table still refuses it.
+    expect(module.exposure).toBe("INTERNAL_ONLY");
     expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("monk/brewmaster");
   });
 

@@ -4735,7 +4735,7 @@
           "every aura transition on actor 4 sourced by actor 4, in canonical order"
         ]
       },
-      "caseId": "spec-brewmaster-monk.the-165s-shado-pan-window-measures-one-hundred-thirteen-decisions-thirty-six-resolved",
+      "caseId": "spec-brewmaster-monk.the-165s-shado-pan-window-measures-one-hundred-thirteen-decisions-seventy-two-resolved",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "referencedArtifactIds": [
         "wcl-brewmaster-monk-gtkb-opener",
@@ -4780,7 +4780,7 @@
           "every aura transition on actor 4 sourced by actor 4, in canonical order"
         ]
       },
-      "caseId": "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-five-resolved",
+      "caseId": "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-six-resolved",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },

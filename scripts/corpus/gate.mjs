@@ -110,6 +110,8 @@ const NODE_EVIDENCE_TESTS = [
   "tests/contracts/m11c4h-discrimination-gate.test.ts",
   // M11-C4h: the control's applicability facts are the production analyzer's own.
   "tests/contracts/m11c4h-protection-applicability-parity.test.ts",
+  // M11-C4i: positive usability and the closure over the committed evidence.
+  "tests/contracts/m11c4i-brewmaster-positive-usability.test.ts",
 ];
 
 /** Credentials never reach a corpus run, whatever the parent shell holds. */

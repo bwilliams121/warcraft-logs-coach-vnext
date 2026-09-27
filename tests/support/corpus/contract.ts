@@ -2891,6 +2891,11 @@ export const ASSERTION_KINDS = {
             readinessAuraEvidence: z.record(z.string().min(1), z.number().int().positive()),
             /** `token | <PROVEN_NOT_READY or reason>` -> count. Exact and exhaustive. */
             cooldownReadiness: z.record(z.string().min(1), z.number().int().positive()),
+            /**
+             * M11-C4i: `token | PROVEN_USABLE` or `token | NOT_PROVEN: <first unresolved dimension>(<reason>)`
+             * -> count, over every supported unobserved token at every decision. Exact and exhaustive.
+             */
+            positiveUsability: z.record(z.string().min(1), z.number().int().positive()),
           })
           .strict(),
       })
@@ -2899,7 +2904,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: true,
     description:
-      "Over this actor's eligible decisions the Brewmaster state bindings distribute exactly so: each pinned buff atom's presence from an M4 transition strictly before the decision (or a talent disproof), or its refusal; the Empty the Cellar readiness aura, which stays NOT_ESTABLISHED while its wire identity is uncorroborated — never proven inactive from silence and never queried under the SimC buff id; and each of the six pinned cooldowns' readiness, PROVEN_NOT_READY only from an observed cast under the pinned base.",
+      "Over this actor's eligible decisions the Brewmaster state bindings distribute exactly so: each pinned buff atom's presence from an M4 transition strictly before the decision (or a talent disproof), or its refusal; the Empty the Cellar readiness aura, queried only under its corroborated wire id (M11-C4i) and never proven inactive from silence; each pinned cooldown's readiness, PROVEN_NOT_READY only from an observed cast under the pinned base; and (M11-C4i) each supported unobserved token's positive usability conclusion — PROVEN_USABLE only when every dimension of the completeness contract is proven or not applicable, otherwise the first unresolved dimension and its reason.",
   },
   "SPEC_BREWMASTER_MONK.DISPATCH_TRACE_AT": {
     owningLayer: "SPEC_BREWMASTER_MONK",

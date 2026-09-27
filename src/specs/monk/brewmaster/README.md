@@ -1,4 +1,4 @@
-# Brewmaster Monk — INTERNAL_ONLY measurement slice (M11-C2, M11-C3a)
+# Brewmaster Monk — INTERNAL_ONLY measurement slice (M11-C2, M11-C3a, M11-C4i)
 
 **Exposure: `INTERNAL_ONLY`.** This evaluator is registered in the production
 catalog (`monk-brewmaster-observed-decisions`, `monk/brewmaster`) and is
@@ -50,16 +50,18 @@ to be measured.
 
 **Empty the Cellar.** Its `ready()` requires its buff up (SimC spell 1262768),
 and REQUIRED_AURA_INACTIVE is implemented — but only under a CORROBORATED wire
-id, and the readiness authority corroborates none (the committed capture holds
-no Exploding Keg, no Empty the Cellar and no 1262768 transition). The fact is
-`NOT_ESTABLISHED / WIRE_AURA_IDENTITY_NOT_CORROBORATED` at every decision; the
-SimC id is never used as a stand-in.
+id, and until M11-C4i the readiness authority corroborated none. Since M11-C4i
+1262768 is CORROBORATED from the committed 165 s window of subject 1 (Exploding
+Keg 2,438,549 → apply 2,438,567; remove 2,439,541 → Empty the Cellar cast
+2,439,542; Exploding Keg 2,516,886 → apply 2,516,900 → remove 2,536,906). An
+uncorroborated id would still refuse the fact; the SimC id is never used as a
+stand-in.
 
 **Tiger Palm.** STATIC_READY_FALSE while Press the Advantage is SELECTED
 (`tiger_palm_t::ready()`, `sc_monk.cpp:848-853`). The subject took Blackout
 Combo, so the proof never fires on it.
 
-## The measurement (gtKb fight 22, actor 4, Shado-Pan, 20 s opener)
+## The measurement (gtKb fight 22, actor 4, Shado-Pan, 20 s opener) — BEFORE M11-C4i
 
 | | |
 | --- | --- |
@@ -107,10 +109,52 @@ AMBIGUOUS_INITIAL_STATE before its first in-fight transition (three decisions
 before +3.99 s), Keg Smash and Celestial Brew / Exploding Keg usability,
 `cooldown.celestial_brew.charges_fractional`, and `buff.empty_the_cellar.remains`.
 
+## M11-C4i — positive usability and the Purifying Brew closure
+
+`positive-usability.ts` builds the shared completeness conclusion
+(`src/findings/usability/`) for an UNOBSERVED Keg Smash, Blackout Kick,
+Breath of Fire or Invoke Niuzao at each decision, one resolver per dimension:
+
+| Dimension | Proof |
+| --- | --- |
+| build applicability | the entry's build gates proven true |
+| `ready()` override | pinned `BREWMASTER_NO_READY_OVERRIDE` source ranges for the action class and every wrapper |
+| cooldown/charge | the shared upper-bound proof (Keg Smash: ≥1 charge via its charge cooldown; Blackout Kick with category sibling 100784) |
+| resource | NOT_APPLICABLE with no power row (Blackout Kick, Breath of Fire, Niuzao); Keg Smash by the decision cast's exact PRE_COST, a corroborated wire cost and `costCannotExceedBase` |
+| GCD | the decision point is a GCD boundary |
+| range/target | STRICT same-target corroboration; Breath of Fire (untargeted, cone) never |
+| movement/cast | NOT_APPLICABLE unless `usable_moving()` is false; Blackout Kick only when the decision cast carries the same restriction |
+| action-specific | none declared for the four |
+
+Purifying Brew now has a reviewed contract: it writes the shared internal
+cooldown and FORGETS `buff.empty_barrel` — a binding the evidence proves UP is
+kept, any other is dropped, and none is ever added (the Bring Me Another proc
+is 20%). The Black Ox Brew refusal remains.
+
+Measured (pinned in the corpus):
+
+| window | MATCH | REJECTED | UNKNOWN |
+| --- | --- | --- | --- |
+| subject 1, opener | 5 | 1 | 9 |
+| subject 1, 165 s | 71 | 1 | 41 |
+| subject 1, full fight | 109 | 10 | 70 |
+| subject 2 (rXAf f13 a11), 165 s | 47 | 1 | 91 |
+
+The independent `REJECTED` decisions are the Tiger Palm at 2,424,688 (subject 1,
+`shado_pan[1] keg_smash` under a proven Invoke Niuzao buff; Keg Smash's last
+cast 9,465 ms earlier against 8,000 + 250 ms, PRE_COST 100 Energy against a base
+cost of 40, the target within 5 yd inside 15) and the Tiger Palm at 2,573,516
+(subject 2, `shado_pan[7] blackout_kick` with Blackout Combo proven down). No
+earlier MATCH flips. The remaining UNKNOWNs name Black Ox Brew
+(`shado_pan[3]`), Blackout Kick, Invoke Niuzao, Keg Smash and Breath of Fire
+divergent worlds, and on subject 2 Empty the Cellar (`shado_pan[11]`: no
+1262768 transition in that window).
+
 ## Not evaluated, deliberately
 
 Brews, Stagger, active mitigation, self-healing, defensive cooldowns,
-interrupts, survival, Energy, brew charges, Keg Smash cooldown and charges,
+interrupts, survival, Energy intervals, brew charges, Keg Smash charge modelling
+(beyond the ≥1-charge upper bound), Black Ox Brew,
 target count, racials, potions, trinkets. The Master of Harmony
 list is authority the engine dispatches correctly and no evidence has
 measured.

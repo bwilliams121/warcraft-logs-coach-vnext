@@ -15,18 +15,25 @@
  *                    Brewmaster applicability rules (domain boundary first)
  *                    and the usability proofs
  *     laneFor        the pinned Brewmaster lane data, per token
- *     transitionFor  the one reviewed NON_GCD contract (`auto_attack`); every
- *                    other NON_GCD entry — the three NON_GCD brews — refuses
- *                    its branch
+ *     transitionFor  the reviewed NON_GCD contracts (`auto_attack`, and since
+ *                    M11-C4i `purifying_brew`); every other NON_GCD entry —
+ *                    Black Ox Brew and Fortifying Brew — refuses its branch
  *
  * The generic engine owns everything else — including the `run_action_list`
  * control flow the pinned list dispatches its hero trees through — and learns
  * none of this.
  *
- * ONE WORLD. There is no race hypothesis (the racial entries are non-domain)
- * and no overlay: the one reviewed contract writes no atom any pinned entry
- * reads, so every scan in every branch runs against the caller's bindings
- * untouched. The observed cast is never an oracle for an earlier entry.
+ * ONE WORLD, ONE OVERLAY. There is no race hypothesis (the racial entries are
+ * non-domain). A branch's bindings are the caller's, with exactly one
+ * overlay a contract may write (M11-C4i): a FORGOTTEN buff's binding is
+ * dropped unless the caller bound it UP, so the atom is enumerated — Empty
+ * Barrel after a hypothetical Purifying Brew. Nothing is ever bound UP by a
+ * branch, and the observed cast is never an oracle for an earlier entry.
+ *
+ * POSITIVE USABILITY (M11-C4i). The caller may supply, per token, a positive
+ * usability conclusion from the completeness contract
+ * (`src/findings/usability/usability-completeness.ts`). The usability rule
+ * reads it only after every hypothetical, observed and negative proof.
  *
  * THE ROOT SCAN'S OWN STOPPING POINT IS KEPT, AND SO ARE ITS DISPATCHES.
  * The shared engine reports a blocked root scan at its EARLIEST unresolved
@@ -75,9 +82,14 @@ import {
   brewmasterStateKey,
   initialBrewmasterState,
   withExecution,
+  withForgottenBuffs,
+  withSharedCooldown,
   type BrewmasterFirstGcdState,
   type ExecutedEntry,
 } from "./first-gcd-state.js";
+import type { PositiveUsability } from "../../../findings/usability/usability-completeness.js";
+
+const NO_POSITIVE_USABILITY: ReadonlyMap<string, PositiveUsability> = new Map();
 
 /** The list this query begins in. The ROOT, with nothing skipped. */
 export const BREWMASTER_FIRST_GCD_ROOT_LIST = "default";
@@ -93,6 +105,20 @@ export interface BrewmasterFirstGcdQueryInput {
   readonly readiness?: readonly BrewmasterReadinessFact[];
   /** Every REQUIRES_AURA_ACTIVE readiness gate's state at this decision. Defaults to nothing. */
   readonly readinessAuras?: readonly BrewmasterReadinessAuraFact[];
+  /** Per-token positive usability conclusions for this decision (M11-C4i). Defaults to none. */
+  readonly positiveUsability?: ReadonlyMap<string, PositiveUsability>;
+}
+
+/** The caller's bindings with the branch's forgotten buffs dropped — unless the caller bound them UP. */
+export function brewmasterBranchBindings(
+  bindings: AtomBindings,
+  state: BrewmasterFirstGcdState,
+): AtomBindings {
+  if (state.forgottenBuffs.length === 0) return bindings;
+  return {
+    ...bindings,
+    knownBuffs: bindings.knownBuffs.filter((buff) => buff.up || !state.forgottenBuffs.includes(buff.name)),
+  };
 }
 
 /** One dispatch entry the ROOT scan visited, with the outcome the engine recorded. */
@@ -189,13 +215,14 @@ export function brewmasterFirstGcdSelectionAt(
       buildFacts: input.buildFacts,
       readiness: input.readiness ?? NO_READINESS_FACTS,
       readinessAuras: input.readinessAuras ?? NO_READINESS_AURA_FACTS,
+      positiveUsability: input.positiveUsability ?? NO_POSITIVE_USABILITY,
     });
 
   const scanFor = (state: BrewmasterFirstGcdState): OneForegroundScanResult =>
     resolveOneForegroundScan({
       authority: input.authority,
       entryListName: BREWMASTER_FIRST_GCD_ROOT_LIST,
-      bindings: input.bindings,
+      bindings: brewmasterBranchBindings(input.bindings, state),
       usabilityFor: (action) => usabilityFor(state, action),
       applicabilityFor,
     });
@@ -210,7 +237,13 @@ export function brewmasterFirstGcdSelectionAt(
     const resolved = brewmasterContractForSelected(action);
     if ("refusal" in resolved) return { kind: "UNSUPPORTED", detail: resolved.refusal };
     const { contract } = resolved;
-    const nextState = withExecution(state, entryOf(action.step));
+    let nextState = withExecution(state, entryOf(action.step));
+    if (contract.writes.includes("SHARED_INTERNAL_COOLDOWN")) {
+      nextState = withSharedCooldown(nextState, contract.simcToken);
+    }
+    if (contract.writes.includes("FORGETS_UNOBSERVED_BUFFS")) {
+      nextState = withForgottenBuffs(nextState, contract.forgetsBuffsUnlessObservedUp);
+    }
     return {
       kind: "APPLIED",
       nextState,

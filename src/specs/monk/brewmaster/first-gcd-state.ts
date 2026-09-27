@@ -6,22 +6,31 @@
  * the root. It never reads the state; it keys it. This module is what it
  * keys.
  *
- * ONE THING. `executedEntries`: the authority entries that fired IN THIS
- * BRANCH. A hypothesis, never an observation: the usability rule turns an
- * executed entry into PROVEN_UNUSABLE with the `SIMULATED_PREFIX_EXECUTION`
- * reason so a reader can never mistake it for something the player did.
+ * `executedEntries`: the authority entries that fired IN THIS BRANCH. A
+ * hypothesis, never an observation: the usability rule turns an executed
+ * entry into PROVEN_UNUSABLE with the `SIMULATED_PREFIX_EXECUTION` reason so a
+ * reader can never mistake it for something the player did.
+ *
+ * TWO MORE THINGS SINCE M11-C4i, both written only by a reviewed transition
+ * contract (`monk-brewmaster-transition-authority.ts`):
+ *
+ *   `sharedCooldownTokens`  tokens whose SHARED internal cooldown a hypothetical
+ *                           execution started: every entry naming the token is
+ *                           PROVEN_UNUSABLE (SIMULATED_PREFIX_EXECUTION) in this
+ *                           branch — Purifying Brew's 1,000 ms by-name cooldown.
+ *   `forgottenBuffs`        `buff.<name>.up` atoms the branch FORGOT: a binding
+ *                           the caller established is dropped unless it is UP,
+ *                           so the atom is enumerated rather than read — Empty
+ *                           Barrel after a hypothetical brew. Never set UP.
  *
  * NO RACE WORLD. Under the class/spec authority boundary every racial entry
  * of the pinned list is outside the rotational decision domain and is
  * classified non-domain before selection, so no race hypothesis is needed,
  * explored, or inferred (`domain-boundary.ts`).
  *
- * NO FORGOTTEN ATOMS, NO BREW STATE. The one reviewed Brewmaster contract
- * (`auto_attack`) writes nothing any pinned entry reads
- * (`monk-brewmaster-transition-authority.ts`), so a branch never has to widen
- * a caller's binding. No brew charge, Stagger or Energy is here: the engine
- * models no time, this build replays no resource change, and a brew entry
- * that would need its writes carried has no contract and refuses its branch.
+ * NO BREW CHARGE, STAGGER OR ENERGY. The engine models no time, this build
+ * replays no resource change, and a brew entry whose writes are not reviewed
+ * has no contract and refuses its branch.
  */
 
 import type { TraversalPathEntry } from "../../../simc/nested-selection.js";
@@ -35,10 +44,14 @@ export interface ExecutedEntry {
 
 export interface BrewmasterFirstGcdState {
   readonly executedEntries: readonly ExecutedEntry[];
+  /** Tokens whose shared internal cooldown a hypothetical execution started in this branch. */
+  readonly sharedCooldownTokens: readonly string[];
+  /** `buff.<name>.up` atoms forgotten in this branch unless the caller bound them UP. */
+  readonly forgottenBuffs: readonly string[];
 }
 
 export function initialBrewmasterState(): BrewmasterFirstGcdState {
-  return { executedEntries: [] };
+  return { executedEntries: [], sharedCooldownTokens: [], forgottenBuffs: [] };
 }
 
 export function executedEntryKey(entry: ExecutedEntry): string {
@@ -56,11 +69,28 @@ export function hasExecuted(state: BrewmasterFirstGcdState, entry: ExecutedEntry
 
 export function withExecution(state: BrewmasterFirstGcdState, entry: ExecutedEntry): BrewmasterFirstGcdState {
   return {
+    ...state,
     executedEntries: hasExecuted(state, entry) ? state.executedEntries : [...state.executedEntries, entry],
   };
 }
 
+export function withSharedCooldown(state: BrewmasterFirstGcdState, token: string): BrewmasterFirstGcdState {
+  return state.sharedCooldownTokens.includes(token)
+    ? state
+    : { ...state, sharedCooldownTokens: [...state.sharedCooldownTokens, token] };
+}
+
+export function withForgottenBuffs(
+  state: BrewmasterFirstGcdState,
+  buffs: readonly string[],
+): BrewmasterFirstGcdState {
+  const added = buffs.filter((buff) => !state.forgottenBuffs.includes(buff));
+  return added.length === 0 ? state : { ...state, forgottenBuffs: [...state.forgottenBuffs, ...added] };
+}
+
 /** Stable and serializable: the engine's cycle detection compares these. */
 export function brewmasterStateKey(state: BrewmasterFirstGcdState): string {
-  return `[${state.executedEntries.map(executedEntryKey).sort().join(",")}]`;
+  const executed = `[${state.executedEntries.map(executedEntryKey).sort().join(",")}]`;
+  if (state.sharedCooldownTokens.length === 0 && state.forgottenBuffs.length === 0) return executed;
+  return `${executed}|cd=[${[...state.sharedCooldownTokens].sort().join(",")}]|forgot=[${[...state.forgottenBuffs].sort().join(",")}]`;
 }

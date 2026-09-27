@@ -459,7 +459,7 @@ describe("the Brewmaster cooldown dataset", () => {
     expect(cooldownArtifact.provenance.specId).toBe(268);
   });
 
-  it("pins the six abilities no pinned code mutates, plus (M11-C3a) Breath of Fire with its one declared cast reset", () => {
+  it("pins the six abilities no pinned code mutates, plus (M11-C3a) Breath of Fire with its one declared cast reset, plus (M11-C4i) Keg Smash with its two declared resets", () => {
     expect(cooldownArtifact.abilities.map((ability) => [ability.simcToken, ability.abilityGameId])).toEqual([
       ["blackout_kick", 205523],
       ["expel_harm", 322101],
@@ -468,13 +468,14 @@ describe("the Brewmaster cooldown dataset", () => {
       ["exploding_keg", 325153],
       ["rushing_jade_wind", 116847],
       ["breath_of_fire", 115181],
+      ["keg_smash", 121253],
     ]);
     for (const ability of cooldownArtifact.abilities) {
       expect(ability.dynamicModifierPolicy.method, ability.simcToken).toBe("HAND_REVIEWED_CPP_ABSENCE_PROOF");
       expect(ability.dynamicModifierPolicy.sourcePaths, ability.simcToken).toContain(MONK_MODULE);
-      // Only Breath of Fire declares a dynamic mutation; the six others still carry none.
+      // Only Breath of Fire and (M11-C4i) Keg Smash declare dynamic mutations; the six others carry none.
       expect("knownDynamicMutations" in ability, ability.simcToken).toBe(
-        ability.simcToken === "breath_of_fire",
+        ability.simcToken === "breath_of_fire" || ability.simcToken === "keg_smash",
       );
     }
     const bof = cooldownArtifact.abilities.find(
@@ -508,11 +509,29 @@ describe("the Brewmaster cooldown dataset", () => {
       expect(BREW_CONTAINER_TOKENS, entry.simcToken).not.toContain(entry.simcToken);
       expect(BREW_CONTAINER_IDS, entry.simcToken).not.toContain(entry.abilityGameId);
     }
-    // Nor Keg Smash: two charges under Stormstout's Last Keg, a hasted recharge
-    // and two reset paths — none modelled. (Breath of Fire is pinned since
-    // M11-C3a, its one reset carried as a CAST_BY_ACTOR signature.)
-    for (const entry of [...target.abilities, ...cooldownArtifact.abilities])
-      expect(entry.simcToken).not.toBe("keg_smash");
+    // Keg Smash (M11-C4i) is pinned for the POSITIVE readiness proof only:
+    // one charge record (8,000 ms), Stormstout's Last Keg (+1 charge) and the
+    // hasted category in its census, and its two resets declared RESET_TO_READY.
+    // Every one of those can only make it MORE ready, so the pinned charge
+    // cooldown is an upper bound; no charge count, recharge or NOT_READY is
+    // modelled from it.
+    const kegSmash = cooldownArtifact.abilities.find(
+      (ability) => ability.simcToken === "keg_smash",
+    ) as unknown as {
+      charges: number;
+      chargeCooldownMs: number;
+      passiveModifierCensus: { modifiers: { direction: string }[] };
+      knownDynamicMutations: { effect: string }[];
+    };
+    expect([kegSmash.charges, kegSmash.chargeCooldownMs]).toEqual([1, 8000]);
+    expect(kegSmash.passiveModifierCensus.modifiers.map((modifier) => modifier.direction)).toEqual([
+      "CHANGES_CHARGES",
+      "SHORTENS_WITH_HASTE",
+    ]);
+    expect(kegSmash.knownDynamicMutations.map((mutation) => mutation.effect)).toEqual([
+      "RESET_TO_READY",
+      "RESET_TO_READY",
+    ]);
   });
 
   it("states a Monk-accurate cooldown-start note (Chi Burst has a cast time)", () => {
@@ -597,13 +616,17 @@ describe("the Brewmaster readiness facts", () => {
     }
   });
 
-  it("pin Empty the Cellar's aura gate without claiming the aura's wire identity", () => {
+  it("pin Empty the Cellar's aura gate with its wire identity corroborated by committed evidence (M11-C4i)", () => {
     const fact = BREWMASTER_READINESS_FACTS.find((candidate) => candidate.simcToken === "empty_the_cellar");
-    expect(fact?.gate).toEqual({
+    expect(fact?.gate).toMatchObject({
       kind: "REQUIRES_AURA_ACTIVE",
       simcBuffName: "empty_the_cellar",
       simcBuffSpellId: EMPTY_THE_CELLAR_BUFF_SIMC_SPELL_ID,
-      wireAuraIdentity: "NOT_YET_CORROBORATED",
+      wireAuraIdentity: {
+        state: "CORROBORATED",
+        wireAuraId: 1262768,
+        fixtureId: "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+      },
     });
     expect(EMPTY_THE_CELLAR_BUFF_SIMC_SPELL_ID).toBe(1262768);
     expect(fact?.claims.map((claim) => claim.lines)).toContain("3447-3450");

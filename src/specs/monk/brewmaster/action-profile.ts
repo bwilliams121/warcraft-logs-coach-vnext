@@ -58,10 +58,19 @@
  *                                  NOT_ESTABLISHED at every decision and the proof is
  *                                  never made.
  *
- * NO RESOURCE PROOF IN EITHER DIRECTION. No Energy is reconstructed, so no
- * INSUFFICIENT_RESOURCE is ever claimed and no affordability-based
- * PROVEN_USABLE either. NO BREW-CHARGE PROOF: the brews' readiness is UNKNOWN
- * unless the decision's own cast proves it.
+ * NO NEGATIVE RESOURCE PROOF. No Energy is reconstructed, so no
+ * INSUFFICIENT_RESOURCE is ever claimed. NO BREW-CHARGE PROOF: the brews'
+ * readiness is UNKNOWN unless the decision's own cast proves it.
+ *
+ * POSITIVE USABILITY (M11-C4i), LAST. After every hypothetical, observed and
+ * negative proof, an action the player did not cast is PROVEN_USABLE only
+ * when the caller supplies a PROVEN_USABLE conclusion of the completeness
+ * contract for its token (`positive-usability.ts`): every dimension —
+ * applicability, ready() override, cooldown, affordability, GCD,
+ * range/target, movement, action-specific — proven or not applicable. A
+ * cooldown proven ready alone never reaches here. SHARED INTERNAL COOLDOWN
+ * (M11-C4i): a token whose by-name cooldown a hypothetical execution started
+ * in this branch is PROVEN_UNUSABLE at every entry naming it.
  */
 
 import type { AplAction } from "../../../simc/apl-authority.js";
@@ -69,6 +78,7 @@ import {
   applicable,
   notApplicable,
   provenUnusable,
+  provenUsable,
   unknownApplicability,
   unknownUsability,
   type ActionApplicability,
@@ -81,6 +91,7 @@ import { BREWMASTER_READINESS_FACTS } from "../../../data/game/monk-brewmaster-r
 import type { BrewmasterReadinessAuraFact } from "./aura-bindings.js";
 import { brewmasterNonDomainApplicabilityFor } from "./domain-boundary.js";
 import { hasExecuted, type BrewmasterFirstGcdState, type ExecutedEntry } from "./first-gcd-state.js";
+import type { PositiveUsability } from "../../../findings/usability/usability-completeness.js";
 
 /** Token → the pinned talent whose absence makes the action `not_found()`-background (action.cpp:541-549). */
 export const TALENT_BUILT_TOKENS: Readonly<Record<string, string>> = Object.freeze({
@@ -201,6 +212,8 @@ export interface BrewmasterUsabilityInput {
   readonly buildFacts: BrewmasterBuildFacts;
   readonly readiness: readonly BrewmasterReadinessFact[];
   readonly readinessAuras: readonly BrewmasterReadinessAuraFact[];
+  /** Per-token positive usability conclusions for this decision (M11-C4i). */
+  readonly positiveUsability?: ReadonlyMap<string, PositiveUsability>;
 }
 
 export function resolveBrewmasterUsability(input: BrewmasterUsabilityInput): ActionUsabilityVerdict {
@@ -223,6 +236,20 @@ export function resolveBrewmasterUsability(input: BrewmasterUsabilityInput): Act
         "HYPOTHETICAL, not observed: in this explored branch this authority entry has already been " +
         "selected once, and nothing returns it at zero elapsed time. This says nothing about what the " +
         "player actually did.",
+    });
+  }
+
+  // A by-name internal cooldown a hypothetical execution started in this branch.
+  if (state.sharedCooldownTokens.includes(action.actionToken)) {
+    return provenUnusable("SIMULATED_PREFIX_EXECUTION", {
+      abilityGameId: null,
+      itemId: null,
+      provenRemainingAtLeastMs: null,
+      cooldownToleranceMs: null,
+      detail:
+        "HYPOTHETICAL, not observed: in this explored branch an entry naming this token has already fired, " +
+        "and its internal cooldown is shared by name across every entry naming it, so none can fire again " +
+        "at zero elapsed time. This says nothing about what the player actually did.",
     });
   }
 
@@ -278,6 +305,9 @@ export function resolveBrewmasterUsability(input: BrewmasterUsabilityInput): Act
         `observed at ${String(aura.anchorReportTimeMs)}; the action cannot fire whatever its gate says.`,
     });
   }
+
+  // POSITIVE, LAST: every usability dimension proven or not applicable (M11-C4i).
+  if (input.positiveUsability?.get(action.actionToken)?.kind === "PROVEN_USABLE") return provenUsable();
 
   return unknownUsability();
 }

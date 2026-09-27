@@ -5361,11 +5361,66 @@ control (Avenger's Shield → Divine Toll at 2,074,381; it has no qualifying
 real `REJECTED`); Assassination, Retribution and Blood by real
 `REJECTED`s, and the stricter Retribution and Blood real-`REJECTED` pins
 remain. Brewmaster (INTERNAL_ONLY) passes observation over two neutral
-subjects and is blocked on discrimination: its slice's only positive
-usability proof is the observed cast, so no `REJECTED` is reachable, and the
-M11-C4g substitution census (local, uncommitted) found no control either. Production carries no case id,
+subjects; it was blocked on discrimination until M11-C4i (its only positive
+usability proof was the observed cast, so no `REJECTED` was reachable, and
+the M11-C4g substitution census found no control). Since M11-C4i it passes
+discrimination by two real `REJECTED`s, one per independent subject (below),
+and stays INTERNAL_ONLY: passing both gates is necessary for promotion, not
+promotion. Production carries no case id,
 artifact id, layer, readiness, gate or control vocabulary;
 `m10d-no-corpus-window-in-production` pins that.
+
+### M11-C4i — shared positive usability, strict range, the Purifying Brew closure
+
+A shared positive-usability derivation (`src/findings/usability/`) and a
+Brewmaster-owned use of it. The shared layer is FACTS ONLY; the
+specialization decides which tokens it applies to and what corroborates them.
+
+- **Completeness contract.** `concludePositiveUsability` takes a TOTAL
+  record over eight dimensions (build applicability, `ready()` override,
+  cooldown/charge, resource affordability, GCD, range/target, movement/cast,
+  action-specific) and returns `PROVEN_USABLE` only when every one is
+  `PROVEN` or `NOT_APPLICABLE`; a missing or extra dimension throws. No
+  dimension may be inferred from another — a cooldown proof alone never
+  yields usability.
+- **Cooldown upper bound.** Proven ready only when the last relevant cast
+  (the ability and its category siblings) lies at least the pinned upper
+  bound (max of base, charge, category and internal cooldowns) plus the
+  250 ms tolerance earlier, with COMPLETE cast coverage between; or, with no
+  relevant cast since fight start proven, when the fight has run that long
+  (a pre-pull use is otherwise possible). Any selected lengthening or
+  charge-removing modifier, or a non-reset mutation, refuses the bound. No
+  charge simulation: a charged ability is proven only at ≥1 charge by the
+  same bound on its charge cooldown.
+- **Affordability.** The decision cast's exact PRE_COST amount
+  (`src/findings/resources/exact-pre-cost.ts`, moved verbatim from the
+  Assassination evaluator), the observed wire cost equal to its pinned base
+  cost (unit corroboration), and a pinned proof that the candidate's cost
+  cannot exceed its base (SimC's cost formula checked mechanically, and a
+  cost census with no increasing effect). Anything short of that is
+  `UNKNOWN`, never "not affordable".
+- **Range, STRICT.** Only by same-target corroboration: the decision cast
+  must be an enemy-unit-targeted spell whose event names the target, the
+  candidate must target the same way, and its pinned range interval must
+  contain the observed one. An untargeted candidate or corroborator proves
+  nothing. No simulated-dummy assumption.
+
+Observed and simulated-prefix proofs keep precedence: the observed cast,
+then a simulated execution or shared cooldown in the prefix, then negative
+cooldown proofs, and only last the positive conclusion.
+
+Brewmaster wires it for Keg Smash, Blackout Kick, Breath of Fire and Invoke
+Niuzao (datasets `SIMC_DBC_MONK_BREWMASTER_USABILITY_AUTHORITY` and a Keg
+Smash cooldown record), reopens the M11-C3b Purifying Brew refusal for the
+deterministic part only (its shared internal cooldown; Empty Barrel is
+FORGOTTEN, never bound up — the 20% proc is never asserted), and reads
+Empty the Cellar's readiness aura under its corroborated wire id 1262768.
+Breath of Fire is untargeted in the pinned data, so it never becomes
+`PROVEN_USABLE` and never corroborates range. Measured: subject 1's full
+fight 109 MATCH / 10 REJECTED / 70 UNKNOWN; subject 2's fixed window 47 /
+1 / 91; no earlier MATCH flips. The two independent `REJECTED`s are the
+Tiger Palm at 2,424,688 (gtKb f22 a4) against Keg Smash and the Tiger Palm
+at 2,573,516 (rXAf f13 a11) against Blackout Kick.
 
 ### The current unsupported subject
 

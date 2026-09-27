@@ -654,6 +654,46 @@ const MONK_BREWMASTER_TARGET = {
         },
       ],
     },
+    {
+      simcToken: "keg_smash",
+      abilityGameId: 121253,
+      aliasGroup: null,
+      createAction:
+        'sc_monk.cpp:5363-5364 if ( name == "keg_smash" ) return new keg_smash_t( this, options_str )',
+      specBinding:
+        'sc_monk.cpp:2509-2510 keg_smash_t : monk_melee_attack_t( player, name, player->talent.brewmaster.keg_smash ), the action and so its cooldown named "keg_smash"; :5696 talent.brewmaster.keg_smash = _ST( "Keg Smash" ), trait row spell 121253. The constructor (:2509-2572) sets no cooldown, charge or recharge field',
+      actionStruct: { file: "classModule", name: "keg_smash_t" },
+      cooldownHandle: "keg_smash",
+      cooldownHandleUnqualified: true,
+      cooldownName: "keg_smash",
+      /**
+       * M11-C4i. TWO reset sites, both RESET_TO_READY, so both can only make
+       * Keg Smash MORE ready: a positive readiness proof built on the pinned
+       * charge cooldown as an UPPER bound stays sound through either. They
+       * are declared so the mechanical policy admits them — not so a NOT_READY
+       * lower bound may be claimed: Keg Smash is deliberately NOT a
+       * NOT_READY-derivation token, and the Empty Barrel reset has no
+       * observable signature.
+       */
+      knownDynamicMutations: [
+        {
+          member: "reset",
+          site: "exploding_keg_t::execute (sc_monk.cpp:3390, :3408)",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "CAST_BY_ACTOR",
+            abilityGameIds: [325153],
+            basis:
+              'exploding_keg_t::execute calls keg_smash->reset( true ) after monk_spell_t::execute (sc_monk.cpp:3408), the handle assigned player->get_cooldown( "keg_smash" ) in the constructor (:3390); exploding_keg_t is the APL action on talent spell 325153, so the reset coincides with a completed Exploding Keg (325153) cast by the actor',
+          },
+        },
+        {
+          member: "reset",
+          site: "empty_barrel_buff_t::trigger under Bring Me Another tier 2 (sc_monk.cpp:4508-4516)",
+          effect: "RESET_TO_READY",
+        },
+      ],
+    },
   ],
   aliasGroups: {},
 };

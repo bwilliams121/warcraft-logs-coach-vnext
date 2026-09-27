@@ -17659,7 +17659,7 @@
       "artifactId": "wcl-brewmaster-monk-gtkb-opener",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "contractUnderTest": "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; observed-action-gate.ts; aura-bindings.ts; cooldown-bindings.ts",
-      "purpose": "Per decision. The Breath of Fire casts at 2,427,076 and 2,431,304 MATCH at shado_pan[0] EXACT_ENTRY: Sal'salabim's Strength is SELECTED and the Invoke Niuzao buff (132578) is proven UP from its application at 2,419,027. The Keg Smash at the pull (2,415,223) is UNKNOWN: no aura has been observed yet, so Niuzao's buff is AMBIGUOUS_INITIAL_STATE, and the world in which Purifying Brew fires at shado_pan[2] has no reviewed contract. Since M11-C3a the Keg Smash at 2,425,704 MATCHES at shado_pan[1]: Breath of Fire's cooldown is proven running (at least 5,973 ms of 15,000 from the Breath of Fire at 2,416,677, with no Keg Smash reset in between), so shado_pan[0] is skipped; the Breath of Fire at 2,427,076 gets no such proof, because the Keg Smash at 2,425,704 may have reset it — and still MATCHES as the observed cast. The Blackout Kick at 2,432,314 is UNKNOWN by DIVERGENT_WORLDS at shado_pan[1]: Keg Smash's readiness is not modelled. Invoke Niuzao's own cooldown is PROVEN_NOT_READY at 2,423,448 (95,000 ms base: 120,000 less Efficient Training, SELECTED), and Blackout Combo, removed by the Tiger Palm at 2,424,688, is still UP to that Tiger Palm.",
+      "purpose": "Per decision. The Breath of Fire casts at 2,427,076 and 2,431,304 MATCH at shado_pan[0] EXACT_ENTRY: Sal'salabim's Strength is SELECTED and the Invoke Niuzao buff (132578) is proven UP from its application at 2,419,027. The Keg Smash at the pull (2,415,223) is UNKNOWN: no aura has been observed yet, so Niuzao's buff is AMBIGUOUS_INITIAL_STATE, and — since M11-C4i gave Purifying Brew a reviewed transition — the world in which Black Ox Brew fires at shado_pan[3] has no reviewed contract. Since M11-C4i the Tiger Palm at 2,424,688 is REJECTED: shado_pan[1] keg_smash selects a Keg Smash proven usable in every dimension of the positive usability contract. Since M11-C3a the Keg Smash at 2,425,704 MATCHES at shado_pan[1]: Breath of Fire's cooldown is proven running (at least 5,973 ms of 15,000 from the Breath of Fire at 2,416,677, with no Keg Smash reset in between), so shado_pan[0] is skipped; the Breath of Fire at 2,427,076 gets no such proof, because the Keg Smash at 2,425,704 may have reset it — and still MATCHES as the observed cast. The Blackout Kick at 2,432,314 is UNKNOWN by DIVERGENT_WORLDS at shado_pan[1]: Keg Smash's readiness is not modelled. Invoke Niuzao's own cooldown is PROVEN_NOT_READY at 2,423,448 (95,000 ms base: 120,000 less Efficient Training, SELECTED), and Blackout Combo, removed by the Tiger Palm at 2,424,688, is still UP to that Tiger Palm.",
       "assertions": [
         {
           "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
@@ -17730,7 +17730,7 @@
               "selectionPrecision": null,
               "decisiveBlocker": "OTHER",
               "rawBlocker": "TRANSITION_UNSUPPORTED",
-              "unresolvedAt": "shado_pan[2] purifying_brew",
+              "unresolvedAt": "shado_pan[3] black_ox_brew",
               "observedActionRejected": false,
               "unselectabilityProven": false,
               "unselectabilityRefusal": "CONDITION_NOT_PROVEN_FALSE",
@@ -17756,7 +17756,7 @@
               "selectionPrecision": null,
               "decisiveBlocker": "OTHER",
               "rawBlocker": "TRANSITION_UNSUPPORTED",
-              "unresolvedAt": "shado_pan[2] purifying_brew",
+              "unresolvedAt": "shado_pan[3] black_ox_brew",
               "observedActionRejected": false,
               "unselectabilityProven": false,
               "unselectabilityRefusal": "UNCONDITIONAL_ENTRY",
@@ -17775,14 +17775,14 @@
               "abilityGameId": 100780
             },
             "expected": {
-              "outcome": "UNKNOWN",
-              "basis": "AUTHORITY_SELECTION_UNRESOLVED",
-              "authorityCoverage": "UNKNOWN",
-              "authorityToken": null,
-              "selectionPrecision": null,
-              "decisiveBlocker": "OTHER",
-              "rawBlocker": "TRANSITION_UNSUPPORTED",
-              "unresolvedAt": "shado_pan[2] purifying_brew",
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityCoverage": "EXACT_ENTRY",
+              "authorityToken": "keg_smash",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "unresolvedAt": null,
               "observedActionRejected": false,
               "unselectabilityProven": false,
               "unselectabilityRefusal": "CONDITION_NOT_PROVEN_FALSE",
@@ -18270,11 +18270,11 @@
       ]
     },
     {
-      "caseId": "spec-brewmaster-monk.the-165s-shado-pan-window-measures-one-hundred-thirteen-decisions-thirty-six-resolved",
+      "caseId": "spec-brewmaster-monk.the-165s-shado-pan-window-measures-one-hundred-thirteen-decisions-seventy-two-resolved",
       "artifactId": "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "contractUnderTest": "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; resolver.ts; tests/support/corpus/fight.ts bundleOverEvidence",
-      "purpose": "THE M11-C4 MEASUREMENT, the unchanged M11-C3a analyzer over the composed 165 s fight of the same subject (gtKb fight 22 actor 4, Shado-Pan). 113 eligible decisions — 30 Keg Smash, 28 Blackout Kick, 27 Breath of Fire, 26 Tiger Palm, 2 Invoke Niuzao — and 117 excluded casts: 57 melee swings; 15 NON_GCD casts (14 Purifying Brew, 1 Fortifying Brew); 38 casts with no pinned lane (27 Gift of the Ox heals, 4 Provoke, 4 Roll, 1 Transcendence, a potion and an on-use item); 7 in-domain GCD casts outside the slice (2 Exploding Keg, 2 Chi Burst, 2 Celestial Infusion, 1 Empty the Cellar). 36 MATCH, all EXACT_ENTRY (19 Blackout Kick, 9 Breath of Fire, 8 Keg Smash), 0 REJECTED, 77 UNKNOWN: 65 because the query must fire a NON_GCD Purifying Brew with no reviewed transition contract (49 at shado_pan[8] while the Niuzao buff is down, 16 at shado_pan[2] while it is up), 12 on divergent worlds (4 at shado_pan[1] Keg Smash readiness, 4 at shado_pan[11] Empty the Cellar, 2 at shado_pan[7] Blackout Kick, 2 at shado_pan[0] Breath of Fire). The 15 opener decisions keep exactly their M11-C3a outcomes inside the bundle. The Empty the Cellar readiness aura stays NOT_CORROBORATED at every decision: the window now holds its wire transitions, and wiring them is a reviewed change this case does not make.",
+      "purpose": "M11-C4i RE-MEASUREMENT (pinned): 71 MATCH, 1 REJECTED (the Tiger Palm at 2,424,688, against a proven-usable Keg Smash), 41 UNKNOWN — 15 behind Black Ox Brew (shado_pan[3], no reviewed contract), 16 on Blackout Kick's divergent worlds (shado_pan[7]), 5 on Keg Smash (4 at shado_pan[1], 1 at shado_pan[14]), 3 on Invoke Niuzao (shado_pan[9]), 2 on Breath of Fire (shado_pan[0]). Positive usability (Keg Smash, Blackout Kick, Breath of Fire, Invoke Niuzao: every dimension of the completeness contract proven or not applicable, range STRICT by same-target corroboration) and the Purifying Brew / Empty the Cellar closure (a reviewed Purifying Brew transition: shared internal cooldown, Empty Barrel forgotten, never bound up; Empty the Cellar's wire aura 1262768 corroborated). No earlier resolved outcome changes. BEFORE M11-C4i — THE M11-C4 MEASUREMENT, the unchanged M11-C3a analyzer over the composed 165 s fight of the same subject (gtKb fight 22 actor 4, Shado-Pan). 113 eligible decisions — 30 Keg Smash, 28 Blackout Kick, 27 Breath of Fire, 26 Tiger Palm, 2 Invoke Niuzao — and 117 excluded casts: 57 melee swings; 15 NON_GCD casts (14 Purifying Brew, 1 Fortifying Brew); 38 casts with no pinned lane (27 Gift of the Ox heals, 4 Provoke, 4 Roll, 1 Transcendence, a potion and an on-use item); 7 in-domain GCD casts outside the slice (2 Exploding Keg, 2 Chi Burst, 2 Celestial Infusion, 1 Empty the Cellar). 36 MATCH, all EXACT_ENTRY (19 Blackout Kick, 9 Breath of Fire, 8 Keg Smash), 0 REJECTED, 77 UNKNOWN: 65 because the query must fire a NON_GCD Purifying Brew with no reviewed transition contract (49 at shado_pan[8] while the Niuzao buff is down, 16 at shado_pan[2] while it is up), 12 on divergent worlds (4 at shado_pan[1] Keg Smash readiness, 4 at shado_pan[11] Empty the Cellar, 2 at shado_pan[7] Blackout Kick, 2 at shado_pan[0] Breath of Fire). The 15 opener decisions keep exactly their M11-C3a outcomes inside the bundle. The Empty the Cellar readiness aura stays NOT_CORROBORATED at every decision: the window now holds its wire transitions, and wiring them is a reviewed change this case does not make.",
       "assertions": [
         {
           "kind": "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
@@ -18284,9 +18284,9 @@
             "declaredHoles": [],
             "expected": {
               "eligibleDecisions": 113,
-              "match": 36,
-              "rejected": 0,
-              "unknown": 77,
+              "match": 71,
+              "rejected": 1,
+              "unknown": 41,
               "exclusions": {
                 "MELEE_SWING": 57,
                 "NON_GCD_ACTION": 15,
@@ -18303,28 +18303,28 @@
             "historyArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"],
             "declaredHoles": [],
             "expected": {
-              "match": 36,
-              "rejected": 0,
-              "exactEntryMatches": 36,
+              "match": 71,
+              "rejected": 1,
+              "exactEntryMatches": 71,
               "tokenConvergedMatches": 0,
               "eligibleTokens": {
-                "keg_smash": 30,
-                "breath_of_fire": 27,
                 "blackout_kick": 28,
+                "breath_of_fire": 27,
                 "invoke_niuzao": 2,
+                "keg_smash": 30,
                 "tiger_palm": 26
               },
               "unresolvedAt": {
-                "TRANSITION_UNSUPPORTED @ shado_pan[8] purifying_brew": 49,
-                "TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew": 16,
+                "DIVERGENT_GCD_OUTCOMES @ shado_pan[0] breath_of_fire": 2,
+                "DIVERGENT_GCD_OUTCOMES @ shado_pan[14] keg_smash": 1,
                 "DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash": 4,
-                "DIVERGENT_GCD_OUTCOMES @ shado_pan[11] empty_the_cellar": 4,
-                "DIVERGENT_GCD_OUTCOMES @ shado_pan[7] blackout_kick": 2,
-                "DIVERGENT_GCD_OUTCOMES @ shado_pan[0] breath_of_fire": 2
+                "DIVERGENT_GCD_OUTCOMES @ shado_pan[7] blackout_kick": 16,
+                "DIVERGENT_GCD_OUTCOMES @ shado_pan[9] invoke_niuzao": 3,
+                "TRANSITION_UNSUPPORTED @ shado_pan[3] black_ox_brew": 15
               },
               "unknownBlockerClasses": {
-                "DIVERGENT_WORLDS": 12,
-                "OTHER": 65
+                "DIVERGENT_WORLDS": 26,
+                "OTHER": 15
               },
               "stoppingEntries": {
                 "(root scan resolved)": 113
@@ -18339,44 +18339,44 @@
               "undecidedGcdCandidates": {
                 "shado_pan[0] breath_of_fire | USABILITY:breath_of_fire": 3,
                 "shado_pan[0] breath_of_fire | buff.invoke_niuzao_the_black_ox.up": 2,
-                "shado_pan[1] keg_smash | USABILITY:keg_smash": 17,
-                "shado_pan[1] keg_smash | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[4] celestial_brew | USABILITY:celestial_brew": 13,
-                "shado_pan[4] celestial_brew | buff.empty_barrel.up": 1,
-                "shado_pan[4] celestial_brew | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[5] exploding_keg | USABILITY:exploding_keg": 7,
-                "shado_pan[5] exploding_keg | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[7] blackout_kick | USABILITY:blackout_kick": 17,
-                "shado_pan[7] blackout_kick | buff.blackout_combo.up": 3,
-                "shado_pan[9] invoke_niuzao | USABILITY:invoke_niuzao": 8,
                 "shado_pan[10] tiger_palm | USABILITY:tiger_palm": 1,
                 "shado_pan[10] tiger_palm | buff.blackout_combo.up": 3,
                 "shado_pan[10] tiger_palm | cooldown.blackout_kick.remains": 3,
-                "shado_pan[11] empty_the_cellar | buff.empty_the_cellar.remains": 66,
+                "shado_pan[11] empty_the_cellar | buff.empty_the_cellar.remains": 11,
                 "shado_pan[12] tiger_palm | USABILITY:tiger_palm": 1,
                 "shado_pan[12] tiger_palm | buff.blackout_combo.up": 3,
                 "shado_pan[13] breath_of_fire | USABILITY:breath_of_fire": 2,
                 "shado_pan[14] keg_smash | USABILITY:keg_smash": 3,
                 "shado_pan[15] exploding_keg | USABILITY:exploding_keg": 2,
                 "shado_pan[16] celestial_brew | USABILITY:celestial_brew": 3,
-                "shado_pan[17] empty_the_cellar | USABILITY:empty_the_cellar": 3,
+                "shado_pan[17] empty_the_cellar | USABILITY:empty_the_cellar": 2,
                 "shado_pan[18] chi_burst | USABILITY:chi_burst": 2,
+                "shado_pan[1] keg_smash | USABILITY:keg_smash": 16,
+                "shado_pan[1] keg_smash | buff.invoke_niuzao_the_black_ox.up": 3,
                 "shado_pan[21] tiger_palm | energy": 1,
                 "shado_pan[21] tiger_palm | energy.regen": 1,
-                "shado_pan[22] expel_harm | USABILITY:expel_harm": 1
+                "shado_pan[22] expel_harm | USABILITY:expel_harm": 1,
+                "shado_pan[4] celestial_brew | USABILITY:celestial_brew": 12,
+                "shado_pan[4] celestial_brew | buff.empty_barrel.up": 1,
+                "shado_pan[4] celestial_brew | buff.invoke_niuzao_the_black_ox.up": 3,
+                "shado_pan[5] exploding_keg | USABILITY:exploding_keg": 6,
+                "shado_pan[5] exploding_keg | buff.invoke_niuzao_the_black_ox.up": 3,
+                "shado_pan[7] blackout_kick | USABILITY:blackout_kick": 17,
+                "shado_pan[7] blackout_kick | buff.blackout_combo.up": 3,
+                "shado_pan[9] invoke_niuzao | USABILITY:invoke_niuzao": 8
               },
               "undecidedNonGcdCandidates": {
                 "default[0] auto_attack | USABILITY:auto_attack": 113,
-                "shado_pan[2] purifying_brew | USABILITY:purifying_brew": 13,
+                "shado_pan[2] purifying_brew | USABILITY:purifying_brew": 12,
                 "shado_pan[2] purifying_brew | buff.empty_barrel.up": 1,
                 "shado_pan[2] purifying_brew | buff.invoke_niuzao_the_black_ox.up": 3,
                 "shado_pan[3] black_ox_brew | buff.empty_barrel.up": 1,
                 "shado_pan[3] black_ox_brew | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[3] black_ox_brew | cooldown.celestial_brew.charges_fractional": 16,
-                "shado_pan[6] fortifying_brew | USABILITY:fortifying_brew": 13,
+                "shado_pan[3] black_ox_brew | cooldown.celestial_brew.charges_fractional": 15,
+                "shado_pan[6] fortifying_brew | USABILITY:fortifying_brew": 12,
                 "shado_pan[6] fortifying_brew | buff.empty_barrel.up": 1,
                 "shado_pan[6] fortifying_brew | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[8] purifying_brew | USABILITY:purifying_brew": 59,
+                "shado_pan[8] purifying_brew | USABILITY:purifying_brew": 58,
                 "shado_pan[8] purifying_brew | buff.empty_barrel.up": 1
               },
               "gcdDistribution": {
@@ -18407,7 +18407,9 @@
                 "invoke_niuzao_the_black_ox | up true (OBSERVED)": 36
               },
               "readinessAuraEvidence": {
-                "empty_the_cellar | WIRE_AURA_IDENTITY_NOT_CORROBORATED": 113
+                "empty_the_cellar | AURA_ACTIVE": 14,
+                "empty_the_cellar | AURA_STATE_UNKNOWN": 18,
+                "empty_the_cellar | PROVEN_INACTIVE": 81
               },
               "cooldownReadiness": {
                 "blackout_kick | COOLDOWN_STATE_UNKNOWN": 3,
@@ -18426,6 +18428,19 @@
                 "invoke_niuzao | PROVEN_NOT_READY": 101,
                 "invoke_niuzao | WITHIN_QUEUEING_TOLERANCE": 8,
                 "rushing_jade_wind | COOLDOWN_STATE_UNKNOWN": 113
+              },
+              "positiveUsability": {
+                "blackout_kick | NOT_PROVEN: COOLDOWN_READINESS(INSIDE_UPPER_BOUND_WINDOW)": 61,
+                "blackout_kick | NOT_PROVEN: COOLDOWN_READINESS(POSSIBLE_PRE_PULL_USE)": 2,
+                "blackout_kick | NOT_PROVEN: RANGE_TARGET(CORROBORATOR_NOT_ENEMY_UNIT_TARGET)": 13,
+                "blackout_kick | NOT_PROVEN: RANGE_TARGET(RANGE_NOT_CONTAINED)": 9,
+                "breath_of_fire | NOT_PROVEN: COOLDOWN_READINESS(INSIDE_UPPER_BOUND_WINDOW)": 85,
+                "breath_of_fire | NOT_PROVEN: COOLDOWN_READINESS(POSSIBLE_PRE_PULL_USE)": 1,
+                "invoke_niuzao | NOT_PROVEN: COOLDOWN_READINESS(INSIDE_UPPER_BOUND_WINDOW)": 108,
+                "invoke_niuzao | NOT_PROVEN: COOLDOWN_READINESS(POSSIBLE_PRE_PULL_USE)": 3,
+                "keg_smash | NOT_PROVEN: COOLDOWN_READINESS(INSIDE_UPPER_BOUND_WINDOW)": 81,
+                "keg_smash | NOT_PROVEN: RESOURCE_AFFORDABILITY(RESOURCE_NOT_OBSERVED_PRE_COST)": 1,
+                "keg_smash | PROVEN_USABLE": 1
               }
             }
           }
@@ -18452,11 +18467,11 @@
       ]
     },
     {
-      "caseId": "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-five-resolved",
+      "caseId": "spec-brewmaster-monk.the-shado-pan-opener-measures-fifteen-decisions-six-resolved",
       "artifactId": "wcl-brewmaster-monk-gtkb-opener",
       "owningLayer": "SPEC_BREWMASTER_MONK",
       "contractUnderTest": "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; resolver.ts",
-      "purpose": "THE M11-C2 MEASUREMENT. The Brewmaster subject (gtKb fight 22 actor 4, Shado-Pan) yields 15 eligible decisions over its 20 s opener — 4 Keg Smash, 4 Blackout Kick, 3 Tiger Palm, 3 Breath of Fire, 1 Invoke Niuzao — and 18 excluded casts (7 melee swings, 3 NON_GCD Purifying Brews, 8 casts with no pinned lane: Provoke, five Gift of the Ox heals, a potion and an on-use item). Every root scan RESOLVES through the hero-tree dispatch (Master of Harmony skipped, Shado-Pan entered), so no decision is lost to the dispatch itself; 5 MATCH at EXACT_ENTRY — both later Breath of Fire casts, selected at shado_pan[0] under Sal'salabim's Strength and a proven Invoke Niuzao buff, and since M11-C3a three Keg Smash casts (+10.7 s, +15.2 s, +19.3 s) selected at shado_pan[1] once Breath of Fire's 15,000 ms cooldown is proven running from the previous Breath of Fire with no Keg Smash reset (CAST_BY_ACTOR 121253) in between — 0 REJECTED, 10 UNKNOWN: 8 because the query must fire the NON_GCD Purifying Brew at shado_pan[2] and no reviewed transition contract exists for it, 2 (Blackout Kick +17.3 s, Tiger Palm +18.3 s) because Keg Smash's readiness at shado_pan[1] is not modelled (two charges, a hasted recharge, two reset paths) and its worlds diverge.",
+      "purpose": "M11-C4i RE-MEASUREMENT (pinned): 5 MATCH, 1 REJECTED, 9 UNKNOWN. Positive usability (Keg Smash, Blackout Kick, Breath of Fire, Invoke Niuzao: every dimension of the completeness contract proven or not applicable, range STRICT by same-target corroboration) and the Purifying Brew / Empty the Cellar closure (a reviewed Purifying Brew transition: shared internal cooldown, Empty Barrel forgotten, never bound up; Empty the Cellar's wire aura 1262768 corroborated). The Tiger Palm at 2,424,688 is REJECTED: shado_pan[1] keg_smash selects a Keg Smash proven usable (its last cast 9,465 ms earlier against an 8,000 ms charge-cooldown upper bound plus the 250 ms tolerance; the Tiger Palm's own PRE_COST 100 Energy against a 40 base cost; the Tiger Palm's target within 5 yd, inside Keg Smash's 15). The 9 UNKNOWN: 7 behind Black Ox Brew (no reviewed contract; shado_pan[3]), 2 on Keg Smash's divergent worlds at shado_pan[1]. BEFORE M11-C4i — THE M11-C2 MEASUREMENT. The Brewmaster subject (gtKb fight 22 actor 4, Shado-Pan) yields 15 eligible decisions over its 20 s opener — 4 Keg Smash, 4 Blackout Kick, 3 Tiger Palm, 3 Breath of Fire, 1 Invoke Niuzao — and 18 excluded casts (7 melee swings, 3 NON_GCD Purifying Brews, 8 casts with no pinned lane: Provoke, five Gift of the Ox heals, a potion and an on-use item). Every root scan RESOLVES through the hero-tree dispatch (Master of Harmony skipped, Shado-Pan entered), so no decision is lost to the dispatch itself; 5 MATCH at EXACT_ENTRY — both later Breath of Fire casts, selected at shado_pan[0] under Sal'salabim's Strength and a proven Invoke Niuzao buff, and since M11-C3a three Keg Smash casts (+10.7 s, +15.2 s, +19.3 s) selected at shado_pan[1] once Breath of Fire's 15,000 ms cooldown is proven running from the previous Breath of Fire with no Keg Smash reset (CAST_BY_ACTOR 121253) in between — 0 REJECTED, 10 UNKNOWN: 8 because the query must fire the NON_GCD Purifying Brew at shado_pan[2] and no reviewed transition contract exists for it, 2 (Blackout Kick +17.3 s, Tiger Palm +18.3 s) because Keg Smash's readiness at shado_pan[1] is not modelled (two charges, a hasted recharge, two reset paths) and its worlds diverge.",
       "assertions": [
         {
           "kind": "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
@@ -18465,8 +18480,8 @@
             "expected": {
               "eligibleDecisions": 15,
               "match": 5,
-              "rejected": 0,
-              "unknown": 10,
+              "rejected": 1,
+              "unknown": 9,
               "exclusions": {
                 "MELEE_SWING": 7,
                 "NON_GCD_ACTION": 3,
@@ -18481,23 +18496,23 @@
             "actorId": 4,
             "expected": {
               "match": 5,
-              "rejected": 0,
+              "rejected": 1,
               "exactEntryMatches": 5,
               "tokenConvergedMatches": 0,
               "eligibleTokens": {
-                "keg_smash": 4,
-                "breath_of_fire": 3,
                 "blackout_kick": 4,
+                "breath_of_fire": 3,
                 "invoke_niuzao": 1,
+                "keg_smash": 4,
                 "tiger_palm": 3
               },
               "unresolvedAt": {
-                "TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew": 8,
-                "DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash": 2
+                "DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash": 2,
+                "TRANSITION_UNSUPPORTED @ shado_pan[3] black_ox_brew": 7
               },
               "unknownBlockerClasses": {
                 "DIVERGENT_WORLDS": 2,
-                "OTHER": 8
+                "OTHER": 7
               },
               "stoppingEntries": {
                 "(root scan resolved)": 15
@@ -18511,41 +18526,41 @@
               },
               "undecidedGcdCandidates": {
                 "shado_pan[0] breath_of_fire | buff.invoke_niuzao_the_black_ox.up": 2,
-                "shado_pan[1] keg_smash | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[1] keg_smash | USABILITY:keg_smash": 7,
-                "shado_pan[4] celestial_brew | buff.empty_barrel.up": 1,
-                "shado_pan[4] celestial_brew | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[4] celestial_brew | USABILITY:celestial_brew": 5,
-                "shado_pan[5] exploding_keg | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[5] exploding_keg | USABILITY:exploding_keg": 7,
-                "shado_pan[7] blackout_kick | buff.blackout_combo.up": 3,
-                "shado_pan[9] invoke_niuzao | USABILITY:invoke_niuzao": 3,
+                "shado_pan[10] tiger_palm | USABILITY:tiger_palm": 1,
                 "shado_pan[10] tiger_palm | buff.blackout_combo.up": 3,
                 "shado_pan[10] tiger_palm | cooldown.blackout_kick.remains": 3,
-                "shado_pan[10] tiger_palm | USABILITY:tiger_palm": 1,
-                "shado_pan[11] empty_the_cellar | buff.empty_the_cellar.remains": 7,
-                "shado_pan[12] tiger_palm | buff.blackout_combo.up": 3,
+                "shado_pan[11] empty_the_cellar | buff.empty_the_cellar.remains": 6,
                 "shado_pan[12] tiger_palm | USABILITY:tiger_palm": 1,
+                "shado_pan[12] tiger_palm | buff.blackout_combo.up": 3,
                 "shado_pan[13] breath_of_fire | USABILITY:breath_of_fire": 1,
                 "shado_pan[14] keg_smash | USABILITY:keg_smash": 2,
                 "shado_pan[15] exploding_keg | USABILITY:exploding_keg": 2,
                 "shado_pan[16] celestial_brew | USABILITY:celestial_brew": 2,
                 "shado_pan[17] empty_the_cellar | USABILITY:empty_the_cellar": 2,
-                "shado_pan[18] chi_burst | USABILITY:chi_burst": 2
+                "shado_pan[18] chi_burst | USABILITY:chi_burst": 2,
+                "shado_pan[1] keg_smash | USABILITY:keg_smash": 6,
+                "shado_pan[1] keg_smash | buff.invoke_niuzao_the_black_ox.up": 3,
+                "shado_pan[4] celestial_brew | USABILITY:celestial_brew": 4,
+                "shado_pan[4] celestial_brew | buff.empty_barrel.up": 1,
+                "shado_pan[4] celestial_brew | buff.invoke_niuzao_the_black_ox.up": 3,
+                "shado_pan[5] exploding_keg | USABILITY:exploding_keg": 6,
+                "shado_pan[5] exploding_keg | buff.invoke_niuzao_the_black_ox.up": 3,
+                "shado_pan[7] blackout_kick | buff.blackout_combo.up": 3,
+                "shado_pan[9] invoke_niuzao | USABILITY:invoke_niuzao": 3
               },
               "undecidedNonGcdCandidates": {
                 "default[0] auto_attack | USABILITY:auto_attack": 15,
+                "shado_pan[2] purifying_brew | USABILITY:purifying_brew": 4,
                 "shado_pan[2] purifying_brew | buff.empty_barrel.up": 1,
                 "shado_pan[2] purifying_brew | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[2] purifying_brew | USABILITY:purifying_brew": 5,
                 "shado_pan[3] black_ox_brew | buff.empty_barrel.up": 1,
-                "shado_pan[3] black_ox_brew | cooldown.celestial_brew.charges_fractional": 8,
                 "shado_pan[3] black_ox_brew | buff.invoke_niuzao_the_black_ox.up": 3,
+                "shado_pan[3] black_ox_brew | cooldown.celestial_brew.charges_fractional": 7,
+                "shado_pan[6] fortifying_brew | USABILITY:fortifying_brew": 4,
                 "shado_pan[6] fortifying_brew | buff.empty_barrel.up": 1,
                 "shado_pan[6] fortifying_brew | buff.invoke_niuzao_the_black_ox.up": 3,
-                "shado_pan[6] fortifying_brew | USABILITY:fortifying_brew": 5,
-                "shado_pan[8] purifying_brew | buff.empty_barrel.up": 1,
-                "shado_pan[8] purifying_brew | USABILITY:purifying_brew": 6
+                "shado_pan[8] purifying_brew | USABILITY:purifying_brew": 5,
+                "shado_pan[8] purifying_brew | buff.empty_barrel.up": 1
               },
               "gcdDistribution": {
                 "GCD_CONSUMING | 1000 ms": 8,
@@ -18563,8 +18578,8 @@
             "expected": {
               "auraEvidence": {
                 "blackout_combo | AURA_STATE_UNKNOWN": 3,
-                "blackout_combo | up true (OBSERVED)": 5,
                 "blackout_combo | up false (OBSERVED)": 7,
+                "blackout_combo | up true (OBSERVED)": 5,
                 "empty_barrel | AURA_STATE_UNKNOWN": 1,
                 "empty_barrel | up false (OBSERVED)": 11,
                 "empty_barrel | up true (OBSERVED)": 3,
@@ -18572,20 +18587,30 @@
                 "invoke_niuzao_the_black_ox | up true (OBSERVED)": 12
               },
               "readinessAuraEvidence": {
-                "empty_the_cellar | WIRE_AURA_IDENTITY_NOT_CORROBORATED": 15
+                "empty_the_cellar | AURA_STATE_UNKNOWN": 15
               },
               "cooldownReadiness": {
                 "blackout_kick | COOLDOWN_STATE_UNKNOWN": 3,
                 "blackout_kick | PROVEN_NOT_READY": 9,
                 "blackout_kick | WITHIN_QUEUEING_TOLERANCE": 3,
-                "expel_harm | COOLDOWN_STATE_UNKNOWN": 15,
+                "breath_of_fire | COOLDOWN_STATE_UNKNOWN": 4,
+                "breath_of_fire | PROVEN_NOT_READY": 11,
                 "chi_burst | COOLDOWN_STATE_UNKNOWN": 15,
+                "expel_harm | COOLDOWN_STATE_UNKNOWN": 15,
+                "exploding_keg | COOLDOWN_STATE_UNKNOWN": 15,
                 "invoke_niuzao | COOLDOWN_STATE_UNKNOWN": 4,
                 "invoke_niuzao | PROVEN_NOT_READY": 11,
-                "exploding_keg | COOLDOWN_STATE_UNKNOWN": 15,
-                "rushing_jade_wind | COOLDOWN_STATE_UNKNOWN": 15,
-                "breath_of_fire | COOLDOWN_STATE_UNKNOWN": 4,
-                "breath_of_fire | PROVEN_NOT_READY": 11
+                "rushing_jade_wind | COOLDOWN_STATE_UNKNOWN": 15
+              },
+              "positiveUsability": {
+                "blackout_kick | NOT_PROVEN: COOLDOWN_READINESS(INSIDE_UPPER_BOUND_WINDOW)": 9,
+                "blackout_kick | NOT_PROVEN: COOLDOWN_READINESS(POSSIBLE_PRE_PULL_USE)": 2,
+                "breath_of_fire | NOT_PROVEN: COOLDOWN_READINESS(INSIDE_UPPER_BOUND_WINDOW)": 11,
+                "breath_of_fire | NOT_PROVEN: COOLDOWN_READINESS(POSSIBLE_PRE_PULL_USE)": 1,
+                "invoke_niuzao | NOT_PROVEN: COOLDOWN_READINESS(INSIDE_UPPER_BOUND_WINDOW)": 11,
+                "invoke_niuzao | NOT_PROVEN: COOLDOWN_READINESS(POSSIBLE_PRE_PULL_USE)": 3,
+                "keg_smash | NOT_PROVEN: COOLDOWN_READINESS(INSIDE_UPPER_BOUND_WINDOW)": 10,
+                "keg_smash | PROVEN_USABLE": 1
               }
             }
           }

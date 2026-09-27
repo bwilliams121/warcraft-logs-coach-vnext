@@ -75,11 +75,18 @@ const BREWMASTER_COOLDOWN_DATASET: TokenCooldownDataset = Object.freeze({
   fallbackSourcePath: "engine/class_modules/monk/sc_monk.cpp",
 });
 
-/** Derives one supported token's cooldown at a decision position, or `null` for an unpinned token. */
+/**
+ * Derives one SUPPORTED token's cooldown at a decision position, or `null`
+ * for a token outside `SUPPORTED_BREWMASTER_COOLDOWN_TOKENS` — including a
+ * pinned one. Keg Smash is pinned since M11-C4i for the POSITIVE readiness
+ * proof only; its resets make a NOT_READY lower bound unsound, so it is never
+ * derived here.
+ */
 export function deriveBrewmasterCooldown(
   input: BrewmasterCooldownInput,
   simcToken: string,
 ): BrewmasterTokenCooldown | null {
+  if (!(SUPPORTED_BREWMASTER_COOLDOWN_TOKENS as readonly string[]).includes(simcToken)) return null;
   return deriveTokenCooldown(BREWMASTER_COOLDOWN_DATASET, input, simcToken);
 }
 

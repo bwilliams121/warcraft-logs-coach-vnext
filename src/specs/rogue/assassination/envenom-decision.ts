@@ -36,8 +36,8 @@
 
 import type { CombatState } from "../../../engine/state/combat-state.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
-import type { StateResult } from "../../../engine/state/state-result.js";
 import type { ResourceAmountObservation } from "../../../engine/resources/resource-observations.js";
+import { acceptExactPreCost } from "../../../findings/resources/exact-pre-cost.js";
 import type { AplAuthority, ReachabilityProof } from "../../../simc/apl-authority.js";
 import { parseSimcExpression } from "../../../simc/expression/parse.js";
 import { evaluateSimcExpression, knownNumber, unknownNumber } from "../../../simc/expression/evaluate.js";
@@ -55,45 +55,7 @@ export const ENVENOM_TOKEN = "envenom";
 // Acceptance of exact decision state
 // --------------------------------------------------------------------------
 
-export type ExactStateAcceptance =
-  | { readonly accepted: true; readonly observation: ResourceAmountObservation }
-  | { readonly accepted: false; readonly detail: string };
-
-/**
- * Whether an M4 resource result may be used as exact decision state.
- *
- * Exported so the refusals can be tested directly, including branches this
- * evaluator cannot currently reach — `observationOnEvent` never returns STALE
- * today, but the refusal must hold if that ever changes, and a rule nobody
- * tested is a rule nobody can rely on.
- */
-export function acceptExactPreCost(result: StateResult<ResourceAmountObservation>): ExactStateAcceptance {
-  if (result.certainty === "UNKNOWN") {
-    // Notably includes NO_OBSERVATION: the event is in hand and carries no
-    // combo-point entry. That is an absence of evidence, never a value of zero.
-    return { accepted: false, detail: `no exact observation on the cast (${result.reason})` };
-  }
-  if (result.certainty === "STALE") {
-    return {
-      accepted: false,
-      detail:
-        "the latest combo-point observation predates this cast; a carried-forward value is not decision state",
-    };
-  }
-  if (result.certainty === "BOUNDED") {
-    return { accepted: false, detail: "combo points were only bounded, not exact" };
-  }
-  if (result.derivation !== "OBSERVED") {
-    return { accepted: false, detail: `combo points were ${result.derivation}, not directly observed` };
-  }
-  if (result.value.timing !== "PRE_COST") {
-    return {
-      accepted: false,
-      detail: `observation timing is ${result.value.timing}; only PRE_COST describes the amount before the cast's own cost`,
-    };
-  }
-  return { accepted: true, observation: result.value };
-}
+export { acceptExactPreCost, type ExactStateAcceptance } from "../../../findings/resources/exact-pre-cost.js";
 
 // --------------------------------------------------------------------------
 // Combo-point adapter

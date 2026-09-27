@@ -406,11 +406,13 @@ export function stateEvidenceCensus(
     auraEvidence: rows(coverage.auraEvidence),
     readinessAuraEvidence: rows(coverage.readinessAuraEvidence),
     cooldownReadiness: rows(coverage.cooldownReadiness),
+    positiveUsability: rows(coverage.positiveUsability),
   };
   const expected = {
     auraEvidence: sorted(Object.entries(params.expected.auraEvidence)),
     readinessAuraEvidence: sorted(Object.entries(params.expected.readinessAuraEvidence)),
     cooldownReadiness: sorted(Object.entries(params.expected.cooldownReadiness)),
+    positiveUsability: sorted(Object.entries(params.expected.positiveUsability)),
   };
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     return fail("the state evidence distributes differently than the case pins", { expected, actual });

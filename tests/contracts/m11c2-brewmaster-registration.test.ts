@@ -48,6 +48,7 @@ import {
 import { resolveSpecIdentity, SUPPORTED_SPEC_IDENTITIES } from "../../src/services/spec-identity.js";
 import { rosterSpecialization } from "../../src/data/game/spec-roster.js";
 import { pinnedBrewmasterMonkCooldowns } from "../../src/data/game/monk-brewmaster-cooldowns.js";
+import { pinnedBrewmasterUsabilityAuthority } from "../../src/data/game/monk-brewmaster-usability-authority.js";
 import { pinnedBrewmasterMonkGcdSemantics } from "../../src/data/game/monk-brewmaster-gcd-semantics.js";
 import { pinnedBrewmasterMonkTalents } from "../../src/data/game/monk-brewmaster-talents.js";
 import { isBuiltinIdentifier, parseSimcExpression } from "../../src/simc/expression/parse.js";
@@ -264,6 +265,21 @@ describe("authority and datasets", () => {
         "exploding_keg",
         "rushing_jade_wind",
         "breath_of_fire",
+        // M11-C4i: Keg Smash, for the POSITIVE readiness proof only (never a NOT_READY derivation).
+        "keg_smash",
+      ]);
+    }
+    // M11-C4i: the positive-usability authority, from the same pinned commit.
+    const usability = pinnedBrewmasterUsabilityAuthority();
+    expect(usability.ok).toBe(true);
+    if (usability.ok) {
+      expect(usability.artifactRevision).toBe("simc-33622e9d-1");
+      expect(usability.spells.map((spell) => spell.simcToken)).toEqual([
+        "tiger_palm",
+        "blackout_kick",
+        "keg_smash",
+        "breath_of_fire",
+        "invoke_niuzao",
       ]);
     }
   });
@@ -431,7 +447,7 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(Object.values(counted.calls).every((count) => count === 0)).toBe(true);
   });
 
-  it("the internal lookup runs the real analyzer over the real subject: 15 eligible, 5 MATCH, 0 REJECTED, 10 UNKNOWN (M11-C3a)", () => {
+  it("the internal lookup runs the real analyzer over the real subject: 15 eligible, 5 MATCH, 1 REJECTED, 9 UNKNOWN (M11-C4i)", () => {
     const registration = internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG);
     expect(registration).not.toBeNull();
     if (registration === null) return;
@@ -451,8 +467,8 @@ describe("the public path refuses the real subject; the internal path analyzes i
     expect(view.coverage).toMatchObject({
       eligibleDecisions: 15,
       match: 5,
-      rejected: 0,
-      unknown: 10,
+      rejected: 1,
+      unknown: 9,
       exactEntryMatches: 5,
       tokenConvergedMatches: 0,
     });

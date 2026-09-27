@@ -25,15 +25,20 @@
  * REJECTED in its favour. The override makes it unusable unless its enabling
  * aura is up.
  *
- * WHAT IS NOT CLAIMED. The aura's identity ON THE WIRE. SimulationCraft
- * builds the buff from spell 1262768, and a readiness aura pinned for an
- * earlier specialization is emitted as a DIFFERENT id from the one its module
- * builds. The one committed Brewmaster capture (M11-C2,
- * `wcl-brewmaster-monk-gtkb-opener`) holds no Exploding Keg cast, no Empty
- * the Cellar cast and no aura transition of 1262768, so it corroborates
- * nothing. `wireAuraIdentity` is therefore still `NOT_YET_CORROBORATED`, and
- * a consumer must treat the gate as unusable-when-proven-inactive only after
- * evidence corroborates the id.
+ * THE WIRE IDENTITY, CORROBORATED (M11-C4i). SimulationCraft builds the buff
+ * from spell 1262768, and a readiness aura pinned for an earlier
+ * specialization was emitted as a DIFFERENT id from the one its module
+ * builds, so the SimC id is never assumed to be the wire id. The M11-C2
+ * opener held no evidence either way. The M11-C4 extension of the same
+ * subject (`wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165`, committed)
+ * holds the whole life cycle SimulationCraft describes, on the wire, under
+ * 1262768: an Exploding Keg cast (325153) at 2,438,549 followed by
+ * `applybuff 1262768` on the actor at 2,438,567; `removebuff 1262768` at
+ * 2,439,541 with the Empty the Cellar cast (1263438) at 2,439,542; and a second
+ * Exploding Keg at 2,516,886, `applybuff` at 2,516,900, and an unconsumed
+ * `removebuff` at 2,536,906 — 20,006 ms later, the buff's duration. The gate
+ * is therefore CORROBORATED under 1262768, and a consumer may read it through
+ * M4 presence (still PROVEN_INACTIVE only from an OBSERVED removal).
  */
 
 /** Measured from the pinned file this milestone read; recorded, never typed from memory. */
@@ -59,13 +64,26 @@ export interface BrewmasterReadinessClaim {
  * What the override requires. Each kind names a DIFFERENT sort of state, and
  * only the first two are facts a consumer could ever bind from committed data.
  */
+/**
+ * Whether committed evidence ties the SimC buff to the id the log emits.
+ * Only a CORROBORATED identity may be queried; the SimC id is never a stand-in.
+ */
+export type BrewmasterWireAuraIdentity =
+  | "NOT_YET_CORROBORATED"
+  | {
+      readonly state: "CORROBORATED";
+      readonly wireAuraId: number;
+      readonly fixtureId: string;
+      readonly observation: string;
+    };
+
 export type BrewmasterReadinessGate =
   /** `ready()` is false unless the named SimC buff is up. */
   | {
       readonly kind: "REQUIRES_AURA_ACTIVE";
       readonly simcBuffName: string;
       readonly simcBuffSpellId: number;
-      readonly wireAuraIdentity: "NOT_YET_CORROBORATED";
+      readonly wireAuraIdentity: BrewmasterWireAuraIdentity;
     }
   /** `ready()` is false while the named talent is selected: build-static. */
   | { readonly kind: "NOT_READY_WHILE_TALENT_SELECTED"; readonly talentSimcName: string }
@@ -103,7 +121,13 @@ const EMPTY_THE_CELLAR: BrewmasterReadinessFact = {
     kind: "REQUIRES_AURA_ACTIVE",
     simcBuffName: "empty_the_cellar",
     simcBuffSpellId: EMPTY_THE_CELLAR_BUFF_SIMC_SPELL_ID,
-    wireAuraIdentity: "NOT_YET_CORROBORATED",
+    wireAuraIdentity: {
+      state: "CORROBORATED",
+      wireAuraId: EMPTY_THE_CELLAR_BUFF_SIMC_SPELL_ID,
+      fixtureId: "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+      observation:
+        "gtKb2xHn87pNcFfW fight 22, actor 4: Exploding Keg (325153) cast at 2,438,549 -> applybuff 1262768 on the actor at 2,438,567; removebuff 1262768 at 2,439,541 -> Empty the Cellar (1263438) cast at 2,439,542; Exploding Keg at 2,516,886 -> applybuff at 2,516,900 -> removebuff at 2,536,906 with no Empty the Cellar cast (20,006 ms: the expiry). Every 1262768 transition in the committed Brewmaster evidence belongs to one of these two windows.",
+    },
   },
   claims: [
     claim(
@@ -189,6 +213,72 @@ const CHI_BURST: BrewmasterReadinessFact = {
  * `usable_while_casting` for Spinning Crane Kick channels before deferring
  * to the base.
  */
+/**
+ * M11-C4i: the READY_OVERRIDE dimension of a positive usability proof, for
+ * the four actions it is wired for. A hand review of the pinned module
+ * (hash `SC_MONK_CPP_SHA256`) against every `bool ready() override` in it:
+ * none of the four action structs, and none of the wrapper templates
+ * Blackout Kick is built from, declares one. Every monk action inherits
+ * `monk_action_t<Base>::ready()`, which only permits the action while
+ * Spinning Crane Kick is being channelled and then defers to
+ * `action_t::ready()` — so the remaining readiness is the base checks the
+ * other positive-usability dimensions discharge.
+ */
+export interface BrewmasterNoReadyOverride {
+  readonly simcToken: string;
+  readonly actionStruct: string;
+  readonly claims: readonly BrewmasterReadinessClaim[];
+}
+
+const MONK_ACTION_READY = claim(
+  "monk_action_t<Base>::ready",
+  "234-241",
+  "The one ready() every monk action inherits: when the action lists cast-during ids it sets usable_while_casting while Spinning Crane Kick is channelled, then returns base_t::ready(). It only widens readiness; it adds no gate.",
+);
+
+export const BREWMASTER_NO_READY_OVERRIDE: readonly BrewmasterNoReadyOverride[] = [
+  {
+    simcToken: "keg_smash",
+    actionStruct: "keg_smash_t",
+    claims: [
+      claim("keg_smash_t", "2328-2642", "keg_smash_t : monk_melee_attack_t declares no ready() override."),
+      MONK_ACTION_READY,
+    ],
+  },
+  {
+    simcToken: "blackout_kick",
+    actionStruct: "blackout_kick_t",
+    claims: [
+      claim(
+        "blackout_kick_t; overwhelming_force_t; charred_passions_t; teachings_of_the_monastery_t; base_blackout_kick_t",
+        "788-833; 1209-1270; 1271-1316; 1318-1365; 1366-1452",
+        "blackout_kick_t is overwhelming_force_t<charred_passions_t<teachings_of_the_monastery_t<base_blackout_kick_t>>>; none of the four declares a ready() override (the override at :848 belongs to tiger_palm_t, :834).",
+      ),
+      MONK_ACTION_READY,
+    ],
+  },
+  {
+    simcToken: "breath_of_fire",
+    actionStruct: "breath_of_fire_t",
+    claims: [
+      claim("breath_of_fire_t", "3233-3317", "breath_of_fire_t : monk_spell_t declares no ready() override."),
+      MONK_ACTION_READY,
+    ],
+  },
+  {
+    simcToken: "invoke_niuzao",
+    actionStruct: "niuzao_spell_t",
+    claims: [
+      claim(
+        "niuzao_spell_t",
+        "3732-3755",
+        "niuzao_spell_t : monk_spell_t declares no ready() override (the override at :3767 belongs to unity_within_t, :3756).",
+      ),
+      MONK_ACTION_READY,
+    ],
+  },
+];
+
 export const BREWMASTER_READINESS_FACTS: readonly BrewmasterReadinessFact[] = [
   CHI_BURST,
   EMPTY_THE_CELLAR,
