@@ -102,6 +102,8 @@ const NODE_EVIDENCE_TESTS = [
   "tests/unit/m11c4e-evidence-archive.test.ts",
   "tests/contracts/m11c4e-promotion-archive.test.ts",
   "tests/contracts/m11-promotion-evidence-gate.test.ts",
+  // M11-C4f: the committed selection frame of the neutral second subject.
+  "tests/unit/m11c4f-selection-frame.test.ts",
 ];
 
 /** Credentials never reach a corpus run, whatever the parent shell holds. */

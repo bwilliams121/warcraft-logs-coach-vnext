@@ -141,7 +141,8 @@ export const MAX_CORPUS_BYTES = 6 * 1024 * 1024;
  *                       for promotion verification, executed only by its own
  *                       command and never loaded by the regression corpus.
  *                       MAX_ARTIFACT_BYTES each, a notice line at
- *                       EVIDENCE_ARCHIVE_NOTICE_BYTES, and no total ceiling.
+ *                       EVIDENCE_ARCHIVE_NOTICE_BYTES over its artifacts plus
+ *                       its committed selection frames, and no total ceiling.
  *
  * An archive case may reference a corpus artifact; a corpus case may never
  * reference an archive artifact. Artifact and case ids are one namespace
@@ -150,7 +151,11 @@ export const MAX_CORPUS_BYTES = 6 * 1024 * 1024;
 export const EVIDENCE_ROOT_IDS = ["REGRESSION_CORPUS", "EVIDENCE_ARCHIVE"] as const;
 export type EvidenceRootId = (typeof EVIDENCE_ROOT_IDS)[number];
 
-/** The archive's notice line: crossed by hand, never silently (checked by a test, not the loader). */
+/**
+ * The archive's notice line over artifact bytes PLUS committed
+ * `tests/evidence/selection-frames/**` bytes: crossed by hand, never silently
+ * (checked by a test, not the loader). MAX_ARTIFACT_BYTES stays artifact-only.
+ */
 export const EVIDENCE_ARCHIVE_NOTICE_BYTES = 4 * 1024 * 1024;
 
 /**

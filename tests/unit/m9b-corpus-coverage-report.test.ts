@@ -28,6 +28,8 @@ describe("coverage is measured from the corpus", () => {
       "encounter 3420/difficulty 4",
       "gtKb2xHn87pNcFfW/22",
       "qJ1pgB49ZrRNVmCd/6",
+      // M11-C4f: the neutral second Brewmaster subject's capture.
+      "rXAfw9t1q8YpmkKD/13",
     ]);
   });
 
@@ -61,6 +63,7 @@ describe("coverage is measured from the corpus", () => {
       "wcl-blood-death-knight-gtkb-opener",
       "wcl-brewmaster-monk-gtkb-opener",
       "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+      "wcl-brewmaster-monk-rxaf-opener",
       "wcl-protection-paladin-a7r6-opener",
       "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
       "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",

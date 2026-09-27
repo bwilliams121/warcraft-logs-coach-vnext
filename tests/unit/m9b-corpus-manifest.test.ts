@@ -76,8 +76,11 @@ describe("the committed corpus loads", () => {
     // authorized extension capture of the same report and fight, revision 22,
     // by the same predicate for actor 4) and three cases (the segment census,
     // the two-part bundle composition, the 165 s measurement).
-    expect(loaded.artifacts).toHaveLength(45);
-    expect(loaded.cases).toHaveLength(171);
+    // M11-C4f added the neutral second Brewmaster subject's fixed 20 s opener
+    // (the rest of its fixed 165 s window is in the evidence archive) and its
+    // normalization case.
+    expect(loaded.artifacts).toHaveLength(46);
+    expect(loaded.cases).toHaveLength(172);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -90,7 +93,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds thirty-four sanitized captures, four derivations and six synthetics", async () => {
+  it("holds thirty-five sanitized captures, four derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -114,6 +117,7 @@ describe("the committed corpus loads", () => {
       "wcl-boss-sourced",
       "wcl-brewmaster-monk-gtkb-opener",
       "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+      "wcl-brewmaster-monk-rxaf-opener",
       "wcl-cast-resource-pre-cost",
       "wcl-encounter-rankings-sszorak-page-1",
       "wcl-fight-context-a7r6-fight-7",
@@ -342,6 +346,8 @@ describe("retained coverage is granted only where the capture predicate supports
     "wcl-brewmaster-monk-gtkb-opener",
     // M11-C4: the same predicate for actor 4 over the M11-C4 extension capture.
     "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
+    // M11-C4f: the same predicate for actor 11 over the M11-C4f capture.
+    "wcl-brewmaster-monk-rxaf-opener",
   ];
 
   it("grants nothing on any property-based or index-based selection", async () => {

@@ -131,9 +131,11 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // (five), the two-part 165 s bundle composition (one) and the unchanged
     // analyzer's measurement over the composed fight — coverage, distribution
     // and state-evidence census (three). Measured, then pinned.
-    expect(result.summary.cases).toBe(171);
-    expect(result.summary.assertions).toBe(740);
-    expect(result.summary.passed).toBe(740);
+    // M11-C4f added one case and five assertions: the neutral second
+    // Brewmaster subject's fixed 20 s opener census.
+    expect(result.summary.cases).toBe(172);
+    expect(result.summary.assertions).toBe(745);
+    expect(result.summary.passed).toBe(745);
   });
 
   it("covers every layer", async () => {

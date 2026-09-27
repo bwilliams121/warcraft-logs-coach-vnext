@@ -1858,6 +1858,101 @@
       }
     },
     {
+      "artifactId": "wcl-brewmaster-monk-rxaf-opener",
+      "path": "artifacts/wcl-events/wcl-brewmaster-monk-rxaf-opener.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "7bf1f1cd21c56e729ddb75dcac904dff37f47830547e36c6cac8df95646bfac2",
+      "byteLength": 89500,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "rXAfw9t1q8YpmkKD",
+          "fightId": 13,
+          "reportRevision": 27,
+          "sourceActorId": 11,
+          "encounterId": 3420,
+          "difficulty": 4,
+          "capturedOn": "2026-09-26",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2440995,
+            "endTimeMs": 2605995
+          },
+          "completeness": {
+            "eventsReturned": 165448,
+            "pagesRetrieved": 17,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Seventeen pages (sixteen of 10,000–10,019 events and a terminal 5,330), the last with nextPageTimestamp null: the whole fixed window was retrieved inside the 25-page cap. The first event is at 2,440,995 = the fight start (16 events, 23 combatantinfo in the window) and the last at 2,605,988. The fight-context request read revision 27 before page 1 and REPORT_REVISION_QUERY after the last page read 27 (.probe/m11c4f/request-count.json)."
+          },
+          "captureTooling": {
+            "name": ".probe/m11c4f/candidate-walk.probe.ts (temporary, gitignored; gated on C4e CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "W2 + A1 fixed evidence window: EVENTS_QUERY over [2,440,995 .. 2,605,995] (fight start .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted — page 1 established actor 11's hero tree, pages 2–17 continued the same window; bounded to 25 pages in .probe/m11c4f/capture-plan.md before running, run once by hand on 2026-09-26 (23 requests in total for the walk and the capture, bound 50)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11c4f/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 27
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11c4f/pages.json wcl-brewmaster-monk-rxaf-opener.json --actor-slice 11 2460995 --families cast,resourcechange,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo"
+            },
+            "detail": "The seventeen page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 11 bounded at 2,460,995 (inclusive, fight start + 20 s — fixed by time, before any analyzer ran), restricted by --families to the same thirteen raw types as the first Brewmaster subject. In place and order preserved, 331 of 165,448 events: 57 casts (44 by actor 11, 13 targeting it), no resourcechange, 273 aura transitions (235 targeting 11, 38 sourced by 11 on others), actor 11's combatantinfo at 2,440,995 (specID 268); first event 2,440,995, last 2,460,994.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [11],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2440995,
+                  "toReportTimeMs": 2460995
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 11 over [2,440,995 .. 2,460,995] by the predicate 'every event actor 11 sources or is targeted by, of a retained family' over a window the capture retrieved COMPLETE with NO actor filter (seventeen pages, terminal, revision 27 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The window begins at the fight start."
+        },
+        "retainedFor": "M11-C4f: the neutral second Brewmaster subject (rXAfw9t1q8YpmkKD fight 13 actor 11 — Shado-Pan), selected by the fixed rule before any analyzer ran. The fixed pull .. +20 s opener is its regression fixture; the rest of the fixed 165 s window, the fight context and the selection frame are retained in the evidence archive.",
+        "limitations": [
+          "The first 20 seconds only: the rest of the subject's fixed 165 s evidence window is in the evidence archive.",
+          "No damage, healing, absorb or summon event is retained.",
+          "Cooldown state at the pull is outside the log; no aura present at the pull is observed until its first in-fight transition.",
+          "Sszorak has adds; nothing about target count is claimed here or anywhere in the corpus.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only.",
+          "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-cast-resource-pre-cost",
       "path": "artifacts/wcl-events/wcl-cast-resource-pre-cost.json",
       "encoding": "JSON",
@@ -6710,6 +6805,59 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m10c5b-corpus-bundle.test.ts"]
+    },
+    {
+      "caseId": "normalization.brewmaster-monk-rxaf-opener-normalizes-whole-and-in-order",
+      "artifactId": "wcl-brewmaster-monk-rxaf-opener",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --families",
+      "purpose": "The 331-event family-filtered actor-11 opener of the neutral second Brewmaster subject (rXAfw9t1q8YpmkKD fight 13) normalizes with every raw type recognised and every event kept in capture order: as SOURCE the combatantinfo, 44 casts and 194 aura transitions; as TARGET 14 casts and 235 aura transitions. No resource change involves actor 11 in the window.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 331
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 11,
+            "side": "SOURCE",
+            "expected": {
+              "COMBATANT_INFO": 1,
+              "CAST": 44,
+              "AURA": 194
+            }
+          }
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "params": {
+            "actorId": 11,
+            "side": "TARGET",
+            "expected": {
+              "CAST": 14,
+              "AURA": 235
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "A census of what the opener holds for the actor, never of the fight. The opener is the second subject's regression fixture, fixed by time (pull .. +20 s) before any analyzer ran; the rest of its fixed window lives in the evidence archive."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m11c4f-selection-frame.test.ts"]
     },
     {
       "caseId": "normalization.high-parse-opener-slice-normalizes-whole-and-in-order",

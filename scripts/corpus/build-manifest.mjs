@@ -862,6 +862,81 @@ const GTKB_FULL_SOURCE = source_g(
     performanceContext: undefined,
   },
 );
+// --------------------------------------------------------------------------
+// M11-C4f (2026-09-26): the NEUTRAL SECOND Brewmaster subject. Selected by the
+// fixed rule of M11-C4c/C4d — the M8 Sszorak heroic ranking page (canonical
+// digest 6b5fd2af…9a50c) minus the gtKb subject, ordered by fight start time,
+// walked to the first fight with a Shado-Pan Brewmaster (its own
+// combatantinfo) — before any analyzer ran. Candidate 5 of 99: report
+// rXAfw9t1q8YpmkKD fight 13, actor 11. ONE capture of the fixed window
+// [fight start .. +165 s], no actor filter: 17 pages, terminal, revision 27
+// before and after. The walk itself is recorded in
+// tests/evidence/selection-frames/brewmaster-second-subject.json.
+// --------------------------------------------------------------------------
+
+const RXAF_ACTOR = 11;
+const [RXAF_START, RXAF_OPENER_END, RXAF_END] = [2440995, 2460995, 2605995];
+const BREWMASTER_RXAF_OPENER = "wcl-brewmaster-monk-rxaf-opener";
+const BREWMASTER_RXAF_20_165 = "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165";
+const RXAF_CONTEXT = "wcl-fight-context-rxaf-fight-13";
+const M11C4F_PROBE = (question, requests) =>
+  tooling(
+    ".probe/m11c4f/candidate-walk.probe.ts (temporary, gitignored; gated on C4e CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+    UNAVAILABLE,
+    `${question}; bounded to ${requests} in .probe/m11c4f/capture-plan.md before running, run once by hand on 2026-09-26 (23 requests in total for the walk and the capture, bound 50)`,
+  );
+const rxaf_source = (captureTooling, rawCaptureLocation, q, comp, extra = {}) => ({
+  reportCode: "rXAfw9t1q8YpmkKD",
+  fightId: 13,
+  reportRevision: 27,
+  sourceActorId: RXAF_ACTOR,
+  encounterId: 3420,
+  difficulty: 4,
+  capturedOn: "2026-09-26",
+  gameVersion: 1,
+  logVersion: 17,
+  ingestionScope: "PLAYER_CONTEXT",
+  query: q,
+  completeness: comp,
+  captureTooling,
+  rawCaptureRetained: false,
+  rawCaptureLocation,
+  reportRevisionAfterCapture: 27,
+  ...extra,
+});
+const RXAF_CONTEXT_SOURCE = rxaf_source(
+  M11C4F_PROBE(
+    "W1 (candidate 5 of the fixed order) fight context: one FIGHT_CONTEXT_QUERY for fight 13 (its actorID argument 1 selects only whose talentImportCode is returned)",
+    "20 context requests",
+  ),
+  ".probe/m11c4f/context-5.json — gitignored, not retained in the repository",
+  { kind: "FIGHT_CONTEXT", fightIds: [13] },
+  completeness(
+    NOT_APPLICABLE,
+    1,
+    NOT_APPLICABLE,
+    "COMPLETE",
+    "A typed, unpaginated GraphQL field: the whole report context arrived in one response. It is the walk's eligibility evidence for this candidate: fight 13 present, encounter 3420, difficulty 4, gameVersion 1, logVersion 17, 271,769 ms, one Monk/Brewmaster (actor 11).",
+  ),
+  { ingestionScope: "FULL_RAID" },
+);
+const RXAF_EVENTS_SOURCE = rxaf_source(
+  M11C4F_PROBE(
+    "W2 + A1 fixed evidence window: EVENTS_QUERY over [2,440,995 .. 2,605,995] (fight start .. +165 s) at limit 10,000 with resources, no actor filter, hostilityType omitted — page 1 established actor 11's hero tree, pages 2–17 continued the same window",
+    "25 pages",
+  ),
+  ".probe/m11c4f/pages.json — gitignored, not retained in the repository",
+  query(true, 10000, RXAF_START, RXAF_END),
+  completeness(
+    165448,
+    17,
+    null,
+    "COMPLETE",
+    "Seventeen pages (sixteen of 10,000–10,019 events and a terminal 5,330), the last with nextPageTimestamp null: the whole fixed window was retrieved inside the 25-page cap. The first event is at 2,440,995 = the fight start (16 events, 23 combatantinfo in the window) and the last at 2,605,988. The fight-context request read revision 27 before page 1 and REPORT_REVISION_QUERY after the last page read 27 (.probe/m11c4f/request-count.json).",
+  ),
+);
+const RXAF_SEGMENT_BASIS =
+  "The retained families are complete for actor 11 over [2,460,996 .. 2,605,995] by the predicate 'every event actor 11 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (seventeen pages, terminal, revision 27 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to the opener slice only because the grants are adjacent (the opener's ends at 2,460,995, this one begins at 2,460,996).";
 const BLOOD_SEGMENT_BASIS = (fromMs, toMs) =>
   `The retained families are complete for actor 14 over [${fromMs.toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every event actor 14 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (seven pages, terminal, revision 30 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of the combatantinfo the bundle's first part holds. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The segment is one part of a bundle: it grants nothing before its own first millisecond, and the bundle composer joins it to its neighbour only where the grants are adjacent.`;
 
@@ -2011,6 +2086,39 @@ const ARTIFACTS = [
       "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
       "No damage, healing, absorb or summon event is retained.",
       "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+      "Sszorak has adds; nothing about target count is claimed here or anywhere in the corpus.",
+      NO_NAMES,
+      VERSION_SCOPE,
+      WHITESPACE,
+    ],
+  }),
+  // ---- M11-C4f: the second Brewmaster subject's fixed 20 s opener (regression fixture) ----
+  artifact(BREWMASTER_RXAF_OPENER, wcl(BREWMASTER_RXAF_OPENER), {
+    kind: "SANITIZED_CAPTURE",
+    source: RXAF_EVENTS_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m11c4f/pages.json ${BREWMASTER_RXAF_OPENER}.json --actor-slice 11 ${String(RXAF_OPENER_END)} --families ${PPB_FAMILIES}`,
+        "The seventeen page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 11 bounded at 2,460,995 (inclusive, fight start + 20 s — fixed by time, before any analyzer ran), restricted by --families to the same thirteen raw types as the first Brewmaster subject. In place and order preserved, 331 of 165,448 events: 57 casts (44 by actor 11, 13 targeting it), no resourcechange, 273 aura transitions (235 targeting 11, 38 sourced by 11 on others), actor 11's combatantinfo at 2,440,995 (specID 268); first event 2,440,995, last 2,460,994.",
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_6),
+      credential_scan(SLICER_REVISION_6),
+    ],
+    grants: [
+      {
+        categories: PPB_CATEGORIES,
+        actorScope: [RXAF_ACTOR],
+        ranges: [{ fromReportTimeMs: RXAF_START, toReportTimeMs: RXAF_OPENER_END }],
+      },
+    ],
+    coverageBasis:
+      "The retained families are complete for actor 11 over [2,440,995 .. 2,460,995] by the predicate 'every event actor 11 sources or is targeted by, of a retained family' over a window the capture retrieved COMPLETE with NO actor filter (seventeen pages, terminal, revision 27 before and after). CASTS and RESOURCES are complete as the source of its own casts and the actor its snapshots describe; AURAS as their target; COMBATANT_INFO and GEAR as the subject of its one combatantinfo. DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted. The window begins at the fight start.",
+    retainedFor:
+      "M11-C4f: the neutral second Brewmaster subject (rXAfw9t1q8YpmkKD fight 13 actor 11 — Shado-Pan), selected by the fixed rule before any analyzer ran. The fixed pull .. +20 s opener is its regression fixture; the rest of the fixed 165 s window, the fight context and the selection frame are retained in the evidence archive.",
+    limitations: [
+      "The first 20 seconds only: the rest of the subject's fixed 165 s evidence window is in the evidence archive.",
+      "No damage, healing, absorb or summon event is retained.",
+      "Cooldown state at the pull is outside the log; no aura present at the pull is observed until its first in-fight transition.",
       "Sszorak has adds; nothing about target count is claimed here or anywhere in the corpus.",
       NO_NAMES,
       VERSION_SCOPE,
@@ -5579,6 +5687,32 @@ const BREWMASTER_CASES = [
     ["VALIDATED_EVIDENCE"],
     "A census of what the opener holds for the actor, never of the fight.",
     { related: ["tests/unit/sanitize-probe.test.ts"] },
+  ),
+  // ---- M11-C4f: the neutral second subject's fixed 20 s opener ----
+  kase(
+    "normalization.brewmaster-monk-rxaf-opener-normalizes-whole-and-in-order",
+    BREWMASTER_RXAF_OPENER,
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --families",
+    "The 331-event family-filtered actor-11 opener of the neutral second Brewmaster subject (rXAfw9t1q8YpmkKD fight 13) normalizes with every raw type recognised and every event kept in capture order: as SOURCE the combatantinfo, 44 casts and 194 aura transitions; as TARGET 14 casts and 235 aura transitions. No resource change involves actor 11 in the window.",
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: 331 }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", {
+        actorId: RXAF_ACTOR,
+        side: "SOURCE",
+        expected: { COMBATANT_INFO: 1, CAST: 44, AURA: 194 },
+      }),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", {
+        actorId: RXAF_ACTOR,
+        side: "TARGET",
+        expected: { CAST: 14, AURA: 235 },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "A census of what the opener holds for the actor, never of the fight. The opener is the second subject's regression fixture, fixed by time (pull .. +20 s) before any analyzer ran; the rest of its fixed window lives in the evidence archive.",
+    { related: ["tests/unit/sanitize-probe.test.ts", "tests/unit/m11c4f-selection-frame.test.ts"] },
   ),
   // ---- M11-C4: the 20–165 s extension segment and the composed 165 s fight ----
   kase(
@@ -10138,6 +10272,69 @@ const CASES = [
 // --------------------------------------------------------------------------
 
 const EVIDENCE_ARTIFACTS = [
+  // ---- M11-C4f: the second Brewmaster subject's fixed 20–165 s segment ----
+  artifact(BREWMASTER_RXAF_20_165, wcl(BREWMASTER_RXAF_20_165), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    source: RXAF_EVENTS_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m11c4f/pages.json ../../../evidence/artifacts/wcl-events/${BREWMASTER_RXAF_20_165}.json --actor-slice 11 ${String(RXAF_END)} --from ${String(RXAF_OPENER_END)} --families ${PPB_FAMILIES}`,
+        "The seventeen page envelopes concatenated in page order, then the --actor-slice predicate for ACTOR 11 with --from 2,460,995 (exclusive) and the bound 2,605,995 (inclusive, fight start + 165 s — the window fixed before any analyzer ran), restricted by --families to the same thirteen raw types. In place and order preserved, 1,834 of 165,448 events: 286 casts (249 by actor 11, 37 targeting it), no resourcechange, 1,548 aura transitions (1,354 targeting 11, 194 sourced by 11 on others), no combatantinfo; first event 2,461,102, last 2,605,987. It holds 30 Keg Smash, 29 Breath of Fire, 29 Blackout Kick, 33 Tiger Palm, 17 Purifying Brew, 4 Chi Burst, 2 Exploding Keg, 2 Celestial Infusion, 1 Invoke Niuzao and 1 Fortifying Brew cast by actor 11. The output name routes the slicer's write into the evidence archive root.",
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_6),
+      credential_scan(SLICER_REVISION_6),
+    ],
+    grants: [
+      {
+        categories: PPB_CATEGORIES,
+        actorScope: [RXAF_ACTOR],
+        ranges: [{ fromReportTimeMs: RXAF_OPENER_END + 1, toReportTimeMs: RXAF_END }],
+      },
+    ],
+    coverageBasis: RXAF_SEGMENT_BASIS,
+    retainedFor:
+      "M11-C4f: the rest of the neutral second subject's fixed 165 s evidence window, retained regardless of its analyzer outcome and composed with the regression-corpus opener by the bundle composer.",
+    limitations: [
+      "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only a composed bundle does.",
+      "No damage, healing, absorb or summon event is retained.",
+      "Cooldown state at the pull is outside the log; what a later decision knows comes from observed casts in the bundle's history.",
+      "Sszorak has adds; nothing about target count is claimed here or anywhere in the corpus.",
+      NO_NAMES,
+      VERSION_SCOPE,
+      WHITESPACE,
+    ],
+  }),
+  // ---- M11-C4f: the second subject's fight context (identity for the promotion gate) ----
+  artifact(RXAF_CONTEXT, graphql(RXAF_CONTEXT), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    payloadKind: "WCL_GRAPHQL_DATA",
+    source: RXAF_CONTEXT_SOURCE,
+    transformations: [
+      {
+        kind: "FIELD_REDACTION",
+        tooling: tooling(
+          PAYLOAD_SANITIZER,
+          PAYLOAD_SANITIZER_REVISION,
+          `node scripts/corpus/sanitize-payloads.mjs context .probe/m11c4f/context-5.json tests/evidence/artifacts/wcl-graphql/${RXAF_CONTEXT}.json`,
+        ),
+        detail: CONTEXT_REDACTION,
+        invalidates: [],
+      },
+      payload_credential_scan(),
+    ],
+    coverageBasis:
+      "Report context, not events: master data, one fight header, phase transitions, abilities and zone. It grants no event coverage. The actor catalog is complete for the report because master data is unpaginated.",
+    retainedFor:
+      "M11-C4f: the second Brewmaster subject's report context — the roster and specs the promotion gate's identity proof reads for actor 11 (Player / Monk / Brewmaster) — and the walk's eligibility evidence for candidate 5.",
+    limitations: [
+      "Names are redacted to `Actor<id>`, servers and player gameIDs to null; a case must never depend on a name beyond its being the redacted form.",
+      "The talent import code present is actor 1's (the query argument), uninterpreted; actor 11's build is read from its own combatantinfo in the opener slice.",
+      VERSION_SCOPE,
+      WHITESPACE,
+    ],
+  }),
   artifact(BREWMASTER_GTKB_165_285, wcl(BREWMASTER_GTKB_165_285), {
     root: "EVIDENCE",
     kind: "SANITIZED_CAPTURE",
@@ -10172,7 +10369,238 @@ const EVIDENCE_ARTIFACTS = [
   }),
 ];
 
+const RXAF_AUTHORITY = {
+  ...BREWMASTER_SIMC,
+  requiredStateEvidence: [
+    "the combatantinfo at 2,440,995 for actor 11 (specID 268)",
+    "every COMPLETE cast by actor 11 in the bundle, in canonical order",
+    "every aura transition on actor 11 sourced by actor 11, in canonical order",
+  ],
+};
+const RXAF_BUNDLE = { historyArtifactIds: [BREWMASTER_RXAF_OPENER], declaredHoles: [] };
+
 const EVIDENCE_CASES = [
+  // ---- M11-C4f: the neutral second subject's fixed 165 s window ----
+  kase(
+    "normalization.brewmaster-monk-rxaf-seg-20-165-normalizes-whole-and-in-order",
+    BREWMASTER_RXAF_20_165,
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from",
+    "The 1,834-event family-filtered actor-11 segment (fight start + 20 s .. + 165 s) normalizes with every raw type recognised and every event kept in capture order: as SOURCE 249 casts and 1,191 aura transitions; as TARGET 39 casts and 1,354 aura transitions. No resource change involves actor 11. No combatantinfo: the profile is carried by the regression-corpus opener the bundle begins with.",
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: 1834 }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", {
+        actorId: RXAF_ACTOR,
+        side: "SOURCE",
+        expected: { CAST: 249, AURA: 1191 },
+      }),
+      a("NORMALIZATION.ACTOR_EVENT_CENSUS", {
+        actorId: RXAF_ACTOR,
+        side: "TARGET",
+        expected: { CAST: 39, AURA: 1354 },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "The census is of the segment, never of the fight: exactly the families the --families option retained, between the recorded exclusive --from and inclusive --to bounds, and nothing else.",
+    { related: ["tests/unit/sanitize-probe.test.ts", "tests/unit/m11c4f-selection-frame.test.ts"] },
+  ),
+  kase(
+    "normalization.brewmaster-monk-rxaf-165s-bundle-composes-two-parts-across-the-roots",
+    BREWMASTER_RXAF_20_165,
+    "NORMALIZATION",
+    "tests/support/corpus/fight.ts bundleOverEvidence; loader.ts (cross-root references); scripts/corpus/build-manifest.mjs",
+    "The two parts of ONE capture — the regression-corpus opener (grant 2,440,995 .. 2,460,995) and the archive segment (granted from 2,460,996) — compose into one 2,165-event fight over [2,440,995 .. 2,605,987] with CASTS, AURAS, RESOURCES, COMBATANT_INFO and GEAR each COMPLETE over ONE joined range [2,440,995 .. 2,605,995]: the whole fixed 165 s window, by adjacency.",
+    [
+      a("NORMALIZATION.BUNDLE_COMPOSITION", {
+        ...RXAF_BUNDLE,
+        actorId: RXAF_ACTOR,
+        expected: {
+          events: 2165,
+          coverage: {
+            CASTS: "COMPLETE",
+            AURAS: "COMPLETE",
+            RESOURCES: "COMPLETE",
+            COMBATANT_INFO: "COMPLETE",
+            GEAR: "COMPLETE",
+            DAMAGE: "ABSENT",
+            HEALING: "ABSENT",
+            ABSORBS: "ABSENT",
+            SUMMONS: "ABSENT",
+          },
+          castRanges: [{ fromReportTimeMs: RXAF_START, toReportTimeMs: RXAF_END }],
+          windowFromReportTimeMs: RXAF_START,
+          windowToReportTimeMs: 2605987,
+        },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "Composition is a claim about coverage, never inferred from the bytes: the same composer and refusals as every other bundle, across the two roots.",
+    { related: ["tests/unit/m10c5b-corpus-bundle.test.ts", "tests/unit/m11c4e-evidence-archive.test.ts"] },
+  ),
+  kase(
+    "spec-brewmaster-monk.the-second-subjects-fixed-165s-window-measures-one-hundred-thirty-nine-decisions-forty-seven-resolved",
+    BREWMASTER_RXAF_20_165,
+    "SPEC_BREWMASTER_MONK",
+    "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; resolver.ts; tests/support/corpus/fight.ts bundleOverEvidence",
+    "THE M11-C4f MEASUREMENT: the unchanged analyzer over the NEUTRAL SECOND subject's fixed 165 s window (rXAfw9t1q8YpmkKD fight 13 actor 11 — Shado-Pan, the same build facts as subject 1), selected by the fixed rule before any analyzer ran and retained regardless of outcome. 139 eligible decisions — 35 Keg Smash, 35 Breath of Fire, 35 Tiger Palm, 32 Blackout Kick, 2 Invoke Niuzao — and 154 excluded casts: 74 melee swings; 22 NON_GCD casts (21 Purifying Brew, 1 Fortifying Brew); 48 casts with no pinned lane; 10 in-domain GCD casts outside the slice (4 Chi Burst, 3 Exploding Keg, 3 Celestial Infusion). 47 MATCH, all EXACT_ENTRY (23 Blackout Kick, 12 Breath of Fire, 12 Keg Smash), 0 REJECTED, 92 UNKNOWN: 82 behind the NON_GCD Purifying Brew with no reviewed transition contract (63 at shado_pan[8], 19 at shado_pan[2]), 10 on divergent worlds (7 at shado_pan[11] Empty the Cellar, 2 at shado_pan[1] Keg Smash, 1 at shado_pan[10] Tiger Palm). The 17 opener decisions keep their outcomes inside the bundle.",
+    [
+      a("SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY", {
+        actorId: RXAF_ACTOR,
+        ...RXAF_BUNDLE,
+        expected: {
+          eligibleDecisions: 139,
+          match: 47,
+          rejected: 0,
+          unknown: 92,
+          exclusions: {
+            MELEE_SWING: 74,
+            NON_GCD_ACTION: 22,
+            EXECUTION_LANE_NOT_ESTABLISHED: 48,
+            OUTSIDE_FIRST_SLICE: 10,
+          },
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION", {
+        actorId: RXAF_ACTOR,
+        ...RXAF_BUNDLE,
+        expected: {
+          match: 47,
+          rejected: 0,
+          exactEntryMatches: 47,
+          tokenConvergedMatches: 0,
+          eligibleTokens: {
+            keg_smash: 35,
+            breath_of_fire: 35,
+            blackout_kick: 32,
+            invoke_niuzao: 2,
+            tiger_palm: 35,
+          },
+          unresolvedAt: {
+            "TRANSITION_UNSUPPORTED @ shado_pan[8] purifying_brew": 63,
+            "TRANSITION_UNSUPPORTED @ shado_pan[2] purifying_brew": 19,
+            "DIVERGENT_GCD_OUTCOMES @ shado_pan[11] empty_the_cellar": 7,
+            "DIVERGENT_GCD_OUTCOMES @ shado_pan[1] keg_smash": 2,
+            "DIVERGENT_GCD_OUTCOMES @ shado_pan[10] tiger_palm": 1,
+          },
+          unknownBlockerClasses: { DIVERGENT_WORLDS: 10, OTHER: 82 },
+          stoppingEntries: { "(root scan resolved)": 139 },
+          stoppingAtoms: {},
+          dispatchOutcomes: {
+            "default[2] -> race_actions : CALL_RETURNED_NO_ACTION_CONTINUE": 139,
+            "default[3] -> item_actions : CALL_RETURNED_NO_ACTION_CONTINUE": 139,
+            "default[4] -> master_of_harmony : RUN_GATE_FALSE_SKIPPED": 139,
+            "default[5] -> shado_pan : RUN_ENTERED_SCAN_ENDS": 139,
+          },
+          undecidedGcdCandidates: {
+            "shado_pan[0] breath_of_fire | USABILITY:breath_of_fire": 1,
+            "shado_pan[1] keg_smash | USABILITY:keg_smash": 21,
+            "shado_pan[4] celestial_brew | USABILITY:celestial_brew": 14,
+            "shado_pan[4] celestial_brew | buff.empty_barrel.up": 5,
+            "shado_pan[5] exploding_keg | USABILITY:exploding_keg": 5,
+            "shado_pan[7] blackout_kick | USABILITY:blackout_kick": 13,
+            "shado_pan[7] blackout_kick | buff.blackout_combo.up": 2,
+            "shado_pan[9] invoke_niuzao | USABILITY:invoke_niuzao": 5,
+            "shado_pan[10] tiger_palm | USABILITY:tiger_palm": 1,
+            "shado_pan[10] tiger_palm | buff.blackout_combo.up": 1,
+            "shado_pan[10] tiger_palm | cooldown.blackout_kick.remains": 1,
+            "shado_pan[11] empty_the_cellar | buff.empty_the_cellar.remains": 82,
+            "shado_pan[12] tiger_palm | USABILITY:tiger_palm": 6,
+            "shado_pan[12] tiger_palm | buff.blackout_combo.up": 1,
+            "shado_pan[14] keg_smash | USABILITY:keg_smash": 9,
+            "shado_pan[15] exploding_keg | USABILITY:exploding_keg": 1,
+            "shado_pan[16] celestial_brew | USABILITY:celestial_brew": 8,
+            "shado_pan[16] celestial_brew | buff.empty_barrel.up": 1,
+            "shado_pan[17] empty_the_cellar | USABILITY:empty_the_cellar": 9,
+            "shado_pan[18] chi_burst | USABILITY:chi_burst": 2,
+            "shado_pan[20] blackout_kick | USABILITY:blackout_kick": 1,
+            "shado_pan[21] tiger_palm | energy": 8,
+            "shado_pan[21] tiger_palm | energy.regen": 8,
+            "shado_pan[22] expel_harm | USABILITY:expel_harm": 8,
+          },
+          undecidedNonGcdCandidates: {
+            "default[0] auto_attack | USABILITY:auto_attack": 139,
+            "shado_pan[2] purifying_brew | USABILITY:purifying_brew": 14,
+            "shado_pan[2] purifying_brew | buff.empty_barrel.up": 5,
+            "shado_pan[3] black_ox_brew | buff.empty_barrel.up": 5,
+            "shado_pan[3] black_ox_brew | cooldown.celestial_brew.charges_fractional": 19,
+            "shado_pan[6] fortifying_brew | USABILITY:fortifying_brew": 14,
+            "shado_pan[6] fortifying_brew | buff.empty_barrel.up": 5,
+            "shado_pan[8] purifying_brew | USABILITY:purifying_brew": 71,
+            "shado_pan[8] purifying_brew | buff.empty_barrel.up": 4,
+          },
+          gcdDistribution: {
+            "GCD_CONSUMING | 1000 ms": 78,
+            "GCD_CONSUMING | 1500 ms": 71,
+            "NON_GCD | 0 ms": 22,
+            "UNKNOWN_LANE | no record": 48,
+          },
+        },
+      }),
+      a("SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS", {
+        actorId: RXAF_ACTOR,
+        ...RXAF_BUNDLE,
+        expected: {
+          auraEvidence: {
+            "blackout_combo | AURA_STATE_UNKNOWN": 5,
+            "blackout_combo | up false (OBSERVED)": 101,
+            "blackout_combo | up true (OBSERVED)": 33,
+            "empty_barrel | AURA_STATE_UNKNOWN": 13,
+            "empty_barrel | up false (OBSERVED)": 110,
+            "empty_barrel | up true (OBSERVED)": 16,
+            "invoke_niuzao_the_black_ox | up false (OBSERVED)": 94,
+            "invoke_niuzao_the_black_ox | up true (OBSERVED)": 45,
+          },
+          readinessAuraEvidence: { "empty_the_cellar | WIRE_AURA_IDENTITY_NOT_CORROBORATED": 139 },
+          cooldownReadiness: {
+            "blackout_kick | COOLDOWN_STATE_UNKNOWN": 5,
+            "blackout_kick | PROVEN_NOT_READY": 80,
+            "blackout_kick | WITHIN_QUEUEING_TOLERANCE": 54,
+            "breath_of_fire | COOLDOWN_STATE_UNKNOWN": 37,
+            "breath_of_fire | PROVEN_NOT_READY": 102,
+            "chi_burst | COOLDOWN_STATE_UNKNOWN": 31,
+            "chi_burst | PROVEN_NOT_READY": 94,
+            "chi_burst | WITHIN_QUEUEING_TOLERANCE": 14,
+            "expel_harm | COOLDOWN_STATE_UNKNOWN": 139,
+            "exploding_keg | COOLDOWN_STATE_UNKNOWN": 10,
+            "exploding_keg | PROVEN_NOT_READY": 127,
+            "exploding_keg | WITHIN_QUEUEING_TOLERANCE": 2,
+            "invoke_niuzao | COOLDOWN_STATE_UNKNOWN": 1,
+            "invoke_niuzao | PROVEN_NOT_READY": 131,
+            "invoke_niuzao | WITHIN_QUEUEING_TOLERANCE": 7,
+            "rushing_jade_wind | COOLDOWN_STATE_UNKNOWN": 139,
+          },
+        },
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "The neutral second subject — chosen by a rule fixed before any outcome was known, over a window fixed by time — agrees with the authority wherever a decision resolves: 47 MATCH, 0 REJECTED. That is evidence, retained as such; it does not satisfy the promotion standard, and no third subject is drawn.",
+    { authority: RXAF_AUTHORITY, related: BREWMASTER_RELATED },
+  ),
+  // ---- M11-C4f closeout: the second subject's first resolved MATCH, pinned over the whole fixed window ----
+  kase(
+    "spec-brewmaster-monk.the-second-subjects-first-resolved-match-over-its-fixed-165s-bundle",
+    BREWMASTER_RXAF_20_165,
+    "SPEC_BREWMASTER_MONK",
+    "src/specs/monk/brewmaster/observed-analysis.ts; first-gcd-adapter.ts; tests/support/corpus/fight.ts bundleOverEvidence; tests/support/corpus/loader.ts (cross-root references)",
+    "The FIRST resolved MATCH of the neutral second subject in report-time order — chosen by that rule, not by what it shows — resolves over the complete fixed 165 s bundle (the regression-corpus opener + the archive segment of ONE capture): the Breath of Fire at 2,442,604 (+1.609 s) matches the authority's selected token at EXACT_ENTRY with no blocker, and the nested unselectability proof refuses with CONDITION_NOT_PROVEN_FALSE. Its identity is proven by the subject's own committed fight context (actor 11: Player / Monk / Brewmaster).",
+    [
+      a("SPEC_BREWMASTER_MONK.DECISION_COVERAGE", {
+        actorId: RXAF_ACTOR,
+        targetActorId: null,
+        ...RXAF_BUNDLE,
+        observedCast: bm_cast(2442604, BM_BOF),
+        expected: {
+          ...BREWMASTER_MATCH("breath_of_fire"),
+          unselectabilityRefusal: "CONDITION_NOT_PROVEN_FALSE",
+        },
+      }),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "Subject 2 contributes real, identity-paired MATCH evidence of its own from SANITIZED_CAPTURE across both roots. One more MATCH is not promotion evidence: the second subject, like the first, has no REJECTED.",
+    { authority: RXAF_AUTHORITY, related: BREWMASTER_RELATED },
+  ),
   kase(
     "normalization.brewmaster-monk-full-fight-seg-165-285-normalizes-whole-and-in-order",
     BREWMASTER_GTKB_165_285,

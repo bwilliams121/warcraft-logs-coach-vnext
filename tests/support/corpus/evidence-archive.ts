@@ -18,7 +18,8 @@
  * the regression corpus as its one dependency:
  *
  *   - SANITIZED_CAPTURE artifacts only, 512 KiB each, no total ceiling (a
- *     notice line at EVIDENCE_ARCHIVE_NOTICE_BYTES, checked by a test);
+ *     notice line at EVIDENCE_ARCHIVE_NOTICE_BYTES over the artifacts PLUS
+ *     the committed `selection-frames/**`, checked by a test);
  *   - evidence-verification assertion families only, each case reading at
  *     least one archive artifact;
  *   - archive cases may read corpus artifacts; corpus cases may never read
@@ -58,6 +59,25 @@ const ARCHIVE_REPORT: Record<string, string> = import.meta.glob("../../evidence/
   query: "?raw",
   import: "default",
 });
+
+const SELECTION_FRAMES: Record<string, string> = import.meta.glob("../../evidence/selection-frames/**", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+
+/**
+ * The UTF-8 bytes of every committed `tests/evidence/selection-frames/**`
+ * file. Frames are not artifacts (no per-artifact rule, no loader), but they
+ * are retained archive payload, so they count toward the notice line. The
+ * archive's `.gitattributes` pins LF, so these are the committed bytes.
+ */
+export function committedSelectionFrameBytes(): number {
+  const encoder = new TextEncoder();
+  let total = 0;
+  for (const text of Object.values(SELECTION_FRAMES)) total += encoder.encode(text).length;
+  return total;
+}
 
 function codePointCompare(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;

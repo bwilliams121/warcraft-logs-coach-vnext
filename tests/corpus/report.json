@@ -148,6 +148,13 @@
       "sha256": "35d6a8f871e576231ab7347568d052c3c05f75cf3989149dcf271cf505df11f6"
     },
     {
+      "artifactId": "wcl-brewmaster-monk-rxaf-opener",
+      "byteLength": 89500,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "7bf1f1cd21c56e729ddb75dcac904dff37f47830547e36c6cac8df95646bfac2"
+    },
+    {
       "artifactId": "wcl-cast-resource-pre-cost",
       "byteLength": 3045,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -332,8 +339,8 @@
       "passed": 24
     },
     {
-      "assertions": 151,
-      "cases": 42,
+      "assertions": 156,
+      "cases": 43,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
@@ -353,7 +360,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 151
+      "passed": 156
     },
     {
       "assertions": 64,
@@ -1503,6 +1510,40 @@
       "caseId": "normalization.brewmaster-monk-rotational-165s-seg-20-165-normalizes-whole-and-in-order",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-rxaf-opener",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.brewmaster-monk-rxaf-opener-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-rxaf-opener"]
     },
     {
       "artifactId": "wcl-assassination-high-parse-opener",
@@ -6545,15 +6586,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 5241687,
-    "artifacts": 45,
-    "assertions": 740,
-    "cases": 171,
+    "artifactBytes": 5331187,
+    "artifacts": 46,
+    "assertions": 745,
+    "cases": 172,
     "declared": 0,
-    "executable": 740,
+    "executable": 745,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 740
+    "passed": 745
   }
 }

@@ -9,6 +9,7 @@ import {
 } from "../support/corpus/contract.js";
 import {
   committedEvidenceArchiveFiles,
+  committedSelectionFrameBytes,
   loadCommittedEvidenceArchive,
   runEvidenceArchiveHarness,
 } from "../support/corpus/evidence-archive.js";
@@ -74,23 +75,31 @@ describe("the committed evidence archive", () => {
     if (!loaded.ok) throw new Error(loaded.errors.map((error) => error.message).join("\n"));
     expect(loaded.archive.rootId).toBe("EVIDENCE_ARCHIVE");
     expect(loaded.corpus.rootId).toBe("REGRESSION_CORPUS");
-    expect(loaded.archive.artifacts.map((entry) => entry.record.artifactId)).toEqual([ARCHIVE_SEGMENT]);
-    expect(loaded.archive.cases).toHaveLength(4);
+    expect(loaded.archive.artifacts.map((entry) => entry.record.artifactId)).toEqual([
+      ARCHIVE_SEGMENT,
+      // M11-C4f: the neutral second subject's 20–165 s segment and fight context.
+      "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
+      "wcl-fight-context-rxaf-fight-13",
+    ]);
+    expect(loaded.archive.cases).toHaveLength(8);
     // Accounting is per root: the archive counts its own bytes only.
-    expect(loaded.archive.totalArtifactBytes).toBe(308961);
+    expect(loaded.archive.totalArtifactBytes).toBe(308961 + 389605 + 387275);
     // Every archive artifact is real evidence.
     for (const entry of loaded.archive.artifacts) {
       expect(entry.record.provenance.kind, entry.record.artifactId).toBe("SANITIZED_CAPTURE");
     }
   });
 
-  it("stays under its 4 MiB notice line and its 512 KiB per-artifact ceiling", async () => {
+  it("stays under its 4 MiB notice line (artifacts + selection frames) and its 512 KiB per-artifact ceiling", async () => {
     const loaded = await loadCommittedEvidenceArchive();
     if (!loaded.ok) throw new Error("archive does not load");
     // The archive has NO total ceiling; the notice line is a deliberate
-    // hand-crossed marker, like the regression corpus's.
+    // hand-crossed marker, like the regression corpus's. It counts every
+    // retained byte: the artifacts AND the committed selection frames.
     expect(EVIDENCE_ARCHIVE_NOTICE_BYTES).toBe(4 * 1024 * 1024);
-    expect(loaded.archive.totalArtifactBytes).toBeLessThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
+    const frameBytes = committedSelectionFrameBytes();
+    expect(frameBytes).toBe(29010);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBeLessThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     for (const entry of loaded.archive.artifacts) {
       expect(entry.canonicalByteLength).toBeLessThan(MAX_ARTIFACT_BYTES);
     }
@@ -324,6 +333,26 @@ const CORPUS_REPORT: Record<string, string> = import.meta.glob("../corpus/report
   eager: true,
   query: "?raw",
   import: "default",
+});
+const PRETTIER_IGNORE: Record<string, string> = import.meta.glob("../../.prettierignore", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+const ARCHIVE_GIT_ATTRIBUTES: Record<string, string> = import.meta.glob("../evidence/.gitattributes", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+
+describe("archive bytes are protected like corpus bytes", () => {
+  it("no formatter rewrites an archived artifact, and git pins LF under the archive root", () => {
+    // M11-C4f: a sanitized fight context is not Prettier-shaped; reformatting
+    // it would change the bytes its digest describes.
+    const ignore = Object.values(PRETTIER_IGNORE)[0] ?? "";
+    expect(ignore.split(/\r?\n/)).toContain("tests/evidence/artifacts/");
+    expect(Object.values(ARCHIVE_GIT_ATTRIBUTES)[0] ?? "").toMatch(/^\* text eol=lf$/m);
+  });
 });
 
 describe("ordinary corpus execution does not load the archive", () => {

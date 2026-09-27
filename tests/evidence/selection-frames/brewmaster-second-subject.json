@@ -1,0 +1,1062 @@
+{
+  "frameVersion": 1,
+  "campaign": "M11-C4f",
+  "purpose": "The neutral second Brewmaster evidence subject: the fixed population, its fixed order, the walk, and why the selected subject was the first eligible one. Fixed before any analyzer ran on any candidate.",
+  "privacy": "Unselected candidates carry rank, fight ID, fight start time, duration, raid size and SHA-256(report code) only. Clear report codes appear for subject 1 (already committed provenance) and the selected subject only. No names, servers, guilds, amounts or brackets.",
+  "population": {
+    "source": "The M8 capture of worldData.encounter(3420).characterRankings(difficulty 4, className Rogue, specName Assassination, metric dps, partition OMITTED, page 1), captured 2026-09-15 — the page subject 1 came from. The raw snapshot (.probe/m8-rankings-shape.json) is not committed.",
+    "rows": 100,
+    "canonicalDigest": "6b5fd2af0bc3575e00ca35e0d52dacaa4c748e6183e4851604ef6bbf93d9a50c",
+    "canonicalDigestRule": "SHA-256 over the sorted lines `reportCode:fightID:startTime` of all rows (clear codes; recomputable from the raw snapshot)",
+    "hashedCanonicalDigest": "91317e8ced506a2e0b6b3a763424804ff38de67f695ae203a9b2cf583c60479d",
+    "hashedCanonicalDigestRule": "SHA-256 over the sorted lines `codeSha256:fightID:startTime` of all rows (recomputable from this frame)"
+  },
+  "excluded": [
+    {
+      "rank": 1,
+      "reportCode": "gtKb2xHn87pNcFfW",
+      "codeSha256": "f6b3ce2fefb23df65621986f117c28937043594ea9edb0c01f6fbf861b60e78c",
+      "fightID": 22,
+      "startTime": 1789341185411,
+      "duration": 284791,
+      "size": 25,
+      "reason": "SUBJECT_1: the first Brewmaster evidence subject's report, excluded before ordering"
+    }
+  ],
+  "order": {
+    "keys": ["fight startTime ascending", "report code (code-point order)", "fight ID ascending"],
+    "startTimeTies": 0
+  },
+  "candidates": [
+    {
+      "order": 1,
+      "rank": 44,
+      "fightID": 17,
+      "startTime": 1788307666876,
+      "duration": 270167,
+      "size": 27,
+      "codeSha256": "0f34e5251d325e1ad603ab4b81d30ccba24a651512552fd2ccafa941a41c4676"
+    },
+    {
+      "order": 2,
+      "rank": 16,
+      "fightID": 10,
+      "startTime": 1788311006818,
+      "duration": 265518,
+      "size": 25,
+      "codeSha256": "2a1063f313a1c57998f34441f2e7dfe0046bbda53cf3a734bcb2f2a2f4ce778f"
+    },
+    {
+      "order": 3,
+      "rank": 80,
+      "fightID": 32,
+      "startTime": 1788311192496,
+      "duration": 287767,
+      "size": 24,
+      "codeSha256": "9bb243c12bf4423253a72262b7e47895b2997982e0f1d30fa588bd7f32ca9b82"
+    },
+    {
+      "order": 4,
+      "rank": 39,
+      "fightID": 23,
+      "startTime": 1788313635122,
+      "duration": 264334,
+      "size": 25,
+      "codeSha256": "badf6f019225ea7db73511d4f2243d9d6f70c88a78626c4148d959c17ff7ff7e"
+    },
+    {
+      "order": 5,
+      "rank": 30,
+      "fightID": 13,
+      "startTime": 1788319816427,
+      "duration": 271769,
+      "size": 23,
+      "codeSha256": "792f8c332dc47bb0d3a93f92374e437d20ff664d572e003408f2d30f778b6e45"
+    },
+    {
+      "order": 6,
+      "rank": 11,
+      "fightID": 26,
+      "startTime": 1788373298679,
+      "duration": 277300,
+      "size": 28,
+      "codeSha256": "51796876feb0eab62cf197f475aeee0225f2a55598f8f23f25f9b1e936c93a1f"
+    },
+    {
+      "order": 7,
+      "rank": 49,
+      "fightID": 27,
+      "startTime": 1788374139300,
+      "duration": 262579,
+      "size": 25,
+      "codeSha256": "0d59edcf34febe52647957b3709610cbe4e8de85ccb9ec292e8f2907017f8977"
+    },
+    {
+      "order": 8,
+      "rank": 77,
+      "fightID": 8,
+      "startTime": 1788376937470,
+      "duration": 274916,
+      "size": 29,
+      "codeSha256": "1fc23236f60648ab0b8c46460f0ba899400198d7ea835a7f39ba415f441b30aa"
+    },
+    {
+      "order": 9,
+      "rank": 19,
+      "fightID": 30,
+      "startTime": 1788379034953,
+      "duration": 278773,
+      "size": 30,
+      "codeSha256": "923c6637bf4d08c292a09ad5fce459438277c020bfd07e29ee10ed4bb16e0fcb"
+    },
+    {
+      "order": 10,
+      "rank": 54,
+      "fightID": 35,
+      "startTime": 1788379675388,
+      "duration": 275024,
+      "size": 19,
+      "codeSha256": "17ae86f0807e9d37e15cef5f2f604062ff62297b78e50fa525e05ddd354eade4"
+    },
+    {
+      "order": 11,
+      "rank": 85,
+      "fightID": 36,
+      "startTime": 1788387184685,
+      "duration": 301898,
+      "size": 23,
+      "codeSha256": "d38a2df1a0e5bf41f5a1198d18e833fd808d4f150c99a44aa217d1afe35f9636"
+    },
+    {
+      "order": 12,
+      "rank": 87,
+      "fightID": 14,
+      "startTime": 1788388409397,
+      "duration": 274703,
+      "size": 25,
+      "codeSha256": "2fba4bcdef829a2e0bcf62e132e7c53dc7c89120799e783d8501f5eae4e31389"
+    },
+    {
+      "order": 13,
+      "rank": 64,
+      "fightID": 15,
+      "startTime": 1788388616044,
+      "duration": 306972,
+      "size": 22,
+      "codeSha256": "2e262c5ac6aea7ca0d0c82817e53892a2d4ace8c938b1433a1b0874b532dc742"
+    },
+    {
+      "order": 14,
+      "rank": 23,
+      "fightID": 27,
+      "startTime": 1788436521828,
+      "duration": 269546,
+      "size": 30,
+      "codeSha256": "3069832d4fb82b22d23bd8c0c3af2583b5dd3aa998587578774754ae3f44307f"
+    },
+    {
+      "order": 15,
+      "rank": 84,
+      "fightID": 19,
+      "startTime": 1788438777399,
+      "duration": 266871,
+      "size": 28,
+      "codeSha256": "ff67661d7397626de10105ae8a767ab2f3919c094dfac363995e3a981298640a"
+    },
+    {
+      "order": 16,
+      "rank": 98,
+      "fightID": 23,
+      "startTime": 1788461071494,
+      "duration": 281109,
+      "size": 20,
+      "codeSha256": "f80d95d1aa54ee0f9c89056cca9f09eb3b8a9b3e6f17407f2989ca823491d572"
+    },
+    {
+      "order": 17,
+      "rank": 86,
+      "fightID": 25,
+      "startTime": 1788463669710,
+      "duration": 296502,
+      "size": 21,
+      "codeSha256": "bb177b4c1e8912df493bd5db387fe1fd6609a349a165f9c17fb4f2dbbe59fe4f"
+    },
+    {
+      "order": 18,
+      "rank": 59,
+      "fightID": 38,
+      "startTime": 1788463727140,
+      "duration": 272818,
+      "size": 25,
+      "codeSha256": "2103e9ecf8b7cc1bcce5a509c46cc2de8ee1f18c3ec6e45e173c70687cfd0978"
+    },
+    {
+      "order": 19,
+      "rank": 55,
+      "fightID": 104,
+      "startTime": 1788573358565,
+      "duration": 287096,
+      "size": 20,
+      "codeSha256": "5d38a73caef4908dd80ef862f815d83a9f3dfd38dbdac20b536d12fda12a4e84"
+    },
+    {
+      "order": 20,
+      "rank": 94,
+      "fightID": 27,
+      "startTime": 1788578093043,
+      "duration": 280206,
+      "size": 27,
+      "codeSha256": "4a6d50cef25ea840658da5b51339fde36f75bb065d5f56846aaa9b30b2357c15"
+    },
+    {
+      "order": 21,
+      "rank": 93,
+      "fightID": 34,
+      "startTime": 1788603841472,
+      "duration": 413368,
+      "size": 23,
+      "codeSha256": "edd9658bf9288616fb9c8c892e982ced9d216dad4d60333c6b1dae4c8713b916"
+    },
+    {
+      "order": 22,
+      "rank": 38,
+      "fightID": 25,
+      "startTime": 1788609508421,
+      "duration": 266763,
+      "size": 30,
+      "codeSha256": "710f1d5e0863547d25c11d7d754d33a582afa645fd9b9809493eff340fea6e2d"
+    },
+    {
+      "order": 23,
+      "rank": 8,
+      "fightID": 13,
+      "startTime": 1788631906805,
+      "duration": 304098,
+      "size": 30,
+      "codeSha256": "c263ce1203301d19721e35b9a0498067e3e059a73acb1eea8853a33abc3ab7a7"
+    },
+    {
+      "order": 24,
+      "rank": 32,
+      "fightID": 43,
+      "startTime": 1788633859713,
+      "duration": 390159,
+      "size": 28,
+      "codeSha256": "c7717c2fded5c11767b3676f82eb864cd494edf0bc05d138a399d1631f15d479"
+    },
+    {
+      "order": 25,
+      "rank": 21,
+      "fightID": 6,
+      "startTime": 1788739698828,
+      "duration": 321063,
+      "size": 21,
+      "codeSha256": "824f8f5ab6352605652ff593b2213359d3fb9c7fb748f5fd73ccbdf5efe8cd59"
+    },
+    {
+      "order": 26,
+      "rank": 46,
+      "fightID": 34,
+      "startTime": 1788746540551,
+      "duration": 278104,
+      "size": 24,
+      "codeSha256": "ffa877a35777a7e9a37bbb0817f94c101e1fd6562fad333601c9094dce5048da"
+    },
+    {
+      "order": 27,
+      "rank": 47,
+      "fightID": 28,
+      "startTime": 1788783180550,
+      "duration": 289828,
+      "size": 30,
+      "codeSha256": "8048a233f785ca033f267d8d9e8a608d20dc30e8b0ca77a9b3831a02f8a4ec0d"
+    },
+    {
+      "order": 28,
+      "rank": 70,
+      "fightID": 17,
+      "startTime": 1788805554094,
+      "duration": 307546,
+      "size": 30,
+      "codeSha256": "e44752b9d5c79e838f4d353a4c9a3558fb942189d4eff31704b0051ad3efe8c9"
+    },
+    {
+      "order": 29,
+      "rank": 81,
+      "fightID": 10,
+      "startTime": 1788818524865,
+      "duration": 340061,
+      "size": 29,
+      "codeSha256": "2b02ddc83b584eb0fb1a01b199ada16c99719dbc8909f28b17ce27956f6936db"
+    },
+    {
+      "order": 30,
+      "rank": 76,
+      "fightID": 26,
+      "startTime": 1788890279820,
+      "duration": 274371,
+      "size": 23,
+      "codeSha256": "0b37baf6dfc75d1a832ea70da33e3942a14947deac129934e2881a2d66650115"
+    },
+    {
+      "order": 31,
+      "rank": 95,
+      "fightID": 19,
+      "startTime": 1788916769810,
+      "duration": 280527,
+      "size": 26,
+      "codeSha256": "761dfdf23cb5d5721435abf206b36f01897ff8f293010ba748fa787ff9fa8bbe"
+    },
+    {
+      "order": 32,
+      "rank": 45,
+      "fightID": 27,
+      "startTime": 1788922146777,
+      "duration": 257191,
+      "size": 28,
+      "codeSha256": "83c2258f0719107e3a3a4d4b5ae87b9dc74e6d025f353ad852b7888ef6770ca3"
+    },
+    {
+      "order": 33,
+      "rank": 25,
+      "fightID": 2,
+      "startTime": 1788936907434,
+      "duration": 297352,
+      "size": 20,
+      "codeSha256": "068954dc55a3eb8f9ec320c112bd0994dc9bcdc622e20d25dfe2241d968454d0"
+    },
+    {
+      "order": 34,
+      "rank": 78,
+      "fightID": 21,
+      "startTime": 1788942716579,
+      "duration": 272753,
+      "size": 24,
+      "codeSha256": "16497b7973061c0b2ac2890282e4ada5ddc9bd51382c69bde4678b534bb43abe"
+    },
+    {
+      "order": 35,
+      "rank": 79,
+      "fightID": 27,
+      "startTime": 1788948595656,
+      "duration": 285069,
+      "size": 25,
+      "codeSha256": "7287ee0659d4e2da24da7f946df29086d79f2d1333adaaf46a47222b8563be30"
+    },
+    {
+      "order": 36,
+      "rank": 100,
+      "fightID": 107,
+      "startTime": 1788955765071,
+      "duration": 293910,
+      "size": 20,
+      "codeSha256": "e4eec359eeb202172cc82e7dbd0742ac9b772cf12e8a3473f5954f529a05c92a"
+    },
+    {
+      "order": 37,
+      "rank": 52,
+      "fightID": 37,
+      "startTime": 1788964786985,
+      "duration": 394149,
+      "size": 29,
+      "codeSha256": "e6bbbf4c757c2c4bae1ad3f0d8276022242713d2d196223b94dd353e8c740bd9"
+    },
+    {
+      "order": 38,
+      "rank": 22,
+      "fightID": 23,
+      "startTime": 1788972235761,
+      "duration": 300061,
+      "size": 30,
+      "codeSha256": "d2b0379c7477b195f5d049845610e40bc045d8d93b69d384b2c92fc71b716ca2"
+    },
+    {
+      "order": 39,
+      "rank": 5,
+      "fightID": 23,
+      "startTime": 1788972454261,
+      "duration": 416912,
+      "size": 28,
+      "codeSha256": "2ba16e5f9497068a1ba3867331fc5537e8c38ab6883a5a5d799c56daceb333de"
+    },
+    {
+      "order": 40,
+      "rank": 75,
+      "fightID": 5,
+      "startTime": 1788975452625,
+      "duration": 267461,
+      "size": 25,
+      "codeSha256": "3731ca0cd6d239db38cd21c52654ab27993c5559d0ed9ef0f5f06ff68222912d"
+    },
+    {
+      "order": 41,
+      "rank": 89,
+      "fightID": 7,
+      "startTime": 1788976728954,
+      "duration": 275126,
+      "size": 19,
+      "codeSha256": "b939580cea225157cca075b5b4100af3d0387351c189a255d8feec2e6f41d638"
+    },
+    {
+      "order": 42,
+      "rank": 10,
+      "fightID": 22,
+      "startTime": 1788976854696,
+      "duration": 313954,
+      "size": 21,
+      "codeSha256": "65672d7a30878fb5925181554a6a8d4071f94c8664e0ae43711f0c653ae231df"
+    },
+    {
+      "order": 43,
+      "rank": 82,
+      "fightID": 22,
+      "startTime": 1788978929253,
+      "duration": 286416,
+      "size": 22,
+      "codeSha256": "395e3873a1c40e9fd29dd55dc9aa639d4ed5757ca8f4f54689e578c014042ab2"
+    },
+    {
+      "order": 44,
+      "rank": 13,
+      "fightID": 22,
+      "startTime": 1788979687198,
+      "duration": 288468,
+      "size": 20,
+      "codeSha256": "26a47a7399843e1db373be119a8714b94010ab1c8307b17eef38be7e535d76fb"
+    },
+    {
+      "order": 45,
+      "rank": 65,
+      "fightID": 27,
+      "startTime": 1788980363537,
+      "duration": 297655,
+      "size": 22,
+      "codeSha256": "fdaeb30b507b138e5fc812699593d66ab63a83ce7ad039180ae9d278886891e6"
+    },
+    {
+      "order": 46,
+      "rank": 42,
+      "fightID": 23,
+      "startTime": 1788980448659,
+      "duration": 274498,
+      "size": 22,
+      "codeSha256": "9f63c8277e5c9d97e82b8a77f50f1e42667c74c00d11706e3da6859da60275c2"
+    },
+    {
+      "order": 47,
+      "rank": 66,
+      "fightID": 30,
+      "startTime": 1788980570110,
+      "duration": 260265,
+      "size": 26,
+      "codeSha256": "8a0d8a51da70f10af6e22d2ff71ff27c90bf0e138834f1ab50110b0f4e060e0f"
+    },
+    {
+      "order": 48,
+      "rank": 33,
+      "fightID": 30,
+      "startTime": 1788981071720,
+      "duration": 303936,
+      "size": 25,
+      "codeSha256": "8e346719ca32259c0c474568d4e586261b3deaa98babacd2cb9de86e624d1a9e"
+    },
+    {
+      "order": 49,
+      "rank": 61,
+      "fightID": 36,
+      "startTime": 1788986544405,
+      "duration": 274842,
+      "size": 21,
+      "codeSha256": "c8fc80ec88f6b42e4ef91518afca9c74492e5e0a45cfec4f19f98490a7358818"
+    },
+    {
+      "order": 50,
+      "rank": 18,
+      "fightID": 45,
+      "startTime": 1788987287047,
+      "duration": 266324,
+      "size": 26,
+      "codeSha256": "b179a8997c5fdfa3f0e5a2d9080f29f6922fa3a61b2592744b48074a086e2c04"
+    },
+    {
+      "order": 51,
+      "rank": 99,
+      "fightID": 35,
+      "startTime": 1789018554446,
+      "duration": 305645,
+      "size": 30,
+      "codeSha256": "83595b9f658522171078acf5fe1939c4b1e59283997b13b6112f77930bde9bc1"
+    },
+    {
+      "order": 52,
+      "rank": 6,
+      "fightID": 25,
+      "startTime": 1789030938446,
+      "duration": 399310,
+      "size": 30,
+      "codeSha256": "c60b63274f86edb78d952b8efb63d4467c3c678a77cbf308df3d46f8f40795f7"
+    },
+    {
+      "order": 53,
+      "rank": 48,
+      "fightID": 37,
+      "startTime": 1789035117802,
+      "duration": 301557,
+      "size": 27,
+      "codeSha256": "862efe5dd6a34d079bf05d7450b860e34d9efde47a14e3b62ff67fc87cf22a64"
+    },
+    {
+      "order": 54,
+      "rank": 28,
+      "fightID": 12,
+      "startTime": 1789041545716,
+      "duration": 298036,
+      "size": 30,
+      "codeSha256": "9555706676a4e09ff510842de7bdc6651acd517bd14971b151ac809474176091"
+    },
+    {
+      "order": 55,
+      "rank": 56,
+      "fightID": 27,
+      "startTime": 1789041609413,
+      "duration": 301161,
+      "size": 30,
+      "codeSha256": "f57a5a56f2a0b3be450c7f28eb7c9cc93cfd87fb4d6bd4f05151160e8cb9633f"
+    },
+    {
+      "order": 56,
+      "rank": 71,
+      "fightID": 23,
+      "startTime": 1789044163671,
+      "duration": 245615,
+      "size": 30,
+      "codeSha256": "b2b5967ba538933eb053b14beafa9bc431c4518b3f660515326bf7b4727c14e0"
+    },
+    {
+      "order": 57,
+      "rank": 57,
+      "fightID": 40,
+      "startTime": 1789045485069,
+      "duration": 273025,
+      "size": 22,
+      "codeSha256": "f0bddb9c36d6ce629c2b9589163059613470654f9e0a1d1395b7f3667774977c"
+    },
+    {
+      "order": 58,
+      "rank": 96,
+      "fightID": 29,
+      "startTime": 1789046268084,
+      "duration": 307351,
+      "size": 26,
+      "codeSha256": "e3833f657920381cf7a4b812b1342651417ae98be4dfbf2828a701836a11ec86"
+    },
+    {
+      "order": 59,
+      "rank": 50,
+      "fightID": 32,
+      "startTime": 1789046741130,
+      "duration": 273076,
+      "size": 26,
+      "codeSha256": "95232ba5f179eea264ddf73b9a77034d29a914e946f8d0a0b186c43d6c1d02cd"
+    },
+    {
+      "order": 60,
+      "rank": 73,
+      "fightID": 17,
+      "startTime": 1789047707417,
+      "duration": 342099,
+      "size": 27,
+      "codeSha256": "549ff38fd1d80b788d6460bb4d19460d59e4f5b45893c8c4c523322f07c8b091"
+    },
+    {
+      "order": 61,
+      "rank": 83,
+      "fightID": 34,
+      "startTime": 1789048690281,
+      "duration": 284264,
+      "size": 25,
+      "codeSha256": "1e734f684ab64ff13809ead0aede6f88151a4b78ea6ce35bf22f156449c022b5"
+    },
+    {
+      "order": 62,
+      "rank": 35,
+      "fightID": 68,
+      "startTime": 1789051296936,
+      "duration": 299518,
+      "size": 26,
+      "codeSha256": "11cb61c3bc189af4110f074ad3cfb82b8f77b2e1870f8964cbc23834a9fb8b09"
+    },
+    {
+      "order": 63,
+      "rank": 63,
+      "fightID": 22,
+      "startTime": 1789065346963,
+      "duration": 284135,
+      "size": 23,
+      "codeSha256": "1d7676781c3588bfe850a18a19ff8bf475c2bbcea1ee00ddd43bd7831130bd26"
+    },
+    {
+      "order": 64,
+      "rank": 7,
+      "fightID": 26,
+      "startTime": 1789065450583,
+      "duration": 290046,
+      "size": 20,
+      "codeSha256": "f78e600625fcffacf630fc88392b099f9908586f9931149d3b60b0b9c2a5cbd1"
+    },
+    {
+      "order": 65,
+      "rank": 92,
+      "fightID": 1,
+      "startTime": 1789066766197,
+      "duration": 303182,
+      "size": 21,
+      "codeSha256": "a2968f37594b4ffa12952204117a29350ffe1b71dbbbbaaf6427432fe0966ade"
+    },
+    {
+      "order": 66,
+      "rank": 40,
+      "fightID": 27,
+      "startTime": 1789067981709,
+      "duration": 296534,
+      "size": 23,
+      "codeSha256": "f34c141164742b46eb09d7d435e08195973565946f9a8aac13c0585411ec52a8"
+    },
+    {
+      "order": 67,
+      "rank": 9,
+      "fightID": 33,
+      "startTime": 1789068839467,
+      "duration": 283651,
+      "size": 22,
+      "codeSha256": "6d4c6f0d1e22561d3798e4a54c9cabc93d2883e5d273ee7dc74485a99907707a"
+    },
+    {
+      "order": 68,
+      "rank": 88,
+      "fightID": 15,
+      "startTime": 1789086356138,
+      "duration": 279920,
+      "size": 27,
+      "codeSha256": "ec9111e8432af3254788e3dc71b668434a0abc1227a67b6bc51d096fdc798f75"
+    },
+    {
+      "order": 69,
+      "rank": 53,
+      "fightID": 44,
+      "startTime": 1789090527271,
+      "duration": 263225,
+      "size": 26,
+      "codeSha256": "5a1c1dae1f379d0bf8eb444592822ff8d103b71d902565f740ace25b372401f7"
+    },
+    {
+      "order": 70,
+      "rank": 91,
+      "fightID": 34,
+      "startTime": 1789127622797,
+      "duration": 303693,
+      "size": 25,
+      "codeSha256": "de2d5037cade6ad48795e011a3609bbb0124c9eb1be4ce4cbadabf1645ee6e75"
+    },
+    {
+      "order": 71,
+      "rank": 41,
+      "fightID": 34,
+      "startTime": 1789127687311,
+      "duration": 252257,
+      "size": 30,
+      "codeSha256": "8400c4117c6bdbfae3409c6c13cb5776ae31bf551df57502cb6d9f2ee1f77622"
+    },
+    {
+      "order": 72,
+      "rank": 36,
+      "fightID": 23,
+      "startTime": 1789128765351,
+      "duration": 316592,
+      "size": 30,
+      "codeSha256": "c4aa6296a02b8de62d5f04e7eee0fd0d74099bc2c47f9a50588cdb5cc3884c3f"
+    },
+    {
+      "order": 73,
+      "rank": 4,
+      "fightID": 36,
+      "startTime": 1789128968735,
+      "duration": 287302,
+      "size": 30,
+      "codeSha256": "c23b4422ffb4de8325f4d4c71b93501dc9ab012b4442a093ed02ba1bae41f477"
+    },
+    {
+      "order": 74,
+      "rank": 90,
+      "fightID": 16,
+      "startTime": 1789131992739,
+      "duration": 275629,
+      "size": 26,
+      "codeSha256": "998a38501bdedfc7abdcb46e73cfca78422ad4f3a7f00276d0ab7b65b5d6df06"
+    },
+    {
+      "order": 75,
+      "rank": 14,
+      "fightID": 39,
+      "startTime": 1789133671235,
+      "duration": 267789,
+      "size": 30,
+      "codeSha256": "aca31c2e9b88105c518c15687242713f253e8c6f8b1b92b56f7e7f611051f4fa"
+    },
+    {
+      "order": 76,
+      "rank": 51,
+      "fightID": 32,
+      "startTime": 1789133776255,
+      "duration": 287443,
+      "size": 30,
+      "codeSha256": "d917a789e66a2c0a7fcd055c3abdd163d26e637846c2fe1a007301cfa5e9590b"
+    },
+    {
+      "order": 77,
+      "rank": 97,
+      "fightID": 43,
+      "startTime": 1789136232982,
+      "duration": 318244,
+      "size": 29,
+      "codeSha256": "d75639d7353717d877e9103ebc6aea0daa1ef310d3003bbd258c53a1d41dc329"
+    },
+    {
+      "order": 78,
+      "rank": 67,
+      "fightID": 14,
+      "startTime": 1789191221904,
+      "duration": 263417,
+      "size": 30,
+      "codeSha256": "916144778fc0236a3681e4a5710fcc6bfb07806947294f72b9ddc560f196589c"
+    },
+    {
+      "order": 79,
+      "rank": 24,
+      "fightID": 38,
+      "startTime": 1789206607177,
+      "duration": 396033,
+      "size": 29,
+      "codeSha256": "fc44453cf63a1029fcbb5647b51abe1857a31c9f8683fad3721a1ed707082e57"
+    },
+    {
+      "order": 80,
+      "rank": 72,
+      "fightID": 38,
+      "startTime": 1789218078048,
+      "duration": 291652,
+      "size": 30,
+      "codeSha256": "8894ac5decffb84b879d4ef9a71a6bf5cbc5ed7748264b5ea745f1ed9fe0e5e2"
+    },
+    {
+      "order": 81,
+      "rank": 60,
+      "fightID": 29,
+      "startTime": 1789221972855,
+      "duration": 311759,
+      "size": 27,
+      "codeSha256": "fd8120a562c0084d00722f2b0042b10f062f7afb4d66c43358d0ad1cbe152536"
+    },
+    {
+      "order": 82,
+      "rank": 62,
+      "fightID": 3,
+      "startTime": 1789229530090,
+      "duration": 347658,
+      "size": 26,
+      "codeSha256": "9b3deac97b7ed435dec125091bf69399981282928a9e42871214d9d41417df31"
+    },
+    {
+      "order": 83,
+      "rank": 20,
+      "fightID": 19,
+      "startTime": 1789245569237,
+      "duration": 405624,
+      "size": 29,
+      "codeSha256": "1c0d649d771fa9f33ef7080489213741b505703eeffdf4d20b665f87ddfb8981"
+    },
+    {
+      "order": 84,
+      "rank": 43,
+      "fightID": 26,
+      "startTime": 1789274344342,
+      "duration": 412487,
+      "size": 30,
+      "codeSha256": "2ebd0d226a5cc8c17af18777662cc50eb684418c0dfcfdb32994d9b014bf3901"
+    },
+    {
+      "order": 85,
+      "rank": 69,
+      "fightID": 45,
+      "startTime": 1789302067039,
+      "duration": 303257,
+      "size": 24,
+      "codeSha256": "6d4c1cc3705e987cab224b6368ff26e61b4c85accc4b35467c15ac2d35b40382"
+    },
+    {
+      "order": 86,
+      "rank": 2,
+      "fightID": 26,
+      "startTime": 1789303982223,
+      "duration": 296244,
+      "size": 27,
+      "codeSha256": "59b01e7d24a06f8c0d46e0afaa68eb481f224db0e6091996d93308201ba9bd67"
+    },
+    {
+      "order": 87,
+      "rank": 17,
+      "fightID": 23,
+      "startTime": 1789310678848,
+      "duration": 288527,
+      "size": 20,
+      "codeSha256": "4152499bc2e9380e8b0b3b6229fc2d7f8fca8534287157465ef5a1fc0a4f3a1d"
+    },
+    {
+      "order": 88,
+      "rank": 68,
+      "fightID": 17,
+      "startTime": 1789325475955,
+      "duration": 298815,
+      "size": 26,
+      "codeSha256": "9d00ae3e214b4796be47db883e6db4e19300df275aea2d7d9238821358f22b95"
+    },
+    {
+      "order": 89,
+      "rank": 31,
+      "fightID": 27,
+      "startTime": 1789325835875,
+      "duration": 383652,
+      "size": 30,
+      "codeSha256": "ed74c3513393d48a7124799108eed3091ea9f1e4b50bb33721272972792b08d3"
+    },
+    {
+      "order": 90,
+      "rank": 34,
+      "fightID": 49,
+      "startTime": 1789334584842,
+      "duration": 336848,
+      "size": 24,
+      "codeSha256": "3172e016819e733f96e415350fd26b5289c60e19a73cf532cd72352960080e32"
+    },
+    {
+      "order": 91,
+      "rank": 27,
+      "fightID": 28,
+      "startTime": 1789357207003,
+      "duration": 391575,
+      "size": 30,
+      "codeSha256": "933bf184e296e148a5a07c97cc59e7b28edb6e15b0425c8dbb7812bba59697d1"
+    },
+    {
+      "order": 92,
+      "rank": 29,
+      "fightID": 18,
+      "startTime": 1789377174445,
+      "duration": 322752,
+      "size": 28,
+      "codeSha256": "7437352db0a36ff9b2f4e38cd438d23ca8ce1508e2ce4f773bed1840c0202004"
+    },
+    {
+      "order": 93,
+      "rank": 37,
+      "fightID": 30,
+      "startTime": 1789380299067,
+      "duration": 309930,
+      "size": 23,
+      "codeSha256": "09a642e5d7a9eadd0169713502322069941c892df29d964f4ca52b758642caed"
+    },
+    {
+      "order": 94,
+      "rank": 26,
+      "fightID": 14,
+      "startTime": 1789390061544,
+      "duration": 410642,
+      "size": 21,
+      "codeSha256": "2812416864c964bc331c043b1ad262e81329c64619c2e7264fd0d94beeaa756b"
+    },
+    {
+      "order": 95,
+      "rank": 74,
+      "fightID": 139,
+      "startTime": 1789400713727,
+      "duration": 392769,
+      "size": 26,
+      "codeSha256": "c6a069110e8a0b17a414c14d09141b69e411cc30b3e9f322220bd12854233584"
+    },
+    {
+      "order": 96,
+      "rank": 3,
+      "fightID": 76,
+      "startTime": 1789419653552,
+      "duration": 403844,
+      "size": 30,
+      "codeSha256": "1c3f0faa5d41b6af3be837ca3ed9ada31e25eda04c72143e571e3ebeba0908a2"
+    },
+    {
+      "order": 97,
+      "rank": 12,
+      "fightID": 58,
+      "startTime": 1789425320965,
+      "duration": 412715,
+      "size": 30,
+      "codeSha256": "c1c9aec16b9af93ea7f14986c96cadc49d9dea3d416aa285cdd7d361369971bc"
+    },
+    {
+      "order": 98,
+      "rank": 15,
+      "fightID": 36,
+      "startTime": 1789445065626,
+      "duration": 379166,
+      "size": 30,
+      "codeSha256": "2161dd5fff3c6b821f97cc4ee3a7aa6748f9c4a71c30782bc5770fb68462bbfb"
+    },
+    {
+      "order": 99,
+      "rank": 58,
+      "fightID": 33,
+      "startTime": 1789450015620,
+      "duration": 390072,
+      "size": 28,
+      "codeSha256": "06223511ebde0c68d1cae6bcbb0691dc7f92096f521449499610b198a6c8b4fe"
+    }
+  ],
+  "eligibility": {
+    "rule": [
+      "report public and reachable",
+      "the ranked fight is the fight evaluated",
+      "encounterID 3420",
+      "difficulty 4 (Heroic)",
+      "masterData gameVersion 1",
+      "masterData logVersion 17",
+      "fight duration >= 165000 ms",
+      "a Player/Monk actor whose friendlySpecs entry is Brewmaster",
+      "that actor's own combatantinfo resolves the Shado-Pan hero tree (normalizeTalentTree -> resolveBrewmasterHeroTree)",
+      "several qualifying Brewmasters: the lowest actor id"
+    ],
+    "caps": {
+      "fightContextRequests": 20,
+      "heroTreePageRequests": 5
+    }
+  },
+  "walk": [
+    {
+      "order": 1,
+      "rank": 44,
+      "fightID": 17,
+      "codeSha256": "0f34e5251d325e1ad603ab4b81d30ccba24a651512552fd2ccafa941a41c4676",
+      "eligibility": {
+        "revision": 35,
+        "fightPresent": true,
+        "encounterID": 3420,
+        "difficulty": 4,
+        "gameVersion": 1,
+        "logVersion": 17,
+        "durationMs": 270167
+      },
+      "brewmasterActorIds": [],
+      "heroTrees": null,
+      "failure": "NO_BREWMASTER_IN_FIGHT",
+      "selected": false
+    },
+    {
+      "order": 2,
+      "rank": 16,
+      "fightID": 10,
+      "codeSha256": "2a1063f313a1c57998f34441f2e7dfe0046bbda53cf3a734bcb2f2a2f4ce778f",
+      "eligibility": {
+        "revision": 1,
+        "fightPresent": true,
+        "encounterID": 3420,
+        "difficulty": 4,
+        "gameVersion": 1,
+        "logVersion": 17,
+        "durationMs": 265518
+      },
+      "brewmasterActorIds": [],
+      "heroTrees": null,
+      "failure": "NO_BREWMASTER_IN_FIGHT",
+      "selected": false
+    },
+    {
+      "order": 3,
+      "rank": 80,
+      "fightID": 32,
+      "codeSha256": "9bb243c12bf4423253a72262b7e47895b2997982e0f1d30fa588bd7f32ca9b82",
+      "eligibility": {
+        "revision": 37,
+        "fightPresent": true,
+        "encounterID": 3420,
+        "difficulty": 4,
+        "gameVersion": 1,
+        "logVersion": 17,
+        "durationMs": 287767
+      },
+      "brewmasterActorIds": [],
+      "heroTrees": null,
+      "failure": "NO_BREWMASTER_IN_FIGHT",
+      "selected": false
+    },
+    {
+      "order": 4,
+      "rank": 39,
+      "fightID": 23,
+      "codeSha256": "badf6f019225ea7db73511d4f2243d9d6f70c88a78626c4148d959c17ff7ff7e",
+      "eligibility": {
+        "revision": 20,
+        "fightPresent": true,
+        "encounterID": 3420,
+        "difficulty": 4,
+        "gameVersion": 1,
+        "logVersion": 17,
+        "durationMs": 264334
+      },
+      "brewmasterActorIds": [],
+      "heroTrees": null,
+      "failure": "NO_BREWMASTER_IN_FIGHT",
+      "selected": false
+    },
+    {
+      "order": 5,
+      "rank": 30,
+      "fightID": 13,
+      "codeSha256": "792f8c332dc47bb0d3a93f92374e437d20ff664d572e003408f2d30f778b6e45",
+      "eligibility": {
+        "revision": 27,
+        "fightPresent": true,
+        "encounterID": 3420,
+        "difficulty": 4,
+        "gameVersion": 1,
+        "logVersion": 17,
+        "durationMs": 271769
+      },
+      "brewmasterActorIds": [11],
+      "heroTrees": {
+        "11": "shadopan"
+      },
+      "failure": null,
+      "selected": true
+    }
+  ],
+  "selected": {
+    "order": 5,
+    "rank": 30,
+    "reportCode": "rXAfw9t1q8YpmkKD",
+    "codeSha256": "792f8c332dc47bb0d3a93f92374e437d20ff664d572e003408f2d30f778b6e45",
+    "fightId": 13,
+    "actorId": 11,
+    "heroTree": "shadopan",
+    "reportRevision": 27,
+    "evidenceWindow": {
+      "fromReportTimeMs": 2440995,
+      "toReportTimeMs": 2605995,
+      "rule": "fight start .. +165,000 ms, fixed before any analyzer ran"
+    }
+  },
+  "requests": {
+    "fightContext": 5,
+    "heroTreePage": 1,
+    "evidencePagesIncludingPageOne": 17,
+    "revisionRecheck": 1,
+    "total": 23
+  }
+}

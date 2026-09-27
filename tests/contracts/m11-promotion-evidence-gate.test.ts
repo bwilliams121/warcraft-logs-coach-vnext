@@ -400,18 +400,25 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     expect(resolveSpecIdentity({ className: "Monk", specName: "Brewmaster" })).toMatchObject({ ok: false });
     const readiness = evaluate(tiers, "monk/brewmaster", "INTERNAL_ONLY", internalPairing(module));
     expect(readiness.exposure).toBe("INTERNAL_ONLY");
-    // M11-C4e: the fourth is the ARCHIVE's first full-fight-segment MATCH over
-    // the cross-tier bundle (corpus opener + corpus 20–165 s + archive
-    // 165–285 s), recorded PASSED in the committed archive report.
-    expect(readiness.qualifyingAssertions.map((q) => `${q.rootId}:${q.expectedOutcome}`)).toEqual([
-      "REGRESSION_CORPUS:MATCH",
-      "REGRESSION_CORPUS:MATCH",
-      "REGRESSION_CORPUS:MATCH",
-      "EVIDENCE_ARCHIVE:MATCH",
+    // M11-C4e: subject 1's fourth is the ARCHIVE's first full-fight-segment
+    // MATCH over the cross-tier bundle (corpus opener + corpus 20–165 s +
+    // archive 165–285 s), recorded PASSED in the committed archive report.
+    // M11-C4f: the neutral second subject contributes exactly one — its first
+    // resolved MATCH by report time over its fixed 165 s cross-tier bundle —
+    // paired by its OWN committed fight context. Still no REJECTED anywhere.
+    const bySubject = readiness.qualifyingAssertions.map(
+      (q) =>
+        `${q.rootId}:${q.expectedOutcome}:${q.evidenceActor.reportCode}/${q.evidenceActor.fightId}/${q.evidenceActor.actorId}`,
+    );
+    expect([...bySubject].sort()).toEqual([
+      "EVIDENCE_ARCHIVE:MATCH:gtKb2xHn87pNcFfW/22/4",
+      "EVIDENCE_ARCHIVE:MATCH:rXAfw9t1q8YpmkKD/13/11",
+      "REGRESSION_CORPUS:MATCH:gtKb2xHn87pNcFfW/22/4",
+      "REGRESSION_CORPUS:MATCH:gtKb2xHn87pNcFfW/22/4",
+      "REGRESSION_CORPUS:MATCH:gtKb2xHn87pNcFfW/22/4",
     ]);
     expect(readiness.qualifyingAssertions.some((q) => q.expectedOutcome === "REJECTED")).toBe(false);
     for (const q of readiness.qualifyingAssertions) {
-      expect(q.evidenceActor).toMatchObject({ reportCode: "gtKb2xHn87pNcFfW", fightId: 22, actorId: 4 });
       expect(q.evidenceIdentity).toEqual({ className: "Monk", specName: "Brewmaster" });
     }
     expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("monk/brewmaster");

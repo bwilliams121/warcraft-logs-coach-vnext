@@ -56,9 +56,12 @@ describe("the committed evidence archive executes clean under workerd", { timeou
     // composition (one), the full-fight coverage, distribution and state
     // census (three), and the first full-fight-segment MATCH over the
     // cross-tier bundle (one). Measured, then pinned.
-    expect(result.summary.cases).toBe(4);
-    expect(result.summary.assertions).toBe(10);
-    expect(result.summary.passed).toBe(10);
+    // M11-C4f added the neutral second subject's fixed 165 s window: the
+    // 20–165 s segment census (five), the cross-root composition (one) and the
+    // measurement — coverage, distribution and state census (three).
+    expect(result.summary.cases).toBe(8);
+    expect(result.summary.assertions).toBe(20);
+    expect(result.summary.passed).toBe(20);
   });
 
   it("is deterministic across runs", async () => {

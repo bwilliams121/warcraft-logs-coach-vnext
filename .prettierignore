@@ -11,3 +11,5 @@ package-lock.json
 # Regression-corpus artifacts are digest-pinned evidence. No tool rewrites
 # their bytes; the manifest beside them is formatted normally.
 tests/corpus/artifacts/
+# Evidence-archive artifacts (M11-C4e) are digest-pinned evidence too.
+tests/evidence/artifacts/

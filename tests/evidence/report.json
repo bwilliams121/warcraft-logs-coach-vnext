@@ -6,12 +6,26 @@
       "payloadKind": "WCL_EVENT_ARRAY",
       "provenanceKind": "SANITIZED_CAPTURE",
       "sha256": "4b393b6a7ce5cdd683367ac075c72098eb3eddf67750a68af66d6f53435b804c"
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
+      "byteLength": 389605,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "49781ccbc9a501471bcd8d810f113cf8b1a0920bd512b21e4944538ea5af8809"
+    },
+    {
+      "artifactId": "wcl-fight-context-rxaf-fight-13",
+      "byteLength": 387275,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "ead33aa2325cf9bfc685f1a18dacb0163b52e5b88c73f4dbae71cc8e86e1f8ff"
     }
   ],
   "byLayer": [
     {
-      "assertions": 6,
-      "cases": 2,
+      "assertions": 12,
+      "cases": 4,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
@@ -22,11 +36,11 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 6
+      "passed": 12
     },
     {
-      "assertions": 4,
-      "cases": 2,
+      "assertions": 8,
+      "cases": 4,
       "failed": 0,
       "kindsExercised": [
         "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
@@ -36,7 +50,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_BREWMASTER_MONK",
-      "passed": 4
+      "passed": 8
     }
   ],
   "cases": [
@@ -91,6 +105,57 @@
       "caseId": "normalization.brewmaster-monk-full-fight-seg-165-285-normalizes-whole-and-in-order",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-full-fight.seg-165-285"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.BUNDLE_COMPOSITION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.brewmaster-monk-rxaf-165s-bundle-composes-two-parts-across-the-roots",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": [
+        "wcl-brewmaster-monk-rxaf-opener",
+        "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165"
+      ]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ACTOR_EVENT_CENSUS",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.brewmaster-monk-rxaf-seg-20-165-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165"]
     },
     {
       "artifactId": "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",
@@ -153,6 +218,66 @@
         "wcl-brewmaster-monk-gtkb-opener",
         "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165"
       ]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
+      "assertions": [
+        {
+          "kind": "SPEC_BREWMASTER_MONK.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_MONK_BREWMASTER",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,440,995 for actor 11 (specID 268)",
+          "every COMPLETE cast by actor 11 in the bundle, in canonical order",
+          "every aura transition on actor 11 sourced by actor 11, in canonical order"
+        ]
+      },
+      "caseId": "spec-brewmaster-monk.the-second-subjects-first-resolved-match-over-its-fixed-165s-bundle",
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "referencedArtifactIds": [
+        "wcl-brewmaster-monk-rxaf-opener",
+        "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165"
+      ]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
+      "assertions": [
+        {
+          "kind": "SPEC_BREWMASTER_MONK.COVERAGE_SUMMARY",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.MEASUREMENT_DISTRIBUTION",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_BREWMASTER_MONK.STATE_EVIDENCE_CENSUS",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_MONK_BREWMASTER",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,440,995 for actor 11 (specID 268)",
+          "every COMPLETE cast by actor 11 in the bundle, in canonical order",
+          "every aura transition on actor 11 sourced by actor 11, in canonical order"
+        ]
+      },
+      "caseId": "spec-brewmaster-monk.the-second-subjects-fixed-165s-window-measures-one-hundred-thirty-nine-decisions-forty-seven-resolved",
+      "owningLayer": "SPEC_BREWMASTER_MONK",
+      "referencedArtifactIds": [
+        "wcl-brewmaster-monk-rxaf-opener",
+        "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165"
+      ]
     }
   ],
   "contractVersion": 2,
@@ -170,15 +295,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 308961,
-    "artifacts": 1,
-    "assertions": 10,
-    "cases": 4,
+    "artifactBytes": 1085841,
+    "artifacts": 3,
+    "assertions": 20,
+    "cases": 8,
     "declared": 0,
-    "executable": 10,
+    "executable": 20,
     "failed": 0,
-    "largestArtifactBytes": 308961,
+    "largestArtifactBytes": 389605,
     "notExecuted": 0,
-    "passed": 10
+    "passed": 20
   }
 }

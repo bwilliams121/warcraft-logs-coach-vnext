@@ -12,7 +12,7 @@ and one provenance vocabulary. They have different responsibilities.
 | Loaded by | every corpus run (`npm run test:corpus`, `npm test`) | its own command (`npm run test:evidence`) and the promotion evidence gate |
 | Artifact kinds | any (`SANITIZED_CAPTURE`, `DERIVED_FROM_CAPTURE`, `SYNTHETIC`) | `SANITIZED_CAPTURE` only |
 | Per artifact | 512 KiB | 512 KiB |
-| Total | 5.5 MiB notice line (test), 6 MiB ceiling (loader) | 4 MiB notice line (test), no total ceiling |
+| Total | 5.5 MiB notice line (test), 6 MiB ceiling (loader) | 4 MiB notice line (test) over artifacts plus committed `selection-frames/**`, no total ceiling |
 | Assertion families | all registered kinds | evidence verification only: the four `NORMALIZATION` census kinds, `NORMALIZATION.BUNDLE_COMPOSITION`, and a specialization's `DECISION_COVERAGE`, `COVERAGE_SUMMARY`, `MEASUREMENT_DISTRIBUTION` and `STATE_EVIDENCE_CENSUS` |
 | May reference | itself only | itself and the regression corpus |
 | Report | `tests/corpus/report.json` | `tests/evidence/report.json` |
