@@ -38,6 +38,14 @@
  * Failures are printed as the vitest output already names them — case,
  * artifact, layer, kind, expected, actual — plus one line from this script
  * saying which step failed. Exit code is 1 on any failure.
+ *
+ * `--root evidence` (M11-C4e, `npm run test:evidence`) runs the SAME four
+ * steps over the evidence archive instead: its manifest
+ * (`build-manifest.mjs --root evidence`), its Node tests (the archive
+ * loader rules and the promotion evidence gate), its workerd gate
+ * (`tests/regression/m11c4e-evidence-archive-gate.test.ts`) twice, and its
+ * committed `tests/evidence/report.json`. The default root is the regression
+ * corpus, and in that mode nothing under `tests/evidence/` is read.
  */
 
 import { spawnSync } from "node:child_process";
@@ -48,10 +56,27 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const VITEST = join(ROOT, "node_modules", "vitest", "vitest.mjs");
-const MANIFEST = join(ROOT, "tests", "corpus", "manifest.json");
-const REPORT = join(ROOT, "tests", "corpus", "report.json");
-const GATE_TEST = "tests/regression/m9b-corpus-gate.test.ts";
+
+const rootIndex = process.argv.indexOf("--root");
+const ROOT_NAME = rootIndex === -1 ? "corpus" : process.argv[rootIndex + 1];
+if (ROOT_NAME !== "corpus" && ROOT_NAME !== "evidence") {
+  console.error("usage: node scripts/corpus/gate.mjs [--root corpus|evidence] [--write-report]");
+  process.exit(1);
+}
+const EVIDENCE = ROOT_NAME === "evidence";
+const LABEL = EVIDENCE ? "evidence gate" : "corpus gate";
+const ROOT_DIR = EVIDENCE ? "evidence" : "corpus";
+const MANIFEST = join(ROOT, "tests", ROOT_DIR, "manifest.json");
+const REPORT = join(ROOT, "tests", ROOT_DIR, "report.json");
+const REPORT_PATH = `tests/${ROOT_DIR}/report.json`;
+const GATE_TEST = EVIDENCE
+  ? "tests/regression/m11c4e-evidence-archive-gate.test.ts"
+  : "tests/regression/m9b-corpus-gate.test.ts";
 const ISOLATION_TEST = "tests/regression/m9c-corpus-network-isolation.test.ts";
+const WORKERD_TESTS = EVIDENCE ? [GATE_TEST] : [GATE_TEST, ISOLATION_TEST];
+const WRITE_HINT = EVIDENCE
+  ? "npm run test:evidence -- --write-report"
+  : "npm run test:corpus -- --write-report";
 
 // Every entry names a file that exists. vitest treats a non-matching filter as
 // a no-op, so a stale entry would not fail the gate — it would silently list a
@@ -68,6 +93,15 @@ const NODE_CORPUS_TESTS = [
   "tests/unit/m9c-corpus-machine-report.test.ts",
   "tests/unit/m9c-sanitize-payloads.test.ts",
   "tests/unit/sanitize-probe.test.ts",
+];
+
+// The archive's Node tests: its loader rules, the promotion-gate reader over
+// both roots, and the promotion evidence gate itself (which reads the
+// committed archive report).
+const NODE_EVIDENCE_TESTS = [
+  "tests/unit/m11c4e-evidence-archive.test.ts",
+  "tests/contracts/m11c4e-promotion-archive.test.ts",
+  "tests/contracts/m11-promotion-evidence-gate.test.ts",
 ];
 
 /** Credentials never reach a corpus run, whatever the parent shell holds. */
@@ -99,12 +133,12 @@ function run(label, args, options = {}) {
     process.stdout.write(result.stdout ?? "");
     process.stderr.write(result.stderr ?? "");
   }
-  console.log(`corpus gate: ${label} ${result.status === 0 ? "ok" : "FAILED"} (${elapsed} s)`);
+  console.log(`${LABEL}: ${label} ${result.status === 0 ? "ok" : "FAILED"} (${elapsed} s)`);
   return result;
 }
 
 function fail(message) {
-  console.error(`corpus gate: FAILED — ${message}`);
+  console.error(`${LABEL}: FAILED — ${message}`);
   process.exit(1);
 }
 
@@ -126,22 +160,24 @@ const serialize = (report) => `${JSON.stringify(canonicalize(report), null, 2)}\
 // 1. Manifest currency
 // --------------------------------------------------------------------------
 
-const scratch = mkdtempSync(join(tmpdir(), "wlc-corpus-gate-"));
+const scratch = mkdtempSync(join(tmpdir(), EVIDENCE ? "wlc-evidence-gate-" : "wlc-corpus-gate-"));
 try {
   const regenerated = join(scratch, "manifest.json");
-  const generation = run("regenerate manifest", ["scripts/corpus/build-manifest.mjs", "--out", regenerated], {
-    capture: true,
-  });
+  const generation = run(
+    "regenerate manifest",
+    ["scripts/corpus/build-manifest.mjs", "--root", ROOT_NAME, "--out", regenerated],
+    { capture: true },
+  );
   if (generation.status !== 0) fail("the manifest generator did not run");
   const committed = JSON.parse(readFileSync(MANIFEST, "utf8"));
   const fresh = JSON.parse(readFileSync(regenerated, "utf8"));
   if (serialize(committed) !== serialize(fresh)) {
     fail(
-      "tests/corpus/manifest.json is not what scripts/corpus/build-manifest.mjs produces from the committed artifacts; regenerate it (node scripts/corpus/build-manifest.mjs && npx prettier --write tests/corpus/manifest.json) and review the diff",
+      `tests/${ROOT_DIR}/manifest.json is not what scripts/corpus/build-manifest.mjs --root ${ROOT_NAME} produces from the committed artifacts; regenerate it (node scripts/corpus/build-manifest.mjs --root ${ROOT_NAME} && npx prettier --write tests/${ROOT_DIR}/manifest.json) and review the diff`,
     );
   }
   console.log(
-    `corpus gate: manifest current — contract version ${String(fresh.contractVersion)}, ${String(fresh.artifacts.length)} artifacts, ${String(fresh.cases.length)} cases`,
+    `${LABEL}: manifest current — contract version ${String(fresh.contractVersion)}, ${String(fresh.artifacts.length)} artifacts, ${String(fresh.cases.length)} cases`,
   );
 
   // ------------------------------------------------------------------------
@@ -151,8 +187,15 @@ try {
   // In --write-report mode the Node suite runs AFTER the report is written,
   // because part of it reads the committed report.
   const runNodeSuite = () => {
-    const node = run("node corpus suite", [VITEST, "run", "--project", "node", ...NODE_CORPUS_TESTS]);
-    if (node.status !== 0) fail("the Node corpus suite did not pass");
+    const tests = EVIDENCE ? NODE_EVIDENCE_TESTS : NODE_CORPUS_TESTS;
+    const node = run(EVIDENCE ? "node evidence suite" : "node corpus suite", [
+      VITEST,
+      "run",
+      "--project",
+      "node",
+      ...tests,
+    ]);
+    if (node.status !== 0) fail(`the Node ${EVIDENCE ? "evidence" : "corpus"} suite did not pass`);
   };
   if (!writeReport) runNodeSuite();
 
@@ -168,8 +211,7 @@ try {
       "run",
       "--project",
       "workers",
-      GATE_TEST,
-      ISOLATION_TEST,
+      ...WORKERD_TESTS,
       "--reporter=default",
       "--reporter=json",
       `--outputFile=${outputFile}`,
@@ -186,13 +228,13 @@ try {
     const report = carrier.meta.corpusReport;
     const { totals } = report;
     console.log(
-      `corpus gate: run ${String(attempt)} executed ${String(totals.cases)} cases / ${String(totals.assertions)} assertions under ${report.runtime}: passed ${String(totals.passed)}, failed ${String(totals.failed)}, not executed ${String(totals.notExecuted)}, declared ${String(totals.declared)}`,
+      `${LABEL}: run ${String(attempt)} executed ${String(totals.cases)} cases / ${String(totals.assertions)} assertions under ${report.runtime}: passed ${String(totals.passed)}, failed ${String(totals.failed)}, not executed ${String(totals.notExecuted)}, declared ${String(totals.declared)}`,
     );
     if (gate.status !== 0 && !writeReport) fail(`workerd gate run ${String(attempt)} did not pass`);
     if (totals.failed !== 0 || totals.notExecuted !== 0 || totals.declared !== 0) {
       fail(`workerd gate run ${String(attempt)} is not complete (see the failures above)`);
     }
-    if (totals.cases === 0 || totals.assertions === 0) fail("the corpus executed nothing");
+    if (totals.cases === 0 || totals.assertions === 0) fail(`the ${ROOT_DIR} executed nothing`);
     // In --write-report mode the only permitted failure is the drift test.
     if (gate.status !== 0 && writeReport) {
       const failing = (gateFile?.assertionResults ?? []).filter((test) => test.status === "failed");
@@ -206,7 +248,7 @@ try {
   if (reports[0] !== reports[1]) {
     fail("two separate workerd processes produced different corpus reports; the corpus is not deterministic");
   }
-  console.log("corpus gate: two separate workerd processes produced byte-identical reports");
+  console.log(`${LABEL}: two separate workerd processes produced byte-identical reports`);
 
   // ------------------------------------------------------------------------
   // 4. Report drift, or write
@@ -215,13 +257,11 @@ try {
   const executed = reports[0];
   if (writeReport) {
     writeFileSync(REPORT, executed, "utf8");
-    console.log(
-      `corpus gate: wrote tests/corpus/report.json from the execution (${String(executed.length)} bytes)`,
-    );
+    console.log(`${LABEL}: wrote ${REPORT_PATH} from the execution (${String(executed.length)} bytes)`);
     const format = run("format report", [
       join(ROOT, "node_modules", "prettier", "bin", "prettier.cjs"),
       "--write",
-      "tests/corpus/report.json",
+      REPORT_PATH,
     ]);
     if (format.status !== 0) fail("prettier could not format the report");
     runNodeSuite();
@@ -230,17 +270,17 @@ try {
     try {
       committedReport = readFileSync(REPORT, "utf8");
     } catch {
-      fail("tests/corpus/report.json is not committed; run `npm run test:corpus -- --write-report`");
+      fail(`${REPORT_PATH} is not committed; run \`${WRITE_HINT}\``);
     }
     if (serialize(JSON.parse(committedReport)) !== executed) {
       fail(
-        "tests/corpus/report.json differs from this execution (the gate test above names the first field); if the change is intended, run `npm run test:corpus -- --write-report` and review the diff",
+        `${REPORT_PATH} differs from this execution (the gate test above names the first field); if the change is intended, run \`${WRITE_HINT}\` and review the diff`,
       );
     }
-    console.log("corpus gate: committed report matches this execution");
+    console.log(`${LABEL}: committed report matches this execution`);
   }
 } finally {
   rmSync(scratch, { recursive: true, force: true });
 }
 
-console.log("corpus gate: PASSED");
+console.log(`${LABEL}: PASSED`);

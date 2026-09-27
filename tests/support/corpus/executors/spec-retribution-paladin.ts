@@ -74,7 +74,7 @@ function partsOf(
   bundle: BundleRequest,
 ): readonly LoadedArtifact[] {
   const parts = bundle.historyArtifactIds.map((artifactId) => {
-    const part = corpus.artifacts.find((entry) => entry.record.artifactId === artifactId);
+    const part = corpus.referenceableArtifacts.find((entry) => entry.record.artifactId === artifactId);
     if (part === undefined) throw new BundleCompositionError(`unknown artifact ${artifactId}`);
     return part;
   });

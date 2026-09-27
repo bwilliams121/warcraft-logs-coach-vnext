@@ -20,6 +20,12 @@ name: CI
 #            environment whatever the runner holds, and the workers project's
 #            outbound service answers 503 to any fetch, so a corpus case that
 #            reached for the network would fail here, actionably, not pass.
+#            A second, distinct step then runs the evidence archive's own
+#            command (`npm run test:evidence`, M11-C4e): the same four stages
+#            over tests/evidence/ — the qualifying real evidence kept out of
+#            the executable regression corpus — holding its two workerd
+#            executions against the committed tests/evidence/report.json that
+#            the promotion evidence gate reads.
 #
 # Neither job deploys, refreshes a fixture, downloads a corpus, or needs an
 # external service. `npm ci` installs exactly the lockfile.
@@ -86,13 +92,17 @@ jobs:
         # apply on write, repeated over what is actually committed.
         run: |
           set -euo pipefail
-          if grep -rlI $'\r' tests/corpus/artifacts tests/corpus/manifest.json tests/corpus/report.json; then
+          if grep -rlI $'\r' tests/corpus/artifacts tests/corpus/manifest.json tests/corpus/report.json tests/evidence; then
             echo "corpus files must be LF" >&2; exit 1
           fi
-          if grep -rliE 'client_secret|access_token|authorization|bearer ' tests/corpus/artifacts tests/corpus/manifest.json tests/corpus/report.json; then
+          if grep -rliE 'client_secret|access_token|authorization|bearer ' tests/corpus/artifacts tests/corpus/manifest.json tests/corpus/report.json tests/evidence; then
             echo "corpus files contain a credential-shaped value" >&2; exit 1
           fi
           echo "corpus artifacts: $(find tests/corpus/artifacts -type f | wc -l) files, $(du -sb tests/corpus/artifacts | cut -f1) bytes"
+          echo "evidence archive artifacts: $(find tests/evidence/artifacts -type f | wc -l) files, $(du -sb tests/evidence/artifacts | cut -f1) bytes"
 
       - name: Regression corpus (manifest currency, Node suite, workerd gate x2, report drift)
         run: npm run test:corpus
+
+      - name: Evidence archive (manifest currency, Node suite, workerd gate x2, report drift)
+        run: npm run test:evidence

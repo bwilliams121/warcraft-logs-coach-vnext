@@ -104,7 +104,7 @@ export function evidenceOf(corpus: LoadedCorpus, artifact: LoadedArtifact): Arti
     rawEvents: rawEventsOf(artifact),
     source: sourceUpChain(
       artifact.record,
-      (id) => corpus.artifacts.find((entry) => entry.record.artifactId === id)?.record,
+      (id) => corpus.referenceableArtifacts.find((entry) => entry.record.artifactId === id)?.record,
     ),
   };
 }
@@ -569,7 +569,9 @@ export function bundleOf(
   declaredHoles: readonly BundleHole[],
 ): BundleComposition {
   const parts = artifactIds.map((artifactId) => {
-    const artifact = corpus.artifacts.find((entry) => entry.record.artifactId === artifactId);
+    // A part may be a regression-corpus artifact when the bundle is an
+    // evidence-archive case (M11-C4e); the regression corpus reads only itself.
+    const artifact = corpus.referenceableArtifacts.find((entry) => entry.record.artifactId === artifactId);
     if (artifact === undefined) throw new BundleCompositionError(`unknown artifact ${artifactId}`);
     return evidenceOf(corpus, artifact);
   });

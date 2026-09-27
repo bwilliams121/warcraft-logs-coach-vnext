@@ -37,6 +37,18 @@
  *                  asserted to REFUSE it. `evidenceReady: true` authorizes
  *                  nothing by itself.
  *
+ * TWO EVIDENCE ROOTS (M11-C4e)
+ *
+ * Qualifying assertions may live in the regression corpus or in the evidence
+ * archive (tests/evidence/). The reader is shared
+ * (`tests/support/corpus/promotion-evidence.ts`) so the negative tests in
+ * `m11c4e-promotion-archive.test.ts` exercise exactly this code. Nothing is
+ * relaxed: the evidence set is resolved across both roots and must be all
+ * SANITIZED_CAPTURE, identity is proven from a committed fight context in
+ * either root, and PASSED comes from the case's own root's committed report.
+ * The archive is loaded against the corpus it depends on; if it fails to
+ * validate, or holds cases with no committed report, this file fails.
+ *
  * No production INTERNAL_ONLY registration existed in M11-A2; Retribution
  * Paladin was one from M11-A4 until M11-A5 promoted it (this gate reported
  * its readiness in INTERNAL_ONLY mode from the same four assertions that now
@@ -55,13 +67,15 @@ import {
   PROTECTION_AUTHORITY_BINDINGS,
   PROTECTION_CAPABILITIES,
 } from "../../src/specs/paladin/protection/authority-bindings.js";
-import { OWNING_LAYERS, SPEC_LAYER_OF, type OwningLayer } from "../support/corpus/contract.js";
+import { OWNING_LAYERS, SPEC_LAYER_OF } from "../support/corpus/contract.js";
+import { committedEvidenceReport, loadCommittedEvidenceArchive } from "../support/corpus/evidence-archive.js";
+import { committedCorpusFiles, loadCorpusOrThrow } from "../support/corpus/loader.js";
 import {
-  committedCorpusFiles,
-  loadCorpusOrThrow,
-  type LoadedCase,
-  type LoadedCorpus,
-} from "../support/corpus/loader.js";
+  evaluatePromotionReadiness,
+  type CommittedReport,
+  type EvidenceTier,
+  type WclIdentity,
+} from "../support/corpus/promotion-evidence.js";
 
 const REGISTRATION_MODULES: Record<string, Record<string, unknown>> = import.meta.glob(
   "../../src/specs/*/*/registration.ts",
@@ -78,19 +92,6 @@ const REPORT: Record<string, string> = import.meta.glob("../corpus/report.json",
 // Inputs
 // ---------------------------------------------------------------------------
 
-interface CommittedReport {
-  readonly runtime: string;
-  readonly totals: { readonly failed: number; readonly notExecuted: number; readonly declared: number };
-  readonly cases: readonly {
-    readonly caseId: string;
-    readonly assertions: readonly {
-      readonly kind: string;
-      readonly ordinal: number;
-      readonly status: string;
-    }[];
-  }[];
-}
-
 function committedReport(): CommittedReport {
   const text = REPORT["../corpus/report.json"];
   if (text === undefined) throw new Error("tests/corpus/report.json not captured");
@@ -105,177 +106,31 @@ const MODULES: readonly SpecModule[] = Object.values(REGISTRATION_MODULES)
 // The gate
 // ---------------------------------------------------------------------------
 
-type ProvenanceKind = "SANITIZED_CAPTURE" | "DERIVED_FROM_CAPTURE" | "SYNTHETIC" | "REAL_CAPTURE";
+/** The shared reader, over every committed evidence root. */
+const evaluate = evaluatePromotionReadiness;
 
-interface WclIdentity {
-  readonly className: string;
-  readonly specName: string;
-}
-
-interface QualifyingAssertion {
-  readonly caseId: string;
-  readonly ordinal: number;
-  readonly kind: string;
-  readonly expectedOutcome: "MATCH" | "REJECTED";
-  readonly artifactId: string;
-  readonly evidenceSet: readonly { readonly artifactId: string; readonly kind: ProvenanceKind }[];
-  readonly evidenceActor: { readonly reportCode: string; readonly fightId: number; readonly actorId: number };
-  readonly evidenceIdentity: WclIdentity;
-  readonly reportStatus: string;
-}
-
-interface Disqualified {
-  readonly caseId: string;
-  readonly ordinal: number;
-  readonly reason: string;
-}
-
-interface Readiness {
-  readonly specId: string;
-  readonly exposure: "PUBLIC" | "INTERNAL_ONLY";
-  readonly layer: OwningLayer;
-  readonly qualifyingAssertions: readonly QualifyingAssertion[];
-  readonly disqualified: readonly Disqualified[];
-  readonly evidenceReady: boolean;
-}
-
-/** The identity the committed fight-context artifact reports for an actor of a report/fight. */
-function committedIdentity(
-  corpus: LoadedCorpus,
-  reportCode: string,
-  fightId: number,
-  actorId: number,
-): WclIdentity | null {
-  for (const artifact of corpus.artifacts) {
-    const source = artifact.record.provenance.source as
-      { readonly reportCode?: unknown; readonly query?: { readonly kind?: unknown } } | null | undefined;
-    if (source?.reportCode !== reportCode || source.query?.kind !== "FIGHT_CONTEXT") continue;
-    const json = artifact.json as {
-      readonly reportData?: {
-        readonly report?: {
-          readonly masterData?: {
-            readonly actors?: readonly { id: number; type: string; subType: string }[];
-          };
-          readonly fights?: readonly {
-            id: number;
-            friendlyPlayers: readonly number[];
-            friendlySpecs: readonly string[];
-          }[];
-        };
-      };
-    };
-    const report = json.reportData?.report;
-    const actor = report?.masterData?.actors?.find((candidate) => candidate.id === actorId);
-    const fight = report?.fights?.find((candidate) => candidate.id === fightId);
-    if (actor === undefined || fight === undefined || actor.type !== "Player") return null;
-    const index = fight.friendlyPlayers.indexOf(actorId);
-    const specName = fight.friendlySpecs[index];
-    if (index < 0 || specName === undefined) return null;
-    return { className: actor.subType, specName };
+/**
+ * The committed evidence roots, loaded FAIL-CLOSED: a regression corpus that
+ * does not validate, an archive that does not validate against it (a digest,
+ * a missing or duplicated id, a forbidden reference), or an archive that holds
+ * cases with no committed report, throws here and fails every test below.
+ */
+async function loadTiers(): Promise<readonly EvidenceTier[]> {
+  const corpus = await loadCorpusOrThrow(committedCorpusFiles());
+  const archive = await loadCommittedEvidenceArchive();
+  if (!archive.ok) {
+    throw new Error(
+      `the evidence archive does not validate:\n${archive.errors.map((error) => `  [${error.code}] ${error.message}`).join("\n")}`,
+    );
   }
-  return null;
-}
-
-function evaluate(
-  corpus: LoadedCorpus,
-  report: CommittedReport,
-  specId: SpecId,
-  exposure: "PUBLIC" | "INTERNAL_ONLY",
-  pairing: (identity: WclIdentity) => boolean,
-): Readiness {
-  const layer = SPEC_LAYER_OF[specId];
-  const decisionKind = `${layer}.DECISION_COVERAGE`;
-  const artifactsById = new Map(
-    corpus.artifacts.map((artifact) => [artifact.record.artifactId, artifact] as const),
-  );
-  const qualifying: QualifyingAssertion[] = [];
-  const disqualified: Disqualified[] = [];
-
-  const consider = (kase: LoadedCase): void => {
-    if (kase.record.owningLayer !== layer) return;
-    kase.assertions.forEach((assertion, ordinal) => {
-      if (assertion.kind !== decisionKind) return;
-      const params = assertion.params as {
-        readonly actorId?: unknown;
-        readonly expected?: { readonly outcome?: unknown };
-      };
-      const outcome = params.expected?.outcome;
-      const reject = (reason: string): void => {
-        disqualified.push({ caseId: kase.record.caseId, ordinal, reason });
-      };
-      if (outcome !== "MATCH" && outcome !== "REJECTED") return; // an UNKNOWN pin is not promotion evidence
-      if (assertion.execution !== "EXECUTABLE") return reject("assertion kind is not EXECUTABLE");
-
-      // Strict provenance over the FULL evidence set.
-      const evidenceSet = kase.referencedArtifactIds.map((artifactId) => ({
-        artifactId,
-        kind: (artifactsById.get(artifactId)?.record.provenance.kind ?? "SYNTHETIC") as ProvenanceKind,
-      }));
-      const impure = evidenceSet.filter((entry) => entry.kind !== "SANITIZED_CAPTURE");
-      if (impure.length > 0) {
-        return reject(
-          `evidence set is not all SANITIZED_CAPTURE: ${impure.map((e) => `${e.artifactId}=${e.kind}`).join(", ")}`,
-        );
-      }
-
-      // Identity: the case artifact's source coordinates and the decision's actor.
-      const source = kase.artifact.record.provenance.source as {
-        readonly reportCode?: unknown;
-        readonly fightId?: unknown;
-        readonly sourceActorId?: unknown;
-      } | null;
-      const actorId = typeof params.actorId === "number" ? params.actorId : null;
-      if (
-        source === null ||
-        typeof source.reportCode !== "string" ||
-        typeof source.fightId !== "number" ||
-        actorId === null
-      ) {
-        return reject("the case artifact has no capture coordinates or the assertion names no actor");
-      }
-      // The artifact's `sourceActorId` is the capture SUBJECT the slicer was
-      // pointed at; the unfiltered `All` stream legitimately carries other
-      // actors' events (the 14-event Envenom slice holds the OTHER
-      // Assassination Rogue's rejected cast). Identity is therefore proven
-      // per decision actor from the committed master data, never assumed
-      // from the capture subject.
-      const identity = committedIdentity(corpus, source.reportCode, source.fightId, actorId);
-      if (identity === null) return reject("no committed fight-context artifact proves the actor's identity");
-      if (!pairing(identity))
-        return reject(
-          `actor ${String(actorId)} is ${identity.className}/${identity.specName}, not this specialization`,
-        );
-
-      // The committed report must record the assertion as PASSED.
-      const reported = report.cases
-        .find((candidate) => candidate.caseId === kase.record.caseId)
-        ?.assertions.find((candidate) => candidate.ordinal === ordinal && candidate.kind === assertion.kind);
-      if (reported === undefined) return reject("the committed report has no record of this assertion");
-      if (reported.status !== "PASSED") return reject(`the committed report records ${reported.status}`);
-
-      qualifying.push({
-        caseId: kase.record.caseId,
-        ordinal,
-        kind: assertion.kind,
-        expectedOutcome: outcome,
-        artifactId: kase.record.artifactId,
-        evidenceSet,
-        evidenceActor: { reportCode: source.reportCode, fightId: source.fightId, actorId },
-        evidenceIdentity: identity,
-        reportStatus: reported.status,
-      });
-    });
-  };
-  for (const kase of corpus.cases) consider(kase);
-
-  return {
-    specId,
-    exposure,
-    layer,
-    qualifyingAssertions: qualifying,
-    disqualified,
-    evidenceReady: qualifying.length > 0,
-  };
+  const archiveReport = committedEvidenceReport() as CommittedReport | null;
+  if (archiveReport === null && archive.archive.cases.length > 0) {
+    throw new Error("tests/evidence/report.json is absent; run `npm run test:evidence -- --write-report`");
+  }
+  return [
+    { rootId: "REGRESSION_CORPUS", corpus, report: committedReport() },
+    { rootId: "EVIDENCE_ARCHIVE", corpus: archive.archive, report: archiveReport },
+  ];
 }
 
 function publicPairing(specId: SpecId): (identity: WclIdentity) => boolean {
@@ -296,7 +151,7 @@ function internalPairing(module: SpecModule): (identity: WclIdentity) => boolean
 // Preconditions
 // ---------------------------------------------------------------------------
 
-const corpusPromise = loadCorpusOrThrow(committedCorpusFiles());
+const tiersPromise = loadTiers();
 
 describe("the gate's inputs", () => {
   it("the committed report is a complete WORKERD execution", () => {
@@ -338,14 +193,8 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
 
   for (const registration of publicRegistrations) {
     it(`${registration.specId}: at least one qualifying MATCH or REJECTED`, async () => {
-      const corpus = await corpusPromise;
-      const readiness = evaluate(
-        corpus,
-        committedReport(),
-        registration.specId,
-        "PUBLIC",
-        publicPairing(registration.specId),
-      );
+      const tiers = await tiersPromise;
+      const readiness = evaluate(tiers, registration.specId, "PUBLIC", publicPairing(registration.specId));
       const summary = readiness.qualifyingAssertions.map(
         (q) =>
           `${q.caseId}[${String(q.ordinal)}] ${q.expectedOutcome} over ${q.evidenceSet.length} sanitized artifact(s), actor ${String(q.evidenceActor.actorId)} = ${q.evidenceIdentity.className}/${q.evidenceIdentity.specName}`,
@@ -367,15 +216,9 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
   }
 
   it("derived and synthetic cases contribute nothing, even when their expectation is a resolved outcome", async () => {
-    const corpus = await corpusPromise;
+    const tiers = await tiersPromise;
     for (const registration of publicRegistrations) {
-      const readiness = evaluate(
-        corpus,
-        committedReport(),
-        registration.specId,
-        "PUBLIC",
-        publicPairing(registration.specId),
-      );
+      const readiness = evaluate(tiers, registration.specId, "PUBLIC", publicPairing(registration.specId));
       for (const q of readiness.qualifyingAssertions) {
         for (const entry of q.evidenceSet) {
           expect(entry.kind, `${q.caseId} references ${entry.artifactId}`).toBe("SANITIZED_CAPTURE");
@@ -389,11 +232,11 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
   });
 
   it("the reviewed snapshot: which real cases qualify each public specialization today", async () => {
-    const corpus = await corpusPromise;
+    const tiers = await tiersPromise;
     const snapshot = Object.fromEntries(
       publicRegistrations.map((registration) => [
         registration.specId,
-        evaluate(corpus, committedReport(), registration.specId, "PUBLIC", publicPairing(registration.specId))
+        evaluate(tiers, registration.specId, "PUBLIC", publicPairing(registration.specId))
           .qualifyingAssertions.map((q) => `${q.caseId}[${String(q.ordinal)}] -> ${q.expectedOutcome}`)
           .sort(),
       ]),
@@ -461,7 +304,7 @@ describe("PUBLIC mode — the M11-A5 promotion standard for Retribution Paladin:
     // kept the stronger M11-A4 standard — both outcomes must remain, from
     // genuine Retribution evidence, so a regression that collapsed the
     // analyzer to one-sided outcomes could not be promoted or stay promoted.
-    const corpus = await corpusPromise;
+    const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "paladin/retribution");
     expect(module).toBeDefined();
     if (module === undefined) return;
@@ -470,13 +313,7 @@ describe("PUBLIC mode — the M11-A5 promotion standard for Retribution Paladin:
       ok: true,
       specId: "paladin/retribution",
     });
-    const readiness = evaluate(
-      corpus,
-      committedReport(),
-      "paladin/retribution",
-      "PUBLIC",
-      publicPairing("paladin/retribution"),
-    );
+    const readiness = evaluate(tiers, "paladin/retribution", "PUBLIC", publicPairing("paladin/retribution"));
     expect(readiness.exposure).toBe("PUBLIC");
     expect(readiness.layer).toBe("SPEC_RETRIBUTION_PALADIN");
     expect(readiness.evidenceReady).toBe(true);
@@ -498,7 +335,7 @@ describe("PUBLIC mode — the M11-A5 promotion standard for Retribution Paladin:
 
 describe("M11-B12: Blood Death Knight's promotion evidence, through the identity table", () => {
   it("is PUBLIC with real MATCH and real REJECTED evidence from sanitized captures, each recorded PASSED", async () => {
-    const corpus = await corpusPromise;
+    const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "deathknight/blood");
     expect(module).toBeDefined();
     if (module === undefined) return;
@@ -507,13 +344,7 @@ describe("M11-B12: Blood Death Knight's promotion evidence, through the identity
       ok: true,
       specId: "deathknight/blood",
     });
-    const readiness = evaluate(
-      corpus,
-      committedReport(),
-      "deathknight/blood",
-      "PUBLIC",
-      publicPairing("deathknight/blood"),
-    );
+    const readiness = evaluate(tiers, "deathknight/blood", "PUBLIC", publicPairing("deathknight/blood"));
     expect(readiness.exposure).toBe("PUBLIC");
     expect(readiness.layer).toBe("SPEC_BLOOD_DEATH_KNIGHT");
     expect(readiness.evidenceReady).toBe(true);
@@ -562,20 +393,22 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // M11-C3a, the Keg Smash at +10.7 s. The M11-A5 standard every promotion so
     // far met — a real MATCH AND a real REJECTED — is NOT met: there is no
     // REJECTED, and fewer UNKNOWNs are not promotion evidence.
-    const corpus = await corpusPromise;
+    const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "monk/brewmaster");
     if (module === undefined) throw new Error("no Brewmaster module");
     expect(module.exposure).toBe("INTERNAL_ONLY");
     expect(resolveSpecIdentity({ className: "Monk", specName: "Brewmaster" })).toMatchObject({ ok: false });
-    const readiness = evaluate(
-      corpus,
-      committedReport(),
-      "monk/brewmaster",
-      "INTERNAL_ONLY",
-      internalPairing(module),
-    );
+    const readiness = evaluate(tiers, "monk/brewmaster", "INTERNAL_ONLY", internalPairing(module));
     expect(readiness.exposure).toBe("INTERNAL_ONLY");
-    expect(readiness.qualifyingAssertions.map((q) => q.expectedOutcome)).toEqual(["MATCH", "MATCH", "MATCH"]);
+    // M11-C4e: the fourth is the ARCHIVE's first full-fight-segment MATCH over
+    // the cross-tier bundle (corpus opener + corpus 20–165 s + archive
+    // 165–285 s), recorded PASSED in the committed archive report.
+    expect(readiness.qualifyingAssertions.map((q) => `${q.rootId}:${q.expectedOutcome}`)).toEqual([
+      "REGRESSION_CORPUS:MATCH",
+      "REGRESSION_CORPUS:MATCH",
+      "REGRESSION_CORPUS:MATCH",
+      "EVIDENCE_ARCHIVE:MATCH",
+    ]);
     expect(readiness.qualifyingAssertions.some((q) => q.expectedOutcome === "REJECTED")).toBe(false);
     for (const q of readiness.qualifyingAssertions) {
       expect(q.evidenceActor).toMatchObject({ reportCode: "gtKb2xHn87pNcFfW", fightId: 22, actorId: 4 });
@@ -590,16 +423,10 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // DeathKnight/Blood, so the internal-mode search over the same real
     // evidence qualifies nothing. Informational, not a failure — the PUBLIC
     // mode above is where those assertions count.
-    const corpus = await corpusPromise;
+    const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "deathknight/blood");
     if (module === undefined) throw new Error("no Blood module");
-    const readiness = evaluate(
-      corpus,
-      committedReport(),
-      "deathknight/blood",
-      "INTERNAL_ONLY",
-      internalPairing(module),
-    );
+    const readiness = evaluate(tiers, "deathknight/blood", "INTERNAL_ONLY", internalPairing(module));
     expect(readiness.qualifyingAssertions).toEqual([]);
     expect(readiness.evidenceReady).toBe(false);
     expect(readiness.disqualified.length).toBeGreaterThan(0);
@@ -612,16 +439,10 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // the same evidence qualifies nothing and reports evidenceReady false;
     // that is informational, not a failure, and the PUBLIC mode above is
     // where the same assertions count.
-    const corpus = await corpusPromise;
+    const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "paladin/retribution");
     if (module === undefined) throw new Error("no Retribution module");
-    const readiness = evaluate(
-      corpus,
-      committedReport(),
-      "paladin/retribution",
-      "INTERNAL_ONLY",
-      internalPairing(module),
-    );
+    const readiness = evaluate(tiers, "paladin/retribution", "INTERNAL_ONLY", internalPairing(module));
     expect(readiness.qualifyingAssertions).toEqual([]);
     expect(readiness.evidenceReady).toBe(false);
     expect(readiness.disqualified.length).toBeGreaterThan(0);
@@ -653,18 +474,12 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
         throw new Error("never viewed");
       },
     });
-    const corpus = await corpusPromise;
+    const tiers = await tiersPromise;
 
     // The public table resolves Paladin/Protection today, so the internal
     // pairing (which requires the table to REFUSE) finds nothing: readiness
     // is reported false, and that is informational, not a failure.
-    const readiness = evaluate(
-      corpus,
-      committedReport(),
-      synthetic.identity.specId,
-      "INTERNAL_ONLY",
-      internalPairing(synthetic),
-    );
+    const readiness = evaluate(tiers, synthetic.identity.specId, "INTERNAL_ONLY", internalPairing(synthetic));
     expect(readiness.exposure).toBe("INTERNAL_ONLY");
     expect(readiness.evidenceReady).toBe(false);
     expect(readiness.disqualified.length).toBeGreaterThan(0);
@@ -676,13 +491,7 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     const pairingWithoutTable = (identity: WclIdentity): boolean =>
       identity.className === synthetic.identity.wclClassName &&
       identity.specName === synthetic.identity.wclSpecName;
-    const simulated = evaluate(
-      corpus,
-      committedReport(),
-      synthetic.identity.specId,
-      "INTERNAL_ONLY",
-      pairingWithoutTable,
-    );
+    const simulated = evaluate(tiers, synthetic.identity.specId, "INTERNAL_ONLY", pairingWithoutTable);
     expect(simulated.evidenceReady).toBe(true);
     expect(simulated.qualifyingAssertions.map((q) => q.expectedOutcome)).toContain("MATCH");
     expect(simulated.qualifyingAssertions.every((q) => q.evidenceIdentity.className === "Paladin")).toBe(
@@ -691,14 +500,8 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
   });
 
   it("an INTERNAL_ONLY readiness with zero qualifying assertions does not throw and does not fail", async () => {
-    const corpus = await corpusPromise;
-    const readiness = evaluate(
-      corpus,
-      committedReport(),
-      "rogue/assassination",
-      "INTERNAL_ONLY",
-      () => false,
-    );
+    const tiers = await tiersPromise;
+    const readiness = evaluate(tiers, "rogue/assassination", "INTERNAL_ONLY", () => false);
     expect(readiness.evidenceReady).toBe(false);
     expect(readiness.qualifyingAssertions).toEqual([]);
   });

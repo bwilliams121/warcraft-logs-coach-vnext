@@ -17,6 +17,7 @@
     "test:unit": "vitest run --project node",
     "test:workers": "vitest run --project workers",
     "test:corpus": "node scripts/corpus/gate.mjs",
+    "test:evidence": "node scripts/corpus/gate.mjs --root evidence",
     "probe": "vitest run --config vitest.probe.config.ts"
   },
   "devDependencies": {

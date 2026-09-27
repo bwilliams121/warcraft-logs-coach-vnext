@@ -142,7 +142,9 @@ export function machineReport(
       byteLength: entry.canonicalByteLength,
     })),
     cases,
-    gaps: KNOWN_EVIDENCE_GAPS.map((gap) => ({
+    // The evidence gaps are the REGRESSION corpus's declared gaps. An evidence
+    // archive report (M11-C4e) lists none: the archive claims no layer coverage.
+    gaps: (corpus.rootId === "EVIDENCE_ARCHIVE" ? [] : KNOWN_EVIDENCE_GAPS).map((gap) => ({
       id: gap.id,
       layers: gap.layers,
       disposition: gap.disposition,

@@ -31,6 +31,7 @@
 import {
   ASSERTION_KINDS,
   CORPUS_CONTRACT_VERSION,
+  isEvidenceArchiveAssertionKind,
   MAX_ARTIFACT_BYTES,
   MAX_CORPUS_BYTES,
   OBSOLETE_CONTRACT_VERSIONS,
@@ -43,6 +44,7 @@ import {
   type CorpusArtifactRecord,
   type CorpusCaseRecord,
   type CorpusManifest,
+  type EvidenceRootId,
   type OwningLayer,
   type PayloadKind,
   type TransformationKind,
@@ -101,6 +103,14 @@ export const CORPUS_ERROR_CODES = [
   "CASE_AUTHORITY_REQUIRED",
   "CASE_AUTHORITY_UNKNOWN",
   "CASE_AUTHORITY_REVISION_STALE",
+  // M11-C4e: the two evidence roots.
+  "ARTIFACT_ID_DUPLICATE_ACROSS_ROOTS",
+  "CASE_ID_DUPLICATE_ACROSS_ROOTS",
+  "CORPUS_REFERENCES_ARCHIVE",
+  "ARCHIVE_DEPENDENCY_INVALID",
+  "ARCHIVE_ARTIFACT_NOT_SANITIZED_CAPTURE",
+  "ARCHIVE_ASSERTION_KIND_NOT_PERMITTED",
+  "ARCHIVE_CASE_WITHOUT_ARCHIVE_EVIDENCE",
 ] as const;
 export type CorpusErrorCode = (typeof CORPUS_ERROR_CODES)[number];
 
@@ -153,9 +163,21 @@ export interface AssertionCoverage {
 }
 
 export interface LoadedCorpus {
+  /** Which committed root this is (M11-C4e). Budgets, reports and reference rules follow it. */
+  readonly rootId: EvidenceRootId;
   readonly manifest: CorpusManifest;
-  /** Sorted by artifactId, code-point order. Independent of manifest and filesystem order. */
+  /**
+   * THIS root's artifacts, sorted by artifactId, code-point order. Independent
+   * of manifest and filesystem order. Byte accounting, reports and coverage
+   * read this list and nothing else.
+   */
   readonly artifacts: readonly LoadedArtifact[];
+  /**
+   * Every artifact a case of this root may READ: its own, plus — for the
+   * evidence archive only — the regression corpus it depends on. Sorted by
+   * artifactId. For the regression corpus it is exactly `artifacts`.
+   */
+  readonly referenceableArtifacts: readonly LoadedArtifact[];
   /** Sorted by caseId, code-point order. */
   readonly cases: readonly LoadedCase[];
   readonly coverage: AssertionCoverage;
@@ -531,6 +553,7 @@ function caseErrors(
   kase: CorpusCaseRecord,
   artifact: CorpusArtifactRecord | undefined,
   knownArtifactIds: ReadonlySet<string>,
+  forbiddenArtifactIds: ReadonlySet<string> = new Set(),
 ): {
   readonly errors: CorpusError[];
   readonly assertions: LoadedAssertion[];
@@ -544,7 +567,12 @@ function caseErrors(
     errors.push({ code, subject, message: `case ${kase.caseId}: ${message}` });
   };
 
-  if (artifact === undefined) {
+  if (forbiddenArtifactIds.has(kase.artifactId)) {
+    fail(
+      "CORPUS_REFERENCES_ARCHIVE",
+      `artifact ${kase.artifactId} is an evidence-archive artifact; a regression-corpus case may never read the archive`,
+    );
+  } else if (artifact === undefined) {
     fail("CASE_ARTIFACT_UNKNOWN", `artifact ${kase.artifactId} is not in the manifest`);
   }
 
@@ -587,6 +615,13 @@ function caseErrors(
     }
     needsAuthority ||= definition.requiresAuthority;
     for (const reference of artifactIdParamsOf(parsed.data)) {
+      if (typeof reference.id === "string" && forbiddenArtifactIds.has(reference.id)) {
+        fail(
+          "CORPUS_REFERENCES_ARCHIVE",
+          `assertion ${String(ordinal)} (${kind}) names evidence-archive artifact ${reference.id} at ${reference.path}; a regression-corpus case may never read the archive`,
+        );
+        continue;
+      }
       if (typeof reference.id !== "string" || !knownArtifactIds.has(reference.id)) {
         fail(
           "CASE_PARAM_ARTIFACT_UNKNOWN",
@@ -633,8 +668,62 @@ function caseErrors(
  * All rules run; the first failure does not hide the rest. Nothing in `files`
  * is written to, and the returned artifacts hold the text exactly as given.
  */
-export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoadResult> {
+export interface CorpusRootOptions {
+  /** Which root `files` is. Defaults to the regression corpus. */
+  readonly rootId?: EvidenceRootId;
+  /**
+   * The loaded regression corpus an EVIDENCE_ARCHIVE depends on: its
+   * artifacts are readable by archive cases and its ids share one namespace
+   * with the archive's. Required for, and only for, the archive.
+   */
+  readonly dependency?: LoadedCorpus;
+  /**
+   * Ids known to belong to the evidence archive, when validating the
+   * regression corpus beside it: a corpus case naming one is
+   * CORPUS_REFERENCES_ARCHIVE rather than a merely unknown artifact.
+   */
+  readonly archiveArtifactIds?: ReadonlySet<string>;
+}
+
+export async function validateCorpus(
+  files: CorpusFileTable,
+  options: CorpusRootOptions = {},
+): Promise<CorpusLoadResult> {
   const errors: CorpusError[] = [];
+  const rootId: EvidenceRootId = options.rootId ?? "REGRESSION_CORPUS";
+  const isArchive = rootId === "EVIDENCE_ARCHIVE";
+  const dependency = options.dependency;
+  if (isArchive && (dependency === undefined || dependency.rootId !== "REGRESSION_CORPUS")) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: "ARCHIVE_DEPENDENCY_INVALID",
+          subject: null,
+          message: "the evidence archive must be validated against a loaded regression corpus",
+        },
+      ],
+    };
+  }
+  if (!isArchive && dependency !== undefined) {
+    return {
+      ok: false,
+      errors: [
+        {
+          code: "ARCHIVE_DEPENDENCY_INVALID",
+          subject: null,
+          message: "the regression corpus depends on nothing; only the evidence archive takes a dependency",
+        },
+      ],
+    };
+  }
+  const dependencyArtifacts = new Map(
+    (dependency?.artifacts ?? []).map((entry) => [entry.record.artifactId, entry] as const),
+  );
+  const dependencyCaseIds = new Set((dependency?.cases ?? []).map((entry) => entry.record.caseId));
+  const archiveArtifactIds = isArchive
+    ? new Set<string>()
+    : (options.archiveArtifactIds ?? new Set<string>());
 
   const manifestText = files[MANIFEST_PATH];
   if (manifestText === undefined) {
@@ -700,6 +789,20 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
         message: `artifact id ${artifact.artifactId} appears more than once`,
       });
       continue;
+    }
+    if (dependencyArtifacts.has(artifact.artifactId)) {
+      errors.push({
+        code: "ARTIFACT_ID_DUPLICATE_ACROSS_ROOTS",
+        subject: { artifactId: artifact.artifactId },
+        message: `artifact id ${artifact.artifactId} is already a regression-corpus artifact; ids are one namespace across both roots, whatever the bytes`,
+      });
+    }
+    if (isArchive && artifact.provenance.kind !== "SANITIZED_CAPTURE") {
+      errors.push({
+        code: "ARCHIVE_ARTIFACT_NOT_SANITIZED_CAPTURE",
+        subject: { artifactId: artifact.artifactId },
+        message: `artifact ${artifact.artifactId} is ${artifact.provenance.kind}; the evidence archive retains SANITIZED_CAPTURE evidence only`,
+      });
     }
     artifactsById.set(artifact.artifactId, artifact);
     const owner = pathsSeen.get(artifact.path);
@@ -802,7 +905,9 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
 
     loadedArtifacts.push({ record: artifact, text, json, canonicalByteLength: bytes.byteLength });
   }
-  if (totalArtifactBytes > MAX_CORPUS_BYTES) {
+  // The total ceiling is the regression corpus's. The archive has a notice
+  // line (a test) and no total ceiling; its per-artifact ceiling is above.
+  if (!isArchive && totalArtifactBytes > MAX_CORPUS_BYTES) {
     errors.push({
       code: "CORPUS_TOO_LARGE",
       subject: null,
@@ -823,23 +928,32 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
     }
   }
 
-  // Lineage.
+  // Lineage. An archive artifact may descend from, or sit after, a corpus
+  // artifact; the corpus never sees the archive.
+  const lineageById = new Map<string, CorpusArtifactRecord>(
+    [...dependencyArtifacts.values()].map((entry) => [entry.record.artifactId, entry.record] as const),
+  );
+  for (const [id, record] of artifactsById) lineageById.set(id, record);
   for (const artifact of artifactsById.values()) {
-    errors.push(...provenanceErrors(artifact, artifactsById));
+    errors.push(...provenanceErrors(artifact, lineageById));
   }
 
   // Zero-event certificates, checked against both artifacts' retained events.
   const eventsById = new Map<string, readonly Record<string, unknown>[]>();
-  for (const entry of loadedArtifacts) {
+  for (const entry of [...dependencyArtifacts.values(), ...loadedArtifacts]) {
     if (Array.isArray(entry.json))
       eventsById.set(entry.record.artifactId, entry.json as Record<string, unknown>[]);
   }
   for (const artifact of artifactsById.values()) {
-    errors.push(...certificateErrors(artifact, artifactsById, eventsById));
+    errors.push(...certificateErrors(artifact, lineageById, eventsById));
   }
 
   // Cases.
-  const loadedById = new Map(loadedArtifacts.map((entry) => [entry.record.artifactId, entry]));
+  const referenceable = [...dependencyArtifacts.values(), ...loadedArtifacts].sort((a, b) =>
+    codePointCompare(a.record.artifactId, b.record.artifactId),
+  );
+  const loadedById = new Map(referenceable.map((entry) => [entry.record.artifactId, entry]));
+  const knownIds = new Set([...artifactsById.keys(), ...dependencyArtifacts.keys()]);
   const casesById = new Map<string, CorpusCaseRecord>();
   const loadedCases: LoadedCase[] = [];
   let executable = 0;
@@ -853,10 +967,36 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
       });
       continue;
     }
+    if (dependencyCaseIds.has(kase.caseId)) {
+      errors.push({
+        code: "CASE_ID_DUPLICATE_ACROSS_ROOTS",
+        subject: { caseId: kase.caseId },
+        message: `case id ${kase.caseId} is already a regression-corpus case; ids are one namespace across both roots`,
+      });
+    }
     casesById.set(kase.caseId, kase);
-    const artifactRecord = artifactsById.get(kase.artifactId);
-    const checked = caseErrors(kase, artifactRecord, new Set(artifactsById.keys()));
+    const artifactRecord =
+      artifactsById.get(kase.artifactId) ?? dependencyArtifacts.get(kase.artifactId)?.record;
+    const checked = caseErrors(kase, artifactRecord, knownIds, archiveArtifactIds);
     errors.push(...checked.errors);
+    if (isArchive) {
+      kase.assertions.forEach((assertion, ordinal) => {
+        if (!isEvidenceArchiveAssertionKind(assertion.kind)) {
+          errors.push({
+            code: "ARCHIVE_ASSERTION_KIND_NOT_PERMITTED",
+            subject: { caseId: kase.caseId },
+            message: `case ${kase.caseId}: assertion ${String(ordinal)} kind ${assertion.kind} is not an evidence-verification family; the archive is not a regression corpus`,
+          });
+        }
+      });
+      if (!checked.referencedArtifactIds.some((id) => artifactsById.has(id))) {
+        errors.push({
+          code: "ARCHIVE_CASE_WITHOUT_ARCHIVE_EVIDENCE",
+          subject: { caseId: kase.caseId },
+          message: `case ${kase.caseId} reads no evidence-archive artifact; a case over regression-corpus artifacts alone belongs in the regression corpus`,
+        });
+      }
+    }
     const artifact = loadedById.get(kase.artifactId);
     if (artifact === undefined) continue;
     for (const assertion of checked.assertions) {
@@ -878,8 +1018,10 @@ export async function validateCorpus(files: CorpusFileTable): Promise<CorpusLoad
   return {
     ok: true,
     corpus: {
+      rootId,
       manifest,
       artifacts: loadedArtifacts,
+      referenceableArtifacts: referenceable,
       cases: loadedCases,
       coverage: { executable, declared },
       totalArtifactBytes,
@@ -896,6 +1038,66 @@ export async function loadCorpusOrThrow(files: CorpusFileTable): Promise<LoadedC
     );
   }
   return result.corpus;
+}
+
+/**
+ * The evidence archive and the regression corpus it depends on, validated
+ * together (M11-C4e). The corpus is validated FIRST and on its own terms —
+ * its limits, its ids — with the archive's artifact ids known, so a corpus
+ * case that names one is CORPUS_REFERENCES_ARCHIVE; then the archive is
+ * validated against the loaded corpus. Either failing fails the whole.
+ */
+export async function validateEvidenceArchive(
+  archiveFiles: CorpusFileTable,
+  corpusFiles: CorpusFileTable,
+): Promise<
+  | { readonly ok: true; readonly archive: LoadedCorpus; readonly corpus: LoadedCorpus }
+  | { readonly ok: false; readonly errors: readonly CorpusError[] }
+> {
+  const declaredIds = (files: CorpusFileTable): Set<string> => {
+    const ids = new Set<string>();
+    const text = files[MANIFEST_PATH];
+    if (text === undefined) return ids;
+    const parsed = parseJsonText(text);
+    const artifacts = parsed.ok ? (parsed.value as { artifacts?: unknown } | null)?.artifacts : undefined;
+    if (!Array.isArray(artifacts)) return ids;
+    for (const entry of artifacts) {
+      const id = (entry as { artifactId?: unknown } | null)?.artifactId;
+      if (typeof id === "string") ids.add(id);
+    }
+    return ids;
+  };
+  // An id the corpus declares ITSELF is the corpus's: a corpus case reading it
+  // reads its own artifact. If the archive declares it too, that duplicate is
+  // the archive's error (ARTIFACT_ID_DUPLICATE_ACROSS_ROOTS, below), never
+  // misread as a corpus → archive reference.
+  const corpusIds = declaredIds(corpusFiles);
+  const archiveArtifactIds = new Set([...declaredIds(archiveFiles)].filter((id) => !corpusIds.has(id)));
+  const corpus = await validateCorpus(corpusFiles, { archiveArtifactIds });
+  if (!corpus.ok) {
+    return {
+      ok: false,
+      errors: [
+        ...corpus.errors,
+        {
+          code: "ARCHIVE_DEPENDENCY_INVALID",
+          subject: null,
+          message: "the regression corpus the evidence archive depends on does not validate",
+        },
+      ],
+    };
+  }
+  const archive = await validateCorpus(archiveFiles, {
+    rootId: "EVIDENCE_ARCHIVE",
+    dependency: corpus.corpus,
+  });
+  if (!archive.ok) return { ok: false, errors: archive.errors };
+  return { ok: true, archive: archive.corpus, corpus: corpus.corpus };
+}
+
+/** The artifact with this id among those a case of `corpus` may read, or undefined. */
+export function referenceableArtifact(corpus: LoadedCorpus, artifactId: string): LoadedArtifact | undefined {
+  return corpus.referenceableArtifacts.find((entry) => entry.record.artifactId === artifactId);
 }
 
 // --------------------------------------------------------------------------

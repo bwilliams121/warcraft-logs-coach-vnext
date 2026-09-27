@@ -139,12 +139,17 @@ const CORPUS_SUPPORT_PATHS = Object.keys(CORPUS_SUPPORT_SOURCES)
 const PURE_RING = [
   "support/corpus/artifacts.ts",
   "support/corpus/contract.ts",
+  // M11-C4e: the evidence archive's file table and harness entry point, and
+  // the promotion-evidence reader over both roots. Pure like the loader they
+  // build on: no transport, service or interface.
+  "support/corpus/evidence-archive.ts",
   "support/corpus/execution-context.ts",
   "support/corpus/executors.ts",
   "support/corpus/fight.ts",
   "support/corpus/harness.ts",
   "support/corpus/loader.ts",
   "support/corpus/machine-report.ts",
+  "support/corpus/promotion-evidence.ts",
   "support/corpus/report.ts",
 ];
 const EXECUTOR_RING = [

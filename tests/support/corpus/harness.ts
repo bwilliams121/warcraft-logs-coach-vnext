@@ -260,8 +260,20 @@ export async function runCorpusHarness(
 ): Promise<HarnessResult> {
   const validation = await validateCorpus(files);
   if (!validation.ok) return { ok: false, stage: "VALIDATION", errors: validation.errors };
-  const { corpus } = validation;
+  return executeLoadedCorpus(validation.corpus, selection, options);
+}
 
+/**
+ * Selects, executes and reports over an ALREADY VALIDATED root — the
+ * regression corpus, or the evidence archive with the corpus it depends on
+ * (M11-C4e, `tests/support/corpus/evidence-archive.ts`). The one execution
+ * path both roots share; nothing here knows which root it is running.
+ */
+export async function executeLoadedCorpus(
+  corpus: LoadedCorpus,
+  selection: HarnessSelection,
+  options: HarnessOptions,
+): Promise<HarnessResult> {
   const selected = selectCases(corpus, selection);
   if (selection.kind === "CASE" && selected.length === 0) {
     return { ok: false, stage: "SELECTION", detail: `no case with id ${selection.caseId}` };

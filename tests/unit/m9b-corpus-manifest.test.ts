@@ -184,7 +184,14 @@ describe("the committed corpus loads", () => {
     // taking the total to 4,792,400 bytes and crossing the 4 MiB notice line
     // DELIBERATELY: the line moves to 5 MiB — five sixths of the 6 MiB
     // ceiling, and still a line growth has to cross by hand, not silently.
-    expect(loaded.totalArtifactBytes).toBeLessThan(5 * 1024 * 1024);
+    // M11-C4 left 5,241,687 bytes. The owner then ACCEPTED 5.5 MiB as the
+    // regression corpus notice ceiling (the M11-C4b and C4d reviews): it is
+    // the current line and is not to be raised again for the next evidence
+    // campaign. Qualifying evidence that does not belong in the executable
+    // corpus goes to the separate evidence archive (tests/evidence/,
+    // M11-C4e), which has its own budget and is never loaded by this corpus.
+    // The 6 MiB ceiling itself is unchanged and is enforced by the loader.
+    expect(loaded.totalArtifactBytes).toBeLessThan(5.5 * 1024 * 1024);
     for (const entry of loaded.artifacts) {
       expect(entry.canonicalByteLength, entry.record.artifactId).toBeLessThan(512 * 1024);
     }

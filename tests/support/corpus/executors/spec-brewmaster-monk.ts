@@ -12,10 +12,11 @@
  * ONE REAL ANALYSIS PER INPUT PER RUN, memoised through the run's own
  * `CorpusExecutionContext` exactly as the other specialization executors do.
  * The aggregate kinds (coverage summary, measurement distribution, state
- * evidence census) also accept a bundle (`historyArtifactIds` +
- * `declaredHoles`, M11-C4), composed through the shared bundle composer
- * exactly as the Blood executors compose theirs; every other kind reads one
- * artifact.
+ * evidence census, M11-C4) and decision coverage (M11-C4e) also accept a
+ * bundle (`historyArtifactIds` + `declaredHoles`), composed through the
+ * shared bundle composer exactly as the Blood executors compose theirs; every
+ * other kind reads one artifact. A bundle part may be a regression-corpus
+ * artifact when the case lives in the evidence archive.
  */
 
 import type { CombatState } from "../../../../src/engine/state/combat-state.js";
@@ -67,7 +68,7 @@ function partsOf(
   bundle: BundleRequest,
 ): readonly LoadedArtifact[] {
   const parts = bundle.historyArtifactIds.map((artifactId) => {
-    const part = corpus.artifacts.find((entry) => entry.record.artifactId === artifactId);
+    const part = corpus.referenceableArtifacts.find((entry) => entry.record.artifactId === artifactId);
     if (part === undefined) throw new BundleCompositionError(`unknown artifact ${artifactId}`);
     return part;
   });
@@ -243,7 +244,15 @@ export function decisionCoverage(
   artifact: LoadedArtifact,
   params: ParamsOf<"SPEC_BREWMASTER_MONK.DECISION_COVERAGE">,
 ): AssertionOutcome {
-  const run = analyzedOrFail(context, corpus, kase, artifact, params.actorId, params.targetActorId);
+  const run = analyzedOrFail(
+    context,
+    corpus,
+    kase,
+    artifact,
+    params.actorId,
+    params.targetActorId,
+    bundleRequestOf(params),
+  );
   if (!run.ok) return run.outcome;
   const found = resolvedAt(run, params.actorId, params.observedCast);
   if (!found.ok) return found.outcome;

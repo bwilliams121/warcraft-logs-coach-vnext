@@ -127,6 +127,63 @@ export const MAX_ARTIFACT_BYTES = 512 * 1024;
 export const MAX_CORPUS_BYTES = 6 * 1024 * 1024;
 
 // --------------------------------------------------------------------------
+// The evidence archive (M11-C4e)
+// --------------------------------------------------------------------------
+
+/**
+ * The two committed evidence roots. They share one artifact and case schema
+ * and one provenance vocabulary, and they have different responsibilities:
+ *
+ *   REGRESSION_CORPUS   tests/corpus/ — the executable regression fixtures,
+ *                       loaded by every corpus run, bounded by
+ *                       MAX_CORPUS_BYTES in total and MAX_ARTIFACT_BYTES each.
+ *   EVIDENCE_ARCHIVE    tests/evidence/ — qualifying real evidence retained
+ *                       for promotion verification, executed only by its own
+ *                       command and never loaded by the regression corpus.
+ *                       MAX_ARTIFACT_BYTES each, a notice line at
+ *                       EVIDENCE_ARCHIVE_NOTICE_BYTES, and no total ceiling.
+ *
+ * An archive case may reference a corpus artifact; a corpus case may never
+ * reference an archive artifact. Artifact and case ids are one namespace
+ * across both roots.
+ */
+export const EVIDENCE_ROOT_IDS = ["REGRESSION_CORPUS", "EVIDENCE_ARCHIVE"] as const;
+export type EvidenceRootId = (typeof EVIDENCE_ROOT_IDS)[number];
+
+/** The archive's notice line: crossed by hand, never silently (checked by a test, not the loader). */
+export const EVIDENCE_ARCHIVE_NOTICE_BYTES = 4 * 1024 * 1024;
+
+/**
+ * The assertion families an archive case may carry. Promotion and evidence
+ * verification only — the archive is not a second regression corpus:
+ *
+ *   - an archived artifact's provenance census (the four NORMALIZATION kinds
+ *     every committed slice carries);
+ *   - bundle composition;
+ *   - a specialization's decision coverage and its measurement aggregates.
+ *
+ * Adding a family is a reviewed change to this list, which a test pins.
+ */
+const EVIDENCE_ARCHIVE_NORMALIZATION_KINDS: readonly string[] = [
+  "NORMALIZATION.EVENT_COUNT_PRESERVED",
+  "NORMALIZATION.INPUT_ORDER_PRESERVED",
+  "NORMALIZATION.ALL_TYPES_RECOGNISED",
+  "NORMALIZATION.ACTOR_EVENT_CENSUS",
+  "NORMALIZATION.BUNDLE_COMPOSITION",
+];
+const EVIDENCE_ARCHIVE_SPEC_SUFFIXES: readonly string[] = [
+  ".DECISION_COVERAGE",
+  ".COVERAGE_SUMMARY",
+  ".MEASUREMENT_DISTRIBUTION",
+  ".STATE_EVIDENCE_CENSUS",
+];
+
+export function isEvidenceArchiveAssertionKind(kind: string): boolean {
+  if (EVIDENCE_ARCHIVE_NORMALIZATION_KINDS.includes(kind)) return true;
+  return kind.startsWith("SPEC_") && EVIDENCE_ARCHIVE_SPEC_SUFFIXES.some((suffix) => kind.endsWith(suffix));
+}
+
+// --------------------------------------------------------------------------
 // Vocabularies
 // --------------------------------------------------------------------------
 
@@ -2671,6 +2728,7 @@ export const ASSERTION_KINDS = {
       .object({
         actorId: z.number().int(),
         targetActorId: z.number().int().nullable(),
+        ...BREWMASTER_BUNDLE_PARAMS,
         observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
         expected: z
           .object({

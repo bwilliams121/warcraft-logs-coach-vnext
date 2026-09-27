@@ -493,7 +493,9 @@ async function encounterContextParity(
       return fail("an external-enabled case must state the subject fight's encounter facts");
     }
     const rankingsArtifactId = params.external.rankingsArtifactId;
-    const rankings = corpus.artifacts.find((candidate) => candidate.record.artifactId === rankingsArtifactId);
+    const rankings = corpus.referenceableArtifacts.find(
+      (candidate) => candidate.record.artifactId === rankingsArtifactId,
+    );
     if (rankings === undefined) {
       return fail(`rankings artifact ${rankingsArtifactId} is not in the corpus`);
     }
