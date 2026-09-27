@@ -112,6 +112,11 @@ const CORPUS_MODEL_AND_PROMOTION_IDENTIFIERS = [
   "promotionEvidence",
   "evidenceReady",
   "qualifyingAssertions",
+  // M11-C4h: the two promotion gates and the negative-control lineage
+  "observationGate",
+  "discriminationGate",
+  "SINGLE_CAST_ABILITY_SUBSTITUTION",
+  "OBSERVED_TOKEN_APPLICABILITY",
 ];
 
 /**

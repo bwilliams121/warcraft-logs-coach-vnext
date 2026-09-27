@@ -79,8 +79,10 @@ describe("the committed corpus loads", () => {
     // M11-C4f added the neutral second Brewmaster subject's fixed 20 s opener
     // (the rest of its fixed 165 s window is in the evidence archive) and its
     // normalization case.
-    expect(loaded.artifacts).toHaveLength(46);
-    expect(loaded.cases).toHaveLength(172);
+    // M11-C4h added the Protection Paladin discrimination control (a
+    // one-field substitution of the 60–90 s segment) and its case.
+    expect(loaded.artifacts).toHaveLength(47);
+    expect(loaded.cases).toHaveLength(173);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -93,7 +95,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds thirty-five sanitized captures, four derivations and six synthetics", async () => {
+  it("holds thirty-five sanitized captures, five derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -143,6 +145,7 @@ describe("the committed corpus loads", () => {
       "wcl-no-actor-sentinel-source.unusable-negative",
       "wcl-page-sequence-limit-40.page-5-removed",
       "wcl-protection-paladin-a7r6-opener.gap-before-2010000",
+      "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
       "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
     ]);
     expect(byKind.get("SYNTHETIC")).toEqual([
@@ -188,7 +191,8 @@ describe("the committed corpus loads", () => {
     // taking the total to 4,792,400 bytes and crossing the 4 MiB notice line
     // DELIBERATELY: the line moves to 5 MiB — five sixths of the 6 MiB
     // ceiling, and still a line growth has to cross by hand, not silently.
-    // M11-C4 left 5,241,687 bytes. The owner then ACCEPTED 5.5 MiB as the
+    // M11-C4 left 5,241,687 bytes; M11-C4f 5,331,187; M11-C4h's 172,086-byte
+    // discrimination control 5,503,273. The owner ACCEPTED 5.5 MiB as the
     // regression corpus notice ceiling (the M11-C4b and C4d reviews): it is
     // the current line and is not to be raised again for the next evidence
     // campaign. Qualifying evidence that does not belong in the executable
@@ -329,6 +333,8 @@ describe("retained coverage is granted only where the capture predicate supports
     "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
     "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
     "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+    // M11-C4h: the discrimination control retains exactly its parent's grants.
+    "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
     "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
     "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
     // M11-A4: the same predicate for actor 6 over the same two captures, and

@@ -43,6 +43,8 @@ const DERIVATION = "PROTECTION_PALADIN_REGISTRATION.analyze";
 const ANALYZING_KINDS = new Set([
   "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE",
   "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+  // M11-C4h: reads the build facts and decision off the same memoized analysis.
+  "SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY",
   "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
   "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
   "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
@@ -102,13 +104,15 @@ async function runLayerCapturingContext() {
 }
 
 describe("the Protection Paladin layer performs exactly one real analysis per distinct input per run", () => {
-  // Measured at M10-C5 Phase B2 in isolation: one layer run is ~2.8 s (six
-  // real analyses, two of them over the composed 3,720-event fight), so the
-  // two-run test below is ~5 s and the default 5 s per-test timeout is
-  // inadequate for it. The same 20 s reading as the harness test's layer
-  // block is used for this block: the work is still bounded and pinned to
-  // exactly six analyses per run.
-  const LAYER_TIMEOUT_MS = 20_000;
+  // Harness ceilings for CPU-sensitive integration work, NOT performance SLAs.
+  // Each test below runs the whole Protection layer for real: seven distinct
+  // analyses per run since M11-C4h added the discrimination-control bundle,
+  // two of them over the composed Phase B2 fight. Wall time scales with
+  // machine load, so the ceilings only stop a hang. What these tests pin is
+  // the work itself: exactly seven analyses per run, each computed once.
+  const LAYER_TIMEOUT_MS = 60_000;
+  // "shares nothing between runs" runs the layer twice.
+  const TWO_RUN_TIMEOUT_MS = 90_000;
 
   it(
     "analyzes each distinct (artifact, actor, target) input once and serves every other assertion from it",
@@ -129,10 +133,11 @@ describe("the Protection Paladin layer performs exactly one real analysis per di
       const stats = context.memo.stats().filter((stat) => stat.key.includes(DERIVATION));
 
       // Exactly as many real analyses as distinct inputs, each computed once —
-      // and the manifest says there are six: the opener, the M10-C5 45-second
-      // slice, each one's gap derivative, the Phase B2 five-part bundle and its
-      // three-part gap bundle.
-      expect(expected.inputs.size).toBe(6);
+      // and the manifest says there are seven: the opener, the M10-C5 45-second
+      // slice, each one's gap derivative, the Phase B2 five-part bundle, its
+      // three-part gap bundle and (M11-C4h) the five-part bundle with the
+      // 60–90 s part swapped for its discrimination control.
+      expect(expected.inputs.size).toBe(7);
       expect(stats.length).toBe(expected.inputs.size);
       for (const stat of stats) expect(stat.computed, stat.key).toBe(1);
 
@@ -184,6 +189,7 @@ describe("the Protection Paladin layer performs exactly one real analysis per di
           "wcl-protection-paladin-a7r6-rotational-45s",
           "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",
           `wcl-protection-paladin-a7r6-rotational-45s > ${B2}.seg-45-60 > ${B2}.seg-60-90 > ${B2}.seg-90-120 > ${B2}.seg-120-165`,
+          `wcl-protection-paladin-a7r6-rotational-45s > ${B2}.seg-45-60 > ${B2}.seg-60-90.control-2074381-divine-toll > ${B2}.seg-90-120 > ${B2}.seg-120-165`,
           `wcl-protection-paladin-a7r6-rotational-45s > ${B2}.seg-45-60 > ${B2}.seg-120-165`,
         ].sort(),
       );
@@ -229,12 +235,12 @@ describe("the Protection Paladin layer performs exactly one real analysis per di
           .stats()
           .filter((stat) => stat.key.includes(DERIVATION))
           .reduce((sum, stat) => sum + stat.computed, 0);
-      expect(computedIn(firstContext)).toBe(6);
-      expect(computedIn(secondContext)).toBe(6);
+      expect(computedIn(firstContext)).toBe(7);
+      expect(computedIn(secondContext)).toBe(7);
       expect(JSON.stringify(second.result.results)).toBe(JSON.stringify(first.result.results));
       expect(second.result.summary).toEqual(first.result.summary);
     },
-    LAYER_TIMEOUT_MS,
+    TWO_RUN_TIMEOUT_MS,
   );
 });
 

@@ -35,11 +35,20 @@ import { PROTECTION_PALADIN_ANALYZER_ID } from "../../../../src/specs/paladin/pr
 import {
   analyzeObservedProtectionPaladinDecisions,
   summarizeProtectionDecisions,
+  type ProtectionBuildResolution,
   type ProtectionPaladinAnalysis,
 } from "../../../../src/specs/paladin/protection/observed-analysis.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../../../../src/specs/paladin/protection/registration.js";
 import { resolveProtectionAtoms } from "../../../../src/specs/paladin/protection/resolver.js";
-import { wornSubActionSet } from "../../../../src/specs/paladin/protection/action-profile.js";
+import {
+  resolveProtectionApplicability,
+  USE_ITEM_TOKEN,
+  USE_ITEMS_TOKEN,
+  wornSubActionSet,
+  type ProtectionBuildFacts,
+} from "../../../../src/specs/paladin/protection/action-profile.js";
+import { initialProtectionState } from "../../../../src/specs/paladin/protection/first-gcd-state.js";
+import { pinnedProtectionPaladinAuthority } from "../../../../src/specs/paladin/protection/pinned-authority.js";
 import {
   DIVINE_INSPIRATION_DISPLAY_NAME,
   resolveProtectionHeroEntry,
@@ -267,6 +276,147 @@ export function decisionCoverage(
   };
   if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
     return fail("the evaluator compared the observed cast differently than the case pins", {
+      expected: params.expected,
+      actual,
+      locator: comparison.decision.locator,
+    });
+  }
+  return pass();
+}
+
+/**
+ * M11-C4h: the Protection tokens whose applicability reads combatant-snapshot
+ * facts — worn gear, malformed gear rows, Divine Inspiration — that the
+ * production analysis does not expose on its payload (`use_item` reads worn
+ * gear; `use_items` reads all three). Every other token's applicability reads
+ * only the talent and hero-tree resolutions the analysis DOES expose
+ * (`analysis.build`), which `m11c4h-protection-applicability-parity` proves
+ * by invariance over the whole pinned authority. OBSERVED_TOKEN_APPLICABILITY
+ * refuses these tokens rather than answer from facts it cannot take from the
+ * production analysis.
+ */
+/** The pinned Protection authority, typed through the specialization's own loader (no direct src/simc import). */
+type ProtectionAuthority = Extract<
+  ReturnType<typeof pinnedProtectionPaladinAuthority>,
+  { ok: true }
+>["authority"];
+
+export const SNAPSHOT_READING_APPLICABILITY_TOKENS: readonly string[] = [USE_ITEM_TOKEN, USE_ITEMS_TOKEN];
+
+/**
+ * The build facts OBSERVED_TOKEN_APPLICABILITY hands the production
+ * `resolveProtectionApplicability`. The four talent and hero-tree facts ARE the
+ * production analysis's own resolution objects (`analysis.build`, by
+ * reference — the same objects `observed-analysis.ts` puts in its build
+ * facts). The snapshot-derived facts are read from the actor's combatant info
+ * the same way the analysis reads it; they matter only to
+ * SNAPSHOT_READING_APPLICABILITY_TOKENS, which the assertion refuses.
+ */
+export function protectionApplicabilityBuildFacts(
+  state: CombatState,
+  actorId: number,
+  build: ProtectionBuildResolution,
+): ProtectionBuildFacts | null {
+  for (const at of state.positionsOfKind("COMBATANT_INFO")) {
+    const event = state.eventAt(at);
+    if (event?.kind !== "COMBATANT_INFO" || event.snapshot.actorId !== actorId) continue;
+    const talents = event.snapshot.talentTree.map((entry) => ({ id: entry.id, nodeId: entry.nodeId }));
+    return {
+      blessedHammer: build.blessedHammer,
+      sentinel: build.sentinel,
+      avengingWrath: build.avengingWrath,
+      heroTree: build.heroTree,
+      wornGear: event.snapshot.gear,
+      malformedGearRows: event.snapshot.malformedGearRows,
+      divineInspiration: resolveProtectionHeroEntry(talents, DIVINE_INSPIRATION_DISPLAY_NAME).selection,
+    };
+  }
+  return null;
+}
+
+/**
+ * Every pinned PLAYER_ACTION entry naming `token`, with the production
+ * applicability verdict under `facts` in the neutral race world the
+ * unselectability proof uses (`observed-action-gate.ts`). Refused for a
+ * snapshot-reading token.
+ */
+export function observedTokenApplicabilityEntries(
+  facts: ProtectionBuildFacts,
+  authority: ProtectionAuthority,
+  token: string,
+):
+  | {
+      readonly ok: true;
+      readonly entries: readonly {
+        readonly listName: string;
+        readonly priorityOrdinal: number;
+        readonly applicability: string;
+      }[];
+    }
+  | { readonly ok: false; readonly reason: string } {
+  if (SNAPSHOT_READING_APPLICABILITY_TOKENS.includes(token)) {
+    return {
+      ok: false,
+      reason: `${token} applicability reads combatant-snapshot facts the production analysis does not expose; this assertion answers only from the analysis's own build resolution`,
+    };
+  }
+  const neutral = initialProtectionState("OTHER");
+  return {
+    ok: true,
+    entries: authority.actions
+      .filter((action) => action.entryKind === "PLAYER_ACTION" && action.actionToken === token)
+      .map((action) => ({
+        listName: action.listName,
+        priorityOrdinal: action.priorityOrdinal,
+        applicability: resolveProtectionApplicability(facts, neutral, action).kind,
+      })),
+  };
+}
+
+/**
+ * M11-C4h: the applicability, under the actor's PROVEN build, of every pinned
+ * entry naming the observed action's token — the fact a negative control needs
+ * so its REJECTED cannot rest on the action being background for the build.
+ * The verdict is the production `resolveProtectionApplicability` over the
+ * production analysis's own build resolution (`protectionApplicabilityBuildFacts`).
+ */
+export function observedTokenApplicability(
+  context: CorpusExecutionContext,
+  corpus: LoadedCorpus,
+  kase: LoadedCase,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY">,
+): AssertionOutcome {
+  const run = analyzedOrFail(
+    context,
+    corpus,
+    kase,
+    artifact,
+    params.actorId,
+    params.targetActorId,
+    bundleRequestOf(params),
+  );
+  if (!run.ok) return run.outcome;
+  const position = castPosition(run.state, params.actorId, params.observedCast);
+  if (!position.ok) return position.outcome;
+  const comparison = run.analysis.comparisons.find((entry) => entry.decision.position === position.position);
+  if (comparison === undefined) {
+    return fail("the observed cast is not an eligible decision", {
+      expected: { eligible: true },
+      locator: run.state.locatorAt(position.position),
+    });
+  }
+  const loaded = pinnedProtectionPaladinAuthority();
+  if (!loaded.ok) return fail("the pinned Protection authority does not load", { actual: loaded.reason });
+  const facts = protectionApplicabilityBuildFacts(run.state, params.actorId, run.analysis.build);
+  if (facts === null)
+    return fail("no combatant info for the actor", { expected: { actorId: params.actorId } });
+  const observedToken = comparison.decision.observedToken;
+  const resolved = observedTokenApplicabilityEntries(facts, loaded.authority, observedToken);
+  if (!resolved.ok) return fail(resolved.reason, { expected: params.expected });
+  const actual = { observedToken, entries: resolved.entries };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the observed token's applicability differs from the case", {
       expected: params.expected,
       actual,
       locator: comparison.decision.locator,

@@ -93,6 +93,8 @@ const NODE_CORPUS_TESTS = [
   "tests/unit/m9c-corpus-machine-report.test.ts",
   "tests/unit/m9c-sanitize-payloads.test.ts",
   "tests/unit/sanitize-probe.test.ts",
+  // M11-C4h: the negative-control derivation reproduces the committed control.
+  "tests/unit/derive-substitution.test.ts",
 ];
 
 // The archive's Node tests: its loader rules, the promotion-gate reader over
@@ -104,6 +106,10 @@ const NODE_EVIDENCE_TESTS = [
   "tests/contracts/m11-promotion-evidence-gate.test.ts",
   // M11-C4f: the committed selection frame of the neutral second subject.
   "tests/unit/m11c4f-selection-frame.test.ts",
+  // M11-C4h: the observation / discrimination split and the control path.
+  "tests/contracts/m11c4h-discrimination-gate.test.ts",
+  // M11-C4h: the control's applicability facts are the production analyzer's own.
+  "tests/contracts/m11c4h-protection-applicability-parity.test.ts",
 ];
 
 /** Credentials never reach a corpus run, whatever the parent shell holds. */

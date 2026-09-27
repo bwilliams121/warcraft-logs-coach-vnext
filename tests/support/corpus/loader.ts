@@ -111,6 +111,12 @@ export const CORPUS_ERROR_CODES = [
   "ARCHIVE_ARTIFACT_NOT_SANITIZED_CAPTURE",
   "ARCHIVE_ASSERTION_KIND_NOT_PERMITTED",
   "ARCHIVE_CASE_WITHOUT_ARCHIVE_EVIDENCE",
+  // M11-C4h: the negative-control substitution rule.
+  "CONTROL_SUBSTITUTION_REQUIRES_DERIVED",
+  "CONTROL_SUBSTITUTION_PARENT_NOT_SANITIZED",
+  "CONTROL_SUBSTITUTION_TRANSFORMATION_INVALID",
+  "CONTROL_SUBSTITUTION_COVERAGE_DIFFERS",
+  "CONTROL_SUBSTITUTION_DIFF_INVALID",
 ] as const;
 export type CorpusErrorCode = (typeof CORPUS_ERROR_CODES)[number];
 
@@ -411,6 +417,130 @@ function provenanceErrors(
     }
   }
 
+  return errors;
+}
+
+/** Canonical JSON: object keys sorted, so equality never depends on key order. */
+function canonicalJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalJson).join(",")}]`;
+  if (typeof value === "object" && value !== null) {
+    const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
+      codePointCompare(a, b),
+    );
+    return `{${entries.map(([key, entry]) => `${JSON.stringify(key)}:${canonicalJson(entry)}`).join(",")}}`;
+  }
+  return JSON.stringify(value);
+}
+
+/**
+ * The negative-control substitution rule (M11-C4h). An artifact that declares
+ * `provenance.substitution` must be DERIVED_FROM_CAPTURE, name a
+ * SANITIZED_CAPTURE parent directly, carry exactly one transformation — a
+ * VALUE_MUTATION — retain exactly its parent's coverage, and differ from its
+ * parent's committed payload in exactly the one declared field: the event at
+ * `eventIndex` is, in the parent, a `cast` by `sourceActorId` at
+ * `reportTimeMs` with `abilityGameID === fromAbilityGameId`; in the child
+ * it is that same event with `abilityGameID === toAbilityGameId` and every
+ * other field equal; every other event is equal, in the same order. The diff
+ * is re-derived here from both payloads, never read from the declaration.
+ */
+function substitutionErrors(
+  artifact: CorpusArtifactRecord,
+  byId: ReadonlyMap<string, CorpusArtifactRecord>,
+  eventsById: ReadonlyMap<string, readonly Record<string, unknown>[]>,
+): CorpusError[] {
+  const declared = artifact.provenance.substitution;
+  if (declared === undefined) return [];
+  const errors: CorpusError[] = [];
+  const subject = { artifactId: artifact.artifactId };
+  const fail = (code: CorpusErrorCode, message: string): void => {
+    errors.push({ code, subject, message: `artifact ${artifact.artifactId}: ${message}` });
+  };
+  if (artifact.provenance.kind !== "DERIVED_FROM_CAPTURE") {
+    fail(
+      "CONTROL_SUBSTITUTION_REQUIRES_DERIVED",
+      `declares a substitution but is ${artifact.provenance.kind}; a substituted capture is DERIVED_FROM_CAPTURE`,
+    );
+    return errors;
+  }
+  const parentId = artifact.provenance.parentArtifactId;
+  const parent = parentId === null ? undefined : byId.get(parentId);
+  if (parent === undefined || parent.provenance.kind !== "SANITIZED_CAPTURE") {
+    fail(
+      "CONTROL_SUBSTITUTION_PARENT_NOT_SANITIZED",
+      `a substitution's parent must be a SANITIZED_CAPTURE held by this corpus; ${String(parentId)} is ${parent === undefined ? "not" : parent.provenance.kind}`,
+    );
+    return errors;
+  }
+  const transformations = artifact.provenance.transformations;
+  if (transformations.length !== 1 || transformations[0]?.kind !== "VALUE_MUTATION") {
+    fail(
+      "CONTROL_SUBSTITUTION_TRANSFORMATION_INVALID",
+      `a substitution carries exactly one VALUE_MUTATION; this artifact lists [${transformations.map((entry) => entry.kind).join(", ")}]`,
+    );
+  }
+  if (artifact.payloadKind !== "WCL_EVENT_ARRAY" || parent.payloadKind !== "WCL_EVENT_ARRAY") {
+    fail("CONTROL_SUBSTITUTION_DIFF_INVALID", "a substitution is defined over two WCL event arrays only");
+    return errors;
+  }
+  const own = {
+    grants: artifact.provenance.retainedCoverage.grants,
+    certifiedEmpty: artifact.provenance.retainedCoverage.certifiedEmpty ?? [],
+  };
+  const theirs = {
+    grants: parent.provenance.retainedCoverage.grants,
+    certifiedEmpty: parent.provenance.retainedCoverage.certifiedEmpty ?? [],
+  };
+  if (canonicalJson(own) !== canonicalJson(theirs)) {
+    fail(
+      "CONTROL_SUBSTITUTION_COVERAGE_DIFFERS",
+      `a substitution retains exactly its parent's coverage grants and certificates; ${parent.artifactId}'s differ`,
+    );
+  }
+  const child = eventsById.get(artifact.artifactId);
+  const original = eventsById.get(parent.artifactId);
+  if (child === undefined || original === undefined) {
+    fail("CONTROL_SUBSTITUTION_DIFF_INVALID", "the child or parent payload is not a loaded event array");
+    return errors;
+  }
+  const diff = (message: string): void => {
+    fail("CONTROL_SUBSTITUTION_DIFF_INVALID", message);
+  };
+  if (child.length !== original.length) {
+    diff(`holds ${String(child.length)} events; its parent holds ${String(original.length)}`);
+    return errors;
+  }
+  if (declared.fromAbilityGameId === declared.toAbilityGameId) diff("the substitution changes nothing");
+  const differing: number[] = [];
+  for (let index = 0; index < child.length; index += 1) {
+    if (canonicalJson(child[index]) !== canonicalJson(original[index])) differing.push(index);
+  }
+  if (differing.length !== 1 || differing[0] !== declared.eventIndex) {
+    diff(
+      `differs from its parent at event(s) [${differing.join(", ")}]; exactly the declared event ${String(declared.eventIndex)} may differ`,
+    );
+    return errors;
+  }
+  const before = original[declared.eventIndex] ?? {};
+  const after = child[declared.eventIndex] ?? {};
+  if (
+    before["type"] !== "cast" ||
+    before["sourceID"] !== declared.sourceActorId ||
+    before["timestamp"] !== declared.reportTimeMs ||
+    before["abilityGameID"] !== declared.fromAbilityGameId
+  ) {
+    diff(
+      `the parent's event ${String(declared.eventIndex)} is not a cast by ${String(declared.sourceActorId)} at ${String(declared.reportTimeMs)} of ${String(declared.fromAbilityGameId)}`,
+    );
+  }
+  const { abilityGameID: toId, ...afterRest } = after;
+  const { abilityGameID: _fromId, ...beforeRest } = before;
+  if (toId !== declared.toAbilityGameId) {
+    diff(`the child's event carries abilityGameID ${String(toId)}, not ${String(declared.toAbilityGameId)}`);
+  }
+  if (canonicalJson(afterRest) !== canonicalJson(beforeRest)) {
+    diff("the substituted event differs from its parent in a field other than abilityGameID");
+  }
   return errors;
 }
 
@@ -946,6 +1076,10 @@ export async function validateCorpus(
   }
   for (const artifact of artifactsById.values()) {
     errors.push(...certificateErrors(artifact, lineageById, eventsById));
+  }
+  // Negative-control substitutions, checked against both committed payloads.
+  for (const artifact of artifactsById.values()) {
+    errors.push(...substitutionErrors(artifact, lineageById, eventsById));
   }
 
   // Cases.

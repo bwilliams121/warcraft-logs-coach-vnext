@@ -337,7 +337,7 @@ describe("the committed corpus holds no stable player identifier", () => {
     // Every recorded revision is one the tooling has had; the current ones are among them.
     for (const revision of revisions) {
       expect(revision).toMatch(
-        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[12]|sanitize-probe-[23456]|derive-gap-1)$/,
+        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[12]|sanitize-probe-[23456]|derive-gap-1|derive-substitution-1)$/,
       );
     }
     expect(revisions.has(SANITIZE_PAYLOADS_REVISION)).toBe(true);

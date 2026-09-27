@@ -267,6 +267,13 @@
       "sha256": "52c5762b5d3d7412c637a82ee1202f9f428529e9bdd68de0337a84772f32b868"
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
+      "byteLength": 172086,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "DERIVED_FROM_CAPTURE",
+      "sha256": "acdb4e0fb35a6f10be650a00d040b0d73ec75898faf3af9f71e0374ce15657ec"
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
       "byteLength": 153998,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -412,8 +419,8 @@
       "passed": 20
     },
     {
-      "assertions": 110,
-      "cases": 23,
+      "assertions": 113,
+      "cases": 24,
       "failed": 0,
       "kindsExercised": [
         "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
@@ -426,6 +433,7 @@
         "SPEC_PROTECTION_PALADIN.DOMAIN_RESULT",
         "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",
         "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
+        "SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY",
         "SPEC_PROTECTION_PALADIN.PUBLIC_PROJECTION",
         "SPEC_PROTECTION_PALADIN.RESOLVED_ATOM",
         "SPEC_PROTECTION_PALADIN.SPEC_GATE",
@@ -434,7 +442,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "SPEC_PROTECTION_PALADIN",
-      "passed": 110
+      "passed": 113
     },
     {
       "assertions": 51,
@@ -5176,6 +5184,45 @@
       "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
       "assertions": [
         {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": {
+        "artifactRevision": "simc-33622e9d-1",
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "caseId": "spec-protection-paladin.negative-control-divine-toll-substituted-at-2074381-is-rejected-on-real-state",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "referencedArtifactIds": [
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
+        "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
+        "wcl-protection-paladin-a7r6-rotational-45s"
+      ]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "assertions": [
+        {
           "kind": "SPEC_PROTECTION_PALADIN.ARMAMENT_STATE_AT",
           "ordinal": 0,
           "status": "PASSED"
@@ -6586,15 +6633,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 5331187,
-    "artifacts": 46,
-    "assertions": 745,
-    "cases": 172,
+    "artifactBytes": 5503273,
+    "artifacts": 47,
+    "assertions": 748,
+    "cases": 173,
     "declared": 0,
-    "executable": 745,
+    "executable": 748,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 745
+    "passed": 748
   }
 }

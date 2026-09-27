@@ -168,6 +168,14 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY":
+      return protection.observedTokenApplicability(
+        context,
+        corpus,
+        kase,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY":
       return protection.coverageSummary(
         context,
@@ -656,6 +664,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_ASSASSINATION.DOT_REMAINS",
   "SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE",
   "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+  "SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY",
   "SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY",
   "SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION",
   "SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED",

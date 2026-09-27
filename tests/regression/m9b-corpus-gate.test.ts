@@ -133,9 +133,13 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // and state-evidence census (three). Measured, then pinned.
     // M11-C4f added one case and five assertions: the neutral second
     // Brewmaster subject's fixed 20 s opener census.
-    expect(result.summary.cases).toBe(172);
-    expect(result.summary.assertions).toBe(745);
-    expect(result.summary.passed).toBe(745);
+    // M11-C4h added one case and three assertions: the Protection Paladin
+    // discrimination control — the substituted decision's REJECTED, the
+    // substituted action's applicability under the proven build, and the wings
+    // binding its pinned condition reads.
+    expect(result.summary.cases).toBe(173);
+    expect(result.summary.assertions).toBe(748);
+    expect(result.summary.passed).toBe(748);
   });
 
   it("covers every layer", async () => {

@@ -161,6 +161,22 @@ A mutated real capture is `DERIVED_FROM_CAPTURE`, never `SANITIZED_CAPTURE`.
 The loader rejects the mislabel in both directions. No `REAL_CAPTURE` is
 committed today: raw probe output stays in gitignored `.probe/`.
 
+**Negative controls (M11-C4h).** A `DERIVED_FROM_CAPTURE` artifact may
+declare `provenance.substitution` (`SINGLE_CAST_ABILITY_SUBSTITUTION`): it is
+its `SANITIZED_CAPTURE` parent with exactly one field of exactly one event
+changed — the `abilityGameID` of the declared cast — cut by
+`scripts/corpus/derive-substitution.mjs`. The loader re-derives that diff
+from both committed payloads and refuses anything else: a parent that is
+not a `SANITIZED_CAPTURE` in the same corpus, any transformation but one
+`VALUE_MUTATION`, coverage grants or certificates that differ from the
+parent's, any other event or field that differs, or a declaration that
+names the wrong event, actor, time or ability (`CONTROL_SUBSTITUTION_*`).
+That is what lets the promotion gate read a control for discrimination —
+never as observed play (`tests/support/corpus/promotion-evidence.ts`). The
+one committed control is the Protection Paladin Avenger's Shield cast at
+2,074,381 re-labelled Divine Toll
+(`wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll`).
+
 Transformation kinds: `SUBSET_SELECTION`, `IDENTIFIER_REMAP`,
 `FIELD_REDACTION` (sanitizing); `VALUE_MUTATION`, `EVENT_INJECTION`,
 `EVENT_REMOVAL` (deriving); `CREDENTIAL_SHAPE_SCAN`, `LEGACY_FIXTURE_COPY`
@@ -230,6 +246,7 @@ nothing after them is meaningful.
 | every file under `artifacts/` is referenced | `CORPUS_FILE_UNREFERENCED` |
 | encoding/kind coherent, JSON parses, kind shape holds | `ARTIFACT_NOT_JSON`, `ARTIFACT_ENCODING_KIND_MISMATCH`, `ARTIFACT_PAYLOAD_KIND_MISMATCH` |
 | lineage coherent | `PROVENANCE_*` (source required/forbidden, parent required/forbidden/unknown/cycle/synthetic, kind matches transformations, derivation admits `OBSERVED_BEHAVIOUR`, grants within the source window, no category in two grants, no grant without capture lineage) |
+| a negative-control substitution is one field of one cast away from a `SANITIZED_CAPTURE` parent, with the parent's coverage (M11-C4h) | `CONTROL_SUBSTITUTION_REQUIRES_DERIVED`, `CONTROL_SUBSTITUTION_PARENT_NOT_SANITIZED`, `CONTROL_SUBSTITUTION_TRANSFORMATION_INVALID`, `CONTROL_SUBSTITUTION_COVERAGE_DIFFERS`, `CONTROL_SUBSTITUTION_DIFF_INVALID` |
 | case references resolve | `CASE_ARTIFACT_UNKNOWN` |
 | assertions registered, typed, layer-owned, payload-compatible | `CASE_ASSERTION_KIND_UNKNOWN`, `CASE_ASSERTION_PARAMS_INVALID`, `CASE_ASSERTION_LAYER_MISMATCH`, `CASE_ASSERTION_PAYLOAD_KIND_MISMATCH` |
 | authority pinned and current | `CASE_AUTHORITY_REQUIRED`, `CASE_AUTHORITY_UNKNOWN`, `CASE_AUTHORITY_REVISION_STALE` |
@@ -295,6 +312,7 @@ least one committed case:
 | `SPEC_ASSASSINATION.DOT_REMAINS` | SPEC_ASSASSINATION | POSITIVE_FACT (or UNKNOWN + blocker); authority-dependent |
 | `SPEC_PROTECTION_PALADIN.AUTHORITY_PROVENANCE` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — the registration's analysis cites exactly this pinned authority; authority-dependent |
 | `SPEC_PROTECTION_PALADIN.DECISION_COVERAGE` (M10-C) | SPEC_PROTECTION_PALADIN | the evaluator's verdict on one observed GCD cast, MATCH / REJECTED / UNKNOWN, with the engine's raw blocker verbatim; authority-dependent |
+| `SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY` (M11-C4h) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — every pinned entry naming the observed action's token and its applicability (APPLICABLE / NOT_APPLICABLE / UNKNOWN) under the actor's proven build, from the production analysis's own build resolution (the item tokens, which read combatant-snapshot facts the analysis does not expose, are refused; `m11c4h-protection-applicability-parity` proves the parity); a negative control counts for discrimination only when every entry is APPLICABLE; authority-dependent |
 | `SPEC_PROTECTION_PALADIN.COVERAGE_SUMMARY` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — eligible / match / rejected / unknown and every exclusion reason counted; authority-dependent |
 | `SPEC_PROTECTION_PALADIN.HOLY_POWER_OBSERVATION` (M10-C) | SPEC_PROTECTION_PALADIN | POSITIVE_FACT — the PRE_COST Holy Power a cast carried, as recorded on the payload |
 | `SPEC_PROTECTION_PALADIN.HOLY_POWER_NOT_OBSERVED` (M10-C) | SPEC_PROTECTION_PALADIN | UNKNOWN — the cast carries no Holy Power entry and the payload says NO_OBSERVATION, never zero |
@@ -469,6 +487,7 @@ Two sanitizers exist, each one documented transformation per mode:
 | --- | --- | --- | --- |
 | `scripts/sanitize-probe.mjs` | `sanitize-probe-6` | a decoded events response, a bare event array, or an array of page envelopes | a bare event array, selected by `--head` / `--per-type` / `--where` / `--indices` / `--decision-slice <subject> <targets>` (the D2 predicate as a recorded mode) / `--actor-slice <subject> [<toReportTimeMs>] [--from <exclusiveFromMs>] [--families <type,...>]` (M10-B: every event the subject sources OR is targeted by, optionally bounded; M10-C5: optionally restricted to the listed raw types, whole — a slice cut with `--families` grants coverage only to the categories its retained families vouch for; M10-C5 Phase B2: `--from` cuts a SEGMENT that starts strictly after the given millisecond, so a long capture can be committed as several artifacts each under the per-artifact ceiling). Only the two predicate modes may carry a coverage grant |
 | `scripts/corpus/derive-gap.mjs` | `derive-gap-1` | a committed event artifact | the same array with every event strictly inside `--remove-between <fromMs> <toMs>` removed, serialized as the slicer serializes (M10-C5; reproduces the M10-B opener gap derivative byte for byte, which `tests/unit/derive-gap.test.ts` checks) |
+| `scripts/corpus/derive-substitution.mjs` | `derive-substitution-1` | a committed event artifact | the same array with the `abilityGameID` of the one `cast` at `--substitute <eventIndex> <from> <to>` changed and nothing else, serialized as the slicer serializes (M11-C4h negative controls; `tests/unit/derive-substitution.test.ts` reproduces the committed control byte for byte) |
 | `scripts/corpus/sanitize-payloads.mjs` | `sanitize-payloads-2` | a decoded `data` object | `pages`: rateLimitData stripped; `context`: actor names → `Actor<id>`, servers → null, **player `gameID` → null** (revision 2; NPC and pet gameIDs are creature taxonomy and stay); `rankings`: names → `Candidate<n>`, servers → null, guilds removed, report codes → `RANK000nAAAAAAAA` (deterministic, equality-preserving) |
 
 **No stable player identifier is committed.** Names, servers, guilds and

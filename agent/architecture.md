@@ -5319,17 +5319,53 @@ gate against the candidate tree, then committed and CI-checked, then — only
 after committed CI success — separately authorized for production smoke.
 
 The promotion-evidence gate is TEST-OWNED
-(`tests/contracts/m11-promotion-evidence-gate.test.ts`): a PUBLIC
-registration must be backed by at least one corpus `DECISION_COVERAGE`
-assertion expecting `MATCH` or `REJECTED`, whose whole referenced evidence
-set is `SANITIZED_CAPTURE` (a `SYNTHETIC` or `DERIVED_FROM_CAPTURE`
-artifact anywhere disqualifies), whose actor the committed fight-context
-master data proves to be that specialization — through the identity table
-for a PUBLIC spec, against the module's own WCL strings for an
-INTERNAL_ONLY one — and which the committed corpus report records as
-PASSED. Zero qualifying cases fails CI for a PUBLIC spec and is reported for
-an INTERNAL_ONLY one. Production carries no case id, artifact id, layer or
-readiness; `m10d-no-corpus-window-in-production` pins that.
+(`tests/contracts/m11-promotion-evidence-gate.test.ts`, reader
+`tests/support/corpus/promotion-evidence.ts`). Since M11-C4h it is two
+global gates, applied to every specialization alike:
+
+- **Observation.** At least one qualifying real `MATCH`, and qualifying
+  real resolved decisions (`MATCH` or `REJECTED`) over at least two
+  distinct supported observed action tokens, each identified by the observed
+  cast's ability id (the criterion does not read authority-entry identities).
+  A qualifying real assertion is a
+  `DECISION_COVERAGE` assertion whose whole referenced evidence set is
+  `SANITIZED_CAPTURE` in either committed root (a `SYNTHETIC` or
+  `DERIVED_FROM_CAPTURE` artifact anywhere disqualifies it as observation),
+  whose actor the committed fight-context master data proves to be that
+  specialization — through the identity table for a PUBLIC spec, against the
+  module's own WCL strings for an INTERNAL_ONLY one — and which its root's
+  committed report records as PASSED.
+- **Discrimination.** At least one qualifying real `REJECTED`, or at least
+  one qualifying negative control. A control is a `DERIVED_FROM_CAPTURE`
+  part declaring a `SINGLE_CAST_ABILITY_SUBSTITUTION`: its payload is its
+  `SANITIZED_CAPTURE` parent's with exactly one cast's `abilityGameID`
+  changed, a diff the loader re-derives from both committed payloads
+  (`CONTROL_SUBSTITUTION_*`). The gate accepts it only as a `REJECTED`
+  about the substituted cast, only when a qualifying real `MATCH` exists at
+  the same decision over the same bundle with the parent in place (the
+  verdict flips when only the action changes), and only when the same case
+  pins `<layer>.OBSERVED_TOKEN_APPLICABILITY` with every entry naming the
+  substituted token `APPLICABLE` under the proven build, so the rejection
+  rests on real state and never on the action being background. A control is
+  never observation evidence and never observed play.
+
+Failing either gate fails CI for a PUBLIC spec and is reported for an
+INTERNAL_ONLY one. The split exists because the single M11-A2 rule ("one
+qualifying `MATCH` or `REJECTED`"), with a spec-specific "real `MATCH`
+and real `REJECTED`" added for Retribution and Blood only, conflated honest
+handling of real play with the ability to disagree on real state, and made
+the second depend on whether the sampled players erred. Acquiring more
+subjects until a `REJECTED` appears is outcome shopping and is not a route
+through the gate. At M11-C4h Protection passes discrimination by its one
+control (Avenger's Shield → Divine Toll at 2,074,381; it has no qualifying
+real `REJECTED`); Assassination, Retribution and Blood by real
+`REJECTED`s, and the stricter Retribution and Blood real-`REJECTED` pins
+remain. Brewmaster (INTERNAL_ONLY) passes observation over two neutral
+subjects and is blocked on discrimination: its slice's only positive
+usability proof is the observed cast, so no `REJECTED` is reachable, and the
+M11-C4g substitution census (local, uncommitted) found no control either. Production carries no case id,
+artifact id, layer, readiness, gate or control vocabulary;
+`m10d-no-corpus-window-in-production` pins that.
 
 ### The current unsupported subject
 

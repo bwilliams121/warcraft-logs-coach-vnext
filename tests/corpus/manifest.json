@@ -3548,6 +3548,61 @@
       }
     },
     {
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
+      "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "acdb4e0fb35a6f10be650a00d040b0d73ec75898faf3af9f71e0374ce15657ec",
+      "byteLength": 172086,
+      "provenance": {
+        "kind": "DERIVED_FROM_CAPTURE",
+        "parentArtifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+        "source": null,
+        "transformations": [
+          {
+            "kind": "VALUE_MUTATION",
+            "tooling": {
+              "name": "scripts/corpus/derive-substitution.mjs",
+              "revision": "derive-substitution-1",
+              "invocation": "node scripts/corpus/derive-substitution.mjs wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.json wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll.json --substitute 241 31935 375576"
+            },
+            "detail": "Event 241 of 827 — actor 7's Avenger's Shield cast at 2,074,381 (31935) — has its abilityGameID changed to Divine Toll (375576). Every other field of that event (its target, its resource snapshot, its position) and every other event are byte-for-byte the parent's, in the parent's order; the Grand Crusader removal the real Avenger's Shield consumed in the same millisecond is kept. The result is a cast that did NOT happen, over state that did.",
+            "invalidates": ["OBSERVED_BEHAVIOUR"]
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [7],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 2064590,
+                  "toReportTimeMs": 2094589
+                }
+              ]
+            }
+          ],
+          "basis": "Exactly the parent's grants: the substitution changes one field of one event, so every retained family is as complete for actor 7 over the parent's range as it was — for the counterfactual cast stream the control describes. The loader refuses a substitution whose coverage differs from its parent's."
+        },
+        "retainedFor": "M11-C4h: the Protection Paladin DISCRIMINATION control. The parent decision is a qualifying real MATCH (Avenger's Shield at 2,074,381 over the full Phase B bundle); with only the action changed, the same analysis over the same observed state must return REJECTED — the analyzer disagrees with an action its authority could not have selected. It is capability evidence for the promotion gate's discrimination half and never observed play.",
+        "limitations": [
+          "Not evidence that actor 7 ever cast Divine Toll at 2,074,381; the cast there was Avenger's Shield.",
+          "The world is not internally consistent by design: the Grand Crusader removal and the resource snapshot belong to the real Avenger's Shield. The control's claim rests on the pinned conditions of the substituted action's entries, which read none of them.",
+          "Inherits every limitation of its parent."
+        ],
+        "substitution": {
+          "kind": "SINGLE_CAST_ABILITY_SUBSTITUTION",
+          "eventIndex": 241,
+          "reportTimeMs": 2074381,
+          "sourceActorId": 7,
+          "fromAbilityGameId": 31935,
+          "toAbilityGameId": 375576,
+          "basis": "Predeclared rule: over Protection's qualifying real MATCH decisions in report-time order (Divine Toll 2,026,655; Avenger's Shield 2,074,381; Divine Toll 2,088,835; Avenger's Shield 2,139,100), each paired with every other pinned GCD token in a fixed order, the first pair whose substituted token is APPLICABLE under the proven build and whose comparison resolves. At 2,026,655 every applicable substitute stays UNKNOWN (DIVERGENT_WORLDS) and only the build-background Hammer of Light and Hammer of the Righteous reject, which the rule refuses; at 2,074,381 Divine Toll is the first applicable substitute that resolves, and it is REJECTED. The full census is disclosed with the case."
+        }
+      }
+    },
+    {
       "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
       "path": "artifacts/wcl-events/wcl-protection-paladin-a7r6-rotational-165s.seg-90-120.json",
       "encoding": "JSON",
@@ -19825,6 +19880,120 @@
         "tests/contracts/m10c-protection-evaluator.test.ts",
         "tests/unit/m10c-protection-resolver.test.ts",
         "tests/regression/m10c-internal-registration-invariance.test.ts"
+      ]
+    },
+    {
+      "caseId": "spec-protection-paladin.negative-control-divine-toll-substituted-at-2074381-is-rejected-on-real-state",
+      "artifactId": "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
+      "owningLayer": "SPEC_PROTECTION_PALADIN",
+      "contractUnderTest": "src/specs/paladin/protection/observed-action-gate.ts proveObservedActionUnselectable; action-profile.ts resolveProtectionApplicability; tests/support/corpus/loader.ts (the substitution rule); tests/support/corpus/promotion-evidence.ts (the discrimination gate)",
+      "purpose": "The Phase B bundle with ONE part swapped for its substitution control: the Avenger's Shield cast at 2,074,381 — a real EXACT_ENTRY MATCH over the unmodified bundle — re-labelled Divine Toll, every other event observed. The only pinned Divine Toll entry, default[6] divine_toll,if=buff.avenging_wrath.up|(!talent.righteous_protector.enabled&cooldown.avenging_wrath.remains>30), is APPLICABLE for this build (not background) and FALSE in every world: the wings (Sentinel) buff is BOUND down from its observed removal at 2,048,248 and Righteous Protector is SELECTED. The unselectability proof therefore holds and the comparison is REJECTED, while the global scan itself stays undecided. Census over the four real MATCH decisions × every other pinned GCD token (36 substitutions): 10 REJECTED, 24 UNKNOWN, 2 MATCH; of the REJECTED, only the two Avenger's Shield → Divine Toll substitutions have an applicable substitute — the other eight are Hammer of Light (Templar-only) and Hammer of the Righteous (Blessed Hammer selected), background for this build.",
+      "assertions": [
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.DECISION_COVERAGE",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2074381,
+              "abilityGameId": 375576
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "OBSERVED_ACTION_REJECTED_BY_AUTHORITY",
+              "authorityCoverage": "UNKNOWN",
+              "authorityToken": null,
+              "selectionPrecision": null,
+              "decisiveBlocker": null,
+              "rawBlocker": "DIVERGENT_GCD_OUTCOMES",
+              "observedActionRejected": true
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 2074381,
+              "abilityGameId": 375576
+            },
+            "expected": {
+              "observedToken": "divine_toll",
+              "entries": [
+                {
+                  "listName": "default",
+                  "priorityOrdinal": 6,
+                  "applicability": "APPLICABLE"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "kind": "SPEC_PROTECTION_PALADIN.AURA_BINDING_AT",
+          "params": {
+            "actorId": 7,
+            "historyArtifactIds": [
+              "wcl-protection-paladin-a7r6-rotational-45s",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
+              "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120"
+            ],
+            "declaredHoles": [],
+            "observedCast": {
+              "reportTimeMs": 2074381,
+              "abilityGameId": 375576
+            },
+            "atomName": "avenging_wrath",
+            "expected": {
+              "state": "BOUND",
+              "up": false,
+              "abilityGameId": 389539,
+              "anchorReportTimeMs": 2048248,
+              "reason": null
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A discrimination control, not observed play. MATCH over real state proves the analyzer is compatible with what was done; this proves that, on the SAME observed state, it rejects an action its authority could not have selected — the property a MATCH/UNKNOWN-only analyzer would lack. It rests on real state because the substituted action is applicable for the proven build and is refused by its pinned condition, not by being background."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_PALADIN_PROTECTION",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 2,004,589 for actor 7 (specID 66, 80-node talent tree), carried by the first part",
+          "every COMPLETE cast by actor 7 across the composed parts, in canonical order",
+          "every aura transition on actor 7 sourced by actor 7 across the composed parts, in canonical order",
+          "the zero-event certificate over [2,049,582 .. 2,049,588] between the first two parts"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": [
+        "tests/contracts/m10c5-protection-evaluator.test.ts",
+        "tests/unit/m10c5b-armament-state.test.ts",
+        "tests/unit/m10c5b-corpus-bundle.test.ts",
+        "tests/unit/m10c5-protection-aura-bindings.test.ts",
+        "tests/unit/m10c5-protection-cooldown-bindings.test.ts",
+        "tests/regression/m10c-internal-registration-invariance.test.ts",
+        "tests/contracts/m11c4h-discrimination-gate.test.ts"
       ]
     },
     {

@@ -1,13 +1,38 @@
 /**
- * M11-A2: the TEST-OWNED public-promotion evidence gate.
+ * M11-A2: the TEST-OWNED public-promotion evidence gate, split into two
+ * global gates in M11-C4h.
  *
- * THE RULE
+ * THE RULE (M11-C4h)
  *
- *     A PUBLIC registration must be backed by at least one REAL-EVIDENCE
- *     resolved decision — a corpus DECISION_COVERAGE assertion expecting
- *     MATCH or REJECTED — whose whole evidence set is sanitized capture,
- *     whose actor is mechanically the registration's specialization, and
- *     which the committed corpus report records as PASSED.
+ *     A PUBLIC registration must pass BOTH gates, with no specialization
+ *     exempt and none held to a private variant:
+ *
+ *     OBSERVATION     at least one REAL-EVIDENCE MATCH, and real resolved
+ *                     decisions (MATCH or REJECTED) over at least
+ *                     MIN_DISTINCT_OBSERVED_ACTION_TOKENS distinct supported
+ *                     observed action tokens (identified by the observed
+ *                     cast's ability id; not authority entries) —
+ *                     each a DECISION_COVERAGE assertion whose whole evidence
+ *                     set is sanitized capture, whose actor is mechanically the
+ *                     registration's specialization, and which the committed
+ *                     report of its root records as PASSED;
+ *     DISCRIMINATION  at least one such REAL REJECTED, or at least one
+ *                     qualifying NEGATIVE CONTROL: the same real decision with
+ *                     only the cast's ability substituted (loader-checked, one
+ *                     field), an action APPLICABLE under the proven build, and
+ *                     the verdict flipping from a qualifying real MATCH to
+ *                     REJECTED (`tests/support/corpus/promotion-evidence.ts`).
+ *
+ * WHY TWO GATES
+ *
+ * The M11-A2 rule was "one qualifying MATCH or REJECTED"; M11-A4/A5 and M11-B12
+ * added "a real MATCH AND a real REJECTED" for Retribution and Blood only, so
+ * that "a regression that collapsed the analyzer to one-sided outcomes could
+ * not be promoted". Protection, promoted at M10-D, had no REJECTED. The one
+ * rule conflated honest handling of real play (observation) with the ability
+ * to disagree on real state (discrimination), and made the second depend on
+ * whether the sampled players happened to err. M11-C4h states both globally;
+ * the stricter Retribution and Blood real-REJECTED pins below stay.
  *
  * Production knows nothing of this. It reads the production catalog for one
  * side of the join and the corpus manifest, artifacts and committed report
@@ -17,13 +42,16 @@
  *
  * THE STRICT M11 PROVENANCE RULE
  *
- * Every artifact a qualifying case references — its own, every bundle part,
- * every context artifact — must be `SANITIZED_CAPTURE`. `SYNTHETIC` anywhere
- * disqualifies. `DERIVED_FROM_CAPTURE` anywhere disqualifies: the corpus can
- * prove a derivation's PARENT is real, but it cannot mechanically prove the
- * derivation manufactured no resolved state, and a gate must not lean on
- * what it cannot prove. Derived and synthetic cases remain what they are —
- * fail-closed and mechanics evidence — and count for nothing here.
+ * Every artifact a qualifying OBSERVATION case references — its own, every
+ * bundle part, every context artifact — must be `SANITIZED_CAPTURE`.
+ * `SYNTHETIC` anywhere disqualifies. `DERIVED_FROM_CAPTURE` anywhere
+ * disqualifies it as observation: a derivation is not what the player did.
+ * The ONE derivation the gate reads is a negative control, and only for
+ * discrimination: a `SINGLE_CAST_ABILITY_SUBSTITUTION` whose one-field diff
+ * from its SANITIZED_CAPTURE parent the loader re-derives, so the gate can
+ * prove it manufactured no state beyond the one action. Every other derived
+ * or synthetic case remains fail-closed and mechanics evidence and counts for
+ * nothing here.
  *
  * TWO MODES
  *
@@ -72,6 +100,7 @@ import { committedEvidenceReport, loadCommittedEvidenceArchive } from "../suppor
 import { committedCorpusFiles, loadCorpusOrThrow } from "../support/corpus/loader.js";
 import {
   evaluatePromotionReadiness,
+  MIN_DISTINCT_OBSERVED_ACTION_TOKENS,
   type CommittedReport,
   type EvidenceTier,
   type WclIdentity,
@@ -192,7 +221,7 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
   });
 
   for (const registration of publicRegistrations) {
-    it(`${registration.specId}: at least one qualifying MATCH or REJECTED`, async () => {
+    it(`${registration.specId}: passes the observation gate AND the discrimination gate`, async () => {
       const tiers = await tiersPromise;
       const readiness = evaluate(tiers, registration.specId, "PUBLIC", publicPairing(registration.specId));
       const summary = readiness.qualifyingAssertions.map(
@@ -200,9 +229,28 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
           `${q.caseId}[${String(q.ordinal)}] ${q.expectedOutcome} over ${q.evidenceSet.length} sanitized artifact(s), actor ${String(q.evidenceActor.actorId)} = ${q.evidenceIdentity.className}/${q.evidenceIdentity.specName}`,
       );
       expect(
-        readiness.evidenceReady,
-        `${registration.specId} is PUBLIC with no qualifying real-evidence MATCH/REJECTED. Disqualified: ${JSON.stringify(readiness.disqualified, null, 1)}`,
+        readiness.observationGate.ready,
+        `${registration.specId} is PUBLIC without observation evidence: ${String(readiness.observationGate.realMatches)} real MATCH over ${String(readiness.observationGate.distinctResolvedAbilityIds.length)} distinct supported observed action token(s). Disqualified: ${JSON.stringify(readiness.disqualified, null, 1)}`,
       ).toBe(true);
+      expect(
+        readiness.discriminationGate.ready,
+        `${registration.specId} is PUBLIC without discrimination evidence: no qualifying real REJECTED and no qualifying negative control. Disqualified: ${JSON.stringify(readiness.disqualified, null, 1)}`,
+      ).toBe(true);
+      expect(readiness.evidenceReady).toBe(true);
+      expect(readiness.observationGate.realMatches).toBeGreaterThanOrEqual(1);
+      expect(readiness.observationGate.distinctResolvedAbilityIds.length).toBeGreaterThanOrEqual(
+        MIN_DISTINCT_OBSERVED_ACTION_TOKENS,
+      );
+      // A control is never observation: no qualifying real assertion reads a derived artifact.
+      for (const control of readiness.discriminationGate.controls) {
+        expect(readiness.qualifyingAssertions.some((q) => q.caseId === control.caseId)).toBe(false);
+        expect(control.expectedOutcome).toBe("REJECTED");
+        expect(control.reportStatus).toBe("PASSED");
+        expect(resolveSpecIdentity(control.evidenceIdentity)).toEqual({
+          ok: true,
+          specId: registration.specId,
+        });
+      }
       // Every qualifying assertion satisfies all six criteria by construction; restate the load-bearing ones.
       for (const q of readiness.qualifyingAssertions) {
         expect(q.kind).toBe(`${readiness.layer}.DECISION_COVERAGE`);
@@ -291,6 +339,96 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
         "spec-assassination.observed-garrote-at-q-is-authority-compatible[0] -> MATCH",
       ],
     });
+  });
+
+  it("the reviewed snapshot (M11-C4h): how each public specialization passes the discrimination gate", async () => {
+    const tiers = await tiersPromise;
+    const routes = Object.fromEntries(
+      publicRegistrations.map((registration) => {
+        const gate = evaluate(
+          tiers,
+          registration.specId,
+          "PUBLIC",
+          publicPairing(registration.specId),
+        ).discriminationGate;
+        return [
+          registration.specId,
+          {
+            realRejected: gate.realRejected.length,
+            controls: gate.controls.map(
+              (c) =>
+                `${c.caseId}[${String(c.ordinal)}] -> REJECTED; ${c.controlArtifactId} substitutes ${String(c.substitution.fromAbilityGameId)} -> ${String(c.substitution.toAbilityGameId)} at ${String(c.substitution.reportTimeMs)}, flipping ${c.parentMatch.caseId}[${String(c.parentMatch.ordinal)}]`,
+            ),
+          },
+        ];
+      }),
+    );
+    expect(routes).toEqual({
+      "deathknight/blood": { realRejected: 10, controls: [] },
+      // Protection has no real REJECTED (0 over 149 decisions); it passes by
+      // its one negative control, migrated atomically with the split.
+      "paladin/protection": {
+        realRejected: 0,
+        controls: [
+          "spec-protection-paladin.negative-control-divine-toll-substituted-at-2074381-is-rejected-on-real-state[0] -> REJECTED; wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll substitutes 31935 -> 375576 at 2074381, flipping spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura[6]",
+        ],
+      },
+      "paladin/retribution": { realRejected: 3, controls: [] },
+      "rogue/assassination": { realRejected: 1, controls: [] },
+    });
+  });
+
+  it("the reviewed snapshot (M11-C4h): the distinct supported observed action tokens (by ability id) each public specialization resolves on real evidence", async () => {
+    const tiers = await tiersPromise;
+    const spans = Object.fromEntries(
+      publicRegistrations.map((registration) => [
+        registration.specId,
+        evaluate(tiers, registration.specId, "PUBLIC", publicPairing(registration.specId)).observationGate
+          .distinctResolvedAbilityIds,
+      ]),
+    );
+    expect(spans).toEqual({
+      "deathknight/blood": [49998, 50842, 195182, 206930, 433895],
+      "paladin/protection": [31935, 375576],
+      "paladin/retribution": [53385, 383328],
+      "rogue/assassination": [703, 32645],
+    });
+  });
+});
+
+describe("M11-C4h: Protection Paladin passes discrimination by a negative control, never by observed play", () => {
+  it("the control is a one-field substitution of a qualifying real MATCH, APPLICABLE for the build, and counted only for discrimination", async () => {
+    const tiers = await tiersPromise;
+    const readiness = evaluate(tiers, "paladin/protection", "PUBLIC", publicPairing("paladin/protection"));
+    expect(readiness.observationGate.ready).toBe(true);
+    expect(readiness.observationGate.realMatches).toBe(4);
+    expect(readiness.discriminationGate.realRejected).toEqual([]);
+    expect(readiness.discriminationGate.controls).toHaveLength(1);
+    const control = readiness.discriminationGate.controls[0];
+    expect(control?.parentArtifactId).toBe("wcl-protection-paladin-a7r6-rotational-165s.seg-60-90");
+    expect(control?.substitution).toMatchObject({
+      kind: "SINGLE_CAST_ABILITY_SUBSTITUTION",
+      sourceActorId: 7,
+      reportTimeMs: 2074381,
+      fromAbilityGameId: 31935,
+      toAbilityGameId: 375576,
+    });
+    expect(control?.applicability.observedToken).toBe("divine_toll");
+    expect(control?.evidenceActor).toEqual({ reportCode: "A7R6kxPJ1hC8YQ4w", fightId: 7, actorId: 7 });
+    expect(control?.evidenceIdentity).toEqual({ className: "Paladin", specName: "Protection" });
+    // Exactly one derived part, the control; every other part observed.
+    expect(control?.evidenceSet.filter((entry) => entry.kind !== "SANITIZED_CAPTURE")).toEqual([
+      { artifactId: control?.controlArtifactId, rootId: "REGRESSION_CORPUS", kind: "DERIVED_FROM_CAPTURE" },
+    ]);
+    // The flipped real MATCH is observation evidence in its own right.
+    const flipped = readiness.qualifyingAssertions.find(
+      (q) => q.caseId === control?.parentMatch.caseId && q.ordinal === control.parentMatch.ordinal,
+    );
+    expect(flipped?.expectedOutcome).toBe("MATCH");
+    expect(flipped?.observedCast).toEqual({ reportTimeMs: 2074381, abilityGameId: 31935 });
+    // The control never appears as observed play.
+    expect(readiness.qualifyingAssertions.some((q) => q.caseId === control?.caseId)).toBe(false);
+    expect(readiness.qualifyingAssertions.every((q) => q.expectedOutcome === "MATCH")).toBe(true);
   });
 });
 
@@ -385,14 +523,16 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     ).toEqual(["monk/brewmaster"]);
   });
 
-  it("Brewmaster Monk (INTERNAL_ONLY since M11-C2) is REPORTED, never failed: real MATCH evidence, no REJECTED — not the promotion standard", async () => {
+  it("Brewmaster Monk (INTERNAL_ONLY since M11-C2) is REPORTED, never failed: it passes observation and is BLOCKED on discrimination", async () => {
     // Informational by construction. The internal pairing accepts the
-    // Monk/Brewmaster identity BECAUSE the public table refuses it, and the
-    // qualifying assertions are the MATCH decisions of the one sanitized
-    // Shado-Pan capture — the two Breath of Fire casts (M11-C2) and, since
-    // M11-C3a, the Keg Smash at +10.7 s. The M11-A5 standard every promotion so
-    // far met — a real MATCH AND a real REJECTED — is NOT met: there is no
-    // REJECTED, and fewer UNKNOWNs are not promotion evidence.
+    // Monk/Brewmaster identity BECAUSE the public table refuses it. The
+    // qualifying real assertions are MATCH decisions of two independent,
+    // neutrally selected Shado-Pan subjects. M11-C4h: that passes the
+    // OBSERVATION gate; the DISCRIMINATION gate is not met — no real REJECTED
+    // and no negative control. That is structural, not bad luck: the slice's
+    // only positive usability proof is the observed cast, so no REJECTED is
+    // reachable (M11-C4g). Fewer UNKNOWNs and more subjects are not
+    // discrimination evidence.
     const tiers = await tiersPromise;
     const module = MODULES.find((candidate) => candidate.identity.specId === "monk/brewmaster");
     if (module === undefined) throw new Error("no Brewmaster module");
@@ -421,6 +561,12 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     for (const q of readiness.qualifyingAssertions) {
       expect(q.evidenceIdentity).toEqual({ className: "Monk", specName: "Brewmaster" });
     }
+    expect(readiness.observationGate.ready).toBe(true);
+    expect(readiness.observationGate.distinctResolvedAbilityIds.length).toBeGreaterThanOrEqual(
+      MIN_DISTINCT_OBSERVED_ACTION_TOKENS,
+    );
+    expect(readiness.discriminationGate).toEqual({ realRejected: [], controls: [], ready: false });
+    expect(readiness.evidenceReady).toBe(false);
     expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("monk/brewmaster");
   });
 
@@ -500,6 +646,8 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       identity.specName === synthetic.identity.wclSpecName;
     const simulated = evaluate(tiers, synthetic.identity.specId, "INTERNAL_ONLY", pairingWithoutTable);
     expect(simulated.evidenceReady).toBe(true);
+    expect(simulated.observationGate.ready).toBe(true);
+    expect(simulated.discriminationGate.controls).toHaveLength(1);
     expect(simulated.qualifyingAssertions.map((q) => q.expectedOutcome)).toContain("MATCH");
     expect(simulated.qualifyingAssertions.every((q) => q.evidenceIdentity.className === "Paladin")).toBe(
       true,

@@ -28,7 +28,9 @@ and one provenance vocabulary. They have different responsibilities.
   to an archive id is `CORPUS_REFERENCES_ARCHIVE`.
 - **Real evidence only.** Archive artifacts are `SANITIZED_CAPTURE`. A
   `DERIVED_FROM_CAPTURE` or `SYNTHETIC` artifact anywhere in a decision's
-  evidence set, in either root, still disqualifies it from promotion.
+  evidence set, in either root, disqualifies it as promotion OBSERVATION
+  evidence. Negative controls (M11-C4h) are derivations and therefore live in
+  the regression corpus, never here.
 - **Not a second regression corpus.** Every archive case must read at least one
   archive artifact, and every archive assertion must belong to the evidence
   verification families. Adding a family is a reviewed change to the list in
@@ -48,8 +50,10 @@ steps:
 `--write-report` writes that report from the execution, never by hand.
 
 The promotion evidence gate (`tests/contracts/m11-promotion-evidence-gate.test.ts`,
-reading `tests/support/corpus/promotion-evidence.ts`) accepts a qualifying
-`MATCH` or `REJECTED` from either root, under unchanged rules:
+reading `tests/support/corpus/promotion-evidence.ts`) accepts a qualifying real
+`MATCH` or `REJECTED` from either root for its OBSERVATION half (and a real
+`REJECTED` for its DISCRIMINATION half; a negative control is the other
+discrimination route, M11-C4h), under unchanged rules:
 
 - the whole evidence set is `SANITIZED_CAPTURE`, resolved across both roots, to
   exactly one holder per id;

@@ -69,6 +69,7 @@ describe("coverage is measured from the corpus", () => {
       "wcl-protection-paladin-a7r6-rotational-165s.seg-120-165",
       "wcl-protection-paladin-a7r6-rotational-165s.seg-45-60",
       "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90",
+      "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll",
       "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
       "wcl-protection-paladin-a7r6-rotational-45s",
       "wcl-protection-paladin-a7r6-rotational-45s.gap-before-2026589",

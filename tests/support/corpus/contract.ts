@@ -607,6 +607,15 @@ const aplEntryRef = z
  * fixed report-time window — a time filter, never an outcome filter — while
  * the history still begins at the bundle's first event.
  */
+/**
+ * An authority entry's applicability for the actor's proven build, as a
+ * specialization's `<layer>.OBSERVED_TOKEN_APPLICABILITY` assertion pins it
+ * (M11-C4h). The promotion gate reads the suffix generically; the verdict is
+ * the specialization's own.
+ */
+export const OBSERVED_TOKEN_APPLICABILITIES = ["APPLICABLE", "NOT_APPLICABLE", "UNKNOWN"] as const;
+export const OBSERVED_TOKEN_APPLICABILITY_SUFFIX = ".OBSERVED_TOKEN_APPLICABILITY";
+
 const BUNDLE_PARAMS = {
   historyArtifactIds: z.array(identifier).optional(),
   declaredHoles: z.array(reportTimeRange).optional(),
@@ -1448,6 +1457,42 @@ export const ASSERTION_KINDS = {
     requiresAuthority: true,
     description:
       "At this decision the specialization's aura bindings bind (or refuse to bind) this buff atom exactly so, from a transition M4 OBSERVED strictly before the decision on the actor's own aura, under the pinned identity the actor's build selects. Never inactive from silence, and never from a later transition.",
+  },
+  "SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY": {
+    owningLayer: "SPEC_PROTECTION_PALADIN",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        ...BUNDLE_PARAMS,
+        targetActorId: z.number().int().nullable(),
+        observedCast: z.object({ reportTimeMs: z.number().int(), abilityGameId: z.number().int() }).strict(),
+        expected: z
+          .object({
+            /** The authority token the observed ability binds to. */
+            observedToken: z.string().min(1),
+            /** Every pinned PLAYER_ACTION entry naming that token, in authority order, with its applicability. */
+            entries: z
+              .array(
+                z
+                  .object({
+                    listName: z.string().min(1),
+                    priorityOrdinal: z.number().int().nonnegative(),
+                    applicability: z.enum(OBSERVED_TOKEN_APPLICABILITIES),
+                  })
+                  .strict(),
+              )
+              .min(1),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: true,
+    description:
+      "At this eligible decision, every pinned authority entry naming the observed action's token has exactly this applicability under the actor's PROVEN build, as the Protection applicability rules resolve it: APPLICABLE, NOT_APPLICABLE (background for this build) or UNKNOWN. A negative control's REJECTED counts for discrimination only when every entry is APPLICABLE, so the rejection cannot rest on the action being background for the build (M11-C4h). The build facts are the production analysis's own resolution; the item tokens, whose applicability reads combatant-snapshot facts the analysis does not expose, are refused (m11c4h-protection-applicability-parity).",
   },
   "SPEC_PROTECTION_PALADIN.UNKNOWN_BLOCKER_DISTRIBUTION": {
     owningLayer: "SPEC_PROTECTION_PALADIN",
@@ -3737,6 +3782,31 @@ const retainedCoverage = z
   })
   .strict();
 
+/**
+ * A NEGATIVE-CONTROL substitution (M11-C4h): a DERIVED_FROM_CAPTURE artifact
+ * that is its SANITIZED_CAPTURE parent with exactly ONE field of exactly ONE
+ * event changed — the `abilityGameID` of the cast at `eventIndex`, by
+ * `sourceActorId` at `reportTimeMs`, from `fromAbilityGameId` to
+ * `toAbilityGameId`. The loader re-derives that diff from the two committed
+ * payloads and refuses any other difference, so the gate may lean on it:
+ * everything the control's analysis reads, apart from the one action, is
+ * observed state. It is never observed behaviour
+ * (`scripts/corpus/derive-substitution.mjs`).
+ */
+const castAbilitySubstitution = z
+  .object({
+    kind: z.literal("SINGLE_CAST_ABILITY_SUBSTITUTION"),
+    eventIndex: z.number().int().nonnegative(),
+    reportTimeMs: z.number().int(),
+    sourceActorId: z.number().int(),
+    fromAbilityGameId: z.number().int(),
+    toAbilityGameId: z.number().int(),
+    /** Why this decision and this substitute: the predeclared selection rule, in prose. */
+    basis: z.string().min(1),
+  })
+  .strict();
+export type CastAbilitySubstitution = z.infer<typeof castAbilitySubstitution>;
+
 const provenanceSchema = z
   .object({
     kind: z.enum(PROVENANCE_KINDS),
@@ -3752,6 +3822,8 @@ const provenanceSchema = z
     retainedCoverage,
     retainedFor: z.string().min(1),
     limitations: z.array(z.string().min(1)),
+    /** Present only on a negative-control derivative (M11-C4h); see `castAbilitySubstitution`. */
+    substitution: castAbilitySubstitution.optional(),
   })
   .strict();
 

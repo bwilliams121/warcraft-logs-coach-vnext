@@ -593,6 +593,8 @@ const SLICER_REVISION_4 = "sanitize-probe-4";
 const SLICER_REVISION_5 = "sanitize-probe-5";
 const GAP_TOOL = "scripts/corpus/derive-gap.mjs";
 const GAP_TOOL_REVISION = "derive-gap-1";
+const SUBSTITUTION_TOOL = "scripts/corpus/derive-substitution.mjs";
+const SUBSTITUTION_TOOL_REVISION = "derive-substitution-1";
 const [PP_START, PP_WINDOW_END, PP_SLICE_END] = [2004589, 2049589, 2026589];
 /**
  * M10-C5 Phase A: the same capture's LAST retained event (2,049,581 = the
@@ -7056,7 +7058,114 @@ const RET_CASES = [
   ),
 ];
 
+// --------------------------------------------------------------------------
+// M11-C4h (2026-09-27): the Protection Paladin DISCRIMINATION CONTROL. One
+// DERIVED_FROM_CAPTURE copy of the 60–90 s segment with exactly one field of
+// exactly one event changed — the Avenger's Shield cast at 2,074,381 re-labelled
+// Divine Toll — and nothing else. The loader re-derives that one-field diff from
+// the two committed payloads; the promotion gate counts the control's REJECTED
+// for discrimination only, never as observed play.
+// --------------------------------------------------------------------------
+
+const PPB_CONTROL = "wcl-protection-paladin-a7r6-rotational-165s.seg-60-90.control-2074381-divine-toll";
+const PPB_CONTROL_INDEX = 241;
+{
+  const parent = ARTIFACTS.find((entry) => entry.artifactId === PPB_60_90);
+  if (parent === undefined) throw new Error(`no parent ${PPB_60_90}`);
+  const control = artifact(PPB_CONTROL, wcl(PPB_CONTROL), {
+    kind: "DERIVED_FROM_CAPTURE",
+    parent: PPB_60_90,
+    transformations: [
+      {
+        kind: "VALUE_MUTATION",
+        tooling: tooling(
+          SUBSTITUTION_TOOL,
+          SUBSTITUTION_TOOL_REVISION,
+          `node scripts/corpus/derive-substitution.mjs ${PPB_60_90}.json ${PPB_CONTROL}.json --substitute ${String(PPB_CONTROL_INDEX)} ${String(PP_AVENGERS_SHIELD)} ${String(PP_DIVINE_TOLL)}`,
+        ),
+        detail:
+          "Event 241 of 827 — actor 7's Avenger's Shield cast at 2,074,381 (31935) — has its abilityGameID changed to Divine Toll (375576). Every other field of that event (its target, its resource snapshot, its position) and every other event are byte-for-byte the parent's, in the parent's order; the Grand Crusader removal the real Avenger's Shield consumed in the same millisecond is kept. The result is a cast that did NOT happen, over state that did.",
+        invalidates: ["OBSERVED_BEHAVIOUR"],
+      },
+    ],
+    grants: parent.provenance.retainedCoverage.grants,
+    coverageBasis:
+      "Exactly the parent's grants: the substitution changes one field of one event, so every retained family is as complete for actor 7 over the parent's range as it was — for the counterfactual cast stream the control describes. The loader refuses a substitution whose coverage differs from its parent's.",
+    retainedFor:
+      "M11-C4h: the Protection Paladin DISCRIMINATION control. The parent decision is a qualifying real MATCH (Avenger's Shield at 2,074,381 over the full Phase B bundle); with only the action changed, the same analysis over the same observed state must return REJECTED — the analyzer disagrees with an action its authority could not have selected. It is capability evidence for the promotion gate's discrimination half and never observed play.",
+    limitations: [
+      "Not evidence that actor 7 ever cast Divine Toll at 2,074,381; the cast there was Avenger's Shield.",
+      "The world is not internally consistent by design: the Grand Crusader removal and the resource snapshot belong to the real Avenger's Shield. The control's claim rests on the pinned conditions of the substituted action's entries, which read none of them.",
+      "Inherits every limitation of its parent.",
+    ],
+  });
+  ARTIFACTS.push({
+    ...control,
+    provenance: {
+      ...control.provenance,
+      substitution: {
+        kind: "SINGLE_CAST_ABILITY_SUBSTITUTION",
+        eventIndex: PPB_CONTROL_INDEX,
+        reportTimeMs: 2074381,
+        sourceActorId: TANK,
+        fromAbilityGameId: PP_AVENGERS_SHIELD,
+        toAbilityGameId: PP_DIVINE_TOLL,
+        basis:
+          "Predeclared rule: over Protection's qualifying real MATCH decisions in report-time order (Divine Toll 2,026,655; Avenger's Shield 2,074,381; Divine Toll 2,088,835; Avenger's Shield 2,139,100), each paired with every other pinned GCD token in a fixed order, the first pair whose substituted token is APPLICABLE under the proven build and whose comparison resolves. At 2,026,655 every applicable substitute stays UNKNOWN (DIVERGENT_WORLDS) and only the build-background Hammer of Light and Hammer of the Righteous reject, which the rule refuses; at 2,074,381 Divine Toll is the first applicable substitute that resolves, and it is REJECTED. The full census is disclosed with the case.",
+      },
+    },
+  });
+}
+const PPB_CONTROL_BUNDLE = {
+  historyArtifactIds: [PP45, PPB_45_60, PPB_CONTROL, PPB_90_120],
+  declaredHoles: [],
+};
+const PP_CONTROL_REJECTED = {
+  outcome: "REJECTED",
+  basis: "OBSERVED_ACTION_REJECTED_BY_AUTHORITY",
+  authorityCoverage: "UNKNOWN",
+  authorityToken: null,
+  selectionPrecision: null,
+  decisiveBlocker: null,
+  rawBlocker: "DIVERGENT_GCD_OUTCOMES",
+  observedActionRejected: true,
+};
+
 const CASES = [
+  // ---- M11-C4h: the Protection discrimination control ---------------------
+  kase(
+    "spec-protection-paladin.negative-control-divine-toll-substituted-at-2074381-is-rejected-on-real-state",
+    PPB_120_165,
+    "SPEC_PROTECTION_PALADIN",
+    "src/specs/paladin/protection/observed-action-gate.ts proveObservedActionUnselectable; action-profile.ts resolveProtectionApplicability; tests/support/corpus/loader.ts (the substitution rule); tests/support/corpus/promotion-evidence.ts (the discrimination gate)",
+    "The Phase B bundle with ONE part swapped for its substitution control: the Avenger's Shield cast at 2,074,381 — a real EXACT_ENTRY MATCH over the unmodified bundle — re-labelled Divine Toll, every other event observed. The only pinned Divine Toll entry, default[6] divine_toll,if=buff.avenging_wrath.up|(!talent.righteous_protector.enabled&cooldown.avenging_wrath.remains>30), is APPLICABLE for this build (not background) and FALSE in every world: the wings (Sentinel) buff is BOUND down from its observed removal at 2,048,248 and Righteous Protector is SELECTED. The unselectability proof therefore holds and the comparison is REJECTED, while the global scan itself stays undecided. Census over the four real MATCH decisions × every other pinned GCD token (36 substitutions): 10 REJECTED, 24 UNKNOWN, 2 MATCH; of the REJECTED, only the two Avenger's Shield → Divine Toll substitutions have an applicable substitute — the other eight are Hammer of Light (Templar-only) and Hammer of the Righteous (Blessed Hammer selected), background for this build.",
+    [
+      ppb_decision(PPB_CONTROL_BUNDLE, 2074381, PP_DIVINE_TOLL, PP_CONTROL_REJECTED),
+      a("SPEC_PROTECTION_PALADIN.OBSERVED_TOKEN_APPLICABILITY", {
+        actorId: TANK,
+        ...PPB_CONTROL_BUNDLE,
+        targetActorId: null,
+        observedCast: { reportTimeMs: 2074381, abilityGameId: PP_DIVINE_TOLL },
+        expected: {
+          observedToken: "divine_toll",
+          entries: [{ listName: "default", priorityOrdinal: 6, applicability: "APPLICABLE" }],
+        },
+      }),
+      ppb_aura(
+        PPB_CONTROL_BUNDLE,
+        2074381,
+        PP_DIVINE_TOLL,
+        "avenging_wrath",
+        ppb_bound(false, PP_SENTINEL, 2048248),
+      ),
+    ],
+    ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+    "A discrimination control, not observed play. MATCH over real state proves the analyzer is compatible with what was done; this proves that, on the SAME observed state, it rejects an action its authority could not have selected — the property a MATCH/UNKNOWN-only analyzer would lack. It rests on real state because the substituted action is applicable for the proven build and is refused by its pinned condition, not by being background.",
+    {
+      authority: PPB_AUTHORITY,
+      related: [...PPB_RELATED, "tests/contracts/m11c4h-discrimination-gate.test.ts"],
+    },
+  ),
   // ---- SHARED_DECISION_ENGINE (M10-C correction 2) ----------------------
   kase(
     "shared-decision-engine.proven-higher-priority-entry-selects-definitely",
