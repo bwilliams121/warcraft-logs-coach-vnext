@@ -276,7 +276,15 @@ evidence, never by inference.
 
 ## After M11-C4i: the corpus layering guard never inspects `tests/contracts/`
 
-**Raised:** M11-C4i (2026-09-27); recorded at M11-C4j.
+**Raised:** M11-C4i (2026-09-27); recorded at M11-C4j. **Resolved in M11-D1
+(2026-09-30).** Every glob key now maps to one path under `tests/` (`./x` →
+`contracts/x`, `../d/x` → `d/x`), a path with no source throws instead of
+reading as `""`, and four regressions pin the enumeration itself: normalized
+paths, non-empty sources, a named contract module genuinely read, and
+per-directory non-vacuity. The re-audit before the change found no violation
+among the 79 newly inspected contract modules (the triple rule, the pair and
+the sanctioned-name rule), so no allowlist was needed; the predicates were not
+changed.
 
 `tests/contracts/m9a-corpus-layering.test.ts` globs `../**/*.ts`; Vite keys
 files in the importer's own directory as `./x`, but the test strips only

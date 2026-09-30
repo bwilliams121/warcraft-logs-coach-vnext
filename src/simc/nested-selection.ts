@@ -101,7 +101,7 @@
  * usability evidence and the starting boundary.
  */
 
-import type { AplAction, AplAuthority } from "./apl-authority.js";
+import { isMalformedAuthorityLine, type AplAction, type AplAuthority } from "./apl-authority.js";
 import type { AplEntryKind } from "./apl-authority.js";
 import {
   evaluateCondition,
@@ -354,6 +354,10 @@ export type TraversalBlocker =
    * parser. This one says the syntax was fine and the entry addresses targets we
    * cannot enumerate — widening the parser would not help, and a reader told to
    * widen it would be sent the wrong way.
+   *
+   * Since M11-D1 it also covers an entry whose option STRUCTURE is malformed
+   * (`MALFORMED_STRUCTURE`: a second `if=`, a non-`key=value` segment,
+   * unbalanced grouping) — on a player, run or call entry alike.
    */
   | "UNSUPPORTED_ACTION_OPTION";
 
@@ -966,12 +970,42 @@ function scanList(
       // conservatively, so there is nothing for this module to add — and
       // demanding a concrete value here would block scans that our own epistemic
       // model is perfectly able to carry forward as unknown.
+      //
+      // `cycling_variable` takes this branch too (M11-D1). Its value is a fold
+      // over every enemy (variable.cpp:369-391), which nothing here computes;
+      // a later read of it is refused or unresolved exactly like any other.
       context.steps.push(stepOf(action, path, gate, "UNKNOWN", "VARIABLE_EXECUTED_CONTINUE"));
       continue;
     }
 
     // ---- call_action_list ----
     if (action.entryKind === "LIST_DISPATCH") {
+      // A dispatch whose option STRUCTURE is malformed — a second `if=`, a
+      // non-`key=value` segment, unbalanced grouping — is refused before its
+      // gate is read (M11-D1C): no reading of a malformed gate may make the
+      // callee entered, certainly or otherwise. A run entry is refused the same
+      // way by `scanRunDispatch`, which refuses every unsupported option.
+      if (isMalformedAuthorityLine(action)) {
+        const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
+        const step = stepOf(
+          action,
+          path,
+          { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+          "UNKNOWN",
+          "BLOCKED",
+          { targetingRefusal: { kind: "REFUSED", optionKeys, failure: "NO_TARGET_INDEPENDENT_CONJUNCT" } },
+        );
+        context.steps.push(step);
+        return earliestObstacle(candidates, {
+          kind: "BLOCKED",
+          blocker: "UNSUPPORTED_ACTION_OPTION",
+          blockedAt: step,
+          detail:
+            "the list-dispatch entry's option structure is malformed, so whether its list is entered " +
+            "cannot be established",
+        });
+      }
+
       const target = action.callsListName;
       if (target === null) {
         // `swap_action_list`, or a malformed call carrying no `name=`. Either

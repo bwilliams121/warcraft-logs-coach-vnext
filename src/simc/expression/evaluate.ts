@@ -641,6 +641,58 @@ function stackWorldValueOf(stack: number | NumericBinding): WorldValue {
   return typeof stack === "number" ? stack : worldValueOf(stack);
 }
 
+/**
+ * `buff.<name>.react` as the COUNT SimulationCraft evaluates (M11-D1).
+ *
+ * Pinned at 33622e9d1662ff0e451691edf85a6b49cc9d11d9: the `react` expression
+ * is `buff_t::stack_react()` (engine/buff/buff.cpp:485-511), which starts from
+ * `current_stack` and drops every stack whose reaction time has not elapsed
+ * (buff.cpp:2004-2016). So `0 <= react <= stack`, and nothing narrower: this
+ * project models no reaction delay.
+ *
+ * Derived ONLY from the exact `knownBuffStacks` binding, the one stack fact a
+ * specialization may state:
+ *
+ *     no binding              UNKNOWN_NUMBER / STATE_NOT_ESTABLISHED, as for
+ *                             `buff.<name>.stack` — never 0, never 1
+ *     exactly 0 stacks        KNOWN 0
+ *     exactly s >= 1 stacks   ONE_OF { 0 .. s } / STATE_NOT_MODELLED — each
+ *                             member is a value SimulationCraft can return
+ *     ONE_OF stack values     ONE_OF { 0 .. max } — the union of the above
+ *     BOUNDED / UNKNOWN       UNKNOWN_NUMBER: a lower bound on the stack is
+ *                             no bound at all on react, which may still be 0
+ *
+ * So `react=2` is FALSE only when at most one stack is proven, and UNKNOWN —
+ * not FALSE — whenever two or more stacks are possible or nothing is known.
+ * A value that is not a whole, non-negative count is refused as unestablished.
+ */
+function reactStackBinding(bindings: AtomBindings, buffName: string): NumericBinding {
+  const entry = (bindings.knownBuffStacks ?? []).find((item) => item.name === buffName);
+  if (entry === undefined) return unknownNumber("STATE_NOT_ESTABLISHED");
+  const stack = typeof entry.stack === "number" ? knownNumber(entry.stack) : entry.stack;
+  const isCount = (value: number): boolean => Number.isInteger(value) && value >= 0;
+  const zeroThrough = (top: number): NumericBinding =>
+    oneOfNumbers(
+      Array.from({ length: top + 1 }, (_, index) => index),
+      "STATE_NOT_MODELLED",
+    );
+  if (stack.state === "KNOWN_NUMBER") {
+    return isCount(stack.value) ? zeroThrough(stack.value) : unknownNumber("STATE_NOT_ESTABLISHED");
+  }
+  if (stack.state === "ONE_OF_NUMBERS") {
+    if (!stack.values.every(isCount)) return unknownNumber("STATE_NOT_ESTABLISHED");
+    return zeroThrough(Math.max(...stack.values));
+  }
+  if (stack.state === "BOUNDED_NUMBER") return unknownNumber(stack.reason);
+  return unknownNumber(stack.reason);
+}
+
+/** Whether `buff.<name>.react` is proven zero: an EXACT zero-stack binding, and nothing else (M11-D1). */
+function reactProvenZero(bindings: AtomBindings, buffName: string): boolean {
+  const binding = reactStackBinding(bindings, buffName);
+  return binding.state === "KNOWN_NUMBER" && binding.value === 0;
+}
+
 /** SimulationCraft has no boolean type: zero is false, everything else is true. */
 function truthOf(value: WorldValue): TruthValue {
   if (isUnknownValue(value)) return "UNKNOWN_STATE";
@@ -882,11 +934,17 @@ function evaluateInWorld(
       return known === undefined ? UNKNOWN : stackWorldValueOf(known.stack);
     }
     case "BUFF_REACT": {
-      // Its own key, so it never reads a `buff.<name>.up` assignment. There is
-      // no binding field, so it is always enumerated.
+      // Its own key, so it never reads a `buff.<name>.up` assignment. In a
+      // truth position it is `stack_react() != 0`: FALSE only when zero stacks
+      // are proven, otherwise enumerated exactly as before (M11-D1).
+      if (reactProvenZero(bindings, node.buffName)) return 0;
       const assigned = world.get(`buff.${node.buffName}.react`);
       return assigned === true ? 1 : 0;
     }
+    case "BUFF_REACT_STACK":
+      // A COUNT, from the exact stack binding only; never a world assignment
+      // (M11-D1). Absent evidence is UNKNOWN, never 0 and never 1.
+      return worldValueOf(reactStackBinding(bindings, node.buffName));
     case "DEBUFF_UP": {
       const assigned = world.get(`debuff.${node.debuffName}.up`);
       return assigned === true ? 1 : 0;
@@ -1127,6 +1185,14 @@ function resolveAtom(
       : fromBinding(knownRemains.remainsSeconds);
   }
 
+  const reactStack = /^buff\.(.+)\.react#stack_react$/.exec(key);
+  const reactStackName = reactStack?.[1];
+  if (reactStackName !== undefined) {
+    // Through the SAME derivation `evaluateInWorld` uses (M11-D1). Absent is
+    // STATE_NOT_ESTABLISHED, exactly as for `buff.<name>.stack`.
+    return fromBinding(reactStackBinding(bindings, reactStackName));
+  }
+
   if (shape === "NUMERIC") {
     // Anything numeric added later without a binding. STATE_NOT_MODELLED, and
     // emphatically not zero.
@@ -1137,6 +1203,12 @@ function resolveAtom(
   const name = buff?.[1];
   const knownBuff = name === undefined ? undefined : bindings.knownBuffs.find((e) => e.name === name);
   if (knownBuff !== undefined) return known(knownBuff.up ? 1 : 0);
+
+  // `.react` in a truth position: zero only on an exact zero-stack proof, the
+  // same test `evaluateInWorld` makes; anything else enumerates below (M11-D1).
+  const reactTruth = /^buff\.(.+)\.react$/.exec(key);
+  const reactTruthName = reactTruth?.[1];
+  if (reactTruthName !== undefined && reactProvenZero(bindings, reactTruthName)) return known(0);
 
   // An ESTABLISHED truth is not enumerated. Beyond producing the right trace,
   // this is what keeps the world count down: `default[4]` carries five boolean

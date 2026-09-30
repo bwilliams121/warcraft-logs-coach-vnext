@@ -72,7 +72,7 @@
  * file knows.
  */
 
-import type { ComparisonOperator, ExpressionNode } from "./ast.js";
+import { asMagnitudeOperand, type ComparisonOperator, type ExpressionNode } from "./ast.js";
 import type { SpecAtomVocabulary } from "./spec-vocabulary.js";
 
 export type ParseFailureReason =
@@ -508,7 +508,7 @@ function parseMultiplicative(cursor: Cursor): ExpressionNode {
     if (!startsWith(cursor, "*")) return left;
     cursor.index += 1;
     const right = parseUnary(cursor);
-    left = { kind: "MULTIPLY", left, right };
+    left = { kind: "MULTIPLY", left: asMagnitudeOperand(left), right: asMagnitudeOperand(right) };
   }
 }
 
@@ -537,12 +537,20 @@ function parseAdditive(cursor: Cursor): ExpressionNode {
     // operators in this grammar at all.
     if (startsWith(cursor, "+")) {
       cursor.index += 1;
-      left = { kind: "ADD", left, right: parseMultiplicative(cursor) };
+      left = {
+        kind: "ADD",
+        left: asMagnitudeOperand(left),
+        right: asMagnitudeOperand(parseMultiplicative(cursor)),
+      };
       continue;
     }
     if (startsWith(cursor, "-")) {
       cursor.index += 1;
-      left = { kind: "SUBTRACT", left, right: parseMultiplicative(cursor) };
+      left = {
+        kind: "SUBTRACT",
+        left: asMagnitudeOperand(left),
+        right: asMagnitudeOperand(parseMultiplicative(cursor)),
+      };
       continue;
     }
     return left;
@@ -557,7 +565,8 @@ function parseComparison(cursor: Cursor): ExpressionNode {
   if (readComparisonOperator(cursor) !== null) {
     throw new ParseError("CHAINED_COMPARISON", cursor.text, cursor.index);
   }
-  return { kind: "COMPARISON", operator, left, right };
+  // Both operands are MAGNITUDE positions: `.react` there is a count (M11-D1).
+  return { kind: "COMPARISON", operator, left: asMagnitudeOperand(left), right: asMagnitudeOperand(right) };
 }
 
 function parseAnd(cursor: Cursor): ExpressionNode {

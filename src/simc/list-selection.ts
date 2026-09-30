@@ -321,6 +321,13 @@ export function selectWithinList(
   const lines: LineEvaluation[] = [];
 
   for (const action of lookup.actions) {
+    // `variable` / `cycling_variable`: SimulationCraft executes the entry and
+    // CONTINUES the scan (player.cpp:14238), so it is never what a list returns
+    // (M11-D1C). Stepped over exactly as the nested walker steps over it. Its
+    // value is not computed here: a later condition reading it is refused or
+    // unresolved at the expression layer, never decided by this skip.
+    if (action.executesAndContinues) continue;
+
     // Control-flow constructs THIS single-list walker does not follow. Both
     // fail closed: a dispatch anywhere in the list could change which action
     // is reached, so no selection conclusion is available here. The nested

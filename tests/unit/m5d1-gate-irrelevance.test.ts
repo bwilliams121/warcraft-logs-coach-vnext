@@ -187,6 +187,7 @@ describe("the default is unchanged: an unreadable condition blocks", () => {
         conditionRaw: null,
         callsListName: null,
         isUnmodelledDispatch: false,
+        executesAndContinues: false,
         entryKind: "PLAYER_ACTION",
         actionOptionKeys: [],
         unsupportedOptions: [],

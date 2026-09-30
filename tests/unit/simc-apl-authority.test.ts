@@ -6,6 +6,7 @@ import {
   deriveConditionRaw,
   loadAplAuthority,
 } from "../../src/simc/apl-authority.js";
+import { parseSimcExpression } from "../../src/simc/expression/parse.js";
 import { pinnedAssassinationAuthority } from "../../src/simc/pinned-authority.js";
 import { syntheticArtifact } from "../support/m5a-authority.js";
 
@@ -82,7 +83,16 @@ describe("derivations are computed from the verbatim string", () => {
   it("refuses an ambiguous condition rather than picking one", () => {
     // Two `,if=` segments cannot be resolved to a single condition, and an
     // arbitrary pick would silently become a definite authority claim.
-    expect(deriveConditionRaw("x,if=a,if=b")).toBeNull();
+    //
+    // Until M11-D1C this pinned `null` — which every consumer of `conditionRaw`
+    // reads as UNCONDITIONAL, so a malformed `call_action_list` became a
+    // CERTAIN list entry. The ambiguous text is now kept: neither condition is
+    // picked, and no parser accepts it, so it is refused wherever it is read.
+    const derived = deriveConditionRaw("x,if=a,if=b");
+    expect(derived).not.toBeNull();
+    expect(derived).not.toBe("a");
+    expect(derived).not.toBe("b");
+    expect(parseSimcExpression(derived ?? "a").ok).toBe(false);
   });
 });
 

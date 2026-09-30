@@ -71,6 +71,47 @@ function normalizeKey(key: string, prefix: RegExp): string {
   return key.replace(prefix, "").split("\\").join("/");
 }
 
+/**
+ * The directory this file lives in, under `tests/`. Vite keys a relative glob
+ * match relative to the IMPORTING file, and keys a match in the importer's
+ * own directory as `./x`, not `../contracts/x`.
+ */
+const OWN_TESTS_DIRECTORY = "contracts/";
+
+/**
+ * A `TEST_SOURCES` key as ONE repository-relative path under `tests/`
+ * (M11-D1).
+ *
+ *     ../unit/x.test.ts   ->  unit/x.test.ts
+ *     ./x.test.ts         ->  contracts/x.test.ts
+ *
+ * Until M11-D1 only `../` was stripped, so every `tests/contracts/` module kept
+ * its `./` key, was looked up again as `.././x`, found nothing, and was checked
+ * as an EMPTY source — listed, and never inspected. Any other key shape is a
+ * change in how the glob is keyed, and fails loudly rather than being dropped.
+ */
+function testsRelativePath(globKey: string): string {
+  const key = globKey.split("\\").join("/");
+  const path = key.startsWith("../")
+    ? key.slice("../".length)
+    : key.startsWith("./")
+      ? `${OWN_TESTS_DIRECTORY}${key.slice("./".length)}`
+      : null;
+  if (
+    path === null ||
+    path.startsWith(".") ||
+    path.split("/").some((part) => part === "." || part === "..")
+  ) {
+    throw new Error(`the test-source glob produced a key this guard cannot place under tests/: ${globKey}`);
+  }
+  return path;
+}
+
+/** Every test and support module's source, keyed by its path under `tests/` (M11-D1). */
+const TEST_SOURCE_BY_PATH: ReadonlyMap<string, string> = new Map(
+  Object.entries(TEST_SOURCES).map(([key, source]) => [testsRelativePath(key), source]),
+);
+
 function importsOf(source: string): readonly string[] {
   return [...source.matchAll(/(?:^|\n)\s*(?:import|export)[^\n]*?from\s+["']([^"']+)["']/g)].map(
     (entry) => entry[1] ?? "",
@@ -360,13 +401,18 @@ describe("the corpus machinery is offline, deterministic and read-only", () => {
  */
 describe("captured evidence receives coverage only through the shared corpus interpreter", () => {
   const CORPUS_DIR = "support/corpus/";
-  const testPaths = Object.keys(TEST_SOURCES)
-    .map((key) => normalizeKey(key, /^\.\.\//))
-    .filter((path) => !path.startsWith(CORPUS_DIR))
-    .sort();
+  const testPaths = [...TEST_SOURCE_BY_PATH.keys()].filter((path) => !path.startsWith(CORPUS_DIR)).sort();
 
+  /**
+   * The source of an enumerated module. A path with no source is a defect in
+   * this guard, not an empty module, and throws: before M11-D1 a miss read as
+   * `""` and every predicate passed on it silently.
+   */
   function sourceAt(path: string): string {
-    return TEST_SOURCES[`../${path}`] ?? "";
+    const source = TEST_SOURCE_BY_PATH.get(path);
+    if (source === undefined)
+      throw new Error(`the coverage guard enumerated ${path} but holds no source for it`);
+    return source;
   }
 
   /** Raw captured events, however obtained. */
@@ -390,6 +436,53 @@ describe("captured evidence receives coverage only through the shared corpus int
 
   it("found the test tree", () => {
     expect(testPaths.length).toBeGreaterThan(100);
+  });
+
+  // M11-D1: the enumeration itself is under test. Before this, every
+  // `tests/contracts/` module was listed under a `./` key and checked as an
+  // empty source, and nothing above could notice: the count still exceeded
+  // 100, and the non-vacuity check below is satisfied by other directories.
+
+  it("keys every enumerated module by one path under tests/, with no ./ or ../ left in it", () => {
+    expect(TEST_SOURCE_BY_PATH.size).toBe(Object.keys(TEST_SOURCES).length);
+    for (const path of testPaths) {
+      expect(path, `${path} is not a normalized path under tests/`).toMatch(/^[a-z0-9_-]+\/[^.]/i);
+      expect(path.split("/").every((part) => part !== "." && part !== ".." && part.length > 0)).toBe(true);
+    }
+  });
+
+  it("maps every enumerated module to its source text", () => {
+    for (const path of testPaths) {
+      expect(sourceAt(path).trim().length, `${path} was enumerated with no source text`).toBeGreaterThan(0);
+    }
+  });
+
+  it("genuinely inspects this file's own directory, tests/contracts/", () => {
+    // A named, existing contract module whose text the triple rule's first
+    // predicate matches (it names `committedEventArray` in order to ban it).
+    // Only a guard that actually READ the file can see that.
+    const named = "contracts/m10d-no-corpus-window-in-production.test.ts";
+    expect(testPaths).toContain(named);
+    expect(sourceAt(named)).toContain('"committedEventArray"');
+    expect(readsCapturedRawEvents(sourceAt(named))).toBe(true);
+    const contracts = testPaths.filter((path) => path.startsWith(OWN_TESTS_DIRECTORY));
+    expect(contracts.length).toBeGreaterThan(0);
+    // Real contract modules import; an empty or unread source imports nothing.
+    expect(contracts.filter((path) => importsOf(sourceAt(path)).length > 0).length).toBe(contracts.length);
+  });
+
+  it("covers every test directory non-vacuously", () => {
+    // Per directory, so no directory can go dark behind the others' totals:
+    // each must be enumerated, and each of its modules must carry imports the
+    // predicates can read.
+    for (const directory of ["contracts/", "unit/", "regression/", "integration/", "support/"]) {
+      const inDirectory = testPaths.filter((path) => path.startsWith(directory));
+      expect(inDirectory.length, `${directory} is not enumerated`).toBeGreaterThan(0);
+      expect(
+        inDirectory.filter((path) => importsOf(sourceAt(path)).length > 0).length,
+        `${directory} modules were enumerated without readable imports`,
+      ).toBeGreaterThan(0);
+    }
   });
 
   it.each(testPaths)("%s does not read, normalize and build a fight over captured events itself", (path) => {

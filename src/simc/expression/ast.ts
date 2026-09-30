@@ -77,9 +77,39 @@ export type ExpressionNode =
    * to REACT to the aura, which `.up` does not; equating them would let a
    * reaction-delay model this project does not have collapse into a plain
    * presence check. It therefore gets its OWN atom key, so no world assignment
-   * correlates the two, and no binding field, so it is always enumerated.
+   * correlates the two.
+   *
+   * This node is `.react` in a TRUTH position only (M11-D1): a bare condition,
+   * an operand of `&`, `|` or `!`. There SimulationCraft's zero-is-false
+   * coercion makes it exactly `stack_react() != 0`, which enumerating a truth
+   * models without inventing a count. Its one binding is an EXACT-ZERO stack
+   * (`stack_react() <= current_stack`, so zero stacks is zero react); every
+   * other state enumerates, as before. In a MAGNITUDE position the parser
+   * produces `BUFF_REACT_STACK` instead.
    */
   | { readonly kind: "BUFF_REACT"; readonly buffName: string }
+  /**
+   * `buff.<name>.react` in a MAGNITUDE position — an operand of a comparison,
+   * `*`, `+` or `-` (M11-D1).
+   *
+   * Pinned at 33622e9d1662ff0e451691edf85a6b49cc9d11d9, the `react` expression
+   * evaluates `buff_t::stack_react()` (engine/buff/buff.cpp:485-511): the
+   * current stack count minus every stack whose reaction time has not yet
+   * elapsed (buff.cpp:2004-2016). It is a COUNT, `0 <= react <= stack`, and
+   * `buff.killing_machine.react=2` compares that count with two.
+   *
+   * Until M11-D1 every `.react` was the truth node above, whose world value is
+   * 0 or 1, so `react=2` came out FALSE in every world — a silent elimination
+   * of a line the authority may well have selected. This node is a MAGNITUDE:
+   * never enumerated, derived only from an EXACT stack binding, UNKNOWN
+   * otherwise. Reaction delay is not modelled, so an exact stack of `s` proves
+   * only that react is one of `0..s`.
+   *
+   * Its atom key is NOT the truth node's key and cannot collide with any
+   * identifier, because `#` is not an identifier character (parse.ts,
+   * spec-vocabulary.ts).
+   */
+  | { readonly kind: "BUFF_REACT_STACK"; readonly buffName: string }
   /**
    * `debuff.<name>.up` — TRUTH-shaped, and on the TARGET. Added at M5-C3c3c.
    *
@@ -310,6 +340,28 @@ export function atomKey(node: ExpressionNode): string | null {
   return atomOf(node)?.key ?? null;
 }
 
+/**
+ * The atom key of `buff.<name>.react` read as a COUNT (M11-D1).
+ *
+ * Named after the pinned function it denotes, `buff_t::stack_react()`. The
+ * `#` makes it unrepresentable as an identifier, so no built-in and no
+ * specialization vocabulary entry can ever produce the same key.
+ */
+export function reactStackAtomKey(buffName: string): string {
+  return `buff.${buffName}.react#stack_react`;
+}
+
+/**
+ * An operand as a MAGNITUDE position reads it (M11-D1).
+ *
+ * The parser applies this to both operands of a comparison, `*`, `+` and `-`.
+ * Every node is returned unchanged except `.react`, the one truth-shaped
+ * built-in whose SimulationCraft value is not 0/1: there it is a stack count.
+ */
+export function asMagnitudeOperand(node: ExpressionNode): ExpressionNode {
+  return node.kind === "BUFF_REACT" ? { kind: "BUFF_REACT_STACK", buffName: node.buffName } : node;
+}
+
 /** The atom a node denotes, or `null` when the node is not an atom. */
 export function atomOf(node: ExpressionNode): AtomDescriptor | null {
   switch (node.kind) {
@@ -331,6 +383,11 @@ export function atomOf(node: ExpressionNode): AtomDescriptor | null {
     case "BUFF_REACT":
       // A DIFFERENT key from `buff.<name>.up`. Two atoms, never correlated.
       return { key: `buff.${node.buffName}.react`, shape: "BOOLEAN", scope: "PLAYER_SCOPED" };
+    case "BUFF_REACT_STACK":
+      // The count, not the truth: a different fact, so a different key. The
+      // two are left uncorrelated when both occur in one expression, which is
+      // sound — it only ever admits more worlds than are real.
+      return { key: reactStackAtomKey(node.buffName), shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "DEBUFF_UP":
       // `debuff.` and `buff.` are different namespaces addressing different
       // actors, so their keys can never collide. TARGET_SCOPED: it is an aura on

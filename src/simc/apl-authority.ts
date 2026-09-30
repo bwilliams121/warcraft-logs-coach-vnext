@@ -120,12 +120,22 @@ export const APL_ENTRY_KINDS = [
  *     UNSUPPORTED_TARGETING   changes WHICH target the condition is about
  *     UNRECOGNISED            never seen at this pinned commit; fails closed
  */
-export type ActionOptionSupport = "SUPPORTED" | "UNSUPPORTED_TARGETING" | "UNRECOGNISED";
+export type ActionOptionSupport =
+  "SUPPORTED" | "UNSUPPORTED_TARGETING" | "UNRECOGNISED" | "MALFORMED_STRUCTURE";
 
+/**
+ * `MALFORMED_STRUCTURE` (M11-D1) is not a key classification: it marks a line
+ * whose option STRUCTURE this module cannot read — a top-level segment that is
+ * not `key=value`, or a second `if=`. Before M11-D1 such a segment after `if=`
+ * was swallowed into the condition text and failed the parser; now that the
+ * condition ends at the next option, the line must still fail closed, and this
+ * is how it does. It refuses exactly as an unrecognised option does.
+ */
 export const ACTION_OPTION_SUPPORTS = [
   "SUPPORTED",
   "UNSUPPORTED_TARGETING",
   "UNRECOGNISED",
+  "MALFORMED_STRUCTURE",
 ] as const satisfies readonly ActionOptionSupport[];
 
 /**
@@ -181,23 +191,106 @@ export function actionOptionSupport(optionKey: string): ActionOptionSupport {
 }
 
 /**
- * The option keys of one action string, in written order.
+ * One APL line, split into its token and its top-level options (M11-D1).
  *
- * Splits on commas and keeps segments shaped like `key=`. That is coarse, and it
- * is coarse in the SAFE direction: a value containing a comma would produce an
- * extra fragment, and a fragment that does not look like `key=` is skipped while
- * one that does is classified — so an unfamiliar shape becomes UNRECOGNISED
- * rather than invisible.
+ * An APL line is `token,key=value,key=value,…`, and an option ends at the next
+ * TOP-LEVEL comma. Until M11-D1 the condition was "everything after `,if=`",
+ * which is right only while `if=` is the last option: the pinned Protection
+ * Warrior line (apl_warrior.cpp:361)
  *
- * The leading token is never an option, so the first segment is always dropped.
+ *     ignore_pain,if=target.health.pct>=20&(…),use_off_gcd=1
+ *
+ * put `,use_off_gcd=1` inside its own condition, which the expression parser
+ * then refused whole. The condition is now the `if` option's value and nothing
+ * more; `use_off_gcd` is read as the option it is.
+ *
+ * TOP-LEVEL means outside parentheses and outside quotes. No pinned
+ * expression contains a comma, and the expression parser refuses one, so a
+ * comma inside parentheses or quotes stays with its value and makes that value
+ * fail wherever it is read — it never becomes an invented option boundary.
+ *
+ * UNBALANCED grouping — a quote never closed, a parenthesis never closed or
+ * closed twice — would let one value swallow every option after it, `if=`
+ * included, and a swallowed condition reads as NONE. So such a line is split
+ * exactly as before M11-D1 (on every comma) and marked unbalanced, which
+ * `deriveAction` refuses: never worse than the pre-D1 reading.
+ *
+ * Nothing here interprets a value. A segment that is not `key=value` is kept
+ * as MALFORMED rather than dropped, so that no text can silently disappear
+ * from a line: `deriveAction` turns it into a refusal.
+ */
+export interface AplLineStructure {
+  /** The segment before the first comma. */
+  readonly actionToken: string;
+  /** Every top-level `key=value` segment after the token, in written order, values verbatim. */
+  readonly options: readonly { readonly key: string; readonly value: string }[];
+  /** Every top-level segment after the token that is not `key=value`, verbatim. */
+  readonly malformedSegments: readonly string[];
+  /** False when a quote or parenthesis is left open or closed twice; the split is then the plain comma split. */
+  readonly balanced: boolean;
+}
+
+const OPTION_SEGMENT = /^([A-Za-z_][A-Za-z0-9_]*)=([\s\S]*)$/;
+
+/** The top-level comma-separated segments of a line, the token included, or `null` when grouping is unbalanced. */
+function topLevelSegments(actionStringVerbatim: string): readonly string[] | null {
+  const segments: string[] = [];
+  let depth = 0;
+  let quote: string | null = null;
+  let start = 0;
+  for (let index = 0; index < actionStringVerbatim.length; index += 1) {
+    const char = actionStringVerbatim[index];
+    if (quote !== null) {
+      if (char === quote) quote = null;
+      continue;
+    }
+    if (char === '"' || char === "'") quote = char;
+    else if (char === "(") depth += 1;
+    else if (char === ")") {
+      depth -= 1;
+      if (depth < 0) return null;
+    } else if (char === "," && depth === 0) {
+      segments.push(actionStringVerbatim.slice(start, index));
+      start = index + 1;
+    }
+  }
+  if (quote !== null || depth !== 0) return null;
+  segments.push(actionStringVerbatim.slice(start));
+  return segments;
+}
+
+export function parseAplLine(actionStringVerbatim: string): AplLineStructure {
+  const grouped = topLevelSegments(actionStringVerbatim);
+  const [, ...rest] = grouped ?? actionStringVerbatim.split(",");
+  const options: { key: string; value: string }[] = [];
+  const malformedSegments: string[] = [];
+  for (const segment of rest) {
+    const match = OPTION_SEGMENT.exec(segment);
+    const key = match?.[1];
+    const value = match?.[2];
+    if (key === undefined || value === undefined) malformedSegments.push(segment);
+    else options.push({ key, value });
+  }
+  return {
+    actionToken: deriveActionToken(actionStringVerbatim),
+    options,
+    malformedSegments,
+    balanced: grouped !== null,
+  };
+}
+
+/**
+ * The option keys of one action string, in written order, each once.
+ *
+ * Read from the top-level structure (M11-D1). Only `key=value` segments carry
+ * a key; a malformed segment is not listed here, and is refused by
+ * `deriveAction` instead of being skipped.
+ *
+ * The leading token is never an option.
  */
 export function deriveActionOptionKeys(actionStringVerbatim: string): readonly string[] {
   const keys: string[] = [];
-  for (const segment of actionStringVerbatim.split(",").slice(1)) {
-    const equals = segment.indexOf("=");
-    if (equals <= 0) continue;
-    const key = segment.slice(0, equals);
-    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+  for (const { key } of parseAplLine(actionStringVerbatim).options) {
     if (!keys.includes(key)) keys.push(key);
   }
   return keys;
@@ -235,6 +328,17 @@ export interface AplAction {
    * field, so it cannot drift from the string it summarises.
    */
   readonly entryKind: AplEntryKind;
+  /**
+   * True for an entry SimulationCraft EXECUTES and then CONTINUES the scan past
+   * — `variable` and `cycling_variable` (player.cpp:14238) — so a scan can
+   * never return it as the selected action (M11-D1C).
+   *
+   * A CONTROL-FLOW fact, derived from `entryKind` and exposed on its own for
+   * the same reason as `isUnmodelledDispatch` and `callsListName`: the
+   * ordered single-list selector acts on control flow and deliberately reads no
+   * structural entry kind or execution lane (tests/contracts/m5c1-gcd-semantics.test.ts).
+   */
+  readonly executesAndContinues: boolean;
   /** Every option key on the line, in written order. Values are never read. */
   readonly actionOptionKeys: readonly string[];
   /**
@@ -253,8 +357,24 @@ export interface AplAction {
 const CALL_TOKENS = new Set(["call_action_list", "run_action_list"]);
 /** Tokens SimulationCraft's `is_real_action` excludes as list-control constructs. */
 const LIST_CONTROL_TOKENS = new Set(["call_action_list", "run_action_list", "swap_action_list"]);
-const VARIABLE_TOKEN = "variable";
-const CONDITION_MARKER = ",if=";
+/**
+ * The tokens of SimulationCraft's execute-and-continue construct (M11-D1 adds
+ * the second).
+ *
+ * Pinned at 33622e9d1662ff0e451691edf85a6b49cc9d11d9: `cycling_variable` is
+ * built as `cycling_variable_t` (engine/player/player.cpp:11123-11124), a
+ * `variable_t` — type ACTION_VARIABLE (engine/action/variable.cpp:17) — whose
+ * `execute()` folds `variable_t::execute()` once per non-sleeping target
+ * (variable.cpp:369-391). The foreground scan executes every ACTION_VARIABLE
+ * and CONTINUES (player.cpp:14238), so neither token can ever be the action a
+ * scan returns. Before M11-D1 `cycling_variable` fell through to
+ * PLAYER_ACTION, which made "the list selected cycling_variable" expressible.
+ *
+ * Its VALUE is a fold over every enemy, which this project cannot compute; like
+ * every variable value it is never computed here (see `nested-selection.ts`),
+ * so a later read of it is resolved — or refused — at the expression layer.
+ */
+const VARIABLE_TOKENS = new Set(["variable", "cycling_variable"]);
 
 export function deriveActionToken(actionStringVerbatim: string): string {
   const comma = actionStringVerbatim.indexOf(",");
@@ -262,18 +382,43 @@ export function deriveActionToken(actionStringVerbatim: string): string {
 }
 
 /**
- * The `,if=` value, verbatim.
+ * The `if` option's value, verbatim, and nothing after it.
  *
- * Matches `,if=` with its leading comma so `target_if=` cannot be mistaken for
- * it. More than one occurrence is ambiguous and yields `null` rather than an
- * arbitrary pick — an ambiguous condition must not silently become a definite
- * one.
+ * A top-level option KEY, so `target_if=` cannot be mistaken for it. More than
+ * one `if=` is malformed and yields text no parser accepts — never an
+ * arbitrary pick, and never `null`, which would read as unconditional. An
+ * ambiguous condition must not silently become a definite one.
  */
 export function deriveConditionRaw(actionStringVerbatim: string): string | null {
-  const at = actionStringVerbatim.indexOf(CONDITION_MARKER);
-  if (at < 0) return null;
-  if (actionStringVerbatim.indexOf(CONDITION_MARKER, at + 1) >= 0) return null;
-  return actionStringVerbatim.slice(at + CONDITION_MARKER.length);
+  // M11-D1: the value of the ONE top-level `if` option, ending at the next
+  // top-level option — not everything after `,if=`. See `parseAplLine`.
+  const structure = parseAplLine(actionStringVerbatim);
+  // Unbalanced grouping: exactly the pre-M11-D1 reading, so no condition can
+  // come out shorter — or more readable — than it did before. `deriveAction`
+  // refuses the line as MALFORMED_STRUCTURE as well.
+  if (!structure.balanced) return conditionAfterFirstIfMarker(actionStringVerbatim);
+  const conditions = structure.options.filter((option) => option.key === "if");
+  const [only] = conditions;
+  if (conditions.length === 0) return null;
+  if (conditions.length === 1 && only !== undefined) return only.value;
+  // More than one `if=` is MALFORMED (M11-D1C). `null` would read as
+  // UNCONDITIONAL — a certain call entry, a definite line — to every consumer
+  // of `conditionRaw`, so the ambiguous text is returned instead: it holds the
+  // second `,if=`, and the expression parser refuses any text with a comma,
+  // so wherever it is read it is refused, never decided. `deriveAction` also
+  // refuses the line as MALFORMED_STRUCTURE.
+  return conditionAfterFirstIfMarker(actionStringVerbatim);
+}
+
+/**
+ * Everything after the first `,if=`, or `null` when there is none: the
+ * pre-M11-D1 reading, except that a SECOND `,if=` no longer yields `null`
+ * (M11-D1C) — the text returned then contains it, and never parses.
+ */
+function conditionAfterFirstIfMarker(actionStringVerbatim: string): string | null {
+  const marker = ",if=";
+  const at = actionStringVerbatim.indexOf(marker);
+  return at < 0 ? null : actionStringVerbatim.slice(at + marker.length);
 }
 
 export function deriveCallsListName(actionStringVerbatim: string): string | null {
@@ -292,7 +437,7 @@ export function deriveCallsListName(actionStringVerbatim: string): string | null
  * Everything that is not a recognised control construct falls back to
  * `PLAYER_ACTION`. That is a claim about control flow only — an unrecognised
  * token would be RETURNED by the scan and would END it, which is precisely what
- * separates it from `variable` and the dispatch constructs. It is emphatically
+ * separates it from `variable`, `cycling_variable` and the dispatch constructs. It is emphatically
  * NOT a claim that the token is a spell, and the fallback confers no ability id
  * and no execution lane.
  *
@@ -302,9 +447,19 @@ export function deriveCallsListName(actionStringVerbatim: string): string | null
  */
 export function deriveEntryKind(actionStringVerbatim: string): AplEntryKind {
   const token = deriveActionToken(actionStringVerbatim);
-  if (token === VARIABLE_TOKEN) return "VARIABLE_ASSIGNMENT";
+  if (VARIABLE_TOKENS.has(token)) return "VARIABLE_ASSIGNMENT";
   if (LIST_CONTROL_TOKENS.has(token)) return "LIST_DISPATCH";
   return "PLAYER_ACTION";
+}
+
+/**
+ * Whether a line's option STRUCTURE could not be read (M11-D1C): a segment that
+ * is not `key=value`, unbalanced grouping, or a second `if=`. One predicate,
+ * so every consumer — player, run and call entries, and the sole-gate proof —
+ * refuses the same lines.
+ */
+export function isMalformedAuthorityLine(action: AplAction): boolean {
+  return action.unsupportedOptions.some((option) => option.support === "MALFORMED_STRUCTURE");
 }
 
 function deriveAction(listName: string, action: AuthorityArtifactAction): AplAction {
@@ -314,6 +469,22 @@ function deriveAction(listName: string, action: AuthorityArtifactAction): AplAct
   for (const optionKey of actionOptionKeys) {
     const support = actionOptionSupport(optionKey);
     if (support !== "SUPPORTED") unsupportedOptions.push({ optionKey, support });
+  }
+  // M11-D1: structure this module cannot read refuses the line rather than
+  // vanishing from it. A non-`key=value` segment is named verbatim, unbalanced
+  // grouping by a fixed label, and a second `if=` by its key.
+  const structure = parseAplLine(action.actionStringVerbatim);
+  for (const segment of structure.malformedSegments) {
+    unsupportedOptions.push({ optionKey: segment, support: "MALFORMED_STRUCTURE" });
+  }
+  if (!structure.balanced) {
+    unsupportedOptions.push({
+      optionKey: "(unbalanced quote or parenthesis)",
+      support: "MALFORMED_STRUCTURE",
+    });
+  }
+  if (structure.options.filter((option) => option.key === "if").length > 1) {
+    unsupportedOptions.push({ optionKey: "if", support: "MALFORMED_STRUCTURE" });
   }
   return {
     listName,
@@ -326,6 +497,7 @@ function deriveAction(listName: string, action: AuthorityArtifactAction): AplAct
     callsListName: deriveCallsListName(action.actionStringVerbatim),
     isUnmodelledDispatch: token === "run_action_list",
     entryKind: deriveEntryKind(action.actionStringVerbatim),
+    executesAndContinues: deriveEntryKind(action.actionStringVerbatim) === "VARIABLE_ASSIGNMENT",
     actionOptionKeys,
     unsupportedOptions,
   };
@@ -340,7 +512,9 @@ export type ReachabilityFailureReason =
   | "INCOMING_EDGE_NOT_FROM_ENTRY_LIST"
   | "GATE_EDGE_HAS_NO_CONDITION"
   | "UNMODELLED_DISPATCH"
-  | "UNKNOWN_LIST_REFERENCE";
+  | "UNKNOWN_LIST_REFERENCE"
+  /** The gate edge's own option structure is malformed (M11-D1C): no condition on it can be trusted. */
+  | "MALFORMED_GATE_EDGE";
 
 export interface AuthorityGate {
   readonly fromListName: string;
@@ -500,6 +674,12 @@ export function loadAplAuthority(rawArtifact: unknown): AuthorityLoadResult {
       return notProvable(
         "INCOMING_EDGE_NOT_FROM_ENTRY_LIST",
         `'${targetListName}' is called from '${edge.listName}', not from entry list '${artifact.entryListName}'`,
+      );
+    }
+    if (isMalformedAuthorityLine(edge)) {
+      return notProvable(
+        "MALFORMED_GATE_EDGE",
+        `the call to '${targetListName}' has a malformed option structure, so its gate cannot be read`,
       );
     }
     if (edge.conditionRaw === null) {
