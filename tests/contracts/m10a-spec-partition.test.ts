@@ -45,13 +45,16 @@ describe("the known specialization ids are exactly partitioned", () => {
     for (const id of PUBLIC_SPEC_IDS) expect(INTERNAL_ONLY_SPEC_IDS as readonly string[]).not.toContain(id);
   });
 
-  it("Assassination, both Paladins and Blood Death Knight are public", () => {
+  it("Assassination, both Paladins, Blood Death Knight and Brewmaster Monk are public", () => {
     expect(PUBLIC_SPEC_IDS).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
       "deathknight/blood",
+      "monk/brewmaster",
     ]);
+    expect(isPublicSpecId("monk/brewmaster")).toBe(true);
+    expect(isSpecId("monk/brewmaster")).toBe(true);
     expect(isPublicSpecId("rogue/assassination")).toBe(true);
     expect(isPublicSpecId("paladin/protection")).toBe(true);
     expect(isPublicSpecId("paladin/retribution")).toBe(true);
@@ -61,19 +64,18 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set holds Brewmaster Monk since M11-C2, and its machinery is live over one member again", () => {
+  it("the internal-only set is empty again since M11-C4j, and its machinery is dormant rather than removed", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
     // Blood Death Knight measurement slice from M11-B2, was empty again from
-    // M11-B12 when that id moved across, and holds the Brewmaster Monk
-    // measurement slice since M11-C2 — which arrived here first, as all three
-    // of its predecessors did.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["monk/brewmaster"]);
+    // M11-B12, held the Brewmaster Monk measurement slice from M11-C2, and is
+    // empty again since M11-C4j moved that id across. The next specialization
+    // is expected to arrive here first, as all four of its predecessors did.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
     expect(typeof requirePublicSpecId).toBe("function");
     expect(typeof InternalSpecExposureError).toBe("function");
-    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(id !== "monk/brewmaster");
-    expect(isSpecId("monk/brewmaster")).toBe(true);
-    expect(() => requirePublicSpecId("monk/brewmaster")).toThrow(InternalSpecExposureError);
+    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
+    expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
   });
 
   it("an unknown string is not a spec id at all", () => {
@@ -86,6 +88,9 @@ describe("the known specialization ids are exactly partitioned", () => {
       "Paladin/Retribution",
       "paladin/holy",
       "deathknight/frost",
+      "monk/mistweaver",
+      "monk/windwalker",
+      "Monk/Brewmaster",
       "warrior/arms",
       "constructor",
     ]) {

@@ -25,7 +25,8 @@
  * (`FULL_RAID`, no resources) and its `analyze` is replaced by one that
  * throws, so reaching it would surface as a failure rather than as a quietly
  * wrong result. The catalog is complete — every public row is present
- * (Retribution Paladin's unmodified production row too, since M11-A5), as the
+ * (Retribution Paladin's unmodified production row too, since M11-A5, and
+ * Blood Death Knight's and Brewmaster Monk's since M11-B12 and M11-C4j), as the
  * registry requires — and the only question is whether a row that was NOT
  * selected for a Rogue request can influence what that request retrieves.
  */
@@ -149,6 +150,13 @@ const PRODUCTION_RETRIBUTION: RegisteredAnalyzer = productionRegistrationFor("pa
  */
 const PRODUCTION_BLOOD: RegisteredAnalyzer = productionRegistrationFor("deathknight/blood");
 
+/**
+ * The production Brewmaster Monk row, unmodified. PUBLIC since M11-C4j, so
+ * every injected catalog below must carry it too; it is never selected for a
+ * Rogue request and takes no part in the question.
+ */
+const PRODUCTION_BREWMASTER: RegisteredAnalyzer = productionRegistrationFor("monk/brewmaster");
+
 function deps(registry: readonly RegisteredAnalyzer[], ingest: CombatIngestionPort): AnalysisServiceDeps {
   return { env: ENV, preflight: PREFLIGHT, ingest, registry };
 }
@@ -160,7 +168,16 @@ describe("an unselected analyzer has no influence on this request", () => {
     const ingest = vi.fn(FIXTURE_INGEST);
     await analyzeFight(
       REQUEST,
-      deps([assassination(), UNRELATED_ANALYZER, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], ingest),
+      deps(
+        [
+          assassination(),
+          UNRELATED_ANALYZER,
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+        ],
+        ingest,
+      ),
     );
 
     expect(ingest.mock.calls[0]?.[0].scope).toBe("PLAYER_CONTEXT");
@@ -175,11 +192,29 @@ describe("an unselected analyzer has no influence on this request", () => {
 
     await analyzeFight(
       REQUEST,
-      deps([UNRELATED_ANALYZER, assassination(), PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], first),
+      deps(
+        [
+          UNRELATED_ANALYZER,
+          assassination(),
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+        ],
+        first,
+      ),
     );
     await analyzeFight(
       REQUEST,
-      deps([assassination(), UNRELATED_ANALYZER, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], second),
+      deps(
+        [
+          assassination(),
+          UNRELATED_ANALYZER,
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+        ],
+        second,
+      ),
     );
 
     expect(first.mock.calls[0]?.[0]).toEqual(second.mock.calls[0]?.[0]);
@@ -194,11 +229,29 @@ describe("an unselected analyzer has no influence on this request", () => {
 
     await analyzeFight(
       REQUEST,
-      deps([assassination(), PRODUCTION_PROTECTION, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], production),
+      deps(
+        [
+          assassination(),
+          PRODUCTION_PROTECTION,
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+        ],
+        production,
+      ),
     );
     await analyzeFight(
       REQUEST,
-      deps([assassination(), UNRELATED_ANALYZER, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], widened),
+      deps(
+        [
+          assassination(),
+          UNRELATED_ANALYZER,
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+        ],
+        widened,
+      ),
     );
 
     expect(widened.mock.calls[0]?.[0]).toEqual(production.mock.calls[0]?.[0]);
@@ -210,7 +263,16 @@ describe("an unselected analyzer has no influence on this request", () => {
     // than as a quietly wrong result.
     const result = await analyzeFight(
       REQUEST,
-      deps([assassination(), UNRELATED_ANALYZER, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], FIXTURE_INGEST),
+      deps(
+        [
+          assassination(),
+          UNRELATED_ANALYZER,
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+        ],
+        FIXTURE_INGEST,
+      ),
     );
 
     expect(result.ok).toBe(true);
@@ -222,7 +284,16 @@ describe("an unselected analyzer has no influence on this request", () => {
     // Gameplay truth cannot depend on who else is in the registry.
     const result = await analyzeFight(
       REQUEST,
-      deps([assassination(), UNRELATED_ANALYZER, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], FIXTURE_INGEST),
+      deps(
+        [
+          assassination(),
+          UNRELATED_ANALYZER,
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+        ],
+        FIXTURE_INGEST,
+      ),
     );
 
     expect(result.ok).toBe(true);
@@ -244,7 +315,16 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
     const ingest = vi.fn(FIXTURE_INGEST);
     await analyzeFight(
       REQUEST,
-      deps([assassination(), PRODUCTION_PROTECTION, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], ingest),
+      deps(
+        [
+          assassination(),
+          PRODUCTION_PROTECTION,
+          PRODUCTION_RETRIBUTION,
+          PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
+        ],
+        ingest,
+      ),
     );
 
     expect(assassination().requirement.includeResources).toBe(true);
@@ -260,7 +340,10 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
 
     await analyzeFight(
       REQUEST,
-      deps([frugal, PRODUCTION_PROTECTION, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD], ingest),
+      deps(
+        [frugal, PRODUCTION_PROTECTION, PRODUCTION_RETRIBUTION, PRODUCTION_BLOOD, PRODUCTION_BREWMASTER],
+        ingest,
+      ),
     );
 
     expect(ingest.mock.calls[0]?.[0].includeResources).toBe(false);
@@ -282,6 +365,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
             PRODUCTION_PROTECTION,
             PRODUCTION_RETRIBUTION,
             PRODUCTION_BLOOD,
+            PRODUCTION_BREWMASTER,
           ],
           ingest,
         ),
@@ -303,6 +387,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_PROTECTION,
           PRODUCTION_RETRIBUTION,
           PRODUCTION_BLOOD,
+          PRODUCTION_BREWMASTER,
         ],
         ingest,
       ),

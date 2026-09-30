@@ -177,7 +177,8 @@ the most of the remaining M11 population (`agent/m11-a3-authority-audit.md`
 
 Both known specializations are PUBLIC and `INTERNAL_ONLY_SPEC_IDS` is empty.
 (Superseded: Retribution Paladin arrived internal-only at M11-A4, Blood Death
-Knight at M11-B2, and Brewmaster Monk at M11-C2, which holds the set today.)
+Knight at M11-B2, and Brewmaster Monk at M11-C2; each was promoted in turn,
+Brewmaster at M11-C4j, and the set is empty again.)
 The partition, `requirePublicSpecId`, `InternalSpecExposureError`, the
 registry's `INTERNAL_ONLY` exposure and `internalAnalyzerForSpec` are kept as
 the on-ramp for the next specialization, which is expected to arrive as an
@@ -246,6 +247,46 @@ code in a change reviewed for exposure.
 each with its own fail-closed status, and each with the four negative tests
 Blood now has (foreign `logVersion`, older `logVersion`, foreign
 `gameVersion`, absent `gameVersion`).
+
+(M11-C4j: Brewmaster's one Energy read is keyed too — owner decision, the
+affordability dimension fails closed on an uncovered version. The two Paladin
+modules remain the only unkeyed readers.)
+
+## After M11-C4j: Brewmaster's retained UNKNOWN areas and the Master of Harmony slice
+
+**Raised:** M11-C4j (2026-09-28).
+
+Brewmaster is public as a beta-quality slice, validated for Shado-Pan only.
+What stays `UNKNOWN` by design, each with its route out:
+
+- **Black Ox Brew** — no reviewed transition contract (what it resets, what it
+  forgets); the largest single UNKNOWN cause on both subjects.
+- **Empty the Cellar on subject 2** — its readiness aura is corroborated, but
+  that window holds no 1262768 transition to anchor it.
+- **Keg Smash charges and hasted recharge** — only the ≥1-charge upper bound
+  is used; no charge simulation.
+- **Energy between observations** — only a decision cast's own PRE_COST is read.
+- **Unproven positive usability** — Breath of Fire is untargeted and never
+  proven; an uncosted decision cast proves no affordability.
+- **Master of Harmony** — refused (`AUTHORITY_NOT_AVAILABLE`) until real
+  Master of Harmony evidence is measured.
+
+**Done looks like:** each item closed by its own reviewed slice with real
+evidence, never by inference.
+
+## After M11-C4i: the corpus layering guard never inspects `tests/contracts/`
+
+**Raised:** M11-C4i (2026-09-27); recorded at M11-C4j.
+
+`tests/contracts/m9a-corpus-layering.test.ts` globs `../**/*.ts`; Vite keys
+files in the importer's own directory as `./x`, but the test strips only
+`../`, so every `tests/contracts/*` source reads as empty and the
+sanctioned-entry and triple rules never check contract tests (79 of 315 files
+at M11-C4i). Not fixed: widening the guard may surface existing violations and
+needs its own reviewed change.
+
+**Done looks like:** `./` keys normalized to `contracts/`, and whatever
+surfaces triaged.
 
 ## After M11-B12: Blood's Deathbringer slice and the Improved Bone Shield maximum
 

@@ -81,8 +81,10 @@ describe("the committed corpus loads", () => {
     // normalization case.
     // M11-C4h added the Protection Paladin discrimination control (a
     // one-field substitution of the 60–90 s segment) and its case.
+    // M11-C4j added no artifact and one case: the Brewmaster subject's REST/MCP
+    // PUBLIC_CONTRACT parity (its APPLICATION_SERVICE case was re-pinned).
     expect(loaded.artifacts).toHaveLength(47);
-    expect(loaded.cases).toHaveLength(173);
+    expect(loaded.cases).toHaveLength(174);
     expect(loaded.coverage.declared).toBe(0);
   });
 

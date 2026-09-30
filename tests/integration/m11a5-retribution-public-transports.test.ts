@@ -273,7 +273,7 @@ describe("MCP: the same public semantics as REST", () => {
     // and the limits are ordered by the catalog, so Retribution is found by
     // its own content rather than by a position this file would have to chase.
     expect(sentence).toBe(
-      "Supported specializations: Assassination Rogue, Blood Death Knight, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
     );
     const retribution = limits.find((entry) => entry.analysis.includes("Retribution Paladin analysis"));
     expect(retribution?.analysis).toContain("only observed Holy Power SPENDER decisions");

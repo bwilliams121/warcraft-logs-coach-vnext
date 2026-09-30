@@ -20,10 +20,15 @@
  * a real question about this specialization, and we have no authority for
  * it" — a different statement from `DOMAIN_NOT_DECLARED`.
  *
- * NO RESOURCE IS DECLARED. The M11-C2 slice reads no Energy — not the cast
- * snapshots, not a regeneration model — so no capability lists ENERGY and the
- * derived ingestion requirement does not ask for resources. A later slice
- * that reads Energy declares it here, and the requirement follows.
+ * ENERGY IS DECLARED ON THE OFFENSIVE CAPABILITY (M11-C4j). The M11-C2 slice
+ * read no Energy, so nothing listed it. M11-C4i's positive usability reads
+ * the decision cast's own PRE_COST Energy for Keg Smash's affordability — the
+ * later slice this paragraph anticipated — and it did not declare it: harmless
+ * while the row was INTERNAL_ONLY (every committed capture carries resources),
+ * a silent under-fetch the moment a public request derived its ingestion from
+ * this declaration. So the offensive capability lists ENERGY and the RESOURCES
+ * category, and the derived requirement follows. No regeneration model and no
+ * carried value exist; the resource-spending domain still reads nothing.
  *
  * Shared between the registration (which hands the access object to the
  * facade) and the facade's standalone path (tests, the corpus executor), so
@@ -54,8 +59,8 @@ export const BREWMASTER_CAPABILITIES: readonly DecisionCapability[] = Object.fre
     domain: "OFFENSIVE_ROTATION",
     requirements: {
       scope: "PLAYER_CONTEXT",
-      resources: [],
-      evidenceCategories: ["CASTS", "AURAS", "COMBATANT_INFO"],
+      resources: ["ENERGY"],
+      evidenceCategories: ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO"],
       targetModel: "PER_OBSERVED_CAST",
     },
   },

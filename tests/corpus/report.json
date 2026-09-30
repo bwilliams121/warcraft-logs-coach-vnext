@@ -533,13 +533,13 @@
       "passed": 13
     },
     {
-      "assertions": 13,
-      "cases": 13,
+      "assertions": 14,
+      "cases": 14,
       "failed": 0,
       "kindsExercised": ["PUBLIC_CONTRACT.REST_MCP_PARITY"],
       "notExecuted": 0,
       "owningLayer": "PUBLIC_CONTRACT",
-      "passed": 13
+      "passed": 14
     }
   ],
   "cases": [
@@ -591,7 +591,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.brewmaster-monk-subject-is-internal-only-and-publicly-unsupported",
+      "caseId": "application-service.brewmaster-monk-subject-is-publicly-supported-since-m11-c4j",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },
@@ -2427,6 +2427,20 @@
       "caseId": "public-contract.analysis-parity-for-the-blood-death-knight-subject",
       "owningLayer": "PUBLIC_CONTRACT",
       "referencedArtifactIds": ["wcl-blood-death-knight-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "public-contract.analysis-parity-for-the-brewmaster-monk-subject",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "referencedArtifactIds": ["wcl-brewmaster-monk-gtkb-opener"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -6635,13 +6649,13 @@
   "totals": {
     "artifactBytes": 5503273,
     "artifacts": 47,
-    "assertions": 748,
-    "cases": 173,
+    "assertions": 749,
+    "cases": 174,
     "declared": 0,
-    "executable": 748,
+    "executable": 749,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 748
+    "passed": 749
   }
 }

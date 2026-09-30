@@ -1,5 +1,5 @@
 /**
- * The Brewmaster Monk observed-decision facade (M11-C2, INTERNAL_ONLY).
+ * The Brewmaster Monk observed-decision facade (M11-C2; PUBLIC since M11-C4j).
  *
  * WHAT IT IS
  *
@@ -7,9 +7,10 @@
  * the observed foreground casts of one Brewmaster Monk, evaluates each cast
  * of a SUPPORTED offensive token against the pinned offensive authority
  * through the nested unselectability proof and the shared first-GCD query,
- * and reports the decision domains separately. Nothing selects it for a
- * public request: the registration is INTERNAL_ONLY, and what this returns is
- * read by the internal lookup, the corpus and tests.
+ * and reports the decision domains separately. Since M11-C4j the
+ * registration is PUBLIC: a Monk/Brewmaster identity dispatches it through the
+ * application service, REST, MCP and raid night, and what this returns is
+ * projected through the shared public contract.
  *
  * WHAT IT IS FOR: MEASUREMENT. The next cohort's representative is a tank
  * whose pinned authority dispatches two hero-tree lists by
@@ -28,8 +29,10 @@
  * - Not a survival evaluator. The brews and Expel Harm are judged nowhere
  *   here; their defensive meaning belongs to domains with no authority
  *   (`domains.ts`).
- * - Not a resource simulator. No Energy is read, carried or regenerated; no
- *   brew charge is modelled. Gates that need either stay undecided.
+ * - Not a resource simulator. No Energy is carried or regenerated (since
+ *   M11-C4i only a decision cast's own PRE_COST Energy is read, for one
+ *   usability dimension); no brew charge is modelled. Gates that need either
+ *   stay undecided.
  * - Not a racial, potion or trinket evaluator: those entries are outside the
  *   rotational decision domain (`domain-boundary.ts`).
  *
@@ -49,11 +52,12 @@
  * `empty_the_cellar` and `rushing_jade_wind` are in-domain GCD tokens the
  * slice observes and does not judge.
  *
- * NO VALIDATED-PROFILE GATE. The slice is INTERNAL_ONLY and exists to be
- * measured; it analyzes whatever hero tree the observed tree resolves to,
- * truthfully (`resolver.ts`). A build that resolves to NO hero tree leaves
- * both run gates unbound, and the measurement records the resulting
- * UNDECIDED_RUN_GATE rather than refusing the actor.
+ * THE VALIDATED-PROFILE GATE (M11-C4j). Until promotion the slice analyzed
+ * whatever hero tree the observed tree resolved to. Since M11-C4j a build is
+ * analyzed only when it resolves to Shado-Pan, the tree both real subjects
+ * use (`supported-profile.ts`): Master of Harmony is AUTHORITY_NOT_AVAILABLE,
+ * an unresolved or contradictory tree PROFILE_NOT_RESOLVED, before any
+ * decision is read. The resolver still binds both run gates truthfully.
  *
  * MATCH MEANS AUTHORITY_COMPATIBLE_ONLY, after the non-domain exclusion.
  */
@@ -129,6 +133,7 @@ import {
 import { resolveBrewmasterAtoms, type BrewmasterResolverDiagnostics } from "./resolver.js";
 import { resolveBrewmasterPositiveUsability } from "./positive-usability.js";
 import type { PositiveUsability } from "../../../findings/usability/usability-completeness.js";
+import { brewmasterValidatedProfile } from "./supported-profile.js";
 import { BREWMASTER_MONK_SPEC_ID } from "./spec.js";
 
 // ---------------------------------------------------------------------------
@@ -533,6 +538,17 @@ export function analyzeObservedBrewmasterMonkDecisions(
   const observedTalents = snapshot.talents;
   const talents = resolveAllModelledTalents(observedTalents);
   const heroTree = resolveBrewmasterHeroTree(observedTalents);
+
+  // ---- the validated-profile gate (M11-C4j), before any decision is read ----
+  //
+  // The supported slice is validated against Shado-Pan evidence only. A build
+  // the observed talent tree resolves to Master of Harmony, or to neither,
+  // fails closed here rather than producing MATCH/REJECTED verdicts for a
+  // decision surface no real evidence backs.
+  const profile = brewmasterValidatedProfile(heroTree);
+  if (!profile.supported) {
+    return unsupported(profile.status, specId, profile.detail);
+  }
   const apex1 = resolveBrewmasterApexTrait(observedTalents, 1);
   const apex3 = resolveBrewmasterApexTrait(observedTalents, 3);
   const buildFacts: BrewmasterBuildFacts = { talents, heroTree };

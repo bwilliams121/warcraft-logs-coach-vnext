@@ -4583,11 +4583,11 @@
       ]
     },
     {
-      "caseId": "application-service.brewmaster-monk-subject-is-internal-only-and-publicly-unsupported",
+      "caseId": "application-service.brewmaster-monk-subject-is-publicly-supported-since-m11-c4j",
       "artifactId": "wcl-brewmaster-monk-gtkb-opener",
       "owningLayer": "APPLICATION_SERVICE",
-      "contractUnderTest": "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts INTERNAL_ONLY_SPEC_IDS",
-      "purpose": "The real Brewmaster Monk subject, over its own captured evidence, is NOT recognized by the public identity table (Monk/Brewmaster resolves to nothing), so the application service answers SPEC_NOT_SUPPORTED with no analyzer, no specId and nothing retrieved. The internal lookup finds the INTERNAL_ONLY registration; the public lookup finds nothing.",
+      "contractUnderTest": "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts PUBLIC_SPEC_IDS",
+      "purpose": "RE-PINNED AT M11-C4j, INVERTING THE M11-C2 CASE. The real Brewmaster Monk subject, over its own captured evidence, is now recognized by the public identity table (Monk/Brewmaster -> monk/brewmaster), so the application service retrieves the fight once and dispatches exactly the Brewmaster registration: status ANALYZED, specId monk/brewmaster, analyzerId monk-brewmaster-observed-decisions, scope PLAYER_CONTEXT (the analyzer's own declared requirement, resources included since M11-C4j declared the ENERGY its positive usability reads). Both catalog lookups now answer with the SAME row, whose exposure is PUBLIC. The five public sites moved together in one reviewed edit: the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure.",
       "assertions": [
         {
           "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
@@ -4598,10 +4598,10 @@
               "specName": "Brewmaster"
             },
             "expected": {
-              "status": "SPEC_NOT_SUPPORTED",
-              "specId": null,
-              "analyzerId": null,
-              "scope": null
+              "status": "ANALYZED",
+              "specId": "monk/brewmaster",
+              "analyzerId": "monk-brewmaster-observed-decisions",
+              "scope": "PLAYER_CONTEXT"
             }
           }
         },
@@ -4611,23 +4611,24 @@
             "specId": "monk/brewmaster",
             "expected": {
               "internalAnalyzerId": "monk-brewmaster-observed-decisions",
-              "publicAnalyzerId": null,
-              "exposure": "INTERNAL_ONLY",
-              "identityResolvesPublicly": false
+              "publicAnalyzerId": "monk-brewmaster-observed-decisions",
+              "exposure": "PUBLIC",
+              "identityResolvesPublicly": true
             }
           }
         }
       ],
       "rationale": {
         "basis": ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-        "text": "An evaluator has to exist, be registered, be exercised and be audited before it is safe to expose. M11-C2 does the first three for a measurement slice; nothing about it is public."
+        "text": "An evaluator has to exist, be registered, be exercised and be audited before it is safe to expose. M11-C2 did the first three for a measurement slice; the M11-C3/C4 slices resolved real decisions over two independent subjects, M11-C4i reached a real REJECTED in each, and M11-C4j exposed exactly that slice — narrowed by the Shado-Pan validated-profile gate — and nothing more."
       },
       "authority": null,
       "limitations": [],
       "relatedTests": [
         "tests/contracts/m11c2-brewmaster-registration.test.ts",
         "tests/contracts/m11-promotion-evidence-gate.test.ts",
-        "tests/contracts/m10a-spec-partition.test.ts"
+        "tests/contracts/m10a-spec-partition.test.ts",
+        "tests/contracts/m11c4j-brewmaster-public-projection.test.ts"
       ]
     },
     {
@@ -8696,6 +8697,42 @@
       "relatedTests": [
         "tests/integration/m11b12-blood-public-transports.test.ts",
         "tests/contracts/m11b12-blood-public-projection.test.ts",
+        "tests/contracts/m10a-spec-partition.test.ts"
+      ]
+    },
+    {
+      "caseId": "public-contract.analysis-parity-for-the-brewmaster-monk-subject",
+      "artifactId": "wcl-brewmaster-monk-gtkb-opener",
+      "owningLayer": "PUBLIC_CONTRACT",
+      "contractUnderTest": "src/contracts/analysis-projection.ts; src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
+      "purpose": "The real Brewmaster Monk subject over its own 20 s opener is ANALYZED on both transports — one document naming monk/brewmaster and the Brewmaster analyzer, identical on REST and MCP (structuredContent and text), schema-valid under warcraft-logs-coach.analysis/1, publishing MATCH as AUTHORITY_COMPATIBLE_ONLY. (Before M11-C4j the same subject answered SPEC_NOT_SUPPORTED on both transports.)",
+      "assertions": [
+        {
+          "kind": "PUBLIC_CONTRACT.REST_MCP_PARITY",
+          "params": {
+            "document": "ANALYSIS",
+            "subject": {
+              "actorId": 4,
+              "className": "Monk",
+              "specName": "Brewmaster"
+            },
+            "expected": {
+              "status": "ANALYZED",
+              "specId": "monk/brewmaster",
+              "analyzerId": "monk-brewmaster-observed-decisions"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["OWNED_CONTRACT"],
+        "text": "The schema version is unchanged: M11-C4j widened the public specId enum and nothing else — no outcome, basis, blocker class, exclusion reason, status or capability value moved for the fifth specialization, and no document a consumer had already received changed. Brewmaster's own evidence classes (the positive-usability conclusions and their per-dimension facts, the readiness aura facts, the dispatch trace) stay inside the payload; what the wire carries is the same vocabulary the other four publish."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/integration/m11c4j-brewmaster-public-transports.test.ts",
+        "tests/contracts/m11c4j-brewmaster-public-projection.test.ts",
         "tests/contracts/m10a-spec-partition.test.ts"
       ]
     },

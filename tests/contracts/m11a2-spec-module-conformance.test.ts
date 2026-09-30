@@ -315,7 +315,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the four public modules and, since M11-C2, one INTERNAL_ONLY module, each with zero supplemental analyses", () => {
+  it("is exactly the five public modules, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -324,7 +324,7 @@ describe("what the tree exports today", () => {
     // (agent/m11-a4-first-spec-contract.md section 8); M11-A5 is exposure only.
     // The fourth module (M11-B2) followed the same two-step: INTERNAL_ONLY
     // first, PUBLIC at M11-B12 by the five-site move. The fifth (M11-C2,
-    // Brewmaster Monk) is INTERNAL_ONLY, carrying the internal partition entry.
+    // Brewmaster Monk) followed it: INTERNAL_ONLY first, PUBLIC at M11-C4j.
     expect(
       MODULES.map(({ exportName, module }) => [
         exportName,
@@ -334,7 +334,7 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "PUBLIC", 0],
-      ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "INTERNAL_ONLY", 0],
+      ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],

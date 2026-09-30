@@ -319,6 +319,21 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
         "spec-blood-death-knight.marrowrend-is-proven-usable-only-from-the-decision-casts-own-runes[7] -> REJECTED",
         "spec-blood-death-knight.outside-the-gift-window-the-scan-skips-san-gift-and-stops-in-sanlayn[19] -> MATCH",
       ],
+      // M11-C4j: Brewmaster Monk's promotion evidence — seven qualifying
+      // assertions over two independent Shado-Pan subjects, five MATCH and two
+      // REJECTED, every one over SANITIZED_CAPTURE, recorded PASSED in its
+      // root's committed report and paired THROUGH the identity table
+      // (Monk/Brewmaster -> the id). The same seven the INTERNAL_ONLY report
+      // counted at M11-C4i; promotion added none.
+      "monk/brewmaster": [
+        "spec-brewmaster-monk.breath-of-fire-and-keg-smash-match-and-the-rest-name-their-blocker[0] -> MATCH",
+        "spec-brewmaster-monk.breath-of-fire-and-keg-smash-match-and-the-rest-name-their-blocker[1] -> MATCH",
+        "spec-brewmaster-monk.breath-of-fire-and-keg-smash-match-and-the-rest-name-their-blocker[4] -> REJECTED",
+        "spec-brewmaster-monk.breath-of-fire-and-keg-smash-match-and-the-rest-name-their-blocker[5] -> MATCH",
+        "spec-brewmaster-monk.the-first-full-fight-segment-match-resolves-over-the-cross-tier-bundle[0] -> MATCH",
+        "spec-brewmaster-monk.the-second-subjects-first-resolved-match-over-its-fixed-165s-bundle[0] -> MATCH",
+        "spec-brewmaster-monk.the-second-subjects-rejected-tiger-palm-over-its-fixed-165s-bundle[0] -> REJECTED",
+      ],
       "paladin/protection": [
         "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura[1] -> MATCH",
         "spec-protection-paladin.hammer-of-wrath-is-unusable-only-from-an-observed-removal-of-its-readiness-aura[6] -> MATCH",
@@ -365,6 +380,9 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
     );
     expect(routes).toEqual({
       "deathknight/blood": { realRejected: 10, controls: [] },
+      // M11-C4j: Brewmaster passes by its two real REJECTEDs, one per
+      // independent subject, with no control.
+      "monk/brewmaster": { realRejected: 2, controls: [] },
       // Protection has no real REJECTED (0 over 149 decisions); it passes by
       // its one negative control, migrated atomically with the split.
       "paladin/protection": {
@@ -389,6 +407,8 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
     );
     expect(spans).toEqual({
       "deathknight/blood": [49998, 50842, 195182, 206930, 433895],
+      // Tiger Palm, Breath of Fire, Keg Smash, Blackout Kick.
+      "monk/brewmaster": [100780, 115181, 121253, 205523],
       "paladin/protection": [31935, 375576],
       "paladin/retribution": [53385, 383328],
       "rogue/assassination": [703, 32645],
@@ -509,48 +529,20 @@ describe("M11-B12: Blood Death Knight's promotion evidence, through the identity
   });
 });
 
-describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("exactly one production INTERNAL_ONLY registration exists since M11-C2 — Brewmaster Monk — and it is the partition's one member", () => {
-    // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
-    // it; the set was empty from M11-B12 until Brewmaster Monk arrived in
-    // M11-C2. The synthetic module below still exercises the branch
-    // independently of whichever real row holds the half.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["monk/brewmaster"]);
-    expect(
-      PRODUCTION_CATALOG.registrations
-        .filter((row) => row.exposure === "INTERNAL_ONLY")
-        .map((row) => row.specId),
-    ).toEqual(["monk/brewmaster"]);
-  });
-
-  it("Brewmaster Monk (INTERNAL_ONLY since M11-C2) is REPORTED, never failed: since M11-C4i it passes BOTH gates on real evidence and stays INTERNAL_ONLY", async () => {
-    // Informational by construction. The internal pairing accepts the
-    // Monk/Brewmaster identity BECAUSE the public table refuses it. The
-    // qualifying real MATCH decisions of two independent, neutrally selected
-    // Shado-Pan subjects pass the OBSERVATION gate (M11-C4h). Until M11-C4i the
-    // DISCRIMINATION gate was structurally unreachable: the only positive
-    // usability proof was the observed cast (M11-C4g). M11-C4i's positive
-    // usability completeness proof lets the authority DEFINITELY select an
-    // alternative the player did not cast, and each subject now carries one
-    // real, state/authority-driven REJECTED over SANITIZED_CAPTURE — no
-    // negative control is used. evidenceReady authorizes NOTHING by itself:
-    // promotion is a separate, reviewed decision, and Brewmaster is not PUBLIC.
+describe("M11-C4j: Brewmaster Monk passes BOTH global gates in PUBLIC mode, on the same real evidence and no control", () => {
+  it("seven qualifying assertions over two independent subjects, paired through the identity table; two real REJECTED; evidenceReady", async () => {
+    // The same global rules as every public specialization (M11-C4h): no
+    // Brewmaster branch in the gate. At M11-C4i the INTERNAL_ONLY report
+    // already counted these seven through the module's own WCL identity;
+    // PUBLIC mode now counts them through the identity table, and a PUBLIC
+    // specialization that failed either gate would fail CI.
     const tiers = await tiersPromise;
-    const module = MODULES.find((candidate) => candidate.identity.specId === "monk/brewmaster");
-    if (module === undefined) throw new Error("no Brewmaster module");
-    expect(module.exposure).toBe("INTERNAL_ONLY");
-    expect(resolveSpecIdentity({ className: "Monk", specName: "Brewmaster" })).toMatchObject({ ok: false });
-    const readiness = evaluate(tiers, "monk/brewmaster", "INTERNAL_ONLY", internalPairing(module));
-    expect(readiness.exposure).toBe("INTERNAL_ONLY");
-    // M11-C4e: subject 1's fourth is the ARCHIVE's first full-fight-segment
-    // MATCH over the cross-tier bundle (corpus opener + corpus 20–165 s +
-    // archive 165–285 s), recorded PASSED in the committed archive report.
-    // M11-C4f: the neutral second subject contributes exactly one — its first
-    // resolved MATCH by report time over its fixed 165 s cross-tier bundle —
-    // paired by its OWN committed fight context.
-    // M11-C4i: subject 1's Tiger Palm at 2,424,688 (corpus opener, against a
-    // proven-usable Keg Smash) and subject 2's at 2,573,516 (archive, against a
-    // proven-usable Blackout Kick) are REJECTED, each over its own capture.
+    expect(resolveSpecIdentity({ className: "Monk", specName: "Brewmaster" })).toEqual({
+      ok: true,
+      specId: "monk/brewmaster",
+    });
+    const readiness = evaluate(tiers, "monk/brewmaster", "PUBLIC", publicPairing("monk/brewmaster"));
+    expect(readiness.exposure).toBe("PUBLIC");
     const bySubject = readiness.qualifyingAssertions.map(
       (q) =>
         `${q.rootId}:${q.expectedOutcome}:${q.evidenceActor.reportCode}/${q.evidenceActor.fightId}/${q.evidenceActor.actorId}`,
@@ -564,12 +556,11 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
       "REGRESSION_CORPUS:MATCH:gtKb2xHn87pNcFfW/22/4",
       "REGRESSION_CORPUS:REJECTED:gtKb2xHn87pNcFfW/22/4",
     ]);
-    // Every qualifying assertion is real observation over SANITIZED_CAPTURE; no control qualifies anything.
     for (const q of readiness.qualifyingAssertions) {
+      expect(q.kind).toBe("SPEC_BREWMASTER_MONK.DECISION_COVERAGE");
       expect(q.evidenceSet.every((entry) => entry.kind === "SANITIZED_CAPTURE")).toBe(true);
-    }
-    for (const q of readiness.qualifyingAssertions) {
       expect(q.evidenceIdentity).toEqual({ className: "Monk", specName: "Brewmaster" });
+      expect(q.reportStatus).toBe("PASSED");
     }
     expect(readiness.observationGate.ready).toBe(true);
     expect(readiness.observationGate.distinctResolvedAbilityIds.length).toBeGreaterThanOrEqual(
@@ -586,9 +577,38 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     ]);
     expect(readiness.discriminationGate.ready).toBe(true);
     expect(readiness.evidenceReady).toBe(true);
-    // Readiness is a report: the module is still INTERNAL_ONLY and the identity table still refuses it.
-    expect(module.exposure).toBe("INTERNAL_ONLY");
-    expect(PUBLIC_SPEC_IDS as readonly string[]).not.toContain("monk/brewmaster");
+    expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
+  });
+});
+
+describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
+  it("no production INTERNAL_ONLY registration exists since M11-C4j, and the partition agrees", () => {
+    // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
+    // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it. The
+    // synthetic module below still exercises the branch independently of
+    // whichever real row holds the half, and the next specialization is
+    // expected to arrive here first.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect(
+      PRODUCTION_CATALOG.registrations
+        .filter((row) => row.exposure === "INTERNAL_ONLY")
+        .map((row) => row.specId),
+    ).toEqual([]);
+  });
+
+  it("the internal pairing finds nothing for Brewmaster Monk now that the identity table resolves it (M11-C4j)", async () => {
+    // The mirror of the Blood and Retribution cases: the internal pairing
+    // REQUIRES the public table to refuse the identity, and the table now
+    // resolves Monk/Brewmaster, so the internal-mode search over the same real
+    // evidence qualifies nothing. The PUBLIC mode is where they count.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "monk/brewmaster");
+    if (module === undefined) throw new Error("no Brewmaster module");
+    const readiness = evaluate(tiers, "monk/brewmaster", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
+    expect(readiness.disqualified.length).toBeGreaterThan(0);
+    for (const d of readiness.disqualified) expect(d.reason).toContain("not this specialization");
   });
 
   it("the internal pairing finds nothing for Blood Death Knight now that the identity table resolves it (M11-B12)", async () => {

@@ -1,5 +1,5 @@
 /**
- * Brewmaster Monk's analyzer registration (M11-C2, INTERNAL_ONLY).
+ * Brewmaster Monk's analyzer registration (M11-C2; PUBLIC since M11-C4j).
  *
  * THIS IS WHERE BREWMASTER STATES WHAT IT IS, AND THE ONLY PLACE.
  *
@@ -10,15 +10,25 @@
  * its result shared code may read. `src/services/analyzer-registry.ts` lists
  * this row and reads nothing else from this directory.
  *
- * INTERNAL_ONLY, AND WHAT THAT MEANS HERE. The row is in the production
- * catalog, reachable by the internal lookup, the corpus and tests, and never
- * selected by the application service, raid-night orchestration, REST or MCP:
- * the identity table does not resolve Monk/Brewmaster, the public partition
- * does not name it, and the public prose is derived from PUBLIC rows only.
- * It is a MEASUREMENT slice (`observed-analysis.ts`). Promotion, if it ever
- * comes, is the reviewed five-site edit every predecessor went through, after
- * the test-owned promotion evidence gate reports real MATCH and REJECTED
- * evidence for it.
+ * PUBLIC SINCE M11-C4j, AND WHAT THAT CHANGED
+ *
+ * The row was INTERNAL_ONLY from M11-C2 through M11-C4i: in the production
+ * catalog, reachable by the internal lookup, the corpus and tests, never
+ * selected by the application service, raid-night orchestration, REST or
+ * MCP. The measurement slices built the decision surface over two independent
+ * Shado-Pan subjects; M11-C4i reached real REJECTED evidence in both; M11-C4j
+ * moved the id by the reviewed five-site edit (the partition, the public
+ * contract's `specId` enum, the identity table, the `satisfies PublicSpecId`
+ * on `spec.ts`, and `exposure` below). Promotion changed REACHABILITY and two
+ * things that guard it, both in the specialization (owner decisions): the
+ * VALIDATED-PROFILE gate (`supported-profile.ts` — Shado-Pan only) and the
+ * version-scoped Energy wire resolution in `positive-usability.ts`. No
+ * gameplay rule, binding, authority reading or verdict moved.
+ *
+ * WHAT IS VALIDATED, AND WHAT IS ONLY MODELLED. The pinned authority carries
+ * both hero lists and the engine dispatches both; the EVIDENCE is Shado-Pan.
+ * A Master of Harmony build therefore fails closed as AUTHORITY_NOT_AVAILABLE
+ * rather than being judged against a list no measurement ever reviewed.
  *
  * THE AUTHORITY, BOUND TO ONE DOMAIN
  *
@@ -147,34 +157,40 @@ export function brewmasterObservedDecisionView(
 
 /**
  * The limitation prose. Owned here because it is a claim about what this
- * evaluator refuses to judge. NOT published: the row is INTERNAL_ONLY, so no
- * MCP description composes it and no public document carries it. It exists
- * so the row is complete and so promotion, if it ever comes, has the text to
- * review.
+ * evaluator refuses to judge, and PUBLISHED since M11-C4j: the MCP tool
+ * descriptions compose it through `publicSpecializationDescriptions`, by the
+ * same mechanism as every other public specialization. It names the validated
+ * hero tree, the slice, what is not evaluated and the UNKNOWN areas the slice
+ * retains, so a reader cannot mistake a narrow denominator for a full rotation
+ * review or an UNKNOWN for a fault.
  */
 export const BREWMASTER_LIMITS = Object.freeze({
   analysis: [
     "Brewmaster Monk analysis evaluates observed offensive global-cooldown decisions — Keg Smash, Blackout",
     "Kick, Tiger Palm, Breath of Fire and Invoke Niuzao — against pinned class/spec rotational authority,",
-    "when the necessary state can be established. Celestial Brew, Expel Harm, Chi Burst, Exploding Keg,",
-    "Empty the Cellar and Rushing Jade Wind are reported as excluded OUTSIDE_SUPPORTED_SLICE: observed, not",
-    "judged. It does NOT evaluate brews, Stagger, active mitigation, self-healing, defensive cooldowns,",
-    "interrupts or survival, it does not score performance, and it does not read race, faction, gear use",
-    "effects or consumables. It does not reconstruct Energy or brew charges; decisions needing that state,",
-    "or needing cooldown, proc or talent evidence the log does not carry, remain UNKNOWN. UNKNOWN is",
-    "expected here and is not a fault.",
+    "when the necessary state can be established. It is VALIDATED FOR THE SHADO-PAN HERO TREE ONLY: a build",
+    "whose observed talent tree resolves to Master of Harmony, to no hero tree, or to more than one is",
+    "refused rather than judged. Celestial Brew, Expel Harm, Chi Burst, Exploding Keg, Empty the Cellar and",
+    "Rushing Jade Wind are reported as excluded OUTSIDE_SUPPORTED_SLICE: observed, not judged. It does NOT",
+    "evaluate brews, Stagger, active mitigation, self-healing, defensive cooldowns, interrupts or survival,",
+    "it does not score performance, and it does not read race, faction, gear use effects or consumables.",
+    "It does not reconstruct Energy between observations, brew charges, Keg Smash charges or its hasted",
+    "recharge, or what Black Ox Brew changes; an alternative action counts as available only when every",
+    "usability condition is proven from the log. Decisions needing unproven state — including Empty the",
+    "Cellar's buff when no transition of it was observed — remain UNKNOWN. UNKNOWN is expected here and is",
+    "not a fault.",
   ].join("\n"),
   raidNight: [
     "Brewmaster Monk cells count only observed offensive global-cooldown decisions (Keg Smash, Blackout Kick,",
-    "Tiger Palm, Breath of Fire, Invoke Niuzao) compared against pinned class/spec authority; other",
-    "rotational decisions are excluded as OUTSIDE_SUPPORTED_SLICE, not judged. They do NOT evaluate brews,",
-    "mitigation, self-healing, defensive cooldowns, interrupts or survival, and they do not score",
-    "performance. Most decisions typically remain UNKNOWN, which is expected.",
+    "Tiger Palm, Breath of Fire, Invoke Niuzao) compared against pinned class/spec authority, and only for",
+    "Shado-Pan builds; other rotational decisions are excluded as OUTSIDE_SUPPORTED_SLICE, not judged. They",
+    "do NOT evaluate brews, mitigation, self-healing, defensive cooldowns, interrupts or survival, and they",
+    "do not score performance. Most decisions typically remain UNKNOWN, which is expected.",
   ].join("\n"),
 });
 
 /**
- * The Brewmaster Monk specialization module (M11-C2), INTERNAL_ONLY.
+ * The Brewmaster Monk specialization module (M11-C2), PUBLIC since M11-C4j.
  *
  * `supplementalAnalyses` is EMPTY by decision. The WCL identity strings are
  * the ones the committed gtKb fight-22 context reports for actor 4
@@ -188,7 +204,7 @@ export const BREWMASTER_MONK_MODULE: SpecModule = defineSpecModule({
     wclClassName: "Monk",
     wclSpecName: "Brewmaster",
   },
-  exposure: "INTERNAL_ONLY",
+  exposure: "PUBLIC",
   capabilities: BREWMASTER_CAPABILITIES,
   authorityBindings: BREWMASTER_AUTHORITY_BINDINGS,
   limitsProse: BREWMASTER_LIMITS,

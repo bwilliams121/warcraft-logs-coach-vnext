@@ -182,15 +182,17 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 }
 
 describe("the production catalog", () => {
-  it("is exactly the four PUBLIC registrations (Blood PUBLIC since M11-B12) plus the INTERNAL_ONLY Brewmaster row (M11-C2), and both lookups answer alike for every PUBLIC one", () => {
+  it("is exactly the five PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j), and both lookups answer alike for every one", () => {
     expect(ANALYZER_REGISTRATIONS).toHaveLength(5);
-    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(4);
+    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(5);
     expect(
       ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY").map((row) => row.specId),
-    ).toEqual(["monk/brewmaster"]);
-    // The INTERNAL_ONLY row answers the internal lookup only.
-    expect(analyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)).toBeNull();
-    expect(internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)?.exposure).toBe("INTERNAL_ONLY");
+    ).toEqual([]);
+    // The Brewmaster row was INTERNAL_ONLY from M11-C2; both lookups now find it.
+    expect(analyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
+    expect(internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)).toBe(
+      analyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG),
+    );
     expect(analyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
     expect(internalAnalyzerForSpec("deathknight/blood", PRODUCTION_CATALOG)).toBe(
       analyzerForSpec("deathknight/blood", PRODUCTION_CATALOG),
@@ -209,7 +211,7 @@ describe("the production catalog", () => {
     expect(analyzerForSpec("rogue/assassination", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
   });
 
-  it("public identity resolution accepts both Paladins and DeathKnight/Blood, and still rejects Warrior/Arms", () => {
+  it("public identity resolution accepts both Paladins, DeathKnight/Blood and Monk/Brewmaster, and still rejects Warrior/Arms", () => {
     expect(resolveSpecIdentity({ className: "Paladin", specName: "Protection" })).toEqual({
       ok: true,
       specId: "paladin/protection",
@@ -221,6 +223,10 @@ describe("the production catalog", () => {
     expect(resolveSpecIdentity({ className: "DeathKnight", specName: "Blood" })).toEqual({
       ok: true,
       specId: "deathknight/blood",
+    });
+    expect(resolveSpecIdentity({ className: "Monk", specName: "Brewmaster" })).toEqual({
+      ok: true,
+      specId: "monk/brewmaster",
     });
     expect(resolveSpecIdentity(UNSUPPORTED_WCL_IDENTITY)).toMatchObject({
       ok: false,

@@ -1032,3 +1032,94 @@ internal Blood evidence class on the wire, or an Assassination, Protection or
 Retribution document that moved — M11-B12 is **not** complete: record exactly
 what was observed and stop. Do not adjust the analyzer, the gates, the
 projection or the descriptions to make a smoke step pass.
+
+# Part VI — Milestone 11-C4j
+
+The deployed surface is unchanged in routes, tools and schema version. What
+changed: a fifth public analyzer, `monk-brewmaster-observed-decisions`,
+selected for `Monk/Brewmaster`; the public `specId` enum of
+`warcraft-logs-coach.analysis/1` now carries `monk/brewmaster`; and the
+`analyze_warcraft_log` / `analyze_raid_night` descriptions name all five
+supported specializations and Brewmaster's limits. **No other public value
+moved** — no outcome, basis, blocker class, exclusion reason, status or
+capability — and no schema version moved.
+
+Two promotion-layer guards are new and both are refusals rather than
+capabilities: Brewmaster is validated for the **Shado-Pan** hero tree only (a
+Master of Harmony build receives `AUTHORITY_NOT_AVAILABLE`, an unresolved or
+contradictory one `PROFILE_NOT_RESOLVED`), and Keg Smash's affordability reads
+Energy only through the version-scoped wire contract (a foreign parser version
+leaves that one usability dimension `UNKNOWN`). Brewmaster's derived ingestion
+requirement now asks for resources (it declares the ENERGY its positive
+usability reads).
+
+**Run Part VI only after M11-C4j is reviewed, committed, pushed, CI-green and
+deployment is separately authorized. Nothing below is executed by an agent.**
+
+Preconditions, unchanged from Part III. Secret handling as in Part II. Use
+only the sanitized report codes this repository already names.
+
+## M11C4J-1. Deploy, M11C4J-2. Health
+
+As M11-1 and M11-2.
+
+## M11C4J-3. REST single fight — the four earlier specializations (invariance)
+
+As M11B12-3 and M11B12-4: the Assassination, Protection, Retribution and Blood
+documents must be what Parts III–V recorded, byte for byte where the report
+revision has not moved. None may mention Brewmaster or `monk/brewmaster`.
+
+## M11C4J-4. REST single fight — Brewmaster Monk (newly public)
+
+Costs **1** unit. Report `gtKb2xHn87pNcFfW`, fight **22**, actor **4** — the
+Brewmaster Monk the committed evidence was captured from
+(`wcl-fight-context-gtkb-fight-22` proves the identity: masterData subType
+Monk, friendlySpecs "Brewmaster"). Expect 200 and confirm all of:
+
+- `status` is `ANALYZED` — **not** `SPEC_NOT_SUPPORTED`;
+- `specialization` is `{ "specId": "monk/brewmaster", "gameplaySupported": true }`;
+- `analyzerId` is `monk-brewmaster-observed-decisions`;
+- `schemaVersion` is `warcraft-logs-coach.analysis/1`;
+- `authority.authorityId` is `SIMC_APL_MONK_BREWMASTER` at commit
+  `33622e9d1662ff0e451691edf85a6b49cc9d11d9`;
+- `capability.scoresPerformance` is `false` and `matchMeaning` is
+  `AUTHORITY_COMPATIBLE_ONLY`;
+- the Tiger Palm at report time **2,424,688** is `REJECTED`,
+  `AUTHORITY_SELECTED_DIFFERENT_TOKEN`, authority token `keg_smash`;
+- every decision's `observedToken` is one of `keg_smash`, `blackout_kick`,
+  `tiger_palm`, `breath_of_fire`, `invoke_niuzao`, and most decisions are
+  `UNKNOWN` — expected, not a fault.
+
+The live document covers the WHOLE fight; the committed full-fight evidence
+measured 109 MATCH / 10 REJECTED / 70 UNKNOWN over 189 decisions. A live count
+that differs is recorded, not "fixed": the report revision may have moved.
+
+## M11C4J-5. REST single fight — unsupported and unvalidated
+
+`gtKb2xHn87pNcFfW` fight 22: actor **17** (Monk / Mistweaver) and actor **12**
+(Warrior / Arms) must each answer `SPEC_NOT_SUPPORTED` with no decisions. The
+canonical unsupported subject (Part III) must be unchanged.
+
+## M11C4J-6. MCP `tools/list`, M11C4J-7. MCP `tools/call`
+
+The descriptions carry the sentence "Supported specializations: Assassination
+Rogue, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution
+Paladin." and Brewmaster's limits (the Shado-Pan validation and the retained
+UNKNOWN areas); `tools/call` for M11C4J-4's subject returns the same document
+as REST.
+
+## M11C4J-8. Transport parity, M11C4J-9. Raid night
+
+As M11B12-9 and M11B12-10 over gtKb fight 22: the actor-4 cell is `ANALYZED`
+under `monk/brewmaster`, actors 12 and 17 are `SPEC_NOT_SUPPORTED`; one roster
+discovery, one ingestion, deterministic cell order.
+
+## M11C4J-10. Unauthorized and leakage sweep, M11C4J-11. Completion
+
+As M11-10 and M11-11. If a step surfaces a problem — a Brewmaster request
+answering `SPEC_NOT_SUPPORTED`, a Master of Harmony request being ANALYZED, an
+internal Brewmaster evidence class (positive-usability facts, readiness
+auras) on the wire, a Mistweaver routed anywhere, or an earlier
+specialization's document that moved — M11-C4j is **not** complete: record
+exactly what was observed and stop. Do not adjust the analyzer, the gates, the
+projection or the descriptions to make a smoke step pass.

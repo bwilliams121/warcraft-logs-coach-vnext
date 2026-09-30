@@ -54,14 +54,15 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the four public ids since M11-B12; internal-only: Brewmaster Monk since M11-C2", () => {
+  it("public partition: the five public ids since M11-C4j; internal-only: empty again", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
       "deathknight/blood",
+      "monk/brewmaster",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["monk/brewmaster"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -75,6 +76,7 @@ describe("the five sites agree", () => {
       ["paladin/protection", "paladin/protection"],
       ["paladin/retribution", "paladin/retribution"],
       ["deathknight/blood", "deathknight/blood"],
+      ["monk/brewmaster", "monk/brewmaster"],
     ]);
   });
 
@@ -83,7 +85,7 @@ describe("the five sites agree", () => {
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain(PROTECTION_PALADIN_SPEC_ID);
   });
 
-  it("the registration is PUBLIC and the catalog carries exactly four enabled analyzers", () => {
+  it("the registration is PUBLIC and the catalog carries exactly five enabled analyzers", () => {
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
     expect(ASSASSINATION_REGISTRATION.exposure).toBe("PUBLIC");
     // M11-A4 put a third, INTERNAL_ONLY row in the catalog, NOT among the
@@ -93,19 +95,22 @@ describe("the five sites agree", () => {
     // again NOT among the enabled analyzers, and M11-B12 made it PUBLIC by
     // that same move after ten slices and a promotion-readiness audit.
     // M11-C2 put a fifth, INTERNAL_ONLY row in — the Brewmaster Monk
-    // measurement slice — NOT among the enabled analyzers.
+    // measurement slice — NOT among the enabled analyzers, and M11-C4j made
+    // it PUBLIC by the same move after the global observation and
+    // discrimination gates passed on two independent subjects.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
       ["paladin/retribution", "PUBLIC"],
       ["deathknight/blood", "PUBLIC"],
-      ["monk/brewmaster", "INTERNAL_ONLY"],
+      ["monk/brewmaster", "PUBLIC"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
       PROTECTION_PALADIN_ANALYZER_ID,
       "paladin-retribution-observed-decisions",
       "deathknight-blood-observed-decisions",
+      "monk-brewmaster-observed-decisions",
     ]);
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toEqual(
       ENABLED_ANALYZERS.map((row) => row.analyzerId),

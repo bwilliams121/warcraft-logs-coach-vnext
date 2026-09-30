@@ -1,16 +1,33 @@
-# Brewmaster Monk — INTERNAL_ONLY measurement slice (M11-C2, M11-C3a, M11-C4i)
+# Brewmaster Monk — public observed-decision slice (M11-C2 … M11-C4i; PUBLIC since M11-C4j)
 
-**Exposure: `INTERNAL_ONLY`.** This evaluator is registered in the production
-catalog (`monk-brewmaster-observed-decisions`, `monk/brewmaster`) and is
-reachable only by the internal lookup (`internalAnalyzerForSpec`), the corpus
-and tests. `monk/brewmaster` is in `INTERNAL_ONLY_SPEC_IDS`, not in
-`PUBLIC_SPEC_IDS`, not in the public contract's `specId` enum and not in
-`SUPPORTED_SPEC_IDENTITIES`; `spec.ts` says `satisfies InternalOnlySpecId`. A
-public request for a `Monk`/`Brewmaster` identity is `SPEC_NOT_SUPPORTED` with
-nothing retrieved and no analyzer called. Promotion, if it ever comes, is the
-reviewed five-site edit every predecessor went through.
+**Exposure: `PUBLIC` since M11-C4j.** The registration
+(`monk-brewmaster-observed-decisions`, `monk/brewmaster`) was INTERNAL_ONLY
+from M11-C2 through M11-C4i and moved by the reviewed five-site edit: the
+partition, the public contract's `specId` enum, the identity table
+(`Monk`/`Brewmaster`, no other Monk specialization), `satisfies PublicSpecId`
+in `spec.ts`, and the registration's `exposure`. REST, MCP and raid night
+dispatch it through the shared application service; there is no Brewmaster
+branch in any of them.
 
-**It is a MEASUREMENT.** The next cohort's representative is a tank whose
+**Validated for Shado-Pan only** (`supported-profile.ts`, owner decision). Both
+real subjects are Shado-Pan. A resolved Master of Harmony build is
+`AUTHORITY_NOT_AVAILABLE`; an unresolved or contradictory hero tree is
+`PROFILE_NOT_RESOLVED`; both before any decision is read.
+
+**Beta: not exhaustive.** These stay `UNKNOWN`, never inferred: what Black Ox
+Brew changes, Empty the Cellar's buff when the window holds no 1262768
+transition (subject 2), Keg Smash charges and its hasted recharge (only the
+≥1-charge upper bound), Energy between observations, and every alternative not
+proven usable in all eight dimensions. The published limits prose
+(`registration.ts`, `BREWMASTER_LIMITS`) says so.
+
+**Ingestion.** The offensive capability declares ENERGY (M11-C4j): C4i's
+positive usability reads the decision cast's own PRE_COST Energy, and the
+derived requirement now asks for resources. The Energy wire type resolves
+through the version-scoped contract; an uncovered parser version leaves only
+the affordability dimension `UNKNOWN`.
+
+**It began as a MEASUREMENT.** The next cohort's representative is a tank whose
 pinned authority dispatches two hero-tree lists by `run_action_list`,
 interleaves NON_GCD brews with GCD actions, and reads brew charges and
 continuous Energy. This slice runs the shared engine over that authority on

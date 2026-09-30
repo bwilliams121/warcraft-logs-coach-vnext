@@ -370,7 +370,7 @@ export const OWNING_LAYERS = {
   SPEC_RETRIBUTION_PALADIN: ["src/specs/paladin/retribution/"],
   /** M11-B2. The INTERNAL_ONLY Blood Death Knight measurement evaluator and nothing else. */
   SPEC_BLOOD_DEATH_KNIGHT: ["src/specs/deathknight/blood/"],
-  /** M11-C2. The INTERNAL_ONLY Brewmaster Monk measurement evaluator and nothing else. */
+  /** M11-C2. The Brewmaster Monk evaluator (INTERNAL_ONLY until M11-C4j) and nothing else. */
   SPEC_BREWMASTER_MONK: ["src/specs/monk/brewmaster/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
@@ -2727,7 +2727,7 @@ export const ASSERTION_KINDS = {
       "Over this artifact (or bundle) the registration refuses to analyze the actor with exactly this status — a segment with no combatant profile is PROFILE_NOT_RESOLVED, never a smaller population that reads as clean play.",
   },
 
-  // ---- SPEC_BREWMASTER_MONK (M11-C2, INTERNAL_ONLY) -----------------------
+  // ---- SPEC_BREWMASTER_MONK (M11-C2; PUBLIC since M11-C4j) ----------------
   //
   // The MEASUREMENT slice for the next cohort's representative. The kinds
   // mirror the Blood ones where the shape is the same, and add what this

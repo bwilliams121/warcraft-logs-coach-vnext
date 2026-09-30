@@ -105,7 +105,7 @@ describe("the ingestion requirement is derived from the declaration", () => {
     expect(both.contributingAnalyzers).toEqual([fixture.analyzerId]);
   });
 
-  it("the build's public requirement set is the four public analyzers' derived requirements", () => {
+  it("the build's public requirement set is the five public analyzers' derived requirements", () => {
     expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
@@ -124,6 +124,13 @@ describe("the ingestion requirement is derived from the declaration", () => {
       },
       {
         analyzerId: "deathknight-blood-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
+      },
+      // M11-C4j: Brewmaster declares ENERGY since its promotion (the decision
+      // cast's own PRE_COST Energy, read by Keg Smash's affordability).
+      {
+        analyzerId: "monk-brewmaster-observed-decisions",
         requiredScope: "PLAYER_CONTEXT",
         includeResources: true,
       },

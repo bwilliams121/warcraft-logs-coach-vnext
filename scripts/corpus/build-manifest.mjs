@@ -6401,33 +6401,39 @@ const BREWMASTER_CASES = [
     { related: ["tests/regression/m10a-analyzer-result-ownership.test.ts", ...BREWMASTER_RELATED] },
   ),
   kase(
-    "application-service.brewmaster-monk-subject-is-internal-only-and-publicly-unsupported",
+    "application-service.brewmaster-monk-subject-is-publicly-supported-since-m11-c4j",
     BREWMASTER_GTKB,
     "APPLICATION_SERVICE",
-    "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts INTERNAL_ONLY_SPEC_IDS",
-    "The real Brewmaster Monk subject, over its own captured evidence, is NOT recognized by the public identity table (Monk/Brewmaster resolves to nothing), so the application service answers SPEC_NOT_SUPPORTED with no analyzer, no specId and nothing retrieved. The internal lookup finds the INTERNAL_ONLY registration; the public lookup finds nothing.",
+    "src/services/analysis-service.ts; src/services/analyzer-registry.ts (publicAnalyzers, internalAnalyzerForSpec); src/services/spec-identity.ts; src/findings/spec-id.ts PUBLIC_SPEC_IDS",
+    "RE-PINNED AT M11-C4j, INVERTING THE M11-C2 CASE. The real Brewmaster Monk subject, over its own captured evidence, is now recognized by the public identity table (Monk/Brewmaster -> monk/brewmaster), so the application service retrieves the fight once and dispatches exactly the Brewmaster registration: status ANALYZED, specId monk/brewmaster, analyzerId monk-brewmaster-observed-decisions, scope PLAYER_CONTEXT (the analyzer's own declared requirement, resources included since M11-C4j declared the ENERGY its positive usability reads). Both catalog lookups now answer with the SAME row, whose exposure is PUBLIC. The five public sites moved together in one reviewed edit: the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure.",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
         subject: { actorId: BREWMASTER, className: "Monk", specName: "Brewmaster" },
-        expected: { status: "SPEC_NOT_SUPPORTED", specId: null, analyzerId: null, scope: null },
+        expected: {
+          status: "ANALYZED",
+          specId: "monk/brewmaster",
+          analyzerId: BREWMASTER_ANALYZER,
+          scope: "PLAYER_CONTEXT",
+        },
       }),
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "monk/brewmaster",
         expected: {
           internalAnalyzerId: BREWMASTER_ANALYZER,
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: BREWMASTER_ANALYZER,
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT", "VALIDATED_EVIDENCE"],
-    "An evaluator has to exist, be registered, be exercised and be audited before it is safe to expose. M11-C2 does the first three for a measurement slice; nothing about it is public.",
+    "An evaluator has to exist, be registered, be exercised and be audited before it is safe to expose. M11-C2 did the first three for a measurement slice; the M11-C3/C4 slices resolved real decisions over two independent subjects, M11-C4i reached a real REJECTED in each, and M11-C4j exposed exactly that slice — narrowed by the Shado-Pan validated-profile gate — and nothing more.",
     {
       related: [
         "tests/contracts/m11c2-brewmaster-registration.test.ts",
         "tests/contracts/m11-promotion-evidence-gate.test.ts",
         "tests/contracts/m10a-spec-partition.test.ts",
+        "tests/contracts/m11c4j-brewmaster-public-projection.test.ts",
       ],
     },
   ),
@@ -7018,6 +7024,29 @@ const RET_CASES = [
       related: [
         "tests/integration/m11b12-blood-public-transports.test.ts",
         "tests/contracts/m11b12-blood-public-projection.test.ts",
+        "tests/contracts/m10a-spec-partition.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "public-contract.analysis-parity-for-the-brewmaster-monk-subject",
+    BREWMASTER_GTKB,
+    "PUBLIC_CONTRACT",
+    "src/contracts/analysis-projection.ts; src/api/worker.ts; src/mcp/tools/analyze-warcraft-log.ts",
+    "The real Brewmaster Monk subject over its own 20 s opener is ANALYZED on both transports — one document naming monk/brewmaster and the Brewmaster analyzer, identical on REST and MCP (structuredContent and text), schema-valid under warcraft-logs-coach.analysis/1, publishing MATCH as AUTHORITY_COMPATIBLE_ONLY. (Before M11-C4j the same subject answered SPEC_NOT_SUPPORTED on both transports.)",
+    [
+      a("PUBLIC_CONTRACT.REST_MCP_PARITY", {
+        document: "ANALYSIS",
+        subject: { actorId: BREWMASTER, className: "Monk", specName: "Brewmaster" },
+        expected: { status: "ANALYZED", specId: "monk/brewmaster", analyzerId: BREWMASTER_ANALYZER },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "The schema version is unchanged: M11-C4j widened the public specId enum and nothing else — no outcome, basis, blocker class, exclusion reason, status or capability value moved for the fifth specialization, and no document a consumer had already received changed. Brewmaster's own evidence classes (the positive-usability conclusions and their per-dimension facts, the readiness aura facts, the dispatch trace) stay inside the payload; what the wire carries is the same vocabulary the other four publish.",
+    {
+      related: [
+        "tests/integration/m11c4j-brewmaster-public-transports.test.ts",
+        "tests/contracts/m11c4j-brewmaster-public-projection.test.ts",
         "tests/contracts/m10a-spec-partition.test.ts",
       ],
     },

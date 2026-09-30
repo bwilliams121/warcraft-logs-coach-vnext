@@ -137,9 +137,12 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // discrimination control — the substituted decision's REJECTED, the
     // substituted action's applicability under the proven build, and the wings
     // binding its pinned condition reads.
-    expect(result.summary.cases).toBe(173);
-    expect(result.summary.assertions).toBe(748);
-    expect(result.summary.passed).toBe(748);
+    // M11-C4j re-pinned the Brewmaster APPLICATION_SERVICE case (public since
+    // the promotion; same two assertions) and added one case and one
+    // assertion: the Brewmaster subject's REST/MCP PUBLIC_CONTRACT parity.
+    expect(result.summary.cases).toBe(174);
+    expect(result.summary.assertions).toBe(749);
+    expect(result.summary.passed).toBe(749);
   });
 
   it("covers every layer", async () => {
@@ -153,12 +156,14 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     expect(covered).toEqual([...OWNING_LAYER_IDS]);
   });
 
+  // Two full ALL runs back to back (42–65 s measured at M11-C4j). 90 s is a
+  // CPU-sensitive integration harness ceiling, not a performance SLA.
   it("is deterministic across runs", async () => {
     const first = await runCorpusHarness({ kind: "ALL" }, { runtime: "WORKERD" });
     const second = await runCorpusHarness({ kind: "ALL" }, { runtime: "WORKERD" });
 
     expect(JSON.stringify(second)).toBe(JSON.stringify(first));
-  });
+  }, 90_000);
 
   it("matches the committed machine-readable report, field for field", async () => {
     // DRIFT CHECK. tests/corpus/report.json was written from an execution by

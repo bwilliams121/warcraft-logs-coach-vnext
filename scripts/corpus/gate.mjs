@@ -112,6 +112,8 @@ const NODE_EVIDENCE_TESTS = [
   "tests/contracts/m11c4h-protection-applicability-parity.test.ts",
   // M11-C4i: positive usability and the closure over the committed evidence.
   "tests/contracts/m11c4i-brewmaster-positive-usability.test.ts",
+  // M11-C4j: the public projection of both subjects, archive parts included.
+  "tests/contracts/m11c4j-brewmaster-public-projection.test.ts",
 ];
 
 /** Credentials never reach a corpus run, whatever the parent shell holds. */

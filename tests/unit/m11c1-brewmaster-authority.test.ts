@@ -58,7 +58,7 @@ import {
   SC_MONK_CPP_SHA256,
 } from "../../src/data/game/monk-brewmaster-readiness-authority.js";
 import { isBuiltinIdentifier } from "../../src/simc/expression/parse.js";
-import { INTERNAL_ONLY_SPEC_IDS, SPEC_IDS } from "../../src/findings/spec-id.js";
+import { PUBLIC_SPEC_IDS, SPEC_IDS } from "../../src/findings/spec-id.js";
 
 const PINNED_COMMIT = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 const MONK_MODULE = "engine/class_modules/monk/sc_monk.cpp";
@@ -652,13 +652,14 @@ const PRODUCTION_SOURCES: Record<string, string> = import.meta.glob("../../src/*
   import: "default",
 });
 
-describe("M11-C1 onboarded no analyzer; M11-C2 added one, INTERNAL_ONLY, inside its own boundary", () => {
-  it("the SpecId is INTERNAL_ONLY, the tree exists, and the APL artifact is committed (R7 satisfied by the tree)", () => {
-    // RE-POINTED AT M11-C2. Through M11-C1 each of these was absent; M11-C2
-    // added the internal id, the specialization tree and the canonical
-    // artifact together, so R7 (m11a2-cross-spec-isolation) holds naturally.
+describe("M11-C1 onboarded no analyzer; M11-C2 added one inside its own boundary (PUBLIC since M11-C4j)", () => {
+  it("the SpecId is known (PUBLIC since M11-C4j), the tree exists, and the APL artifact is committed (R7 satisfied by the tree)", () => {
+    // RE-POINTED AT M11-C2, and again at M11-C4j. Through M11-C1 each of
+    // these was absent; M11-C2 added the internal id, the specialization tree
+    // and the canonical artifact together, so R7 (m11a2-cross-spec-isolation)
+    // holds naturally; M11-C4j moved the id to the public half.
     expect((SPEC_IDS as readonly string[]).includes("monk/brewmaster")).toBe(true);
-    expect((INTERNAL_ONLY_SPEC_IDS as readonly string[]).includes("monk/brewmaster")).toBe(true);
+    expect((PUBLIC_SPEC_IDS as readonly string[]).includes("monk/brewmaster")).toBe(true);
     expect(existsSync("src/specs/monk/brewmaster/registration.ts")).toBe(true);
     expect(existsSync("src/simc/data/monk-brewmaster.apl.json")).toBe(true);
   });

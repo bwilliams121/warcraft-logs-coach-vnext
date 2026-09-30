@@ -40,9 +40,10 @@
  * is what lets a specialization be registered, exercised and proven without
  * becoming reachable by a public request — as Protection Paladin was from
  * M10-C until M10-D made it public, Retribution Paladin from M11-A4 until
- * M11-A5, and Blood Death Knight from M11-B2 until M11-B12. Since M11-B12
- * every registration is PUBLIC again and the internal-only machinery is
- * dormant; it is kept because the next specialization arrives through it.
+ * M11-A5, Blood Death Knight from M11-B2 until M11-B12, and Brewmaster Monk
+ * from M11-C2 until M11-C4j. Since M11-C4j every registration is PUBLIC again
+ * and the internal-only machinery is dormant; it is kept because the next
+ * specialization arrives through it.
  *
  * INJECTED CATALOGS MUST BE COMPLETE. The public-set equality below applies to
  * an injected catalog exactly as to the production one: a test that wants to
@@ -422,8 +423,7 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Five rows: four PUBLIC (since M11-B12) and, since M11-C2, one
- * INTERNAL_ONLY. A publicly unsupported
+ * Five rows, all PUBLIC since M11-C4j. A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
  * internal lookup and tests, and is never selected for a public request —
@@ -438,7 +438,7 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   RETRIBUTION_PALADIN_REGISTRATION,
   // INTERNAL_ONLY from M11-B2; PUBLIC since M11-B12.
   BLOOD_DEATH_KNIGHT_REGISTRATION,
-  // INTERNAL_ONLY from M11-C2: the next cohort's measurement slice.
+  // INTERNAL_ONLY from M11-C2; PUBLIC since M11-C4j.
   BREWMASTER_MONK_REGISTRATION,
 ]);
 

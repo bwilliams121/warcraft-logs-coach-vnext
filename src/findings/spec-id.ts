@@ -73,6 +73,7 @@ export const PUBLIC_SPEC_IDS = Object.freeze([
   "paladin/protection",
   "paladin/retribution",
   "deathknight/blood",
+  "monk/brewmaster",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -110,11 +111,17 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * Brewmaster Monk arrived here in M11-C2 as the representative slice of the
  * next cohort: a real, registered, INTERNAL_ONLY evaluator whose purpose is
  * MEASUREMENT — where the shared engine's traversal of a hero-tree-dispatched
- * tank authority with brew and Energy state stops, and on which atom. It is
- * reachable only through the internal lookup and the test/corpus seams, and
- * it remains `SPEC_NOT_SUPPORTED` on every public path.
+ * tank authority with brew and Energy state stops, and on which atom. Slices
+ * M11-C3a … M11-C4i made that measurement an evidence-backed decision surface
+ * over two independent subjects, and M11-C4j moved the id to
+ * `PUBLIC_SPEC_IDS` by the same five-site edit after the global observation
+ * and discrimination gates reported real MATCH and real REJECTED evidence for
+ * it. Promotion changed REACHABILITY, not the analyzer: the slice it publishes
+ * is exactly the slice it had, narrowed by one PUBLIC validation gate
+ * (Shado-Pan hero tree — see the Brewmaster module). The set is empty again;
+ * its machinery stays because the next specialization arrives through it.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze(["monk/brewmaster"] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

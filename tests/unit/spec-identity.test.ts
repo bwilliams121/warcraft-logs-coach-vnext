@@ -74,7 +74,24 @@ describe("the supported identities", () => {
     expect(outcome("Warrior", "Blood")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
-  it("recognizes exactly four specializations", () => {
+  it("resolves Monk/Brewmaster to monk/brewmaster (M11-C4j), and no other Monk specialization", () => {
+    // The canonical module identity (`wclClassName`/`wclSpecName` of
+    // BREWMASTER_MONK_MODULE), under the same normalization as the others.
+    expect(outcome("Monk", "Brewmaster")).toBe("monk/brewmaster");
+    expect(outcome("monk", "brewmaster")).toBe("monk/brewmaster");
+    expect(outcome("  Monk ", " Brewmaster")).toBe("monk/brewmaster");
+    expect(outcome("MONK", "BREWMASTER")).toBe("monk/brewmaster");
+    // The same class never stands for the promoted specialization, and no
+    // repair makes a near-miss supported.
+    expect(outcome("Monk", "Mistweaver")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Monk", "Windwalker")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Monk", "Brew master")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Monk", "Brewmasterr")).toBe("UNSUPPORTED_SPECIALIZATION");
+    // Right spec name, wrong class.
+    expect(outcome("Paladin", "Brewmaster")).toBe("UNSUPPORTED_SPECIALIZATION");
+  });
+
+  it("recognizes exactly five specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
@@ -82,6 +99,7 @@ describe("the supported identities", () => {
       "paladin/protection",
       "paladin/retribution",
       "deathknight/blood",
+      "monk/brewmaster",
     ]);
   });
 

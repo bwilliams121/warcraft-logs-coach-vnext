@@ -225,7 +225,7 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
     // A different question from "what should THIS request retrieve". It
     // describes what the deployment supports, and the service is deliberately
     // not given it.
-    // Four public analyzers since M11-B12, each deriving the same requirement
+    // Five public analyzers since M11-C4j, each deriving the same requirement
     // from its own capabilities.
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.requirement)).toEqual([
       {
@@ -245,6 +245,11 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
       },
       {
         analyzerId: "deathknight-blood-observed-decisions",
+        requiredScope: "PLAYER_CONTEXT",
+        includeResources: true,
+      },
+      {
+        analyzerId: "monk-brewmaster-observed-decisions",
         requiredScope: "PLAYER_CONTEXT",
         includeResources: true,
       },

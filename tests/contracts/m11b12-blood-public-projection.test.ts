@@ -134,12 +134,13 @@ describe("the schema is analysis/1, widened by exactly one specId", () => {
     expect(PUBLIC_ANALYSIS_SCHEMA_VERSION).toBe("warcraft-logs-coach.analysis/1");
   });
 
-  it("deathknight/blood is appended to the specId enum; the three earlier ids keep their position", () => {
+  it("deathknight/blood was appended to the specId enum after the three earlier ids (monk/brewmaster follows it since M11-C4j)", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
       "deathknight/blood",
+      "monk/brewmaster",
     ]);
   });
 

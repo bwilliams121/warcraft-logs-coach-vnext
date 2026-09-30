@@ -16,7 +16,8 @@
  *                             casts of every spell sharing its category
  *     RESOURCE_AFFORDABILITY  NOT_APPLICABLE for a spell with no power row; for Keg
  *                             Smash's Energy, the shared base-cost proof from the
- *                             decision cast's own PRE_COST observation
+ *                             decision cast's own PRE_COST observation, read under
+ *                             the Energy wire type version-scoped to this capture
  *     GCD                     the candidate is a GCD action, and the decision is an
  *                             eligible GCD cast: a GCD action could start here
  *     RANGE_TARGET            STRICT same-target corroboration from the pinned range
@@ -40,7 +41,7 @@ import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type { AplAuthority } from "../../../simc/apl-authority.js";
 import type { ObservedTalentEntry } from "../../../data/game/talent-selection.js";
 import { PINNED_DEFAULT_COOLDOWN_TOLERANCE_MS } from "../../../data/game/external-buff-authority.js";
-import { RESOURCE_WIRE_CONTRACTS } from "../../../data/wcl-wire/resource-types.js";
+import { resourceWireTypeFor } from "../../../data/wcl-wire/resource-types.js";
 import {
   brewmasterExecutionLaneForAbility,
   brewmasterExecutionLaneForToken,
@@ -98,8 +99,20 @@ export interface BrewmasterPositiveUsabilityInput {
 
 const ENERGY_POWER_TYPE = 3;
 
-function energyWireType(): number | null {
-  return RESOURCE_WIRE_CONTRACTS.find((entry) => entry.resourceId === "ENERGY")?.wireType ?? null;
+/**
+ * The wire type carrying Energy FOR THIS FIGHT'S PARSER VERSION (M11-C4j,
+ * owner decision): through the shared version-scoped resolver with the
+ * capture's own `gameVersion` / `logVersion`, never by scanning the contract
+ * table unkeyed. A version no contract covers yields null, and only the
+ * affordability dimension fails closed; a wire type read from the wrong parser
+ * version would be a different field.
+ */
+function energyWireType(state: CombatState): number | null {
+  const resolution = resourceWireTypeFor("ENERGY", {
+    gameVersion: state.fight.provenance.gameVersion,
+    logVersion: state.fight.provenance.logVersion,
+  });
+  return resolution.ok ? resolution.wireType : null;
 }
 
 function buildDimension(input: BrewmasterPositiveUsabilityInput, token: string): DimensionResolution {
@@ -186,13 +199,16 @@ function affordabilityDimension(
       `the pinned spell has ${String(spell.powerRows.length)} power row(s); only a single Energy row is supported`,
     );
   }
-  const wireType = energyWireType();
-  const loaded = pinnedBrewmasterUsabilityAuthority();
-  if (wireType === null || !loaded.ok) {
+  const wireType = energyWireType(input.state);
+  if (wireType === null) {
     return unknownDimension(
-      "RESOURCE_SEMANTICS_NOT_PINNED",
-      "no Energy wire contract or no usability authority",
+      "RESOURCE_WIRE_VERSION_NOT_COVERED",
+      "no version-scoped Energy wire contract covers this capture's gameVersion/logVersion",
     );
+  }
+  const loaded = pinnedBrewmasterUsabilityAuthority();
+  if (!loaded.ok) {
+    return unknownDimension("RESOURCE_SEMANTICS_NOT_PINNED", "no usability authority");
   }
   const observedSpell = brewmasterUsabilitySpell(input.observedAbilityGameId);
   const observedRow = observedSpell?.powerRows.find((entry) => entry.powerType === ENERGY_POWER_TYPE);

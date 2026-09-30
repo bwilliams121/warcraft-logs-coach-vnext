@@ -191,7 +191,7 @@ describe("the roster and the analyzers", () => {
     expect(rosterSpecialization("paladin/protection")).toMatchObject({ simcSpecId: 66, role: "TANK" });
   });
 
-  it("the roster confers no support: thirty-five rows have no registration (Brewmaster Monk registered INTERNAL_ONLY at M11-C2)", () => {
+  it("the roster confers no support: thirty-five rows have no registration (Brewmaster Monk registered at M11-C2, PUBLIC since M11-C4j)", () => {
     const registered = new Set(ANALYZER_REGISTRATIONS.map((registration) => registration.specId as string));
     const unregistered = roster().specializations.filter((row) => !registered.has(row.rosterKey));
     expect(unregistered).toHaveLength(35);

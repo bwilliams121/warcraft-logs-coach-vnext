@@ -1,19 +1,20 @@
 /**
- * M11-C2: the Brewmaster Monk registration — identity, INTERNAL_ONLY
- * exposure, the one authority it binds, the six domains it declares, the
- * datasets it loads, its vocabulary, and its isolation from every public
- * surface and every other specialization.
+ * M11-C2: the Brewmaster Monk registration — identity, exposure, the one
+ * authority it binds, the six domains it declares, the datasets it loads, its
+ * vocabulary, and its isolation from every other specialization.
  *
- * The negative half is the point of this file: a public request for the real
- * Brewmaster subject answers SPEC_NOT_SUPPORTED with zero analyzer calls and
- * nothing retrieved; the public spec list, the identity table, the public
- * contract, the supported-specializations sentence and both MCP tool
- * descriptions are exactly what they were before M11-C2 (four PUBLIC
- * specializations); Warrior/Arms is still unsupported; the four public
- * specializations' own vocabularies neither gain nor lose an identifier; and
- * nothing outside the Brewmaster tree names the specialization except the
- * partition, the registry row and the pinned data. An INTERNAL_ONLY analyzer
- * that leaked into a public surface would be a promotion nobody reviewed.
+ * RE-POINTED AT M11-C4j. From M11-C2 through M11-C4i the point of this file
+ * was the negative half: a public request for the real Brewmaster subject
+ * answered SPEC_NOT_SUPPORTED with nothing retrieved, and no public surface
+ * named the specialization. M11-C4j promoted it by the reviewed five-site
+ * edit, so those assertions are INVERTED here, exactly as M11-B12 inverted
+ * Blood's: the public lookup, the identity table, the public contract, the
+ * derived sentence and both MCP tool descriptions now carry Brewmaster, and
+ * the public path dispatches the same row the internal lookup finds.
+ * Warrior/Arms is still unsupported, no other Monk specialization resolves,
+ * the other specializations' vocabularies neither gain nor lose an
+ * identifier, and outside the Brewmaster tree the specialization is named only
+ * by the partition, the registry row, the two promotion sites and pinned data.
  */
 
 import { describe, expect, it } from "vitest";
@@ -25,7 +26,6 @@ import {
 import type { CombatFight } from "../../src/engine/normalization/combat-fight.js";
 import {
   INTERNAL_ONLY_SPEC_IDS,
-  InternalSpecExposureError,
   isPublicSpecId,
   isSpecId,
   PUBLIC_SPEC_IDS,
@@ -89,7 +89,13 @@ import { corpusFight, corpusState } from "../support/corpus/fight.js";
 const PIN = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 const BREWMASTER_GTKB = "wcl-brewmaster-monk-gtkb-opener";
 const BREWMASTER = 4;
-const FOUR_PUBLIC = ["rogue/assassination", "paladin/protection", "paladin/retribution", "deathknight/blood"];
+const FIVE_PUBLIC = [
+  "rogue/assassination",
+  "paladin/protection",
+  "paladin/retribution",
+  "deathknight/blood",
+  "monk/brewmaster",
+];
 
 const SOURCES: Record<string, string> = import.meta.glob("../../src/**/*.ts", {
   eager: true,
@@ -116,21 +122,28 @@ describe("identity and partition", () => {
     });
   });
 
-  it("is INTERNAL_ONLY in the partition and ABSENT from the public contract and the identity table", () => {
+  it("is PUBLIC in the partition, the public contract and the identity table since M11-C4j", () => {
+    // INVERTED at M11-C4j. Every assertion here was the opposite from M11-C2
+    // through M11-C4i, and the five sites moved in one reviewed edit.
     expect(isSpecId("monk/brewmaster")).toBe(true);
-    expect(isPublicSpecId("monk/brewmaster")).toBe(false);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["monk/brewmaster"]);
-    expect([...PUBLIC_SPEC_IDS]).toEqual(FOUR_PUBLIC);
-    expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).not.toContain("monk/brewmaster");
-    expect(() => requirePublicSpecId("monk/brewmaster")).toThrow(InternalSpecExposureError);
-    expect(SUPPORTED_SPEC_IDENTITIES).not.toHaveProperty("monk/brewmaster");
-    expect(Object.values(SUPPORTED_SPEC_IDENTITIES)).not.toContain("monk/brewmaster");
-    expect(resolveSpecIdentity({ className: "Monk", specName: "Brewmaster" })).toMatchObject({
-      ok: false,
-      reason: "UNSUPPORTED_SPECIALIZATION",
+    expect(isPublicSpecId("monk/brewmaster")).toBe(true);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect([...PUBLIC_SPEC_IDS]).toEqual(FIVE_PUBLIC);
+    expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
+    expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
+    expect(SUPPORTED_SPEC_IDENTITIES).toHaveProperty("monk/brewmaster");
+    expect(resolveSpecIdentity({ className: "Monk", specName: "Brewmaster" })).toEqual({
+      ok: true,
+      specId: "monk/brewmaster",
     });
-    expect(BREWMASTER_MONK_MODULE.exposure).toBe("INTERNAL_ONLY");
-    expect(BREWMASTER_MONK_REGISTRATION.exposure).toBe("INTERNAL_ONLY");
+    for (const specName of ["Mistweaver", "Windwalker"]) {
+      expect(resolveSpecIdentity({ className: "Monk", specName }), specName).toMatchObject({
+        ok: false,
+        reason: "UNSUPPORTED_SPECIALIZATION",
+      });
+    }
+    expect(BREWMASTER_MONK_MODULE.exposure).toBe("PUBLIC");
+    expect(BREWMASTER_MONK_REGISTRATION.exposure).toBe("PUBLIC");
     expect(BREWMASTER_MONK_MODULE.supplementalAnalyses).toEqual([]);
   });
 
@@ -142,30 +155,41 @@ describe("identity and partition", () => {
     });
   });
 
-  it("is in the validated catalog for the INTERNAL lookup only, and in no public derivation", () => {
+  it("is in the validated catalog for BOTH lookups and in every public derivation", () => {
+    // INVERTED at M11-C4j: both lookups find the SAME row, and every derived
+    // public surface carries it because it is derived, not listed.
     expect(internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)?.analyzerId).toBe(
       BREWMASTER_MONK_ANALYZER_ID,
     );
-    expect(internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)?.exposure).toBe("INTERNAL_ONLY");
-    expect(analyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)).toBeNull();
-    expect(publicAnalyzers(PRODUCTION_CATALOG).map((row) => row.specId)).toEqual(FOUR_PUBLIC);
-    expect(ENABLED_ANALYZERS.map((row) => row.specId)).toEqual(FOUR_PUBLIC);
-    expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).not.toContain(
+    expect(internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
+    expect(analyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)).toBe(
+      internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG),
+    );
+    expect(publicAnalyzers(PRODUCTION_CATALOG).map((row) => row.specId)).toEqual(FIVE_PUBLIC);
+    expect(ENABLED_ANALYZERS.map((row) => row.specId)).toEqual(FIVE_PUBLIC);
+    expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
       BREWMASTER_MONK_ANALYZER_ID,
     );
-    // The public prose is unchanged by an INTERNAL_ONLY row.
+    // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Blood Death Knight, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(4);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(5);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
+      BREWMASTER_MONK_REGISTRATION.publicLimits,
+    );
     for (const description of [
       analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS),
       raidNightToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS),
     ]) {
-      expect(description).not.toMatch(/monk|brewmaster/i);
-      expect(description).not.toContain(BREWMASTER_LIMITS.analysis);
-      expect(description).not.toContain(BREWMASTER_LIMITS.raidNight);
+      expect(description).toContain("Brewmaster Monk");
     }
+    // The analysis tool composes Brewmaster's own limits prose verbatim; the
+    // raid-night tool composes the raid-night one.
+    expect(analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS)).toContain(BREWMASTER_LIMITS.analysis);
+    expect(raidNightToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS)).toContain(
+      BREWMASTER_LIMITS.raidNight,
+    );
   });
 
   it("projects every internal exclusion reason onto an existing public one — no new public reason", () => {
@@ -284,21 +308,29 @@ describe("authority and datasets", () => {
     }
   });
 
-  it("declares no resource: the slice reads no Energy, so the derived requirement asks for none", () => {
-    for (const capability of BREWMASTER_CAPABILITIES) expect(capability.requirements.resources).toEqual([]);
+  it("declares ENERGY on the offensive capability only, so the derived requirement asks for resources (M11-C4j)", () => {
+    // M11-C4i's positive usability reads the decision cast's own PRE_COST
+    // Energy (Keg Smash's affordability). Until M11-C4j nothing declared it,
+    // which a public request deriving its ingestion from this declaration
+    // would have silently under-fetched. Only the offensive capability reads
+    // it; the resource-spending domain still reads nothing.
     const offensive = BREWMASTER_CAPABILITIES.find(
       (capability) => capability.domain === "OFFENSIVE_ROTATION",
     );
     expect(offensive?.requirements).toEqual({
       scope: "PLAYER_CONTEXT",
-      resources: [],
-      evidenceCategories: ["CASTS", "AURAS", "COMBATANT_INFO"],
+      resources: ["ENERGY"],
+      evidenceCategories: ["CASTS", "RESOURCES", "AURAS", "COMBATANT_INFO"],
       targetModel: "PER_OBSERVED_CAST",
     });
-    expect(BREWMASTER_MONK_REGISTRATION.requirement).toMatchObject({
+    for (const capability of BREWMASTER_CAPABILITIES) {
+      if (capability.domain === "OFFENSIVE_ROTATION") continue;
+      expect(capability.requirements.resources, capability.domain).toEqual([]);
+    }
+    expect(BREWMASTER_MONK_REGISTRATION.requirement).toEqual({
       analyzerId: BREWMASTER_MONK_ANALYZER_ID,
       requiredScope: "PLAYER_CONTEXT",
-      includeResources: false,
+      includeResources: true,
     });
   });
 });
@@ -399,7 +431,7 @@ describe("the vocabulary, owned and isolated", () => {
   });
 });
 
-describe("the public path refuses the real subject; the internal path analyzes it", () => {
+describe("the public path analyzes the real subject (M11-C4j), through the same row as the internal path", () => {
   function identityFor(fight: CombatFight) {
     return {
       report: {
@@ -421,15 +453,16 @@ describe("the public path refuses the real subject; the internal path analyzes i
     };
   }
 
-  it("the application service reports SPEC_NOT_SUPPORTED for Monk/Brewmaster, retrieves nothing and calls no analyzer", async () => {
+  it("the application service dispatches Monk/Brewmaster to the Brewmaster analyzer once, retrieving with the declared requirement", async () => {
     const fight = corpusFight(BREWMASTER_GTKB);
     const counted = countedProductionCatalog();
     let ingested = 0;
     const deps: AnalysisServiceDeps = {
       env: MCP_TEST_ENV,
       preflight: async () => ({ ok: true, identity: identityFor(fight), rateLimit: undefined }),
-      ingest: async () => {
+      ingest: async (request) => {
         ingested += 1;
+        expect(request).toMatchObject({ scope: "PLAYER_CONTEXT", includeResources: true });
         return { ok: true, fight, rateLimit: undefined };
       },
       registry: counted.registry,
@@ -440,11 +473,18 @@ describe("the public path refuses the real subject; the internal path analyzes i
     );
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(result.analysis.specId).toBeNull();
-    expect(result.analysis.analyzerId).toBeNull();
-    expect(ingested).toBe(0);
-    expect(Object.values(counted.calls).every((count) => count === 0)).toBe(true);
+    // INVERTED at M11-C4j: until then this was SPEC_NOT_SUPPORTED with nothing
+    // retrieved and no analyzer called.
+    expect(result.analysis.analysis.status).toBe("ANALYZED");
+    expect(result.analysis.specId).toBe("monk/brewmaster");
+    expect(result.analysis.analyzerId).toBe(BREWMASTER_MONK_ANALYZER_ID);
+    expect(result.analysis.scope).toBe("PLAYER_CONTEXT");
+    expect(ingested).toBe(1);
+    expect(counted.calls).toEqual(
+      Object.fromEntries(
+        Object.keys(counted.calls).map((id) => [id, id === BREWMASTER_MONK_ANALYZER_ID ? 1 : 0]),
+      ),
+    );
   });
 
   it("the internal lookup runs the real analyzer over the real subject: 15 eligible, 5 MATCH, 1 REJECTED, 9 UNKNOWN (M11-C4i)", () => {
@@ -482,24 +522,34 @@ describe("the public path refuses the real subject; the internal path analyzes i
 });
 
 describe("no central specialization switch", () => {
-  it("nothing outside the Brewmaster tree names the specialization except the partition, the registry row and the pinned data", () => {
+  it("nothing outside the Brewmaster tree names the specialization except the partition, the registry row, the two promotion sites and the pinned data", () => {
     const offenders = Object.entries(SOURCES)
       .filter(([, code]) => /monk\/brewmaster|Brewmaster Monk|BREWMASTER_MONK|MONK_BREWMASTER/.test(code))
       .filter(([path]) => !path.includes("/specs/monk/brewmaster/"))
       .map(([path]) => path.replace(/^.*\/src\//, "src/"))
       .filter((path) => !path.startsWith("src/data/game/monk-brewmaster-"))
       .sort();
+    // M11-C4j added exactly two names, both SITES OF THE FIVE-SITE PROMOTION
+    // EDIT (the public contract's specId enum and the identity table), and
+    // neither is a switch on the specialization.
     expect(offenders).toEqual([
+      // The public contract's specId enum and its widening note (M11-C4j).
+      "src/contracts/analysis-contract.ts",
       // The partition.
       "src/findings/spec-id.ts",
       // The registration import and the catalog row.
       "src/services/analyzer-registry.ts",
+      // The public identity table (M11-C4j).
+      "src/services/spec-identity.ts",
     ]);
+    for (const path of ["src/services/spec-identity.ts", "src/contracts/analysis-contract.ts"]) {
+      const code = SOURCES[Object.keys(SOURCES).find((candidate) => candidate.endsWith(path)) ?? ""] ?? "";
+      expect(code, path).not.toMatch(/if\s*\([^)]*monk\/brewmaster/);
+      expect(code, path).not.toMatch(/case\s+"monk\/brewmaster"/);
+    }
     for (const path of [
       "src/services/analysis-service.ts",
       "src/services/raid-night-service.ts",
-      "src/services/spec-identity.ts",
-      "src/contracts/analysis-contract.ts",
       "src/contracts/analysis-projection.ts",
       "src/contracts/raid-night-projection.ts",
       "src/aggregation/cell-projection.ts",

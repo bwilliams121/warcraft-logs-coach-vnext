@@ -1,5 +1,5 @@
 /**
- * SPEC_BREWMASTER_MONK executors (M11-C2, INTERNAL_ONLY): the real Brewmaster
+ * SPEC_BREWMASTER_MONK executors (M11-C2; PUBLIC since M11-C4j): the real Brewmaster
  * Monk registration over a real corpus artifact.
  *
  * The analysis is obtained through the REGISTRATION — `registration.analyze`,

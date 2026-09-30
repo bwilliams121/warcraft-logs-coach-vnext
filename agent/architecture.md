@@ -5360,13 +5360,14 @@ through the gate. At M11-C4h Protection passes discrimination by its one
 control (Avenger's Shield → Divine Toll at 2,074,381; it has no qualifying
 real `REJECTED`); Assassination, Retribution and Blood by real
 `REJECTED`s, and the stricter Retribution and Blood real-`REJECTED` pins
-remain. Brewmaster (INTERNAL_ONLY) passes observation over two neutral
-subjects; it was blocked on discrimination until M11-C4i (its only positive
-usability proof was the observed cast, so no `REJECTED` was reachable, and
-the M11-C4g substitution census found no control). Since M11-C4i it passes
-discrimination by two real `REJECTED`s, one per independent subject (below),
-and stays INTERNAL_ONLY: passing both gates is necessary for promotion, not
-promotion. Production carries no case id,
+remain. Brewmaster passes observation over two neutral subjects; it was
+blocked on discrimination until M11-C4i (its only positive usability proof was
+the observed cast, so no `REJECTED` was reachable, and the M11-C4g
+substitution census found no control). Since M11-C4i it passes discrimination
+by two real `REJECTED`s, one per independent subject (below); passing both
+gates was necessary for promotion, not promotion, and M11-C4j promoted it
+separately (below), after which the same gates count it in PUBLIC mode.
+Production carries no case id,
 artifact id, layer, readiness, gate or control vocabulary;
 `m10d-no-corpus-window-in-production` pins that.
 
@@ -5421,6 +5422,70 @@ fight 109 MATCH / 10 REJECTED / 70 UNKNOWN; subject 2's fixed window 47 /
 1 / 91; no earlier MATCH flips. The two independent `REJECTED`s are the
 Tiger Palm at 2,424,688 (gtKb f22 a4) against Keg Smash and the Tiger Palm
 at 2,573,516 (rXAf f13 a11) against Blackout Kick.
+
+### M11-C4j — Brewmaster Monk becomes publicly supported
+
+The five-site move, two promotion-layer guards (owner decisions, the M11-B12
+T2 / T3 precedents), one declaration correction, and nothing else. No gameplay
+rule, binding, authority reading or verdict changed: subject 1's full fight is
+still 109 MATCH / 10 REJECTED / 70 UNKNOWN and subject 2's 165 s window 47 /
+1 / 91, decision for decision, now also through REST, MCP and raid night.
+
+- **The five sites, in one reviewed edit.** `src/findings/spec-id.ts` (the
+  partition — `monk/brewmaster` moves to `PUBLIC_SPEC_IDS`; the internal-only
+  set is empty again and its machinery stays dormant), the public contract's
+  own `specId` enum (the additive-widening precedent; no other public value
+  moved), `src/services/spec-identity.ts` (`Monk`/`Brewmaster`, matched
+  exactly: no other Monk specialization resolves), the `satisfies
+  PublicSpecId` on `spec.ts`, and the registration's `exposure`.
+- **The validated-profile gate** (`supported-profile.ts`). Both real subjects
+  are Shado-Pan; the Master of Harmony list is dispatched by the engine but no
+  verdict on it has ever been measured. A resolved Master of Harmony build is
+  `AUTHORITY_NOT_AVAILABLE`; an unresolved or contradictory tree
+  `PROFILE_NOT_RESOLVED`; both before any decision is read, from the
+  three-way talent resolution only.
+- **The version-keyed Energy read.** C4i's Keg Smash affordability resolved
+  the Energy wire type by scanning the contract table unkeyed; it now goes
+  through `resourceWireTypeFor` with the capture's own
+  `gameVersion`/`logVersion`, and an uncovered version leaves only the
+  RESOURCE_AFFORDABILITY dimension `UNKNOWN` (`RESOURCE_WIRE_VERSION_NOT_COVERED`).
+- **The declaration correction.** C4i read Energy without declaring it, so
+  the derived ingestion requirement asked for no resources — harmless while
+  INTERNAL_ONLY (every committed capture carries resources), a silent
+  under-fetch for a public request that would have turned the 2,424,688
+  REJECTED into UNKNOWN. The offensive capability now declares ENERGY and the
+  RESOURCES category; the requirement is `includeResources: true`.
+
+**Beta limits, published in the limits prose.** The slice is not exhaustive.
+These stay `UNKNOWN`, never inferred: what Black Ox Brew changes (no reviewed
+transition — the largest single UNKNOWN cause on both subjects), Empty the
+Cellar's buff on subject 2 (its window holds no 1262768 transition), Keg Smash
+charges and its hasted recharge (only the ≥1-charge upper bound), Energy
+between observations, and every alternative whose positive usability is not
+proven in all eight dimensions (Breath of Fire never is: it is untargeted).
+
+**Proven.** `m11c4j-brewmaster-supported-profile` (the four hero-tree
+answers; both subjects Shado-Pan from their own trait entries; a relabelled
+parser version failing only affordability, so the 2,424,688 REJECTED becomes
+UNKNOWN and nothing else moves); `m11c4j-brewmaster-public-projection`
+(schema v1, the enum widened by one id, every committed input projected with
+the C4i totals and REJECTED times, decision-for-decision equivalence, no
+internal field or vocabulary, service/internal equality);
+`m11c4j-brewmaster-public-transports` (REST 200 for both subjects with their
+real REJECTEDs, MCP `structuredContent` and text equal to the REST body,
+repeat determinism, Arms and the other Monk specializations still
+SPEC_NOT_SUPPORTED, bearer behaviour unchanged, the derived description naming
+the Shado-Pan validation and the retained UNKNOWN areas);
+`m11c4j-mixed-raid-night` (Brewmaster alone and among real gtKb fight-22
+neighbours — Blood, Retribution, Assassination truthfully
+PROFILE_NOT_RESOLVED, Arms and Mistweaver SPEC_NOT_SUPPORTED — one discovery,
+one ingestion, each analyzer once, the cell identical alone, in company and on
+a second run); the promotion evidence gate counting Brewmaster in PUBLIC mode
+with the same seven qualifying assertions and two real REJECTEDs; the
+re-pinned partition, registry, capability, identity, contract, service,
+inventory, registration-list, module-conformance, authority-ownership,
+second-registration and tools-list suites; and the corpus (the
+APPLICATION_SERVICE case re-pinned, a new PUBLIC_CONTRACT parity case).
 
 ### The current unsupported subject
 

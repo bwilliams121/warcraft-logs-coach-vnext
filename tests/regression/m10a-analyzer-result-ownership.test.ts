@@ -35,6 +35,7 @@ import { ASSASSINATION_REGISTRATION } from "../../src/specs/rogue/assassination/
 import { PROTECTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retribution/registration.js";
 import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../../src/specs/deathknight/blood/registration.js";
+import { BREWMASTER_MONK_REGISTRATION } from "../../src/specs/monk/brewmaster/registration.js";
 import { analyzeObservedProtectionPaladinDecisions } from "../../src/specs/paladin/protection/observed-analysis.js";
 import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
 import {
@@ -255,14 +256,17 @@ describe("a mismatched result cannot reach observedDecisionViewOf", () => {
     const rogueView = vi.fn(ASSASSINATION_REGISTRATION.observedDecisionView);
     const paladinView = vi.fn(PROTECTION_PALADIN_REGISTRATION.observedDecisionView);
     // M11-A5: the third public row completes the catalog; M11-B12 the
-    // fourth. Neither view may be reached by any neighbour's analysis.
+    // fourth; M11-C4j the fifth. No view may be reached by any neighbour's
+    // analysis.
     const retributionView = vi.fn(RETRIBUTION_PALADIN_REGISTRATION.observedDecisionView);
     const bloodView = vi.fn(BLOOD_DEATH_KNIGHT_REGISTRATION.observedDecisionView);
+    const brewmasterView = vi.fn(BREWMASTER_MONK_REGISTRATION.observedDecisionView);
     const catalog = requireValidatedCatalog([
       { ...ASSASSINATION_REGISTRATION, observedDecisionView: rogueView },
       { ...PROTECTION_PALADIN_REGISTRATION, observedDecisionView: paladinView },
       { ...RETRIBUTION_PALADIN_REGISTRATION, observedDecisionView: retributionView },
       { ...BLOOD_DEATH_KNIGHT_REGISTRATION, observedDecisionView: bloodView },
+      { ...BREWMASTER_MONK_REGISTRATION, observedDecisionView: brewmasterView },
     ]);
     const real = realAssassinationAnalysis();
     if (real.status !== "ANALYZED") throw new Error("expected ANALYZED");
@@ -283,6 +287,7 @@ describe("a mismatched result cannot reach observedDecisionViewOf", () => {
     expect(rogueView).toHaveBeenCalledTimes(1);
     expect(paladinView).toHaveBeenCalledTimes(1);
     expect(retributionView).not.toHaveBeenCalled();
+    expect(brewmasterView).not.toHaveBeenCalled();
   });
 });
 

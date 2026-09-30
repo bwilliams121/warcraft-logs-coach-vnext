@@ -496,7 +496,7 @@
     {
       "specId": "monk/brewmaster",
       "cohort": "C_RUN_ACTION_LIST_DISPATCH",
-      "currentAnalyzerStatus": "INTERNAL_ONLY",
+      "currentAnalyzerStatus": "PUBLIC",
       "realEvidenceStatus": "REAL_SANITIZED_EVIDENCE_AVAILABLE",
       "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "PARTIAL",

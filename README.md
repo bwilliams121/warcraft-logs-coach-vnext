@@ -449,9 +449,13 @@ onboarding slice. The second M11 specialization, Blood Death Knight, took
 the same path over a longer road: `INTERNAL_ONLY` at M11-B2 as a measurement
 slice for the `run_action_list` dispatch cohort, ten evidence slices
 (M11-B2 … M11-B10), a promotion-readiness audit at M11-B11, and PUBLIC at
-M11-B12 with twenty-three qualifying real sanitized-capture assertions
-(M11 as a whole is NOT complete: twenty-eight ordinary specializations
-remain, healers are M12, Augmentation is M13). Its slice
+M11-B12 with twenty-three qualifying real sanitized-capture assertions. The
+third, Brewmaster Monk, arrived `INTERNAL_ONLY` at M11-C2 as the next
+cohort's measurement slice, built its decision surface over two independent
+Shado-Pan subjects (M11-C3 … M11-C4i), passed the global observation and
+discrimination gates on real evidence with one real `REJECTED` per subject,
+and became PUBLIC at M11-C4j (M11 as a whole is NOT complete: twenty-seven
+ordinary specializations remain, healers are M12, Augmentation is M13). Its slice
 judges observed Holy Power spender decisions (Divine Storm versus
 Templar's/Final Verdict) only, under the class/spec authority boundary
 (racials, potions, item uses and external buffs are outside the rotational
@@ -582,7 +586,7 @@ transport — a test asserts the two payloads are deeply equal.
 
 **Observed-decision authority verification for the publicly supported
 specializations: Assassination Rogue, Protection Paladin, Retribution
-Paladin and Blood Death Knight.**
+Paladin, Blood Death Knight and Brewmaster Monk.**
 
 It takes the rotational decisions a player *already made* and checks each one
 against that specialization's pinned SimulationCraft action priority list.
@@ -648,7 +652,31 @@ Bone Shield raises the in-game maximum to 12, but no supported predicate reads
 that maximum, so the analyzer neither enforces nor infers it. See
 `agent/architecture.md`, "M11-B", and `src/specs/deathknight/blood/README.md`.
 
-Any specialization other than those four returns `status: "SPEC_NOT_SUPPORTED"`
+Brewmaster Monk analysis (public since M11-C4j, a beta-quality slice)
+evaluates observed offensive global-cooldown decisions — Keg Smash, Blackout
+Kick, Tiger Palm, Breath of Fire and Invoke Niuzao — against the pinned
+Brewmaster APL, when the necessary state can be established. It is
+**validated for the Shado-Pan hero tree only**: a build whose observed talent
+tree resolves to Master of Harmony, to no hero tree, or to more than one is
+refused rather than judged (`AUTHORITY_NOT_AVAILABLE` or
+`PROFILE_NOT_RESOLVED`), because no Master of Harmony evidence has been
+measured. Celestial Brew, Expel Harm, Chi Burst, Exploding Keg, Empty the
+Cellar and Rushing Jade Wind are excluded `OUTSIDE_SUPPORTED_SLICE`. An
+alternative action counts as available only when every usability condition is
+proven from the log (cooldown upper bound, the decision cast's own pre-cost
+Energy, same-target range). The modelling is NOT exhaustive, and these areas
+stay `UNKNOWN` rather than being inferred: what Black Ox Brew changes (no
+reviewed transition), Empty the Cellar's buff when the window holds no
+transition of it, Keg Smash charges and its hasted recharge (only a ≥1-charge
+upper bound is used), Energy between observations, and every alternative whose
+usability is not fully proven. On the committed evidence: 109 MATCH / 10
+REJECTED / 70 UNKNOWN over one subject's full fight and 47 / 1 / 91 over the
+second subject's 165 s window. It does not evaluate brews, Stagger, active
+mitigation, self-healing, defensive cooldowns, interrupts or survival, and it
+does not score performance. See `agent/architecture.md`, "M11-C4j", and
+`src/specs/monk/brewmaster/README.md`.
+
+Any specialization other than those five returns `status: "SPEC_NOT_SUPPORTED"`
 with no decisions and no coverage. That is a complete, truthful answer — not
 evidence of clean play. The canonical list of supported specializations is
 derived at runtime from the production analyzer catalog (the PUBLIC
