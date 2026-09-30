@@ -38,19 +38,31 @@
  * discriminator is that the Hunter carries type 2 and never type 3: Focus and
  * Energy are adjacent enum values, so a renumbering would show up there first.
  *
- * WHAT A WIRE CONTRACT DOES NOT CLAIM: AN ABSOLUTE UNIT SCALE
+ * A UNIT SCALE IS A SEPARATE, SEPARATELY EVIDENCED CLAIM (M11-D2-A1)
  *
- * A contract says which RESOURCE a wire number describes. It does not claim that
- * Warcraft Logs encodes that resource on the same absolute scale as any other
- * tool. The same capture shows Rage at `max` 1300 and Runic Power at `max` 1250,
- * which are plainly not the numbers a player reads off their own bar.
+ * Which RESOURCE a wire number describes says nothing about the SCALE its
+ * amounts are on. The same capture shows Rage at `max` 1300 and Runic Power at
+ * `max` 1250, which are plainly not the numbers a player reads off their own
+ * bar. Until M11-D2-A1 no contract claimed a scale at all, and every reader
+ * that needed one either avoided it or carried its own: the Energy adapter is
+ * a PERCENTAGE, because the ratio of two numbers in one encoding is
+ * independent of what that encoding is (see `adaptEnergyPct`), and the Blood
+ * module carried Runic Power's divisor 10 privately.
  *
- * That is why the Energy adapter is defined as a PERCENTAGE and not as a raw
- * amount. SimulationCraft's `energy.pct` is itself a percentage from 0 to 100,
- * Warcraft Logs supplies an exact current amount and a contemporaneous maximum
- * on the SAME observation, and the ratio of two numbers in one encoding is
- * independent of what that encoding is. The absolute scale is therefore not an
- * input to the comparison at all. See `adaptEnergyPct`.
+ * Each contract now states its `unitScale`: the divisor from the wire amount to
+ * the unit SimulationCraft expressions read, resting on TWO facts that must
+ * both hold and neither implies the other:
+ *
+ *     the GAME DATA says  power_type_data.inc row N carries divisor D
+ *     the WIRE says       this resource's `cost` equals the pinned DBC `_cost`
+ *                         (or, where no DBC cost applies, its magnitudes fit
+ *                         D and no other)
+ *
+ * The first is read from ONE pinned file (`POWER_TYPE_DATA_SOURCE`), whose
+ * header names exactly the pinned client build. The second is recorded per
+ * contract in `unitScale.wireEncoding`, naming committed evidence. The
+ * percentage adapter is unaffected: it never needed a scale, and still takes
+ * none.
  *
  * HOLY POWER (M10-B) IS CORROBORATED BY A PROTECTION PALADIN CAPTURE
  *
@@ -142,9 +154,50 @@ export interface WireCorroborationEvidence {
 }
 
 /**
+ * The pinned game-data file every `unitScale.powerTypeData` row is read from
+ * (M11-D2-A1): SimulationCraft's generated power-type table at the pinned
+ * commit. Its first line reads `// Power types, wow build 12.1.0.69587` — the
+ * pinned client build. Recorded for traceability, not as a fight gate: a
+ * `CombatFight` carries no game build (see `../provenance.ts`), so the
+ * contract's `scope` stays the only applicability gate.
+ */
+export const POWER_TYPE_DATA_SOURCE = Object.freeze({
+  repository: "https://github.com/simulationcraft/simc",
+  commitSha: "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+  sourcePath: "engine/dbc/generated/power_type_data.inc",
+  sourceSha256: "c5e8e2327005f47d4aa31b64fc3e59572b39c291624b3ad3221682e8fb9055ee",
+  sourceByteLength: 2614,
+  gameBuild: "12.1.0.69587",
+  retrievedOn: "2026-09-30",
+});
+
+/**
+ * How a resource's wire amounts map onto the unit SimulationCraft expressions
+ * read (M11-D2-A1). See the module comment: both halves are required.
+ */
+export interface WireUnitScale {
+  /**
+   * `wire amount / divisor` is the amount in expression units. Equal to
+   * `powerTypeData.divisor`: the wire was shown to share the DBC encoding.
+   */
+  readonly divisor: number;
+  /** The row of `POWER_TYPE_DATA_SOURCE`, verbatim. Its `id` is the wire type. */
+  readonly powerTypeData: { readonly id: number; readonly name: string; readonly divisor: number };
+  /**
+   * Whether the expression unit is an indivisible count (combo points, Holy
+   * Power, Runes), so a well-formed wire amount and maximum are whole numbers.
+   */
+  readonly wholeUnits: boolean;
+  /** Committed evidence that the wire carries this resource in the DBC encoding. Factual. */
+  readonly wireEncoding: string;
+}
+
+/**
  * One wire contract.
  *
  * Both evidence members are required and non-optional. See the module comment.
+ * So is `unitScale` (M11-D2-A1): a contract that cannot state its scale does
+ * not exist, rather than existing with a guessed one.
  */
 export interface ResourceWireContract {
   readonly wireType: number;
@@ -154,6 +207,7 @@ export interface ResourceWireContract {
     readonly gameEnum: GameEnumEvidence;
     readonly wireCorroboration: WireCorroborationEvidence;
   };
+  readonly unitScale: WireUnitScale;
 }
 
 export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
@@ -182,6 +236,17 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "on no other class. Every type-4 entry carried a positive cost. No other wire type " +
           "appeared on those actors with those maxima.",
       },
+    },
+    unitScale: {
+      divisor: 1,
+      powerTypeData: { id: 4, name: "Combo_points", divisor: 1.0 },
+      wholeUnits: true,
+      wireEncoding:
+        "power_type_data.inc row 4 (Combo_points) carries divisor 1.0 and base maximum 5. Every costed type-4 " +
+        "entry on the Envenom casts of fixture wcl-assassination-envenom-combo-points (actor 19) reports a cost " +
+        "equal to its PRE_COST amount — the combo points spent, 7, 6 and 5 — against a maximum of 7, and the " +
+        "capture's Feral Druid " +
+        "carries a maximum of 5: whole combo points. A tenths encoding would put those maxima at 70 and 50.",
     },
   },
   {
@@ -220,6 +285,16 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "fight: 250 across 6,923 and 6,471 observations for the two Rogues respectively.",
       },
     },
+    unitScale: {
+      divisor: 1,
+      powerTypeData: { id: 3, name: "Energy", divisor: 1.0 },
+      wholeUnits: false,
+      wireEncoding:
+        "power_type_data.inc row 3 (Energy) carries divisor 1.0. On fixture wcl-brewmaster-monk-gtkb-opener " +
+        "the subject's (actor 4) Tiger Palm (100780) casts carry type-3 cost 50 and Keg Smash (121253) casts " +
+        "cost 40, equal to the pinned DBC _cost of their Energy rows (5167 and 6739, " +
+        "monk-brewmaster-spender-costs.json): the wire is in the DBC encoding.",
+    },
   },
   {
     wireType: 9,
@@ -255,6 +330,16 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "wcl-assassination-envenom-combo-points is consistent with all of it.",
       },
     },
+    unitScale: {
+      divisor: 1,
+      powerTypeData: { id: 9, name: "Holy_power", divisor: 1.0 },
+      wholeUnits: true,
+      wireEncoding:
+        "power_type_data.inc row 9 (Holy_power) carries divisor 1.0. On fixture " +
+        "wcl-retribution-paladin-a7r6-rotational-45s the subject's (actor 6) Divine Storm (53385) and Final " +
+        "Verdict (383328) casts carry type-9 cost 3 against a maximum of 5, equal to the pinned DBC _cost of " +
+        "their Holy Power rows (paladin-retribution-spender-costs.json): the wire is in the DBC encoding.",
+    },
   },
   {
     wireType: 5,
@@ -287,6 +372,16 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "of the same subject (two later A7R6 segments and the gtKb opener) show the same shape: " +
           "attached, costed 1 or 2, max 6, actor 14 only.",
       },
+    },
+    unitScale: {
+      divisor: 1,
+      powerTypeData: { id: 5, name: "Runes", divisor: 1.0 },
+      wholeUnits: true,
+      wireEncoding:
+        "power_type_data.inc row 5 (Runes) carries divisor 1.0. On fixture " +
+        "wcl-blood-death-knight-a7r6-rotational-45s the subject's (actor 14) Marrowrend (195182) casts carry " +
+        "type-5 cost 2 and Heart Strike (206930) casts cost 1 against a maximum of 6, equal to the pinned DBC " +
+        "_cost of their Rune rows (deathknight-blood-spender-costs.json): the wire is in the DBC encoding.",
     },
   },
   {
@@ -324,6 +419,17 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "Death Strike with attached amounts 440 and 390 against a reported cost of 450. The cost field " +
           "corroborates identity only.",
       },
+    },
+    unitScale: {
+      divisor: 10,
+      powerTypeData: { id: 6, name: "Runic_power", divisor: 10.0 },
+      wholeUnits: false,
+      wireEncoding:
+        "power_type_data.inc row 6 (Runic_power) carries divisor 10.0 — the fact the Blood module's " +
+        "RUNIC_POWER_WIRE_DIVISOR states. On fixture wcl-blood-death-knight-a7r6-rotational-45s the subject's " +
+        "(actor 14) Death Strike (49998) casts carry type-6 cost 450 against a maximum of 1250, equal to the " +
+        "pinned DBC _cost of its Runic Power row (deathknight-blood-spender-costs.json): the wire is in the DBC " +
+        "encoding, tenths of a point.",
     },
   },
 ];
