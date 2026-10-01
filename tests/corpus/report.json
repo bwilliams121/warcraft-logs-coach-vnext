@@ -309,6 +309,13 @@
       "sha256": "0a4826c5334c516b1f7205957245f79ae507a5bd1e12acf86fa88254ca2d3413"
     },
     {
+      "artifactId": "wcl-resource-change-pool-ownership",
+      "byteLength": 3462,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "5193c1b96ddda50024b553599cefc7a6a6a5019cf50bfd565b8b1ad968b47e2d"
+    },
+    {
       "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
       "byteLength": 140409,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -377,8 +384,8 @@
       "passed": 156
     },
     {
-      "assertions": 70,
-      "cases": 22,
+      "assertions": 82,
+      "cases": 25,
       "failed": 0,
       "kindsExercised": [
         "COMBAT_STATE.ACTOR_INDEX_CENSUS",
@@ -388,12 +395,13 @@
         "COMBAT_STATE.LAST_OBSERVED_CAST_PROVEN_ABSENT",
         "COMBAT_STATE.LAST_OBSERVED_CAST_UNKNOWN",
         "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
+        "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
         "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT",
         "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST"
       ],
       "notExecuted": 0,
       "owningLayer": "COMBAT_STATE",
-      "passed": 70
+      "passed": 82
     },
     {
       "assertions": 10,
@@ -784,6 +792,69 @@
       "referencedArtifactIds": ["wcl-cast-resource-pre-cost"]
     },
     {
+      "artifactId": "wcl-resource-change-pool-ownership",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 4,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.cross-actor-resource-changes-belong-to-the-pool-they-describe",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-resource-change-pool-ownership"]
+    },
+    {
+      "artifactId": "wcl-pet-sourced-events-hunter-pet-29",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 3,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.cross-actor-resource-changes-without-a-snapshot-stay-unowned",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-pet-sourced-events-hunter-pet-29"]
+    },
+    {
       "artifactId": "wcl-assassination-high-parse-opener",
       "assertions": [
         {
@@ -1153,6 +1224,30 @@
       "caseId": "combat-state.resources-are-observed-never-regenerated",
       "owningLayer": "COMBAT_STATE",
       "referencedArtifactIds": ["wcl-cast-resource-pre-cost"]
+    },
+    {
+      "artifactId": "wcl-midfight-window",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.same-actor-resource-changes-keep-their-owner",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-midfight-window"]
     },
     {
       "artifactId": "wcl-protection-paladin-a7r6-opener",
@@ -6693,15 +6788,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 5506688,
-    "artifacts": 48,
-    "assertions": 755,
-    "cases": 175,
+    "artifactBytes": 5510150,
+    "artifacts": 49,
+    "assertions": 767,
+    "cases": 178,
     "declared": 0,
-    "executable": 755,
+    "executable": 767,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 755
+    "passed": 767
   }
 }

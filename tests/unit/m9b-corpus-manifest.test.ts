@@ -85,8 +85,11 @@ describe("the committed corpus loads", () => {
     // PUBLIC_CONTRACT parity (its APPLICATION_SERVICE case was re-pinned).
     // M11-D2-A2 added one sanitized capture (six own completed casts proving
     // the Rage, Focus and Fury wire encodings) and its COMBAT_STATE case.
-    expect(loaded.artifacts).toHaveLength(48);
-    expect(loaded.cases).toHaveLength(175);
+    // M11-D2-A3 added one sanitized capture (five resourcechange events proving
+    // standalone pool ownership) and three COMBAT_STATE cases: over it, over the
+    // resourceless pet capture, and the same-actor control over the mid-fight window.
+    expect(loaded.artifacts).toHaveLength(49);
+    expect(loaded.cases).toHaveLength(178);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -99,7 +102,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds thirty-six sanitized captures, five derivations and six synthetics", async () => {
+  it("holds thirty-seven sanitized captures, five derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -141,6 +144,7 @@ describe("the committed corpus loads", () => {
       "wcl-protection-paladin-a7r6-rotational-45s",
       "wcl-pull-window-with-resources",
       "wcl-rage-fury-focus-pre-cost",
+      "wcl-resource-change-pool-ownership",
       "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
       "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
       "wcl-retribution-paladin-a7r6-rotational-45s",

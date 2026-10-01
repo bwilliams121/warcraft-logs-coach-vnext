@@ -54,6 +54,7 @@ import type {
   ActorRef,
   ClassResourceObservation,
   CombatEvent,
+  ResourceChangeEvent,
   ResourceSide,
   SourceRef,
   TargetRef,
@@ -178,17 +179,148 @@ export interface HealthAmountObservation {
 }
 
 /**
+ * Whose resource POOL a standalone `resourcechange` changed (M11-D2-A3).
+ *
+ * The event's SOURCE is the actor that caused the change. It is not, in
+ * general, the actor whose pool changed: one captured Hunter ability that
+ * restores Focus is sourced by the Hunter on four events at one millisecond —
+ * the Hunter's own pool and three pets' pools. Until M11-D2-A3 the standalone
+ * index filed every change under its source, so the pets' changes read as the
+ * Hunter's own Focus history.
+ *
+ * Ownership is read from evidence ON THE EVENT, never from who the actors are,
+ * and an event that does not establish it stays UNRESOLVED — it is never
+ * defaulted to the source, the target, or a pet's owner.
+ */
+export type StandaloneChangeOwnership =
+  | {
+      readonly state: "RESOLVED";
+      /** The actor whose pool changed. A plain reference: neither the source nor the target brand. */
+      readonly owner: ActorRef;
+      readonly basis: StandaloneChangeOwnershipBasis;
+    }
+  | {
+      readonly state: "UNRESOLVED";
+      readonly reason: UnresolvedChangeOwnershipReason;
+      /** The concrete actors on the event's two sides, ascending and distinct. */
+      readonly candidateActorIds: readonly number[];
+      /**
+       * False when a side carried no concrete actor: the pool may then belong
+       * to an actor the event does not name, and no actor can be ruled out.
+       */
+      readonly candidatesComplete: boolean;
+    };
+
+export type StandaloneChangeOwnershipBasis =
+  /**
+   * The event's own snapshot — on the side its `resourceActor` discriminator
+   * names — carries an entry of the CHANGED resource type, and that side has a
+   * concrete actor. That entry is the changed pool after the change
+   * (POST_CHANGE, M11-B5), so its actor owns the pool. Read off the
+   * discriminator M3 already verified, never off the actors' roles. Evidence:
+   * corpus artifact `wcl-resource-change-pool-ownership`
+   * (tests/corpus/manifest.json).
+   */
+  | "ATTACHED_CHANGED_POOL"
+  /**
+   * The event's source and target are one concrete actor instance. Both sides
+   * name the same actor, so the owner is that actor under either reading.
+   */
+  | "SAME_ACTOR_BOTH_SIDES";
+
+export const STANDALONE_CHANGE_OWNERSHIP_BASES = [
+  "ATTACHED_CHANGED_POOL",
+  "SAME_ACTOR_BOTH_SIDES",
+] as const satisfies readonly StandaloneChangeOwnershipBasis[];
+
+export type UnresolvedChangeOwnershipReason =
+  /** No snapshot rides on the event, and its two sides are not one actor. */
+  | "NO_ATTACHED_POOL"
+  /** A snapshot rides on the event but carries no entry of the changed type, and the sides differ. */
+  | "ATTACHMENT_LACKS_CHANGED_TYPE"
+  /** The changed type's entry rides on a side with no concrete actor, and the sides differ. */
+  | "ATTACHED_SIDE_HAS_NO_ACTOR";
+
+export const UNRESOLVED_CHANGE_OWNERSHIP_REASONS = [
+  "NO_ATTACHED_POOL",
+  "ATTACHMENT_LACKS_CHANGED_TYPE",
+  "ATTACHED_SIDE_HAS_NO_ACTOR",
+] as const satisfies readonly UnresolvedChangeOwnershipReason[];
+
+function sameActorInstance(a: ActorRef | null, b: ActorRef | null): boolean {
+  return a !== null && b !== null && a.actorId === b.actorId && a.instanceId === b.instanceId;
+}
+
+/**
+ * Decides whose pool one standalone change changed, from the event alone.
+ *
+ * Two bases, in this order, and nothing else:
+ *
+ *     the changed type's entry on a named side   -> that side's actor
+ *     source and target are one actor instance   -> that actor
+ *     otherwise                                  -> UNRESOLVED
+ *
+ * There is deliberately no rule about pets, owners, classes or resource types.
+ * Actor id `0` is real; only an absent actor is absent.
+ */
+export function standaloneChangeOwnershipOf(event: ResourceChangeEvent): StandaloneChangeOwnership {
+  const attached = event.attachedResources;
+  const carriesChangedType =
+    attached !== null && attached.classResources.some((entry) => entry.resourceType === event.resourceType);
+  if (carriesChangedType && attached.actor !== null) {
+    return {
+      state: "RESOLVED",
+      owner: { actorId: attached.actor.actorId, instanceId: attached.actor.instanceId },
+      basis: "ATTACHED_CHANGED_POOL",
+    };
+  }
+  if (event.source !== null && sameActorInstance(event.source, event.target)) {
+    return {
+      state: "RESOLVED",
+      owner: { actorId: event.source.actorId, instanceId: event.source.instanceId },
+      basis: "SAME_ACTOR_BOTH_SIDES",
+    };
+  }
+  const candidates = new Set<number>();
+  if (event.source !== null) candidates.add(event.source.actorId);
+  if (event.target !== null) candidates.add(event.target.actorId);
+  return {
+    state: "UNRESOLVED",
+    reason:
+      attached === null
+        ? "NO_ATTACHED_POOL"
+        : carriesChangedType
+          ? "ATTACHED_SIDE_HAS_NO_ACTOR"
+          : "ATTACHMENT_LACKS_CHANGED_TYPE",
+    candidateActorIds: [...candidates].sort((a, b) => a - b),
+    candidatesComplete: event.source !== null && event.target !== null,
+  };
+}
+
+/**
+ * Whether an actor's pool could be the one an ownership describes: the owner
+ * itself; for an UNRESOLVED change any candidate, and every actor when the
+ * candidates are incomplete.
+ */
+export function ownershipCouldBe(ownership: StandaloneChangeOwnership, actorId: number): boolean {
+  if (ownership.state === "RESOLVED") return ownership.owner.actorId === actorId;
+  return !ownership.candidatesComplete || ownership.candidateActorIds.includes(actorId);
+}
+
+/**
  * One standalone `resourcechange` observation.
  *
- * `source` and `target` are M3's branded references, carried through. Which of
- * them "gained" the resource is not asserted here: M3 owns attribution, and this
- * layer reports the envelope it was given.
+ * `source` and `target` are M3's branded references, carried through
+ * unchanged: the source is still the actor that CAUSED the change. Whose POOL
+ * changed is a separate fact, `ownership`, decided once from the event's own
+ * evidence (M11-D2-A3).
  */
 export interface StandaloneResourceChangeObservation {
   readonly position: number;
   readonly locator: EvidenceLocator;
   readonly source: SourceRef | null;
   readonly target: TargetRef | null;
+  readonly ownership: StandaloneChangeOwnership;
   readonly resourceType: number;
   readonly resourceChange: number;
   readonly otherResourceChange: number | null;
@@ -223,8 +355,21 @@ export interface ResourceIndexes {
   readonly unattributedSnapshotPositions: readonly number[];
   /** Actor -> ascending positions of snapshots carrying `hitPoints`. */
   readonly healthPositionsByActor: ReadonlyMap<number, readonly number[]>;
-  /** Standalone changes: SOURCE actor -> resource type -> ascending positions. */
-  readonly standaloneChangePositionsBySource: ReadonlyMap<number, ReadonlyMap<number, readonly number[]>>;
+  /**
+   * Standalone changes: POOL OWNER -> resource type -> ascending positions.
+   *
+   * Keyed by the actor whose pool changed (`standaloneChangeOwnershipOf`), not
+   * by the event's source (M11-D2-A3).
+   */
+  readonly standaloneChangePositionsByOwner: ReadonlyMap<number, ReadonlyMap<number, readonly number[]>>;
+  /**
+   * Standalone changes whose pool owner the event does not establish.
+   *
+   * Preserved, never attributed — the standalone counterpart of
+   * `unattributedSnapshotPositions`. Filing one under its source would be the
+   * defect M11-D2-A3 removed.
+   */
+  readonly unresolvedOwnershipChangePositions: readonly number[];
   /** Every standalone change position, in canonical order. */
   readonly standaloneChangePositions: readonly number[];
 }
@@ -271,7 +416,8 @@ export function buildResourceIndexes(fight: CombatFight): ResourceIndexes {
   const snapshotPositionsByActor = new Map<number, Map<number, number[]>>();
   const unattributedSnapshotPositions: number[] = [];
   const healthPositionsByActor = new Map<number, number[]>();
-  const standaloneChangePositionsBySource = new Map<number, Map<number, number[]>>();
+  const standaloneChangePositionsByOwner = new Map<number, Map<number, number[]>>();
+  const unresolvedOwnershipChangePositions: number[] = [];
   const standaloneChangePositions: number[] = [];
 
   for (let position = 0; position < fight.events.length; position += 1) {
@@ -297,8 +443,11 @@ export function buildResourceIndexes(fight: CombatFight): ResourceIndexes {
 
     if (event.kind === "RESOURCE_CHANGE") {
       standaloneChangePositions.push(position);
-      if (event.source !== null) {
-        appendNested(standaloneChangePositionsBySource, event.source.actorId, event.resourceType, position);
+      const ownership = standaloneChangeOwnershipOf(event);
+      if (ownership.state === "RESOLVED") {
+        appendNested(standaloneChangePositionsByOwner, ownership.owner.actorId, event.resourceType, position);
+      } else {
+        unresolvedOwnershipChangePositions.push(position);
       }
     }
   }
@@ -307,7 +456,8 @@ export function buildResourceIndexes(fight: CombatFight): ResourceIndexes {
     snapshotPositionsByActor,
     unattributedSnapshotPositions,
     healthPositionsByActor,
-    standaloneChangePositionsBySource,
+    standaloneChangePositionsByOwner,
+    unresolvedOwnershipChangePositions,
     standaloneChangePositions,
   };
 }
@@ -435,6 +585,7 @@ export function standaloneChangeAt(
     locator: event.locator,
     source: event.source,
     target: event.target,
+    ownership: standaloneChangeOwnershipOf(event),
     resourceType: event.resourceType,
     resourceChange: event.resourceChange,
     otherResourceChange: event.otherResourceChange,

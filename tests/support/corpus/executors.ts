@@ -132,6 +132,8 @@ export async function executeAssertion(
         artifact,
         params as ParamsOf<typeof assertion.kind>,
       );
+    case "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER":
+      return combatState.resourceChangePoolOwner(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "COMBAT_STATE.AURA_PRESENCE":
       return combatState.auraPresence(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "COMBAT_STATE.ACTOR_INDEX_CENSUS":
@@ -654,6 +656,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
   "COMBAT_STATE.LATEST_RESOURCE_OBSERVATION",
   "COMBAT_STATE.RESOURCE_CHANGE_POST_CHANGE_CONTRACT",
+  "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
   "COMBAT_STATE.AURA_PRESENCE",
   "COMBAT_STATE.ACTOR_INDEX_CENSUS",
   "COMBAT_STATE.AURA_STACK_OBSERVATION",

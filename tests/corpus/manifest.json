@@ -4104,8 +4104,123 @@
         "retainedFor": "The wire encodings of the Rage, Focus and Fury contracts (M11-D2-A2): every retained cast's wire cost equals the pinned DBC _cost of its spell's power row at SimulationCraft 33622e9d (sc_spell_data.inc sha256 d8e3d197…4c62: Cleave row 99 = 200, Mortal Strike row 9599 = 300, Kill Command row 1470 = 30, Cobra Shot row 10443 = 35, Eye Beam row 10720 = 30, Annihilation row 10809 = 40), so the wire is in the DBC encoding and power_type_data.inc's divisor (Rage 10.0, Focus 1.0, Fury 1.0) converts it. Mortal Strike's 1300/1300 and Kill Command's 100/100 while costed are cap-bounded falsifiers of a post-cost reading.",
         "limitations": [
           "Settles one instant per event. Nothing here establishes a resource BETWEEN casts: Rage has hidden melee gains on the wire, Focus regenerates, and no carry or regeneration is modelled.",
-          "Standalone resourcechange events are deliberately absent: Hunter-caused changes to a pet's Focus are currently attributed to the Hunter by source (the D2-A3 defect), so no Focus claim may rest on one.",
+          "Standalone resourcechange events are deliberately absent, and no claim here rests on one. Exact own-cast Focus snapshots are sound on their own; since M11-D2-A3 a standalone change is attributed to the pool the event's own evidence names (a Hunter's change to its pet's Focus is the pet's), and a change whose pool the event does not establish stays unresolved and fails closed (wcl-resource-change-pool-ownership).",
           "Actor identities are proven from the committed wcl-fight-context-a7r6-fight-7 master data, not from this slice.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-resource-change-pool-ownership",
+      "path": "artifacts/wcl-events/wcl-resource-change-pool-ownership.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "5193c1b96ddda50024b553599cefc7a6a6a5019cf50bfd565b8b1ad968b47e2d",
+      "byteLength": 3462,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-16",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2004589,
+            "endTimeMs": 2049589
+          },
+          "completeness": {
+            "eventsReturned": 30588,
+            "pagesRetrieved": 4,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Four pages (10,007 / 10,000 / 10,009 / 572 events; cursors 2,021,544, 2,034,579, 2,048,380, then null): the whole 45-second window was retrieved inside the 10-page cap. The fight's first event (the encounterstart at 2,004,589 = the fight start) is on page 1, so coverage runs from the pull. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first, so no page straddles two exports (.probe/m10b-request-count.json)."
+          },
+          "captureTooling": {
+            "name": ".probe/m10b-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R5 opener window: EVENTS_QUERY over [2,004,589 .. 2,049,589] (the pull's first 45 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10b-capture-plan.md before running, run once by hand on 2026-09-16 (6 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10b-pages.json wcl-resource-change-pool-ownership.json --indices 1759,5715,5716,5717,5718"
+            },
+            "detail": "The four page envelopes concatenated in page order, then exactly five resourcechange capture positions in capture order. Position 1759: actor 10 (Shaman) -> actor 16 (Shaman), ability 381931, Mana (type 0) +225 waste 225, resourceActor 2 with a snapshot carrying only Maelstrom (type 11). Positions 5715-5718: one Hunter ability (1264783) at 2,015,438 sourced by actor 20 (Hunter) on four events — targets 38, 30 and 29 (pets, petOwner 20) with resourceActor 2 and each pet's Focus snapshot (100/100; waste 3, 0, 3), and target 20 itself with resourceActor 1 and the Hunter's Focus snapshot (70/100; waste 0). Positions are meaningful only against report revision 30.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "An --indices selection retains five capture positions, four of them adjacent; no coverage is granted for any category or actor."
+        },
+        "retainedFor": "Standalone resource-change POOL OWNERSHIP (M11-D2-A3). One Hunter ability changes four Focus pools at one millisecond, all sourced by the Hunter: three pets' (the snapshot on the target side names each pet's pool, two of them reporting waste 3 at 100/100) and the Hunter's own (70/100, waste 0 — so a waste of 3 cannot be the Hunter's pool). Ownership is read from the event's own resourceActor discriminator and changed-type entry, never from source; the Shaman-to-Shaman Mana change, whose snapshot carries no Mana entry, establishes no owner.",
+        "limitations": [
+          "Ownership only. No Focus or Mana state between events is established, no pet resource is modelled, and nothing here is Hunter or pet gameplay.",
+          "The changed-type snapshot reads as the changed pool on the strength of the M11-B5 POST_CHANGE contract and of the local A7R6 captures this slice was cut from (every cross-actor resourcechange there carries resourceActor 2, its changed-type entry's max equals maxResourceAmount, and every positive waste sits at that entry's cap); only these five events are committed.",
+          "Actor identities and pet ownership are proven from the committed wcl-fight-context-a7r6-fight-7 master data, not from this slice.",
           "gameVersion 1 / logVersion 17 only."
         ]
       }
@@ -5255,6 +5370,167 @@
       "relatedTests": ["tests/unit/cast-resource-pre-cost-contract.test.ts"]
     },
     {
+      "caseId": "combat-state.cross-actor-resource-changes-belong-to-the-pool-they-describe",
+      "artifactId": "wcl-resource-change-pool-ownership",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-observations.ts standaloneChangeOwnershipOf, buildResourceIndexes; src/engine/resources/resource-state.ts standaloneChangePositionsFor",
+      "purpose": "A Hunter-sourced change to each pet's Focus is owned by that pet — read from the target-side Focus snapshot the event carries — and is indexed under the pet, never under the Hunter; the same ability's change to the Hunter's own Focus is the Hunter's. A cross-actor Mana change whose snapshot carries no Mana entry is owned by nobody and indexed under nobody. Every source stays the actor that caused the change.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2015438,
+            "sourceActorId": 20,
+            "targetActorId": 38,
+            "resourceWireType": 2,
+            "expected": {
+              "state": "RESOLVED",
+              "ownerActorId": 38,
+              "basis": "ATTACHED_CHANGED_POOL"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2015438,
+            "sourceActorId": 20,
+            "targetActorId": 30,
+            "resourceWireType": 2,
+            "expected": {
+              "state": "RESOLVED",
+              "ownerActorId": 30,
+              "basis": "ATTACHED_CHANGED_POOL"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2015438,
+            "sourceActorId": 20,
+            "targetActorId": 29,
+            "resourceWireType": 2,
+            "expected": {
+              "state": "RESOLVED",
+              "ownerActorId": 29,
+              "basis": "ATTACHED_CHANGED_POOL"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2015438,
+            "sourceActorId": 20,
+            "targetActorId": 20,
+            "resourceWireType": 2,
+            "expected": {
+              "state": "RESOLVED",
+              "ownerActorId": 20,
+              "basis": "ATTACHED_CHANGED_POOL"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2009098,
+            "sourceActorId": 10,
+            "targetActorId": 16,
+            "resourceWireType": 0,
+            "expected": {
+              "state": "UNRESOLVED",
+              "reason": "ATTACHMENT_LACKS_CHANGED_TYPE",
+              "candidateActorIds": [10, 16]
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "The discriminating fact is on the events themselves: the pets' events report waste 3 at a Focus snapshot of 100/100, while the Hunter's own event at the same millisecond reports 70/100 and waste 0, so the pets' changes cannot have been to the Hunter's pool. Before M11-D2-A3 all four were filed under the Hunter by source."
+      },
+      "authority": null,
+      "limitations": [
+        "Ownership of standalone changes only. No resource carry, regeneration or pet state is established.",
+        "gameVersion 1 / logVersion 17 only."
+      ],
+      "relatedTests": ["tests/unit/m11d2a3-resource-pool-ownership.test.ts"]
+    },
+    {
+      "caseId": "combat-state.cross-actor-resource-changes-without-a-snapshot-stay-unowned",
+      "artifactId": "wcl-pet-sourced-events-hunter-pet-29",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-observations.ts standaloneChangeOwnershipOf, buildResourceIndexes",
+      "purpose": "The four Hunter-to-pet Focus changes of a capture taken without resources carry no resourceActor snapshot: nothing on the event names the changed pool, so each is UNRESOLVED and indexed under neither the Hunter nor the pet — never defaulted to the source.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2164982,
+            "sourceActorId": 20,
+            "targetActorId": 29,
+            "resourceWireType": 2,
+            "expected": {
+              "state": "UNRESOLVED",
+              "reason": "NO_ATTACHED_POOL",
+              "candidateActorIds": [20, 29]
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2167913,
+            "sourceActorId": 20,
+            "targetActorId": 29,
+            "resourceWireType": 2,
+            "expected": {
+              "state": "UNRESOLVED",
+              "reason": "NO_ATTACHED_POOL",
+              "candidateActorIds": [20, 29]
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2170373,
+            "sourceActorId": 20,
+            "targetActorId": 29,
+            "resourceWireType": 2,
+            "expected": {
+              "state": "UNRESOLVED",
+              "reason": "NO_ATTACHED_POOL",
+              "candidateActorIds": [20, 29]
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 2174904,
+            "sourceActorId": 20,
+            "targetActorId": 29,
+            "resourceWireType": 2,
+            "expected": {
+              "state": "UNRESOLVED",
+              "reason": "NO_ATTACHED_POOL",
+              "candidateActorIds": [20, 29]
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "Fail closed: the capture's query did not request resources, so the event carries source and target and nothing more. That a pet's owner caused a change is not evidence of whose pool it changed."
+      },
+      "authority": null,
+      "limitations": ["gameVersion 1 / logVersion 17 only."],
+      "relatedTests": ["tests/unit/m11d2a3-resource-pool-ownership.test.ts"]
+    },
+    {
       "caseId": "combat-state.high-parse-opener-pre-pull-stealth-is-ambiguous-until-its-observed-removal",
       "artifactId": "wcl-assassination-high-parse-opener",
       "owningLayer": "COMBAT_STATE",
@@ -6286,6 +6562,64 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/regression/m4-resource-state-is-never-simulated.test.ts"]
+    },
+    {
+      "caseId": "combat-state.same-actor-resource-changes-keep-their-owner",
+      "artifactId": "wcl-midfight-window",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-observations.ts standaloneChangeOwnershipOf, buildResourceIndexes",
+      "purpose": "A standalone change whose source and target are one actor is that actor's, even with no snapshot on the event: both sides name the same actor. These three changes (Holy Power for actors 1 and 5, type 16 for actor 3) are indexed exactly where the source-keyed index filed them before M11-D2-A3.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 7550183,
+            "sourceActorId": 3,
+            "targetActorId": 3,
+            "resourceWireType": 16,
+            "expected": {
+              "state": "RESOLVED",
+              "ownerActorId": 3,
+              "basis": "SAME_ACTOR_BOTH_SIDES"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 7550183,
+            "sourceActorId": 1,
+            "targetActorId": 1,
+            "resourceWireType": 9,
+            "expected": {
+              "state": "RESOLVED",
+              "ownerActorId": 1,
+              "basis": "SAME_ACTOR_BOTH_SIDES"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER",
+          "params": {
+            "reportTimeMs": 7550183,
+            "sourceActorId": 5,
+            "targetActorId": 5,
+            "resourceWireType": 9,
+            "expected": {
+              "state": "RESOLVED",
+              "ownerActorId": 5,
+              "basis": "SAME_ACTOR_BOTH_SIDES"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "The same-actor control: the correction moves no change whose source and target agree."
+      },
+      "authority": null,
+      "limitations": ["gameVersion 1 / logVersion 17 only."],
+      "relatedTests": ["tests/unit/m11d2a3-resource-pool-ownership.test.ts"]
     },
     {
       "caseId": "combat-state.standalone-holy-power-changes-are-observed-never-replayed",

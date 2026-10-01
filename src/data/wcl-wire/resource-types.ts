@@ -510,8 +510,11 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
           "max of 100, the snapshot on the caster's own side (resourceActor 1): Kill Command (34026) costing 30 and " +
           "Cobra Shot (193455) costing 35. The fixture retains Kill Command at 100/100 costing 30 (the cap-bounded " +
           "falsifier of a post-cost reading) and Cobra Shot at 98/100 costing 35. OWN-CAST OBSERVATIONS ONLY: " +
-          "standalone resource changes a Hunter causes to its pet's Focus are currently attributed to the Hunter " +
-          "by source, so no Focus history between casts is established, and none is used here.",
+          "the exact PRE_COST snapshot on the Hunter's own completed cast is what this contract rests on. " +
+          "Standalone resource changes are attributed since M11-D2-A3 to the pool the event's own evidence names " +
+          "(a Hunter's change to its pet's Focus is the pet's), and a change whose pool the event does not " +
+          "establish stays unresolved and fails closed; no Focus history between casts is established, and none " +
+          "is used here.",
       },
     },
     unitScale: {

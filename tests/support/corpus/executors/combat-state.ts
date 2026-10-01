@@ -263,6 +263,86 @@ export function resourceChangePostChangeContract(
   return pass();
 }
 
+/**
+ * M11-D2-A3: whose pool one standalone change changed, and that the index
+ * agrees — under the owner and no other actor on the event, or under nobody.
+ */
+export function resourceChangePoolOwner(
+  corpus: LoadedCorpus,
+  artifact: LoadedArtifact,
+  params: ParamsOf<"COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER">,
+): AssertionOutcome {
+  const state = stateOf(corpus, artifact);
+  const { reportTimeMs, sourceActorId, targetActorId, resourceWireType: type } = params;
+  const matches = state.resources.indexes.standaloneChangePositions.filter((position) => {
+    const event = state.eventAt(position);
+    return (
+      event?.kind === "RESOURCE_CHANGE" &&
+      event.reportTimeMs === reportTimeMs &&
+      event.source?.actorId === sourceActorId &&
+      event.target?.actorId === targetActorId &&
+      event.resourceType === type
+    );
+  });
+  const position = matches[0];
+  if (position === undefined || matches.length !== 1) {
+    return fail("the locator does not name exactly one standalone change", {
+      expected: 1,
+      actual: matches.length,
+    });
+  }
+  const change = state.resources.standaloneChangeOnEvent(position);
+  if (change.certainty !== "EXACT") {
+    return fail("the located change is not an exact standalone observation", { actual: change.certainty });
+  }
+  const { ownership, source } = change.value;
+  if (source?.actorId !== sourceActorId) {
+    return fail("the change's source was not carried through", {
+      locator: change.value.locator,
+      expected: sourceActorId,
+      actual: source?.actorId ?? null,
+    });
+  }
+  const actual =
+    ownership.state === "RESOLVED"
+      ? { state: "RESOLVED", ownerActorId: ownership.owner.actorId, basis: ownership.basis }
+      : { state: "UNRESOLVED", reason: ownership.reason, candidateActorIds: ownership.candidateActorIds };
+  if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
+    return fail("the change's pool ownership does not match the case", {
+      locator: change.value.locator,
+      expected: params.expected,
+      actual,
+    });
+  }
+  const indexedUnder = [...new Set([sourceActorId, targetActorId])].filter((actorId) =>
+    state.resources.standaloneChangePositionsFor(actorId, type).includes(position),
+  );
+  const unresolved = state.resources.indexes.unresolvedOwnershipChangePositions.includes(position);
+  const expectedIndex =
+    ownership.state === "RESOLVED"
+      ? {
+          indexedUnder: [ownership.owner.actorId].filter(
+            (id) => id === sourceActorId || id === targetActorId,
+          ),
+          unresolved: false,
+        }
+      : { indexedUnder: [], unresolved: true };
+  if (
+    ownership.state === "RESOLVED" &&
+    !state.resources.standaloneChangePositionsFor(ownership.owner.actorId, type).includes(position)
+  ) {
+    return fail("the change is not indexed under its owner", { locator: change.value.locator });
+  }
+  if (JSON.stringify({ indexedUnder, unresolved }) !== JSON.stringify(expectedIndex)) {
+    return fail("the standalone index disagrees with the change's ownership", {
+      locator: change.value.locator,
+      expected: expectedIndex,
+      actual: { indexedUnder, unresolved },
+    });
+  }
+  return pass();
+}
+
 export function latestResourceObservation(
   corpus: LoadedCorpus,
   artifact: LoadedArtifact,

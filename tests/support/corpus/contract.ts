@@ -29,7 +29,11 @@
 import { z } from "zod";
 
 import { UNKNOWN_REASONS } from "../../../src/engine/state/state-result.js";
-import { RESOURCE_OBSERVATION_TIMINGS } from "../../../src/engine/resources/resource-observations.js";
+import {
+  RESOURCE_OBSERVATION_TIMINGS,
+  STANDALONE_CHANGE_OWNERSHIP_BASES,
+  UNRESOLVED_CHANGE_OWNERSHIP_REASONS,
+} from "../../../src/engine/resources/resource-observations.js";
 import { BLOOD_RUNE_AFFORDABILITY_EVIDENCE } from "../../../src/specs/deathknight/blood/rune-affordability.js";
 import { TALENT_SELECTIONS } from "../../../src/data/game/rogue-talents.js";
 import {
@@ -989,6 +993,41 @@ export const ASSERTION_KINDS = {
     requiresAuthority: false,
     description:
       "M11-B5. Every attachment of this resource on this actor's resourcechange events is tagged POST_CHANGE, and carrying the latest exact observed amount forward — each POST_CHANGE attachment REPLACING the state, a costed cast leaving it unknown until the next observation — reproduces every later PRE_COST and uncosted amount with zero hidden changes. The scaled delta is compared beside each attachment only to classify it (reconciled, capped, or rounded where the attachment is exact); no state is ever produced from a delta.",
+  },
+  "COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER": {
+    owningLayer: "COMBAT_STATE",
+    outcomeClass: "POSITIVE_FACT",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        /** Locates exactly one standalone change: (report time, source, target, resource type). */
+        reportTimeMs: z.number().int(),
+        sourceActorId: z.number().int(),
+        targetActorId: z.number().int(),
+        resourceWireType: z.number().int(),
+        expected: z.union([
+          z
+            .object({
+              state: z.literal("RESOLVED"),
+              ownerActorId: z.number().int(),
+              basis: z.enum(STANDALONE_CHANGE_OWNERSHIP_BASES),
+            })
+            .strict(),
+          z
+            .object({
+              state: z.literal("UNRESOLVED"),
+              reason: z.enum(UNRESOLVED_CHANGE_OWNERSHIP_REASONS),
+              candidateActorIds: z.array(z.number().int()),
+            })
+            .strict(),
+        ]),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "M11-D2-A3. The one standalone change at (report time, source, target, resource) changed exactly this actor's pool, on this basis read from the event itself — and is indexed under that owner and under no other actor on the event — or its pool is UNRESOLVED for this reason and it is indexed under no actor at all. The source is carried through unchanged: the actor that caused a change is never rewritten into the actor whose pool changed, nor the reverse.",
   },
   "COMBAT_STATE.AURA_PRESENCE": {
     owningLayer: "COMBAT_STATE",

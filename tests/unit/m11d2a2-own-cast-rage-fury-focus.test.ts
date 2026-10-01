@@ -28,11 +28,14 @@ import {
  *
  *   NOT          any Rage, Focus or Fury state BETWEEN casts. Rage gained from
  *                melee is not on the wire as a resource change; Focus
- *                regenerates; Fury drains for some specializations; and
- *                standalone resource changes a Hunter causes to its PET's
- *                Focus are currently indexed under the Hunter by source — the
- *                open D2-A3 defect. General Hunter Focus history is therefore
- *                NOT sound, and nothing here claims it is.
+ *                regenerates; Fury drains for some specializations. Since
+ *                M11-D2-A3 a standalone resource change is attributed to the
+ *                pool the event's own evidence names — a Hunter's change to
+ *                its PET's Focus is the pet's — and one whose pool the event
+ *                does not establish stays unresolved and fails closed. No
+ *                Focus carry or regeneration is modelled, so Hunter Focus
+ *                history between casts is still not established, and nothing
+ *                here claims it is.
  *
  * Fixture: wcl-rage-fury-focus-pre-cost (A7R6kxPJ1hC8YQ4w fight 7, revision
  * 30), six own completed casts, no resource change event.
@@ -244,8 +247,8 @@ describe("ownCastResourceAt reads Rage, Focus and Fury from the fixture", () => 
 describe("the Focus boundary after A2: own-cast observations only", () => {
   // A Hunter (20) casts, causes a standalone change to its PET's (37) Focus,
   // and casts again. The reader at each cast reads that cast's own snapshot
-  // and nothing else: the standalone change — which the resource index today
-  // files under the Hunter by SOURCE (the D2-A3 defect) — never enters it.
+  // and nothing else: the standalone change — the pet's own since M11-D2-A3,
+  // and in any case not a cast — never enters it.
   const HUNTER = 20;
   const PET = 37;
   const FOCUS = 2;

@@ -95,6 +95,7 @@ import { lastPositionAtOrBefore, type TemporalPosition } from "../state/temporal
 import {
   buildResourceIndexes,
   healthObservationAt,
+  ownershipCouldBe,
   resourceObservationAt,
   standaloneChangeAt,
   type HealthAmountObservation,
@@ -118,7 +119,11 @@ export interface ResourceStateView {
 
   /** Ascending canonical positions of snapshots describing this actor and resource. */
   snapshotPositionsFor(actorId: number, resourceType: number): readonly number[];
-  /** Ascending canonical positions of standalone changes sourced by this actor. */
+  /**
+   * Ascending canonical positions of standalone changes to THIS ACTOR'S POOL
+   * of this resource — not the changes the actor caused (M11-D2-A3). A change
+   * whose owner the event does not establish is in no actor's list.
+   */
   standaloneChangePositionsFor(actorId: number, resourceType: number): readonly number[];
 
   /**
@@ -202,6 +207,12 @@ export interface ResourceStateView {
    * No anchor in the prefix is UNKNOWN: `NO_OBSERVATION` when coverage from
    * the fight start proves the log carried none, otherwise the coverage
    * reason.
+   *
+   * A standalone change counts as this actor's only when the change is to
+   * this actor's POOL (M11-D2-A3). A change of this resource after the anchor
+   * whose pool the event does not establish, and which could be this actor's,
+   * makes the history UNSUPPORTED_DERIVATION — exactly as an unattributed
+   * snapshot does — rather than being dropped from it.
    */
   resourceHistoryAt(query: ResourceObservationQuery): StateResult<ResourceHistory>;
 
@@ -260,7 +271,7 @@ export function createResourceState(environment: StateEnvironment): ResourceStat
   }
 
   function standaloneChangePositionsFor(actorId: number, resourceType: number): readonly number[] {
-    return indexes.standaloneChangePositionsBySource.get(actorId)?.get(resourceType) ?? NO_POSITIONS;
+    return indexes.standaloneChangePositionsByOwner.get(actorId)?.get(resourceType) ?? NO_POSITIONS;
   }
 
   function observationOnEvent(
@@ -377,8 +388,12 @@ export function createResourceState(environment: StateEnvironment): ResourceStat
   function entryAt(position: number, actorId: number, resourceType: number): ResourceHistoryEntry | null {
     const snapshot = resourceObservationAt(fight, position, actorId, resourceType);
     const change = standaloneChangeAt(fight, position);
+    // The change to this actor's POOL, never merely one this actor caused.
     const ownChange =
-      change !== null && change.resourceType === resourceType && change.source?.actorId === actorId
+      change !== null &&
+      change.resourceType === resourceType &&
+      change.ownership.state === "RESOLVED" &&
+      change.ownership.owner.actorId === actorId
         ? change
         : null;
     if (snapshot === null && ownChange === null) return null;
@@ -430,6 +445,21 @@ export function createResourceState(environment: StateEnvironment): ResourceStat
     const unattributed = lastPositionAtOrBefore(indexes.unattributedSnapshotPositions, lastIncludedPosition);
     if (unattributed !== null && unattributed > anchorPosition) {
       return unknownState("UNSUPPORTED_DERIVATION", [anchor.locator], RESOURCES);
+    }
+    // So could a change of this resource whose pool the event does not
+    // establish (M11-D2-A3): the history cannot claim to hold every change to
+    // this actor's pool while one might be missing from it.
+    for (const position of indexes.unresolvedOwnershipChangePositions) {
+      if (position <= anchorPosition) continue;
+      if (position > lastIncludedPosition) break;
+      const change = standaloneChangeAt(fight, position);
+      if (
+        change !== null &&
+        change.resourceType === query.resourceType &&
+        ownershipCouldBe(change.ownership, query.actorId)
+      ) {
+        return unknownState("UNSUPPORTED_DERIVATION", [anchor.locator, change.locator], RESOURCES);
+      }
     }
 
     const since: ResourceHistoryEntry[] = [];

@@ -1204,8 +1204,8 @@ const ARTIFACTS = [
   // (17), from the SAME M10-B capture the Protection opener slices came from.
   // Six own completed casts, two per resource, each a costed PRE_COST snapshot
   // the caster's own pool carries (resourceActor 1). No resourcechange is
-  // retained: standalone changes are attributed by SOURCE (the open D2-A3
-  // pet-attribution defect), and no contract here rests on one.
+  // retained, and no contract here rests on one: standalone-change pool
+  // ownership is M11-D2-A3's, proven by wcl-resource-change-pool-ownership.
   artifact("wcl-rage-fury-focus-pre-cost", wcl("wcl-rage-fury-focus-pre-cost"), {
     kind: "SANITIZED_CAPTURE",
     source: PROT_OPENER_SOURCE,
@@ -1223,8 +1223,30 @@ const ARTIFACTS = [
       "The wire encodings of the Rage, Focus and Fury contracts (M11-D2-A2): every retained cast's wire cost equals the pinned DBC _cost of its spell's power row at SimulationCraft 33622e9d (sc_spell_data.inc sha256 d8e3d197…4c62: Cleave row 99 = 200, Mortal Strike row 9599 = 300, Kill Command row 1470 = 30, Cobra Shot row 10443 = 35, Eye Beam row 10720 = 30, Annihilation row 10809 = 40), so the wire is in the DBC encoding and power_type_data.inc's divisor (Rage 10.0, Focus 1.0, Fury 1.0) converts it. Mortal Strike's 1300/1300 and Kill Command's 100/100 while costed are cap-bounded falsifiers of a post-cost reading.",
     limitations: [
       "Settles one instant per event. Nothing here establishes a resource BETWEEN casts: Rage has hidden melee gains on the wire, Focus regenerates, and no carry or regeneration is modelled.",
-      "Standalone resourcechange events are deliberately absent: Hunter-caused changes to a pet's Focus are currently attributed to the Hunter by source (the D2-A3 defect), so no Focus claim may rest on one.",
+      "Standalone resourcechange events are deliberately absent, and no claim here rests on one. Exact own-cast Focus snapshots are sound on their own; since M11-D2-A3 a standalone change is attributed to the pool the event's own evidence names (a Hunter's change to its pet's Focus is the pet's), and a change whose pool the event does not establish stays unresolved and fails closed (wcl-resource-change-pool-ownership).",
       "Actor identities are proven from the committed wcl-fight-context-a7r6-fight-7 master data, not from this slice.",
+      VERSION_SCOPE,
+    ],
+  }),
+  artifact("wcl-resource-change-pool-ownership", wcl("wcl-resource-change-pool-ownership"), {
+    kind: "SANITIZED_CAPTURE",
+    source: PROT_OPENER_SOURCE,
+    transformations: [
+      selection(
+        "node scripts/sanitize-probe.mjs .probe/m10b-pages.json wcl-resource-change-pool-ownership.json --indices 1759,5715,5716,5717,5718",
+        "The four page envelopes concatenated in page order, then exactly five resourcechange capture positions in capture order. Position 1759: actor 10 (Shaman) -> actor 16 (Shaman), ability 381931, Mana (type 0) +225 waste 225, resourceActor 2 with a snapshot carrying only Maelstrom (type 11). Positions 5715-5718: one Hunter ability (1264783) at 2,015,438 sourced by actor 20 (Hunter) on four events — targets 38, 30 and 29 (pets, petOwner 20) with resourceActor 2 and each pet's Focus snapshot (100/100; waste 3, 0, 3), and target 20 itself with resourceActor 1 and the Hunter's Focus snapshot (70/100; waste 0). Positions are meaningful only against report revision 30.",
+        ALL_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_6),
+      credential_scan(SLICER_REVISION_6),
+    ],
+    coverageBasis:
+      "An --indices selection retains five capture positions, four of them adjacent; no coverage is granted for any category or actor.",
+    retainedFor:
+      "Standalone resource-change POOL OWNERSHIP (M11-D2-A3). One Hunter ability changes four Focus pools at one millisecond, all sourced by the Hunter: three pets' (the snapshot on the target side names each pet's pool, two of them reporting waste 3 at 100/100) and the Hunter's own (70/100, waste 0 — so a waste of 3 cannot be the Hunter's pool). Ownership is read from the event's own resourceActor discriminator and changed-type entry, never from source; the Shaman-to-Shaman Mana change, whose snapshot carries no Mana entry, establishes no owner.",
+    limitations: [
+      "Ownership only. No Focus or Mana state between events is established, no pet resource is modelled, and nothing here is Hunter or pet gameplay.",
+      "The changed-type snapshot reads as the changed pool on the strength of the M11-B5 POST_CHANGE contract and of the local A7R6 captures this slice was cut from (every cross-actor resourcechange there carries resourceActor 2, its changed-type entry's max equals maxResourceAmount, and every positive waste sits at that entry's cap); only these five events are committed.",
+      "Actor identities and pet ownership are proven from the committed wcl-fight-context-a7r6-fight-7 master data, not from this slice.",
       VERSION_SCOPE,
     ],
   }),
@@ -7990,6 +8012,142 @@ const CASES = [
         "tests/unit/m11d2a1-resource-unit-scale.test.ts",
         "tests/unit/m11d2a2-own-cast-rage-fury-focus.test.ts",
       ],
+    },
+  ),
+  kase(
+    "combat-state.cross-actor-resource-changes-belong-to-the-pool-they-describe",
+    "wcl-resource-change-pool-ownership",
+    "COMBAT_STATE",
+    "src/engine/resources/resource-observations.ts standaloneChangeOwnershipOf, buildResourceIndexes; src/engine/resources/resource-state.ts standaloneChangePositionsFor",
+    "A Hunter-sourced change to each pet's Focus is owned by that pet — read from the target-side Focus snapshot the event carries — and is indexed under the pet, never under the Hunter; the same ability's change to the Hunter's own Focus is the Hunter's. A cross-actor Mana change whose snapshot carries no Mana entry is owned by nobody and indexed under nobody. Every source stays the actor that caused the change.",
+    [
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2015438,
+        sourceActorId: 20,
+        targetActorId: 38,
+        resourceWireType: 2,
+        expected: { state: "RESOLVED", ownerActorId: 38, basis: "ATTACHED_CHANGED_POOL" },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2015438,
+        sourceActorId: 20,
+        targetActorId: 30,
+        resourceWireType: 2,
+        expected: { state: "RESOLVED", ownerActorId: 30, basis: "ATTACHED_CHANGED_POOL" },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2015438,
+        sourceActorId: 20,
+        targetActorId: 29,
+        resourceWireType: 2,
+        expected: { state: "RESOLVED", ownerActorId: 29, basis: "ATTACHED_CHANGED_POOL" },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2015438,
+        sourceActorId: 20,
+        targetActorId: 20,
+        resourceWireType: 2,
+        expected: { state: "RESOLVED", ownerActorId: 20, basis: "ATTACHED_CHANGED_POOL" },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2009098,
+        sourceActorId: 10,
+        targetActorId: 16,
+        resourceWireType: 0,
+        expected: {
+          state: "UNRESOLVED",
+          reason: "ATTACHMENT_LACKS_CHANGED_TYPE",
+          candidateActorIds: [10, 16],
+        },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+    "The discriminating fact is on the events themselves: the pets' events report waste 3 at a Focus snapshot of 100/100, while the Hunter's own event at the same millisecond reports 70/100 and waste 0, so the pets' changes cannot have been to the Hunter's pool. Before M11-D2-A3 all four were filed under the Hunter by source.",
+    {
+      limitations: [
+        "Ownership of standalone changes only. No resource carry, regeneration or pet state is established.",
+        "gameVersion 1 / logVersion 17 only.",
+      ],
+      related: ["tests/unit/m11d2a3-resource-pool-ownership.test.ts"],
+    },
+  ),
+  kase(
+    "combat-state.cross-actor-resource-changes-without-a-snapshot-stay-unowned",
+    "wcl-pet-sourced-events-hunter-pet-29",
+    "COMBAT_STATE",
+    "src/engine/resources/resource-observations.ts standaloneChangeOwnershipOf, buildResourceIndexes",
+    "The four Hunter-to-pet Focus changes of a capture taken without resources carry no resourceActor snapshot: nothing on the event names the changed pool, so each is UNRESOLVED and indexed under neither the Hunter nor the pet — never defaulted to the source.",
+    [
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2164982,
+        sourceActorId: 20,
+        targetActorId: 29,
+        resourceWireType: 2,
+        expected: { state: "UNRESOLVED", reason: "NO_ATTACHED_POOL", candidateActorIds: [20, 29] },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2167913,
+        sourceActorId: 20,
+        targetActorId: 29,
+        resourceWireType: 2,
+        expected: { state: "UNRESOLVED", reason: "NO_ATTACHED_POOL", candidateActorIds: [20, 29] },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2170373,
+        sourceActorId: 20,
+        targetActorId: 29,
+        resourceWireType: 2,
+        expected: { state: "UNRESOLVED", reason: "NO_ATTACHED_POOL", candidateActorIds: [20, 29] },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 2174904,
+        sourceActorId: 20,
+        targetActorId: 29,
+        resourceWireType: 2,
+        expected: { state: "UNRESOLVED", reason: "NO_ATTACHED_POOL", candidateActorIds: [20, 29] },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+    "Fail closed: the capture's query did not request resources, so the event carries source and target and nothing more. That a pet's owner caused a change is not evidence of whose pool it changed.",
+    {
+      limitations: ["gameVersion 1 / logVersion 17 only."],
+      related: ["tests/unit/m11d2a3-resource-pool-ownership.test.ts"],
+    },
+  ),
+  kase(
+    "combat-state.same-actor-resource-changes-keep-their-owner",
+    "wcl-midfight-window",
+    "COMBAT_STATE",
+    "src/engine/resources/resource-observations.ts standaloneChangeOwnershipOf, buildResourceIndexes",
+    "A standalone change whose source and target are one actor is that actor's, even with no snapshot on the event: both sides name the same actor. These three changes (Holy Power for actors 1 and 5, type 16 for actor 3) are indexed exactly where the source-keyed index filed them before M11-D2-A3.",
+    [
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 7550183,
+        sourceActorId: 3,
+        targetActorId: 3,
+        resourceWireType: 16,
+        expected: { state: "RESOLVED", ownerActorId: 3, basis: "SAME_ACTOR_BOTH_SIDES" },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 7550183,
+        sourceActorId: 1,
+        targetActorId: 1,
+        resourceWireType: 9,
+        expected: { state: "RESOLVED", ownerActorId: 1, basis: "SAME_ACTOR_BOTH_SIDES" },
+      }),
+      a("COMBAT_STATE.RESOURCE_CHANGE_POOL_OWNER", {
+        reportTimeMs: 7550183,
+        sourceActorId: 5,
+        targetActorId: 5,
+        resourceWireType: 9,
+        expected: { state: "RESOLVED", ownerActorId: 5, basis: "SAME_ACTOR_BOTH_SIDES" },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+    "The same-actor control: the correction moves no change whose source and target agree.",
+    {
+      limitations: ["gameVersion 1 / logVersion 17 only."],
+      related: ["tests/unit/m11d2a3-resource-pool-ownership.test.ts"],
     },
   ),
   kase(

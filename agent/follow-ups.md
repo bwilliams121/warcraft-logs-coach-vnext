@@ -326,6 +326,29 @@ the artifact regenerated, a Blood-owned modifier beside Frenzied Bloodthirst's,
 and the guard switched on — required only if a future predicate reads the
 maximum.
 
+## After M11-D2: deferred resource and Energy safety items
+
+**Raised:** M11-D2 audit, M11-D2-A2 and M11-D2-A3 (2026-10-01). None is
+reachable by a current public decision; each must be closed before the work
+that would make it reachable.
+
+**Assassination stale Energy before D3.** Before D3 broadens APL coverage,
+the Assassination first-GCD query must not bind a stale `energy.pct` inside
+branches that fire `thistle_tea`. Today the bindings it uses are taken before
+the Tea grant. Audited SAFE_AS_IMPLEMENTED at M11-D2, but not structurally
+guarded.
+
+**`wholeUnits` provenance.** `wholeUnits: true` for COMBO_POINTS, HOLY_POWER
+and RUNES rests on count semantics, not on a pinned field (`power_type_data_t`
+has none). Give it explicit provenance, or document it as a modelling
+decision.
+
+**Unresolved resource-window handling.** `observationsWithinBefore` does not
+currently surface unresolved-ownership changes that fall inside the queried
+historical window. `resourceHistoryAt` currently protects Blood's production
+path, but the generic window helper needs an explicit fail-closed ownership
+rule before broader resource-history consumers rely on it.
+
 ## After M9-C: evidence the corpus still lacks
 
 **Raised:** M9-C closeout (2026-09-15).

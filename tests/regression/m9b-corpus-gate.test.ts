@@ -142,9 +142,12 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // assertion: the Brewmaster subject's REST/MCP PUBLIC_CONTRACT parity.
     // M11-D2-A2 added one COMBAT_STATE case and six assertions: the Rage,
     // Focus and Fury snapshots on six own costed casts are EXACT and PRE_COST.
-    expect(result.summary.cases).toBe(175);
-    expect(result.summary.assertions).toBe(755);
-    expect(result.summary.passed).toBe(755);
+    // M11-D2-A3 added three COMBAT_STATE cases and twelve assertions: the pool
+    // owner of five changes in its ownership capture, of the resourceless pet
+    // capture's four, and of the mid-fight window's three same-actor changes.
+    expect(result.summary.cases).toBe(178);
+    expect(result.summary.assertions).toBe(767);
+    expect(result.summary.passed).toBe(767);
   });
 
   it("covers every layer", async () => {
