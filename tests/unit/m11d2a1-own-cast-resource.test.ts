@@ -200,7 +200,7 @@ describe("refuses everything it cannot establish", () => {
     const result = ownCastResourceAt(stateOf([ownCast(exact)]), {
       position: 0,
       actorId: ACTOR,
-      resourceId: "RAGE" as ResourceId,
+      resourceId: "MAELSTROM" as ResourceId,
     });
     expect(refusalOf(result)).toBe("NO_CONTRACT_FOR_RESOURCE");
   });

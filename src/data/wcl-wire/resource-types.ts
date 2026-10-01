@@ -122,12 +122,16 @@ import {
 } from "../provenance.js";
 
 /** Resource identities this project models. Deliberately not a full database. */
-export type ResourceId = "COMBO_POINTS" | "ENERGY" | "HOLY_POWER" | "RUNES" | "RUNIC_POWER";
+export type ResourceId =
+  "COMBO_POINTS" | "ENERGY" | "FOCUS" | "FURY" | "HOLY_POWER" | "RAGE" | "RUNES" | "RUNIC_POWER";
 
 export const RESOURCE_IDS = [
   "COMBO_POINTS",
   "ENERGY",
+  "FOCUS",
+  "FURY",
   "HOLY_POWER",
+  "RAGE",
   "RUNES",
   "RUNIC_POWER",
 ] as const satisfies readonly ResourceId[];
@@ -430,6 +434,133 @@ export const RESOURCE_WIRE_CONTRACTS: readonly ResourceWireContract[] = [
         "(actor 14) Death Strike (49998) casts carry type-6 cost 450 against a maximum of 1250, equal to the " +
         "pinned DBC _cost of its Runic Power row (deathknight-blood-spender-costs.json): the wire is in the DBC " +
         "encoding, tenths of a point.",
+    },
+  },
+  // M11-D2-A2: Rage, Focus and Fury. Each rests on the pinned power_type_data
+  // row (POWER_TYPE_DATA_SOURCE) and the pinned SimulationCraft power_e
+  // enumerator of the same value (engine/sc_enums.hpp, sha256 64e10c19…c1f),
+  // and on fixture wcl-rage-fury-focus-pre-cost: own completed casts only, no
+  // standalone resource change. `wholeUnits` is false for all three — the
+  // pinned row type carries no indivisibility field, and each row's own
+  // columns say otherwise (a 10.0 divisor; 5.0/s regeneration; -1.0/s decay).
+  {
+    wireType: 1,
+    resourceId: "RAGE",
+    scope: { gameVersion: 1, logVersion: 17 },
+    evidence: {
+      gameEnum: {
+        enumName: "Enum.PowerType",
+        memberName: "Rage",
+        value: 1,
+        expansion: "Midnight",
+        gameBuild: "12.1.0.69587",
+        source:
+          "SimulationCraft 33622e9d engine/dbc/generated/power_type_data.inc row 1 (Rage) and engine/sc_enums.hpp POWER_RAGE = 1, both generated from the client's power types",
+        verifiedOn: "2026-10-01",
+      },
+      wireCorroboration: {
+        fixtureId: "wcl-rage-fury-focus-pre-cost",
+        reportCode: "A7R6kxPJ1hC8YQ4w",
+        reportRevision: 30,
+        capturedOn: "2026-09-16",
+        observation:
+          "In the first 45 s of the same complete 20-player fight, the Warrior (actor 4, Warrior/Arms by the " +
+          "committed fight-context master data) carried wire type 1 on 24 costed completed casts against a stable " +
+          "max of 1300, the snapshot on the caster's own side (resourceActor 1). Costs were 200 (Cleave 845, Slam " +
+          "1464, a 1269383 cast) and 300 (Mortal Strike 12294). The fixture retains Cleave at 464/1300 costing 200 and " +
+          "Mortal Strike at 1300/1300 costing 300; amount == max while costed is the cap-bounded falsifier of a " +
+          "post-cost reading. Rage gained from melee swings is not carried by any resource-change event on the wire, " +
+          "so no state between casts is established by this contract.",
+      },
+    },
+    unitScale: {
+      divisor: 10,
+      powerTypeData: { id: 1, name: "Rage", divisor: 10.0 },
+      wholeUnits: false,
+      wireEncoding:
+        "power_type_data.inc row 1 (Rage) carries divisor 10.0 and base maximum 1000. On fixture " +
+        "wcl-rage-fury-focus-pre-cost the Warrior's (actor 4) Cleave costs 200 and Mortal Strike 300 on the wire, " +
+        "equal to the pinned DBC _cost of their Rage rows (sc_spell_data.inc rows 99 and 9599): the wire is in the " +
+        "DBC encoding, tenths of a point — Cleave's 464 is 46.4 Rage.",
+    },
+  },
+  {
+    wireType: 2,
+    resourceId: "FOCUS",
+    scope: { gameVersion: 1, logVersion: 17 },
+    evidence: {
+      gameEnum: {
+        enumName: "Enum.PowerType",
+        memberName: "Focus",
+        value: 2,
+        expansion: "Midnight",
+        gameBuild: "12.1.0.69587",
+        source:
+          "SimulationCraft 33622e9d engine/dbc/generated/power_type_data.inc row 2 (Focus) and engine/sc_enums.hpp POWER_FOCUS = 2, both generated from the client's power types",
+        verifiedOn: "2026-10-01",
+      },
+      wireCorroboration: {
+        fixtureId: "wcl-rage-fury-focus-pre-cost",
+        reportCode: "A7R6kxPJ1hC8YQ4w",
+        reportRevision: 30,
+        capturedOn: "2026-09-16",
+        observation:
+          "In the first 45 s of the same complete 20-player fight, the Hunter (actor 20, Hunter/BeastMastery by the " +
+          "committed fight-context master data) carried wire type 2 on 28 costed completed casts against a stable " +
+          "max of 100, the snapshot on the caster's own side (resourceActor 1): Kill Command (34026) costing 30 and " +
+          "Cobra Shot (193455) costing 35. The fixture retains Kill Command at 100/100 costing 30 (the cap-bounded " +
+          "falsifier of a post-cost reading) and Cobra Shot at 98/100 costing 35. OWN-CAST OBSERVATIONS ONLY: " +
+          "standalone resource changes a Hunter causes to its pet's Focus are currently attributed to the Hunter " +
+          "by source, so no Focus history between casts is established, and none is used here.",
+      },
+    },
+    unitScale: {
+      divisor: 1,
+      powerTypeData: { id: 2, name: "Focus", divisor: 1.0 },
+      wholeUnits: false,
+      wireEncoding:
+        "power_type_data.inc row 2 (Focus) carries divisor 1.0, base maximum 100 and 5.0/s regeneration. On fixture " +
+        "wcl-rage-fury-focus-pre-cost the Hunter's (actor 20) Kill Command costs 30 and Cobra Shot 35 on the wire, " +
+        "equal to the pinned DBC _cost of their Focus rows (sc_spell_data.inc rows 1470 and 10443), against the " +
+        "base maximum of 100: the wire is in the DBC encoding.",
+    },
+  },
+  {
+    wireType: 17,
+    resourceId: "FURY",
+    scope: { gameVersion: 1, logVersion: 17 },
+    evidence: {
+      gameEnum: {
+        enumName: "Enum.PowerType",
+        memberName: "Fury",
+        value: 17,
+        expansion: "Midnight",
+        gameBuild: "12.1.0.69587",
+        source:
+          "SimulationCraft 33622e9d engine/dbc/generated/power_type_data.inc row 17 (Fury) and engine/sc_enums.hpp POWER_FURY = 17, both generated from the client's power types",
+        verifiedOn: "2026-10-01",
+      },
+      wireCorroboration: {
+        fixtureId: "wcl-rage-fury-focus-pre-cost",
+        reportCode: "A7R6kxPJ1hC8YQ4w",
+        reportRevision: 30,
+        capturedOn: "2026-09-16",
+        observation:
+          "In the first 45 s of the same complete 20-player fight, the Demon Hunter (actor 18, DemonHunter/Havoc by " +
+          "the committed fight-context master data) carried wire type 17 on 28 costed completed casts against a " +
+          "stable max of 170, the snapshot on the caster's own side (resourceActor 1), costing 30, 35 or 40. The " +
+          "fixture retains Eye Beam (198013) at 44/170 costing 30 and Annihilation (201427) at 109/170 costing 40. " +
+          "No state between casts is established by this contract.",
+      },
+    },
+    unitScale: {
+      divisor: 1,
+      powerTypeData: { id: 17, name: "Fury", divisor: 1.0 },
+      wholeUnits: false,
+      wireEncoding:
+        "power_type_data.inc row 17 (Fury) carries divisor 1.0. On fixture wcl-rage-fury-focus-pre-cost the Demon " +
+        "Hunter's (actor 18) Eye Beam costs 30 and Annihilation 40 on the wire, equal to the pinned DBC _cost of " +
+        "their Fury rows (sc_spell_data.inc rows 10720 and 10809): the wire is in the DBC encoding.",
     },
   },
 ];

@@ -83,8 +83,10 @@ describe("the committed corpus loads", () => {
     // one-field substitution of the 60–90 s segment) and its case.
     // M11-C4j added no artifact and one case: the Brewmaster subject's REST/MCP
     // PUBLIC_CONTRACT parity (its APPLICATION_SERVICE case was re-pinned).
-    expect(loaded.artifacts).toHaveLength(47);
-    expect(loaded.cases).toHaveLength(174);
+    // M11-D2-A2 added one sanitized capture (six own completed casts proving
+    // the Rage, Focus and Fury wire encodings) and its COMBAT_STATE case.
+    expect(loaded.artifacts).toHaveLength(48);
+    expect(loaded.cases).toHaveLength(175);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -97,7 +99,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds thirty-five sanitized captures, five derivations and six synthetics", async () => {
+  it("holds thirty-six sanitized captures, five derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -138,6 +140,7 @@ describe("the committed corpus loads", () => {
       "wcl-protection-paladin-a7r6-rotational-165s.seg-90-120",
       "wcl-protection-paladin-a7r6-rotational-45s",
       "wcl-pull-window-with-resources",
+      "wcl-rage-fury-focus-pre-cost",
       "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
       "wcl-retribution-paladin-a7r6-rotational-165s.seg-45-105",
       "wcl-retribution-paladin-a7r6-rotational-45s",

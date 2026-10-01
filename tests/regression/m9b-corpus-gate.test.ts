@@ -140,9 +140,11 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // M11-C4j re-pinned the Brewmaster APPLICATION_SERVICE case (public since
     // the promotion; same two assertions) and added one case and one
     // assertion: the Brewmaster subject's REST/MCP PUBLIC_CONTRACT parity.
-    expect(result.summary.cases).toBe(174);
-    expect(result.summary.assertions).toBe(749);
-    expect(result.summary.passed).toBe(749);
+    // M11-D2-A2 added one COMBAT_STATE case and six assertions: the Rage,
+    // Focus and Fury snapshots on six own costed casts are EXACT and PRE_COST.
+    expect(result.summary.cases).toBe(175);
+    expect(result.summary.assertions).toBe(755);
+    expect(result.summary.passed).toBe(755);
   });
 
   it("covers every layer", async () => {

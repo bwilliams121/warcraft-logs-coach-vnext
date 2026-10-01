@@ -3996,6 +3996,121 @@
       }
     },
     {
+      "artifactId": "wcl-rage-fury-focus-pre-cost",
+      "path": "artifacts/wcl-events/wcl-rage-fury-focus-pre-cost.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "0a4826c5334c516b1f7205957245f79ae507a5bd1e12acf86fa88254ca2d3413",
+      "byteLength": 3415,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "A7R6kxPJ1hC8YQ4w",
+          "fightId": 7,
+          "reportRevision": 30,
+          "sourceActorId": 7,
+          "encounterId": 3445,
+          "difficulty": 5,
+          "capturedOn": "2026-09-16",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 2004589,
+            "endTimeMs": 2049589
+          },
+          "completeness": {
+            "eventsReturned": 30588,
+            "pagesRetrieved": 4,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Four pages (10,007 / 10,000 / 10,009 / 572 events; cursors 2,021,544, 2,034,579, 2,048,380, then null): the whole 45-second window was retrieved inside the 10-page cap. The fight's first event (the encounterstart at 2,004,589 = the fight start) is on page 1, so coverage runs from the pull. REPORT_REVISION_QUERY after the last page read 30, equal to the revision R1 read before the first, so no page straddles two exports (.probe/m10b-request-count.json)."
+          },
+          "captureTooling": {
+            "name": ".probe/m10b-capture.probe.ts (temporary, gitignored) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R5 opener window: EVENTS_QUERY over [2,004,589 .. 2,049,589] (the pull's first 45 s) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 10 pages in .probe/m10b-capture-plan.md before running, run once by hand on 2026-09-16 (6 requests in total for the whole capture, bound 12)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m10b-pages.json — gitignored, not retained in the repository",
+          "performanceContext": {
+            "source": "reportData.report.rankings(fightIDs:[7]) — the report's own per-fight rankings",
+            "partition": 1,
+            "metric": "dps",
+            "subjects": [
+              {
+                "actorId": 19,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 58,
+                "bracketPercent": 63,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              },
+              {
+                "actorId": 13,
+                "className": "Rogue",
+                "specName": "Assassination",
+                "rankPercent": 33,
+                "bracketPercent": 34,
+                "bracket": 16,
+                "bracketData": 319,
+                "totalParses": 655
+              }
+            ],
+            "fightOutcome": "KILL",
+            "fightDurationMs": 424514
+          },
+          "reportRevisionAfterCapture": 30
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m10b-pages.json wcl-rage-fury-focus-pre-cost.json --indices 468,1212,1392,2757,3702,3805"
+            },
+            "detail": "The four page envelopes concatenated in page order, then exactly six capture positions in capture order: per resource, two costed COMPLETE casts by the actor whose pool the snapshot describes (resourceActor 1, the source). Rage: actor 4 (Warrior/Arms) Cleave 845 at 464/1300 costing 200 and Mortal Strike 12294 at 1300/1300 costing 300. Focus: actor 20 (Hunter/BeastMastery) Kill Command 34026 at 100/100 costing 30 and Cobra Shot 193455 at 98/100 costing 35. Fury: actor 18 (DemonHunter/Havoc) Eye Beam 198013 at 44/170 costing 30 and Annihilation 201427 at 109/170 costing 40. Positions are meaningful only against report revision 30.",
+            "invalidates": [
+              "WINDOW_COVERAGE",
+              "ABSENCE_PROOF",
+              "CROSS_EVENT_CONTINUITY",
+              "PAGINATION_BEHAVIOUR"
+            ]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-6",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "An --indices selection retains six non-adjacent capture positions; no contiguous range survives."
+        },
+        "retainedFor": "The wire encodings of the Rage, Focus and Fury contracts (M11-D2-A2): every retained cast's wire cost equals the pinned DBC _cost of its spell's power row at SimulationCraft 33622e9d (sc_spell_data.inc sha256 d8e3d197…4c62: Cleave row 99 = 200, Mortal Strike row 9599 = 300, Kill Command row 1470 = 30, Cobra Shot row 10443 = 35, Eye Beam row 10720 = 30, Annihilation row 10809 = 40), so the wire is in the DBC encoding and power_type_data.inc's divisor (Rage 10.0, Focus 1.0, Fury 1.0) converts it. Mortal Strike's 1300/1300 and Kill Command's 100/100 while costed are cap-bounded falsifiers of a post-cost reading.",
+        "limitations": [
+          "Settles one instant per event. Nothing here establishes a resource BETWEEN casts: Rage has hidden melee gains on the wire, Focus regenerates, and no carry or regeneration is modelled.",
+          "Standalone resourcechange events are deliberately absent: Hunter-caused changes to a pet's Focus are currently attributed to the Hunter by source (the D2-A3 defect), so no Focus claim may rest on one.",
+          "Actor identities are proven from the committed wcl-fight-context-a7r6-fight-7 master data, not from this slice.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
       "path": "artifacts/wcl-events/wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165.json",
       "encoding": "JSON",
@@ -6020,6 +6135,125 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/combat-state.test.ts"]
+    },
+    {
+      "caseId": "combat-state.rage-focus-and-fury-snapshots-on-costed-casts-are-pre-cost",
+      "artifactId": "wcl-rage-fury-focus-pre-cost",
+      "owningLayer": "COMBAT_STATE",
+      "contractUnderTest": "src/engine/resources/resource-observations.ts timing; src/engine/resources/resource-state.ts observationOnEvent; src/data/wcl-wire/resource-types.ts (RAGE, FOCUS, FURY)",
+      "purpose": "Each retained cast's own snapshot is EXACT and PRE_COST with amount, max and cost verbatim, for Rage (wire type 1, tenths), Focus (wire type 2) and Fury (wire type 17). Mortal Strike's 1300/1300 costing 300 and Kill Command's 100/100 costing 30 are the cap-bounded falsifiers of a post-cost reading; every cost equals its spell's pinned DBC _cost.",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 4,
+            "abilityGameId": 845,
+            "reportTimeMs": 2006029,
+            "resourceWireType": 1,
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 464,
+              "observedMax": 1300,
+              "observedCost": 200,
+              "timing": "PRE_COST"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 4,
+            "abilityGameId": 12294,
+            "reportTimeMs": 2012524,
+            "resourceWireType": 1,
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 1300,
+              "observedMax": 1300,
+              "observedCost": 300,
+              "timing": "PRE_COST"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 20,
+            "abilityGameId": 34026,
+            "reportTimeMs": 2007928,
+            "resourceWireType": 2,
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 100,
+              "observedMax": 100,
+              "observedCost": 30,
+              "timing": "PRE_COST"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 20,
+            "abilityGameId": 193455,
+            "reportTimeMs": 2010916,
+            "resourceWireType": 2,
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 98,
+              "observedMax": 100,
+              "observedCost": 35,
+              "timing": "PRE_COST"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 18,
+            "abilityGameId": 198013,
+            "reportTimeMs": 2008277,
+            "resourceWireType": 17,
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 44,
+              "observedMax": 170,
+              "observedCost": 30,
+              "timing": "PRE_COST"
+            }
+          }
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "params": {
+            "actorId": 18,
+            "abilityGameId": 201427,
+            "reportTimeMs": 2012753,
+            "resourceWireType": 17,
+            "expected": {
+              "certainty": "EXACT",
+              "observedAmount": 109,
+              "observedMax": 170,
+              "observedCost": 40,
+              "timing": "PRE_COST"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "amount == max while cost > 0 is decided from one event with no arithmetic (a post-cost reading would require holding max + cost, above the cap). The cost-equals-DBC check is what ties each wire encoding to power_type_data.inc's divisor; the contract test re-checks it against the pinned rows."
+      },
+      "authority": null,
+      "limitations": [
+        "Establishes exact own-cast PRE_COST observations only. No Rage, Focus or Fury state between casts is established, and none is modelled.",
+        "Focus evidence is own-cast snapshots only; standalone Hunter resource changes are not used (D2-A3).",
+        "gameVersion 1 / logVersion 17 only."
+      ],
+      "relatedTests": [
+        "tests/unit/m11d2a1-resource-unit-scale.test.ts",
+        "tests/unit/m11d2a2-own-cast-rage-fury-focus.test.ts"
+      ]
     },
     {
       "caseId": "combat-state.resources-are-observed-never-regenerated",

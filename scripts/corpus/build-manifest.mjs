@@ -1200,6 +1200,34 @@ const ARTIFACTS = [
       WHITESPACE,
     ],
   }),
+  // M11-D2-A2 (2026-10-01): the wire encodings of Rage (1), Focus (2) and Fury
+  // (17), from the SAME M10-B capture the Protection opener slices came from.
+  // Six own completed casts, two per resource, each a costed PRE_COST snapshot
+  // the caster's own pool carries (resourceActor 1). No resourcechange is
+  // retained: standalone changes are attributed by SOURCE (the open D2-A3
+  // pet-attribution defect), and no contract here rests on one.
+  artifact("wcl-rage-fury-focus-pre-cost", wcl("wcl-rage-fury-focus-pre-cost"), {
+    kind: "SANITIZED_CAPTURE",
+    source: PROT_OPENER_SOURCE,
+    transformations: [
+      selection(
+        "node scripts/sanitize-probe.mjs .probe/m10b-pages.json wcl-rage-fury-focus-pre-cost.json --indices 468,1212,1392,2757,3702,3805",
+        "The four page envelopes concatenated in page order, then exactly six capture positions in capture order: per resource, two costed COMPLETE casts by the actor whose pool the snapshot describes (resourceActor 1, the source). Rage: actor 4 (Warrior/Arms) Cleave 845 at 464/1300 costing 200 and Mortal Strike 12294 at 1300/1300 costing 300. Focus: actor 20 (Hunter/BeastMastery) Kill Command 34026 at 100/100 costing 30 and Cobra Shot 193455 at 98/100 costing 35. Fury: actor 18 (DemonHunter/Havoc) Eye Beam 198013 at 44/170 costing 30 and Annihilation 201427 at 109/170 costing 40. Positions are meaningful only against report revision 30.",
+        ALL_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_6),
+      credential_scan(SLICER_REVISION_6),
+    ],
+    coverageBasis:
+      "An --indices selection retains six non-adjacent capture positions; no contiguous range survives.",
+    retainedFor:
+      "The wire encodings of the Rage, Focus and Fury contracts (M11-D2-A2): every retained cast's wire cost equals the pinned DBC _cost of its spell's power row at SimulationCraft 33622e9d (sc_spell_data.inc sha256 d8e3d197…4c62: Cleave row 99 = 200, Mortal Strike row 9599 = 300, Kill Command row 1470 = 30, Cobra Shot row 10443 = 35, Eye Beam row 10720 = 30, Annihilation row 10809 = 40), so the wire is in the DBC encoding and power_type_data.inc's divisor (Rage 10.0, Focus 1.0, Fury 1.0) converts it. Mortal Strike's 1300/1300 and Kill Command's 100/100 while costed are cap-bounded falsifiers of a post-cost reading.",
+    limitations: [
+      "Settles one instant per event. Nothing here establishes a resource BETWEEN casts: Rage has hidden melee gains on the wire, Focus regenerates, and no carry or regeneration is modelled.",
+      "Standalone resourcechange events are deliberately absent: Hunter-caused changes to a pet's Focus are currently attributed to the Hunter by source (the D2-A3 defect), so no Focus claim may rest on one.",
+      "Actor identities are proven from the committed wcl-fight-context-a7r6-fight-7 master data, not from this slice.",
+      VERSION_SCOPE,
+    ],
+  }),
   artifact("wcl-assassination-envenom-combo-points", wcl("wcl-assassination-envenom-combo-points"), {
     kind: "SANITIZED_CAPTURE",
     source: ENVENOM_SOURCE,
@@ -7862,6 +7890,106 @@ const CASES = [
         "gameVersion 1 / logVersion 17 only.",
       ],
       related: ["tests/unit/cast-resource-pre-cost-contract.test.ts"],
+    },
+  ),
+  kase(
+    "combat-state.rage-focus-and-fury-snapshots-on-costed-casts-are-pre-cost",
+    "wcl-rage-fury-focus-pre-cost",
+    "COMBAT_STATE",
+    "src/engine/resources/resource-observations.ts timing; src/engine/resources/resource-state.ts observationOnEvent; src/data/wcl-wire/resource-types.ts (RAGE, FOCUS, FURY)",
+    "Each retained cast's own snapshot is EXACT and PRE_COST with amount, max and cost verbatim, for Rage (wire type 1, tenths), Focus (wire type 2) and Fury (wire type 17). Mortal Strike's 1300/1300 costing 300 and Kill Command's 100/100 costing 30 are the cap-bounded falsifiers of a post-cost reading; every cost equals its spell's pinned DBC _cost.",
+    [
+      a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+        actorId: 4,
+        abilityGameId: 845,
+        reportTimeMs: 2006029,
+        resourceWireType: 1,
+        expected: {
+          certainty: "EXACT",
+          observedAmount: 464,
+          observedMax: 1300,
+          observedCost: 200,
+          timing: "PRE_COST",
+        },
+      }),
+      a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+        actorId: 4,
+        abilityGameId: 12294,
+        reportTimeMs: 2012524,
+        resourceWireType: 1,
+        expected: {
+          certainty: "EXACT",
+          observedAmount: 1300,
+          observedMax: 1300,
+          observedCost: 300,
+          timing: "PRE_COST",
+        },
+      }),
+      a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+        actorId: 20,
+        abilityGameId: 34026,
+        reportTimeMs: 2007928,
+        resourceWireType: 2,
+        expected: {
+          certainty: "EXACT",
+          observedAmount: 100,
+          observedMax: 100,
+          observedCost: 30,
+          timing: "PRE_COST",
+        },
+      }),
+      a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+        actorId: 20,
+        abilityGameId: 193455,
+        reportTimeMs: 2010916,
+        resourceWireType: 2,
+        expected: {
+          certainty: "EXACT",
+          observedAmount: 98,
+          observedMax: 100,
+          observedCost: 35,
+          timing: "PRE_COST",
+        },
+      }),
+      a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+        actorId: 18,
+        abilityGameId: 198013,
+        reportTimeMs: 2008277,
+        resourceWireType: 17,
+        expected: {
+          certainty: "EXACT",
+          observedAmount: 44,
+          observedMax: 170,
+          observedCost: 30,
+          timing: "PRE_COST",
+        },
+      }),
+      a("COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST", {
+        actorId: 18,
+        abilityGameId: 201427,
+        reportTimeMs: 2012753,
+        resourceWireType: 17,
+        expected: {
+          certainty: "EXACT",
+          observedAmount: 109,
+          observedMax: 170,
+          observedCost: 40,
+          timing: "PRE_COST",
+        },
+      }),
+    ],
+    ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+    "amount == max while cost > 0 is decided from one event with no arithmetic (a post-cost reading would require holding max + cost, above the cap). The cost-equals-DBC check is what ties each wire encoding to power_type_data.inc's divisor; the contract test re-checks it against the pinned rows.",
+    {
+      limitations: [
+        "Establishes exact own-cast PRE_COST observations only. No Rage, Focus or Fury state between casts is established, and none is modelled.",
+        "Focus evidence is own-cast snapshots only; standalone Hunter resource changes are not used (D2-A3).",
+        "gameVersion 1 / logVersion 17 only.",
+      ],
+      related: [
+        "tests/unit/m11d2a1-resource-unit-scale.test.ts",
+        "tests/unit/m11d2a2-own-cast-rage-fury-focus.test.ts",
+      ],
     },
   ),
   kase(

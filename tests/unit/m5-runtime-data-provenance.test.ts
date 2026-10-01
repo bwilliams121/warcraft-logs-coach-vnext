@@ -40,8 +40,18 @@ function contractFor(resourceId: string) {
 
 describe("the declared wire contracts", () => {
   it("declares exactly the modelled resources, each scoped to one parser version", () => {
-    expect(RESOURCE_IDS).toEqual(["COMBO_POINTS", "ENERGY", "HOLY_POWER", "RUNES", "RUNIC_POWER"]);
-    expect(RESOURCE_WIRE_CONTRACTS).toHaveLength(5);
+    // M11-D2-A2 added exactly three: Rage, Focus and Fury, for Cohort A.
+    expect(RESOURCE_IDS).toEqual([
+      "COMBO_POINTS",
+      "ENERGY",
+      "FOCUS",
+      "FURY",
+      "HOLY_POWER",
+      "RAGE",
+      "RUNES",
+      "RUNIC_POWER",
+    ]);
+    expect(RESOURCE_WIRE_CONTRACTS).toHaveLength(8);
     for (const contract of RESOURCE_WIRE_CONTRACTS) {
       expect(contract.scope).toEqual({ gameVersion: 1, logVersion: 17 });
     }
@@ -52,6 +62,11 @@ describe("the declared wire contracts", () => {
     // M11-B2: corroborated by a Blood Death Knight capture, never by the enum alone.
     expect(contractFor("RUNES").wireType).toBe(5);
     expect(contractFor("RUNIC_POWER").wireType).toBe(6);
+    // M11-D2-A2: corroborated by own-cast snapshots of a Warrior, a Hunter and
+    // a Demon Hunter in the same capture, never by the enum alone.
+    expect(contractFor("RAGE").wireType).toBe(1);
+    expect(contractFor("FOCUS").wireType).toBe(2);
+    expect(contractFor("FURY").wireType).toBe(17);
   });
 
   it("declares one wire type per resource and one resource per wire type", () => {
@@ -76,6 +91,7 @@ describe("the declared wire contracts", () => {
         "wcl-assassination-envenom-combo-points",
         "wcl-protection-paladin-a7r6-opener",
         "wcl-blood-death-knight-a7r6-rotational-45s",
+        "wcl-rage-fury-focus-pre-cost",
       ]).toContain(contract.evidence.wireCorroboration.fixtureId);
       expect(contract.evidence.wireCorroboration.reportCode).toBe("A7R6kxPJ1hC8YQ4w");
       expect(contract.evidence.wireCorroboration.reportRevision).toBe(30);
@@ -104,6 +120,22 @@ describe("the declared wire contracts", () => {
     expect(contractFor("RUNIC_POWER").evidence.wireCorroboration.observation).toContain("PRE_COST holds");
     expect(contractFor("RUNIC_POWER").evidence.wireCorroboration.observation).toContain(
       "corroborates identity only",
+    );
+    // M11-D2-A2: one own-cast fixture corroborates all three, and the Focus
+    // evidence says in words that it is own-cast only (the D2-A3 boundary).
+    for (const [resourceId, memberName] of [
+      ["RAGE", "Rage"],
+      ["FOCUS", "Focus"],
+      ["FURY", "Fury"],
+    ] as const) {
+      expect(contractFor(resourceId).evidence.gameEnum.memberName).toBe(memberName);
+      expect(contractFor(resourceId).evidence.wireCorroboration.fixtureId).toBe(
+        "wcl-rage-fury-focus-pre-cost",
+      );
+      expect(contractFor(resourceId).evidence.wireCorroboration.observation).toContain("resourceActor 1");
+    }
+    expect(contractFor("FOCUS").evidence.wireCorroboration.observation).toContain(
+      "OWN-CAST OBSERVATIONS ONLY",
     );
   });
 

@@ -30,10 +30,16 @@ const EXPECTED: Readonly<
   HOLY_POWER: { wireType: 9, name: "Holy_power", divisor: 1, whole: true },
   RUNES: { wireType: 5, name: "Runes", divisor: 1, whole: true },
   RUNIC_POWER: { wireType: 6, name: "Runic_power", divisor: 10, whole: false },
+  // M11-D2-A2. None is an indivisible count: the pinned row type has no such
+  // field, and the rows themselves show a 10.0 divisor (Rage), 5.0/s
+  // regeneration (Focus) and -1.0/s decay (Fury).
+  RAGE: { wireType: 1, name: "Rage", divisor: 10, whole: false },
+  FOCUS: { wireType: 2, name: "Focus", divisor: 1, whole: false },
+  FURY: { wireType: 17, name: "Fury", divisor: 1, whole: false },
 };
 
 describe("every resource wire contract states its unit scale", () => {
-  it("covers exactly the five modelled resources", () => {
+  it("covers exactly the eight modelled resources", () => {
     expect(RESOURCE_WIRE_CONTRACTS.map((contract) => contract.resourceId).sort()).toEqual(
       Object.keys(EXPECTED).sort(),
     );
@@ -162,5 +168,47 @@ describe("each contract's wireEncoding claim holds on the committed evidence it 
       expect(Number.isSafeInteger(row.amount)).toBe(true);
       expect(row.max).toBe(7);
     }
+  });
+  /**
+   * M11-D2-A2. No committed dataset carries Warrior, Hunter or Demon Hunter
+   * spell costs, so the pinned DBC rows are stated here by value, exactly as
+   * read from SimulationCraft 33622e9d engine/dbc/generated/sc_spell_data.inc
+   * (sha256 d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62,
+   * the hash every committed spender-cost dataset records), table
+   * __spellpower_data: [spell id, power row id, power type, _cost].
+   */
+  const PINNED_POWER_ROWS: readonly (readonly [number, number, number, number])[] = [
+    [845, 99, 1, 200], // Cleave, Rage
+    [12_294, 9599, 1, 300], // Mortal Strike, Rage
+    [34_026, 1470, 2, 30], // Kill Command, Focus
+    [193_455, 10_443, 2, 35], // Cobra Shot, Focus
+    [198_013, 10_720, 17, 30], // Eye Beam, Fury
+    [201_427, 10_809, 17, 40], // Annihilation, Fury
+  ];
+
+  it.each([
+    ["Rage", 4, 1, 1300],
+    ["Focus", 20, 2, 100],
+    ["Fury", 18, 17, 170],
+  ] as const)(
+    "%s: every retained cast's wire cost equals its spell's pinned DBC cost",
+    (_name, actorId, wireType, max) => {
+      const rows = PINNED_POWER_ROWS.filter(([, , powerType]) => powerType === wireType);
+      expect(rows).toHaveLength(2);
+      for (const [spellId, , , cost] of rows) {
+        const casts = costedCasts("wcl-rage-fury-focus-pre-cost", actorId, spellId, wireType);
+        expect(casts, String(spellId)).toHaveLength(1);
+        expect(casts[0]?.cost).toBe(cost);
+        expect(casts[0]?.max).toBe(max);
+      }
+    },
+  );
+
+  it("Rage: the wire carries tenths, so a retained amount is not a whole number of Rage", () => {
+    // Cleave at 464 is 46.4 Rage: only the divisor 10 reading is consistent
+    // with a 200 (= 20 Rage) cost against a 1300 (= 130 Rage) maximum.
+    const [cleave] = costedCasts("wcl-rage-fury-focus-pre-cost", 4, 845, 1);
+    expect(cleave?.amount).toBe(464);
+    expect((cleave?.amount ?? 0) / 10).toBe(46.4);
   });
 });

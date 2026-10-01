@@ -302,6 +302,13 @@
       "sha256": "7c13a171a49a7e482842adcb0914f2efc929b7ece59f28d4acd7b33680ec3007"
     },
     {
+      "artifactId": "wcl-rage-fury-focus-pre-cost",
+      "byteLength": 3415,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "0a4826c5334c516b1f7205957245f79ae507a5bd1e12acf86fa88254ca2d3413"
+    },
+    {
       "artifactId": "wcl-retribution-paladin-a7r6-rotational-165s.seg-105-165",
       "byteLength": 140409,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -370,8 +377,8 @@
       "passed": 156
     },
     {
-      "assertions": 64,
-      "cases": 21,
+      "assertions": 70,
+      "cases": 22,
       "failed": 0,
       "kindsExercised": [
         "COMBAT_STATE.ACTOR_INDEX_CENSUS",
@@ -386,7 +393,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "COMBAT_STATE",
-      "passed": 64
+      "passed": 70
     },
     {
       "assertions": 10,
@@ -1093,6 +1100,45 @@
       "caseId": "combat-state.protection-paladin-index-exposes-damage-taken-healing-and-absorbs",
       "owningLayer": "COMBAT_STATE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-rage-fury-focus-pre-cost",
+      "assertions": [
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 2,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 3,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 4,
+          "status": "PASSED"
+        },
+        {
+          "kind": "COMBAT_STATE.RESOURCE_OBSERVATION_ON_CAST",
+          "ordinal": 5,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "combat-state.rage-focus-and-fury-snapshots-on-costed-casts-are-pre-cost",
+      "owningLayer": "COMBAT_STATE",
+      "referencedArtifactIds": ["wcl-rage-fury-focus-pre-cost"]
     },
     {
       "artifactId": "wcl-cast-resource-pre-cost",
@@ -6647,15 +6693,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 5503273,
-    "artifacts": 47,
-    "assertions": 749,
-    "cases": 174,
+    "artifactBytes": 5506688,
+    "artifacts": 48,
+    "assertions": 755,
+    "cases": 175,
     "declared": 0,
-    "executable": 749,
+    "executable": 755,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 749
+    "passed": 755
   }
 }
