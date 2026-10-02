@@ -77,7 +77,7 @@ import { itemEffectForItemId, itemEffectForToken } from "../../../data/game/rogu
 import { slotOccupancy } from "../../../simc/authority-profile.js";
 import { tryAbilityIdentityFor } from "../../../data/game/rogue-abilities.js";
 import type { CombatState } from "../../../engine/state/combat-state.js";
-import type { AtomBindings } from "../../../simc/expression/evaluate.js";
+import { unknownNumber, type AtomBindings } from "../../../simc/expression/evaluate.js";
 import { resolveApplicability, resolveUsability } from "./action-profile.js";
 import {
   RACE_WORLDS,
@@ -89,6 +89,7 @@ import {
   racialIsApplicableIn,
   teaChargesRemain,
   withExecution,
+  withTransitionWrites,
   type AssassinationFirstGcdState,
   type ExecutedEntry,
   type RaceWorld,
@@ -308,7 +309,9 @@ function runOneRaceWorld(input: FirstGcdQueryInput, race: RaceWorld): Rotational
       authority: input.authority,
       // THE ROOT, and no start boundary: nothing is skipped for this query.
       entryListName: FIRST_GCD_ROOT_LIST,
-      bindings: input.bindings,
+      // The decision's bindings, minus whatever THIS branch's hypothetical
+      // writes invalidated (M11-D3-0). Sibling branches keep the observed values.
+      bindings: branchBindings(input.bindings, state),
       usabilityFor: (action) => usabilityFor(state, action),
       applicabilityFor: (action) => applicabilityFor(state, action),
       // M5-D1. The ONLY claim that an unreadable condition can be stepped past,
@@ -343,7 +346,10 @@ function runOneRaceWorld(input: FirstGcdQueryInput, race: RaceWorld): Rotational
     }
 
     const entry = entryOf(action.step);
-    const nextState = withExecution(state, entry);
+    // The contract's DECLARED writes decide what the branch forgets — Thistle
+    // Tea forgets `energy.pct` because its contract writes PLAYER_ENERGY, not
+    // because of its name.
+    const nextState = withTransitionWrites(withExecution(state, entry), contract.writes);
     return {
       kind: "APPLIED",
       nextState,
@@ -367,6 +373,20 @@ function runOneRaceWorld(input: FirstGcdQueryInput, race: RaceWorld): Rotational
     laneFor,
     transitionFor,
   });
+}
+
+/**
+ * The bindings one explored branch evaluates against (M11-D3-0).
+ *
+ * The caller's bindings describe the REAL decision instant. A branch whose
+ * hypothetical transitions declared a write that invalidates one of them reads
+ * it as not established; nothing is estimated in its place — not the grant,
+ * not a cap, not regeneration. A branch that forgot nothing gets the caller's
+ * bindings object itself.
+ */
+export function branchBindings(bindings: AtomBindings, state: AssassinationFirstGcdState): AtomBindings {
+  if (!state.forgottenAtoms.includes("energy.pct")) return bindings;
+  return { ...bindings, energyPct: unknownNumber("STATE_NOT_ESTABLISHED") };
 }
 
 /** The possible NON_GCD prefix, as authority coordinates. Never a sequence. */

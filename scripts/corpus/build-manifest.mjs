@@ -8573,11 +8573,14 @@ const CASES = [
     },
   ),
   kase(
-    "spec-assassination.envenom-after-q-diverges-rather-than-falling-through",
+    // M11-D3-0: renamed from `envenom-after-q-diverges-rather-than-falling-through`,
+    // whose divergence rested on stale post-Tea Energy. The id is internal to
+    // the corpus; nothing outside this manifest refers to it.
+    "spec-assassination.envenom-after-tea-blocks-on-unobserved-energy",
     D2,
     "SPEC_ASSASSINATION",
-    "src/specs/rogue/assassination/first-gcd-selection.ts; decision-coverage.ts DIVERGENT_WORLDS",
-    "The max-combo-point Envenom at 2,178,582 reaches spend[1] SELECTED in one world, but core_dot[0] Garrote is still an unresolved candidate ahead of it, so another world plays Garrote. The comparison stays UNKNOWN with DIVERGENT_WORLDS rather than picking the lower-priority entry.",
+    "src/specs/rogue/assassination/first-gcd-adapter.ts branchBindings; first-gcd-state.ts ATOMS_INVALIDATED_BY_WRITE; decision-coverage.ts OBSERVED_STATE_MISSING",
+    "The max-combo-point Envenom at 2,178,582 explores a world in which Thistle Tea fires first. Tea's reviewed contract writes PLAYER_ENERGY without establishing the new amount, so the rescan after it reads `energy.pct` as not established and blocks at `thistle_tea,if=energy.pct<30|fight_remains<10`. The comparison stays UNKNOWN on missing observed state rather than picking the lower-priority spend[1] entry.",
     [
       a("SPEC_ASSASSINATION.DECISION_COVERAGE", {
         actorId: 19,
@@ -8589,19 +8592,20 @@ const CASES = [
           authorityCoverage: "UNKNOWN",
           authorityToken: null,
           selectionPrecision: null,
-          decisiveBlocker: "DIVERGENT_WORLDS",
+          decisiveBlocker: "OBSERVED_STATE_MISSING",
           observedActionRejected: false,
         },
       }),
     ],
     ["PINNED_AUTHORITY"],
-    "An UNKNOWN higher-priority APL condition must never fall through to a confident lower-priority recommendation. Divergence is the honest answer and the corpus pins it as such.",
+    "An UNKNOWN higher-priority APL condition must never fall through to a confident lower-priority recommendation. Until M11-D3-0 this case pinned DIVERGENT_WORLDS: the post-Tea branch reused the decision's stale PRE_COST Energy, kept the Tea condition true, fired Tea again and diverged between Garrote and Rupture. Tea changes Energy without establishing its new exact value, so the post-Tea rescan fails closed at the Energy-dependent Tea condition: the correct blocker is missing observed state, not divergent proven GCD outcomes.",
     {
       authority: {
         ...SIMC,
         requiredStateEvidence: [
           "the Envenom cast at 2,178,582 carrying 7 / 7 combo points PRE_COST",
-          "the unresolved core_dot[0] Garrote candidate ahead of spend",
+          "the Thistle Tea transition contract declaring PLAYER_ENERGY",
+          "the Energy-dependent default[3] thistle_tea condition at source line 83",
         ],
       },
       related: [

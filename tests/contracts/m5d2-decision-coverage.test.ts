@@ -70,9 +70,12 @@ describe("the measured coverage of the real corpus", () => {
   });
 
   it("pins the blocker census, so a weakened refusal shows up as a diff", () => {
+    // M11-D3-0: was 4 / 2. Cases 3 and 4 diverged only on stale PRE_COST
+    // Energy reused after a hypothetical Thistle Tea (PLAYER_ENERGY); the
+    // post-Tea rescan now fails closed on the unobserved Energy.
     expect(census.byBlockerClass).toStrictEqual({
-      OBSERVED_STATE_MISSING: 4,
-      DIVERGENT_WORLDS: 2,
+      OBSERVED_STATE_MISSING: 6,
+      DIVERGENT_WORLDS: 0,
       TARGET_COUNT: 0,
       PREDICTIVE_STATE: 0,
       TARGETING_NOT_MODELLED: 0,

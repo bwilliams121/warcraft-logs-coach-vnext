@@ -15,7 +15,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
+import {
+  analyzeObservedAssassinationDecisions,
+  summarize,
+} from "../../src/specs/rogue/assassination/observed-analysis.js";
 import { M5D2_ACTOR, M5D2_TARGET, m5d2State } from "../support/m5d2-fixture.js";
 import { ASSASSINATION_ACTOR_B, m5aState } from "../support/m5a-fixture.js";
 import { executionLaneForAbility } from "../../src/data/game/ability-gcd-semantics.js";
@@ -115,20 +118,44 @@ describe("unknown reasons are aggregated, not flattened", () => {
     expect(tallied).toBe(coverage.unknown);
   });
 
-  it("preserves the distinct blocker families rather than one bucket", () => {
+  it("the aggregation keeps distinct blocker families apart rather than one bucket", () => {
     // Reducing every unknown to "UNKNOWN" would tell a reader nothing about
-    // which gaps can ever close. These two cannot be merged.
-    const keys = coverage.unknownBlockerClasses.map((row) => row.key);
-    expect(keys).toContain("OBSERVED_STATE_MISSING");
-    expect(keys).toContain("DIVERGENT_WORLDS");
+    // which gaps can ever close. The real corpus has carried a single family
+    // since M11-D3-0, so this invariant is proven on the production `summarize`
+    // with the smallest input that has two: three of this actor's real UNKNOWN
+    // comparisons, two left as OBSERVED_STATE_MISSING and one re-labelled
+    // DIVERGENT_WORLDS. Only the blocker class is varied; nothing is analyzed.
+    const unknowns = analysis.comparisons.filter((comparison) => comparison.outcome === "UNKNOWN");
+    expect(unknowns.length).toBeGreaterThanOrEqual(3);
+    const [first, second, third] = unknowns;
+    if (first === undefined || second === undefined || third === undefined) return;
+    const families = [
+      { ...first, decisiveBlocker: "OBSERVED_STATE_MISSING" as const },
+      { ...second, decisiveBlocker: "DIVERGENT_WORLDS" as const },
+      { ...third, decisiveBlocker: "OBSERVED_STATE_MISSING" as const },
+    ];
+    const aggregated = summarize(M5D2_ACTOR, families, []);
+    // Each family separately, with its own count, in the declared class order
+    // — DIVERGENT_WORLDS listed second even though it appeared first in input
+    // order — and never folded into a generic UNKNOWN row.
+    expect(aggregated.unknownBlockerClasses).toStrictEqual([
+      { key: "OBSERVED_STATE_MISSING", count: 2 },
+      { key: "DIVERGENT_WORLDS", count: 1 },
+    ]);
+    expect(aggregated.unknown).toBe(3);
+    expect(aggregated.unknownBlockerClasses.map((row) => row.key)).not.toContain("UNKNOWN");
+    const reordered = summarize(M5D2_ACTOR, [families[1]!, families[0]!, families[2]!], []);
+    expect(reordered.unknownBlockerClasses).toStrictEqual(aggregated.unknownBlockerClasses);
+    // On the real corpus every unknown is still attributed to a family.
     expect(coverage.unknownBlockerClasses.reduce((sum, row) => sum + row.count, 0)).toBe(coverage.unknown);
   });
 
   it("pins the measured unknown census", () => {
-    expect(coverage.unknownBlockerClasses).toStrictEqual([
-      { key: "OBSERVED_STATE_MISSING", count: 6 },
-      { key: "DIVERGENT_WORLDS", count: 4 },
-    ]);
+    // M11-D3-0: was OBSERVED_STATE_MISSING 6 / DIVERGENT_WORLDS 4. The four
+    // divergent Envenoms diverged only on stale PRE_COST Energy reused after a
+    // hypothetical Thistle Tea (PLAYER_ENERGY); the post-Tea rescan now fails
+    // closed on the unobserved Energy.
+    expect(coverage.unknownBlockerClasses).toStrictEqual([{ key: "OBSERVED_STATE_MISSING", count: 10 }]);
   });
 });
 

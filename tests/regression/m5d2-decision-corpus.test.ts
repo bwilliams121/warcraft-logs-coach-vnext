@@ -219,16 +219,24 @@ describe("cases 3 and 4 — observed max-combo-point Envenom", () => {
       expect(stepAt(r, "vanish", 1)?.usability).toBe("PROVEN_UNUSABLE");
     });
 
-    it(`case ${String(id)}: still refuses, because a higher-priority GCD entry is unresolved`, () => {
-      // The spender is not selected, and must not be. core_dot[0] Garrote sits
-      // ahead of it and could not be decided, so one world plays Garrote and
-      // another plays Envenom. Choosing the lower-priority entry here is exactly
-      // the priority short-circuit CLAUDE.md forbids.
+    it(`case ${String(id)}: still refuses, because the post-Tea rescan cannot read Energy`, () => {
+      // The spender is not selected, and must not be. core_dot[0] Garrote is
+      // still undecided ahead of it, and a world in which Thistle Tea fires
+      // first must rescan. Tea's contract writes PLAYER_ENERGY without
+      // establishing the new amount, so since M11-D3-0 that rescan reads
+      // `energy.pct` as not established and blocks at default[3]'s Energy-
+      // dependent Tea condition. Before, it reused the pre-Tea PRE_COST Energy,
+      // fired Tea again, and diverged between Garrote and Rupture
+      // (DIVERGENT_GCD_OUTCOMES at core_dot[0]) — a divergence that rested on a
+      // stale value. Choosing the lower-priority entry would be exactly the
+      // priority short-circuit CLAUDE.md forbids.
       expect(r.result.kind).toBe("ROTATIONAL_GCD_UNKNOWN");
       if (r.result.kind !== "ROTATIONAL_GCD_UNKNOWN") return;
-      expect(r.result.blocker).toBe("DIVERGENT_GCD_OUTCOMES");
-      expect(r.result.blockedAt?.listName).toBe("core_dot");
-      expect(r.result.blockedAt?.priorityOrdinal).toBe(0);
+      expect(r.result.blocker).toBe("ONE_SCAN_BLOCKED");
+      expect(r.result.scanBlocker).toBe("NO_DEFINITE_WINNER");
+      expect(r.result.blockedAt?.listName).toBe("default");
+      expect(r.result.blockedAt?.priorityOrdinal).toBe(3);
+      expect(r.result.blockedAt?.actionToken).toBe("thistle_tea");
       expect(stepAt(r, "core_dot", 0)?.outcome).toBe("MAY_SELECT");
     });
   }

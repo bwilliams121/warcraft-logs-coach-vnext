@@ -332,11 +332,21 @@ maximum.
 reachable by a current public decision; each must be closed before the work
 that would make it reachable.
 
-**Assassination stale Energy before D3.** Before D3 broadens APL coverage,
-the Assassination first-GCD query must not bind a stale `energy.pct` inside
-branches that fire `thistle_tea`. Today the bindings it uses are taken before
-the Tea grant. Audited SAFE_AS_IMPLEMENTED at M11-D2, but not structurally
-guarded.
+**Assassination stale Energy before D3.** **Resolved in M11-D3-0
+(2026-10-01).** The first-GCD query reused the decision's PRE_COST
+`energy.pct` in every explored branch, including those after a hypothetical
+Thistle Tea. Each declared transition write now names the observed bindings
+it invalidates (`ATOMS_INVALIDATED_BY_WRITE`, exhaustive over
+`TransitionWrite`); a branch that executes a PLAYER_ENERGY write reads
+`energy.pct` as not established, its siblings keep the observed value, and no
+post-transition Energy is inferred. On committed evidence the 36 decisions
+keep their outcomes; four d2 Envenoms change blocker from DIVERGENT_WORLDS to
+OBSERVED_STATE_MISSING (the divergence rested on the stale value), re-pinned
+in `spec-assassination.envenom-after-tea-blocks-on-unobserved-energy`.
+DELAYED_STEALTH_EXPIRY was reviewed in the same audit and intentionally
+invalidates nothing: the pinned Kick timing puts the stealth expiry at t+1ms,
+every scan and the selected GCD at t+0, and the engine refuses any non-zero
+time advance, so a bound `stealthed.rogue` is proven unchanged over the query.
 
 **`wholeUnits` provenance.** `wholeUnits: true` for COMBO_POINTS, HOLY_POWER
 and RUNES rests on count semantics, not on a pinned field (`power_type_data_t`

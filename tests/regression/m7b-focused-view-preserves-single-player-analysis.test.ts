@@ -115,12 +115,12 @@ describe("the real Assassination analysis survives the focused evidence view", (
     expect(baseline.coverage.match).toBe(1);
     expect(baseline.coverage.unknown).toBe(10);
     expect(baseline.coverage.excludedCastCount).toBe(120);
-    // Two distinct blocker classes and five distinct observed tokens: the
-    // comparison below is ranging over real variety, not one repeated shape.
-    expect(baseline.coverage.unknownBlockerClasses.map((row) => row.key)).toEqual([
-      "OBSERVED_STATE_MISSING",
-      "DIVERGENT_WORLDS",
-    ]);
+    // Eleven decisions over five distinct observed tokens, a MATCH among
+    // them: the comparison below ranges over real variety, not one repeated
+    // shape. The unknowns share one blocker family since M11-D3-0 (the four
+    // former DIVERGENT_WORLDS Envenoms diverged only on stale PRE_COST Energy
+    // after a hypothetical Thistle Tea), and that truthful census is pinned.
+    expect(baseline.coverage.unknownBlockerClasses.map((row) => row.key)).toEqual(["OBSERVED_STATE_MISSING"]);
     expect(new Set(baseline.comparisons.map((comparison) => comparison.decision.observedToken)).size).toBe(5);
   });
 

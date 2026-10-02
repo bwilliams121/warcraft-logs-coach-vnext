@@ -136,13 +136,18 @@ export const M5D2_CORPUS: readonly CorpusCase[] = [
     queryPoint: { kind: "OBSERVED_CAST", reportTimeMs: 2_178_582, abilityGameId: M5D2_IDS.envenom },
     observedAbilityGameId: M5D2_IDS.envenom,
     expectedCoverage: "UNKNOWN",
-    expectedBlockerClass: "DIVERGENT_WORLDS",
+    // M11-D3-0: DIVERGENT_WORLDS until then, a divergence that rested on the
+    // decision's stale PRE_COST Energy reused after a hypothetical Thistle Tea
+    // (PLAYER_ENERGY); the post-Tea rescan now fails closed on unobserved Energy.
+    expectedBlockerClass: "OBSERVED_STATE_MISSING",
     rationale:
       "The one-scan gets all the way to `spend[1] envenom SELECTED` — the Vanish cooldown anchor " +
       "eliminates the vanish list, and 7 of 7 combo points make default[7] FALSE and default[8] TRUE. " +
-      "But core_dot[0] Garrote is still an unresolved GCD candidate AHEAD of it, so one world plays " +
-      "Garrote and another plays Envenom. Divergence is the honest answer; picking the lower-priority " +
-      "entry would be exactly the priority short-circuit CLAUDE.md forbids.",
+      "But a world in which Thistle Tea fires first must rescan, and Tea's contract writes PLAYER_ENERGY " +
+      "without establishing the new amount, so that rescan reads `energy.pct` as not established and " +
+      "blocks at default[3] `thistle_tea,if=energy.pct<30|fight_remains<10`. Before M11-D3-0 the rescan " +
+      "reused the pre-Tea PRE_COST Energy and diverged between Garrote and Rupture instead. Either way the " +
+      "lower-priority Envenom is not picked: that would be the priority short-circuit CLAUDE.md forbids.",
   },
   {
     id: 4,
@@ -153,7 +158,10 @@ export const M5D2_CORPUS: readonly CorpusCase[] = [
     queryPoint: { kind: "OBSERVED_CAST", reportTimeMs: 2_190_902, abilityGameId: M5D2_IDS.envenom },
     observedAbilityGameId: M5D2_IDS.envenom,
     expectedCoverage: "UNKNOWN",
-    expectedBlockerClass: "DIVERGENT_WORLDS",
+    // M11-D3-0: DIVERGENT_WORLDS until then, a divergence that rested on the
+    // decision's stale PRE_COST Energy reused after a hypothetical Thistle Tea
+    // (PLAYER_ENERGY); the post-Tea rescan now fails closed on unobserved Energy.
+    expectedBlockerClass: "OBSERVED_STATE_MISSING",
     rationale:
       "The same shape as case 3, 12.3 s later, and it exists to prove the Vanish CHARGE cooldown is " +
       "what governs: 14,782 ms after the anchor, well inside 120,000 ms, so vanish[0] and vanish[1] are " +

@@ -235,10 +235,11 @@ describe("the ANALYZED result preserves M5's pinned coverage", () => {
   });
 
   it("publishes the measured blocker census", () => {
-    expect(projected.coverage.unknownBlockerClasses).toEqual([
-      { key: "OBSERVED_STATE_MISSING", count: 6 },
-      { key: "DIVERGENT_WORLDS", count: 4 },
-    ]);
+    // M11-D3-0: was OBSERVED_STATE_MISSING 6 / DIVERGENT_WORLDS 4. The four
+    // divergent Envenoms diverged only on stale PRE_COST Energy reused after a
+    // hypothetical Thistle Tea (PLAYER_ENERGY); the post-Tea rescan now fails
+    // closed on the unobserved Energy.
+    expect(projected.coverage.unknownBlockerClasses).toEqual([{ key: "OBSERVED_STATE_MISSING", count: 10 }]);
   });
 
   it("publishes the measured selection precision", () => {

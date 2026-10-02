@@ -26,15 +26,30 @@
  *     teaExecutions      a COUNT, because Thistle Tea has three charges and
  *                        firing it once does not spend them all.
  *     race               the correlated race world. One player has one race.
+ *     forgottenAtoms     the OBSERVED bindings a hypothetical write has
+ *                        invalidated in this branch (M11-D3-0).
  *
- * WHY THERE IS NO ENERGY FIELD
+ * HYPOTHETICAL WRITES INVALIDATE OBSERVED BINDINGS; NOTHING REPLACES THEM
  *
- * Because nothing in the supported prefix can move it below the one threshold
- * that matters. Kick and the four racials spend nothing; Thistle Tea only grants,
- * and Energy at Q is already at its cap. Carrying a number that provably never
- * changes would invite someone to start deriving from it.
+ * An observed binding that a hypothetical write invalidates cannot be reused
+ * in that branch unless the transition itself proves the replacement state.
+ * `ATOMS_INVALIDATED_BY_WRITE` records, per declared write, which bindings it
+ * invalidates; a write that invalidates none says why the bindings stay proven.
+ *
+ * The caller binds `energy.pct` from the decision cast's exact PRE_COST
+ * snapshot, which describes the REAL decision instant. A transition whose
+ * reviewed contract declares `PLAYER_ENERGY` (Thistle Tea's grant) changes
+ * Energy without establishing the new value, so the branch that executed it
+ * FORGETS the binding: every later scan in that branch reads `energy.pct` as
+ * not established. Its siblings keep the observed value. Driven by the
+ * contract's declared write, never by the token.
+ *
+ * There is still no Energy field, deliberately. A post-transition Energy value
+ * is not inferred from anything — not the grant, not a cap, not regeneration —
+ * because nothing observed establishes it.
  */
 
+import type { TransitionWrite } from "../../../data/game/assassination-transition-authority.js";
 import type { TraversalPathEntry } from "../../../simc/nested-selection.js";
 
 /**
@@ -104,10 +119,65 @@ export interface AssassinationFirstGcdState {
   readonly teaExecutions: number;
   /** The correlated race world this branch is exploring. */
   readonly race: RaceWorld;
+  /** Observed bindings a hypothetical write invalidated in THIS branch. Monotonic, sorted. */
+  readonly forgottenAtoms: readonly ForgettableAtom[];
 }
 
+/** The observed bindings a declared hypothetical write can invalidate (M11-D3-0). */
+export type ForgettableAtom = "energy.pct";
+
+/**
+ * Which observed bindings each declared write invalidates (M11-D3-0).
+ *
+ * EXHAUSTIVE over `TransitionWrite`: a new write kind does not compile until
+ * someone decides what it invalidates. An EMPTY list is a reviewed claim —
+ * "every binding the caller supplies stays proven under this write's reviewed
+ * semantics" — never "this write was not modelled". The bindings in question
+ * are the ones `rotationalBindingsAt` supplies: combo points and deficit,
+ * `energy.pct`, per-action DoT remains and refreshable, the derived cooldowns
+ * (kingsbane, deathmark, vanish), and a positive-only `stealthed.rogue`.
+ */
+export const ATOMS_INVALIDATED_BY_WRITE: Readonly<Record<TransitionWrite, readonly ForgettableAtom[]>> =
+  Object.freeze({
+    // Re-selection of the executed entry is already refused by
+    // SIMULATED_PREFIX_EXECUTION, and no transition token has a bound cooldown.
+    OWN_PREFIX_AVAILABILITY: [],
+    // The grant changes Energy and observes nothing: the PRE_COST value is stale.
+    PLAYER_ENERGY: ["energy.pct"],
+    // No buff is bound (`knownBuffs` is empty), `pmultiplier` is not modelled,
+    // regeneration is never bound, and no simulated time elapses.
+    PLAYER_STAT_BUFF: [],
+    // No player-debuff atom read by this query is bound; `debuff.deathmark.up`
+    // addresses the target.
+    PLAYER_DEBUFF_REMOVAL: [],
+    // PROVEN UNCHANGED, not overlooked: the pinned Kick contract times the
+    // stealth and vanish expiry at t+1ms, every rescan and the selected GCD at
+    // t+0, and the engine refuses any non-zero time advance — so a bound
+    // `stealthed.rogue` holds at every scan of the query.
+    DELAYED_STEALTH_EXPIRY: [],
+    // No target-cast atom read by the authority is bound.
+    TARGET_CAST_INTERRUPT: [],
+  } satisfies Record<TransitionWrite, readonly ForgettableAtom[]>);
+
 export function initialFirstGcdState(race: RaceWorld): AssassinationFirstGcdState {
-  return { executedEntries: [], teaExecutions: 0, race };
+  return { executedEntries: [], teaExecutions: 0, race, forgottenAtoms: [] };
+}
+
+/**
+ * The state after a transition with these declared writes: every binding they
+ * invalidate is forgotten, and nothing already forgotten comes back. Returns
+ * the SAME state when nothing new is forgotten.
+ */
+export function withTransitionWrites(
+  state: AssassinationFirstGcdState,
+  writes: readonly TransitionWrite[],
+): AssassinationFirstGcdState {
+  const added = writes
+    .flatMap((write) => ATOMS_INVALIDATED_BY_WRITE[write])
+    .filter((atom, index, all) => !state.forgottenAtoms.includes(atom) && all.indexOf(atom) === index);
+  return added.length === 0
+    ? state
+    : { ...state, forgottenAtoms: [...state.forgottenAtoms, ...added].sort() };
 }
 
 /** The stable identity of one authority entry. Never just its token. */
@@ -145,6 +215,7 @@ export function withExecution(
     executedEntries: hasExecuted(state, entry) ? state.executedEntries : [...state.executedEntries, entry],
     teaExecutions,
     race: state.race,
+    forgottenAtoms: state.forgottenAtoms,
   };
 }
 
@@ -156,10 +227,15 @@ export function withExecution(
  * order-dependent: each entry either has fired or has not, and Tea's count is a
  * count. An order-dependent state would need the order in the key, and this one
  * would then be wrong rather than merely slow.
+ *
+ * Forgotten bindings are part of the state, so they are part of the key — but
+ * only when there are any, which leaves every branch that forgot nothing keyed
+ * exactly as before M11-D3-0.
  */
 export function firstGcdStateKey(state: AssassinationFirstGcdState): string {
   const executed = state.executedEntries.map(executedEntryKey).sort().join(",");
-  return `${state.race}|tea=${String(state.teaExecutions)}|[${executed}]`;
+  const forgotten = state.forgottenAtoms.length === 0 ? "" : `|forgot=[${state.forgottenAtoms.join(",")}]`;
+  return `${state.race}|tea=${String(state.teaExecutions)}${forgotten}|[${executed}]`;
 }
 
 /**

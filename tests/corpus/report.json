@@ -2904,10 +2904,11 @@
         "authorityId": "SIMC_APL_ROGUE_ASSASSINATION",
         "requiredStateEvidence": [
           "the Envenom cast at 2,178,582 carrying 7 / 7 combo points PRE_COST",
-          "the unresolved core_dot[0] Garrote candidate ahead of spend"
+          "the Thistle Tea transition contract declaring PLAYER_ENERGY",
+          "the Energy-dependent default[3] thistle_tea condition at source line 83"
         ]
       },
-      "caseId": "spec-assassination.envenom-after-q-diverges-rather-than-falling-through",
+      "caseId": "spec-assassination.envenom-after-tea-blocks-on-unobserved-energy",
       "owningLayer": "SPEC_ASSASSINATION",
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
     },

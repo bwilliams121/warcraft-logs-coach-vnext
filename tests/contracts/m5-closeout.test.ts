@@ -55,9 +55,14 @@ describe("the D2 corpus keeps its measured shape", () => {
     // Pinned WITH the total on purpose. A refusal weakened into an answer moves
     // the total; a refusal weakened into a DIFFERENT refusal does not, and only
     // this catches that.
+    //
+    // REVIEWED AT M11-D3-0: 4 / 2 became 6 / 0. Cases 3 and 4 diverged only
+    // because the branch in which Thistle Tea fires reused the decision's
+    // stale PRE_COST Energy after Tea's PLAYER_ENERGY write; with that binding
+    // forgotten, the post-Tea rescan fails closed as OBSERVED_STATE_MISSING.
     expect(census.byBlockerClass, REVIEW).toStrictEqual({
-      OBSERVED_STATE_MISSING: 4,
-      DIVERGENT_WORLDS: 2,
+      OBSERVED_STATE_MISSING: 6,
+      DIVERGENT_WORLDS: 0,
       TARGET_COUNT: 0,
       PREDICTIVE_STATE: 0,
       TARGETING_NOT_MODELLED: 0,
