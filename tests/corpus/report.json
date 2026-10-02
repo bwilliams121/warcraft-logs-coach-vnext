@@ -2851,7 +2851,7 @@
         }
       ],
       "authority": null,
-      "caseId": "shared-decision-engine.undecided-run-gate-blocks-and-explores-no-world",
+      "caseId": "shared-decision-engine.undecided-run-gate-worlds-disagree-and-the-gate-is-the-stop",
       "owningLayer": "SHARED_DECISION_ENGINE",
       "referencedArtifactIds": ["synthetic.apl-run-action-list"]
     },

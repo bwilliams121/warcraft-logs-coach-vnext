@@ -209,9 +209,11 @@ function classifyBlocker(
   }
   if (scanBlocker === "UNSUPPORTED_AUTHORITY_EXPRESSION") return lineClass(blockingLine) ?? "OTHER";
   if (scanBlocker === "UNDECIDED_RUN_GATE" || scanBlocker === "UNDECIDED_CALL_GATE_OVER_RUN") {
-    // The run entry's gate parsed and could not be decided (M11-B1). Read like
-    // an undecided player-action condition: a permanent atom on the line names
-    // the reason, otherwise it is state the evidence did not establish.
+    // The run entry's gate parsed and could not be decided (M11-B1); since
+    // M11-D3-A its worlds were also explored and did not converge. Either way
+    // the stop is the GATE, so it is read like an undecided player-action
+    // condition: a permanent atom on the line names the reason, otherwise it
+    // is state the evidence did not establish. Never DIVERGENT_WORLDS.
     return lineClass(blockingLine) ?? "OBSERVED_STATE_MISSING";
   }
   if (scanBlocker === "NO_DEFINITE_WINNER" || scanBlocker === "COMPETING_POSSIBLE_ACTION") {

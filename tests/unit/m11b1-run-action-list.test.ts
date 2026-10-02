@@ -14,8 +14,12 @@
  *                     restored only afterwards (player.cpp:7382-7386). So the
  *                     parent's later entries are never part of this selection,
  *                     and a child that selects nothing is a selection of NOTHING
- *   undecided gate    fail closed: `UNDECIDED_RUN_GATE`. Neither world is
- *                     explored in M11-B1
+ *   undecided gate    fail closed: `UNDECIDED_RUN_GATE`. Neither world was
+ *                     explored in M11-B1. Since M11-D3-A both are, and only a
+ *                     result every world agrees on replaces the gate; when
+ *                     they disagree the stop, the reported trace and the
+ *                     blocker are exactly the ones pinned here (see
+ *                     `m11d3a-undecided-run-action-list.test.ts`)
  *
  * And the distinction that must never blur: `call_action_list` is
  * ACTION_CALL, whose "callee returned nothing" branch falls through to the
@@ -228,7 +232,7 @@ describe("a run_action_list whose gate is certain transfers selection into the c
 });
 
 describe("a run_action_list whose gate cannot be decided blocks", () => {
-  it("undecided gate: UNDECIDED_RUN_GATE at the run entry; later parent entries are not visited", () => {
+  it("undecided gate: UNDECIDED_RUN_GATE at the run entry; later parent entries are not in the reported trace", () => {
     const result = traverse(
       [
         {
@@ -545,7 +549,7 @@ describe("nesting", () => {
     expect(visited(nothing)).toEqual(["default[0]", "a[0]"]);
   });
 
-  it("call -> run under an UNDECIDED call gate blocks rather than exploring the worlds", () => {
+  it("call -> run under an UNDECIDED call gate keeps the stop at the call gate when the worlds disagree", () => {
     const result = traverse(
       [
         {

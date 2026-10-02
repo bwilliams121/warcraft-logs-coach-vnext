@@ -7463,11 +7463,11 @@ const CASES = [
     { limitations: SER_LIMITS, related: SER_RELATED },
   ),
   kase(
-    "shared-decision-engine.undecided-run-gate-blocks-and-explores-no-world",
+    "shared-decision-engine.undecided-run-gate-worlds-disagree-and-the-gate-is-the-stop",
     SER,
     "SHARED_DECISION_ENGINE",
-    "src/simc/nested-selection.ts scanRunDispatch (UNDECIDED_RUN_GATE)",
-    "With buff.gate UNBOUND, default[0]'s run gate is neither proven TRUE nor proven FALSE. The scan is BLOCKED with UNDECIDED_RUN_GATE at default[0]; `child` is not entered and default[1] parent_filler is not visited. Neither the parent-continues world nor the child-replaces-parent world is explored.",
+    "src/simc/nested-selection.ts scanRunDispatch (UNDECIDED_RUN_GATE; M11-D3-A world exploration and collapse)",
+    "With buff.gate UNBOUND, default[0]'s run gate is neither proven TRUE nor proven FALSE, so both worlds are explored (M11-D3-A). TRUE: the child replaces the parent and child[0] child_action is proven to fire (talent.opt taken). FALSE: the parent continues and default[1] parent_filler is proven to fire. The worlds select different actions, so they do not converge, and the scan is BLOCKED with UNDECIDED_RUN_GATE at default[0] — the gate itself, not anything inside the speculative child. The reported trace is the gate's: the explored worlds' steps are internal evidence and are not reported as visited.",
     [
       a("SHARED_DECISION_ENGINE.SCAN_BLOCKED_WITH", {
         entryListName: "default",
@@ -7480,7 +7480,7 @@ const CASES = [
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Fail closed. An undecided run gate is not TRUE (which would select from the child), not FALSE (which would select parent_filler) and not absent. World-union semantics for run gates are deliberately deferred beyond M11-B1; until then the honest answer is that the scan cannot get past the entry.",
+    "Fail closed, with world exploration. An undecided run gate is not TRUE (which would select child_action), not FALSE (which would select parent_filler) and not absent. Since M11-D3-A both worlds are explored, and a result every world agrees on would replace the gate; these worlds disagree, so the stop stays at the gate and is classified by the gate's own predicate. An obstacle or competing candidate met only inside the speculative TRUE child is never the root attribution: that child is real only if the gate holds.",
     { limitations: SER_LIMITS, related: SER_RELATED },
   ),
   kase(

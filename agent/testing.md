@@ -1456,6 +1456,9 @@ run gate TRUE       -> child entered; the child's answer is the answer; the
 run + child NOTHING -> NO_ACTION. NOT the parent's next entry
 run + child BLOCKED -> the child's blocker propagates
 run gate undecided  -> BLOCKED, UNDECIDED_RUN_GATE; no world is explored
+                       (M11-D3-A: both are; a converged result stands, else
+                       the same stop at the gate, never a child obstacle —
+                       tests/unit/m11d3a-undecided-run-action-list.test.ts)
 call -> run         -> a run reached inside a callee ends the WHOLE selection;
                        the caller does not continue either
 undecided call over a transferring callee -> BLOCKED, UNDECIDED_CALL_GATE_OVER_RUN

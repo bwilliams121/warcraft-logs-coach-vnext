@@ -57,6 +57,7 @@ import type { ExecutionLane } from "../data/game/ability-gcd-semantics.js";
 import type {
   OneForegroundScanResult,
   ScanCandidate,
+  ScanResolution,
   TraversalBlocker,
   TraversalPathEntry,
   TraversalStep,
@@ -740,6 +741,16 @@ export function firstGcdSelectionAcrossRescans<TState>(
     const scan = input.scanFor(state);
 
     if (scan.kind === "BLOCKED") {
+      // M11-D3-A. A scan that explored an undecided run gate whose worlds did
+      // not converge WITHIN the scan reports the gate as its stop, and carries
+      // the worlds it explored. They may still converge here, once NON_GCD
+      // candidates fire and the root is rescanned; only a result every world
+      // agrees on replaces the gate. Otherwise the gate stands, exactly as a
+      // scan blocked there.
+      if (scan.explored !== undefined) {
+        const converged = exploreResolution(scan.explored.resolution, state, key, prefix, nextOnPath);
+        if (converged.kind !== "UNKNOWN") return converged;
+      }
       const trace: RotationalTraceNode = {
         stateKey: key,
         rootListName: input.rootListName,
@@ -759,8 +770,17 @@ export function firstGcdSelectionAcrossRescans<TState>(
       return result;
     }
 
-    const resolution = scan.resolution;
+    return exploreResolution(scan.resolution, state, key, prefix, nextOnPath);
+  }
 
+  /** The worlds one resolved scan offers, explored and converged. */
+  function exploreResolution(
+    resolution: ScanResolution,
+    state: TState,
+    key: string,
+    prefix: PrefixFacts,
+    nextOnPath: readonly string[],
+  ): BranchResult {
     if (resolution.kind === "NO_ACTION") {
       const trace: RotationalTraceNode = {
         stateKey: key,

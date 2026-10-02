@@ -5771,7 +5771,7 @@ consequences the engine now models, at the run entry's own priority position:
 | certain (TRUE or unconditional), child offers candidates | the child's candidates ARE the scan's remaining candidates, verbatim; the parent's later entries are never visited | `RUN_ENTERED_SCAN_ENDS` |
 | certain, child proven to select nothing | the selection is NOTHING; the parent's later entries are NOT fallen through to | `RUN_RETURNED_NO_ACTION_SCAN_ENDS` |
 | certain, child blocked | the child's blocker propagates | `BLOCKED` |
-| undecided | fail closed; neither world is explored | blocker `UNDECIDED_RUN_GATE` |
+| undecided | fail closed; neither world is explored (since M11-D3-A both are, and only a result every world agrees on replaces the gate — see below) | blocker `UNDECIDED_RUN_GATE` |
 | unreadable | the existing parser refusal | blocker `UNSUPPORTED_AUTHORITY_EXPRESSION` |
 | carries an unsupported option (`target_if=` on Arms' execute dispatch) | refused before the gate is read | blocker `UNSUPPORTED_ACTION_OPTION` |
 
@@ -5791,7 +5791,20 @@ to one that transferred.
 undecided run gate (explore both worlds, mark every contribution
 non-definite, converge as calls do) are sound under the same Kleene rule the
 call already uses and are NOT implemented here; the refusal is named so the
-deferral is measurable. The active-stack cycle guard applies to run edges
+deferral is measurable.
+
+*Since M11-D3-A* the worlds are explored: TRUE scans the child (whose
+selection, or NOTHING, is this selection's), FALSE continues the parent, and
+the child's candidates join as possible ones. Exploration may CONVERGE the
+gate — one definite entry, one token, or nothing in every world — and never
+MOVES the stop. When the worlds disagree, or either is unresolved, the scan
+reports exactly the stop and trace above: `UNDECIDED_RUN_GATE` at the gate
+(`UNDECIDED_CALL_GATE_OVER_RUN` one level up), classified by the gate's own
+predicate. An obstacle met only inside the speculative TRUE child is never the
+stop; a gate PROVEN TRUE makes its child real, and then the child's obstacle
+is. The explored worlds ride on `OneForegroundScanResult.explored` as
+internal evidence, which the first-GCD query may still converge across
+rescans. `nested-selection.ts` `Collapse` is the mechanism. The active-stack cycle guard applies to run edges
 unchanged (`CONTROL_FLOW_CYCLE` for `run X` inside X, X ⇄ Y, or a mixed
 call/run cycle); the pinned `swap_action_list_t::ready`
 (`action.cpp:4725-4731`) would instead make a run into the already-active

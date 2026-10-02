@@ -30,9 +30,16 @@
  *     nothing
  *
  * A run entry whose gate is proven FALSE is skipped like any other not-ready
- * entry (player.cpp:14235). A run entry whose gate cannot be decided BLOCKS:
- * the two worlds (parent continues / child replaces the parent) are not
- * explored in M11-B1, so the refusal is `UNDECIDED_RUN_GATE`.
+ * entry (player.cpp:14235). A run entry whose gate cannot be decided has two
+ * worlds — the parent continues, or the child replaces the parent — and since
+ * M11-D3-A both are explored (M11-B1 blocked with `UNDECIDED_RUN_GATE` without
+ * exploring). The child's selections join as possible candidates; a child that
+ * may select nothing is a world in which the whole selection is NOTHING, which
+ * no later candidate can overrule. Exploration may CONVERGE the gate — a
+ * result every world agrees on replaces it — but never MOVES the stop: when
+ * the worlds disagree, or either is unresolved, the scan stops at the gate
+ * with `UNDECIDED_RUN_GATE`, exactly as an unexplored gate did. See
+ * `scanRunDispatch` and `Collapse`.
  *
  * Three consequences this module is built around:
  *
@@ -196,6 +203,22 @@ export type TraversalStepOutcome =
    */
   | "RUN_RETURNED_NO_ACTION_SCAN_ENDS"
   /**
+   * A `run_action_list` whose gate is UNDECIDED (M11-D3-A). Both worlds are
+   * explored: the child was scanned for the TRUE world (its candidates become
+   * POSSIBLE candidates, and a child that may select nothing records a world
+   * in which this selection is NOTHING), and the parent continues at its next
+   * ordinal for the FALSE world. Distinct from `CALL_MAY_SELECT`: the TRUE
+   * world never returns to the parent.
+   */
+  | "RUN_GATE_UNDECIDED_MAY_TRANSFER"
+  /**
+   * A `call_action_list` whose gate is UNDECIDED and whose callee TRANSFERRED
+   * selection through a `run_action_list` (M11-D3-A). The same two worlds as
+   * `RUN_GATE_UNDECIDED_MAY_TRANSFER`, one level up: the TRUE world ended in
+   * the callee's run, the FALSE world continues here.
+   */
+  | "CALL_GATE_UNDECIDED_MAY_TRANSFER"
+  /**
    * The entry is not a selectable action for this player at all.
    *
    * Mirrors `if (a->background) continue;`. Its condition was NEVER evaluated.
@@ -319,12 +342,13 @@ export type TargetingRefusal =
  *   vocabulary because the two share it verbatim; since M11-B1 this module no
  *   longer produces it — a run entry is modelled here (see the header).
  * - `UNDECIDED_RUN_GATE` — a `run_action_list` gate that is neither proven TRUE
- *   nor proven FALSE (M11-B1). The parent-continues and child-replaces-parent
- *   worlds are not explored, so the scan cannot get past the entry.
+ *   nor proven FALSE (M11-B1). Since M11-D3-A it means: the gate's two worlds
+ *   were explored and did not establish one definite result (they disagree,
+ *   or one is unresolved). Reported AT the gate, never at an obstacle inside
+ *   its speculative child.
  * - `UNDECIDED_CALL_GATE_OVER_RUN` — a `call_action_list` whose gate is
  *   undecided and whose callee transferred selection through a
- *   `run_action_list` (M11-B1). The same two worlds, one level up; the same
- *   deferral.
+ *   `run_action_list` (M11-B1). Same meaning since M11-D3-A, one level up.
  * - `CALLED_LIST_ABSENT` — a call names a list the artifact does not contain.
  *   A hole in the model, never an empty list.
  * - `CONTROL_FLOW_CYCLE` — a list was re-entered while still on the call stack.
@@ -621,13 +645,103 @@ type ScanOutcome =
        * transfer point in any enclosing list was visited.
        */
       readonly transferred: boolean;
+      /**
+       * Whether an explored world ended this SELECTION with no action at a
+       * `run_action_list` transfer while the walk went on for another world
+       * (M11-D3-A) — an undecided run gate whose child may select nothing, or
+       * the same one level up, in this list or a callee.
+       *
+       * A run child that selects nothing is a selection of NOTHING; it does not
+       * fall through to the parent. So once the walk has continued past such a
+       * world, a definite candidate found later does NOT make the scan
+       * definite: some world still selects nothing. `resolveScan` reads this.
+       */
+      readonly mayEndEmpty: boolean;
+      /**
+       * The undecided gate this walk explored past, if any (M11-D3-A) — the
+       * EARLIEST one, in this list or a callee. `null` when every gate the walk
+       * passed was decided.
+       *
+       * Exploration is allowed to CONVERGE, never to MOVE the stop. If the
+       * worlds do not agree on one result, the scan stops at this gate exactly
+       * as it did before the worlds were explored. See `Collapse`.
+       */
+      readonly collapse: Collapse | null;
     }
-  | {
-      readonly kind: "BLOCKED";
-      readonly blocker: TraversalBlocker;
-      readonly blockedAt: TraversalStep | null;
-      readonly detail: string;
-    };
+  | BlockedScan;
+
+type BlockedScan = {
+  readonly kind: "BLOCKED";
+  readonly blocker: TraversalBlocker;
+  readonly blockedAt: TraversalStep | null;
+  readonly detail: string;
+};
+
+/**
+ * Where a scan stops when the worlds of an undecided gate do not converge
+ * (M11-D3-A).
+ *
+ * WHY THE GATE, AND NOT WHAT THE WORLDS FOUND
+ *
+ * An undecided `run_action_list` gate is explored in both worlds, but the TRUE
+ * world is SPECULATIVE: the child is reached only if the gate holds, and that
+ * is exactly what is not known. An obstacle met inside it — an applicability
+ * gap, a competing candidate, a blocked callee — is real only in a world that
+ * may never have happened, so it cannot be what stopped the selection. What
+ * stopped the selection is the unresolved gate predicate itself. So unless
+ * every world agrees on one result, the stop stays at the gate, and its
+ * classification comes from the gate's own predicate (target count, a buff, a
+ * hero tree, a talent), never from a world.
+ *
+ * The record captures that stop BEFORE the child is visited:
+ *
+ *   outcome       the blocked outcome the scan reports — `UNDECIDED_RUN_GATE`
+ *                 (or `UNDECIDED_CALL_GATE_OVER_RUN` one level up) at the
+ *                 gate's own step, through the same earliest-obstacle rule any
+ *                 abort uses
+ *   stepsLength   how much of the trace precedes and includes the gate; the
+ *                 speculative worlds' steps beyond it are dropped from the
+ *                 reported trace
+ *   blockedSlots  the gate's step, and every enclosing call or run step that
+ *                 was still open over it, restored to `BLOCKED`
+ *
+ * Applied, it reproduces the stop and trace an unexplored gate produced.
+ * A gate PROVEN TRUE never creates one: its child is real, and an obstacle
+ * there is the stop.
+ */
+interface Collapse {
+  readonly outcome: BlockedScan;
+  readonly stepsLength: number;
+  readonly blockedSlots: readonly { readonly index: number; readonly step: TraversalStep }[];
+}
+
+/** Restores the trace to the collapse point and returns the gate's stop. */
+function applyCollapse(context: ScanContext, collapse: Collapse): BlockedScan {
+  context.steps.length = Math.min(context.steps.length, collapse.stepsLength);
+  for (const slot of collapse.blockedSlots) {
+    if (slot.index < context.steps.length) context.steps[slot.index] = slot.step;
+  }
+  return collapse.outcome;
+}
+
+/**
+ * The collapse a caller inherits from a completed child walk: the same stop,
+ * seen from one level up. The enclosing call or run step that was open over
+ * the gate is restored to `BLOCKED`, and the caller's own earlier candidates
+ * take precedence through the earliest-obstacle rule.
+ */
+function inheritedCollapse(
+  candidates: readonly Candidate[],
+  child: Collapse,
+  enclosingIndex: number,
+  enclosingStep: TraversalStep,
+): Collapse {
+  return {
+    outcome: earliestObstacle(candidates, child.outcome),
+    stepsLength: child.stepsLength,
+    blockedSlots: [...child.blockedSlots, { index: enclosingIndex, step: enclosingStep }],
+  };
+}
 
 /**
  * Turns a completed scan's candidates into what it offers its caller.
@@ -635,9 +749,21 @@ type ScanOutcome =
  * A DEFINITE result requires a candidate PROVEN to fire. Without one the scan
  * might have fallen off the end and returned nothing, so even a single possible
  * candidate only yields `MAY_SELECT` — "X or nothing", never "X".
+ *
+ * `mayEndEmpty` (M11-D3-A) is the same "or nothing" arriving from a different
+ * place: a world in which an undecided `run_action_list` transferred into a
+ * child that selected nothing. With candidates present the scan can only be
+ * `MAY_SELECT`, whatever their `definite` flags say; with none, every world
+ * selects nothing and the scan is `NO_ACTION`.
  */
-function resolveScan(candidates: readonly Candidate[]): ScanResolution {
+function resolveScan(candidates: readonly Candidate[], mayEndEmpty = false): ScanResolution {
   if (candidates.length === 0) return { kind: "NO_ACTION" };
+  if (mayEndEmpty) {
+    return {
+      kind: "MAY_SELECT",
+      candidates: candidates.map((candidate) => ({ ...candidate, definite: false })),
+    };
+  }
 
   const definite = candidates.find((candidate) => candidate.definite);
 
@@ -752,7 +878,7 @@ interface ScanContext {
  * This is `list-selection`'s earliest-blocker rule applied across an abort
  * boundary rather than only within a completed scan.
  */
-function earliestObstacle(candidates: readonly Candidate[], blocked: ScanOutcome): ScanOutcome {
+function earliestObstacle(candidates: readonly Candidate[], blocked: BlockedScan): BlockedScan {
   const earliest = candidates[0];
   if (earliest === undefined) return blocked;
   return {
@@ -778,8 +904,54 @@ function earliestObstacle(candidates: readonly Candidate[], blocked: ScanOutcome
  */
 type RunDispatchOutcome =
   | { readonly kind: "CONTINUE" }
-  | { readonly kind: "SCAN_ENDS"; readonly contributed: readonly Candidate[] }
-  | { readonly kind: "BLOCKED"; readonly outcome: ScanOutcome };
+  | {
+      readonly kind: "SCAN_ENDS";
+      readonly contributed: readonly Candidate[];
+      readonly mayEndEmpty: boolean;
+      /** An undecided gate the certainly-entered child explored past, seen from here. */
+      readonly collapse: Collapse | null;
+    }
+  /**
+   * The gate is undecided (M11-D3-A): the child's candidates are POSSIBLE, the
+   * parent continues for the FALSE world, and `mayEndEmpty` records whether the
+   * TRUE world may select nothing at all. `collapse` is this gate's own stop,
+   * reported if the worlds do not converge.
+   */
+  | {
+      readonly kind: "MAY_TRANSFER";
+      readonly contributed: readonly Candidate[];
+      readonly mayEndEmpty: boolean;
+      readonly collapse: Collapse;
+    }
+  | { readonly kind: "BLOCKED"; readonly outcome: BlockedScan };
+
+/**
+ * The TRUE world of an undecided gate whose child TRANSFERS selection
+ * (M11-D3-A): what the child offers the parent's continuing walk.
+ *
+ * The child's candidates become POSSIBLE — the gate may be FALSE — and keep
+ * their priority order. If the child may select nothing, that is a world in
+ * which this whole selection is nothing (a run never falls back into its
+ * parent), so `mayEndEmpty` is set. A child that definitely selects an action
+ * but cannot say which is `AMBIGUOUS`: that world cannot agree with any other,
+ * so the caller stops at its undecided gate.
+ */
+function undecidedTransferWorld(child: Extract<ScanOutcome, { kind: "COMPLETED" }>):
+  | {
+      readonly kind: "MAY_TRANSFER";
+      readonly contributed: readonly Candidate[];
+      readonly mayEndEmpty: boolean;
+    }
+  | { readonly kind: "AMBIGUOUS"; readonly blockedAt: TraversalStep | null } {
+  const resolution = resolveScan(child.candidates, child.mayEndEmpty);
+  if (resolution.kind === "AMBIGUOUS")
+    return { kind: "AMBIGUOUS", blockedAt: resolution.candidates[0]?.step ?? null };
+  return {
+    kind: "MAY_TRANSFER",
+    contributed: child.candidates.map((candidate) => ({ ...candidate, definite: false })),
+    mayEndEmpty: resolution.kind === "NO_ACTION" || resolution.kind === "MAY_SELECT",
+  };
+}
 
 /**
  * Models one `run_action_list` entry at its own priority position.
@@ -800,11 +972,17 @@ type RunDispatchOutcome =
  *     selection of NOTHING. There is no fall-through into the parent's later
  *     entries; `call_action_list`'s "returns nothing, keep scanning" rule
  *     (player.cpp:14255-14260) belongs to `ACTION_CALL` alone;
- *   - an undecided gate BLOCKS. The parent-continues world and the
- *     child-replaces-parent world could be explored and converged exactly as
- *     the call's two worlds are, but that is deliberately NOT done in M11-B1:
- *     the refusal is `UNDECIDED_RUN_GATE`, never TRUE, never FALSE, never
- *     "as though the entry were absent".
+ *   - an undecided gate explores BOTH worlds (M11-D3-A; M11-B1 blocked here
+ *     with `UNDECIDED_RUN_GATE`). TRUE: the child is scanned and whatever it
+ *     selects — or nothing — is this selection's. FALSE: the parent continues
+ *     at its next ordinal. Neither world is preferred, and the gate is never
+ *     read as TRUE, FALSE or absent: the child's candidates join as POSSIBLE
+ *     candidates, a child that may select nothing records a world in which
+ *     this selection is NOTHING (`mayEndEmpty`), and only a resolution every
+ *     world agrees on can be definite. When they do not agree — or the child
+ *     is blocked, or definitely selects but not one action — the stop is THIS
+ *     entry, `UNDECIDED_RUN_GATE`, with the trace cut back to it: the child is
+ *     speculative, so nothing met inside it is the stop (`Collapse`).
  *
  * WHAT STAYS CONSERVATIVE, ON PURPOSE
  *
@@ -880,42 +1058,79 @@ function scanRunDispatch(
     return { kind: "CONTINUE" };
   }
 
-  if (!gateIsCertainlyEntered(gate)) {
-    const step = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
-    context.steps.push(step);
-    return blocked(
-      step,
-      "UNDECIDED_RUN_GATE",
-      "the run_action_list gate is neither proven TRUE nor proven FALSE; the parent-continues and " +
-        "child-replaces-parent worlds are not explored",
-    );
-  }
-
-  // Certain gate. The run entry's own step is recorded BEFORE the child so the
-  // trace reads in visit order; its outcome is known once the child returns.
+  // The run entry's own step is recorded BEFORE the child so the trace reads
+  // in visit order; its outcome is known once the child returns.
   const runStepIndex = context.steps.length;
-  context.steps.push(stepOf(action, path, gate, "UNKNOWN", "BLOCKED"));
+  const blockedRunStep = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
+  context.steps.push(blockedRunStep);
   const finishRun = (outcome: TraversalStepOutcome): void => {
     context.steps[runStepIndex] = stepOf(action, path, gate, "UNKNOWN", outcome);
   };
+
+  // An undecided gate's stop is fixed BEFORE its child is visited (M11-D3-A):
+  // whatever the speculative TRUE world meets, this is where the selection
+  // stops unless the worlds converge. See `Collapse`.
+  const gateCollapse: Collapse | null = gateIsCertainlyEntered(gate)
+    ? null
+    : {
+        outcome: earliestObstacle(candidates, {
+          kind: "BLOCKED",
+          blocker: "UNDECIDED_RUN_GATE",
+          blockedAt: blockedRunStep,
+          detail:
+            "the run_action_list gate is neither proven TRUE nor proven FALSE; the parent-continues and " +
+            "child-replaces-parent worlds were explored and did not establish one definite result",
+        }),
+        stepsLength: runStepIndex + 1,
+        blockedSlots: [{ index: runStepIndex, step: blockedRunStep }],
+      };
 
   const runPath = [...path, pathEntryOf(action)];
   const child = scanList(context, target, 0, runPath, nestedStack);
   if (child.kind === "BLOCKED") {
     finishRun("BLOCKED");
+    // Undecided gate: the TRUE world is unresolved, so the worlds cannot
+    // converge — and the child's obstacle is only real in that world. The gate
+    // is the stop.
+    if (gateCollapse !== null) return { kind: "BLOCKED", outcome: applyCollapse(context, gateCollapse) };
+    // Certain gate: the child is real, and so is its obstacle.
     return { kind: "BLOCKED", outcome: earliestObstacle(candidates, child) };
   }
+
+  if (gateCollapse !== null) {
+    // ---- undecided gate: both worlds (M11-D3-A) ----
+    const world = undecidedTransferWorld(child);
+    if (world.kind === "AMBIGUOUS") {
+      // The TRUE world definitely selects, but not one action: it cannot agree
+      // with anything. The gate is the stop.
+      finishRun("BLOCKED");
+      return { kind: "BLOCKED", outcome: applyCollapse(context, gateCollapse) };
+    }
+    finishRun("RUN_GATE_UNDECIDED_MAY_TRANSFER");
+    return { ...world, collapse: gateCollapse };
+  }
+
+  const collapse =
+    child.collapse === null
+      ? null
+      : inheritedCollapse(candidates, child.collapse, runStepIndex, blockedRunStep);
   if (child.candidates.length === 0) {
     // PROVEN to select nothing. This selection selects nothing: the pinned
     // loop's next `select_action` ran over the child and found no ready entry,
     // and the parent's later ordinals were never part of that selection.
     finishRun("RUN_RETURNED_NO_ACTION_SCAN_ENDS");
-    return { kind: "SCAN_ENDS", contributed: [] };
+    return { kind: "SCAN_ENDS", contributed: [], mayEndEmpty: child.mayEndEmpty, collapse };
   }
   finishRun("RUN_ENTERED_SCAN_ENDS");
-  return { kind: "SCAN_ENDS", contributed: child.candidates };
+  return { kind: "SCAN_ENDS", contributed: child.candidates, mayEndEmpty: child.mayEndEmpty, collapse };
 }
 
+/**
+ * Walks one list. Any stop reached AFTER the walk explored past an undecided
+ * gate is reported as that gate's stop (M11-D3-A): the later obstacle is real
+ * only in a world the gate may not have produced, or comes after a gate whose
+ * worlds were never shown to agree. See `Collapse`.
+ */
 function scanList(
   context: ScanContext,
   listName: string,
@@ -924,6 +1139,31 @@ function scanList(
   /** The lists currently ON THE CALL STACK, innermost last. Not "ever visited". */
   callStack: readonly string[],
 ): ScanOutcome {
+  const pending: PendingCollapse = { collapse: null };
+  const outcome = walkList(context, listName, startOrdinal, path, callStack, pending);
+  if (outcome.kind === "BLOCKED" && pending.collapse !== null)
+    return applyCollapse(context, pending.collapse);
+  return outcome;
+}
+
+/** The earliest undecided gate a walk has explored past. The first one recorded wins. */
+interface PendingCollapse {
+  collapse: Collapse | null;
+}
+
+function walkList(
+  context: ScanContext,
+  listName: string,
+  startOrdinal: number,
+  path: readonly TraversalPathEntry[],
+  callStack: readonly string[],
+  pending: PendingCollapse,
+): ScanOutcome {
+  /** Records `collapse` unless an earlier gate already holds the stop. */
+  const explorePast = (collapse: Collapse | null): void => {
+    if (pending.collapse === null) pending.collapse = collapse;
+  };
+
   // The cycle guard, mirroring `visited_apls_`. Checked on ENTRY, before any
   // entry is read, because the loop below would otherwise recurse first.
   if (callStack.includes(listName)) {
@@ -950,6 +1190,8 @@ function scanList(
   const candidates: Candidate[] = [];
   /** Set when a run entry — here or in a certainly-entered callee — ended the walk. */
   let transferred = false;
+  /** Set when a world explored here or in a callee ended the selection with nothing (M11-D3-A). */
+  let mayEndEmpty = false;
 
   for (const action of lookup.actions) {
     if (action.priorityOrdinal < startOrdinal) continue;
@@ -1025,9 +1267,18 @@ function scanList(
         const run = scanRunDispatch(context, action, target, gate, path, nestedStack, candidates);
         if (run.kind === "CONTINUE") continue;
         if (run.kind === "SCAN_ENDS") {
+          explorePast(run.collapse);
           candidates.push(...run.contributed);
+          if (run.mayEndEmpty) mayEndEmpty = true;
           transferred = true;
           break;
+        }
+        if (run.kind === "MAY_TRANSFER") {
+          // The TRUE world's possible selections; the walk goes on for the FALSE world.
+          explorePast(run.collapse);
+          candidates.push(...run.contributed);
+          if (run.mayEndEmpty) mayEndEmpty = true;
+          continue;
         }
         return run.outcome;
       }
@@ -1059,6 +1310,21 @@ function scanList(
         finishCall("BLOCKED");
         return earliestObstacle(candidates, child);
       }
+      // A world the callee explored that ended the selection with nothing is
+      // still such a world here, whatever this caller does next (M11-D3-A).
+      if (child.mayEndEmpty) mayEndEmpty = true;
+      // So is an undecided gate the callee explored past: it holds the stop
+      // here too, ahead of anything this caller meets later.
+      if (child.collapse !== null) {
+        explorePast(
+          inheritedCollapse(
+            candidates,
+            child.collapse,
+            callStepIndex,
+            stepOf(action, path, gate, "UNKNOWN", "BLOCKED"),
+          ),
+        );
+      }
 
       if (child.transferred) {
         // ---- the callee reached a run_action_list (M11-B1) ----
@@ -1074,23 +1340,43 @@ function scanList(
           transferred = true;
           break;
         }
-        // Undecided call gate over a transferring callee: the FALSE world
-        // continues here, the TRUE world ended in the callee. Converging those
-        // is the run-gate world exploration M11-B1 defers, so this blocks.
-        finishCall("BLOCKED");
-        const callStep = context.steps[callStepIndex] ?? null;
-        return earliestObstacle(candidates, {
-          kind: "BLOCKED",
-          blocker: "UNDECIDED_CALL_GATE_OVER_RUN",
-          blockedAt: callStep,
-          detail:
-            "the called list transfers selection through run_action_list, but the call's own gate is " +
-            "neither proven TRUE nor proven FALSE; the parent-continues and child-replaces-parent " +
-            "worlds are not explored",
-        });
+        // Undecided call gate over a transferring callee (M11-D3-A; M11-B1
+        // blocked here without exploring): the TRUE world ended in the
+        // callee's run, the FALSE world continues here — the undecided run
+        // gate's two worlds, one level up, under the same rule. This gate
+        // holds the stop unless the worlds converge; the callee's own stops
+        // stay as they were, because the callee was always going to be walked.
+        const blockedCallStep = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
+        const callCollapse: Collapse = {
+          outcome: earliestObstacle(candidates, {
+            kind: "BLOCKED",
+            blocker: "UNDECIDED_CALL_GATE_OVER_RUN",
+            blockedAt: blockedCallStep,
+            detail:
+              "the called list transfers selection through run_action_list, but the call's own gate is " +
+              "neither proven TRUE nor proven FALSE; the parent-continues and child-replaces-parent " +
+              "worlds were explored and did not establish one definite result",
+          }),
+          stepsLength: context.steps.length,
+          blockedSlots: [{ index: callStepIndex, step: blockedCallStep }],
+        };
+        explorePast(callCollapse);
+        const world = undecidedTransferWorld(child);
+        if (world.kind === "AMBIGUOUS") {
+          // The TRUE world cannot agree with anything; `scanList` reports the
+          // earliest recorded gate — this one, or one the callee explored past.
+          finishCall("BLOCKED");
+          return callCollapse.outcome;
+        }
+        finishCall("CALL_GATE_UNDECIDED_MAY_TRANSFER");
+        candidates.push(...world.contributed);
+        if (world.mayEndEmpty) mayEndEmpty = true;
+        continue;
       }
 
-      const childResolution = resolveScan(child.candidates);
+      // A callee that explored a nothing-selecting run world cannot be definite
+      // to its caller either (M11-D3-A).
+      const childResolution = resolveScan(child.candidates, child.mayEndEmpty);
 
       if (childResolution.kind === "NO_ACTION") {
         // THE CONVERGENCE RULE. The callee is PROVEN to return nothing, so the
@@ -1366,7 +1652,7 @@ function scanList(
     candidates.push({ identity: action.actionToken, step, definite: false });
   }
 
-  return { kind: "COMPLETED", candidates, transferred };
+  return { kind: "COMPLETED", candidates, transferred, mayEndEmpty, collapse: pending.collapse };
 }
 
 // --------------------------------------------------------------------------
@@ -1396,7 +1682,48 @@ export type OneForegroundScanResult =
       readonly blockedAt: TraversalStep | null;
       readonly detail: string;
       readonly steps: readonly TraversalStep[];
+      /**
+       * Present only when the scan stopped at an undecided gate whose worlds
+       * WERE explored and did not converge within this scan (M11-D3-A): what
+       * they offered, and the full trace of the walk. Internal evidence for a
+       * caller that can converge worlds further — the first-GCD engine, across
+       * rescans. The stop above is the gate's, and is what a caller reports
+       * unless it converges these worlds into one result.
+       */
+      readonly explored?: {
+        readonly resolution: ScanResolution;
+        readonly steps: readonly TraversalStep[];
+      };
     };
+
+/**
+ * The resolution of a completed root walk, or the collapse it falls back to.
+ *
+ * Every world agreeing — one definite entry, one token, or nothing at all — is
+ * the only thing that replaces an undecided gate's stop. A result that still
+ * leaves "X, or something else, or nothing" open, or names two actions, is not
+ * agreement, so the walk reports the gate (M11-D3-A).
+ */
+function convergedOrCollapsed(
+  context: ScanContext,
+  outcome: Extract<ScanOutcome, { kind: "COMPLETED" }>,
+):
+  | { readonly kind: "RESOLVED"; readonly resolution: ScanResolution }
+  | {
+      readonly kind: "COLLAPSED";
+      readonly stop: BlockedScan;
+      readonly resolution: ScanResolution;
+      readonly exploredSteps: readonly TraversalStep[];
+    } {
+  const resolution = resolveScan(outcome.candidates, outcome.mayEndEmpty);
+  const agreed =
+    resolution.kind === "DEFINITE" ||
+    resolution.kind === "TOKEN_CONVERGED" ||
+    resolution.kind === "NO_ACTION";
+  if (outcome.collapse === null || agreed) return { kind: "RESOLVED", resolution };
+  const exploredSteps = [...context.steps];
+  return { kind: "COLLAPSED", stop: applyCollapse(context, outcome.collapse), resolution, exploredSteps };
+}
 
 /**
  * Runs one foreground scan and returns its resolution unflattened.
@@ -1434,7 +1761,18 @@ export function resolveOneForegroundScan(input: NestedSelectionInput): OneForegr
       steps,
     };
   }
-  return { kind: "RESOLVED", resolution: resolveScan(outcome.candidates), steps };
+  const settled = convergedOrCollapsed(context, outcome);
+  if (settled.kind === "COLLAPSED") {
+    return {
+      kind: "BLOCKED",
+      blocker: settled.stop.blocker,
+      blockedAt: settled.stop.blockedAt,
+      detail: settled.stop.detail,
+      steps,
+      explored: { resolution: settled.resolution, steps: settled.exploredSteps },
+    };
+  }
+  return { kind: "RESOLVED", resolution: settled.resolution, steps };
 }
 
 /**
@@ -1500,7 +1838,17 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
     };
   }
 
-  const resolution = resolveScan(outcome.candidates);
+  const settled = convergedOrCollapsed(context, outcome);
+  if (settled.kind === "COLLAPSED") {
+    return {
+      kind: "UNKNOWN",
+      blocker: settled.stop.blocker,
+      blockedAt: settled.stop.blockedAt,
+      steps,
+      detail: settled.stop.detail,
+    };
+  }
+  const resolution = settled.resolution;
 
   switch (resolution.kind) {
     case "NO_ACTION":

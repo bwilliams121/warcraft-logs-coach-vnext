@@ -676,7 +676,9 @@ contract: a FALSE run gate skips to the parent's next entry; a TRUE gate
 transfers selection into the child; a child that selects nothing is
 NO_ACTION with the parent's later entries provably unvisited; the same
 premises over `call_action_list` continue the parent (the contrast); an
-undecided run gate blocks with `UNDECIDED_RUN_GATE`; run → run transfers
+undecided run gate blocks with `UNDECIDED_RUN_GATE` (since M11-D3-A its worlds
+are explored first and disagree, so the stop stays at the gate; the case was
+renamed `…undecided-run-gate-worlds-disagree-and-the-gate-is-the-stop`); run → run transfers
 twice; a run cycle fails closed under the existing active-stack guard. No
 existing case, artifact or expectation changed. The artifact is regression
 evidence only — SYNTHETIC qualifies nothing for promotion.
