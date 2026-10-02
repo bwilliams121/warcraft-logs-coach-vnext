@@ -17,8 +17,31 @@ declare module "node:fs" {
   export function existsSync(path: string): boolean;
   export function readdirSync(path: string, options: { recursive: boolean; withFileTypes: false }): string[];
   export function statSync(path: string): { isFile(): boolean };
+  // M11-D2-C: the APL extractor's batch tests stage a scratch source root and
+  // output directory, and remove them.
+  export function mkdtempSync(prefix: string): string;
+  export function rmSync(path: string, options: { recursive: boolean; force: boolean }): void;
 }
 
 declare module "node:path" {
   export function dirname(path: string): string;
+  export function join(...paths: string[]): string;
+}
+
+declare module "node:os" {
+  export function tmpdir(): string;
+}
+
+declare module "node:crypto" {
+  export function createHash(algorithm: "sha256"): {
+    update(data: string): { digest(encoding: "hex"): string };
+  };
+}
+
+declare module "node:child_process" {
+  export function spawnSync(
+    command: string,
+    args: readonly string[],
+    options: { encoding: "utf8" },
+  ): { status: number | null; stdout: string; stderr: string };
 }

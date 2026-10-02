@@ -101,6 +101,33 @@ interface AuthorityArtifactProvenanceCommon {
    * was never in the source. Absent on artifacts whose region has no guard.
    */
   readonly conditionalCompilation?: AuthorityConditionalCompilation;
+  /**
+   * What ties a PINNED target's artifact back to its extraction record
+   * (M11-D2-C): the region's own bytes, the live/PTR policy that chose the
+   * region, the class module that dispatches to it, and every statement the
+   * region parser was told to treat as inert. All present or all absent;
+   * absent on every artifact extracted before M11-D2-C.
+   */
+  readonly regionSha256?: string;
+  readonly livePtrPolicy?: AuthorityLivePtrPolicy;
+  readonly dispatchSource?: { readonly sourcePath: string; readonly sourceSha256: string };
+  readonly inertStatements?: readonly AuthorityInertStatement[];
+}
+
+/** How a pinned target's live region relates to a PTR region at the pin (M11-D2-C). */
+export type AuthorityLivePtrPolicy = "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL";
+
+export const AUTHORITY_LIVE_PTR_POLICIES = [
+  "NO_PTR_REGION",
+  "PTR_MARKERS_EMPTY",
+  "PTR_BODY_IDENTICAL",
+] as const satisfies readonly AuthorityLivePtrPolicy[];
+
+/** One region statement the extractor dropped as proven inert, by exact text. */
+export interface AuthorityInertStatement {
+  readonly sourceLine: number;
+  readonly statement: string;
+  readonly identifier: string;
 }
 
 export interface AuthorityVersionGuardRecord {
@@ -211,6 +238,8 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
 
   const conditionalCompilation = validateConditionalCompilation(value["conditionalCompilation"]);
   if (conditionalCompilation === undefined) return null;
+  const pinnedExtraction = validatePinnedExtraction(value);
+  if (pinnedExtraction === undefined) return null;
 
   return {
     ...(conditionalCompilation === null ? {} : { conditionalCompilation }),
@@ -224,7 +253,54 @@ function validateProvenance(value: unknown): AuthorityArtifactProvenance | null 
     ...region,
     extractedOn,
     extractorVersion,
+    ...(pinnedExtraction === null ? {} : pinnedExtraction),
   };
+}
+
+const PINNED_EXTRACTION_KEYS = ["regionSha256", "livePtrPolicy", "dispatchSource", "inertStatements"];
+const SHA256_HEX = /^[0-9a-f]{64}$/;
+
+/**
+ * The M11-D2-C extraction record, when present. `null` when none of its
+ * fields is present (every earlier artifact), `undefined` when any is present
+ * and the record is partial or malformed — a half-recorded tie-back is
+ * refused rather than read as whichever half looks usable.
+ */
+function validatePinnedExtraction(value: Record<string, unknown>):
+  | {
+      readonly regionSha256: string;
+      readonly livePtrPolicy: AuthorityLivePtrPolicy;
+      readonly dispatchSource: { readonly sourcePath: string; readonly sourceSha256: string };
+      readonly inertStatements?: readonly AuthorityInertStatement[];
+    }
+  | null
+  | undefined {
+  if (!PINNED_EXTRACTION_KEYS.some((key) => key in value)) return null;
+  const regionSha256 = str(value, "regionSha256");
+  const livePtrPolicy = AUTHORITY_LIVE_PTR_POLICIES.find((policy) => policy === value["livePtrPolicy"]);
+  const dispatchRaw = value["dispatchSource"];
+  if (regionSha256 === null || !SHA256_HEX.test(regionSha256) || livePtrPolicy === undefined)
+    return undefined;
+  if (!isRecord(dispatchRaw) || Object.keys(dispatchRaw).length !== 2) return undefined;
+  const dispatchPath = str(dispatchRaw, "sourcePath");
+  const dispatchSha256 = str(dispatchRaw, "sourceSha256");
+  if (dispatchPath === null || dispatchSha256 === null || !SHA256_HEX.test(dispatchSha256)) return undefined;
+  const dispatchSource = { sourcePath: dispatchPath, sourceSha256: dispatchSha256 };
+  if (!("inertStatements" in value)) return { regionSha256, livePtrPolicy, dispatchSource };
+  const inertRaw = value["inertStatements"];
+  if (!Array.isArray(inertRaw) || inertRaw.length === 0) return undefined;
+  const inertStatements: AuthorityInertStatement[] = [];
+  for (const raw of inertRaw) {
+    if (!isRecord(raw)) return undefined;
+    const sourceLine = num(raw, "sourceLine");
+    const statement = str(raw, "statement");
+    const identifier = str(raw, "identifier");
+    if (sourceLine === null || !Number.isInteger(sourceLine) || sourceLine < 1) return undefined;
+    if (statement === null || identifier === null || !CPP_IDENTIFIER.test(identifier)) return undefined;
+    if (!statement.includes(identifier)) return undefined;
+    inertStatements.push({ sourceLine, statement, identifier });
+  }
+  return { regionSha256, livePtrPolicy, dispatchSource, inertStatements };
 }
 
 const NAMESPACE_FUNCTION_SELECTOR_KEYS = ["kind", "enclosingNamespace", "functionHeader", "playerIdentifier"];

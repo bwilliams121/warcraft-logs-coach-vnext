@@ -83,13 +83,178 @@
  */
 
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
-import { dirname } from "node:path";
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  realpathSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const REPOSITORY = "https://github.com/simulationcraft/simc";
 const EXTRACTOR_VERSION = 1;
 const ARTIFACT_VERSION = 1;
+
+/**
+ * The one SimulationCraft commit every PINNED target is recorded against
+ * (M11-D2-C). Every byte count and SHA-256 below was read from the file at
+ * this commit, each file first matched against the commit's own git blob id.
+ */
+export const PINNED_SIMC_COMMIT = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
+
+/**
+ * Every pinned source file a PINNED target reads (M11-D2-C): the APL module,
+ * the class module that dispatches to it, and the files an inert-statement
+ * proof rests on. Path, exact byte length and SHA-256 at `PINNED_SIMC_COMMIT`.
+ */
+const PINNED_SOURCES = Object.freeze({
+  APL_WARRIOR: {
+    sourcePath: "engine/class_modules/apl/apl_warrior.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "bc9473e51e3d4d233793d6d165eb0165183f61eebde5c119ddd8aaa7b1202ec1",
+    byteLength: 30516,
+  },
+  APL_DEATH_KNIGHT: {
+    sourcePath: "engine/class_modules/apl/apl_death_knight.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "e381da691875ceecb8357a76e90fef9e01f3a200c67da7024deff1ca7f728df6",
+    byteLength: 36557,
+  },
+  APL_DEMON_HUNTER: {
+    sourcePath: "engine/class_modules/apl/apl_demon_hunter.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "c95ab0af6cfce46c64304903a7e8c65417beb01ff69f661beb727b9e23b4b389",
+    byteLength: 56505,
+  },
+  APL_ROGUE: {
+    sourcePath: "engine/class_modules/apl/apl_rogue.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "a74e4daa8376197d94f8449555035b3fd67634db450d2f7cb16bf84233939eb3",
+    byteLength: 26074,
+  },
+  APL_HUNTER: {
+    sourcePath: "engine/class_modules/apl/apl_hunter.cpp",
+    commitSha: PINNED_SIMC_COMMIT,
+    sha256: "8d7b7273ac056d1b28154cd9342db48cd95c643c215e5731c6b770c2e49facbb",
+    byteLength: 51094,
+  },
+  WARRIOR_DISPATCH: {
+    sourcePath: "engine/class_modules/sc_warrior.cpp",
+    sha256: "ba492ee43e62e01d6921cb40b5269d692d8edb64bebc26de9f722ee76a632d8e",
+    byteLength: 350723,
+  },
+  DEATH_KNIGHT_DISPATCH: {
+    sourcePath: "engine/class_modules/sc_death_knight.cpp",
+    sha256: "beed4d7cffad6a548dc1791eef6f4208c308d53836b46d644e4e9c9c95058d39",
+    byteLength: 636861,
+  },
+  DEMON_HUNTER_DISPATCH: {
+    sourcePath: "engine/class_modules/sc_demon_hunter.cpp",
+    sha256: "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+    byteLength: 459885,
+  },
+  ROGUE_DISPATCH: {
+    sourcePath: "engine/class_modules/sc_rogue.cpp",
+    sha256: "209e95265aae4168cf7cda57d1b241dda6361971ba6849a9262bd933bff3e13e",
+    byteLength: 436673,
+  },
+  HUNTER_DISPATCH: {
+    sourcePath: "engine/class_modules/sc_hunter.cpp",
+    sha256: "d576fa2205fd79d279fda803edb201eb9b375106a6eba05afd483818a19537d9",
+    byteLength: 309166,
+  },
+  PLAYER_CPP: {
+    sourcePath: "engine/player/player.cpp",
+    sha256: "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+    byteLength: 546677,
+  },
+  PLAYER_HPP: {
+    sourcePath: "engine/player/player.hpp",
+    sha256: "7c28e2264813fea679d53b030ac6ca68ca209df3d64d67ce5b9839b437732d68",
+    byteLength: 69912,
+  },
+  PARSE_EFFECTS_HPP: {
+    sourcePath: "engine/action/parse_effects.hpp",
+    sha256: "22ca12c1a54c5bef93293687bffe160669fbea461756aeaedb3de6a2d4a01d2a",
+    byteLength: 42977,
+  },
+  PARSE_EFFECTS_CPP: {
+    sourcePath: "engine/action/parse_effects.cpp",
+    sha256: "48203b6bf57f0d593d6c72dc836bef7e446715e0a09764923bad20dcae233c58",
+    byteLength: 62848,
+  },
+});
+
+/**
+ * ONE statement the Arms and Fury regions carry that the region parser does
+ * not model, proven inert per target (M11-D2-C). Not a rule about unused
+ * locals: the record names the exact statement text, and every claim it rests
+ * on is checked against hash-pinned bytes on every run.
+ *
+ *   1. In the target's region the statement occurs exactly once and its
+ *      identifier occurs on no other line (checked by `extract`, per region).
+ *   2. Its initializer is `player_t::get_racial_actions()`, declared virtual in
+ *      player.hpp, and the body at the pin builds and returns a local vector of
+ *      eight literals and nothing else (the body's SHA-256 is pinned).
+ *   3. Nothing between warrior_t and player_t overrides it: warrior_t derives
+ *      from parse_player_effects_t, which derives from player_t and
+ *      parse_effects_t, and none of sc_warrior.cpp, parse_effects.hpp or
+ *      parse_effects.cpp names `get_racial_actions`.
+ *
+ * So the statement constructs a value nobody reads, with no side effect, and
+ * dropping it cannot change one `add_action` the extractor emits. Each target
+ * carries its own copy so its own region is checked on its own.
+ */
+function racialActionsInert(regionName) {
+  return Object.freeze({
+    statement: "std::vector<std::string> racial_actions = p->get_racial_actions();",
+    identifier: "racial_actions",
+    reason: `the ${regionName} region declares racial_actions and never reads it; its initializer is the side-effect-free base player_t::get_racial_actions(), which no class between warrior_t and player_t overrides`,
+    proofs: [
+      {
+        ...PINNED_SOURCES.PLAYER_CPP,
+        checks: [
+          {
+            kind: "FUNCTION_BODY_SHA256",
+            functionHeader: "std::vector<std::string> player_t::get_racial_actions()",
+            bodySha256: "857fc6f4fab83d398ac0981582d6d14007665aeadd9bc713498990d96d7c2ce9",
+          },
+        ],
+      },
+      {
+        ...PINNED_SOURCES.PLAYER_HPP,
+        checks: [
+          { kind: "LINE_EXACTLY_ONCE", line: "virtual std::vector<std::string> get_racial_actions();" },
+        ],
+      },
+      {
+        ...PINNED_SOURCES.WARRIOR_DISPATCH,
+        checks: [
+          { kind: "LINE_EXACTLY_ONCE", line: "struct warrior_t : public parse_player_effects_t" },
+          { kind: "TOKEN_ABSENT", token: "get_racial_actions" },
+        ],
+      },
+      {
+        ...PINNED_SOURCES.PARSE_EFFECTS_HPP,
+        checks: [
+          {
+            kind: "LINE_EXACTLY_ONCE",
+            line: "struct parse_player_effects_t : public player_t, public parse_effects_t",
+          },
+          { kind: "TOKEN_ABSENT", token: "get_racial_actions" },
+        ],
+      },
+      {
+        ...PINNED_SOURCES.PARSE_EFFECTS_CPP,
+        checks: [{ kind: "TOKEN_ABSENT", token: "get_racial_actions" }],
+      },
+    ],
+  });
+}
 
 /**
  * Facts this extractor REQUIRES the pinned source to exhibit, per target.
@@ -295,6 +460,701 @@ export const TARGETS = {
       ],
       forbiddenTokens: ["swap_action_list"],
       noTargetingOptions: true,
+    },
+  },
+  // ---- M11-D2-C: PINNED targets ------------------------------------------
+  //
+  // Extraction coordinates only; no analyzer reads them. Each carries the
+  // pinned bytes of its module and of its region, its live/PTR policy, the
+  // class-module dispatch that calls its function, and its pinned topology,
+  // all measured from the files at PINNED_SIMC_COMMIT. They are preflighted
+  // and extracted only through the batch path (--targets/--source-root).
+  "warrior-arms": {
+    sourcePath: PINNED_SOURCES.APL_WARRIOR.sourcePath,
+    regionStart: "//arms_apl_start",
+    regionEnd: "//arms_apl_end",
+    functionHeader: "void arms( player_t* p )",
+    regionName: "arms",
+    authorityId: "SIMC_APL_WARRIOR_ARMS",
+    spec: { className: "warrior", specName: "arms" },
+    defaultOut: "src/simc/data/warrior-arms.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_WARRIOR,
+      regionSha256: "ff4607b25ff123b06b23af460b7be7e7da93e7a9cb9164c157e188fe2a4508c6",
+    },
+    livePtrPolicy: {
+      kind: "NO_PTR_REGION",
+      ptrRegionStart: "//arms_ptr_apl_start",
+      ptrRegionEnd: "//arms_ptr_apl_end",
+      ptrFunctionHeader: "void arms_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.WARRIOR_DISPATCH,
+      functionHeader: "void warrior_t::init_action_list()",
+      sequence: ["case WARRIOR_ARMS:", "warrior_apl::arms( this );", "break;"],
+    },
+    inertStatements: [racialActionsInert("arms")],
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "colossus_aoe",
+        "colossus_execute",
+        "colossus_st",
+        "slayer_aoe",
+        "slayer_execute",
+        "slayer_st",
+        "trinkets",
+        "variables",
+      ],
+      listSizes: {
+        default: 20,
+        precombat: 14,
+        colossus_aoe: 18,
+        colossus_execute: 12,
+        colossus_st: 21,
+        slayer_aoe: 20,
+        slayer_execute: 16,
+        slayer_st: 19,
+        trinkets: 5,
+        variables: 3,
+      },
+      edges: [
+        { from: "default", ordinal: 4, kind: "CALL", to: "variables", condition: null },
+        { from: "default", ordinal: 5, kind: "CALL", to: "trinkets", condition: null },
+        {
+          from: "default",
+          ordinal: 14,
+          kind: "RUN",
+          to: "colossus_aoe",
+          condition: "talent.demolish&active_enemies>2",
+        },
+        {
+          from: "default",
+          ordinal: 15,
+          kind: "RUN",
+          to: "colossus_execute",
+          condition: "talent.demolish&variable.execute_phase",
+        },
+        { from: "default", ordinal: 16, kind: "RUN", to: "colossus_st", condition: "talent.demolish" },
+        {
+          from: "default",
+          ordinal: 17,
+          kind: "RUN",
+          to: "slayer_aoe",
+          condition: "talent.slayers_dominance&active_enemies>2",
+        },
+        {
+          from: "default",
+          ordinal: 18,
+          kind: "RUN",
+          to: "slayer_execute",
+          condition: "talent.slayers_dominance&variable.execute_phase",
+        },
+        { from: "default", ordinal: 19, kind: "RUN", to: "slayer_st", condition: "talent.slayers_dominance" },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+    },
+  },
+  "warrior-fury": {
+    sourcePath: PINNED_SOURCES.APL_WARRIOR.sourcePath,
+    regionStart: "//fury_apl_start",
+    regionEnd: "//fury_apl_end",
+    functionHeader: "void fury( player_t* p )",
+    regionName: "fury",
+    authorityId: "SIMC_APL_WARRIOR_FURY",
+    spec: { className: "warrior", specName: "fury" },
+    defaultOut: "src/simc/data/warrior-fury.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_WARRIOR,
+      regionSha256: "d924df0f14ad4b838ea104903c62ff5b91b480efce506d1bc27772df49340b63",
+    },
+    livePtrPolicy: {
+      kind: "NO_PTR_REGION",
+      ptrRegionStart: "//fury_ptr_apl_start",
+      ptrRegionEnd: "//fury_ptr_apl_end",
+      ptrFunctionHeader: "void fury_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.WARRIOR_DISPATCH,
+      functionHeader: "void warrior_t::init_action_list()",
+      sequence: ["case WARRIOR_FURY:", "warrior_apl::fury( this );", "break;"],
+    },
+    inertStatements: [racialActionsInert("fury")],
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "slayer",
+        "slayer_aoe",
+        "thane",
+        "thane_aoe",
+        "trinkets",
+        "variables",
+      ],
+      listSizes: {
+        default: 18,
+        precombat: 16,
+        slayer: 22,
+        slayer_aoe: 14,
+        thane: 20,
+        thane_aoe: 22,
+        trinkets: 5,
+        variables: 4,
+      },
+      edges: [
+        { from: "default", ordinal: 5, kind: "CALL", to: "trinkets", condition: null },
+        { from: "default", ordinal: 6, kind: "CALL", to: "variables", condition: null },
+        {
+          from: "default",
+          ordinal: 14,
+          kind: "RUN",
+          to: "slayer",
+          condition: "talent.slayers_dominance&active_enemies=1",
+        },
+        {
+          from: "default",
+          ordinal: 15,
+          kind: "RUN",
+          to: "slayer_aoe",
+          condition: "talent.slayers_dominance&active_enemies>1",
+        },
+        {
+          from: "default",
+          ordinal: 16,
+          kind: "RUN",
+          to: "thane",
+          condition: "talent.lightning_strikes&active_enemies=1",
+        },
+        {
+          from: "default",
+          ordinal: 17,
+          kind: "RUN",
+          to: "thane_aoe",
+          condition: "talent.lightning_strikes&active_enemies>1",
+        },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+      noTargetingOptions: true,
+    },
+  },
+  "warrior-protection": {
+    sourcePath: PINNED_SOURCES.APL_WARRIOR.sourcePath,
+    regionStart: "//protection_apl_start",
+    regionEnd: "//protection_apl_end",
+    functionHeader: "void protection( player_t* p )",
+    regionName: "protection",
+    authorityId: "SIMC_APL_WARRIOR_PROTECTION",
+    spec: { className: "warrior", specName: "protection" },
+    defaultOut: "src/simc/data/warrior-protection.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_WARRIOR,
+      regionSha256: "d545e36d629c3dd693cbfa2a901ff6d4ee73d70f89af2ec432815fbf6f2af7cb",
+    },
+    livePtrPolicy: {
+      kind: "NO_PTR_REGION",
+      ptrRegionStart: "//protection_ptr_apl_start",
+      ptrRegionEnd: "//protection_ptr_apl_end",
+      ptrFunctionHeader: "void protection_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.WARRIOR_DISPATCH,
+      functionHeader: "void warrior_t::init_action_list()",
+      sequence: ["case WARRIOR_PROTECTION:", "warrior_apl::protection( this );", "break;"],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "colossus_aoe",
+        "colossus_st",
+        "thane_aoe",
+        "thane_st",
+        "variables",
+      ],
+      listSizes: {
+        default: 29,
+        precombat: 3,
+        colossus_aoe: 9,
+        colossus_st: 12,
+        thane_aoe: 7,
+        thane_st: 10,
+        variables: 1,
+      },
+      edges: [
+        { from: "default", ordinal: 1, kind: "CALL", to: "variables", condition: null },
+        {
+          from: "default",
+          ordinal: 25,
+          kind: "RUN",
+          to: "colossus_aoe",
+          condition: "hero_tree.colossus&spell_targets.thunder_clap>=3",
+        },
+        {
+          from: "default",
+          ordinal: 26,
+          kind: "RUN",
+          to: "thane_aoe",
+          condition: "hero_tree.mountain_thane&spell_targets.thunder_clap>=3",
+        },
+        { from: "default", ordinal: 27, kind: "RUN", to: "colossus_st", condition: "talent.demolish" },
+        { from: "default", ordinal: 28, kind: "RUN", to: "thane_st", condition: "talent.lightning_strikes" },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+      noTargetingOptions: true,
+    },
+  },
+  "deathknight-frost": {
+    sourcePath: PINNED_SOURCES.APL_DEATH_KNIGHT.sourcePath,
+    regionStart: "//frost_apl_start",
+    regionEnd: "//frost_apl_end",
+    functionHeader: "void frost( player_t* p )",
+    regionName: "frost",
+    authorityId: "SIMC_APL_DEATHKNIGHT_FROST",
+    spec: { className: "deathknight", specName: "frost" },
+    defaultOut: "src/simc/data/deathknight-frost.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_DEATH_KNIGHT,
+      regionSha256: "3a7f6677af62e244e952279a1418a3d3c469be93807815959d0437438dce5a87",
+    },
+    livePtrPolicy: {
+      kind: "NO_PTR_REGION",
+      ptrRegionStart: "//frost_ptr_apl_start",
+      ptrRegionEnd: "//frost_ptr_apl_end",
+      ptrFunctionHeader: "void frost_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.DEATH_KNIGHT_DISPATCH,
+      functionHeader: "void death_knight_t::init_action_list()",
+      sequence: ["case DEATH_KNIGHT_FROST:", "death_knight_apl::frost( this );", "break;"],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "aoe",
+        "cooldowns",
+        "high_prio_actions",
+        "racials",
+        "single_target",
+        "trinkets",
+        "variables",
+      ],
+      listSizes: {
+        default: 8,
+        precombat: 11,
+        aoe: 14,
+        cooldowns: 15,
+        high_prio_actions: 3,
+        racials: 8,
+        single_target: 9,
+        trinkets: 8,
+        variables: 9,
+      },
+      edges: [
+        { from: "default", ordinal: 1, kind: "CALL", to: "variables", condition: null },
+        { from: "default", ordinal: 2, kind: "CALL", to: "trinkets", condition: null },
+        { from: "default", ordinal: 3, kind: "CALL", to: "high_prio_actions", condition: null },
+        { from: "default", ordinal: 4, kind: "CALL", to: "cooldowns", condition: null },
+        { from: "default", ordinal: 5, kind: "CALL", to: "racials", condition: null },
+        { from: "default", ordinal: 6, kind: "RUN", to: "aoe", condition: "active_enemies>=2" },
+        { from: "default", ordinal: 7, kind: "RUN", to: "single_target", condition: null },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+    },
+  },
+  "demonhunter-havoc": {
+    sourcePath: PINNED_SOURCES.APL_DEMON_HUNTER.sourcePath,
+    regionStart: "//havoc_apl_start",
+    regionEnd: "//havoc_apl_end",
+    functionHeader: "void havoc( player_t* p )",
+    regionName: "havoc",
+    authorityId: "SIMC_APL_DEMONHUNTER_HAVOC",
+    spec: { className: "demonhunter", specName: "havoc" },
+    defaultOut: "src/simc/data/demonhunter-havoc.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_DEMON_HUNTER,
+      regionSha256: "ee8c3c24abed354f3dcad01daa794aa5f17ae2e12c7a8990e8067186b064fb56",
+    },
+    livePtrPolicy: {
+      kind: "PTR_MARKERS_EMPTY",
+      ptrRegionStart: "//havoc_ptr_apl_start",
+      ptrRegionEnd: "//havoc_ptr_apl_end",
+      ptrFunctionHeader: "void havoc_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.DEMON_HUNTER_DISPATCH,
+      functionHeader: "void demon_hunter_t::init_action_list()",
+      sequence: ["case DEMON_HUNTER_HAVOC:", "demon_hunter_apl::havoc( this );", "break;"],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "items"],
+      listSizes: { default: 29, precombat: 10, items: 6 },
+      edges: [{ from: "default", ordinal: 7, kind: "CALL", to: "items", condition: null }],
+      forbiddenTokens: ["swap_action_list"],
+    },
+  },
+  "demonhunter-devourer": {
+    sourcePath: PINNED_SOURCES.APL_DEMON_HUNTER.sourcePath,
+    regionStart: "//devourer_apl_start",
+    regionEnd: "//devourer_apl_end",
+    functionHeader: "void devourer( player_t* p )",
+    regionName: "devourer",
+    authorityId: "SIMC_APL_DEMONHUNTER_DEVOURER",
+    spec: { className: "demonhunter", specName: "devourer" },
+    defaultOut: "src/simc/data/demonhunter-devourer.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_DEMON_HUNTER,
+      regionSha256: "7ea8913291909f2060a752d391cd7c1360c3795276db28203893bc871e54e48e",
+    },
+    livePtrPolicy: {
+      kind: "PTR_MARKERS_EMPTY",
+      ptrRegionStart: "//devourer_ptr_apl_start",
+      ptrRegionEnd: "//devourer_ptr_apl_end",
+      ptrFunctionHeader: "void devourer_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.DEMON_HUNTER_DISPATCH,
+      functionHeader: "void demon_hunter_t::init_action_list()",
+      sequence: ["case DEMON_HUNTER_DEVOURER:", "demon_hunter_apl::devourer( this );", "break;"],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: [
+        "default",
+        "precombat",
+        "annihilator_ranged",
+        "annihilator_melee",
+        "voidscarred_ranged",
+        "voidscarred_melee",
+        "vsm_st",
+        "vsm_meta",
+        "vsm_out",
+        "variables",
+        "cooldowns",
+        "reaps",
+      ],
+      listSizes: {
+        default: 6,
+        precombat: 14,
+        annihilator_ranged: 18,
+        annihilator_melee: 27,
+        voidscarred_ranged: 15,
+        voidscarred_melee: 3,
+        vsm_st: 20,
+        vsm_meta: 17,
+        vsm_out: 14,
+        variables: 6,
+        cooldowns: 10,
+        reaps: 3,
+      },
+      edges: [
+        { from: "default", ordinal: 0, kind: "CALL", to: "variables", condition: null },
+        { from: "default", ordinal: 1, kind: "CALL", to: "cooldowns", condition: null },
+        {
+          from: "default",
+          ordinal: 2,
+          kind: "RUN",
+          to: "annihilator_melee",
+          condition: "hero_tree.annihilator&talent.the_hunt",
+        },
+        {
+          from: "default",
+          ordinal: 3,
+          kind: "RUN",
+          to: "annihilator_ranged",
+          condition: "hero_tree.annihilator",
+        },
+        {
+          from: "default",
+          ordinal: 4,
+          kind: "RUN",
+          to: "voidscarred_ranged",
+          condition: "hero_tree.voidscarred&!talent.the_hunt",
+        },
+        {
+          from: "default",
+          ordinal: 5,
+          kind: "RUN",
+          to: "voidscarred_melee",
+          condition: "hero_tree.voidscarred&talent.the_hunt",
+        },
+        {
+          from: "annihilator_ranged",
+          ordinal: 7,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "active_enemies=1&!buff.metamorphosis.up&action.reap.souls_consumed>=4&variable.wont_drop_meta",
+        },
+        {
+          from: "annihilator_ranged",
+          ordinal: 9,
+          kind: "CALL",
+          to: "reaps",
+          condition: "active_enemies=1&action.reap.souls_consumed>=4",
+        },
+        {
+          from: "annihilator_ranged",
+          ordinal: 10,
+          kind: "CALL",
+          to: "reaps",
+          condition: "fight_remains<=6&action.reap.souls_consumed>=1",
+        },
+        {
+          from: "annihilator_ranged",
+          ordinal: 11,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "active_enemies>1&buff.eradicate.up&action.reap.souls_consumed>=4+6*buff.moment_of_craving.up",
+        },
+        {
+          from: "annihilator_ranged",
+          ordinal: 13,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "(!buff.eradicate.up|active_enemies=1)&(buff.voidfall_spending.stack>=3&prev_gcd.1.void_ray|buff.voidfall_spending.react>=3)",
+        },
+        {
+          from: "annihilator_ranged",
+          ordinal: 14,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "buff.metamorphosis.up&talent.collapsing_star&buff.collapsing_star_stacking.stack+action.reap.souls_consumed>=30&variable.wont_overcap_cstar&void_metamorphosis_base_drain_ps>35&action.reap.souls_consumed>=4&variable.wont_drop_meta",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 13,
+          kind: "CALL",
+          to: "reaps",
+          condition: "active_enemies=1&action.reap.souls_consumed>=4",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 14,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "!talent.eradicate&(active_enemies>1&variable.wont_overcap_cstar&set_bonus.midnight_season_2_4pc&(buff.voidfall_spending.stack>=3&prev_gcd.1.void_ray|buff.voidfall_spending.react>=3))",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 15,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "action.reap.souls_consumed>=4&active_enemies<5&(active_enemies>1|!buff.metamorphosis.up|buff.moment_of_craving.up|buff.collapsing_star_stacking.stack+action.reap.souls_consumed>=30|void_metamorphosis_base_drain_ps>35)",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 16,
+          kind: "CALL",
+          to: "reaps",
+          condition: "fight_remains<=6&action.reap.souls_consumed>=1",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 17,
+          kind: "CALL",
+          to: "reaps",
+          condition: "talent.eradicate&active_enemies>1&buff.eradicate.up&action.reap.souls_consumed>=1",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 20,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "buff.eradicate.up&active_enemies>1&action.reap.souls_consumed>=4+6*buff.moment_of_craving.up",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 21,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "!talent.eradicate&(active_enemies>1&!buff.metamorphosis.up&buff.moment_of_craving.up&talent.voidfall&(buff.voidfall_building.react<2|variable.ray_after_reap))",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 22,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "!talent.eradicate&(active_enemies>1&(buff.voidfall_spending.stack>=3&prev_gcd.1.void_ray|buff.voidfall_spending.react>=3))",
+        },
+        {
+          from: "annihilator_melee",
+          ordinal: 23,
+          kind: "CALL",
+          to: "reaps",
+          condition:
+            "active_enemies>1&buff.metamorphosis.up&talent.collapsing_star&(active_enemies>1|apex.1|buff.dark_matter.up|talent.star_fragments)&buff.collapsing_star_stacking.stack+action.reap.souls_consumed>=30&variable.wont_overcap_cstar&void_metamorphosis_base_drain_ps>35",
+        },
+        {
+          from: "voidscarred_ranged",
+          ordinal: 5,
+          kind: "CALL",
+          to: "reaps",
+          condition: "action.reap.souls_consumed>=4",
+        },
+        {
+          from: "voidscarred_ranged",
+          ordinal: 6,
+          kind: "CALL",
+          to: "reaps",
+          condition: "fight_remains<=6&action.reap.souls_consumed>=1",
+        },
+        { from: "voidscarred_melee", ordinal: 0, kind: "RUN", to: "vsm_st", condition: "active_enemies=1" },
+        {
+          from: "voidscarred_melee",
+          ordinal: 1,
+          kind: "RUN",
+          to: "vsm_meta",
+          condition: "buff.metamorphosis.up",
+        },
+        { from: "voidscarred_melee", ordinal: 2, kind: "RUN", to: "vsm_out", condition: null },
+        {
+          from: "vsm_st",
+          ordinal: 14,
+          kind: "CALL",
+          to: "reaps",
+          condition: "action.reap.souls_consumed>=4",
+        },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+      noTargetingOptions: true,
+    },
+  },
+  "rogue-subtlety": {
+    sourcePath: PINNED_SOURCES.APL_ROGUE.sourcePath,
+    regionStart: "//subtlety_apl_start",
+    regionEnd: "//subtlety_apl_end",
+    functionHeader: "void subtlety( player_t* p )",
+    regionName: "subtlety",
+    authorityId: "SIMC_APL_ROGUE_SUBTLETY",
+    spec: { className: "rogue", specName: "subtlety" },
+    defaultOut: "src/simc/data/rogue-subtlety.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_ROGUE,
+      regionSha256: "065f1a57d8d63fc5a7fff496c054daf37ff9c5ea13bbbfdb8e8c57dae4da3aee",
+    },
+    livePtrPolicy: {
+      kind: "NO_PTR_REGION",
+      ptrRegionStart: "//subtlety_ptr_apl_start",
+      ptrRegionEnd: "//subtlety_ptr_apl_end",
+      ptrFunctionHeader: "void subtlety_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.ROGUE_DISPATCH,
+      functionHeader: "void rogue_t::init_action_list()",
+      sequence: ["else if ( specialization() == ROGUE_SUBTLETY )", "{", "rogue_apl::subtlety( this );", "}"],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "cds", "race", "item", "finish", "build", "fill"],
+      listSizes: { default: 15, precombat: 6, cds: 7, race: 5, item: 4, finish: 7, build: 5, fill: 4 },
+      edges: [
+        { from: "default", ordinal: 6, kind: "CALL", to: "race", condition: null },
+        { from: "default", ordinal: 7, kind: "CALL", to: "item", condition: null },
+        { from: "default", ordinal: 8, kind: "CALL", to: "cds", condition: null },
+        {
+          from: "default",
+          ordinal: 12,
+          kind: "CALL",
+          to: "finish",
+          condition: "combo_points>=cp_max_spend-!buff.darkest_night.up",
+        },
+        { from: "default", ordinal: 13, kind: "CALL", to: "build", condition: "variable.stealth|energy>60" },
+        { from: "default", ordinal: 14, kind: "CALL", to: "fill", condition: "!variable.stealth" },
+      ],
+      forbiddenTokens: ["swap_action_list"],
+      noTargetingOptions: true,
+    },
+  },
+  "hunter-survival": {
+    sourcePath: PINNED_SOURCES.APL_HUNTER.sourcePath,
+    regionStart: "//survival_apl_start",
+    regionEnd: "//survival_apl_end",
+    functionHeader: "void survival( player_t* p )",
+    regionName: "survival",
+    authorityId: "SIMC_APL_HUNTER_SURVIVAL",
+    spec: { className: "hunter", specName: "survival" },
+    defaultOut: "src/simc/data/hunter-survival.apl.json",
+    pinnedSource: {
+      ...PINNED_SOURCES.APL_HUNTER,
+      regionSha256: "b16ff21787dc24f665080261989540cafa1c1e2904d4a6e9c0cea01d3d37c1d8",
+    },
+    livePtrPolicy: {
+      kind: "PTR_BODY_IDENTICAL",
+      ptrRegionStart: "//survival_ptr_apl_start",
+      ptrRegionEnd: "//survival_ptr_apl_end",
+      ptrFunctionHeader: "void survival_ptr( player_t* p )",
+    },
+    dispatch: {
+      ...PINNED_SOURCES.HUNTER_DISPATCH,
+      functionHeader: "void hunter_t::init_action_list()",
+      sequence: [
+        "case HUNTER_SURVIVAL:",
+        "if ( is_ptr() )",
+        "hunter_apl::survival_ptr( this );",
+        "else",
+        "hunter_apl::survival( this );",
+        "break;",
+      ],
+    },
+    requiredFacts: {
+      kind: "DISPATCH_GRAPH",
+      entryListName: "default",
+      requiredLists: ["default", "precombat", "cds", "plst", "sentst", "plcleave", "sentcleave"],
+      listSizes: { default: 7, precombat: 4, cds: 12, plst: 9, sentst: 10, plcleave: 10, sentcleave: 8 },
+      edges: [
+        { from: "default", ordinal: 2, kind: "CALL", to: "cds", condition: null },
+        {
+          from: "default",
+          ordinal: 3,
+          kind: "CALL",
+          to: "plst",
+          condition: "active_enemies<3&talent.howl_of_the_pack_leader",
+        },
+        {
+          from: "default",
+          ordinal: 4,
+          kind: "CALL",
+          to: "plcleave",
+          condition: "active_enemies>2&talent.howl_of_the_pack_leader",
+        },
+        {
+          from: "default",
+          ordinal: 5,
+          kind: "CALL",
+          to: "sentst",
+          condition: "active_enemies<3&!talent.howl_of_the_pack_leader",
+        },
+        {
+          from: "default",
+          ordinal: 6,
+          kind: "CALL",
+          to: "sentcleave",
+          condition: "active_enemies>2&!talent.howl_of_the_pack_leader",
+        },
+      ],
+      forbiddenTokens: ["swap_action_list"],
     },
   },
 };
@@ -544,6 +1404,12 @@ export function locateRegion(lines, target) {
   }
 
   if (hasMarkers) {
+    // M11-D2-C: each marker line must occur EXACTLY once. A first match is
+    // not a region when a second copy of the marker could bound another one.
+    for (const marker of [target.regionStart, target.regionEnd]) {
+      const count = lines.filter((line) => line.trim() === marker).length;
+      if (count > 1) fail(`region marker ${marker} occurs ${String(count)} times; exactly one is required`);
+    }
     const startIndex = lines.findIndex((line) => line.trim() === target.regionStart);
     const endIndex = lines.findIndex((line) => line.trim() === target.regionEnd);
     if (startIndex < 0 || endIndex < 0 || endIndex <= startIndex) {
@@ -636,6 +1502,8 @@ export function extract(sourceText, target) {
 
   let sawFunctionHeader = false;
   let braceDepth = 0;
+  const inertDeclared = TARGET.inertStatements ?? [];
+  const inertSeen = [];
 
   // ---- version guards (M11-B2) ----
   //
@@ -771,6 +1639,16 @@ export function extract(sourceText, target) {
       fail(`line ${lineNumber}: a version guard may govern only add_action statements: ${line}`);
     }
 
+    // A statement THIS target declares inert, by exact text (M11-D2-C). Its
+    // per-region conditions are checked after the walk; its proof sources by
+    // the pinned preflight.
+    if (inertDeclared.some((inert) => inert.statement === line)) {
+      if (braceDepth !== 1)
+        fail(`line ${lineNumber}: an inert statement must sit at function scope: ${line}`);
+      inertSeen.push({ sourceLine: lineNumber, statement: line });
+      continue;
+    }
+
     // Reached only by a construct this extractor does not model. Failing here is
     // the contract: a silently skipped line produces a complete-looking artifact
     // with a missing action, and every reachability proof built on it is void.
@@ -781,6 +1659,33 @@ export function extract(sourceText, target) {
   if (braceDepth !== 0) fail(`unbalanced braces inside the ${TARGET.regionName} region`);
   if (pending !== null || active !== null) fail(`a version guard is left open at the end of the region`);
 
+  // Each declared inert statement: exactly once in THIS region, and its
+  // identifier on no other region line — a later read, however indirect,
+  // would make it not inert, so any mention refuses the region.
+  const inertStatements = [];
+  for (const inert of inertDeclared) {
+    const seen = inertSeen.filter((entry) => entry.statement === inert.statement);
+    if (seen.length !== 1) {
+      fail(
+        `inert statement occurs ${String(seen.length)} times in the ${TARGET.regionName} region; exactly one is required: ${inert.statement}`,
+      );
+    }
+    const mention = new RegExp(`\\b${inert.identifier}\\b`);
+    for (let i = startIndex + 1; i < endIndex; i += 1) {
+      if (i + 1 === seen[0].sourceLine) continue;
+      if (mention.test(lines[i])) {
+        fail(
+          `line ${i + 1}: '${inert.identifier}' is referenced after its inert declaration: ${lines[i].trim()}`,
+        );
+      }
+    }
+    inertStatements.push({
+      sourceLine: seen[0].sourceLine,
+      statement: inert.statement,
+      identifier: inert.identifier,
+    });
+  }
+
   return {
     lists: listOrder.map((listName) => ({
       listName,
@@ -789,7 +1694,14 @@ export function extract(sourceText, target) {
     })),
     guards,
     regionProvenance: region.provenance,
+    // The region's own bytes, marker lines included, LF-joined (M11-D2-C).
+    regionSha256: sha256Of(lines.slice(startIndex, endIndex + 1).join("\n")),
+    ...(inertDeclared.length === 0 ? {} : { inertStatements }),
   };
+}
+
+function sha256Of(value) {
+  return createHash("sha256").update(value).digest("hex");
 }
 
 // --------------------------------------------------------------------------
@@ -1131,13 +2043,578 @@ export function buildArtifact({
               guards: extracted.guards,
             },
           }),
+      ...(target.pinnedSource === undefined
+        ? {}
+        : {
+            // M11-D2-C: what ties a PINNED target's artifact back to its
+            // record — the region's bytes, the live/PTR policy that chose
+            // the region, the class module that dispatches to it, and every
+            // statement the region parser was told to treat as inert.
+            regionSha256: extracted.regionSha256,
+            livePtrPolicy: target.livePtrPolicy.kind,
+            dispatchSource: { sourcePath: target.dispatch.sourcePath, sourceSha256: target.dispatch.sha256 },
+            ...(extracted.inertStatements === undefined
+              ? {}
+              : { inertStatements: extracted.inertStatements }),
+          }),
     },
     lists: extracted.lists,
   };
 }
 
+// --------------------------------------------------------------------------
+// PINNED BATCH PREFLIGHT (M11-D2-C)
+//
+// A PINNED target carries, besides its coordinates, the exact bytes it was
+// recorded against: its module's SHA-256 and length, its region's SHA-256, a
+// live/PTR policy, the class-module dispatch that calls its function, and any
+// statement it declares inert with the hash-pinned proof of it. The preflight
+// checks every one of those against a local source root and reads nothing
+// else. C++ is text here: nothing is compiled, evaluated or executed.
+//
+// A batch is ATOMIC. Every selected target is preflighted and every artifact
+// built in memory first; if ANY target or the batch itself fails, nothing is
+// written. `--check` writes nothing even when everything passes.
+// --------------------------------------------------------------------------
+
+export const LIVE_PTR_POLICIES = Object.freeze(["NO_PTR_REGION", "PTR_MARKERS_EMPTY", "PTR_BODY_IDENTICAL"]);
+
+const MARKER_LINE = /^\/\/[a-z][a-z0-9_]*_apl_(?:start|end)$/;
+const SHA256_HEX = /^[0-9a-f]{64}$/;
+const COMMIT_HEX = /^[0-9a-f]{40}$/;
+const LIVE_FUNCTION_HEADER = /^void ([A-Za-z_][A-Za-z0-9_]*)\( player_t\* p \)$/;
+const PROOF_CHECK_KINDS = ["FUNCTION_BODY_SHA256", "LINE_EXACTLY_ONCE", "TOKEN_ABSENT"];
+
+/**
+ * One relative source path, resolved inside the source root. Absolute paths,
+ * drive letters, backslashes and empty, `.` or `..` segments are refused
+ * before anything touches the filesystem.
+ */
+export function confinedSourcePath(sourceRoot, relativePath) {
+  if (typeof relativePath !== "string" || relativePath.length === 0) {
+    fail("a source path must be a non-empty string");
+  }
+  if (relativePath.includes("\\") || isAbsolute(relativePath) || /^[A-Za-z]:/.test(relativePath)) {
+    fail(`source path '${relativePath}' must be relative to the source root and use '/'`);
+  }
+  const segments = relativePath.split("/");
+  if (segments.some((segment) => segment === "" || segment === "." || segment === "..")) {
+    fail(`source path '${relativePath}' has an empty, '.' or '..' segment`);
+  }
+  const root = resolve(sourceRoot);
+  const full = resolve(root, ...segments);
+  const inside = relative(root, full);
+  if (inside.startsWith("..") || isAbsolute(inside)) {
+    fail(`source path '${relativePath}' escapes the source root`);
+  }
+  return full;
+}
+
+/**
+ * A reader over one source root: the bytes of a confined path, or `null` when
+ * the file does not exist. A path whose real location (symlinks followed)
+ * leaves the root is refused, not read.
+ */
+export function sourceRootReader(sourceRoot) {
+  if (typeof sourceRoot !== "string" || !existsSync(sourceRoot)) {
+    fail(`source root '${String(sourceRoot)}' does not exist`);
+  }
+  const root = realpathSync(resolve(sourceRoot));
+  return (relativePath) => {
+    const full = confinedSourcePath(root, relativePath);
+    if (!existsSync(full)) return null;
+    const real = realpathSync(full);
+    const inside = relative(root, real);
+    if (inside.startsWith("..") || isAbsolute(inside)) {
+      fail(`source path '${relativePath}' resolves outside the source root`);
+    }
+    return readFileSync(real);
+  };
+}
+
+function isPinnedFile(record) {
+  return (
+    record !== null &&
+    typeof record === "object" &&
+    typeof record.sourcePath === "string" &&
+    typeof record.sha256 === "string" &&
+    SHA256_HEX.test(record.sha256) &&
+    Number.isInteger(record.byteLength) &&
+    record.byteLength > 0
+  );
+}
+
+/** The record's own shape, before any byte is read. Problems, never a throw. */
+export function validatePinnedRecord(targetName, target) {
+  const problems = [];
+  const pinned = target.pinnedSource;
+  if (!isPinnedFile(pinned)) problems.push(`MALFORMED_RECORD: '${targetName}' pinnedSource is incomplete`);
+  else {
+    if (typeof pinned.commitSha !== "string" || !COMMIT_HEX.test(pinned.commitSha)) {
+      problems.push(`MISSING_COMMIT: '${targetName}' pinnedSource names no 40-character commit`);
+    }
+    if (typeof pinned.regionSha256 !== "string" || !SHA256_HEX.test(pinned.regionSha256)) {
+      problems.push(`MALFORMED_RECORD: '${targetName}' pinnedSource names no region SHA-256`);
+    }
+    if (pinned.sourcePath !== target.sourcePath) {
+      problems.push(
+        `MODULE_MISMATCH: '${targetName}' reads ${target.sourcePath} but is pinned to ${pinned.sourcePath}`,
+      );
+    }
+  }
+  for (const [field, marker, suffix] of [
+    ["regionStart", target.regionStart, "_start"],
+    ["regionEnd", target.regionEnd, "_end"],
+  ]) {
+    if (typeof marker !== "string" || !MARKER_LINE.test(marker) || !marker.endsWith(suffix)) {
+      problems.push(
+        `MALFORMED_MARKER: '${targetName}' ${field} '${String(marker)}' is not a //<name>_apl${suffix} line`,
+      );
+    }
+  }
+  if (
+    typeof target.regionStart === "string" &&
+    typeof target.regionEnd === "string" &&
+    target.regionStart.replace(/_start$/, "") !== target.regionEnd.replace(/_end$/, "")
+  ) {
+    problems.push(`MALFORMED_MARKER: '${targetName}' start and end markers name different regions`);
+  }
+  const live = LIVE_FUNCTION_HEADER.exec(target.functionHeader ?? "");
+  if (live === null)
+    problems.push(`MALFORMED_RECORD: '${targetName}' functionHeader is not 'void <name>( player_t* p )'`);
+  const policy = target.livePtrPolicy;
+  if (policy === undefined || !LIVE_PTR_POLICIES.includes(policy.kind)) {
+    problems.push(`MALFORMED_POLICY: '${targetName}' declares no known live/PTR policy`);
+  } else if (live !== null) {
+    if (
+      policy.ptrRegionStart !== `//${live[1]}_ptr_apl_start` ||
+      policy.ptrRegionEnd !== `//${live[1]}_ptr_apl_end`
+    ) {
+      problems.push(`MALFORMED_POLICY: '${targetName}' PTR markers do not name the ${live[1]}_ptr region`);
+    }
+    if (policy.ptrFunctionHeader !== `void ${live[1]}_ptr( player_t* p )`) {
+      problems.push(`MALFORMED_POLICY: '${targetName}' PTR function header does not name ${live[1]}_ptr`);
+    }
+  }
+  const dispatch = target.dispatch;
+  if (
+    !isPinnedFile(dispatch) ||
+    typeof dispatch.functionHeader !== "string" ||
+    !Array.isArray(dispatch.sequence) ||
+    dispatch.sequence.length === 0 ||
+    dispatch.sequence.some((line) => typeof line !== "string" || line.length === 0 || line.trim() !== line)
+  ) {
+    problems.push(`MALFORMED_DISPATCH: '${targetName}' dispatch record is incomplete`);
+  } else if (live !== null) {
+    const call = new RegExp(`^[A-Za-z_][A-Za-z0-9_]*::${live[1]}\\( this \\);$`);
+    if (dispatch.sequence.filter((line) => call.test(line)).length !== 1) {
+      problems.push(
+        `MALFORMED_DISPATCH: '${targetName}' dispatch sequence does not call ${live[1]}( this ) exactly once`,
+      );
+    }
+  }
+  for (const inert of target.inertStatements ?? []) {
+    if (
+      typeof inert.statement !== "string" ||
+      typeof inert.identifier !== "string" ||
+      !/^[A-Za-z_][A-Za-z0-9_]*$/.test(inert.identifier) ||
+      !inert.statement.includes(inert.identifier) ||
+      !Array.isArray(inert.proofs) ||
+      inert.proofs.length === 0 ||
+      inert.proofs.some(
+        (proof) =>
+          !isPinnedFile(proof) ||
+          !Array.isArray(proof.checks) ||
+          proof.checks.length === 0 ||
+          proof.checks.some((check) => !PROOF_CHECK_KINDS.includes(check.kind)),
+      )
+    ) {
+      problems.push(
+        `MALFORMED_INERT: '${targetName}' declares an inert statement without a complete pinned proof`,
+      );
+    }
+  }
+  return problems;
+}
+
+/** The pinned file's bytes, or a problem: missing, or not the recorded bytes. */
+function readPinned(read, record, role, problems) {
+  let bytes;
+  try {
+    bytes = read(record.sourcePath);
+  } catch (error) {
+    if (!(error instanceof ExtractionError)) throw error;
+    problems.push(`PATH_REFUSED: ${role} ${error.message}`);
+    return null;
+  }
+  if (bytes === null) {
+    problems.push(`MISSING_SOURCE: ${role} ${record.sourcePath} is not under the source root`);
+    return null;
+  }
+  const sha256 = sha256Of(bytes);
+  if (sha256 !== record.sha256 || bytes.length !== record.byteLength) {
+    problems.push(
+      `SOURCE_SHA256_MISMATCH: ${role} ${record.sourcePath} is ${sha256} (${String(bytes.length)} bytes), pinned ${record.sha256} (${String(record.byteLength)} bytes)`,
+    );
+    return null;
+  }
+  return bytes;
+}
+
+/** The lines of the one function whose header line equals `header`, header to closing brace. */
+function functionBody(lines, header) {
+  const headers = lines.flatMap((line, index) => (line.trim() === header ? [index] : []));
+  if (headers.length !== 1)
+    fail(`'${header}' occurs ${String(headers.length)} times; exactly one is required`);
+  const open = nextCodeLine(lines, headers[0] + 1);
+  if (open < 0 || lines[open].trim() !== "{") fail(`'${header}' is not followed by '{' on its own line`);
+  return lines.slice(headers[0], braceSpan(lines, open).closeIndex + 1);
+}
+
+function countLines(lines, text) {
+  return lines.filter((line) => line.trim() === text).length;
+}
+
+/** The live/PTR relationship the target declares, checked against the module and its dispatch. */
+export function verifyLivePtrPolicy(lines, dispatchText, target) {
+  const policy = target.livePtrPolicy;
+  const name = LIVE_FUNCTION_HEADER.exec(target.functionHeader)[1];
+  const starts = countLines(lines, policy.ptrRegionStart);
+  const ends = countLines(lines, policy.ptrRegionEnd);
+  const ptrDefinitions = lines.filter((line) => line.trim().startsWith(`void ${name}_ptr(`)).length;
+  const ptrDispatches = dispatchText.split(`::${name}_ptr(`).length - 1;
+
+  if (policy.kind === "NO_PTR_REGION") {
+    if (starts !== 0 || ends !== 0 || ptrDefinitions !== 0 || ptrDispatches !== 0) {
+      fail(
+        `POLICY_VIOLATED: NO_PTR_REGION, but the module has ${String(starts)}/${String(ends)} PTR markers and ${String(ptrDefinitions)} ${name}_ptr definitions, and the dispatch calls ${name}_ptr ${String(ptrDispatches)} times`,
+      );
+    }
+    return;
+  }
+  if (starts !== 1 || ends !== 1) {
+    fail(
+      `POLICY_VIOLATED: ${policy.kind} needs exactly one ${policy.ptrRegionStart} and one ${policy.ptrRegionEnd}`,
+    );
+  }
+  const ptrStart = lines.findIndex((line) => line.trim() === policy.ptrRegionStart);
+  const ptrEnd = lines.findIndex((line) => line.trim() === policy.ptrRegionEnd);
+  if (ptrEnd <= ptrStart) fail(`POLICY_VIOLATED: the PTR markers of ${name} are reversed`);
+
+  if (policy.kind === "PTR_MARKERS_EMPTY") {
+    const between = lines.slice(ptrStart + 1, ptrEnd).filter((line) => line.trim().length > 0);
+    if (between.length !== 0 || ptrDefinitions !== 0 || ptrDispatches !== 0) {
+      fail(
+        `POLICY_VIOLATED: PTR_MARKERS_EMPTY, but the PTR region holds ${String(between.length)} non-blank lines, the module defines ${name}_ptr ${String(ptrDefinitions)} times and the dispatch calls it ${String(ptrDispatches)} times`,
+      );
+    }
+    return;
+  }
+
+  // PTR_BODY_IDENTICAL: both regions open on their own header, and every line
+  // after the header is byte-identical, so either branch of the dispatch
+  // builds the same lists.
+  const liveStart = lines.findIndex((line) => line.trim() === target.regionStart);
+  const liveEnd = lines.findIndex((line) => line.trim() === target.regionEnd);
+  const liveHeader = nextCodeLine(lines, liveStart + 1);
+  const ptrHeader = nextCodeLine(lines, ptrStart + 1);
+  if (liveHeader < 0 || lines[liveHeader].trim() !== target.functionHeader) {
+    fail(`POLICY_VIOLATED: the live region does not open on ${target.functionHeader}`);
+  }
+  if (ptrHeader < 0 || lines[ptrHeader].trim() !== policy.ptrFunctionHeader) {
+    fail(`POLICY_VIOLATED: the PTR region does not open on ${policy.ptrFunctionHeader}`);
+  }
+  const liveBody = lines.slice(liveHeader + 1, liveEnd);
+  const ptrBody = lines.slice(ptrHeader + 1, ptrEnd);
+  if (liveBody.length !== ptrBody.length || liveBody.some((line, index) => line !== ptrBody[index])) {
+    const at = liveBody.findIndex((line, index) => line !== ptrBody[index]);
+    fail(
+      `POLICY_VIOLATED: PTR_BODY_IDENTICAL, but the bodies differ (${String(liveBody.length)} vs ${String(ptrBody.length)} lines, first difference at body line ${String(at + 1)})`,
+    );
+  }
+  if (ptrDefinitions !== 1 || ptrDispatches !== 1) {
+    fail(`POLICY_VIOLATED: PTR_BODY_IDENTICAL needs one ${name}_ptr definition and one dispatch call`);
+  }
+}
+
+/**
+ * The class module dispatches to the target's function: inside the one
+ * dispatch function, the pinned code-line sequence occurs exactly once, and
+ * the live call occurs exactly once in the whole module.
+ */
+export function verifyDispatch(dispatchText, target) {
+  const { functionHeader, sequence } = target.dispatch;
+  const lines = dispatchText.split(/\r?\n/);
+  const code = functionBody(lines, functionHeader)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("//"));
+  let occurrences = 0;
+  for (let i = 0; i + sequence.length <= code.length; i += 1) {
+    if (sequence.every((line, offset) => code[i + offset] === line)) occurrences += 1;
+  }
+  if (occurrences !== 1) {
+    fail(
+      `DISPATCH_UNVERIFIED: the sequence [${sequence.join(" | ")}] occurs ${String(occurrences)} times in ${functionHeader}; exactly one is required`,
+    );
+  }
+  const name = LIVE_FUNCTION_HEADER.exec(target.functionHeader)[1];
+  const call = sequence.find((line) => new RegExp(`::${name}\\( this \\);$`).test(line));
+  if (countLines(lines, call) !== 1)
+    fail(`DISPATCH_UNVERIFIED: '${call}' must occur exactly once in the module`);
+}
+
+/** One hash-pinned proof file's checks. */
+function verifyProof(bytes, proof) {
+  const text = Buffer.from(bytes).toString("utf8");
+  const lines = text.split(/\r?\n/);
+  for (const check of proof.checks) {
+    if (check.kind === "FUNCTION_BODY_SHA256") {
+      const body = sha256Of(functionBody(lines, check.functionHeader).join("\n"));
+      if (body !== check.bodySha256) {
+        fail(`INERT_PROOF_FAILED: ${check.functionHeader} body is ${body}, pinned ${check.bodySha256}`);
+      }
+    } else if (check.kind === "LINE_EXACTLY_ONCE") {
+      const count = countLines(lines, check.line);
+      if (count !== 1)
+        fail(`INERT_PROOF_FAILED: '${check.line}' occurs ${String(count)} times in ${proof.sourcePath}`);
+    } else if (check.kind === "TOKEN_ABSENT") {
+      if (text.includes(check.token)) fail(`INERT_PROOF_FAILED: ${proof.sourcePath} names '${check.token}'`);
+    } else {
+      fail(`INERT_PROOF_FAILED: unknown check kind '${String(check.kind)}'`);
+    }
+  }
+}
+
+/**
+ * Every pinned fact of one target, against one source root. Never writes.
+ * Returns the problems found (empty when the target passes) and, on success,
+ * the artifact the target would produce.
+ */
+export function preflightTarget({ targetName, target, read, sha, extractedOn, commitDate, branch }) {
+  const problems = [];
+  const result = {
+    targetName,
+    ok: false,
+    problems,
+    sourcePath: target?.sourcePath ?? null,
+    sourceSha256: null,
+    sourceByteLength: null,
+    regionSha256: null,
+    livePtrPolicy: target?.livePtrPolicy?.kind ?? null,
+    dispatchSourcePath: target?.dispatch?.sourcePath ?? null,
+    inertStatements: 0,
+    lists: 0,
+    actions: 0,
+    artifact: null,
+  };
+  const step = (run) => {
+    try {
+      return run();
+    } catch (error) {
+      if (!(error instanceof ExtractionError)) throw error;
+      problems.push(error.message);
+      return undefined;
+    }
+  };
+  if (target === undefined) {
+    problems.push(`UNKNOWN_TARGET: '${targetName}'`);
+    return result;
+  }
+  if (target.pinnedSource === undefined) {
+    problems.push(`NOT_PINNED: '${targetName}' carries no pinned source record and cannot be preflighted`);
+    return result;
+  }
+  problems.push(...validatePinnedRecord(targetName, target));
+  if (typeof sha !== "string" || !COMMIT_HEX.test(sha)) {
+    problems.push("MISSING_COMMIT: no 40-character --sha was given");
+  } else if (sha !== target.pinnedSource.commitSha) {
+    problems.push(`COMMIT_MISMATCH: --sha ${sha} is not the pinned commit ${target.pinnedSource.commitSha}`);
+  }
+  if (problems.length > 0) return result;
+
+  const module = readPinned(read, target.pinnedSource, "module", problems);
+  const dispatchBytes = readPinned(read, target.dispatch, "dispatch", problems);
+  const proofBytes = (target.inertStatements ?? []).flatMap((inert) =>
+    inert.proofs.map((proof) => ({ proof, bytes: readPinned(read, proof, "inert proof", problems) })),
+  );
+  if (problems.length > 0 || module === null || dispatchBytes === null) return result;
+  result.sourceSha256 = target.pinnedSource.sha256;
+  result.sourceByteLength = module.length;
+
+  const text = Buffer.from(module).toString("utf8");
+  const lines = text.split(/\r?\n/);
+  const dispatchText = Buffer.from(dispatchBytes).toString("utf8");
+  const extracted = step(() => extract(text, target));
+  if (extracted !== undefined) {
+    result.regionSha256 = extracted.regionSha256;
+    if (extracted.regionSha256 !== target.pinnedSource.regionSha256) {
+      problems.push(
+        `REGION_SHA256_MISMATCH: region ${target.regionStart} is ${extracted.regionSha256}, pinned ${target.pinnedSource.regionSha256}`,
+      );
+    }
+  }
+  step(() => verifyLivePtrPolicy(lines, dispatchText, target));
+  step(() => verifyDispatch(dispatchText, target));
+  for (const { proof, bytes } of proofBytes) step(() => verifyProof(bytes, proof));
+  if (extracted === undefined || problems.length > 0) return result;
+
+  const artifact = buildArtifact({
+    target,
+    extracted,
+    sourceSha256: target.pinnedSource.sha256,
+    sourceByteLength: module.length,
+    sha,
+    branch,
+    commitDate,
+    extractedOn,
+  });
+  problems.push(...verifyRequiredFacts(artifact, target).map((problem) => `REQUIRED_FACT: ${problem}`));
+  if (problems.length > 0) return result;
+  result.inertStatements = (extracted.inertStatements ?? []).length;
+  result.lists = artifact.lists.length;
+  result.actions = artifact.lists.reduce((sum, list) => sum + list.actions.length, 0);
+  result.artifact = artifact;
+  result.ok = true;
+  return result;
+}
+
+/** Where a target's artifact would be written: `outDir` keeps the default file name. */
+export function outputPathOf(target, outDir) {
+  return outDir === undefined ? target.defaultOut : join(outDir, basename(target.defaultOut));
+}
+
+/**
+ * Preflights a batch, all-or-nothing, without writing. Batch problems —
+ * no targets, a repeated or unknown name, two targets on one region or one
+ * output path — fail the batch even when every target passes alone.
+ */
+export function preflightBatch({
+  targetNames,
+  targets = TARGETS,
+  read,
+  sha,
+  extractedOn,
+  commitDate,
+  branch,
+  outDir,
+}) {
+  const problems = [];
+  if (!Array.isArray(targetNames) || targetNames.length === 0)
+    problems.push("NO_TARGETS: the batch selects no target");
+  const names = Array.isArray(targetNames) ? targetNames : [];
+  const seen = new Set();
+  for (const name of names) {
+    if (seen.has(name)) problems.push(`DUPLICATE_TARGET: '${name}' is selected twice`);
+    seen.add(name);
+  }
+  const unique = [...seen].sort();
+  const byRegion = new Map();
+  const byOutput = new Map();
+  for (const name of unique) {
+    const target = Object.hasOwn(targets, name) ? targets[name] : undefined;
+    if (target === undefined) continue;
+    const region = `${target.sourcePath}#${target.regionStart ?? target.enclosingNamespace}`;
+    if (byRegion.has(region))
+      problems.push(`DUPLICATE_REGION: '${byRegion.get(region)}' and '${name}' select ${region}`);
+    else byRegion.set(region, name);
+    const output = resolve(outputPathOf(target, outDir));
+    if (byOutput.has(output))
+      problems.push(`DUPLICATE_OUTPUT: '${byOutput.get(output)}' and '${name}' both write ${output}`);
+    else byOutput.set(output, name);
+  }
+  const results = unique.map((targetName) => ({
+    ...preflightTarget({
+      targetName,
+      target: Object.hasOwn(targets, targetName) ? targets[targetName] : undefined,
+      read,
+      sha,
+      extractedOn,
+      commitDate,
+      branch,
+    }),
+    outputPath: Object.hasOwn(targets, targetName) ? outputPathOf(targets[targetName], outDir) : null,
+  }));
+  return { ok: problems.length === 0 && results.every((result) => result.ok), problems, results };
+}
+
+/** The batch as a deterministic report: sorted targets, no artifact bodies, no clock. */
+export function batchReport(batch) {
+  return {
+    ok: batch.ok,
+    problems: batch.problems,
+    targets: batch.results.map(({ artifact: _artifact, ...result }) => result),
+  };
+}
+
+/**
+ * Writes a PASSED batch, all or nothing: every artifact to a temporary file
+ * first, then each renamed into place. A failure before the renames removes
+ * every temporary file and writes nothing.
+ */
+export function writeBatch(batch) {
+  if (!batch.ok) fail("the batch did not pass preflight; nothing is written");
+  const staged = [];
+  try {
+    for (const result of batch.results) {
+      const outPath = result.outputPath;
+      mkdirSync(dirname(outPath), { recursive: true });
+      const temporary = `${outPath}.${String(process.pid)}.tmp`;
+      writeFileSync(temporary, `${JSON.stringify(result.artifact, null, 2)}\n`, "utf8");
+      staged.push({ temporary, outPath });
+    }
+  } catch (error) {
+    for (const { temporary } of staged) rmSync(temporary, { force: true });
+    throw error;
+  }
+  for (const { temporary, outPath } of staged) renameSync(temporary, outPath);
+  return staged.map(({ outPath }) => outPath);
+}
+
+function mainBatch(args) {
+  const names =
+    typeof args.targets === "string"
+      ? args.targets.split(",").map((name) => name.trim())
+      : typeof args.target === "string"
+        ? [args.target]
+        : [];
+  if (typeof args["source-root"] !== "string") fail("--source-root <dir> is required for pinned targets");
+  const check = args.check === true;
+  const outDir = typeof args["out-dir"] === "string" ? args["out-dir"] : undefined;
+  if (!check && outDir === undefined)
+    fail("--out-dir <dir> is required to write; use --check to verify only");
+  if (!check && typeof args["extracted-on"] !== "string")
+    fail("--extracted-on <YYYY-MM-DD> is required to write");
+  const batch = preflightBatch({
+    targetNames: names,
+    read: sourceRootReader(args["source-root"]),
+    sha: typeof args.sha === "string" ? args.sha : null,
+    extractedOn: check ? "CHECK" : args["extracted-on"],
+    commitDate: typeof args["commit-date"] === "string" ? args["commit-date"] : "UNKNOWN",
+    branch: typeof args.branch === "string" ? args.branch : "midnight",
+    outDir,
+  });
+  console.log(JSON.stringify(batchReport(batch), null, 2));
+  if (!batch.ok) {
+    console.error("EXTRACTION FAILED: the batch did not pass preflight; nothing was written.");
+    process.exit(1);
+  }
+  if (check) {
+    console.error(`CHECK PASSED: ${String(batch.results.length)} target(s); nothing was written.`);
+    return;
+  }
+  for (const path of writeBatch(batch)) console.error(`Wrote ${path}`);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  // M11-D2-C: a PINNED target is preflighted and extracted only as a batch.
+  if (
+    args.targets !== undefined ||
+    (typeof args.target === "string" && TARGETS[args.target]?.pinnedSource !== undefined)
+  ) {
+    mainBatch(args);
+    return;
+  }
   const targetName = typeof args.target === "string" ? args.target : "rogue-assassination";
   const TARGET = TARGETS[targetName];
   if (TARGET === undefined) {

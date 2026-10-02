@@ -527,6 +527,105 @@ for byte from the current extractor — they predate M11-B2 adding POWER_RUNE
 and POWER_RUNIC_POWER to the shared enumerator list and carry only POWER_MANA
 and POWER_HOLY_POWER. That drift is recorded, not fixed.
 
+## M11-D2-C — pinned batch preflight for eight Cohort A/B targets
+
+Extraction infrastructure only. No artifact for these targets is committed,
+no analyzer reads them, and no specialization is registered or promoted.
+
+Eight `TARGETS` entries carry a PINNED record besides their coordinates: the
+APL module's exact bytes, the region's exact bytes, a live/PTR policy, the
+class-module dispatch that calls the region's function, and — for Arms and
+Fury — the one statement the region parser does not model, with a
+hash-pinned proof that it is inert. Every byte count and SHA-256 was read
+from the file at `33622e9d1662ff0e451691edf85a6b49cc9d11d9`, each file first
+matched against that commit's own git blob id.
+
+| Target | Module (bytes, SHA-256) | Region (lines, SHA-256) | Live/PTR policy | Dispatch |
+| --- | --- | --- | --- | --- |
+| `warrior-arms` | `apl_warrior.cpp` (30,516, `bc9473e5…2ec1`) | 153–329, `ff4607b2…08c6` | `NO_PTR_REGION` | `sc_warrior.cpp` `case WARRIOR_ARMS:` |
+| `warrior-fury` | `apl_warrior.cpp` | 7–151, `d924df0f…0b63` | `NO_PTR_REGION` | `sc_warrior.cpp` `case WARRIOR_FURY:` |
+| `warrior-protection` | `apl_warrior.cpp` | 331–422, `d545e36d…f7cb` | `NO_PTR_REGION` | `sc_warrior.cpp` `case WARRIOR_PROTECTION:` |
+| `deathknight-frost` | `apl_death_knight.cpp` (36,557, `e381da69…8df6`) | 214–321, `3a7f6677…5a87` | `NO_PTR_REGION` | `sc_death_knight.cpp` `case DEATH_KNIGHT_FROST:` |
+| `demonhunter-havoc` | `apl_demon_hunter.cpp` (56,505, `c95ab0af…b389`) | 265–320, `ee8c3c24…fb56` | `PTR_MARKERS_EMPTY` | `sc_demon_hunter.cpp` `case DEMON_HUNTER_HAVOC:` |
+| `demonhunter-devourer` | `apl_demon_hunter.cpp` | 75–256, `7ea89132…e48e` | `PTR_MARKERS_EMPTY` | `sc_demon_hunter.cpp` `case DEMON_HUNTER_DEVOURER:` |
+| `rogue-subtlety` | `apl_rogue.cpp` (26,074, `a74e4daa…9eb3`) | 197–270, `065f1a57…3aee` | `NO_PTR_REGION` | `sc_rogue.cpp` `else if ( specialization() == ROGUE_SUBTLETY )` |
+| `hunter-survival` | `apl_hunter.cpp` (51,094, `8d7b7273…acbb`) | 423–501, `b16ff217…c1d8` | `PTR_BODY_IDENTICAL` | `sc_hunter.cpp` `case HUNTER_SURVIVAL:` with the `is_ptr()` branch |
+
+The region SHA-256 is over the region's lines, both marker lines included,
+LF-joined.
+
+### Live/PTR policies, each mechanically verified
+
+- `NO_PTR_REGION` — the module has no `//<name>_ptr_apl_start` /
+  `_end` marker and no `void <name>_ptr(` definition, and the dispatch module
+  never calls `<name>_ptr(`.
+- `PTR_MARKERS_EMPTY` (Havoc, Devourer) — the PTR marker pair occurs exactly
+  once, in order, with nothing but blank lines between; no `<name>_ptr`
+  function is defined or dispatched. `demon_hunter_t::init_action_list`
+  calls the live function unconditionally, so the live region is the
+  authority on every build.
+- `PTR_BODY_IDENTICAL` (Survival) — the PTR pair occurs once; each region
+  opens on its own header (`void survival( player_t* p )`,
+  `void survival_ptr( player_t* p )`); every one of the 76 lines after the
+  header is byte-identical between the two; and `hunter_t::init_action_list`
+  picks between them with `if ( is_ptr() )`. The live region is extracted,
+  and either branch builds the same lists.
+
+### The Arms and Fury `racial_actions` statement
+
+Both regions open with
+`std::vector<std::string> racial_actions = p->get_racial_actions();` (Fury
+line 10, Arms line 156) — a construct the region parser does not model. It
+is accepted ONLY as an exact-text inert statement declared per target, and
+each run re-proves, against hash-pinned bytes:
+
+1. in that target's own region the statement occurs once and
+   `racial_actions` is named on no other line;
+2. `player_t::get_racial_actions()` is declared virtual (`player.hpp`) and its
+   body at the pin builds and returns a local vector of eight literals and
+   nothing else (body SHA-256 `857fc6f4…2ce9`);
+3. nothing between `warrior_t` and `player_t` overrides it: `warrior_t`
+   derives from `parse_player_effects_t`, which derives from `player_t` and
+   `parse_effects_t`, and none of `sc_warrior.cpp`, `parse_effects.hpp` or
+   `parse_effects.cpp` names `get_racial_actions`.
+
+So the statement builds a value nobody reads, with no side effect; dropping it
+cannot change an `add_action` the extractor emits. The artifact records it
+under `provenance.inertStatements`. There is no rule about unused locals.
+
+### Reproduce (local; CI has no pinned checkout)
+
+Stage the files at the pinned commit under one source root, mirroring the
+repository's paths: the five APL modules, the five class modules above,
+`engine/player/player.cpp`, `engine/player/player.hpp`,
+`engine/action/parse_effects.hpp` and `engine/action/parse_effects.cpp`.
+
+```bash
+node scripts/authority/extract-simc-apl.mjs \
+  --targets warrior-arms,warrior-fury,warrior-protection,deathknight-frost,demonhunter-havoc,demonhunter-devourer,rogue-subtlety,hunter-survival \
+  --source-root <root> --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --check
+```
+
+`--check` writes nothing and prints a deterministic JSON report (targets
+sorted, no clock). Writing needs `--out-dir <dir> --extracted-on <date>`. The
+batch is ATOMIC: every target is preflighted and every artifact built in
+memory first; if any target or the batch itself fails — a hash, a marker, a
+policy, a dispatch line, an inert proof, a duplicate name, region or output
+path — nothing is written. Source paths are confined to the root: absolute
+paths, drive letters, backslashes and `..` segments are refused before any
+read. A pinned target is reachable only through this path; the five earlier
+targets keep their single-target invocations, byte for byte.
+
+The runtime validator (`src/simc/authority-artifact.ts`) keeps the tie-back
+fields — `regionSha256`, `livePtrPolicy`, `dispatchSource`,
+`inertStatements` — when present and refuses a partial or malformed set.
+Every artifact committed before M11-D2-C carries none and validates exactly
+as before.
+
+Enhancement is not a target: its APL is a class method in `sc_shaman.cpp`
+with a C++ prologue and `add_action( this, … )` forms whose meaning depends
+on `action_priority_list.cpp`. It needs its own audit.
+
 ## What the extractor guarantees
 
 **It fails closed.** It is not a general C++ parser and does not pretend to be.

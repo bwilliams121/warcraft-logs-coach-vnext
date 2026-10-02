@@ -30,6 +30,11 @@ export interface AplExtractionTarget {
   readonly spec: { readonly className: string; readonly specName: string };
   readonly defaultOut: string;
   readonly clientVersion?: readonly [number, number, number];
+  /** M11-D2-C: present on PINNED targets only. */
+  readonly pinnedSource?: PinnedTargetRecord["pinnedSource"];
+  readonly livePtrPolicy?: PinnedTargetRecord["livePtrPolicy"];
+  readonly dispatch?: PinnedTargetRecord["dispatch"];
+  readonly inertStatements?: PinnedTargetRecord["inertStatements"];
   readonly requiredFacts: {
     readonly kind: string;
     readonly entryListName: string;
@@ -83,6 +88,13 @@ export interface ExtractedRegion {
   readonly lists: readonly ExtractedList[];
   readonly guards: readonly unknown[];
   readonly regionProvenance: ExtractedRegionProvenance;
+  /** SHA-256 of the region lines, marker or selector lines included, LF-joined (M11-D2-C). */
+  readonly regionSha256: string;
+  readonly inertStatements?: readonly {
+    readonly sourceLine: number;
+    readonly statement: string;
+    readonly identifier: string;
+  }[];
 }
 
 export class ExtractionError extends Error {}
@@ -108,3 +120,113 @@ export function verifyRequiredFacts(
   artifact: { readonly entryListName: string; readonly lists: readonly ExtractedList[] },
   target: AplExtractionTarget,
 ): readonly string[];
+
+// ---------------------------------------------------------------------------
+// M11-D2-C: pinned targets and the atomic batch preflight
+// ---------------------------------------------------------------------------
+
+/** One pinned source file: its path under the source root, exact length and SHA-256. */
+export interface PinnedSourceFile {
+  readonly sourcePath: string;
+  readonly sha256: string;
+  readonly byteLength: number;
+}
+
+export type LivePtrPolicyKind = "NO_PTR_REGION" | "PTR_MARKERS_EMPTY" | "PTR_BODY_IDENTICAL";
+
+export interface PinnedTargetRecord {
+  readonly pinnedSource: PinnedSourceFile & { readonly commitSha: string; readonly regionSha256: string };
+  readonly livePtrPolicy: {
+    readonly kind: LivePtrPolicyKind;
+    readonly ptrRegionStart: string;
+    readonly ptrRegionEnd: string;
+    readonly ptrFunctionHeader: string;
+  };
+  readonly dispatch: PinnedSourceFile & {
+    readonly functionHeader: string;
+    readonly sequence: readonly string[];
+  };
+  readonly inertStatements?: readonly {
+    readonly statement: string;
+    readonly identifier: string;
+    readonly reason: string;
+    readonly proofs: readonly (PinnedSourceFile & {
+      readonly checks: readonly (
+        | {
+            readonly kind: "FUNCTION_BODY_SHA256";
+            readonly functionHeader: string;
+            readonly bodySha256: string;
+          }
+        | { readonly kind: "LINE_EXACTLY_ONCE"; readonly line: string }
+        | { readonly kind: "TOKEN_ABSENT"; readonly token: string }
+      )[];
+    })[];
+  }[];
+}
+
+export type PinnedExtractionTarget = AplExtractionTarget & PinnedTargetRecord;
+
+/** Reads one source-root-relative path: its bytes, or `null` when absent. Throws ExtractionError on a refused path. */
+export type SourceReader = (relativePath: string) => Uint8Array | null;
+
+export interface TargetPreflight {
+  readonly targetName: string;
+  readonly ok: boolean;
+  readonly problems: readonly string[];
+  readonly sourcePath: string | null;
+  readonly sourceSha256: string | null;
+  readonly sourceByteLength: number | null;
+  readonly regionSha256: string | null;
+  readonly livePtrPolicy: LivePtrPolicyKind | null;
+  readonly dispatchSourcePath: string | null;
+  readonly inertStatements: number;
+  readonly lists: number;
+  readonly actions: number;
+  readonly artifact: Record<string, unknown> | null;
+  readonly outputPath?: string | null;
+}
+
+export interface BatchPreflight {
+  readonly ok: boolean;
+  readonly problems: readonly string[];
+  readonly results: readonly TargetPreflight[];
+}
+
+export const PINNED_SIMC_COMMIT: string;
+export const LIVE_PTR_POLICIES: readonly LivePtrPolicyKind[];
+
+export function confinedSourcePath(sourceRoot: string, relativePath: string): string;
+export function sourceRootReader(sourceRoot: string): SourceReader;
+export function validatePinnedRecord(targetName: string, target: AplExtractionTarget): readonly string[];
+export function verifyLivePtrPolicy(
+  lines: readonly string[],
+  dispatchText: string,
+  target: PinnedExtractionTarget,
+): void;
+export function verifyDispatch(dispatchText: string, target: PinnedExtractionTarget): void;
+export function preflightTarget(input: {
+  readonly targetName: string;
+  readonly target: AplExtractionTarget | undefined;
+  readonly read: SourceReader;
+  readonly sha: string | null;
+  readonly extractedOn: string;
+  readonly commitDate: string;
+  readonly branch: string;
+}): TargetPreflight;
+export function outputPathOf(target: AplExtractionTarget, outDir?: string): string;
+export function preflightBatch(input: {
+  readonly targetNames: readonly string[];
+  readonly targets?: Readonly<Record<string, AplExtractionTarget>>;
+  readonly read: SourceReader;
+  readonly sha: string | null;
+  readonly extractedOn: string;
+  readonly commitDate: string;
+  readonly branch: string;
+  readonly outDir?: string;
+}): BatchPreflight;
+export function batchReport(batch: BatchPreflight): {
+  readonly ok: boolean;
+  readonly problems: readonly string[];
+  readonly targets: readonly Omit<TargetPreflight, "artifact">[];
+};
+export function writeBatch(batch: BatchPreflight): readonly string[];
