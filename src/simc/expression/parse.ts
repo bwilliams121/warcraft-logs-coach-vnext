@@ -246,6 +246,9 @@ const COOLDOWN_REMAINS = /^cooldown\.([A-Za-z_][A-Za-z0-9_]*)\.remains$/;
  */
 const TALENT = /^talent\.([A-Za-z_][A-Za-z0-9_]*)$/;
 
+/** `variable.<name>`, one dot-free name (M11-D3-C2). Consulted AFTER the built-ins and the vocabulary. */
+const VARIABLE_READ = /^variable\.([A-Za-z_][A-Za-z0-9_]*)$/;
+
 /**
  * The built-in identifier reading, or `null` when the subset does not contain
  * `raw`.
@@ -362,14 +365,22 @@ function parseIdentifier(cursor: Cursor): ExpressionNode {
     };
   }
 
+  // `variable.<name>` (M11-D3-C2): a read of the player's stored variable, for
+  // a name neither a built-in nor the vocabulary claimed — so a declared
+  // `variable.<name>` stays the specialization's, and no vocabulary can be
+  // refused for shadowing it. Exactly one dot-free name: `variable.` is a
+  // namespace of variables, not of properties.
+  const variable = VARIABLE_READ.exec(raw);
+  if (variable?.[1] !== undefined) return { kind: "VARIABLE_READ", name: variable[1].toLowerCase() };
+
   // Everything else is refused. `spell_targets.y`, `buff.x.duration`,
   // `debuff.x.remains`, `debuff.x.react`,
-  // `energy.regen_combined`, `talent.x.rank`, `variable.trinket_sync_slot`,
+  // `energy.regen_combined`, `talent.x.rank`,
   // `stealthed.all`, `dot.y.remains`, `dot.y.pmultiplier`, `cooldown.y.ready`
   // and `cooldown.y.duration` all land here. Note that `energy.pct` matching
   // exactly does NOT make `energy.` a supported namespace; the same holds for
-  // `stealthed.`, `talent.` and `variable.` (M5-C2) and for the `dot.` and
-  // `cooldown.` namespaces opened by ONE property each in M5-C3c1.
+  // `stealthed.` and `talent.` (M5-C2) and for the `dot.` and `cooldown.`
+  // namespaces opened by ONE property each in M5-C3c1.
   throw new ParseError("UNSUPPORTED_IDENTIFIER", raw, start);
 }
 

@@ -4599,6 +4599,52 @@ scopes (`collectAtoms` walks both). B1 finiteness proves an extremum only when
 BOTH operands are proven, with bound max(|a|, |b|). No other operator, no unary
 minus and no function was opened.
 
+*Since M11-D3-C2* the nested scan EXECUTES `variable` lines
+(`src/simc/variable-execution.ts`). Pinned: a ready variable line runs inline
+and the scan continues (`player.cpp:14235-14241`); a FALSE `if=` skips it;
+values live on the PLAYER and persist between scans until an iteration reset
+(`player.cpp:6727-6728`). So a read before this scan's assignment sees an
+earlier scan's value — history this project does not have — and reads UNKNOWN,
+never 0 and never the line's `default=`.
+
+- Modelled: `set` (default), `setif`, `reset` — the operations that do not
+  read the stored value. Every other operation, `cycling_variable`, and a line
+  with an option outside `name value op if default condition value_else`
+  (`delay=`, `line_cd=`, …) makes the variable UNKNOWN. A malformed line taints
+  every variable. None of these refuses the scan: an unknown value is not a
+  malformed authority.
+- `variable.<name>` parses as `VARIABLE_READ` — a MAGNITUDE, PLAYER_SCOPED
+  (a stored value), NOT_PROVEN_FINITE — only for a name neither a built-in nor
+  the spec vocabulary claimed. ONE VALUE PER NAME, LATER WRITE WINS: every
+  executed assignment writes the variable, whatever reads it. A read takes
+  (1) this scan's assignment, else (2) the initial value a specialization
+  bound for a `variable.<name>` it declared, else (3) UNKNOWN. A declaration
+  is a way of reading and seeding the variable, never a write suppression.
+  Truth-shaped reads (the built-in `variable.single_target`, a spec's BOOLEAN
+  `variable.<name>`) take an assignment that decides the truth and otherwise
+  stay an enumerated boolean, as an unbound one always has; in a magnitude
+  position the built-in is the generic number read. Assassination's
+  `single_target` (written UNKNOWN: `spell_targets` does not parse) and
+  Retribution's `ds_castable` (written from the same value expression, under
+  the same bindings, its resolver evaluates) read exactly as before.
+  Retribution's `pre_es_wake` is the one spec-SEEDED variable: its only
+  write is `precombat[7] op=reset,default=0`, which is not executed, so
+  the resolver supplies that KNOWN 0 as the initial value — and an in-combat
+  write, were the APL to gain one, would win. There is NO immutable
+  variable: built-in syntax is a read representation, not frozen state.
+- State: one immutable map per walk. A certain call's assignments carry to
+  the caller; an undecided call's caller reads the JOIN of both worlds; an
+  undecided run's FALSE world continues with the pre-child state. An undecided
+  `if=` joins the assigned value with the value before it (scan, else
+  initial, else UNKNOWN). A name assigned in only one joined world is joined
+  with what the other world reads for it — its initial value, else UNKNOWN —
+  never dropped back to the initial value alone. Joins keep only what holds
+  in both (exact, one-of, a common lower bound, else UNKNOWN). Nothing crosses
+  a first-GCD rescan: every scan starts from the unknown incoming value, so
+  the spec's state key stays the whole cross-scan state.
+- Not executed: the single-list walker (`list-selection.ts`) and the
+  precombat list; their variables read UNKNOWN.
+
 ## Self-Addressing Atoms Need an Acting Action
 
 `remains`, `refreshable` and `pmultiplier` are written bare and mean "the ACTING

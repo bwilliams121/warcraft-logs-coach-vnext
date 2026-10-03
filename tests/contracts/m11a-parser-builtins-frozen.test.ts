@@ -108,8 +108,6 @@ const FROZEN_NON_BUILTINS = Object.freeze([
   "stealthed.all",
   "stealthed.basic",
   "stealthed.mantle",
-  "variable.finish_condition",
-  "variable.trinket_priority",
   "buff.zz_probe_buff.down",
   "buff.zz_probe_buff.duration",
   "buff.zz_probe_buff.max_stack",
@@ -197,6 +195,21 @@ describe("every pattern built-in parses an arbitrary name to its pinned node kin
       expect(parsed.ast.kind).toBe(kind);
       expect((parsed.ast as unknown as Record<string, unknown>)[field]).toBe(name);
     }
+  });
+});
+
+describe("a generic variable read is not a built-in (M11-D3-C2)", () => {
+  // RE-POINTED from the frozen list below. These two were frozen as
+  // identifiers "a later specialization will want, through its vocabulary".
+  // M11-D3-C2 executes the authority's own `variable` lines, so a read of a
+  // variable nobody owns parses as a VARIABLE_READ — and it is STILL not a
+  // built-in, so a specialization can still declare, and then own, either one.
+  it.each(["variable.finish_condition", "variable.trinket_priority"])("%s", (identifier) => {
+    expect(isBuiltinIdentifier(identifier)).toBe(false);
+    const parsed = parseSimcExpression(identifier);
+    expect(parsed.ok && parsed.ast.kind).toBe("VARIABLE_READ");
+    // A dotted property of one is still refused.
+    expect(parseSimcExpression(`${identifier}.value`).ok).toBe(false);
   });
 });
 

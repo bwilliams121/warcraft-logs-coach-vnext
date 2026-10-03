@@ -1485,6 +1485,17 @@ extremum operators (M11-D3-C1, tests/unit/m11d3c1-extremum.test.ts):
   finite set / lower bound operands            -> only what holds in every world
   unknown operand                              -> UNKNOWN, never dominated
   scope / finiteness                           -> join of operands / both proven
+variable execution (M11-D3-C2, tests/unit/m11d3c2-variable-execution.test.ts):
+  set / setif / reset                          -> the walk's value; continue
+  read before assignment                       -> UNKNOWN (an earlier scan's value)
+  precedence: scan write > spec initial > UNKNOWN -> the later write wins (A-C, H)
+  declared / built-in name, any shape or seed  -> still written, never suppressed
+  pre-branch write, branch-local overwrite     -> sibling reads pre-branch (D, G)
+  certain / undecided call over an initial     -> caller reads write / join (E, F)
+  truth-shaped read of an undecided write      -> enumerated, as when unbound
+  other ops, cycling, delay=, line_cd=         -> variable UNKNOWN, never a refusal
+  run TRUE world / undecided call / if=        -> isolated / joined / joined
+  undecided, unknown, divergent, unmodelled    -> UNKNOWN, never REJECTED
 ```
 
 Required negative pairs, same premises, different construct:

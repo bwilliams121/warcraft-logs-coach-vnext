@@ -291,7 +291,9 @@ describe("unsupported syntax never enters the truth domain", () => {
     // supported atoms; a talent RANK and every other variable did not, and they
     // keep proving that neither `talent.` nor `variable.` is an open namespace.
     "talent.scent_of_blood.rank>=2",
-    "variable.trinket_sync_slot=1",
+    // RE-POINTED for M11-D3-C2: a generic variable read is a MAGNITUDE now; a
+    // dotted property of one is still refused.
+    "variable.trinket_sync_slot.value=1",
     "stealthed.all",
     // RE-POINTED for M5-C3a. BARE `pmultiplier` and BARE `remains` became
     // recognised atoms — the acting action's own DoT. The DOTTED forms name

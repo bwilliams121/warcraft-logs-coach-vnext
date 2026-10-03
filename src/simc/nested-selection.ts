@@ -127,10 +127,16 @@ import {
   type GateIrrelevance,
   type GateIrrelevanceResolver,
 } from "./action-applicability.js";
-import type { AtomBindings } from "./expression/evaluate.js";
+import {
+  initialScanVariables,
+  joinScanVariables,
+  type AtomBindings,
+  type ScanVariables,
+} from "./expression/evaluate.js";
 import type { TargetIndependenceFailure, TargetIndependentElimination } from "./target-independence.js";
 import { targetingOutcomeFor, type TargetIfVerdict, type TargetingOutcome } from "./target-if.js";
 import { firstGcdPseudoEffectOf, pseudoActionOf, type PseudoActionRecord } from "./pseudo-actions.js";
+import { executeVariableLine, type VariableExecutionRecord } from "./variable-execution.js";
 
 // --------------------------------------------------------------------------
 // Path and trace
@@ -292,6 +298,11 @@ export interface TraversalStep {
    * for every other entry, so no existing step changes shape.
    */
   readonly pseudoAction?: PseudoActionRecord;
+  /**
+   * What a `variable` line did to the scan's variables (M11-D3-C2; see
+   * `variable-execution.ts`). ABSENT for every other entry.
+   */
+  readonly variableExecution?: VariableExecutionRecord;
   /**
    * The gate-irrelevance claim, when one carried this entry past an unreadable
    * condition (M5-D1).
@@ -840,10 +851,12 @@ function stepOf(
     readonly targetingRefusal?: TargetingRefusal | null;
     readonly gateIrrelevance?: GateIrrelevance | null;
     readonly pseudoAction?: PseudoActionRecord | undefined;
+    readonly variableExecution?: VariableExecutionRecord | undefined;
   } = {},
 ): TraversalStep {
   return {
     ...(verdicts.pseudoAction === undefined ? {} : { pseudoAction: verdicts.pseudoAction }),
+    ...(verdicts.variableExecution === undefined ? {} : { variableExecution: verdicts.variableExecution }),
     applicability: verdicts.applicability ?? { kind: "APPLICABLE" },
     usabilityVerdict: verdicts.usabilityVerdict ?? null,
     targetingRefusal: verdicts.targetingRefusal ?? null,
@@ -890,7 +903,32 @@ interface ScanContext {
   readonly gateIrrelevanceFor: GateIrrelevanceResolver;
   /** Every step visited anywhere, in visit order. Accumulated across recursion. */
   readonly steps: TraversalStep[];
+  /**
+   * The generic variables this walk has assigned so far (M11-D3-C2). The ONE
+   * mutable field: every value is immutable, and the walk REASSIGNS it as it
+   * executes `variable` lines and as branches rejoin — so a speculative world
+   * that restores the value it started from leaks nothing into its sibling.
+   */
+  variables: ScanVariables;
 }
+
+/**
+ * The bindings every condition and value in the walk is evaluated under: the
+ * caller's, plus the variables the walk has assigned so far (M11-D3-C2).
+ */
+function bindingsOf(context: ScanContext): AtomBindings {
+  const cached = boundVariables.get(context);
+  if (cached !== undefined && cached.variables === context.variables) return cached.bindings;
+  const bindings: AtomBindings = { ...context.bindings, scanVariables: context.variables };
+  boundVariables.set(context, { variables: context.variables, bindings });
+  return bindings;
+}
+
+/** `bindingsOf`, built once per variable state rather than once per line. */
+const boundVariables = new WeakMap<
+  ScanContext,
+  { readonly variables: ScanVariables; readonly bindings: AtomBindings }
+>();
 
 /**
  * Chooses which obstacle to report when a scan aborts with candidates already
@@ -1076,7 +1114,7 @@ function scanRunDispatch(
   // before.
   const soleTargetIf =
     action.targetIf !== null && action.unsupportedOptions.every((option) => option.optionKey === "target_if");
-  const targeting = soleTargetIf ? targetingOutcomeFor(action, context.bindings) : null;
+  const targeting = soleTargetIf ? targetingOutcomeFor(action, bindingsOf(context)) : null;
   const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
 
   if (targeting?.kind === "ELIMINATED_FOR_EVERY_TARGET") {
@@ -1206,6 +1244,10 @@ function scanRunDispatch(
         };
 
   const runPath = [...path, pathEntryOf(action)];
+  // The child's assignments belong to the TRUE world, which never returns to
+  // the parent (M11-D3-C2). Only the FALSE world continues, with the variables
+  // as they stood before the child ran.
+  const variablesBeforeChild = context.variables;
   const child = scanList(context, target, 0, runPath, nestedStack);
   if (child.kind === "BLOCKED") {
     finishRun("BLOCKED");
@@ -1227,6 +1269,7 @@ function scanRunDispatch(
       return { kind: "BLOCKED", outcome: applyCollapse(context, gateCollapse) };
     }
     finishRun("RUN_GATE_UNDECIDED_MAY_TRANSFER");
+    context.variables = variablesBeforeChild;
     return { ...world, collapse: gateCollapse };
   }
 
@@ -1316,7 +1359,7 @@ function walkList(
   for (const action of lookup.actions) {
     if (action.priorityOrdinal < startOrdinal) continue;
 
-    const gate = evaluateCondition(action, context.bindings);
+    const gate = evaluateCondition(action, bindingsOf(context));
 
     // ---- variable: the one execute-and-continue construct ----
     if (action.entryKind === "VARIABLE_ASSIGNMENT") {
@@ -1324,19 +1367,23 @@ function walkList(
       // its GATE cannot either — a variable that does not get assigned still
       // does not end the scan.
       //
-      // Its VALUE is a different question, and it is handled a layer down rather
-      // than ignored. A later condition reading `variable.single_target` sees an
-      // unresolved BOOLEAN atom and enumerates both worlds; a later condition
-      // reading a variable with no atom at all fails the whole expression at the
-      // parser and blocks there. Either way the value is accounted for
-      // conservatively, so there is nothing for this module to add — and
-      // demanding a concrete value here would block scans that our own epistemic
-      // model is perfectly able to carry forward as unknown.
+      // Its VALUE is executed since M11-D3-C2 (`variable-execution.ts`): a
+      // modelled assignment updates the walk's variables, which every later
+      // condition in this walk reads; an unmodelled one makes the variable
+      // UNKNOWN — never a refusal, because SimulationCraft still executes it.
+      // Every executed assignment writes, whoever else reads or seeds the
+      // variable: the later write wins (`scanAssignedBinding`).
       //
       // `cycling_variable` takes this branch too (M11-D1). Its value is a fold
-      // over every enemy (variable.cpp:369-391), which nothing here computes;
-      // a later read of it is refused or unresolved exactly like any other.
-      context.steps.push(stepOf(action, path, gate, "UNKNOWN", "VARIABLE_EXECUTED_CONTINUE"));
+      // over every enemy (variable.cpp:369-391), which nothing here computes,
+      // so it writes UNKNOWN.
+      const execution = executeVariableLine(action, gate, bindingsOf(context), context.variables);
+      context.variables = execution.state;
+      context.steps.push(
+        stepOf(action, path, gate, "UNKNOWN", "VARIABLE_EXECUTED_CONTINUE", {
+          variableExecution: execution.record,
+        }),
+      );
       continue;
     }
 
@@ -1448,7 +1495,16 @@ function walkList(
       };
 
       const callPath = [...path, pathEntryOf(action)];
+      const variablesBeforeCall = context.variables;
       const child = scanList(context, target, 0, callPath, nestedStack);
+      // Variables are the PLAYER's, so a callee's assignments are still there
+      // when the caller continues (M11-D3-C2). Under an undecided gate the
+      // continuation is either world — entered, or not — so it reads their join.
+      // A continuation exists only where the callee returned nothing, and the
+      // callee's final state is exactly that world's.
+      if (child.kind === "COMPLETED" && !gateIsCertainlyEntered(gate)) {
+        context.variables = joinScanVariables(variablesBeforeCall, context.variables, context.bindings);
+      }
       if (child.kind === "BLOCKED") {
         // An unresolved callee blocks every entry BELOW this call site. Stepping
         // over it to reach something decidable lower down is precisely the
@@ -1515,6 +1571,7 @@ function walkList(
           return callCollapse.outcome;
         }
         finishCall("CALL_GATE_UNDECIDED_MAY_TRANSFER");
+        context.variables = variablesBeforeCall;
         candidates.push(...world.contributed);
         if (world.mayEndEmpty) mayEndEmpty = true;
         continue;
@@ -1624,7 +1681,7 @@ function walkList(
       const soleTargetIf =
         action.unsupportedOptions.length > 0 &&
         action.unsupportedOptions.every((option) => option.optionKey === "target_if");
-      const targeting = soleTargetIf ? targetingOutcomeFor(action, context.bindings) : null;
+      const targeting = soleTargetIf ? targetingOutcomeFor(action, bindingsOf(context)) : null;
       const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
       if (targeting?.kind === "ELIMINATED_FOR_EVERY_TARGET") {
         context.steps.push(
@@ -1734,7 +1791,7 @@ function walkList(
     let targetSelection: TargetingRefusal | null = null;
     if (action.unsupportedOptions.length > 0) {
       const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
-      const targeting = targetingOutcomeFor(action, context.bindings);
+      const targeting = targetingOutcomeFor(action, bindingsOf(context));
 
       if (targeting.kind === "ELIMINATED_FOR_EVERY_TARGET") {
         const elimination = targeting.elimination;
@@ -1977,6 +2034,9 @@ export function resolveOneForegroundScan(input: NestedSelectionInput): OneForegr
     applicabilityFor: input.applicabilityFor ?? allApplicable(),
     gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
     steps,
+    // Every variable starts at its INCOMING value: the previous scan's, which
+    // this project does not have (M11-D3-C2).
+    variables: initialScanVariables(),
   };
 
   const outcome = scanList(context, input.entryListName, boundary.startOrdinal, [], []);
@@ -2052,6 +2112,9 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
     applicabilityFor: input.applicabilityFor ?? allApplicable(),
     gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
     steps,
+    // Every variable starts at its INCOMING value: the previous scan's, which
+    // this project does not have (M11-D3-C2).
+    variables: initialScanVariables(),
   };
 
   const outcome = scanList(context, input.entryListName, boundary.startOrdinal, [], []);

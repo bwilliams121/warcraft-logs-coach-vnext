@@ -390,6 +390,27 @@ converges. SimulationCraft would reach the proven entry in every world; the
 engine answers UNKNOWN at the gate. Sound, and a coverage limit; lifting it
 means teaching D3-A's collapse about pseudo-actions, which B2 did not do.
 
+## After M11-D3-C2: what generic variable execution does not reach
+
+**Raised:** M11-D3-C2 (2026-10-03). Coverage, not soundness: each reads UNKNOWN.
+
+**Precombat variables.** Many Cohort A/B variables are assigned ONLY in the
+precombat list (trinket buffs and priorities for Fury, Arms, Frost DK,
+Devourer and Subtlety; everything Havoc assigns). Pinned, their value
+persists from precombat into combat; nothing here executes the precombat
+list, so every read of them is the unknown incoming value. Executing it needs
+a decision about precombat state (buffs and resources before the pull).
+
+**Values across first-GCD rescans.** SimulationCraft's rescan after a NON_GCD
+action sees the previous scan's assignments; each scan here starts from the
+unknown incoming value instead. Carrying them would put variable values into
+the first-GCD state key.
+
+**Combining operations.** `add`, `sub`, `mul`, `div`, `pow`, `mod`, `min`,
+`max`, `floor`, `ceil` and `cycling_variable` are not modelled. In Cohorts A/B
+only Devourer's `void_ray_count` (`op=add`) is in combat. Vengeance's
+in-combat programme combines `%`, `ceil` and charges and stays out of reach.
+
 ## After M9-C: evidence the corpus still lacks
 
 **Raised:** M9-C closeout (2026-09-15).

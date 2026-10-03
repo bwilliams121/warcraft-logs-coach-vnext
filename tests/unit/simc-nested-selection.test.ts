@@ -585,11 +585,19 @@ describe("variable executes and the scan continues", () => {
     // The epistemic model, end to end: the assignment executes, the value stays
     // unknown, and the later condition reading it enumerates both worlds. Here
     // the two worlds disagree, so the result is honestly unresolved.
+    //
+    // RE-POINTED at the M11-D3-C2 review: this wrote `value=1`, which since
+    // C2 is an exact write the later read sees (the later write wins; see
+    // below). Assassination's real `default[2]` value does not parse, so the
+    // value it writes is still unknown — the case this test exists for.
     const result = traverse(
       [
         {
           listName: "default",
-          actions: ["variable,name=single_target,value=1", "mutilate,if=variable.single_target"],
+          actions: [
+            "variable,name=single_target,value=spell_targets.fan_of_knives=1",
+            "mutilate,if=variable.single_target",
+          ],
         },
       ],
       ["mutilate"],
@@ -601,6 +609,26 @@ describe("variable executes and the scan continues", () => {
     expect(step?.gate.kind).toBe("EVALUATED");
     if (step?.gate.kind !== "EVALUATED") return;
     expect(step.gate.truth).toBe("UNKNOWN_STATE");
+  });
+
+  it("an exact write is what the later read sees, even for the built-in single_target (M11-D3-C2)", () => {
+    const written = (value: number) =>
+      traverse(
+        [
+          {
+            listName: "default",
+            actions: [
+              `variable,name=single_target,value=${String(value)}`,
+              "mutilate,if=variable.single_target",
+            ],
+          },
+        ],
+        ["mutilate"],
+      );
+    const one = written(1);
+    expect(one.kind === "SELECTED" && one.actionToken).toBe("mutilate");
+    // FALSE: nothing else is listed, so the scan selects nothing — never mutilate.
+    expect(written(0).kind).not.toBe("SELECTED");
   });
 });
 

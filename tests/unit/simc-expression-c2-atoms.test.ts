@@ -81,9 +81,11 @@ describe("the namespaces did NOT open", () => {
     "talent.scent_of_blood.rank",
     "talent.scent_of_blood.rank>=2",
     // Other variables are not booleans. `trinket_sync_slot` is compared to 1/2.
-    "variable.trinket_sync_slot",
-    "variable.trinket_sync_slot=1",
-    "variable.base_trinket_condition",
+    // RE-POINTED for M11-D3-C2: `variable.<name>` now reads the stored value
+    // as a MAGNITUDE; a dotted property of one is still refused.
+    "variable.trinket_sync_slot.value",
+    "variable.trinket_sync_slot.value=1",
+    "variable.base_trinket_condition.up",
     // Other stealth scopes denote DIFFERENT masks.
     "stealthed.all",
     "stealthed.basic",

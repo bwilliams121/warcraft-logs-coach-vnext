@@ -501,6 +501,136 @@ export interface AtomBindings {
    * `SPEC_ATOM` node can exist and nothing here is consulted.
    */
   readonly specAtoms?: SpecAtomBindings;
+  /**
+   * The values the CURRENT SCAN has assigned to generic variables (M11-D3-C2).
+   *
+   * Written only by the traversal as it executes `variable` lines; read by
+   * `variable.<name>`. A name the scan has not assigned reads its INCOMING
+   * value, which is the previous scan's — history this project does not have —
+   * so it is UNKNOWN, never zero and never the line's `default=`. Absent, every
+   * generic variable reads UNKNOWN.
+   */
+  readonly scanVariables?: ScanVariables;
+}
+
+/**
+ * The generic variables one scan has assigned so far (M11-D3-C2). Immutable:
+ * every write makes a new value, so a speculative world's writes cannot reach
+ * a sibling.
+ *
+ *   values    name (lower-cased) -> what the scan assigned
+ *   tainted   a variable line nobody could attribute to one name wrote an
+ *             unknown value somewhere: every read is UNKNOWN from here on
+ */
+export interface ScanVariables {
+  readonly values: ReadonlyMap<string, NumericBinding>;
+  readonly tainted: boolean;
+}
+
+/** The state a scan starts in: nothing assigned, every variable at its unknown incoming value. */
+export function initialScanVariables(): ScanVariables {
+  return { values: new Map(), tainted: false };
+}
+
+/** The value `variable.<name>` reads under `bindings`: the precedence below, as one binding. */
+export function scanVariableBinding(bindings: AtomBindings, name: string): NumericBinding {
+  return variableValueBeforeWrite(bindings, name);
+}
+
+/**
+ * What THIS scan has assigned `name`, or `undefined` when no executed line
+ * wrote it (M11-D3-C2). A tainted state counts as an UNKNOWN assignment to
+ * every name.
+ *
+ * THE READ PRECEDENCE, for every read of a variable: (1) this scan's
+ * assignment, when there is one — the later write wins, exactly as
+ * SimulationCraft's one stored value per name; (2) otherwise the initial value
+ * a specialization supplied for a variable it declared; (3) otherwise UNKNOWN.
+ */
+export function scanAssignedBinding(bindings: AtomBindings, name: string): NumericBinding | undefined {
+  const state = bindings.scanVariables;
+  if (state === undefined) return undefined;
+  if (state.tainted) return unknownNumber("STATE_NOT_ESTABLISHED");
+  return state.values.get(name);
+}
+
+/**
+ * The value `variable.<name>` holds just before a line writes it: the
+ * precedence above, as one binding. What an UNDECIDED `if=` joins the new
+ * value with.
+ */
+export function variableValueBeforeWrite(bindings: AtomBindings, name: string): NumericBinding {
+  return scanAssignedBinding(bindings, name) ?? initialVariableValue(bindings, name);
+}
+
+/**
+ * What `variable.<name>` reads when this scan has not assigned it: the
+ * initial value a specialization bound for a variable it declared, else
+ * UNKNOWN (an earlier scan's value, which this project does not carry).
+ */
+export function initialVariableValue(bindings: AtomBindings, name: string): NumericBinding {
+  const value = specAtomValueFor(bindings.specAtoms, `variable.${name}`, null);
+  if (value?.kind === "MAGNITUDE") return value.binding;
+  if (value?.kind === "TRUTH") return knownNumber(value.value ? 1 : 0);
+  return unknownNumber("STATE_NOT_ESTABLISHED");
+}
+
+/** `state` with `name` assigned `value`. */
+export function withScanVariable(state: ScanVariables, name: string, value: NumericBinding): ScanVariables {
+  const values = new Map(state.values);
+  values.set(name, value);
+  return { values, tainted: state.tainted };
+}
+
+/**
+ * One magnitude that is EITHER `left` OR `right` — two worlds rejoining
+ * (M11-D3-C2). Claims only what holds in both:
+ *
+ *     same exact value            that value
+ *     exact / one-of members      one-of the union — each member is a value
+ *                                 one of the two worlds established
+ *     every side bounded below    at least the smaller bound
+ *     anything UNKNOWN            UNKNOWN
+ *
+ * Correlation with other magnitudes is not kept, which only ever withholds a
+ * verdict.
+ */
+export function joinNumericBindings(left: NumericBinding, right: NumericBinding): NumericBinding {
+  if (left.state === "UNKNOWN_NUMBER") return left;
+  if (right.state === "UNKNOWN_NUMBER") return right;
+  const members = (binding: NumericBinding): readonly number[] | null =>
+    binding.state === "KNOWN_NUMBER"
+      ? [binding.value]
+      : binding.state === "ONE_OF_NUMBERS"
+        ? binding.values
+        : null;
+  const a = members(left);
+  const b = members(right);
+  if (a !== null && b !== null) return oneOfNumbers([...a, ...b], "STATE_NOT_ESTABLISHED");
+  const lowest = (binding: NumericBinding, set: readonly number[] | null): number =>
+    binding.state === "BOUNDED_NUMBER" ? binding.atLeast : Math.min(...(set ?? []));
+  return boundedBelowNumber(Math.min(lowest(left, a), lowest(right, b)), "STATE_NOT_ESTABLISHED");
+}
+
+/**
+ * Two worlds' variable states rejoining. A name assigned on only one side is
+ * joined with what the OTHER side reads for it — its initial value
+ * (`initialVariableValue`), else UNKNOWN — so the join is never narrower than
+ * either world. Dropping it instead would let the read fall back to the
+ * initial value alone and ignore the world that wrote it.
+ */
+export function joinScanVariables(
+  left: ScanVariables,
+  right: ScanVariables,
+  bindings: AtomBindings,
+): ScanVariables {
+  if (left === right) return left;
+  const values = new Map<string, NumericBinding>();
+  for (const name of new Set([...left.values.keys(), ...right.values.keys()])) {
+    const either = (state: ScanVariables) => state.values.get(name) ?? initialVariableValue(bindings, name);
+    values.set(name, joinNumericBindings(either(left), either(right)));
+  }
+  return { values, tainted: left.tainted || right.tainted };
 }
 
 export type TraceAtomBinding = "KNOWN" | "BOUNDED" | "ONE_OF" | "UNRESOLVED_BOOLEAN" | "UNKNOWN_NUMBER";
@@ -901,6 +1031,27 @@ function extremumValue(kind: "MAX" | "MIN", left: WorldValue, right: WorldValue)
   return { atLeastValue: Math.min(lower, otherLow) };
 }
 
+/**
+ * The world value a TRUTH-SHAPED variable read takes from an assigned value,
+ * or `null` when that value does not decide the truth (M11-D3-C2).
+ *
+ * A truth-shaped read — the built-in `variable.single_target`, or a
+ * specialization's BOOLEAN `variable.<name>` — has always been an ENUMERATED
+ * boolean when its value was not established. An assignment that decides the
+ * truth (exact, or a set whose members all agree on zero/non-zero) is read as
+ * that value; one that does not keeps the enumeration, which is sound for any
+ * number because truth is one bit.
+ */
+function decidedTruthValue(binding: NumericBinding): WorldValue | null {
+  const value = worldValueOf(binding);
+  if (isExactValue(value)) return value;
+  if (isOneOfValue(value)) {
+    const truths = value.oneOfValues.map((member) => member !== 0);
+    return truths.every((truth) => truth) || truths.every((truth) => !truth) ? value : null;
+  }
+  return null;
+}
+
 /** A canonical world value from established members: one distinct member is that exact number. */
 function oneOfValue(members: readonly number[]): WorldValue {
   const distinct = [...new Set(members)].sort((first, second) => first - second);
@@ -1051,7 +1202,17 @@ function evaluateInWorld(
       // (action.cpp:3832-3842). Warcraft Logs supplies no enemy positional state,
       // so that count is not historically reconstructible. Leaving out the field
       // means no future caller can supply a guess without editing this type.
+      // The SAME variable a `variable,name=single_target` line writes
+      // (M11-D3-C2): this scan's assignment wins when it decides the truth.
+      {
+        const assigned = scanAssignedBinding(bindings, "single_target");
+        const decided = assigned === undefined ? null : decidedTruthValue(assigned);
+        if (decided !== null) return decided;
+      }
       return world.get("variable.single_target") === true ? 1 : 0;
+    case "VARIABLE_READ":
+      // The scan's own assignment, or the unknown incoming value (M11-D3-C2).
+      return worldValueOf(scanVariableBinding(bindings, node.name));
     case "DOT_PMULTIPLIER":
       // NO BINDING FIELD EXISTS, permanently. Reconstructing a snapshot
       // multiplier from Warcraft Logs would mean inferring it from damage
@@ -1062,6 +1223,15 @@ function evaluateInWorld(
       // KEYED BY THE ACTING ACTION. Never a scalar shared across entries.
       return worldValueOf(actingDotRemains(bindings, context));
     case "SPEC_ATOM": {
+      // A declared `variable.<name>` is still the APL's variable: this scan's
+      // assignment wins over the spec's initial value (M11-D3-C2).
+      const assigned = declaredVariableAssignment(bindings, node.identifier);
+      if (assigned !== undefined) {
+        if (node.shape === "NUMERIC") return worldValueOf(assigned);
+        const decided = decidedTruthValue(assigned);
+        if (decided !== null) return decided;
+        return world.get(node.identifier) === true ? 1 : 0;
+      }
       const value = specAtomValueFor(bindings.specAtoms, node.identifier, context.currentActionToken);
       if (value?.kind === "MAGNITUDE") return worldValueOf(value.binding);
       if (value?.kind === "TRUTH") return value.value ? 1 : 0;
@@ -1117,6 +1287,18 @@ function evaluateInWorld(
     case "OR":
       return valueOf(orTruth(truthOf(recurse(node.left)), truthOf(recurse(node.right))));
   }
+}
+
+/** This scan's assignment to a DECLARED `variable.<name>`, or `undefined` (M11-D3-C2). */
+function declaredVariableAssignment(bindings: AtomBindings, identifier: string): NumericBinding | undefined {
+  // Nothing assigned and nothing tainted: no read can differ from the initial
+  // value. Checked first because this runs for every spec atom in every world.
+  const state = bindings.scanVariables;
+  if (state === undefined || (!state.tainted && state.values.size === 0)) return undefined;
+  if (!identifier.startsWith("variable.")) return undefined;
+  const variable = /^variable\.([A-Za-z_][A-Za-z0-9_]*)$/.exec(identifier);
+  const name = variable?.[1];
+  return name === undefined ? undefined : scanAssignedBinding(bindings, name.toLowerCase());
 }
 
 /** The binding of one atom, decided once, before any world is built. */
@@ -1218,6 +1400,23 @@ function resolveAtom(
   // nothing above could have claimed it first.
   const declared = bindings.specAtoms?.vocabulary.lookup(key) ?? null;
   if (declared !== null) {
+    // This scan's assignment first, through the SAME helpers `evaluateInWorld`
+    // uses (M11-D3-C2).
+    const assigned = declaredVariableAssignment(bindings, key);
+    if (assigned !== undefined) {
+      if (shape === "NUMERIC" || decidedTruthValue(assigned) !== null) return fromBinding(assigned);
+      return {
+        trace: {
+          key,
+          shape,
+          binding: "UNRESOLVED_BOOLEAN",
+          value: null,
+          atLeast: null,
+          unknownNumberReason: null,
+        },
+        enumerate: true,
+      };
+    }
     const value = specAtomValueFor(bindings.specAtoms, key, context.currentActionToken);
     if (value?.kind === "MAGNITUDE") return fromBinding(value.binding);
     if (value?.kind === "TRUTH") return known(value.value ? 1 : 0);
@@ -1237,6 +1436,14 @@ function resolveAtom(
       enumerate: true,
     };
   }
+
+  // A generic variable read (M11-D3-C2). NUMERIC, so never enumerated; the
+  // built-in `variable.single_target` is BOOLEAN and is not caught here, and
+  // a declared `variable.<name>` was answered above.
+  const variableRead = /^variable\.([a-z_][a-z0-9_]*)$/.exec(key);
+  const variableName = variableRead?.[1];
+  if (variableName !== undefined && shape === "NUMERIC")
+    return fromBinding(scanVariableBinding(bindings, variableName));
 
   const stack = /^buff\.(.+)\.stack$/.exec(key);
   const stackName = stack?.[1];
@@ -1322,8 +1529,13 @@ function resolveAtom(
       : (bindings.knownTalents ?? []).find((entry) => entry.name === talentName);
   if (knownTalent !== undefined) return known(knownTalent.taken ? 1 : 0);
 
-  // `variable.single_target` deliberately never lands here as KNOWN: it has no
-  // binding field, so it always enumerates.
+  // `variable.single_target` has no binding field. Since M11-D3-C2 it reads
+  // this scan's assignment when that decides its truth; otherwise it
+  // enumerates, exactly as before.
+  if (key === "variable.single_target") {
+    const assigned = scanAssignedBinding(bindings, "single_target");
+    if (assigned !== undefined && decidedTruthValue(assigned) !== null) return fromBinding(assigned);
+  }
 
   return {
     trace: {
@@ -1367,6 +1579,45 @@ function aggregateRuleFor(
  * that produced the aggregate, so a finding can answer "why did it tell me
  * this?" without re-running anything.
  */
+/**
+ * The MAGNITUDE an expression takes, across every world of its unresolved
+ * truth atoms (M11-D3-C2) — what a `variable` line's `value=` assigns.
+ *
+ * SimulationCraft evaluates a value expression to one double; here each world
+ * yields one value and the worlds rejoin through `joinNumericBindings`, so
+ * the result claims only what every world agrees on. More unresolved atoms
+ * than `MAX_UNRESOLVED_ATOMS` is UNKNOWN — never a refusal: an unknown value
+ * is not a malformed one.
+ */
+export function evaluateSimcMagnitude(
+  ast: ExpressionNode,
+  bindings: AtomBindings,
+  context: ExpressionContext = NO_ACTING_ACTION,
+): NumericBinding {
+  const enumerated: string[] = [];
+  for (const atom of collectAtoms(ast)) {
+    if (resolveAtom(atom.key, atom.shape, bindings, context).enumerate) enumerated.push(atom.key);
+  }
+  if (enumerated.length > MAX_UNRESOLVED_ATOMS) return unknownNumber("STATE_NOT_ESTABLISHED");
+
+  let joined: NumericBinding | null = null;
+  for (let mask = 0; mask < 2 ** enumerated.length; mask += 1) {
+    const world = new Map<string, boolean>();
+    enumerated.forEach((key, bit) => world.set(key, (mask & (1 << bit)) !== 0));
+    const value = bindingOfWorldValue(evaluateInWorld(ast, bindings, world, context));
+    joined = joined === null ? value : joinNumericBindings(joined, value);
+  }
+  return joined ?? unknownNumber("STATE_NOT_ESTABLISHED");
+}
+
+/** A world value as a binding: the inverse of `worldValueOf`. */
+function bindingOfWorldValue(value: WorldValue): NumericBinding {
+  if (isUnknownValue(value)) return unknownNumber("STATE_NOT_ESTABLISHED");
+  if (isExactValue(value)) return knownNumber(value);
+  if (isBoundedValue(value)) return boundedBelowNumber(value.atLeastValue, "STATE_NOT_ESTABLISHED");
+  return oneOfNumbers(value.oneOfValues, "STATE_NOT_ESTABLISHED");
+}
+
 export function evaluateSimcExpression(
   ast: ExpressionNode,
   expressionRaw: string,

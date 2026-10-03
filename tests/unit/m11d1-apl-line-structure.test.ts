@@ -455,12 +455,16 @@ describe("the single-list walker never returns a variable entry (M11-D1C)", () =
   });
 
   it("invents no value: a later read is refused, or stays unresolved and blocks the lower action", () => {
-    // Undeclared: the reading line's condition is refused whole.
-    const refused = selectIn([AFFLICTION_MIN_AGONY, "drain_soul,if=variable.min_agony<5", "shadow_bolt"]);
-    expect(refused.kind).toBe("INDETERMINATE");
-    if (refused.kind === "INDETERMINATE") {
-      expect(refused.blocker).toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");
-      expect(refused.blockedBy?.actionToken).toBe("drain_soul");
+    // Undeclared: RE-POINTED for M11-D3-C2. The read parses as a generic
+    // variable, and this single-list walker executes no variable line, so it
+    // reads the UNKNOWN incoming value — Drain Soul stays possible, exactly as
+    // when declared but unbound, and Shadow Bolt is not selected over it.
+    const undeclared = selectIn([AFFLICTION_MIN_AGONY, "drain_soul,if=variable.min_agony<5", "shadow_bolt"]);
+    expect(undeclared.kind).toBe("INDETERMINATE");
+    if (undeclared.kind === "INDETERMINATE") {
+      expect(undeclared.blocker).toBe("COMPETING_POSSIBLE_ACTION");
+      expect(undeclared.lines[0]?.actionToken).toBe("drain_soul");
+      expect(undeclared.lines[0]?.outcome).toBe("POSSIBLE");
     }
     // Declared but unbound: UNKNOWN, so Drain Soul stays possible and Shadow
     // Bolt is not selected over it.

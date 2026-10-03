@@ -167,6 +167,21 @@ export type ExpressionNode =
    */
   | { readonly kind: "VARIABLE_SINGLE_TARGET" }
   /**
+   * `variable.<name>` read as SimulationCraft stores it (M11-D3-C2): the
+   * player's variable `current_value_` (engine/player/player.cpp:11936-11968).
+   * MAGNITUDE-shaped and PLAYER_SCOPED — a stored value, the same whichever
+   * enemy the reading action is aimed at.
+   *
+   * Produced for a name nothing else PARSES: `variable.single_target` keeps
+   * its built-in truth-shaped node (in magnitude positions it becomes this
+   * node) and a specialization-declared `variable.<name>` stays a SPEC_ATOM.
+   * All three read the SAME variable, and this scan's assignment wins over any
+   * initial value (`scanAssignedBinding`).
+   * The name is lower-cased: SimulationCraft matches variable names
+   * case-insensitively (`util::str_compare_ci`).
+   */
+  | { readonly kind: "VARIABLE_READ"; readonly name: string }
+  /**
    * `pmultiplier` — MAGNITUDE-shaped, and permanently unbindable.
    *
    * SimulationCraft's `dot.<x>.pmultiplier` returns
@@ -393,7 +408,12 @@ export function reactStackAtomKey(buffName: string): string {
  * built-in whose SimulationCraft value is not 0/1: there it is a stack count.
  */
 export function asMagnitudeOperand(node: ExpressionNode): ExpressionNode {
-  return node.kind === "BUFF_REACT" ? { kind: "BUFF_REACT_STACK", buffName: node.buffName } : node;
+  if (node.kind === "BUFF_REACT") return { kind: "BUFF_REACT_STACK", buffName: node.buffName };
+  // The built-in `variable.single_target` is a TRUTH-shaped read; where a
+  // magnitude is read it is the stored number, so it becomes the generic read
+  // of the same variable (M11-D3-C2).
+  if (node.kind === "VARIABLE_SINGLE_TARGET") return { kind: "VARIABLE_READ", name: "single_target" };
+  return node;
 }
 
 /** The atom a node denotes, or `null` when the node is not an atom. */
@@ -443,6 +463,10 @@ export function atomOf(node: ExpressionNode): AtomDescriptor | null {
     case "VARIABLE_SINGLE_TARGET":
       // A count of the whole enemy list, not a property of one enemy.
       return { key: "variable.single_target", shape: "BOOLEAN", scope: "PLAYER_SCOPED" };
+    case "VARIABLE_READ":
+      // A stored value: whichever enemy the reading action targets, it reads
+      // the same number (M11-D3-C2).
+      return { key: `variable.${node.name}`, shape: "NUMERIC", scope: "PLAYER_SCOPED" };
     case "DOT_PMULTIPLIER":
       return { key: "pmultiplier", shape: "NUMERIC", scope: "TARGET_SCOPED" };
     case "DOT_REMAINS":

@@ -259,8 +259,11 @@ describe("expression families", () => {
       "main_hand.dagger": 1,
       "spell_targets.fan_of_knives": 6,
       "talent.scent_of_blood.rank": 1,
-      "variable.base_trinket_condition": 1,
-      "variable.trinket_sync_slot": 2,
+      // DECIDED at M11-D3-C2: generic `variable.<name>` reads parse. `items[2]`
+      // now parses whole (its variable reads the value `items[0]` assigns);
+      // `items[4]`/`items[5]` now stop at their trinket readiness instead.
+      "trinket.1.cooldown.ready": 1,
+      "trinket.2.cooldown.ready": 1,
     });
   });
 

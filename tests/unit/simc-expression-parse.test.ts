@@ -133,8 +133,11 @@ describe("everything outside the subset is refused whole", () => {
     // variable did. `variable.trinket_sync_slot` (pinned `items` lines 4-5) is
     // compared against 1 and 2 and is therefore NUMERIC — a generic
     // `variable.<name>` boolean rule would have read it as a truth.
-    ["variable.trinket_sync_slot=1", "UNSUPPORTED_IDENTIFIER"],
-    ["variable.base_trinket_condition", "UNSUPPORTED_IDENTIFIER"],
+    // RE-POINTED for M11-D3-C2: `variable.<name>` reads the stored value as a
+    // MAGNITUDE (VARIABLE_READ) — never a truth rule. A PROPERTY of a variable
+    // is still refused: `variable.` names variables, it is not a namespace.
+    ["variable.trinket_sync_slot.value=1", "UNSUPPORTED_IDENTIFIER"],
+    ["variable.base_trinket_condition.up", "UNSUPPORTED_IDENTIFIER"],
     // RE-POINTED for M5-C2. `stealthed.rogue` became supported; the other
     // `stealthed.*` scopes denote DIFFERENT masks and must not fold into it.
     ["stealthed.all", "UNSUPPORTED_IDENTIFIER"],
