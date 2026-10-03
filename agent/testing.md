@@ -1471,6 +1471,14 @@ target_if (M11-D3-B1, tests/unit/m11d3b1-target-if.test.ts):
   (even with a finite score), malformed option
   run + refused target_if, worlds disagree     -> stop AT the run line
   ignorable target_if                          -> never the attributed class
+retarget pseudo-actions (M11-D3-B2, tests/unit/m11d3b2-retarget.test.ts):
+  retarget_auto_attack (if/target_if/line_cd only, no prev. atom)
+                                               -> POSSIBLE at most; its world
+                                                  converges; never the obstacle
+  retarget, even with B1-ignorable readiness   -> selected by the scan, refused
+                                                  by the first-GCD query
+  FIRST, malformed, target-dependent if=        -> UNKNOWN, never REJECTED
+  proven FALSE                                 -> eliminated
 ```
 
 Required negative pairs, same premises, different construct:

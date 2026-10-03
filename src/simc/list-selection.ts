@@ -71,6 +71,7 @@
 import type { AplAction, AplAuthority } from "./apl-authority.js";
 import { parseSimcExpression, type ParseFailureReason } from "./expression/parse.js";
 import { targetingOutcomeFor } from "./target-if.js";
+import { pseudoActionOf } from "./pseudo-actions.js";
 import {
   actingAction,
   evaluateSimcExpression,
@@ -410,7 +411,14 @@ export function selectWithinList(
     }
 
     const usability = usabilityFor(action);
-    const outcome = outcomeOf(truthOfCondition(condition), usability);
+    const ordinary = outcomeOf(truthOfCondition(condition), usability);
+    // `retarget_auto_attack` is never proven to fire: its pinned readiness also
+    // needs an auto attack aimed at a different enemy, which nothing here can
+    // know (M11-D3-B2, `pseudo-actions.ts`).
+    const outcome =
+      ordinary === "DEFINITE_WINNER" && pseudoActionOf(action.actionToken) === "RETARGET_AUTO_ATTACK"
+        ? "POSSIBLE"
+        : ordinary;
     const line: LineEvaluation = {
       listName: action.listName,
       priorityOrdinal: action.priorityOrdinal,

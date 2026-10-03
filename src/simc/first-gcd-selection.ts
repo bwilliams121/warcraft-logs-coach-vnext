@@ -836,6 +836,21 @@ export function firstGcdSelectionAcrossRescans<TState>(
     const results: BranchResult[] = [];
 
     for (const candidate of resolution.candidates) {
+      if (candidate.step.pseudoAction?.firstGcdEffect.kind === "NO_FIRST_GCD_EFFECT") {
+        // M11-D3-B2. A `retarget_auto_attack` whose firing nothing before the
+        // next selection can observe (`pseudo-actions.ts`): it fires at zero
+        // time, the next scan sees the same state, and it is no longer ready
+        // — so that world IS the continuation, which the other worlds here
+        // already cover. Exploring it separately would only rescan this same
+        // state; it is recorded, not explored.
+        branches.push({
+          label: "this auto-attack retarget fires; its world converges with the continuation",
+          entry: candidateEntry(candidate),
+          node: null,
+          outcome: "CONVERGES_WITH_CONTINUATION",
+        });
+        continue;
+      }
       const branch = takeCandidate(candidate, state, prefix, nextOnPath);
       results.push(branch);
       branches.push({
@@ -894,6 +909,27 @@ export function firstGcdSelectionAcrossRescans<TState>(
       branches: [],
       outcome: "",
     };
+    // M11-D3-B2. A retarget pseudo-action is zero-time and NON_GCD by its pinned
+    // semantics, whatever a spec's lane data says, and executing it is what
+    // matters: `retarget` moves every later target-scoped read onto an enemy
+    // nobody identified, and an auto-attack retarget not proven irrelevant may
+    // be observed. Neither is applied; both fail closed here.
+    const pseudoAction = candidate.step.pseudoAction;
+    if (pseudoAction !== undefined) {
+      return {
+        kind: "UNKNOWN",
+        blocker: "TRANSITION_UNSUPPORTED",
+        scanBlocker: null,
+        blockedAt: candidate.step,
+        detail:
+          pseudoAction.firstGcdEffect.kind === "TARGET_IDENTITY_REQUIRED"
+            ? "retarget moves the player and every action onto the enemy its target_if chose; which enemy " +
+              "that is, is not modelled, so the scans that follow cannot be evaluated"
+            : "an auto-attack retarget fired whose effect on the scans that follow is not proven irrelevant",
+        trace: { ...emptyTrace, outcome: "UNKNOWN TRANSITION_UNSUPPORTED" },
+      };
+    }
+
     const lane = input.laneFor(candidate.step);
 
     if (lane === "UNKNOWN_LANE") {

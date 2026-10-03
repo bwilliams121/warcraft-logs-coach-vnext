@@ -359,6 +359,37 @@ historical window. `resourceHistoryAt` currently protects Blood's production
 path, but the generic window helper needs an explicit fail-closed ownership
 rule before broader resource-history consumers rely on it.
 
+## After M11-D3-B: target selection diagnostics and coverage limits
+
+**Raised:** M11-D3-B1 and M11-D3-B2 (2026-10-02). None changes a current
+public decision; none is a soundness defect — each is attribution precision
+or coverage.
+
+**Whole-line blocker classification for refused `target_if` lines.**
+`decision-coverage.ts` classifies a blocked line by permanent-atom markers
+over its WHOLE verbatim text, and `time_to_die` precedes `target_if` in
+`PERMANENT_ATOM_MARKERS`. So a REFUSED `target_if` line whose score is
+`target.time_to_die` (every Windwalker MIN/MAX line) classifies as
+PREDICTIVE_STATE, although target selection is what is missing
+(TARGETING_NOT_MODELLED). This predates B1; B1 only excluded the `target_if`
+text when target choice was proven IGNORABLE. Settle the precedence — or
+classify a refused line by its refusal reason — before a Windwalker-shaped
+authority becomes public.
+
+**`retarget` and the B1 NON_GCD guard classify as OTHER.** Both fail closed
+with the first-GCD blocker `TRANSITION_UNSUPPORTED`, which `classifyBlocker`
+maps to OTHER; the missing thing is the chosen enemy's identity, which reads
+more truthfully as TARGETING_NOT_MODELLED. A classification change, not a
+semantic one.
+
+**D3-A collapses before the first-GCD query can drop an auto-attack
+retarget.** A run child offering "`retarget_auto_attack`, or a proven entry"
+is AMBIGUOUS to one scan, and D3-A stops at the gate without recording the
+explored worlds, so the first-GCD query never sees that the retarget's world
+converges. SimulationCraft would reach the proven entry in every world; the
+engine answers UNKNOWN at the gate. Sound, and a coverage limit; lifting it
+means teaching D3-A's collapse about pseudo-actions, which B2 did not do.
+
 ## After M9-C: evidence the corpus still lacks
 
 **Raised:** M9-C closeout (2026-09-15).

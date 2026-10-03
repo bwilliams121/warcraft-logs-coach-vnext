@@ -4557,6 +4557,28 @@ malformed one is refused there. On a run, a refused but well-formed `target_if`
 with a readable `if=` is explored as an undecided gate whose stop stays at the
 line (`UNSUPPORTED_ACTION_OPTION`), under D3-A's collapse rule.
 
+*Since M11-D3-B2* the two retarget pseudo-actions have their own pinned
+semantics (`src/simc/pseudo-actions.ts`, player.cpp:10820-10883), and they are
+NOT one abstraction. `retarget_auto_attack` is ready only when an auto attack
+is aimed elsewhere than the target it chose, and executing it moves only the
+auto attacks; `retarget` has ordinary readiness, and executing it sets
+`player->target` and re-aims every player and pet action. Both are zero-time,
+zero-GCD, and the next selection follows at the same timestamp with no event
+in between (event order is `(time, id)`, event_manager.cpp:114-178). For the
+first GCD:
+
+- `retarget_auto_attack` is SAFE TO IGNORE when its line carries only `if`,
+  `target_if` and `line_cd` and the vocabulary declares no `prev.` atom — the
+  only zero-time reader of what it changes. It is POSSIBLE at most in one scan,
+  its world is dropped in the first-GCD query because it converges with the
+  continuation, and it is never named as the earliest obstacle;
+- `retarget` is TARGET IDENTITY REQUIRED: the one scan returns it honestly,
+  and the first-GCD query refuses to execute it (`TRANSITION_UNSUPPORTED`),
+  even when B1 proves its readiness target-independent. Readiness independence
+  is not side-effect independence.
+
+Neither the B1 NON_GCD guard nor any target_if rule was relaxed.
+
 ## Self-Addressing Atoms Need an Acting Action
 
 `remains`, `refreshable` and `pmultiplier` are written bare and mean "the ACTING

@@ -130,6 +130,7 @@ import {
 import type { AtomBindings } from "./expression/evaluate.js";
 import type { TargetIndependenceFailure, TargetIndependentElimination } from "./target-independence.js";
 import { targetingOutcomeFor, type TargetIfVerdict, type TargetingOutcome } from "./target-if.js";
+import { firstGcdPseudoEffectOf, pseudoActionOf, type PseudoActionRecord } from "./pseudo-actions.js";
 
 // --------------------------------------------------------------------------
 // Path and trace
@@ -285,6 +286,12 @@ export interface TraversalStep {
    * conjunct settled it.
    */
   readonly targetingRefusal: TargetingRefusal | null;
+  /**
+   * The retarget pseudo-action this entry is, and what its firing means for
+   * the first GCD (M11-D3-B2; see `pseudo-actions.ts`). ABSENT — not `null` —
+   * for every other entry, so no existing step changes shape.
+   */
+  readonly pseudoAction?: PseudoActionRecord;
   /**
    * The gate-irrelevance claim, when one carried this entry past an unreadable
    * condition (M5-D1).
@@ -832,9 +839,11 @@ function stepOf(
     readonly usabilityVerdict?: ActionUsabilityVerdict | null;
     readonly targetingRefusal?: TargetingRefusal | null;
     readonly gateIrrelevance?: GateIrrelevance | null;
+    readonly pseudoAction?: PseudoActionRecord | undefined;
   } = {},
 ): TraversalStep {
   return {
+    ...(verdicts.pseudoAction === undefined ? {} : { pseudoAction: verdicts.pseudoAction }),
     applicability: verdicts.applicability ?? { kind: "APPLICABLE" },
     usabilityVerdict: verdicts.usabilityVerdict ?? null,
     targetingRefusal: verdicts.targetingRefusal ?? null,
@@ -903,9 +912,17 @@ interface ScanContext {
  *
  * This is `list-selection`'s earliest-blocker rule applied across an abort
  * boundary rather than only within a completed scan.
+ *
+ * One kind of candidate is never the obstacle (M11-D3-B2): a
+ * `retarget_auto_attack` proven to have no first-GCD effect. Whether it fires
+ * changes nothing the first GCD depends on (`pseudo-actions.ts`), so naming it
+ * would send a reader to a line that resolving cannot help; the obstacle is
+ * the next candidate, or the abort itself.
  */
 function earliestObstacle(candidates: readonly Candidate[], blocked: BlockedScan): BlockedScan {
-  const earliest = candidates[0];
+  const earliest = candidates.find(
+    (candidate) => candidate.step.pseudoAction?.firstGcdEffect.kind !== "NO_FIRST_GCD_EFFECT",
+  );
   if (earliest === undefined) return blocked;
   return {
     kind: "BLOCKED",
@@ -1578,6 +1595,75 @@ function walkList(
       });
     }
 
+    // ---- retarget pseudo-actions (M11-D3-B2) ----
+    //
+    // `retarget` and `retarget_auto_attack` are core SimulationCraft actions
+    // with their own pinned semantics (`pseudo-actions.ts`). Both are walked
+    // as the ordinary entries they are for this ONE scan — the scan answers
+    // which action it returns — and carry a record of what their firing means
+    // for the first GCD, which `firstGcdSelectionAcrossRescans` acts on.
+    const pseudoKind = pseudoActionOf(action.actionToken);
+    const pseudoAction: PseudoActionRecord | undefined =
+      pseudoKind === null
+        ? undefined
+        : { kind: pseudoKind, firstGcdEffect: firstGcdPseudoEffectOf(action, pseudoKind, context.bindings) };
+
+    if (
+      pseudoAction?.kind === "RETARGET_AUTO_ATTACK" &&
+      pseudoAction.firstGcdEffect.kind === "NO_FIRST_GCD_EFFECT" &&
+      !isMalformedAuthorityLine(action) &&
+      action.targetIf?.kind !== "MALFORMED"
+    ) {
+      // Its readiness ends with "an auto attack's target differs from the one
+      // this action chose" — auto-attack state and target identity this
+      // project never has — so it is POSSIBLE at most, never proven to fire.
+      // And since its firing cannot change the first GCD, nothing about its
+      // readiness needs to be read: its applicability, usability, `line_cd`
+      // and an unreadable condition change nothing. Only a PROVEN-false
+      // condition is used, to record that it cannot fire.
+      const soleTargetIf =
+        action.unsupportedOptions.length > 0 &&
+        action.unsupportedOptions.every((option) => option.optionKey === "target_if");
+      const targeting = soleTargetIf ? targetingOutcomeFor(action, context.bindings) : null;
+      const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
+      if (targeting?.kind === "ELIMINATED_FOR_EVERY_TARGET") {
+        context.steps.push(
+          stepOf(
+            action,
+            path,
+            { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+            "UNKNOWN",
+            "TARGET_INDEPENDENT_ELIMINATION_CONTINUE",
+            {
+              targetingRefusal: {
+                kind: "ELIMINATED_FOR_EVERY_TARGET",
+                optionKeys,
+                elimination: targeting.elimination,
+              },
+              pseudoAction,
+            },
+          ),
+        );
+        continue;
+      }
+      const readGate = action.unsupportedOptions.length === 0;
+      if (readGate && gateIsCertainlyNotEntered(gate)) {
+        context.steps.push(stepOf(action, path, gate, "UNKNOWN", "ELIMINATED_CONTINUE", { pseudoAction }));
+        continue;
+      }
+      const step = stepOf(
+        action,
+        path,
+        readGate ? gate : { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+        "UNKNOWN",
+        "MAY_SELECT",
+        { pseudoAction },
+      );
+      context.steps.push(step);
+      candidates.push({ identity: action.actionToken, step, definite: false });
+      continue;
+    }
+
     // ---- applicability, then usability, then the condition ----
     //
     // This ORDER is the pinned one, not a convenience. `select_action` skips a
@@ -1708,7 +1794,7 @@ function walkList(
           { kind: "NOT_EVALUATED", why: "PROVEN_UNUSABLE" },
           "PROVEN_UNUSABLE",
           "PROVEN_UNUSABLE_CONTINUE",
-          { applicability, usabilityVerdict: verdict, targetingRefusal: targetSelection },
+          { applicability, usabilityVerdict: verdict, targetingRefusal: targetSelection, pseudoAction },
         ),
       );
       continue;
@@ -1730,6 +1816,7 @@ function walkList(
           usabilityVerdict: verdict,
           gateIrrelevance: irrelevance,
           targetingRefusal: targetSelection,
+          pseudoAction,
         });
         context.steps.push(step);
         candidates.push({ identity: action.actionToken, step, definite: false });
@@ -1741,6 +1828,7 @@ function walkList(
         usabilityVerdict: verdict,
         gateIrrelevance: irrelevance,
         targetingRefusal: targetSelection,
+        pseudoAction,
       });
       context.steps.push(step);
       return earliestObstacle(candidates, {
@@ -1759,12 +1847,15 @@ function walkList(
           applicability,
           usabilityVerdict: verdict,
           targetingRefusal: targetSelection,
+          pseudoAction,
         }),
       );
       continue;
     }
 
-    if (outcome === "DEFINITE_WINNER") {
+    // A `retarget_auto_attack` is never proven to fire: its readiness also
+    // needs an auto attack aimed elsewhere, which nothing here can know (M11-D3-B2).
+    if (outcome === "DEFINITE_WINNER" && pseudoKind !== "RETARGET_AUTO_ATTACK") {
       // Returned whatever its GCD lane. The pinned loop has no `trigger_gcd`
       // branch: a zero-GCD action ends this scan exactly like any other, and
       // merely begins a new one afterwards.
@@ -1772,6 +1863,7 @@ function walkList(
         applicability,
         usabilityVerdict: verdict,
         targetingRefusal: targetSelection,
+        pseudoAction,
       });
       context.steps.push(step);
       candidates.push({ identity: action.actionToken, step, definite: true });
@@ -1782,6 +1874,7 @@ function walkList(
       applicability,
       usabilityVerdict: verdict,
       targetingRefusal: targetSelection,
+      pseudoAction,
     });
     context.steps.push(step);
     candidates.push({ identity: action.actionToken, step, definite: false });
