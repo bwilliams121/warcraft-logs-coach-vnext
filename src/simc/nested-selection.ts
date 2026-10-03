@@ -128,11 +128,8 @@ import {
   type GateIrrelevanceResolver,
 } from "./action-applicability.js";
 import type { AtomBindings } from "./expression/evaluate.js";
-import {
-  proveTargetIndependentFalsehood,
-  type TargetIndependenceFailure,
-  type TargetIndependentElimination,
-} from "./target-independence.js";
+import type { TargetIndependenceFailure, TargetIndependentElimination } from "./target-independence.js";
+import { targetingOutcomeFor, type TargetIfVerdict, type TargetingOutcome } from "./target-if.js";
 
 // --------------------------------------------------------------------------
 // Path and trace
@@ -319,7 +316,36 @@ export type TargetingRefusal =
       readonly kind: "REFUSED";
       readonly optionKeys: readonly string[];
       readonly failure: TargetIndependenceFailure;
+      /**
+       * Why a `target_if` line could not be read past (M11-D3-B1), when B1
+       * applied to it: its structure and the refusal reason. Absent otherwise.
+       */
+      readonly targetIf?: Extract<TargetIfVerdict, { kind: "REFUSED" }>;
+    }
+  | {
+      /**
+       * NOT a refusal (M11-D3-B1): the line's `target_if` is MIN/MAX with a
+       * score POSITIVELY PROVEN finite — so a target is always chosen — and an
+       * `if=` that is absent or reads only player state, so whichever enemy
+       * wins, the line is ready exactly when the same line
+       * without `target_if` would be. The line was evaluated as an ordinary
+       * one; this records that target identity was ignored, and why that was
+       * sound. See `target-if.ts`.
+       */
+      readonly kind: "TARGET_SELECTION_IGNORABLE";
+      readonly optionKeys: readonly string[];
+      readonly targetIf: Extract<TargetIfVerdict, { kind: "TARGET_SELECTION_IGNORABLE" }>;
     };
+
+/** The step record for a refused targeting option, carrying the `target_if` reason when B1 applied. */
+function refusalOf(
+  optionKeys: readonly string[],
+  targeting: Extract<TargetingOutcome, { kind: "REFUSED" }>,
+): TargetingRefusal {
+  return targeting.targetIf === null
+    ? { kind: "REFUSED", optionKeys, failure: targeting.failure }
+    : { kind: "REFUSED", optionKeys, failure: targeting.failure, targetIf: targeting.targetIf };
+}
 
 // --------------------------------------------------------------------------
 // Result
@@ -986,10 +1012,13 @@ function undecidedTransferWorld(child: Extract<ScanOutcome, { kind: "COMPLETED" 
  *
  * WHAT STAYS CONSERVATIVE, ON PURPOSE
  *
- *   - Options. A run entry carrying an option outside the supported set
- *     (`target_if` on Arms' execute dispatch, for one) is refused with
- *     `UNSUPPORTED_ACTION_OPTION` before its gate is read. No option key was
- *     admitted for run entries; the existing classification applies.
+ *   - Options. A run entry carrying an option outside the supported set is
+ *     refused with `UNSUPPORTED_ACTION_OPTION` before its gate is read; the
+ *     existing classification applies. The one exception is a sole
+ *     `target_if` (M11-D3-B1): read past when `target-if.ts` can, eliminated
+ *     by a FALSE player-only conjunct, and otherwise — when well-formed with a
+ *     readable `if=` — explored as an undecided gate whose stop stays at this
+ *     line as `UNSUPPORTED_ACTION_OPTION`.
  *   - Cycles. The child is scanned under the same active-stack guard as a
  *     callee, so `run X` inside X, or X ⇄ Y through runs, calls or a mix,
  *     blocks with `CONTROL_FLOW_CYCLE`. The pinned `swap_action_list_t::ready`
@@ -1016,8 +1045,52 @@ function scanRunDispatch(
     outcome: earliestObstacle(candidates, { kind: "BLOCKED", blocker, blockedAt: step, detail }),
   });
 
-  if (action.unsupportedOptions.length > 0) {
-    const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
+  // ---- target_if on a run entry (M11-D3-B1) ----
+  //
+  // A run is an ordinary `action_t` for readiness (it does not override
+  // `action_ready`), so `select_target()` applies before its `if=`
+  // (action.cpp:2567-2629). Target selection only decides whether the run is
+  // READY: the run's own target is not read by its child, whose entries keep
+  // their own targets. So a `target_if` the shared rule can read past is
+  // read past; one it cannot read past, on an otherwise well-formed line
+  // with a readable `if=`, leaves exactly two worlds — ready or not — and is
+  // explored like any undecided gate, with the stop held at this line.
+  // Every other unsupported option is refused before the gate is read, as
+  // before.
+  const soleTargetIf =
+    action.targetIf !== null && action.unsupportedOptions.every((option) => option.optionKey === "target_if");
+  const targeting = soleTargetIf ? targetingOutcomeFor(action, context.bindings) : null;
+  const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
+
+  if (targeting?.kind === "ELIMINATED_FOR_EVERY_TARGET") {
+    // Not ready whatever target selection does: the parent continues.
+    context.steps.push(
+      stepOf(
+        action,
+        path,
+        { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+        "UNKNOWN",
+        "TARGET_INDEPENDENT_ELIMINATION_CONTINUE",
+        {
+          targetingRefusal: {
+            kind: "ELIMINATED_FOR_EVERY_TARGET",
+            optionKeys,
+            elimination: targeting.elimination,
+          },
+        },
+      ),
+    );
+    return { kind: "CONTINUE" };
+  }
+
+  const explorableRefusal =
+    targeting?.kind === "REFUSED" &&
+    targeting.targetIf !== null &&
+    targeting.targetIf.reason !== "TARGET_IF_MALFORMED" &&
+    targeting.targetIf.reason !== "CONDITION_UNSUPPORTED" &&
+    gate.kind !== "UNSUPPORTED";
+
+  if (action.unsupportedOptions.length > 0 && targeting?.kind !== "ORDINARY_LINE" && !explorableRefusal) {
     const step = stepOf(
       action,
       path,
@@ -1025,11 +1098,10 @@ function scanRunDispatch(
       "UNKNOWN",
       "BLOCKED",
       {
-        targetingRefusal: {
-          kind: "REFUSED",
-          optionKeys,
-          failure: "NO_TARGET_INDEPENDENT_CONJUNCT",
-        },
+        targetingRefusal:
+          targeting?.kind === "REFUSED"
+            ? refusalOf(optionKeys, targeting)
+            : { kind: "REFUSED", optionKeys, failure: "NO_TARGET_INDEPENDENT_CONJUNCT" },
       },
     );
     context.steps.push(step);
@@ -1041,8 +1113,23 @@ function scanRunDispatch(
     );
   }
 
+  // What the run entry's steps record about target selection, if anything.
+  const targetingRecord: TargetingRefusal | null =
+    targeting?.kind === "ORDINARY_LINE"
+      ? { kind: "TARGET_SELECTION_IGNORABLE", optionKeys, targetIf: targeting.targetIf }
+      : targeting?.kind === "REFUSED"
+        ? refusalOf(optionKeys, targeting)
+        : null;
+  // A refused `target_if` is read on an enemy this project cannot name, so its
+  // `if=` is not evaluated and the gate is undecided by construction.
+  const runGate: LineCondition = explorableRefusal
+    ? { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" }
+    : gate;
+  const runStep = (outcome: TraversalStepOutcome): TraversalStep =>
+    stepOf(action, path, runGate, "UNKNOWN", outcome, { targetingRefusal: targetingRecord });
+
   if (gate.kind === "UNSUPPORTED") {
-    const step = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
+    const step = runStep("BLOCKED");
     context.steps.push(step);
     return blocked(
       step,
@@ -1052,38 +1139,54 @@ function scanRunDispatch(
     );
   }
 
-  if (gateIsCertainlyNotEntered(gate)) {
+  if (!explorableRefusal && gateIsCertainlyNotEntered(gate)) {
     // Proven FALSE: not ready, not returned, not entered. The parent continues.
-    context.steps.push(stepOf(action, path, gate, "UNKNOWN", "RUN_GATE_FALSE_SKIPPED"));
+    context.steps.push(runStep("RUN_GATE_FALSE_SKIPPED"));
     return { kind: "CONTINUE" };
   }
 
   // The run entry's own step is recorded BEFORE the child so the trace reads
   // in visit order; its outcome is known once the child returns.
   const runStepIndex = context.steps.length;
-  const blockedRunStep = stepOf(action, path, gate, "UNKNOWN", "BLOCKED");
+  const blockedRunStep = runStep("BLOCKED");
   context.steps.push(blockedRunStep);
   const finishRun = (outcome: TraversalStepOutcome): void => {
-    context.steps[runStepIndex] = stepOf(action, path, gate, "UNKNOWN", outcome);
+    context.steps[runStepIndex] = runStep(outcome);
   };
 
   // An undecided gate's stop is fixed BEFORE its child is visited (M11-D3-A):
   // whatever the speculative TRUE world meets, this is where the selection
-  // stops unless the worlds converge. See `Collapse`.
-  const gateCollapse: Collapse | null = gateIsCertainlyEntered(gate)
-    ? null
-    : {
-        outcome: earliestObstacle(candidates, {
-          kind: "BLOCKED",
-          blocker: "UNDECIDED_RUN_GATE",
-          blockedAt: blockedRunStep,
-          detail:
-            "the run_action_list gate is neither proven TRUE nor proven FALSE; the parent-continues and " +
-            "child-replaces-parent worlds were explored and did not establish one definite result",
-        }),
-        stepsLength: runStepIndex + 1,
-        blockedSlots: [{ index: runStepIndex, step: blockedRunStep }],
-      };
+  // stops unless the worlds converge. See `Collapse`. When what is undecided
+  // is TARGET SELECTION (M11-D3-B1), the stop is the same line, named for
+  // what is actually missing.
+  const gateCollapse: Collapse | null =
+    !explorableRefusal && gateIsCertainlyEntered(gate)
+      ? null
+      : {
+          outcome: earliestObstacle(
+            candidates,
+            explorableRefusal
+              ? {
+                  kind: "BLOCKED",
+                  blocker: "UNSUPPORTED_ACTION_OPTION",
+                  blockedAt: blockedRunStep,
+                  detail:
+                    "the run_action_list entry's target_if decides whether it is ready on enemies this " +
+                    "project does not enumerate; the parent-continues and child-replaces-parent worlds were " +
+                    "explored and did not establish one definite result",
+                }
+              : {
+                  kind: "BLOCKED",
+                  blocker: "UNDECIDED_RUN_GATE",
+                  blockedAt: blockedRunStep,
+                  detail:
+                    "the run_action_list gate is neither proven TRUE nor proven FALSE; the parent-continues and " +
+                    "child-replaces-parent worlds were explored and did not establish one definite result",
+                },
+          ),
+          stepsLength: runStepIndex + 1,
+          blockedSlots: [{ index: runStepIndex, step: blockedRunStep }],
+        };
 
   const runPath = [...path, pathEntryOf(action)];
   const child = scanList(context, target, 0, runPath, nestedStack);
@@ -1245,6 +1348,32 @@ function walkList(
           detail:
             "the list-dispatch entry's option structure is malformed, so whether its list is entered " +
             "cannot be established",
+        });
+      }
+
+      // A call's `target_if` has no effect on readiness: `call_action_list_t`
+      // overrides `action_ready` and never calls `select_target()`
+      // (action.cpp:4672-4685), so a call's gate is read without its options.
+      // A MALFORMED one is different — an invalid APL at the pinned commit —
+      // and is refused rather than ignored (M11-D3-B1). A run's `target_if` is
+      // decided in `scanRunDispatch`.
+      if (!action.isUnmodelledDispatch && action.targetIf?.kind === "MALFORMED") {
+        const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
+        const step = stepOf(
+          action,
+          path,
+          { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+          "UNKNOWN",
+          "BLOCKED",
+          { targetingRefusal: { kind: "REFUSED", optionKeys, failure: "PROOF_NOT_ATTEMPTED" } },
+        );
+        context.steps.push(step);
+        return earliestObstacle(candidates, {
+          kind: "BLOCKED",
+          blocker: "UNSUPPORTED_ACTION_OPTION",
+          blockedAt: step,
+          detail:
+            "the list-dispatch entry's target_if option is malformed, so the line is not a valid APL entry",
         });
       }
 
@@ -1508,21 +1637,21 @@ function walkList(
     // below — readiness and the condition — is evaluated PER CANDIDATE TARGET
     // inside the cycle loop, so this project cannot answer any of it, and asking
     // would produce a single-target answer to a multi-target question.
+    //
+    // Since M11-D3-B1 a `target_if` line is read through `targetingOutcomeFor`,
+    // the one rule both selectors share. Cycling re-runs the SAME condition
+    // per candidate, so a player-scoped conjunct that is false settles it; a
+    // `target_if` line is settled the same way, and a MIN/MAX one whose `if=`
+    // reads only player state is ready exactly when the line without
+    // `target_if` would be — so it is evaluated as an ordinary line below.
+    // Everything else is refused, as before.
+    let targetSelection: TargetingRefusal | null = null;
     if (action.unsupportedOptions.length > 0) {
       const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
-      // `target_if` is refused OUTRIGHT and is never routed through the
-      // target-independent rule. Cycling re-runs the SAME condition per
-      // candidate, so a conjunct that is false for all of them settles it;
-      // `target_if` instead SCORES candidates and RETARGETS the action
-      // (action.cpp:2429-2461), which changes what every later atom in the scan
-      // reads. One conjunct cannot settle that, and pretending otherwise would
-      // be modelling target scoring by the back door.
-      const retargets = optionKeys.includes("target_if");
-      const elimination = retargets
-        ? ({ kind: "NOT_PROVEN", failure: "NO_TARGET_INDEPENDENT_CONJUNCT" } as const)
-        : proveTargetIndependentFalsehood(action, context.bindings);
+      const targeting = targetingOutcomeFor(action, context.bindings);
 
-      if (elimination.kind === "ELIMINATED_FOR_EVERY_TARGET") {
+      if (targeting.kind === "ELIMINATED_FOR_EVERY_TARGET") {
+        const elimination = targeting.elimination;
         // A conjunct reading only PLAYER state is FALSE. `FALSE & anything` is
         // FALSE for every candidate, so the loop finds none ready. No target was
         // enumerated to establish this.
@@ -1542,26 +1671,27 @@ function walkList(
         continue;
       }
 
-      const step = stepOf(
-        action,
-        path,
-        { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
-        "UNKNOWN",
-        "BLOCKED",
-        {
-          applicability,
-          targetingRefusal: { kind: "REFUSED", optionKeys, failure: elimination.failure },
-        },
-      );
-      context.steps.push(step);
-      return earliestObstacle(candidates, {
-        kind: "BLOCKED",
-        blocker: "UNSUPPORTED_ACTION_OPTION",
-        blockedAt: step,
-        detail:
-          "the entry carries an action option that redirects its condition onto targets this project " +
-          "does not enumerate, and no target-independent conjunct proves it cannot select",
-      });
+      if (targeting.kind === "ORDINARY_LINE") {
+        targetSelection = { kind: "TARGET_SELECTION_IGNORABLE", optionKeys, targetIf: targeting.targetIf };
+      } else {
+        const step = stepOf(
+          action,
+          path,
+          { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" },
+          "UNKNOWN",
+          "BLOCKED",
+          { applicability, targetingRefusal: refusalOf(optionKeys, targeting) },
+        );
+        context.steps.push(step);
+        return earliestObstacle(candidates, {
+          kind: "BLOCKED",
+          blocker: "UNSUPPORTED_ACTION_OPTION",
+          blockedAt: step,
+          detail:
+            "the entry carries an action option that redirects its condition onto targets this project " +
+            "does not enumerate, and no target-independent conjunct proves it cannot select",
+        });
+      }
     }
 
     const verdict = context.usabilityFor(action);
@@ -1578,7 +1708,7 @@ function walkList(
           { kind: "NOT_EVALUATED", why: "PROVEN_UNUSABLE" },
           "PROVEN_UNUSABLE",
           "PROVEN_UNUSABLE_CONTINUE",
-          { applicability, usabilityVerdict: verdict },
+          { applicability, usabilityVerdict: verdict, targetingRefusal: targetSelection },
         ),
       );
       continue;
@@ -1599,6 +1729,7 @@ function walkList(
           applicability,
           usabilityVerdict: verdict,
           gateIrrelevance: irrelevance,
+          targetingRefusal: targetSelection,
         });
         context.steps.push(step);
         candidates.push({ identity: action.actionToken, step, definite: false });
@@ -1609,6 +1740,7 @@ function walkList(
         applicability,
         usabilityVerdict: verdict,
         gateIrrelevance: irrelevance,
+        targetingRefusal: targetSelection,
       });
       context.steps.push(step);
       return earliestObstacle(candidates, {
@@ -1626,6 +1758,7 @@ function walkList(
         stepOf(action, path, gate, usability, "ELIMINATED_CONTINUE", {
           applicability,
           usabilityVerdict: verdict,
+          targetingRefusal: targetSelection,
         }),
       );
       continue;
@@ -1638,6 +1771,7 @@ function walkList(
       const step = stepOf(action, path, gate, usability, "SELECTED", {
         applicability,
         usabilityVerdict: verdict,
+        targetingRefusal: targetSelection,
       });
       context.steps.push(step);
       candidates.push({ identity: action.actionToken, step, definite: true });
@@ -1647,6 +1781,7 @@ function walkList(
     const step = stepOf(action, path, gate, usability, "MAY_SELECT", {
       applicability,
       usabilityVerdict: verdict,
+      targetingRefusal: targetSelection,
     });
     context.steps.push(step);
     candidates.push({ identity: action.actionToken, step, definite: false });

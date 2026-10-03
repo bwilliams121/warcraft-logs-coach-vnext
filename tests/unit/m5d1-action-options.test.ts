@@ -140,22 +140,24 @@ describe("an unsupported targeting option refuses the entry", () => {
     expect(result.blocker).not.toBe("UNSUPPORTED_AUTHORITY_EXPRESSION");
   });
 
-  it("refuses target_if, and does not route it through the cycle rule", () => {
-    // `target_if` SCORES candidates and RETARGETS. Even a target-independent
-    // false conjunct would not settle it, because the retarget changes what
-    // every later atom in the scan reads.
+  it("eliminates a target_if line through the same conjunct rule (M11-D3-B1)", () => {
+    // M5-D1 refused this line on the reading that the retarget changes what
+    // every later atom in the scan reads. The pinned source does not bear that
+    // out: `select_target()` writes only this action's own target, and `if=` is
+    // read after it, on the chosen enemy (action.cpp:2426-2459, 2567-2629). A
+    // FALSE player-scoped conjunct is FALSE on every enemy, so the line is not
+    // ready whatever target selection does. `combo_points<5` at 7 is one.
     const result = traverse([
       {
         listName: "default",
         actions: ["crimson_tempest,target_if=max:dot.rupture.remains,if=combo_points<5"],
       },
     ]);
-    expect(result.kind).toBe("UNKNOWN");
-    if (result.kind !== "UNKNOWN") return;
-    expect(result.blocker).toBe("UNSUPPORTED_ACTION_OPTION");
-    // `combo_points<5` at 7 combo points IS a false player-scoped conjunct, and
-    // it still does not rescue the entry.
-    expect(result.blockedAt?.targetingRefusal?.kind).toBe("REFUSED");
+    expect(result.kind).toBe("NO_ACTION_SELECTED");
+    const line = result.steps.find((step) => step.priorityOrdinal === 0);
+    expect(line?.outcome).toBe("TARGET_INDEPENDENT_ELIMINATION_CONTINUE");
+    expect(line?.targetingRefusal?.kind).toBe("ELIMINATED_FOR_EVERY_TARGET");
+    expect(line?.gate).toEqual({ kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" });
   });
 
   it("never evaluates a cycling entry's condition against the implicit target", () => {

@@ -1462,6 +1462,15 @@ run gate undecided  -> BLOCKED, UNDECIDED_RUN_GATE; no world is explored
 call -> run         -> a run reached inside a callee ends the WHOLE selection;
                        the caller does not continue either
 undecided call over a transferring callee -> BLOCKED, UNDECIDED_CALL_GATE_OVER_RUN
+target_if (M11-D3-B1, tests/unit/m11d3b1-target-if.test.ts):
+  MIN/MAX + PROVEN-finite score + player-only if= -> the ordinary line's answer
+  MIN/MAX + score NOT proven finite             -> refused, UNKNOWN (spec atoms,
+                                                  unaudited atoms, % and %%)
+  any mode + player-only FALSE conjunct        -> eliminated
+  target-dependent or unparseable if=, FIRST   -> UNKNOWN, never FALSE/REJECTED
+  (even with a finite score), malformed option
+  run + refused target_if, worlds disagree     -> stop AT the run line
+  ignorable target_if                          -> never the attributed class
 ```
 
 Required negative pairs, same premises, different construct:

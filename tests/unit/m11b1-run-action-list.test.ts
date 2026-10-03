@@ -271,13 +271,15 @@ describe("a run_action_list whose gate cannot be decided blocks", () => {
   });
 
   it("an unsupported option on the run entry refuses before the gate is read", () => {
-    // Arms' pinned execute dispatch carries `target_if=` on a run entry. No
-    // option key was admitted for run entries in M11-B1.
+    // No option key was admitted for run entries in M11-B1. Arms' pinned
+    // execute dispatch, with `target_if=min:target.health.pct`, was the case
+    // in point until M11-D3-B1 read MIN/MAX `target_if` past (see
+    // `m11d3b1-target-if.test.ts`); `cycle_targets` still has no run rule.
     const result = traverse(
       [
         {
           listName: "default",
-          actions: [`run_action_list,name=child,target_if=min:target.health.pct,if=${TRUE_COND}`, "mutilate"],
+          actions: [`run_action_list,name=child,cycle_targets=1,if=${TRUE_COND}`, "mutilate"],
         },
         { listName: "child", actions: [`envenom,if=${TRUE_COND}`] },
       ],

@@ -35,7 +35,9 @@
  * module re-exports it unchanged.
  */
 
+import { deriveConditionRaw } from "./apl-authority.js";
 import type { RotationalGcdResult } from "./first-gcd-selection.js";
+import type { TraversalStep } from "./nested-selection.js";
 
 /** How completely one rotational decision resolved. */
 export type DecisionCoverage =
@@ -170,13 +172,26 @@ export function classifyDecision(result: RotationalGcdResult): DecisionCoverageR
     coverage: "UNKNOWN",
     actionToken: null,
     entry: null,
-    blockerClass: classifyBlocker(result.blocker, result.scanBlocker, step?.actionStringVerbatim ?? null),
+    blockerClass: classifyBlocker(result.blocker, result.scanBlocker, classificationTextOf(step)),
     rawBlocker: result.scanBlocker === null ? result.blocker : `${result.blocker}/${result.scanBlocker}`,
     blockedAt:
       step === null
         ? null
         : { listName: step.listName, priorityOrdinal: step.priorityOrdinal, actionToken: step.actionToken },
   };
+}
+
+/**
+ * The authority text a blocked step is classified by: its verbatim line, or —
+ * when the step's `target_if` was proven ignorable (M11-D3-B1) — only its
+ * condition. Target selection was then shown not to matter, so the line's
+ * `target_if` text names nothing that is actually missing, and classifying by
+ * it would attribute an undecided talent or buff to target selection.
+ */
+function classificationTextOf(step: TraversalStep | null): string | null {
+  if (step === null) return null;
+  if (step.targetingRefusal?.kind !== "TARGET_SELECTION_IGNORABLE") return step.actionStringVerbatim;
+  return deriveConditionRaw(step.actionStringVerbatim);
 }
 
 /**

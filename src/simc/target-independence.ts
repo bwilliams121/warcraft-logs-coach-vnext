@@ -35,12 +35,13 @@
  *
  * WHAT IS DELIBERATELY NOT HERE
  *
- * No target enumeration, no target scoring, no `target_if`. `target_if` picks a
- * winner by evaluating a SCORING expression over candidates
- * (action.cpp:2429-2461); the same conjunct argument would apply to its `if=`,
- * but the retarget itself changes which target every LATER atom in the scan reads,
- * and that is not something one conjunct can settle. So `target_if` is refused
- * outright and is not routed through this module.
+ * No target enumeration and no target scoring. M5-D1 also kept `target_if` out,
+ * on the reading that its retarget changes which target every LATER atom in the
+ * scan reads. The pinned source does not bear that out: `select_target()`
+ * writes only the acting action's own `target` and resets it to the player's
+ * target on every call (action.cpp:2426-2459). Since M11-D3-B1 the same
+ * conjunct argument is applied to a `target_if` line's `if=` — see
+ * `target-if.ts`, which owns everything else about `target_if`.
  *
  * WHY EACH CONJUNCT IS EVALUATED ALONE
  *
@@ -75,13 +76,20 @@ export type TargetIndependenceFailure =
   /** Every top-level conjunct reads target state, so none is target-independent. */
   | "NO_TARGET_INDEPENDENT_CONJUNCT"
   /** Target-independent conjuncts exist, and none of them is provably FALSE. */
-  | "NO_TARGET_INDEPENDENT_CONJUNCT_IS_FALSE";
+  | "NO_TARGET_INDEPENDENT_CONJUNCT_IS_FALSE"
+  /**
+   * No proof was attempted, because the line's `target_if` option is
+   * malformed — an invalid APL at the pinned commit (M11-D3-B1). Nothing about
+   * such a line is read, so nothing about it is proven either.
+   */
+  | "PROOF_NOT_ATTEMPTED";
 
 export const TARGET_INDEPENDENCE_FAILURES = [
   "NO_CONDITION",
   "CONDITION_UNSUPPORTED",
   "NO_TARGET_INDEPENDENT_CONJUNCT",
   "NO_TARGET_INDEPENDENT_CONJUNCT_IS_FALSE",
+  "PROOF_NOT_ATTEMPTED",
 ] as const satisfies readonly TargetIndependenceFailure[];
 
 /**

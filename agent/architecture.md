@@ -4516,6 +4516,47 @@ This is why atoms carry a SCOPE alongside their shape. `target_if` is NOT routed
 through the rule: it SCORES candidates and retargets the action, which changes
 what every later atom in the scan reads, and one conjunct cannot settle that.
 
+*Since M11-D3-B1* that last reading is corrected against the pinned source:
+`select_target()` writes only the acting action's own `target` and resets it to
+the player's target on every call (`action.cpp:2426-2459`), and `if=` is read
+after it, on the chosen enemy (`action.cpp:2567-2629`). `src/simc/target-if.ts`
+now owns `target_if`, read structurally as `AplAction.targetIf` (mode
+FIRST/MIN/MAX and its expression), through ONE rule both selectors share:
+
+- any mode, a PLAYER_SCOPED `if=` conjunct proven FALSE: eliminated. This
+  needs nothing from the score: the line is not ready whether or not a target
+  is chosen;
+- MIN/MAX target identity may be ignored ONLY when target selection is
+  guaranteed by a POSITIVELY PROVEN finite target score and the `if=` that
+  follows is absent or target-independent (wholly PLAYER_SCOPED). The line is
+  then evaluated as an ordinary line;
+- everything else (FIRST — even with a finite score, since it still needs SOME
+  enemy to score non-zero —, a target-dependent or unparseable `if=`, a score
+  not proven finite, a malformed option): refused, as before.
+
+The M11-D0 audit's statement that MIN/MAX "choose a target" is refined by the
+pinned source: they choose one only for a finite score. With several
+candidates, a score that is NaN on every ready candidate — or +inf for MIN,
+-inf for MAX — selects none (`action.cpp:5353-5446`), and the pinned operators
+can produce both (`%` is `std::divides`, `%%` is `std::fmod`). So
+finiteness is PROVEN, never assumed: `scoreFinitenessOf` is a compositional
+check over the supported expression AST (literals; comparisons, `&`, `|` and
+`!`, which are C++ bools; `talent.*`, `buff.*.up` and `debuff.*.up`, which
+are bools; `target.time_to_die`, a `timespan_t` read in seconds; `+ - *` only
+within an overflow-safe bound), each rule cited against the pinned source.
+Anything else — division and modulus, unsupported syntax, atoms without an
+audited value domain, and EVERY spec-declared identifier — is
+NOT_PROVEN_FINITE. Scope is not evidence of finiteness, and an atom's project
+SHAPE is not a SimulationCraft value domain (`buff.*.react` is a truth node
+here and a stack count there). A finite-domain contract for spec atoms would be
+a later, per-spec responsibility.
+A NON_GCD action selected through an ignorable `target_if` is never executed by
+the first-GCD query (`TRANSITION_UNSUPPORTED`): which enemy it hit is unknown.
+`call_action_list` ignores `target_if` entirely (`action.cpp:4672-4685`); only a
+malformed one is refused there. On a run, a refused but well-formed `target_if`
+with a readable `if=` is explored as an undecided gate whose stop stays at the
+line (`UNSUPPORTED_ACTION_OPTION`), under D3-A's collapse rule.
+
 ## Self-Addressing Atoms Need an Acting Action
 
 `remains`, `refreshable` and `pmultiplier` are written bare and mean "the ACTING
@@ -5773,7 +5814,7 @@ consequences the engine now models, at the run entry's own priority position:
 | certain, child blocked | the child's blocker propagates | `BLOCKED` |
 | undecided | fail closed; neither world is explored (since M11-D3-A both are, and only a result every world agrees on replaces the gate — see below) | blocker `UNDECIDED_RUN_GATE` |
 | unreadable | the existing parser refusal | blocker `UNSUPPORTED_AUTHORITY_EXPRESSION` |
-| carries an unsupported option (`target_if=` on Arms' execute dispatch) | refused before the gate is read | blocker `UNSUPPORTED_ACTION_OPTION` |
+| carries an unsupported option (`target_if=` on Arms' execute dispatch) | refused before the gate is read (since M11-D3-B1 a sole `target_if` is read through `target-if.ts` first — see the M5-D1 section) | blocker `UNSUPPORTED_ACTION_OPTION` |
 
 **A run is not a call, one level up too.** The transfer is carried on the
 scan outcome (`transferred`), so a run reached INSIDE a called list ends the

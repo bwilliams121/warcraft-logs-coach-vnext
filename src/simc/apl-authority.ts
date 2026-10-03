@@ -178,6 +178,11 @@ export const SUPPORTED_ACTION_OPTION_KEYS = [
  *
  * Both are recognised and REFUSED. Recognising them is what turns a silent
  * misreading into an explicit UNKNOWN.
+ *
+ * The KEY classification is unchanged by M11-D3-B1, which reads `target_if`'s
+ * value structurally (`targetIfStructureOf`) and lets the selectors read past
+ * the subset that cannot depend on the enemy set — see `target-if.ts`. A
+ * `target_if` line is still refused by default.
  */
 export const UNSUPPORTED_TARGETING_OPTION_KEYS = ["cycle_targets", "target_if", "max_cycle_targets"] as const;
 
@@ -296,6 +301,66 @@ export function deriveActionOptionKeys(actionStringVerbatim: string): readonly s
   return keys;
 }
 
+/**
+ * The `target_if` option, read STRUCTURALLY (M11-D3-B1) — the mode and its
+ * expression, never evaluated here. What a well-formed one means for selection
+ * is decided in `target-if.ts`; see its header for the pinned semantics.
+ */
+export type TargetIfMode = "FIRST" | "MIN" | "MAX";
+
+export const TARGET_IF_MODES = ["FIRST", "MIN", "MAX"] as const satisfies readonly TargetIfMode[];
+
+/**
+ * A line's `target_if` option, structurally — or why it cannot be read.
+ *
+ * `null` (from `targetIfStructureOf`) means the line carries no `target_if`.
+ */
+export type TargetIfStructure =
+  | {
+      readonly kind: "WELL_FORMED";
+      readonly mode: TargetIfMode;
+      /** False when no `mode:` prefix was written and FIRST is the pinned default. */
+      readonly modeWritten: boolean;
+      /** The scoring (MIN/MAX) or gating (FIRST) expression, verbatim. Never evaluated here. */
+      readonly expressionRaw: string;
+    }
+  | {
+      readonly kind: "MALFORMED";
+      /**
+       *   UNKNOWN_MODE        a `prefix:` other than min/max/first — SimC throws
+       *   EMPTY_EXPRESSION    `min:` with nothing after it, or `target_if=` with
+       *                       no text at all; neither is a selection this module
+       *                       will read either way
+       *   MULTIPLE_TARGET_IF  two `target_if=` options; which one SimC keeps is
+       *                       an option-parser detail this module does not read
+       */
+      readonly reason: "UNKNOWN_MODE" | "EMPTY_EXPRESSION" | "MULTIPLE_TARGET_IF";
+    };
+
+/** Reads the `target_if` option of one line, or `null` when it has none. */
+export function targetIfStructureOf(actionStringVerbatim: string): TargetIfStructure | null {
+  const values = parseAplLine(actionStringVerbatim)
+    .options.filter((option) => option.key === "target_if")
+    .map((option) => option.value);
+  const [only] = values;
+  if (only === undefined) return null;
+  if (values.length > 1) return { kind: "MALFORMED", reason: "MULTIPLE_TARGET_IF" };
+
+  const colon = only.indexOf(":");
+  if (colon < 0) {
+    return only.length === 0
+      ? { kind: "MALFORMED", reason: "EMPTY_EXPRESSION" }
+      : { kind: "WELL_FORMED", mode: "FIRST", modeWritten: false, expressionRaw: only };
+  }
+  const prefix = only.slice(0, colon).toLowerCase();
+  const expressionRaw = only.slice(colon + 1);
+  const mode: TargetIfMode | null =
+    prefix === "min" ? "MIN" : prefix === "max" ? "MAX" : prefix === "first" ? "FIRST" : null;
+  if (mode === null) return { kind: "MALFORMED", reason: "UNKNOWN_MODE" };
+  if (expressionRaw.length === 0) return { kind: "MALFORMED", reason: "EMPTY_EXPRESSION" };
+  return { kind: "WELL_FORMED", mode, modeWritten: true, expressionRaw };
+}
+
 /** One action, with the fields derived from its verbatim string. */
 export interface AplAction {
   readonly listName: string;
@@ -352,6 +417,12 @@ export interface AplAction {
     readonly optionKey: string;
     readonly support: Exclude<ActionOptionSupport, "SUPPORTED">;
   }[];
+  /**
+   * The `target_if` option, structurally, or `null` when the line has none
+   * (M11-D3-B1). Its key stays `UNSUPPORTED_TARGETING` above; this says what
+   * it IS, and `target-if.ts` decides what it means for selection.
+   */
+  readonly targetIf: TargetIfStructure | null;
 }
 
 const CALL_TOKENS = new Set(["call_action_list", "run_action_list"]);
@@ -500,6 +571,7 @@ function deriveAction(listName: string, action: AuthorityArtifactAction): AplAct
     executesAndContinues: deriveEntryKind(action.actionStringVerbatim) === "VARIABLE_ASSIGNMENT",
     actionOptionKeys,
     unsupportedOptions,
+    targetIf: targetIfStructureOf(action.actionStringVerbatim),
   };
 }
 

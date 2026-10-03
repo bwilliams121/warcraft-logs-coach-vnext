@@ -948,6 +948,24 @@ export function firstGcdSelectionAcrossRescans<TState>(
     }
 
     // ---- NON_GCD: it fires, it executes, and a new scan begins at the root ----
+
+    // A candidate whose `target_if` was read past (M11-D3-B1) was selected
+    // WITHOUT knowing which enemy it acts on — sound for whether it is ready,
+    // not for what it does. Executing it would let every later scan read state
+    // on an enemy nobody identified, so no transition is asked for.
+    if (candidate.step.targetingRefusal?.kind === "TARGET_SELECTION_IGNORABLE") {
+      return {
+        kind: "UNKNOWN",
+        blocker: "TRANSITION_UNSUPPORTED",
+        scanBlocker: null,
+        blockedAt: candidate.step,
+        detail:
+          "a NON_GCD action chose its target through target_if; which enemy it acted on is not modelled, " +
+          "so its effect on the scans that follow cannot be applied",
+        trace: { ...emptyTrace, outcome: "UNKNOWN TRANSITION_UNSUPPORTED" },
+      };
+    }
+
     const outcome = input.transitionFor({ actionToken: candidate.identity, step: candidate.step }, state);
 
     if (outcome.kind === "UNSUPPORTED") {

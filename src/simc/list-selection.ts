@@ -70,7 +70,7 @@
 
 import type { AplAction, AplAuthority } from "./apl-authority.js";
 import { parseSimcExpression, type ParseFailureReason } from "./expression/parse.js";
-import { proveTargetIndependentFalsehood } from "./target-independence.js";
+import { targetingOutcomeFor } from "./target-if.js";
 import {
   actingAction,
   evaluateSimcExpression,
@@ -357,12 +357,13 @@ export function selectWithinList(
     // M5-D1 those lines were unreachable because `refreshable` failed the parser;
     // now that it parses, an unguarded walk here would evaluate a cycling entry
     // against the one implicit target.
-    if (action.unsupportedOptions.length > 0) {
-      // `target_if` refuses outright; only `cycle_targets` can be settled by a
-      // target-independent conjunct. See the same guard in `nested-selection.ts`.
-      const elimination = action.unsupportedOptions.some((option) => option.optionKey === "target_if")
-        ? ({ kind: "NOT_PROVEN", failure: "NO_TARGET_INDEPENDENT_CONJUNCT" } as const)
-        : proveTargetIndependentFalsehood(action, bindings);
+    // Since M11-D3-B1 the ONE rule both selectors share (`targetingOutcomeFor`):
+    // a target-independent FALSE conjunct eliminates the line, a MIN/MAX
+    // `target_if` whose `if=` reads only player state is evaluated as an
+    // ordinary line below, and everything else is refused.
+    const targeting = action.unsupportedOptions.length > 0 ? targetingOutcomeFor(action, bindings) : null;
+    if (targeting !== null && targeting.kind !== "ORDINARY_LINE") {
+      const elimination = targeting;
       const condition: LineCondition = { kind: "NOT_EVALUATED", why: "UNSUPPORTED_TARGETING" };
       const line: LineEvaluation = {
         listName: action.listName,

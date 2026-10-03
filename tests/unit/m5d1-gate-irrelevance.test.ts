@@ -191,6 +191,7 @@ describe("the default is unchanged: an unreadable condition blocks", () => {
         entryKind: "PLAYER_ACTION",
         actionOptionKeys: [],
         unsupportedOptions: [],
+        targetIf: null,
       }).kind,
     ).toBe("NOT_ESTABLISHED");
   });
