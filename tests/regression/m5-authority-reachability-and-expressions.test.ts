@@ -165,12 +165,15 @@ describe("unsupported authority syntax never becomes false", () => {
    */
   it.each([
     ["an unsupported identifier", "combo_points>=5&energy.regen_combined>40"],
-    ["the >? max operator", "combo_points.deficit>?0"],
+    // RE-POINTED for M11-D3-C1, which made `>?` (a MINIMUM, pinned) and `<?`
+    // (a MAXIMUM) binary operators. An extremum over an unsupported operand is
+    // still refused whole.
+    ["an extremum over an unsupported operand", "combo_points.deficit>?spell_targets.fan_of_knives"],
     // RE-POINTED for M5-C3c3c: `buff.<name>.stack` is recognised now, so the
     // abridged form above would parse. The REAL pinned `cds` gate is still
-    // refused, on three OTHER fragments it also contains - a talent rank, a
-    // spell-target count, and the `>?` max operator - so the verbatim line is
-    // used here rather than a paraphrase of it.
+    // refused, on OTHER fragments it also contains - a talent rank and a
+    // spell-target count (its `>?`, a MINIMUM, parses since M11-D3-C1) - so the
+    // verbatim line is used here rather than a paraphrase of it.
     [
       "the real pinned cds call condition, verbatim",
       "variable.single_target|!talent.scent_of_blood|buff.scent_of_blood.stack>=" +
@@ -192,7 +195,8 @@ describe("unsupported authority syntax never becomes false", () => {
     // malformed decimal — an empty fraction — is still a whole-expression refusal.
     ["a malformed decimal literal", "combo_points>=5."],
     ["!=", "combo_points!=5"],
-    ["<?", "combo_points<?5"],
+    // RE-POINTED for M11-D3-C1: `<?` is a binary operator now; a dangling one is not.
+    ["a dangling <?", "combo_points<?"],
     // RE-POINTED for M5-C3c3c: `buff.<name>.stack`, `buff.<name>.react` and
     // `debuff.<name>.up` are recognised now. The still-unsupported neighbours
     // are other properties of the same two namespaces, which recognising three

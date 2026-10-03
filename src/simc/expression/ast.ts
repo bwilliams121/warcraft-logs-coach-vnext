@@ -46,6 +46,18 @@
  */
 export type ComparisonOperator = ">=" | ">" | "=" | "<" | "<=";
 
+/** The two extremum operators, as WRITTEN. Read their meaning through `extremumOf`, never by eye. */
+export type ExtremumOperator = "<?" | ">?";
+
+/**
+ * What an extremum operator computes, per the pinned tokenizer: `<?` is the
+ * MAXIMUM and `>?` the MINIMUM (engine/sim/expressions.cpp:132-147, 212-226,
+ * 413-416). The one place that mapping lives.
+ */
+export function extremumOf(operator: ExtremumOperator): "MAX" | "MIN" {
+  return operator === "<?" ? "MAX" : "MIN";
+}
+
 export type ExpressionNode =
   | { readonly kind: "NUMBER"; readonly value: number }
   /** `combo_points` */
@@ -275,6 +287,28 @@ export type ExpressionNode =
    * literal nobody meant.
    */
   | { readonly kind: "SUBTRACT"; readonly left: ExpressionNode; readonly right: ExpressionNode }
+  /**
+   * `<?` and `>?`, SimulationCraft's numeric extremum operators (M11-D3-C1).
+   *
+   * THE DIRECTION IS THE TRAP. Pinned at
+   * 33622e9d1662ff0e451691edf85a6b49cc9d11d9, the tokenizer reads `<?` as
+   * `TOK_MAX` and `>?` as `TOK_MIN` (engine/sim/expressions.cpp:132-147), and
+   * those build `std::max` and `std::min` (expressions.cpp:212-226, 413-416).
+   * So `a<?b` is the LARGER operand and `a>?b` the SMALLER — `spell_targets>?3`
+   * caps a count at three. The written token is kept verbatim; `extremumOf` is
+   * the one place its meaning is read.
+   *
+   * Precedence 5: tighter than comparison (4), looser than `+`/`-` (6);
+   * left-associative like every binary operator (expressions.cpp:1081-1110,
+   * 1311-1324). Both operands are evaluated (`expr_binary_t::evaluate`,
+   * expressions.cpp:384-387). Both are MAGNITUDE positions.
+   */
+  | {
+      readonly kind: "EXTREMUM";
+      readonly operator: ExtremumOperator;
+      readonly left: ExpressionNode;
+      readonly right: ExpressionNode;
+    }
   | {
       readonly kind: "COMPARISON";
       readonly operator: ComparisonOperator;
@@ -453,6 +487,9 @@ export function collectAtoms(node: ExpressionNode): readonly AtomDescriptor[] {
       case "MULTIPLY":
       case "ADD":
       case "SUBTRACT":
+      // Both operands' atoms, so an extremum's scope is the join of its
+      // operands' scopes: target-scoped if either is (M11-D3-C1).
+      case "EXTREMUM":
         walk(current.left);
         walk(current.right);
         return;

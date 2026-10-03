@@ -246,9 +246,11 @@ describe("arithmetic was opened by the operator, not wholesale", () => {
     ["remains<=14/2", "UNSUPPORTED_OPERATOR"],
     ["remains<=14%2", "UNSUPPORTED_OPERATOR"],
     ["remains<=14^2", "UNSUPPORTED_OPERATOR"],
-    // SimulationCraft's max/min. `>?` must never decay into the supported `>`.
-    ["remains>?14", "UNSUPPORTED_OPERATOR"],
-    ["remains<?14", "UNSUPPORTED_OPERATOR"],
+    // SimulationCraft's extremum operators became binary operators at
+    // M11-D3-C1 (RE-POINTED). Arithmetic was still not opened wholesale: in an
+    // operand position they refuse, and they never decay into `>` or `<`.
+    ["remains<=>?14", "UNSUPPORTED_OPERATOR"],
+    ["remains<=<?14", "UNSUPPORTED_OPERATOR"],
   ])("still refuses %s", (source, reason) => {
     const parsed = parseSimcExpression(source);
     expect(parsed.ok, `${source} should be refused`).toBe(false);

@@ -77,7 +77,13 @@
  * operators and comparisons yield 1 or 0.
  */
 
-import { collectAtoms, type AtomShape, type ComparisonOperator, type ExpressionNode } from "./ast.js";
+import {
+  collectAtoms,
+  extremumOf,
+  type AtomShape,
+  type ComparisonOperator,
+  type ExpressionNode,
+} from "./ast.js";
 import { specAtomValueFor, type SpecAtomBindings } from "./spec-vocabulary.js";
 
 /**
@@ -833,6 +839,76 @@ function compareWithBounds(operator: ComparisonOperator, left: WorldValue, right
   return UNKNOWN;
 }
 
+/**
+ * `<?` (MAX) or `>?` (MIN) over two operands of ONE world (M11-D3-C1).
+ *
+ * Pinned, it is `std::max` / `std::min` of two eagerly evaluated doubles
+ * (engine/sim/expressions.cpp:212-226, 384-387). Here every operand may be a
+ * value nobody fully established, and the result claims ONLY what holds in
+ * every world the operands allow. Uncorrelated operands are never correlated.
+ *
+ *     exact      exact       the exact pinned result
+ *     UNKNOWN    anything    UNKNOWN — no atom here carries a domain contract,
+ *                            so an unknown operand may lie on either side of
+ *                            any value; it is never zero and never dominated
+ *     one-of S   exact b     member-wise, { pick(s, b) } — one result per
+ *                            possible world of S, so nothing is manufactured
+ *     one-of S   one-of T    when every member of one is <= every member of the
+ *                            other, the result IS that set (MAX: the upper one,
+ *                            MIN: the lower one). Overlapping: only the proven
+ *                            lower bound pick(min S, min T) — pairing members
+ *                            would manufacture values two worlds may never share
+ *     >= L       exact b     MAX: >= max(L, b). MIN: exactly b when L >= b,
+ *                            otherwise >= L
+ *     >= L       >= M        MAX: >= max(L, M). MIN: >= min(L, M)
+ *     >= L       one-of S    MAX: >= max(L, min S). MIN: S itself when
+ *                            L >= max S, otherwise >= min(L, min S)
+ *
+ * There is no upper bound in this evaluator's value domain, so a two-sided
+ * result keeps only its proven lower side. That is a weaker claim, never a
+ * wrong one.
+ */
+function extremumValue(kind: "MAX" | "MIN", left: WorldValue, right: WorldValue): WorldValue {
+  const pick = kind === "MAX" ? Math.max : Math.min;
+  if (isUnknownValue(left) || isUnknownValue(right)) return UNKNOWN;
+  if (isExactValue(left) && isExactValue(right)) return pick(left, right);
+
+  const membersOf = (value: number | OneOfValue): readonly number[] =>
+    isExactValue(value) ? [value] : value.oneOfValues;
+  if (!isBoundedValue(left) && !isBoundedValue(right)) {
+    const a = membersOf(left);
+    const b = membersOf(right);
+    if (a.length === 1 || b.length === 1) {
+      return oneOfValue(a.flatMap((x) => b.map((y) => pick(x, y))));
+    }
+    const [aLow, aHigh, bLow, bHigh] = [Math.min(...a), Math.max(...a), Math.min(...b), Math.max(...b)];
+    if (aHigh <= bLow) return oneOfValue(kind === "MAX" ? b : a);
+    if (bHigh <= aLow) return oneOfValue(kind === "MAX" ? a : b);
+    return { atLeastValue: pick(aLow, bLow) };
+  }
+
+  // At least one proven lower bound. Normalise to (bound, other).
+  const [bound, other] = isBoundedValue(left) ? [left, right] : [right as BoundedValue, left];
+  const lower = bound.atLeastValue;
+  if (isBoundedValue(other)) return { atLeastValue: pick(lower, other.atLeastValue) };
+  const members = membersOf(other);
+  const otherLow = Math.min(...members);
+  const otherHigh = Math.max(...members);
+  if (kind === "MAX") return { atLeastValue: Math.max(lower, otherLow) };
+  // MIN: the bounded side never goes below `lower`; if that already clears
+  // every member of the other side, the other side is the minimum outright.
+  if (lower >= otherHigh) return oneOfValue(members);
+  return { atLeastValue: Math.min(lower, otherLow) };
+}
+
+/** A canonical world value from established members: one distinct member is that exact number. */
+function oneOfValue(members: readonly number[]): WorldValue {
+  const distinct = [...new Set(members)].sort((first, second) => first - second);
+  const only = distinct[0];
+  if (distinct.length === 1 && only !== undefined) return only;
+  return { oneOfValues: distinct };
+}
+
 /** The one truth every member produced, or UNKNOWN when they differ. */
 function agreedComparison(results: readonly number[]): WorldValue {
   const first = results[0];
@@ -1024,6 +1100,8 @@ function evaluateInWorld(
       if (node.kind === "MULTIPLY") return left * right;
       return node.kind === "ADD" ? left + right : left - right;
     }
+    case "EXTREMUM":
+      return extremumValue(extremumOf(node.operator), recurse(node.left), recurse(node.right));
     case "NOT":
       return valueOf(notTruth(truthOf(recurse(node.operand))));
     case "COMPARISON": {

@@ -157,6 +157,9 @@ const ARITHMETIC_BOUND_LIMIT = 1e300;
  *                            (expressions.cpp:179-181, 302-303): 0 or 1
  *   + - *                    finite when both operands are proven, with a bound
  *                            no overflow can exceed (`ARITHMETIC_BOUND_LIMIT`)
+ *   <? >?                    `std::max` / `std::min` (expressions.cpp:212-226):
+ *                            finite when BOTH operands are proven, bound
+ *                            max(|a|, |b|) (M11-D3-C1)
  *   talent.<name>            `create_constant( …, _talent.enabled() )`
  *                            (engine/player/player.cpp:12355-12358): 0 or 1
  *   buff.<name>.up           `buff->check() > 0` through `coerce( bool )`
@@ -211,6 +214,17 @@ function finitenessOf(node: ExpressionNode): ScoreFiniteness {
       return bound <= ARITHMETIC_BOUND_LIMIT
         ? { kind: "PROVEN_FINITE", bound }
         : { kind: "NOT_PROVEN_FINITE", reason: "ARITHMETIC_BOUND_EXCEEDED", at: node.kind };
+    }
+    case "EXTREMUM": {
+      // M11-D3-C1. `std::max` / `std::min` return one operand or the other
+      // (expressions.cpp:212-226), and `std::max( NaN, x )` returns the NaN —
+      // so BOTH operands must be proven; neither rescues the other. Then
+      // |max(a, b)| and |min(a, b)| are at most max(|a|, |b|).
+      const left = finitenessOf(node.left);
+      if (left.kind !== "PROVEN_FINITE") return left;
+      const right = finitenessOf(node.right);
+      if (right.kind !== "PROVEN_FINITE") return right;
+      return { kind: "PROVEN_FINITE", bound: Math.max(left.bound, right.bound) };
     }
     default:
       return { kind: "NOT_PROVEN_FINITE", reason: "NO_AUDITED_DOMAIN", at: atomKey(node) ?? node.kind };

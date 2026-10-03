@@ -1479,6 +1479,12 @@ retarget pseudo-actions (M11-D3-B2, tests/unit/m11d3b2-retarget.test.ts):
                                                   by the first-GCD query
   FIRST, malformed, target-dependent if=        -> UNKNOWN, never REJECTED
   proven FALSE                                 -> eliminated
+extremum operators (M11-D3-C1, tests/unit/m11d3c1-extremum.test.ts):
+  <? is MAX and >? is MIN (pinned tokenizer)   -> exact results pinned both ways
+  precedence 5, left-associative               -> AST shapes pinned
+  finite set / lower bound operands            -> only what holds in every world
+  unknown operand                              -> UNKNOWN, never dominated
+  scope / finiteness                           -> join of operands / both proven
 ```
 
 Required negative pairs, same premises, different construct:

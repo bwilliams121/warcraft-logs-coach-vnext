@@ -4200,8 +4200,8 @@ them would collapse a model we lack into a presence check we have.
 enemy and the other the player.
 
 Recognising `buff.<name>.stack` does NOT unblock the `default[5]` gate, which
-also carries a talent rank, a spell-target count and the `>?` operator. It does
-not need to: an unsupported gate on a `call_action_list` already branches over
+also carries a talent rank, a spell-target count and the `>?` operator (which
+parses since M11-D3-C1; the other two still do not). It does not need to: an unsupported gate on a `call_action_list` already branches over
 both worlds, which is what the design pass predicted and a test now pins.
 
 ### Hypothetical prefix state is not observed state
@@ -4578,6 +4578,26 @@ first GCD:
   is not side-effect independence.
 
 Neither the B1 NON_GCD guard nor any target_if rule was relaxed.
+
+*Since M11-D3-C1* the parser reads SimulationCraft's extremum operators as an
+explicit `EXTREMUM` node — and the direction is the reverse of the glyphs:
+pinned, `<?` tokenizes as `TOK_MAX` and `>?` as `TOK_MIN`
+(`expressions.cpp:132-147`), building `std::max` / `std::min`
+(`212-226`, `413-416`). So `spell_targets>?3` caps a count at three. The
+node keeps the written token; `extremumOf` (`ast.ts`) is the one place its
+meaning is read. Precedence 5 (looser than `+ -`, tighter than comparison),
+left-associative, both operands evaluated and read as magnitudes, so `.react`
+stays a stack count there.
+
+The evaluator claims only what holds in every world: exact results for exact
+operands; member-wise over a finite set against an exact value; a dominating
+set outright; a proven lower bound where only that follows (the value domain
+has no upper bound, so a two-sided result keeps its lower side); and UNKNOWN
+whenever an operand is unknown — no atom carries a domain contract, and pinned
+`std::max` returns a NaN first operand. Scope is the join of the operands'
+scopes (`collectAtoms` walks both). B1 finiteness proves an extremum only when
+BOTH operands are proven, with bound max(|a|, |b|). No other operator, no unary
+minus and no function was opened.
 
 ## Self-Addressing Atoms Need an Acting Action
 

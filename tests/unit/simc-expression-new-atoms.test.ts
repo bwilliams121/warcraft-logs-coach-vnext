@@ -86,9 +86,9 @@ describe("buff.<name>.stack parses as a MAGNITUDE", () => {
 
   it("does NOT unblock the real cds gate, which needs three more forms", () => {
     // Worth stating plainly. The pinned `default[5]` condition also contains a
-    // talent RANK, a spell-target count and the `>?` max operator, all still
-    // refused — and it does not need to parse: an unsupported gate on a
-    // `call_action_list` already branches over both worlds.
+    // talent RANK and a spell-target count, both still refused (its `>?` — a
+    // MINIMUM — parses since M11-D3-C1) — and it does not need to parse: an
+    // unsupported gate on a `call_action_list` already branches over both worlds.
     const real =
       "variable.single_target|!talent.scent_of_blood|buff.scent_of_blood.stack>=" +
       "(2*talent.scent_of_blood.rank*spell_targets.fan_of_knives>?20)";
@@ -176,9 +176,12 @@ describe("recognising three forms opened no namespace", () => {
     },
   );
 
-  it("still refuses the >? and <? operators", () => {
-    expect(parseSimcExpression("combo_points>?5").ok).toBe(false);
-    expect(parseSimcExpression("combo_points<?5").ok).toBe(false);
+  it("reads >? and <? as extremum operators, never as comparisons (RE-POINTED for M11-D3-C1)", () => {
+    for (const operator of [">?", "<?"] as const) {
+      const parsed = parseSimcExpression(`combo_points${operator}5`);
+      expect(parsed.ok && parsed.ast.kind, operator).toBe("EXTREMUM");
+      expect(parsed.ok && parsed.ast.kind === "EXTREMUM" && parsed.ast.operator, operator).toBe(operator);
+    }
   });
 });
 

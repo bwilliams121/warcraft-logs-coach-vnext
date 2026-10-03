@@ -153,11 +153,11 @@ describe("everything outside the subset is refused whole", () => {
     // `dot.` properties are not, which is what shows the namespace did not open.
     ["dot.rupture.remains", "UNSUPPORTED_IDENTIFIER"],
     ["dot.garrote.pmultiplier", "UNSUPPORTED_IDENTIFIER"],
-    // RE-POINTED for M5-B. `>` became supported; SimulationCraft's max operator
-    // `>?` did not, and must never decay into its supported one-char prefix.
-    ["combo_points>?5", "UNSUPPORTED_OPERATOR"],
-    // RE-POINTED for M5-B. `<=` became supported; the min operator `<?` did not.
-    ["combo_points<?5", "UNSUPPORTED_OPERATOR"],
+    // RE-POINTED for M11-D3-C1, which made `>?` and `<?` binary operators
+    // (see the extremum describe below). Where an OPERAND is expected they
+    // are still refused, never read.
+    ["combo_points>?>?5", "UNSUPPORTED_OPERATOR"],
+    ["combo_points<?<?5", "UNSUPPORTED_OPERATOR"],
     ["combo_points==5", "UNSUPPORTED_OPERATOR"],
     ["combo_points!=5", "UNSUPPORTED_OPERATOR"],
     ["combo_points>=5&&buff.x.up", "UNSUPPORTED_OPERATOR"],
@@ -331,8 +331,11 @@ describe("the M5-B additions, against the pinned authority text", () => {
   });
 
   it.each([
-    ["combo_points>?5", ">?"],
-    ["combo_points<?5", "<?"],
+    // RE-POINTED for M11-D3-C1: `>?`/`<?` now parse as EXTREMUM nodes (and
+    // never as `>`/`<` — see the extremum describe); a doubled one still
+    // refuses at its own fragment rather than truncating.
+    ["combo_points>=>?5", ">?"],
+    ["combo_points<=<?5", "<?"],
     ["combo_points==5", "=="],
     ["combo_points!=5", "!="],
   ])("refuses %s rather than truncating it to a supported prefix", (source, fragment) => {

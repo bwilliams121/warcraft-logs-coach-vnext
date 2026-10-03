@@ -303,8 +303,10 @@ describe("unsupported syntax never enters the truth domain", () => {
     "buff.darkest_night.duration>=2",
     "debuff.deathmark.remains>=2",
     "energy.regen_combined>40",
-    "combo_points>?5",
-    "combo_points<?5",
+    // RE-POINTED for M11-D3-C1, which made `>?`/`<?` binary operators. A
+    // dangling or doubled one is still refused whole.
+    "combo_points>?",
+    "combo_points<?<?5",
     "combo_points!=5",
     // RE-POINTED for M5-D1, which added BINARY `-`. Division stays refused, and
     // so does UNARY minus — `>=-2` is a negative literal, not a subtraction.

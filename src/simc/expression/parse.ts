@@ -3,7 +3,7 @@
  *
  * SUPPORTED, AND NOTHING ELSE:
  *
- *     operators     !   &   |   >=   >   =   <   <=   ( )
+ *     operators     !   &   |   >=   >   =   <   <=   <?   >?   ( )
  *     literals      non-negative integers, and non-negative decimals of the
  *                   form digits '.' digits (M11-B3)
  *     atoms         combo_points
@@ -21,6 +21,9 @@
  *     |                or
  *     &                and
  *     >= > = < <=      comparison (non-chaining)
+ *     <? >?            extremum: <? is MAX, >? is MIN (M11-D3-C1)
+ *     + -              additive
+ *     *                multiplicative
  *     !                unary, tightest
  *
  * So `!buff.darkest_night.up&combo_points>=5|buff.darkest_night.up&combo_points.deficit=0`
@@ -34,7 +37,7 @@
  *
  * FAIL CLOSED, WHOLE-EXPRESSION. Every rejection path returns a failure for the
  * ENTIRE expression. There is no partial parse, no skipped fragment and no
- * placeholder node. `!=`, `&&`, `||`, `>?`, `<?`, `==`, UNARY minus, the
+ * placeholder node. `!=`, `&&`, `||`, `==`, UNARY minus, the
  * decimal forms outside digits '.' digits (`.5`, `1.`, `1e3`) and
  * every unlisted identifier (`spell_targets.y`, `active_dot.z`,
  * `energy.regen_combined`, `main_hand.dagger`, `talent.x.rank`,
@@ -43,7 +46,7 @@
  *
  * BINARY `-` IS SUPPORTED FROM M5-D1; unary `-` is not. See `parseAdditive`.
  *
- * WHY `>` AND `<=` ARE HERE AND `>?` / `<?` ARE NOT
+ * WHY `>` AND `<=` ARE HERE
  *
  * M5-B evaluates the pinned `spend` sub-list, whose first two lines need `<=`
  * (`buff.envenom.remains<=1`) and `>` (`energy.pct>70`). Adding exactly those
@@ -51,11 +54,13 @@
  * SimulationCraft's operator set would widen the supported surface without a
  * decision that needs it.
  *
- * `>?` and `<?` are SimulationCraft's max and min operators. They share a
- * leading character with `>` and `<`, so every operator match in this file is
- * LONGEST-FIRST: a `>?` that decayed into `>` followed by a stray `?` would
- * change an authority condition's meaning silently, which is the exact class of
- * failure the whole-expression refusal exists to prevent.
+ * `<?` and `>?` are SimulationCraft's extremum operators, supported from
+ * M11-D3-C1 — and `<?` is the MAXIMUM, `>?` the MINIMUM, the reverse of what
+ * the glyphs suggest (see `extremumOf` in `ast.ts`). They share a leading
+ * character with `<` and `>`, so they are read at their own precedence level
+ * (`parseExtremum`) BEFORE any comparison operator is tried: a `>?` that
+ * decayed into `>` followed by a stray `?` would change an authority
+ * condition's meaning silently.
  *
  * A consequence worth knowing: the pinned `generate` call condition uses `>`
  * and therefore now PARSES. It does not follow that it is decidable — see
@@ -134,8 +139,10 @@ function startsWith(cursor: Cursor, token: string): boolean {
  * Operator-shaped tokens OUTSIDE the subset.
  *
  * Every entry here is longer than, or disjoint from, any supported operator it
- * could be confused with. `>?` and `<?` appear so they win against the
- * supported `>` and `<`; `==` wins against `=`; `!=` wins against `!`; `&&` and
+ * could be confused with. `>?` and `<?` are binary operators since M11-D3-C1,
+ * read by `parseExtremum`, and STAY here for the reason `-` does: this list is
+ * consulted where an OPERAND is expected, so a dangling `>?5` or `a<?<?b` is
+ * refused rather than read. `==` wins against `=`; `!=` wins against `!`; `&&` and
  * `||` win against `&` and `|`; `%%` wins against `%`.
  *
  * `>`, `<`, `>=`, `<=` and `=` are deliberately ABSENT: they are supported, and
@@ -457,7 +464,9 @@ function parseUnary(cursor: Cursor): ExpressionNode {
  * The order below is the whole correctness argument of this function. `>?` is
  * tested before `>=` and `>`; `<?` before `<=` and `<`; `==` before `=`. An
  * unsupported two-character operator must be REFUSED, never silently truncated
- * to its supported one-character prefix.
+ * to its supported one-character prefix. Since M11-D3-C1 `parseExtremum`
+ * consumes every `<?` and `>?` before this runs; the two refusals stay as the
+ * backstop that keeps a missed one from decaying into `<` or `>`.
  */
 function readComparisonOperator(cursor: Cursor): ComparisonOperator | null {
   if (startsWith(cursor, ">?")) {
@@ -557,11 +566,38 @@ function parseAdditive(cursor: Cursor): ExpressionNode {
   }
 }
 
+/**
+ * `<?` and `>?`, SimulationCraft's extremum operators (M11-D3-C1).
+ *
+ * Precedence 5 in pinned SimulationCraft — looser than `+`/`-` (6), tighter
+ * than comparison (4) — and LEFT-ASSOCIATIVE, so `a>?b<?c` is `(a>?b)<?c`
+ * and `x>=y>?3` is `x>=(y>?3)` (engine/sim/expressions.cpp:1081-1110,
+ * 1311-1324). `<?` is the MAXIMUM and `>?` the MINIMUM — see `extremumOf`.
+ * Both operands are magnitude positions.
+ *
+ * Read here, before `readComparisonOperator` can see the leading `<` or `>`,
+ * so neither can ever decay into a comparison followed by a stray `?`.
+ */
+function parseExtremum(cursor: Cursor): ExpressionNode {
+  let left = parseAdditive(cursor);
+  for (;;) {
+    const operator = startsWith(cursor, "<?") ? "<?" : startsWith(cursor, ">?") ? ">?" : null;
+    if (operator === null) return left;
+    cursor.index += 2;
+    left = {
+      kind: "EXTREMUM",
+      operator,
+      left: asMagnitudeOperand(left),
+      right: asMagnitudeOperand(parseAdditive(cursor)),
+    };
+  }
+}
+
 function parseComparison(cursor: Cursor): ExpressionNode {
-  const left = parseAdditive(cursor);
+  const left = parseExtremum(cursor);
   const operator = readComparisonOperator(cursor);
   if (operator === null) return left;
-  const right = parseAdditive(cursor);
+  const right = parseExtremum(cursor);
   if (readComparisonOperator(cursor) !== null) {
     throw new ParseError("CHAINED_COMPARISON", cursor.text, cursor.index);
   }

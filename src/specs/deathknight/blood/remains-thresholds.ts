@@ -57,6 +57,7 @@ function collect(node: ExpressionNode, at: string, into: BloodRemainsThreshold[]
     case "ADD":
     case "SUBTRACT":
     case "MULTIPLY":
+    case "EXTREMUM":
       collect(node.left, at, into);
       collect(node.right, at, into);
       return;
