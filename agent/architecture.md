@@ -4645,6 +4645,57 @@ never 0 and never the line's `default=`.
 - Not executed: the single-list walker (`list-selection.ts`) and the
   precombat list; their variables read UNKNOWN.
 
+*Since M11-D3-C3* the nested scan reads `line_cd=` as READINESS
+(`src/simc/line-cooldown.ts`). Pinned: every APL LINE is its own `action_t`
+with a private `cooldown_t("line_cd")` (player.cpp:4213-4243, action.cpp:502),
+so two lines with one token keep independent timers. A foreground line's
+timer starts at SELECTION (player.cpp:7390), an off-GCD one after `execute()`
+(action.cpp:85), a variable's or a call's NEVER (both are handled inside
+`select_action`). It is ready again when `now - start >= duration` — at the
+boundary it is ready — with no haste, no queue window and no tolerance
+(cooldown.cpp:422-511). It is reset to ready at every pull, and precombat
+starts nothing. `line_cd=0` is no restriction.
+
+- Readiness is a fact the caller derived beforehand
+  (`NestedSelectionInput.lineCooldownFor`), from a `LineSelectionHistory`
+  of LINE SELECTIONS — the timer's start event — never of casts as such: per
+  line, ATTRIBUTED and AMBIGUOUS selections as bounds (`selectedAtMostMs`,
+  and `selectedAtLeastMs` or `null`), the known pull, and a
+  `selectionCoverage` that is `SELECTION_COVERAGE_PROVEN` over an interval
+  or `NOT_PROVEN` (recording, separately, any cast-retrieval coverage). The
+  default with no history is UNKNOWN. The spell's own cooldown is never a
+  substitute.
+- THE EVIDENCE BOUNDARY (corrected in review). A successful cast bounds its
+  selection from ABOVE only — the selection precedes it by any queue delay or
+  cast — and a selection may be dropped and cast nothing while still
+  restarting the timer. So complete cast retrieval is not selection coverage,
+  and a cast is no lower bound. `lineSelectionHistoryFromObservedCasts`
+  records each attributed cast as `{ selectedAtLeastMs: null,
+  selectedAtMostMs: cast }` and its coverage as `NOT_PROVEN`: ordinary cast
+  history proves neither READY nor NOT_READY.
+- Attribution (approved): an observed cast of token X is evidence about line L
+  only when L is the SOLE in-combat player-action entry that can produce X.
+  Every other cast of X is AMBIGUOUS for each entry that could have produced
+  it, and never proof of a specific line's selection.
+- NOT_READY: an attributed selection with `selectedAtLeastMs` >= pull,
+  `selectedAtMostMs` < D, and `selectedAtLeastMs` > D - duration; later
+  selections, seen or not, only extend it. READY: `SELECTION_COVERAGE_PROVEN`
+  over [max(pull, D - duration), D) and no attributed or ambiguous selection
+  that may lie in (D - duration, D) at or after the pull. Otherwise UNKNOWN.
+  A NOT_READY line is skipped before its `if=`
+  (`LINE_COOLDOWN_NOT_READY_CONTINUE`); an UNKNOWN one may fire at most.
+- The decision's own prefix: `firstGcdSelectionAcrossRescans` adds each fired
+  line with a positive `line_cd` to a branch-local
+  `linesStartedThisDecision`, part of the world's key and passed to every
+  rescan; a line in it is NOT_READY there (ready = D + duration > D). This
+  is the one selection whose instant is known exactly — the analyzer made it,
+  in its own modelled world — and it is branch state, never history.
+- Variables: `line_cd` is pinned to change nothing; the line executes as if it
+  were absent. Retarget pseudo-actions keep their M11-D3-B2 semantics:
+  `retarget_auto_attack`'s timer is never read, `retarget` never becomes a
+  transition. Still refused, unchanged: `line_cd` on a call or run line, on
+  any line the single-list walker reads, and a malformed value anywhere.
+
 ## Self-Addressing Atoms Need an Acting Action
 
 `remains`, `refreshable` and `pmultiplier` are written bare and mean "the ACTING

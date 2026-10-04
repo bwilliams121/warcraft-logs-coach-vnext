@@ -1493,9 +1493,24 @@ variable execution (M11-D3-C2, tests/unit/m11d3c2-variable-execution.test.ts):
   pre-branch write, branch-local overwrite     -> sibling reads pre-branch (D, G)
   certain / undecided call over an initial     -> caller reads write / join (E, F)
   truth-shaped read of an undecided write      -> enumerated, as when unbound
-  other ops, cycling, delay=, line_cd=         -> variable UNKNOWN, never a refusal
+  other ops, cycling, delay=                   -> variable UNKNOWN, never a refusal
   run TRUE world / undecided call / if=        -> isolated / joined / joined
   undecided, unknown, divergent, unmodelled    -> UNKNOWN, never REJECTED
+line_cd (M11-D3-C3, tests/unit/m11d3c3-line-cd.test.ts):
+  attributed cast t=0, decision t=15, line_cd=10 -> UNKNOWN: a hidden selection at
+                                                  t=12 that cast nothing is the
+                                                  same cast log (review A)
+  cast inside the window, no selection lower bound -> UNKNOWN, never NOT_READY (B)
+  synthetic selection with S_lo > D - N        -> NOT_READY (C)
+  synthetic PROVEN selection coverage, none in window -> READY (D)
+  proven selection at t=0: t=5 / t=10 / t=11   -> not ready / READY / ready
+  same token from another entry                -> ambiguous, never a line's selection (F)
+  two lines, one token                         -> independent timers
+  late / early-ending / no-pull / cast-only coverage -> UNKNOWN, never ready by absence
+  variable line                                -> executes as if absent, timer unread (H)
+  retarget_auto_attack / retarget              -> B2 unchanged: converges / refused (I, J)
+  fired earlier in this decision               -> NOT_READY in that world's rescans only (E)
+  no history supplied                          -> UNKNOWN, whatever the spell's cooldown
 ```
 
 Required negative pairs, same premises, different construct:

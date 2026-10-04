@@ -54,6 +54,7 @@
  */
 
 import type { ExecutionLane } from "../data/game/ability-gcd-semantics.js";
+import { aplLineKey } from "./apl-authority.js";
 import type {
   OneForegroundScanResult,
   ScanCandidate,
@@ -442,6 +443,23 @@ function mergeSummaries(left: NonGcdPrefixSummary, right: NonGcdPrefixSummary): 
   };
 }
 
+/**
+ * What THIS decision's own zero-time prefix has done in the world being
+ * explored, beyond the caller's state (M11-D3-C3).
+ *
+ * `linesStartedThisDecision` are the lines with a positive `line_cd` that
+ * fired earlier in this world. SimulationCraft starts a line's timer when it
+ * is selected (player.cpp:7390), and a rescan at the same instant reads it
+ * running (ready = t + duration > t), so each is NOT READY for the rest of
+ * this world. A caller forwards it to its line-cooldown resolver
+ * (`lineCooldownResolverFor`); a caller that ignores it leaves those lines at
+ * whatever its resolver says, which without history is UNKNOWN. Sorted,
+ * distinct, and part of the world's key.
+ */
+export interface FirstGcdDecisionContext {
+  readonly linesStartedThisDecision: readonly string[];
+}
+
 export interface FirstGcdSelectionInput<TState> {
   /** Named for the cycle key and the trace. The scan itself is the caller's. */
   readonly rootListName: string;
@@ -462,7 +480,7 @@ export interface FirstGcdSelectionInput<TState> {
    * becomes an expression binding or a usability verdict. The caller closes over
    * the authority and its resolvers.
    */
-  readonly scanFor: (state: TState) => OneForegroundScanResult;
+  readonly scanFor: (state: TState, decision: FirstGcdDecisionContext) => OneForegroundScanResult;
   /** The lane of a selectable action. `UNKNOWN_LANE` refuses; it never defaults. */
   readonly laneFor: (step: TraversalStep) => ExecutionLane;
   readonly transitionFor: NonGcdTransitionResolver<TState>;
@@ -487,6 +505,14 @@ function entryKey(entry: TraversalPathEntry): string {
 
 function sequenceKey(entries: readonly TraversalPathEntry[]): string {
   return entries.map(entryKey).join(" -> ");
+}
+
+/** `started` plus the step's line, when that line carries a positive `line_cd` (M11-D3-C3). */
+function startedAfter(started: readonly string[], step: TraversalStep): readonly string[] {
+  const duration = step.lineCooldown?.durationMs ?? 0;
+  if (duration <= 0) return started;
+  const key = aplLineKey(step);
+  return started.includes(key) ? started : [...started, key].sort();
 }
 
 function withAction(prefix: PrefixFacts, entry: TraversalPathEntry): PrefixFacts {
@@ -705,9 +731,20 @@ export function firstGcdSelectionAcrossRescans<TState>(
 ): RotationalGcdResult {
   const memo = new Map<string, BranchResult>();
 
+  /** A world's key: the caller's state, plus the lines its prefix started (M11-D3-C3). */
+  function worldKey(state: TState, started: readonly string[]): string {
+    const base = `${input.rootListName}::${input.stateKey(state)}`;
+    return started.length === 0 ? base : `${base}::line_cd_started=${started.join(",")}`;
+  }
+
   /** Explores one abstract state. `onPath` is the cycle guard for THIS branch. */
-  function explore(state: TState, prefix: PrefixFacts, onPath: readonly string[]): BranchResult {
-    const key = `${input.rootListName}::${input.stateKey(state)}`;
+  function explore(
+    state: TState,
+    prefix: PrefixFacts,
+    onPath: readonly string[],
+    started: readonly string[],
+  ): BranchResult {
+    const key = worldKey(state, started);
 
     // CYCLE FIRST, memo second. A state already on this path has produced no
     // progress, and that is true regardless of what a completed exploration of
@@ -738,7 +775,7 @@ export function firstGcdSelectionAcrossRescans<TState>(
     if (memoized !== undefined) return rebase(memoized, prefix);
 
     const nextOnPath = [...onPath, key];
-    const scan = input.scanFor(state);
+    const scan = input.scanFor(state, { linesStartedThisDecision: started });
 
     if (scan.kind === "BLOCKED") {
       // M11-D3-A. A scan that explored an undecided run gate whose worlds did
@@ -748,7 +785,14 @@ export function firstGcdSelectionAcrossRescans<TState>(
       // agrees on replaces the gate. Otherwise the gate stands, exactly as a
       // scan blocked there.
       if (scan.explored !== undefined) {
-        const converged = exploreResolution(scan.explored.resolution, state, key, prefix, nextOnPath);
+        const converged = exploreResolution(
+          scan.explored.resolution,
+          state,
+          key,
+          prefix,
+          nextOnPath,
+          started,
+        );
         if (converged.kind !== "UNKNOWN") return converged;
       }
       const trace: RotationalTraceNode = {
@@ -770,7 +814,7 @@ export function firstGcdSelectionAcrossRescans<TState>(
       return result;
     }
 
-    return exploreResolution(scan.resolution, state, key, prefix, nextOnPath);
+    return exploreResolution(scan.resolution, state, key, prefix, nextOnPath, started);
   }
 
   /** The worlds one resolved scan offers, explored and converged. */
@@ -780,6 +824,7 @@ export function firstGcdSelectionAcrossRescans<TState>(
     key: string,
     prefix: PrefixFacts,
     nextOnPath: readonly string[],
+    started: readonly string[],
   ): BranchResult {
     if (resolution.kind === "NO_ACTION") {
       const trace: RotationalTraceNode = {
@@ -800,6 +845,7 @@ export function firstGcdSelectionAcrossRescans<TState>(
         state,
         prefix,
         nextOnPath,
+        started,
       );
       const trace: RotationalTraceNode = {
         stateKey: key,
@@ -851,7 +897,7 @@ export function firstGcdSelectionAcrossRescans<TState>(
         });
         continue;
       }
-      const branch = takeCandidate(candidate, state, prefix, nextOnPath);
+      const branch = takeCandidate(candidate, state, prefix, nextOnPath, started);
       results.push(branch);
       branches.push({
         label: "this entry is the one that fires",
@@ -901,9 +947,10 @@ export function firstGcdSelectionAcrossRescans<TState>(
     state: TState,
     prefix: PrefixFacts,
     onPath: readonly string[],
+    started: readonly string[],
   ): BranchResult {
     const emptyTrace: RotationalTraceNode = {
-      stateKey: `${input.rootListName}::${input.stateKey(state)}`,
+      stateKey: worldKey(state, started),
       rootListName: input.rootListName,
       scan: "SELECTION",
       branches: [],
@@ -1044,7 +1091,15 @@ export function firstGcdSelectionAcrossRescans<TState>(
     // can differ on the next scan is the abstract state, so a transition that
     // returns an equivalent state is caught by the cycle guard rather than by a
     // depth limit.
-    return explore(outcome.nextState, withAction(prefix, candidateEntry(candidate)), onPath);
+    //
+    // The fired line's own timer is now running in this world (M11-D3-C3),
+    // and only in this world: the set is branch state, never history.
+    return explore(
+      outcome.nextState,
+      withAction(prefix, candidateEntry(candidate)),
+      onPath,
+      startedAfter(started, candidate.step),
+    );
   }
 
   /** Replaces a branch's trace without touching its verdict. */
@@ -1065,7 +1120,7 @@ export function firstGcdSelectionAcrossRescans<TState>(
     return { ...result, prefix: mergePrefixes(prefix, result.prefix) };
   }
 
-  const explored = explore(input.initialState, EMPTY_PREFIX, []);
+  const explored = explore(input.initialState, EMPTY_PREFIX, [], []);
 
   switch (explored.kind) {
     case "SELECTED":

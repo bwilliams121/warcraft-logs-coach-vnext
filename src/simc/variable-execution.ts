@@ -32,9 +32,17 @@
  * `set`, `setif` and `reset` — the three operations whose result does not
  * depend on the value already stored, so they need no history. Everything
  * else that can change a value — the combining operations, `cycling_variable`,
- * a line with an option outside the supported set (`delay=` and `line_cd=`
- * gate readiness on a cooldown; `target_if=` on a target) — makes the variable
- * UNKNOWN. That is never a refusal: SimulationCraft still executes the line,
+ * a line with an option outside the supported set (`delay=` gates readiness
+ * on a cooldown; `target_if=` on a target) — makes the variable UNKNOWN.
+ *
+ * `line_cd=` IS supported, and as nothing (M11-D3-C3): a variable line's
+ * timer is never started. `variable_t::execute` runs inline in
+ * `select_action` (player.cpp:14235-14241) and does nothing a real action does
+ * (variable.cpp:258), and only `execute_action` and `do_execute` start a
+ * line's timer (player.cpp:7390, action.cpp:85). So `line_cooldown->down()`
+ * in `variable_t::action_ready` (variable.cpp:360) is always false, whatever
+ * history says, and the line executes exactly as it would without the option.
+ * A malformed value is still refused. That is never a refusal: SimulationCraft still executes the line,
  * and an unknown value is not a malformed authority.
  *
  * ONE VALUE PER NAME, AND THE LATER WRITE WINS
@@ -64,6 +72,7 @@ import {
   type ScanVariables,
 } from "./expression/evaluate.js";
 import { parseSimcExpression } from "./expression/parse.js";
+import { lineCooldownOptionOf } from "./line-cooldown.js";
 
 /** What one `variable` line did to the scan's variables. */
 export type VariableExecutionRecord =
@@ -151,7 +160,10 @@ export function executeVariableLine(
   });
 
   if (action.actionToken === "cycling_variable") return notModelled("CYCLING_VARIABLE");
-  if (structure.options.some((entry) => !MODELLED_OPTION_KEYS.includes(entry.key))) {
+  if (
+    structure.options.some((entry) => !MODELLED_OPTION_KEYS.includes(entry.key) && entry.key !== "line_cd") ||
+    lineCooldownOptionOf(action).kind === "MALFORMED"
+  ) {
     return notModelled("UNMODELLED_OPTION");
   }
   if (operation === "print") return { state, record: { kind: "INERT", reason: "PRINT" } };

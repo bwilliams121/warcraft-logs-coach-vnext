@@ -187,7 +187,10 @@ describe("options around the condition keep their meaning, and unsupported ones 
   });
 
   it("does not let a trailing unrecognised option be skipped: the scan blocks at it", () => {
-    const result = traverse([{ listName: "default", actions: ["kick,if=buff.x.up,line_cd=5", "slam"] }], {
+    // RE-POINTED at M11-D3-C3, which made `line_cd=` a recognised readiness
+    // option (without history its timer is UNKNOWN, never ready). `moving=` is
+    // a pinned action option this project still does not model.
+    const result = traverse([{ listName: "default", actions: ["kick,if=buff.x.up,moving=1", "slam"] }], {
       ...BINDINGS,
       knownBuffs: [{ name: "x", up: true }],
     });

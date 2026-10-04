@@ -390,6 +390,38 @@ converges. SimulationCraft would reach the proven entry in every world; the
 engine answers UNKNOWN at the gate. Sound, and a coverage limit; lifting it
 means teaching D3-A's collapse about pseudo-actions, which B2 did not do.
 
+## After M11-D3-C3: what line_cd support does not reach
+
+**Raised:** M11-D3-C3 (2026-10-04). Coverage, not soundness: each is UNKNOWN
+or refused.
+
+**Ordinary Warcraft Logs history decides no line_cd.** The timer starts at
+line SELECTION, and a cast proves only that a selection happened at or
+before it: no lower bound (queue delay, cast time), and no coverage (a
+dropped selection casts nothing). So history built from casts
+(`lineSelectionHistoryFromObservedCasts`) is always UNKNOWN for a positive
+`line_cd`, and only the analyzer's own same-decision prefix decides one.
+Deciding more needs SELECTION evidence that does not exist today: a source
+that proves every selection in an interval (READY), or one that proves a
+selection's instant from below (NOT_READY). The five public authorities
+carry no `line_cd`, so no public adapter supplies any history.
+
+**Call and run lines.** Pinned, `line_cd` on a `call_action_list` is never
+started (a call is recursed into, never executed), and on a
+`run_action_list` it starts at selection. Neither occurs in Cohorts A/B, so
+both stay refused as unsupported options.
+
+**What the probes still stop at.** Havoc reads past its two
+`retarget_auto_attack,line_cd=1` lines (B2) and stops at `default[3]` on
+`gcd.max`. Survival's `retarget,…,line_cd=5` is refused at its `target_if`
+(its `if=fight_style.dungeonroute` is unsupported) before the timer matters,
+and would need target identity anyway. Devourer's four
+`pick_up_fragment,…,line_cd=` lines share one token across five entries and
+are never observed casts, so their timers can only be UNKNOWN; its scans stop
+earlier, at `cooldowns[0]`. Enhancement's `bloodlust,line_cd=600` is its
+sole Bloodlust entry, so an observed cast would attribute; Enhancement has no
+analyzer.
+
 ## After M11-D3-C2: what generic variable execution does not reach
 
 **Raised:** M11-D3-C2 (2026-10-03). Coverage, not soundness: each reads UNKNOWN.

@@ -144,7 +144,8 @@ export type LineCondition =
        * false; that proof lives in `TraversalStep.targetingRefusal`, not here,
        * because it is a claim about one fragment rather than about the line.
        */
-      readonly why: "NOT_APPLICABLE" | "PROVEN_UNUSABLE" | "UNSUPPORTED_TARGETING";
+      readonly why:
+        "NOT_APPLICABLE" | "PROVEN_UNUSABLE" | "UNSUPPORTED_TARGETING" | "LINE_COOLDOWN_NOT_READY";
     };
 
 export type LineOutcome = "ELIMINATED" | "POSSIBLE" | "DEFINITE_WINNER";

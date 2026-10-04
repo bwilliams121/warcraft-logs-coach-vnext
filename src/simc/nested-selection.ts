@@ -137,6 +137,13 @@ import type { TargetIndependenceFailure, TargetIndependentElimination } from "./
 import { targetingOutcomeFor, type TargetIfVerdict, type TargetingOutcome } from "./target-if.js";
 import { firstGcdPseudoEffectOf, pseudoActionOf, type PseudoActionRecord } from "./pseudo-actions.js";
 import { executeVariableLine, type VariableExecutionRecord } from "./variable-execution.js";
+import {
+  lineCooldownOptionOf,
+  NO_LINE_COOLDOWN_HISTORY,
+  withoutLineCooldownOption,
+  type LineCooldownRecord,
+  type LineCooldownResolver,
+} from "./line-cooldown.js";
 
 // --------------------------------------------------------------------------
 // Path and trace
@@ -237,6 +244,14 @@ export type TraversalStepOutcome =
    */
   | "PROVEN_UNUSABLE_CONTINUE"
   /**
+   * The entry's own `line_cd` timer provably still runs (M11-D3-C3). Its
+   * condition was NEVER evaluated: `action_ready` reads the timer before
+   * `if_expr` (action.cpp:2601-2611). Distinct from `PROVEN_UNUSABLE_CONTINUE`,
+   * which is about the ACTION; this is about one APL LINE — the same spell on
+   * another line has its own timer.
+   */
+  | "LINE_COOLDOWN_NOT_READY_CONTINUE"
+  /**
    * The entry cycles or retargets, and a TARGET-INDEPENDENT conjunct of its
    * condition is proven FALSE (M5-D1).
    *
@@ -303,6 +318,11 @@ export interface TraversalStep {
    * `variable-execution.ts`). ABSENT for every other entry.
    */
   readonly variableExecution?: VariableExecutionRecord;
+  /**
+   * The line's `line_cd` timer and its readiness at this decision (M11-D3-C3;
+   * see `line-cooldown.ts`). ABSENT for every entry whose line carries none.
+   */
+  readonly lineCooldown?: LineCooldownRecord;
   /**
    * The gate-irrelevance claim, when one carried this entry past an unreadable
    * condition (M5-D1).
@@ -551,6 +571,14 @@ export interface NestedSelectionInput {
    * condition blocks the scan.
    */
   readonly gateIrrelevanceFor?: GateIrrelevanceResolver;
+  /**
+   * The readiness of a line's own `line_cd` timer (M11-D3-C3).
+   *
+   * OPTIONAL, defaulting to UNKNOWN for every line that carries a positive
+   * `line_cd` — never READY. A caller that supplies no history gets lines
+   * that may fire at most, never a timer assumed idle.
+   */
+  readonly lineCooldownFor?: LineCooldownResolver;
   /** Defaults to the top of the entry list. */
   readonly startBoundary?: ScanStartBoundary;
 }
@@ -852,9 +880,11 @@ function stepOf(
     readonly gateIrrelevance?: GateIrrelevance | null;
     readonly pseudoAction?: PseudoActionRecord | undefined;
     readonly variableExecution?: VariableExecutionRecord | undefined;
+    readonly lineCooldown?: LineCooldownRecord | undefined;
   } = {},
 ): TraversalStep {
   return {
+    ...(verdicts.lineCooldown === undefined ? {} : { lineCooldown: verdicts.lineCooldown }),
     ...(verdicts.pseudoAction === undefined ? {} : { pseudoAction: verdicts.pseudoAction }),
     ...(verdicts.variableExecution === undefined ? {} : { variableExecution: verdicts.variableExecution }),
     applicability: verdicts.applicability ?? { kind: "APPLICABLE" },
@@ -899,6 +929,7 @@ interface ScanContext {
   readonly authority: AplAuthority;
   readonly bindings: AtomBindings;
   readonly usabilityFor: ActionUsabilityVerdictResolver;
+  readonly lineCooldownFor: LineCooldownResolver;
   readonly applicabilityFor: ActionApplicabilityResolver;
   readonly gateIrrelevanceFor: GateIrrelevanceResolver;
   /** Every step visited anywhere, in visit order. Accumulated across recursion. */
@@ -1788,10 +1819,16 @@ function walkList(
     // reads only player state is ready exactly when the line without
     // `target_if` would be — so it is evaluated as an ordinary line below.
     // Everything else is refused, as before.
+    //
+    // A well-formed `line_cd=` is not a targeting option (M11-D3-C3): it is
+    // read below, as readiness, and every other option on the line is judged
+    // without it. A malformed one stays an unsupported option and is refused.
+    const lineCooldownOption = lineCooldownOptionOf(action);
+    const scanned = lineCooldownOption.kind === "DURATION" ? withoutLineCooldownOption(action) : action;
     let targetSelection: TargetingRefusal | null = null;
-    if (action.unsupportedOptions.length > 0) {
-      const optionKeys = action.unsupportedOptions.map((option) => option.optionKey);
-      const targeting = targetingOutcomeFor(action, bindingsOf(context));
+    if (scanned.unsupportedOptions.length > 0) {
+      const optionKeys = scanned.unsupportedOptions.map((option) => option.optionKey);
+      const targeting = targetingOutcomeFor(scanned, bindingsOf(context));
 
       if (targeting.kind === "ELIMINATED_FOR_EVERY_TARGET") {
         const elimination = targeting.elimination;
@@ -1857,7 +1894,48 @@ function walkList(
       continue;
     }
 
-    const usability: ActionUsability = verdict.kind === "PROVEN_USABLE" ? "PROVEN_USABLE" : "UNKNOWN";
+    // ---- line_cd (M11-D3-C3; see `line-cooldown.ts`) ----
+    //
+    // Read in `action_ready` before `if_expr` (action.cpp:2601-2611), so a line
+    // whose timer provably runs never reaches its condition. Its readiness is
+    // the caller's history fact — never the spell's own cooldown, never assumed.
+    // An UNKNOWN timer leaves the line possible at most, exactly like unknown
+    // usability; a line with `line_cd=0` has no timer at all.
+    const lineCooldown: LineCooldownRecord | undefined =
+      lineCooldownOption.kind === "DURATION"
+        ? {
+            durationMs: lineCooldownOption.durationMs,
+            readiness:
+              lineCooldownOption.durationMs <= 0
+                ? { kind: "READY", basis: "NO_RESTRICTION" }
+                : context.lineCooldownFor(action, lineCooldownOption.durationMs),
+          }
+        : undefined;
+    if (lineCooldown?.readiness.kind === "NOT_READY") {
+      context.steps.push(
+        stepOf(
+          action,
+          path,
+          { kind: "NOT_EVALUATED", why: "LINE_COOLDOWN_NOT_READY" },
+          verdict.kind === "PROVEN_USABLE" ? "PROVEN_USABLE" : "UNKNOWN",
+          "LINE_COOLDOWN_NOT_READY_CONTINUE",
+          {
+            applicability,
+            usabilityVerdict: verdict,
+            targetingRefusal: targetSelection,
+            pseudoAction,
+            lineCooldown,
+          },
+        ),
+      );
+      continue;
+    }
+
+    const usability: ActionUsability =
+      verdict.kind === "PROVEN_USABLE" &&
+      (lineCooldown === undefined || lineCooldown.readiness.kind === "READY")
+        ? "PROVEN_USABLE"
+        : "UNKNOWN";
 
     if (gate.kind === "UNSUPPORTED") {
       // Never skipped, never read as false. We cannot tell whether it fires, so
@@ -1874,6 +1952,7 @@ function walkList(
           gateIrrelevance: irrelevance,
           targetingRefusal: targetSelection,
           pseudoAction,
+          lineCooldown,
         });
         context.steps.push(step);
         candidates.push({ identity: action.actionToken, step, definite: false });
@@ -1886,6 +1965,7 @@ function walkList(
         gateIrrelevance: irrelevance,
         targetingRefusal: targetSelection,
         pseudoAction,
+        lineCooldown,
       });
       context.steps.push(step);
       return earliestObstacle(candidates, {
@@ -1905,6 +1985,7 @@ function walkList(
           usabilityVerdict: verdict,
           targetingRefusal: targetSelection,
           pseudoAction,
+          lineCooldown,
         }),
       );
       continue;
@@ -1921,6 +2002,7 @@ function walkList(
         usabilityVerdict: verdict,
         targetingRefusal: targetSelection,
         pseudoAction,
+        lineCooldown,
       });
       context.steps.push(step);
       candidates.push({ identity: action.actionToken, step, definite: true });
@@ -1932,6 +2014,7 @@ function walkList(
       usabilityVerdict: verdict,
       targetingRefusal: targetSelection,
       pseudoAction,
+      lineCooldown,
     });
     context.steps.push(step);
     candidates.push({ identity: action.actionToken, step, definite: false });
@@ -2031,6 +2114,7 @@ export function resolveOneForegroundScan(input: NestedSelectionInput): OneForegr
     authority: input.authority,
     bindings: input.bindings,
     usabilityFor: input.usabilityFor,
+    lineCooldownFor: input.lineCooldownFor ?? NO_LINE_COOLDOWN_HISTORY,
     applicabilityFor: input.applicabilityFor ?? allApplicable(),
     gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
     steps,
@@ -2109,6 +2193,7 @@ export function selectAcrossLists(input: NestedSelectionInput): TraversalResult 
     authority: input.authority,
     bindings: input.bindings,
     usabilityFor: input.usabilityFor,
+    lineCooldownFor: input.lineCooldownFor ?? NO_LINE_COOLDOWN_HISTORY,
     applicabilityFor: input.applicabilityFor ?? allApplicable(),
     gateIrrelevanceFor: input.gateIrrelevanceFor ?? noGateIrrelevance(),
     steps,

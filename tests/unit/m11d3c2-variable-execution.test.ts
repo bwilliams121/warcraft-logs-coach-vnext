@@ -272,7 +272,10 @@ describe("executing one variable line", () => {
       "variable,name=x,op=floor",
       "cycling_variable,name=x,op=add,value=1",
       "variable,name=x,value=3,delay=2",
-      "variable,name=x,value=3,line_cd=5",
+      // RE-POINTED at M11-D3-C3: `line_cd=` on a variable is pinned to change
+      // nothing (the timer is never started), so it executes; a MALFORMED one
+      // is still not modelled. See tests/unit/m11d3c3-line-cd.test.ts.
+      "variable,name=x,value=3,line_cd=soon",
     ]) {
       const result = execute(line, prior);
       expect(result.record.kind, line).toBe("NOT_MODELLED");

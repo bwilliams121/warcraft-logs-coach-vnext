@@ -93,9 +93,9 @@ vi.mock("../../src/simc/first-gcd-selection.js", async (importOriginal) => {
     firstGcdSelectionAcrossRescans: (input: Parameters<typeof m.firstGcdSelectionAcrossRescans>[0]) =>
       m.firstGcdSelectionAcrossRescans({
         ...input,
-        scanFor: (state) => {
+        scanFor: (state, decision) => {
           recorder.scanState = state;
-          return input.scanFor(state);
+          return input.scanFor(state, decision);
         },
       }),
   };

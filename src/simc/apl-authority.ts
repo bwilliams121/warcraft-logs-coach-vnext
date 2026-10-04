@@ -264,6 +264,14 @@ function topLevelSegments(actionStringVerbatim: string): readonly string[] | nul
   return segments;
 }
 
+/**
+ * One APL LINE within one authority: its list and ordinal, never its token
+ * (M11-D3-C3). Two lines with the same token are two lines.
+ */
+export function aplLineKey(entry: { readonly listName: string; readonly priorityOrdinal: number }): string {
+  return `${entry.listName}[${String(entry.priorityOrdinal)}]`;
+}
+
 export function parseAplLine(actionStringVerbatim: string): AplLineStructure {
   const grouped = topLevelSegments(actionStringVerbatim);
   const [, ...rest] = grouped ?? actionStringVerbatim.split(",");
