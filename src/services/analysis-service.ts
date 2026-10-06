@@ -469,6 +469,7 @@ export async function analyzeFight(
       sourceId: parsed.request.sourceId,
       scope: scope.scope,
       includeResources: requirement.includeResources,
+      ...(scope.ownedPetEvidence === true ? { ownedPetEvidence: true as const } : {}),
     },
     config.config.wcl,
   );

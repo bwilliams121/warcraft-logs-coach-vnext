@@ -203,8 +203,30 @@ export interface AuraEvent extends CombatEventBase {
   readonly absorbAmount: number | null;
 }
 
+/**
+ * What the raw `tick` key of a damage event said, without interpretation
+ * (M11-E1).
+ *
+ *   TRUE           the key was present with the boolean `true`
+ *   FALSE          the key was present with the boolean `false` (never yet
+ *                  observed in a capture; kept apart rather than merged)
+ *   NOT_SUPPLIED   the key was absent. NOT "direct", NOT "false": what an absent
+ *                  `tick` means is not established (follow-up M3)
+ *   UNUSABLE_VALUE the key was present with a non-boolean value
+ *
+ * `isTick` is kept unchanged for its existing consumers; it folds every state
+ * but TRUE into `false`, which is exactly the collapse this field exists to
+ * avoid.
+ */
+export type TickFieldState = "TRUE" | "FALSE" | "NOT_SUPPLIED" | "UNUSABLE_VALUE";
+
 export interface DamageEvent extends CombatEventBase {
   readonly kind: "DAMAGE";
+  /**
+   * The raw v2 `amount` key, verbatim (`requireNumber`, no transformation).
+   * What it means in Warcraft Logs' accounting is NOT established (follow-up
+   * M1): it is a raw field, not "damage done".
+   */
   readonly amount: number;
   readonly unmitigatedAmount: number | null;
   readonly mitigatedAmount: number | null;
@@ -213,6 +235,16 @@ export interface DamageEvent extends CombatEventBase {
   readonly hitType: number | null;
   readonly isAoE: boolean | null;
   readonly isTick: boolean;
+  /** The raw `tick` key's state (M11-E1). See `TickFieldState`. */
+  readonly tickField: TickFieldState;
+  /**
+   * The raw `overkill` key when it was a finite number, else `null` — absent
+   * is `null`, never 0 (M11-E1). The key name is the one Warcraft Logs'
+   * scripting surface documents; NO committed capture contains it yet, so its
+   * presence on the raw v2 stream is unverified, and `null` is what every
+   * current capture produces.
+   */
+  readonly overkillAmount: number | null;
   /** Augmentation support attribution, as reported. Not interpreted here. */
   readonly supportActorId: number | null;
   readonly subtractsFromSupportedActor: boolean | null;

@@ -553,7 +553,12 @@ export async function analyzeRaidNight(
 
       // One focused view, one state. Both fall out of scope at the end of this
       // iteration; nothing accumulates them.
-      const focused = focusedFightFor(core, entry.sourceId, scope.scope);
+      const focused = focusedFightFor(
+        core,
+        entry.sourceId,
+        scope.scope,
+        scope.ownedPetEvidence === true ? { ownedPetEvidence: true } : undefined,
+      );
       const state = createCombatState(focused);
       // Through `runAnalyzer`, which checks the result is the registration's
       // own. A mismatch is a deployment defect and fails the whole night: a

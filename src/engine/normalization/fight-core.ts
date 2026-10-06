@@ -222,6 +222,8 @@ export function focusedFightFor(
   core: NormalizedFightCore,
   focusActorId: number,
   scope: IngestionScope,
+  /** Declared, never defaulted on (M11-E1): see `EvidenceActorScopeInput`. */
+  options?: { readonly ownedPetEvidence?: true },
 ): CombatFight {
   // Was the per-actor typed field obtained for THIS player?
   //
@@ -266,6 +268,7 @@ export function focusedFightFor(
           focusActorId,
           friendlyPlayerActorIds: core.friendlyPlayers,
           actors: core.actors,
+          ...(options?.ownedPetEvidence === true ? { includeFocusOwnedPets: true } : {}),
         }),
       }),
     },

@@ -61,6 +61,7 @@ import {
   type CombatEvent,
   type CombatEventBase,
   type DamageEvent,
+  type TickFieldState,
   type MalformedRawObservation,
   type ResourceChangeEvent,
   type ResourceSide,
@@ -203,18 +204,33 @@ export function castEvent(options: EventOptions & { readonly castPhase: CastPhas
   };
 }
 
-export function damageEvent(options: EventOptions & { readonly amount?: number | undefined }): DamageEvent {
+export function damageEvent(
+  options: EventOptions & {
+    readonly amount?: number | undefined;
+    /** Raw components (M11-E1). Every one defaults to absent — never to 0. */
+    readonly absorbedAmount?: number | null | undefined;
+    readonly mitigatedAmount?: number | null | undefined;
+    readonly unmitigatedAmount?: number | null | undefined;
+    readonly blockedAmount?: number | null | undefined;
+    readonly overkillAmount?: number | null | undefined;
+    readonly hitType?: number | null | undefined;
+    readonly tickField?: TickFieldState | undefined;
+  },
+): DamageEvent {
+  const tickField = options.tickField ?? "NOT_SUPPLIED";
   return {
     ...baseEvent(options, "damage"),
     kind: "DAMAGE",
     amount: options.amount ?? 100,
-    unmitigatedAmount: null,
-    mitigatedAmount: null,
-    absorbedAmount: null,
-    blockedAmount: null,
-    hitType: null,
+    unmitigatedAmount: options.unmitigatedAmount ?? null,
+    mitigatedAmount: options.mitigatedAmount ?? null,
+    absorbedAmount: options.absorbedAmount ?? null,
+    blockedAmount: options.blockedAmount ?? null,
+    hitType: options.hitType ?? null,
     isAoE: null,
-    isTick: false,
+    isTick: tickField === "TRUE",
+    tickField,
+    overkillAmount: options.overkillAmount ?? null,
     supportActorId: null,
     subtractsFromSupportedActor: null,
   };

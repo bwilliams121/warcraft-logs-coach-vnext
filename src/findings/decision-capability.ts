@@ -65,6 +65,12 @@ export interface StateRequirements {
   /** Evidence categories read. `CASTS` is mandatory under `PER_OBSERVED_CAST`. */
   readonly evidenceCategories: readonly EvidenceCategory[];
   readonly targetModel: TargetModel;
+  /**
+   * This capability reads the focus player's OWN pets as evidence (M11-E1,
+   * owner decision M5). Present only when true, so no existing capability's
+   * shape changes.
+   */
+  readonly ownedPetEvidence?: true;
 }
 
 export interface DecisionCapability {
@@ -228,11 +234,18 @@ export function requirementFromCapabilities(
 ): AnalyzerRequirement {
   let requiredScope: IngestionScope = "PLAYER_CONTEXT";
   let includeResources = false;
+  let ownedPetEvidence = false;
   for (const capability of capabilities) {
+    if (capability.requirements.ownedPetEvidence === true) ownedPetEvidence = true;
     if (SCOPE_BREADTH[capability.requirements.scope] > SCOPE_BREADTH[requiredScope]) {
       requiredScope = capability.requirements.scope;
     }
     if (capability.requirements.resources.length > 0) includeResources = true;
   }
-  return { analyzerId, requiredScope, includeResources };
+  return {
+    analyzerId,
+    requiredScope,
+    includeResources,
+    ...(ownedPetEvidence ? { ownedPetEvidence: true } : {}),
+  };
 }

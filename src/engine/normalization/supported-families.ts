@@ -28,6 +28,7 @@ import type {
   CombatEvent,
   CombatEventBase,
   FieldProblem,
+  TickFieldState,
 } from "./normalized-events.js";
 
 /**
@@ -98,6 +99,15 @@ function optionalInteger(raw: Record<string, unknown>, key: string): number | nu
 function optionalBoolean(raw: Record<string, unknown>, key: string): boolean | null {
   const value = raw[key];
   return typeof value === "boolean" ? value : null;
+}
+
+/** The raw `tick` key's state, with absence kept apart from `false` (M11-E1). */
+function tickFieldOf(raw: Record<string, unknown>): TickFieldState {
+  if (!("tick" in raw)) return "NOT_SUPPLIED";
+  const value = raw["tick"];
+  if (value === true) return "TRUE";
+  if (value === false) return "FALSE";
+  return "UNUSABLE_VALUE";
 }
 
 /** Required numeric field. A rename or type change surfaces as a defect. */
@@ -208,6 +218,8 @@ function decodeDamage(base: CombatEventBase, raw: Record<string, unknown>): Fami
       hitType: optionalInteger(raw, "hitType"),
       isAoE: optionalBoolean(raw, "isAoE"),
       isTick: optionalBoolean(raw, "tick") === true,
+      tickField: tickFieldOf(raw),
+      overkillAmount: optionalNumber(raw, "overkill"),
       supportActorId: optionalInteger(raw, "supportID"),
       subtractsFromSupportedActor: optionalBoolean(raw, "subtractsFromSupportedActor"),
     },

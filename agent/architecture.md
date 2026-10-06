@@ -7356,6 +7356,81 @@ case and the re-pinned APPLICATION_SERVICE case, two byte-identical workerd
 runs). Assassination, Protection and Retribution are unchanged in the
 committed report, row for row.
 
+## M11-E1 — Observed Combat Facts (internal, post-hoc)
+
+`src/combat-facts/` answers one question — "what did the observed combat
+evidence establish?" — and never "was it good". It is the evidence substrate
+for M11-G (causal damage disparity) and for the M11-ED/F enemy-set decision,
+and it is internal: no public analyzer reads it, `analysis/1` is unchanged,
+`scoresPerformance` stays false, and a contract test
+(`tests/contracts/m11e1-combat-facts-layering.test.ts`) forbids any import of
+it from outside, including from `src/simc` and `src/specs`. Post-hoc facts
+(actual fight end, later damage, later target observations) can therefore
+never satisfy a past decision's `fight_remains`, `time_to_die`,
+`active_enemies` or target availability; the 281 predictive-atom lines found
+by the post-D3 census remain an authority-verification limitation.
+
+- Canonical facts are per event: `DamageObservation` and `CastObservation`
+  (evidence locator, report time, source/target `ActorKey` =
+  `(actorId, instanceId | null)` with null ≠ 0, ability, BEGIN and COMPLETE
+  kept apart). Damage keeps its raw components named by their raw v2 key
+  (`amountField`, `absorbedField`, `mitigatedField`,
+  `unmitigatedAmountField`, `blockedField`, `overkillField`,
+  `supportActorIdField`, ...), `hitTypeRaw`, and `tickField`. Absence is
+  null / NOT_SUPPLIED, never 0 or false.
+- Normalizer, additive only: `DamageEvent.tickField` (TRUE / FALSE /
+  NOT_SUPPLIED / UNUSABLE_VALUE — absent is never false, and never "direct")
+  and `DamageEvent.overkillAmount` (raw `overkill`, absent = null; no capture
+  contains the key yet). `isTick` is unchanged for its consumers.
+- M1 STATUS — NOT YET PROVEN. Proven: raw v2 `amount` → `requireNumber` →
+  `DamageEvent.amount`, verbatim. Not proven: what raw `amount` means in
+  Warcraft Logs' accounting. The RpgLogs Scripting API documents a
+  `DamageEvent.amount` "excluding absorbs and overkill", but that is the
+  Script Pins / Report Components object model — a derived surface whose
+  fields differ from the raw v2 JSON (`source` vs `sourceID`, `isTick` vs
+  `tick`, string `hitType` vs numeric, plus a separate `effectiveDamage`) —
+  and `Report.events.data` is documented only as JSON "not considered frozen".
+  So there is no "damage done", "effective damage" or average hit here: only
+  raw-field measures (`RAW_AMOUNT_FIELD_SUM` is the sum of the raw `amount`
+  scalar), with no relation among raw fields assumed.
+- Ownership: Warcraft Logs `petOwner` is the only authority. Summon events
+  are evidence, never ownership. `OWNER_ROLLUP` is a factual grouping by
+  stated ownership — not a gameplay attribution — and always keeps the
+  per-source-instance and per-member breakdown; unstated-owner pets observed
+  in the window are disclosed, never rolled up.
+- Owned-pet scope (owner decision M5): a capability may declare
+  `ownedPetEvidence`; derived through the requirement and the scope
+  derivation, it widens PLAYER_CONTEXT's vouch to actors whose `petOwner` is
+  the focus actor and nothing else. No current analyzer declares it, so every
+  existing requirement, derivation and ingestion request is byte-identical.
+- Target metadata: `WCL_BOSS_SUBTYPE` means catalogued with subType Boss,
+  excluding the `-1` sentinel (master data lists it NPC/Boss). Hostility and
+  targetability are always UNKNOWN; an NPC is not an enemy.
+- Observed activity: timestamped SOURCE/TARGET observations with their
+  evidence category; `observationExtremes` is a convenience, not an interval
+  of presence, life or targetability.
+- Coverage before aggregation: a window fact is COMPLETE only when the
+  category is OBSERVABLE, not decode-degraded, covers the whole `[start, end)`
+  window, and vouches for every source actor in scope (and, for owner views
+  and the boss filter, the catalog is COMPLETE). Scalars: EXACT needs
+  COMPLETE; under PARTIAL a COUNT may be AT_LEAST (never "at least 0"), while
+  raw-field sums, averages and rates are UNKNOWN, because no raw field's sign
+  is proven. Collections (target sets, hitType distributions, cast-event
+  sequences, evidence lists) are never AT_LEAST: they are
+  `ObservedCollection`s, EXHAUSTIVE only under COMPLETE coverage and otherwise
+  OBSERVED_ONLY — what was observed, with no claim about what else exists, and
+  never a prefix (M11-E1.1).
+- Window query: one half-open `[startMs, endMs)` primitive with
+  DIRECT_PLAYER / SOURCE_ACTORS / OWNER_ROLLUP scopes, ability, target and
+  boss-metadata filters, and per-measure coverage. Cast-family measures are
+  about EVENTS, per phase: `CAST_BEGIN_EVENT_COUNT` and
+  `CAST_COMPLETE_EVENT_COUNT` are never summed into "casts", and
+  `CAST_EVENT_SEQUENCE` lists BEGIN and COMPLETE events separately, with
+  locators, ordered by (report time, ingestion ordinal) with ties marked
+  RETRIEVAL_ORDER_NOT_PROVEN_AUTHORITATIVE. None of this is an action or GCD
+  sequence; a reviewed later contract may derive one (M11-E1.1). Results are plain, sorted data,
+  independent of input order; sums use checked safe-integer arithmetic.
+
 ---
 
 # Milestone 12 — Healer Foundation

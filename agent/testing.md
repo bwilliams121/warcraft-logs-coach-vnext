@@ -1511,6 +1511,28 @@ line_cd (M11-D3-C3, tests/unit/m11d3c3-line-cd.test.ts):
   retarget_auto_attack / retarget              -> B2 unchanged: converges / refused (I, J)
   fired earlier in this decision               -> NOT_READY in that world's rescans only (E)
   no history supplied                          -> UNKNOWN, whatever the spell's cooldown
+observed combat facts (M11-E1, tests/unit/m11e1-combat-facts.test.ts,
+m11e1-owned-pet-scope.test.ts, contracts/m11e1-combat-facts-layering.test.ts):
+  COMPLETE, no matching events                 -> EXACT 0; raw sum EXACT
+  PARTIAL                                      -> counts AT_LEAST; raw sums UNKNOWN
+  PARTIAL, nothing observed                    -> UNKNOWN, never (at least) 0
+  PARTIAL / COMPLETE target set, hitType map   -> OBSERVED_ONLY / EXHAUSTIVE, never AT_LEAST (E1.1 A-D)
+  BEGIN + COMPLETE of one ability              -> one event per phase, never "2 casts" (E1.1 E)
+  cast-event sequence, COMPLETE / PARTIAL      -> both phases kept; EXHAUSTIVE / OBSERVED_ONLY, not a prefix (F, G)
+  COMPLETE cast events, PARTIAL damage         -> exact cast-event counts, non-exact damage
+  decode-degraded category                     -> nothing exact that needs it
+  absorbed / overkill / unmitigatedAmount      -> never added to or substituted for amount
+  absent overkill / absent tick                -> null / NOT_SUPPLIED (never 0 / false)
+  hitType 2                                    -> raw 2, no crit anywhere
+  NPC / WCL_BOSS_SUBTYPE / actor -1            -> not hostile / not targetable / not a boss
+  owner rollup                                 -> keeps source + member breakdown
+  pet with no stated owner (even summoned)     -> disclosed, never rolled up
+  owned pet outside the vouch                  -> rollup PARTIAL, DIRECT_PLAYER exact
+  two observations 30 s apart                  -> nothing about the time between
+  equal timestamps                             -> RETRIEVAL_ORDER_NOT_PROVEN_AUTHORITATIVE
+  permuted input                               -> byte-identical results
+  any import from outside src/combat-facts     -> refused (current-milestone guard; a reviewed
+                                                  M11-F/G consumer amends it explicitly)
 ```
 
 Required negative pairs, same premises, different construct:

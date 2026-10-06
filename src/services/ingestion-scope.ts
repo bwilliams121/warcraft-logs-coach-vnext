@@ -53,6 +53,13 @@ export interface AnalyzerRequirement {
    * them".
    */
   readonly includeResources: boolean;
+  /**
+   * Whether this analyzer reads the focus player's own pets (M11-E1). Present
+   * only when true. Under PLAYER_CONTEXT it widens the evidence vouch to the
+   * focus player's WCL-stated pets and nothing else; FULL_RAID already
+   * vouches for every actor.
+   */
+  readonly ownedPetEvidence?: true;
 }
 
 export type ScopeDerivation =
@@ -60,6 +67,8 @@ export type ScopeDerivation =
       readonly ok: true;
       readonly scope: IngestionScope;
       readonly contributingAnalyzers: readonly string[];
+      /** Unioned across the requirements: present when any one declared it. */
+      readonly ownedPetEvidence?: true;
     }
   | { readonly ok: false; readonly reason: "NO_ANALYZERS_ENABLED" };
 
@@ -102,11 +111,13 @@ export function deriveIngestionScope(requirements: readonly AnalyzerRequirement[
     }
   }
 
+  const ownedPetEvidence = requirements.some((requirement) => requirement.ownedPetEvidence === true);
   return {
     ok: true,
     scope,
     contributingAnalyzers: requirements
       .filter((requirement) => requirement.requiredScope === scope)
       .map((requirement) => requirement.analyzerId),
+    ...(ownedPetEvidence ? { ownedPetEvidence: true as const } : {}),
   };
 }

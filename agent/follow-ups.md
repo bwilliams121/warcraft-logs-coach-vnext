@@ -390,6 +390,35 @@ converges. SimulationCraft would reach the proven entry in every world; the
 engine answers UNKNOWN at the gate. Sound, and a coverage limit; lifting it
 means teaching D3-A's collapse about pseudo-actions, which B2 did not do.
 
+## After M11-E1: what the observed combat facts do not establish
+
+**Raised:** M11-E1 (2026-10-05). Each is NOT YET PROVEN, and the facts layer
+reports raw fields only until it is.
+
+**M1 — what raw v2 `amount` means.** The decoder path is proven verbatim; its
+accounting meaning is not. The scripting-API definition ("excluding absorbs
+and overkill") is a different, derived surface. Closing it needs an official
+statement about the v2 `events.data` field, or an approved capture (M8 plan)
+with a killing blow carrying `overkill`, compared against the target's health
+snapshot. Then `OBSERVED_EFFECTIVE_DAMAGE_SUM` is one more measure over the
+existing observations.
+
+**M2 — raw numeric `hitType`.** The documented `DamageHitType` is a string
+union; no official source maps the raw numbers. No crit, miss, immune or
+glancing classification until one does.
+
+**M3 — an absent `tick`.** Not "direct". No direct-hit count until pinned.
+
+**M4 — summon-event ownership.** Recorded as evidence only.
+
+**M6 — Augmentation attribution** (`supportID`, `subtractsFromSupportedActor`).
+Kept raw; no damage is moved. Owned by M13 or a reviewed attribution model.
+
+**M8 — the full-fight capture.** Planned and approved; not executed. Every
+committed fixture except the 22 s Protection opener lacks complete outgoing
+damage, and no corpus fight carries an actor catalog, so owner views and the
+boss filter are NOT_ESTABLISHED on committed fixtures.
+
 ## After M11-D3-C3: what line_cd support does not reach
 
 **Raised:** M11-D3-C3 (2026-10-04). Coverage, not soundness: each is UNKNOWN

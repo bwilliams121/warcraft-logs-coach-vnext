@@ -157,6 +157,8 @@ export interface FightIngestionRequest {
   readonly sourceId: number;
   readonly scope: IngestionScope;
   readonly includeResources: boolean;
+  /** Derived, never chosen (M11-E1): the focus player's own pets are evidence. */
+  readonly ownedPetEvidence?: true;
   readonly hostility?: readonly HostilitySelector[];
   readonly limit?: number;
 }
@@ -444,7 +446,12 @@ export async function ingestFight(
   return {
     ok: true,
     rateLimit: outcome.rateLimit,
-    fight: focusedFightFor(outcome.core, request.sourceId, request.scope),
+    fight: focusedFightFor(
+      outcome.core,
+      request.sourceId,
+      request.scope,
+      request.ownedPetEvidence === true ? { ownedPetEvidence: true } : undefined,
+    ),
   };
 }
 

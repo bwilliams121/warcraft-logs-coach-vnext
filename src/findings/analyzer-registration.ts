@@ -268,6 +268,7 @@ function snapshotCapability(capability: DecisionCapability): DecisionCapability 
         requirements.evidenceCategories,
       ) as DecisionCapability["requirements"]["evidenceCategories"],
       targetModel: requirements.targetModel,
+      ...(requirements.ownedPetEvidence === true ? { ownedPetEvidence: true as const } : {}),
     }),
   });
 }

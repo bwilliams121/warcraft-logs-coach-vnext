@@ -63,6 +63,15 @@ export interface EvidenceActorScopeInput {
   readonly friendlyPlayerActorIds: readonly number[];
   /** The master-data catalog. Only actors present here can enter scope. */
   readonly actors: ReadonlyMap<number, CombatActor>;
+  /**
+   * An analyzer declared that it reads the FOCUS player's own pets (M11-E1,
+   * owner decision M5). Under PLAYER_CONTEXT it widens the vouch to exactly
+   * the actors whose WCL `petOwner` is the focus actor — never another
+   * player's pet, never a pet with no stated owner (those are already in scope
+   * as non-ally state), never one inferred from a summon event. Absent or
+   * false changes nothing.
+   */
+  readonly includeFocusOwnedPets?: boolean;
 }
 
 /**
@@ -92,7 +101,14 @@ export function deriveEvidenceActorScope(input: EvidenceActorScopeInput): readon
     // pet whose owner Warcraft Logs did not state — such a pet is treated as
     // non-friendly and enters scope, which is the same treatment an unowned NPC
     // gets and is safe: it is not ally raid state.
-    if (actor.petOwnerActorId !== null && friendly.has(actor.petOwnerActorId)) continue;
+    if (actor.petOwnerActorId !== null && friendly.has(actor.petOwnerActorId)) {
+      // The one widening (M11-E1): the focus player's OWN pets, by WCL's own
+      // `petOwner` and an explicit `===` on ids (actor 0 is real).
+      if (input.includeFocusOwnedPets === true && actor.petOwnerActorId === input.focusActorId) {
+        inScope.add(actorId);
+      }
+      continue;
+    }
     inScope.add(actorId);
   }
 
