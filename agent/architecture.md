@@ -7430,6 +7430,17 @@ by the post-D3 census remain an authority-verification limitation.
   RETRIEVAL_ORDER_NOT_PROVEN_AUTHORITATIVE. None of this is an action or GCD
   sequence; a reviewed later contract may derive one (M11-E1.1). Results are plain, sorted data,
   independent of input order; sums use checked safe-integer arithmetic.
+- Canonical evidence (M11-E2.1): the full-fight Blood Death Knight capture is
+  committed to the EVIDENCE ARCHIVE as seven compact owned-pet segments plus
+  its fight context. A test-support bundle composes them, with the context's
+  master data as the actor catalog: ACTORS is COMPLETE and every capture-vouched
+  category follows the grants.
+  - The owned-pet scope (focus + WCL `petOwner` = focus) is an evidence-tooling
+    concept: the slicer derives it and the corpus loader re-derives it.
+  - Nothing in `src/` changed. Combat facts still learn ownership from the
+    catalog alone.
+  - The caller supplies any gameplay window, such as a Dancing Rune Weapon buff
+    interval. The substrate never defines one.
 
 ---
 

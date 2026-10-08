@@ -1533,6 +1533,21 @@ m11e1-owned-pet-scope.test.ts, contracts/m11e1-combat-facts-layering.test.ts):
   permuted input                               -> byte-identical results
   any import from outside src/combat-facts     -> refused (current-milestone guard; a reviewed
                                                   M11-F/G consumer amends it explicitly)
+canonical BDK fixture (M11-E2.1, tests/unit/m11e2-blood-dk-fixture.test.ts):
+  seven segments composed                      -> one range [7,436,292 .. 7,781,469], no hole (A)
+  owned set                                    -> derived from catalog petOwner, never typed (B, C)
+  owned pet with no event (224)                -> EXACT 0 member, not UNKNOWN, not dropped (D)
+  E2 replay facts                              -> reproduced exactly from committed bytes
+  pet instances / owner rollup / direct player -> kept per instance; rollup != direct (E-H)
+  raw fields, missing keys, raw hitType        -> verbatim; null / NOT_SUPPLIED; no labels (I-K)
+  BEGIN vs COMPLETE, target collections        -> separate; ActorKeys only (L, M)
+  boss subtype / -1 / friendly Paladin         -> 161 only / sentinel / not an enemy (N, O)
+  activity                                     -> first/last observation only, no interval (P)
+  raw deaths                                   -> verbatim, DEATHS stays UNVERIFIED (Q)
+  compact re-slice                             -> byte-identical; default serialization unchanged (R)
+  declaration vs catalog / grant / bytes       -> ACTOR_SLICE_INVALID (S)
+  excluded heal / absorbed                     -> never COMPLETE; a HEALING grant is refused (T)
+  caller-supplied window (DRW aura, read raw)  -> casts, raw sums, targets; substrate defines none
 ```
 
 Required negative pairs, same premises, different construct:

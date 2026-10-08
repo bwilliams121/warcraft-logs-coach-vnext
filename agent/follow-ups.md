@@ -403,6 +403,24 @@ with a killing blow carrying `overkill`, compared against the target's health
 snapshot. Then `OBSERVED_EFFECTIVE_DAMAGE_SUM` is one more measure over the
 existing observations.
 
+*Empirical evidence (M11-E2, 2026-10-06; still NOT_YET_PROVEN).* The
+full-fight capture of b1PmaKrd6CDfzngc fight 48 (271,011 events) was examined
+offline:
+
+- 48 events carry `overkill`.
+- Every one has a target snapshot with `hitPoints` 0.
+- In all 48, raw `amount` equals the target's last observed pre-hit
+  `hitPoints`, so `amount` did not include overkill.
+- 45 of the target instances have a `death` event.
+- No event combines a positive `absorbed` with `overkill`.
+
+This is consistent with "amount excludes overkill", but it is one report, not
+an official statement. No `OBSERVED_EFFECTIVE_DAMAGE_SUM` was created.
+
+The committed fixture keeps the focus's one overkill blow (raw fields
+separate). The full record is in
+`tests/evidence/m11e2-blood-death-knight-b1pm-fight-48.md`.
+
 **M2 — raw numeric `hitType`.** The documented `DamageHitType` is a string
 union; no official source maps the raw numbers. No crit, miss, immune or
 glancing classification until one does.
@@ -414,10 +432,22 @@ glancing classification until one does.
 **M6 — Augmentation attribution** (`supportID`, `subtractsFromSupportedActor`).
 Kept raw; no damage is moved. Owned by M13 or a reviewed attribution model.
 
-**M8 — the full-fight capture.** Planned and approved; not executed. Every
-committed fixture except the 22 s Protection opener lacks complete outgoing
-damage, and no corpus fight carries an actor catalog, so owner views and the
-boss filter are NOT_ESTABLISHED on committed fixtures.
+**M8 — the full-fight capture.** Executed in M11-E2 and committed in M11-E2.1
+to the evidence archive (not the regression corpus):
+
+- b1PmaKrd6CDfzngc fight 48: focus 15 and its WCL-stated pets 44, 45, 47 and
+  224.
+- Seven compact segments plus the fight context, with the context as the actor
+  catalog.
+- Owner views, SOURCE_ACTORS per pet and the boss-subtype filter are EXACT
+  over committed bytes (`tests/unit/m11e2-blood-dk-fixture.test.ts`).
+
+What remains:
+
+- Regression-corpus fixtures still carry no actor catalog. Owner views stay
+  NOT_ESTABLISHED there.
+- Healing, absorbs, deaths and targetability are not granted by the new
+  fixture.
 
 ## After M11-D3-C3: what line_cd support does not reach
 

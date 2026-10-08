@@ -15,6 +15,7 @@ import {
 } from "../../scripts/corpus/sanitize-payloads.mjs";
 import { committedEventArray, committedManifest } from "../support/corpus/artifacts.js";
 import { committedCorpusFiles, loadCorpusOrThrow } from "../support/corpus/loader.js";
+import { committedEvidenceArchiveFiles } from "../support/corpus/evidence-archive.js";
 
 /**
  * The payload sanitizer's rules, and the proof that what it forbids cannot be
@@ -325,10 +326,15 @@ describe("the committed corpus holds no stable player identifier", () => {
   });
 
   it("records the sanitizer revisions the scripts export, so a manifest cannot claim a revision that does not exist", () => {
-    expect(SANITIZE_PAYLOADS_REVISION).toBe("sanitize-payloads-2");
-    expect(SANITIZER_REVISION).toBe("sanitize-probe-6");
+    expect(SANITIZE_PAYLOADS_REVISION).toBe("sanitize-payloads-3");
+    expect(SANITIZER_REVISION).toBe("sanitize-probe-7");
     const revisions = new Set<string>();
-    for (const artifact of committedManifest().artifacts) {
+    // M11-E2.1: the current revisions first cut evidence-archive artifacts, so
+    // both committed roots are read.
+    const archive = JSON.parse(committedEvidenceArchiveFiles()["manifest.json"] ?? "null") as {
+      artifacts: { provenance: { transformations: { tooling: { name: string; revision: string } }[] } }[];
+    };
+    for (const artifact of [...committedManifest().artifacts, ...archive.artifacts]) {
       for (const transformation of artifact.provenance.transformations) {
         if (transformation.tooling.name.startsWith("scripts/"))
           revisions.add(transformation.tooling.revision);
@@ -337,7 +343,7 @@ describe("the committed corpus holds no stable player identifier", () => {
     // Every recorded revision is one the tooling has had; the current ones are among them.
     for (const revision of revisions) {
       expect(revision).toMatch(
-        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[12]|sanitize-probe-[23456]|derive-gap-1|derive-substitution-1)$/,
+        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[123]|sanitize-probe-[234567]|derive-gap-1|derive-substitution-1)$/,
       );
     }
     expect(revisions.has(SANITIZE_PAYLOADS_REVISION)).toBe(true);

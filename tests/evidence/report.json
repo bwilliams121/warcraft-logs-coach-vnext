@@ -1,6 +1,55 @@
 {
   "artifacts": [
     {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
+      "byteLength": 492175,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "f823cb5a1e28ec0f348e726a8c7b949e49b7769d24f79fc9199116eff1ff0ff1"
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-113-151",
+      "byteLength": 491453,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "8126ff8cdf61d96f1f01f2b22856a56bb75bb32fa4a2357a05da16f7439da79a"
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-151-214",
+      "byteLength": 488237,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "f284008545ffcb7e9d2e2e530dcc511f2b0dfa7ceb33093df354f1a0f976c956"
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-214-263",
+      "byteLength": 496131,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "a8c90d772479b2ce7299760d7e857c349fbeedf96ff0302e2b11ac3c320d8219"
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-263-311",
+      "byteLength": 494101,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "3dfecdb2138662aac8c963be7f476f7d2ca1c56e9f5b9ba50911438b58ac9d57"
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-311-345",
+      "byteLength": 346853,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "055b7fc3cadc57fb474a8d9e657bdd0338aa0f0473269fae4fcb96bf691f486e"
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-45-113",
+      "byteLength": 468294,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "76489f6bb0df2d98dfb41971863d39abfa18a0869ec3e273c7941aa7c95f18dd"
+    },
+    {
       "artifactId": "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",
       "byteLength": 308961,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -13,6 +62,13 @@
       "payloadKind": "WCL_EVENT_ARRAY",
       "provenanceKind": "SANITIZED_CAPTURE",
       "sha256": "49781ccbc9a501471bcd8d810f113cf8b1a0920bd512b21e4944538ea5af8809"
+    },
+    {
+      "artifactId": "wcl-fight-context-b1pm-fight-48",
+      "byteLength": 144924,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "ff9905aae009ca02e8551406223f62af87becf918a74a748c605f322d4975fbe"
     },
     {
       "artifactId": "wcl-fight-context-rxaf-fight-13",
@@ -320,14 +376,14 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 1085841,
-    "artifacts": 3,
+    "artifactBytes": 4508009,
+    "artifacts": 11,
     "assertions": 21,
     "cases": 9,
     "declared": 0,
     "executable": 21,
     "failed": 0,
-    "largestArtifactBytes": 389605,
+    "largestArtifactBytes": 496131,
     "notExecuted": 0,
     "passed": 21
   }

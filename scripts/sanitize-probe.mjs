@@ -16,6 +16,9 @@
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --indices <i,j,k>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --decision-slice <subject> <target,target>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice <subject> [<toReportTimeMs>] [--from <exclusiveFromMs>] [--families <type,type,...>]
+ *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice-with-owned-pets <focus> [<toReportTimeMs>] --catalog <context.json> [--from <exclusiveFromMs>] [--families <type,type,...>] [--actorless-families <type,type,...>]
+ *
+ * Any mode accepts a trailing `--compact`.
  *
  * `--per-type` keeps up to N events of EACH distinct `type`, in original order.
  * That yields far more evidence per byte than a head slice: a fixture that has
@@ -73,6 +76,36 @@
  * starts at from + 1; the composer that joins segments requires adjacency
  * and refuses overlaps or holes it was not told about.
  *
+ * `--actor-slice-with-owned-pets` (M11-E2.1) is the `--actor-slice` predicate
+ * over a DERIVED actor set rather than one subject: the focus actor plus every
+ * actor whose Warcraft Logs master-data `petOwner` is exactly the focus, read
+ * from the fight context named by `--catalog`. The set is never typed on the
+ * command line. No recursion (a pet's pet is not included), no inference from
+ * summon events, no other player's pets, and an actor with a null owner is not
+ * owned. A stated owner is not combat relevance: an owned actor with no event
+ * is still in the set, and the slicer reports which members have none.
+ * Derivation fails closed — nothing is written — when the focus is absent or
+ * listed twice, an actor id is listed twice, a `petOwner` is neither an
+ * integer nor null, or an actor naming the focus as owner is itself a Player
+ * or the focus. `--from`, the bound and `--families` behave exactly as for
+ * `--actor-slice`.
+ *
+ * `--actorless-families` (that mode only) additionally keeps events of the
+ * listed raw types that carry NEITHER a `sourceID` NOR a `targetID` key —
+ * `encounterstart` / `encounterend`, which no actor predicate can select. It
+ * is an explicit, recorded structural inclusion: an actorless event of an
+ * unlisted type is dropped, and a listed type's events that DO carry an actor
+ * are subject to the actor predicate like any other. Every listed type must
+ * also be in `--families`.
+ *
+ * `--compact` (M11-E2.1) writes the slice as compact JSON — no whitespace
+ * between tokens — instead of the default two-space indentation. It changes
+ * bytes, never content: the same events, the same order, each event's keys in
+ * the order the capture held them, one trailing newline. Without the flag the
+ * output is byte-identical to every earlier revision's, so no committed
+ * artifact changes. It exists for the evidence archive, where a full-fight
+ * slice would otherwise be mostly indentation.
+ *
  * Accepts a full GraphQL envelope, a bare event array, or an ARRAY OF PAGE
  * ENVELOPES (a paginated capture, concatenated in page order), and always
  * writes a bare event array plus a small provenance header alongside it.
@@ -99,7 +132,7 @@ const FORBIDDEN = ["client_secret", "access_token", "authorization", "bearer ", 
  * M9-B predates this field, and their manifest entries record UNAVAILABLE —
  * a fact about those captures, not something to backfill.
  */
-export const SANITIZER_REVISION = "sanitize-probe-6";
+export const SANITIZER_REVISION = "sanitize-probe-7";
 
 /** Where a reviewed slice lands: the regression corpus, never a loose fixture directory. */
 export const OUTPUT_ROOT = "tests/corpus/artifacts/wcl-events";
@@ -154,6 +187,15 @@ export function extractEvents(value) {
     // page order, which is retrieval order. Anything else is a bare array.
     if (value.length > 0 && value.every((page) => Array.isArray(page?.reportData?.report?.events?.data))) {
       return value.flatMap((page) => page.reportData.report.events.data);
+    }
+    // A paginated capture whose pages are recorded with their request facts
+    // (`{ requestedStartTime, data }`, the M11-E2 probe's shape): the same
+    // concatenation over each record's `data` envelope, in record order.
+    if (
+      value.length > 0 &&
+      value.every((page) => Array.isArray(page?.data?.reportData?.report?.events?.data))
+    ) {
+      return value.flatMap((page) => page.data.reportData.report.events.data);
     }
     return value;
   }
@@ -217,6 +259,100 @@ export function actorSlice(events, subject, untilMs = null, families = null, fro
 }
 
 /**
+ * The actor set of an owned-pet slice, DERIVED from a fight context's master
+ * data: `focusActorId` plus every actor whose `petOwner` is exactly it.
+ * Exported for tests. Returns a discriminated result; every refusal names the
+ * fact that made the catalog unusable.
+ */
+export function deriveOwnedPetScope(context, focusActorId) {
+  const actors = context?.reportData?.report?.masterData?.actors;
+  if (!Array.isArray(actors)) {
+    return { ok: false, error: "the catalog holds no reportData.report.masterData.actors array" };
+  }
+  if (!Number.isSafeInteger(focusActorId)) {
+    return { ok: false, error: `focus actor ${String(focusActorId)} is not an integer actor id` };
+  }
+  const seen = new Set();
+  for (const actor of actors) {
+    const id = actor?.id;
+    if (!Number.isSafeInteger(id))
+      return { ok: false, error: "the catalog holds an actor without an integer id" };
+    if (seen.has(id)) return { ok: false, error: `actor ${id} is listed more than once in the catalog` };
+    seen.add(id);
+    const owner = actor.petOwner;
+    if (owner !== null && owner !== undefined && !Number.isSafeInteger(owner)) {
+      return { ok: false, error: `actor ${id} has a petOwner that is neither an integer nor null` };
+    }
+  }
+  if (!seen.has(focusActorId)) {
+    return { ok: false, error: `focus actor ${focusActorId} is not in the catalog` };
+  }
+  const owned = actors.filter((actor) => actor.petOwner === focusActorId);
+  for (const actor of owned) {
+    if (actor.id === focusActorId) {
+      return { ok: false, error: `focus actor ${focusActorId} names itself as its own petOwner` };
+    }
+    if (actor.type === "Player") {
+      return { ok: false, error: `actor ${actor.id} is a Player but names ${focusActorId} as its petOwner` };
+    }
+  }
+  const ownedActorIds = owned.map((actor) => actor.id).sort((a, b) => a - b);
+  return {
+    ok: true,
+    focusActorId,
+    ownedActorIds,
+    actorScope: [focusActorId, ...ownedActorIds].sort((a, b) => a - b),
+  };
+}
+
+/**
+ * The `--actor-slice-with-owned-pets` predicate. Exported for tests.
+ *
+ * Keeps, in capture order, every event whose `sourceID` or `targetID` is in
+ * `actorScope`, plus every event of an `actorlessFamilies` type carrying
+ * neither key; then the same `families`, `fromMs` (exclusive) and `untilMs`
+ * (inclusive) restrictions as `actorSlice`. Nothing is reordered,
+ * deduplicated or synthesised.
+ */
+export function ownedPetSlice(events, actorScope, options = {}) {
+  const scope = new Set(actorScope);
+  const families = options.families ?? null;
+  const kept = families === null ? null : new Set(families);
+  const actorless = new Set(options.actorlessFamilies ?? []);
+  const fromMs = options.fromMs ?? null;
+  const untilMs = options.untilMs ?? null;
+  return events.filter((event) => {
+    if (typeof event !== "object" || event === null) return false;
+    const inScope = scope.has(event.sourceID) || scope.has(event.targetID);
+    const structural = actorless.has(event.type) && !("sourceID" in event) && !("targetID" in event);
+    if (!inScope && !structural) return false;
+    if (kept !== null && !kept.has(event.type)) return false;
+    if (fromMs !== null && !(typeof event.timestamp === "number" && event.timestamp > fromMs)) return false;
+    return untilMs === null || (typeof event.timestamp === "number" && event.timestamp <= untilMs);
+  });
+}
+
+/** Members of `actorScope` that appear as `sourceID` or `targetID` of a retained event, ascending. */
+export function actorsWithRetainedEvents(events, actorScope) {
+  const scope = new Set(actorScope);
+  const active = new Set();
+  for (const event of events) {
+    if (scope.has(event?.sourceID)) active.add(event.sourceID);
+    if (scope.has(event?.targetID)) active.add(event.targetID);
+  }
+  return [...active].sort((a, b) => a - b);
+}
+
+/**
+ * The slice's bytes: two-space indentation by default (every earlier
+ * revision's output, unchanged), or compact JSON under `--compact`. Always one
+ * trailing newline. Exported for tests.
+ */
+export function serializeSlice(sliced, compact = false) {
+  return `${compact ? JSON.stringify(sliced) : JSON.stringify(sliced, null, 2)}\n`;
+}
+
+/**
  * Parses a `--families` list: raw Warcraft Logs type strings, comma-separated,
  * each non-empty and listed once. Exported for tests. Refuses rather than
  * trims, for the same reason `parseIndexSelection` does.
@@ -242,11 +378,20 @@ export function parseFamilySelection(spec) {
 }
 
 function main() {
-  const [inputPath, outputName, mode, countRaw] = process.argv.slice(2);
+  // `--compact` is a serialization flag valid with every mode; it is removed
+  // before the mode's own arguments are read, and recorded in the invocation.
+  const argv = process.argv.slice(2);
+  if (argv.filter((token) => token === "--compact").length > 1) {
+    console.error("--compact given more than once");
+    process.exit(1);
+  }
+  const compact = argv.includes("--compact");
+  const args = argv.filter((token) => token !== "--compact");
+  const [inputPath, outputName, mode, countRaw] = args;
 
   if (inputPath === undefined || outputName === undefined) {
     console.error(
-      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs] [--from exclusiveFromMs] [--families type,type]]",
+      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs] [--from exclusiveFromMs] [--families type,type] | --actor-slice-with-owned-pets focus [toReportTimeMs] --catalog context.json [--from exclusiveFromMs] [--families type,type] [--actorless-families type,type]] [--compact]",
     );
     process.exit(1);
   }
@@ -257,9 +402,80 @@ function main() {
   const events = extractEvents(payload);
 
   let sliced;
-  if (mode === "--actor-slice") {
+  let ownedPetReport = null;
+  if (mode === "--actor-slice-with-owned-pets") {
+    const focus = Number(countRaw);
+    const rest = args.slice(4);
+    const valued = ["--catalog", "--from", "--families", "--actorless-families"];
+    const options = new Map();
+    const positional = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      const token = rest[i];
+      if (valued.includes(token)) {
+        if (options.has(token) || rest[i + 1] === undefined) {
+          console.error(`usage: --actor-slice-with-owned-pets: ${token} given twice or without a value`);
+          process.exit(1);
+        }
+        options.set(token, rest[i + 1]);
+        i += 1;
+      } else positional.push(token);
+    }
+    const untilMs = positional[0] === undefined ? null : Number(positional[0]);
+    const fromMs = options.has("--from") ? Number(options.get("--from")) : null;
+    if (
+      !Number.isSafeInteger(focus) ||
+      !options.has("--catalog") ||
+      (untilMs !== null && !Number.isSafeInteger(untilMs)) ||
+      (fromMs !== null && !Number.isSafeInteger(fromMs)) ||
+      (fromMs !== null && untilMs !== null && !(fromMs < untilMs)) ||
+      positional.length > 1
+    ) {
+      console.error(
+        "usage: --actor-slice-with-owned-pets <focus actor id> [<toReportTimeMs>] --catalog <context.json> [--from <exclusiveFromMs>] [--families <type,...>] [--actorless-families <type,...>]  (from < to)",
+      );
+      process.exit(1);
+    }
+    const derived = deriveOwnedPetScope(JSON.parse(readFileSync(options.get("--catalog"), "utf8")), focus);
+    if (!derived.ok) {
+      console.error(`refusing to slice: ${derived.error}`);
+      process.exit(1);
+    }
+    let families = null;
+    if (options.has("--families")) {
+      const selection = parseFamilySelection(options.get("--families"));
+      if (!selection.ok) {
+        console.error(selection.error);
+        process.exit(1);
+      }
+      families = selection.families;
+    }
+    let actorlessFamilies = [];
+    if (options.has("--actorless-families")) {
+      const selection = parseFamilySelection(options.get("--actorless-families"));
+      if (!selection.ok) {
+        console.error(selection.error.replaceAll("--families", "--actorless-families"));
+        process.exit(1);
+      }
+      if (families !== null && selection.families.some((type) => !families.includes(type))) {
+        console.error("every --actorless-families type must also be listed in --families");
+        process.exit(1);
+      }
+      actorlessFamilies = selection.families;
+    }
+    sliced = ownedPetSlice(events, derived.actorScope, { untilMs, fromMs, families, actorlessFamilies });
+    const active = actorsWithRetainedEvents(sliced, derived.actorScope);
+    ownedPetReport = {
+      focusActorId: derived.focusActorId,
+      ownedActorIds: derived.ownedActorIds,
+      ownershipAuthority: "WCL_PET_OWNER",
+      actorsWithRetainedEvents: active,
+      actorsWithoutRetainedEvents: derived.actorScope.filter((id) => !active.includes(id)),
+      actorlessEventsRetained: sliced.filter((event) => !("sourceID" in event) && !("targetID" in event))
+        .length,
+    };
+  } else if (mode === "--actor-slice") {
     const subject = Number(countRaw);
-    const rest = process.argv.slice(6);
+    const rest = args.slice(4);
     // Options may follow the optional bound in any order; each takes one value.
     const options = new Map();
     const positional = [];
@@ -304,7 +520,7 @@ function main() {
     sliced = actorSlice(events, subject, untilMs, families, fromMs);
   } else if (mode === "--decision-slice") {
     const subject = Number(countRaw);
-    const targets = String(process.argv[6] ?? "")
+    const targets = String(args[4] ?? "")
       .split(",")
       .filter((entry) => entry.trim() !== "")
       .map(Number);
@@ -322,7 +538,7 @@ function main() {
     sliced = selection.indices.map((index) => events[index]);
   } else if (mode === "--where") {
     const [whereKey, whereValueRaw] = String(countRaw ?? "").split("=");
-    const limit = Number(process.argv[6] ?? 3);
+    const limit = Number(args[4] ?? 3);
     if (whereKey === undefined || whereValueRaw === undefined) {
       console.error("usage: --where <key>=<value> <N>");
       process.exit(1);
@@ -350,9 +566,9 @@ function main() {
     typeCounts[type] = (typeCounts[type] ?? 0) + 1;
   }
 
-  const serialized = JSON.stringify(sliced, null, 2);
+  const bytes = serializeSlice(sliced, compact);
 
-  const lowered = serialized.toLowerCase();
+  const lowered = bytes.toLowerCase();
   const offender = FORBIDDEN.find((needle) => lowered.includes(needle));
   if (offender !== undefined) {
     console.error(`refusing to write: output contains a credential-shaped value (${offender})`);
@@ -361,7 +577,6 @@ function main() {
 
   const outputPath = `${OUTPUT_ROOT}/${outputName}`;
   mkdirSync(dirname(outputPath), { recursive: true });
-  const bytes = `${serialized}\n`;
   writeFileSync(outputPath, bytes, "utf8");
 
   // The corpus digest policy: SHA-256 over the bytes with CRLF folded to LF.
@@ -371,8 +586,9 @@ function main() {
   console.log(`  types:      ${JSON.stringify(typeCounts)}`);
   console.log(`  sha256:     ${createHash("sha256").update(canonical).digest("hex")}`);
   console.log(`  byteLength: ${canonical.length}`);
+  if (ownedPetReport !== null) console.log(`  ownedPets:  ${JSON.stringify(ownedPetReport)}`);
   console.log(
-    `  tooling:    { name: "scripts/sanitize-probe.mjs", revision: "${SANITIZER_REVISION}", invocation: "${process.argv.slice(2).join(" ")}" }`,
+    `  tooling:    { name: "scripts/sanitize-probe.mjs", revision: "${SANITIZER_REVISION}", invocation: "${argv.join(" ")}" }`,
   );
   console.log(
     "Review it, then add an artifact record to scripts/corpus/build-manifest.mjs with its source capture,",

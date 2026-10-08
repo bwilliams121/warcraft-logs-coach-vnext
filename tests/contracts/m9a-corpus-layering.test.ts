@@ -535,6 +535,13 @@ describe("captured evidence receives coverage only through the shared corpus int
       // bundle entry that resolves an evidence-archive part (the composer
       // still owns reading, normalization and composition).
       "stateOfBundle",
+      // M11-E2.1: the loader-backed composition itself, for the canonical
+      // Blood Death Knight fixture. It is the only entry that takes a
+      // committed fight-context catalog, and it exposes the composed ranges
+      // and holes test A asserts. The composer still owns reading,
+      // normalization, composition and the catalog's decoding.
+      "bundleOf",
+      "BundleComposition",
     ]);
     for (const path of testPaths) {
       const source = sourceAt(path);

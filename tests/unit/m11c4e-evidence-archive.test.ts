@@ -30,6 +30,26 @@ import {
  */
 
 const ARCHIVE_SEGMENT = "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285";
+
+/**
+ * M11-E2.1: the canonical Blood Death Knight owned-pet fixture — seven compact
+ * segments and their fight context, with their committed byte lengths. It is
+ * the ONE owner-reviewed exception to the 4 MiB notice line (approved for this
+ * fixture only, 2026-10-06): the archive without it must still sit under the
+ * line, and the archive with it is pinned to the byte, so any other growth
+ * past the line fails here and needs its own review.
+ */
+const M11E2_NOTICE_LINE_EXCEPTION: Readonly<Record<string, number>> = {
+  "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45": 492175,
+  "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-113-151": 491453,
+  "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-151-214": 488237,
+  "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-214-263": 496131,
+  "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-263-311": 494101,
+  "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-311-345": 346853,
+  "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-45-113": 468294,
+  "wcl-fight-context-b1pm-fight-48": 144924,
+};
+const M11E2_BYTES = Object.values(M11E2_NOTICE_LINE_EXCEPTION).reduce((sum, bytes) => sum + bytes, 0);
 const ARCHIVE_SEGMENT_PATH = `artifacts/wcl-events/${ARCHIVE_SEGMENT}.json`;
 const CORPUS_OPENER = "wcl-brewmaster-monk-gtkb-opener";
 const CORPUS_20_165 = "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165";
@@ -76,21 +96,35 @@ describe("the committed evidence archive", () => {
     expect(loaded.archive.rootId).toBe("EVIDENCE_ARCHIVE");
     expect(loaded.corpus.rootId).toBe("REGRESSION_CORPUS");
     expect(loaded.archive.artifacts.map((entry) => entry.record.artifactId)).toEqual([
+      // M11-E2.1: the canonical Blood Death Knight owned-pet segments, code-point order.
+      "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
+      "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-113-151",
+      "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-151-214",
+      "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-214-263",
+      "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-263-311",
+      "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-311-345",
+      "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-45-113",
       ARCHIVE_SEGMENT,
       // M11-C4f: the neutral second subject's 20–165 s segment and fight context.
       "wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165",
+      // M11-E2.1: the Blood Death Knight fight context (catalog and identity).
+      "wcl-fight-context-b1pm-fight-48",
       "wcl-fight-context-rxaf-fight-13",
     ]);
     expect(loaded.archive.cases).toHaveLength(9);
     // Accounting is per root: the archive counts its own bytes only.
-    expect(loaded.archive.totalArtifactBytes).toBe(308961 + 389605 + 387275);
+    expect(loaded.archive.totalArtifactBytes).toBe(308961 + 389605 + 387275 + M11E2_BYTES);
+    for (const [artifactId, bytes] of Object.entries(M11E2_NOTICE_LINE_EXCEPTION)) {
+      const entry = loaded.archive.artifacts.find((candidate) => candidate.record.artifactId === artifactId);
+      expect(entry?.canonicalByteLength, artifactId).toBe(bytes);
+    }
     // Every archive artifact is real evidence.
     for (const entry of loaded.archive.artifacts) {
       expect(entry.record.provenance.kind, entry.record.artifactId).toBe("SANITIZED_CAPTURE");
     }
   });
 
-  it("stays under its 4 MiB notice line (artifacts + selection frames) and its 512 KiB per-artifact ceiling", async () => {
+  it("stays under its 4 MiB notice line (artifacts + selection frames) apart from the one owner-reviewed M11-E2 exception, and under its 512 KiB per-artifact ceiling", async () => {
     const loaded = await loadCommittedEvidenceArchive();
     if (!loaded.ok) throw new Error("archive does not load");
     // The archive has NO total ceiling; the notice line is a deliberate
@@ -99,7 +133,16 @@ describe("the committed evidence archive", () => {
     expect(EVIDENCE_ARCHIVE_NOTICE_BYTES).toBe(4 * 1024 * 1024);
     const frameBytes = committedSelectionFrameBytes();
     expect(frameBytes).toBe(29010);
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBeLessThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
+    // Without the M11-E2 fixture the archive is under the line, as before.
+    expect(loaded.archive.totalArtifactBytes - M11E2_BYTES + frameBytes).toBeLessThan(
+      EVIDENCE_ARCHIVE_NOTICE_BYTES,
+    );
+    // With it the line is crossed — by hand, for this fixture only — and the
+    // crossing is pinned to the byte: 4,537,019 bytes (≈4.33 MiB).
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(4537019);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
+    // The regression corpus's own ceiling is untouched by the archive.
+    expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);
     for (const entry of loaded.archive.artifacts) {
       expect(entry.canonicalByteLength).toBeLessThan(MAX_ARTIFACT_BYTES);
     }

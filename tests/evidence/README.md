@@ -12,7 +12,7 @@ and one provenance vocabulary. They have different responsibilities.
 | Loaded by | every corpus run (`npm run test:corpus`, `npm test`) | its own command (`npm run test:evidence`) and the promotion evidence gate |
 | Artifact kinds | any (`SANITIZED_CAPTURE`, `DERIVED_FROM_CAPTURE`, `SYNTHETIC`) | `SANITIZED_CAPTURE` only |
 | Per artifact | 512 KiB | 512 KiB |
-| Total | 5.5 MiB notice line (test), 6 MiB ceiling (loader) | 4 MiB notice line (test) over artifacts plus committed `selection-frames/**`, no total ceiling |
+| Total | 5.5 MiB notice line (test), 6 MiB ceiling (loader) | 4 MiB notice line (test) over artifacts plus committed `selection-frames/**`, no total ceiling; crossed once, by owner review, for the M11-E2 fixture only (below) |
 | Assertion families | all registered kinds | evidence verification only: the four `NORMALIZATION` census kinds, `NORMALIZATION.BUNDLE_COMPOSITION`, and a specialization's `DECISION_COVERAGE`, `COVERAGE_SUMMARY`, `MEASUREMENT_DISTRIBUTION` and `STATE_EVIDENCE_CENSUS` |
 | May reference | itself only | itself and the regression corpus |
 | Report | `tests/corpus/report.json` | `tests/evidence/report.json` |
@@ -35,6 +35,35 @@ and one provenance vocabulary. They have different responsibilities.
   archive artifact, and every archive assertion must belong to the evidence
   verification families. Adding a family is a reviewed change to the list in
   `contract.ts`, which a test pins.
+
+## Owned-pet slices and compact bytes (M11-E2.1)
+
+An artifact may declare `provenance.actorSlice`: it is the
+`scripts/sanitize-probe.mjs --actor-slice-with-owned-pets` predicate. The
+actor scope is a focus plus every actor whose WCL master-data `petOwner` is
+exactly the focus. The scope is derived from a named, committed fight-context
+artifact, never chosen by hand.
+
+The loader re-derives the scope on every load. It refuses
+(`ACTOR_SLICE_INVALID`) when:
+
+- the focus cannot be resolved;
+- the catalog's ownership is contradictory;
+- the derived set differs from the declared set;
+- a grant's actor scope is not exactly focus + owned;
+- a retained event lies outside the predicate or the granted range;
+- the declared activity split does not match the events;
+- a grant names a category whose families were not all retained. For example,
+  there can be no HEALING grant when `heal` was excluded.
+
+Archive artifacts may be compact JSON. `--compact` on the slicer and on
+`sanitize-payloads.mjs` changes whitespace only. Without the flag, both tools
+produce the same bytes as before, so no earlier artifact changes.
+
+The canonical Blood Death Knight fixture is seven segments plus its context.
+It crosses the 4 MiB notice line under a recorded, owner-reviewed exception
+for that fixture only, pinned to the byte by a test. See
+`m11e2-blood-death-knight-b1pm-fight-48.md`.
 
 ## Execution and promotion
 

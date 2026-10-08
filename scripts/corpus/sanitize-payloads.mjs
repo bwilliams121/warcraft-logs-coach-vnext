@@ -11,6 +11,12 @@
  *     node scripts/corpus/sanitize-payloads.mjs context   <in.json> <out-path>
  *     node scripts/corpus/sanitize-payloads.mjs rankings  <in.json> <out-path> <data-key>
  *
+ * Any mode accepts a trailing `--compact` (revision 3, M11-E2.1): the output
+ * is written as compact JSON instead of two-space indentation. Bytes only —
+ * the same redacted value, keys in the same order, one trailing newline.
+ * Without it the output is byte-identical to revision 2's, so no committed
+ * artifact changes; it exists for the evidence archive.
+ *
  *   pages     an array of decoded `data` objects (one per page): `rateLimitData`
  *             is removed from each; events and cursors are untouched.
  *   context   a decoded fight-context `data`: `rateLimitData` removed; every
@@ -35,7 +41,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { pathToFileURL } from "node:url";
 
-export const SANITIZE_PAYLOADS_REVISION = "sanitize-payloads-2";
+export const SANITIZE_PAYLOADS_REVISION = "sanitize-payloads-3";
 
 const FORBIDDEN = ["client_secret", "access_token", "authorization", "bearer ", "wcl_client_secret"];
 
@@ -108,10 +114,12 @@ export function sanitizeRankings(probe, dataKey) {
 }
 
 function main() {
-  const [mode, inputPath, outputPath, dataKey] = process.argv.slice(2);
+  const argv = process.argv.slice(2);
+  const compact = argv.includes("--compact");
+  const [mode, inputPath, outputPath, dataKey] = argv.filter((token) => token !== "--compact");
   if (mode === undefined || inputPath === undefined || outputPath === undefined) {
     console.error(
-      "usage: node scripts/corpus/sanitize-payloads.mjs <pages|context|rankings> <in.json> <out-path> [data-key]",
+      "usage: node scripts/corpus/sanitize-payloads.mjs <pages|context|rankings> <in.json> <out-path> [data-key] [--compact]",
     );
     process.exit(1);
   }
@@ -124,7 +132,7 @@ function main() {
     console.error(`unknown mode ${mode}`);
     process.exit(1);
   }
-  const serialized = JSON.stringify(output, null, 2);
+  const serialized = compact ? JSON.stringify(output) : JSON.stringify(output, null, 2);
   const lowered = serialized.toLowerCase();
   const offender = FORBIDDEN.find((needle) => lowered.includes(needle));
   if (offender !== undefined) {

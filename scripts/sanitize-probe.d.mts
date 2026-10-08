@@ -20,8 +20,9 @@ export type IndexSelection =
 export function parseIndexSelection(spec: string | undefined, eventCount: number): IndexSelection;
 
 /**
- * Pulls the event array out of a bare array, a full GraphQL envelope, or an
- * array of page envelopes (concatenated in page order). Throws on none of them.
+ * Pulls the event array out of a bare array, a full GraphQL envelope, an
+ * array of page envelopes, or an array of `{ requestedStartTime, data }` page
+ * records (both concatenated in page order). Throws on none of them.
  */
 export function extractEvents(value: unknown): readonly unknown[];
 
@@ -55,6 +56,51 @@ export type FamilySelection =
 
 /** Parses a `--families` list: raw event types, comma-separated, each once. Refuses rather than trims. */
 export function parseFamilySelection(spec: string | undefined): FamilySelection;
+
+export type OwnedPetScope =
+  | {
+      readonly ok: true;
+      readonly focusActorId: number;
+      /** Ascending; every actor whose master-data `petOwner` is exactly the focus. */
+      readonly ownedActorIds: readonly number[];
+      /** The focus and the owned actors, ascending. */
+      readonly actorScope: readonly number[];
+    }
+  | { readonly ok: false; readonly error: string };
+
+/**
+ * Derives an owned-pet slice's actor set from a fight context's
+ * `reportData.report.masterData.actors`. No recursion, no summon inference.
+ * Refuses an absent focus, a repeated actor id, a non-integer non-null
+ * `petOwner`, and an "owned" actor that is a Player or the focus itself.
+ */
+export function deriveOwnedPetScope(context: unknown, focusActorId: number): OwnedPetScope;
+
+/**
+ * The `--actor-slice-with-owned-pets` predicate: every event whose sourceID or
+ * targetID is in `actorScope`, plus events of an `actorlessFamilies` type
+ * carrying neither key; then the `families`, `fromMs` (exclusive) and
+ * `untilMs` (inclusive) restrictions. Capture order, nothing synthesised.
+ */
+export function ownedPetSlice(
+  events: readonly unknown[],
+  actorScope: readonly number[],
+  options?: {
+    readonly families?: readonly string[] | null;
+    readonly actorlessFamilies?: readonly string[];
+    readonly fromMs?: number | null;
+    readonly untilMs?: number | null;
+  },
+): readonly unknown[];
+
+/** Members of `actorScope` that are the sourceID or targetID of an event, ascending. */
+export function actorsWithRetainedEvents(
+  events: readonly unknown[],
+  actorScope: readonly number[],
+): readonly number[];
+
+/** The slice's bytes: two-space indentation, or compact JSON when `compact`; one trailing newline. */
+export function serializeSlice(sliced: readonly unknown[], compact?: boolean): string;
 
 /** The slicer's own revision, recorded as `tooling.revision` on a corpus artifact. */
 export const SANITIZER_REVISION: string;

@@ -15,6 +15,10 @@
  * within the ceilings, lineage is coherent, and every assertion is a registered
  * kind with well-formed parameters owned by the case's layer.
  *
+ * An owned-pet actor slice (M11-E2.1) is the one place it reads event fields:
+ * `sourceID`, `targetID`, `type` and `timestamp`, to prove the bytes are the
+ * slice the declaration and grants describe. That is still structure.
+ *
  * It does NOT check combat validity. A deliberately malformed Warcraft Logs
  * payload is a valid artifact when a case explicitly tests its rejection, so an
  * artifact declared `JSON` must merely parse, and one declared `RAW_TEXT` need
@@ -49,6 +53,10 @@ import {
   type PayloadKind,
   type TransformationKind,
 } from "./contract.js";
+import {
+  categoriesByRawType,
+  SUPPORTED_TYPE_CONTRACTS,
+} from "../../../src/engine/normalization/supported-families.js";
 
 export const MANIFEST_PATH = "manifest.json";
 export const ARTIFACT_ROOT = "artifacts/";
@@ -117,6 +125,8 @@ export const CORPUS_ERROR_CODES = [
   "CONTROL_SUBSTITUTION_TRANSFORMATION_INVALID",
   "CONTROL_SUBSTITUTION_COVERAGE_DIFFERS",
   "CONTROL_SUBSTITUTION_DIFF_INVALID",
+  // M11-E2.1: the owned-pet actor slice.
+  "ACTOR_SLICE_INVALID",
 ] as const;
 export type CorpusErrorCode = (typeof CORPUS_ERROR_CODES)[number];
 
@@ -540,6 +550,184 @@ function substitutionErrors(
   }
   if (canonicalJson(afterRest) !== canonicalJson(beforeRest)) {
     diff("the substituted event differs from its parent in a field other than abilityGameID");
+  }
+  return errors;
+}
+
+/**
+ * The owned set a fight context's master data states for `focusActorId`: the
+ * same derivation `scripts/sanitize-probe.mjs deriveOwnedPetScope` performs,
+ * re-done here from the committed catalog so the manifest's declaration is
+ * checked rather than trusted. `null` with a reason when the catalog cannot
+ * support it.
+ */
+function ownedSetFromCatalog(
+  catalog: unknown,
+  focusActorId: number,
+):
+  { readonly ok: true; readonly owned: readonly number[] } | { readonly ok: false; readonly reason: string } {
+  const actors = (catalog as { reportData?: { report?: { masterData?: { actors?: unknown } } } } | null)
+    ?.reportData?.report?.masterData?.actors;
+  if (!Array.isArray(actors)) return { ok: false, reason: "the catalog holds no masterData.actors array" };
+  const seen = new Set<number>();
+  const owned: number[] = [];
+  for (const entry of actors as readonly Record<string, unknown>[]) {
+    const id = entry["id"];
+    const owner = entry["petOwner"];
+    if (typeof id !== "number" || !Number.isSafeInteger(id))
+      return { ok: false, reason: "the catalog holds an actor without an integer id" };
+    if (seen.has(id)) return { ok: false, reason: `actor ${String(id)} is listed more than once` };
+    seen.add(id);
+    if (owner !== null && owner !== undefined && !(typeof owner === "number" && Number.isSafeInteger(owner)))
+      return { ok: false, reason: `actor ${String(id)} has a petOwner that is neither an integer nor null` };
+    if (owner !== focusActorId) continue;
+    if (id === focusActorId) return { ok: false, reason: "the focus names itself as its own petOwner" };
+    if (entry["type"] === "Player")
+      return { ok: false, reason: `actor ${String(id)} is a Player but names the focus as its petOwner` };
+    owned.push(id);
+  }
+  if (!seen.has(focusActorId))
+    return { ok: false, reason: `focus actor ${String(focusActorId)} is not in the catalog` };
+  return { ok: true, owned: owned.sort((a, b) => a - b) };
+}
+
+/** Raw types per granted category, from the supported-family contracts. GEAR is read from combatantinfo. */
+function rawTypesFeeding(category: string): readonly string[] {
+  const feeding = category === "GEAR" ? "COMBATANT_INFO" : category;
+  return [...categoriesByRawType(SUPPORTED_TYPE_CONTRACTS)]
+    .filter(([, fed]) => fed === feeding)
+    .map(([rawType]) => rawType);
+}
+
+const sameList = (a: readonly number[], b: readonly number[]): boolean =>
+  a.length === b.length && a.every((value, index) => value === b[index]);
+
+/**
+ * The owned-pet actor slice rule (M11-E2.1): the declaration is re-derived
+ * from the catalog and re-checked against every retained event. Any
+ * disagreement fails closed — a grant cannot vouch for an actor the catalog
+ * does not tie to the focus, and an event from outside the declared predicate
+ * means the artifact is not the slice its grant describes.
+ */
+function actorSliceErrors(
+  artifact: CorpusArtifactRecord,
+  loadedById: ReadonlyMap<string, LoadedArtifact>,
+  eventsById: ReadonlyMap<string, readonly Record<string, unknown>[]>,
+): CorpusError[] {
+  const slice = artifact.provenance.actorSlice;
+  if (slice === undefined) return [];
+  const errors: CorpusError[] = [];
+  const fail = (message: string): void => {
+    errors.push({
+      code: "ACTOR_SLICE_INVALID",
+      subject: { artifactId: artifact.artifactId },
+      message: `artifact ${artifact.artifactId}: ${message}`,
+    });
+  };
+  const source = artifact.provenance.source;
+  if (artifact.payloadKind !== "WCL_EVENT_ARRAY" || source === null) {
+    fail("an owned-pet actor slice is a captured WCL event array");
+    return errors;
+  }
+
+  // ---- the owned set, re-derived from the committed catalog ----
+  const catalog = loadedById.get(slice.catalogArtifactId);
+  if (catalog === undefined || catalog.record.payloadKind !== "WCL_GRAPHQL_DATA") {
+    fail(`catalog ${slice.catalogArtifactId} is not a loaded WCL_GRAPHQL_DATA artifact`);
+    return errors;
+  }
+  const catalogSource = catalog.record.provenance.source;
+  if (catalogSource?.reportCode !== source.reportCode || catalogSource.fightId !== source.fightId) {
+    fail(`catalog ${slice.catalogArtifactId} is not from this artifact's report and fight`);
+  }
+  const derived = ownedSetFromCatalog(catalog.json, slice.focusActorId);
+  if (!derived.ok) {
+    fail(`the catalog cannot establish ownership: ${derived.reason}`);
+    return errors;
+  }
+  if (!sameList(derived.owned, slice.ownedActorIds)) {
+    fail(
+      `declares owned actors [${slice.ownedActorIds.join(", ")}] but the catalog's petOwner links give [${derived.owned.join(", ")}]`,
+    );
+  }
+  const scope = [slice.focusActorId, ...derived.owned].sort((a, b) => a - b);
+  const scopeSet = new Set(scope);
+
+  // ---- grants: exactly the derived scope, only categories the families feed ----
+  const families = new Set(slice.families);
+  for (const type of slice.actorlessFamilies) {
+    if (!families.has(type)) fail(`actorless family ${type} is not a retained family`);
+  }
+  const grants = artifact.provenance.retainedCoverage.grants;
+  if (grants.length === 0) fail("an owned-pet actor slice must state its grant");
+  for (const [ordinal, grant] of grants.entries()) {
+    if (
+      grant.actorScope === null ||
+      !sameList(
+        [...grant.actorScope].sort((a, b) => a - b),
+        scope,
+      )
+    ) {
+      fail(
+        `grant ${String(ordinal)} has actor scope ${JSON.stringify(grant.actorScope)}; the derived scope is [${scope.join(", ")}]`,
+      );
+    }
+    for (const category of grant.categories) {
+      const missing = rawTypesFeeding(category).filter((type) => !families.has(type));
+      if (missing.length > 0) {
+        fail(
+          `grant ${String(ordinal)} names ${category}, but its families [${missing.join(", ")}] were not retained`,
+        );
+      }
+    }
+  }
+  const ranges = grants.flatMap((grant) => grant.ranges);
+  const granted = (timestamp: unknown): boolean =>
+    typeof timestamp === "number" &&
+    ranges.some((range) => timestamp >= range.fromReportTimeMs && timestamp <= range.toReportTimeMs);
+
+  // ---- every retained event satisfies the predicate ----
+  const actorless = new Set(slice.actorlessFamilies);
+  const active = new Set<number>();
+  const events = eventsById.get(artifact.artifactId) ?? [];
+  let outside = 0;
+  let firstOutside = "";
+  events.forEach((event, index) => {
+    const sourceId = event["sourceID"];
+    const targetId = event["targetID"];
+    const type = event["type"];
+    const inScope =
+      (typeof sourceId === "number" && scopeSet.has(sourceId)) ||
+      (typeof targetId === "number" && scopeSet.has(targetId));
+    const structural =
+      typeof type === "string" && actorless.has(type) && !("sourceID" in event) && !("targetID" in event);
+    if (typeof sourceId === "number" && scopeSet.has(sourceId)) active.add(sourceId);
+    if (typeof targetId === "number" && scopeSet.has(targetId)) active.add(targetId);
+    if (
+      (inScope || structural) &&
+      typeof type === "string" &&
+      families.has(type) &&
+      granted(event["timestamp"])
+    )
+      return;
+    outside += 1;
+    if (firstOutside === "")
+      firstOutside = `event ${String(index)} (${String(type)}, source ${String(sourceId)}, target ${String(targetId)}, at ${String(event["timestamp"])})`;
+  });
+  if (outside > 0) {
+    fail(`${String(outside)} retained event(s) lie outside the declared slice, first ${firstOutside}`);
+  }
+
+  // ---- the activity split matches the events ----
+  const withEvents = [...active].sort((a, b) => a - b);
+  const without = scope.filter((id) => !active.has(id));
+  if (
+    !sameList(withEvents, slice.actorsWithRetainedEvents) ||
+    !sameList(without, slice.actorsWithoutRetainedEvents)
+  ) {
+    fail(
+      `declares activity [${slice.actorsWithRetainedEvents.join(", ")}] / none [${slice.actorsWithoutRetainedEvents.join(", ")}], but the events give [${withEvents.join(", ")}] / [${without.join(", ")}]`,
+    );
   }
   return errors;
 }
@@ -1080,6 +1268,15 @@ export async function validateCorpus(
   // Negative-control substitutions, checked against both committed payloads.
   for (const artifact of artifactsById.values()) {
     errors.push(...substitutionErrors(artifact, lineageById, eventsById));
+  }
+  // Owned-pet actor slices, re-derived from their committed catalog.
+  const loadedArtifactsById = new Map<string, LoadedArtifact>(
+    [...dependencyArtifacts.values(), ...loadedArtifacts].map(
+      (entry) => [entry.record.artifactId, entry] as const,
+    ),
+  );
+  for (const artifact of artifactsById.values()) {
+    errors.push(...actorSliceErrors(artifact, loadedArtifactsById, eventsById));
   }
 
   // Cases.

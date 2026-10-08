@@ -34,13 +34,20 @@ import {
   createNormalizer,
   type NormalizationOutput,
 } from "../../../src/engine/normalization/event-normalizer.js";
+import type { CombatActor } from "../../../src/engine/normalization/actors.js";
+import { normalizeFightContext } from "../../../src/engine/normalization/fight-context.js";
 import { VERIFIED_DIRECTION_FIELDS } from "../../../src/engine/normalization/raw-event-fields.js";
 import {
   indexContracts,
   SUPPORTED_TYPE_CONTRACTS,
 } from "../../../src/engine/normalization/supported-families.js";
 import { createCombatState, type CombatState } from "../../../src/engine/state/combat-state.js";
-import type { CapabilityRecord, EvidenceCategory } from "../../../src/wcl/evidence-capability.js";
+import {
+  EVIDENCE_CAPABILITY_REGISTRY,
+  type CapabilityRecord,
+  type EvidenceCategory,
+} from "../../../src/wcl/evidence-capability.js";
+import { decodeFightContext } from "../../../src/wcl/fight-context-query.js";
 import { syntheticFight } from "../synthetic-fight.js";
 import { committedArtifactRecord, committedEventArray, committedManifest } from "./artifacts.js";
 import { CAPTURE_VOUCHED_CATEGORIES, type CorpusArtifactRecord } from "./contract.js";
@@ -436,9 +443,67 @@ function holesBetween(joined: readonly BundleHole[]): BundleHole[] {
 const holeKey = (hole: BundleHole): string =>
   `${String(hole.fromReportTimeMs)}..${String(hole.toReportTimeMs)}`;
 
+/**
+ * A committed fight context whose master data a bundle may carry as its actor
+ * catalog (M11-E2.1). The catalog is report-level and unpaginated, so it is
+ * ACTORS evidence for the whole fight or nothing: it must come from the same
+ * report and fight as the parts, decode through the production fight-context
+ * decoder and normalize through the production actor normalizer. Entries
+ * without a usable id leave ACTORS PARTIAL, never silently COMPLETE.
+ */
+export interface CatalogEvidence {
+  readonly record: CorpusArtifactRecord;
+  readonly json: unknown;
+}
+
+function catalogOf(
+  catalog: CatalogEvidence,
+  source: CaptureSource,
+  window: TimeRangeMs,
+): { readonly actors: ReadonlyMap<number, CombatActor>; readonly evidence: CategoryEvidence } {
+  const catalogSource = catalog.record.provenance.source;
+  if (
+    catalog.record.payloadKind !== "WCL_GRAPHQL_DATA" ||
+    catalogSource === null ||
+    catalogSource.reportCode !== source.reportCode ||
+    catalogSource.fightId !== source.fightId
+  ) {
+    throw new BundleCompositionError(
+      `catalog ${catalog.record.artifactId} is not a fight context of ${String(source.reportCode)}/${String(source.fightId)}`,
+    );
+  }
+  const decoded = decodeFightContext(catalog.json);
+  const fightId = source.fightId;
+  if (!decoded.ok || decoded.value.report === null || typeof fightId !== "number") {
+    throw new BundleCompositionError(
+      `catalog ${catalog.record.artifactId} does not decode as a fight context`,
+    );
+  }
+  const normalized = normalizeFightContext(decoded.value.report, fightId);
+  if (!normalized.ok) {
+    throw new BundleCompositionError(`catalog ${catalog.record.artifactId}: ${normalized.reason}`);
+  }
+  const degraded = normalized.actors.unusableEntryCount > 0;
+  return {
+    actors: normalized.actors.actors,
+    evidence: {
+      capability: "OBSERVABLE",
+      source: EVIDENCE_CAPABILITY_REGISTRY.ACTORS,
+      coverage: {
+        state: degraded ? "PARTIAL" : "COMPLETE",
+        reason: degraded ? "MALFORMED_EVENT_CONTENT" : "COMPLETED_NORMALLY",
+        coveredRanges: [window],
+        sourceStreamIds: ["context:masterData"],
+        actorScope: null,
+      },
+    },
+  };
+}
+
 export function bundleOverEvidence(
   parts: readonly ArtifactEvidence[],
   declaredHoles: readonly BundleHole[],
+  options: { readonly catalog?: CatalogEvidence } = {},
 ): BundleComposition {
   if (parts.length < 2) throw new BundleCompositionError("a bundle needs at least two parts");
   const first = parts[0];
@@ -552,12 +617,15 @@ export function bundleOverEvidence(
       },
     };
   }
+  const catalog = options.catalog === undefined ? null : catalogOf(options.catalog, first.source, window);
+  if (catalog !== null) categories.ACTORS = catalog.evidence;
   const fight = syntheticFight({
     events: normalized.events,
     malformedObservations: normalized.malformedObservations,
     startTimeMs: window.fromReportTimeMs,
     endTimeMs: window.toReportTimeMs,
     categories,
+    ...(catalog === null ? {} : { actors: catalog.actors }),
   });
   return { fight, coveredRanges, holes, events: rawEvents.length };
 }
@@ -567,6 +635,7 @@ export function bundleOf(
   corpus: LoadedCorpus,
   artifactIds: readonly string[],
   declaredHoles: readonly BundleHole[],
+  options: { readonly catalogArtifactId?: string } = {},
 ): BundleComposition {
   const parts = artifactIds.map((artifactId) => {
     // A part may be a regression-corpus artifact when the bundle is an
@@ -575,7 +644,13 @@ export function bundleOf(
     if (artifact === undefined) throw new BundleCompositionError(`unknown artifact ${artifactId}`);
     return evidenceOf(corpus, artifact);
   });
-  return bundleOverEvidence(parts, declaredHoles);
+  if (options.catalogArtifactId === undefined) return bundleOverEvidence(parts, declaredHoles);
+  const catalogId = options.catalogArtifactId;
+  const catalog = corpus.referenceableArtifacts.find((entry) => entry.record.artifactId === catalogId);
+  if (catalog === undefined) throw new BundleCompositionError(`unknown catalog artifact ${catalogId}`);
+  return bundleOverEvidence(parts, declaredHoles, {
+    catalog: { record: catalog.record, json: catalog.json },
+  });
 }
 
 export function stateOfBundle(

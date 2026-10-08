@@ -3851,6 +3851,45 @@ const castAbilitySubstitution = z
   .strict();
 export type CastAbilitySubstitution = z.infer<typeof castAbilitySubstitution>;
 
+/**
+ * An OWNED-PET ACTOR SLICE (M11-E2.1): the artifact is the
+ * `scripts/sanitize-probe.mjs --actor-slice-with-owned-pets` predicate over
+ * its capture — every event of a listed family whose `sourceID` or
+ * `targetID` is the focus or an actor whose Warcraft Logs master-data
+ * `petOwner` is exactly the focus, plus the listed ACTORLESS families' events
+ * that carry neither key.
+ *
+ * The declaration is never taken on trust. The loader re-derives the owned
+ * set from the named catalog artifact (a committed fight context of the same
+ * report and fight), and refuses unless: the derivation succeeds; it equals
+ * `ownedActorIds`; every grant's actor scope is exactly focus + owned; every
+ * retained event satisfies the predicate inside the granted range; the
+ * activity split matches the events; and every granted category is fed only
+ * by retained families. A stated owner is not combat relevance: an owned
+ * actor with no retained event stays in scope, listed under
+ * `actorsWithoutRetainedEvents`.
+ */
+const ownedPetActorSlice = z
+  .object({
+    mode: z.literal("FOCUS_WITH_OWNED_PETS"),
+    focusActorId: z.number().int(),
+    /** Ascending. Derived from the catalog, never chosen. */
+    ownedActorIds: z.array(z.number().int()),
+    ownershipAuthority: z.literal("WCL_PET_OWNER"),
+    /** The committed fight context the ownership is read from. */
+    catalogArtifactId: identifier,
+    /** The raw types `--families` retained. */
+    families: z.array(z.string().regex(/^[a-z]+$/)).min(1),
+    /** The raw types `--actorless-families` retained without an actor; each also in `families`. */
+    actorlessFamilies: z.array(z.string().regex(/^[a-z]+$/)),
+    /** Scope members that are the source or target of a retained event. Ascending. */
+    actorsWithRetainedEvents: z.array(z.number().int()),
+    /** Scope members that are neither. Ascending. */
+    actorsWithoutRetainedEvents: z.array(z.number().int()),
+  })
+  .strict();
+export type OwnedPetActorSlice = z.infer<typeof ownedPetActorSlice>;
+
 const provenanceSchema = z
   .object({
     kind: z.enum(PROVENANCE_KINDS),
@@ -3868,6 +3907,8 @@ const provenanceSchema = z
     limitations: z.array(z.string().min(1)),
     /** Present only on a negative-control derivative (M11-C4h); see `castAbilitySubstitution`. */
     substitution: castAbilitySubstitution.optional(),
+    /** Present only on an owned-pet actor slice (M11-E2.1); see `ownedPetActorSlice`. */
+    actorSlice: ownedPetActorSlice.optional(),
   })
   .strict();
 

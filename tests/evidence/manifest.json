@@ -3,6 +3,909 @@
   "corpusId": "warcraft-logs-coach-vnext.evidence-archive",
   "artifacts": [
     {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "f823cb5a1e28ec0f348e726a8c7b949e49b7769d24f79fc9199116eff1ff0ff1",
+      "byteLength": 492175,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45.json --actor-slice-with-owned-pets 15 7481292 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7436291 --families cast,begincast,empowerstart,empowerend,damage,extraattacks,summon,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange,combatantinfo,encounterstart,encounterend,death --actorless-families encounterstart,encounterend --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice-with-owned-pets predicate: actor scope DERIVED from the committed context's master data — focus 15 plus every actor whose WCL petOwner is 15 (44, 45, 47, 224; no recursion, no summon inference) — keeping every event whose sourceID or targetID is in that scope, plus the actorless encounterstart/encounterend, with --from 7436291 (exclusive) and the bound 7481292 (inclusive), restricted by --families to the twenty-two listed raw types. In place and order preserved; written as compact JSON (--compact). 1,746 of 271,011 events (the encounterstart at 7,436,292, actor 15's combatantinfo, 238 casts, 587 damage, 6 extraattacks, 9 summons, 80 resource changes, 823 aura transitions, 1 death).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "DAMAGE", "SUMMONS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [15, 44, 45, 47, 224],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7436292,
+                  "toReportTimeMs": 7481292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actors [15, 44, 45, 47, 224] over [7,436,292 .. 7,481,292] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The scope is focus 15 plus the actors whose WCL master-data petOwner is 15, re-derived by the loader from wcl-fight-context-b1pm-fight-48; a stated owner is not combat relevance, so an owned actor with no event stays in scope. CASTS, DAMAGE and SUMMONS are complete for those actors as source or target; AURAS likewise; RESOURCES as the actors their snapshots and resource changes describe; COMBATANT_INFO and GEAR as the subject of the combatantinfo the first segment holds. HEALING and ABSORBS are NOT granted (heal, absorbed and healabsorbed are excluded); DEATHS, ENCOUNTER_PHASES and TARGETABILITY are not capture-vouched categories and are granted nothing. The segment is one part of a seven-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M11-E2.1: one chronological segment of the canonical full-fight Blood Death Knight evidence — the focus and its WCL-stated pets, so observed combat facts (DIRECT_PLAYER, OWNER_ROLLUP, SOURCE_ACTORS per pet, boss-subtype and window queries) can be re-proven from committed bytes. No analyzer verdict rests on it.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "No heal, absorbed, healabsorbed, drain, dispel, resurrect or aurabroken event is retained — they exist in the capture and are excluded here; their absence from these bytes is not their absence from the fight.",
+          "Raw death events are retained only where their target is in scope; DEATHS stays UNVERIFIED and no death-completeness claim is made.",
+          "Events between other actors (including enemy-on-enemy and other players' pets) are not retained; no hostility or targetability is inferred.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FOCUS_WITH_OWNED_PETS",
+          "focusActorId": 15,
+          "ownedActorIds": [44, 45, 47, 224],
+          "ownershipAuthority": "WCL_PET_OWNER",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": [
+            "cast",
+            "begincast",
+            "empowerstart",
+            "empowerend",
+            "damage",
+            "extraattacks",
+            "summon",
+            "applybuff",
+            "refreshbuff",
+            "removebuff",
+            "applybuffstack",
+            "removebuffstack",
+            "applydebuff",
+            "refreshdebuff",
+            "removedebuff",
+            "applydebuffstack",
+            "removedebuffstack",
+            "resourcechange",
+            "combatantinfo",
+            "encounterstart",
+            "encounterend",
+            "death"
+          ],
+          "actorlessFamilies": ["encounterstart", "encounterend"],
+          "actorsWithRetainedEvents": [15, 44, 45, 47],
+          "actorsWithoutRetainedEvents": [224]
+        }
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-113-151",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-113-151.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "8126ff8cdf61d96f1f01f2b22856a56bb75bb32fa4a2357a05da16f7439da79a",
+      "byteLength": 491453,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-113-151.json --actor-slice-with-owned-pets 15 7587292 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7549292 --families cast,begincast,empowerstart,empowerend,damage,extraattacks,summon,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange,combatantinfo,encounterstart,encounterend,death --actorless-families encounterstart,encounterend --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice-with-owned-pets predicate: actor scope DERIVED from the committed context's master data — focus 15 plus every actor whose WCL petOwner is 15 (44, 45, 47, 224; no recursion, no summon inference) — keeping every event whose sourceID or targetID is in that scope, plus the actorless encounterstart/encounterend, with --from 7549292 (exclusive) and the bound 7587292 (inclusive), restricted by --families to the twenty-two listed raw types. In place and order preserved; written as compact JSON (--compact). 1,735 of 271,011 events (143 casts, 729 damage, 5 extraattacks, 3 summons, 93 resource changes, 761 aura transitions, 1 death).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "DAMAGE", "SUMMONS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [15, 44, 45, 47, 224],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7549293,
+                  "toReportTimeMs": 7587292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actors [15, 44, 45, 47, 224] over [7,549,293 .. 7,587,292] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The scope is focus 15 plus the actors whose WCL master-data petOwner is 15, re-derived by the loader from wcl-fight-context-b1pm-fight-48; a stated owner is not combat relevance, so an owned actor with no event stays in scope. CASTS, DAMAGE and SUMMONS are complete for those actors as source or target; AURAS likewise; RESOURCES as the actors their snapshots and resource changes describe; COMBATANT_INFO and GEAR as the subject of the combatantinfo the first segment holds. HEALING and ABSORBS are NOT granted (heal, absorbed and healabsorbed are excluded); DEATHS, ENCOUNTER_PHASES and TARGETABILITY are not capture-vouched categories and are granted nothing. The segment is one part of a seven-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M11-E2.1: one chronological segment of the canonical full-fight Blood Death Knight evidence — the focus and its WCL-stated pets, so observed combat facts (DIRECT_PLAYER, OWNER_ROLLUP, SOURCE_ACTORS per pet, boss-subtype and window queries) can be re-proven from committed bytes. No analyzer verdict rests on it.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "No heal, absorbed, healabsorbed, drain, dispel, resurrect or aurabroken event is retained — they exist in the capture and are excluded here; their absence from these bytes is not their absence from the fight.",
+          "Raw death events are retained only where their target is in scope; DEATHS stays UNVERIFIED and no death-completeness claim is made.",
+          "Events between other actors (including enemy-on-enemy and other players' pets) are not retained; no hostility or targetability is inferred.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FOCUS_WITH_OWNED_PETS",
+          "focusActorId": 15,
+          "ownedActorIds": [44, 45, 47, 224],
+          "ownershipAuthority": "WCL_PET_OWNER",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": [
+            "cast",
+            "begincast",
+            "empowerstart",
+            "empowerend",
+            "damage",
+            "extraattacks",
+            "summon",
+            "applybuff",
+            "refreshbuff",
+            "removebuff",
+            "applybuffstack",
+            "removebuffstack",
+            "applydebuff",
+            "refreshdebuff",
+            "removedebuff",
+            "applydebuffstack",
+            "removedebuffstack",
+            "resourcechange",
+            "combatantinfo",
+            "encounterstart",
+            "encounterend",
+            "death"
+          ],
+          "actorlessFamilies": ["encounterstart", "encounterend"],
+          "actorsWithRetainedEvents": [15, 44, 45, 47],
+          "actorsWithoutRetainedEvents": [224]
+        }
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-151-214",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-151-214.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "f284008545ffcb7e9d2e2e530dcc511f2b0dfa7ceb33093df354f1a0f976c956",
+      "byteLength": 488237,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-151-214.json --actor-slice-with-owned-pets 15 7650292 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7587292 --families cast,begincast,empowerstart,empowerend,damage,extraattacks,summon,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange,combatantinfo,encounterstart,encounterend,death --actorless-families encounterstart,encounterend --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice-with-owned-pets predicate: actor scope DERIVED from the committed context's master data — focus 15 plus every actor whose WCL petOwner is 15 (44, 45, 47, 224; no recursion, no summon inference) — keeping every event whose sourceID or targetID is in that scope, plus the actorless encounterstart/encounterend, with --from 7587292 (exclusive) and the bound 7650292 (inclusive), restricted by --families to the twenty-two listed raw types. In place and order preserved; written as compact JSON (--compact). 1,837 of 271,011 events (170 casts, 689 damage, 5 extraattacks, 8 summons, 76 resource changes, 889 aura transitions).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "DAMAGE", "SUMMONS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [15, 44, 45, 47, 224],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7587293,
+                  "toReportTimeMs": 7650292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actors [15, 44, 45, 47, 224] over [7,587,293 .. 7,650,292] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The scope is focus 15 plus the actors whose WCL master-data petOwner is 15, re-derived by the loader from wcl-fight-context-b1pm-fight-48; a stated owner is not combat relevance, so an owned actor with no event stays in scope. CASTS, DAMAGE and SUMMONS are complete for those actors as source or target; AURAS likewise; RESOURCES as the actors their snapshots and resource changes describe; COMBATANT_INFO and GEAR as the subject of the combatantinfo the first segment holds. HEALING and ABSORBS are NOT granted (heal, absorbed and healabsorbed are excluded); DEATHS, ENCOUNTER_PHASES and TARGETABILITY are not capture-vouched categories and are granted nothing. The segment is one part of a seven-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M11-E2.1: one chronological segment of the canonical full-fight Blood Death Knight evidence — the focus and its WCL-stated pets, so observed combat facts (DIRECT_PLAYER, OWNER_ROLLUP, SOURCE_ACTORS per pet, boss-subtype and window queries) can be re-proven from committed bytes. No analyzer verdict rests on it.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "No heal, absorbed, healabsorbed, drain, dispel, resurrect or aurabroken event is retained — they exist in the capture and are excluded here; their absence from these bytes is not their absence from the fight.",
+          "Raw death events are retained only where their target is in scope; DEATHS stays UNVERIFIED and no death-completeness claim is made.",
+          "Events between other actors (including enemy-on-enemy and other players' pets) are not retained; no hostility or targetability is inferred.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FOCUS_WITH_OWNED_PETS",
+          "focusActorId": 15,
+          "ownedActorIds": [44, 45, 47, 224],
+          "ownershipAuthority": "WCL_PET_OWNER",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": [
+            "cast",
+            "begincast",
+            "empowerstart",
+            "empowerend",
+            "damage",
+            "extraattacks",
+            "summon",
+            "applybuff",
+            "refreshbuff",
+            "removebuff",
+            "applybuffstack",
+            "removebuffstack",
+            "applydebuff",
+            "refreshdebuff",
+            "removedebuff",
+            "applydebuffstack",
+            "removedebuffstack",
+            "resourcechange",
+            "combatantinfo",
+            "encounterstart",
+            "encounterend",
+            "death"
+          ],
+          "actorlessFamilies": ["encounterstart", "encounterend"],
+          "actorsWithRetainedEvents": [15, 44, 45, 47],
+          "actorsWithoutRetainedEvents": [224]
+        }
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-214-263",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-214-263.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "a8c90d772479b2ce7299760d7e857c349fbeedf96ff0302e2b11ac3c320d8219",
+      "byteLength": 496131,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-214-263.json --actor-slice-with-owned-pets 15 7699292 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7650292 --families cast,begincast,empowerstart,empowerend,damage,extraattacks,summon,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange,combatantinfo,encounterstart,encounterend,death --actorless-families encounterstart,encounterend --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice-with-owned-pets predicate: actor scope DERIVED from the committed context's master data — focus 15 plus every actor whose WCL petOwner is 15 (44, 45, 47, 224; no recursion, no summon inference) — keeping every event whose sourceID or targetID is in that scope, plus the actorless encounterstart/encounterend, with --from 7650292 (exclusive) and the bound 7699292 (inclusive), restricted by --families to the twenty-two listed raw types. In place and order preserved; written as compact JSON (--compact). 1,717 of 271,011 events (186 casts, 651 damage, 9 extraattacks, 4 summons, 91 resource changes, 775 aura transitions, 1 death).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "DAMAGE", "SUMMONS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [15, 44, 45, 47, 224],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7650293,
+                  "toReportTimeMs": 7699292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actors [15, 44, 45, 47, 224] over [7,650,293 .. 7,699,292] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The scope is focus 15 plus the actors whose WCL master-data petOwner is 15, re-derived by the loader from wcl-fight-context-b1pm-fight-48; a stated owner is not combat relevance, so an owned actor with no event stays in scope. CASTS, DAMAGE and SUMMONS are complete for those actors as source or target; AURAS likewise; RESOURCES as the actors their snapshots and resource changes describe; COMBATANT_INFO and GEAR as the subject of the combatantinfo the first segment holds. HEALING and ABSORBS are NOT granted (heal, absorbed and healabsorbed are excluded); DEATHS, ENCOUNTER_PHASES and TARGETABILITY are not capture-vouched categories and are granted nothing. The segment is one part of a seven-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M11-E2.1: one chronological segment of the canonical full-fight Blood Death Knight evidence — the focus and its WCL-stated pets, so observed combat facts (DIRECT_PLAYER, OWNER_ROLLUP, SOURCE_ACTORS per pet, boss-subtype and window queries) can be re-proven from committed bytes. No analyzer verdict rests on it.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "No heal, absorbed, healabsorbed, drain, dispel, resurrect or aurabroken event is retained — they exist in the capture and are excluded here; their absence from these bytes is not their absence from the fight.",
+          "Raw death events are retained only where their target is in scope; DEATHS stays UNVERIFIED and no death-completeness claim is made.",
+          "Events between other actors (including enemy-on-enemy and other players' pets) are not retained; no hostility or targetability is inferred.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FOCUS_WITH_OWNED_PETS",
+          "focusActorId": 15,
+          "ownedActorIds": [44, 45, 47, 224],
+          "ownershipAuthority": "WCL_PET_OWNER",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": [
+            "cast",
+            "begincast",
+            "empowerstart",
+            "empowerend",
+            "damage",
+            "extraattacks",
+            "summon",
+            "applybuff",
+            "refreshbuff",
+            "removebuff",
+            "applybuffstack",
+            "removebuffstack",
+            "applydebuff",
+            "refreshdebuff",
+            "removedebuff",
+            "applydebuffstack",
+            "removedebuffstack",
+            "resourcechange",
+            "combatantinfo",
+            "encounterstart",
+            "encounterend",
+            "death"
+          ],
+          "actorlessFamilies": ["encounterstart", "encounterend"],
+          "actorsWithRetainedEvents": [15, 44, 45, 47],
+          "actorsWithoutRetainedEvents": [224]
+        }
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-263-311",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-263-311.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "3dfecdb2138662aac8c963be7f476f7d2ca1c56e9f5b9ba50911438b58ac9d57",
+      "byteLength": 494101,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-263-311.json --actor-slice-with-owned-pets 15 7747292 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7699292 --families cast,begincast,empowerstart,empowerend,damage,extraattacks,summon,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange,combatantinfo,encounterstart,encounterend,death --actorless-families encounterstart,encounterend --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice-with-owned-pets predicate: actor scope DERIVED from the committed context's master data — focus 15 plus every actor whose WCL petOwner is 15 (44, 45, 47, 224; no recursion, no summon inference) — keeping every event whose sourceID or targetID is in that scope, plus the actorless encounterstart/encounterend, with --from 7699292 (exclusive) and the bound 7747292 (inclusive), restricted by --families to the twenty-two listed raw types. In place and order preserved; written as compact JSON (--compact). 1,796 of 271,011 events (165 casts, 691 damage, 4 extraattacks, 6 summons, 76 resource changes, 854 aura transitions).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "DAMAGE", "SUMMONS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [15, 44, 45, 47, 224],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7699293,
+                  "toReportTimeMs": 7747292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actors [15, 44, 45, 47, 224] over [7,699,293 .. 7,747,292] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The scope is focus 15 plus the actors whose WCL master-data petOwner is 15, re-derived by the loader from wcl-fight-context-b1pm-fight-48; a stated owner is not combat relevance, so an owned actor with no event stays in scope. CASTS, DAMAGE and SUMMONS are complete for those actors as source or target; AURAS likewise; RESOURCES as the actors their snapshots and resource changes describe; COMBATANT_INFO and GEAR as the subject of the combatantinfo the first segment holds. HEALING and ABSORBS are NOT granted (heal, absorbed and healabsorbed are excluded); DEATHS, ENCOUNTER_PHASES and TARGETABILITY are not capture-vouched categories and are granted nothing. The segment is one part of a seven-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M11-E2.1: one chronological segment of the canonical full-fight Blood Death Knight evidence — the focus and its WCL-stated pets, so observed combat facts (DIRECT_PLAYER, OWNER_ROLLUP, SOURCE_ACTORS per pet, boss-subtype and window queries) can be re-proven from committed bytes. No analyzer verdict rests on it.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "No heal, absorbed, healabsorbed, drain, dispel, resurrect or aurabroken event is retained — they exist in the capture and are excluded here; their absence from these bytes is not their absence from the fight.",
+          "Raw death events are retained only where their target is in scope; DEATHS stays UNVERIFIED and no death-completeness claim is made.",
+          "Events between other actors (including enemy-on-enemy and other players' pets) are not retained; no hostility or targetability is inferred.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FOCUS_WITH_OWNED_PETS",
+          "focusActorId": 15,
+          "ownedActorIds": [44, 45, 47, 224],
+          "ownershipAuthority": "WCL_PET_OWNER",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": [
+            "cast",
+            "begincast",
+            "empowerstart",
+            "empowerend",
+            "damage",
+            "extraattacks",
+            "summon",
+            "applybuff",
+            "refreshbuff",
+            "removebuff",
+            "applybuffstack",
+            "removebuffstack",
+            "applydebuff",
+            "refreshdebuff",
+            "removedebuff",
+            "applydebuffstack",
+            "removedebuffstack",
+            "resourcechange",
+            "combatantinfo",
+            "encounterstart",
+            "encounterend",
+            "death"
+          ],
+          "actorlessFamilies": ["encounterstart", "encounterend"],
+          "actorsWithRetainedEvents": [15, 44, 45, 47],
+          "actorsWithoutRetainedEvents": [224]
+        }
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-311-345",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-311-345.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "055b7fc3cadc57fb474a8d9e657bdd0338aa0f0473269fae4fcb96bf691f486e",
+      "byteLength": 346853,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-311-345.json --actor-slice-with-owned-pets 15 7781469 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7747292 --families cast,begincast,empowerstart,empowerend,damage,extraattacks,summon,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange,combatantinfo,encounterstart,encounterend,death --actorless-families encounterstart,encounterend --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice-with-owned-pets predicate: actor scope DERIVED from the committed context's master data — focus 15 plus every actor whose WCL petOwner is 15 (44, 45, 47, 224; no recursion, no summon inference) — keeping every event whose sourceID or targetID is in that scope, plus the actorless encounterstart/encounterend, with --from 7747292 (exclusive) and the bound 7781469 (inclusive), restricted by --families to the twenty-two listed raw types. In place and order preserved; written as compact JSON (--compact). 1,239 of 271,011 events (120 casts, 448 damage, 4 extraattacks, 4 summons, 63 resource changes, 598 aura transitions, 1 death, the encounterend at 7,781,469 = the fight end).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "DAMAGE", "SUMMONS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [15, 44, 45, 47, 224],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7747293,
+                  "toReportTimeMs": 7781469
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actors [15, 44, 45, 47, 224] over [7,747,293 .. 7,781,469] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The scope is focus 15 plus the actors whose WCL master-data petOwner is 15, re-derived by the loader from wcl-fight-context-b1pm-fight-48; a stated owner is not combat relevance, so an owned actor with no event stays in scope. CASTS, DAMAGE and SUMMONS are complete for those actors as source or target; AURAS likewise; RESOURCES as the actors their snapshots and resource changes describe; COMBATANT_INFO and GEAR as the subject of the combatantinfo the first segment holds. HEALING and ABSORBS are NOT granted (heal, absorbed and healabsorbed are excluded); DEATHS, ENCOUNTER_PHASES and TARGETABILITY are not capture-vouched categories and are granted nothing. The segment is one part of a seven-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M11-E2.1: one chronological segment of the canonical full-fight Blood Death Knight evidence — the focus and its WCL-stated pets, so observed combat facts (DIRECT_PLAYER, OWNER_ROLLUP, SOURCE_ACTORS per pet, boss-subtype and window queries) can be re-proven from committed bytes. No analyzer verdict rests on it.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "No heal, absorbed, healabsorbed, drain, dispel, resurrect or aurabroken event is retained — they exist in the capture and are excluded here; their absence from these bytes is not their absence from the fight.",
+          "Raw death events are retained only where their target is in scope; DEATHS stays UNVERIFIED and no death-completeness claim is made.",
+          "Events between other actors (including enemy-on-enemy and other players' pets) are not retained; no hostility or targetability is inferred.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FOCUS_WITH_OWNED_PETS",
+          "focusActorId": 15,
+          "ownedActorIds": [44, 45, 47, 224],
+          "ownershipAuthority": "WCL_PET_OWNER",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": [
+            "cast",
+            "begincast",
+            "empowerstart",
+            "empowerend",
+            "damage",
+            "extraattacks",
+            "summon",
+            "applybuff",
+            "refreshbuff",
+            "removebuff",
+            "applybuffstack",
+            "removebuffstack",
+            "applydebuff",
+            "refreshdebuff",
+            "removedebuff",
+            "applydebuffstack",
+            "removedebuffstack",
+            "resourcechange",
+            "combatantinfo",
+            "encounterstart",
+            "encounterend",
+            "death"
+          ],
+          "actorlessFamilies": ["encounterstart", "encounterend"],
+          "actorsWithRetainedEvents": [15, 44, 45],
+          "actorsWithoutRetainedEvents": [47, 224]
+        }
+      }
+    },
+    {
+      "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-45-113",
+      "path": "artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-45-113.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "76489f6bb0df2d98dfb41971863d39abfa18a0869ec3e273c7941aa7c95f18dd",
+      "byteLength": 468294,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-45-113.json --actor-slice-with-owned-pets 15 7549292 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7481292 --families cast,begincast,empowerstart,empowerend,damage,extraattacks,summon,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange,combatantinfo,encounterstart,encounterend,death --actorless-families encounterstart,encounterend --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice-with-owned-pets predicate: actor scope DERIVED from the committed context's master data — focus 15 plus every actor whose WCL petOwner is 15 (44, 45, 47, 224; no recursion, no summon inference) — keeping every event whose sourceID or targetID is in that scope, plus the actorless encounterstart/encounterend, with --from 7481292 (exclusive) and the bound 7549292 (inclusive), restricted by --families to the twenty-two listed raw types. In place and order preserved; written as compact JSON (--compact). 1,799 of 271,011 events (176 casts, 603 damage, 8 extraattacks, 8 summons, 90 resource changes, 914 aura transitions).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "DAMAGE", "SUMMONS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [15, 44, 45, 47, 224],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7481293,
+                  "toReportTimeMs": 7549292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actors [15, 44, 45, 47, 224] over [7,481,293 .. 7,549,292] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The scope is focus 15 plus the actors whose WCL master-data petOwner is 15, re-derived by the loader from wcl-fight-context-b1pm-fight-48; a stated owner is not combat relevance, so an owned actor with no event stays in scope. CASTS, DAMAGE and SUMMONS are complete for those actors as source or target; AURAS likewise; RESOURCES as the actors their snapshots and resource changes describe; COMBATANT_INFO and GEAR as the subject of the combatantinfo the first segment holds. HEALING and ABSORBS are NOT granted (heal, absorbed and healabsorbed are excluded); DEATHS, ENCOUNTER_PHASES and TARGETABILITY are not capture-vouched categories and are granted nothing. The segment is one part of a seven-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M11-E2.1: one chronological segment of the canonical full-fight Blood Death Knight evidence — the focus and its WCL-stated pets, so observed combat facts (DIRECT_PLAYER, OWNER_ROLLUP, SOURCE_ACTORS per pet, boss-subtype and window queries) can be re-proven from committed bytes. No analyzer verdict rests on it.",
+        "limitations": [
+          "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "No heal, absorbed, healabsorbed, drain, dispel, resurrect or aurabroken event is retained — they exist in the capture and are excluded here; their absence from these bytes is not their absence from the fight.",
+          "Raw death events are retained only where their target is in scope; DEATHS stays UNVERIFIED and no death-completeness claim is made.",
+          "Events between other actors (including enemy-on-enemy and other players' pets) are not retained; no hostility or targetability is inferred.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FOCUS_WITH_OWNED_PETS",
+          "focusActorId": 15,
+          "ownedActorIds": [44, 45, 47, 224],
+          "ownershipAuthority": "WCL_PET_OWNER",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": [
+            "cast",
+            "begincast",
+            "empowerstart",
+            "empowerend",
+            "damage",
+            "extraattacks",
+            "summon",
+            "applybuff",
+            "refreshbuff",
+            "removebuff",
+            "applybuffstack",
+            "removebuffstack",
+            "applydebuff",
+            "refreshdebuff",
+            "removedebuff",
+            "applydebuffstack",
+            "removedebuffstack",
+            "resourcechange",
+            "combatantinfo",
+            "encounterstart",
+            "encounterend",
+            "death"
+          ],
+          "actorlessFamilies": ["encounterstart", "encounterend"],
+          "actorsWithRetainedEvents": [15, 44, 45, 47],
+          "actorsWithoutRetainedEvents": [224]
+        }
+      }
+    },
+    {
       "artifactId": "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",
       "path": "artifacts/wcl-events/wcl-brewmaster-monk-gtkb-full-fight.seg-165-285.json",
       "encoding": "JSON",
@@ -189,6 +1092,83 @@
           "No actor or player names are present; identities are numeric ids only.",
           "gameVersion 1 / logVersion 17 only.",
           "Prettier-formatted whitespace; the parsed payload is what the capture returned."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-fight-context-b1pm-fight-48",
+      "path": "artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "ff9905aae009ca02e8551406223f62af87becf918a74a748c605f322d4975fbe",
+      "byteLength": 144924,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "FULL_RAID",
+          "query": {
+            "kind": "FIGHT_CONTEXT",
+            "fightIds": [48]
+          },
+          "completeness": {
+            "eventsReturned": "NOT_APPLICABLE",
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "COMPLETE",
+            "evidence": "A typed, unpaginated GraphQL field: the whole report context arrived in one response, revision 51. It identified fight 48 (encounter 3455, difficulty 5, kill, [7,436,292 .. 7,781,469]), actor 15 as Player / DeathKnight with Blood at its friendlySpecs index, and 290 master-data actors of which exactly four (44, 45, 47, 224) state petOwner 15."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R1 fight context: one FIGHT_CONTEXT_QUERY for fight 48 (its actorID argument 15 selects only whose talentImportCode is returned); bounded to 1 context request in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/context.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-payloads.mjs",
+              "revision": "sanitize-payloads-3",
+              "invocation": "node scripts/corpus/sanitize-payloads.mjs context .probe/m11e2/context.json tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --compact"
+            },
+            "detail": "rateLimitData removed; every masterData.actors[].name replaced by `Actor<id>`, every server set to null, and every PLAYER's gameID (a stable character identifier) set to null. Report-local actor ids, types, subTypes and petOwner links are untouched, as are NPC and pet gameIDs (creature taxonomy) and the fight, phase, ability and zone fields. Sanitized under sanitize-payloads-3 and written as compact JSON (--compact); the redaction rules are revision 2's.",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-payloads.mjs",
+              "revision": "sanitize-payloads-3",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report context, not events: master data, one fight header, phase transitions, abilities and zone. It grants no event coverage. The actor catalog is complete for the report because master data is unpaginated; it is the ownership authority (WCL petOwner) the owned-pet segments' actor scope is re-derived from."
+        },
+        "retainedFor": "M11-E2.1: the canonical Blood Death Knight report context — actor 15's identity (Player / DeathKnight, Blood at its friendlySpecs index), the WCL petOwner links that define the owned-pet scope (44, 45, 47, 224 → 15), the Boss subType of actor 161, and the fight header [7,436,292 .. 7,781,469].",
+        "limitations": [
+          "Names are redacted to `Actor<id>`, servers and player gameIDs to null; a case must never depend on a name beyond its being the redacted form.",
+          "The talent import code present is actor 15's (the query argument), uninterpreted.",
+          "phaseTransitions is null for this fight; no phase or intermission evidence is retained.",
+          "Compact JSON: no whitespace between tokens.",
+          "gameVersion 1 / logVersion 17 only."
         ]
       }
     },
