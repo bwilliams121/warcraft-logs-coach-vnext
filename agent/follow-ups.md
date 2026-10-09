@@ -390,6 +390,55 @@ converges. SimulationCraft would reach the proven entry in every world; the
 engine answers UNKNOWN at the gate. Sound, and a coverage limit; lifting it
 means teaching D3-A's collapse about pseudo-actions, which B2 did not do.
 
+## After M11-F: what the narrow evidence primitives do not establish
+
+**Raised:** M11-F (2026-10-08). Each item is UNKNOWN or refused today, never
+guessed.
+
+**Raid `fight_style` binding (O7) blocked on a difficulty authority.** The binding
+`fight_style.dungeonroute/dungeonslice = false` is approved for a positively
+identified raid encounter. No authoritative raid-difficulty classification
+exists in the repository, and numeric difficulty ids must not be guessed. It
+needs a pinned source: a captured `Zone.difficulties`, or a documented WCL
+difficulty enumeration.
+
+**`resurrect` has no committed evidence.** The decoder and contract exist
+(`resurrectionContractFor`) but are not registered. Production therefore
+answers UNREVIEWED_EVENT_AFTER_DEATH after a death followed by a resurrection,
+which fails closed. Committing a capture that contains one (the M11-E2 player 5
+event is outside the committed slice) would admit it.
+
+**`active_dot` is a lower bound only.** An exact count needs a proven-empty
+window: a pinned MAXIMUM carry duration (pandemic, haste and talents included)
+for the DoT, so that complete focus-sourced aura coverage over that window rules
+out unobserved carriers. Assassination's pinned durations are base values only.
+
+**NORMALIZATION_REVISION bumped `m3.2` -> `m3.3` (resolved, owner-approved).**
+The repo contract bumps on any change of normalized-model shape or meaning, and
+additive changes count. M11-E1 (`tickField`, `overkillAmount`) and M11-F
+(`DEATH` / `RESURRECTION`, raw `death` no longer `UNSUPPORTED_TYPE`) both
+qualified.
+
+Historical note: `b05f0c4` (M10-C4, 2026-09-17) replaced the raw gear ids
+`permanentEnchantId` / `temporaryEnchantId` / `gemIds` with the
+`GearEnchantState` / `GearGemsState` states without the required bump. It is
+recorded here as a missed historical bump. `m3.3` is the next current revision
+and incorporates the model as it exists now. No history was rewritten.
+
+The intentional public delta: every ANALYZED raid-night/1 cell's
+`provenance.normalizationRevision` reads `"m3.3"`, so a stored `m3.2` result
+compares as `sameNormalizationRevision` false and NOT_COMPATIBLE. analysis/1
+carries no normalization revision.
+
+**Deferred with Policy B:**
+- exact `active_enemies`;
+- generic `spell_targets` (an alias of `active_enemies` under the pinned
+  defaults);
+- closed `target_if` enumeration;
+- targetability and attackability windows;
+- add availability;
+- hostility authority (N5).
+
 ## After M11-E1: what the observed combat facts do not establish
 
 **Raised:** M11-E1 (2026-10-05). Each is NOT YET PROVEN, and the facts layer

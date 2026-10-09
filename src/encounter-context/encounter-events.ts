@@ -13,10 +13,11 @@
  *
  * DEATH CONTEXT IS DELIBERATELY UNSUPPORTED
  *
- * Death-event encounter context is unsupported because the normalized combat
- * model currently has no evidence-backed death event family. `CombatEvent` has
- * no death variant, and `DEATHS` remains capability UNVERIFIED — the registry
- * records that neither committed capture contained a death event.
+ * Death-event encounter context is unsupported here. Since M11-F the normalized
+ * model has a POSITIVE `DEATH` event family (evidenced by the archived M11-E2
+ * capture) read only by `src/engine/state/death-state.ts`, whose API cannot
+ * express "alive". This module does not consume it: encounter context over
+ * deaths needs its own reviewed contract.
  *
  * NO ABSENCE CLAIM ABOUT DEATHS IS PERMITTED. In particular this module exposes
  * no `deaths: []` field: an empty array would be read as observed absence, which

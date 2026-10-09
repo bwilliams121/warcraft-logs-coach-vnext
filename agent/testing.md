@@ -1533,6 +1533,24 @@ m11e1-owned-pet-scope.test.ts, contracts/m11e1-combat-facts-layering.test.ts):
   permuted input                               -> byte-identical results
   any import from outside src/combat-facts     -> refused (current-milestone guard; a reviewed
                                                   M11-F/G consumer amends it explicitly)
+positive deaths (M11-F, tests/unit/m11f-death-state.test.ts):
+  killed boss with no death event              -> NO_POSITIVE_DEATH_EVIDENCE, never alive (A)
+  death of X#3                                 -> DEAD_SINCE for X#3; X#4 and X#null unaffected (B)
+  dead actor sourcing delayed damage           -> still DEAD_SINCE (C)
+  later hit with the same key's hp>0 snapshot  -> EVIDENCE_CONTRADICTION; auras/0 hp/other instance do not (D)
+  decisive event in the death's millisecond    -> ORDERING_AMBIGUOUS in either retrieval order (E)
+  decoded resurrection / production resurrect  -> RESURRECTION_OBSERVED / UNREVIEWED_EVENT_AFTER_DEATH (F)
+  complete death retrieval, no death event     -> still NO_POSITIVE_DEATH_EVIDENCE (G)
+  events after the query time                  -> never read
+active_dot (M11-F, tests/unit/m11f-active-dot.test.ts):
+  caster's proven carriers                     -> AT_LEAST lower bound; upper bound never claimed
+  another source's DoT / no aura coverage      -> not counted / UNKNOWN, never inactive
+  positive death after the anchor              -> PROVEN_INACTIVE; same-ms or unresolved -> UNKNOWN
+  resurrection                                 -> does not recreate the DoT
+  Assassination crimson_tempest                -> still refused (spell_targets), no public change
+evidence roots (M11-F, tests/contracts/m11f-evidence-root-citations.test.ts):
+  archive citation                             -> resolves by archive id, fixture, recomputed SHA-256, raw type
+  wrong root / missing fixture / bad digest / edited bytes / absent raw type -> refused
 canonical BDK fixture (M11-E2.1, tests/unit/m11e2-blood-dk-fixture.test.ts):
   seven segments composed                      -> one range [7,436,292 .. 7,781,469], no hole (A)
   owned set                                    -> derived from catalog petOwner, never typed (B, C)
@@ -1543,7 +1561,7 @@ canonical BDK fixture (M11-E2.1, tests/unit/m11e2-blood-dk-fixture.test.ts):
   BEGIN vs COMPLETE, target collections        -> separate; ActorKeys only (L, M)
   boss subtype / -1 / friendly Paladin         -> 161 only / sentinel / not an enemy (N, O)
   activity                                     -> first/last observation only, no interval (P)
-  raw deaths                                   -> verbatim, DEATHS stays UNVERIFIED (Q)
+  raw deaths                                   -> verbatim positive DEATH facts, no DEATHS coverage (Q)
   compact re-slice                             -> byte-identical; default serialization unchanged (R)
   declaration vs catalog / grant / bytes       -> ACTOR_SLICE_INVALID (S)
   excluded heal / absorbed                     -> never COMPLETE; a HEALING grant is refused (T)

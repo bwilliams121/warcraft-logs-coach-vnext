@@ -5,6 +5,26 @@ import { SUPPORTED_TYPE_CONTRACTS } from "../../src/engine/normalization/support
 import { VERIFIED_DIRECTION_FIELDS } from "../../src/engine/normalization/raw-event-fields.js";
 import { NORMALIZATION_REVISION } from "../../src/engine/normalization/combat-fight.js";
 import { committedEventArrays } from "../support/corpus/artifacts.js";
+import { committedEvidenceArchiveFiles } from "../support/corpus/evidence-archive.js";
+
+/**
+ * Raw types present in the committed EVIDENCE ARCHIVE artifact a citation
+ * names (M11-F, N3). Synchronous, by manifest path; digest and root identity
+ * are resolved in tests/contracts/m11f-evidence-root-citations.test.ts.
+ */
+function archivedRawTypes(fixtureId: string): Set<string> {
+  const files = committedEvidenceArchiveFiles();
+  const manifest = JSON.parse(files["manifest.json"] ?? "null") as {
+    artifacts: { artifactId: string; path: string; payloadKind: string }[];
+  };
+  const record = manifest.artifacts.find((entry) => entry.artifactId === fixtureId);
+  const types = new Set<string>();
+  if (record === undefined || record.payloadKind !== "WCL_EVENT_ARRAY") return types;
+  for (const event of JSON.parse(files[record.path] ?? "[]") as { type?: unknown }[]) {
+    if (typeof event.type === "string") types.add(event.type);
+  }
+  return types;
+}
 
 function filesUnder(root: string): readonly string[] {
   if (!existsSync(root)) {
@@ -24,8 +44,10 @@ describe("every recognised raw type is evidence-gated", () => {
     // bar for it. Naming a type is still a claim about a non-frozen upstream.
     for (const contract of SUPPORTED_TYPE_CONTRACTS) {
       expect(contract.evidence, `${contract.rawType} has no evidence`).toBeDefined();
-      expect(["SANITIZED_CAPTURE", "SCHEMA_TYPED_FIELD"]).toContain(contract.evidence.kind);
-      if (contract.evidence.kind === "SANITIZED_CAPTURE") {
+      expect(["SANITIZED_CAPTURE", "SCHEMA_TYPED_FIELD", "ARCHIVED_CAPTURE"]).toContain(
+        contract.evidence.kind,
+      );
+      if (contract.evidence.kind === "SANITIZED_CAPTURE" || contract.evidence.kind === "ARCHIVED_CAPTURE") {
         expect(contract.evidence.fixtureId.length).toBeGreaterThan(0);
       }
     }
@@ -46,10 +68,15 @@ describe("every recognised raw type is evidence-gated", () => {
     }
 
     for (const contract of SUPPORTED_TYPE_CONTRACTS) {
-      expect(
-        committed.has(contract.rawType),
-        `${contract.rawType} is recognised in code but appears in no committed fixture`,
-      ).toBe(true);
+      // M11-F (N3): a contract citing the evidence archive is held to the
+      // artifact it names there — never to "some file somewhere".
+      const present =
+        contract.evidence.kind === "ARCHIVED_CAPTURE"
+          ? archivedRawTypes(contract.evidence.fixtureId).has(contract.rawType)
+          : committed.has(contract.rawType);
+      expect(present, `${contract.rawType} is recognised in code but appears in no committed fixture`).toBe(
+        true,
+      );
     }
   });
 
@@ -114,6 +141,9 @@ describe("the normalized model contains no gameplay vocabulary", () => {
 
   it("records a normalization revision so results stay traceable", () => {
     expect(NORMALIZATION_REVISION).toMatch(/^m\d+\.\d+$/);
+    // M11-F: bumped for the M11-E1 and M11-F model changes (shape and meaning).
+    // A model change without a bump is what this pin makes visible in review.
+    expect(NORMALIZATION_REVISION).toBe("m3.3");
   });
 });
 

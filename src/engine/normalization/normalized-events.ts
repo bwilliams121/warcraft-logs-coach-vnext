@@ -299,6 +299,48 @@ export interface SummonEvent extends CombatEventBase {
 }
 
 /**
+ * `death` (M11-F). A POSITIVE fact: Warcraft Logs wrote a death event for the
+ * TARGET actor instance at this report time.
+ *
+ * The dying actor is the envelope's `target` (`targetID`/`targetInstance`),
+ * required by the decoder. The envelope's raw source (the `-1` sentinel in
+ * every audited event) and raw `abilityGameID` (0 in every audited event) are
+ * kept verbatim on the envelope and given no meaning.
+ *
+ * WHAT ITS ABSENCE MEANS: NOTHING. The M11-ED audit found a killed boss with
+ * no death event and NPC instances that vanished without one, so no death
+ * event is never "alive", "survived", "did not die" or "present". The only
+ * reader is `src/engine/state/death-state.ts`, whose API has no state for
+ * alive.
+ */
+export interface DeathEvent extends CombatEventBase {
+  readonly kind: "DEATH";
+  /**
+   * `killerID` / `killerInstance` when Warcraft Logs supplied them, verbatim.
+   * Absent on most audited deaths: absence is "not attributed", never "no
+   * killer". Never inferred from the last damage source.
+   */
+  readonly killer: ActorRef | "NOT_SUPPLIED";
+  /** `killingAbilityGameID` when supplied; same rule. */
+  readonly killingAbilityGameId: number | "NOT_SUPPLIED";
+}
+
+/**
+ * A positive resurrection of the TARGET actor instance (M11-F).
+ *
+ * The raw `resurrect` type is NOT registered in `SUPPORTED_TYPE_CONTRACTS`:
+ * no committed artifact contains one, and recognising a raw type requires
+ * committed evidence for it. In production a `resurrect` therefore stays an
+ * `UNSUPPORTED_TYPE` event, which `death-state.ts` treats as unreviewed
+ * evidence after a death (fail closed). This kind exists so the contract is
+ * ready, and tested, the day committed evidence admits the type — see
+ * `resurrectionContractFor` in `supported-families.ts`.
+ */
+export interface ResurrectionEvent extends CombatEventBase {
+  readonly kind: "RESURRECTION";
+}
+
+/**
  * The ONE dated Warcraft Logs contract this project holds for the optional
  * identity fields of a `combatantinfo` gear row (M10-C4).
  *
@@ -445,6 +487,8 @@ export type CombatEvent =
   | AbsorbEvent
   | ResourceChangeEvent
   | SummonEvent
+  | DeathEvent
+  | ResurrectionEvent
   | CombatantInfoEvent
   | EnvelopeOnlyEvent
   | UnsupportedEvent

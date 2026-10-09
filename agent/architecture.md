@@ -7442,6 +7442,96 @@ by the post-D3 census remain an authority-verification limitation.
   - The caller supplies any gameplay window, such as a Dancing Rune Weapon buff
     interval. The substrate never defines one.
 
+## M11-F — narrow evidence primitives (positive deaths, active_dot)
+
+Pinned SimulationCraft defaults at commit `33622e9d` (M11-F0, from
+`engine/sim/sim.cpp`, sha256 `519bd104…`):
+
+- `distance_targeting_enabled` is false (`sim.cpp:1548`), and so is
+  `ignore_invulnerable_targets` (`:1549`; only DungeonSlice sets it).
+- The default fight style is Patchwerk (`:1487`, `:2440`), with no raid events
+  and one target.
+- `active_enemies` is the constant 1 when the sim has one target and no
+  `adds`/`pull` raid event; otherwise it is the live counter (`:3599-3608`).
+- `fight_style.X` is a constant name comparison (`:3678-3682`).
+- `spell_targets` falls back to `active_enemies` while distance targeting is
+  off (`action.cpp:3878-3887`).
+
+Semantic targets and rules:
+
+- **`active_enemies` (N1).** "Encounter enemy units represented by the pinned
+  authority profile that have arisen and not demised at decision D."
+  Invulnerability does not remove a unit. Harmful-target readiness for
+  `target_if` is a separate domain. `active_enemies` is never described as
+  attackable, targetable, observed NPCs, WCL enemyNPCs or targets hit. Not
+  implemented.
+- **WCL enemy classification (N2).** `WCL_ENEMY_NPC_CLASSIFIED` /
+  `WCL_ENEMY_PET_CLASSIFIED` are whole-fight participation metadata. They are
+  post-hoc only: M11-G labels, Policy B drift checks, roster research. They are
+  never authority evidence at D and never HOSTILE, ACTIVE_ENEMY, ATTACKABLE or
+  TARGETABLE. Not ingested.
+- **No future bracketing (O2).** For authority, an observation after D may never
+  raise the proof state at D. Post-hoc analysis may report "the same instance
+  was observed before and after t", never "available throughout".
+- **Policy B (O3), approved and deferred.**
+  - Curated encounter metadata will be pinned, versioned and provenance-bearing.
+  - It will be keyed by encounter, difficulty and build or season, and be local
+    at runtime.
+  - It may give an upper bound, a closed roster or attackability windows.
+  - Any contradiction with observed evidence yields UNKNOWN plus a drift
+    diagnostic, never REJECTED.
+- **Positive-only deaths.**
+  - `death` decodes to `DEATH`, a fact about its TARGET ActorKey, with killer
+    fields kept verbatim or `NOT_SUPPLIED`.
+  - `src/engine/state/death-state.ts` answers `NO_POSITIVE_DEATH_EVIDENCE`
+    (never alive), `DEAD_SINCE`, `RESURRECTION_OBSERVED`,
+    `EVIDENCE_CONTRADICTION`, `UNREVIEWED_EVENT_AFTER_DEATH` or
+    `ORDERING_AMBIGUOUS`. It reads only events at or before the query.
+  - The only reviewed contradiction is a later hit carrying the SAME key's
+    positive TARGET-side health snapshot. Aura changes, casts at the dead
+    actor and the dead actor's own sourced damage are not contradictions.
+  - `resurrect` has no committed evidence, so it stays `UNSUPPORTED_TYPE`,
+    which makes the state UNREVIEWED after a death.
+  - `DEATH_EVENTS_RETRIEVED_COMPLETE` is a separate retrieval fact. It never
+    gives the absence of a death any meaning.
+- **Evidence roots (N3).**
+  - A citation is `SANITIZED_CAPTURE` (regression corpus) or
+    `ARCHIVED_CAPTURE` (evidence archive: root, archive identity, fixture id,
+    SHA-256).
+  - A contract test resolves every archive citation against the root's
+    manifest, recomputes the digest and checks the raw type.
+  - Paths and arbitrary files are never accepted.
+- **`active_dot.X` / `dot.X.active_dots`.**
+  - The value is the number of target instances carrying THIS caster's DoT
+    (`player.cpp:12118-12127`, `14356-14385`).
+  - `src/engine/auras/aura-carriers.ts` decides each candidate target with
+    `presenceAt` (FROM_SOURCE). A positive death after the anchor ends that
+    target's DoT (`player.cpp:7219-7220`).
+  - The count is a proven LOWER bound only. No upper bound is claimed, because
+    no specialization pins a maximum carry duration.
+  - `src/simc/expression/active-dot.ts` binds that bound as
+    `BOUNDED_NUMBER`. It imports nothing from the engine.
+  - Assassination maps Garrote 703 and Rupture 1943 from its pinned DoT
+    dataset. Its one consuming line also needs `spell_targets` and stays
+    refused, so no decision changes.
+- **Normalization revision.** M11-F bumps `NORMALIZATION_REVISION` from `m3.2`
+  to `m3.3`. The contract bumps on any change of normalized-model shape or
+  meaning, additive changes included; it covers M11-E1, M11-F and the missed
+  M10-C4 gear-model change. The public delta is raid-night/1 cell provenance
+  only.
+- **Consumers of death facts.** `tests/contracts/m11f-evidence-layering.test.ts`
+  limits `death-state` to one importer (`aura-carriers`) and `aura-carriers`
+  to one (the Assassination seam). That is a CURRENT-MILESTONE isolation guard.
+  A reviewed M11-G tranche may add causal-analysis consumers of positive death
+  facts by amending the allowlist explicitly. The permanent rules are:
+  - evidence use is deliberate;
+  - authority never consumes future or post-hoc evidence;
+  - every new consumer comes with a reviewed dependency direction.
+- **Raid `fight_style` binding (O7).** Approved, NOT implemented. The repository
+  holds no authoritative raid-difficulty classification (`difficulty` is an
+  opaque number everywhere, and `Zone.difficulties` was never captured), and
+  difficulty ids must not be guessed.
+
 ---
 
 # Milestone 12 — Healer Foundation

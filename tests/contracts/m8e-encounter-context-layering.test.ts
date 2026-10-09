@@ -278,15 +278,23 @@ describe("death context is absent, and absent in the right way", () => {
   });
 
   it("records why, so the gap is not mistaken for an oversight", () => {
-    // The prose is the tracked follow-up. It must survive refactors.
+    // The prose is the tracked follow-up. It must survive refactors. Since
+    // M11-F a POSITIVE death family exists; encounter context still does not
+    // consume it, and says so.
     const doc = sourceOf("src/encounter-context/encounter-events.ts");
-    expect(doc).toContain("DEATHS");
-    expect(doc).toContain("UNVERIFIED");
-    expect(doc).toContain("no evidence-backed death event family");
+    expect(doc).toContain("Death-event encounter context is unsupported here");
+    expect(doc).toContain("POSITIVE `DEATH` event family");
+    expect(doc).toContain("This module does not consume it");
   });
 
   it("does not weaken the DEATHS capability to obtain a feature", () => {
-    expect(codeOf("src/wcl/evidence-capability.ts")).toContain("DEATHS: unverified(");
+    // M11-F promoted DEATHS for POSITIVE events only, citing the archived
+    // capture — never from the encounter-context side, which still reads no
+    // death fact at all.
+    expect(codeOf("src/wcl/evidence-capability.ts")).toContain("evidence: DEATH_EVENT_EVIDENCE");
+    for (const path of CONTEXT_MODULES) {
+      expect(codeOf(path), path).not.toContain("death-state");
+    }
   });
 });
 

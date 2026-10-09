@@ -471,9 +471,12 @@ describe("death context is unsupported and claims nothing", () => {
     expect((ENCOUNTER_EVENT_FAMILIES as readonly string[]).includes("DEATH")).toBe(false);
   });
 
-  it("leaves DEATHS capability UNVERIFIED", () => {
-    // M8-E must not have weakened this to obtain a feature.
-    expect(EVIDENCE_CAPABILITY_REGISTRY.DEATHS.capability).toBe("UNVERIFIED");
+  it("gains no death feature from the M11-F promotion: DEATHS is positive archived evidence only", () => {
+    // M8-E must not have weakened this to obtain a feature, and did not:
+    // M11-F promoted DEATHS for POSITIVE events, citing the archived capture.
+    const record = EVIDENCE_CAPABILITY_REGISTRY.DEATHS;
+    expect(record.capability).toBe("OBSERVABLE");
+    if (record.capability === "OBSERVABLE") expect(record.evidence.kind).toBe("ARCHIVED_CAPTURE");
   });
 
   it("exposes no deaths field that could be read as observed absence", () => {

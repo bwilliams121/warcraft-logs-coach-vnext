@@ -196,6 +196,11 @@ describe("every analysis status projects and validates", () => {
       expect(projected.schemaVersion).toBe(PUBLIC_ANALYSIS_SCHEMA_VERSION);
     });
 
+    it(`carries no normalization revision for ${testCase.status} (that is raid-night/1 cell provenance only)`, () => {
+      const wire = JSON.stringify(projectAnalysisResult(testCase.analysis));
+      expect(wire).not.toContain("normalizationRevision");
+    });
+
     it(`survives a JSON round trip for ${testCase.status}`, () => {
       // Proves the payload is genuinely wire-safe: no Map, Set, Date, class
       // instance, function, BigInt or Symbol survives `JSON.stringify`.

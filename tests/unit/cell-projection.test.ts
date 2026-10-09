@@ -35,8 +35,15 @@ import {
   NORMALIZATION_REVISION,
   REPORT_CODE,
 } from "../support/aggregation-fixture.js";
+import { NORMALIZATION_REVISION as CURRENT_NORMALIZATION_REVISION } from "../../src/engine/normalization/combat-fight.js";
 
 const ROGUE = 19;
+
+describe("the fixture's normalization revision", () => {
+  it("is the repository's current revision, not a stale copy", () => {
+    expect(NORMALIZATION_REVISION).toBe(CURRENT_NORMALIZATION_REVISION);
+  });
+});
 
 function project(analysis: Parameters<typeof toPlayerFightCell>[0]["analysis"]) {
   const projection = toPlayerFightCell({ analysis, normalizationRevision: NORMALIZATION_REVISION });

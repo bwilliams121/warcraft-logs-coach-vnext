@@ -163,7 +163,8 @@ export interface ResourceAmountObservation {
  * accessor: health moves continuously, a carried-forward value would be read as
  * current, and that is the first step toward a health simulator. Nothing here
  * infers that health was unchanged between observations, and nothing here infers
- * death — `DEATHS` capability is UNVERIFIED.
+ * death: deaths are POSITIVE `DEATH` events read by `death-state.ts` (M11-F),
+ * never a health value of zero.
  */
 export interface HealthAmountObservation {
   readonly position: number;

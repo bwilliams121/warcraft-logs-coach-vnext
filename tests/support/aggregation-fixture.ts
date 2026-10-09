@@ -26,7 +26,8 @@ import { CURRENT_UNSUPPORTED_SUBJECT } from "./unsupported-subject.js";
 
 export const REPORT_CODE = "aBcDeFgH12345678";
 export const REVISION = 30;
-export const NORMALIZATION_REVISION = "m3.2";
+/** The repository's current normalization revision; a test pins it to the production constant. */
+export const NORMALIZATION_REVISION = "m3.3";
 
 function locator(ordinal: number): EvidenceLocator {
   return {

@@ -504,7 +504,11 @@ describe("identities and views survive the slice", () => {
 // ---------------------------------------------------------------------------
 
 describe("raw deaths and excluded families", () => {
-  it("Q: the four raw deaths in scope survive verbatim, and DEATHS is NOT promoted from UNVERIFIED", () => {
+  // M11-F promoted DEATHS to a POSITIVE event capability (owner-approved): the
+  // four deaths now normalize as DEATH facts. What Q protected in E2.1 still
+  // holds: the raw facts survive verbatim, nothing is invented about killers,
+  // and this composed fight grants no death-retrieval coverage at all.
+  it("Q: the four raw deaths in scope survive verbatim as positive DEATH facts, with no coverage granted", () => {
     const deaths = rawEvents.filter((event) => event["type"] === "death");
     expect(
       deaths.map((event) => [
@@ -523,7 +527,14 @@ describe("raw deaths and excluded families", () => {
     expect(deaths.some((event) => "killerID" in event || "killingAbilityGameID" in event)).toBe(false);
     const normalized = fight.events.filter((event) => event.locator.rawType === "death");
     expect(normalized).toHaveLength(4);
-    expect(normalized.every((event) => event.kind === "UNSUPPORTED_TYPE")).toBe(true);
+    expect(normalized.map((event) => event.kind)).toEqual(["DEATH", "DEATH", "DEATH", "DEATH"]);
+    for (const event of normalized) {
+      if (event.kind !== "DEATH") continue;
+      expect(event.killer).toBe("NOT_SUPPLIED");
+      expect(event.killingAbilityGameId).toBe("NOT_SUPPLIED");
+    }
+    // The archive grants never named DEATHS, so the composed fight holds no
+    // death-retrieval coverage: positive facts only.
     expect(fight.completeness.categories.DEATHS).toEqual({ capability: "UNVERIFIED" });
   });
 

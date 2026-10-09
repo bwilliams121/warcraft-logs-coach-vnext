@@ -27,12 +27,30 @@ import type { CombatEvent, MalformedRawObservation } from "./normalized-events.j
  * Recorded on every fight so a stored result can eventually be traced to the
  * model revision that produced it, without building any history storage now.
  *
+ * Shape or meaning includes, for example:
+ *
+ *   - adding, removing or changing a normalized field — ADDITIVE changes are
+ *     shape changes too;
+ *   - adding a normalized event variant;
+ *   - changing how an existing raw event type is normalized (including a raw
+ *     type that used to normalize as `UNSUPPORTED_TYPE`);
+ *   - changing the meaning of an existing normalized field.
+ *
+ * The trigger is the normalized MODEL. A change to evidence-capability records
+ * alone does not bump this revision.
+ *
  * `m3.2` removed `focusActorId`. The field was written by ingestion and read
  * nowhere, and a single canonical player is not a property a fight retrieved
  * once for several players can honestly claim — `breadth.focusActorIds` already
  * carries the same fact in a form that stays true per view.
+ *
+ * `m3.3` is the model as it exists after M11-F. It covers every change since
+ * `m3.2`: the M10-C4 gear-identity states that replaced the raw enchant and gem
+ * ids (a missed bump at the time), M11-E1's `DamageEvent.tickField` and
+ * `overkillAmount`, and M11-F's `DEATH` and `RESURRECTION` variants — raw
+ * `death` now normalizes as `DEATH` rather than `UNSUPPORTED_TYPE`.
  */
-export const NORMALIZATION_REVISION = "m3.2";
+export const NORMALIZATION_REVISION = "m3.3";
 
 /**
  * Was the FIGHT finished? Entirely separate from whether we RETRIEVED it.

@@ -51,6 +51,8 @@
  * follows: locate by fact, never by canonical position.
  */
 
+import { NORMALIZATION_REVISION } from "../../src/engine/normalization/combat-fight.js";
+import { projectCell } from "../../src/contracts/raid-night-projection.js";
 import { describe, expect, it } from "vitest";
 
 import { toPlayerFightCell } from "../../src/aggregation/cell-projection.js";
@@ -276,6 +278,20 @@ describe("the M6 single-fight service and the M7-F raid night agree exactly", ()
     expect(single.identity).toEqual(
       identityFor({ fightId: FIGHT_ID, sourceId: M5D2_ACTOR, name: `Raider${String(M5D2_ACTOR)}` }),
     );
+  });
+
+  it("stamps every ANALYZED cell with the current normalization revision, through the public raid-night projection", async () => {
+    // M11-F bumped the revision; raid-night/1 carries it per analyzed cell,
+    // read from the core that produced the analysis, never a literal.
+    const { cells } = await raidNight();
+    const analyzed = cells.filter((cell) => cell.kind === "ANALYZED");
+    expect(analyzed.length).toBeGreaterThan(0);
+    for (const cell of analyzed) {
+      const published = projectCell("aBcDeFgH12345678", cell);
+      expect(published.kind).toBe("ANALYZED");
+      if (published.kind !== "ANALYZED") continue;
+      expect(published.provenance.normalizationRevision).toBe(NORMALIZATION_REVISION);
+    }
   });
 
   it("projects to the identical cell end to end", async () => {

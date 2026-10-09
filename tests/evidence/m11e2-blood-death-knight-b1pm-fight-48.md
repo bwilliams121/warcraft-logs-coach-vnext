@@ -143,7 +143,13 @@ What is not granted, and why:
 - ACTORS comes from the context's master data. Master data is unpaginated, so
   ACTORS is COMPLETE for the report.
 
-## Raw deaths (DEATHS stays UNVERIFIED)
+## Raw deaths (no DEATHS coverage granted)
+
+Since M11-F the capability registry records DEATHS as OBSERVABLE for POSITIVE
+death events only, citing segment `seg-0-45` of this fixture. These segments
+still grant no DEATHS coverage, so the composed fight answers
+`DEATH_EVENT_RETRIEVAL_NOT_ESTABLISHED`. The text below records the E2.1
+position when the fixture was committed.
 
 Four raw `death` events are retained. Each has target 45 (Blood Beast
 instances 1–4) and source −1. None carries `killerID` or

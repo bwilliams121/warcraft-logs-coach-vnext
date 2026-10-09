@@ -10,6 +10,8 @@
 
 import { describe, expect, it } from "vitest";
 
+import { NORMALIZATION_REVISION } from "../../src/engine/normalization/combat-fight.js";
+
 import type { CellAnalysisProvenance, CellCounts, PlayerFightResult } from "../../src/aggregation/cell.js";
 import {
   ANALYSIS_PROVENANCE_FIELDS,
@@ -659,6 +661,18 @@ describe("player analysis comparability", () => {
     expect(result.comparability).toBe("NOT_COMPATIBLE");
     expect(result.reason).toBe("PROVENANCE_DIFFERS");
     expect(result.differingFields).toContain(field);
+  });
+
+  it("refuses a stored m3.2 result against a current-revision result on that field alone (M11-F bump)", () => {
+    // The default provenance above is the HISTORICAL revision "m3.2", kept on
+    // purpose: it is exactly what a result stored before the bump carries.
+    const stored = analyzedCell({ provenance: { normalizationRevision: "m3.2" } });
+    const current = analyzedCell({ provenance: { normalizationRevision: NORMALIZATION_REVISION } });
+    expect(NORMALIZATION_REVISION).not.toBe("m3.2");
+    const result = assessAnalysisComparability(stored, current);
+    expect(result.comparability).toBe("NOT_COMPATIBLE");
+    expect(result.reason).toBe("PROVENANCE_DIFFERS");
+    expect(result.differingFields).toEqual(["normalizationRevision"]);
   });
 
   it("orders several differing fields canonically", () => {

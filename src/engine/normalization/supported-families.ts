@@ -15,11 +15,19 @@
  * where it is preserved and counted.
  *
  * Every entry below cites a sanitized capture committed under
- * `tests/corpus/artifacts/wcl-events/`. A contract test asserts that each entry carries
- * evidence and that each cited fixture actually exists.
+ * `tests/corpus/artifacts/wcl-events/` — or, since M11-F, an `ARCHIVED_CAPTURE`
+ * under the committed evidence archive, named by root, archive identity,
+ * fixture id and SHA-256 (owner decision N3). A contract test asserts that each
+ * entry carries evidence and resolves every citation against the root it
+ * names: the fixture exists there, its digest matches, and its bytes contain
+ * the cited raw type.
  */
 
-import type { EvidenceCategory } from "../../wcl/evidence-capability.js";
+import {
+  DEATH_EVENT_EVIDENCE,
+  type ArchivedCaptureEvidence,
+  type EvidenceCategory,
+} from "../../wcl/evidence-capability.js";
 import { isFiniteNumber, isSafeInteger } from "../../wcl/decode.js";
 import { normalizeGear, normalizeTalentTree } from "./combatant-info.js";
 import type {
@@ -39,7 +47,8 @@ import type {
  */
 export type SupportedTypeEvidence =
   | { readonly kind: "SANITIZED_CAPTURE"; readonly fixtureId: string; readonly capturedOn: string }
-  | { readonly kind: "SCHEMA_TYPED_FIELD"; readonly graphqlPath: string; readonly verifiedOn: string };
+  | { readonly kind: "SCHEMA_TYPED_FIELD"; readonly graphqlPath: string; readonly verifiedOn: string }
+  | ArchivedCaptureEvidence;
 
 export type FamilyDecodeResult =
   | { readonly ok: true; readonly event: CombatEvent }
@@ -302,6 +311,74 @@ function decodeSummon(base: CombatEventBase): FamilyDecodeResult {
   return { ok: true, event: { ...base, kind: "SUMMON" } };
 }
 
+// --------------------------------------------------------------------------
+// Deaths and resurrections (M11-F)
+// --------------------------------------------------------------------------
+
+/** An optional raw integer key: absent is NOT_SUPPLIED; present but unusable is a broken contract. */
+function optionalIntegerField(
+  raw: Record<string, unknown>,
+  key: string,
+  problems: FieldProblem[],
+): number | "NOT_SUPPLIED" {
+  if (!(key in raw)) return "NOT_SUPPLIED";
+  const value = raw[key];
+  if (!isSafeInteger(value)) {
+    problems.push({ field: key, problem: "WRONG_TYPE" });
+    return "NOT_SUPPLIED";
+  }
+  return value;
+}
+
+/**
+ * `death`: the TARGET actor instance has a death event here. The dying actor
+ * must be stated; killer fields are optional and kept verbatim. Nothing is
+ * inferred — not a killer from the last hit, and not a death from health.
+ */
+function decodeDeath(base: CombatEventBase, raw: Record<string, unknown>): FamilyDecodeResult {
+  const problems: FieldProblem[] = [];
+  if (base.target === null) problems.push({ field: "targetID", problem: "MISSING" });
+  const killerId = optionalIntegerField(raw, "killerID", problems);
+  const killerInstance = optionalIntegerField(raw, "killerInstance", problems);
+  const killingAbilityGameId = optionalIntegerField(raw, "killingAbilityGameID", problems);
+  if (killerId === "NOT_SUPPLIED" && killerInstance !== "NOT_SUPPLIED") {
+    problems.push({ field: "killerID", problem: "MISSING" });
+  }
+  if (problems.length > 0) return { ok: false, problems };
+  return {
+    ok: true,
+    event: {
+      ...base,
+      kind: "DEATH",
+      killer:
+        killerId === "NOT_SUPPLIED"
+          ? "NOT_SUPPLIED"
+          : { actorId: killerId, instanceId: killerInstance === "NOT_SUPPLIED" ? null : killerInstance },
+      killingAbilityGameId,
+    },
+  };
+}
+
+function decodeResurrection(base: CombatEventBase): FamilyDecodeResult {
+  if (base.target === null) return { ok: false, problems: [{ field: "targetID", problem: "MISSING" }] };
+  return { ok: true, event: { ...base, kind: "RESURRECTION" } };
+}
+
+/**
+ * The `resurrect` contract, built ONLY from evidence the caller supplies.
+ *
+ * Deliberately not in `SUPPORTED_TYPE_CONTRACTS`: no committed artifact
+ * contains a `resurrect` event (the one the M11-E2 capture held was outside
+ * the committed slice, and the archive was not grown for it). Until committed
+ * evidence exists, production leaves the type `UNSUPPORTED_TYPE`, and
+ * `death-state.ts` treats such an event on a dead identity as unreviewed
+ * (fail closed). Tests build the contract with test-only evidence to pin what
+ * the decoded event means.
+ */
+export function resurrectionContractFor(evidence: SupportedTypeEvidence): FamilyTypeContract {
+  return family("resurrect", "RESURRECTION", "DEATHS", decodeResurrection, evidence);
+}
+
 function decodeCombatantInfo(base: CombatEventBase, raw: Record<string, unknown>): FamilyDecodeResult {
   const problems: FieldProblem[] = [];
   const actorId = base.source?.actorId ?? null;
@@ -378,6 +455,8 @@ export const SUPPORTED_TYPE_CONTRACTS: readonly SupportedTypeContract[] = [
   family("resourcechange", "RESOURCE_CHANGE", "RESOURCES", decodeResourceChange, fromPullWindow()),
 
   family("summon", "SUMMON", "SUMMONS", decodeSummon, fromPullWindow()),
+  // M11-F: positive death events, evidenced by the archived M11-E2 capture.
+  family("death", "DEATH", "DEATHS", decodeDeath, DEATH_EVENT_EVIDENCE),
   family("combatantinfo", "COMBATANT_INFO", "COMBATANT_INFO", decodeCombatantInfo, fromPullWindow()),
 
   // Envelope-only: observed, named, and deliberately left undecoded. They still

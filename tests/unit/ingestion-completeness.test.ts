@@ -172,7 +172,11 @@ describe("capability evidence is directional", () => {
     for (const category of EVIDENCE_CATEGORIES) {
       const record = EVIDENCE_CAPABILITY_REGISTRY[category];
       if (record.capability === "OBSERVABLE") {
-        expect(["SCHEMA_TYPED_FIELD", "SANITIZED_CAPTURE"]).toContain(record.evidence.kind);
+        // M11-F (N3): an archived capture is positive evidence too, resolved
+        // against the evidence archive by tests/contracts/m11f-evidence-root-citations.test.ts.
+        expect(["SCHEMA_TYPED_FIELD", "SANITIZED_CAPTURE", "ARCHIVED_CAPTURE"]).toContain(
+          record.evidence.kind,
+        );
       }
     }
   });

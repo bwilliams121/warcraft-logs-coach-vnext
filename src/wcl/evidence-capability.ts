@@ -106,7 +106,47 @@ export type RetrievalSource =
  */
 export type PositiveCapabilityEvidence =
   | { readonly kind: "SCHEMA_TYPED_FIELD"; readonly graphqlPath: string; readonly verifiedOn: string }
-  | { readonly kind: "SANITIZED_CAPTURE"; readonly fixtureId: string; readonly capturedOn: string };
+  | { readonly kind: "SANITIZED_CAPTURE"; readonly fixtureId: string; readonly capturedOn: string }
+  | ArchivedCaptureEvidence;
+
+/**
+ * The two committed evidence ROOTS a citation may name (M11-F, owner decision
+ * N3). `SANITIZED_CAPTURE` above cites the REGRESSION_CORPUS, as it always
+ * has; `ARCHIVED_CAPTURE` cites the EVIDENCE_ARCHIVE explicitly, by root, by
+ * the archive's manifest identity, by fixture id and by the fixture's SHA-256
+ * over canonical bytes, so the claim is auditable against immutable bytes. It
+ * is never a path and never an arbitrary file: a contract test resolves every
+ * citation against the committed root it names and refuses any mismatch.
+ */
+export type EvidenceRoot = "REGRESSION_CORPUS" | "EVIDENCE_ARCHIVE";
+
+export interface ArchivedCaptureEvidence {
+  readonly kind: "ARCHIVED_CAPTURE";
+  readonly evidenceRoot: "EVIDENCE_ARCHIVE";
+  /** The archive manifest's own identity (`corpusId`). */
+  readonly archiveId: string;
+  readonly fixtureId: string;
+  /** SHA-256 of the fixture's canonical bytes, as the archive manifest records it. */
+  readonly fixtureSha256: string;
+  readonly capturedOn: string;
+}
+
+/** The committed evidence archive's manifest identity. */
+export const EVIDENCE_ARCHIVE_ID = "warcraft-logs-coach-vnext.evidence-archive";
+
+/**
+ * The archived segment that carries the first committed raw `death` event
+ * (M11-E2.1: report b1PmaKrd6CDfzngc fight 48, actor 45 instance 1 at
+ * 7,449,399). Cited by the `death` family and by the DEATHS capability.
+ */
+export const DEATH_EVENT_EVIDENCE: ArchivedCaptureEvidence = {
+  kind: "ARCHIVED_CAPTURE",
+  evidenceRoot: "EVIDENCE_ARCHIVE",
+  archiveId: EVIDENCE_ARCHIVE_ID,
+  fixtureId: "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
+  fixtureSha256: "f823cb5a1e28ec0f348e726a8c7b949e49b7769d24f79fc9199116eff1ff0ff1",
+  capturedOn: "2026-10-06",
+};
 
 /**
  * Evidence that a category is NOT obtainable from a source.
@@ -243,10 +283,20 @@ export const EVIDENCE_CAPABILITY_REGISTRY: Readonly<Record<EvidenceCategory, Cap
   GEAR: observableFromCapture(PULL_WINDOW),
   ABSORBS: observableFromCapture(MIDFIGHT_WINDOW),
 
-  DEATHS: unverified(
-    "EVENTS_ALL_STREAM",
-    "A sanitized capture containing a death event. Neither captured window contained one.",
-  ),
+  // M11-F: POSITIVE death events only. The capability is that Warcraft Logs
+  // CAN emit a `death` event, observed in the archived M11-E2 capture. It is
+  // NOT that every real death, defeat or despawn produces one: the same
+  // capture holds a killed boss with no death event. Coverage of this
+  // category therefore means only "every death event the retrieved stream
+  // emitted in the range was retrieved" (`DEATH_EVENTS_RETRIEVED_COMPLETE` in
+  // `death-state.ts`), never that an actor without one was alive.
+  DEATHS: {
+    capability: "OBSERVABLE",
+    retrievalSource: "EVENTS_ALL_STREAM",
+    evidence: DEATH_EVENT_EVIDENCE,
+    logVersionObserved: CAPTURE_LOG_VERSION,
+    gameVersionObserved: CAPTURE_GAME_VERSION,
+  },
   INTERRUPTS: unverified(
     "EVENTS_ALL_STREAM",
     "A sanitized capture containing an interrupt event. Neither captured window contained one.",

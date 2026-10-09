@@ -10898,7 +10898,7 @@ function b1pm_segment(name, fromMs, toMs, facts, activity) {
     limitations: [
       "One segment of a longer window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
       "No heal, absorbed, healabsorbed, drain, dispel, resurrect or aurabroken event is retained — they exist in the capture and are excluded here; their absence from these bytes is not their absence from the fight.",
-      "Raw death events are retained only where their target is in scope; DEATHS stays UNVERIFIED and no death-completeness claim is made.",
+      "Raw death events are retained only where their target is in scope. This archive grants no DEATHS coverage — since M11-F death events are POSITIVE facts only — and no death-completeness claim is made.",
       "Events between other actors (including enemy-on-enemy and other players' pets) are not retained; no hostility or targetability is inferred.",
       "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
       NO_NAMES,
