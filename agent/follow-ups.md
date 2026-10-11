@@ -439,6 +439,41 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G1: what the observed cohort does not establish
+
+**Raised:** M11-G1 (2026-10-09). Each item is unproven or refused today, never
+guessed.
+
+**M1 is still NOT_YET_PROVEN.** ACTUAL_DPS reads WCL's DamageDone table total,
+which differs from the normalized raw-amount owner rollup for the same subject
+(45,802,009 vs 45,709,411). Explaining the 92,598 difference (absorbed damage,
+pets outside the vouch, or anything else) needs evidence; until then no
+normalized sum stands in for WCL's figure.
+
+**Pet inclusion in the table total is corroborated, not proven.** The total
+minus the table's listed pets lands near the direct-player raw sum, but nothing
+pins which pets WCL rolls in. Nothing depends on it today.
+
+**NAME_AND_SERVER identity degrades to NAME_ONLY across surfaces.** Rankings
+spell realms with spaces ("Tarren Mill", "Area 52"); `masterData` does not
+("TarrenMill", "Area52"). The M8-F rule therefore falls back to a unique
+name-only match, the same as M8-F. A pinned realm normalization (a
+WCL-documented slug, not a guessed space-strip) would restore server-exact
+matching.
+
+**Deaths are a table, not a stream.** DIED_BEFORE_END reads the candidate's
+Deaths-table entries. A resurrection within the fight still excludes. That is
+conservative (it can only shrink the pool) and is never used to blame anyone.
+
+**Page 1 per bracket only.** Each bracket's discovery pool is page 1 (100 rows,
+PARTIAL). A highest-DPS selection reads only the top, so this is enough when
+three qualify early. A cohort that needs deeper rows reports INSUFFICIENT
+rather than paging.
+
+**Not in G1, by owner decision:** simulation, Raidbots, a SimC runner,
+ceilings, RNG, execution loss, blame, and comparison-player events (a
+G2-or-later decision, with its own budget).
+
 ## After M11-E1: what the observed combat facts do not establish
 
 **Raised:** M11-E1 (2026-10-05). Each is NOT YET PROVEN, and the facts layer

@@ -1247,6 +1247,708 @@
           "Prettier-formatted whitespace; the parsed payload is what the capture returned."
         ]
       }
+    },
+    {
+      "artifactId": "wcl-g1-cohort-candidate-1",
+      "path": "artifacts/wcl-graphql/wcl-g1-cohort-candidate-1.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "2dc371bd98ce46c51571aab035ad5936cffdb4345613357632731bc709a161ff",
+      "byteLength": 43945,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "REDACTED",
+          "fightId": 33,
+          "reportRevision": "UNAVAILABLE",
+          "sourceActorId": "NOT_APPLICABLE",
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-09",
+          "gameVersion": "UNAVAILABLE",
+          "logVersion": "UNAVAILABLE",
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "REPORT_SURFACES",
+            "fightIds": [33],
+            "surfaces": [
+              "fights",
+              "masterData.actors",
+              "rankings(playerMetric: dps)",
+              "playerDetails(includeCombatantInfo: true)",
+              "table(dataType: Deaths)"
+            ]
+          },
+          "completeness": {
+            "eventsReturned": "NOT_APPLICABLE",
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "COMPLETE",
+            "evidence": "One unpaginated request (R5): candidate 1 in highest-ranked-amount order at rung 1. It qualified: a kill of encounter 3455 difficulty 5, a unique Blood Death Knight resolved by name, duration and item level inside the rung, ranked amounts equal across both surfaces, no Deaths-table entry for the actor, combatant info present."
+          },
+          "captureTooling": {
+            "name": ".probe/m11g1/stage-{a,b,c}.probe.ts (temporary, gitignored; gated on M11-F CI GREEN) driving src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 15th GraphQL request",
+            "revision": "UNAVAILABLE",
+            "invocation": "R5 candidate context 1; planned in .probe/m11g1/capture-plan.md before running, run once by hand on 2026-10-09 (7 GraphQL requests in total, cap 14)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11g1/r-candidate-01.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "node scripts/corpus/sanitize-g1-cohort.mjs .probe/m11g1 .probe/m11e2/context.json <out> (writes wcl-g1-cohort-candidate-1.json)"
+            },
+            "detail": "Kept exactly the fields the G1 decoders read (and, for a selected cohort member, its gear item ids, levels, qualities, permanent and temporary enchant ids, gem ids, bonus ids, set ids and talent tree, each enchant or gem key copied only when present because the shared gear adapter reads key absence as KNOWN_NONE); dropped guilds, character ids, GUIDs, icons, item and enchant names, parse ranks and percentiles, rate-limit data and every NPC actor.",
+            "invalidates": []
+          },
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Third-party player names -> Player<nnnn> (keyed by name alone, numbered in SHA-256 order) and third-party report codes -> COHORT<nnn>AAAAAAA, consistently across all G1 artifacts; the subject report keeps its code and its players become Actor<report actor id>, matched by the M8-F rule (a unique server-exact match, else a unique name-only match; every ranked player of the subject fight resolved).",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Every server set to null (the existing rankings rule).",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, or any real player name, server or third-party report code it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report or ranking surfaces, not events: no event coverage is granted."
+        },
+        "retainedFor": "M11-G1: the qualification context and gear/talent facts of selected cohort member 1.",
+        "limitations": [
+          "Names are pseudonyms and servers are null; identity resolution over this evidence is NAME_ONLY. The live surfaces spell realms differently (rankings 'Tarren Mill' vs masterData 'TarrenMill'), so the live resolution also fell back to NAME_ONLY for those rows.",
+          "A cohort is a barometer only: it never sets a ceiling, an execution loss, an APL verdict or a scaling factor.",
+          "No comparison-player event stream was requested or retained."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-g1-cohort-candidate-2",
+      "path": "artifacts/wcl-graphql/wcl-g1-cohort-candidate-2.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "cfd9aedc7cfeaf45c8de12d290faac4a8b59c69dd875d5e0bd6e604acb1bd5b9",
+      "byteLength": 96431,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "REDACTED",
+          "fightId": 64,
+          "reportRevision": "UNAVAILABLE",
+          "sourceActorId": "NOT_APPLICABLE",
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-09",
+          "gameVersion": "UNAVAILABLE",
+          "logVersion": "UNAVAILABLE",
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "REPORT_SURFACES",
+            "fightIds": [64],
+            "surfaces": [
+              "fights",
+              "masterData.actors",
+              "rankings(playerMetric: dps)",
+              "playerDetails(includeCombatantInfo: true)",
+              "table(dataType: Deaths)"
+            ]
+          },
+          "completeness": {
+            "eventsReturned": "NOT_APPLICABLE",
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "COMPLETE",
+            "evidence": "One unpaginated request (R6): candidate 2 in highest-ranked-amount order at rung 1. It qualified: a kill of encounter 3455 difficulty 5, a unique Blood Death Knight resolved by name, duration and item level inside the rung, ranked amounts equal across both surfaces, no Deaths-table entry for the actor, combatant info present."
+          },
+          "captureTooling": {
+            "name": ".probe/m11g1/stage-{a,b,c}.probe.ts (temporary, gitignored; gated on M11-F CI GREEN) driving src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 15th GraphQL request",
+            "revision": "UNAVAILABLE",
+            "invocation": "R6 candidate context 2; planned in .probe/m11g1/capture-plan.md before running, run once by hand on 2026-10-09 (7 GraphQL requests in total, cap 14)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11g1/r-candidate-02.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "node scripts/corpus/sanitize-g1-cohort.mjs .probe/m11g1 .probe/m11e2/context.json <out> (writes wcl-g1-cohort-candidate-2.json)"
+            },
+            "detail": "Kept exactly the fields the G1 decoders read (and, for a selected cohort member, its gear item ids, levels, qualities, permanent and temporary enchant ids, gem ids, bonus ids, set ids and talent tree, each enchant or gem key copied only when present because the shared gear adapter reads key absence as KNOWN_NONE); dropped guilds, character ids, GUIDs, icons, item and enchant names, parse ranks and percentiles, rate-limit data and every NPC actor.",
+            "invalidates": []
+          },
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Third-party player names -> Player<nnnn> (keyed by name alone, numbered in SHA-256 order) and third-party report codes -> COHORT<nnn>AAAAAAA, consistently across all G1 artifacts; the subject report keeps its code and its players become Actor<report actor id>, matched by the M8-F rule (a unique server-exact match, else a unique name-only match; every ranked player of the subject fight resolved).",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Every server set to null (the existing rankings rule).",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, or any real player name, server or third-party report code it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report or ranking surfaces, not events: no event coverage is granted."
+        },
+        "retainedFor": "M11-G1: the qualification context and gear/talent facts of selected cohort member 2.",
+        "limitations": [
+          "Names are pseudonyms and servers are null; identity resolution over this evidence is NAME_ONLY. The live surfaces spell realms differently (rankings 'Tarren Mill' vs masterData 'TarrenMill'), so the live resolution also fell back to NAME_ONLY for those rows.",
+          "A cohort is a barometer only: it never sets a ceiling, an execution loss, an APL verdict or a scaling factor.",
+          "No comparison-player event stream was requested or retained."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-g1-cohort-candidate-3",
+      "path": "artifacts/wcl-graphql/wcl-g1-cohort-candidate-3.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "4941c8f9bac75b1c7694883ce85648613a31b35bf4cc26161035497798d0e1f3",
+      "byteLength": 54976,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "REDACTED",
+          "fightId": 31,
+          "reportRevision": "UNAVAILABLE",
+          "sourceActorId": "NOT_APPLICABLE",
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-09",
+          "gameVersion": "UNAVAILABLE",
+          "logVersion": "UNAVAILABLE",
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "REPORT_SURFACES",
+            "fightIds": [31],
+            "surfaces": [
+              "fights",
+              "masterData.actors",
+              "rankings(playerMetric: dps)",
+              "playerDetails(includeCombatantInfo: true)",
+              "table(dataType: Deaths)"
+            ]
+          },
+          "completeness": {
+            "eventsReturned": "NOT_APPLICABLE",
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "COMPLETE",
+            "evidence": "One unpaginated request (R7): candidate 3 in highest-ranked-amount order at rung 1. It qualified: a kill of encounter 3455 difficulty 5, a unique Blood Death Knight resolved by name, duration and item level inside the rung, ranked amounts equal across both surfaces, no Deaths-table entry for the actor, combatant info present."
+          },
+          "captureTooling": {
+            "name": ".probe/m11g1/stage-{a,b,c}.probe.ts (temporary, gitignored; gated on M11-F CI GREEN) driving src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 15th GraphQL request",
+            "revision": "UNAVAILABLE",
+            "invocation": "R7 candidate context 3; planned in .probe/m11g1/capture-plan.md before running, run once by hand on 2026-10-09 (7 GraphQL requests in total, cap 14)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11g1/r-candidate-03.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "node scripts/corpus/sanitize-g1-cohort.mjs .probe/m11g1 .probe/m11e2/context.json <out> (writes wcl-g1-cohort-candidate-3.json)"
+            },
+            "detail": "Kept exactly the fields the G1 decoders read (and, for a selected cohort member, its gear item ids, levels, qualities, permanent and temporary enchant ids, gem ids, bonus ids, set ids and talent tree, each enchant or gem key copied only when present because the shared gear adapter reads key absence as KNOWN_NONE); dropped guilds, character ids, GUIDs, icons, item and enchant names, parse ranks and percentiles, rate-limit data and every NPC actor.",
+            "invalidates": []
+          },
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Third-party player names -> Player<nnnn> (keyed by name alone, numbered in SHA-256 order) and third-party report codes -> COHORT<nnn>AAAAAAA, consistently across all G1 artifacts; the subject report keeps its code and its players become Actor<report actor id>, matched by the M8-F rule (a unique server-exact match, else a unique name-only match; every ranked player of the subject fight resolved).",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Every server set to null (the existing rankings rule).",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, or any real player name, server or third-party report code it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report or ranking surfaces, not events: no event coverage is granted."
+        },
+        "retainedFor": "M11-G1: the qualification context and gear/talent facts of selected cohort member 3.",
+        "limitations": [
+          "Names are pseudonyms and servers are null; identity resolution over this evidence is NAME_ONLY. The live surfaces spell realms differently (rankings 'Tarren Mill' vs masterData 'TarrenMill'), so the live resolution also fell back to NAME_ONLY for those rows.",
+          "A cohort is a barometer only: it never sets a ceiling, an execution loss, an APL verdict or a scaling factor.",
+          "No comparison-player event stream was requested or retained."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-g1-cohort-rankings-3455-5-blood-bracket-18",
+      "path": "artifacts/wcl-graphql/wcl-g1-cohort-rankings-3455-5-blood-bracket-18.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "278b36bec3c3b42e453e760682089f88f1dfc568f27a8132eda9492726a8c598",
+      "byteLength": 47866,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "NOT_APPLICABLE",
+          "fightId": "NOT_APPLICABLE",
+          "reportRevision": "UNAVAILABLE",
+          "sourceActorId": "NOT_APPLICABLE",
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-09",
+          "gameVersion": "UNAVAILABLE",
+          "logVersion": "UNAVAILABLE",
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "ENCOUNTER_CHARACTER_RANKINGS",
+            "encounterId": 3455,
+            "difficulty": 5,
+            "className": "DeathKnight",
+            "specName": "Blood",
+            "metric": "dps",
+            "partition": 1,
+            "page": 1,
+            "bracket": 18
+          },
+          "completeness": {
+            "eventsReturned": 100,
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "PARTIAL",
+            "evidence": "Page 1 of item-level bracket 18 (100 rows, hasMorePages true). Every row's bracketData lies in 323-325, pinning the bracket argument. Page 1 holds the bracket's highest ranked amounts, which is all a highest-DPS selection reads."
+          },
+          "captureTooling": {
+            "name": ".probe/m11g1/stage-{a,b,c}.probe.ts (temporary, gitignored; gated on M11-F CI GREEN) driving src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 15th GraphQL request",
+            "revision": "UNAVAILABLE",
+            "invocation": "R3 characterRankings page 1, bracket 18; planned in .probe/m11g1/capture-plan.md before running, run once by hand on 2026-10-09 (7 GraphQL requests in total, cap 14)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11g1/r-rankings-bracket-18.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "node scripts/corpus/sanitize-g1-cohort.mjs .probe/m11g1 .probe/m11e2/context.json <out> (writes wcl-g1-cohort-rankings-3455-5-blood-bracket-18.json)"
+            },
+            "detail": "Kept exactly the fields the G1 decoders read (and, for a selected cohort member, its gear item ids, levels, qualities, permanent and temporary enchant ids, gem ids, bonus ids, set ids and talent tree, each enchant or gem key copied only when present because the shared gear adapter reads key absence as KNOWN_NONE); dropped guilds, character ids, GUIDs, icons, item and enchant names, parse ranks and percentiles, rate-limit data and every NPC actor.",
+            "invalidates": []
+          },
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Third-party player names -> Player<nnnn> (keyed by name alone, numbered in SHA-256 order) and third-party report codes -> COHORT<nnn>AAAAAAA, consistently across all G1 artifacts; the subject report keeps its code and its players become Actor<report actor id>, matched by the M8-F rule (a unique server-exact match, else a unique name-only match; every ranked player of the subject fight resolved).",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Every server set to null (the existing rankings rule).",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, or any real player name, server or third-party report code it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report or ranking surfaces, not events: no event coverage is granted."
+        },
+        "retainedFor": "M11-G1: one item-level bracket of the cohort discovery pool for the canonical Blood Death Knight subject (item level 327 ± 3 spans brackets 18-20).",
+        "limitations": [
+          "Names are pseudonyms and servers are null; identity resolution over this evidence is NAME_ONLY. The live surfaces spell realms differently (rankings 'Tarren Mill' vs masterData 'TarrenMill'), so the live resolution also fell back to NAME_ONLY for those rows.",
+          "A cohort is a barometer only: it never sets a ceiling, an execution loss, an APL verdict or a scaling factor.",
+          "No comparison-player event stream was requested or retained."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-g1-cohort-rankings-3455-5-blood-bracket-19",
+      "path": "artifacts/wcl-graphql/wcl-g1-cohort-rankings-3455-5-blood-bracket-19.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "da819fb3ed98ea943a75b3525c0d663c6326134b0a39631a4abb100baf701e98",
+      "byteLength": 47873,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "NOT_APPLICABLE",
+          "fightId": "NOT_APPLICABLE",
+          "reportRevision": "UNAVAILABLE",
+          "sourceActorId": "NOT_APPLICABLE",
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-09",
+          "gameVersion": "UNAVAILABLE",
+          "logVersion": "UNAVAILABLE",
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "ENCOUNTER_CHARACTER_RANKINGS",
+            "encounterId": 3455,
+            "difficulty": 5,
+            "className": "DeathKnight",
+            "specName": "Blood",
+            "metric": "dps",
+            "partition": 1,
+            "page": 1,
+            "bracket": 19
+          },
+          "completeness": {
+            "eventsReturned": 100,
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "PARTIAL",
+            "evidence": "Page 1 of item-level bracket 19 (100 rows, hasMorePages true). Every row's bracketData lies in 326-328, pinning the bracket argument. Page 1 holds the bracket's highest ranked amounts, which is all a highest-DPS selection reads."
+          },
+          "captureTooling": {
+            "name": ".probe/m11g1/stage-{a,b,c}.probe.ts (temporary, gitignored; gated on M11-F CI GREEN) driving src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 15th GraphQL request",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2 characterRankings page 1, bracket 19; planned in .probe/m11g1/capture-plan.md before running, run once by hand on 2026-10-09 (7 GraphQL requests in total, cap 14)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11g1/r-rankings-bracket-19.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "node scripts/corpus/sanitize-g1-cohort.mjs .probe/m11g1 .probe/m11e2/context.json <out> (writes wcl-g1-cohort-rankings-3455-5-blood-bracket-19.json)"
+            },
+            "detail": "Kept exactly the fields the G1 decoders read (and, for a selected cohort member, its gear item ids, levels, qualities, permanent and temporary enchant ids, gem ids, bonus ids, set ids and talent tree, each enchant or gem key copied only when present because the shared gear adapter reads key absence as KNOWN_NONE); dropped guilds, character ids, GUIDs, icons, item and enchant names, parse ranks and percentiles, rate-limit data and every NPC actor.",
+            "invalidates": []
+          },
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Third-party player names -> Player<nnnn> (keyed by name alone, numbered in SHA-256 order) and third-party report codes -> COHORT<nnn>AAAAAAA, consistently across all G1 artifacts; the subject report keeps its code and its players become Actor<report actor id>, matched by the M8-F rule (a unique server-exact match, else a unique name-only match; every ranked player of the subject fight resolved).",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Every server set to null (the existing rankings rule).",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, or any real player name, server or third-party report code it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report or ranking surfaces, not events: no event coverage is granted."
+        },
+        "retainedFor": "M11-G1: one item-level bracket of the cohort discovery pool for the canonical Blood Death Knight subject (item level 327 ± 3 spans brackets 18-20).",
+        "limitations": [
+          "Names are pseudonyms and servers are null; identity resolution over this evidence is NAME_ONLY. The live surfaces spell realms differently (rankings 'Tarren Mill' vs masterData 'TarrenMill'), so the live resolution also fell back to NAME_ONLY for those rows.",
+          "A cohort is a barometer only: it never sets a ceiling, an execution loss, an APL verdict or a scaling factor.",
+          "No comparison-player event stream was requested or retained."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-g1-cohort-rankings-3455-5-blood-bracket-20",
+      "path": "artifacts/wcl-graphql/wcl-g1-cohort-rankings-3455-5-blood-bracket-20.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "26a6f55b40ac1ac686d3370d80e0c5d4a84f510c688af2d26b1b97232bec2c2c",
+      "byteLength": 47869,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "NOT_APPLICABLE",
+          "fightId": "NOT_APPLICABLE",
+          "reportRevision": "UNAVAILABLE",
+          "sourceActorId": "NOT_APPLICABLE",
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-09",
+          "gameVersion": "UNAVAILABLE",
+          "logVersion": "UNAVAILABLE",
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "ENCOUNTER_CHARACTER_RANKINGS",
+            "encounterId": 3455,
+            "difficulty": 5,
+            "className": "DeathKnight",
+            "specName": "Blood",
+            "metric": "dps",
+            "partition": 1,
+            "page": 1,
+            "bracket": 20
+          },
+          "completeness": {
+            "eventsReturned": 100,
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "PARTIAL",
+            "evidence": "Page 1 of item-level bracket 20 (100 rows, hasMorePages true). Every row's bracketData lies in 329-331, pinning the bracket argument. Page 1 holds the bracket's highest ranked amounts, which is all a highest-DPS selection reads."
+          },
+          "captureTooling": {
+            "name": ".probe/m11g1/stage-{a,b,c}.probe.ts (temporary, gitignored; gated on M11-F CI GREEN) driving src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 15th GraphQL request",
+            "revision": "UNAVAILABLE",
+            "invocation": "R4 characterRankings page 1, bracket 20; planned in .probe/m11g1/capture-plan.md before running, run once by hand on 2026-10-09 (7 GraphQL requests in total, cap 14)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11g1/r-rankings-bracket-20.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "node scripts/corpus/sanitize-g1-cohort.mjs .probe/m11g1 .probe/m11e2/context.json <out> (writes wcl-g1-cohort-rankings-3455-5-blood-bracket-20.json)"
+            },
+            "detail": "Kept exactly the fields the G1 decoders read (and, for a selected cohort member, its gear item ids, levels, qualities, permanent and temporary enchant ids, gem ids, bonus ids, set ids and talent tree, each enchant or gem key copied only when present because the shared gear adapter reads key absence as KNOWN_NONE); dropped guilds, character ids, GUIDs, icons, item and enchant names, parse ranks and percentiles, rate-limit data and every NPC actor.",
+            "invalidates": []
+          },
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Third-party player names -> Player<nnnn> (keyed by name alone, numbered in SHA-256 order) and third-party report codes -> COHORT<nnn>AAAAAAA, consistently across all G1 artifacts; the subject report keeps its code and its players become Actor<report actor id>, matched by the M8-F rule (a unique server-exact match, else a unique name-only match; every ranked player of the subject fight resolved).",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Every server set to null (the existing rankings rule).",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, or any real player name, server or third-party report code it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report or ranking surfaces, not events: no event coverage is granted."
+        },
+        "retainedFor": "M11-G1: one item-level bracket of the cohort discovery pool for the canonical Blood Death Knight subject (item level 327 ± 3 spans brackets 18-20).",
+        "limitations": [
+          "Names are pseudonyms and servers are null; identity resolution over this evidence is NAME_ONLY. The live surfaces spell realms differently (rankings 'Tarren Mill' vs masterData 'TarrenMill'), so the live resolution also fell back to NAME_ONLY for those rows.",
+          "A cohort is a barometer only: it never sets a ceiling, an execution loss, an APL verdict or a scaling factor.",
+          "No comparison-player event stream was requested or retained."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-g1-subject-performance-b1pm-fight-48",
+      "path": "artifacts/wcl-graphql/wcl-g1-subject-performance-b1pm-fight-48.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "9ac39cd0cd1b0d91d3daa9b668deec04226121e28ba33267170b82f8615903dd",
+      "byteLength": 25671,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-09",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "kind": "REPORT_SURFACES",
+            "fightIds": [48],
+            "surfaces": ["fights", "rankings(playerMetric: dps)", "table(dataType: DamageDone)"]
+          },
+          "completeness": {
+            "eventsReturned": "NOT_APPLICABLE",
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "COMPLETE",
+            "evidence": "One unpaginated request (R1). Pins ACTUAL_DPS semantics: the DamageDone table's totalTime (345,177 ms) equals the fight's endTime - startTime, and total / totalTime equals the ranked dps amount for every player present in both surfaces (19 of 19, including a player who died and was resurrected); the table itemLevel equals the ranking bracketData (19 of 19); the subject's 45,802,009 is NOT the normalized raw-amount sum (45,709,411)."
+          },
+          "captureTooling": {
+            "name": ".probe/m11g1/stage-{a,b,c}.probe.ts (temporary, gitignored; gated on M11-F CI GREEN) driving src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 15th GraphQL request",
+            "revision": "UNAVAILABLE",
+            "invocation": "R1 subject surfaces: report(b1PmaKrd6CDfzngc){fights(48), rankings(fightIDs:[48], dps), table(DamageDone, fightIDs:[48])}; planned in .probe/m11g1/capture-plan.md before running, run once by hand on 2026-10-09 (7 GraphQL requests in total, cap 14)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11g1/r01-subject.json — gitignored, not retained in the repository"
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "node scripts/corpus/sanitize-g1-cohort.mjs .probe/m11g1 .probe/m11e2/context.json <out> (writes wcl-g1-subject-performance-b1pm-fight-48.json)"
+            },
+            "detail": "Kept exactly the fields the G1 decoders read (and, for a selected cohort member, its gear item ids, levels, qualities, permanent and temporary enchant ids, gem ids, bonus ids, set ids and talent tree, each enchant or gem key copied only when present because the shared gear adapter reads key absence as KNOWN_NONE); dropped guilds, character ids, GUIDs, icons, item and enchant names, parse ranks and percentiles, rate-limit data and every NPC actor.",
+            "invalidates": []
+          },
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Third-party player names -> Player<nnnn> (keyed by name alone, numbered in SHA-256 order) and third-party report codes -> COHORT<nnn>AAAAAAA, consistently across all G1 artifacts; the subject report keeps its code and its players become Actor<report actor id>, matched by the M8-F rule (a unique server-exact match, else a unique name-only match; every ranked player of the subject fight resolved).",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "Every server set to null (the existing rankings rule).",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-g1-cohort.mjs",
+              "revision": "sanitize-g1-cohort-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, or any real player name, server or third-party report code it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report or ranking surfaces, not events: no event coverage is granted."
+        },
+        "retainedFor": "M11-G1: the Warcraft Logs surface ACTUAL_DPS is read from, and the evidence pinning what it means (src/cohort/observed-performance.ts).",
+        "limitations": [
+          "Names are pseudonyms and servers are null; identity resolution over this evidence is NAME_ONLY. The live surfaces spell realms differently (rankings 'Tarren Mill' vs masterData 'TarrenMill'), so the live resolution also fell back to NAME_ONLY for those rows.",
+          "A cohort is a barometer only: it never sets a ceiling, an execution loss, an APL verdict or a scaling factor.",
+          "No comparison-player event stream was requested or retained.",
+          "Whether the table total includes the listed pets is corroborated, not proven; nothing depends on it."
+        ]
+      }
     }
   ],
   "cases": [

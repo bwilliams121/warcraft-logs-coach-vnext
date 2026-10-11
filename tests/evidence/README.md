@@ -65,6 +65,10 @@ It crosses the 4 MiB notice line under a recorded, owner-reviewed exception
 for that fixture only, pinned to the byte by a test. See
 `m11e2-blood-death-knight-b1pm-fight-48.md`.
 
+The M11-G1 observed-performance and elite-cohort evidence is seven sanitized
+report and ranking surfaces, with no events. Third-party identities are
+pseudonyms. See `m11g1-cohort-capture.md`.
+
 ## Execution and promotion
 
 `npm run test:evidence` (`scripts/corpus/gate.mjs --root evidence`) runs four

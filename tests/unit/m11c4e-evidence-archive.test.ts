@@ -50,6 +50,23 @@ const M11E2_NOTICE_LINE_EXCEPTION: Readonly<Record<string, number>> = {
   "wcl-fight-context-b1pm-fight-48": 144924,
 };
 const M11E2_BYTES = Object.values(M11E2_NOTICE_LINE_EXCEPTION).reduce((sum, bytes) => sum + bytes, 0);
+
+/**
+ * M11-G1: the observed-performance and elite-cohort evidence — seven small,
+ * sanitized report and ranking surfaces (no events). Ordinary archive growth
+ * (362,565 bytes), named and pinned so it is reviewed rather than absorbed:
+ * the archive without the M11-E2 exception, G1 included, stays under the line.
+ */
+const M11G1_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-g1-cohort-candidate-1": 43945,
+  "wcl-g1-cohort-candidate-2": 96431,
+  "wcl-g1-cohort-candidate-3": 54976,
+  "wcl-g1-cohort-rankings-3455-5-blood-bracket-18": 47866,
+  "wcl-g1-cohort-rankings-3455-5-blood-bracket-19": 47873,
+  "wcl-g1-cohort-rankings-3455-5-blood-bracket-20": 47869,
+  "wcl-g1-subject-performance-b1pm-fight-48": 25671,
+};
+const M11G1_BYTES = Object.values(M11G1_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 const ARCHIVE_SEGMENT_PATH = `artifacts/wcl-events/${ARCHIVE_SEGMENT}.json`;
 const CORPUS_OPENER = "wcl-brewmaster-monk-gtkb-opener";
 const CORPUS_20_165 = "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165";
@@ -110,11 +127,13 @@ describe("the committed evidence archive", () => {
       // M11-E2.1: the Blood Death Knight fight context (catalog and identity).
       "wcl-fight-context-b1pm-fight-48",
       "wcl-fight-context-rxaf-fight-13",
+      // M11-G1: observed performance and the elite cohort (report and ranking surfaces only).
+      ...Object.keys(M11G1_EVIDENCE),
     ]);
     expect(loaded.archive.cases).toHaveLength(9);
     // Accounting is per root: the archive counts its own bytes only.
-    expect(loaded.archive.totalArtifactBytes).toBe(308961 + 389605 + 387275 + M11E2_BYTES);
-    for (const [artifactId, bytes] of Object.entries(M11E2_NOTICE_LINE_EXCEPTION)) {
+    expect(loaded.archive.totalArtifactBytes).toBe(308961 + 389605 + 387275 + M11E2_BYTES + M11G1_BYTES);
+    for (const [artifactId, bytes] of Object.entries({ ...M11E2_NOTICE_LINE_EXCEPTION, ...M11G1_EVIDENCE })) {
       const entry = loaded.archive.artifacts.find((candidate) => candidate.record.artifactId === artifactId);
       expect(entry?.canonicalByteLength, artifactId).toBe(bytes);
     }
@@ -138,8 +157,10 @@ describe("the committed evidence archive", () => {
       EVIDENCE_ARCHIVE_NOTICE_BYTES,
     );
     // With it the line is crossed — by hand, for this fixture only — and the
-    // crossing is pinned to the byte: 4,537,019 bytes (≈4.33 MiB).
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(4537019);
+    // crossing is pinned to the byte: 4,537,019 bytes (≈4.33 MiB) at M11-E2,
+    // plus the 364,631 bytes of M11-G1 evidence: 4,901,650.
+    expect(M11G1_BYTES).toBe(364631);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(4537019 + M11G1_BYTES);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

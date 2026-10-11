@@ -7532,6 +7532,68 @@ Semantic targets and rules:
   opaque number everywhere, and `Zone.difficulties` was never captured), and
   difficulty ids must not be guessed.
 
+## M11-G1 — observed performance and elite cohort evidence (internal barometer)
+
+Evidence: seven sanitized archive artifacts from one capture of 7 GraphQL
+requests (cap 14). See `tests/evidence/m11g1-cohort-capture.md`. Nothing in
+`src/` imports this domain yet, and analysis/1 is unchanged.
+
+- **ACTUAL_DPS** (`src/cohort/observed-performance.ts`).
+  - It is `WCL_DAMAGE_DONE_TABLE_TOTAL_PER_FIGHT_SECOND`: the WCL DamageDone
+    table `total` divided by the table `totalTime` in seconds.
+  - It is accepted only when `totalTime` equals the fight's
+    `endTime − startTime`. Otherwise it is `TABLE_TIME_IS_NOT_FIGHT_DURATION`.
+  - When the subject has a report-rankings row, its amount must agree within
+    0.01. Otherwise it is `RANKED_AMOUNT_DISAGREES`.
+  - The row is not required (`NOT_RANKED`).
+  - The pinned semantics: the full-fight denominator, with downtime and deaths
+    not removed; equal to WCL's own ranked dps for 19/19 players. It is never
+    computed from normalized raw `amount` events, so M1 stays NOT_YET_PROVEN.
+  - Pet inclusion is corroborated, not proven.
+- **Eligibility.** The subject must be a kill with a resolved specialization.
+  Otherwise it is NOT_ELIGIBLE (NOT_KILL, KILL_UNKNOWN, SPEC_UNRESOLVED, or an
+  unusable surface), and discovery stops after the subject request.
+- **Rankings semantics** (`src/wcl/cohort`).
+  - `characterRankings(…, bracket: b)` returns rows with `bracketData` in
+    269+3b … 271+3b (`WCL_ITEM_LEVEL_BRACKET_3_WIDE_FROM_269`).
+  - Every page is re-checked against that range; a mismatch stops discovery
+    with BRACKET_SEMANTICS_MISMATCH.
+  - `RankedCohortRow` is a separate G1 type that carries `amount`. M8's
+    `RankingCandidateRow` still cannot.
+  - The decoders fail closed (`PAYLOAD_UNRECOGNISED` with a named defect).
+  - A member's gear goes through the shared adapter
+    (`src/engine/normalization/combatant-info.ts`, the M10-C4 contract), so its
+    enchants and gems are KNOWN / KNOWN_NONE / UNKNOWN states, never a raw null
+    or a guessed empty list. A gear row the adapter cannot read is
+    MALFORMED_EVIDENCE.
+- **Selection** (`src/cohort/cohort-selection.ts`, `cohort-discovery.ts`).
+  - Rungs: ±3 item level / ±5% duration, then ±10%, then ±15% duration, then
+    item level ±6 and ±9 (`COHORT_SELECTION_CONFIG`). Every widening step is
+    recorded.
+  - Rows are ordered by amount descending, then report code, fight id and name.
+    Candidates are qualified in that order until three qualify, so the cohort
+    is the three highest-DPS qualifying kills, never the nearest.
+  - Every row considered is recorded as QUALIFIED, NOT_REACHED, or an
+    exclusion: HIDDEN, ANONYMOUS, SUBJECT_ITSELF, SOURCE_UNRESOLVED,
+    SOURCE_AMBIGUOUS (M8-F identity rule), SPEC_MISMATCH, NOT_KILL,
+    DIED_BEFORE_END (a Deaths-table entry at or before fight end),
+    DURATION_OUTSIDE_WINDOW, ILVL_OUTSIDE_WINDOW, CONTEXT_UNAVAILABLE or
+    MALFORMED_EVIDENCE.
+  - Outcomes: 3 → OK with median, min and max; 2 → RANGE_ONLY (range, no
+    median, no outlier claim); fewer → INSUFFICIENT.
+  - The request budget is checked before every call. Reaching it is
+    INSUFFICIENT / REQUEST_BUDGET_EXHAUSTED, never a partial claim.
+- **Barometer only.** `ObservedCohortEvidence` carries facts and provenance. It
+  sets no ceiling, measures no execution loss, makes no APL verdict, scales
+  nothing, and never fetches a comparison player's events. The cohort domain
+  imports no SimC, specialization, finding, analysis or report module, and no
+  module outside it imports it (`tests/unit/m11g1-cohort-boundary.test.ts`).
+- **Terminology.** WCL enemy classification remains `WCL_ENEMY_NPC_CLASSIFIED`.
+  G1 introduces no HOSTILE, ATTACKABLE or TARGETABLE state.
+- **Identities.** A live report may show a member's real name, server, DPS,
+  item level, duration and log reference (`liveIdentity`, `comparisonRef`).
+  Committed evidence is pseudonymized by `scripts/corpus/sanitize-g1-cohort.mjs`.
+
 ---
 
 # Milestone 12 — Healer Foundation

@@ -1566,6 +1566,26 @@ canonical BDK fixture (M11-E2.1, tests/unit/m11e2-blood-dk-fixture.test.ts):
   declaration vs catalog / grant / bytes       -> ACTOR_SLICE_INVALID (S)
   excluded heal / absorbed                     -> never COMPLETE; a HEALING grant is refused (T)
   caller-supplied window (DRW aura, read raw)  -> casts, raw sums, targets; substrate defines none
+observed cohort (M11-G1, tests/unit/m11g1-cohort.test.ts, m11g1-cohort-boundary.test.ts):
+  subject ACTUAL_DPS                           -> WCL table total / fight seconds; never the raw-amount sum (A)
+  table total / fight seconds vs ranked dps    -> equal for 19/19 players, death included (A)
+  no subject rankings row                      -> still OBSERVED (NOT_RANKED) (B)
+  ranked disagreement / other denominator      -> UNAVAILABLE, never a guess (B)
+  non-kill / unresolved spec subject           -> NOT_ELIGIBLE; only the subject request made (C, D)
+  committed pool                               -> rung ±3 ilvl / ±5%, no widening, three OK; 300 rows tallied (E, G, I)
+  widening                                     -> ±5% -> ±10% -> ±15%, then ilvl ±6, ±9; every step recorded (F, G)
+  selection                                    -> three highest DPS, never nearest duration (H)
+  two / fewer qualify                          -> RANGE_ONLY without median / INSUFFICIENT (J, K)
+  hidden, anonymous, subject's own row         -> excluded (L)
+  no / several identity matches                -> SOURCE_UNRESOLVED / SOURCE_AMBIGUOUS, never the first (M)
+  other spec / death before end / non-kill     -> SPEC_MISMATCH / DIED_BEFORE_END / NOT_KILL (N, O)
+  malformed row, context or bracket page       -> PAYLOAD_UNRECOGNISED / MALFORMED_EVIDENCE / BRACKET_SEMANTICS_MISMATCH (P)
+  permuted or tied rows                        -> identical cohort; ties by code, fight, name (Q)
+  queries / imports                            -> no events field, paginator or ingestion (R)
+  unbounded pool, no candidate qualifies       -> exactly 14 requests, then REQUEST_BUDGET_EXHAUSTED (S)
+  committed G1 evidence                        -> pseudonyms only, null servers, no credential shape (T)
+  any import of the cohort domain              -> refused, side-effect and dynamic imports included (U, V)
+  member gear                                  -> shared adapter states (24/30, 3/51, 12/42); bad row -> MALFORMED_EVIDENCE
 ```
 
 Required negative pairs, same premises, different construct:

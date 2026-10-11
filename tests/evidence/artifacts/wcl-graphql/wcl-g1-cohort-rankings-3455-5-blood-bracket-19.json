@@ -1,0 +1,1613 @@
+{
+  "worldData": {
+    "encounter": {
+      "characterRankings": {
+        "page": 1,
+        "hasMorePages": true,
+        "count": 100,
+        "rankings": [
+          {
+            "name": "Player0792",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 228940.65939633,
+            "hardModeLevel": 0,
+            "duration": 394755,
+            "startTime": 1790738920211,
+            "report": {
+              "code": "COHORT040AAAAAAA",
+              "fightID": 27,
+              "startTime": 1790732400755
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0697",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 202704.36785883,
+            "hardModeLevel": 0,
+            "duration": 451869,
+            "startTime": 1789587302554,
+            "report": {
+              "code": "COHORT291AAAAAAA",
+              "fightID": 23,
+              "startTime": 1789579836315
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0388",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 200491.27807065,
+            "hardModeLevel": 0,
+            "duration": 378242,
+            "startTime": 1790879402919,
+            "report": {
+              "code": "COHORT061AAAAAAA",
+              "fightID": 10,
+              "startTime": 1790877003266
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0074",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 199847.76651912,
+            "hardModeLevel": 0,
+            "duration": 389034,
+            "startTime": 1789739538281,
+            "report": {
+              "code": "COHORT231AAAAAAA",
+              "fightID": 20,
+              "startTime": 1789733087647
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0627",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 199052.51969161,
+            "hardModeLevel": 0,
+            "duration": 419595,
+            "startTime": 1790884158810,
+            "report": {
+              "code": "COHORT014AAAAAAA",
+              "fightID": 26,
+              "startTime": 1790876012276
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0024",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 198453.69013054,
+            "hardModeLevel": 0,
+            "duration": 388157,
+            "startTime": 1789644251356,
+            "report": {
+              "code": "COHORT196AAAAAAA",
+              "fightID": 30,
+              "startTime": 1789636536498
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0044",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 198000.46978521,
+            "hardModeLevel": 0,
+            "duration": 434241,
+            "startTime": 1791401025470,
+            "report": {
+              "code": "COHORT220AAAAAAA",
+              "fightID": 35,
+              "startTime": 1791388189628
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0021",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 196360.90234488,
+            "hardModeLevel": 0,
+            "duration": 421258,
+            "startTime": 1790263839989,
+            "report": {
+              "code": "COHORT109AAAAAAA",
+              "fightID": 48,
+              "startTime": 1790244477696
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0016",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 193296.52131157,
+            "hardModeLevel": 0,
+            "duration": 388451,
+            "startTime": 1790603276767,
+            "report": {
+              "code": "COHORT248AAAAAAA",
+              "fightID": 19,
+              "startTime": 1790598488082
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0246",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 193200.64317813,
+            "hardModeLevel": 0,
+            "duration": 401444,
+            "startTime": 1791374326441,
+            "report": {
+              "code": "COHORT225AAAAAAA",
+              "fightID": 44,
+              "startTime": 1791362427089
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0265",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 191475.1063396,
+            "hardModeLevel": 0,
+            "duration": 431636,
+            "startTime": 1791293988397,
+            "report": {
+              "code": "COHORT232AAAAAAA",
+              "fightID": 29,
+              "startTime": 1791287814682
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0575",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 190897.20919115,
+            "hardModeLevel": 0,
+            "duration": 414181,
+            "startTime": 1791472445642,
+            "report": {
+              "code": "COHORT154AAAAAAA",
+              "fightID": 26,
+              "startTime": 1791461370149
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0749",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 190587.7725853,
+            "hardModeLevel": 0,
+            "duration": 418126,
+            "startTime": 1790546076426,
+            "report": {
+              "code": "COHORT271AAAAAAA",
+              "fightID": 34,
+              "startTime": 1790538861095
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0723",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 190256.87449746,
+            "hardModeLevel": 0,
+            "duration": 394247,
+            "startTime": 1791467407768,
+            "report": {
+              "code": "COHORT026AAAAAAA",
+              "fightID": 42,
+              "startTime": 1791460621800
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0444",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 188333.27618195,
+            "hardModeLevel": 0,
+            "duration": 390775,
+            "startTime": 1790797227298,
+            "report": {
+              "code": "COHORT115AAAAAAA",
+              "fightID": 25,
+              "startTime": 1790790445957
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0261",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 188071.24697425,
+            "hardModeLevel": 0,
+            "duration": 410642,
+            "startTime": 1790842618787,
+            "report": {
+              "code": "COHORT189AAAAAAA",
+              "fightID": 31,
+              "startTime": 1790834511145
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0003",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 187827.52513334,
+            "hardModeLevel": 0,
+            "duration": 394098,
+            "startTime": 1789580299489,
+            "report": {
+              "code": "COHORT022AAAAAAA",
+              "fightID": 38,
+              "startTime": 1789570619880
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0557",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 187826.35109744,
+            "hardModeLevel": 0,
+            "duration": 431094,
+            "startTime": 1790262558529,
+            "report": {
+              "code": "COHORT033AAAAAAA",
+              "fightID": 52,
+              "startTime": 1790247124805
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0702",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 187608.79615671,
+            "hardModeLevel": 0,
+            "duration": 397992,
+            "startTime": 1790192657690,
+            "report": {
+              "code": "COHORT209AAAAAAA",
+              "fightID": 25,
+              "startTime": 1790188391202
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0446",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 187306.45407175,
+            "hardModeLevel": 0,
+            "duration": 400135,
+            "startTime": 1790020017134,
+            "report": {
+              "code": "COHORT148AAAAAAA",
+              "fightID": 10,
+              "startTime": 1790008008436
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0647",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 186864.86461646,
+            "hardModeLevel": 0,
+            "duration": 435208,
+            "startTime": 1789668335628,
+            "report": {
+              "code": "COHORT161AAAAAAA",
+              "fightID": 1,
+              "startTime": 1789668327445
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0788",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 186453.03237795,
+            "hardModeLevel": 0,
+            "duration": 413306,
+            "startTime": 1789759357631,
+            "report": {
+              "code": "COHORT076AAAAAAA",
+              "fightID": 8,
+              "startTime": 1789752851613
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0033",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 186257.93276457,
+            "hardModeLevel": 0,
+            "duration": 385868,
+            "startTime": 1790969704051,
+            "report": {
+              "code": "COHORT277AAAAAAA",
+              "fightID": 56,
+              "startTime": 1790957082330
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0288",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 185714.52369111,
+            "hardModeLevel": 0,
+            "duration": 414206,
+            "startTime": 1790281962808,
+            "report": {
+              "code": "COHORT253AAAAAAA",
+              "fightID": 15,
+              "startTime": 1790275034056
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0270",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 184947.88996577,
+            "hardModeLevel": 0,
+            "duration": 395586,
+            "startTime": 1790127725073,
+            "report": {
+              "code": "COHORT195AAAAAAA",
+              "fightID": 21,
+              "startTime": 1790121235566
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0348",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 184799.02475467,
+            "hardModeLevel": 0,
+            "duration": 396208,
+            "startTime": 1791119925177,
+            "report": {
+              "code": "COHORT193AAAAAAA",
+              "fightID": 80,
+              "startTime": 1791093884037
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0614",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 184485.36591491,
+            "hardModeLevel": 0,
+            "duration": 398180,
+            "startTime": 1791143699955,
+            "report": {
+              "code": "COHORT079AAAAAAA",
+              "fightID": 27,
+              "startTime": 1791137945062
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0646",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 184231.82987718,
+            "hardModeLevel": 0,
+            "duration": 404978,
+            "startTime": 1790885774792,
+            "report": {
+              "code": "COHORT024AAAAAAA",
+              "fightID": 27,
+              "startTime": 1790879390979
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0739",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 184106.15502323,
+            "hardModeLevel": 0,
+            "duration": 397334,
+            "startTime": 1790801399213,
+            "report": {
+              "code": "COHORT073AAAAAAA",
+              "fightID": 29,
+              "startTime": 1790793723358
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0037",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 183988.00113337,
+            "hardModeLevel": 0,
+            "duration": 416456,
+            "startTime": 1789700749113,
+            "report": {
+              "code": "COHORT202AAAAAAA",
+              "fightID": 17,
+              "startTime": 1789696241607
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0688",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 183705.76664251,
+            "hardModeLevel": 0,
+            "duration": 396019,
+            "startTime": 1790219016482,
+            "report": {
+              "code": "COHORT273AAAAAAA",
+              "fightID": 27,
+              "startTime": 1790207112318
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0743",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 183439.39831152,
+            "hardModeLevel": 0,
+            "duration": 377737,
+            "startTime": 1791470736160,
+            "report": {
+              "code": "COHORT167AAAAAAA",
+              "fightID": 39,
+              "startTime": 1791461026560
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0039",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 183265.92901473,
+            "hardModeLevel": 0,
+            "duration": 400731,
+            "startTime": 1791183670830,
+            "report": {
+              "code": "COHORT159AAAAAAA",
+              "fightID": 30,
+              "startTime": 1791164747372
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0084",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 180822.1749498,
+            "hardModeLevel": 0,
+            "duration": 419789,
+            "startTime": 1791487578280,
+            "report": {
+              "code": "COHORT094AAAAAAA",
+              "fightID": 29,
+              "startTime": 1791443685345
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0744",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 180597.31649883,
+            "hardModeLevel": 0,
+            "duration": 397913,
+            "startTime": 1791309160357,
+            "report": {
+              "code": "COHORT269AAAAAAA",
+              "fightID": 32,
+              "startTime": 1791303074338
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0017",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 179994.93063777,
+            "hardModeLevel": 0,
+            "duration": 329430,
+            "startTime": 1791400155909,
+            "report": {
+              "code": "COHORT246AAAAAAA",
+              "fightID": 33,
+              "startTime": 1791393728144
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0729",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 179654.50340326,
+            "hardModeLevel": 0,
+            "duration": 401674,
+            "startTime": 1790194050010,
+            "report": {
+              "code": "COHORT162AAAAAAA",
+              "fightID": 30,
+              "startTime": 1790186337648
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0559",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 179609.70134616,
+            "hardModeLevel": 0,
+            "duration": 412953,
+            "startTime": 1791253628310,
+            "report": {
+              "code": "COHORT226AAAAAAA",
+              "fightID": 22,
+              "startTime": 1791249171009
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0694",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 179554.09925678,
+            "hardModeLevel": 0,
+            "duration": 398804,
+            "startTime": 1790817648259,
+            "report": {
+              "code": "COHORT259AAAAAAA",
+              "fightID": 22,
+              "startTime": 1790813387947
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0696",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 179494.17337472,
+            "hardModeLevel": 0,
+            "duration": 402377,
+            "startTime": 1789907110201,
+            "report": {
+              "code": "COHORT227AAAAAAA",
+              "fightID": 67,
+              "startTime": 1789877842582
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0501",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 179290.22766588,
+            "hardModeLevel": 0,
+            "duration": 388464,
+            "startTime": 1790861672779,
+            "report": {
+              "code": "COHORT113AAAAAAA",
+              "fightID": 44,
+              "startTime": 1790839648468
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0550",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 179173.94330684,
+            "hardModeLevel": 0,
+            "duration": 422379,
+            "startTime": 1790262796150,
+            "report": {
+              "code": "COHORT118AAAAAAA",
+              "fightID": 30,
+              "startTime": 1790254321013
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0258",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 179146.73918669,
+            "hardModeLevel": 0,
+            "duration": 386468,
+            "startTime": 1790798299157,
+            "report": {
+              "code": "COHORT153AAAAAAA",
+              "fightID": 29,
+              "startTime": 1790790395603
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0695",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 178544.06275944,
+            "hardModeLevel": 0,
+            "duration": 415555,
+            "startTime": 1790359977602,
+            "report": {
+              "code": "COHORT078AAAAAAA",
+              "fightID": 18,
+              "startTime": 1790355631043
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0776",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 178533.88446164,
+            "hardModeLevel": 0,
+            "duration": 312208,
+            "startTime": 1790185311665,
+            "report": {
+              "code": "COHORT247AAAAAAA",
+              "fightID": 16,
+              "startTime": 1790182378986
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0490",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 178174.78185194,
+            "hardModeLevel": 0,
+            "duration": 387237,
+            "startTime": 1790606797897,
+            "report": {
+              "code": "COHORT254AAAAAAA",
+              "fightID": 25,
+              "startTime": 1790600384661
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0052",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 177916.68616839,
+            "hardModeLevel": 0,
+            "duration": 401674,
+            "startTime": 1790194050010,
+            "report": {
+              "code": "COHORT162AAAAAAA",
+              "fightID": 30,
+              "startTime": 1790186337648
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0323",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 177524.03088662,
+            "hardModeLevel": 0,
+            "duration": 383985,
+            "startTime": 1791142908174,
+            "report": {
+              "code": "COHORT087AAAAAAA",
+              "fightID": 36,
+              "startTime": 1791136246125
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0539",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 177351.33042306,
+            "hardModeLevel": 0,
+            "duration": 399046,
+            "startTime": 1790131687918,
+            "report": {
+              "code": "COHORT242AAAAAAA",
+              "fightID": 26,
+              "startTime": 1790121823014
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0083",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 177336.7320701,
+            "hardModeLevel": 0,
+            "duration": 404464,
+            "startTime": 1791006951659,
+            "report": {
+              "code": "COHORT091AAAAAAA",
+              "fightID": 11,
+              "startTime": 1791003192529
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0400",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 177168.00053322,
+            "hardModeLevel": 0,
+            "duration": 405088,
+            "startTime": 1790944086268,
+            "report": {
+              "code": "COHORT275AAAAAAA",
+              "fightID": 24,
+              "startTime": 1790940109588
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0063",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 176902.90715115,
+            "hardModeLevel": 0,
+            "duration": 383365,
+            "startTime": 1790194602520,
+            "report": {
+              "code": "COHORT071AAAAAAA",
+              "fightID": 43,
+              "startTime": 1790185227003
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0756",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 175971.48023321,
+            "hardModeLevel": 0,
+            "duration": 394323,
+            "startTime": 1790620635801,
+            "report": {
+              "code": "COHORT203AAAAAAA",
+              "fightID": 13,
+              "startTime": 1790617503392
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0279",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 175872.21968148,
+            "hardModeLevel": 0,
+            "duration": 395773,
+            "startTime": 1790761591967,
+            "report": {
+              "code": "COHORT051AAAAAAA",
+              "fightID": 24,
+              "startTime": 1790757918028
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0237",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 175739.03385596,
+            "hardModeLevel": 0,
+            "duration": 393461,
+            "startTime": 1791055897273,
+            "report": {
+              "code": "COHORT093AAAAAAA",
+              "fightID": 38,
+              "startTime": 1791027449190
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0269",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 175634.68309859,
+            "hardModeLevel": 0,
+            "duration": 429408,
+            "startTime": 1790261201586,
+            "report": {
+              "code": "COHORT086AAAAAAA",
+              "fightID": 66,
+              "startTime": 1790247906073
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0456",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 175498.31421637,
+            "hardModeLevel": 0,
+            "duration": 408712,
+            "startTime": 1791210865881,
+            "report": {
+              "code": "COHORT233AAAAAAA",
+              "fightID": 45,
+              "startTime": 1791202206734
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0768",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 175233.74900187,
+            "hardModeLevel": 0,
+            "duration": 418282,
+            "startTime": 1790739309690,
+            "report": {
+              "code": "COHORT184AAAAAAA",
+              "fightID": 42,
+              "startTime": 1790727790514
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0426",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 175081.25895145,
+            "hardModeLevel": 0,
+            "duration": 396584,
+            "startTime": 1791206546328,
+            "report": {
+              "code": "COHORT170AAAAAAA",
+              "fightID": 28,
+              "startTime": 1791201889512
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0618",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 174990.88530101,
+            "hardModeLevel": 0,
+            "duration": 439071,
+            "startTime": 1790516450098,
+            "report": {
+              "code": "COHORT157AAAAAAA",
+              "fightID": 28,
+              "startTime": 1790510435407
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0045",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 174865.0281651,
+            "hardModeLevel": 0,
+            "duration": 403336,
+            "startTime": 1790887877619,
+            "report": {
+              "code": "COHORT005AAAAAAA",
+              "fightID": 35,
+              "startTime": 1790878931814
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0381",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 174785.33817207,
+            "hardModeLevel": 0,
+            "duration": 432620,
+            "startTime": 1790304446029,
+            "report": {
+              "code": "COHORT143AAAAAAA",
+              "fightID": 24,
+              "startTime": 1790296590219
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0172",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 174768.7329634,
+            "hardModeLevel": 0,
+            "duration": 359887,
+            "startTime": 1790483689393,
+            "report": {
+              "code": "COHORT261AAAAAAA",
+              "fightID": 31,
+              "startTime": 1790479477207
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0800",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 174753.84176332,
+            "hardModeLevel": 0,
+            "duration": 388949,
+            "startTime": 1789587678443,
+            "report": {
+              "code": "COHORT191AAAAAAA",
+              "fightID": 29,
+              "startTime": 1789578062035
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0217",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 173662.24234612,
+            "hardModeLevel": 0,
+            "duration": 453855,
+            "startTime": 1791145366836,
+            "report": {
+              "code": "COHORT096AAAAAAA",
+              "fightID": 27,
+              "startTime": 1791134487065
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0183",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 173384.93616864,
+            "hardModeLevel": 0,
+            "duration": 379359,
+            "startTime": 1790319480172,
+            "report": {
+              "code": "COHORT106AAAAAAA",
+              "fightID": 4,
+              "startTime": 1790315692942
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0229",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 173004.70336209,
+            "hardModeLevel": 0,
+            "duration": 420125,
+            "startTime": 1789663319698,
+            "report": {
+              "code": "COHORT031AAAAAAA",
+              "fightID": 14,
+              "startTime": 1789657508902
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0726",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 172922.6792654,
+            "hardModeLevel": 0,
+            "duration": 386494,
+            "startTime": 1790816249468,
+            "report": {
+              "code": "COHORT070AAAAAAA",
+              "fightID": 4,
+              "startTime": 1790815138116
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0393",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 172779.6709318,
+            "hardModeLevel": 0,
+            "duration": 391469,
+            "startTime": 1789739992698,
+            "report": {
+              "code": "COHORT036AAAAAAA",
+              "fightID": 48,
+              "startTime": 1789728391984
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0049",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 172765.80081029,
+            "hardModeLevel": 0,
+            "duration": 421086,
+            "startTime": 1791139802866,
+            "report": {
+              "code": "COHORT281AAAAAAA",
+              "fightID": 16,
+              "startTime": 1791135040209
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0634",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 172006.36964765,
+            "hardModeLevel": 0,
+            "duration": 432520,
+            "startTime": 1790002012222,
+            "report": {
+              "code": "COHORT063AAAAAAA",
+              "fightID": 46,
+              "startTime": 1789990925768
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0014",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 171818.60758425,
+            "hardModeLevel": 0,
+            "duration": 378996,
+            "startTime": 1790520997117,
+            "report": {
+              "code": "COHORT112AAAAAAA",
+              "fightID": 27,
+              "startTime": 1790512833333
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0610",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 171274.583825,
+            "hardModeLevel": 0,
+            "duration": 425422,
+            "startTime": 1790580351059,
+            "report": {
+              "code": "COHORT137AAAAAAA",
+              "fightID": 29,
+              "startTime": 1790573382153
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0512",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170992.91473491,
+            "hardModeLevel": 0,
+            "duration": 400973,
+            "startTime": 1790908848943,
+            "report": {
+              "code": "COHORT219AAAAAAA",
+              "fightID": 45,
+              "startTime": 1790881601468
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0330",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170978.60481747,
+            "hardModeLevel": 0,
+            "duration": 380366,
+            "startTime": 1790014320599,
+            "report": {
+              "code": "COHORT025AAAAAAA",
+              "fightID": 2,
+              "startTime": 1790013764731
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0611",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170929.83319661,
+            "hardModeLevel": 0,
+            "duration": 383985,
+            "startTime": 1791142908174,
+            "report": {
+              "code": "COHORT087AAAAAAA",
+              "fightID": 36,
+              "startTime": 1791136246125
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0678",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170737.47795534,
+            "hardModeLevel": 0,
+            "duration": 443418,
+            "startTime": 1790879944515,
+            "report": {
+              "code": "COHORT062AAAAAAA",
+              "fightID": 11,
+              "startTime": 1790877352191
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0458",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170699.66129513,
+            "hardModeLevel": 0,
+            "duration": 392377,
+            "startTime": 1790317819615,
+            "report": {
+              "code": "COHORT287AAAAAAA",
+              "fightID": 29,
+              "startTime": 1790308153391
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0664",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170640.31079536,
+            "hardModeLevel": 0,
+            "duration": 395244,
+            "startTime": 1791401130420,
+            "report": {
+              "code": "COHORT292AAAAAAA",
+              "fightID": 13,
+              "startTime": 1791398491502
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0691",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170579.46200629,
+            "hardModeLevel": 0,
+            "duration": 405804,
+            "startTime": 1791513802874,
+            "report": {
+              "code": "COHORT064AAAAAAA",
+              "fightID": 39,
+              "startTime": 1791504611131
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0736",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170560.21388736,
+            "hardModeLevel": 0,
+            "duration": 391795,
+            "startTime": 1790300454701,
+            "report": {
+              "code": "COHORT135AAAAAAA",
+              "fightID": 19,
+              "startTime": 1790294066388
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0124",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170486.99081811,
+            "hardModeLevel": 0,
+            "duration": 333918,
+            "startTime": 1789593909590,
+            "report": {
+              "code": "COHORT263AAAAAAA",
+              "fightID": 54,
+              "startTime": 1789550789715
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0222",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170469.41125404,
+            "hardModeLevel": 0,
+            "duration": 384733,
+            "startTime": 1791137264461,
+            "report": {
+              "code": "COHORT065AAAAAAA",
+              "fightID": 12,
+              "startTime": 1791133359156
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0337",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170201.86340226,
+            "hardModeLevel": 0,
+            "duration": 386390,
+            "startTime": 1790298069390,
+            "report": {
+              "code": "COHORT223AAAAAAA",
+              "fightID": 17,
+              "startTime": 1790294159043
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0648",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 170192.38847884,
+            "hardModeLevel": 0,
+            "duration": 392773,
+            "startTime": 1790428253160,
+            "report": {
+              "code": "COHORT054AAAAAAA",
+              "fightID": 43,
+              "startTime": 1790418612505
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0007",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 169919.07688662,
+            "hardModeLevel": 0,
+            "duration": 388208,
+            "startTime": 1791421344629,
+            "report": {
+              "code": "COHORT006AAAAAAA",
+              "fightID": 9,
+              "startTime": 1791419142477
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0436",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 169800.53867302,
+            "hardModeLevel": 0,
+            "duration": 393931,
+            "startTime": 1790797037508,
+            "report": {
+              "code": "COHORT186AAAAAAA",
+              "fightID": 23,
+              "startTime": 1790786675535
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0636",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 169624.36162621,
+            "hardModeLevel": 0,
+            "duration": 413355,
+            "startTime": 1791476088155,
+            "report": {
+              "code": "COHORT197AAAAAAA",
+              "fightID": 31,
+              "startTime": 1791469395326
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0422",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 169499.62290024,
+            "hardModeLevel": 0,
+            "duration": 437550,
+            "startTime": 1790130147883,
+            "report": {
+              "code": "COHORT103AAAAAAA",
+              "fightID": 40,
+              "startTime": 1790121176073
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0284",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 169468.00452846,
+            "hardModeLevel": 0,
+            "duration": 396603,
+            "startTime": 1790127336226,
+            "report": {
+              "code": "COHORT088AAAAAAA",
+              "fightID": 50,
+              "startTime": 1790101972157
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0786",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 169170.28540683,
+            "hardModeLevel": 0,
+            "duration": 408890,
+            "startTime": 1789997235816,
+            "report": {
+              "code": "COHORT274AAAAAAA",
+              "fightID": 26,
+              "startTime": 1789991706362
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0564",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168939.19817323,
+            "hardModeLevel": 0,
+            "duration": 420415,
+            "startTime": 1791230239071,
+            "report": {
+              "code": "COHORT171AAAAAAA",
+              "fightID": 18,
+              "startTime": 1791226403706
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0508",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168915.48969669,
+            "hardModeLevel": 0,
+            "duration": 380072,
+            "startTime": 1789671062970,
+            "report": {
+              "code": "COHORT221AAAAAAA",
+              "fightID": 25,
+              "startTime": 1789667064320
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0784",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168765.68044885,
+            "hardModeLevel": 0,
+            "duration": 386054,
+            "startTime": 1790885505092,
+            "report": {
+              "code": "COHORT058AAAAAAA",
+              "fightID": 32,
+              "startTime": 1790877725552
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0657",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168707.43881374,
+            "hardModeLevel": 0,
+            "duration": 356616,
+            "startTime": 1790878770728,
+            "report": {
+              "code": "COHORT037AAAAAAA",
+              "fightID": 24,
+              "startTime": 1790875204752
+            },
+            "server": null,
+            "bracketData": 328
+          },
+          {
+            "name": "Player0300",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168698.29412232,
+            "hardModeLevel": 0,
+            "duration": 414977,
+            "startTime": 1791178836292,
+            "report": {
+              "code": "COHORT160AAAAAAA",
+              "fightID": 31,
+              "startTime": 1791170953214
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0050",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168565.48692374,
+            "hardModeLevel": 0,
+            "duration": 397629,
+            "startTime": 1791076954242,
+            "report": {
+              "code": "COHORT151AAAAAAA",
+              "fightID": 16,
+              "startTime": 1791067802488
+            },
+            "server": null,
+            "bracketData": 327
+          },
+          {
+            "name": "Player0554",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168444.01557249,
+            "hardModeLevel": 0,
+            "duration": 390689,
+            "startTime": 1790610892323,
+            "report": {
+              "code": "COHORT279AAAAAAA",
+              "fightID": 34,
+              "startTime": 1790604389579
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0524",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168358.95616898,
+            "hardModeLevel": 0,
+            "duration": 380598,
+            "startTime": 1789655855509,
+            "report": {
+              "code": "COHORT270AAAAAAA",
+              "fightID": 35,
+              "startTime": 1789643839622
+            },
+            "server": null,
+            "bracketData": 326
+          },
+          {
+            "name": "Player0798",
+            "class": "DeathKnight",
+            "spec": "Blood",
+            "amount": 168335.71488879,
+            "hardModeLevel": 0,
+            "duration": 438229,
+            "startTime": 1790625586947,
+            "report": {
+              "code": "COHORT286AAAAAAA",
+              "fightID": 18,
+              "startTime": 1790620398416
+            },
+            "server": null,
+            "bracketData": 326
+          }
+        ]
+      }
+    }
+  }
+}

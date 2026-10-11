@@ -76,6 +76,55 @@
       "payloadKind": "WCL_GRAPHQL_DATA",
       "provenanceKind": "SANITIZED_CAPTURE",
       "sha256": "ead33aa2325cf9bfc685f1a18dacb0163b52e5b88c73f4dbae71cc8e86e1f8ff"
+    },
+    {
+      "artifactId": "wcl-g1-cohort-candidate-1",
+      "byteLength": 43945,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "2dc371bd98ce46c51571aab035ad5936cffdb4345613357632731bc709a161ff"
+    },
+    {
+      "artifactId": "wcl-g1-cohort-candidate-2",
+      "byteLength": 96431,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "cfd9aedc7cfeaf45c8de12d290faac4a8b59c69dd875d5e0bd6e604acb1bd5b9"
+    },
+    {
+      "artifactId": "wcl-g1-cohort-candidate-3",
+      "byteLength": 54976,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "4941c8f9bac75b1c7694883ce85648613a31b35bf4cc26161035497798d0e1f3"
+    },
+    {
+      "artifactId": "wcl-g1-cohort-rankings-3455-5-blood-bracket-18",
+      "byteLength": 47866,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "278b36bec3c3b42e453e760682089f88f1dfc568f27a8132eda9492726a8c598"
+    },
+    {
+      "artifactId": "wcl-g1-cohort-rankings-3455-5-blood-bracket-19",
+      "byteLength": 47873,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "da819fb3ed98ea943a75b3525c0d663c6326134b0a39631a4abb100baf701e98"
+    },
+    {
+      "artifactId": "wcl-g1-cohort-rankings-3455-5-blood-bracket-20",
+      "byteLength": 47869,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "26a6f55b40ac1ac686d3370d80e0c5d4a84f510c688af2d26b1b97232bec2c2c"
+    },
+    {
+      "artifactId": "wcl-g1-subject-performance-b1pm-fight-48",
+      "byteLength": 25671,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "9ac39cd0cd1b0d91d3daa9b668deec04226121e28ba33267170b82f8615903dd"
     }
   ],
   "byLayer": [
@@ -376,8 +425,8 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 4508009,
-    "artifacts": 11,
+    "artifactBytes": 4872640,
+    "artifacts": 18,
     "assertions": 21,
     "cases": 9,
     "declared": 0,

@@ -1,0 +1,2000 @@
+{
+  "reportData": {
+    "report": {
+      "code": "COHORT261AAAAAAA",
+      "fights": [
+        {
+          "id": 31,
+          "encounterID": 3455,
+          "difficulty": 5,
+          "kill": true,
+          "startTime": 4212186,
+          "endTime": 4572073
+        }
+      ],
+      "masterData": {
+        "actors": [
+          {
+            "id": 1,
+            "name": "Player0325",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 2,
+            "name": "Player0179",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 3,
+            "name": "Player0799",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 4,
+            "name": "Player0738",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 5,
+            "name": "Player0745",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 6,
+            "name": "Player0172",
+            "server": null,
+            "type": "Player",
+            "subType": "DeathKnight"
+          },
+          {
+            "id": 7,
+            "name": "Player0652",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 9,
+            "name": "Player0051",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 10,
+            "name": "Player0593",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 11,
+            "name": "Player0029",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 12,
+            "name": "Player0527",
+            "server": null,
+            "type": "Player",
+            "subType": "Evoker"
+          },
+          {
+            "id": 13,
+            "name": "Player0602",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 14,
+            "name": "Player0722",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 15,
+            "name": "Player0377",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 16,
+            "name": "Player0601",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 17,
+            "name": "Player0761",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 18,
+            "name": "Player0230",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 19,
+            "name": "Player0385",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 20,
+            "name": "Player0005",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 21,
+            "name": "Player0170",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 23,
+            "name": "Player0707",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 24,
+            "name": "Player0530",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 26,
+            "name": "Player0747",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 27,
+            "name": "Player0189",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 29,
+            "name": "Player0308",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 30,
+            "name": "Player0118",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 31,
+            "name": "Player0298",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 32,
+            "name": "Player0796",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 33,
+            "name": "Player0528",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 34,
+            "name": "Player0109",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 36,
+            "name": "Player0312",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 37,
+            "name": "Player0309",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 38,
+            "name": "Player0107",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 39,
+            "name": "Player0674",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 40,
+            "name": "Player0332",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 41,
+            "name": "Player0398",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 42,
+            "name": "Player0509",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 44,
+            "name": "Player0766",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 46,
+            "name": "Player0721",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 48,
+            "name": "Player0542",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 49,
+            "name": "Player0374",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 50,
+            "name": "Player0401",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 51,
+            "name": "Player0794",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 52,
+            "name": "Player0701",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 53,
+            "name": "Player0525",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 54,
+            "name": "Player0571",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 55,
+            "name": "Player0623",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 56,
+            "name": "Player0370",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 57,
+            "name": "Player0445",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 59,
+            "name": "Player0395",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 61,
+            "name": "Player0584",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 62,
+            "name": "Player0248",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 63,
+            "name": "Player0450",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 64,
+            "name": "Player0218",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 65,
+            "name": "Player0295",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 66,
+            "name": "Player0403",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 67,
+            "name": "Player0297",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 68,
+            "name": "Player0637",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 69,
+            "name": "Player0679",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 70,
+            "name": "Player0133",
+            "server": null,
+            "type": "Player",
+            "subType": "Rogue"
+          },
+          {
+            "id": 71,
+            "name": "Player0586",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 72,
+            "name": "Player0531",
+            "server": null,
+            "type": "Player",
+            "subType": "DemonHunter"
+          },
+          {
+            "id": 73,
+            "name": "Player0259",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 74,
+            "name": "Player0080",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 75,
+            "name": "Player0038",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 76,
+            "name": "Player0520",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 77,
+            "name": "Player0180",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 78,
+            "name": "Player0020",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 79,
+            "name": "Player0176",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 80,
+            "name": "Player0166",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 81,
+            "name": "Player0424",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 82,
+            "name": "Player0167",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 83,
+            "name": "Player0686",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 84,
+            "name": "Player0443",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 85,
+            "name": "Player0147",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 86,
+            "name": "Player0367",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 87,
+            "name": "Player0622",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 88,
+            "name": "Player0232",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 89,
+            "name": "Player0110",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 90,
+            "name": "Player0466",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 91,
+            "name": "Player0293",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 92,
+            "name": "Player0475",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 93,
+            "name": "Player0153",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 95,
+            "name": "Player0583",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 98,
+            "name": "Player0783",
+            "server": null,
+            "type": "Player",
+            "subType": "Evoker"
+          },
+          {
+            "id": 99,
+            "name": "Player0411",
+            "server": null,
+            "type": "Player",
+            "subType": "Druid"
+          },
+          {
+            "id": 100,
+            "name": "Player0808",
+            "server": null,
+            "type": "Player",
+            "subType": "Shaman"
+          },
+          {
+            "id": 101,
+            "name": "Player0775",
+            "server": null,
+            "type": "Player",
+            "subType": "Warrior"
+          },
+          {
+            "id": 102,
+            "name": "Player0672",
+            "server": null,
+            "type": "Player",
+            "subType": "Priest"
+          },
+          {
+            "id": 103,
+            "name": "Player0693",
+            "server": null,
+            "type": "Player",
+            "subType": "Mage"
+          },
+          {
+            "id": 107,
+            "name": "Player0397",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 108,
+            "name": "Player0553",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 109,
+            "name": "Player0192",
+            "server": null,
+            "type": "Player",
+            "subType": "Hunter"
+          },
+          {
+            "id": 120,
+            "name": "Player0427",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 121,
+            "name": "Player0752",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 122,
+            "name": "Player0168",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 123,
+            "name": "Player0682",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 124,
+            "name": "Player0606",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 125,
+            "name": "Player0449",
+            "server": null,
+            "type": "Player",
+            "subType": "DeathKnight"
+          },
+          {
+            "id": 126,
+            "name": "Player0608",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 127,
+            "name": "Player0562",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 128,
+            "name": "Player0228",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 131,
+            "name": "Player0386",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 132,
+            "name": "Player0275",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 133,
+            "name": "Player0521",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 134,
+            "name": "Player0613",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 135,
+            "name": "Player0590",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 136,
+            "name": "Player0328",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 137,
+            "name": "Player0343",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 138,
+            "name": "Player0072",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 139,
+            "name": "Player0292",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 143,
+            "name": "Player0345",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 144,
+            "name": "Player0532",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 145,
+            "name": "Player0096",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 146,
+            "name": "Player0680",
+            "server": null,
+            "type": "Player",
+            "subType": "Unknown"
+          },
+          {
+            "id": 147,
+            "name": "Player0093",
+            "server": null,
+            "type": "Player",
+            "subType": "Hunter"
+          },
+          {
+            "id": 148,
+            "name": "Player0251",
+            "server": null,
+            "type": "Player",
+            "subType": "Paladin"
+          },
+          {
+            "id": 149,
+            "name": "Player0472",
+            "server": null,
+            "type": "Player",
+            "subType": "Shaman"
+          },
+          {
+            "id": 150,
+            "name": "Player0609",
+            "server": null,
+            "type": "Player",
+            "subType": "Evoker"
+          },
+          {
+            "id": 151,
+            "name": "Player0432",
+            "server": null,
+            "type": "Player",
+            "subType": "Paladin"
+          },
+          {
+            "id": 152,
+            "name": "Player0806",
+            "server": null,
+            "type": "Player",
+            "subType": "Druid"
+          },
+          {
+            "id": 154,
+            "name": "Player0313",
+            "server": null,
+            "type": "Player",
+            "subType": "Monk"
+          },
+          {
+            "id": 155,
+            "name": "Player0700",
+            "server": null,
+            "type": "Player",
+            "subType": "Warlock"
+          },
+          {
+            "id": 157,
+            "name": "Player0493",
+            "server": null,
+            "type": "Player",
+            "subType": "DemonHunter"
+          },
+          {
+            "id": 196,
+            "name": "Player0468",
+            "server": null,
+            "type": "Player",
+            "subType": "Mage"
+          }
+        ]
+      },
+      "rankings": {
+        "data": [
+          {
+            "fightID": 31,
+            "partition": 1,
+            "encounter": {
+              "id": 3455
+            },
+            "difficulty": 5,
+            "kill": 1,
+            "duration": 359887,
+            "bracketData": 322.55,
+            "bracket": 17,
+            "roles": {
+              "tanks": {
+                "characters": [
+                  {
+                    "name": "Player0172",
+                    "server": null,
+                    "class": "DeathKnight",
+                    "spec": "Blood",
+                    "amount": 174768.7329634,
+                    "bracketData": 326,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Player0806",
+                    "server": null,
+                    "class": "Druid",
+                    "spec": "Guardian",
+                    "amount": 117355.57272144,
+                    "bracketData": 320,
+                    "bracket": 17
+                  }
+                ]
+              },
+              "healers": {
+                "characters": [
+                  {
+                    "name": "Player0251",
+                    "server": null,
+                    "class": "Paladin",
+                    "spec": "Holy",
+                    "amount": 4356.2312614793,
+                    "bracketData": 317,
+                    "bracket": 16
+                  },
+                  {
+                    "name": "Player0808",
+                    "server": null,
+                    "class": "Shaman",
+                    "spec": "Restoration",
+                    "amount": 10083.809640248,
+                    "bracketData": 321,
+                    "bracket": 17
+                  },
+                  {
+                    "name": "Player0609",
+                    "server": null,
+                    "class": "Evoker",
+                    "spec": "Preservation",
+                    "amount": 15352.099408981,
+                    "bracketData": 314,
+                    "bracket": 15
+                  },
+                  {
+                    "name": "Player0783",
+                    "server": null,
+                    "class": "Evoker",
+                    "spec": "Preservation",
+                    "amount": 7961.0016477394,
+                    "bracketData": 326,
+                    "bracket": 19
+                  }
+                ]
+              },
+              "dps": {
+                "characters": [
+                  {
+                    "name": "Player0449",
+                    "server": null,
+                    "class": "DeathKnight",
+                    "spec": "Unholy",
+                    "amount": 255325.51606476,
+                    "bracketData": 324,
+                    "bracket": 18
+                  },
+                  {
+                    "name": "Player0411",
+                    "server": null,
+                    "class": "Druid",
+                    "spec": "Balance",
+                    "amount": 246827.77093921,
+                    "bracketData": 322,
+                    "bracket": 17
+                  },
+                  {
+                    "name": "Player0093",
+                    "server": null,
+                    "class": "Hunter",
+                    "spec": "Marksmanship",
+                    "amount": 275038.07306182,
+                    "bracketData": 322,
+                    "bracket": 17
+                  },
+                  {
+                    "name": "Player0693",
+                    "server": null,
+                    "class": "Mage",
+                    "spec": "Arcane",
+                    "amount": 285200.77691053,
+                    "bracketData": 325,
+                    "bracket": 18
+                  },
+                  {
+                    "name": "Player0468",
+                    "server": null,
+                    "class": "Mage",
+                    "spec": "Arcane",
+                    "amount": 286007.51346951,
+                    "bracketData": 325,
+                    "bracket": 18
+                  },
+                  {
+                    "name": "Player0313",
+                    "server": null,
+                    "class": "Monk",
+                    "spec": "Windwalker",
+                    "amount": 213439.80193783,
+                    "bracketData": 316,
+                    "bracket": 15
+                  },
+                  {
+                    "name": "Player0432",
+                    "server": null,
+                    "class": "Paladin",
+                    "spec": "Retribution",
+                    "amount": 269318.46385115,
+                    "bracketData": 323,
+                    "bracket": 18
+                  },
+                  {
+                    "name": "Player0672",
+                    "server": null,
+                    "class": "Priest",
+                    "spec": "Shadow",
+                    "amount": 231262.7213542,
+                    "bracketData": 326,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Player0133",
+                    "server": null,
+                    "class": "Rogue",
+                    "spec": "Subtlety",
+                    "amount": 204393.86251796,
+                    "bracketData": 325,
+                    "bracket": 18
+                  },
+                  {
+                    "name": "Player0472",
+                    "server": null,
+                    "class": "Shaman",
+                    "spec": "Elemental",
+                    "amount": 242742.83038843,
+                    "bracketData": 326,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Player0700",
+                    "server": null,
+                    "class": "Warlock",
+                    "spec": "Demonology",
+                    "amount": 244784.69075015,
+                    "bracketData": 321,
+                    "bracket": 17
+                  },
+                  {
+                    "name": "Player0775",
+                    "server": null,
+                    "class": "Warrior",
+                    "spec": "Arms",
+                    "amount": 269235.71287654,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Player0531",
+                    "server": null,
+                    "class": "DemonHunter",
+                    "spec": "Devourer",
+                    "amount": 239492.94083976,
+                    "bracketData": 320,
+                    "bracket": 17
+                  },
+                  {
+                    "name": "Player0527",
+                    "server": null,
+                    "class": "Evoker",
+                    "spec": "Augmentation",
+                    "amount": 250926.92984187,
+                    "bracketData": 325,
+                    "bracket": 18
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "playerDetails": {
+        "data": {
+          "playerDetails": {
+            "dps": [
+              {
+                "id": 102,
+                "type": "Priest",
+                "specs": [
+                  {
+                    "spec": "Shadow",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 99,
+                "type": "Druid",
+                "specs": [
+                  {
+                    "spec": "Balance",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 72,
+                "type": "DemonHunter",
+                "specs": [
+                  {
+                    "spec": "Devourer",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 154,
+                "type": "Monk",
+                "specs": [
+                  {
+                    "spec": "Windwalker",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 196,
+                "type": "Mage",
+                "specs": [
+                  {
+                    "spec": "Arcane",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 147,
+                "type": "Hunter",
+                "specs": [
+                  {
+                    "spec": "Marksmanship",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 103,
+                "type": "Mage",
+                "specs": [
+                  {
+                    "spec": "Arcane",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 101,
+                "type": "Warrior",
+                "specs": [
+                  {
+                    "spec": "Arms",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 155,
+                "type": "Warlock",
+                "specs": [
+                  {
+                    "spec": "Demonology",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 125,
+                "type": "DeathKnight",
+                "specs": [
+                  {
+                    "spec": "Unholy",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 151,
+                "type": "Paladin",
+                "specs": [
+                  {
+                    "spec": "Retribution",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 12,
+                "type": "Evoker",
+                "specs": [
+                  {
+                    "spec": "Augmentation",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 70,
+                "type": "Rogue",
+                "specs": [
+                  {
+                    "spec": "Subtlety",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 149,
+                "type": "Shaman",
+                "specs": [
+                  {
+                    "spec": "Elemental",
+                    "count": 1
+                  }
+                ]
+              }
+            ],
+            "healers": [
+              {
+                "id": 150,
+                "type": "Evoker",
+                "specs": [
+                  {
+                    "spec": "Preservation",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 100,
+                "type": "Shaman",
+                "specs": [
+                  {
+                    "spec": "Restoration",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 148,
+                "type": "Paladin",
+                "specs": [
+                  {
+                    "spec": "Holy",
+                    "count": 1
+                  }
+                ]
+              },
+              {
+                "id": 98,
+                "type": "Evoker",
+                "specs": [
+                  {
+                    "spec": "Preservation",
+                    "count": 1
+                  }
+                ]
+              }
+            ],
+            "tanks": [
+              {
+                "id": 6,
+                "type": "DeathKnight",
+                "specs": [
+                  {
+                    "spec": "Blood",
+                    "count": 1
+                  }
+                ],
+                "combatantInfo": {
+                  "specIDs": [
+                    250
+                  ],
+                  "gear": [
+                    {
+                      "id": 271474,
+                      "slot": 0,
+                      "itemLevel": 334,
+                      "quality": 4,
+                      "permanentEnchant": 7991,
+                      "bonusIDs": [
+                        6652,
+                        13335,
+                        12854,
+                        13696,
+                        13692,
+                        13698,
+                        1587
+                      ],
+                      "setID": 2055
+                    },
+                    {
+                      "id": 268265,
+                      "slot": 1,
+                      "itemLevel": 331,
+                      "quality": 4,
+                      "bonusIDs": [
+                        6652,
+                        13668,
+                        13334,
+                        13987,
+                        12853
+                      ],
+                      "gems": [
+                        {
+                          "id": 240894,
+                          "itemLevel": 295
+                        },
+                        {
+                          "id": 240894,
+                          "itemLevel": 295
+                        }
+                      ]
+                    },
+                    {
+                      "id": 271472,
+                      "slot": 2,
+                      "itemLevel": 334,
+                      "quality": 4,
+                      "permanentEnchant": 7973,
+                      "bonusIDs": [
+                        6652,
+                        13335,
+                        12854,
+                        13694,
+                        13697,
+                        1587
+                      ],
+                      "setID": 2055
+                    },
+                    {
+                      "id": 0,
+                      "slot": 3,
+                      "itemLevel": 0,
+                      "quality": 1
+                    },
+                    {
+                      "id": 271477,
+                      "slot": 4,
+                      "itemLevel": 321,
+                      "quality": 4,
+                      "permanentEnchant": 7987,
+                      "bonusIDs": [
+                        6652,
+                        13440,
+                        13690,
+                        13698,
+                        12846
+                      ],
+                      "setID": 2055
+                    },
+                    {
+                      "id": 159418,
+                      "slot": 5,
+                      "itemLevel": 321,
+                      "quality": 3,
+                      "bonusIDs": [
+                        13440,
+                        41,
+                        13695,
+                        13662,
+                        12699,
+                        12846
+                      ],
+                      "gems": [
+                        {
+                          "id": 240983,
+                          "itemLevel": 295
+                        }
+                      ]
+                    },
+                    {
+                      "id": 271878,
+                      "slot": 6,
+                      "itemLevel": 334,
+                      "quality": 4,
+                      "permanentEnchant": 8159,
+                      "bonusIDs": [
+                        6652,
+                        13662,
+                        13334,
+                        13708,
+                        12854
+                      ]
+                    },
+                    {
+                      "id": 268245,
+                      "slot": 7,
+                      "itemLevel": 321,
+                      "quality": 4,
+                      "permanentEnchant": 8019,
+                      "bonusIDs": [
+                        6652,
+                        13662,
+                        13335,
+                        12850
+                      ]
+                    },
+                    {
+                      "id": 237834,
+                      "slot": 8,
+                      "itemLevel": 331,
+                      "quality": 4,
+                      "bonusIDs": [
+                        12214,
+                        13667,
+                        12497,
+                        13751,
+                        14001,
+                        8960,
+                        12384,
+                        8792,
+                        13836,
+                        13696
+                      ]
+                    },
+                    {
+                      "id": 271475,
+                      "slot": 9,
+                      "itemLevel": 321,
+                      "quality": 4,
+                      "bonusIDs": [
+                        6652,
+                        13440,
+                        13691,
+                        13697,
+                        12846
+                      ],
+                      "setID": 2055
+                    },
+                    {
+                      "id": 162544,
+                      "slot": 10,
+                      "itemLevel": 321,
+                      "quality": 3,
+                      "permanentEnchant": 8027,
+                      "bonusIDs": [
+                        13440,
+                        6652,
+                        13668,
+                        12699,
+                        12846
+                      ],
+                      "gems": [
+                        {
+                          "id": 240894,
+                          "itemLevel": 295
+                        }
+                      ]
+                    },
+                    {
+                      "id": 273792,
+                      "slot": 11,
+                      "itemLevel": 321,
+                      "quality": 3,
+                      "permanentEnchant": 8027,
+                      "bonusIDs": [
+                        13440,
+                        41,
+                        13668,
+                        12699,
+                        12846
+                      ],
+                      "gems": [
+                        {
+                          "id": 240894,
+                          "itemLevel": 295
+                        }
+                      ]
+                    },
+                    {
+                      "id": 270175,
+                      "slot": 12,
+                      "itemLevel": 334,
+                      "quality": 4,
+                      "bonusIDs": [
+                        6652,
+                        13334,
+                        12854
+                      ]
+                    },
+                    {
+                      "id": 270165,
+                      "slot": 13,
+                      "itemLevel": 308,
+                      "quality": 4,
+                      "bonusIDs": [
+                        6652,
+                        13333,
+                        12838
+                      ]
+                    },
+                    {
+                      "id": 239656,
+                      "slot": 14,
+                      "itemLevel": 331,
+                      "quality": 4,
+                      "bonusIDs": [
+                        12214,
+                        13667,
+                        12497,
+                        13751,
+                        14001,
+                        8960,
+                        12384,
+                        8792,
+                        13836
+                      ]
+                    },
+                    {
+                      "id": 268213,
+                      "slot": 15,
+                      "itemLevel": 334,
+                      "quality": 4,
+                      "permanentEnchant": 6241,
+                      "temporaryEnchant": 8052,
+                      "bonusIDs": [
+                        6652,
+                        13334,
+                        12854,
+                        13696
+                      ],
+                      "setID": 2070
+                    },
+                    {
+                      "id": 0,
+                      "slot": 16,
+                      "itemLevel": 0,
+                      "quality": 1
+                    },
+                    {
+                      "id": 0,
+                      "slot": 17,
+                      "itemLevel": 0,
+                      "quality": 1
+                    }
+                  ],
+                  "talentTree": [
+                    {
+                      "id": 96167,
+                      "rank": 1,
+                      "nodeID": 76039
+                    },
+                    {
+                      "id": 96169,
+                      "rank": 1,
+                      "nodeID": 76041
+                    },
+                    {
+                      "id": 96170,
+                      "rank": 1,
+                      "nodeID": 76042
+                    },
+                    {
+                      "id": 96171,
+                      "rank": 1,
+                      "nodeID": 76043
+                    },
+                    {
+                      "id": 96173,
+                      "rank": 1,
+                      "nodeID": 76045
+                    },
+                    {
+                      "id": 96174,
+                      "rank": 1,
+                      "nodeID": 76046
+                    },
+                    {
+                      "id": 96179,
+                      "rank": 1,
+                      "nodeID": 76051
+                    },
+                    {
+                      "id": 96180,
+                      "rank": 2,
+                      "nodeID": 76052
+                    },
+                    {
+                      "id": 96182,
+                      "rank": 2,
+                      "nodeID": 76054
+                    },
+                    {
+                      "id": 96183,
+                      "rank": 1,
+                      "nodeID": 76055
+                    },
+                    {
+                      "id": 96184,
+                      "rank": 1,
+                      "nodeID": 76056
+                    },
+                    {
+                      "id": 96187,
+                      "rank": 1,
+                      "nodeID": 76058
+                    },
+                    {
+                      "id": 96190,
+                      "rank": 1,
+                      "nodeID": 76061
+                    },
+                    {
+                      "id": 96194,
+                      "rank": 1,
+                      "nodeID": 76065
+                    },
+                    {
+                      "id": 96195,
+                      "rank": 1,
+                      "nodeID": 76066
+                    },
+                    {
+                      "id": 96196,
+                      "rank": 1,
+                      "nodeID": 76067
+                    },
+                    {
+                      "id": 96197,
+                      "rank": 1,
+                      "nodeID": 76068
+                    },
+                    {
+                      "id": 96198,
+                      "rank": 2,
+                      "nodeID": 76069
+                    },
+                    {
+                      "id": 96201,
+                      "rank": 1,
+                      "nodeID": 76072
+                    },
+                    {
+                      "id": 96202,
+                      "rank": 1,
+                      "nodeID": 76073
+                    },
+                    {
+                      "id": 96203,
+                      "rank": 1,
+                      "nodeID": 76074
+                    },
+                    {
+                      "id": 96205,
+                      "rank": 1,
+                      "nodeID": 76076
+                    },
+                    {
+                      "id": 96207,
+                      "rank": 1,
+                      "nodeID": 76078
+                    },
+                    {
+                      "id": 96208,
+                      "rank": 2,
+                      "nodeID": 76079
+                    },
+                    {
+                      "id": 96210,
+                      "rank": 1,
+                      "nodeID": 76081
+                    },
+                    {
+                      "id": 96212,
+                      "rank": 1,
+                      "nodeID": 76083
+                    },
+                    {
+                      "id": 96213,
+                      "rank": 1,
+                      "nodeID": 76084
+                    },
+                    {
+                      "id": 96214,
+                      "rank": 1,
+                      "nodeID": 76085
+                    },
+                    {
+                      "id": 96216,
+                      "rank": 1,
+                      "nodeID": 76087
+                    },
+                    {
+                      "id": 96217,
+                      "rank": 1,
+                      "nodeID": 76088
+                    },
+                    {
+                      "id": 96255,
+                      "rank": 1,
+                      "nodeID": 76124
+                    },
+                    {
+                      "id": 96256,
+                      "rank": 1,
+                      "nodeID": 76125
+                    },
+                    {
+                      "id": 96257,
+                      "rank": 2,
+                      "nodeID": 76126
+                    },
+                    {
+                      "id": 96258,
+                      "rank": 1,
+                      "nodeID": 76127
+                    },
+                    {
+                      "id": 96259,
+                      "rank": 1,
+                      "nodeID": 76128
+                    },
+                    {
+                      "id": 96260,
+                      "rank": 1,
+                      "nodeID": 76129
+                    },
+                    {
+                      "id": 96261,
+                      "rank": 1,
+                      "nodeID": 76130
+                    },
+                    {
+                      "id": 96262,
+                      "rank": 1,
+                      "nodeID": 76131
+                    },
+                    {
+                      "id": 96264,
+                      "rank": 1,
+                      "nodeID": 76133
+                    },
+                    {
+                      "id": 96266,
+                      "rank": 1,
+                      "nodeID": 76135
+                    },
+                    {
+                      "id": 96268,
+                      "rank": 1,
+                      "nodeID": 76137
+                    },
+                    {
+                      "id": 96269,
+                      "rank": 1,
+                      "nodeID": 76138
+                    },
+                    {
+                      "id": 96273,
+                      "rank": 1,
+                      "nodeID": 76141
+                    },
+                    {
+                      "id": 96274,
+                      "rank": 1,
+                      "nodeID": 76142
+                    },
+                    {
+                      "id": 96277,
+                      "rank": 1,
+                      "nodeID": 76144
+                    },
+                    {
+                      "id": 96279,
+                      "rank": 1,
+                      "nodeID": 76146
+                    },
+                    {
+                      "id": 96301,
+                      "rank": 1,
+                      "nodeID": 76166
+                    },
+                    {
+                      "id": 96303,
+                      "rank": 1,
+                      "nodeID": 76168
+                    },
+                    {
+                      "id": 96304,
+                      "rank": 1,
+                      "nodeID": 76169
+                    },
+                    {
+                      "id": 96305,
+                      "rank": 1,
+                      "nodeID": 76170
+                    },
+                    {
+                      "id": 96306,
+                      "rank": 1,
+                      "nodeID": 76171
+                    },
+                    {
+                      "id": 96307,
+                      "rank": 1,
+                      "nodeID": 76172
+                    },
+                    {
+                      "id": 96308,
+                      "rank": 1,
+                      "nodeID": 76173
+                    },
+                    {
+                      "id": 117630,
+                      "rank": 1,
+                      "nodeID": 95033
+                    },
+                    {
+                      "id": 117637,
+                      "rank": 1,
+                      "nodeID": 95040
+                    },
+                    {
+                      "id": 117642,
+                      "rank": 1,
+                      "nodeID": 95045
+                    },
+                    {
+                      "id": 117643,
+                      "rank": 1,
+                      "nodeID": 95046
+                    },
+                    {
+                      "id": 117645,
+                      "rank": 1,
+                      "nodeID": 95048
+                    },
+                    {
+                      "id": 117650,
+                      "rank": 1,
+                      "nodeID": 95053
+                    },
+                    {
+                      "id": 117652,
+                      "rank": 1,
+                      "nodeID": 95055
+                    },
+                    {
+                      "id": 117662,
+                      "rank": 1,
+                      "nodeID": 95065
+                    },
+                    {
+                      "id": 117891,
+                      "rank": 1,
+                      "nodeID": 95056
+                    },
+                    {
+                      "id": 117892,
+                      "rank": 1,
+                      "nodeID": 95064
+                    },
+                    {
+                      "id": 123325,
+                      "rank": 1,
+                      "nodeID": 99822
+                    },
+                    {
+                      "id": 126015,
+                      "rank": 1,
+                      "nodeID": 102007
+                    },
+                    {
+                      "id": 126016,
+                      "rank": 1,
+                      "nodeID": 102008
+                    },
+                    {
+                      "id": 126296,
+                      "rank": 1,
+                      "nodeID": 102242
+                    },
+                    {
+                      "id": 126298,
+                      "rank": 1,
+                      "nodeID": 102243
+                    },
+                    {
+                      "id": 135994,
+                      "rank": 1,
+                      "nodeID": 109736
+                    },
+                    {
+                      "id": 135995,
+                      "rank": 1,
+                      "nodeID": 109737
+                    },
+                    {
+                      "id": 135996,
+                      "rank": 1,
+                      "nodeID": 109738
+                    },
+                    {
+                      "id": 136524,
+                      "rank": 1,
+                      "nodeID": 110030
+                    },
+                    {
+                      "id": 136526,
+                      "rank": 1,
+                      "nodeID": 76064
+                    },
+                    {
+                      "id": 136915,
+                      "rank": 1,
+                      "nodeID": 110353
+                    },
+                    {
+                      "id": 136916,
+                      "rank": 2,
+                      "nodeID": 110353
+                    },
+                    {
+                      "id": 136917,
+                      "rank": 1,
+                      "nodeID": 110353
+                    },
+                    {
+                      "id": 117648,
+                      "rank": 1,
+                      "nodeID": 95051
+                    },
+                    {
+                      "id": 96200,
+                      "rank": 1,
+                      "nodeID": 76071
+                    }
+                  ]
+                }
+              },
+              {
+                "id": 152,
+                "type": "Druid",
+                "specs": [
+                  {
+                    "spec": "Guardian",
+                    "count": 1
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "deaths": {
+        "data": {
+          "entries": [
+            {
+              "id": 155,
+              "type": "Warlock",
+              "timestamp": 4358279
+            },
+            {
+              "id": 155,
+              "type": "Warlock",
+              "timestamp": 4511074
+            },
+            {
+              "id": 70,
+              "type": "Rogue",
+              "timestamp": 4513066
+            }
+          ]
+        }
+      }
+    }
+  }
+}

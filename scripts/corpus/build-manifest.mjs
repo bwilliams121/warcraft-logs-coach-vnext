@@ -10907,6 +10907,195 @@ function b1pm_segment(name, fromMs, toMs, facts, activity) {
   });
 }
 
+// --------------------------------------------------------------------------
+// M11-G1 (2026-10-09): observed performance + elite cohort evidence. ONE
+// authorized capture of 7 GraphQL requests (cap 14; 3 OAuth calls logged
+// separately; ~22 of 9,000 hourly points): the subject's report surfaces, three
+// characterRankings pages (Vashnik 3455, Mythic, Blood Death Knight, partition
+// 1, item-level brackets 18/19/20), and three candidate contexts — the three
+// highest-DPS rung-1 candidates, all of which qualified. No comparison event
+// stream was requested. Third-party identities are pseudonymized by
+// scripts/corpus/sanitize-g1-cohort.mjs; see tests/evidence/m11g1-cohort-capture.md.
+// --------------------------------------------------------------------------
+
+const G1_SANITIZER = "scripts/corpus/sanitize-g1-cohort.mjs";
+const G1_SANITIZER_REVISION = "sanitize-g1-cohort-1";
+const G1_PROBE = (question) =>
+  tooling(
+    ".probe/m11g1/stage-{a,b,c}.probe.ts (temporary, gitignored; gated on M11-F CI GREEN) driving src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 15th GraphQL request",
+    UNAVAILABLE,
+    `${question}; planned in .probe/m11g1/capture-plan.md before running, run once by hand on 2026-10-09 (7 GraphQL requests in total, cap 14)`,
+  );
+const G1_SANITIZE = (file) => [
+  {
+    kind: "SUBSET_SELECTION",
+    tooling: tooling(
+      G1_SANITIZER,
+      G1_SANITIZER_REVISION,
+      `node scripts/corpus/sanitize-g1-cohort.mjs .probe/m11g1 .probe/m11e2/context.json <out> (writes ${file})`,
+    ),
+    detail:
+      "Kept exactly the fields the G1 decoders read (and, for a selected cohort member, its gear item ids, levels, qualities, permanent and temporary enchant ids, gem ids, bonus ids, set ids and talent tree, each enchant or gem key copied only when present because the shared gear adapter reads key absence as KNOWN_NONE); dropped guilds, character ids, GUIDs, icons, item and enchant names, parse ranks and percentiles, rate-limit data and every NPC actor.",
+    invalidates: [],
+  },
+  {
+    kind: "IDENTIFIER_REMAP",
+    tooling: tooling(G1_SANITIZER, G1_SANITIZER_REVISION, "implicit on every write"),
+    detail:
+      "Third-party player names -> Player<nnnn> (keyed by name alone, numbered in SHA-256 order) and third-party report codes -> COHORT<nnn>AAAAAAA, consistently across all G1 artifacts; the subject report keeps its code and its players become Actor<report actor id>, matched by the M8-F rule (a unique server-exact match, else a unique name-only match; every ranked player of the subject fight resolved).",
+    invalidates: ["ORIGINAL_IDENTIFIERS"],
+  },
+  {
+    kind: "FIELD_REDACTION",
+    tooling: tooling(G1_SANITIZER, G1_SANITIZER_REVISION, "implicit on every write"),
+    detail: "Every server set to null (the existing rankings rule).",
+    invalidates: [],
+  },
+  {
+    kind: "CREDENTIAL_SHAPE_SCAN",
+    tooling: tooling(G1_SANITIZER, G1_SANITIZER_REVISION, "implicit on every write"),
+    detail:
+      "The sanitizer refuses to write a credential-shaped value, or any real player name, server or third-party report code it saw in the input. Nothing was found.",
+    invalidates: [],
+  },
+];
+const G1_LIMITATIONS = [
+  "Names are pseudonyms and servers are null; identity resolution over this evidence is NAME_ONLY. The live surfaces spell realms differently (rankings 'Tarren Mill' vs masterData 'TarrenMill'), so the live resolution also fell back to NAME_ONLY for those rows.",
+  "A cohort is a barometer only: it never sets a ceiling, an execution loss, an APL verdict or a scaling factor.",
+  "No comparison-player event stream was requested or retained.",
+];
+const g1Source = (q, comp, extra) => ({
+  reportCode: "REDACTED",
+  fightId: "NOT_APPLICABLE",
+  reportRevision: "UNAVAILABLE",
+  sourceActorId: "NOT_APPLICABLE",
+  encounterId: 3455,
+  difficulty: 5,
+  capturedOn: "2026-10-09",
+  gameVersion: "UNAVAILABLE",
+  logVersion: "UNAVAILABLE",
+  ingestionScope: "UNAVAILABLE",
+  query: q,
+  completeness: comp,
+  captureTooling: extra.captureTooling,
+  rawCaptureRetained: false,
+  rawCaptureLocation: extra.rawCaptureLocation,
+  ...(extra.override ?? {}),
+});
+const g1Artifact = (id, options) =>
+  artifact(id, graphql(id), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    payloadKind: "WCL_GRAPHQL_DATA",
+    source: options.source,
+    transformations: G1_SANITIZE(`${id}.json`),
+    coverageBasis: "Report or ranking surfaces, not events: no event coverage is granted.",
+    retainedFor: options.retainedFor,
+    limitations: [...G1_LIMITATIONS, ...(options.limitations ?? [])],
+  });
+
+const G1_ARTIFACTS = [
+  g1Artifact("wcl-g1-subject-performance-b1pm-fight-48", {
+    source: g1Source(
+      {
+        kind: "REPORT_SURFACES",
+        fightIds: [48],
+        surfaces: ["fights", "rankings(playerMetric: dps)", "table(dataType: DamageDone)"],
+      },
+      completeness(
+        NOT_APPLICABLE,
+        1,
+        NOT_APPLICABLE,
+        "COMPLETE",
+        "One unpaginated request (R1). Pins ACTUAL_DPS semantics: the DamageDone table's totalTime (345,177 ms) equals the fight's endTime - startTime, and total / totalTime equals the ranked dps amount for every player present in both surfaces (19 of 19, including a player who died and was resurrected); the table itemLevel equals the ranking bracketData (19 of 19); the subject's 45,802,009 is NOT the normalized raw-amount sum (45,709,411).",
+      ),
+      {
+        captureTooling: G1_PROBE(
+          "R1 subject surfaces: report(b1PmaKrd6CDfzngc){fights(48), rankings(fightIDs:[48], dps), table(DamageDone, fightIDs:[48])}",
+        ),
+        rawCaptureLocation: ".probe/m11g1/r01-subject.json — gitignored, not retained in the repository",
+        override: {
+          reportCode: "b1PmaKrd6CDfzngc",
+          fightId: 48,
+          reportRevision: 51,
+          sourceActorId: 15,
+          gameVersion: 1,
+          logVersion: 17,
+          ingestionScope: "PLAYER_CONTEXT",
+        },
+      },
+    ),
+    retainedFor:
+      "M11-G1: the Warcraft Logs surface ACTUAL_DPS is read from, and the evidence pinning what it means (src/cohort/observed-performance.ts).",
+    limitations: [
+      "Whether the table total includes the listed pets is corroborated, not proven; nothing depends on it.",
+    ],
+  }),
+  ...[18, 19, 20].map((bracket) =>
+    g1Artifact(`wcl-g1-cohort-rankings-3455-5-blood-bracket-${String(bracket)}`, {
+      source: g1Source(
+        {
+          kind: "ENCOUNTER_CHARACTER_RANKINGS",
+          encounterId: 3455,
+          difficulty: 5,
+          className: "DeathKnight",
+          specName: "Blood",
+          metric: "dps",
+          partition: 1,
+          page: 1,
+          bracket,
+        },
+        completeness(
+          100,
+          1,
+          NOT_APPLICABLE,
+          "PARTIAL",
+          `Page 1 of item-level bracket ${String(bracket)} (100 rows, hasMorePages true). Every row's bracketData lies in ${String(269 + 3 * bracket)}-${String(271 + 3 * bracket)}, pinning the bracket argument. Page 1 holds the bracket's highest ranked amounts, which is all a highest-DPS selection reads.`,
+        ),
+        {
+          captureTooling: G1_PROBE(
+            `R${String(bracket === 19 ? 2 : bracket === 18 ? 3 : 4)} characterRankings page 1, bracket ${String(bracket)}`,
+          ),
+          rawCaptureLocation: `.probe/m11g1/r-rankings-bracket-${String(bracket)}.json — gitignored, not retained in the repository`,
+          override: { fightId: "NOT_APPLICABLE", reportCode: "NOT_APPLICABLE" },
+        },
+      ),
+      retainedFor:
+        "M11-G1: one item-level bracket of the cohort discovery pool for the canonical Blood Death Knight subject (item level 327 ± 3 spans brackets 18-20).",
+    }),
+  ),
+  ...[1, 2, 3].map((ordinal) =>
+    g1Artifact(`wcl-g1-cohort-candidate-${String(ordinal)}`, {
+      source: g1Source(
+        {
+          kind: "REPORT_SURFACES",
+          fightIds: [ordinal === 1 ? 33 : ordinal === 2 ? 64 : 31],
+          surfaces: [
+            "fights",
+            "masterData.actors",
+            "rankings(playerMetric: dps)",
+            "playerDetails(includeCombatantInfo: true)",
+            "table(dataType: Deaths)",
+          ],
+        },
+        completeness(
+          NOT_APPLICABLE,
+          1,
+          NOT_APPLICABLE,
+          "COMPLETE",
+          `One unpaginated request (R${String(4 + ordinal)}): candidate ${String(ordinal)} in highest-ranked-amount order at rung 1. It qualified: a kill of encounter 3455 difficulty 5, a unique Blood Death Knight resolved by name, duration and item level inside the rung, ranked amounts equal across both surfaces, no Deaths-table entry for the actor, combatant info present.`,
+        ),
+        {
+          captureTooling: G1_PROBE(`R${String(4 + ordinal)} candidate context ${String(ordinal)}`),
+          rawCaptureLocation: `.probe/m11g1/r-candidate-0${String(ordinal)}.json — gitignored, not retained in the repository`,
+          override: { fightId: ordinal === 1 ? 33 : ordinal === 2 ? 64 : 31 },
+        },
+      ),
+      retainedFor: `M11-G1: the qualification context and gear/talent facts of selected cohort member ${String(ordinal)}.`,
+    }),
+  ),
+];
+
 const EVIDENCE_ARTIFACTS = [
   // ---- M11-C4f: the second Brewmaster subject's fixed 20–165 s segment ----
   artifact(BREWMASTER_RXAF_20_165, wcl(BREWMASTER_RXAF_20_165), {
@@ -11091,6 +11280,7 @@ const EVIDENCE_ARTIFACTS = [
     "1,239 of 271,011 events (120 casts, 448 damage, 4 extraattacks, 4 summons, 63 resource changes, 598 aura transitions, 1 death, the encounterend at 7,781,469 = the fight end).",
     { with: [15, 44, 45], without: [47, 224] },
   ),
+  ...G1_ARTIFACTS,
 ];
 
 const RXAF_AUTHORITY = {

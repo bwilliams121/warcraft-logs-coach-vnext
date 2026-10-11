@@ -1,0 +1,931 @@
+{
+  "reportData": {
+    "report": {
+      "code": "b1PmaKrd6CDfzngc",
+      "revision": 51,
+      "fights": [
+        {
+          "id": 48,
+          "encounterID": 3455,
+          "difficulty": 5,
+          "kill": true,
+          "startTime": 7436292,
+          "endTime": 7781469
+        }
+      ],
+      "rankings": {
+        "data": [
+          {
+            "fightID": 48,
+            "partition": 1,
+            "encounter": {
+              "id": 3455
+            },
+            "difficulty": 5,
+            "kill": 1,
+            "duration": 345177,
+            "bracketData": 327.15,
+            "bracket": 19,
+            "roles": {
+              "tanks": {
+                "characters": [
+                  {
+                    "name": "Actor15",
+                    "server": null,
+                    "class": "DeathKnight",
+                    "spec": "Blood",
+                    "amount": 132691.36993485,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor3",
+                    "server": null,
+                    "class": "Paladin",
+                    "spec": "Protection",
+                    "amount": 172199.16158956,
+                    "bracketData": 326,
+                    "bracket": 19
+                  }
+                ]
+              },
+              "healers": {
+                "characters": [
+                  {
+                    "name": "Actor9",
+                    "server": null,
+                    "class": "Monk",
+                    "spec": "Mistweaver",
+                    "amount": 20697.998418203,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor1",
+                    "server": null,
+                    "class": "Paladin",
+                    "spec": "Holy",
+                    "amount": 7918.7663140939,
+                    "bracketData": 326,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor2",
+                    "server": null,
+                    "class": "Priest",
+                    "spec": "Holy",
+                    "amount": 4852.8870695324,
+                    "bracketData": 330,
+                    "bracket": 20
+                  },
+                  {
+                    "name": "Actor122",
+                    "server": null,
+                    "class": "Shaman",
+                    "spec": "Restoration",
+                    "amount": 0,
+                    "bracketData": 327,
+                    "bracket": 19
+                  }
+                ]
+              },
+              "dps": {
+                "characters": [
+                  {
+                    "name": "Actor19",
+                    "server": null,
+                    "class": "DeathKnight",
+                    "spec": "Frost",
+                    "amount": 259654.47002552,
+                    "bracketData": 326,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor170",
+                    "server": null,
+                    "class": "Druid",
+                    "spec": "Feral",
+                    "amount": 212757.71560678,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor164",
+                    "server": null,
+                    "class": "Hunter",
+                    "spec": "BeastMastery",
+                    "amount": 292919.72234535,
+                    "bracketData": 328,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor7",
+                    "server": null,
+                    "class": "Mage",
+                    "spec": "Arcane",
+                    "amount": 280787.45686995,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor121",
+                    "server": null,
+                    "class": "Mage",
+                    "spec": "Arcane",
+                    "amount": 254773.25546024,
+                    "bracketData": 326,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor13",
+                    "server": null,
+                    "class": "Monk",
+                    "spec": "Windwalker",
+                    "amount": 272608.67612848,
+                    "bracketData": 328,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor12",
+                    "server": null,
+                    "class": "Rogue",
+                    "spec": "Assassination",
+                    "amount": 258418.51861509,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor17",
+                    "server": null,
+                    "class": "Shaman",
+                    "spec": "Elemental",
+                    "amount": 251676.49930326,
+                    "bracketData": 328,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor8",
+                    "server": null,
+                    "class": "Shaman",
+                    "spec": "Elemental",
+                    "amount": 212183.09157331,
+                    "bracketData": 328,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor11",
+                    "server": null,
+                    "class": "Warlock",
+                    "spec": "Demonology",
+                    "amount": 291254.44047547,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor14",
+                    "server": null,
+                    "class": "Warlock",
+                    "spec": "Demonology",
+                    "amount": 290984.48042598,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor5",
+                    "server": null,
+                    "class": "Warrior",
+                    "spec": "Arms",
+                    "amount": 258922.97285161,
+                    "bracketData": 328,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor18",
+                    "server": null,
+                    "class": "DemonHunter",
+                    "spec": "Havoc",
+                    "amount": 269813.33634628,
+                    "bracketData": 327,
+                    "bracket": 19
+                  },
+                  {
+                    "name": "Actor16",
+                    "server": null,
+                    "class": "Evoker",
+                    "spec": "Devastation",
+                    "amount": 262431.46849298,
+                    "bracketData": 326,
+                    "bracket": 19
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "damageDone": {
+        "data": {
+          "totalTime": 345177,
+          "logVersion": 17,
+          "gameVersion": 1,
+          "entries": [
+            {
+              "name": "Actor2",
+              "id": 2,
+              "type": "Priest",
+              "itemLevel": 330,
+              "total": 1675105,
+              "activeTime": 305615,
+              "pets": [],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 1610046
+                },
+                {
+                  "type": "NPC",
+                  "total": 65059
+                }
+              ]
+            },
+            {
+              "name": "Actor16",
+              "id": 16,
+              "type": "Evoker",
+              "itemLevel": 326,
+              "total": 90585307,
+              "activeTime": 344810,
+              "pets": [
+                {
+                  "id": 46,
+                  "type": "Pet",
+                  "total": 6596159
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 51868477
+                },
+                {
+                  "type": "NPC",
+                  "total": 28235312
+                },
+                {
+                  "type": "NPC",
+                  "total": 10481518
+                }
+              ]
+            },
+            {
+              "name": "Actor164",
+              "id": 164,
+              "type": "Hunter",
+              "itemLevel": 328,
+              "total": 101109151,
+              "activeTime": 344342,
+              "pets": [
+                {
+                  "id": 187,
+                  "type": "Pet",
+                  "total": 1075965
+                },
+                {
+                  "id": 166,
+                  "type": "Pet",
+                  "total": 24456752
+                },
+                {
+                  "id": 186,
+                  "type": "Pet",
+                  "total": 234008
+                },
+                {
+                  "id": 165,
+                  "type": "Pet",
+                  "total": 19454454
+                },
+                {
+                  "id": 174,
+                  "type": "Pet",
+                  "total": 10483744
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 58343924
+                },
+                {
+                  "type": "NPC",
+                  "total": 34322391
+                },
+                {
+                  "type": "NPC",
+                  "total": 8442836
+                }
+              ]
+            },
+            {
+              "name": "Actor15",
+              "id": 15,
+              "type": "DeathKnight",
+              "itemLevel": 327,
+              "total": 45802009,
+              "activeTime": 344440,
+              "pets": [
+                {
+                  "id": 47,
+                  "type": "Pet",
+                  "total": 248333
+                },
+                {
+                  "id": 45,
+                  "type": "Pet",
+                  "total": 1333469
+                },
+                {
+                  "id": 44,
+                  "type": "Pet",
+                  "total": 7344648
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 32251561
+                },
+                {
+                  "type": "NPC",
+                  "total": 9106962
+                },
+                {
+                  "type": "NPC",
+                  "total": 4443486
+                }
+              ]
+            },
+            {
+              "name": "Actor12",
+              "id": 12,
+              "type": "Rogue",
+              "itemLevel": 327,
+              "total": 89200129,
+              "activeTime": 343995,
+              "pets": [],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 64611461
+                },
+                {
+                  "type": "NPC",
+                  "total": 18379026
+                },
+                {
+                  "type": "NPC",
+                  "total": 6209642
+                }
+              ]
+            },
+            {
+              "name": "Actor170",
+              "id": 170,
+              "type": "Druid",
+              "itemLevel": 327,
+              "total": 73439070,
+              "activeTime": 344182,
+              "pets": [],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 54298724
+                },
+                {
+                  "type": "NPC",
+                  "total": 10225619
+                },
+                {
+                  "type": "NPC",
+                  "total": 8914727
+                }
+              ]
+            },
+            {
+              "name": "Actor9",
+              "id": 9,
+              "type": "Monk",
+              "itemLevel": 327,
+              "total": 7144473,
+              "activeTime": 332915,
+              "pets": [],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 5659165
+                },
+                {
+                  "type": "NPC",
+                  "total": 789285
+                },
+                {
+                  "type": "NPC",
+                  "total": 696023
+                }
+              ]
+            },
+            {
+              "name": "Actor18",
+              "id": 18,
+              "type": "DemonHunter",
+              "itemLevel": 327,
+              "total": 93133358,
+              "activeTime": 343442,
+              "pets": [],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 74297218
+                },
+                {
+                  "type": "NPC",
+                  "total": 11461715
+                },
+                {
+                  "type": "NPC",
+                  "total": 7374425
+                }
+              ]
+            },
+            {
+              "name": "Actor7",
+              "id": 7,
+              "type": "Mage",
+              "itemLevel": 327,
+              "total": 96921372,
+              "activeTime": 344409,
+              "pets": [
+                {
+                  "id": 35,
+                  "type": "Pet",
+                  "total": 2611536
+                },
+                {
+                  "id": 49,
+                  "type": "Pet",
+                  "total": 9264
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 66372827
+                },
+                {
+                  "type": "NPC",
+                  "total": 21244122
+                },
+                {
+                  "type": "NPC",
+                  "total": 9304423
+                }
+              ]
+            },
+            {
+              "name": "Actor5",
+              "id": 5,
+              "type": "Warrior",
+              "itemLevel": 328,
+              "total": 89374255,
+              "activeTime": 343661,
+              "pets": [],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 65167951
+                },
+                {
+                  "type": "NPC",
+                  "total": 13506272
+                },
+                {
+                  "type": "NPC",
+                  "total": 10700032
+                }
+              ]
+            },
+            {
+              "name": "Actor11",
+              "id": 11,
+              "type": "Warlock",
+              "itemLevel": 327,
+              "total": 100534334,
+              "activeTime": 344241,
+              "pets": [
+                {
+                  "id": 59,
+                  "type": "Pet",
+                  "total": 6854663
+                },
+                {
+                  "id": 64,
+                  "type": "Pet",
+                  "total": 3872656
+                },
+                {
+                  "id": 53,
+                  "type": "Pet",
+                  "total": 8215984
+                },
+                {
+                  "id": 36,
+                  "type": "Pet",
+                  "total": 10302688
+                },
+                {
+                  "id": 69,
+                  "type": "Pet",
+                  "total": 1881131
+                },
+                {
+                  "id": 172,
+                  "type": "Pet",
+                  "total": 3092975
+                },
+                {
+                  "id": 63,
+                  "type": "Pet",
+                  "total": 3021140
+                },
+                {
+                  "id": 61,
+                  "type": "Pet",
+                  "total": 661723
+                },
+                {
+                  "id": 54,
+                  "type": "Pet",
+                  "total": 3315731
+                },
+                {
+                  "id": 39,
+                  "type": "Pet",
+                  "total": 6545090
+                },
+                {
+                  "id": 52,
+                  "type": "Pet",
+                  "total": 1396020
+                },
+                {
+                  "id": 22,
+                  "type": "Pet",
+                  "total": 2893673
+                },
+                {
+                  "id": 169,
+                  "type": "Pet",
+                  "total": 4128011
+                },
+                {
+                  "id": 51,
+                  "type": "Pet",
+                  "total": 13188381
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 59650740
+                },
+                {
+                  "type": "NPC",
+                  "total": 30375004
+                },
+                {
+                  "type": "NPC",
+                  "total": 10508590
+                }
+              ]
+            },
+            {
+              "name": "Actor17",
+              "id": 17,
+              "type": "Shaman",
+              "itemLevel": 328,
+              "total": 86872939,
+              "activeTime": 344957,
+              "pets": [
+                {
+                  "id": 25,
+                  "type": "Pet",
+                  "total": 2740653
+                },
+                {
+                  "id": 79,
+                  "type": "Pet",
+                  "total": 15221
+                },
+                {
+                  "id": 43,
+                  "type": "Pet",
+                  "total": 6011452
+                },
+                {
+                  "id": 24,
+                  "type": "Pet",
+                  "total": 17020747
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 52901546
+                },
+                {
+                  "type": "NPC",
+                  "total": 27779271
+                },
+                {
+                  "type": "NPC",
+                  "total": 6192122
+                }
+              ]
+            },
+            {
+              "name": "Actor14",
+              "id": 14,
+              "type": "Warlock",
+              "itemLevel": 327,
+              "total": 100441150,
+              "activeTime": 343496,
+              "pets": [
+                {
+                  "id": 153,
+                  "type": "Pet",
+                  "total": 3447722
+                },
+                {
+                  "id": 154,
+                  "type": "Pet",
+                  "total": 1525050
+                },
+                {
+                  "id": 150,
+                  "type": "Pet",
+                  "total": 7414489
+                },
+                {
+                  "id": 151,
+                  "type": "Pet",
+                  "total": 1040468
+                },
+                {
+                  "id": 155,
+                  "type": "Pet",
+                  "total": 1387717
+                },
+                {
+                  "id": 188,
+                  "type": "Pet",
+                  "total": 6411590
+                },
+                {
+                  "id": 148,
+                  "type": "Pet",
+                  "total": 4204694
+                },
+                {
+                  "id": 149,
+                  "type": "Pet",
+                  "total": 9150350
+                },
+                {
+                  "id": 176,
+                  "type": "Pet",
+                  "total": 2923713
+                },
+                {
+                  "id": 152,
+                  "type": "Pet",
+                  "total": 1339469
+                },
+                {
+                  "id": 145,
+                  "type": "Pet",
+                  "total": 11349746
+                },
+                {
+                  "id": 32,
+                  "type": "Pet",
+                  "total": 4026318
+                },
+                {
+                  "id": 146,
+                  "type": "Pet",
+                  "total": 4230005
+                },
+                {
+                  "id": 147,
+                  "type": "Pet",
+                  "total": 5901080
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 68975003
+                },
+                {
+                  "type": "NPC",
+                  "total": 20715965
+                },
+                {
+                  "type": "NPC",
+                  "total": 10750182
+                }
+              ]
+            },
+            {
+              "name": "Actor1",
+              "id": 1,
+              "type": "Paladin",
+              "itemLevel": 326,
+              "total": 2733376,
+              "activeTime": 170066,
+              "pets": [],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 2078886
+                },
+                {
+                  "type": "NPC",
+                  "total": 573342
+                },
+                {
+                  "type": "NPC",
+                  "total": 81148
+                }
+              ]
+            },
+            {
+              "name": "Actor13",
+              "id": 13,
+              "type": "Monk",
+              "itemLevel": 328,
+              "total": 94098245,
+              "activeTime": 344662,
+              "pets": [],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 62029949
+                },
+                {
+                  "type": "NPC",
+                  "total": 21730442
+                },
+                {
+                  "type": "NPC",
+                  "total": 10337854
+                }
+              ]
+            },
+            {
+              "name": "Actor8",
+              "id": 8,
+              "type": "Shaman",
+              "itemLevel": 328,
+              "total": 73240723,
+              "activeTime": 344569,
+              "pets": [
+                {
+                  "id": 42,
+                  "type": "Pet",
+                  "total": 4580047
+                },
+                {
+                  "id": 29,
+                  "type": "Pet",
+                  "total": 3535233
+                },
+                {
+                  "id": 28,
+                  "type": "Pet",
+                  "total": 11397963
+                },
+                {
+                  "id": 216,
+                  "type": "Pet",
+                  "total": 18442
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 58461636
+                },
+                {
+                  "type": "NPC",
+                  "total": 12213408
+                },
+                {
+                  "type": "NPC",
+                  "total": 2565679
+                }
+              ]
+            },
+            {
+              "name": "Actor3",
+              "id": 3,
+              "type": "Paladin",
+              "itemLevel": 326,
+              "total": 59439190,
+              "activeTime": 344897,
+              "pets": [
+                {
+                  "id": 33,
+                  "type": "Pet",
+                  "total": 2003036
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 31517146
+                },
+                {
+                  "type": "NPC",
+                  "total": 20468337
+                },
+                {
+                  "type": "NPC",
+                  "total": 7453707
+                }
+              ]
+            },
+            {
+              "name": "Actor121",
+              "id": 121,
+              "type": "Mage",
+              "itemLevel": 326,
+              "total": 87941868,
+              "activeTime": 344986,
+              "pets": [
+                {
+                  "id": 123,
+                  "type": "Pet",
+                  "total": 3381880
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 55792546
+                },
+                {
+                  "type": "NPC",
+                  "total": 21746771
+                },
+                {
+                  "type": "NPC",
+                  "total": 10402551
+                }
+              ]
+            },
+            {
+              "name": "Actor19",
+              "id": 19,
+              "type": "DeathKnight",
+              "itemLevel": 326,
+              "total": 89626751,
+              "activeTime": 344728,
+              "pets": [
+                {
+                  "id": 41,
+                  "type": "Pet",
+                  "total": 283242
+                }
+              ],
+              "targets": [
+                {
+                  "type": "Boss",
+                  "total": 63583423
+                },
+                {
+                  "type": "NPC",
+                  "total": 14696088
+                },
+                {
+                  "type": "NPC",
+                  "total": 11347240
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}

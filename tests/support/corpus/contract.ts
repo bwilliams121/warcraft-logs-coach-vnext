@@ -3644,6 +3644,17 @@ const captureQuery = z.union([
       /** `OMITTED` is Warcraft Logs' default: the latest partition AT CAPTURE TIME, which moves. */
       partition: z.union([z.number().int(), z.literal("OMITTED")]),
       page: z.number().int().positive(),
+      /** M11-G1: the item-level bracket requested, when one was. */
+      bracket: z.number().int().optional(),
+    })
+    .strict(),
+  // M11-G1: one composed request for a report's NON-EVENT surfaces (fight
+  // header, rankings, tables, playerDetails), named verbatim.
+  z
+    .object({
+      kind: z.literal("REPORT_SURFACES"),
+      fightIds: z.array(z.number().int()).min(1),
+      surfaces: z.array(z.string().min(1)).min(1),
     })
     .strict(),
 ]);
