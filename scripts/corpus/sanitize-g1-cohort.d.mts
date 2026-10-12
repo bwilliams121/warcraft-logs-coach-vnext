@@ -23,3 +23,16 @@ export function sanitizeG1(
   candidates: unknown[];
   leakNeedles: { players: string[]; servers: string[]; codes: string[] };
 };
+
+/**
+ * The ONE third-party pseudonym scheme (M11-G1), reused by M11-G2: real player
+ * name -> Player<nnnn>, real report code -> COHORT<nnn>AAAAAAA. The maps hold
+ * REAL identities as keys and are never written.
+ */
+export function g1PseudonymTables(capture: unknown): {
+  players: ReadonlyMap<string, string>;
+  codes: ReadonlyMap<string, string>;
+};
+
+/** The gitignored G1 raw capture, assembled exactly as the CLI assembles it. */
+export function readG1Capture(captureDir: string): unknown;

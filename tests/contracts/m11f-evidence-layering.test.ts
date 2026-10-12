@@ -7,7 +7,8 @@ import { describe, expect, it } from "vitest";
  * position asked about, and reach SimulationCraft authority only through a
  * declared, structural seam:
  *
- *   engine/state/death-state.ts      <- engine/auras/aura-carriers.ts only
+ *   engine/state/death-state.ts      <- engine/auras/aura-carriers.ts, and (M11-G2)
+ *                                       comparison-facts/environment-profile.ts
  *   engine/auras/aura-carriers.ts    <- specs/rogue/assassination/active-dot.ts only
  *   simc/expression/active-dot.ts    imports nothing from engine or combat-facts
  *
@@ -62,8 +63,14 @@ describe("M11-F evidence layering", () => {
     }
   });
 
-  it("death-state is read only through the aura-carrier evidence", () => {
-    expect(importersOf("src/engine/state/death-state.ts")).toEqual(["src/engine/auras/aura-carriers.ts"]);
+  it("death-state is read only through the aura-carrier evidence and the reviewed M11-G2 post-hoc consumer", () => {
+    // AMENDED AT M11-G2, explicitly: the post-hoc environment profile reports
+    // positive deaths (observedDeathsOf) as facts. It is post-hoc, unreachable
+    // from authority (tests/contracts/m11g2-comparison-facts-layering.test.ts).
+    expect(importersOf("src/engine/state/death-state.ts")).toEqual([
+      "src/comparison-facts/environment-profile.ts",
+      "src/engine/auras/aura-carriers.ts",
+    ]);
   });
 
   it("aura-carriers is read only by the declared specialization seam", () => {

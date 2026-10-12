@@ -1586,6 +1586,24 @@ observed cohort (M11-G1, tests/unit/m11g1-cohort.test.ts, m11g1-cohort-boundary.
   committed G1 evidence                        -> pseudonyms only, null servers, no credential shape (T)
   any import of the cohort domain              -> refused, side-effect and dynamic imports included (U, V)
   member gear                                  -> shared adapter states (24/30, 3/51, 12/42); bad row -> MALFORMED_EVIDENCE
+comparison facts (M11-G2, tests/unit/m11g2-*.test.ts, contracts/m11g2-comparison-facts-layering.test.ts):
+  actor set                                    -> focus + petOwner only; no pet's pet, ownerless or other's pet (A, B, S)
+  G1 member <-> G2 fixture                     -> same code, fight, actor and pseudonym for all three (C)
+  instances                                    -> every ActorKey kept; 33/30/33/30 Rune Weapons (D)
+  subject / comparisons                        -> EXACT (vouched) / AT_LEAST (uncertified), never at least 0 (E, T)
+  filtered capture with a grant                -> FILTERED_CAPTURE_GRANTED; every category ABSENT (F)
+  begincast + cast / equal ms                  -> counted apart / retrieval order not proven (G, H)
+  raw amount                                   -> RAW_AMOUNT_FIELD_SUM, M1; never WCL damage; UNKNOWN when uncertified (I, K)
+  WCL table amounts                            -> explicit authority and interval (J)
+  hitType                                      -> raw numbers only (L)
+  boss / enemy-listed / player target          -> metadata; hostility UNKNOWN; player never enemy (M, N, O)
+  DRW windows                                  -> aura transitions; unobserved end UNKNOWN, no nominal length (P, Q)
+  Rune Weapon / window                         -> temporal association, ambiguity kept, not 1 cast = 1 instance (R)
+  Blood Beast                                  -> summons, casts, hits, boss vs other, targets, raw + WCL (U)
+  deaths                                       -> positive facts only; nothing says alive (V)
+  post-hoc modules                             -> unreachable from SimC / specs / services (W)
+  sanitizer / committed files                  -> byte-identical re-cut; pseudonyms only (X, Y)
+  capture plan                                 -> <= 36, no rankings, never the subject, always filtered (Z, AA, AB, AC)
 ```
 
 Required negative pairs, same premises, different construct:

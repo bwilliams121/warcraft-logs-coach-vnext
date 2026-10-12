@@ -118,8 +118,21 @@ describe("it reads only normalized evidence", () => {
  * guard: the authority branch (`src/simc`, `src/specs`) must never read
  * post-hoc facts, so a future outcome can never settle a past decision.
  */
-describe("nothing reads it yet — least of all the authority branch", () => {
-  const OUTSIDE = allPaths().filter((path) => !path.startsWith("src/combat-facts/"));
+describe("nothing reads it but the reviewed M11-G2 consumer — least of all the authority branch", () => {
+  /**
+   * AMENDED AT M11-G2, explicitly: `src/comparison-facts/` (the post-hoc
+   * comparison facts) is the reviewed consumer this guard anticipated. It is
+   * itself post-hoc and unreachable from authority
+   * (tests/contracts/m11g2-comparison-facts-layering.test.ts). Every other
+   * module, the authority branch above all, still may not import this layer.
+   */
+  const CONSUMERS = "src/comparison-facts/";
+  const OUTSIDE = allPaths().filter(
+    (path) => !path.startsWith("src/combat-facts/") && !path.startsWith(CONSUMERS),
+  );
+  it("the reviewed consumer exists and is the only one", () => {
+    expect(allPaths().filter((path) => path.startsWith(CONSUMERS)).length).toBeGreaterThan(0);
+  });
 
   it("found modules to check", () => {
     expect(OUTSIDE.length).toBeGreaterThan(100);

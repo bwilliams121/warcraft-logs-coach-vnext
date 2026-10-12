@@ -187,10 +187,17 @@ describe("the raw boundary holds", () => {
     // (`events-query.ts`) and the page handed to the normalizer
     // (`retrieval-types.ts`). Both sit below the boundary. What matters is that
     // no third one appears above it.
+    // M11-G2 adds a third, also below the boundary: the comparison CAPTURE
+    // tool (`src/wcl/comparison/comparison-capture.ts`) hands raw pages to its
+    // window callback. No analyzer path imports it (m11g2 layering contract).
     const declarations = SOURCE_FILES.filter((path) =>
       /events: readonly unknown\[\]/.test(readFileSync(path, "utf8")),
     );
-    expect(declarations.sort()).toEqual(["src/wcl/events-query.ts", "src/wcl/retrieval-types.ts"]);
+    expect(declarations.sort()).toEqual([
+      "src/wcl/comparison/comparison-capture.ts",
+      "src/wcl/events-query.ts",
+      "src/wcl/retrieval-types.ts",
+    ]);
   });
 
   it("keeps Warcraft Logs wire types out of the service layer", () => {

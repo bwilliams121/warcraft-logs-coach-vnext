@@ -127,6 +127,7 @@ export const CORPUS_ERROR_CODES = [
   "CONTROL_SUBSTITUTION_DIFF_INVALID",
   // M11-E2.1: the owned-pet actor slice.
   "ACTOR_SLICE_INVALID",
+  "FILTERED_CAPTURE_GRANTED",
 ] as const;
 export type CorpusErrorCode = (typeof CORPUS_ERROR_CODES)[number];
 
@@ -659,7 +660,12 @@ function actorSliceErrors(
     if (!families.has(type)) fail(`actorless family ${type} is not a retained family`);
   }
   const grants = artifact.provenance.retainedCoverage.grants;
-  if (grants.length === 0) fail("an owned-pet actor slice must state its grant");
+  if (slice.grantsWithheld === undefined && grants.length === 0) {
+    fail("an owned-pet actor slice must state its grant, or record why it is withheld");
+  }
+  if (slice.grantsWithheld !== undefined && grants.length > 0) {
+    fail("an owned-pet actor slice that withholds its grants must hold none");
+  }
   for (const [ordinal, grant] of grants.entries()) {
     if (
       grant.actorScope === null ||
@@ -681,7 +687,17 @@ function actorSliceErrors(
       }
     }
   }
-  const ranges = grants.flatMap((grant) => grant.ranges);
+  // With grants withheld, the predicate is checked over the capture's own window.
+  const query = source.query;
+  const ranges =
+    slice.grantsWithheld === undefined
+      ? grants.flatMap((grant) => grant.ranges)
+      : "startTimeMs" in query && typeof query.startTimeMs === "number" && typeof query.endTimeMs === "number"
+        ? [{ fromReportTimeMs: query.startTimeMs, toReportTimeMs: query.endTimeMs }]
+        : [];
+  if (slice.grantsWithheld !== undefined && ranges.length === 0) {
+    fail("a slice that withholds its grants needs an events capture with a recorded window");
+  }
   const granted = (timestamp: unknown): boolean =>
     typeof timestamp === "number" &&
     ranges.some((range) => timestamp >= range.fromReportTimeMs && timestamp <= range.toReportTimeMs);
@@ -1268,6 +1284,22 @@ export async function validateCorpus(
   // Negative-control substitutions, checked against both committed payloads.
   for (const artifact of artifactsById.values()) {
     errors.push(...substitutionErrors(artifact, lineageById, eventsById));
+  }
+  // A filtered capture retains no coverage (the documented `actorFilter` rule).
+  for (const artifact of artifactsById.values()) {
+    const query = artifact.provenance.source?.query;
+    if (
+      query !== undefined &&
+      "actorFilter" in query &&
+      query.actorFilter !== "NONE" &&
+      artifact.provenance.retainedCoverage.grants.length > 0
+    ) {
+      errors.push({
+        code: "FILTERED_CAPTURE_GRANTED",
+        subject: { artifactId: artifact.artifactId },
+        message: `artifact ${artifact.artifactId}: a capture filtered by ${JSON.stringify(query.actorFilter)} retains no coverage, but it grants some`,
+      });
+    }
   }
   // Owned-pet actor slices, re-derived from their committed catalog.
   const loadedArtifactsById = new Map<string, LoadedArtifact>(

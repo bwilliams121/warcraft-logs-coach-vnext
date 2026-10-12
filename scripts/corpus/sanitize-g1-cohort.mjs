@@ -44,21 +44,15 @@ const ordinalMap = (values, format) => {
 };
 const playerKey = (name, _server) => name;
 
-export function sanitizeG1(capture, subjectContext) {
-  const { subject, pages, candidates } = capture;
-  const subjectActors = subjectContext.reportData.report.masterData.actors.filter((a) => a.type === "Player");
-  // The M8-F rule: a unique server-exact match first; more than one is
-  // ambiguous; otherwise a unique name-only match (the surfaces spell realms
-  // differently: rankings "Tarren Mill", masterData "TarrenMill").
-  const subjectActorId = (name, server) => {
-    const exact = subjectActors.filter((a) => a.name === name && server !== null && a.server === server);
-    if (exact.length === 1) return exact[0].id;
-    if (exact.length > 1) return null;
-    const byName = subjectActors.filter((a) => a.name === name);
-    return byName.length === 1 ? byName[0].id : null;
-  };
-
-  // ---- the consistent third-party pseudonym tables ----
+/**
+ * The ONE third-party pseudonym scheme (M11-G1), exported so M11-G2 reuses it
+ * rather than inventing a second: every third-party player name seen in the
+ * G1 capture -> Player<nnnn>, every third-party report code -> COHORT<nnn>AAAAAAA,
+ * both numbered in SHA-256 order of the distinct inputs. Keyed by name alone
+ * (the surfaces spell realms differently).
+ */
+export function g1PseudonymTables(capture) {
+  const { pages, candidates } = capture;
   const thirdPartyPlayers = [];
   const thirdPartyCodes = [];
   for (const page of pages) {
@@ -81,6 +75,24 @@ export function sanitizeG1(capture, subjectContext) {
   }
   const players = ordinalMap(thirdPartyPlayers, (n) => `Player${String(n).padStart(4, "0")}`);
   const codes = ordinalMap(thirdPartyCodes, (n) => `COHORT${String(n).padStart(3, "0")}AAAAAAA`);
+  return { players, codes };
+}
+
+export function sanitizeG1(capture, subjectContext) {
+  const { subject, pages, candidates } = capture;
+  const subjectActors = subjectContext.reportData.report.masterData.actors.filter((a) => a.type === "Player");
+  // The M8-F rule: a unique server-exact match first; more than one is
+  // ambiguous; otherwise a unique name-only match (the surfaces spell realms
+  // differently: rankings "Tarren Mill", masterData "TarrenMill").
+  const subjectActorId = (name, server) => {
+    const exact = subjectActors.filter((a) => a.name === name && server !== null && a.server === server);
+    if (exact.length === 1) return exact[0].id;
+    if (exact.length > 1) return null;
+    const byName = subjectActors.filter((a) => a.name === name);
+    return byName.length === 1 ? byName[0].id : null;
+  };
+
+  const { players, codes } = g1PseudonymTables(capture);
   const pseudoPlayer = (name, server) => players.get(playerKey(name, server)) ?? "UnresolvedPlayer";
   const pseudoCode = (code) => (code === SUBJECT_CODE ? code : (codes.get(code) ?? "COHORT000AAAAAAA"));
 
@@ -325,18 +337,12 @@ function assertClean(label, text, needles) {
   }
 }
 
-function main() {
-  const [captureDir, subjectContextPath, outDir] = process.argv.slice(2);
-  if (captureDir === undefined || subjectContextPath === undefined || outDir === undefined) {
-    console.error(
-      "usage: node scripts/corpus/sanitize-g1-cohort.mjs <capture-dir> <subject-context.json> <out-dir>",
-    );
-    process.exit(1);
-  }
+/** The G1 raw capture (gitignored), assembled exactly as `main` assembles it. */
+export function readG1Capture(captureDir) {
   const read = (name) => JSON.parse(readFileSync(join(captureDir, name), "utf8"));
   const outcomes = read("stage-c-outcomes.json").outcomes;
   const replay = read("replay.json");
-  const capture = {
+  return {
     subject: read("r01-subject.json"),
     pages: [18, 19, 20].map((bracket) => ({
       bracket,
@@ -351,6 +357,17 @@ function main() {
         )?.comparisonRef.actorId ?? null,
     })),
   };
+}
+
+function main() {
+  const [captureDir, subjectContextPath, outDir] = process.argv.slice(2);
+  if (captureDir === undefined || subjectContextPath === undefined || outDir === undefined) {
+    console.error(
+      "usage: node scripts/corpus/sanitize-g1-cohort.mjs <capture-dir> <subject-context.json> <out-dir>",
+    );
+    process.exit(1);
+  }
+  const capture = readG1Capture(captureDir);
   const out = sanitizeG1(capture, JSON.parse(readFileSync(subjectContextPath, "utf8")));
   mkdirSync(outDir, { recursive: true });
   const write = (file, value) => {

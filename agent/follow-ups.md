@@ -439,6 +439,51 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G2: what the comparison facts do not establish
+
+**Raised:** M11-G2 (2026-10-12). Each item is unproven or refused today, never
+guessed.
+
+**No comparison coverage is granted.** Under the owner's rule, no table certifies
+the filtered streams. Comparison counts are therefore AT_LEAST and their raw sums
+UNKNOWN. Two certification paths would need their own review:
+- a certified UNFILTERED reference window of one comparison fight;
+- a per-direction grant model (the coverage grant has no direction field, and
+  the pets' DamageTaken tables are empty).
+
+Every observed discrepancy is an event the tables omit, so nothing points to
+under-retrieval.
+
+**The subject is asymmetric.**
+- It has no per-actor tables, no window tables and no enemy list, because it is
+  never re-fetched. Its WCL-computed amounts are the G1 raid entry only: total,
+  pets and per-target-type split.
+- Its WCL_ENEMY_NPC_CLASSIFIED label is unavailable, not zero.
+
+**Filter-language semantics are pinned on one report** (three diagnostic
+requests): `source.id` is the catalog gameID, `owner.id` reaches pets, and
+missed damage is not `type = "damage"`. A future capture must re-check them,
+and the certificates are how.
+
+**M1 data points, not proof.** The subject's Risen Ghoul raw `amount` sum
+(248,333) equals its WCL raid-entry pet total exactly. Rune Weapon (7,060,330 vs
+7,344,648) and Blood Beast (1,014,118 vs 1,333,469) do not. M1 stays
+NOT_YET_PROVEN.
+
+**Resource at window start is UNKNOWN.** No post-hoc resource primitive exists,
+and the Blood resource reconstruction lives in the authority branch, which
+post-hoc code may not import.
+
+**Dancing Rune Weapon has two sources.** 17–19 aura windows per fight against
+4 casts. Proc windows (summon 1264353) are kept, so "the four DRWs" means the
+four trigger casts (AT_WINDOW_START or DURING_ACTIVE_WINDOW), not four windows.
+
+**Rune Weapon instances span several windows.** Most instances overlap two or
+more windows, because windows are adjacent and instances persist. One cast is
+never one instance, and no finer attribution is claimed.
+
+**M2 stays unresolved.** Raw hitTypes 1 / 2 / 10 are reported without meaning.
+
 ## After M11-G1: what the observed cohort does not establish
 
 **Raised:** M11-G1 (2026-10-09). Each item is unproven or refused today, never

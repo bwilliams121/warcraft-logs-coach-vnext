@@ -11096,6 +11096,372 @@ const G1_ARTIFACTS = [
   ),
 ];
 
+// --------------------------------------------------------------------------
+// M11-G2 (2026-10-11/12): the bounded full-fight capture of the three
+// comparison fights G1 selected (COHORT246#33, COHORT116#64, COHORT261#31).
+// 23 GraphQL requests of a 36 cap (OAuth logged separately; ~371 points):
+// per fight one FIGHT_CONTEXT_QUERY, two pages of a SERVER-FILTERED events
+// stream (the owned-pet slice bound, addressing the focus by its catalog
+// gameID) and one composed table request; plus two failed filter attempts,
+// three diagnostic requests and one whole-fight NPC request
+// (tests/evidence/m11g2-comparison-capture.md). Every slice WITHHOLDS its
+// grants: a filtered capture earns a category grant only by an exact table
+// certificate (owner decision), and no category certified. Archived under a
+// one-time, owner-approved, byte-pinned size exception (≈12.3 MiB approved).
+// --------------------------------------------------------------------------
+
+const G2_SANITIZER = "scripts/corpus/sanitize-g2-comparisons.mjs";
+const G2_SANITIZER_REVISION = "sanitize-g2-comparisons-1";
+const G2_INVOCATION = "node scripts/corpus/sanitize-g2-comparisons.mjs .probe/m11g2 .probe/m11g1 <out>";
+const G2_FAMILIES = B1PM_FAMILIES;
+const G2_ACTORLESS = B1PM_ACTORLESS;
+/** The server filter, verbatim, with the focus's player gameID redacted. */
+const G2_FILTER_TEMPLATE =
+  '((source.id = <FOCUS_GAME_ID> or source.owner.id = <FOCUS_GAME_ID> or target.id = <FOCUS_GAME_ID> or target.owner.id = <FOCUS_GAME_ID>) and not type in ("heal", "absorbed", "healabsorbed", "drain", "dispel", "resurrect", "aurabroken", "interrupt")) or type in ("encounterstart", "encounterend")';
+const G2_PROBE = (question) =>
+  tooling(
+    ".probe/m11g2/capture.probe.ts (temporary, gitignored; gated on M11-G1 CI GREEN) driving src/wcl/comparison/comparison-capture.ts through src/wcl/token-provider.ts and graphql-client.ts, with a persistent ledger refusing a 37th GraphQL request",
+    UNAVAILABLE,
+    `${question}; planned in .probe/m11g2/capture-plan.md (with amendments A–C) before running, run by hand on 2026-10-11/12 (23 GraphQL requests in total, cap 36)`,
+  );
+const G2_LIMITATIONS = [
+  "A comparison player's identity is the G1 pseudonym only; names, servers and player gameIDs are not retained.",
+  "Facts derived from this evidence are POST-HOC and never authority evidence for a decision.",
+  VERSION_SCOPE,
+];
+const G2_GRANTS_WITHHELD = (certification) => ({
+  reason: `Server-filtered capture (actorFilter.filterExpressionTemplate). No category certified against the fight's WCL tables (src/wcl/comparison/comparison-tables.ts: ${certification}); CASTS, AURAS, RESOURCES, SUMMONS, COMBATANT_INFO and GEAR have no certifying table. Every observed event is real; nothing is claimed about events the filter may not have served.`,
+});
+const G2_FIGHTS = [
+  {
+    cohort: "cohort246",
+    code: "COHORT246AAAAAAA",
+    fight: 33,
+    focus: 7,
+    owned: [15, 16, 92, 202],
+    revision: 46,
+    start: 6427765,
+    end: 6757195,
+    captured: 12554,
+    pages: [10000, 2554],
+    actors: 387,
+    requests:
+      "R11 context, R12–R13 events, R14 tables (after the failed filter attempts R1–R3 and R6–R9, and the diagnoses R4, R5 and R10)",
+    certification:
+      "DAMAGE not certified — damage TARGETING 7 differs by Spirit Link (98021, 8 events the DamageTaken table omits) and the DamageTaken tables of pets 16 and 202 are empty; damage SOURCED by 7, 15, 16 and 202 matches per ability",
+    segments: [
+      ["0-46", 6427764, 6473765, [7, 15, 16, 202]],
+      ["46-106", 6473765, 6533765, [7, 15, 16, 202]],
+      ["106-144", 6533765, 6571765, [7, 15, 202]],
+      ["144-197", 6571765, 6624765, [7, 15, 16, 202]],
+      ["197-228", 6624765, 6655765, [7, 15, 16, 202]],
+      ["228-284", 6655765, 6711765, [7, 15, 16, 202]],
+      ["284-315", 6711765, 6742765, [7, 15, 202]],
+      ["315-329", 6742765, 6757195, [7, 15]],
+    ],
+  },
+  {
+    cohort: "cohort116",
+    code: "COHORT116AAAAAAA",
+    fight: 64,
+    focus: 332,
+    owned: [362, 364, 665],
+    revision: 1,
+    start: 13759145,
+    end: 14095448,
+    captured: 13679,
+    pages: [10001, 3678],
+    actors: 811,
+    requests: "R15 context, R16–R17 events, R18 tables",
+    certification:
+      "DAMAGE not certified — damage SOURCED by 332 holds 95 events of 1287955 the DamageDone table omits, damage TARGETING 332 differs by Spirit Link (98021, 1 event), and the DamageTaken tables of pets 362 and 665 are empty",
+    segments: [
+      ["0-36", 13759144, 13795145, [332, 362, 364, 665]],
+      ["36-96", 13795145, 13855145, [332, 362, 364, 665]],
+      ["96-136", 13855145, 13895145, [332, 364, 665]],
+      ["136-192", 13895145, 13951145, [332, 362, 364, 665]],
+      ["192-214", 13951145, 13973145, [332, 362, 364, 665]],
+      ["214-274", 13973145, 14033145, [332, 362, 364]],
+      ["274-288", 14033145, 14047145, [332, 364, 665]],
+      ["288-335", 14047145, 14094145, [332, 364, 665]],
+      ["335-336", 14094145, 14095448, [332, 364]],
+    ],
+  },
+  {
+    cohort: "cohort261",
+    code: "COHORT261AAAAAAA",
+    fight: 31,
+    focus: 6,
+    owned: [166, 184, 185, 309],
+    revision: 20,
+    start: 4212186,
+    end: 4572073,
+    captured: 13410,
+    pages: [10000, 3410],
+    actors: 339,
+    requests: "R19 context, R20–R21 events, R22 tables",
+    certification:
+      "DAMAGE not certified — damage SOURCED by 6 holds 13 events of 404908 and 410265 the DamageDone table omits, damage TARGETING 6 differs by Spirit Link (98021, 6 events), and the DamageTaken tables of pets 184 and 185 are empty",
+    segments: [
+      ["0-46", 4212185, 4258186, [6, 166, 184, 185]],
+      ["46-108", 4258186, 4320186, [6, 166, 184, 185]],
+      ["108-159", 4320186, 4371186, [6, 166, 185]],
+      ["159-200", 4371186, 4412186, [6, 166, 184, 185]],
+      ["200-249", 4412186, 4461186, [6, 166, 184, 185]],
+      ["249-290", 4461186, 4502186, [6, 166, 184, 185]],
+      ["290-342", 4502186, 4554186, [6, 166, 185]],
+      ["342-360", 4554186, 4572073, [6, 166]],
+    ],
+  },
+];
+const g2ContextId = (f) => `wcl-g2-fight-context-${f.cohort}-fight-${String(f.fight)}`;
+const g2TablesId = (f) => `wcl-g2-tables-${f.cohort}-fight-${String(f.fight)}`;
+const g2SegmentId = (f, name) => `wcl-g2-${f.cohort}-f${String(f.fight)}-owned-pets.seg-${name}`;
+const g2Source = (f, captureTooling, rawCaptureLocation, q, comp, extra = {}) => ({
+  reportCode: f.code,
+  fightId: f.fight,
+  reportRevision: f.revision,
+  sourceActorId: f.focus,
+  encounterId: 3455,
+  difficulty: 5,
+  capturedOn: "2026-10-11",
+  gameVersion: 1,
+  logVersion: 17,
+  ingestionScope: "PLAYER_CONTEXT",
+  query: q,
+  completeness: comp,
+  captureTooling,
+  rawCaptureRetained: false,
+  rawCaptureLocation,
+  reportRevisionAfterCapture: f.revision,
+  ...extra,
+});
+const g2Scan = {
+  kind: "CREDENTIAL_SHAPE_SCAN",
+  tooling: tooling(G2_SANITIZER, G2_SANITIZER_REVISION, "implicit on every write"),
+  detail:
+    "The sanitizer refuses to write a credential-shaped value, or any real player name, server, report code or player gameID it saw in the input. Nothing was found.",
+  invalidates: [],
+};
+const g2Remap = (detail) => ({
+  kind: "IDENTIFIER_REMAP",
+  tooling: tooling(G2_SANITIZER, G2_SANITIZER_REVISION, G2_INVOCATION),
+  detail,
+  invalidates: ["ORIGINAL_IDENTIFIERS"],
+});
+
+function g2Artifacts(f) {
+  const tag = `${f.code}-${String(f.fight)}`;
+  const scope = [f.focus, ...f.owned].sort((a, b) => a - b);
+  const contextSource = g2Source(
+    f,
+    G2_PROBE(
+      `fight context: one FIGHT_CONTEXT_QUERY for fight ${String(f.fight)} (actorID ${String(f.focus)})`,
+    ),
+    `.probe/m11g2/${tag}-context.json — gitignored, not retained in the repository`,
+    { kind: "FIGHT_CONTEXT", fightIds: [f.fight] },
+    completeness(
+      NOT_APPLICABLE,
+      1,
+      NOT_APPLICABLE,
+      "COMPLETE",
+      `A typed, unpaginated GraphQL field (${f.requests}): revision ${String(f.revision)}; fight ${String(f.fight)} a kill of encounter 3455 difficulty 5 [${String(f.start)} .. ${String(f.end)}]; actor ${String(f.focus)} Player / DeathKnight with Blood at its friendlySpecs index; ${String(f.actors)} master-data actors, of which exactly [${f.owned.join(", ")}] state petOwner ${String(f.focus)}.`,
+    ),
+    { ingestionScope: "FULL_RAID" },
+  );
+  const eventsSource = g2Source(
+    f,
+    G2_PROBE(
+      `events: COMPARISON_EVENTS_QUERY over [${String(f.start)} .. ${String(f.end)}] at limit 10,000 with resources, hostilityType omitted, one filterExpression`,
+    ),
+    `.probe/m11g2/${tag}-pages.json — gitignored, not retained in the repository`,
+    {
+      ...query(true, 10000, f.start, f.end),
+      actorFilter: { filterExpressionTemplate: G2_FILTER_TEMPLATE, focusGameIdRedacted: true },
+    },
+    completeness(
+      f.captured,
+      f.pages.length,
+      null,
+      "COMPLETE",
+      `${String(f.pages.length)} pages (${f.pages.map(String).join(" + ")} events), the last with nextPageTimestamp null; each page's requestedStartTime the previous page's cursor. COMPLETE for the FILTERED query only: the stream is what the server filter served. The revision read ${String(f.revision)} in the context request and again in the table request after the last page.`,
+    ),
+  );
+  const tablesSource = g2Source(
+    f,
+    G2_PROBE("tables: one composed request (revision re-check + Warcraft Logs tables)"),
+    `.probe/m11g2/${tag}-tables.json — gitignored, not retained in the repository`,
+    {
+      kind: "REPORT_SURFACES",
+      fightIds: [f.fight],
+      surfaces: [
+        "revision",
+        "table(DamageDone) raid-wide",
+        "table(Deaths)",
+        "table(Buffs, sourceID focus)",
+        "table(Debuffs, sourceID focus)",
+        "table(Casts | DamageDone | DamageTaken, sourceID each actor in scope)",
+        "table(DamageDone, sourceID each actor in scope) over each observed Dancing Rune Weapon aura window",
+      ],
+    },
+    completeness(
+      NOT_APPLICABLE,
+      1,
+      NOT_APPLICABLE,
+      "COMPLETE",
+      "One unpaginated request; every table over the fight interval except the window tables, which use the window's own bounds.",
+    ),
+    { ingestionScope: "UNAVAILABLE" },
+  );
+  return [
+    artifact(g2ContextId(f), graphql(g2ContextId(f)), {
+      root: "EVIDENCE",
+      kind: "SANITIZED_CAPTURE",
+      payloadKind: "WCL_GRAPHQL_DATA",
+      source: contextSource,
+      transformations: [
+        g2Remap(
+          "report code -> the G1 pseudonym; every Player actor's name -> its G1 Player<nnnn> pseudonym (the ONE scheme, from g1PseudonymTables; refused if absent); every other actor's name -> Actor<id>.",
+        ),
+        {
+          kind: "FIELD_REDACTION",
+          tooling: tooling(G2_SANITIZER, G2_SANITIZER_REVISION, G2_INVOCATION),
+          detail:
+            "rateLimitData removed; every server set to null; every PLAYER's gameID (a stable character identifier) set to null. Report-local actor ids, types, subTypes, petOwner links, NPC and pet gameIDs, abilities, phases and fights untouched. Compact JSON.",
+          invalidates: [],
+        },
+        g2Scan,
+      ],
+      coverageBasis:
+        "Report context, not events: master data, one fight header, phases, abilities and zone. It grants no event coverage. The actor catalog is complete for the report (master data is unpaginated) and is the ownership authority (WCL petOwner) the owned-pet slices' actor scope is re-derived from.",
+      retainedFor: `M11-G2: the comparison fight ${f.code}#${String(f.fight)}'s context — the focus identity (G1-selected member), the petOwner links that define the owned-pet scope, the boss subtype catalog and the fight header.`,
+      limitations: [
+        "The talent import code present is the focus's (the query argument), uninterpreted.",
+        "Compact JSON: no whitespace between tokens.",
+        ...G2_LIMITATIONS,
+      ],
+    }),
+    artifact(g2TablesId(f), graphql(g2TablesId(f)), {
+      root: "EVIDENCE",
+      kind: "SANITIZED_CAPTURE",
+      payloadKind: "WCL_GRAPHQL_DATA",
+      source: tablesSource,
+      transformations: [
+        {
+          kind: "SUBSET_SELECTION",
+          tooling: tooling(G2_SANITIZER, G2_SANITIZER_REVISION, G2_INVOCATION),
+          detail:
+            "Each table reduced to ids, counts, totals, uptimes and bands: per-ability tables keep guid, type, actor, actorType, total, uses, hit/tick/miss/tickMiss counts, composite and subentries; the raid DamageDone keeps each entry's id, type, total, itemLevel, activeTime and pets' id/total/activeTime; Deaths keeps id, type, timestamp and the killing-blow ability id; Buffs/Debuffs keep guid, type, totalUses, totalUptime and bands. Names, icons, source/target lists and hit/miss detail breakdowns are dropped.",
+          invalidates: [],
+        },
+        g2Remap("report code -> the G1 pseudonym."),
+        g2Scan,
+      ],
+      coverageBasis:
+        "Warcraft Logs-computed aggregates, not events: no event coverage is granted. They are the WCL_COMPUTED damage authority for this fight and the certificates' reference.",
+      retainedFor: `M11-G2: Warcraft Logs-computed damage, casts and deaths for ${f.code}#${String(f.fight)}, and the certification of its filtered event capture (${f.certification}).`,
+      limitations: [
+        "Warcraft Logs documents table data as not frozen: the values are those of the capture date.",
+        "The Casts table omits melee, some triggered spells and pet casts; DamageTaken omits some sources and is empty for pets; a player's DamageDone is an owner rollup whose leaves name their true source.",
+        ...G2_LIMITATIONS,
+      ],
+    }),
+    ...f.segments.map(([name, fromMs, toMs, active]) => {
+      const id = g2SegmentId(f, name);
+      return artifact(id, wcl(id), {
+        root: "EVIDENCE",
+        kind: "SANITIZED_CAPTURE",
+        source: eventsSource,
+        transformations: [
+          {
+            kind: "SUBSET_SELECTION",
+            tooling: tooling(G2_SANITIZER, G2_SANITIZER_REVISION, G2_INVOCATION),
+            detail: `The filtered pages concatenated in page order, then the E2.1 owned-pet slice predicate (scripts/sanitize-probe.mjs ownedPetSlice): actor scope DERIVED from the committed context's master data — focus ${String(f.focus)} plus every actor whose WCL petOwner is ${String(f.focus)} ([${f.owned.join(", ")}]; no recursion, no summon inference) — keeping every event whose sourceID or targetID is in that scope, plus the actorless encounterstart/encounterend, restricted to the twenty-two retained raw types, then (${String(fromMs)}, ${String(toMs)}] (whole pull seconds, at most 500,000 compact bytes). In place and order preserved; compact JSON; events verbatim (ids only, no names).`,
+            invalidates: ACTOR_SLICE_INVALIDATIONS,
+          },
+          g2Scan,
+        ],
+        actorSlice: {
+          mode: "FOCUS_WITH_OWNED_PETS",
+          focusActorId: f.focus,
+          ownedActorIds: f.owned,
+          ownershipAuthority: "WCL_PET_OWNER",
+          catalogArtifactId: g2ContextId(f),
+          families: G2_FAMILIES.split(","),
+          actorlessFamilies: G2_ACTORLESS.split(","),
+          actorsWithRetainedEvents: active,
+          actorsWithoutRetainedEvents: scope.filter((id) => !active.includes(id)),
+          grantsWithheld: G2_GRANTS_WITHHELD(f.certification),
+        },
+        coverageBasis:
+          "NO coverage is granted. The source capture is server-filtered, and a filtered capture earns a category grant only by an exact certificate against a trusted WCL table over the same interval and predicate (owner decision, 2026-10-11); none certified. Every retained event is a real observation; absence from these bytes proves nothing.",
+        retainedFor: `M11-G2: one chronological segment of comparison fight ${f.code}#${String(f.fight)}'s focus-and-owned-pets evidence, for post-hoc comparison facts (observed counts, sequences, targets, windows, sub-actors).`,
+        limitations: [
+          "No heal, absorbed, healabsorbed, drain, dispel, resurrect, aurabroken or interrupt event was requested.",
+          "Raw death events are positive facts only; no death-completeness claim is made.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          NO_NAMES,
+          ...G2_LIMITATIONS,
+        ],
+      });
+    }),
+  ];
+}
+
+const G2_ARTIFACTS = [
+  ...G2_FIGHTS.flatMap(g2Artifacts),
+  artifact("wcl-g2-fight-npcs-comparisons", graphql("wcl-g2-fight-npcs-comparisons"), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    payloadKind: "WCL_GRAPHQL_DATA",
+    source: {
+      reportCode: NOT_APPLICABLE,
+      fightId: NOT_APPLICABLE,
+      reportRevision: UNAVAILABLE,
+      sourceActorId: NOT_APPLICABLE,
+      encounterId: 3455,
+      difficulty: 5,
+      capturedOn: "2026-10-12",
+      gameVersion: UNAVAILABLE,
+      logVersion: UNAVAILABLE,
+      ingestionScope: "UNAVAILABLE",
+      query: {
+        kind: "REPORT_SURFACES",
+        fightIds: [33, 64, 31],
+        surfaces: ["fights{enemyNPCs, enemyPets, friendlyPets} for each comparison fight (ids only)"],
+      },
+      completeness: completeness(
+        NOT_APPLICABLE,
+        1,
+        NOT_APPLICABLE,
+        "COMPLETE",
+        "One unpaginated request (R23) aliasing the three comparison reports; the subject's was NOT requested (never re-fetched).",
+      ),
+      captureTooling: G2_PROBE("R23 whole-fight NPC and pet classification for the three comparison fights"),
+      rawCaptureRetained: false,
+      rawCaptureLocation: ".probe/m11g2/fight-npcs.json — gitignored, not retained in the repository",
+    },
+    transformations: [
+      {
+        kind: "SUBSET_SELECTION",
+        tooling: tooling(G2_SANITIZER, G2_SANITIZER_REVISION, G2_INVOCATION),
+        detail:
+          "Each fight's enemyNPCs / enemyPets / friendlyPets reduced to id, gameID, instanceCount, groupCount and petOwner, keyed by the G1 comparison identity instead of the report code.",
+        invalidates: [],
+      },
+      g2Scan,
+    ],
+    coverageBasis:
+      "Whole-fight participation metadata, not events: WCL_ENEMY_NPC_CLASSIFIED with no decision-time semantics, and WCL's per-fight pet list as corroboration of master-data petOwner (master data stays the ownership authority). It grants no coverage.",
+    retainedFor:
+      "M11-G2: the comparison fights' WCL enemy-NPC classification for target labels and the environment profile; the subject's is unavailable.",
+    limitations: [
+      "WCL_ENEMY_NPC_CLASSIFIED is whole-fight participation metadata: never hostile, attackable, targetable or an active enemy at any instant.",
+      ...G2_LIMITATIONS,
+    ],
+  }),
+];
+
 const EVIDENCE_ARTIFACTS = [
   // ---- M11-C4f: the second Brewmaster subject's fixed 20–165 s segment ----
   artifact(BREWMASTER_RXAF_20_165, wcl(BREWMASTER_RXAF_20_165), {
@@ -11281,6 +11647,7 @@ const EVIDENCE_ARTIFACTS = [
     { with: [15, 44, 45], without: [47, 224] },
   ),
   ...G1_ARTIFACTS,
+  ...G2_ARTIFACTS,
 ];
 
 const RXAF_AUTHORITY = {

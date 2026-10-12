@@ -69,6 +69,8 @@ The M11-G1 observed-performance and elite-cohort evidence is seven sanitized
 report and ranking surfaces, with no events. Third-party identities are
 pseudonyms. See `m11g1-cohort-capture.md`.
 
+The M11-G2 comparison-fight evidence is the three G1 cohort fights at E2 parity: 25 owned-pet segments, three contexts, three table surfaces and one NPC surface. It has its own one-time, byte-pinned size exception. The captures were server-filtered and certify no category, so every slice withholds its grants. See `m11g2-comparison-capture.md`.
+
 ## Execution and promotion
 
 `npm run test:evidence` (`scripts/corpus/gate.mjs --root evidence`) runs four

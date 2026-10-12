@@ -3611,7 +3611,24 @@ const eventsCaptureQuery = z
      * analyzer never filters by actor (see `src/wcl/events-query.ts`), and an
      * artifact captured this way retains no coverage for anyone.
      */
-    actorFilter: z.union([z.literal("NONE"), z.object({ sourceId: z.number().int() }).strict()]),
+    actorFilter: z.union([
+      z.literal("NONE"),
+      z.object({ sourceId: z.number().int() }).strict(),
+      /**
+       * M11-G2: a CAPTURE-ONLY `filterExpression`, recorded verbatim except
+       * that the focus player's catalog gameID (a character identifier) is
+       * replaced by the literal `<FOCUS_GAME_ID>`. Like `{ sourceId }`, an
+       * artifact captured this way retains no coverage (loader rule
+       * FILTERED_CAPTURE_GRANTED); a later reviewed certification path is the
+       * only way it could.
+       */
+      z
+        .object({
+          filterExpressionTemplate: z.string().includes("<FOCUS_GAME_ID>"),
+          focusGameIdRedacted: z.literal(true),
+        })
+        .strict(),
+    ]),
     includeResources: z.boolean(),
     limit: recordedInt,
     startTimeMs: recordedInt,
@@ -3897,6 +3914,19 @@ const ownedPetActorSlice = z
     actorsWithRetainedEvents: z.array(z.number().int()),
     /** Scope members that are neither. Ascending. */
     actorsWithoutRetainedEvents: z.array(z.number().int()),
+    /**
+     * M11-G2: the slice grants NOTHING, deliberately, and says why. Present
+     * exactly when `retainedCoverage.grants` is empty; the predicate is then
+     * checked over the source query's own window instead of the grant ranges.
+     * Owner decision (2026-10-11): a server-filtered capture earns a category
+     * grant only by an exact certificate against a trusted WCL table over the
+     * same interval and predicate; a failed, unavailable or semantically
+     * mismatched certificate earns none.
+     */
+    grantsWithheld: z
+      .object({ reason: z.string().min(1) })
+      .strict()
+      .optional(),
   })
   .strict();
 export type OwnedPetActorSlice = z.infer<typeof ownedPetActorSlice>;

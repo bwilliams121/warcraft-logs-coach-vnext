@@ -517,7 +517,10 @@ export function bundleOverEvidence(
   const scopes = parts.flatMap((part) =>
     part.record.provenance.retainedCoverage.grants.map((grant) => JSON.stringify(grant.actorScope)),
   );
-  if (new Set(scopes).size !== 1) {
+  // M11-G2: a bundle whose parts ALL grant nothing composes with every
+  // category ABSENT (an owned-pet slice that withholds its grants).
+  const ungranted = parts.every((part) => part.record.provenance.retainedCoverage.grants.length === 0);
+  if (!ungranted && new Set(scopes).size !== 1) {
     throw new BundleCompositionError(
       `parts grant different actor scopes: ${[...new Set(scopes)].join(", ")}`,
     );

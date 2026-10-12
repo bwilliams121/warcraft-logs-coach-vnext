@@ -7594,6 +7594,76 @@ requests (cap 14). See `tests/evidence/m11g1-cohort-capture.md`. Nothing in
   item level, duration and log reference (`liveIdentity`, `comparisonRef`).
   Committed evidence is pseudonymized by `scripts/corpus/sanitize-g1-cohort.mjs`.
 
+## M11-G2 — factual damage ledgers, cooldown windows, sub-actor trees (post-hoc)
+
+Evidence: the three G1 comparison fights at E2 parity, under a one-time,
+byte-pinned size exception. See `tests/evidence/m11g2-comparison-capture.md`.
+The subject is its M11-E2 fixture and was never re-fetched.
+
+- **Capture** (`src/wcl/comparison/comparison-capture.ts`).
+  - A capture tool, never an analyzer path. Per fight: the production
+    `FIGHT_CONTEXT_QUERY` with the identity gate; the owned-pet actor set from
+    WCL `petOwner` only; event pages carrying ONE server filter; and one
+    composed table request.
+  - Budget: the plan's worst case is checked before the first request, and every
+    request is checked again at runtime.
+  - The subject's report is refused before any request.
+  - **Pinned by diagnosis.** In WCL's filter language `source.id` / `target.id`
+    are the catalog gameID, and `owner.id` reaches owned pets. Missed damage is
+    not `type = "damage"`. So the filter addresses the focus's gameID and
+    EXCLUDES the never-requested types. It is a superset; slices are re-cut
+    offline with the E2.1 predicate.
+- **Certification** (`src/wcl/comparison/comparison-tables.ts`).
+  - Fail-closed table decoders. A player's DamageDone is an owner rollup whose
+    leaves name their true source. Composite entries are flattened. Window
+    tables carry their recorded bounds.
+  - Certificates compare events with one table per actor and direction. A
+    category is CERTIFIED only if every certificate feeding it, for every actor,
+    MATCHES.
+  - Nothing certified: tables omit melee, pet casts, Spirit Link, some
+    trinket damage, and pets' damage taken. So every G2 slice withholds its
+    grants (`actorSlice.grantsWithheld`).
+  - The loader now enforces the documented rule that a filtered capture retains
+    no coverage (`FILTERED_CAPTURE_GRANTED`). The composer accepts all-ungranted
+    bundles, with every category ABSENT.
+- **Facts domain** (`src/comparison-facts/`, POST-HOC).
+  - `evidence-basis`: COVERAGE_VOUCHED (the subject; E1 coverage decides) vs
+    UNCERTIFIED_FILTERED_CAPTURE (comparisons: PARTIAL semantics — AT_LEAST
+    counts, never "at least 0", raw sums UNKNOWN, collections OBSERVED_ONLY).
+  - `damage-ledger`: cells keyed by (slice, source ActorKey, ability, target
+    ActorKey). The raw sum is always `RAW_AMOUNT_FIELD_SUM`, M1 NOT_YET_PROVEN.
+    WCL-computed amounts are separate records (`WCL_DAMAGE_DONE_TABLE`,
+    `WCL_RAID_DAMAGE_DONE_TABLE`), each with its interval.
+  - `target-classification`: `WCL_BOSS_SUBTYPE`, `WCL_ENEMY_NPC_CLASSIFIED`
+    (whole-fight participation metadata), `OBSERVED_NPC_OTHER`,
+    `OBSERVED_PLAYER_TARGET` (never an enemy), `OTHER_OBSERVED_TARGET`.
+    Hostility and targetability are always UNKNOWN.
+  - `cast-facts`: BEGIN and COMPLETE are counted apart. Equal timestamps are
+    marked RETRIEVAL_ORDER_NOT_PROVEN_AUTHORITATIVE.
+  - `cooldown-windows` (generic): windows are observed aura transitions on the
+    focus from the focus. An unobserved bound is UNKNOWN, and no nominal
+    duration is ever substituted. Trigger casts are AT_WINDOW_START (within the
+    definition's tolerance), DURING_ACTIVE_WINDOW, or NO_OBSERVED_WINDOW.
+  - `sub-actor-tree`: children are `petOwner` only and kinds come from the spec's
+    gameID map. Summons are observations only. Each instance's window
+    association is temporal, with ambiguity kept.
+  - `environment-profile`: positive deaths (M11-F) only.
+  - `fight-facts` / `four-fight-report`: the internal side-by-side.
+- **Blood definition** (`src/specs/deathknight/blood/post-hoc-definition.ts`).
+  - Data only: cast 49028 from the pinned SimC DBC cooldown dataset; aura 81256
+    from the aura authority (applied by casts AND procs: 17–19 windows against
+    4 casts per fight); 5 ms association tolerance (observed jitter ≤ 2 ms).
+  - Pet kinds by WCL catalog gameID: 27893 Rune Weapon, 217228 Blood Beast,
+    26125 Risen Ghoul.
+- **Layering.**
+  - `tests/contracts/m11g2-comparison-facts-layering.test.ts`: the authority
+    branch reads neither G1 nor G2 evidence, and no G2 module has a word for a
+    judgement.
+  - The E1 combat-facts guard and the M11-F death-state guard were amended
+    explicitly to name `src/comparison-facts/` as their reviewed M11-G consumer.
+  - The normalization-boundary contract names the capture tool as a third
+    raw-array holder below the boundary.
+
 ---
 
 # Milestone 12 — Healer Foundation

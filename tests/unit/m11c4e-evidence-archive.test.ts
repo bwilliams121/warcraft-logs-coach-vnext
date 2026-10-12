@@ -67,6 +67,50 @@ const M11G1_EVIDENCE: Readonly<Record<string, number>> = {
   "wcl-g1-subject-performance-b1pm-fight-48": 25671,
 };
 const M11G1_BYTES = Object.values(M11G1_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+
+/**
+ * M11-G2: the three G1-selected comparison fights at full E2 parity — 25
+ * compact owned-pet segments, three fight contexts, three table surfaces and
+ * one NPC-classification surface. A SECOND, one-time, owner-reviewed exception
+ * to the notice line (approved 2026-10-12 for this evidence only, ≈12.3 MiB;
+ * not a budget and not a precedent). Pinned to the byte: the archive without
+ * the M11-E2 and M11-G2 exceptions must still sit under the line.
+ */
+const M11G2_NOTICE_LINE_EXCEPTION: Readonly<Record<string, number>> = {
+  "wcl-g2-cohort116-f64-owned-pets.seg-0-36": 499916,
+  "wcl-g2-cohort116-f64-owned-pets.seg-136-192": 481051,
+  "wcl-g2-cohort116-f64-owned-pets.seg-192-214": 486719,
+  "wcl-g2-cohort116-f64-owned-pets.seg-214-274": 497820,
+  "wcl-g2-cohort116-f64-owned-pets.seg-274-288": 470849,
+  "wcl-g2-cohort116-f64-owned-pets.seg-288-335": 498094,
+  "wcl-g2-cohort116-f64-owned-pets.seg-335-336": 16405,
+  "wcl-g2-cohort116-f64-owned-pets.seg-36-96": 496069,
+  "wcl-g2-cohort116-f64-owned-pets.seg-96-136": 493600,
+  "wcl-g2-cohort246-f33-owned-pets.seg-0-46": 498603,
+  "wcl-g2-cohort246-f33-owned-pets.seg-106-144": 495413,
+  "wcl-g2-cohort246-f33-owned-pets.seg-144-197": 485741,
+  "wcl-g2-cohort246-f33-owned-pets.seg-197-228": 497893,
+  "wcl-g2-cohort246-f33-owned-pets.seg-228-284": 492399,
+  "wcl-g2-cohort246-f33-owned-pets.seg-284-315": 499493,
+  "wcl-g2-cohort246-f33-owned-pets.seg-315-329": 138151,
+  "wcl-g2-cohort246-f33-owned-pets.seg-46-106": 492022,
+  "wcl-g2-cohort261-f31-owned-pets.seg-0-46": 496380,
+  "wcl-g2-cohort261-f31-owned-pets.seg-108-159": 495844,
+  "wcl-g2-cohort261-f31-owned-pets.seg-159-200": 492219,
+  "wcl-g2-cohort261-f31-owned-pets.seg-200-249": 497330,
+  "wcl-g2-cohort261-f31-owned-pets.seg-249-290": 483065,
+  "wcl-g2-cohort261-f31-owned-pets.seg-290-342": 497681,
+  "wcl-g2-cohort261-f31-owned-pets.seg-342-360": 130510,
+  "wcl-g2-cohort261-f31-owned-pets.seg-46-108": 479309,
+  "wcl-g2-fight-context-cohort116-fight-64": 228540,
+  "wcl-g2-fight-context-cohort246-fight-33": 180393,
+  "wcl-g2-fight-context-cohort261-fight-31": 145679,
+  "wcl-g2-fight-npcs-comparisons": 12579,
+  "wcl-g2-tables-cohort116-fight-64": 158635,
+  "wcl-g2-tables-cohort246-fight-33": 159303,
+  "wcl-g2-tables-cohort261-fight-31": 164445,
+};
+const M11G2_BYTES = Object.values(M11G2_NOTICE_LINE_EXCEPTION).reduce((sum, bytes) => sum + bytes, 0);
 const ARCHIVE_SEGMENT_PATH = `artifacts/wcl-events/${ARCHIVE_SEGMENT}.json`;
 const CORPUS_OPENER = "wcl-brewmaster-monk-gtkb-opener";
 const CORPUS_20_165 = "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165";
@@ -129,11 +173,19 @@ describe("the committed evidence archive", () => {
       "wcl-fight-context-rxaf-fight-13",
       // M11-G1: observed performance and the elite cohort (report and ranking surfaces only).
       ...Object.keys(M11G1_EVIDENCE),
+      // M11-G2: the comparison fights' segments, contexts, tables and NPC surface.
+      ...Object.keys(M11G2_NOTICE_LINE_EXCEPTION),
     ]);
     expect(loaded.archive.cases).toHaveLength(9);
     // Accounting is per root: the archive counts its own bytes only.
-    expect(loaded.archive.totalArtifactBytes).toBe(308961 + 389605 + 387275 + M11E2_BYTES + M11G1_BYTES);
-    for (const [artifactId, bytes] of Object.entries({ ...M11E2_NOTICE_LINE_EXCEPTION, ...M11G1_EVIDENCE })) {
+    expect(loaded.archive.totalArtifactBytes).toBe(
+      308961 + 389605 + 387275 + M11E2_BYTES + M11G1_BYTES + M11G2_BYTES,
+    );
+    for (const [artifactId, bytes] of Object.entries({
+      ...M11E2_NOTICE_LINE_EXCEPTION,
+      ...M11G1_EVIDENCE,
+      ...M11G2_NOTICE_LINE_EXCEPTION,
+    })) {
       const entry = loaded.archive.artifacts.find((candidate) => candidate.record.artifactId === artifactId);
       expect(entry?.canonicalByteLength, artifactId).toBe(bytes);
     }
@@ -143,7 +195,7 @@ describe("the committed evidence archive", () => {
     }
   });
 
-  it("stays under its 4 MiB notice line (artifacts + selection frames) apart from the one owner-reviewed M11-E2 exception, and under its 512 KiB per-artifact ceiling", async () => {
+  it("stays under its 4 MiB notice line (artifacts + selection frames) apart from the owner-reviewed M11-E2 and M11-G2 exceptions, and under its 512 KiB per-artifact ceiling", async () => {
     const loaded = await loadCommittedEvidenceArchive();
     if (!loaded.ok) throw new Error("archive does not load");
     // The archive has NO total ceiling; the notice line is a deliberate
@@ -152,15 +204,19 @@ describe("the committed evidence archive", () => {
     expect(EVIDENCE_ARCHIVE_NOTICE_BYTES).toBe(4 * 1024 * 1024);
     const frameBytes = committedSelectionFrameBytes();
     expect(frameBytes).toBe(29010);
-    // Without the M11-E2 fixture the archive is under the line, as before.
-    expect(loaded.archive.totalArtifactBytes - M11E2_BYTES + frameBytes).toBeLessThan(
+    // Without the M11-E2 and M11-G2 exceptions the archive is under the line, as before.
+    expect(loaded.archive.totalArtifactBytes - M11E2_BYTES - M11G2_BYTES + frameBytes).toBeLessThan(
       EVIDENCE_ARCHIVE_NOTICE_BYTES,
     );
     // With it the line is crossed — by hand, for this fixture only — and the
     // crossing is pinned to the byte: 4,537,019 bytes (≈4.33 MiB) at M11-E2,
     // plus the 364,631 bytes of M11-G1 evidence: 4,901,650.
+    // M11-G2 adds its own one-time exception, 12,162,150 bytes (≈11.60 MiB,
+    // within the ≈12.3 MiB approved): 17,063,800 bytes in all.
     expect(M11G1_BYTES).toBe(364631);
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(4537019 + M11G1_BYTES);
+    expect(M11G2_BYTES).toBe(12162150);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(4537019 + M11G1_BYTES + M11G2_BYTES);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(17063800);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

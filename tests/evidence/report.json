@@ -125,6 +125,230 @@
       "payloadKind": "WCL_GRAPHQL_DATA",
       "provenanceKind": "SANITIZED_CAPTURE",
       "sha256": "9ac39cd0cd1b0d91d3daa9b668deec04226121e28ba33267170b82f8615903dd"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-0-36",
+      "byteLength": 499916,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "1dd97dfdbfb09464d3630a4ee95dfa24315b7dcad658fa118d94d44fac732977"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-136-192",
+      "byteLength": 481051,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "19d54a8fae4d76bfb2490859a392f74921787881ca59c84a78522a9161e16298"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-192-214",
+      "byteLength": 486719,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "dafb25ddfafc7f38c182b1a3bfc5e6c5ad89cb5792626bf567617ec8ecc7751f"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-214-274",
+      "byteLength": 497820,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "3e87b2a6109a229fba03564bc226818c1f38b3f0ecafbad6d6ae9fa04f2770bb"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-274-288",
+      "byteLength": 470849,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "dd10871cbd1ab78c615d822383a3cdd276708c4f5e630b13dac8e0f868c40f24"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-288-335",
+      "byteLength": 498094,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "a73b04a1d69c2879fcb25c140064728d4231261cdaaf2d53af3af788aa599693"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-335-336",
+      "byteLength": 16405,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "dac48a1e2ae582344ee6648b13f76bac56babdcfe8272c66836fd3d0668e08b3"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-36-96",
+      "byteLength": 496069,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "5599f1f332d929c35c4e3212a187fbba30895ef65ffffe6cafe81ffb4156fe24"
+    },
+    {
+      "artifactId": "wcl-g2-cohort116-f64-owned-pets.seg-96-136",
+      "byteLength": 493600,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "df4dddbad72b1dd67f8903bd78b01cdca7690e00ed6fc49371c9fd3446ae8152"
+    },
+    {
+      "artifactId": "wcl-g2-cohort246-f33-owned-pets.seg-0-46",
+      "byteLength": 498603,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "55e75cde46f7d18cba87cef9da48b9c8485e209f348d8702d0c27b7d257e0dd9"
+    },
+    {
+      "artifactId": "wcl-g2-cohort246-f33-owned-pets.seg-106-144",
+      "byteLength": 495413,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "362a6e083d5aa59e2b2be0c543a914ff598f280b3c434e0c988e80d50f33e27e"
+    },
+    {
+      "artifactId": "wcl-g2-cohort246-f33-owned-pets.seg-144-197",
+      "byteLength": 485741,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "831a0acb0e6d3ff4d3f670af7aa4120df20b617d605ef683b510545529b747d8"
+    },
+    {
+      "artifactId": "wcl-g2-cohort246-f33-owned-pets.seg-197-228",
+      "byteLength": 497893,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "072fb98a0731b372bc754d288f9f693cedece87eafead143695fb3daeba3900e"
+    },
+    {
+      "artifactId": "wcl-g2-cohort246-f33-owned-pets.seg-228-284",
+      "byteLength": 492399,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "987d6f227ad6e57c7b1d903317120478b8624d238e599be2aeebefcc39d035c1"
+    },
+    {
+      "artifactId": "wcl-g2-cohort246-f33-owned-pets.seg-284-315",
+      "byteLength": 499493,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "986db0e9c3ecd1ee757e686ed86ec77bd6fa3468a7283a887bf70bc8700d93d5"
+    },
+    {
+      "artifactId": "wcl-g2-cohort246-f33-owned-pets.seg-315-329",
+      "byteLength": 138151,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "cec6c773a4a098800e1869a1e7247ffe65937a1340a07b6b8eb57d2771ea9071"
+    },
+    {
+      "artifactId": "wcl-g2-cohort246-f33-owned-pets.seg-46-106",
+      "byteLength": 492022,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "12ae731a6e6807cd79109907863e29d8248252cfd7a4a1e6ea046e3a2aa10ab6"
+    },
+    {
+      "artifactId": "wcl-g2-cohort261-f31-owned-pets.seg-0-46",
+      "byteLength": 496380,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "89b3d9dab3fb017398b808742d5f86cb14f8dc7793b3719056f7ee8d9bee4271"
+    },
+    {
+      "artifactId": "wcl-g2-cohort261-f31-owned-pets.seg-108-159",
+      "byteLength": 495844,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "dff85296593dff5b53b73e44bc30084843d775c19973bdc25de2a56d289933ca"
+    },
+    {
+      "artifactId": "wcl-g2-cohort261-f31-owned-pets.seg-159-200",
+      "byteLength": 492219,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "803ed9ce9d10f9bdaeb3867f47c12cfc83f1120c7bcedebaf2b59f636de0be16"
+    },
+    {
+      "artifactId": "wcl-g2-cohort261-f31-owned-pets.seg-200-249",
+      "byteLength": 497330,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "1ebec7a0491881a94204645ba62594f65d2c0e1b0315b2a3a9d036765b97d0ee"
+    },
+    {
+      "artifactId": "wcl-g2-cohort261-f31-owned-pets.seg-249-290",
+      "byteLength": 483065,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "4904f91e6446ae7e35f8563f6fbf7bc654cff01497bd49941c3daeab09e83d05"
+    },
+    {
+      "artifactId": "wcl-g2-cohort261-f31-owned-pets.seg-290-342",
+      "byteLength": 497681,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "3085acd966e0c60403b1ce482d862cb7d8e67fa09192ce5c524225e3deaf8fca"
+    },
+    {
+      "artifactId": "wcl-g2-cohort261-f31-owned-pets.seg-342-360",
+      "byteLength": 130510,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "39a9cc90c4a384173f647d4a7c7dfe3241276123c20c53af19aa7b4e2d289dbe"
+    },
+    {
+      "artifactId": "wcl-g2-cohort261-f31-owned-pets.seg-46-108",
+      "byteLength": 479309,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "377ef918ec29260e12faeb18274a0d5214e057a0e6cda818692939128b1bd32d"
+    },
+    {
+      "artifactId": "wcl-g2-fight-context-cohort116-fight-64",
+      "byteLength": 228540,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "327f96a8923b9d9bb95e9a2d9d0d96d7abb0083b72552ffcaca7d0504eb96faa"
+    },
+    {
+      "artifactId": "wcl-g2-fight-context-cohort246-fight-33",
+      "byteLength": 180393,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "7851cc9db370d7169a45403df385a81c88f067a53d6c8dccd1ba3c6ad1f1d411"
+    },
+    {
+      "artifactId": "wcl-g2-fight-context-cohort261-fight-31",
+      "byteLength": 145679,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "6372ba5928089a62770049c824ccda2e58394d632113b26d8b6e3c0451bf2c04"
+    },
+    {
+      "artifactId": "wcl-g2-fight-npcs-comparisons",
+      "byteLength": 12579,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "f59cc6da2d8a49358ea1feef7239a1c1a70a35c5645f197f2e68338618ac886d"
+    },
+    {
+      "artifactId": "wcl-g2-tables-cohort116-fight-64",
+      "byteLength": 158635,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "1526b3849a130d79511edfc51e59fabe1bf9583f3e0e2054938e774bb240f00d"
+    },
+    {
+      "artifactId": "wcl-g2-tables-cohort246-fight-33",
+      "byteLength": 159303,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "8fa9ec83a5f74687cf6e767f625ca1444bd8ae9c86c5619b4f333fc7296e964c"
+    },
+    {
+      "artifactId": "wcl-g2-tables-cohort261-fight-31",
+      "byteLength": 164445,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "f4beb89d53f8040808899bd9f94c102fb6e30d6782c1bee89552f080efbcbe85"
     }
   ],
   "byLayer": [
@@ -425,14 +649,14 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 4872640,
-    "artifacts": 18,
+    "artifactBytes": 17034790,
+    "artifacts": 50,
     "assertions": 21,
     "cases": 9,
     "declared": 0,
     "executable": 21,
     "failed": 0,
-    "largestArtifactBytes": 496131,
+    "largestArtifactBytes": 499916,
     "notExecuted": 0,
     "passed": 21
   }
