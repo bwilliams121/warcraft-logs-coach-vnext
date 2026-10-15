@@ -7664,6 +7664,191 @@ The subject is its M11-E2 fixture and was never re-fetched.
   - The normalization-boundary contract names the capture tool as a third
     raw-array holder below the boundary.
 
+## M11-G3-1 — pinned SimulationCraft runner and result contract
+
+Model: SimulationCraft `33622e9d1662ff0e451691edf85a6b49cc9d11d9`, client data
+`12.1.0.69587` (`src/simulation/model.ts`). Self-hosted thin runner (G3-0). No
+Raidbots API, no simulator of our own. Nothing here produces a finding.
+
+- **Engine artifact** (`runner/simc-build/`).
+  - The official recipe, with documented deviations: Alpine pinned BY DIGEST in
+    both stages, a git checkout of the exact commit (so the binary embeds its
+    revision), `SC_NO_NETWORKING=1` (no libcurl), no API key, an unprivileged
+    runtime user and toolchain manifests.
+  - `build.mjs` writes `build-record.json`: base digest, build arguments,
+    toolchain, image id and the binary SHA-256 measured twice.
+  - An artifact is APPROVED (`runner/approved-artifacts.ts`) only after the
+    engine's own JSON identity is verified. The nightly and Windows builds are
+    never substitutes. With no approved artifact the runner answers
+    RUNNER_UNAVAILABLE.
+  - **Built and verified 2026-10-14.**
+    - Image `sha256:8ab91e72…aaf4`, built on Alpine 3.24.2 (pinned by digest)
+      with clang 22.1.3 in 2,079 s.
+    - Binary `41347bc4…cb77`; the build-stage and final-image hashes agree.
+    - The engine's own JSON reports `git_revision` `33622e9d16`, client data
+      12.1.0.69587 (`Live`) and `no_networking: true`.
+    - The binary starts in a runtime image that contains no libcurl.
+    - Golden artifact: `tests/fixtures/simulation/simc-33622e9d-blood-dev-standard.json`
+      (a 17.9 KB projection; the raw report's SHA-256 is recorded inside it).
+- **Identity** (`model.ts`). From the engine's JSON: `git_revision` must be
+  ≥ 7 hex characters and a prefix of the commit; the client data comes from
+  `dbc.Live.wow_version` with `version_used` Live; `no_networking` must be
+  true. The runner computes the SHA-256 of the binary it executed. Any
+  disagreement is MODEL_PROVENANCE_MISMATCH. File names and tags are never
+  trusted; the Docker launcher refuses tags.
+- **Job** (`job.ts`, `simulation-job/1`).
+  - Strict zod and structured data only. No field can carry SimC text,
+    including paths, includes, `$(…)`, APL, raid events, outputs, sources,
+    profilesets or overrides.
+  - Consumables, raid buffs and Bloodlust are explicit
+    (`ACTUAL_OBSERVED | DEVELOPMENT_FIXTURE`). There is no ideal default.
+  - `additionalTargets` accepts no element (ENVIRONMENT_NOT_REPRESENTABLE), so
+    an engagement span never becomes availability.
+  - Limits: payload ≤ 256 KB, iterations ≤ 20,000, timeout ≤ 60 s. The job's
+    policy must equal the registry entry.
+- **Spec ownership.** `src/simulation/` names no specialization. Blood's engine
+  tokens live in `src/specs/deathknight/blood/simulation-binding.ts`. The
+  runner is the composition root (`runner/spec-bindings.ts`). An unbound spec is
+  UNSUPPORTED_SPEC.
+- **Input builder** (`input-builder.ts`). The only SimC text writer. It is
+  deterministic: fixed names (`Subject` / `Target`), no paths or timestamps, and
+  `strict_parsing=1`.
+  - `optimal_raid=0`, then every override is written explicitly.
+  - Bloodlust is written as the observed time or `override.bloodlust=0`. The
+    engine checks every 1 s, so the effective time is the next whole second.
+  - NONE consumables are written as `disabled`, because an empty value means
+    the class default.
+  - Duration uses `fixed_time=1`, `vary_combat_length=0` and the exact
+    `max_time`. This is a CEILING ASSUMPTION: `fight_remains` is perfect
+    information.
+- **Times are integer milliseconds.** The pinned engine parses a timespan as
+  `trunc(stod(text) * 1000)` (`util/timespan.hpp:74`).
+  - Derived stddevs are therefore 1 / 37 / 62 ms, not 1.25 / 37.5 / 62.5. The
+    profiles hold the effective values, and the JSON echo agrees.
+  - About 1% of exact decimal texts truncate one millisecond short (for example
+    "1.001" becomes 1000). The builder then writes the half-millisecond
+    midpoint, and verifies the round trip for every value it emits.
+- **Tank model** (`tank-model.ts`). STANDARD_TANK_LOAD_V1 is
+  `tank_dummy` + `tank_dummy_type=mythic`: level +3, Mythic armor, the engine's
+  tank action list and its `tank_heal` event. It is a standardized input,
+  never a reconstruction of intake.
+- **Execution profiles and policies.**
+  - Profiles: SIMC_DEFAULT_PINNED (engine defaults written out), plus
+    ELITE_REALISTIC_CANDIDATE_A and _B, which are PROVISIONAL (G3-3 decides).
+  - Policies: STANDARD_SIM_V1 (2,000 iterations, 8 threads) and
+    PRECISION_ESCALATED_V1 (8,000 iterations, 8 threads) are CANDIDATES
+    pending the exact-pin benchmark. The BENCHMARK_* policies measure only.
+  - All policies are deterministic, with a fixed seed, iterations and threads,
+    and no `target_error`. Thread count is part of identity, because seeds are
+    `seed + thread`.
+- **Parser** (`result-parser.ts`, SIMC_JSON_2_PARSER_V1). Report 2.0.0 only, up
+  to 5 MB. Before reading any number it checks, in order:
+  1. provenance;
+  2. the full options echo (iterations, threads, seed, determinism, duration,
+     every timing, override flags and the lust time);
+  3. the actors (one bound player with the job's level, race, talents and item
+     ids; one `Target`; no raid event except `tank_heal`);
+  4. no engine log, a fixed simulated length and a sane counted total;
+  5. DPS greater than 0;
+  6. the precision gate (SIMULATION_PRECISION_NOT_MET).
+
+  Two report facts were settled on the real engine:
+  - `options.seed` is NOT an echo. With `deterministic=1` the engine reseeds
+    at every iteration reset (`sim.cpp:1810`), so the report carries the last
+    reseed. The configured seed's effect is proven by reproduction instead.
+  - Items without stats (the cosmetic shirt and tabard) are omitted from the
+    gear echo (`report_json.cpp:387`). Those two slots may be absent but must
+    match when present; every other slot must be echoed.
+
+  Raw JSON is not the contract; `SimulationResult` (`result.ts`) is.
+  Reproduction compares semantics under a 1e-9 relative tolerance, and
+  `diagnostics` is ignored.
+- **Hashes and keys** (`canonical.ts`, `cache-key.ts`).
+  - WebCrypto SHA-256 over canonical JSON. The profile and environment hashes
+    cannot contain a name, report or path.
+  - The engine-run key covers: job schema, commit, client data, binary, recipe,
+    builder revision, spec binding, both hashes, execution profile (id, version,
+    settings), policy, iterations, seed, threads and outputs.
+  - The parsed-result key adds the parser revision.
+- **Runner** (`runner/`). One path: `prepareSimulation` → limits → job slot →
+  launcher → parser.
+  - Process: no shell, a fixed argument vector, a private temp directory
+    (always removed) and an empty environment. On Windows, libuv still adds its
+    fixed required set.
+  - Limits: SIGKILL at the wall-clock cap (`docker kill` too), capped stderr,
+    output size checked before reading, and host paths stripped from failure
+    details.
+  - Docker launcher: `--network none --read-only --cap-drop ALL`, plus
+    no-new-privileges, pids, memory and CPU caps.
+  - Failures: `RUNNER_OVERLOADED` (no queue), `JOB_REJECTED` (threads above
+    the core limit), `CANCELLED` and `RUNNER_UNAVAILABLE`.
+  - The same job, builder, verifier, parser and result serve local and remote
+    runs; only the launcher differs.
+- **Pet map audit** (pinned `sc_death_knight.cpp`, audit only).
+  - `blood_beast` ↔ 217228 is engine-derived (spell 434237 effect 1
+    `misc_value1`).
+  - `dancing_rune_weapon`, `everlasting_bond` and `dance_of_midnight` set no
+    npc id, and all three plausibly correspond to WCL's Rune Weapon (27893).
+    That is AMBIGUOUS, not mapped.
+  - `ghoul` ↔ Risen Ghoul (26125) is NOT ESTABLISHED (no npc id at the pin).
+  - Pets are reported by engine name only; DPS parsing does not depend on
+    them.
+  - On the real development job, `stats_pets` held only `dance_of_midnight`
+    and `everlasting_bond`.
+- **Not in G3-1.** Race (the development fixture states one), WCL profile
+  reconstruction, fight environment, adds, ceilings, configuration search and
+  coaching.
+- **Exact-pin benchmark** (i7-9750H, 12 logical cores, Docker Desktop/WSL2;
+  development Blood job, 345.177 s, SIMC_DEFAULT_PINNED; wall time includes
+  container start).
+
+  | Policy | Threads | Counted | Mean DPS | Rel. SE | 95% CI ± | Engine s | Wall s |
+  | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+  | BENCHMARK_300_T1 | 1 | 299 | 82,228.3 | 0.207% | 0.405% | 4.2 | 5.2 |
+  | STANDARD_SIM_V1 (2k) | 8 | 1,992 | 82,330.6 | 0.077% | 0.150% | 9.0 | 10.2 |
+  | BENCHMARK_2K_T12 | 12 | 1,988 | 82,323.0 | 0.077% | 0.150% | 6.8 | 7.7 |
+  | BENCHMARK_5K_T12 | 12 | 4,988 | 82,296.8 | 0.049% | 0.095% | 13.9 | 14.8 |
+  | PRECISION_ESCALATED_V1 (8k) | 8 | 7,992 | 82,287.2 | 0.038% | 0.075% | 18.9 | 19.7 |
+  | BENCHMARK_10K_T12 | 12 | 9,988 | 82,285.7 | 0.034% | 0.067% | 23.8 | 24.6 |
+
+  - Per-iteration σ is 3.42% of the mean, and counted = iterations − threads.
+  - Container and startup overhead is 0.7–1.2 s, and the JSON is about
+    0.8–0.85 MB.
+  - Engine time for the same 2k/8-thread job varied between 4.7 and 9.0 s
+    across runs (host load).
+  - Determinism: the same 8-thread job twice differs by 2.7e-15 relative; the
+    1-thread job is bit-identical.
+  - **Recommendation:** keep STANDARD_SIM_V1 at 2,000 iterations / 8 threads
+    and PRECISION_ESCALATED_V1 at 8,000 / 8.
+    - Their relative-SE gates (0.12% / 0.06%) hold with margin (observed
+      0.077% / 0.038%).
+    - A difference of two STANDARD results has a 95% CI of about ±0.21%, well
+      inside the 0.5% materiality threshold.
+    - Both fit the 60 s cap and the 1–2 minute report target.
+    - The policies stay CANDIDATE until the owner confirms them.
+- **Execution-profile finding (for G3-3).** ELITE_REALISTIC_CANDIDATE_A and
+  _B produced DPS bit-identical to SIMC_DEFAULT_PINNED for Blood.
+  - Player reaction time is sampled only for `reactable` buffs
+    (`buff.cpp:2697`), and the pinned Blood APL has no `.react`.
+  - So reaction-only candidates are inert for Blood. Realism for Blood must
+    come from lag, queue and cooldown-tolerance parameters.
+- **G6 note.** One-GCD differentials are not supported.
+  - On the pin, 2,000 iterations give a relative SE of 0.077% (95% CI
+    ±0.15%).
+  - One filler GCD in a 345 s fight is about 0.4% of all GCDs, and the
+    difference between two adjacent choices is far smaller. A changed decision
+    also desynchronises the RNG streams, so the noise is not paired.
+  - Only whole-policy, cooldown-policy and configuration variants are
+    resolvable against the 0.5% materiality threshold.
+- **Layering** (`tests/contracts/m11g3-simulation-layering.test.ts`).
+  - `src/simulation/` imports only zod and itself: no Node, no APL, authority,
+    spec, comparison or combat-facts code, and no verdict vocabulary.
+  - The runner reaches `src/` only through `src/simulation/` and spec bindings.
+  - No simulation code has first/last-hit vocabulary.
+  - `types/node-builtins.d.ts` grew a marked runner section (`spawn`, a binary
+    `readFileSync`, `statSync().size`, byte hashing, `cpus`), instead of adding
+    `@types/node`.
+
 ---
 
 # Milestone 12 — Healer Foundation

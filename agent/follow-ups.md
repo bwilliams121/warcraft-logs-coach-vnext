@@ -439,6 +439,55 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G3-1: what the simulation runner does not yet establish
+
+**Raised:** M11-G3-1 (2026-10-14).
+
+**Built and verified.** The exact pin was built in Docker (Alpine by digest,
+clang 22.1.3) and verified by its own JSON: `33622e9d16`, 12.1.0.69587 Live,
+`no_networking` true. The approved artifact has binary sha256 `41347bc4…cb77`.
+A golden artifact and the exact-pin benchmark exist (`agent/architecture.md`,
+M11-G3-1).
+
+**Settled on real output.**
+- `encoded_item` carries `id=`.
+- No `logs` array appears on a clean run.
+- `dps.count` = iterations − threads exactly.
+- `overrides` echoed only `bloodlust` and `bloodlust_time` for the development
+  job.
+- Two of my earlier assumptions were wrong and are fixed with tests:
+  - `options.seed` is not an echo; deterministic=1 reseeds every iteration;
+  - stat-less items (shirt, tabard) are not echoed.
+
+**Still unconfirmed on real output.**
+- How a `disabled` consumable is echoed. The development job names all five,
+  so NONE is still not asserted.
+- Whether `logs` warnings ever appear on valid runs. Any entry still fails
+  closed.
+
+**Owner decisions pending.**
+- STANDARD_SIM_V1 (2k / 8 threads) and PRECISION_ESCALATED_V1 (8k / 8) are
+  recommended but remain CANDIDATE.
+- ELITE_REALISTIC_CANDIDATE_A/B are inert for Blood: reaction time is sampled
+  only for `.react` buffs, and the pinned Blood APL has none. G3-3 must use
+  other execution parameters for Blood.
+
+**Pets are not mapped to WCL actors.**
+- Only Blood Beast (217228) is engine-derived.
+- The Rune Weapon is AMBIGUOUS across three engine pets.
+- Risen Ghoul is not established.
+- The real development job reported only `dance_of_midnight` and
+  `everlasting_bond`.
+
+**Binary reproducibility is not claimed.** `__DATE__` / `__TIME__` are
+compiled in, so a rebuild yields a new binary hash and needs its own approval.
+The full-history clone took about 13 minutes of a 35-minute build.
+
+**Development-host environment.** On Windows, libuv gives every child a fixed
+set of required variables even with an empty environment. The production
+runner (Linux, DirectLauncher in the image) passes none. Docker Desktop's CLI
+is not on Git Bash's PATH by default.
+
 ## After M11-G2: what the comparison facts do not establish
 
 **Raised:** M11-G2 (2026-10-12). Each item is unproven or refused today, never

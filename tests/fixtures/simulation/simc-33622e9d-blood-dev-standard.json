@@ -1,0 +1,592 @@
+{
+  "_golden": {
+    "schema": "simc-golden-projection/1",
+    "source": "exact-pin engine sha256 41347bc4203bd1b073a617cd9cd147a96c9c09a36f8c7af5c013ca7be273cb77, image sha256:8ab91e722bd4c6e50a58a38a1244d2688bdaf3ddc68e09cd2aa59877f8b7aaf4",
+    "job": "tests/support/simulation/dev-blood-job.ts devBloodJob('STANDARD_SIM_V1', 'SIMC_DEFAULT_PINNED')",
+    "rawSha256": "997dc61d2bdea2089c62ee2dc08bd97667bc6da56d4463387b3b1c2e22f7b285",
+    "rawBytes": 853670,
+    "projection": "only the fields SIMC_JSON_2_PARSER_V1 reads; build_date, build_time, timestamp and all timelines/buffs/procs dropped"
+  },
+  "version": "1210-01",
+  "report_version": "2.0.0",
+  "ptr_enabled": 1,
+  "beta_enabled": 0,
+  "no_networking": true,
+  "git_revision": "33622e9d16",
+  "git_branch": "HEAD",
+  "sim": {
+    "options": {
+      "max_time": 345.177,
+      "vary_combat_length": 0,
+      "iterations": 2000,
+      "target_error": 0,
+      "threads": 8,
+      "seed": 7596449901710748000,
+      "queue_lag": 0.005,
+      "queue_lag_stddev": 0.001,
+      "gcd_lag": 0.15,
+      "gcd_lag_stddev": 0.037,
+      "channel_lag": 0.25,
+      "channel_lag_stddev": 0.062,
+      "queue_gcd_reduction": 0.1,
+      "strict_gcd_queue": false,
+      "confidence": 0.95,
+      "confidence_estimator": 1.9599639854088815,
+      "world_lag": 0.1,
+      "world_lag_stddev": 0.01,
+      "travel_variance": 0,
+      "default_skill": 1,
+      "reaction_time": 0.5,
+      "fixed_time": true,
+      "optimal_raid": 0,
+      "deterministic": 1,
+      "average_range": 1,
+      "average_gauss": 0,
+      "fight_style": "Patchwerk",
+      "desired_targets": 1,
+      "default_aura_delay": 0.03,
+      "default_aura_delay_stddev": 0.005,
+      "dbc": {
+        "Live": {
+          "build_level": 69587,
+          "wow_version": "12.1.0.69587",
+          "hotfix_date": "2026-09-10",
+          "hotfix_build": 69587,
+          "hotfix_hash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720"
+        },
+        "version_used": "Live"
+      }
+    },
+    "overrides": {
+      "bloodlust": 1,
+      "bloodlust_time": 5
+    },
+    "statistics": {
+      "elapsed_cpu_seconds": 60.4032566,
+      "elapsed_time_seconds": 8.998933687,
+      "total_events_processed": 16825368,
+      "simulation_length": {
+        "sum": 687592.584000029,
+        "count": 1992,
+        "mean": 345.1770000000146,
+        "min": 345.177,
+        "max": 345.177,
+        "median": 345.177,
+        "variance": 2.117582368135751e-22,
+        "std_dev": 1.4551915228366852e-11,
+        "mean_variance": 1.0630433574978668e-25,
+        "mean_std_dev": 3.260434568424686e-13
+      }
+    },
+    "players": [
+      {
+        "name": "Subject",
+        "race": "mechagnome",
+        "level": 90,
+        "role": "tank",
+        "specialization": "Blood Death Knight",
+        "talents": "CoPAAAAAAAAAAAAAAAAAAAAAAwYWGzMmxMjhZbmZmmZxMjxMGAAAAwMzMzMzMDzYMAYMzMzAAAYgBmxmGLbAWGwGgZMDAAYmBzwA",
+        "reaction_offset": 0.1,
+        "reaction_max": 1.4000000000000001,
+        "reaction_mean": 0.25,
+        "reaction_stddev": 0.05,
+        "reaction_nu": 0.15,
+        "world_lag": 0.1,
+        "world_lag_stddev": 0.01,
+        "brain_lag": 0,
+        "brain_lag_stddev": 0,
+        "potion": "draught_of_rampant_abandon_2",
+        "flask": "flask_of_the_shattered_sun_2",
+        "food": "silvermoon_parade",
+        "augmentation": "void_touched",
+        "temporary_enchant": "main_hand:thalassian_phoenix_oil_2",
+        "collected_data": {
+          "dps": {
+            "sum": 164002590.33614004,
+            "count": 1992,
+            "mean": 82330.61763862452,
+            "min": 71708.91637701317,
+            "max": 93312.69760756221,
+            "median": 82452.6991957475,
+            "variance": 7924109.393423013,
+            "std_dev": 2814.979465897223,
+            "mean_variance": 3977.96656296336,
+            "mean_std_dev": 63.07112305138826
+          }
+        },
+        "stats": [
+          {
+            "id": 1264426,
+            "name": "augmentation",
+            "type": "damage",
+            "compound_amount": 0,
+            "num_executes": {
+              "mean": 1
+            }
+          },
+          {
+            "id": 0,
+            "name": "auto_attack_mh",
+            "type": "damage",
+            "compound_amount": 2633569.2260280144,
+            "num_executes": {
+              "mean": 173.31927710843374
+            }
+          },
+          {
+            "id": 434237,
+            "name": "blood_beast",
+            "type": "damage",
+            "compound_amount": 0,
+            "num_executes": {
+              "mean": 4
+            }
+          },
+          {
+            "id": 50842,
+            "name": "blood_boil",
+            "type": "damage",
+            "compound_amount": 1021234.5315306998,
+            "num_executes": {
+              "mean": 46.97991967871486
+            }
+          },
+          {
+            "id": 50842,
+            "name": "blood_boil_boiling_point",
+            "type": "damage",
+            "compound_amount": 421172.97903539386,
+            "num_executes": {
+              "mean": 21.34487951807229
+            }
+          },
+          {
+            "id": 374606,
+            "name": "blood_draw",
+            "type": "damage",
+            "compound_amount": 14523.724245829002,
+            "num_executes": {
+              "mean": 1.2575301204819278
+            }
+          },
+          {
+            "id": 1263752,
+            "name": "blood_mist",
+            "type": "damage",
+            "compound_amount": 279499.1885591265,
+            "num_executes": {
+              "mean": 36
+            }
+          },
+          {
+            "id": 55078,
+            "name": "blood_plague",
+            "type": "damage",
+            "compound_amount": 859395.7311540362,
+            "num_executes": {
+              "mean": 77.09437751004016
+            }
+          },
+          {
+            "id": 55078,
+            "name": "blood_plague_heal",
+            "type": "heal",
+            "compound_amount": 897743.9740233623,
+            "num_executes": {
+              "mean": 135
+            }
+          },
+          {
+            "id": 77535,
+            "name": "blood_shield",
+            "type": "absorb",
+            "compound_amount": 11000650.22290847,
+            "num_executes": {
+              "mean": 97.3785140562249
+            }
+          },
+          {
+            "id": 1264146,
+            "name": "crawling_plague",
+            "type": "damage",
+            "compound_amount": 1142332.1773445723,
+            "num_executes": {
+              "mean": 28.41817269076305
+            }
+          },
+          {
+            "id": 1264156,
+            "name": "crawling_plague_heal",
+            "type": "heal",
+            "compound_amount": 391126.8647268894,
+            "num_executes": {
+              "mean": 28.41817269076305
+            }
+          },
+          {
+            "id": 49028,
+            "name": "dancing_rune_weapon",
+            "type": "damage",
+            "compound_amount": 969884.1625567819,
+            "num_executes": {
+              "mean": 4
+            }
+          },
+          {
+            "id": 43265,
+            "name": "death_and_decay",
+            "type": "damage",
+            "compound_amount": 618208.0357113123,
+            "num_executes": {
+              "mean": 26.946787148594378
+            }
+          },
+          {
+            "id": 49998,
+            "name": "death_strike",
+            "type": "damage",
+            "compound_amount": 8903678.267630035,
+            "num_executes": {
+              "mean": 97.3785140562249
+            }
+          },
+          {
+            "id": 45470,
+            "name": "death_strike_heal",
+            "type": "heal",
+            "compound_amount": 8985741.694832738,
+            "num_executes": {
+              "mean": 97.3785140562249
+            }
+          },
+          {
+            "id": 195292,
+            "name": "deaths_caress",
+            "type": "damage",
+            "compound_amount": 40461.16690661011,
+            "num_executes": {
+              "mean": 7.926204819277109
+            }
+          },
+          {
+            "id": 1235111,
+            "name": "flask",
+            "type": "damage",
+            "compound_amount": 0,
+            "num_executes": {
+              "mean": 1
+            }
+          },
+          {
+            "id": 1259659,
+            "name": "food",
+            "type": "damage",
+            "compound_amount": 0,
+            "num_executes": {
+              "mean": 1
+            }
+          },
+          {
+            "id": 207203,
+            "name": "frost_shield",
+            "type": "absorb",
+            "compound_amount": 1959275.2062468792,
+            "num_executes": {
+              "mean": 173.31927710843374
+            }
+          },
+          {
+            "id": 1306604,
+            "name": "guillotine",
+            "type": "damage",
+            "compound_amount": 1688314.5474027197,
+            "num_executes": {
+              "mean": 28.623995983935743
+            }
+          },
+          {
+            "id": 206930,
+            "name": "heart_strike",
+            "type": "damage",
+            "compound_amount": 5130574.702867959,
+            "num_executes": {
+              "mean": 147.57630522088354
+            }
+          },
+          {
+            "id": 460501,
+            "name": "heart_strike_bloodied_blade",
+            "type": "damage",
+            "compound_amount": 79431.89638376218,
+            "num_executes": {
+              "mean": 1.4181726907630523
+            }
+          },
+          {
+            "id": 143924,
+            "name": "leech",
+            "type": "heal",
+            "compound_amount": 1990531.8757223757,
+            "num_executes": {
+              "mean": 340.11746987951807
+            }
+          },
+          {
+            "id": 195182,
+            "name": "marrowrend",
+            "type": "damage",
+            "compound_amount": 764448.3089128484,
+            "num_executes": {
+              "mean": 8.325301204819278
+            }
+          },
+          {
+            "id": 1236998,
+            "name": "potion",
+            "type": "damage",
+            "compound_amount": 0,
+            "num_executes": {
+              "mean": 2
+            }
+          },
+          {
+            "id": 46585,
+            "name": "raise_dead",
+            "type": "damage",
+            "compound_amount": 126828.66177383951,
+            "num_executes": {
+              "mean": 3
+            }
+          },
+          {
+            "id": 317614,
+            "name": "relish_in_blood",
+            "type": "heal",
+            "compound_amount": 397278.34817095904,
+            "num_executes": {
+              "mean": 26.93975903614458
+            }
+          },
+          {
+            "id": 326808,
+            "name": "rune_of_sanguination",
+            "type": "heal",
+            "compound_amount": 636749.2135792407,
+            "num_executes": {
+              "mean": 2
+            }
+          },
+          {
+            "id": 1263786,
+            "name": "sanguinary_burst",
+            "type": "damage",
+            "compound_amount": 329201.45326977165,
+            "num_executes": {
+              "mean": 4
+            }
+          },
+          {
+            "id": 55233,
+            "name": "vampiric_blood",
+            "type": "damage",
+            "compound_amount": 0,
+            "num_executes": {
+              "mean": 12.526606425702811
+            }
+          },
+          {
+            "id": 434422,
+            "name": "vampiric_strike_heal",
+            "type": "heal",
+            "compound_amount": 552208.4855501321,
+            "num_executes": {
+              "mean": 54.89708835341366
+            }
+          }
+        ],
+        "stats_pets": {
+          "everlasting_bond": [
+            {
+              "id": 0,
+              "name": "auto_attack_mh",
+              "type": "damage",
+              "compound_amount": 33364.88194500411,
+              "num_executes": {
+                "mean": 21.440763052208837
+              }
+            },
+            {
+              "id": 50842,
+              "name": "blood_boil",
+              "type": "damage",
+              "compound_amount": 55467.09525942255,
+              "num_executes": {
+                "mean": 4.209839357429719
+              }
+            },
+            {
+              "id": 55078,
+              "name": "blood_plague",
+              "type": "damage",
+              "compound_amount": 58055.797107051214,
+              "num_executes": {
+                "mean": 4.209839357429719
+              }
+            },
+            {
+              "id": 49998,
+              "name": "death_strike",
+              "type": "damage",
+              "compound_amount": 616870.0738444192,
+              "num_executes": {
+                "mean": 18.951807228915662
+              }
+            },
+            {
+              "id": 433895,
+              "name": "vampiric_strike",
+              "type": "damage",
+              "compound_amount": 207302.77378117433,
+              "num_executes": {
+                "mean": 24.143072289156628
+              }
+            }
+          ],
+          "dance_of_midnight": [
+            {
+              "id": 0,
+              "name": "auto_attack_mh",
+              "type": "damage",
+              "compound_amount": 97689.60072017192,
+              "num_executes": {
+                "mean": 77.46586345381526
+              }
+            },
+            {
+              "id": 50842,
+              "name": "blood_boil",
+              "type": "damage",
+              "compound_amount": 297412.6428053695,
+              "num_executes": {
+                "mean": 36.15160642570281
+              }
+            },
+            {
+              "id": 55078,
+              "name": "blood_plague",
+              "type": "damage",
+              "compound_amount": 292396.82859768544,
+              "num_executes": {
+                "mean": 41.140562248995984
+              }
+            },
+            {
+              "id": 49998,
+              "name": "death_strike",
+              "type": "damage",
+              "compound_amount": 1029756.2367145665,
+              "num_executes": {
+                "mean": 53.15963855421687
+              }
+            },
+            {
+              "id": 195292,
+              "name": "deaths_caress",
+              "type": "damage",
+              "compound_amount": 8531.205661135527,
+              "num_executes": {
+                "mean": 4.967871485943775
+              }
+            },
+            {
+              "id": 228645,
+              "name": "heart_strike",
+              "type": "damage",
+              "compound_amount": 428011.3249785675,
+              "num_executes": {
+                "mean": 59.351907630522085
+              }
+            },
+            {
+              "id": 195182,
+              "name": "marrowrend",
+              "type": "damage",
+              "compound_amount": 36238.01335258079,
+              "num_executes": {
+                "mean": 5.490461847389558
+              }
+            },
+            {
+              "id": 433895,
+              "name": "vampiric_strike",
+              "type": "damage",
+              "compound_amount": 234780.36856696292,
+              "num_executes": {
+                "mean": 31.54116465863454
+              }
+            }
+          ]
+        },
+        "gear": {
+          "head": {
+            "encoded_item": "baleful_graveknights_casque,id=271474,bonus_id=6652/12846/13440/13692/13696/13698,enchant_id=7991"
+          },
+          "neck": {
+            "encoded_item": "aqirbane_reliquary,id=268265,bonus_id=6652/12854/13334/13668/13696/13987,gem_id=240983/240916"
+          },
+          "shoulders": {
+            "encoded_item": "baleful_graveknights_gibbets,id=271472,bonus_id=6652/12851/13335/13694/13697,enchant_id=7973"
+          },
+          "chest": {
+            "encoded_item": "baleful_graveknights_breastplate,id=271477,bonus_id=1587/6652/12854/13334/13690/13698,enchant_id=7987"
+          },
+          "waist": {
+            "encoded_item": "sandscoured_greatbelt,id=159442,bonus_id=6652/12699/12846/13440/13662/13696"
+          },
+          "legs": {
+            "encoded_item": "baleful_graveknights_greaves,id=271473,bonus_id=6652/12854/13334/13693/13698/13708,enchant_id=8159"
+          },
+          "feet": {
+            "encoded_item": "spellbreakers_march,id=237828,bonus_id=8790/8960/12214/12384/13667/13751/13836/14001/12497,enchant_id=8019"
+          },
+          "wrists": {
+            "encoded_item": "spellbreakers_bracers,id=237834,bonus_id=8792/8960/12214/12384/13667/13695/13696/13751/13836/14001/12497,gem_id=240916"
+          },
+          "hands": {
+            "encoded_item": "baleful_graveknights_deathgrips,id=271475,bonus_id=6652/12846/13440/13691/13697"
+          },
+          "finger1": {
+            "encoded_item": "ritual_binders_ring,id=159459,bonus_id=6652/12699/12846/13440/13668,gem_id=240916,enchant_id=7967"
+          },
+          "finger2": {
+            "encoded_item": "charged_sandstone_band,id=158366,bonus_id=42/12699/12846/13440/13668,gem_id=240916,enchant_id=7967"
+          },
+          "trinket1": {
+            "encoded_item": "zuljins_guillotine_technique,id=270173,bonus_id=6652/12854/13334"
+          },
+          "trinket2": {
+            "encoded_item": "tumor_of_the_swarm,id=250245,bonus_id=6652/12699/12846/13440"
+          },
+          "back": {
+            "encoded_item": "baleful_graveknights_greatcloak,id=271469,bonus_id=6652/12854/13334/13696"
+          },
+          "main_hand": {
+            "encoded_item": "blood_knights_warblade,id=237846,bonus_id=8790/12214/12715/13751/13836/14004/12497,enchant_id=6241"
+          }
+        }
+      }
+    ],
+    "targets": [
+      {
+        "name": "Target",
+        "level": 93
+      }
+    ],
+    "raid_events": [
+      {
+        "name": "tank_heal",
+        "type": "heal"
+      }
+    ]
+  }
+}

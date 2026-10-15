@@ -26,6 +26,7 @@
     "src/**/*.ts",
     "tests/**/*.ts",
     "scripts/**/*.ts",
+    "runner/**/*.ts",
     "types/**/*.d.ts",
     "vitest.config.ts",
     "vitest.probe.config.ts"

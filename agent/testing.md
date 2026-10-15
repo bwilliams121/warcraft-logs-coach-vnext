@@ -1604,7 +1604,37 @@ comparison facts (M11-G2, tests/unit/m11g2-*.test.ts, contracts/m11g2-comparison
   post-hoc modules                             -> unreachable from SimC / specs / services (W)
   sanitizer / committed files                  -> byte-identical re-cut; pseudonyms only (X, Y)
   capture plan                                 -> <= 36, no rankings, never the subject, always filtered (Z, AA, AB, AC)
+simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
+  smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
+  directive / path / $(…) / space in an id     -> JOB_REJECTED (C)
+  built input                                  -> allow-listed keys only, no forbidden directive, byte-stable (D, E)
+  other spec / no binding / other model        -> UNSUPPORTED_SPEC / UNSUPPORTED_SPEC / UNSUPPORTED_MODEL_VERSION (G, H)
+  any additional target                        -> ENVIRONMENT_NOT_REPRESENTABLE; no first/last-hit vocabulary (I, layering)
+  duration / gear / lust / consumable change   -> environment / profile / environment / profile hash only (J)
+  payload, iterations, threads, policy drift   -> JOB_REJECTED (L)
+  any cache-key component                      -> a different engine-run key (M)
+  empty buff list / lust NONE / consumable NONE -> every override 0 / override.bloodlust=0 / disabled, never omitted (N, O)
+  ms value whose decimal truncates short       -> midpoint text; engine round trip exact up to 20 min (P)
+  revision / data / PTR / networking / binary  -> MODEL_PROVENANCE_MISMATCH (R, parser)
+  echo, actors, raid events, logs, length      -> SIMULATION_OUTPUT_MALFORMED / SIMULATION_ENGINE_FAILED (parser)
+  zero or negative DPS, bad counted total      -> SIMULATION_OUTPUT_MALFORMED, never a number (parser)
+  noisier than the policy                      -> SIMULATION_PRECISION_NOT_MET (parser)
+  diagnostics differ / DPS differs             -> semantically equal / first differing path (T)
+  engine exit≠0, no output, oversize, hang     -> ENGINE_FAILED, ENGINE_FAILED, MALFORMED, TIMEOUT; temp dir removed (U)
+  cancel / no engine / no artifact / busy      -> CANCELLED / RUNNER_UNAVAILABLE / RUNNER_UNAVAILABLE / RUNNER_OVERLOADED (U)
+  engine argv and environment                  -> exactly job.simc + json2 in its temp dir; empty env (V)
+  image tag                                    -> refused; content-addressed refs only (U)
+  14 deliberate source faults                  -> each caught by the suite (.probe/m11g3/faults.cjs)
+  reported seed differs from configured        -> parses: deterministic=1 reseeds every iteration (pinned sim.cpp:1810)
+  shirt/tabard absent / wrong / other slot gone -> parses / MALFORMED / MALFORMED (report_json.cpp:387)
+  golden exact-pin artifact                    -> pinned identity, DPS and counts; wrong binary -> MODEL_PROVENANCE_MISMATCH
 ```
+
+The fake engine (`tests/support/simulation/fake-simc.mjs`) re-parses the
+builder's text independently and echoes it the way the pinned report writer
+does. It is never a source of DPS. Exact-pin identity, determinism, precision
+and runtime are measured by `scripts/bench/m11g3-simc-exact-pin.bench.ts`
+against the built image, not by `npm test`.
 
 Required negative pairs, same premises, different construct:
 
