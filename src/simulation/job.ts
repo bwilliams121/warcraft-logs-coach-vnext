@@ -110,7 +110,24 @@ export const TANK_MODELS = ["STANDARD_TANK_LOAD_V1"] as const;
 /** A SimC item/consumable name: lowercase letters, digits and underscores only. */
 const identifier = z.string().regex(/^[a-z][a-z0-9_]{0,63}$/);
 const gameId = z.number().int().min(1).max(10_000_000);
-const provenance = z.enum(["ACTUAL_OBSERVED", "DEVELOPMENT_FIXTURE"]);
+/**
+ * FIDELITY_CONTROL (M11-G3-2): deliberately disabled for a profile-fidelity
+ * round trip. Allowed only on a LOGGED_FIDELITY_PROBE, and only as "nothing":
+ * no consumable, no raid buff, no Bloodlust.
+ */
+const provenance = z.enum(["ACTUAL_OBSERVED", "DEVELOPMENT_FIXTURE", "FIDELITY_CONTROL"]);
+
+/**
+ * DEVELOPMENT_FIXTURE: test/benchmark data. LOGGED_RECONSTRUCTION: a character
+ * reconstructed from a logged fight (M11-G3-2). LOGGED_FIDELITY_PROBE: the same
+ * reconstruction run only to read the engine echo back — never a ceiling, and
+ * the only kind that may state race "none" while race is unresolved.
+ */
+export const PROFILE_KINDS = [
+  "DEVELOPMENT_FIXTURE",
+  "LOGGED_RECONSTRUCTION",
+  "LOGGED_FIDELITY_PROBE",
+] as const;
 
 const enchant = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("KNOWN"), enchantId: gameId }).strict(),
@@ -136,10 +153,10 @@ const consumable = z.union([identifier, z.literal("NONE")]);
 
 const characterInput = z
   .object({
-    profileKind: z.literal("DEVELOPMENT_FIXTURE"),
+    profileKind: z.enum(PROFILE_KINDS),
     spec: z.string().regex(/^[a-z]{1,32}\/[a-z_]{1,32}$/),
     level: z.number().int().min(80).max(90),
-    race: z.enum(PLAYABLE_RACES),
+    race: z.union([z.enum(PLAYABLE_RACES), z.literal("none")]),
     talents: z.object({ importString: z.string().regex(/^[A-Za-z0-9+/]{20,256}$/) }).strict(),
     gear: z.array(gearSlot).min(1).max(GEAR_SLOTS.length),
     consumables: z
@@ -242,6 +259,33 @@ export function validateSimulationJob(
       "ENVIRONMENT_NOT_REPRESENTABLE",
       "environment: G3-1 has only the standardized tank-load target model",
     );
+  }
+  const probe = job.character.profileKind === "LOGGED_FIDELITY_PROBE";
+  if (job.character.race === "none" && !probe) {
+    return fail("JOB_REJECTED", "character.race: none is allowed only for a LOGGED_FIDELITY_PROBE");
+  }
+  const consumables = job.character.consumables;
+  const controlled = [
+    consumables.provenance,
+    job.environment.raidBuffs.provenance,
+    job.environment.bloodlust.provenance,
+  ].map((value) => value === "FIDELITY_CONTROL");
+  if (probe && !controlled.every(Boolean)) {
+    return fail("JOB_REJECTED", "a LOGGED_FIDELITY_PROBE must control consumables, raid buffs and Bloodlust");
+  }
+  if (!probe && controlled.some(Boolean)) {
+    return fail("JOB_REJECTED", "FIDELITY_CONTROL is allowed only for a LOGGED_FIDELITY_PROBE");
+  }
+  if (
+    probe &&
+    ([consumables.potion, consumables.flask, consumables.food, consumables.augmentation].some(
+      (c) => c !== "NONE",
+    ) ||
+      consumables.temporaryEnchants.length > 0 ||
+      job.environment.raidBuffs.active.length > 0 ||
+      job.environment.bloodlust.kind !== "NONE")
+  ) {
+    return fail("JOB_REJECTED", "FIDELITY_CONTROL means nothing: no consumable, raid buff or Bloodlust");
   }
   const slots = job.character.gear.map((entry) => entry.slot);
   if (new Set(slots).size !== slots.length) return fail("JOB_REJECTED", "character.gear: duplicate slot");

@@ -7849,6 +7849,118 @@ Raidbots API, no simulator of our own. Nothing here produces a finding.
     `readFileSync`, `statSync().size`, byte hashing, `cpus`), instead of adding
     `@types/node`.
 
+## M11-G3-2 — exact logged character reconstruction and fidelity gate
+
+Question: can the character observed in the canonical fight be rebuilt as a
+typed SimulationCraft profile without silently changing its setup?
+
+Subject: b1PmaKrd6CDfzngc fight 48, actor 15, from committed E2 evidence only.
+Model: the approved G3-1 artifact (binary `41347bc4…`). There is no ceiling,
+no optimization and no coaching; a fidelity probe's DPS is never a result.
+
+- **Domain** (`src/character-profile/`, spec-agnostic).
+  - `CharacterProfile` (`character-profile/1`). Every field is KNOWN,
+    KNOWN_NONE, UNKNOWN, NOT_APPLICABLE or a versioned MODEL_ASSUMPTION, and
+    carries an evidence source.
+  - Reconstruction blockers: spec unresolved or mismatched; talent import
+    missing, invalid or not reconciled; WCL talent tree missing; hero tree
+    unresolved, contradictory or mismatched; an unreadable gear row; a
+    missing stat-bearing position; unknown item level, bonus ids, gems or
+    enchant on a stat-bearing item; an unknown required enchant; race
+    unresolved.
+  - Only a fidelity MATCH on a blocker-free profile is SIMULATION_READY.
+- **Spec meaning** (`src/specs/deathknight/blood/character-binding.ts`).
+  Injected by the runner (`runner/character-bindings.ts`):
+  - spec 250 / class 6, the shared class-6 loadout table and Blood's hero-tree
+    resolver;
+  - the main-hand runeforge as required setup;
+  - tier-set markers cited to `sc_death_knight.cpp:15245-15248`. MID1's
+    4-piece has no engine-reported spell, so it has no marker.
+- **Evidence isolation.** Each input (snapshot, talent import, pull facts,
+  casts) carries its actor. A foreign actor is EVIDENCE_ACTOR_MISMATCH, so
+  comparison players can never fill a subject field.
+  - The import code's actor comes from the committed context's manifest
+    provenance (`sourceActorId` 15), not from a test bundle's focus.
+- **Talents** (`src/data/game/talent-loadout.ts` + the shared, class-keyed
+  `trait-loadout-tables.json`).
+  - The import string is decoded exactly as the pinned
+    `parse_traits_hash` does it. The node walk comes from the machine-extracted
+    trait table (206 nodes, 230 entries, source SHA-256s matching the Blood
+    talent dataset). Choice indices follow insertion order, a TIERED node's
+    rank is spread over its tiers, and every engine error is a typed failure.
+    Data-level agreement is RECONCILED / DIVERGED: `src/data` keeps no
+    MATCH vocabulary (the m5 rule).
+  - Subject: version 2, spec 250, and 78 entries reconciling with
+    `combatantinfo.talentTree` exactly (ids, nodes, ranks), including the
+    three Dance of Midnight tiers. Hero sub-tree 31 (San'layn) on both sides.
+- **Gear.** One map: WCL position → canonical slot → engine slot
+  (`gear-slots.ts`). Ids go to the engine verbatim; `ilevel=` and
+  `crafted_stats=` overrides are never written.
+  - The engine reorders bonus ids, so they compare as multisets.
+  - Shirt and tabard (no stats) need not be echoed but must match if they are.
+    With unknown fields they stay evidence only.
+  - Crafted secondary stats travel in the bonus ids. The engine decodes 8790
+    as crit/haste and 8792 as versatility/haste.
+- **Engine echo** (`src/simulation/profile-echo.ts`). Read only after
+  `parseSimcJson` accepts the report:
+  - per item: id, decoded item level, bonus/gem/enchant ids;
+  - the talent string and race;
+  - every engine-reported spell id (buffs, actions and child actions);
+  - stats at pull.
+- **Fidelity probe** (`fidelityProbeJob`, `runner/run-fidelity.ts`).
+  - Job kind LOGGED_FIDELITY_PROBE, policy FIDELITY_PROBE_V1 (200 iterations,
+    4 threads, 300 s, precision not gated).
+  - Consumables, raid buffs and Bloodlust are FIDELITY_CONTROL: nothing. The
+    job schema refuses any value under that provenance, and FIDELITY_CONTROL
+    and race `none` on any other job kind.
+  - Golden echo: `tests/fixtures/simulation/simc-33622e9d-blood-subject-fidelity.json`
+    (20.9 KB).
+- **Subject result.** PARTIAL / NOT_SIMULATION_READY.
+  - MATCH: spec, talents, hero tree, gear, item levels, bonus ids, gems,
+    enchants (runeforge 6241), and set bonus (WCL set 2055 ×5 → engine MID2
+    2pc + 4pc).
+  - UNRESOLVED: race.
+  - Semantic profile hash `994b04ef…ebc5`.
+- **Level.** MODEL_ASSUMPTION `LEVEL_IS_PINNED_ENGINE_MAX_LEVEL@1` (90,
+  `engine/config.hpp:176`). No WCL field carries level.
+- **Race audit.**
+  - No committed field carries race, and none of the 11,869 subject events is
+    one of the pinned engine's 181 racial spells. Name, realm and shipped
+    profiles are never used.
+  - At the pin, race changes base attributes, passive racials and APL racial
+    actions (Fireblood, Blood Fury, Berserking, Ancestral Call).
+  - Development Blood job, 2k iterations: the races span −0.16% (Vulpera) to
+    +1.35% (Troll) relative to `race=none`, and `race=none` sits 0.6–1.0%
+    below most races. So `none` is not neutral, and the spread is about 3× the
+    0.5% materiality threshold.
+  - Therefore RACE_UNRESOLVED blocks readiness, and the probe uses the
+    explicit engine race `none` only to read gear and talents back.
+- **Stat semantics.** WCL `combatantinfo` stats are BUFFED pull stats.
+  - With `flask_of_thalassian_resistance_2` the versatility residual is
+    exactly 0 (rank 1 leaves 14).
+  - Stamina carries Power Word: Fortitude, and armor matches to 0.3.
+  - Unexplained: haste +245 and mastery −231 against the probe. Two pull
+    auras (food 1285644 "Hearty Well Fed", 1296934 "Fury of the Dead") are
+    absent from the pinned spell data.
+  - Stats are therefore STAT_RECONCILIATION_NOT_PROVEN: a diagnostic with
+    residuals, never a gate.
+- **Consumables** (setup evidence for G3-4, not written to the profile;
+  `src/data/game/consumables.json`, machine-extracted).
+  - Flask KNOWN (aura 1235057, rank open).
+  - Potion KNOWN (cast 1236994, Potion of Recklessness, rank open).
+  - Food UNKNOWN (the aura is not in the pinned data).
+  - Augment rune UNKNOWN.
+  - Weapon oil KNOWN: enchant 8052 → `thalassian_phoenix_oil_2`.
+- **Model version.** The log (2026-10-01) postdates the pinned hotfix data
+  (2026-09-10), and its client build is not in evidence. That gives
+  MODEL_VERSION_COMPATIBILITY_UNKNOWN as a diagnostic.
+- **Layering.**
+  - `tests/contracts/m11g32-character-profile-layering.test.ts`: the domain
+    imports only shared primitives and names no spec. It has no
+    finding/coaching/verdict, racial-action, trinket-usage or add vocabulary.
+  - The G3-1 simulation guard was amended explicitly to allow
+    `src/character-profile/` and spec character bindings.
+
 ---
 
 # Milestone 12 — Healer Foundation

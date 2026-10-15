@@ -1628,6 +1628,25 @@ simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-si
   reported seed differs from configured        -> parses: deterministic=1 reseeds every iteration (pinned sim.cpp:1810)
   shirt/tabard absent / wrong / other slot gone -> parses / MALFORMED / MALFORMED (report_json.cpp:387)
   golden exact-pin artifact                    -> pinned identity, DPS and counts; wrong binary -> MODEL_PROVENANCE_MISMATCH
+character reconstruction (M11-G3-2, tests/unit/character-profile/*.test.ts, contracts/m11g32-character-profile-layering.test.ts):
+  canonical subject                            -> deterministic; only RACE_UNRESOLVED blocks; hash pinned (A, T)
+  specID null / other spec / no combatantinfo  -> SPEC_UNRESOLVED / SPEC_MISMATCH / COMBATANT_INFO_MISSING (B)
+  UNKNOWN gems/enchant/bonus/ilvl              -> stays UNKNOWN, blocks, probe job refused (C, H, I, T)
+  WCL position -> slot -> engine slot          -> one table; every position; shirt/tabard narrow (D, K)
+  ids, levels, bonus order                     -> preserved exactly; bonus compared as multiset (E, F, G)
+  runeforge UNKNOWN / KNOWN_NONE               -> REQUIRED_ENCHANT_UNKNOWN blocks / recorded, not invented (J)
+  import string                                -> engine decode; 78/78 vs WCL facts; tiers; typed failures (L, N)
+  hero tree                                    -> San'layn both sides; mismatch / contradictory blocks (M)
+  race                                         -> never inferred or defaulted; blocks; "none" only for probes (U, V)
+  comparison player's snapshot/code/pull       -> EVIDENCE_ACTOR_MISMATCH, nothing filled (W)
+  probe job                                    -> no raid buff, consumable, lust or target; schema refuses (X, Y, Z)
+  golden exact-pin echo                        -> all gated checks MATCH except race UNRESOLVED (Q)
+  changed item/ilvl/gem/enchant/bonus/talent   -> FAILED fidelity, NOT_SIMULATION_READY (N, O, P, Q, R, G)
+  set markers removed / extra                  -> setBonus MISMATCH (S)
+  stats                                        -> STAT_RECONCILIATION_NOT_PROVEN diagnostic, never gated (P)
+  provenance moved / order changed / setup     -> same hash / same hash / new hash; UNKNOWN != KNOWN_NONE (AA, AB)
+  fidelity result                              -> carries no simulation number (AC)
+  16 deliberate faults                         -> each caught (.probe/m11g3/faults-g32.cjs)
 ```
 
 The fake engine (`tests/support/simulation/fake-simc.mjs`) re-parses the

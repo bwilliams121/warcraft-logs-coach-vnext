@@ -20,7 +20,7 @@
 export interface SimulationPolicy {
   readonly id: string;
   readonly version: number;
-  readonly status: "CANDIDATE" | "BENCHMARK_ONLY";
+  readonly status: "CANDIDATE" | "BENCHMARK_ONLY" | "FIDELITY_ONLY";
   readonly iterations: number;
   readonly seed: number;
   readonly threads: number;
@@ -69,6 +69,9 @@ export const SIMULATION_POLICIES: readonly SimulationPolicy[] = [
   policy("BENCHMARK_5K_T12", "BENCHMARK_ONLY", 5_000, 12, 0.0008),
   policy("BENCHMARK_10K_T12", "BENCHMARK_ONLY", 10_000, 12, 0.0006),
   policy("BENCHMARK_300_T1", "BENCHMARK_ONLY", 300, 1, 0.01),
+  // M11-G3-2: profile-fidelity probes read the engine echo back; their DPS is
+  // not a result, so precision is not gated (any finite SE passes).
+  policy("FIDELITY_PROBE_V1", "FIDELITY_ONLY", 200, 4, 1),
 ];
 
 export function simulationPolicyById(id: string): SimulationPolicy | undefined {

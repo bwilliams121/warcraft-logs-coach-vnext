@@ -439,6 +439,48 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G3-2: what character reconstruction does not establish
+
+**Raised:** M11-G3-2 (2026-10-14).
+
+**Race is unresolved and blocks every current-setup ceiling.** No committed
+evidence carries it, and no neutral engine race exists. This is an owner
+decision (see the G3-2 report). Options:
+- a player-supplied race;
+- a race-bounded range across playable races;
+- a documented race policy.
+
+**WCL pull stats do not reconcile exactly.**
+- Versatility (flask rank 2), armor and stamina (Fortitude) are explained.
+- Haste +245 and mastery −231 against the probe are not. The food aura
+  (1285644) and a "Fury of the Dead" aura (1296934) are absent from the
+  pinned spell data.
+- Until it is explained, stats stay a diagnostic.
+
+**Model-version compatibility is unknown.** The log is 21 days newer than the
+pinned hotfix data, and no evidence field carries the client build.
+
+**Consumables for G3-4.**
+- Flask and potion are known by identity, with rank open.
+- Food and augment rune are UNKNOWN.
+- The flask rank-2 stat match is a derived diagnostic, not observed
+  evidence.
+- Whether the pull aura list is exhaustive is not proven.
+
+**Set-bonus mapping.** WCL setID → engine tier is proven only through
+engine-reported markers. The pinned item-set table was not available offline,
+and MID1's 4-piece has no engine marker.
+
+**Hero tree is not echoed by the engine.** It is verified from the import
+decode against WCL, and indirectly through San'layn spells in the engine
+output.
+
+**G3-1 tests were not committed with 6d84c8a.** At the time of G3-2:
+- `tests/unit/simulation/*`, `tests/support/simulation/*`,
+  `tests/contracts/m11g3-simulation-layering.test.ts` and the G3-1 bench were
+  untracked;
+- CI for G3-1 ran without them.
+
 ## After M11-G3-1: what the simulation runner does not yet establish
 
 **Raised:** M11-G3-1 (2026-10-14).

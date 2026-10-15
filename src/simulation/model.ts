@@ -32,6 +32,9 @@ export const APPROVED_SIMC_MODEL: SimcModelPin = {
   gameDataBuild: "12.1.0.69587",
 };
 
+/** The pinned engine's maximum character level (engine/config.hpp:176 at the pin). */
+export const PINNED_ENGINE_MAX_LEVEL = 90;
+
 /** One approved built engine artifact. */
 export interface ApprovedEngineArtifact {
   readonly model: SimcModelPin;
