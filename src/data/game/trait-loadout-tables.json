@@ -1,0 +1,3367 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_TRAIT_LOADOUT_TABLES",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "method": "MACHINE_EXTRACTED_LOADOUT_WALK",
+    "extractorVersion": 1,
+    "decoderReference": "engine/player/player.cpp generate_tree_nodes (trees INVALID..SELECTION, std::map by id_node) and parse_traits_hash"
+  },
+  "tables": [
+    {
+      "classId": 6,
+      "nodes": [
+        {
+          "nodeId": 76033,
+          "entries": [
+            {
+              "entryId": 96161,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 392950,
+              "displayNameEn": "Icebreaker"
+            }
+          ]
+        },
+        {
+          "nodeId": 76037,
+          "entries": [
+            {
+              "entryId": 96165,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1230223,
+              "displayNameEn": "Howling Blades"
+            }
+          ]
+        },
+        {
+          "nodeId": 76039,
+          "entries": [
+            {
+              "entryId": 96167,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1265790,
+              "displayNameEn": "Boiling Point"
+            }
+          ]
+        },
+        {
+          "nodeId": 76040,
+          "entries": [
+            {
+              "entryId": 96168,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 391517,
+              "displayNameEn": "Umbilicus Eternus"
+            }
+          ]
+        },
+        {
+          "nodeId": 76041,
+          "entries": [
+            {
+              "entryId": 96169,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 391477,
+              "displayNameEn": "Coagulopathy"
+            }
+          ]
+        },
+        {
+          "nodeId": 76042,
+          "entries": [
+            {
+              "entryId": 96170,
+              "tree": "SPECIALIZATION",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 108199,
+              "displayNameEn": "Gorefiend's Grasp"
+            },
+            {
+              "entryId": 136213,
+              "tree": "SPECIALIZATION",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1263569,
+              "displayNameEn": "Abomination Limb"
+            }
+          ]
+        },
+        {
+          "nodeId": 76043,
+          "entries": [
+            {
+              "entryId": 96171,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 273953,
+              "displayNameEn": "Voracious"
+            }
+          ]
+        },
+        {
+          "nodeId": 76044,
+          "entries": [
+            {
+              "entryId": 96172,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 207167,
+              "displayNameEn": "Blinding Sleet"
+            }
+          ]
+        },
+        {
+          "nodeId": 76045,
+          "entries": [
+            {
+              "entryId": 96173,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 207104,
+              "displayNameEn": "Runic Attenuation"
+            }
+          ]
+        },
+        {
+          "nodeId": 76046,
+          "entries": [
+            {
+              "entryId": 96174,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 205727,
+              "displayNameEn": "Anti-Magic Barrier"
+            }
+          ]
+        },
+        {
+          "nodeId": 76048,
+          "entries": [
+            {
+              "entryId": 96176,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374383,
+              "displayNameEn": "Assimilation"
+            }
+          ]
+        },
+        {
+          "nodeId": 76050,
+          "entries": [
+            {
+              "entryId": 96178,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 457574,
+              "displayNameEn": "Unyielding Will"
+            }
+          ]
+        },
+        {
+          "nodeId": 76051,
+          "entries": [
+            {
+              "entryId": 96179,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 391566,
+              "displayNameEn": "Insidious Chill"
+            }
+          ]
+        },
+        {
+          "nodeId": 76052,
+          "entries": [
+            {
+              "entryId": 96180,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 391571,
+              "displayNameEn": "Gloom Ward"
+            }
+          ]
+        },
+        {
+          "nodeId": 76053,
+          "entries": [
+            {
+              "entryId": 96181,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 454851,
+              "displayNameEn": "Vestigial Shell"
+            }
+          ]
+        },
+        {
+          "nodeId": 76054,
+          "entries": [
+            {
+              "entryId": 96182,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 206967,
+              "displayNameEn": "Will of the Necropolis"
+            }
+          ]
+        },
+        {
+          "nodeId": 76055,
+          "entries": [
+            {
+              "entryId": 96183,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 454788,
+              "displayNameEn": "Runic Protection"
+            }
+          ]
+        },
+        {
+          "nodeId": 76056,
+          "entries": [
+            {
+              "entryId": 96184,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374598,
+              "displayNameEn": "Blood Draw"
+            }
+          ]
+        },
+        {
+          "nodeId": 76057,
+          "entries": [
+            {
+              "entryId": 96186,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 273952,
+              "displayNameEn": "Grip of the Dead"
+            }
+          ]
+        },
+        {
+          "nodeId": 76058,
+          "entries": [
+            {
+              "entryId": 96187,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 389682,
+              "displayNameEn": "Unholy Endurance"
+            }
+          ]
+        },
+        {
+          "nodeId": 76059,
+          "entries": [
+            {
+              "entryId": 96188,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 111673,
+              "displayNameEn": "Control Undead"
+            }
+          ]
+        },
+        {
+          "nodeId": 76060,
+          "entries": [
+            {
+              "entryId": 96189,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 1267028,
+              "displayNameEn": "Blood Bond"
+            }
+          ]
+        },
+        {
+          "nodeId": 76061,
+          "entries": [
+            {
+              "entryId": 96190,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374504,
+              "displayNameEn": "Brittle"
+            }
+          ]
+        },
+        {
+          "nodeId": 76064,
+          "entries": [
+            {
+              "entryId": 96193,
+              "tree": "CLASS",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 221562,
+              "displayNameEn": "Asphyxiate"
+            },
+            {
+              "entryId": 136526,
+              "tree": "CLASS",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 276079,
+              "displayNameEn": "Death's Reach"
+            }
+          ]
+        },
+        {
+          "nodeId": 76065,
+          "entries": [
+            {
+              "entryId": 96194,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 51052,
+              "displayNameEn": "Anti-Magic Zone"
+            }
+          ]
+        },
+        {
+          "nodeId": 76066,
+          "entries": [
+            {
+              "entryId": 96195,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 207200,
+              "displayNameEn": "Permafrost"
+            }
+          ]
+        },
+        {
+          "nodeId": 76067,
+          "entries": [
+            {
+              "entryId": 96196,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374277,
+              "displayNameEn": "Improved Death Strike"
+            }
+          ]
+        },
+        {
+          "nodeId": 76068,
+          "entries": [
+            {
+              "entryId": 96197,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 48263,
+              "displayNameEn": "Veteran of the Third War"
+            }
+          ]
+        },
+        {
+          "nodeId": 76069,
+          "entries": [
+            {
+              "entryId": 96198,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374265,
+              "displayNameEn": "Unholy Momentum"
+            }
+          ]
+        },
+        {
+          "nodeId": 76071,
+          "entries": [
+            {
+              "entryId": 96200,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 49998,
+              "displayNameEn": "Death Strike"
+            }
+          ]
+        },
+        {
+          "nodeId": 76072,
+          "entries": [
+            {
+              "entryId": 96201,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 46585,
+              "displayNameEn": "Raise Dead"
+            }
+          ]
+        },
+        {
+          "nodeId": 76073,
+          "entries": [
+            {
+              "entryId": 96202,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 316916,
+              "displayNameEn": "Cleaving Strikes"
+            }
+          ]
+        },
+        {
+          "nodeId": 76074,
+          "entries": [
+            {
+              "entryId": 96203,
+              "tree": "CLASS",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 391546,
+              "displayNameEn": "March of Darkness"
+            },
+            {
+              "entryId": 133518,
+              "tree": "CLASS",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 212552,
+              "displayNameEn": "Wraith Walk"
+            }
+          ]
+        },
+        {
+          "nodeId": 76075,
+          "entries": [
+            {
+              "entryId": 96204,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 48743,
+              "displayNameEn": "Death Pact"
+            }
+          ]
+        },
+        {
+          "nodeId": 76076,
+          "entries": [
+            {
+              "entryId": 96205,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374261,
+              "displayNameEn": "Unholy Bond"
+            }
+          ]
+        },
+        {
+          "nodeId": 76078,
+          "entries": [
+            {
+              "entryId": 96207,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374030,
+              "displayNameEn": "Blood Scent"
+            }
+          ]
+        },
+        {
+          "nodeId": 76079,
+          "entries": [
+            {
+              "entryId": 96208,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374574,
+              "displayNameEn": "Rune Mastery"
+            }
+          ]
+        },
+        {
+          "nodeId": 76080,
+          "entries": [
+            {
+              "entryId": 96209,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 454822,
+              "displayNameEn": "Subduing Grasp"
+            }
+          ]
+        },
+        {
+          "nodeId": 76081,
+          "entries": [
+            {
+              "entryId": 96210,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 48792,
+              "displayNameEn": "Icebound Fortitude"
+            }
+          ]
+        },
+        {
+          "nodeId": 76083,
+          "entries": [
+            {
+              "entryId": 96212,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 378848,
+              "displayNameEn": "Coldthirst"
+            }
+          ]
+        },
+        {
+          "nodeId": 76084,
+          "entries": [
+            {
+              "entryId": 96213,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 47528,
+              "displayNameEn": "Mind Freeze"
+            }
+          ]
+        },
+        {
+          "nodeId": 76085,
+          "entries": [
+            {
+              "entryId": 96214,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 194878,
+              "displayNameEn": "Icy Talons"
+            }
+          ]
+        },
+        {
+          "nodeId": 76086,
+          "entries": [
+            {
+              "entryId": 96215,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 454786,
+              "displayNameEn": "Ice Prison"
+            }
+          ]
+        },
+        {
+          "nodeId": 76087,
+          "entries": [
+            {
+              "entryId": 96216,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 374049,
+              "displayNameEn": "Suppression"
+            }
+          ]
+        },
+        {
+          "nodeId": 76088,
+          "entries": [
+            {
+              "entryId": 96217,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 454835,
+              "displayNameEn": "Osmosis"
+            }
+          ]
+        },
+        {
+          "nodeId": 76091,
+          "entries": [
+            {
+              "entryId": 96220,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 281238,
+              "displayNameEn": "Obliteration"
+            }
+          ]
+        },
+        {
+          "nodeId": 76092,
+          "entries": [
+            {
+              "entryId": 96221,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 377073,
+              "displayNameEn": "Frigid Executioner"
+            }
+          ]
+        },
+        {
+          "nodeId": 76093,
+          "entries": [
+            {
+              "entryId": 96222,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1249658,
+              "displayNameEn": "Breath of Sindragosa"
+            }
+          ]
+        },
+        {
+          "nodeId": 76094,
+          "entries": [
+            {
+              "entryId": 96223,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 455993,
+              "displayNameEn": "Frostbane"
+            }
+          ]
+        },
+        {
+          "nodeId": 76095,
+          "entries": [
+            {
+              "entryId": 96224,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 207057,
+              "displayNameEn": "Shattering Blade"
+            }
+          ]
+        },
+        {
+          "nodeId": 76096,
+          "entries": [
+            {
+              "entryId": 96225,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 47568,
+              "displayNameEn": "Empower Rune Weapon"
+            }
+          ]
+        },
+        {
+          "nodeId": 76098,
+          "entries": [
+            {
+              "entryId": 96228,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1230301,
+              "displayNameEn": "Frostreaper"
+            }
+          ]
+        },
+        {
+          "nodeId": 76099,
+          "entries": [
+            {
+              "entryId": 96229,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 376938,
+              "displayNameEn": "Everfrost"
+            }
+          ]
+        },
+        {
+          "nodeId": 76100,
+          "entries": [
+            {
+              "entryId": 96230,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 253593,
+              "displayNameEn": "Inexorable Assault"
+            }
+          ]
+        },
+        {
+          "nodeId": 76101,
+          "entries": [
+            {
+              "entryId": 96231,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 435005,
+              "displayNameEn": "Smothering Offense"
+            }
+          ]
+        },
+        {
+          "nodeId": 76102,
+          "entries": [
+            {
+              "entryId": 96232,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 376251,
+              "displayNameEn": "Runic Command"
+            }
+          ]
+        },
+        {
+          "nodeId": 76103,
+          "entries": [
+            {
+              "entryId": 96233,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 316803,
+              "displayNameEn": "Runic Overflow"
+            }
+          ]
+        },
+        {
+          "nodeId": 76105,
+          "entries": [
+            {
+              "entryId": 96235,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 207142,
+              "displayNameEn": "Avalanche"
+            }
+          ]
+        },
+        {
+          "nodeId": 76106,
+          "entries": [
+            {
+              "entryId": 96236,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 279302,
+              "displayNameEn": "Frostwyrm's Fury"
+            }
+          ]
+        },
+        {
+          "nodeId": 76108,
+          "entries": [
+            {
+              "entryId": 96238,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 456238,
+              "displayNameEn": "Hyperpyrexia"
+            }
+          ]
+        },
+        {
+          "nodeId": 76109,
+          "entries": [
+            {
+              "entryId": 96239,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1230284,
+              "displayNameEn": "Northwinds"
+            }
+          ]
+        },
+        {
+          "nodeId": 76110,
+          "entries": [
+            {
+              "entryId": 96240,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 194912,
+              "displayNameEn": "Gathering Storm"
+            }
+          ]
+        },
+        {
+          "nodeId": 76112,
+          "entries": [
+            {
+              "entryId": 96242,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 377056,
+              "displayNameEn": "Biting Cold"
+            }
+          ]
+        },
+        {
+          "nodeId": 76113,
+          "entries": [
+            {
+              "entryId": 96243,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 207230,
+              "displayNameEn": "Frostscythe"
+            }
+          ]
+        },
+        {
+          "nodeId": 76114,
+          "entries": [
+            {
+              "entryId": 96244,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 49184,
+              "displayNameEn": "Howling Blast"
+            }
+          ]
+        },
+        {
+          "nodeId": 76115,
+          "entries": [
+            {
+              "entryId": 96245,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 49143,
+              "displayNameEn": "Frost Strike"
+            }
+          ]
+        },
+        {
+          "nodeId": 76116,
+          "entries": [
+            {
+              "entryId": 96246,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 49020,
+              "displayNameEn": "Obliterate"
+            }
+          ]
+        },
+        {
+          "nodeId": 76117,
+          "entries": [
+            {
+              "entryId": 96247,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 51128,
+              "displayNameEn": "Killing Machine"
+            }
+          ]
+        },
+        {
+          "nodeId": 76118,
+          "entries": [
+            {
+              "entryId": 96248,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 456230,
+              "displayNameEn": "Arctic Assault"
+            }
+          ]
+        },
+        {
+          "nodeId": 76121,
+          "entries": [
+            {
+              "entryId": 96252,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 207061,
+              "displayNameEn": "Murderous Efficiency"
+            }
+          ]
+        },
+        {
+          "nodeId": 76122,
+          "entries": [
+            {
+              "entryId": 96253,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 377098,
+              "displayNameEn": "Bonegrinder"
+            }
+          ]
+        },
+        {
+          "nodeId": 76123,
+          "entries": [
+            {
+              "entryId": 96254,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1230153,
+              "displayNameEn": "Killing Streak"
+            }
+          ]
+        },
+        {
+          "nodeId": 76124,
+          "entries": [
+            {
+              "entryId": 96255,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 374747,
+              "displayNameEn": "Perseverance of the Ebon Blade"
+            }
+          ]
+        },
+        {
+          "nodeId": 76125,
+          "entries": [
+            {
+              "entryId": 96256,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 391398,
+              "displayNameEn": "Bloodshot"
+            }
+          ]
+        },
+        {
+          "nodeId": 76126,
+          "entries": [
+            {
+              "entryId": 96257,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 374717,
+              "displayNameEn": "Improved Heart Strike"
+            }
+          ]
+        },
+        {
+          "nodeId": 76127,
+          "entries": [
+            {
+              "entryId": 96258,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1263781,
+              "displayNameEn": "Sanguinary Burst"
+            }
+          ]
+        },
+        {
+          "nodeId": 76128,
+          "entries": [
+            {
+              "entryId": 96259,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1263743,
+              "displayNameEn": "Blood Mist"
+            }
+          ]
+        },
+        {
+          "nodeId": 76129,
+          "entries": [
+            {
+              "entryId": 96260,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 377637,
+              "displayNameEn": "Insatiable Blade"
+            }
+          ]
+        },
+        {
+          "nodeId": 76130,
+          "entries": [
+            {
+              "entryId": 96261,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 377668,
+              "displayNameEn": "Everlasting Bond"
+            }
+          ]
+        },
+        {
+          "nodeId": 76131,
+          "entries": [
+            {
+              "entryId": 96262,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 391458,
+              "displayNameEn": "Sanguine Ground"
+            }
+          ]
+        },
+        {
+          "nodeId": 76132,
+          "entries": [
+            {
+              "entryId": 96263,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 205723,
+              "displayNameEn": "Red Thirst"
+            }
+          ]
+        },
+        {
+          "nodeId": 76133,
+          "entries": [
+            {
+              "entryId": 96264,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 114556,
+              "displayNameEn": "Purgatory"
+            }
+          ]
+        },
+        {
+          "nodeId": 76135,
+          "entries": [
+            {
+              "entryId": 96266,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 221536,
+              "displayNameEn": "Heartbreaker"
+            }
+          ]
+        },
+        {
+          "nodeId": 76137,
+          "entries": [
+            {
+              "entryId": 96268,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 273946,
+              "displayNameEn": "Hemostasis"
+            }
+          ]
+        },
+        {
+          "nodeId": 76138,
+          "entries": [
+            {
+              "entryId": 96269,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 49028,
+              "displayNameEn": "Dancing Rune Weapon"
+            }
+          ]
+        },
+        {
+          "nodeId": 76139,
+          "entries": [
+            {
+              "entryId": 96271,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1279633,
+              "displayNameEn": "Bloody Reflection"
+            }
+          ]
+        },
+        {
+          "nodeId": 76140,
+          "entries": [
+            {
+              "entryId": 96272,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 317133,
+              "displayNameEn": "Improved Vampiric Blood"
+            }
+          ]
+        },
+        {
+          "nodeId": 76141,
+          "entries": [
+            {
+              "entryId": 96273,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 194662,
+              "displayNameEn": "Rapid Decomposition"
+            }
+          ]
+        },
+        {
+          "nodeId": 76142,
+          "entries": [
+            {
+              "entryId": 96274,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 374715,
+              "displayNameEn": "Improved Bone Shield"
+            }
+          ]
+        },
+        {
+          "nodeId": 76143,
+          "entries": [
+            {
+              "entryId": 96276,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1264296,
+              "displayNameEn": "Lifeblood"
+            }
+          ]
+        },
+        {
+          "nodeId": 76144,
+          "entries": [
+            {
+              "entryId": 96277,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 219786,
+              "displayNameEn": "Ossuary"
+            }
+          ]
+        },
+        {
+          "nodeId": 76145,
+          "entries": [
+            {
+              "entryId": 96278,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 377629,
+              "displayNameEn": "Leeching Strike"
+            }
+          ]
+        },
+        {
+          "nodeId": 76146,
+          "entries": [
+            {
+              "entryId": 96279,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 317610,
+              "displayNameEn": "Relish in Blood"
+            }
+          ]
+        },
+        {
+          "nodeId": 76147,
+          "entries": [
+            {
+              "entryId": 96280,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 195679,
+              "displayNameEn": "Bloodworms"
+            }
+          ]
+        },
+        {
+          "nodeId": 76148,
+          "entries": [
+            {
+              "entryId": 96282,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 390196,
+              "displayNameEn": "Magus of the Dead"
+            }
+          ]
+        },
+        {
+          "nodeId": 76149,
+          "entries": [
+            {
+              "entryId": 96283,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 390259,
+              "displayNameEn": "Commander of the Dead"
+            }
+          ]
+        },
+        {
+          "nodeId": 76150,
+          "entries": [
+            {
+              "entryId": 96284,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 377440,
+              "displayNameEn": "Unholy Aura"
+            }
+          ]
+        },
+        {
+          "nodeId": 76152,
+          "entries": [
+            {
+              "entryId": 96286,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 377590,
+              "displayNameEn": "Ancient Power"
+            }
+          ]
+        },
+        {
+          "nodeId": 76155,
+          "entries": [
+            {
+              "entryId": 96289,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1290864,
+              "displayNameEn": "Cycle of Death"
+            }
+          ]
+        },
+        {
+          "nodeId": 76156,
+          "entries": [
+            {
+              "entryId": 96290,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 390270,
+              "displayNameEn": "Coil of Devastation"
+            }
+          ]
+        },
+        {
+          "nodeId": 76160,
+          "entries": [
+            {
+              "entryId": 96294,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 377592,
+              "displayNameEn": "Morbidity"
+            }
+          ]
+        },
+        {
+          "nodeId": 76162,
+          "entries": [
+            {
+              "entryId": 96296,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 455396,
+              "displayNameEn": "Foul Infections"
+            }
+          ]
+        },
+        {
+          "nodeId": 76166,
+          "entries": [
+            {
+              "entryId": 96301,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1264235,
+              "displayNameEn": "Deadly Reach"
+            }
+          ]
+        },
+        {
+          "nodeId": 76167,
+          "entries": [
+            {
+              "entryId": 96302,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 206974,
+              "displayNameEn": "Foul Bulwark"
+            }
+          ]
+        },
+        {
+          "nodeId": 76168,
+          "entries": [
+            {
+              "entryId": 96303,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 195182,
+              "displayNameEn": "Marrowrend"
+            }
+          ]
+        },
+        {
+          "nodeId": 76169,
+          "entries": [
+            {
+              "entryId": 96304,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 206930,
+              "displayNameEn": "Heart Strike"
+            }
+          ]
+        },
+        {
+          "nodeId": 76170,
+          "entries": [
+            {
+              "entryId": 96305,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 50842,
+              "displayNameEn": "Blood Boil"
+            }
+          ]
+        },
+        {
+          "nodeId": 76171,
+          "entries": [
+            {
+              "entryId": 96306,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 458572,
+              "displayNameEn": "Bone Collector"
+            }
+          ]
+        },
+        {
+          "nodeId": 76172,
+          "entries": [
+            {
+              "entryId": 96307,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 391395,
+              "displayNameEn": "Iron Heart"
+            }
+          ]
+        },
+        {
+          "nodeId": 76173,
+          "entries": [
+            {
+              "entryId": 96308,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 55233,
+              "displayNameEn": "Vampiric Blood"
+            }
+          ]
+        },
+        {
+          "nodeId": 76174,
+          "entries": [
+            {
+              "entryId": 96309,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 391386,
+              "displayNameEn": "Blood Feast"
+            }
+          ]
+        },
+        {
+          "nodeId": 76176,
+          "entries": [
+            {
+              "entryId": 96311,
+              "tree": "SPECIALIZATION",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1242608,
+              "displayNameEn": "Raise Abomination"
+            },
+            {
+              "entryId": 133514,
+              "tree": "SPECIALIZATION",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1242147,
+              "displayNameEn": "Summon Gargoyle"
+            }
+          ]
+        },
+        {
+          "nodeId": 76178,
+          "entries": [
+            {
+              "entryId": 96313,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 276023,
+              "displayNameEn": "Harbinger of Doom"
+            }
+          ]
+        },
+        {
+          "nodeId": 76179,
+          "entries": [
+            {
+              "entryId": 96314,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 343294,
+              "displayNameEn": "Soul Reaper"
+            }
+          ]
+        },
+        {
+          "nodeId": 76181,
+          "entries": [
+            {
+              "entryId": 96317,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 194916,
+              "displayNameEn": "All Will Serve"
+            }
+          ]
+        },
+        {
+          "nodeId": 76182,
+          "entries": [
+            {
+              "entryId": 96318,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1241705,
+              "displayNameEn": "Outnumber"
+            }
+          ]
+        },
+        {
+          "nodeId": 76184,
+          "entries": [
+            {
+              "entryId": 96321,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1241858,
+              "displayNameEn": "Unholy Devotion"
+            }
+          ]
+        },
+        {
+          "nodeId": 76185,
+          "entries": [
+            {
+              "entryId": 96322,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1233448,
+              "displayNameEn": "Dark Transformation"
+            }
+          ]
+        },
+        {
+          "nodeId": 76186,
+          "entries": [
+            {
+              "entryId": 96323,
+              "tree": "SPECIALIZATION",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 390166,
+              "displayNameEn": "Plague Mastery"
+            },
+            {
+              "entryId": 133365,
+              "tree": "SPECIALIZATION",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1238900,
+              "displayNameEn": "Grave Mastery"
+            }
+          ]
+        },
+        {
+          "nodeId": 76187,
+          "entries": [
+            {
+              "entryId": 96324,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 207272,
+              "displayNameEn": "Infected Claws"
+            }
+          ]
+        },
+        {
+          "nodeId": 76189,
+          "entries": [
+            {
+              "entryId": 96326,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 77575,
+              "displayNameEn": "Outbreak"
+            }
+          ]
+        },
+        {
+          "nodeId": 76190,
+          "entries": [
+            {
+              "entryId": 96327,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 55090,
+              "displayNameEn": "Scourge Strike"
+            }
+          ]
+        },
+        {
+          "nodeId": 76191,
+          "entries": [
+            {
+              "entryId": 96328,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 49530,
+              "displayNameEn": "Sudden Doom"
+            }
+          ]
+        },
+        {
+          "nodeId": 76192,
+          "entries": [
+            {
+              "entryId": 96329,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 390283,
+              "displayNameEn": "Superstrain"
+            }
+          ]
+        },
+        {
+          "nodeId": 76193,
+          "entries": [
+            {
+              "entryId": 96330,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 455397,
+              "displayNameEn": "Festering Scythe"
+            }
+          ]
+        },
+        {
+          "nodeId": 76194,
+          "entries": [
+            {
+              "entryId": 96331,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 377587,
+              "displayNameEn": "Ghoulish Frenzy"
+            }
+          ]
+        },
+        {
+          "nodeId": 76196,
+          "entries": [
+            {
+              "entryId": 96333,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 42650,
+              "displayNameEn": "Army of the Dead"
+            }
+          ]
+        },
+        {
+          "nodeId": 76197,
+          "entries": [
+            {
+              "entryId": 96334,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 207269,
+              "displayNameEn": "Ebon Fever"
+            }
+          ]
+        },
+        {
+          "nodeId": 95032,
+          "entries": [
+            {
+              "entryId": 117629,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 443560,
+              "displayNameEn": "Swift and Painful"
+            }
+          ]
+        },
+        {
+          "nodeId": 95033,
+          "entries": [
+            {
+              "entryId": 117630,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434143,
+              "displayNameEn": "Infliction of Sorrow"
+            }
+          ]
+        },
+        {
+          "nodeId": 95034,
+          "entries": [
+            {
+              "entryId": 117631,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 434905,
+              "displayNameEn": "Grim Reaper"
+            }
+          ]
+        },
+        {
+          "nodeId": 95035,
+          "entries": [
+            {
+              "entryId": 117632,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 440476,
+              "displayNameEn": "Pact of the Deathbringer"
+            },
+            {
+              "entryId": 123420,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 440282,
+              "displayNameEn": "Rune Carved Plates"
+            }
+          ]
+        },
+        {
+          "nodeId": 95036,
+          "entries": [
+            {
+              "entryId": 117633,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 439851,
+              "displayNameEn": "Wave of Souls"
+            }
+          ]
+        },
+        {
+          "nodeId": 95037,
+          "entries": [
+            {
+              "entryId": 117634,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444074,
+              "displayNameEn": "Horsemen's Aid"
+            },
+            {
+              "entryId": 123410,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444083,
+              "displayNameEn": "Pact of the Apocalypse"
+            }
+          ]
+        },
+        {
+          "nodeId": 95040,
+          "entries": [
+            {
+              "entryId": 117637,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434151,
+              "displayNameEn": "Incite Terror"
+            }
+          ]
+        },
+        {
+          "nodeId": 95041,
+          "entries": [
+            {
+              "entryId": 117638,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444040,
+              "displayNameEn": "Apocalypse Now"
+            }
+          ]
+        },
+        {
+          "nodeId": 95042,
+          "entries": [
+            {
+              "entryId": 117639,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444069,
+              "displayNameEn": "Fury of the Horsemen"
+            },
+            {
+              "entryId": 123411,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444072,
+              "displayNameEn": "A Feast of Souls"
+            }
+          ]
+        },
+        {
+          "nodeId": 95043,
+          "entries": [
+            {
+              "entryId": 117640,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 440031,
+              "displayNameEn": "Bind in Darkness"
+            }
+          ]
+        },
+        {
+          "nodeId": 95044,
+          "entries": [
+            {
+              "entryId": 117641,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444037,
+              "displayNameEn": "Hungering Thirst"
+            }
+          ]
+        },
+        {
+          "nodeId": 95045,
+          "entries": [
+            {
+              "entryId": 117642,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 1280658,
+              "displayNameEn": "Inevitable"
+            }
+          ]
+        },
+        {
+          "nodeId": 95046,
+          "entries": [
+            {
+              "entryId": 117643,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434260,
+              "displayNameEn": "The Blood is Life"
+            }
+          ]
+        },
+        {
+          "nodeId": 95047,
+          "entries": [
+            {
+              "entryId": 117644,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444033,
+              "displayNameEn": "Whitemane's Famine"
+            }
+          ]
+        },
+        {
+          "nodeId": 95048,
+          "entries": [
+            {
+              "entryId": 117645,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434033,
+              "displayNameEn": "Blood-Soaked Ground"
+            },
+            {
+              "entryId": 136836,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 1234559,
+              "displayNameEn": "Desecrate"
+            }
+          ]
+        },
+        {
+          "nodeId": 95049,
+          "entries": [
+            {
+              "entryId": 117646,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 437122,
+              "displayNameEn": "Death's Messenger"
+            },
+            {
+              "entryId": 128234,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 439948,
+              "displayNameEn": "Expelling Shield"
+            }
+          ]
+        },
+        {
+          "nodeId": 95051,
+          "entries": [
+            {
+              "entryId": 117648,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 433901,
+              "displayNameEn": "Vampiric Strike"
+            }
+          ]
+        },
+        {
+          "nodeId": 95053,
+          "entries": [
+            {
+              "entryId": 117650,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434152,
+              "displayNameEn": "Gift of the San'layn"
+            }
+          ]
+        },
+        {
+          "nodeId": 95054,
+          "entries": [
+            {
+              "entryId": 117651,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444099,
+              "displayNameEn": "Mawsworn Menace"
+            }
+          ]
+        },
+        {
+          "nodeId": 95055,
+          "entries": [
+            {
+              "entryId": 117652,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434261,
+              "displayNameEn": "Pact of the San'layn"
+            },
+            {
+              "entryId": 117893,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434263,
+              "displayNameEn": "Sanguine Scent"
+            }
+          ]
+        },
+        {
+          "nodeId": 95056,
+          "entries": [
+            {
+              "entryId": 117653,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434100,
+              "displayNameEn": "Vampiric Aura"
+            },
+            {
+              "entryId": 117891,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434136,
+              "displayNameEn": "Bloody Fortitude"
+            }
+          ]
+        },
+        {
+          "nodeId": 95057,
+          "entries": [
+            {
+              "entryId": 117654,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 436687,
+              "displayNameEn": "Dark Talons"
+            },
+            {
+              "entryId": 128266,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 469870,
+              "displayNameEn": "Reaper's Onslaught"
+            }
+          ]
+        },
+        {
+          "nodeId": 95058,
+          "entries": [
+            {
+              "entryId": 117655,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 441894,
+              "displayNameEn": "Wither Away"
+            }
+          ]
+        },
+        {
+          "nodeId": 95059,
+          "entries": [
+            {
+              "entryId": 117656,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444052,
+              "displayNameEn": "Nazgrim's Conquest"
+            }
+          ]
+        },
+        {
+          "nodeId": 95060,
+          "entries": [
+            {
+              "entryId": 117657,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444008,
+              "displayNameEn": "On a Paler Horse"
+            },
+            {
+              "entryId": 123412,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444010,
+              "displayNameEn": "Death Charge"
+            }
+          ]
+        },
+        {
+          "nodeId": 95061,
+          "entries": [
+            {
+              "entryId": 117658,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 437161,
+              "displayNameEn": "Soul Rupture"
+            }
+          ]
+        },
+        {
+          "nodeId": 95062,
+          "entries": [
+            {
+              "entryId": 117659,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 439843,
+              "displayNameEn": "Reaper's Mark"
+            }
+          ]
+        },
+        {
+          "nodeId": 95063,
+          "entries": [
+            {
+              "entryId": 117660,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444097,
+              "displayNameEn": "Trollbane's Icy Fury"
+            }
+          ]
+        },
+        {
+          "nodeId": 95064,
+          "entries": [
+            {
+              "entryId": 117661,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 433934,
+              "displayNameEn": "Newly Turned"
+            },
+            {
+              "entryId": 117892,
+              "tree": "HERO",
+              "nodeType": "CHOICE",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434028,
+              "displayNameEn": "Vampiric Speed"
+            }
+          ]
+        },
+        {
+          "nodeId": 95065,
+          "entries": [
+            {
+              "entryId": 117662,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434075,
+              "displayNameEn": "Frenzied Bloodthirst"
+            }
+          ]
+        },
+        {
+          "nodeId": 95066,
+          "entries": [
+            {
+              "entryId": 117663,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444005,
+              "displayNameEn": "Rider's Champion"
+            }
+          ]
+        },
+        {
+          "nodeId": 95067,
+          "entries": [
+            {
+              "entryId": 117664,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 444047,
+              "displayNameEn": "Mograine's Might"
+            }
+          ]
+        },
+        {
+          "nodeId": 95068,
+          "entries": [
+            {
+              "entryId": 117665,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 441378,
+              "displayNameEn": "Exterminate"
+            }
+          ]
+        },
+        {
+          "nodeId": 99820,
+          "entries": [
+            {
+              "entryId": 123322,
+              "tree": "SELECTION",
+              "nodeType": "SELECTION",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 32,
+              "spellId": 0,
+              "displayNameEn": "0"
+            },
+            {
+              "entryId": 123321,
+              "tree": "SELECTION",
+              "nodeType": "SELECTION",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 31,
+              "spellId": 0,
+              "displayNameEn": "0"
+            }
+          ]
+        },
+        {
+          "nodeId": 99821,
+          "entries": [
+            {
+              "entryId": 123324,
+              "tree": "SELECTION",
+              "nodeType": "SELECTION",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 33,
+              "spellId": 0,
+              "displayNameEn": "0"
+            },
+            {
+              "entryId": 123323,
+              "tree": "SELECTION",
+              "nodeType": "SELECTION",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 32,
+              "spellId": 0,
+              "displayNameEn": "0"
+            }
+          ]
+        },
+        {
+          "nodeId": 99822,
+          "entries": [
+            {
+              "entryId": 123326,
+              "tree": "SELECTION",
+              "nodeType": "SELECTION",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 33,
+              "spellId": 0,
+              "displayNameEn": "0"
+            },
+            {
+              "entryId": 123325,
+              "tree": "SELECTION",
+              "nodeType": "SELECTION",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 31,
+              "spellId": 0,
+              "displayNameEn": "0"
+            }
+          ]
+        },
+        {
+          "nodeId": 101708,
+          "entries": [
+            {
+              "entryId": 125606,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 373930,
+              "displayNameEn": "Proliferating Chill"
+            }
+          ]
+        },
+        {
+          "nodeId": 101882,
+          "entries": [
+            {
+              "entryId": 125815,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 455135,
+              "displayNameEn": "Menacing Magus"
+            }
+          ]
+        },
+        {
+          "nodeId": 101929,
+          "entries": [
+            {
+              "entryId": 125874,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 51271,
+              "displayNameEn": "Pillar of Frost"
+            }
+          ]
+        },
+        {
+          "nodeId": 101930,
+          "entries": [
+            {
+              "entryId": 125875,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 377190,
+              "displayNameEn": "Enduring Strength"
+            }
+          ]
+        },
+        {
+          "nodeId": 101931,
+          "entries": [
+            {
+              "entryId": 125876,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 377076,
+              "displayNameEn": "Rage of the Frozen Champion"
+            }
+          ]
+        },
+        {
+          "nodeId": 101932,
+          "entries": [
+            {
+              "entryId": 125877,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 456240,
+              "displayNameEn": "The Long Winter"
+            }
+          ]
+        },
+        {
+          "nodeId": 101933,
+          "entries": [
+            {
+              "entryId": 125878,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 435010,
+              "displayNameEn": "Icy Death Torrent"
+            }
+          ]
+        },
+        {
+          "nodeId": 102007,
+          "entries": [
+            {
+              "entryId": 126015,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 356367,
+              "displayNameEn": "Death's Echo"
+            }
+          ]
+        },
+        {
+          "nodeId": 102008,
+          "entries": [
+            {
+              "entryId": 126016,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 454842,
+              "displayNameEn": "Null Magic"
+            }
+          ]
+        },
+        {
+          "nodeId": 102009,
+          "entries": [
+            {
+              "entryId": 126017,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 377226,
+              "displayNameEn": "Frozen Dominion"
+            }
+          ]
+        },
+        {
+          "nodeId": 102242,
+          "entries": [
+            {
+              "entryId": 126296,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 458753,
+              "displayNameEn": "Bloodied Blade"
+            }
+          ]
+        },
+        {
+          "nodeId": 102243,
+          "entries": [
+            {
+              "entryId": 126298,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1265869,
+              "displayNameEn": "Plague Infusion"
+            }
+          ]
+        },
+        {
+          "nodeId": 102244,
+          "entries": [
+            {
+              "entryId": 126300,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1263824,
+              "displayNameEn": "Consumption"
+            }
+          ]
+        },
+        {
+          "nodeId": 102245,
+          "entries": [
+            {
+              "entryId": 126301,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 458752,
+              "displayNameEn": "Carnage"
+            }
+          ]
+        },
+        {
+          "nodeId": 106790,
+          "entries": [
+            {
+              "entryId": 131618,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 456237,
+              "displayNameEn": "Cryogenic Chamber"
+            }
+          ]
+        },
+        {
+          "nodeId": 106791,
+          "entries": [
+            {
+              "entryId": 131619,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1230272,
+              "displayNameEn": "Icy Onslaught"
+            }
+          ]
+        },
+        {
+          "nodeId": 108124,
+          "entries": [
+            {
+              "entryId": 133513,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1271974,
+              "displayNameEn": "Blightfall"
+            }
+          ]
+        },
+        {
+          "nodeId": 108126,
+          "entries": [
+            {
+              "entryId": 133515,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1254552,
+              "displayNameEn": "Blightburst"
+            }
+          ]
+        },
+        {
+          "nodeId": 108127,
+          "entries": [
+            {
+              "entryId": 133516,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 2,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1242604,
+              "displayNameEn": "Scourging"
+            }
+          ]
+        },
+        {
+          "nodeId": 108129,
+          "entries": [
+            {
+              "entryId": 133522,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1247378,
+              "displayNameEn": "Putrefy"
+            }
+          ]
+        },
+        {
+          "nodeId": 108130,
+          "entries": [
+            {
+              "entryId": 125816,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 455386,
+              "displayNameEn": "Doomed Bidding"
+            }
+          ]
+        },
+        {
+          "nodeId": 108131,
+          "entries": [
+            {
+              "entryId": 133523,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1241567,
+              "displayNameEn": "Clawing Shadows"
+            }
+          ]
+        },
+        {
+          "nodeId": 108151,
+          "entries": [
+            {
+              "entryId": 133546,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 377580,
+              "displayNameEn": "Putrid Echoes"
+            }
+          ]
+        },
+        {
+          "nodeId": 109258,
+          "entries": [
+            {
+              "entryId": 133362,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1238680,
+              "displayNameEn": "Frostbound Will"
+            }
+          ]
+        },
+        {
+          "nodeId": 109392,
+          "entries": [
+            {
+              "entryId": 133517,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 377514,
+              "displayNameEn": "Reaping"
+            }
+          ]
+        },
+        {
+          "nodeId": 109458,
+          "entries": [
+            {
+              "entryId": 135676,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1256813,
+              "displayNameEn": "Lord of the Dead"
+            }
+          ]
+        },
+        {
+          "nodeId": 109733,
+          "entries": [
+            {
+              "entryId": 135991,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 1265855,
+              "displayNameEn": "Echoing Fury"
+            }
+          ]
+        },
+        {
+          "nodeId": 109734,
+          "entries": [
+            {
+              "entryId": 135992,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 1265932,
+              "displayNameEn": "Deathly Blows"
+            }
+          ]
+        },
+        {
+          "nodeId": 109735,
+          "entries": [
+            {
+              "entryId": 135993,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 251],
+              "subTreeId": 33,
+              "spellId": 1265859,
+              "displayNameEn": "Frigid Resolve"
+            }
+          ]
+        },
+        {
+          "nodeId": 109736,
+          "entries": [
+            {
+              "entryId": 135994,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 1265574,
+              "displayNameEn": "Transfusion"
+            }
+          ]
+        },
+        {
+          "nodeId": 109737,
+          "entries": [
+            {
+              "entryId": 135995,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 1265547,
+              "displayNameEn": "Thrill of Blood"
+            }
+          ]
+        },
+        {
+          "nodeId": 109738,
+          "entries": [
+            {
+              "entryId": 135996,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [250, 252],
+              "subTreeId": 31,
+              "spellId": 434157,
+              "displayNameEn": "Visceral Strength"
+            }
+          ]
+        },
+        {
+          "nodeId": 109739,
+          "entries": [
+            {
+              "entryId": 135997,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 1265971,
+              "displayNameEn": "Unholy Armaments"
+            }
+          ]
+        },
+        {
+          "nodeId": 109740,
+          "entries": [
+            {
+              "entryId": 135998,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 1265949,
+              "displayNameEn": "Let Terror Reign"
+            }
+          ]
+        },
+        {
+          "nodeId": 109741,
+          "entries": [
+            {
+              "entryId": 135999,
+              "tree": "HERO",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [251, 252],
+              "subTreeId": 32,
+              "spellId": 1265959,
+              "displayNameEn": "Ride or Die!"
+            }
+          ]
+        },
+        {
+          "nodeId": 110029,
+          "entries": [
+            {
+              "entryId": 136523,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 392566,
+              "displayNameEn": "Enfeeble"
+            }
+          ]
+        },
+        {
+          "nodeId": 110030,
+          "entries": [
+            {
+              "entryId": 136524,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 1266819,
+              "displayNameEn": "Death Notes"
+            }
+          ]
+        },
+        {
+          "nodeId": 110031,
+          "entries": [
+            {
+              "entryId": 136525,
+              "tree": "CLASS",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [],
+              "subTreeId": 0,
+              "spellId": 1266818,
+              "displayNameEn": "Death Defiance"
+            }
+          ]
+        },
+        {
+          "nodeId": 110260,
+          "entries": [
+            {
+              "entryId": 136797,
+              "tree": "SPECIALIZATION",
+              "nodeType": "NORMAL",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 288848,
+              "displayNameEn": "Necromancer's Cunning"
+            }
+          ]
+        },
+        {
+          "nodeId": 110353,
+          "entries": [
+            {
+              "entryId": 136917,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1264506,
+              "displayNameEn": "Dance of Midnight"
+            },
+            {
+              "entryId": 136916,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 2,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1264405,
+              "displayNameEn": "Dance of Midnight"
+            },
+            {
+              "entryId": 136915,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 1,
+              "specIds": [250],
+              "subTreeId": 0,
+              "spellId": 1264351,
+              "displayNameEn": "Dance of Midnight"
+            }
+          ]
+        },
+        {
+          "nodeId": 110354,
+          "entries": [
+            {
+              "entryId": 136920,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1242158,
+              "displayNameEn": "Forbidden Knowledge"
+            },
+            {
+              "entryId": 136919,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 2,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1256565,
+              "displayNameEn": "Forbidden Knowledge"
+            },
+            {
+              "entryId": 136918,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 1,
+              "specIds": [252],
+              "subTreeId": 0,
+              "spellId": 1256566,
+              "displayNameEn": "Forbidden Knowledge"
+            }
+          ]
+        },
+        {
+          "nodeId": 110400,
+          "entries": [
+            {
+              "entryId": 136968,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1265632,
+              "displayNameEn": "Chosen of Frostbrood"
+            },
+            {
+              "entryId": 136967,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 2,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1265633,
+              "displayNameEn": "Chosen of Frostbrood"
+            },
+            {
+              "entryId": 136966,
+              "tree": "SPECIALIZATION",
+              "nodeType": "TIERED",
+              "maxRanks": 1,
+              "specIds": [251],
+              "subTreeId": 0,
+              "spellId": 1265637,
+              "displayNameEn": "Chosen of Frostbrood"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
