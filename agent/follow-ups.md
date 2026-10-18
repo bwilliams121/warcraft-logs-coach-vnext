@@ -439,6 +439,29 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G3-3: what ELITE_REALISTIC_V1 does not establish
+
+**Raised:** M11-G3-3 (2026-10-15).
+
+**The 400 ms elite reaction is an assumption, not a measurement.** It is inert
+for Blood, and a Fire probe moved by +0.07% against the engine's 500 ms.
+Revisit it with evidence when a proc-reactive spec is onboarded; a change is
+ELITE_REALISTIC_V2.
+
+**Channel lag (250 ms, pinned) is material for channellers.** An Arcane probe
+shows +3.7% at 0 ms. Whether an elite player can queue into a channel's end
+needs a product and gameplay decision before a channelling spec is onboarded.
+For Blood it is conditional on the Consumption talent.
+
+**The engine emits trivial-level log lines for some specs.** Arcane Mage
+reported "Unable to register Improved Conjuration…". The G3-1 parser fails
+closed on any log entry, so such specs would be refused until a reviewed
+log-level policy exists. Blood emits none.
+
+**No queue timing check against logs.** WCL carries no haste state, so exact
+GCD lengths, and with them queue gaps, are not reconstructible from committed
+evidence.
+
 ## After M11-G3-2: what character reconstruction does not establish
 
 **Raised:** M11-G3-2 (2026-10-14).

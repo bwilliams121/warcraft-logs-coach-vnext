@@ -4,8 +4,8 @@
     "source": "approved engine 41347bc4203bd1b073a617cd9cd147a96c9c09a36f8c7af5c013ca7be273cb77",
     "job": "fidelityProbeJob(reconstructCharacterProfile(canonical G3-2 subject), BLOOD_CHARACTER_BINDING)",
     "jobProfileHash": "429d7a5c173ba90d1d2af4c621a346cd9b35b4ff16143c47d65779a9ec6fc191",
-    "rawSha256": "79b6d233d23b3bb24380c481d90adfd6cc160bfe2ec6a910b6f73b0025aaa731",
-    "rawBytes": 692553,
+    "rawSha256": "b11fd40c55569df7f38363b78363fa3561602a8caa0c47c8e7cb0327bff824f2",
+    "rawBytes": 692726,
     "projection": "fields read by SIMC_JSON_2_PARSER_V1 and the profile echo; build_date, build_time, timestamp and all timelines dropped"
   },
   "version": "1210-01",
@@ -60,8 +60,8 @@
     },
     "overrides": {},
     "statistics": {
-      "elapsed_cpu_seconds": 1.6299935,
-      "elapsed_time_seconds": 0.4631418,
+      "elapsed_cpu_seconds": 6.156917,
+      "elapsed_time_seconds": 1.895920865,
       "total_events_processed": 1410310,
       "simulation_length": {
         "sum": 58800,
@@ -89,6 +89,7 @@
         "reaction_mean": 0.25,
         "reaction_stddev": 0.05,
         "reaction_nu": 0.15,
+        "ready_type": 0,
         "world_lag": 0.1,
         "world_lag_stddev": 0.01,
         "brain_lag": 0,
@@ -100,16 +101,16 @@
         "temporary_enchant": "disabled",
         "collected_data": {
           "dps": {
-            "sum": 14196123.82980073,
+            "sum": 14196123.829800729,
             "count": 196,
-            "mean": 72429.20321326904,
+            "mean": 72429.20321326902,
             "min": 65112.51052410076,
             "max": 80208.49241083118,
             "median": 72302.16301645165,
-            "variance": 7991387.349450212,
-            "std_dev": 2826.904198845481,
-            "mean_variance": 40772.38443597047,
-            "mean_std_dev": 201.92172848896294
+            "variance": 7991387.349450215,
+            "std_dev": 2826.904198845482,
+            "mean_variance": 40772.38443597048,
+            "mean_std_dev": 201.92172848896297
           },
           "buffed_stats": {
             "attribute": {
@@ -306,7 +307,7 @@
             "id": 50842,
             "name": "blood_boil",
             "type": "damage",
-            "compound_amount": 771314.6499823461,
+            "compound_amount": 771314.649982346,
             "num_executes": {
               "mean": 39.724489795918366
             }
@@ -342,7 +343,7 @@
             "id": 55078,
             "name": "blood_plague",
             "type": "damage",
-            "compound_amount": 668040.9517167226,
+            "compound_amount": 668040.9517167227,
             "num_executes": {
               "mean": 64.54591836734694
             }
@@ -351,7 +352,7 @@
             "id": 55078,
             "name": "blood_plague_heal",
             "type": "heal",
-            "compound_amount": 747550.8310936211,
+            "compound_amount": 747550.8310936212,
             "num_executes": {
               "mean": 117
             }
@@ -432,7 +433,7 @@
                 "id": 433895,
                 "name": "vampiric_strike",
                 "type": "damage",
-                "compound_amount": 175063.1264814309,
+                "compound_amount": 175063.12648143087,
                 "num_executes": {
                   "mean": 23.632653061224488
                 }
@@ -463,7 +464,7 @@
             "id": 49998,
             "name": "death_strike",
             "type": "damage",
-            "compound_amount": 6854565.810237599,
+            "compound_amount": 6854565.810237598,
             "num_executes": {
               "mean": 81.71428571428571
             }
@@ -481,7 +482,7 @@
             "id": 195292,
             "name": "deaths_caress",
             "type": "damage",
-            "compound_amount": 29166.06689108578,
+            "compound_amount": 29166.066891085775,
             "num_executes": {
               "mean": 6.26530612244898
             }
@@ -508,7 +509,7 @@
             "id": 206930,
             "name": "heart_strike",
             "type": "damage",
-            "compound_amount": 3825587.66173933,
+            "compound_amount": 3825587.661739329,
             "num_executes": {
               "mean": 122.86224489795919
             },
@@ -517,7 +518,7 @@
                 "id": 433895,
                 "name": "vampiric_strike",
                 "type": "damage",
-                "compound_amount": 2374259.7425355124,
+                "compound_amount": 2374259.742535512,
                 "num_executes": {
                   "mean": 48.826530612244895
                 },
@@ -544,7 +545,7 @@
                     "id": 0,
                     "name": "auto_attack_mh",
                     "type": "damage",
-                    "compound_amount": 174305.1372901121,
+                    "compound_amount": 174305.13729011206,
                     "num_executes": {
                       "mean": 65.12244897959184
                     }
@@ -642,7 +643,7 @@
                 "id": 91776,
                 "name": "claw",
                 "type": "damage",
-                "compound_amount": 6313.153026128119,
+                "compound_amount": 6313.1530261281205,
                 "num_executes": {
                   "mean": 6
                 }
@@ -728,7 +729,7 @@
               "id": 49998,
               "name": "death_strike",
               "type": "damage",
-              "compound_amount": 501046.07609066524,
+              "compound_amount": 501046.0760906652,
               "num_executes": {
                 "mean": 18.086734693877553
               }
@@ -766,7 +767,7 @@
               "id": 55078,
               "name": "blood_plague",
               "type": "damage",
-              "compound_amount": 216164.92134867623,
+              "compound_amount": 216164.9213486763,
               "num_executes": {
                 "mean": 32.75
               }

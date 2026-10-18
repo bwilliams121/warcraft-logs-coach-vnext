@@ -102,6 +102,7 @@ export async function runSimulationJob(
           executedBinarySha256: launched.executedBinarySha256,
           profileHash: keys.profileHash,
           environmentHash: keys.environmentHash,
+          executionProfileRevision: keys.executionProfileRevision,
         });
         return {
           outcome,

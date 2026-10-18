@@ -157,6 +157,7 @@ if (mode === "hang") {
           reaction_mean: secs(player.reaction_time_mean),
           reaction_stddev: secs(player.reaction_time_stddev),
           reaction_nu: secs(player.reaction_time_nu),
+          ready_type: player.ready_trigger === "1" ? 1 : 0,
           world_lag: secs(player.world_lag),
           world_lag_stddev: secs(player.world_lag_stddev),
           brain_lag: secs(player.brain_lag),

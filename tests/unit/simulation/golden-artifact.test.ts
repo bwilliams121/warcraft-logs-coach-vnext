@@ -37,6 +37,7 @@ async function context(): Promise<ParseContext> {
     executedBinarySha256: ARTIFACT.binarySha256,
     profileHash: prepared.value.keys.profileHash,
     environmentHash: prepared.value.keys.environmentHash,
+    executionProfileRevision: prepared.value.keys.executionProfileRevision,
   };
 }
 

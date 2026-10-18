@@ -11,6 +11,8 @@
  * excluded from semantic equality. Everything else must reproduce.
  */
 
+import type { ExecutionPlayerSettings, ExecutionSimSettings } from "./execution-profiles.js";
+
 export const SIMULATION_RESULT_SCHEMA_VERSION = "simulation-result/1";
 
 export interface SimulationActionBreakdownEntry {
@@ -41,7 +43,16 @@ export interface SimulationResult {
   };
   readonly profileHash: string;
   readonly environmentHash: string;
-  readonly executionProfile: { readonly id: string; readonly version: number };
+  /** Identity AND definition: the revision hash and the effective settings the engine ran. */
+  readonly executionProfile: {
+    readonly id: string;
+    readonly version: number;
+    readonly revision: string;
+    readonly effectiveSettings: {
+      readonly sim: ExecutionSimSettings;
+      readonly player: ExecutionPlayerSettings;
+    };
+  };
   readonly simulationPolicy: { readonly id: string; readonly version: number };
   readonly iterations: { readonly requested: number; readonly counted: number };
   /** Player DPS including its pets, as the engine reports it. */

@@ -61,6 +61,7 @@ export async function runProfileFidelity(
     executedBinarySha256: launched.executedBinarySha256,
     profileHash: prepared.value.keys.profileHash,
     environmentHash: prepared.value.keys.environmentHash,
+    executionProfileRevision: prepared.value.keys.executionProfileRevision,
   });
   if (!parsed.ok) return parsed;
   const echo = extractProfileEcho(launched.json);

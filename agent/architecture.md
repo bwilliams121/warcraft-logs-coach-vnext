@@ -7961,6 +7961,86 @@ no optimization and no coaching; a fidelity probe's DPS is never a result.
   - The G3-1 simulation guard was amended explicitly to allow
     `src/character-profile/` and spec character bindings.
 
+## M11-G3-3 — ELITE_REALISTIC_V1 execution profile (frozen)
+
+One shared, standardized execution profile: an elite player executing the
+pinned APL under realistic game and input timing. It is not player-specific
+and not fitted to any DPS or log. Runtime: the approved G3-1 artifact.
+
+- **The pinned semantics that decide it** (pinned source).
+  - `strict_gcd_queue` OFF: every GCD action takes the queued branch and starts
+    `queue_lag` (5 ± 1 ms effective) after the GCD/cast becomes available
+    (`player.cpp:6942-6990`). This is the in-game spell queue, used well.
+    `gcd_lag` and `queue_gcd_reduction` apply only with the strict queue ON.
+  - `channel_lag` applies after a completed channel. World lag delays a
+    cooldown only above 400 ms, and also the GCD reset after an interrupted
+    cast and a channel's auto-attack reset.
+  - `cooldown_tolerance` is the cooldown queue window (`cooldown.cpp:655`).
+    Aura delay delays every in-combat buff trigger (`buff.cpp:295, :2138`).
+  - Player reaction = `min(max, offset + ExGauss(μ, σ, ν))`
+    (`player.cpp:7763`). It is sampled only for buffs made reactable by
+    `buff.<x>.react` / `react_pct` (`buff.cpp:480-530, :2697`).
+  - The sim-level `reaction_time` covers non-player auras. `brain_lag` feeds
+    only the `cast_delay` expression. `skill` < 1 adds false-positive and
+    false-negative action rolls (`action.cpp:1326-1365`).
+  - `enable_spell_queue` picks the next action before a cast ends, on stale
+    state. `ready_trigger` replaces the ~100 ± 10 ms wait poll
+    (`player.cpp:7130`).
+- **Millisecond rule, re-verified on the binary.** A configured `0.0375` runs
+  and echoes as 0.037 s. Every profile time is an integer effective
+  millisecond.
+- **Decisions.**
+  - `strict_gcd_queue` OFF. ON adds a ~150 ms post-GCD gap that pre-queueing
+    removes: −10.6% on Blood.
+  - `queue_lag` kept at 5 ± 1 ms. A deliberately imperfect 30 ± 10 ms queue
+    (ELITE_CANDIDATE_QUEUE) costs −1.61% and contradicts "excellent
+    execution".
+  - Reaction: 100 ms + ExGauss(200, 40, 100) ms, mean 400 ms, cap 1.4 s. This
+    is a PRODUCT_EXECUTION_ASSUMPTION: the engine's generic 500 ms shape and
+    20% σ/μ, 20% faster. Not fitted.
+  - World lag 100 ± 10, aura delay 30 ± 5, cooldown tolerance 250 and sim
+    reaction 500 are kept: STANDARDIZED_ENVIRONMENT_ASSUMPTION, server
+    behaviour rather than skill, never the user's latency.
+  - `brain_lag` 0 and `skill` 1: the APL is executed correctly.
+  - `channel_lag` 250 ± 62 ms is kept (pinned).
+  - Spell queue off; `ready_trigger` off (polling, a non-zero wait response).
+- **Definition** (`src/simulation/execution-profiles.ts`).
+  - `ELITE_REALISTIC_V1` v1 is the only PRODUCTION profile: a complete,
+    deep-frozen literal, not built from the pinned-default helpers.
+  - Revision `5692cfece9870b95028ed41ebada3bf858c624e5a8d784ce677eada203d9190c`
+    (`executionProfileRevision`: id, version and every effective setting).
+  - SIMC_DEFAULT_PINNED v2 is the reference. It adds explicit
+    `enable_spell_queue`, `spell_queue_window` and `ready_trigger`, and
+    reproduces G3-1's 82,330.6 exactly.
+  - EVALUATED_CANDIDATEs: QUEUE, REACTION (= V1's settings) and COMBINED. The
+    G3-1 provisional A/B are retired.
+- **Identity.** Builder `simc-input-builder/2` writes the three new player
+  options, and parser `SIMC_JSON_2_PARSER_V2` checks the `ready_type` echo.
+  - Results record `executionProfile {id, version, revision,
+    effectiveSettings}`.
+  - The cache key carries the revision, so two profiles with identical
+    settings and different ids never share a key.
+- **Activity** (`execution-activity.ts`, spec facts in
+  `src/specs/deathknight/blood/execution-facts.ts`). Classes are
+  ACTIVE_FOR_THIS_APL, INACTIVE_FOR_THIS_APL, ENGINE_GLOBAL and CONDITIONAL,
+  from semantics.
+  - Blood: reaction and brain lag are inactive (no `.react` or `cast_delay`).
+    `channel_lag` is CONDITIONAL on the Consumption talent, Blood's only
+    channel. `gcd_lag` is inactive.
+  - A one-field-at-a-time single-thread engine check confirmed every
+    classification (identical vs changed results). `travel_variance` is active
+    for Blood.
+- **Blood benchmark** (development job, STANDARD_SIM_V1, descriptive only).
+  - Pinned reference = V1 = REACTION = 82,330.6 (relative SE 0.077%).
+  - QUEUE = COMBINED = 81,005.8 (−1.61%): fewer Blood Boil and Blood Plague
+    applications.
+- **Non-Blood sanity** (probe-only raw input: the engine's default APL and
+  default talents, no gear).
+  - Fire Mage (`buff.hot_streak.react`): the V1 reaction differs from pinned
+    (+0.07%), so reaction is active.
+  - Arcane Mage (Arcane Missiles channel): `channel_lag` 0 vs 250 ms is +3.7%,
+    so it is active and material for channellers.
+
 ---
 
 # Milestone 12 — Healer Foundation

@@ -1647,6 +1647,19 @@ character reconstruction (M11-G3-2, tests/unit/character-profile/*.test.ts, cont
   provenance moved / order changed / setup     -> same hash / same hash / new hash; UNKNOWN != KNOWN_NONE (AA, AB)
   fidelity result                              -> carries no simulation number (AC)
   16 deliberate faults                         -> each caught (.probe/m11g3/faults-g32.cjs)
+execution profile (M11-G3-3, tests/unit/simulation/execution-profiles.test.ts, runner-and-parser.test.ts):
+  ELITE_REALISTIC_V1                           -> sole PRODUCTION profile; deep-frozen; revision pinned (A)
+  every field                                  -> explicit; V1 is its own literal, not the pinned defaults (B, E)
+  any setting / id / version change            -> new revision (C, D)
+  profile times                                -> integer effective ms; builder round-trips (F)
+  Blood vs .react APL                          -> reaction INACTIVE vs ACTIVE; strict ON activates gcd_lag (G, H)
+  queue, strict, server delays, brain, skill   -> each written to the engine input (I-M)
+  smuggled latency field                       -> JOB_REJECTED; no WCL/normalization import (N, O)
+  V1 vs pinned input                           -> only reaction lines differ (P)
+  profile change / same settings, other id     -> different engine-run key (Q)
+  real run                                     -> result records id, version, revision, effective settings (R)
+  ready_type echo mismatch                     -> SIMULATION_OUTPUT_MALFORMED
+  13 deliberate faults                         -> each caught (.probe/m11g3/faults-g33.cjs)
 ```
 
 The fake engine (`tests/support/simulation/fake-simc.mjs`) re-parses the

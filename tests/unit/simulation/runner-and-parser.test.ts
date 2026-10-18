@@ -19,7 +19,8 @@ import { DirectLauncher, DockerLauncher, type LaunchOutcome } from "../../../run
 import { DEFAULT_RUNNER_LIMITS, JobSlots, type RunnerLimits } from "../../../runner/limits.js";
 import { runSimulationJob } from "../../../runner/run-simulation.js";
 import { RUNNER_SPEC_BINDINGS } from "../../../runner/spec-bindings.js";
-import { executionProfileById } from "../../../src/simulation/execution-profiles.js";
+import { executionProfileById, type ExecutionProfile } from "../../../src/simulation/execution-profiles.js";
+import { executionProfileRevision } from "../../../src/simulation/execution-revision.js";
 import type { SimulationJob } from "../../../src/simulation/job.js";
 import { APPROVED_SIMC_MODEL, type ApprovedEngineArtifact } from "../../../src/simulation/model.js";
 import { prepareSimulation } from "../../../src/simulation/prepare.js";
@@ -89,7 +90,10 @@ describe("M11-G3-1 runner: one job, end to end through the fake engine", () => {
     expect(result.dps.mean).toBe(50_000);
     expect(result.dps.ci95.lower).toBeLessThan(result.dps.mean);
     expect(result.dps.ci95.upper).toBeGreaterThan(result.dps.mean);
-    expect(result.executionProfile).toEqual({ id: "SIMC_DEFAULT_PINNED", version: 1 });
+    expect(result.executionProfile).toMatchObject({ id: "SIMC_DEFAULT_PINNED", version: 2 });
+    expect(result.executionProfile.revision).toMatch(/^[0-9a-f]{64}$/);
+    expect(result.executionProfile.effectiveSettings.sim.queueLagMs).toBe(5);
+    expect(result.executionProfile.effectiveSettings.player.readyTrigger).toBe(false);
     expect(result.simulationPolicy).toEqual({ id: "STANDARD_SIM_V1", version: 1 });
     expect(result.provenance.durationAssumption).toBe("EXACT_OBSERVED_DURATION_CEILING_ASSUMPTION");
     expect(result.provenance.tankModel).toBe("STANDARD_TANK_LOAD_V1");
@@ -228,6 +232,7 @@ describe("M11-G3-1 result parser: fail closed on anything but the job that was r
       executedBinarySha256: FAKE_SHA,
       profileHash: prepared.value.keys.profileHash,
       environmentHash: prepared.value.keys.environmentHash,
+      executionProfileRevision: prepared.value.keys.executionProfileRevision,
     };
   });
 
@@ -328,6 +333,7 @@ describe("M11-G3-1 result parser: fail closed on anything but the job that was r
       ["player reaction", (r) => (r["sim"].players[0].reaction_mean = 0.15)],
       ["player world lag", (r) => (r["sim"].players[0].world_lag = 0.05)],
       ["player brain lag", (r) => (r["sim"].players[0].brain_lag = 0.1)],
+      ["player ready trigger", (r) => (r["sim"].players[0].ready_type = 1)],
       ["class-default potion", (r) => (r["sim"].players[0].potion = "tempered_potion_3")],
       ["temporary enchant", (r) => delete r["sim"].players[0].temporary_enchant],
     ];
@@ -391,6 +397,37 @@ describe("M11-G3-1 result parser: fail closed on anything but the job that was r
 
   it("the policy and profile registries resolve the job's ids", () => {
     expect(simulationPolicyById("STANDARD_SIM_V1")?.iterations).toBe(2_000);
-    expect(executionProfileById("SIMC_DEFAULT_PINNED")?.status).toBe("PINNED_ENGINE_DEFAULT");
+    expect(executionProfileById("SIMC_DEFAULT_PINNED")?.status).toBe("PINNED_ENGINE_REFERENCE");
+  });
+});
+
+describe("M11-G3-3 execution-profile provenance through a real run", () => {
+  const V1 = executionProfileById("ELITE_REALISTIC_V1") as ExecutionProfile;
+  it("R. result provenance records the profile revision and its effective settings", async () => {
+    const fake = join(process.cwd(), "tests", "support", "simulation", "fake-simc.mjs");
+    const artifact: ApprovedEngineArtifact = {
+      model: APPROVED_SIMC_MODEL,
+      binarySha256: createHash("sha256").update(readFileSync(fake)).digest("hex"),
+      buildRecipeRevision: "fake",
+    };
+    const body = devBloodJob("STANDARD_SIM_V1", "ELITE_REALISTIC_V1");
+    const report = await runSimulationJob(body, jsonBytes(body), {
+      artifact,
+      launcher: new DirectLauncher(
+        { executable: process.execPath, leadingArgs: [fake, "ok"], binaryToHash: fake },
+        DEFAULT_RUNNER_LIMITS,
+      ),
+      bindings: RUNNER_SPEC_BINDINGS,
+      limits: DEFAULT_RUNNER_LIMITS,
+      slots: new JobSlots(1),
+    });
+    if (!report.outcome.ok) throw new Error(report.outcome.failure.detail);
+    expect(report.outcome.value.executionProfile).toEqual({
+      id: "ELITE_REALISTIC_V1",
+      version: 1,
+      revision: await executionProfileRevision(V1),
+      effectiveSettings: { sim: V1.sim, player: V1.player },
+    });
+    expect(report.outcome.value.model.requestedSimcCommit).toBe(APPROVED_SIMC_MODEL.simcCommit);
   });
 });

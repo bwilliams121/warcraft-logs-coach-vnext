@@ -112,6 +112,7 @@ export function goldenProjection(raw: string, source: Json): Json {
             "reaction_mean",
             "reaction_stddev",
             "reaction_nu",
+            "ready_type",
             "world_lag",
             "world_lag_stddev",
             "brain_lag",

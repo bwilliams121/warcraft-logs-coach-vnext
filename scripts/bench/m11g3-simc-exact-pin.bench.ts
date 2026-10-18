@@ -122,6 +122,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-1 exact-pin SimulationCraft runner"
           executedBinarySha256: launched.executedBinarySha256,
           profileHash: prepared.value.keys.profileHash,
           environmentHash: prepared.value.keys.environmentHash,
+          executionProfileRevision: prepared.value.keys.executionProfileRevision,
         });
         if (!parsed.ok) {
           writeFileSync(join(OUT, `raw-failed-${label}.json`), launched.json, "utf8");
@@ -188,7 +189,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-1 exact-pin SimulationCraft runner"
       }
 
       // 5. Execution profiles.
-      for (const profileId of ["ELITE_REALISTIC_CANDIDATE_A", "ELITE_REALISTIC_CANDIDATE_B"]) {
+      for (const profileId of ["ELITE_REALISTIC_V1"]) {
         await runOnce(`standard-${profileId.toLowerCase()}`, "STANDARD_SIM_V1", profileId);
       }
       save("complete");

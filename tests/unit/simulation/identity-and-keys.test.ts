@@ -141,7 +141,7 @@ describe("M11-G3-1 cache keys", () => {
     );
     add(
       "execution profile version",
-      simulationCacheKeys(job(), BLOOD, TEST_ARTIFACT, { ...profile, version: 2 }, policy),
+      simulationCacheKeys(job(), BLOOD, TEST_ARTIFACT, { ...profile, version: profile.version + 1 }, policy),
     );
     add(
       "execution profile setting",

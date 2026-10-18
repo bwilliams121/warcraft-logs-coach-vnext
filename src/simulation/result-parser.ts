@@ -38,7 +38,7 @@ import {
 import type { SimulationPolicy } from "./simulation-policy.js";
 import type { SimulationSpecBinding } from "./spec-binding.js";
 
-export const RESULT_PARSER_REVISION = "SIMC_JSON_2_PARSER_V1";
+export const RESULT_PARSER_REVISION = "SIMC_JSON_2_PARSER_V2";
 export const SUPPORTED_REPORT_VERSION = "2.0.0";
 export const MAX_ENGINE_OUTPUT_BYTES = 5 * 1024 * 1024;
 
@@ -137,6 +137,7 @@ const reportSchema = z.object({
         reaction_mean: z.number(),
         reaction_stddev: z.number(),
         reaction_nu: z.number(),
+        ready_type: z.number(),
         world_lag: z.number(),
         world_lag_stddev: z.number(),
         brain_lag: z.number(),
@@ -168,6 +169,8 @@ export interface ParseContext {
   /** SHA-256 of the binary the runner actually executed, computed by the runner. */
   readonly executedBinarySha256: string;
   readonly profileHash: string;
+  /** `executionProfileRevision` of `profile`, computed when the job was prepared. */
+  readonly executionProfileRevision: string;
   readonly environmentHash: string;
 }
 
@@ -276,7 +279,12 @@ export function parseSimcJson(
     },
     profileHash: context.profileHash,
     environmentHash: context.environmentHash,
-    executionProfile: { id: context.profile.id, version: context.profile.version },
+    executionProfile: {
+      id: context.profile.id,
+      version: context.profile.version,
+      revision: context.executionProfileRevision,
+      effectiveSettings: { sim: context.profile.sim, player: context.profile.player },
+    },
     simulationPolicy: { id: context.policy.id, version: context.policy.version },
     iterations: { requested, counted: dps.count },
     dps: {
@@ -395,6 +403,7 @@ function checkActors(
     ["world_lag_stddev", player.world_lag_stddev, profile.sim.worldLagStddevMs],
   ];
   for (const [name, seconds, ms] of timings) if (!sameMillis(seconds, ms)) return `player.${name}`;
+  if (player.ready_type !== (profile.player.readyTrigger ? 1 : 0)) return "player.ready_type";
   // A named consumable must be echoed as named. How the pinned report echoes
   // a DISABLED one is not yet confirmed on real output, so NONE is not
   // asserted here (agent/follow-ups.md, M11-G3-1).

@@ -38,7 +38,7 @@ import type { SimulationSpecBinding } from "./spec-binding.js";
 import { TANK_MODEL_DIRECTIVES } from "./tank-model.js";
 
 /** Bump when the emitted text changes for the same job. Part of every cache key. */
-export const INPUT_BUILDER_REVISION = "simc-input-builder/1";
+export const INPUT_BUILDER_REVISION = "simc-input-builder/2";
 
 /** The fixed actor names. Never the player's name. */
 export const SIMULATED_PLAYER_NAME = "Subject";
@@ -138,6 +138,9 @@ function executionPlayerLines(profile: ExecutionProfile): string[] {
     `world_lag=${seconds(sim.worldLagMs)}`,
     `world_lag_stddev=${seconds(sim.worldLagStddevMs)}`,
     `skill=${String(player.skill)}`,
+    `enable_spell_queue=${player.enableSpellQueue ? "1" : "0"}`,
+    `spell_queue_window=${seconds(player.spellQueueWindowMs)}`,
+    `ready_trigger=${player.readyTrigger ? "1" : "0"}`,
   ];
 }
 

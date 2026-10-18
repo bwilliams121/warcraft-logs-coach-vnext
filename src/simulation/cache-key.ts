@@ -15,6 +15,7 @@
 
 import { canonicalJson, environmentHash, profileHash, sha256Hex } from "./canonical.js";
 import type { ExecutionProfile } from "./execution-profiles.js";
+import { executionProfileRevision } from "./execution-revision.js";
 import { INPUT_BUILDER_REVISION } from "./input-builder.js";
 import { SIMULATION_JOB_SCHEMA_VERSION, type SimulationJob } from "./job.js";
 import type { ApprovedEngineArtifact } from "./model.js";
@@ -27,6 +28,7 @@ export interface SimulationCacheKeys {
   readonly environmentHash: string;
   readonly engineRunKey: string;
   readonly parsedResultKey: string;
+  readonly executionProfileRevision: string;
 }
 
 export async function simulationCacheKeys(
@@ -38,6 +40,7 @@ export async function simulationCacheKeys(
 ): Promise<SimulationCacheKeys> {
   const profileDigest = await profileHash(job.character);
   const environmentDigest = await environmentHash(job.environment);
+  const executionDigest = await executionProfileRevision(profile);
   const engineRun = {
     kind: "simulation-engine-run-key/1",
     jobSchema: SIMULATION_JOB_SCHEMA_VERSION,
@@ -52,6 +55,7 @@ export async function simulationCacheKeys(
     executionProfile: {
       id: profile.id,
       version: profile.version,
+      revision: executionDigest,
       settings: { sim: profile.sim, player: profile.player },
     },
     simulationPolicy: { id: policy.id, version: policy.version },
@@ -68,5 +72,11 @@ export async function simulationCacheKeys(
       parserRevision: RESULT_PARSER_REVISION,
     }),
   );
-  return { profileHash: profileDigest, environmentHash: environmentDigest, engineRunKey, parsedResultKey };
+  return {
+    profileHash: profileDigest,
+    environmentHash: environmentDigest,
+    engineRunKey,
+    parsedResultKey,
+    executionProfileRevision: executionDigest,
+  };
 }

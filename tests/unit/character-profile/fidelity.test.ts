@@ -91,6 +91,7 @@ describe("M11-G3-2 profile fidelity on the exact-pin golden echo", () => {
       executedBinarySha256: artifact.binarySha256,
       profileHash: prepared.value.keys.profileHash,
       environmentHash: prepared.value.keys.environmentHash,
+      executionProfileRevision: prepared.value.keys.executionProfileRevision,
     });
     expect(parsed.ok).toBe(true);
     expect(echo.race).toBe("none");

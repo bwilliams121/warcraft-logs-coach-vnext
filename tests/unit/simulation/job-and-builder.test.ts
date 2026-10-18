@@ -120,6 +120,9 @@ const ALLOWED_KEYS = new Set([
   "world_lag",
   "world_lag_stddev",
   "skill",
+  "enable_spell_queue",
+  "spell_queue_window",
+  "ready_trigger",
 ]);
 
 describe("M11-G3-1 simulation job: structured data only", () => {
@@ -262,7 +265,7 @@ describe("M11-G3-1 simulation job: structured data only", () => {
     (nondeterministic.simulationPolicy as { deterministic: boolean }).deterministic = false;
     expect((await failureOf(nondeterministic))?.code).toBe("JOB_REJECTED");
     const profile = clone();
-    profile.executionProfileId = "ELITE_REALISTIC_V1";
+    profile.executionProfileId = "ELITE_REALISTIC_V2";
     expect((await failureOf(profile))?.code).toBe("JOB_REJECTED");
   });
 });
@@ -359,11 +362,14 @@ describe("M11-G3-1 input builder: observed environment, no ideal defaults", () =
     expect(() => millisecondsToSecondsText(-1)).toThrow(RangeError);
   });
 
-  it("Q. every execution option is explicit, and each profile changes the input", async () => {
-    const inputs = new Set<string>();
+  it("Q. every execution option is explicit, and distinct settings give distinct input", async () => {
+    const bySettings = new Map<string, string>();
     for (const profile of EXECUTION_PROFILES) {
       const input = await preparedInput(devBloodJob("STANDARD_SIM_V1", profile.id));
-      inputs.add(input);
+      const settings = JSON.stringify({ sim: profile.sim, player: profile.player });
+      // The input depends only on the settings; identity lives in the revision and cache key.
+      if (bySettings.has(settings)) expect(input, profile.id).toBe(bySettings.get(settings));
+      bySettings.set(settings, input);
       for (const key of [
         "queue_lag",
         "gcd_lag",
@@ -375,6 +381,9 @@ describe("M11-G3-1 input builder: observed environment, no ideal defaults", () =
         "reaction_time_max",
         "brain_lag",
         "skill",
+        "enable_spell_queue",
+        "spell_queue_window",
+        "ready_trigger",
       ]) {
         expect(input, `${profile.id} ${key}`).toMatch(new RegExp(`\\n${key}=`));
       }
@@ -383,9 +392,9 @@ describe("M11-G3-1 input builder: observed environment, no ideal defaults", () =
           expect(Number.isInteger(value) || value <= 1, `${profile.id} ${String(value)}`).toBe(true);
       }
     }
-    expect(inputs.size).toBe(EXECUTION_PROFILES.length);
-    const elite = executionProfileById("ELITE_REALISTIC_CANDIDATE_A");
-    expect(elite?.status).toBe("PROVISIONAL_CANDIDATE");
+    expect(new Set(bySettings.values()).size).toBe(bySettings.size);
+    const elite = executionProfileById("ELITE_REALISTIC_V1");
+    expect(elite?.status).toBe("PRODUCTION");
   });
 
   it("Q. the pinned profile writes the effective (integer-ms) engine defaults", async () => {

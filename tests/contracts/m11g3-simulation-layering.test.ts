@@ -108,6 +108,13 @@ describe("M11-G3-1 simulation layering", () => {
     )) {
       const text = code(file);
       for (const spec of importsOf(file).filter((candidate) => /simulation\//.test(candidate))) {
+        // M11-G3-3 amendment (reviewed): a spec's execution facts use the shared
+        // activity classifier — spec knowledge says which shared execution
+        // options are active for it, never what they mean.
+        if (/^src\/specs\/[a-z]+\/[a-z_]+\/execution-facts\.ts$/.test(file)) {
+          expect(spec, file).toBe("../../../simulation/execution-activity.js");
+          continue;
+        }
         expect(file, `${file} imports ${spec}`).toMatch(
           /^src\/specs\/[a-z]+\/[a-z_]+\/simulation-binding\.ts$/,
         );
