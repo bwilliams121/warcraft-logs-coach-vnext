@@ -1,7 +1,7 @@
 {
   "artifactVersion": 1,
   "datasetId": "SIMC_CONSUMABLES",
-  "artifactRevision": "simc-33622e9d-1",
+  "artifactRevision": "simc-33622e9d-3",
   "provenance": {
     "repository": "https://github.com/simulationcraft/simc",
     "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
@@ -25,11 +25,16 @@
         "path": "engine/dbc/generated/client_data_version.inc",
         "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
         "byteLength": 525
+      },
+      {
+        "path": "engine/item/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
       }
     ],
     "clientDataWowVersion": "12.1.0.69587",
     "method": "MACHINE_EXTRACTED_CONSUMABLE_JOIN",
-    "extractorVersion": 1,
+    "extractorVersion": 3,
     "scope": "item class 0 subclasses {\"1\":\"POTION\",\"3\":\"FLASK\",\"5\":\"FOOD\",\"8\":\"OTHER\"} with required level >= 80"
   },
   "temporaryEnchants": [
@@ -827,384 +832,1344 @@
     {
       "spellId": 453250,
       "kind": "OTHER",
-      "items": [{ "itemId": 224572, "name": "Crystallized Augment Rune", "itemLevel": 80, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 224572,
+          "name": "Crystallized Augment Rune",
+          "itemLevel": 80,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "crystallized", "candidateItemIds": [224572], "unambiguous": true }
+      ]
     },
     {
       "spellId": 454149,
       "kind": "FOOD",
-      "items": [{ "itemId": 222728, "name": "Beledar's Bounty", "itemLevel": 80, "quality": 3 }]
+      "items": [
+        { "itemId": 222728, "name": "Beledar's Bounty", "itemLevel": 80, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "beledars_bounty",
+          "candidateItemIds": [222728, 222776],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 456409,
       "kind": "FOOD",
-      "items": [{ "itemId": 233118, "name": "Incontinental Takeout", "itemLevel": 80, "quality": 2 }]
+      "items": [
+        {
+          "itemId": 233118,
+          "name": "Incontinental Takeout",
+          "itemLevel": 80,
+          "quality": 2,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "incontinental_takeout",
+          "candidateItemIds": [233118],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 457482,
       "kind": "FOOD",
       "items": [
-        { "itemId": 235853, "name": "Hearty Authentic Undermine Clam Chowder", "itemLevel": 80, "quality": 3 }
+        {
+          "itemId": 235853,
+          "name": "Hearty Authentic Undermine Clam Chowder",
+          "itemLevel": 80,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "hearty_authentic_undermine_clam_chowder",
+          "candidateItemIds": [235853],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 473166,
       "kind": "FOOD",
-      "items": [{ "itemId": 233062, "name": "Pocket Pizza", "itemLevel": 80, "quality": 2 }]
+      "items": [
+        { "itemId": 233062, "name": "Pocket Pizza", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "pocket_pizza", "candidateItemIds": [233062], "unambiguous": true }
+      ]
     },
     {
       "spellId": 1232246,
       "kind": "FOOD",
-      "items": [{ "itemId": 242309, "name": "Farstrider Rations", "itemLevel": 80, "quality": 1 }]
+      "items": [
+        {
+          "itemId": 242309,
+          "name": "Farstrider Rations",
+          "itemLevel": 80,
+          "quality": 1,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "farstrider_rations",
+          "candidateItemIds": [242309, 242776],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232249,
       "kind": "FOOD",
-      "items": [{ "itemId": 242308, "name": "Portable Snack", "itemLevel": 80, "quality": 1 }]
+      "items": [
+        { "itemId": 242308, "name": "Portable Snack", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "portable_snack",
+          "candidateItemIds": [242308, 242775],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232250,
       "kind": "FOOD",
-      "items": [{ "itemId": 242307, "name": "Quick Sandwich", "itemLevel": 80, "quality": 1 }]
+      "items": [
+        { "itemId": 242307, "name": "Quick Sandwich", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "quick_sandwich",
+          "candidateItemIds": [242307, 242774],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232251,
       "kind": "FOOD",
-      "items": [{ "itemId": 242306, "name": "Forager's Medley", "itemLevel": 80, "quality": 1 }]
+      "items": [
+        { "itemId": 242306, "name": "Forager's Medley", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "foragers_medley",
+          "candidateItemIds": [242306, 242773],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232252,
       "kind": "FOOD",
-      "items": [{ "itemId": 242305, "name": "Silvermoon Standard", "itemLevel": 80, "quality": 1 }]
+      "items": [
+        {
+          "itemId": 242305,
+          "name": "Silvermoon Standard",
+          "itemLevel": 80,
+          "quality": 1,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "silvermoon_standard",
+          "candidateItemIds": [242305, 242772],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232253,
       "kind": "FOOD",
-      "items": [{ "itemId": 242304, "name": "Spiced Biscuits", "itemLevel": 80, "quality": 1 }]
+      "items": [
+        { "itemId": 242304, "name": "Spiced Biscuits", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "spiced_biscuits",
+          "candidateItemIds": [242304, 242771],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232256,
       "kind": "FOOD",
-      "items": [{ "itemId": 242303, "name": "Mana-Infused Stew", "itemLevel": 80, "quality": 1 }]
+      "items": [
+        { "itemId": 242303, "name": "Mana-Infused Stew", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "manainfused_stew",
+          "candidateItemIds": [242303, 242770],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232257,
       "kind": "FOOD",
-      "items": [{ "itemId": 242302, "name": "Bloom Skewers", "itemLevel": 80, "quality": 1 }]
+      "items": [
+        { "itemId": 242302, "name": "Bloom Skewers", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "bloom_skewers",
+          "candidateItemIds": [242302, 242769],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232481,
       "kind": "FOOD",
-      "items": [{ "itemId": 242296, "name": "Bloodthistle-Wrapped Cutlets", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        {
+          "itemId": 242296,
+          "name": "Bloodthistle-Wrapped Cutlets",
+          "itemLevel": 90,
+          "quality": 2,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "bloodthistlewrapped_cutlets",
+          "candidateItemIds": [242296, 242768],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232483,
       "kind": "FOOD",
-      "items": [{ "itemId": 242295, "name": "Hearthflame Supper", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        {
+          "itemId": 242295,
+          "name": "Hearthflame Supper",
+          "itemLevel": 90,
+          "quality": 2,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearthflame_supper",
+          "candidateItemIds": [242295, 242767],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232484,
       "kind": "FOOD",
-      "items": [{ "itemId": 242293, "name": "Sunwell Delight", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        { "itemId": 242293, "name": "Sunwell Delight", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "sunwell_delight",
+          "candidateItemIds": [242293, 242765],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232485,
       "kind": "FOOD",
-      "items": [{ "itemId": 242292, "name": "Eversong Pudding", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        { "itemId": 242292, "name": "Eversong Pudding", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "eversong_pudding",
+          "candidateItemIds": [242292, 242764],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232486,
       "kind": "FOOD",
-      "items": [{ "itemId": 242291, "name": "Fried Bloomtail", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        { "itemId": 242291, "name": "Fried Bloomtail", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "fried_bloomtail",
+          "candidateItemIds": [242291, 242763],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232487,
       "kind": "FOOD",
-      "items": [{ "itemId": 242290, "name": "Wise Tails", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        { "itemId": 242290, "name": "Wise Tails", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "wise_tails", "candidateItemIds": [242290, 242762], "unambiguous": false }
+      ]
     },
     {
       "spellId": 1232488,
       "kind": "FOOD",
-      "items": [{ "itemId": 242289, "name": "Spellfire Filet", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        { "itemId": 242289, "name": "Spellfire Filet", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "spellfire_filet",
+          "candidateItemIds": [242289, 242761],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232489,
       "kind": "FOOD",
-      "items": [{ "itemId": 242288, "name": "Twilight Angler's Medley", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        {
+          "itemId": 242288,
+          "name": "Twilight Angler's Medley",
+          "itemLevel": 90,
+          "quality": 2,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "twilight_anglers_medley",
+          "candidateItemIds": [242288, 242760],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232901,
       "kind": "FOOD",
-      "items": [{ "itemId": 242294, "name": "Felberry Figs", "itemLevel": 90, "quality": 2 }]
+      "items": [
+        { "itemId": 242294, "name": "Felberry Figs", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "felberry_figs",
+          "candidateItemIds": [242294, 242766],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232902,
       "kind": "FOOD",
-      "items": [{ "itemId": 242287, "name": "Arcano Cutlets", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 242287, "name": "Arcano Cutlets", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "arcano_cutlets",
+          "candidateItemIds": [242287, 242759],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232903,
       "kind": "FOOD",
-      "items": [{ "itemId": 242286, "name": "Fel-Kissed Filet", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 242286, "name": "Fel-Kissed Filet", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "felkissed_filet",
+          "candidateItemIds": [242286, 242758],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232905,
       "kind": "FOOD",
-      "items": [{ "itemId": 242285, "name": "Warped Wise Wings", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 242285, "name": "Warped Wise Wings", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "warped_wise_wings",
+          "candidateItemIds": [242285, 242757],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232906,
       "kind": "FOOD",
-      "items": [{ "itemId": 242284, "name": "Void-Kissed Fish Rolls", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242284,
+          "name": "Void-Kissed Fish Rolls",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "voidkissed_fish_rolls",
+          "candidateItemIds": [242284, 242756],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232907,
       "kind": "FOOD",
-      "items": [{ "itemId": 242283, "name": "Sun-Seared Lumifin", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242283,
+          "name": "Sun-Seared Lumifin",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "sunseared_lumifin",
+          "candidateItemIds": [242283, 242755],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232908,
       "kind": "FOOD",
-      "items": [{ "itemId": 242282, "name": "Null and Void Plate", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242282,
+          "name": "Null and Void Plate",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "null_and_void_plate",
+          "candidateItemIds": [242282, 242754],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232909,
       "kind": "FOOD",
-      "items": [{ "itemId": 242281, "name": "Glitter Skewers", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 242281, "name": "Glitter Skewers", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "glitter_skewers",
+          "candidateItemIds": [242281, 242753],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232910,
       "kind": "FOOD",
-      "items": [{ "itemId": 242280, "name": "Buttered Root Crab", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242280,
+          "name": "Buttered Root Crab",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "buttered_root_crab",
+          "candidateItemIds": [242280, 242752],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232914,
       "kind": "FOOD",
-      "items": [{ "itemId": 242278, "name": "Tasty Smoked Tetra", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242278,
+          "name": "Tasty Smoked Tetra",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "tasty_smoked_tetra",
+          "candidateItemIds": [242278, 242750],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232915,
       "kind": "FOOD",
-      "items": [{ "itemId": 242277, "name": "Crimson Calamari", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 242277, "name": "Crimson Calamari", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "crimson_calamari",
+          "candidateItemIds": [242277, 242749],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232916,
       "kind": "FOOD",
-      "items": [{ "itemId": 242276, "name": "Braised Blood Hunter", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242276,
+          "name": "Braised Blood Hunter",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "braised_blood_hunter",
+          "candidateItemIds": [242276, 242748],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1232917,
       "kind": "FOOD",
       "items": [
-        { "itemId": 242275, "name": "Royal Roast", "itemLevel": 90, "quality": 3 },
-        { "itemId": 255847, "name": "Impossibly Royal Roast", "itemLevel": 90, "quality": 3 }
+        { "itemId": 242275, "name": "Royal Roast", "itemLevel": 90, "quality": 3, "craftingQuality": 0 },
+        {
+          "itemId": 255847,
+          "name": "Impossibly Royal Roast",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "royal_roast",
+          "candidateItemIds": [242275, 242747, 255847, 268679],
+          "unambiguous": false
+        }
       ]
     },
     {
       "spellId": 1232919,
       "kind": "FOOD",
       "items": [
-        { "itemId": 242274, "name": "Champion's Bento", "itemLevel": 90, "quality": 3 },
-        { "itemId": 255848, "name": "Flora Frenzy", "itemLevel": 90, "quality": 3 },
-        { "itemId": 275258, "name": "Venom-Spiced Cutlets", "itemLevel": 90, "quality": 3 },
-        { "itemId": 275260, "name": "Puffer Plate", "itemLevel": 90, "quality": 3 },
-        { "itemId": 275261, "name": "Sweet-And-Sour Skewers", "itemLevel": 90, "quality": 3 }
+        { "itemId": 242274, "name": "Champion's Bento", "itemLevel": 90, "quality": 3, "craftingQuality": 0 },
+        { "itemId": 255848, "name": "Flora Frenzy", "itemLevel": 90, "quality": 3, "craftingQuality": 0 },
+        {
+          "itemId": 275258,
+          "name": "Venom-Spiced Cutlets",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        { "itemId": 275260, "name": "Puffer Plate", "itemLevel": 90, "quality": 3, "craftingQuality": 0 },
+        {
+          "itemId": 275261,
+          "name": "Sweet-And-Sour Skewers",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "champions_bento",
+          "candidateItemIds": [242274, 242746],
+          "unambiguous": false
+        }
       ]
     },
     {
       "spellId": 1232925,
       "kind": "FOOD",
-      "items": [{ "itemId": 242301, "name": "Azeroot Tea", "itemLevel": 80, "quality": 2 }]
+      "items": [
+        { "itemId": 242301, "name": "Azeroot Tea", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "azeroot_tea", "candidateItemIds": [242301], "unambiguous": true }
+      ]
     },
     {
       "spellId": 1232926,
       "kind": "FOOD",
-      "items": [{ "itemId": 242298, "name": "Argentleaf Tea", "itemLevel": 80, "quality": 2 }]
+      "items": [
+        { "itemId": 242298, "name": "Argentleaf Tea", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "argentleaf_tea", "candidateItemIds": [242298], "unambiguous": true }
+      ]
     },
     {
       "spellId": 1232927,
       "kind": "FOOD",
-      "items": [{ "itemId": 242299, "name": "Sanguithorn Tea", "itemLevel": 80, "quality": 2 }]
+      "items": [
+        { "itemId": 242299, "name": "Sanguithorn Tea", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "sanguithorn_tea", "candidateItemIds": [242299], "unambiguous": true }
+      ]
     },
     {
       "spellId": 1233738,
       "kind": "FOOD",
-      "items": [{ "itemId": 242776, "name": "Hearty Farstrider Rations", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242776,
+          "name": "Hearty Farstrider Rations",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_farstrider_rations",
+          "candidateItemIds": [242776],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233739,
       "kind": "FOOD",
-      "items": [{ "itemId": 242775, "name": "Hearty Portable Snack", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242775,
+          "name": "Hearty Portable Snack",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_portable_snack",
+          "candidateItemIds": [242775],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233740,
       "kind": "FOOD",
-      "items": [{ "itemId": 242774, "name": "Hearty Quick Sandwich", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242774,
+          "name": "Hearty Quick Sandwich",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_quick_sandwich",
+          "candidateItemIds": [242774],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233741,
       "kind": "FOOD",
-      "items": [{ "itemId": 242773, "name": "Hearty Forager's Medley", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242773,
+          "name": "Hearty Forager's Medley",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_foragers_medley",
+          "candidateItemIds": [242773],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233742,
       "kind": "FOOD",
-      "items": [{ "itemId": 242772, "name": "Hearty Silvermoon Standard", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242772,
+          "name": "Hearty Silvermoon Standard",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_silvermoon_standard",
+          "candidateItemIds": [242772],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233743,
       "kind": "FOOD",
-      "items": [{ "itemId": 242771, "name": "Hearty Spiced Biscuits", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242771,
+          "name": "Hearty Spiced Biscuits",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_spiced_biscuits",
+          "candidateItemIds": [242771],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233744,
       "kind": "FOOD",
-      "items": [{ "itemId": 242770, "name": "Hearty Mana-Infused Stew", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242770,
+          "name": "Hearty Mana-Infused Stew",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_manainfused_stew",
+          "candidateItemIds": [242770],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233745,
       "kind": "FOOD",
-      "items": [{ "itemId": 242769, "name": "Hearty Bloom Skewers", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242769,
+          "name": "Hearty Bloom Skewers",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_bloom_skewers",
+          "candidateItemIds": [242769],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233746,
       "kind": "FOOD",
       "items": [
-        { "itemId": 242768, "name": "Hearty Bloodthistle-Wrapped Cutlets", "itemLevel": 90, "quality": 3 }
+        {
+          "itemId": 242768,
+          "name": "Hearty Bloodthistle-Wrapped Cutlets",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_bloodthistlewrapped_cutlets",
+          "candidateItemIds": [242768],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1233747,
       "kind": "FOOD",
-      "items": [{ "itemId": 242767, "name": "Hearty Hearthflame Supper", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242767,
+          "name": "Hearty Hearthflame Supper",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_hearthflame_supper",
+          "candidateItemIds": [242767],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233748,
       "kind": "FOOD",
-      "items": [{ "itemId": 242765, "name": "Hearty Sunwell Delight", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242765,
+          "name": "Hearty Sunwell Delight",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_sunwell_delight",
+          "candidateItemIds": [242765],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233749,
       "kind": "FOOD",
-      "items": [{ "itemId": 242764, "name": "Hearty Eversong Pudding", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242764,
+          "name": "Hearty Eversong Pudding",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_eversong_pudding",
+          "candidateItemIds": [242764],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233750,
       "kind": "FOOD",
-      "items": [{ "itemId": 242763, "name": "Hearty Fried Bloomtail", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242763,
+          "name": "Hearty Fried Bloomtail",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_fried_bloomtail",
+          "candidateItemIds": [242763],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233751,
       "kind": "FOOD",
-      "items": [{ "itemId": 242762, "name": "Hearty Wise Tails", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 242762, "name": "Hearty Wise Tails", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "hearty_wise_tails", "candidateItemIds": [242762], "unambiguous": true }
+      ]
     },
     {
       "spellId": 1233752,
       "kind": "FOOD",
-      "items": [{ "itemId": 242761, "name": "Hearty Spellfire Filet", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242761,
+          "name": "Hearty Spellfire Filet",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_spellfire_filet",
+          "candidateItemIds": [242761],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233753,
       "kind": "FOOD",
       "items": [
-        { "itemId": 242760, "name": "Hearty Twilight Angler's Medley", "itemLevel": 90, "quality": 3 }
+        {
+          "itemId": 242760,
+          "name": "Hearty Twilight Angler's Medley",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_twilight_anglers_medley",
+          "candidateItemIds": [242760],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1233754,
       "kind": "FOOD",
-      "items": [{ "itemId": 242766, "name": "Hearty Felberry Figs", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242766,
+          "name": "Hearty Felberry Figs",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_felberry_figs",
+          "candidateItemIds": [242766],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233755,
       "kind": "FOOD",
-      "items": [{ "itemId": 242759, "name": "Hearty Arcano Cutlets", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242759,
+          "name": "Hearty Arcano Cutlets",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_arcano_cutlets",
+          "candidateItemIds": [242759],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233756,
       "kind": "FOOD",
-      "items": [{ "itemId": 242758, "name": "Hearty Fel-Kissed Filet", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242758,
+          "name": "Hearty Fel-Kissed Filet",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_felkissed_filet",
+          "candidateItemIds": [242758],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233757,
       "kind": "FOOD",
-      "items": [{ "itemId": 242757, "name": "Hearty Warped Wise Wings", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242757,
+          "name": "Hearty Warped Wise Wings",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_warped_wise_wings",
+          "candidateItemIds": [242757],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233758,
       "kind": "FOOD",
-      "items": [{ "itemId": 242756, "name": "Hearty Void-Kissed Fish Rolls", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242756,
+          "name": "Hearty Void-Kissed Fish Rolls",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_voidkissed_fish_rolls",
+          "candidateItemIds": [242756],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233759,
       "kind": "FOOD",
-      "items": [{ "itemId": 242755, "name": "Hearty Sun-Seared Lumifin", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242755,
+          "name": "Hearty Sun-Seared Lumifin",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_sunseared_lumifin",
+          "candidateItemIds": [242755],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233760,
       "kind": "FOOD",
-      "items": [{ "itemId": 242754, "name": "Hearty Null and Void Plate", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242754,
+          "name": "Hearty Null and Void Plate",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_null_and_void_plate",
+          "candidateItemIds": [242754],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233761,
       "kind": "FOOD",
-      "items": [{ "itemId": 242753, "name": "Hearty Glitter Skewers", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242753,
+          "name": "Hearty Glitter Skewers",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_glitter_skewers",
+          "candidateItemIds": [242753],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233762,
       "kind": "FOOD",
-      "items": [{ "itemId": 242752, "name": "Hearty Buttered Root Crab", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242752,
+          "name": "Hearty Buttered Root Crab",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_buttered_root_crab",
+          "candidateItemIds": [242752],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233764,
       "kind": "FOOD",
-      "items": [{ "itemId": 242750, "name": "Hearty Tasty Smoked Tetra", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242750,
+          "name": "Hearty Tasty Smoked Tetra",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_tasty_smoked_tetra",
+          "candidateItemIds": [242750],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233765,
       "kind": "FOOD",
-      "items": [{ "itemId": 242749, "name": "Hearty Crimson Calamari", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242749,
+          "name": "Hearty Crimson Calamari",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_crimson_calamari",
+          "candidateItemIds": [242749],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233766,
       "kind": "FOOD",
-      "items": [{ "itemId": 242748, "name": "Hearty Braised Blood Hunter", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 242748,
+          "name": "Hearty Braised Blood Hunter",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_braised_blood_hunter",
+          "candidateItemIds": [242748],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1233767,
       "kind": "FOOD",
       "items": [
-        { "itemId": 242747, "name": "Hearty Royal Roast", "itemLevel": 90, "quality": 3 },
-        { "itemId": 268679, "name": "Hearty Impossibly Royal Roast", "itemLevel": 90, "quality": 3 }
+        {
+          "itemId": 242747,
+          "name": "Hearty Royal Roast",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 268679,
+          "name": "Hearty Impossibly Royal Roast",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "hearty_royal_roast", "candidateItemIds": [242747], "unambiguous": true }
       ]
     },
     {
       "spellId": 1233768,
       "kind": "FOOD",
       "items": [
-        { "itemId": 242746, "name": "Hearty Champion's Bento", "itemLevel": 90, "quality": 3 },
-        { "itemId": 268680, "name": "Hearty Flora Frenzy", "itemLevel": 90, "quality": 3 },
-        { "itemId": 275259, "name": "Hearty Venom-Spiced Cutlets", "itemLevel": 90, "quality": 3 },
-        { "itemId": 275262, "name": "Hearty Puffer Plate", "itemLevel": 90, "quality": 3 },
-        { "itemId": 275263, "name": "Hearty Sweet-And-Sour Skewers", "itemLevel": 90, "quality": 3 }
+        {
+          "itemId": 242746,
+          "name": "Hearty Champion's Bento",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 268680,
+          "name": "Hearty Flora Frenzy",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 275259,
+          "name": "Hearty Venom-Spiced Cutlets",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 275262,
+          "name": "Hearty Puffer Plate",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 275263,
+          "name": "Hearty Sweet-And-Sour Skewers",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_champions_bento",
+          "candidateItemIds": [242746],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1235057,
       "kind": "FLASK",
       "items": [
-        { "itemId": 241320, "name": "Flask of Thalassian Resistance", "itemLevel": 295, "quality": 1 },
-        { "itemId": 241321, "name": "Flask of Thalassian Resistance", "itemLevel": 278, "quality": 1 },
+        {
+          "itemId": 241320,
+          "name": "Flask of Thalassian Resistance",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241321,
+          "name": "Flask of Thalassian Resistance",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
         {
           "itemId": 245926,
           "name": "Fleeting Flask of Thalassian Resistance",
           "itemLevel": 295,
-          "quality": 1
+          "quality": 1,
+          "craftingQuality": 2
         },
         {
           "itemId": 245927,
           "name": "Fleeting Flask of Thalassian Resistance",
           "itemLevel": 278,
-          "quality": 1
+          "quality": 1,
+          "craftingQuality": 1
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "flask_of_thalassian_resistance_1",
+          "candidateItemIds": [241321, 245927],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "flask_of_thalassian_resistance_2",
+          "candidateItemIds": [241320, 245926],
+          "unambiguous": true
         }
       ]
     },
@@ -1212,172 +2177,677 @@
       "spellId": 1235108,
       "kind": "FLASK",
       "items": [
-        { "itemId": 241322, "name": "Flask of the Magisters", "itemLevel": 295, "quality": 1 },
-        { "itemId": 241323, "name": "Flask of the Magisters", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245932, "name": "Fleeting Flask of the Magisters", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245933, "name": "Fleeting Flask of the Magisters", "itemLevel": 295, "quality": 1 }
+        {
+          "itemId": 241322,
+          "name": "Flask of the Magisters",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241323,
+          "name": "Flask of the Magisters",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245932,
+          "name": "Fleeting Flask of the Magisters",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245933,
+          "name": "Fleeting Flask of the Magisters",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "flask_of_the_magisters_1",
+          "candidateItemIds": [241323, 245932],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "flask_of_the_magisters_2",
+          "candidateItemIds": [241322, 245933],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1235110,
       "kind": "FLASK",
       "items": [
-        { "itemId": 241324, "name": "Flask of the Blood Knights", "itemLevel": 295, "quality": 1 },
-        { "itemId": 241325, "name": "Flask of the Blood Knights", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245930, "name": "Fleeting Flask of the Blood Knights", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245931, "name": "Fleeting Flask of the Blood Knights", "itemLevel": 295, "quality": 1 }
+        {
+          "itemId": 241324,
+          "name": "Flask of the Blood Knights",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241325,
+          "name": "Flask of the Blood Knights",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245930,
+          "name": "Fleeting Flask of the Blood Knights",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245931,
+          "name": "Fleeting Flask of the Blood Knights",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "flask_of_the_blood_knights_1",
+          "candidateItemIds": [241325, 245930],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "flask_of_the_blood_knights_2",
+          "candidateItemIds": [241324, 245931],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1235111,
       "kind": "FLASK",
       "items": [
-        { "itemId": 241326, "name": "Flask of the Shattered Sun", "itemLevel": 295, "quality": 1 },
-        { "itemId": 241327, "name": "Flask of the Shattered Sun", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245928, "name": "Fleeting Flask of the Shattered Sun", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245929, "name": "Fleeting Flask of the Shattered Sun", "itemLevel": 295, "quality": 1 }
+        {
+          "itemId": 241326,
+          "name": "Flask of the Shattered Sun",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241327,
+          "name": "Flask of the Shattered Sun",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245928,
+          "name": "Fleeting Flask of the Shattered Sun",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245929,
+          "name": "Fleeting Flask of the Shattered Sun",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "flask_of_the_shattered_sun_1",
+          "candidateItemIds": [241327, 245928],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "flask_of_the_shattered_sun_2",
+          "candidateItemIds": [241326, 245929],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1236616,
       "kind": "POTION",
       "items": [
-        { "itemId": 241308, "name": "Light's Potential", "itemLevel": 295, "quality": 1 },
-        { "itemId": 241309, "name": "Light's Potential", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245897, "name": "Fleeting Light's Potential", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245898, "name": "Fleeting Light's Potential", "itemLevel": 295, "quality": 1 }
+        {
+          "itemId": 241308,
+          "name": "Light's Potential",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241309,
+          "name": "Light's Potential",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245897,
+          "name": "Fleeting Light's Potential",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245898,
+          "name": "Fleeting Light's Potential",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "lights_potential_1",
+          "candidateItemIds": [241309, 245897],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "lights_potential_2",
+          "candidateItemIds": [241308, 245898],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1236994,
       "kind": "POTION",
       "items": [
-        { "itemId": 241288, "name": "Potion of Recklessness", "itemLevel": 295, "quality": 1 },
-        { "itemId": 241289, "name": "Potion of Recklessness", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245902, "name": "Fleeting Potion of Recklessness", "itemLevel": 295, "quality": 1 },
-        { "itemId": 245903, "name": "Fleeting Potion of Recklessness", "itemLevel": 278, "quality": 1 }
+        {
+          "itemId": 241288,
+          "name": "Potion of Recklessness",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241289,
+          "name": "Potion of Recklessness",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245902,
+          "name": "Fleeting Potion of Recklessness",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 245903,
+          "name": "Fleeting Potion of Recklessness",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "potion_of_recklessness_1",
+          "candidateItemIds": [241289, 245903],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "potion_of_recklessness_2",
+          "candidateItemIds": [241288, 245902],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1236998,
       "kind": "POTION",
       "items": [
-        { "itemId": 241292, "name": "Draught of Rampant Abandon", "itemLevel": 295, "quality": 1 },
-        { "itemId": 241293, "name": "Draught of Rampant Abandon", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245910, "name": "Fleeting Draught of Rampant Abandon", "itemLevel": 295, "quality": 1 },
-        { "itemId": 245911, "name": "Fleeting Draught of Rampant Abandon", "itemLevel": 278, "quality": 1 }
+        {
+          "itemId": 241292,
+          "name": "Draught of Rampant Abandon",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241293,
+          "name": "Draught of Rampant Abandon",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245910,
+          "name": "Fleeting Draught of Rampant Abandon",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 245911,
+          "name": "Fleeting Draught of Rampant Abandon",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "draught_of_rampant_abandon_1",
+          "candidateItemIds": [241293, 245911],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "draught_of_rampant_abandon_2",
+          "candidateItemIds": [241292, 245910],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1238443,
       "kind": "POTION",
       "items": [
-        { "itemId": 241296, "name": "Potion of Zealotry", "itemLevel": 295, "quality": 1 },
-        { "itemId": 241297, "name": "Potion of Zealotry", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245900, "name": "Fleeting Potion of Zealotry", "itemLevel": 278, "quality": 1 },
-        { "itemId": 245901, "name": "Fleeting Potion of Zealotry", "itemLevel": 295, "quality": 1 }
+        {
+          "itemId": 241296,
+          "name": "Potion of Zealotry",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241297,
+          "name": "Potion of Zealotry",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245900,
+          "name": "Fleeting Potion of Zealotry",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245901,
+          "name": "Fleeting Potion of Zealotry",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "potion_of_zealotry_1",
+          "candidateItemIds": [241297, 245900],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "potion_of_zealotry_2",
+          "candidateItemIds": [241296, 245901],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1259656,
       "kind": "FOOD",
-      "items": [{ "itemId": 242273, "name": "Blooming Feast", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 242273, "name": "Blooming Feast", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "blooming_feast",
+          "candidateItemIds": [242273, 242745],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1259657,
       "kind": "FOOD",
-      "items": [{ "itemId": 242272, "name": "Quel'dorei Medley", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 242272, "name": "Quel'dorei Medley", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "queldorei_medley",
+          "candidateItemIds": [242272, 242744],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1259658,
       "kind": "FOOD",
-      "items": [{ "itemId": 255846, "name": "Harandar Celebration", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 255846,
+          "name": "Harandar Celebration",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "harandar_celebration",
+          "candidateItemIds": [255846, 266996],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1259659,
       "kind": "FOOD",
-      "items": [{ "itemId": 255845, "name": "Silvermoon Parade", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 255845, "name": "Silvermoon Parade", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "silvermoon_parade",
+          "candidateItemIds": [255845, 266985],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1264426,
       "kind": "OTHER",
-      "items": [{ "itemId": 259085, "name": "Void-Touched Augment Rune", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 259085,
+          "name": "Void-Touched Augment Rune",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "void_touched", "candidateItemIds": [259085], "unambiguous": true }
+      ]
     },
     {
       "spellId": 1269305,
       "kind": "FOOD",
-      "items": [{ "itemId": 242297, "name": "Mana Lily Tea", "itemLevel": 80, "quality": 2 }]
+      "items": [
+        { "itemId": 242297, "name": "Mana Lily Tea", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "mana_lily_tea", "candidateItemIds": [242297], "unambiguous": true }
+      ]
     },
     {
       "spellId": 1278895,
       "kind": "FOOD",
-      "items": [{ "itemId": 266985, "name": "Hearty Silvermoon Parade", "itemLevel": 90, "quality": 4 }]
+      "items": [
+        {
+          "itemId": 266985,
+          "name": "Hearty Silvermoon Parade",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_silvermoon_parade",
+          "candidateItemIds": [266985],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1278909,
       "kind": "FOOD",
-      "items": [{ "itemId": 242745, "name": "Hearty Blooming Feast", "itemLevel": 90, "quality": 4 }]
+      "items": [
+        {
+          "itemId": 242745,
+          "name": "Hearty Blooming Feast",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_blooming_feast",
+          "candidateItemIds": [242745],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1278915,
       "kind": "FOOD",
-      "items": [{ "itemId": 242744, "name": "Hearty Quel'dorei Medley", "itemLevel": 90, "quality": 4 }]
+      "items": [
+        {
+          "itemId": 242744,
+          "name": "Hearty Quel'dorei Medley",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_queldorei_medley",
+          "candidateItemIds": [242744],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1278929,
       "kind": "FOOD",
-      "items": [{ "itemId": 266996, "name": "Hearty Harandar Celebration", "itemLevel": 90, "quality": 4 }]
+      "items": [
+        {
+          "itemId": 266996,
+          "name": "Hearty Harandar Celebration",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_harandar_celebration",
+          "candidateItemIds": [266996],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1295015,
       "kind": "POTION",
       "items": [
-        { "itemId": 271889, "name": "Alluring Nostrum", "itemLevel": 278, "quality": 1 },
-        { "itemId": 271890, "name": "Alluring Nostrum", "itemLevel": 295, "quality": 1 }
+        {
+          "itemId": 271889,
+          "name": "Alluring Nostrum",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        { "itemId": 271890, "name": "Alluring Nostrum", "itemLevel": 295, "quality": 1, "craftingQuality": 2 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "alluring_nostrum_1",
+          "candidateItemIds": [271889],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "alluring_nostrum_2",
+          "candidateItemIds": [271890, 274765],
+          "unambiguous": true
+        }
       ]
     },
     {
       "spellId": 1295132,
       "kind": "POTION",
       "items": [
-        { "itemId": 271886, "name": "Liquid Luster", "itemLevel": 278, "quality": 1 },
-        { "itemId": 271887, "name": "Liquid Luster", "itemLevel": 295, "quality": 1 }
+        { "itemId": 271886, "name": "Liquid Luster", "itemLevel": 278, "quality": 1, "craftingQuality": 1 },
+        { "itemId": 271887, "name": "Liquid Luster", "itemLevel": 295, "quality": 1, "craftingQuality": 2 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 278, "token": "liquid_luster_1", "candidateItemIds": [271886], "unambiguous": true },
+        { "itemLevel": 295, "token": "liquid_luster_2", "candidateItemIds": [271887], "unambiguous": true }
       ]
     },
     {
       "spellId": 1296432,
       "kind": "FOOD",
-      "items": [{ "itemId": 275264, "name": "Amani Cornucopia", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 275264, "name": "Amani Cornucopia", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "amani_cornucopia",
+          "candidateItemIds": [275264, 275267],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1296433,
       "kind": "FOOD",
-      "items": [{ "itemId": 275265, "name": "Loa's Gathering", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        { "itemId": 275265, "name": "Loa's Gathering", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "loas_gathering",
+          "candidateItemIds": [275265, 275268],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1296434,
       "kind": "FOOD",
-      "items": [{ "itemId": 275266, "name": "Feast of Knowledge", "itemLevel": 90, "quality": 3 }]
+      "items": [
+        {
+          "itemId": 275266,
+          "name": "Feast of Knowledge",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "feast_of_knowledge",
+          "candidateItemIds": [275266, 275269],
+          "unambiguous": false
+        }
+      ]
     },
     {
       "spellId": 1303407,
       "kind": "FOOD",
-      "items": [{ "itemId": 275267, "name": "Hearty Amani Cornucopia", "itemLevel": 90, "quality": 4 }]
+      "items": [
+        {
+          "itemId": 275267,
+          "name": "Hearty Amani Cornucopia",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_amani_cornucopia",
+          "candidateItemIds": [275267],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1303408,
       "kind": "FOOD",
-      "items": [{ "itemId": 275268, "name": "Hearty Loa's Gathering", "itemLevel": 90, "quality": 4 }]
+      "items": [
+        {
+          "itemId": 275268,
+          "name": "Hearty Loa's Gathering",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_loas_gathering",
+          "candidateItemIds": [275268],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1303409,
       "kind": "FOOD",
-      "items": [{ "itemId": 275269, "name": "Hearty Feast of Knowledge", "itemLevel": 90, "quality": 4 }]
+      "items": [
+        {
+          "itemId": 275269,
+          "name": "Hearty Feast of Knowledge",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_feast_of_knowledge",
+          "candidateItemIds": [275269],
+          "unambiguous": true
+        }
+      ]
     },
     {
       "spellId": 1308717,
       "kind": "FOOD",
-      "items": [{ "itemId": 280422, "name": "Spirit Sprouts", "itemLevel": 90, "quality": 1 }]
+      "items": [
+        { "itemId": 280422, "name": "Spirit Sprouts", "itemLevel": 90, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "spirit_sprouts", "candidateItemIds": [280422], "unambiguous": true }
+      ]
     }
   ]
 }

@@ -166,7 +166,9 @@ export function assessProfileFidelity(
 
   const raceState = profile.identity.race;
   const race =
-    raceState.state === "KNOWN"
+    // A USER_PROVIDED race is checked against the echo the same way; the
+    // profile keeps its USER_PROVIDED provenance (M11-G3-4 race policy).
+    raceState.state === "KNOWN" || raceState.state === "USER_PROVIDED"
       ? check(echo.race === raceState.value ? [] : [`engine race ${echo.race}`])
       : {
           state: "UNRESOLVED" as const,

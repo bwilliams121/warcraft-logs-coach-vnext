@@ -439,6 +439,78 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G3-4: what the environment reconstruction does not establish
+
+**Raised:** M11-G3-4 (2026-10-19).
+
+**Add availability is unproven, and committed evidence cannot prove it.**
+- TARGETABILITY, ENCOUNTER_PHASES and DEATHS are not capability-established.
+- SUMMONS does not vouch for enemy actors.
+- No phase metadata exists for encounter 3455.
+- The subject's adds 179 and 180 are engaged in waves but have no availability
+  interval.
+
+A future capture can only help if Warcraft Logs exposes a reviewed boundary
+semantic (see the G3-4 report's capture plan).
+
+**Target debuffs on the boss are out of the retrieved scope.** Chaos Brand,
+Mystic Touch and Hunter's Mark are material (0.9–3.2%) and UNKNOWN. Resolving
+them needs aura events on the boss from every source over the fight.
+
+**Setup consumables can never be KNOWN_NONE.** The pull aura list is not proven
+exhaustive. A CURRENT_SETUP translation can therefore never write "no flask",
+"no food" or "no rune".
+
+**No pinned item-to-engine-token mapping for ranked consumables.** Even a known
+rank cannot be written: the engine token is the tokenized item name plus its
+crafting quality (`consumable.cpp:38-59`), and crafting quality is not in the
+pinned consumables artifact.
+
+**Observed potion timing cannot be expressed.** The job has no potion schedule,
+and the built-in APL owns timing.
+
+**Unnamed pull auras.** 1296934, 1303184 and 1285644 have no pinned identity.
+1303171 (Vantus Rune: Tides) is in the pinned data, but the engine does not
+model it. Their stat effects are unknown, which keeps stat reconciliation
+PARTIALLY_RECONCILED (haste +229, mastery −231, strength +52, stamina +184,
+crit +3).
+
+**Lust runs at the next whole second** (≤ 1 s offset; 0.07% for Blood).
+
+**Continuation (2026-10-22).**
+- **Ranked consumables.** Superseded by the rank-envelope tokens (consumables
+  revision 2).
+- **Potion timing.** Superseded by the owner's APL-timing policy.
+- **Add availability.** WCL_TARGET_AVAILABILITY_AUTHORITY_NOT_FOUND; a pinned
+  encounter schedule is the only remaining route.
+- **Boss debuffs.** Intervals were observed through an uncertified filtered
+  capture. Certifying them needs one table request under
+  `hostilityType: Friendlies, targetID: 161` plus a committed artifact.
+  Whole-fight representation also needs an approved approximation, or engine
+  support for timed debuffs.
+- **Food and rune.** A pre-pull filtered Buffs query for the two pinned
+  candidates (1264426, 1278929) returned nothing. That proves no absence. The
+  remaining route is USER_PROVIDED. Even a stated food cannot make the
+  environment simulation-ready at this pin: the approved engine refuses every
+  derived food token (consumable-token-acceptance.json). Some engine food
+  names do work (`silvermoon_parade`, used for the materiality example), but
+  which item those build is unverified.
+- **Unidentified auras** 1285644, 1296934 and 1303184 are absent from the
+  pinned data. They need a newer pinned model (no auto-update).
+
+**Final authority reduction (2026-10-22).**
+- **Boss-debuff certification.** The friendly-sourced Debuffs table on the
+  boss returns nothing, so no WCL surface tried so far certifies those windows.
+  Even certified, a late start needs an approved bounded approximation, because
+  the engine cannot apply a timed school debuff.
+- **Food.** The engine accepts 43 canonical food tokens, verified by echo, but
+  none links to the subject's evidence. For future USER_PROVIDED foods, an
+  echo-verified token↔spell table could replace the order-independent static
+  rule (which marks e.g. `silvermoon_parade` ambiguous). Not implemented.
+- **Adds.** Neither Warcraft Logs nor pinned data holds an availability
+  authority for encounter 3455; a schedule needs a new, owner-approved
+  authority class.
+
 ## After M11-G3-3: what ELITE_REALISTIC_V1 does not establish
 
 **Raised:** M11-G3-3 (2026-10-15).

@@ -17,6 +17,7 @@ import { readCombatantPullFacts } from "../../../src/character-profile/pull-fact
 import type { ReconstructionInput } from "../../../src/character-profile/reconstruct.js";
 import type { CombatantSnapshot } from "../../../src/engine/normalization/normalized-events.js";
 import manifest from "../../evidence/manifest.json";
+import statements from "../../fixtures/character/canonical-subject-user-statements.json";
 import { committedEvidenceArchiveFiles } from "../corpus/evidence-archive.js";
 import { bundleOf } from "../corpus/fight.js";
 import { artifactJson, COMPARISONS, g2Archive, SUBJECT } from "../m11/g2-four-fights.js";
@@ -104,6 +105,29 @@ export async function comparisonEvidence(index = 0): Promise<FightEvidence> {
   const fixture = COMPARISONS[index];
   if (fixture === undefined) throw new Error("no comparison");
   return await fightEvidence(fixture.fightRef, fixture.focusActorId, fixture.contextId, fixture.segmentIds);
+}
+
+/**
+ * The owner's explicit statements about the canonical subject (USER_PROVIDED,
+ * with provenance) — never evidence, never a default. Applied only by callers
+ * that ask for them; the plain subject stays RACE_UNRESOLVED.
+ */
+export function withOwnerStatements(input: ReconstructionInput): ReconstructionInput {
+  if (
+    input.subject.fightRef !== statements.subject.fightRef ||
+    input.subject.actorId !== statements.subject.actorId
+  ) {
+    throw new Error("owner statements belong to the canonical subject only");
+  }
+  return {
+    ...input,
+    userProvided: {
+      race: {
+        value: statements.race.value,
+        provenance: { ...statements.race.provenance, source: "USER_PROVIDED" as const },
+      },
+    },
+  };
 }
 
 export function reconstructionInputOf(evidence: FightEvidence): ReconstructionInput {

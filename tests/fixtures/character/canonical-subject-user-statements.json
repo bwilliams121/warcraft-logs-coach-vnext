@@ -1,0 +1,11 @@
+{
+  "subject": { "fightRef": "b1PmaKrd6CDfzngc#48", "actorId": 15 },
+  "race": {
+    "value": "dwarf",
+    "provenance": {
+      "source": "USER_PROVIDED",
+      "reference": "owner statement in the M11-G3-4 final authority reduction instruction (race = DWARF, provenance = USER_PROVIDED)",
+      "providedAt": "2026-10-22T00:00:00Z"
+    }
+  }
+}

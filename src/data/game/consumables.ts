@@ -7,6 +7,9 @@
  *   items that apply it. Several items (quality ranks, "Fleeting" variants) may
  *   share one aura, so an aura identifies the consumable, not its rank.
  *
+ * - rank options (M11-G3-4): per item level, the engine token that selects it
+ *   and whether that selection is unambiguous at the pin.
+ *
  * A spell absent from the table is UNKNOWN to the pinned model — never "not a
  * consumable".
  */
@@ -42,6 +45,20 @@ const schema = z.object({
           name: z.string(),
           itemLevel: z.number(),
           quality: z.number(),
+          craftingQuality: z.number().int().nonnegative(),
+        }),
+      ),
+      /**
+       * M11-G3-4: per distinct item level, an engine token and every item the
+       * engine's match predicate could resolve it to. UNAMBIGUOUS only when all
+       * candidates apply this aura at this item level.
+       */
+      rankOptions: z.array(
+        z.object({
+          itemLevel: z.number(),
+          token: z.string().regex(/^[a-z0-9_+.%]+$/),
+          candidateItemIds: z.array(z.number().int().positive()),
+          unambiguous: z.boolean(),
         }),
       ),
     }),

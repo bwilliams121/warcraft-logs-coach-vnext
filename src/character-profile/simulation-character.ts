@@ -82,7 +82,7 @@ export function fidelityProbeJob(
       profileKind: "LOGGED_FIDELITY_PROBE",
       spec: binding.simulation.specKey,
       level: level.value,
-      race: race.state === "KNOWN" ? race.value : "none",
+      race: race.state === "KNOWN" || race.state === "USER_PROVIDED" ? race.value : "none",
       talents: { importString: importCode.value },
       gear,
       consumables: {

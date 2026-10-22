@@ -1660,7 +1660,52 @@ execution profile (M11-G3-3, tests/unit/simulation/execution-profiles.test.ts, r
   real run                                     -> result records id, version, revision, effective settings (R)
   ready_type echo mismatch                     -> SIMULATION_OUTPUT_MALFORMED
   13 deliberate faults                         -> each caught (.probe/m11g3/faults-g33.cjs)
+environment (M11-G3-4, tests/unit/environment/*.test.ts, contracts/m11g34-environment-layering.test.ts):
+  canonical subject                            -> 345,177 ms exact; NOT_REPRESENTABLE; BLOCKED for audited codes (A, W)
+  fight-end knowledge                          -> RETROSPECTIVE_EXACT_FIGHT_END@1 assumption in provenance (C)
+  raid buff absent from pull list / caster     -> UNKNOWN, never KNOWN_NONE, never from composition (D, E)
+  mid-fight removal                            -> TIMED, NOT_REPRESENTABLE (never broadened)
+  generated text                               -> exact duration, optimal_raid=0, every override explicit (B, F)
+  lust                                         -> Heroism 32182 equivalent 471->40475; whole-second diagnostic (G)
+  no application / partial coverage / lockout  -> timing UNKNOWN; never a pull or default lust (H, I)
+  temporary enchant 8052                       -> thalassian_phoenix_oil_2 preserved and echoed (J)
+  food / rune                                  -> UNKNOWN; never ideal; candidates only (K, L)
+  flask / potion rank                          -> UNKNOWN; never chosen; CURRENT_SETUP refuses (M)
+  potion uses                                  -> exact intervals; timing not representable (N)
+  consumable options / APL                     -> all written explicitly; only the gated potion line (O)
+  tank load                                    -> V1 explicit; revision = hash of directives (P)
+  first/last hit, catalog, summon, death       -> never availability; schedule UNKNOWN (Q, R, S, T)
+  BOSS_ONLY_DIAGNOSTIC                         -> labelled; never ceiling-eligible; mixing refused (U)
+  additional target                            -> never emitted; runner refuses (V)
+  fully established synthetic environment      -> PUBLISHABLE and translatable; each condition alone blocks (W)
+  character profile                            -> separately RACE_UNRESOLVED; nothing crosses (X)
+  hash                                         -> deterministic, pinned; semantics move it; identity doesn't (Y, Z, AA)
+  stat revisit                                 -> PARTIALLY_RECONCILED; blocking only with proven comparability (AB)
+  model build lag                              -> diagnostic only (AC)
+  27 deliberate faults                         -> each caught (.probe/m11g3/faults-g34.cjs)
+environment continuation (M11-G3-4, 2026-10-22):
+  primary-target continuity                    -> approved for the canonical fight only; any other fight PENDING
+  weapon oil                                   -> whole-fight only with COMPLETE casts and no replacement
+  defensive ally auras                         -> pinned list excluded (approved); any other ally aura PENDING
+  lust whole second                            -> approved approximation, both values in provenance
+  potion                                       -> actual availability, APL timing; timestamps never replayed
+  unresolved rank                              -> complete plausible set as variants; unrepresentable -> refused
+  food / rune USER_PROVIDED                    -> pinned token only; NONE allowed; conflict and invalid block
+  race                                         -> USER_PROVIDED with provenance; "none"/invalid refused; no range
+  aura absent from pinned data                 -> PINNED_MODEL_MISSING_OBSERVED_EFFECT blocks; age alone does not
+  WCL investigation                            -> AUTHORITY_NOT_FOUND audit, no interval
+  pinned encounter audit / debuff certification -> recorded; schedule and debuffs stay UNKNOWN
+  missing model effect                         -> one PINNED_MODEL_MISSING_OBSERVED_EFFECT blocker per aura
+  owner-stated race (canonical subject)        -> USER_PROVIDED dwarf; exact-pin echo MATCH, SIMULATION_READY; environment still BLOCKED
 ```
+
+The G3-4 materiality numbers, the stat-revisit fixture
+(`tests/fixtures/environment/simc-33622e9d-subject-stat-revisit.json`) and the
+diagnostic round trip are produced on the approved engine by
+`scripts/bench/m11g34-environment.bench.ts`, not by `npm test`.
+Single-threaded measurements reproduce exactly. STANDARD_SIM_V1 reproduces to
+1e-9, because its thread merge order is not fixed (last-bit drift between
+runs).
 
 The fake engine (`tests/support/simulation/fake-simc.mjs`) re-parses the
 builder's text independently and echoes it the way the pinned report writer

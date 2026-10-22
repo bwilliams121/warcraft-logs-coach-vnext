@@ -102,9 +102,31 @@ describe("M11-G3-1 simulation layering", () => {
 
   // M11-G3-2 amendment (reviewed): src/character-profile/ is the one other
   // consumer — it builds the fidelity-probe job and reads the engine echo.
-  it("outside src/simulation, only spec-owned bindings (binding type) and src/character-profile import it — no analysis path", () => {
+  // M11-G3-4 amendment (reviewed): src/environment/ translates a reconstructed
+  // environment into the job's environment/consumables shape and hashes it with
+  // the canonical hashing; it reads exactly the modules below and runs nothing.
+  it("src/environment reads only the job schema, the model pin, canonical hashing and the tank-load directives", () => {
+    for (const file of tsFiles("src/environment")) {
+      for (const spec of importsOf(file).filter((candidate) => /simulation\//.test(candidate))) {
+        expect(
+          [
+            "../simulation/job.js",
+            "../simulation/model.js",
+            "../simulation/canonical.js",
+            "../simulation/tank-model.js",
+          ],
+          `${file} imports ${spec}`,
+        ).toContain(spec);
+      }
+    }
+  });
+
+  it("outside src/simulation, only spec-owned bindings (binding type), src/character-profile and src/environment import it — no analysis path", () => {
     for (const file of tsFiles("src").filter(
-      (name) => !name.startsWith("src/simulation/") && !name.startsWith("src/character-profile/"),
+      (name) =>
+        !name.startsWith("src/simulation/") &&
+        !name.startsWith("src/character-profile/") &&
+        !name.startsWith("src/environment/"),
     )) {
       const text = code(file);
       for (const spec of importsOf(file).filter((candidate) => /simulation\//.test(candidate))) {

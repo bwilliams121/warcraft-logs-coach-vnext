@@ -25,6 +25,9 @@ function semantic<T>(field: Evidenced<T>, normalize: (value: T) => unknown = (va
         value: normalize(field.value),
         assumption: `${field.assumption.id}@${String(field.assumption.version)}`,
       };
+    case "USER_PROVIDED":
+      // The value is semantic; who provided it, and when, is provenance.
+      return { state: "USER_PROVIDED", value: normalize(field.value) };
     default:
       return { state: field.state };
   }

@@ -114,8 +114,18 @@ const gameId = z.number().int().min(1).max(10_000_000);
  * FIDELITY_CONTROL (M11-G3-2): deliberately disabled for a profile-fidelity
  * round trip. Allowed only on a LOGGED_FIDELITY_PROBE, and only as "nothing":
  * no consumable, no raid buff, no Bloodlust.
+ *
+ * DIAGNOSTIC_RECONSTRUCTION (M11-G3-4): a logged environment translated for a
+ * BOSS_ONLY_DIAGNOSTIC run — proven facts only, unresolved components left
+ * out. Never a ceiling; it must label consumables, raid buffs and Bloodlust
+ * together, so a diagnostic environment cannot be mixed into another job.
  */
-const provenance = z.enum(["ACTUAL_OBSERVED", "DEVELOPMENT_FIXTURE", "FIDELITY_CONTROL"]);
+const provenance = z.enum([
+  "ACTUAL_OBSERVED",
+  "DEVELOPMENT_FIXTURE",
+  "FIDELITY_CONTROL",
+  "DIAGNOSTIC_RECONSTRUCTION",
+]);
 
 /**
  * DEVELOPMENT_FIXTURE: test/benchmark data. LOGGED_RECONSTRUCTION: a character
@@ -286,6 +296,17 @@ export function validateSimulationJob(
       job.environment.bloodlust.kind !== "NONE")
   ) {
     return fail("JOB_REJECTED", "FIDELITY_CONTROL means nothing: no consumable, raid buff or Bloodlust");
+  }
+  const diagnostic = [
+    consumables.provenance,
+    job.environment.raidBuffs.provenance,
+    job.environment.bloodlust.provenance,
+  ].map((value) => value === "DIAGNOSTIC_RECONSTRUCTION");
+  if (diagnostic.some(Boolean) && !diagnostic.every(Boolean)) {
+    return fail(
+      "JOB_REJECTED",
+      "DIAGNOSTIC_RECONSTRUCTION must label consumables, raid buffs and Bloodlust together",
+    );
   }
   const slots = job.character.gear.map((entry) => entry.slot);
   if (new Set(slots).size !== slots.length) return fail("JOB_REJECTED", "character.gear: duplicate slot");

@@ -29,6 +29,7 @@ import type {
   GearEnchantState,
   GearPiece,
 } from "../engine/normalization/normalized-events.js";
+import { PLAYABLE_RACES } from "../simulation/job.js";
 import { PINNED_ENGINE_MAX_LEVEL } from "../simulation/model.js";
 import type { CharacterSpecBinding } from "./binding.js";
 import { GEAR_SLOT_MAPPINGS, type GearSlotMapping } from "./gear-slots.js";
@@ -43,6 +44,7 @@ import {
   type EvidenceDocument,
   type Evidenced,
   type PlayableRace,
+  type UserProvidedProvenance,
   type TemporaryEnchantEvidence,
   type ProfileIssue,
   type TalentsRecord,
@@ -59,6 +61,14 @@ export interface ReconstructionInput {
   /** Spell ids of casts sourced by the subject (e.g. a potion). */
   readonly subjectCasts: { readonly actorId: number; readonly spellIds: readonly number[] } | null;
   readonly documents: readonly EvidenceDocument[];
+  /**
+   * Explicit user statements (M11-G3-4 race policy). Used ONLY where no
+   * authoritative evidence resolves the field; never a default, never
+   * inferred, and the provenance is kept.
+   */
+  readonly userProvided?: {
+    readonly race?: { readonly value: string; readonly provenance: UserProvidedProvenance };
+  };
 }
 
 export const LEVEL_ASSUMPTION = {
@@ -112,11 +122,10 @@ export function reconstructCharacterProfile(
     assumption: LEVEL_ASSUMPTION,
   };
   note("LEVEL_IS_MODEL_ASSUMPTION", LEVEL_ASSUMPTION.statement);
-  const race: Evidenced<PlayableRace> = unknown(NO_RACE, null, "race");
-  block(
-    "RACE_UNRESOLVED",
-    "race changes the pinned engine simulation (base attributes, passive racials, racial APL actions) and the engine has no neutral race (race=none is not neutral); see the G3-2 race audit",
-  );
+  // Race policy (owner, M11-G3-4): 1. authoritative evidence — none exists in
+  // the evidence surfaces (see NO_RACE); 2. otherwise an explicit USER_PROVIDED
+  // race with provenance; never a default, never "none", never a range.
+  const race = resolveRace(input, note, block);
 
   const talents = reconstructTalents(input, snapshot, binding, block);
   const equipment = GEAR_SLOT_MAPPINGS.map((mapping) =>
@@ -159,6 +168,39 @@ export function reconstructCharacterProfile(
     diagnostics,
     reconstructionStatus: blockers.length === 0 ? "AWAITING_FIDELITY" : "PROFILE_NOT_SIMULATION_READY",
   };
+}
+
+function resolveRace(
+  input: ReconstructionInput,
+  note: (code: ProfileIssue["code"], detail: string) => void,
+  block: (code: ProfileIssue["code"], detail: string) => void,
+): Evidenced<PlayableRace> {
+  const stated = input.userProvided?.race;
+  const unresolved = () =>
+    block(
+      "RACE_UNRESOLVED",
+      "race changes the pinned engine simulation (base attributes, passive racials, racial APL actions) and the engine has no neutral race (race=none is not neutral); no authoritative evidence carries it and no user-provided race was supplied",
+    );
+  if (stated === undefined) {
+    unresolved();
+    return unknown(NO_RACE, null, "race");
+  }
+  if (
+    !(PLAYABLE_RACES as readonly string[]).includes(stated.value) ||
+    stated.provenance.source !== "USER_PROVIDED"
+  ) {
+    block(
+      "RACE_USER_PROVIDED_INVALID",
+      `"${stated.value}" is not a playable race at the pin (no default, no "none")`,
+    );
+    unresolved();
+    return unknown(NO_RACE, null, "race");
+  }
+  note(
+    "RACE_USER_PROVIDED",
+    `race ${stated.value} as stated by the user (${stated.provenance.reference}); not observed`,
+  );
+  return { state: "USER_PROVIDED", value: stated.value as PlayableRace, provenance: stated.provenance };
 }
 
 function reconstructTalents(

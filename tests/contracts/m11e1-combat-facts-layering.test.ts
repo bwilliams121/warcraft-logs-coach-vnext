@@ -118,20 +118,39 @@ describe("it reads only normalized evidence", () => {
  * guard: the authority branch (`src/simc`, `src/specs`) must never read
  * post-hoc facts, so a future outcome can never settle a past decision.
  */
-describe("nothing reads it but the reviewed M11-G2 consumer — least of all the authority branch", () => {
+describe("nothing reads it but the reviewed consumers — least of all the authority branch", () => {
   /**
    * AMENDED AT M11-G2, explicitly: `src/comparison-facts/` (the post-hoc
    * comparison facts) is the reviewed consumer this guard anticipated. It is
    * itself post-hoc and unreachable from authority
-   * (tests/contracts/m11g2-comparison-facts-layering.test.ts). Every other
-   * module, the authority branch above all, still may not import this layer.
+   * (tests/contracts/m11g2-comparison-facts-layering.test.ts).
+   *
+   * AMENDED AT M11-G3-4, explicitly: `src/environment/` (the retrospective
+   * fight-environment reconstruction) reads the actor descriptors — the
+   * owned-pet set and the boss-subtype metadata — and nothing else. It is
+   * post-hoc, and unreachable from authority except one type-only import
+   * of its spec-facts shape (tests/contracts/m11g34-environment-layering.test.ts).
+   *
+   * Every other module, the authority branch above all, still may not import
+   * this layer.
    */
-  const CONSUMERS = "src/comparison-facts/";
+  const CONSUMERS = ["src/comparison-facts/", "src/environment/"] as const;
   const OUTSIDE = allPaths().filter(
-    (path) => !path.startsWith("src/combat-facts/") && !path.startsWith(CONSUMERS),
+    (path) =>
+      !path.startsWith("src/combat-facts/") && !CONSUMERS.some((consumer) => path.startsWith(consumer)),
   );
-  it("the reviewed consumer exists and is the only one", () => {
-    expect(allPaths().filter((path) => path.startsWith(CONSUMERS)).length).toBeGreaterThan(0);
+  it("each reviewed consumer exists", () => {
+    for (const consumer of CONSUMERS) {
+      expect(allPaths().filter((path) => path.startsWith(consumer)).length, consumer).toBeGreaterThan(0);
+    }
+  });
+
+  it("src/environment reads only the actor descriptors", () => {
+    for (const path of allPaths().filter((candidate) => candidate.startsWith("src/environment/"))) {
+      for (const specifier of importsOf(sourceOf(path)).filter((spec) => spec.includes("combat-facts"))) {
+        expect(specifier, path).toBe("../combat-facts/descriptors.js");
+      }
+    }
   });
 
   it("found modules to check", () => {

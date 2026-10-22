@@ -19,6 +19,8 @@ function show<T>(field: Evidenced<T>, value: (v: T) => string = (v) => String(v)
       return `${value(field.value)} [MODEL_ASSUMPTION ${field.assumption.id}@${String(field.assumption.version)}]`;
     case "NOT_APPLICABLE":
       return "n/a";
+    case "USER_PROVIDED":
+      return `${value(field.value)} [USER_PROVIDED ${field.provenance.reference}]`;
     default:
       return "UNKNOWN";
   }

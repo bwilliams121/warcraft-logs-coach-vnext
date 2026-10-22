@@ -8041,6 +8041,318 @@ and not fitted to any DPS or log. Runtime: the approved G3-1 artifact.
   - Arcane Mage (Arcane Missiles channel): `channel_lag` 0 vs 250 ms is +3.7%,
     so it is active and material for channellers.
 
+## M11-G3-4 — fight environment reconstruction and publishability gate
+
+Answers one question: can enough of the ACTUAL logged fight environment be
+reconstructed to simulate this pull without fabricating conditions? It
+produces an environment, a readiness and a publishability decision. It
+publishes nothing: no ceiling, attainment, loss estimate or coaching (G4 owns
+publication, G5 optimization, G6 attribution).
+
+- **Domain** (`src/environment/`, spec-agnostic). FACTUAL RECONSTRUCTION
+  (`reconstruct.ts`) is separate from SIMC TRANSLATION (`translate.ts`), and
+  the translation targets the existing G3-1 `SimulationEnvironmentInput` plus
+  the job's consumables block. There is no second environment model.
+  - Every component is an `Evidenced<T>` (KNOWN / KNOWN_NONE / UNKNOWN /
+    NOT_APPLICABLE / MODEL_ASSUMPTION), with fight-relative times.
+  - `EnvironmentReconstructionResult {status READY | PARTIAL |
+    NOT_REPRESENTABLE, checks, blockers, diagnostics, assumptions,
+    provenance}`. Environment readiness is independent of the character
+    profile's.
+- **Inputs.** The normalized fight with its completeness, the subject's pull
+  facts, its temporary enchants and the spell ids its own talents own. Each
+  carries its actor id; a foreign actor is EVIDENCE_ACTOR_MISMATCH.
+- **Duration.** The exact committed interval (345,177 ms for the subject) →
+  `fixed_time=1`, `max_time=345.177`, `vary_combat_length=0`, no target-health
+  override. `RETROSPECTIVE_EXACT_FIGHT_END@1` is an owner-approved
+  MODEL_ASSUMPTION, never observed knowledge.
+- **Primary target.** The single WCL boss-subtype actor OBSERVED in this
+  fight's events (the catalog is report-wide: it lists six bosses). The
+  subtype is metadata only. Presence for the whole encounter is
+  `PRIMARY_TARGET_PRESENT_WHOLE_ENCOUNTER@1`, PENDING owner approval:
+  targetability and phases are not established, and the observed hits (largest
+  gap 2.475 s) support it without proving it.
+- **Raid buffs.** KNOWN only from the subject's own evidence. A buff must be on
+  the pull's combatantinfo aura list and never removed under COMPLETE subject
+  aura coverage; a removal makes it TIMED, which is not representable (the
+  engine override is whole-fight).
+  - The pull list is not proven exhaustive, so an absent buff is UNKNOWN,
+    never KNOWN_NONE. Raid composition, comparisons and the engine package
+    are never used.
+  - Target debuffs are UNKNOWN when the aura evidence does not vouch for the
+    primary target. Generic `bleeding` has no aura identity.
+  - Pinned identities: `src/data/game/raid-environment.json`, machine-extracted
+    by `scripts/authority/extract-simc-raid-environment.mjs` from the pinned
+    spell data (sha256 d8e3d197…). Blessing of the Bronze is one aura per
+    class: the engine reads `effectN(player_e)` of 364342, which is 381732 for
+    a Death Knight.
+- **Bloodlust.** Keyed by the pinned lust family. A spell is equivalent to the
+  engine's 2825 only when its duration and every aura-effect row are
+  identical: Heroism 32182 yes; Time Warp, Primal Rage and Fury of the Aspects
+  no.
+  - KNOWN_NONE needs COMPLETE coverage, no family transition and no lockout. A
+    lockout without a recognised lust is UNKNOWN.
+  - A non-equivalent lust or more than one lust is not representable.
+  - Translation: `override.bloodlust=1`, `bloodlust_percent=0`,
+    `bloodlust_time=<observed>`, after `optimal_raid=0`. The pinned check runs
+    at 0 s and then every whole second, triggers once and never reschedules
+    (`sim.cpp bloodlust_check_t`). So there is never a default or second lust,
+    and 471 ms runs at 1.000 s, recorded as `BLOODLUST_ENGINE_WHOLE_SECOND`.
+- **Consumables.**
+  - Identity comes from pinned consumable data. Rank is the item level shared
+    by every item applying the aura: flask 1235057 and potion 1236994 are
+    each applied at 278 and 295, so rank is UNKNOWN.
+  - Potion uses are the aura intervals, kept apart from identity: 1.921–31.951
+    s and 303.773–333.776 s.
+  - Temporary enchant 8052 maps to `thalassian_phoenix_oil_2`. Its whole-fight
+    persistence is `TEMPORARY_ENCHANT_PERSISTS_WHOLE_FIGHT@1`, PENDING.
+  - Food and augment rune are UNKNOWN. The subject's unclassified pull auras
+    (1296934, 1303171 Vantus Rune: Tides, 1303184, 1285644) are kept as
+    candidates only.
+  - The built-in APL owns potion timing (`potion,if=cooldown.dancing_rune_weapon.remains>78|fight_remains<=30`),
+    so observed potion timing is not representable.
+- **Automatic consumables.** The builder writes every consumable option
+  explicitly; an empty one would mean the class default (`player.cpp:12910`).
+  `disabled` makes the consumable action never ready, even a named APL action
+  (`consumable.cpp:862-866, :998`). Blood's APL has no flask, food or rune
+  action, and its one potion line is gated by the potion option.
+- **Tank load.** `STANDARD_TANK_LOAD_V1` v1 (`tank_dummy_type=mythic` after
+  the primary-target line), revision
+  `7397216ba23406188218ea9444e2387de05988156cabcc235cba06e99338aad1`. That is
+  the SHA-256 of `{model, version, directives}`, so any directive change is a
+  new revision. It is an owner-approved MODEL_ASSUMPTION, and the spec carries
+  the disclosure wording.
+- **Targets.** `OBSERVED_ENGAGEMENT_SPAN ≠ SIMULATED_TARGET_AVAILABLE_INTERVAL`.
+  Candidates are catalog NPCs the subject or its owned pets were observed
+  damaging. Each carries an observation span and descriptive 10 s clusters,
+  and an audit of every availability source:
+  - TARGETABILITY, ENCOUNTER_PHASES and DEATHS: capability not established;
+  - SUMMONS: out of scope, and not availability anyway;
+  - observed engagement and catalog: not availability evidence.
+
+  No approved source establishes an interval, so availability and the
+  schedule are UNKNOWN. The subject's adds 179 (260895) and 180 (260905) are
+  engaged and not representable. No lower or upper environment exists, and
+  the job still admits no additional target.
+- **Pull-aura inventory.** Every pull aura is classified:
+  - RAID_BUFF, LUST_FAMILY, SATED, CONSUMABLE, CHARACTER_TALENT;
+  - UNCLASSIFIED_SELF, which blocks: its simulation effect is unknown;
+  - UNCLASSIFIED_ALLY: Devotion Aura 465 ×2, Power Word: Shield 1246768 and
+    Prayer of Mending 41635 have no player-side engine representation. They
+    are excluded under `UNREPRESENTABLE_ALLY_AURAS_EXCLUDED@1`, PENDING.
+- **Materiality** (`materiality.ts`, `ENVIRONMENT_MATERIALITY_V1`, 0.5%). Spec
+  facts supply measurements; the policy is shared and fails closed:
+  - no measurement → blocking;
+  - a bit-identical result → inert, NON_BLOCKING;
+  - |Δ| ≥ 0.5% → blocking;
+  - below 0.5% → NON_BLOCKING only when the compared values bound every
+    plausible value. One example of an open set (an unknown food) is a
+    semantic ambiguity and blocks.
+
+  Blood's measurements (`src/specs/deathknight/blood/environment-facts.ts`,
+  reproduced by `scripts/bench/m11g34-environment.bench.ts`):
+
+  | field | change | classification |
+  | --- | --- | --- |
+  | chaos brand | +0.92% | blocking |
+  | mystic touch | +3.18% | blocking |
+  | hunter's mark | +2.93% | blocking |
+  | mortal wounds, bleeding | bit-identical single-thread | inert |
+  | flask rank | −0.27% | non-blocking |
+  | potion rank | −0.23% | non-blocking |
+  | food (example) | +1.20% | blocking |
+  | rune (example) | +0.53% | blocking |
+  | lust at 0 vs 1 s | +0.07% | non-blocking |
+
+  Arcane Intellect and Blessing of the Bronze are inert for Blood. Battle
+  Shout, Mark of the Wild, Fortitude and Skyfury are active.
+- **Publishability** (`publishability.ts`). PUBLISHABLE needs four things:
+  1. no factual blocker materiality cannot clear;
+  2. every UNKNOWN classified NON_BLOCKING;
+  3. every assumption OWNER_APPROVED;
+  4. a successful CURRENT_SETUP translation.
+
+  So PUBLISHABLE implies translatable. CURRENT_SETUP never writes UNKNOWN as
+  absent unless the field is inert. It never chooses an unresolved rank, never
+  writes a ranked consumable without a pinned item-to-token mapping (none
+  exists), and never writes observed potion uses or an unestablished schedule.
+- **BOSS_ONLY_DIAGNOSTIC.** Proven facts only, one target, provenance
+  `DIAGNOSTIC_RECONSTRUCTION`. Every omission is recorded in the ledger as not
+  a claim of absence.
+  - The job schema requires the label on consumables, raid buffs and Bloodlust
+    together.
+  - `ceilingEligibility` refuses any non-ACTUAL_OBSERVED job.
+  - It is never called a lower, conservative, current-setup or attainable
+    ceiling.
+- **Hash** (`hash.ts`). It uses the G3-1 canonical JSON and SHA-256 over a
+  semantic projection: duration and finality, states by game id, presence,
+  lust timing, consumables, tank model/version/revision, pull-aura classes and
+  assumption ids.
+  - It excludes report code, fight, actor ids, sources, report timestamps,
+    documents, explanatory text and observations.
+  - Subject: `e0be25aff0113c17ac2f4704c1d4cda9c91858380293198a86962964f4e81ad2`.
+- **Stat reconciliation revisit** (`stat-reconciliation.ts`). Engine buffed
+  stats under the PROVEN pull environment, race `none` for measurement only:
+  - versatility reconciles with flask rank 2 (rank 1 leaves 14);
+  - Fortitude explains stamina except 184;
+  - strength +52, crit +3, haste +229 and mastery −231 remain.
+
+  PARTIALLY_RECONCILED. Comparability is not proven (race, food, rune and
+  unclassified auras), so it stays a diagnostic. It blocks only when
+  comparability is proven and a residual remains.
+- **MODEL_BUILD_LAG.** The log (2026-10-01) is newer than the pinned hotfix
+  data (2026-09-10). That is a diagnostic. Its specific gaps (unnamed pull
+  auras, unknown food and rune) block under their own codes.
+- **Subject result.** Readiness NOT_REPRESENTABLE; publishability BLOCKED:
+  - TARGET_SCHEDULE_UNRESOLVED;
+  - MATERIAL_RAID_BUFF_UNKNOWN (chaos brand, mystic touch, hunter's mark);
+  - MATERIAL_CONSUMABLE_UNKNOWN (food, rune);
+  - SETUP_AURA_UNCLASSIFIED;
+  - ENVIRONMENT_TRANSLATION_UNSUPPORTED (potion timing; CURRENT_SETUP plan);
+  - ASSUMPTION_NOT_OWNER_APPROVED (three pending).
+
+  The character profile stays separately NOT_SIMULATION_READY (RACE_UNRESOLVED).
+- **Exact-pin round trip.** The development character runs with the subject's
+  BOSS_ONLY_DIAGNOSTIC translation through the full parser, which checks the
+  duration, override, lust and consumable echoes. The report itself confirms:
+  - one target and only the `tank_heal` raid event;
+  - a fixed 345.177 s length;
+  - constant buffs equal to the translated six;
+  - exactly one Bloodlust (2825) per iteration.
+
+  Its DPS is not recorded.
+
+### M11-G3-4 continuation — owner decisions applied (2026-10-22)
+
+- **Primary target.** `PRIMARY_TARGET_CONTINUOUS_V1` is a MODEL_ASSUMPTION.
+  It is OWNER_APPROVED only for `b1PmaKrd6CDfzngc#48` / encounter 3455
+  (`PRIMARY_TARGET_CONTINUOUS_APPROVALS`); any other fight gets it PENDING.
+- **Weapon oil.** `TEMPORARY_ENCHANT_PERSISTS_WHOLE_FIGHT` is approved under
+  two conditions:
+  - the enchant is established at pull, the subject's casts are COMPLETE, and
+    no pinned temporary-enchant spell is cast in the fight;
+  - otherwise persistence is UNKNOWN. An unknown enchant never persists.
+- **Defensive ally auras.** `DEFENSIVE_ALLY_AURAS_EXCLUDED_V1` is approved,
+  keyed by spell id: 465, 1246768 and 41635. The extractor records every
+  effect row, including linked spells, and fails unless each is damage-taken,
+  absorb, dummy or a link to a defensive spell. Any other ally aura keeps the
+  PENDING `UNREPRESENTABLE_ALLY_AURAS_EXCLUDED`.
+- **Bloodlust.** `BLOODLUST_WHOLE_SECOND_START_V1` is an approved bounded
+  engine approximation. Provenance `engineApproximations` keeps the observed
+  471 ms and the engine's 1000 ms.
+- **Potion policy (corrected).** `POTION_TIMING_ELITE_APL_V1`: actual
+  identity/availability, elite-APL timing. Observed uses are evidence only and
+  never replayed; there is no potion schedule.
+- **Consumable rank: uncertainty envelope.**
+  - The consumables artifact (revision 2) carries per-aura `rankOptions`:
+    item level → engine token (`tokenize(name)_<crafting quality>`).
+  - A token is UNAMBIGUOUS only when every item the engine's match predicate
+    could select applies the same aura at the same item level, which makes it
+    independent of the engine's iteration order.
+  - An UNKNOWN rank with a complete, representable set is carried as
+    translation `consumableVariants` (the Cartesian product; subject: flask ×
+    potion = 4). G4 runs every variant and reports the envelope; it never
+    sums sensitivities.
+  - Augment runes resolve through the engine's keyword chain
+    (`augmentation_t::driver()`, e.g. `void_touched` → 1264426), not by item
+    name. The extractor reads that chain from the pinned `consumable.cpp`
+    (sha recorded).
+  - **Representable means the approved engine ACCEPTS the token.** A name
+    match is not proof. `src/data/game/consumable-token-acceptance.json`
+    (`scripts/bench/m11g34-consumable-tokens.bench.ts`, one engine run per
+    unambiguous token) accepts 22 of 67 tokens: every flask, potion and rune
+    token, and **no** food token. Every derived Midnight food fails engine
+    effect initialization at the pin. Unrecorded or refused tokens are not
+    representable.
+  - Stat reconciliation is never used for rank.
+- **Food / rune.** No defaults. An explicit `USER_PROVIDED` statement (an
+  engine token or "NONE", with provenance) fills an UNKNOWN identity only.
+  It is validated against pinned, unambiguous tokens and never overrides an
+  observation: a conflict is `USER_PROVIDED_CONFLICT`, an invalid token
+  `USER_PROVIDED_INVALID`. A statement does not clear unidentified-aura
+  blockers.
+- **USER_PROVIDED** is a new `Evidenced` state. The hash covers its value,
+  never its reference or time.
+- **Race policy.** Authoritative evidence first (none exists); otherwise an
+  explicit `USER_PROVIDED` race with provenance. There is no default, no
+  production "none" and no all-races range. An invalid or "none" statement is
+  `RACE_USER_PROVIDED_INVALID` plus `RACE_UNRESOLVED`.
+- **MODEL_BUILD_LAG.** Age alone stays a diagnostic. A subject pull aura that
+  the pinned spell data does not contain (audited: 1285644, 1296934, 1303184)
+  is `PINNED_MODEL_MISSING_OBSERVED_EFFECT` and blocks. 1303171 (Vantus Rune:
+  Tides) is in the pinned data and stays unclassified only.
+- **Add availability.** An owner-authorized WCL investigation (3 requests)
+  found no targetability or spawn/despawn event type for the fight:
+  `WCL_TARGET_AVAILABILITY_AUTHORITY_NOT_FOUND`
+  (`TARGET_AVAILABILITY_INVESTIGATIONS`, recorded as a `WCL_INVESTIGATION`
+  audit).
+  - Add 179: 32 instances summoned by the environment in 4 waves of 8, each
+    dying 5–6 s later.
+  - Add 180: 12 deaths, no summons.
+
+  Summons are creation and deaths are ends only. The schedule stays UNKNOWN.
+- **Boss debuffs.** One filtered capture shows Mystic Touch applied at
+  0.505 s, Chaos Brand at 1.336 s, and Hunter's Mark (257284) applied before
+  the pull; all are removed at the fight end. This is not certified: the debuff
+  table under `hostilityType: Enemies` returned only enemy-sourced debuffs. The
+  raw capture is not committed, the environment keeps them UNKNOWN, and none is
+  converted to whole-fight.
+- **Subject result.** Readiness NOT_REPRESENTABLE; publishability BLOCKED:
+  - TARGET_SCHEDULE_UNRESOLVED;
+  - MATERIAL_RAID_BUFF_UNKNOWN (three debuffs);
+  - MATERIAL_CONSUMABLE_UNKNOWN (food, rune);
+  - SETUP_AURA_UNCLASSIFIED;
+  - PINNED_MODEL_MISSING_OBSERVED_EFFECT;
+  - ENVIRONMENT_TRANSLATION_UNSUPPORTED (the CURRENT_SETUP plan for those).
+
+  No pending assumption remains. Hash
+  `874c2a74c82d3675f5f2f382ba988064b40fb4690e7d7fcb925b563d2fe9b98a`.
+
+### M11-G3-4 final authority reduction (2026-10-22)
+
+- **Boss-debuff certification failed.** One request, the friendly-sourced
+  Debuffs table on actor 161 for 113746, 1490 and 257284, returned no aura
+  band.
+  - It is recorded as `WCL_DEBUFF_INTERVAL_CERTIFICATION_NOT_ACHIEVED`
+    (`BOSS_DEBUFF_CERTIFICATION_ATTEMPTS`, cited in the UNKNOWN reason).
+  - The debuffs stay UNKNOWN and blocking, and no approximation was evaluated.
+- **Timed boss debuffs are not representable at the pin.** The overrides are
+  applied once when the enemy arises (`player.cpp` `override_buff()`, whole
+  fight). The job admits no raid events, and no pinned raid-event type models
+  a school-specific damage-taken debuff.
+- **Food tokens.** An offline engine audit set each of the 93 pinned
+  current-content food items' canonical tokens.
+  - 43 are accepted, and each echoes the spell the engine builds; several build
+    another item's spell, e.g. `flora_frenzy` → 1232919.
+  - No engine-built food spell, and no pinned food effect chain, reaches any
+    subject pull aura.
+  - Result: FOOD_ENGINE_MAPPING_NOT_PROVEN. The food blocker is unchanged.
+- **Missing model effects.** Each subject pull aura that is absent from the
+  pinned spell data blocks as `PINNED_MODEL_MISSING_OBSERVED_EFFECT`, one
+  blocker per effect: 1285644, 1296934 and 1303184. MODEL_BUILD_LAG (age)
+  stays a diagnostic.
+- **Encounter schedule: `PINNED_ENCOUNTER_SCHEDULE_AUTHORITY_NOT_FOUND`**
+  (`ENCOUNTER_SCHEDULE_AUTHORITY_AUDITS`, a `PINNED_ENCOUNTER_DATA` audit
+  for encounter 3455).
+  - The approved image holds only the binary.
+  - The engine's fight styles and raid events are generic.
+  - The pinned spell and item data carry no encounter or creature schedule; the
+    adds' summon spell 1284785 is absent from them.
+  - The repository holds no encounter metadata.
+
+  No encounter-metadata contract is proposed, and the target schedule stays
+  UNKNOWN.
+- **Owner race statement.** The owner stated race = dwarf as USER_PROVIDED
+  (`tests/fixtures/character/canonical-subject-user-statements.json`, applied
+  only through `withOwnerStatements`). With it, the canonical subject
+  reconstructs with race USER_PROVIDED and no blockers.
+  - The exact-pin fidelity echo
+    (`simc-33622e9d-blood-subject-fidelity-user-race.json`) MATCHes every
+    gated check, race included, so the character profile is SIMULATION_READY.
+  - Stats stay STAT_RECONCILIATION_NOT_PROVEN, a diagnostic.
+  - The statement-free subject stays RACE_UNRESOLVED.
+  - The environment is unaffected: still NOT_REPRESENTABLE / BLOCKED.
+
 ---
 
 # Milestone 12 — Healer Foundation

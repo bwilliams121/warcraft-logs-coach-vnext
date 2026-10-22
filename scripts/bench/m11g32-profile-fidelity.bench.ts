@@ -8,6 +8,11 @@
  * the internal reconstruction report. With WRITE_GOLDEN=1 it also re-cuts the
  * committed golden echo fixture.
  *
+ * M11-G3-4: a second run applies the owner's USER_PROVIDED race statement
+ * (tests/fixtures/character/canonical-subject-user-statements.json) and re-cuts
+ * its own golden (…-subject-fidelity-user-race.json). The plain run and its
+ * golden are unchanged.
+ *
  * No DPS is reported: the probe is not a performance simulation.
  *
  *     SIMC_IMAGE=sha256:<image id> npx vitest run --config scripts/bench/vitest.config.ts scripts/bench/m11g32-profile-fidelity.bench.ts
@@ -27,7 +32,11 @@ import { readCombatantPullFacts } from "../../src/character-profile/pull-facts.j
 import { reconstructCharacterProfile } from "../../src/character-profile/reconstruct.js";
 import { renderReconstructionReport } from "../../src/character-profile/report.js";
 import { BLOOD_CHARACTER_BINDING } from "../../src/specs/deathknight/blood/character-binding.js";
-import { reconstructionInputOf, subjectEvidence } from "../../tests/support/character/subject.js";
+import {
+  reconstructionInputOf,
+  subjectEvidence,
+  withOwnerStatements,
+} from "../../tests/support/character/subject.js";
 import { goldenProjection } from "../../tests/support/simulation/golden.js";
 
 declare const process: any;
@@ -35,6 +44,12 @@ declare const process: any;
 const IMAGE: string | undefined = process.env["SIMC_IMAGE"];
 const OUT = join(".probe", "m11g3", "g32");
 const GOLDEN = join("tests", "fixtures", "simulation", "simc-33622e9d-blood-subject-fidelity.json");
+const GOLDEN_USER_RACE = join(
+  "tests",
+  "fixtures",
+  "simulation",
+  "simc-33622e9d-blood-subject-fidelity-user-race.json",
+);
 
 describe.skipIf(IMAGE === undefined)("M11-G3-2 exact-pin profile fidelity", () => {
   it(
@@ -86,6 +101,36 @@ describe.skipIf(IMAGE === undefined)("M11-G3-2 exact-pin profile fidelity", () =
         writeFileSync(GOLDEN, `${JSON.stringify(golden, null, 1)}\n`, "utf8");
       }
       expect(run.value.fidelity.status).not.toBe("FAILED");
+
+      // ---- M11-G3-4: the same subject with the owner's USER_PROVIDED race ----
+      const stated = reconstructCharacterProfile(withOwnerStatements(input), BLOOD_CHARACTER_BINDING);
+      const statedRun = await runProfileFidelity(
+        stated,
+        BLOOD_CHARACTER_BINDING,
+        readCombatantPullFacts(evidence.rawCombatantInfo),
+        artifact,
+        launcher,
+      );
+      if (!statedRun.ok) throw new Error(`${statedRun.failure.code}: ${statedRun.failure.detail}`);
+      writeFileSync(
+        join(OUT, "fidelity-user-race.json"),
+        JSON.stringify(statedRun.value.fidelity, null, 2),
+        "utf8",
+      );
+      writeFileSync(
+        join(OUT, "subject-report-user-race.md"),
+        renderReconstructionReport(stated, statedRun.value.fidelity, await semanticProfileHash(stated)),
+        "utf8",
+      );
+      if (process.env["WRITE_GOLDEN"] === "1") {
+        const golden = goldenProjection(statedRun.value.rawReport, {
+          source: `approved engine ${artifact.binarySha256}`,
+          job: "fidelityProbeJob(reconstructCharacterProfile(withOwnerStatements(canonical G3-2 subject)), BLOOD_CHARACTER_BINDING)",
+          jobProfileHash: statedRun.value.jobProfileHash,
+        });
+        writeFileSync(GOLDEN_USER_RACE, `${JSON.stringify(golden, null, 1)}\n`, "utf8");
+      }
+      expect(statedRun.value.fidelity.status).not.toBe("FAILED");
     },
   );
 });

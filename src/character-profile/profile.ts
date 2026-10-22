@@ -9,6 +9,9 @@
  *   UNKNOWN           not established — never "none", never 0, never a default
  *   NOT_APPLICABLE    the question does not arise for this field
  *   MODEL_ASSUMPTION  not observed; a versioned, provenance-visible assumption
+ *   USER_PROVIDED     not observed; stated by the user (M11-G3-4), with its
+ *                     provenance. Never inferred, never a default, and never
+ *                     upgraded to KNOWN
  *
  * The profile describes what the player HAD. Nothing here improves it, fills
  * it from other players, or chooses a "standard" value for an unknown.
@@ -39,12 +42,22 @@ export interface ModelAssumption {
   readonly statement: string;
 }
 
+/** Where a USER_PROVIDED value came from. Provenance only — never part of a semantic hash. */
+export interface UserProvidedProvenance {
+  readonly source: "USER_PROVIDED";
+  /** An opaque reference to the user's statement (request id, form submission). */
+  readonly reference: string;
+  /** ISO-8601 instant the statement was recorded. */
+  readonly providedAt: string;
+}
+
 export type Evidenced<T> =
   | { readonly state: "KNOWN"; readonly value: T; readonly source: EvidenceSource }
   | { readonly state: "KNOWN_NONE"; readonly source: EvidenceSource; readonly basis: string }
   | { readonly state: "UNKNOWN"; readonly reason: string; readonly source: EvidenceSource | null }
   | { readonly state: "NOT_APPLICABLE"; readonly reason: string }
-  | { readonly state: "MODEL_ASSUMPTION"; readonly value: T; readonly assumption: ModelAssumption };
+  | { readonly state: "MODEL_ASSUMPTION"; readonly value: T; readonly assumption: ModelAssumption }
+  | { readonly state: "USER_PROVIDED"; readonly value: T; readonly provenance: UserProvidedProvenance };
 
 export type PlayableRace = (typeof PLAYABLE_RACES)[number];
 
@@ -69,8 +82,10 @@ export type ProfileIssueCode =
   | "ENCHANT_UNKNOWN"
   | "REQUIRED_ENCHANT_UNKNOWN"
   | "RACE_UNRESOLVED"
+  | "RACE_USER_PROVIDED_INVALID"
   // Non-blocking diagnostics.
   | "LEVEL_IS_MODEL_ASSUMPTION"
+  | "RACE_USER_PROVIDED"
   | "REQUIRED_ENCHANT_ABSENT"
   | "TEMPORARY_ENCHANT_NOT_IN_PINNED_DATA"
   | "MODEL_VERSION_COMPATIBILITY_UNKNOWN"
