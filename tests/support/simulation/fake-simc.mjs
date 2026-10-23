@@ -16,11 +16,20 @@ if (rest.length > 0 || !jsonArg?.startsWith("json2=")) {
 }
 const outPath = jsonArg.slice("json2=".length);
 
+// M11-G3-5 service tests: `slow:<ms>` succeeds after a delay (queue and
+// cancellation timing); `hang-pid:<path>` records its pid at a test-owned path
+// and never finishes, so a test can prove a cancelled engine process is gone.
+if (mode?.startsWith("slow:")) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, Number(mode.slice("slow:".length)));
+} else if (mode?.startsWith("hang-pid:")) {
+  writeFileSync(mode.slice("hang-pid:".length), String(process.pid));
+}
+
 if (mode === "exit-nonzero") {
   process.stderr.write(`Error: failed to parse ${jobPath}\n`);
   process.exit(3);
 }
-if (mode === "hang") {
+if (mode === "hang" || mode?.startsWith("hang-pid:")) {
   setInterval(() => undefined, 1000);
 } else if (mode === "no-output") {
   process.exit(0);

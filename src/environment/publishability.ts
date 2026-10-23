@@ -31,6 +31,17 @@ import { planTranslation } from "./translate.js";
 
 export const ENVIRONMENT_PUBLISHABILITY_SCHEMA_VERSION = "environment-publishability/1";
 
+/**
+ * Revision of the environment PUBLISHABILITY gate (reconstruction, materiality,
+ * translation and this module's PUBLISHABLE/BLOCKED decision). The schema
+ * version above describes the result shape; this describes its MEANING. A
+ * PRODUCTION simulation attestation names it, and the runner accepts only the
+ * current one (src/simulation/readiness-attestation.ts). Bump it whenever what
+ * PUBLISHABLE means changes; tests/contracts/m11g35-readiness-gate-revisions.test.ts
+ * pins the gate's code fingerprint to force that decision.
+ */
+export const ENVIRONMENT_PUBLISHABILITY_GATE_REVISION = "environment-publishability-gate/1";
+
 export type PublishabilityBlockerCode =
   | "DURATION_UNRESOLVED"
   | "PRIMARY_TARGET_UNRESOLVED"

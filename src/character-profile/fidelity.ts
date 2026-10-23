@@ -32,6 +32,16 @@ import type { CharacterSpecBinding } from "./binding.js";
 import type { CharacterProfile, Evidenced } from "./profile.js";
 import type { CombatantPullFacts } from "./pull-facts.js";
 
+/**
+ * Revision of the profile READINESS gate (this module's MATCH/SIMULATION_READY
+ * decision plus the reconstruction blockers it consumes). A PRODUCTION
+ * simulation attestation names it; the runner accepts only the current one
+ * (src/simulation/readiness-attestation.ts). Bump it whenever what
+ * SIMULATION_READY means changes; tests/contracts/m11g35-readiness-gate-revisions.test.ts
+ * pins this module's code fingerprint to force that decision.
+ */
+export const PROFILE_READINESS_GATE_REVISION = "profile-readiness-gate/1";
+
 export type FidelityCheckState = "MATCH" | "MISMATCH" | "UNRESOLVED" | "NOT_PROVEN";
 
 export interface FidelityCheck {

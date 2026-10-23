@@ -23,6 +23,9 @@ declare module "node:fs" {
   export function rmSync(path: string, options: { recursive: boolean; force: boolean }): void;
   // M11-G3-1: the simulation runner hashes the engine binary it executes.
   export function readFileSync(path: string): Uint8Array;
+  // M11-G3-5: the runner service cache writes an entry to a temporary name and
+  // renames it into place.
+  export function renameSync(from: string, to: string): void;
 }
 
 declare module "node:path" {
@@ -70,4 +73,30 @@ declare module "node:child_process" {
       stdio: ["ignore", "pipe", "pipe"];
     },
   ): ChildProcessHandle;
+}
+
+// M11-G3-5: the private simulation runner service listens with node:http (TLS
+// is terminated in front of it; see agent/architecture.md).
+declare module "node:http" {
+  export interface IncomingMessage {
+    readonly method?: string;
+    readonly url?: string;
+    readonly headers: Record<string, string | string[] | undefined>;
+    on(event: "data", listener: (chunk: Uint8Array) => void): this;
+    on(event: "end", listener: () => void): this;
+    on(event: "error", listener: (error: Error) => void): this;
+  }
+  export interface ServerResponse {
+    writeHead(status: number, headers: Record<string, string>): this;
+    end(body?: string): void;
+  }
+  export interface Server {
+    listen(port: number, host: string, listener: () => void): this;
+    close(listener?: (error?: Error) => void): this;
+    closeAllConnections(): void;
+    address(): { port: number } | string | null;
+  }
+  export function createServer(
+    listener: (request: IncomingMessage, response: ServerResponse) => void,
+  ): Server;
 }

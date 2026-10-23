@@ -8353,6 +8353,286 @@ publication, G5 optimization, G6 attribution).
   - The statement-free subject stays RACE_UNRESOLVED.
   - The environment is unaffected: still NOT_REPRESENTABLE / BLOCKED.
 
+## M11-G3-5 — private SimulationCraft runner service
+
+**Status:** implemented, uncommitted, awaiting architecture review (2026-10-22).
+There is no public simulation endpoint, no G4 math, no pin change and no
+`analysis/1` change.
+
+### Shape
+
+```text
+Worker (src/simulation-client/remote-client.ts)
+   -- signed HTTPS (simc-runner-api/1) -->
+private runner API (runner/service/http.ts, server.ts)
+   -> SimulationService (runner/service/service.ts)
+        prepare (G3-1) -> class allowlist + readiness attestation -> cache (verified)
+        -> coalesce -> bounded FIFO -> executor
+   -> runSimulationJob (G3-1, unchanged) -> launcher -> parseSimcJson
+   -> cache entry (parsed-result key) -> ticket view
+Worker <- ticket -> settleTicket (re-derives key/class, verifySimulationResult)
+```
+
+There is ONE simulation implementation. The service wraps the G3-1 core
+unchanged: job schema, input builder, execution profiles, policies, process
+runner, parser, `SimulationResult` and canonical keys. Transport redefines none
+of them.
+
+Files:
+
+- `src/simulation/approved-artifacts.ts` — moved from runner/ so the Worker can
+  verify against the same identity. runner/ re-exports it.
+- `src/simulation/job-class.ts` — DEVELOPMENT / FIDELITY_PROBE / DIAGNOSTIC /
+  PRODUCTION; only PRODUCTION is publishable.
+- `src/simulation/runner-protocol.ts` — the wire contract, shared by both ends:
+  request, ticket, refusal, transport-error schemas and HMAC signing.
+- `src/simulation/result-verification.ts` — strict result schema plus identity
+  re-check.
+- `src/simulation/backend.ts` — `SimulationBackend` and `settleTicket`.
+- `src/simulation-client/remote-client.ts` — the Worker client. It sits outside
+  src/simulation because it does network I/O.
+- `runner/service/`:
+  - `service`, `http`, `server`, `auth`, `cache`, `capacity`, `config`;
+  - `engine` (executor binding), `self-test`, `compose`, `main`.
+- `runner/local-backend.ts`.
+
+### Decisions
+
+- **Async submit/poll** (`POST /v1/simulations` → 202 + ticket; `GET`/`DELETE
+  /v1/simulations/:id`):
+  - A STANDARD run takes ~5 s on the dev host and an ESCALATED run ~16 s, and
+    queueing multiplies both. A synchronous request would hold a Worker
+    subrequest open for an unbounded queue wait.
+  - It would also make cancellation impossible to express.
+  - A cache HIT is answered 200 and terminal immediately.
+- **Auth: HMAC-SHA256** (`WLC-SIMC-HMAC-SHA256-1`) over scheme, key id,
+  timestamp, nonce, METHOD, path and sha256(body):
+  - ±300 s tolerance.
+  - The (keyId, nonce) store is bounded. When full it refuses rather than
+    forgetting a live nonce, and it is consulted only after the signature
+    verifies.
+  - Key ring `SIMC_RUNNER_HMAC_KEYS` = `id:base64,…` (≥32 bytes each). Rotation:
+    add an id, move clients, remove the old id.
+  - Chosen over a bearer token because the signature binds the body and path
+    and expires: a captured request cannot be replayed or re-targeted, and the
+    secret never crosses the wire.
+  - Query strings are refused, so the signed path is the whole target.
+- **Identity, idempotency and coalescing use the parsed-result key.**
+  - The job id is an opaque ticket (UUID). It never enters a hash, a key or a
+    result.
+  - Identical in-flight jobs share one execution, with one ticket per
+    submission.
+- **Cancellation.**
+  - Cancelling a ticket detaches it.
+  - The execution is aborted only when no live ticket remains: a QUEUED one is
+    removed; a RUNNING one has its engine killed (the launcher kills the
+    process; Docker also gets `docker kill`).
+  - Race rule: the first terminal transition wins per ticket. A cancel processed
+    first leaves that ticket CANCELLED forever; a later cancel is a no-op.
+  - There is never a partial result. A run that completes after losing the race
+    is still a full, verified run and is cached.
+- **Queue.**
+  - Bounded FIFO (`maxQueueDepth`). A full queue is RUNNER_OVERLOADED with no
+    ticket. A job queued past `maxQueueWaitMs` fails RUNNER_OVERLOADED.
+  - There is no priority field in the protocol.
+  - Concurrency is `maxConcurrentJobs`, separate from SimC threads.
+    `jobs × threadsPerJob > logicalCpu` is an invalid capacity, so the service
+    is NOT READY. It never runs 2 × 8 on 12.
+  - A capacity claiming more CPUs than `availableParallelism()` is NOT READY.
+- **Cache.**
+  - `SimulationCache` has memory and filesystem adapters (one
+    `<key>.json`, atomic temp+rename).
+  - Entry (`simulation-cache-entry/2`) = {schema, cacheKey, engineRunKey,
+    result, resultMac, createdAt, modelIdentity, parserRevision}.
+  - Keys are immutable; there is no clear-on-deploy.
+  - **Integrity (final hardening).** `resultMac` = HMAC-SHA256 under a
+    DEDICATED cache-integrity key (`SIMC_RUNNER_CACHE_MAC_KEY`) over
+    `canonicalJson({scheme: "WLC-SIMC-CACHE-MAC-SHA256-1", cacheKey,
+    engineRunKey, result})`.
+    - The scheme label separates this domain from request signing.
+    - Binding the keys stops a valid record being replayed under another key.
+    - Configuration refuses a cache key equal to any HMAC request key.
+    - A missing key leaves the service NOT READY (`checks.cache: INVALID`), for
+      every adapter.
+  - A read is typed (`CacheReadOutcome`), in order:
+    - shape and keys → `CACHE_ENTRY_MALFORMED`;
+    - MAC, compared in constant time → `CACHE_INTEGRITY_FAILED`;
+    - full result verification against the identity recomputed from the
+      submitted job → `CACHE_RESULT_UNVERIFIED`.
+    - Any refusal is logged as `CACHE_REJECTED` with that code and counted
+      (`cacheRejected`, `cacheIntegrityFailures`). The entry is deleted and
+      the job recomputed; it never fails the caller and is never served.
+    - A record with edited DPS and untouched provenance is caught by the MAC.
+  - The production gate and the class allowlist run BEFORE the cache, so a
+    refused job never reads it.
+- **Job-class deployment allowlist (final hardening).**
+  - `SIMC_RUNNER_JOB_CLASSES`; the production default (and the compose
+    default) is PRODUCTION only.
+  - Development and test deployments enable DEVELOPMENT, FIDELITY_PROBE or
+    DIAGNOSTIC explicitly. An empty list is NOT READY.
+  - A disallowed class is REFUSED (`JOB_REJECTED`) first: before the cache,
+    the queue and the engine. It is the same service with one implementation.
+  - The startup self-test is runner-owned and executes directly, so it is not
+    subject to the caller allowlist.
+- **Allowlists (`SERVICE_POLICY_V1`).**
+  - PRODUCTION / DIAGNOSTIC / DEVELOPMENT → ELITE_REALISTIC_V1 with
+    STANDARD_SIM_V1 or PRECISION_ESCALATED_V1.
+  - FIDELITY_PROBE → SIMC_DEFAULT_PINNED with FIDELITY_PROBE_V1.
+  - BENCHMARK_300_T1 is runner-internal (the self-test) and never a caller
+    policy.
+  - Model and spec allowlists are G3-1's: the approved artifact and Blood only.
+- **PRODUCTION needs a revision-bound readiness attestation**
+  (`src/simulation/readiness-attestation.ts`).
+  - Shape:
+
+    ```text
+    { schemaVersion: "simulation-readiness-attestation/2", jobClass: "PRODUCTION",
+      profile:     { hash, status: SIMULATION_READY | NOT_SIMULATION_READY, gateRevision },
+      environment: { hash, status: PUBLISHABLE | BLOCKED,                   gateRevision } }
+    ```
+
+  - The Worker stays the authoritative G3-2/G3-4 policy engine. The runner
+    never re-runs those gates. It authenticates the Worker, then checks in
+    order:
+    - the schema version (stale → JOB_REJECTED);
+    - jobClass, and that the job is PRODUCTION;
+    - both hashes against its own recomputation;
+    - both gate revisions against `ACCEPTED_READINESS_GATE_REVISIONS`
+      (current only → JOB_REJECTED otherwise);
+    - the statuses: NOT_SIMULATION_READY → PROFILE_RECONSTRUCTION_FAILED,
+      BLOCKED → ENVIRONMENT_NOT_REPRESENTABLE.
+  - All of this happens before the cache and the engine. A non-production job
+    may not carry an attestation.
+  - Gate revisions are owned by the gates:
+    - `PROFILE_READINESS_GATE_REVISION = "profile-readiness-gate/1"` in
+      `src/character-profile/fidelity.ts`;
+    - `ENVIRONMENT_PUBLISHABILITY_GATE_REVISION =
+      "environment-publishability-gate/1"` in
+      `src/environment/publishability.ts`.
+  - `tests/contracts/m11g35-readiness-gate-revisions.test.ts` keeps the
+    runner's accepted set equal to them. It also pins each gate's code
+    fingerprint (comments and whitespace ignored) per revision, so changing gate
+    code forces an explicit decision: bump the revision (old attestations are
+    then refused) or re-pin as a reviewed refactor.
+  - The envelope carries the attestation opaquely (`readiness: unknown`), so
+    LOCAL and REMOTE submissions are judged by the same typed check.
+- **DIAGNOSTIC jobs** are marked `jobClass: DIAGNOSTIC, publishable: false` in
+  every ticket. The client re-derives the class from the job and refuses a
+  ticket that disagrees.
+- **Cache status** (MISS / HIT / COALESCED) lives on the ticket and BackendRun,
+  never in `SimulationResult`.
+- **Worker client.**
+  - Prepares the job locally (refuses without a request), signs every request
+    with a fresh nonce, and polls.
+  - At the deadline or on abort it sends a signed DELETE → SIMULATION_TIMEOUT /
+    CANCELLED.
+  - NOT_FOUND → re-submits, at most `maxResubmits`.
+  - Settles through `settleTicket`: key, class, publishability and full result
+    verification. HTTP 200 is never trust.
+  - Transport failures keep the existing typed codes plus a `transport` field:
+    NETWORK, AUTH_REJECTED, BAD_RESPONSE, TICKET_LOST, CLIENT_DEADLINE or
+    REQUEST_REFUSED.
+- **LOCAL / REMOTE parity.** `LocalSimulationBackend` drives the same service
+  in-process and settles through the same `settleTicket`.
+- **Non-durable queue.**
+  - Tickets and executions live in memory. A restart loses them, and polls
+    answer 404.
+  - The client re-submits; semantic identity makes that safe (durable cache
+    HIT, or a re-run to the same key).
+- **Readiness vs liveness.**
+  - `/livez` answers whenever the process serves.
+  - `/v1/readiness` is 200 only when all of these hold: the startup self-test
+    has PASSED, capacity is valid, the cache is writable and the service is not
+    shutting down.
+  - The self-test hashes the image's engine and runs a 60 s main-hand-only
+    Blood DEVELOPMENT job (BENCHMARK_300_T1) through the SAME executor, then
+    re-verifies it. A missing image, a wrong binary, a wrong model revision or
+    a broken parser therefore keeps the runner NOT READY, and every submission
+    is RUNNER_UNAVAILABLE.
+- **Graceful shutdown.** Stop accepting, cancel the queued jobs, let running
+  engines finish within the grace period, kill the rest, then wait for every
+  execution to settle (process gone, temp dir removed) before closing.
+- **Observability.**
+  - One JSON line per service event and HTTP refusal, with a 12-hex key prefix
+    and the ticket id only.
+  - Never a header, signature, nonce, secret, job or result.
+  - `/v1/metrics` (authenticated) reports queue depth, running, queue-wait and
+    runtime aggregates, and counters: submitted, cacheHits, cacheMisses,
+    coalesced, cacheRejected, cancellations, timeouts, engineFailures,
+    rejectedOverload and rejected:<code>.
+- **Limits.**
+  - Request ≤ 260 KB, enforced while reading; the job itself is ≤ 256 KB,
+    measured canonically.
+  - Iterations, threads and timeout must equal the registered policy (G3-1).
+  - Threads must fit `threadsPerJob`.
+  - Output ≤ 5 MB; stdio capped.
+  - Wall time is capped by the capacity; memory by the container.
+- **Isolation (unchanged G3-1 launchers):**
+  - a private temp directory, removed in `finally`;
+  - a fixed executable, no shell, no caller path or argument;
+  - Docker `--network none --read-only --cap-drop ALL no-new-privileges
+    --pids-limit 256 --memory`, digest-only image, non-root `simc` user.
+- **Provenance.**
+  - Results carry G3-1 provenance unchanged.
+  - Tickets carry `serviceRevision` (`simc-runner-service/1`) as transport
+    provenance only; it is never part of a key.
+
+### Deployment shape (recommended, not provisioned)
+
+- A dedicated Linux host, not the Worker, running the bundled service.
+  - Bundle with `esbuild runner/service/main.ts --bundle --platform=node`.
+  - Node cannot resolve this repository's `.js`→`.ts` specifiers directly; the
+    bundle was verified to start and reach READY on the exact pin.
+- It listens on loopback or a private interface.
+- **TLS is mandatory for production**, terminated in front of the service
+  (reverse proxy or tunnel). Only the Worker holds an HMAC request key.
+- **Application HMAC remains mandatory** even behind TLS or a private network.
+  TLS protects the channel; the HMAC authenticates the caller, binds body and
+  path, and bounds replay.
+- Engine: per-job DockerLauncher (rootless Docker) on the approved image digest.
+  DirectLauncher is for a container that IS the image.
+- Durable cache on local disk, or an object-store adapter implementing
+  `SimulationCache`.
+- Capacity: `RECOMMENDED_PRODUCTION_CAPACITY_V1` is a recommendation for a
+  16-vCPU host: 2 × 8 threads, queue 32, wait 180 s. It is NOT a configuration
+  this repository has run. The development host is 12 logical CPUs and runs
+  `DEV_LOCAL_CAPACITY_V1` (1 × 8).
+
+### Accepted v1 limitations (owner-approved, final hardening)
+
+- **In-memory nonce store.** A request captured in the last tolerance window
+  could be replayed once against a freshly restarted runner. This is an
+  accepted v1 limitation.
+- **Single instance.** A single-instance runner is the approved v1 deployment.
+  There is no shared nonce store, ticket store or coalescing.
+- **Non-durable queue.** It is approved, with semantic retry: the client
+  re-submits, and the cache or a re-run to the same key answers.
+- **TLS termination.** It is a deployment requirement, not implemented in this
+  repository.
+
+### Measured capacity (dev host, 12 logical CPUs, exact pin, unloaded)
+
+From `scripts/bench/m11g35-runner-service.bench.ts` (`.probe/m11g35/report.json`):
+
+| measurement | result |
+| --- | --- |
+| startup self-test (hash + 60 s job) | ~10 s cold; ~3 s from the bundled entry point |
+| one STANDARD_SIM_V1 (345 s fight) | 5.2 s |
+| one PRECISION_ESCALATED_V1 | 16.4 s |
+| two STANDARD queued behind a 1-job runner | done at 4.9 s and 9.9 s |
+| two 8-thread engines simultaneously (launcher level, oversubscribed 16 on 12) | 8.8 s and 8.6 s |
+| cache HIT over HTTP, signed, loopback | 8 / 15 / 30 ms (min / median / max of 20) |
+
+Feasibility for a 1–2 minute product target:
+
+- One 1 × 8 runner serves ~11 STANDARD or ~3 ESCALATED runs per minute.
+- A 16-vCPU 2 × 8 host roughly doubles that.
+- At the recommended queue depth (32), a STANDARD job arriving at a full queue
+  waits ~32 × 5.2 s / 2 ≈ 83 s before running. That fits the 2-minute bound, but
+  not with ESCALATED jobs in the mix.
+- So queue depth and wait must be re-derived from the observed mix before
+  production. These are estimates from one host, not a load test.
+
 ---
 
 # Milestone 12 — Healer Foundation

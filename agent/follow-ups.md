@@ -439,6 +439,58 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G3-5: what the runner service does not establish
+
+**Raised:** M11-G3-5 (2026-10-22).
+
+- **No deployed host.**
+  - `RECOMMENDED_PRODUCTION_CAPACITY_V1` (16 vCPU, 2 × 8) is a recommendation.
+  - The only measured configuration is the 12-CPU development host at 1 × 8.
+  - Queue depth and wait must be re-derived from a real job mix before
+    production. The feasibility numbers are single-host estimates, not a load
+    test.
+- **TLS is not in the service.** TLS is MANDATORY for production deployment,
+  terminated in front of the service (reverse proxy or tunnel). That is an
+  accepted v1 deployment requirement, not implemented here. Application HMAC
+  stays mandatory behind TLS or a private network. The HMAC scheme
+  authenticates requests; it does not encrypt them or authenticate the
+  responses.
+  - Response trust comes from `settleTicket`'s full re-verification. A forged
+    response can therefore only produce a typed failure or a result whose
+    identity matches the job.
+  - Numbers inside a well-formed response are not signed.
+- **The readiness attestation is a statement, not a proof.** By design the
+  Worker is the authoritative G3-2/G3-4 policy engine. Since the final
+  hardening, the attestation is bound to the exact job (both hashes) and to the
+  gate REVISIONS that declared it ready. The runner accepts only the current
+  revisions, and a contract pins each gate's code fingerprint. A compromised
+  HMAC holder could still attest falsely; the runner does not re-run the gates.
+- **Gate fingerprints cover gate code, not data.** Runtime data the gates read
+  (consumable acceptance, raid environment, materiality inputs) is versioned by
+  its own revisions. A data change that alters readiness meaning must also
+  move the gate revision, and review must catch that, not the fingerprint.
+- **Cache numbers:** RESOLVED by the final hardening. Records carry an
+  HMAC-SHA256 under a dedicated cache-integrity key, so an edited DPS with
+  intact provenance is detected, dropped and recomputed. The key must stay
+  private to the runner; whoever holds it can forge records.
+- **Accepted v1 limitations (owner-approved):**
+  - **Non-durable queue.** A restart loses queued and running work. Recovery is
+    client re-submission with semantic identity (tested). It is approved for
+    v1.
+  - **Nonce store per process.** A request captured in the last tolerance
+    window (±300 s) could be replayed once against a freshly restarted runner.
+    This is an accepted v1 limitation, not solved here.
+  - **Single runner instance.** This is the approved v1 deployment.
+    Coalescing, tickets and the nonce store are in-process. Horizontal scaling
+    would need shared nonce and ticket stores and a shared cache.
+- **No public endpoint and no analysis wiring.** The Worker client is not
+  connected to any route, `analysis/1` is unchanged, and no G4 math exists.
+- **Layering amendments (reviewed in this tranche):**
+  - `runner/service/` may import `../../src/simulation/*`;
+  - runner top-level files may import `./service/*`;
+  - the new `src/simulation-client/` imports only zod and `src/simulation/*`,
+    and nothing in `src/` imports it.
+
 ## After M11-G3-4: what the environment reconstruction does not establish
 
 **Raised:** M11-G3-4 (2026-10-19).

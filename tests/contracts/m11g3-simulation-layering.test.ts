@@ -78,9 +78,22 @@ describe("M11-G3-1 simulation layering", () => {
   it("the runner reaches src/ only through src/simulation, src/character-profile and spec-owned bindings; src/ never imports the runner", () => {
     for (const file of RUNNER) {
       for (const spec of importsOf(file)) {
+        // M11-G3-5 amendment (reviewed): the private runner service lives in
+        // runner/service/ (two levels deep) and reaches src/ only through
+        // src/simulation; runner/ top-level modules may compose it.
+        if (file.startsWith("runner/service/")) {
+          const serviceAllowed =
+            spec.startsWith("node:") ||
+            /^\.\/[a-z-]+\.js$/.test(spec) ||
+            /^\.\.\/[a-z-]+\.js$/.test(spec) ||
+            /^\.\.\/\.\.\/src\/simulation\/[a-z-]+\.js$/.test(spec);
+          expect(serviceAllowed, `${file} imports ${spec}`).toBe(true);
+          continue;
+        }
         const allowed =
           spec.startsWith("node:") ||
           /^\.\/[a-z-]+\.js$/.test(spec) ||
+          /^\.\/service\/[a-z-]+\.js$/.test(spec) ||
           /^\.\.\/src\/simulation\/[a-z-]+\.js$/.test(spec) ||
           /^\.\.\/src\/character-profile\/[a-z-]+\.js$/.test(spec) ||
           /^\.\.\/src\/specs\/[a-z]+\/[a-z_]+\/(simulation|character)-binding\.js$/.test(spec);
@@ -121,10 +134,35 @@ describe("M11-G3-1 simulation layering", () => {
     }
   });
 
-  it("outside src/simulation, only spec-owned bindings (binding type), src/character-profile and src/environment import it — no analysis path", () => {
+  // M11-G3-5 amendment (reviewed): src/simulation-client/ is the Worker-side
+  // client of the private runner. It is the only simulation code that performs
+  // network I/O (so src/simulation stays network-free), it imports only zod and
+  // src/simulation, and nothing in src imports it yet (no analysis path).
+  it("src/simulation-client imports only zod and src/simulation, uses no Node builtin, and nothing in src imports it", () => {
+    const client = tsFiles("src/simulation-client");
+    expect(client).toEqual(["src/simulation-client/remote-client.ts"]);
+    for (const file of client) {
+      for (const spec of importsOf(file)) {
+        expect(
+          spec === "zod" || /^\.\/[a-z-]+\.js$/.test(spec) || /^\.\.\/simulation\/[a-z-]+\.js$/.test(spec),
+          `${file} imports ${spec}`,
+        ).toBe(true);
+      }
+      expect(code(file), file).not.toMatch(
+        /\bnode:|\brequire\(|\bprocess\.|readFileSync|import\.meta|\bBuffer\b/,
+      );
+      expect(code(file), file).not.toMatch(/\b(MATCH|REJECTED|ACCEPTED|ADVISORY_MISMATCH)\b/);
+    }
+    for (const file of tsFiles("src").filter((name) => !name.startsWith("src/simulation-client/"))) {
+      for (const spec of importsOf(file)) expect(spec, file).not.toMatch(/simulation-client\//);
+    }
+  });
+
+  it("outside src/simulation, only spec-owned bindings (binding type), src/character-profile, src/environment and src/simulation-client import it — no analysis path", () => {
     for (const file of tsFiles("src").filter(
       (name) =>
         !name.startsWith("src/simulation/") &&
+        !name.startsWith("src/simulation-client/") &&
         !name.startsWith("src/character-profile/") &&
         !name.startsWith("src/environment/"),
     )) {

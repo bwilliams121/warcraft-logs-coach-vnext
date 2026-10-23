@@ -1697,6 +1697,54 @@ environment continuation (M11-G3-4, 2026-10-22):
   pinned encounter audit / debuff certification -> recorded; schedule and debuffs stay UNKNOWN
   missing model effect                         -> one PINNED_MODEL_MISSING_OBSERVED_EFFECT blocker per aura
   owner-stated race (canonical subject)        -> USER_PROVIDED dwarf; exact-pin echo MATCH, SIMULATION_READY; environment still BLOCKED
+runner service (M11-G3-5, tests/unit/simulation/runner-service-*.test.ts, integration/m11g35-remote-simulation-client.test.ts):
+  no / bad / stale / future / replayed auth    -> 401 before the service; reason logged, never headers (A, B, C)
+  key rotation / revocation / full nonce store -> both keys accepted / removed key refused / refuses, never forgets (C)
+  logs and responses                           -> no secret, signature, nonce or job content (D)
+  raw SimC text / file path / network source   -> JOB_REJECTED or 400; builder emits no fetch directive (E, K, L)
+  arbitrary model / profile / policy           -> UNSUPPORTED_MODEL_VERSION / JOB_REJECTED; engine never starts (F, G, H)
+  raised iterations or threads                 -> JOB_REJECTED; runner thread cap enforced (I, J)
+  production unattested / blocked              -> JOB_REJECTED / ENVIRONMENT_NOT_REPRESENTABLE / PROFILE_RECONSTRUCTION_FAILED (M)
+  blocked production with a cached result      -> refused before the cache (M)
+  diagnostic job                               -> jobClass DIAGNOSTIC, publishable false; attestation refused (N)
+  tampered cache entry (11 kinds)              -> CACHE_REJECTED, dropped, re-run (O)
+  concurrency / depth / overload / FIFO        -> <= maxConcurrentJobs; RUNNER_OVERLOADED, no ticket; queue-wait expiry (P-S)
+  queued / running cancel                      -> removed, never run / engine process killed, pid gone (T, U)
+  completion vs cancel                         -> first terminal transition wins; never a partial result (V)
+  temp dirs / capacity after every outcome     -> none left / empty and full width again (W, X)
+  identical in-flight jobs                     -> one execution; one caller cancelling leaves the others running (Y)
+  repeat job                                   -> HIT, terminal at once, no engine run (Z)
+  same / profile / environment / execution / model / parser -> same key / a new key each (AA-AF)
+  HIT                                          -> full provenance; corrupt durable entry recomputed (AG, AH)
+  MISS / COALESCED / HIT                       -> identical result; status beside it, never in it (AI)
+  LOCAL vs REMOTE                              -> same result, same provenance, remote HIT, same failures (AJ-AM)
+  restart                                      -> lost ticket re-submitted: HIT or re-run to the same key; bounded
+  forged ticket (16 kinds)                     -> refused by the client with a typed failure (BAD_RESPONSE)
+  client deadline / abort                      -> signed DELETE; SIMULATION_TIMEOUT / CANCELLED
+  startup: bad engine, wrong hash/revision, capacity, cache -> NOT READY; submissions RUNNER_UNAVAILABLE
+  graceful shutdown                            -> engines killed after grace; no live execution; new work refused
+  workerd                                      -> WebCrypto signature verifies; forged tickets refused; deadline DELETE
+  deliberate faults                            -> each caught (.probe/m11g3/faults-g35.cjs)
+  final hardening (runner-service-hardening.test.ts, contracts/m11g35-readiness-gate-revisions.test.ts):
+  attestation: wrong profile / environment gate revision -> JOB_REJECTED, before cache and engine
+  attestation: stale schema (v1 shape, /1 version), wrong class, extra field -> JOB_REJECTED
+  attestation: hash mismatch / other job's attestation -> JOB_REJECTED
+  attestation: NOT_SIMULATION_READY / BLOCKED  -> PROFILE_RECONSTRUCTION_FAILED / ENVIRONMENT_NOT_REPRESENTABLE
+  valid current attestation                    -> SUCCEEDED, PRODUCTION, publishable
+  blocked / stale production with a valid cached result -> refused; zero cache reads
+  gate revisions                               -> runner accepts exactly the gate-owned current revisions
+  gate code changed                            -> fingerprint fails until revision bumped or reviewed re-pin
+  cache: edited DPS / ci95 / action / pet / provenance / MAC -> CACHE_INTEGRITY_FAILED; dropped; recomputed
+  cache: schema-1 record / record moved under another key -> CACHE_ENTRY_MALFORMED / CACHE_INTEGRITY_FAILED
+  cache: valid MAC, foreign provenance         -> CACHE_RESULT_UNVERIFIED (MAC first, then verification)
+  cache: durable file with edited DPS          -> rejected; served DPS is the recomputed one
+  HTTP key as cache key / cache key as HTTP key -> MAC refused / 401 BAD_SIGNATURE; config refuses reuse
+  missing cache-integrity key                  -> NOT READY; submissions RUNNER_UNAVAILABLE
+  cache-integrity secret                       -> absent from logs, metrics, readiness, tickets, errors
+  job classes: production default              -> PRODUCTION only; DEVELOPMENT / DIAGNOSTIC / FIDELITY_PROBE REFUSED
+  job classes: dev configuration               -> enabled explicitly, per class; empty list NOT READY
+  class refusal with a shared cache holding the result -> refused; zero cache reads; no engine
+  10 hardening faults                          -> each caught (.probe/m11g3/faults-g35h.cjs)
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture
