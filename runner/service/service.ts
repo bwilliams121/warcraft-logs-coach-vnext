@@ -22,6 +22,13 @@
  * EXECUTION: at most `maxConcurrentJobs` engine runs; FIFO; a QUEUED execution
  * waiting longer than `maxQueueWaitMs` fails RUNNER_OVERLOADED.
  *
+ * MODELS (M11 model registry): the service hosts one ENGINE per approved
+ * simulation model it is configured with. A job names its model (`job.model`);
+ * prepare resolves it through the registry and the service runs it on THAT
+ * model's engine only. The service never picks a model, never substitutes
+ * another, and a PRODUCTION job's spec must have validated the model
+ * (SIMULATION_MODEL_NOT_VALIDATED_FOR_SPEC) and its attestation must name it.
+ *
  * TICKETS vs EXECUTIONS: a ticket (the opaque job id) is one caller's handle;
  * an execution is the semantic work, shared by every ticket with the same key.
  * Cancelling a ticket detaches it; the execution is aborted only when no live
@@ -47,6 +54,10 @@ import type { ApprovedEngineArtifact } from "../../src/simulation/model.js";
 import type { PreparedSimulation } from "../../src/simulation/prepare.js";
 import { RESULT_PARSER_REVISION } from "../../src/simulation/result-parser.js";
 import type { SimulationResult } from "../../src/simulation/result.js";
+import {
+  isModelValidatedForSpec,
+  type SpecSimulationModelValidations,
+} from "../../src/simulation/model-registry.js";
 import { checkReadinessAttestation } from "../../src/simulation/readiness-attestation.js";
 import {
   expectedResultIdentity,
@@ -144,9 +155,20 @@ export interface ServiceEvent {
   readonly runtimeMs?: number;
 }
 
-export interface ServiceDependencies {
+/** One hosted engine: an approved artifact, how to run a job on it, and how to verify it at startup. */
+export interface ServiceEngine {
   readonly artifact: ApprovedEngineArtifact;
+  readonly execute: ExecuteJob;
+  /** Verifies the engine artifact at startup (a self-test job through `execute`). */
+  readonly startupCheck: () => Promise<SimulationOutcome<unknown>>;
+}
+
+export interface ServiceDependencies {
+  /** The engines this runner hosts, at most one per simulation model. */
+  readonly engines: readonly ServiceEngine[];
   readonly bindings: readonly SimulationSpecBinding[];
+  /** Spec-owned production validations of simulation models (the composition root's set). */
+  readonly modelValidations: readonly SpecSimulationModelValidations[];
   readonly capacity: RunnerCapacity;
   readonly policy: ServicePolicy;
   readonly cache: SimulationCache;
@@ -154,9 +176,6 @@ export interface ServiceDependencies {
   readonly cacheIntegrity: CacheIntegrity | null;
   /** Job classes this deployment runs (production: PRODUCTION_JOB_CLASSES). */
   readonly allowedJobClasses: readonly SimulationJobClass[];
-  readonly execute: ExecuteJob;
-  /** Verifies the engine artifact at startup (e.g. a self-test job through `execute`). */
-  readonly startupCheck: () => Promise<SimulationOutcome<unknown>>;
   readonly clock?: () => number;
   readonly newId?: () => string;
   readonly log?: (event: ServiceEvent) => void;
@@ -178,6 +197,8 @@ export type Submission =
 
 interface Execution {
   readonly id: string;
+  /** The engine of the model the job names. */
+  readonly engine: ServiceEngine;
   readonly key: string;
   readonly engineRunKey: string;
   readonly job: unknown;
@@ -273,14 +294,32 @@ export class SimulationService {
       this.log({ event: "STARTUP_FAILED", code: "CAPACITY" });
       return this.readiness();
     }
-    const checked = await this.deps.startupCheck();
-    if (checked.ok) {
+    const models = this.deps.engines.map(
+      (engine) => `${engine.artifact.model.simcCommit}/${engine.artifact.model.gameDataBuild}`,
+    );
+    if (this.deps.engines.length === 0 || new Set(models).size !== models.length) {
+      this.startup = "FAILED";
+      this.startupDetail = "engines: at least one, and at most one per simulation model";
+      this.log({ event: "STARTUP_FAILED", code: "ENGINES" });
+      return this.readiness();
+    }
+    // Every hosted engine must verify; one failing engine keeps the whole runner NOT READY.
+    const failures: string[] = [];
+    for (const engine of this.deps.engines) {
+      const checked = await engine.startupCheck();
+      if (!checked.ok) {
+        failures.push(
+          `${engine.artifact.model.simcCommit.slice(0, 8)}: ${checked.failure.code}: ${checked.failure.detail}`,
+        );
+        this.log({ event: "STARTUP_FAILED", code: checked.failure.code });
+      }
+    }
+    if (failures.length === 0) {
       this.startup = "PASSED";
       this.log({ event: "STARTUP_VERIFIED" });
     } else {
       this.startup = "FAILED";
-      this.startupDetail = `${checked.failure.code}: ${checked.failure.detail}`.slice(0, 300);
-      this.log({ event: "STARTUP_FAILED", code: checked.failure.code });
+      this.startupDetail = failures.join(" | ").slice(0, 600);
     }
     return this.readiness();
   }
@@ -348,7 +387,7 @@ export class SimulationService {
     const expected = await expectedResultIdentity(
       input.job,
       input.rawByteLength,
-      this.deps.artifact,
+      this.deps.engines.map((engine) => engine.artifact),
       this.deps.bindings,
     );
     if (!expected.ok) return this.reject(expected);
@@ -457,6 +496,13 @@ export class SimulationService {
         };
   }
 
+  /** The hosted engine for the prepared job's model (prepare already proved one exists). */
+  private engineFor(prepared: PreparedSimulation): ServiceEngine {
+    const engine = this.deps.engines.find((candidate) => candidate.artifact === prepared.artifact);
+    if (engine === undefined) throw new Error("prepared artifact is not hosted");
+    return engine;
+  }
+
   private policyFailure(prepared: PreparedSimulation, readiness: unknown): SimulationOutcome<never> | null {
     const job = prepared.job;
     const jobClass = classifySimulationJob(job);
@@ -490,7 +536,13 @@ export class SimulationService {
         ? null
         : fail("JOB_REJECTED", `a ${jobClass} job carries no readiness attestation`);
     }
-    return checkReadinessAttestation(readiness, prepared.keys);
+    if (!isModelValidatedForSpec(this.deps.modelValidations, job.character.spec, prepared.model.id)) {
+      return fail(
+        "SIMULATION_MODEL_NOT_VALIDATED_FOR_SPEC",
+        `${job.character.spec} has not validated simulation model ${prepared.model.id} for production`,
+      );
+    }
+    return checkReadinessAttestation(readiness, { ...prepared.keys, simulationModelId: prepared.model.id });
   }
 
   // ---------------------------------------------------------------- status / cancel
@@ -554,7 +606,7 @@ export class SimulationService {
     const waited = execution.startedAt - execution.queuedAt;
     this.observe(this.waits, waited);
     this.log({ event: "STARTED", key: short(execution.key), queueWaitMs: waited });
-    void this.deps
+    void execution.engine
       .execute(execution.job, execution.rawByteLength, execution.controller.signal)
       .catch((error: unknown) =>
         fail<SimulationResult>(
@@ -642,6 +694,7 @@ export class SimulationService {
       id: this.newId(),
       key: prepared.keys.parsedResultKey,
       engineRunKey: prepared.keys.engineRunKey,
+      engine: this.engineFor(prepared),
       job: input.job,
       rawByteLength: input.rawByteLength,
       jobClass,

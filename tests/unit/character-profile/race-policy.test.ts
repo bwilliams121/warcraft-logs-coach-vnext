@@ -19,6 +19,10 @@ import {
 import { fidelityProbeJob } from "../../../src/character-profile/simulation-character.js";
 import { BLOOD_CHARACTER_BINDING } from "../../../src/specs/deathknight/blood/character-binding.js";
 import { reconstructionInputOf, subjectEvidence } from "../../support/character/subject.js";
+import { DEV_SIMULATION_MODEL_ID, modelPin } from "../../support/simulation/dev-blood-job.js";
+
+/** The historical simulation model these tests were written against (M11 model registry). */
+const HISTORICAL_MODEL = modelPin(DEV_SIMULATION_MODEL_ID);
 
 let input: ReconstructionInput;
 
@@ -87,6 +91,7 @@ describe("M11-G3-4 race policy", () => {
     const job = fidelityProbeJob(
       reconstructCharacterProfile(withRace("orc"), BLOOD_CHARACTER_BINDING),
       BLOOD_CHARACTER_BINDING,
+      HISTORICAL_MODEL,
     );
     if (!job.ok) throw new Error(job.failure.detail);
     expect(job.value.character.race).toBe("orc");

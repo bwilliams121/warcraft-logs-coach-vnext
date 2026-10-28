@@ -1,0 +1,2853 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_CONSUMABLES",
+  "artifactRevision": "simc-0a72e6a7-4",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "0a72e6a74684d23c989b2d76143e429d2b4f1c91",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/temporary_enchant.inc",
+        "sha256": "67555215e6359b65d92a8acbd8bd408300077e0dcaa8cb5ca1f8d3b260943814",
+        "byteLength": 7007
+      },
+      {
+        "path": "engine/dbc/generated/item_data.inc",
+        "sha256": "24a4b8e5ffd55aa6e8700d2fb60efac9a071530fe3982008a021ff0e14f38584",
+        "byteLength": 26406817
+      },
+      {
+        "path": "engine/dbc/generated/item_effect.inc",
+        "sha256": "4f749b8fa6c353449cfb467f17e50b73bcb196b4b9e6e5aa5cb58c5704130a7b",
+        "byteLength": 1033644
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "116380c20789dd431b9ea5508455434c4de4f4055c31492514907f14c85bf3d1",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69933",
+    "method": "MACHINE_EXTRACTED_CONSUMABLE_JOIN",
+    "extractorVersion": 4,
+    "scope": "item class 0 subclasses {\"1\":\"POTION\",\"3\":\"FLASK\",\"5\":\"FOOD\",\"8\":\"OTHER\"} with required level >= 80"
+  },
+  "temporaryEnchants": [
+    {
+      "enchantId": 2713,
+      "rank": 0,
+      "spellId": 29453,
+      "baseToken": "adamantite_sharpening_stone",
+      "token": "adamantite_sharpening_stone"
+    },
+    {
+      "enchantId": 2955,
+      "rank": 0,
+      "spellId": 34340,
+      "baseToken": "adamantite_weightstone",
+      "token": "adamantite_weightstone"
+    },
+    {
+      "enchantId": 7493,
+      "rank": 1,
+      "spellId": 451869,
+      "baseToken": "algari_mana_oil",
+      "token": "algari_mana_oil_1"
+    },
+    {
+      "enchantId": 7494,
+      "rank": 2,
+      "spellId": 451873,
+      "baseToken": "algari_mana_oil",
+      "token": "algari_mana_oil_2"
+    },
+    {
+      "enchantId": 7495,
+      "rank": 3,
+      "spellId": 451874,
+      "baseToken": "algari_mana_oil",
+      "token": "algari_mana_oil_3"
+    },
+    {
+      "enchantId": 3265,
+      "rank": 0,
+      "spellId": 45395,
+      "baseToken": "blessed_weapon_coating",
+      "token": "blessed_weapon_coating"
+    },
+    {
+      "enchantId": 3592,
+      "rank": 0,
+      "spellId": 28898,
+      "baseToken": "blessed_wizard_oil",
+      "token": "blessed_wizard_oil"
+    },
+    {
+      "enchantId": 3102,
+      "rank": 0,
+      "spellId": 38615,
+      "baseToken": "bloodboil_poison",
+      "token": "bloodboil_poison"
+    },
+    {
+      "enchantId": 2629,
+      "rank": 0,
+      "spellId": 25123,
+      "baseToken": "brilliant_mana_oil",
+      "token": "brilliant_mana_oil"
+    },
+    {
+      "enchantId": 2628,
+      "rank": 0,
+      "spellId": 25122,
+      "baseToken": "brilliant_wizard_oil",
+      "token": "brilliant_wizard_oil"
+    },
+    { "enchantId": 7467, "rank": 0, "spellId": 444755, "baseToken": "bubbling_wax", "token": "bubbling_wax" },
+    {
+      "enchantId": 6512,
+      "rank": 1,
+      "spellId": 385325,
+      "baseToken": "buzzing_rune",
+      "token": "buzzing_rune_1"
+    },
+    {
+      "enchantId": 6513,
+      "rank": 2,
+      "spellId": 385326,
+      "baseToken": "buzzing_rune",
+      "token": "buzzing_rune_2"
+    },
+    {
+      "enchantId": 6514,
+      "rank": 3,
+      "spellId": 385327,
+      "baseToken": "buzzing_rune",
+      "token": "buzzing_rune_3"
+    },
+    {
+      "enchantId": 6515,
+      "rank": 1,
+      "spellId": 385330,
+      "baseToken": "chirping_rune",
+      "token": "chirping_rune_1"
+    },
+    {
+      "enchantId": 6694,
+      "rank": 2,
+      "spellId": 396147,
+      "baseToken": "chirping_rune",
+      "token": "chirping_rune_2"
+    },
+    {
+      "enchantId": 6695,
+      "rank": 3,
+      "spellId": 396148,
+      "baseToken": "chirping_rune",
+      "token": "chirping_rune_3"
+    },
+    {
+      "enchantId": 13,
+      "rank": 0,
+      "spellId": 2829,
+      "baseToken": "coarse_sharpening_stone",
+      "token": "coarse_sharpening_stone"
+    },
+    {
+      "enchantId": 20,
+      "rank": 0,
+      "spellId": 3113,
+      "baseToken": "coarse_weightstone",
+      "token": "coarse_weightstone"
+    },
+    {
+      "enchantId": 2795,
+      "rank": 0,
+      "spellId": 32426,
+      "baseToken": "comfortable_insoles",
+      "token": "comfortable_insoles"
+    },
+    {
+      "enchantId": 6529,
+      "rank": 1,
+      "spellId": 386243,
+      "baseToken": "completely_safe_rockets",
+      "token": "completely_safe_rockets_1"
+    },
+    {
+      "enchantId": 6530,
+      "rank": 2,
+      "spellId": 386245,
+      "baseToken": "completely_safe_rockets",
+      "token": "completely_safe_rockets_2"
+    },
+    {
+      "enchantId": 6531,
+      "rank": 3,
+      "spellId": 386246,
+      "baseToken": "completely_safe_rockets",
+      "token": "completely_safe_rockets_3"
+    },
+    {
+      "enchantId": 8649,
+      "rank": 0,
+      "spellId": 1281332,
+      "baseToken": "conjured_illusory_adornment__blooming_light",
+      "token": "conjured_illusory_adornment__blooming_light"
+    },
+    {
+      "enchantId": 8650,
+      "rank": 0,
+      "spellId": 1281333,
+      "baseToken": "conjured_illusory_adornment__natures_embrace",
+      "token": "conjured_illusory_adornment__natures_embrace"
+    },
+    {
+      "enchantId": 8651,
+      "rank": 0,
+      "spellId": 1281334,
+      "baseToken": "conjured_illusory_adornment__voidtouched",
+      "token": "conjured_illusory_adornment__voidtouched"
+    },
+    {
+      "enchantId": 3593,
+      "rank": 0,
+      "spellId": 28891,
+      "baseToken": "consecrated_sharpening_stone",
+      "token": "consecrated_sharpening_stone"
+    },
+    {
+      "enchantId": 1643,
+      "rank": 0,
+      "spellId": 16138,
+      "baseToken": "dense_sharpening_stone",
+      "token": "dense_sharpening_stone"
+    },
+    {
+      "enchantId": 1703,
+      "rank": 0,
+      "spellId": 16622,
+      "baseToken": "dense_weightstone",
+      "token": "dense_weightstone"
+    },
+    {
+      "enchantId": 6224,
+      "rank": 0,
+      "spellId": 324064,
+      "baseToken": "desolate_armor_kit",
+      "token": "desolate_armor_kit"
+    },
+    {
+      "enchantId": 2506,
+      "rank": 0,
+      "spellId": 22756,
+      "baseToken": "elemental_sharpening_stone",
+      "token": "elemental_sharpening_stone"
+    },
+    {
+      "enchantId": 6190,
+      "rank": 0,
+      "spellId": 321389,
+      "baseToken": "embalmers_oil",
+      "token": "embalmers_oil"
+    },
+    {
+      "enchantId": 6532,
+      "rank": 1,
+      "spellId": 386252,
+      "baseToken": "endless_stack_of_needles",
+      "token": "endless_stack_of_needles_1"
+    },
+    {
+      "enchantId": 6533,
+      "rank": 2,
+      "spellId": 386254,
+      "baseToken": "endless_stack_of_needles",
+      "token": "endless_stack_of_needles_2"
+    },
+    {
+      "enchantId": 6534,
+      "rank": 3,
+      "spellId": 386255,
+      "baseToken": "endless_stack_of_needles",
+      "token": "endless_stack_of_needles_3"
+    },
+    {
+      "enchantId": 3298,
+      "rank": 0,
+      "spellId": 47904,
+      "baseToken": "exceptional_mana_oil",
+      "token": "exceptional_mana_oil"
+    },
+    {
+      "enchantId": 2712,
+      "rank": 0,
+      "spellId": 29452,
+      "baseToken": "fel_sharpening_stone",
+      "token": "fel_sharpening_stone"
+    },
+    {
+      "enchantId": 2954,
+      "rank": 0,
+      "spellId": 34339,
+      "baseToken": "fel_weightstone",
+      "token": "fel_weightstone"
+    },
+    { "enchantId": 26, "rank": 0, "spellId": 3595, "baseToken": "frost_oil", "token": "frost_oil" },
+    {
+      "enchantId": 2791,
+      "rank": 0,
+      "spellId": 32282,
+      "baseToken": "greater_rune_of_warding",
+      "token": "greater_rune_of_warding"
+    },
+    {
+      "enchantId": 2506,
+      "rank": 0,
+      "spellId": 22756,
+      "baseToken": "grim_iron_shackles",
+      "token": "grim_iron_shackles"
+    },
+    {
+      "enchantId": 6225,
+      "rank": 0,
+      "spellId": 324068,
+      "baseToken": "heavy_desolate_armor_kit",
+      "token": "heavy_desolate_armor_kit"
+    },
+    {
+      "enchantId": 14,
+      "rank": 0,
+      "spellId": 2830,
+      "baseToken": "heavy_sharpening_stone",
+      "token": "heavy_sharpening_stone"
+    },
+    {
+      "enchantId": 21,
+      "rank": 0,
+      "spellId": 3114,
+      "baseToken": "heavy_weightstone",
+      "token": "heavy_weightstone"
+    },
+    {
+      "enchantId": 6838,
+      "rank": 1,
+      "spellId": 409654,
+      "baseToken": "hissing_rune",
+      "token": "hissing_rune_1"
+    },
+    {
+      "enchantId": 6837,
+      "rank": 2,
+      "spellId": 409659,
+      "baseToken": "hissing_rune",
+      "token": "hissing_rune_2"
+    },
+    {
+      "enchantId": 6839,
+      "rank": 3,
+      "spellId": 409660,
+      "baseToken": "hissing_rune",
+      "token": "hissing_rune_3"
+    },
+    {
+      "enchantId": 6516,
+      "rank": 1,
+      "spellId": 385575,
+      "baseToken": "howling_rune",
+      "token": "howling_rune_1"
+    },
+    {
+      "enchantId": 6517,
+      "rank": 2,
+      "spellId": 385576,
+      "baseToken": "howling_rune",
+      "token": "howling_rune_2"
+    },
+    {
+      "enchantId": 6518,
+      "rank": 3,
+      "spellId": 385577,
+      "baseToken": "howling_rune",
+      "token": "howling_rune_3"
+    },
+    {
+      "enchantId": 8042,
+      "rank": 1,
+      "spellId": 1291455,
+      "baseToken": "illusory_adornment__blooming_light",
+      "token": "illusory_adornment__blooming_light_1"
+    },
+    {
+      "enchantId": 8043,
+      "rank": 2,
+      "spellId": 1291459,
+      "baseToken": "illusory_adornment__blooming_light",
+      "token": "illusory_adornment__blooming_light_2"
+    },
+    {
+      "enchantId": 8044,
+      "rank": 1,
+      "spellId": 1291464,
+      "baseToken": "illusory_adornment__natures_embrace",
+      "token": "illusory_adornment__natures_embrace_1"
+    },
+    {
+      "enchantId": 8045,
+      "rank": 2,
+      "spellId": 1291466,
+      "baseToken": "illusory_adornment__natures_embrace",
+      "token": "illusory_adornment__natures_embrace_2"
+    },
+    {
+      "enchantId": 8046,
+      "rank": 1,
+      "spellId": 1291460,
+      "baseToken": "illusory_adornment__voidtouched",
+      "token": "illusory_adornment__voidtouched_1"
+    },
+    {
+      "enchantId": 8047,
+      "rank": 2,
+      "spellId": 1291465,
+      "baseToken": "illusory_adornment__voidtouched",
+      "token": "illusory_adornment__voidtouched_2"
+    },
+    {
+      "enchantId": 7546,
+      "rank": 1,
+      "spellId": 458929,
+      "baseToken": "ironclaw_razorstone",
+      "token": "ironclaw_razorstone_1"
+    },
+    {
+      "enchantId": 7547,
+      "rank": 2,
+      "spellId": 458930,
+      "baseToken": "ironclaw_razorstone",
+      "token": "ironclaw_razorstone_2"
+    },
+    {
+      "enchantId": 7548,
+      "rank": 3,
+      "spellId": 458931,
+      "baseToken": "ironclaw_razorstone",
+      "token": "ironclaw_razorstone_3"
+    },
+    {
+      "enchantId": 7549,
+      "rank": 1,
+      "spellId": 458935,
+      "baseToken": "ironclaw_weightstone",
+      "token": "ironclaw_weightstone_1"
+    },
+    {
+      "enchantId": 7550,
+      "rank": 2,
+      "spellId": 458936,
+      "baseToken": "ironclaw_weightstone",
+      "token": "ironclaw_weightstone_2"
+    },
+    {
+      "enchantId": 7551,
+      "rank": 3,
+      "spellId": 458937,
+      "baseToken": "ironclaw_weightstone",
+      "token": "ironclaw_weightstone_3"
+    },
+    {
+      "enchantId": 7543,
+      "rank": 1,
+      "spellId": 458932,
+      "baseToken": "ironclaw_whetstone",
+      "token": "ironclaw_whetstone_1"
+    },
+    {
+      "enchantId": 7544,
+      "rank": 2,
+      "spellId": 458933,
+      "baseToken": "ironclaw_whetstone",
+      "token": "ironclaw_whetstone_2"
+    },
+    {
+      "enchantId": 7545,
+      "rank": 3,
+      "spellId": 458934,
+      "baseToken": "ironclaw_whetstone",
+      "token": "ironclaw_whetstone_3"
+    },
+    {
+      "enchantId": 8608,
+      "rank": 1,
+      "spellId": 1262057,
+      "baseToken": "laced_zoomshots",
+      "token": "laced_zoomshots_1"
+    },
+    {
+      "enchantId": 8609,
+      "rank": 2,
+      "spellId": 1262110,
+      "baseToken": "laced_zoomshots",
+      "token": "laced_zoomshots_2"
+    },
+    {
+      "enchantId": 2625,
+      "rank": 0,
+      "spellId": 25120,
+      "baseToken": "lesser_mana_oil",
+      "token": "lesser_mana_oil"
+    },
+    {
+      "enchantId": 2718,
+      "rank": 0,
+      "spellId": 32274,
+      "baseToken": "lesser_rune_of_warding",
+      "token": "lesser_rune_of_warding"
+    },
+    {
+      "enchantId": 2626,
+      "rank": 0,
+      "spellId": 25119,
+      "baseToken": "lesser_wizard_oil",
+      "token": "lesser_wizard_oil"
+    },
+    {
+      "enchantId": 2624,
+      "rank": 0,
+      "spellId": 25118,
+      "baseToken": "minor_mana_oil",
+      "token": "minor_mana_oil"
+    },
+    {
+      "enchantId": 2623,
+      "rank": 0,
+      "spellId": 25117,
+      "baseToken": "minor_wizard_oil",
+      "token": "minor_wizard_oil"
+    },
+    {
+      "enchantId": 7500,
+      "rank": 1,
+      "spellId": 451926,
+      "baseToken": "oil_of_beledars_grace",
+      "token": "oil_of_beledars_grace_1"
+    },
+    {
+      "enchantId": 7501,
+      "rank": 2,
+      "spellId": 451925,
+      "baseToken": "oil_of_beledars_grace",
+      "token": "oil_of_beledars_grace_2"
+    },
+    {
+      "enchantId": 7502,
+      "rank": 3,
+      "spellId": 451927,
+      "baseToken": "oil_of_beledars_grace",
+      "token": "oil_of_beledars_grace_3"
+    },
+    {
+      "enchantId": 8053,
+      "rank": 1,
+      "spellId": 1237002,
+      "baseToken": "oil_of_dawn",
+      "token": "oil_of_dawn_1"
+    },
+    {
+      "enchantId": 8054,
+      "rank": 2,
+      "spellId": 1237001,
+      "baseToken": "oil_of_dawn",
+      "token": "oil_of_dawn_2"
+    },
+    {
+      "enchantId": 7496,
+      "rank": 1,
+      "spellId": 451882,
+      "baseToken": "oil_of_deep_toxins",
+      "token": "oil_of_deep_toxins_1"
+    },
+    {
+      "enchantId": 7497,
+      "rank": 2,
+      "spellId": 451901,
+      "baseToken": "oil_of_deep_toxins",
+      "token": "oil_of_deep_toxins_2"
+    },
+    {
+      "enchantId": 7498,
+      "rank": 3,
+      "spellId": 451902,
+      "baseToken": "oil_of_deep_toxins",
+      "token": "oil_of_deep_toxins_3"
+    },
+    {
+      "enchantId": 6198,
+      "rank": 0,
+      "spellId": 322749,
+      "baseToken": "porous_sharpening_stone",
+      "token": "porous_sharpening_stone"
+    },
+    {
+      "enchantId": 6199,
+      "rank": 0,
+      "spellId": 322761,
+      "baseToken": "porous_weightstone",
+      "token": "porous_weightstone"
+    },
+    {
+      "enchantId": 6382,
+      "rank": 1,
+      "spellId": 371641,
+      "baseToken": "primal_razorstone",
+      "token": "primal_razorstone_1"
+    },
+    {
+      "enchantId": 6383,
+      "rank": 2,
+      "spellId": 371680,
+      "baseToken": "primal_razorstone",
+      "token": "primal_razorstone_2"
+    },
+    {
+      "enchantId": 6384,
+      "rank": 3,
+      "spellId": 371681,
+      "baseToken": "primal_razorstone",
+      "token": "primal_razorstone_3"
+    },
+    {
+      "enchantId": 6696,
+      "rank": 1,
+      "spellId": 371676,
+      "baseToken": "primal_weightstone",
+      "token": "primal_weightstone_1"
+    },
+    {
+      "enchantId": 6697,
+      "rank": 2,
+      "spellId": 371677,
+      "baseToken": "primal_weightstone",
+      "token": "primal_weightstone_2"
+    },
+    {
+      "enchantId": 6698,
+      "rank": 3,
+      "spellId": 371678,
+      "baseToken": "primal_weightstone",
+      "token": "primal_weightstone_3"
+    },
+    {
+      "enchantId": 6379,
+      "rank": 1,
+      "spellId": 396155,
+      "baseToken": "primal_whetstone",
+      "token": "primal_whetstone_1"
+    },
+    {
+      "enchantId": 6380,
+      "rank": 2,
+      "spellId": 396156,
+      "baseToken": "primal_whetstone",
+      "token": "primal_whetstone_2"
+    },
+    {
+      "enchantId": 6381,
+      "rank": 3,
+      "spellId": 396157,
+      "baseToken": "primal_whetstone",
+      "token": "primal_whetstone_3"
+    },
+    {
+      "enchantId": 7909,
+      "rank": 1,
+      "spellId": 1224334,
+      "baseToken": "refulgent_razorstone",
+      "token": "refulgent_razorstone_1"
+    },
+    {
+      "enchantId": 7910,
+      "rank": 2,
+      "spellId": 1224335,
+      "baseToken": "refulgent_razorstone",
+      "token": "refulgent_razorstone_2"
+    },
+    {
+      "enchantId": 7907,
+      "rank": 1,
+      "spellId": 1224332,
+      "baseToken": "refulgent_weightstone",
+      "token": "refulgent_weightstone_1"
+    },
+    {
+      "enchantId": 7908,
+      "rank": 2,
+      "spellId": 1224333,
+      "baseToken": "refulgent_weightstone",
+      "token": "refulgent_weightstone_2"
+    },
+    {
+      "enchantId": 7906,
+      "rank": 1,
+      "spellId": 1224331,
+      "baseToken": "refulgent_whetstone",
+      "token": "refulgent_whetstone_1"
+    },
+    {
+      "enchantId": 7905,
+      "rank": 2,
+      "spellId": 1224328,
+      "baseToken": "refulgent_whetstone",
+      "token": "refulgent_whetstone_2"
+    },
+    {
+      "enchantId": 3266,
+      "rank": 0,
+      "spellId": 45397,
+      "baseToken": "righteous_weapon_coating",
+      "token": "righteous_weapon_coating"
+    },
+    {
+      "enchantId": 40,
+      "rank": 0,
+      "spellId": 2828,
+      "baseToken": "rough_sharpening_stone",
+      "token": "rough_sharpening_stone"
+    },
+    {
+      "enchantId": 19,
+      "rank": 0,
+      "spellId": 3112,
+      "baseToken": "rough_weightstone",
+      "token": "rough_weightstone"
+    },
+    { "enchantId": 3093, "rank": 0, "spellId": 37360, "baseToken": "scourgebane", "token": "scourgebane" },
+    {
+      "enchantId": 6200,
+      "rank": 0,
+      "spellId": 322762,
+      "baseToken": "shaded_sharpening_stone",
+      "token": "shaded_sharpening_stone"
+    },
+    {
+      "enchantId": 6201,
+      "rank": 0,
+      "spellId": 322763,
+      "baseToken": "shaded_weightstone",
+      "token": "shaded_weightstone"
+    },
+    { "enchantId": 25, "rank": 0, "spellId": 3594, "baseToken": "shadow_oil", "token": "shadow_oil" },
+    {
+      "enchantId": 6188,
+      "rank": 0,
+      "spellId": 320798,
+      "baseToken": "shadowcore_oil",
+      "token": "shadowcore_oil"
+    },
+    {
+      "enchantId": 8055,
+      "rank": 1,
+      "spellId": 1237004,
+      "baseToken": "smugglers_enchanted_edge",
+      "token": "smugglers_enchanted_edge_1"
+    },
+    {
+      "enchantId": 8056,
+      "rank": 2,
+      "spellId": 1237003,
+      "baseToken": "smugglers_enchanted_edge",
+      "token": "smugglers_enchanted_edge_2"
+    },
+    {
+      "enchantId": 483,
+      "rank": 0,
+      "spellId": 9900,
+      "baseToken": "solid_sharpening_stone",
+      "token": "solid_sharpening_stone"
+    },
+    {
+      "enchantId": 484,
+      "rank": 0,
+      "spellId": 9903,
+      "baseToken": "solid_weightstone",
+      "token": "solid_weightstone"
+    },
+    {
+      "enchantId": 2677,
+      "rank": 0,
+      "spellId": 28013,
+      "baseToken": "superior_mana_oil",
+      "token": "superior_mana_oil"
+    },
+    {
+      "enchantId": 2678,
+      "rank": 0,
+      "spellId": 28017,
+      "baseToken": "superior_wizard_oil",
+      "token": "superior_wizard_oil"
+    },
+    {
+      "enchantId": 6252,
+      "rank": 0,
+      "spellId": 334456,
+      "baseToken": "tempered_armor_patch",
+      "token": "tempered_armor_patch"
+    },
+    {
+      "enchantId": 8051,
+      "rank": 1,
+      "spellId": 1237008,
+      "baseToken": "thalassian_phoenix_oil",
+      "token": "thalassian_phoenix_oil_1"
+    },
+    {
+      "enchantId": 8052,
+      "rank": 2,
+      "spellId": 1237006,
+      "baseToken": "thalassian_phoenix_oil",
+      "token": "thalassian_phoenix_oil_2"
+    },
+    {
+      "enchantId": 8610,
+      "rank": 1,
+      "spellId": 1262121,
+      "baseToken": "weighted_boomshots",
+      "token": "weighted_boomshots_1"
+    },
+    {
+      "enchantId": 8611,
+      "rank": 2,
+      "spellId": 1262123,
+      "baseToken": "weighted_boomshots",
+      "token": "weighted_boomshots_2"
+    },
+    { "enchantId": 2627, "rank": 0, "spellId": 25121, "baseToken": "wizard_oil", "token": "wizard_oil" }
+  ],
+  "consumableAuras": [
+    {
+      "spellId": 453250,
+      "kind": "OTHER",
+      "items": [
+        {
+          "itemId": 224572,
+          "name": "Crystallized Augment Rune",
+          "itemLevel": 80,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "crystallized", "candidateItemIds": [224572], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 454149,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 222728, "name": "Beledar's Bounty", "itemLevel": 80, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "beledars_bounty",
+          "candidateItemIds": [222728, 222776],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 456409,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 233118,
+          "name": "Incontinental Takeout",
+          "itemLevel": 80,
+          "quality": 2,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "incontinental_takeout",
+          "candidateItemIds": [233118],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 457482,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 235853,
+          "name": "Hearty Authentic Undermine Clam Chowder",
+          "itemLevel": 80,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "hearty_authentic_undermine_clam_chowder",
+          "candidateItemIds": [235853],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 473166,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 233062, "name": "Pocket Pizza", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "pocket_pizza", "candidateItemIds": [233062], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1232246,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242309,
+          "name": "Farstrider Rations",
+          "itemLevel": 80,
+          "quality": 1,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "farstrider_rations",
+          "candidateItemIds": [242309, 242776],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232249,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242308, "name": "Portable Snack", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "portable_snack",
+          "candidateItemIds": [242308, 242775],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232250,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242307, "name": "Quick Sandwich", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "quick_sandwich",
+          "candidateItemIds": [242307, 242774],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232251,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242306, "name": "Forager's Medley", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "foragers_medley",
+          "candidateItemIds": [242306, 242773],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232252,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242305,
+          "name": "Silvermoon Standard",
+          "itemLevel": 80,
+          "quality": 1,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "silvermoon_standard",
+          "candidateItemIds": [242305, 242772],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232253,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242304, "name": "Spiced Biscuits", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "spiced_biscuits",
+          "candidateItemIds": [242304, 242771],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232256,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242303, "name": "Mana-Infused Stew", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "manainfused_stew",
+          "candidateItemIds": [242303, 242770],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232257,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242302, "name": "Bloom Skewers", "itemLevel": 80, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 80,
+          "token": "bloom_skewers",
+          "candidateItemIds": [242302, 242769],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232481,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242296,
+          "name": "Bloodthistle-Wrapped Cutlets",
+          "itemLevel": 90,
+          "quality": 2,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "bloodthistlewrapped_cutlets",
+          "candidateItemIds": [242296, 242768],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232483,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242295,
+          "name": "Hearthflame Supper",
+          "itemLevel": 90,
+          "quality": 2,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearthflame_supper",
+          "candidateItemIds": [242295, 242767],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232484,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242293, "name": "Sunwell Delight", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "sunwell_delight",
+          "candidateItemIds": [242293, 242765],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232485,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242292, "name": "Eversong Pudding", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "eversong_pudding",
+          "candidateItemIds": [242292, 242764],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232486,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242291, "name": "Fried Bloomtail", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "fried_bloomtail",
+          "candidateItemIds": [242291, 242763],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232487,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242290, "name": "Wise Tails", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "wise_tails", "candidateItemIds": [242290, 242762], "unambiguous": false }
+      ]
+    },
+    {
+      "spellId": 1232488,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242289, "name": "Spellfire Filet", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "spellfire_filet",
+          "candidateItemIds": [242289, 242761],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232489,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242288,
+          "name": "Twilight Angler's Medley",
+          "itemLevel": 90,
+          "quality": 2,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "twilight_anglers_medley",
+          "candidateItemIds": [242288, 242760],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232901,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242294, "name": "Felberry Figs", "itemLevel": 90, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "felberry_figs",
+          "candidateItemIds": [242294, 242766],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232902,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242287, "name": "Arcano Cutlets", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "arcano_cutlets",
+          "candidateItemIds": [242287, 242759],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232903,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242286, "name": "Fel-Kissed Filet", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "felkissed_filet",
+          "candidateItemIds": [242286, 242758],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232905,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242285, "name": "Warped Wise Wings", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "warped_wise_wings",
+          "candidateItemIds": [242285, 242757],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232906,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242284,
+          "name": "Void-Kissed Fish Rolls",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "voidkissed_fish_rolls",
+          "candidateItemIds": [242284, 242756],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232907,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242283,
+          "name": "Sun-Seared Lumifin",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "sunseared_lumifin",
+          "candidateItemIds": [242283, 242755],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232908,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242282,
+          "name": "Null and Void Plate",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "null_and_void_plate",
+          "candidateItemIds": [242282, 242754],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232909,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242281, "name": "Glitter Skewers", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "glitter_skewers",
+          "candidateItemIds": [242281, 242753],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232910,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242280,
+          "name": "Buttered Root Crab",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "buttered_root_crab",
+          "candidateItemIds": [242280, 242752],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232914,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242278,
+          "name": "Tasty Smoked Tetra",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "tasty_smoked_tetra",
+          "candidateItemIds": [242278, 242750],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232915,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242277, "name": "Crimson Calamari", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "crimson_calamari",
+          "candidateItemIds": [242277, 242749],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232916,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242276,
+          "name": "Braised Blood Hunter",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "braised_blood_hunter",
+          "candidateItemIds": [242276, 242748],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232917,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242275, "name": "Royal Roast", "itemLevel": 90, "quality": 3, "craftingQuality": 0 },
+        {
+          "itemId": 255847,
+          "name": "Impossibly Royal Roast",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "royal_roast",
+          "candidateItemIds": [242275, 242747, 255847, 268679],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232919,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242274, "name": "Champion's Bento", "itemLevel": 90, "quality": 3, "craftingQuality": 0 },
+        { "itemId": 255848, "name": "Flora Frenzy", "itemLevel": 90, "quality": 3, "craftingQuality": 0 },
+        {
+          "itemId": 275258,
+          "name": "Venom-Spiced Cutlets",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        { "itemId": 275260, "name": "Puffer Plate", "itemLevel": 90, "quality": 3, "craftingQuality": 0 },
+        {
+          "itemId": 275261,
+          "name": "Sweet-And-Sour Skewers",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "champions_bento",
+          "candidateItemIds": [242274, 242746],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1232925,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242301, "name": "Azeroot Tea", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "azeroot_tea", "candidateItemIds": [242301], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1232926,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242298, "name": "Argentleaf Tea", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "argentleaf_tea", "candidateItemIds": [242298], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1232927,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242299, "name": "Sanguithorn Tea", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "sanguithorn_tea", "candidateItemIds": [242299], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1233738,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242776,
+          "name": "Hearty Farstrider Rations",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_farstrider_rations",
+          "candidateItemIds": [242776],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233739,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242775,
+          "name": "Hearty Portable Snack",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_portable_snack",
+          "candidateItemIds": [242775],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233740,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242774,
+          "name": "Hearty Quick Sandwich",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_quick_sandwich",
+          "candidateItemIds": [242774],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233741,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242773,
+          "name": "Hearty Forager's Medley",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_foragers_medley",
+          "candidateItemIds": [242773],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233742,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242772,
+          "name": "Hearty Silvermoon Standard",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_silvermoon_standard",
+          "candidateItemIds": [242772],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233743,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242771,
+          "name": "Hearty Spiced Biscuits",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_spiced_biscuits",
+          "candidateItemIds": [242771],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233744,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242770,
+          "name": "Hearty Mana-Infused Stew",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_manainfused_stew",
+          "candidateItemIds": [242770],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233745,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242769,
+          "name": "Hearty Bloom Skewers",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_bloom_skewers",
+          "candidateItemIds": [242769],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233746,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242768,
+          "name": "Hearty Bloodthistle-Wrapped Cutlets",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_bloodthistlewrapped_cutlets",
+          "candidateItemIds": [242768],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233747,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242767,
+          "name": "Hearty Hearthflame Supper",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_hearthflame_supper",
+          "candidateItemIds": [242767],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233748,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242765,
+          "name": "Hearty Sunwell Delight",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_sunwell_delight",
+          "candidateItemIds": [242765],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233749,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242764,
+          "name": "Hearty Eversong Pudding",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_eversong_pudding",
+          "candidateItemIds": [242764],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233750,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242763,
+          "name": "Hearty Fried Bloomtail",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_fried_bloomtail",
+          "candidateItemIds": [242763],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233751,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242762, "name": "Hearty Wise Tails", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "hearty_wise_tails", "candidateItemIds": [242762], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1233752,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242761,
+          "name": "Hearty Spellfire Filet",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_spellfire_filet",
+          "candidateItemIds": [242761],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233753,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242760,
+          "name": "Hearty Twilight Angler's Medley",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_twilight_anglers_medley",
+          "candidateItemIds": [242760],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233754,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242766,
+          "name": "Hearty Felberry Figs",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_felberry_figs",
+          "candidateItemIds": [242766],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233755,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242759,
+          "name": "Hearty Arcano Cutlets",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_arcano_cutlets",
+          "candidateItemIds": [242759],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233756,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242758,
+          "name": "Hearty Fel-Kissed Filet",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_felkissed_filet",
+          "candidateItemIds": [242758],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233757,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242757,
+          "name": "Hearty Warped Wise Wings",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_warped_wise_wings",
+          "candidateItemIds": [242757],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233758,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242756,
+          "name": "Hearty Void-Kissed Fish Rolls",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_voidkissed_fish_rolls",
+          "candidateItemIds": [242756],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233759,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242755,
+          "name": "Hearty Sun-Seared Lumifin",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_sunseared_lumifin",
+          "candidateItemIds": [242755],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233760,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242754,
+          "name": "Hearty Null and Void Plate",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_null_and_void_plate",
+          "candidateItemIds": [242754],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233761,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242753,
+          "name": "Hearty Glitter Skewers",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_glitter_skewers",
+          "candidateItemIds": [242753],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233762,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242752,
+          "name": "Hearty Buttered Root Crab",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_buttered_root_crab",
+          "candidateItemIds": [242752],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233764,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242750,
+          "name": "Hearty Tasty Smoked Tetra",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_tasty_smoked_tetra",
+          "candidateItemIds": [242750],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233765,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242749,
+          "name": "Hearty Crimson Calamari",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_crimson_calamari",
+          "candidateItemIds": [242749],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233766,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242748,
+          "name": "Hearty Braised Blood Hunter",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_braised_blood_hunter",
+          "candidateItemIds": [242748],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1233767,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242747,
+          "name": "Hearty Royal Roast",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 268679,
+          "name": "Hearty Impossibly Royal Roast",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "hearty_royal_roast", "candidateItemIds": [242747], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1233768,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242746,
+          "name": "Hearty Champion's Bento",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 268680,
+          "name": "Hearty Flora Frenzy",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 275259,
+          "name": "Hearty Venom-Spiced Cutlets",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 275262,
+          "name": "Hearty Puffer Plate",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        },
+        {
+          "itemId": 275263,
+          "name": "Hearty Sweet-And-Sour Skewers",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_champions_bento",
+          "candidateItemIds": [242746],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1235057,
+      "kind": "FLASK",
+      "items": [
+        {
+          "itemId": 241320,
+          "name": "Flask of Thalassian Resistance",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241321,
+          "name": "Flask of Thalassian Resistance",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245926,
+          "name": "Fleeting Flask of Thalassian Resistance",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 245927,
+          "name": "Fleeting Flask of Thalassian Resistance",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "flask_of_thalassian_resistance_1",
+          "candidateItemIds": [241321, 245927],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "flask_of_thalassian_resistance_2",
+          "candidateItemIds": [241320, 245926],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1235108,
+      "kind": "FLASK",
+      "items": [
+        {
+          "itemId": 241322,
+          "name": "Flask of the Magisters",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241323,
+          "name": "Flask of the Magisters",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245932,
+          "name": "Fleeting Flask of the Magisters",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245933,
+          "name": "Fleeting Flask of the Magisters",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "flask_of_the_magisters_1",
+          "candidateItemIds": [241323, 245932],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "flask_of_the_magisters_2",
+          "candidateItemIds": [241322, 245933],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1235110,
+      "kind": "FLASK",
+      "items": [
+        {
+          "itemId": 241324,
+          "name": "Flask of the Blood Knights",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241325,
+          "name": "Flask of the Blood Knights",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245930,
+          "name": "Fleeting Flask of the Blood Knights",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245931,
+          "name": "Fleeting Flask of the Blood Knights",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "flask_of_the_blood_knights_1",
+          "candidateItemIds": [241325, 245930],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "flask_of_the_blood_knights_2",
+          "candidateItemIds": [241324, 245931],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1235111,
+      "kind": "FLASK",
+      "items": [
+        {
+          "itemId": 241326,
+          "name": "Flask of the Shattered Sun",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241327,
+          "name": "Flask of the Shattered Sun",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245928,
+          "name": "Fleeting Flask of the Shattered Sun",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245929,
+          "name": "Fleeting Flask of the Shattered Sun",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "flask_of_the_shattered_sun_1",
+          "candidateItemIds": [241327, 245928],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "flask_of_the_shattered_sun_2",
+          "candidateItemIds": [241326, 245929],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1236616,
+      "kind": "POTION",
+      "items": [
+        {
+          "itemId": 241308,
+          "name": "Light's Potential",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241309,
+          "name": "Light's Potential",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245897,
+          "name": "Fleeting Light's Potential",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245898,
+          "name": "Fleeting Light's Potential",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "lights_potential_1",
+          "candidateItemIds": [241309, 245897],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "lights_potential_2",
+          "candidateItemIds": [241308, 245898],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1236994,
+      "kind": "POTION",
+      "items": [
+        {
+          "itemId": 241288,
+          "name": "Potion of Recklessness",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241289,
+          "name": "Potion of Recklessness",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245902,
+          "name": "Fleeting Potion of Recklessness",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 245903,
+          "name": "Fleeting Potion of Recklessness",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "potion_of_recklessness_1",
+          "candidateItemIds": [241289, 245903],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "potion_of_recklessness_2",
+          "candidateItemIds": [241288, 245902],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1236998,
+      "kind": "POTION",
+      "items": [
+        {
+          "itemId": 241292,
+          "name": "Draught of Rampant Abandon",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241293,
+          "name": "Draught of Rampant Abandon",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245910,
+          "name": "Fleeting Draught of Rampant Abandon",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 245911,
+          "name": "Fleeting Draught of Rampant Abandon",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "draught_of_rampant_abandon_1",
+          "candidateItemIds": [241293, 245911],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "draught_of_rampant_abandon_2",
+          "candidateItemIds": [241292, 245910],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1238443,
+      "kind": "POTION",
+      "items": [
+        {
+          "itemId": 241296,
+          "name": "Potion of Zealotry",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        },
+        {
+          "itemId": 241297,
+          "name": "Potion of Zealotry",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245900,
+          "name": "Fleeting Potion of Zealotry",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        {
+          "itemId": 245901,
+          "name": "Fleeting Potion of Zealotry",
+          "itemLevel": 295,
+          "quality": 1,
+          "craftingQuality": 2
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "potion_of_zealotry_1",
+          "candidateItemIds": [241297, 245900],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "potion_of_zealotry_2",
+          "candidateItemIds": [241296, 245901],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1259656,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242273, "name": "Blooming Feast", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "blooming_feast",
+          "candidateItemIds": [242273, 242745],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1259657,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242272, "name": "Quel'dorei Medley", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "queldorei_medley",
+          "candidateItemIds": [242272, 242744],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1259658,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 255846,
+          "name": "Harandar Celebration",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "harandar_celebration",
+          "candidateItemIds": [255846, 266996],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1259659,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 255845, "name": "Silvermoon Parade", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "silvermoon_parade",
+          "candidateItemIds": [255845, 266985],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1264426,
+      "kind": "OTHER",
+      "items": [
+        {
+          "itemId": 259085,
+          "name": "Void-Touched Augment Rune",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "void_touched", "candidateItemIds": [259085], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1269305,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 242297, "name": "Mana Lily Tea", "itemLevel": 80, "quality": 2, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 80, "token": "mana_lily_tea", "candidateItemIds": [242297], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1278895,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 266985,
+          "name": "Hearty Silvermoon Parade",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_silvermoon_parade",
+          "candidateItemIds": [266985],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1278909,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242745,
+          "name": "Hearty Blooming Feast",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_blooming_feast",
+          "candidateItemIds": [242745],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1278915,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 242744,
+          "name": "Hearty Quel'dorei Medley",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_queldorei_medley",
+          "candidateItemIds": [242744],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1278929,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 266996,
+          "name": "Hearty Harandar Celebration",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_harandar_celebration",
+          "candidateItemIds": [266996],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1295015,
+      "kind": "POTION",
+      "items": [
+        {
+          "itemId": 271889,
+          "name": "Alluring Nostrum",
+          "itemLevel": 278,
+          "quality": 1,
+          "craftingQuality": 1
+        },
+        { "itemId": 271890, "name": "Alluring Nostrum", "itemLevel": 295, "quality": 1, "craftingQuality": 2 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 278,
+          "token": "alluring_nostrum_1",
+          "candidateItemIds": [271889],
+          "unambiguous": true
+        },
+        {
+          "itemLevel": 295,
+          "token": "alluring_nostrum_2",
+          "candidateItemIds": [271890, 274765],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1295132,
+      "kind": "POTION",
+      "items": [
+        { "itemId": 271886, "name": "Liquid Luster", "itemLevel": 278, "quality": 1, "craftingQuality": 1 },
+        { "itemId": 271887, "name": "Liquid Luster", "itemLevel": 295, "quality": 1, "craftingQuality": 2 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 278, "token": "liquid_luster_1", "candidateItemIds": [271886], "unambiguous": true },
+        { "itemLevel": 295, "token": "liquid_luster_2", "candidateItemIds": [271887], "unambiguous": true }
+      ]
+    },
+    {
+      "spellId": 1296432,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 275264, "name": "Amani Cornucopia", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "amani_cornucopia",
+          "candidateItemIds": [275264, 275267],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1296433,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 275265, "name": "Loa's Gathering", "itemLevel": 90, "quality": 3, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "loas_gathering",
+          "candidateItemIds": [275265, 275268],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1296434,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 275266,
+          "name": "Feast of Knowledge",
+          "itemLevel": 90,
+          "quality": 3,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "feast_of_knowledge",
+          "candidateItemIds": [275266, 275269],
+          "unambiguous": false
+        }
+      ]
+    },
+    {
+      "spellId": 1303407,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 275267,
+          "name": "Hearty Amani Cornucopia",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_amani_cornucopia",
+          "candidateItemIds": [275267],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1303408,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 275268,
+          "name": "Hearty Loa's Gathering",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_loas_gathering",
+          "candidateItemIds": [275268],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1303409,
+      "kind": "FOOD",
+      "items": [
+        {
+          "itemId": 275269,
+          "name": "Hearty Feast of Knowledge",
+          "itemLevel": 90,
+          "quality": 4,
+          "craftingQuality": 0
+        }
+      ],
+      "rankOptions": [
+        {
+          "itemLevel": 90,
+          "token": "hearty_feast_of_knowledge",
+          "candidateItemIds": [275269],
+          "unambiguous": true
+        }
+      ]
+    },
+    {
+      "spellId": 1308717,
+      "kind": "FOOD",
+      "items": [
+        { "itemId": 280422, "name": "Spirit Sprouts", "itemLevel": 90, "quality": 1, "craftingQuality": 0 }
+      ],
+      "rankOptions": [
+        { "itemLevel": 90, "token": "spirit_sprouts", "candidateItemIds": [280422], "unambiguous": true }
+      ]
+    }
+  ]
+}

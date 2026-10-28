@@ -1745,6 +1745,31 @@ runner service (M11-G3-5, tests/unit/simulation/runner-service-*.test.ts, integr
   job classes: dev configuration               -> enabled explicitly, per class; empty list NOT READY
   class refusal with a shared cache holding the result -> refused; zero cache reads; no engine
   10 hardening faults                          -> each caught (.probe/m11g3/faults-g35h.cjs)
+simulation-model registry (M11, tests/unit/simulation/{model-registry,runner-service-models,model-0a72e6a7-canonical,consumption-release}.test.ts, contracts/m11-simulation-model-registry.test.ts):
+  registry                                     -> exactly 33622e9d/69587 and 0a72e6a7/69933; historical unchanged; build records VERIFIED
+  analyzer authority                           -> every analyzer artifact on 33622e9d; no import between the two model concepts
+  global default model                         -> none in src or runner (no APPROVED_SIMC_MODEL, no APPROVED_ENGINE_ARTIFACTS[n])
+  canonical context (69933, 2026-10-01)        -> 0a72e6a7; a 69587 context -> 33622e9d, never the newer model
+  12.1.5 / outside the validated window        -> SIMULATION_MODEL_NOT_AVAILABLE; no fallback in either direction
+  build or fight time unresolved               -> SIMULATION_MODEL_CONTEXT_UNRESOLVED
+  spec without a validation                    -> SIMULATION_MODEL_NOT_VALIDATED_FOR_SPEC (runner: before the cache)
+  commit/build cross-pairing, unregistered pin -> UNSUPPORTED_MODEL_VERSION
+  wrong artifact for the job's model           -> RUNNER_UNAVAILABLE (prepare) / NOT READY (runner startup)
+  cache identity                               -> engine-run and parsed-result keys differ by model; profile/env/execution hashes do not
+  cache MAC                                    -> per model; a record moved under the other model's key fails the MAC
+  result of one model                          -> never verifies or settles as the other model
+  LOCAL / REMOTE                               -> parity on the new model (fake and exact-pin)
+  attestation schema 3                         -> names the simulation model; another model's attestation JOB_REJECTED
+  promoted model, canonical character          -> identical profile; fidelity MATCH / SIMULATION_READY
+  promoted model, canonical environment        -> NOT_REPRESENTABLE / BLOCKED, same blockers and materiality classes
+  absent auras                                 -> three PINNED_MODEL_MISSING_OBSERVED_EFFECT naming 12.1.0.69933, with or without applicability
+  selection applicability                      -> the one matching validation (spec, build, fight start, window, basis); two matching windows CONTEXT_UNRESOLVED
+  chronology inside a validated window         -> MODEL_SNAPSHOT_PRECEDES_LOG (informational), no MODEL_BUILD_LAG; status/blockers/hash/publishability unchanged
+  applicability not covering model+fight       -> MODEL_BUILD_LAG stays (null, other model, other build, window outside or ending at the start, unparseable)
+  data bundle load (tests/unit/simulation/model-data-bundle.test.ts) -> history must end at the loaded revisions; stale v3 revision, foreign provenance, v1 manifest, sourceless consumables refused
+  consumables provenance                       -> real source paths, extractor v4, semantic hash = committed v3 content, token verdicts unchanged
+  Consumption                                  -> parses and verifies on both; breakdown granularity model-dependent (pinned)
+  runner config                                -> registered ids only, registered image per model, no repeats
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture

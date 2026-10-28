@@ -46,7 +46,10 @@ describe("M11-G3-2 character-profile layering", () => {
   it("imports only shared primitives: data/game, normalization types, simulation, wcl decode, itself", () => {
     const allowed = [
       /^\.\/[a-z-]+\.js$/,
-      /^\.\.\/data\/game\/(talent-loadout|talent-selection|consumables)\.js$/,
+      /^\.\.\/data\/game\/(talent-loadout|talent-selection)\.js$/,
+      // M11 model-registry amendment (reviewed): consumable identities are
+      // simulation-model data, read from the NAMED model's bundle.
+      /^\.\.\/data\/simulation-models\/index\.js$/,
       /^\.\.\/engine\/normalization\/(combatant-info|normalized-events)\.js$/,
       /^\.\.\/simulation\/[a-z-]+\.js$/,
       /^\.\.\/wcl\/decode\.js$/,

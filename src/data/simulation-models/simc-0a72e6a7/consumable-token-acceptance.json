@@ -1,0 +1,551 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_CONSUMABLE_TOKEN_ACCEPTANCE",
+  "artifactRevision": "simc-0a72e6a7-2",
+  "provenance": {
+    "commitSha": "0a72e6a74684d23c989b2d76143e429d2b4f1c91",
+    "clientDataWowVersion": "12.1.0.69933",
+    "binarySha256": "79bf5a406b0ca16eb8e828ef017603b60fdee576a5cb3cf4acaacf93a08eea36",
+    "consumablesRevision": "simc-0a72e6a7-4",
+    "method": "ENGINE_RUN_PER_TOKEN",
+    "bench": "scripts/bench/m11g34-consumable-tokens.bench.ts"
+  },
+  "tokens": [
+    {
+      "kind": "POTION",
+      "spellId": 1295015,
+      "itemLevel": 278,
+      "token": "alluring_nostrum_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1295015,
+      "itemLevel": 295,
+      "token": "alluring_nostrum_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1232926,
+      "itemLevel": 80,
+      "token": "argentleaf_tea",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'argentleaf_tea' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1232925,
+      "itemLevel": 80,
+      "token": "azeroot_tea",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'azeroot_tea' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "OTHER",
+      "spellId": 453250,
+      "itemLevel": 80,
+      "token": "crystallized",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1236998,
+      "itemLevel": 278,
+      "token": "draught_of_rampant_abandon_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1236998,
+      "itemLevel": 295,
+      "token": "draught_of_rampant_abandon_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FLASK",
+      "spellId": 1235057,
+      "itemLevel": 278,
+      "token": "flask_of_thalassian_resistance_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FLASK",
+      "spellId": 1235057,
+      "itemLevel": 295,
+      "token": "flask_of_thalassian_resistance_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FLASK",
+      "spellId": 1235110,
+      "itemLevel": 278,
+      "token": "flask_of_the_blood_knights_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FLASK",
+      "spellId": 1235110,
+      "itemLevel": 295,
+      "token": "flask_of_the_blood_knights_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FLASK",
+      "spellId": 1235108,
+      "itemLevel": 278,
+      "token": "flask_of_the_magisters_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FLASK",
+      "spellId": 1235108,
+      "itemLevel": 295,
+      "token": "flask_of_the_magisters_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FLASK",
+      "spellId": 1235111,
+      "itemLevel": 278,
+      "token": "flask_of_the_shattered_sun_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FLASK",
+      "spellId": 1235111,
+      "itemLevel": 295,
+      "token": "flask_of_the_shattered_sun_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1303407,
+      "itemLevel": 90,
+      "token": "hearty_amani_cornucopia",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_amani_cornucopia' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233755,
+      "itemLevel": 90,
+      "token": "hearty_arcano_cutlets",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_arcano_cutlets' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 457482,
+      "itemLevel": 80,
+      "token": "hearty_authentic_undermine_clam_chowder",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_authentic_undermine_clam_chowder' with expression ''.: First special effect initialization phase could not deduce a proper consumable to c"
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233746,
+      "itemLevel": 90,
+      "token": "hearty_bloodthistlewrapped_cutlets",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_bloodthistlewrapped_cutlets' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create"
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233745,
+      "itemLevel": 90,
+      "token": "hearty_bloom_skewers",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_bloom_skewers' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1278909,
+      "itemLevel": 90,
+      "token": "hearty_blooming_feast",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_blooming_feast' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233766,
+      "itemLevel": 90,
+      "token": "hearty_braised_blood_hunter",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_braised_blood_hunter' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233762,
+      "itemLevel": 90,
+      "token": "hearty_buttered_root_crab",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_buttered_root_crab' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233768,
+      "itemLevel": 90,
+      "token": "hearty_champions_bento",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_champions_bento' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233765,
+      "itemLevel": 90,
+      "token": "hearty_crimson_calamari",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_crimson_calamari' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233749,
+      "itemLevel": 90,
+      "token": "hearty_eversong_pudding",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_eversong_pudding' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233738,
+      "itemLevel": 90,
+      "token": "hearty_farstrider_rations",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_farstrider_rations' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1303409,
+      "itemLevel": 90,
+      "token": "hearty_feast_of_knowledge",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_feast_of_knowledge' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233754,
+      "itemLevel": 90,
+      "token": "hearty_felberry_figs",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_felberry_figs' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233756,
+      "itemLevel": 90,
+      "token": "hearty_felkissed_filet",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_felkissed_filet' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233741,
+      "itemLevel": 90,
+      "token": "hearty_foragers_medley",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_foragers_medley' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233750,
+      "itemLevel": 90,
+      "token": "hearty_fried_bloomtail",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_fried_bloomtail' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233761,
+      "itemLevel": 90,
+      "token": "hearty_glitter_skewers",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_glitter_skewers' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1278929,
+      "itemLevel": 90,
+      "token": "hearty_harandar_celebration",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_harandar_celebration' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233747,
+      "itemLevel": 90,
+      "token": "hearty_hearthflame_supper",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_hearthflame_supper' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1303408,
+      "itemLevel": 90,
+      "token": "hearty_loas_gathering",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_loas_gathering' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233744,
+      "itemLevel": 90,
+      "token": "hearty_manainfused_stew",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_manainfused_stew' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233760,
+      "itemLevel": 90,
+      "token": "hearty_null_and_void_plate",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_null_and_void_plate' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233739,
+      "itemLevel": 90,
+      "token": "hearty_portable_snack",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_portable_snack' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1278915,
+      "itemLevel": 90,
+      "token": "hearty_queldorei_medley",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_queldorei_medley' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233740,
+      "itemLevel": 90,
+      "token": "hearty_quick_sandwich",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_quick_sandwich' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233767,
+      "itemLevel": 90,
+      "token": "hearty_royal_roast",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_royal_roast' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1278895,
+      "itemLevel": 90,
+      "token": "hearty_silvermoon_parade",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_silvermoon_parade' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233742,
+      "itemLevel": 90,
+      "token": "hearty_silvermoon_standard",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_silvermoon_standard' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233752,
+      "itemLevel": 90,
+      "token": "hearty_spellfire_filet",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_spellfire_filet' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233743,
+      "itemLevel": 90,
+      "token": "hearty_spiced_biscuits",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_spiced_biscuits' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233759,
+      "itemLevel": 90,
+      "token": "hearty_sunseared_lumifin",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_sunseared_lumifin' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233748,
+      "itemLevel": 90,
+      "token": "hearty_sunwell_delight",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_sunwell_delight' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233764,
+      "itemLevel": 90,
+      "token": "hearty_tasty_smoked_tetra",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_tasty_smoked_tetra' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233753,
+      "itemLevel": 90,
+      "token": "hearty_twilight_anglers_medley",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_twilight_anglers_medley' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233758,
+      "itemLevel": 90,
+      "token": "hearty_voidkissed_fish_rolls",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_voidkissed_fish_rolls' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233757,
+      "itemLevel": 90,
+      "token": "hearty_warped_wise_wings",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_warped_wise_wings' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1233751,
+      "itemLevel": 90,
+      "token": "hearty_wise_tails",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'hearty_wise_tails' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 456409,
+      "itemLevel": 80,
+      "token": "incontinental_takeout",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'incontinental_takeout' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1236616,
+      "itemLevel": 278,
+      "token": "lights_potential_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1236616,
+      "itemLevel": 295,
+      "token": "lights_potential_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1295132,
+      "itemLevel": 278,
+      "token": "liquid_luster_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1295132,
+      "itemLevel": 295,
+      "token": "liquid_luster_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1269305,
+      "itemLevel": 80,
+      "token": "mana_lily_tea",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'mana_lily_tea' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 473166,
+      "itemLevel": 80,
+      "token": "pocket_pizza",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'pocket_pizza' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1236994,
+      "itemLevel": 278,
+      "token": "potion_of_recklessness_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1236994,
+      "itemLevel": 295,
+      "token": "potion_of_recklessness_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1238443,
+      "itemLevel": 278,
+      "token": "potion_of_zealotry_1",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "POTION",
+      "spellId": 1238443,
+      "itemLevel": 295,
+      "token": "potion_of_zealotry_2",
+      "accepted": true,
+      "detail": null
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1232927,
+      "itemLevel": 80,
+      "token": "sanguithorn_tea",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'sanguithorn_tea' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "FOOD",
+      "spellId": 1308717,
+      "itemLevel": 90,
+      "token": "spirit_sprouts",
+      "accepted": false,
+      "detail": "exit 30: Error: Initialization error: Player 'Subject': Action 'food' (0): Invalid consumable 'spirit_sprouts' with expression ''.: First special effect initialization phase could not deduce a proper consumable to create."
+    },
+    {
+      "kind": "OTHER",
+      "spellId": 1264426,
+      "itemLevel": 90,
+      "token": "void_touched",
+      "accepted": true,
+      "detail": null
+    }
+  ]
+}

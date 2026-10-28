@@ -29,6 +29,11 @@
  *    data contains them at all (an absent spell cannot be represented).
  *
  * Local pinned copies only; source SHA-256 recorded.
+ *
+ * Extractor v3 (M11 model registry): the client-data build is READ from the
+ * commit's own client_data_version.inc (--file-clientDataVersion) instead of
+ * being a literal, so a second simulation model cannot be mislabelled. v2
+ * artifacts (33622e9d) are unchanged; this only affects artifacts emitted by v3.
  */
 
 import { createHash } from "node:crypto";
@@ -38,7 +43,7 @@ import { pathToFileURL } from "node:url";
 
 import { format, resolveConfig } from "prettier";
 
-import { parseArgs, sourceHashProblem } from "./extract-simc-talents.mjs";
+import { parseArgs, parseClientDataVersion, sourceHashProblem } from "./extract-simc-talents.mjs";
 
 const ENGINE_BLOODLUST = 2825;
 const LUST_CANDIDATES = [2825, 32182, 80353, 264667, 390386];
@@ -145,6 +150,12 @@ async function main() {
   );
   if (problem !== null) fail(problem);
   const text = buffer.toString("utf8");
+  if (typeof args["file-clientDataVersion"] !== "string")
+    fail("pass --file-clientDataVersion (local pinned client_data_version.inc)");
+  const versionBuffer = readFileSync(args["file-clientDataVersion"]);
+  const versionSha256 = createHash("sha256").update(versionBuffer).digest("hex");
+  const clientDataWowVersion = parseClientDataVersion(versionBuffer.toString("utf8"));
+  if (clientDataWowVersion === null) fail("client_data_version.inc has no CLIENT_DATA_WOW_VERSION");
 
   const engine = spellRow(text, ENGINE_BLOODLUST);
   const engineEffects = effectSignature(text, ENGINE_BLOODLUST);
@@ -218,10 +229,17 @@ async function main() {
     provenance: {
       repository: "https://github.com/simulationcraft/simc",
       commitSha: args.sha,
-      sources: [{ path: "engine/dbc/generated/sc_spell_data.inc", sha256, byteLength: buffer.length }],
-      clientDataWowVersion: "12.1.0.69587",
+      sources: [
+        { path: "engine/dbc/generated/sc_spell_data.inc", sha256, byteLength: buffer.length },
+        {
+          path: "engine/dbc/generated/client_data_version.inc",
+          sha256: versionSha256,
+          byteLength: versionBuffer.length,
+        },
+      ],
+      clientDataWowVersion,
       method: "MACHINE_EXTRACTED_SPELL_EQUIVALENCE",
-      extractorVersion: 2,
+      extractorVersion: 3,
     },
     engineBloodlust: { spellId: ENGINE_BLOODLUST, durationMs: engine.durationMs },
     lustFamily,

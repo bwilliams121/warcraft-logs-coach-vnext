@@ -1,12 +1,12 @@
 {
   "artifactVersion": 1,
   "datasetId": "SIMC_CONSUMABLE_TOKEN_ACCEPTANCE",
-  "artifactRevision": "simc-33622e9d-1",
+  "artifactRevision": "simc-33622e9d-2",
   "provenance": {
     "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
     "clientDataWowVersion": "12.1.0.69587",
     "binarySha256": "41347bc4203bd1b073a617cd9cd147a96c9c09a36f8c7af5c013ca7be273cb77",
-    "consumablesRevision": "simc-33622e9d-3",
+    "consumablesRevision": "simc-33622e9d-4",
     "method": "ENGINE_RUN_PER_TOKEN",
     "bench": "scripts/bench/m11g34-consumable-tokens.bench.ts"
   },

@@ -10,7 +10,7 @@
  *      oil; no food, rune or potion), change ONE unresolved field at a time
  *      under STANDARD_SIM_V1; then, single-threaded (bit-reproducible), toggle
  *      each raid-buff override to classify it inert or active. The results
- *      must equal BLOOD_ENVIRONMENT_FACTS (single-thread exactly; STANDARD to
+ *      must equal the MODEL's BLOOD_ENVIRONMENT_FACTS_BY_MODEL entry (single-thread exactly; STANDARD to
  *      1e-9, its thread merge order is not fixed).
  *   2. STAT RECONCILIATION REVISIT: the subject's gear (the development
  *      character's gear IS the subject's) with race `none` (raw-input edit, a
@@ -35,7 +35,11 @@
  *
  * Output: .probe/m11g3/g34/report.json. Docker `--network none`.
  *
- *     SIMC_IMAGE=sha256:<id> npx vitest run --config scripts/bench/vitest.config.ts scripts/bench/m11g34-environment.bench.ts
+ * M11 model registry: MODEL_ID names the simulation model (default: the
+ * historical 33622e9d model); SIMC_IMAGE must be its registered image; the
+ * stat-revisit fixture and the diagnostic round-trip golden are per model.
+ *
+ *     [MODEL_ID=<id>] SIMC_IMAGE=sha256:<id> [WRITE_GOLDEN=1] npx vitest run --config scripts/bench/vitest.config.ts scripts/bench/m11g34-environment.bench.ts
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -43,7 +47,6 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { APPROVED_ENGINE_ARTIFACTS } from "../../runner/approved-artifacts.js";
 import { DockerLauncher } from "../../runner/engine-launcher.js";
 import { DEFAULT_RUNNER_LIMITS } from "../../runner/limits.js";
 import { RUNNER_SPEC_BINDINGS } from "../../runner/spec-bindings.js";
@@ -53,15 +56,26 @@ import { translateEnvironment } from "../../src/environment/translate.js";
 import { prepareSimulation } from "../../src/simulation/prepare.js";
 import { parseSimcJson } from "../../src/simulation/result-parser.js";
 import { RAID_BUFFS } from "../../src/simulation/job.js";
-import { BLOOD_ENVIRONMENT_FACTS } from "../../src/specs/deathknight/blood/environment-facts.js";
+import { simulationModelById } from "../../src/simulation/model-registry.js";
+import { BLOOD_ENVIRONMENT_FACTS_BY_MODEL } from "../../src/specs/deathknight/blood/environment-facts.js";
 import { subjectEnvironmentInput } from "../../tests/support/environment/subject-environment.js";
 import { devBloodJob, jsonBytes } from "../../tests/support/simulation/dev-blood-job.js";
 
 declare const process: any;
 
 const IMAGE: string | undefined = process.env["SIMC_IMAGE"];
-const OUT = join(".probe", "m11g3", "g34");
-const STAT_FIXTURE = join("tests", "fixtures", "environment", "simc-33622e9d-subject-stat-revisit.json");
+const MODEL_ID: string = process.env["MODEL_ID"] ?? "SIMC_33622E9D_LIVE_12_1_0_69587";
+const MODEL = simulationModelById(MODEL_ID);
+if (MODEL === undefined) throw new Error(`MODEL_ID ${MODEL_ID} is not a registered simulation model`);
+const SHORT = MODEL.pin.simcCommit.slice(0, 8);
+const OUT = join(".probe", "m11g3", "g34", SHORT);
+const STAT_FIXTURE = join("tests", "fixtures", "environment", `simc-${SHORT}-subject-stat-revisit.json`);
+const ROUND_TRIP_GOLDEN = join(
+  "tests",
+  "fixtures",
+  "environment",
+  `simc-${SHORT}-subject-diagnostic-roundtrip.json`,
+);
 const PROVEN_BUFFS = [
   "arcane_intellect",
   "battle_shout",
@@ -88,8 +102,8 @@ describe.skipIf(IMAGE === undefined)("M11-G3-4 environment on the exact pin", ()
     { timeout: 3_600_000 },
     async () => {
       mkdirSync(OUT, { recursive: true });
-      const artifact = APPROVED_ENGINE_ARTIFACTS[0];
-      if (artifact === undefined) throw new Error("no approved artifact");
+      const artifact = MODEL.artifact;
+      expect(IMAGE, "SIMC_IMAGE must be the model's registered image").toBe(MODEL.imageId);
       const launcher = new DockerLauncher(
         {
           imageRef: IMAGE ?? "",
@@ -113,7 +127,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-4 environment on the exact pin", ()
 
       // ---- 1. materiality ----
       const baselineInput = async (policyId: string) => {
-        const job = devBloodJob(policyId, "ELITE_REALISTIC_V1") as Json;
+        const job = devBloodJob(policyId, "ELITE_REALISTIC_V1", MODEL_ID) as Json;
         job["environment"].raidBuffs = { provenance: "DEVELOPMENT_FIXTURE", active: [...PROVEN_BUFFS] };
         job["environment"].bloodlust = { kind: "AT", provenance: "DEVELOPMENT_FIXTURE", atMs: 471 };
         Object.assign(job["character"].consumables, {
@@ -191,7 +205,9 @@ describe.skipIf(IMAGE === undefined)("M11-G3-4 environment on the exact pin", ()
 
       // Compared at the end, so one run reports every disagreement.
       const factMismatches: string[] = [];
-      for (const fact of BLOOD_ENVIRONMENT_FACTS.measurements) {
+      const MODEL_FACTS = BLOOD_ENVIRONMENT_FACTS_BY_MODEL[MODEL_ID];
+      if (MODEL_FACTS === undefined) throw new Error(`no Blood environment facts for ${MODEL_ID}`);
+      for (const fact of MODEL_FACTS.measurements) {
         const buff = fact.field.startsWith("RAID_BUFF:") ? fact.field.slice("RAID_BUFF:".length) : null;
         const expectedIdentical = buff === null ? false : (identical[buff].identical as boolean);
         // STANDARD_SIM_V1 merges threads in a non-fixed order (last-bit drift); single-thread runs are exact.
@@ -254,8 +270,8 @@ describe.skipIf(IMAGE === undefined)("M11-G3-4 environment on the exact pin", ()
         JSON.stringify(JSON.parse(readFileSync(STAT_FIXTURE, "utf8"))) === JSON.stringify(stats);
 
       // ---- 3. diagnostic round trip: EVERY rank-envelope variant ----
-      const reconstruction = reconstructEnvironment(await subjectEnvironmentInput());
-      const publishability = assessEnvironmentPublishability(reconstruction, BLOOD_ENVIRONMENT_FACTS);
+      const reconstruction = reconstructEnvironment(await subjectEnvironmentInput(MODEL_ID));
+      const publishability = assessEnvironmentPublishability(reconstruction, MODEL_FACTS);
       expect(publishability.status).toBe("BLOCKED");
       const translated = translateEnvironment(reconstruction, publishability, "BOSS_ONLY_DIAGNOSTIC");
       if (!translated.ok) throw new Error(translated.problems.join("; "));
@@ -263,7 +279,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-4 environment on the exact pin", ()
       const echoes: Json[] = [];
       const variantDps: number[] = [];
       for (const variant of translated.translation.consumableVariants) {
-        const job = devBloodJob("STANDARD_SIM_V1", "ELITE_REALISTIC_V1") as Json;
+        const job = devBloodJob("STANDARD_SIM_V1", "ELITE_REALISTIC_V1", MODEL_ID) as Json;
         job["environment"] = translated.translation.environment;
         job["character"].consumables = variant.consumables;
         const prepared = await prepareSimulation(job, jsonBytes(job), artifact, RUNNER_SPEC_BINDINGS);
@@ -325,6 +341,21 @@ describe.skipIf(IMAGE === undefined)("M11-G3-4 environment on the exact pin", ()
         variantsDistinct: new Set(variantDps).size === variantDps.length,
       };
       save();
+      // Per-model diagnostic round-trip golden (engine echo of the translated
+      // environment; no DPS). Written only with WRITE_GOLDEN=1.
+      if (process.env["WRITE_GOLDEN"] === "1") {
+        const golden = {
+          _golden: {
+            source: `simulation model ${MODEL.id} (binary ${artifact.binarySha256})`,
+            job: "BOSS_ONLY_DIAGNOSTIC translation of the canonical subject environment, every consumable variant",
+          },
+          purpose: report.roundTrip.purpose,
+          variants: report.roundTrip.variants,
+          ledger: report.roundTrip.ledger,
+          echoes,
+        };
+        writeFileSync(ROUND_TRIP_GOLDEN, `${JSON.stringify(golden, null, 1)}\n`, "utf8");
+      }
 
       // ---- 4. rank tokens at the pin (single thread, bit-reproducible) ----
       const tokenRun = async (from: string, to: string) => dpsOf((await raw(edit(single, from, to))).json);

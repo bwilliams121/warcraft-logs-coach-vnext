@@ -10,14 +10,18 @@ import { beforeAll, describe, expect, it } from "vitest";
 
 import { readCombatantPullFacts } from "../../../src/character-profile/pull-facts.js";
 import {
-  engineAcceptsToken,
-  pinnedTokenAcceptance,
-} from "../../../src/data/game/consumable-token-acceptance.js";
-import {
-  lustFamilyMember,
-  pinnedRaidEnvironment,
-  raidBuffOverrideForAura,
-} from "../../../src/data/game/raid-environment.js";
+  engineAcceptsToken as acceptsToken,
+  lustFamilyMember as lustMember,
+  raidBuffOverrideForAura as overrideForAura,
+} from "../../../src/data/simulation-models/index.js";
+import { simulationModelDataOrThrow } from "../../support/character/subject.js";
+import { DEV_SIMULATION_MODEL_ID } from "../../support/simulation/dev-blood-job.js";
+
+/** The historical simulation model's pinned data (M11 model registry). */
+const historical = simulationModelDataOrThrow(DEV_SIMULATION_MODEL_ID);
+const engineAcceptsToken = (spellId: number, token: string) => acceptsToken(historical, spellId, token);
+const lustFamilyMember = (spellId: number) => lustMember(historical, spellId);
+const raidBuffOverrideForAura = (spellId: number) => overrideForAura(historical, spellId);
 import { semanticEnvironment, simulationEnvironmentHash } from "../../../src/environment/hash.js";
 import type {
   EnvironmentReconstructionResult,
@@ -225,8 +229,7 @@ describe("M11-G3-4 stat reconciliation revisit", () => {
 
 describe("M11-G3-4 pinned raid-environment data", () => {
   it("loads at the pin with the spell-data source hash the Blood datasets cite", () => {
-    const loaded = pinnedRaidEnvironment();
-    if (!loaded.ok) throw new Error(loaded.detail);
+    const loaded = { data: historical.raidEnvironment };
     expect(loaded.data.provenance.sources[0]?.sha256).toBe(
       "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
     );
@@ -257,8 +260,7 @@ describe("M11-G3-4 engine token acceptance", () => {
     expect(engineAcceptsToken(1264426, "void_touched")).toBe(true);
     expect(engineAcceptsToken(1278929, "hearty_harandar_celebration")).toBe(false);
     expect(engineAcceptsToken(1235057, "potion_of_recklessness_1")).toBe(false);
-    const loaded = pinnedTokenAcceptance();
-    if (!loaded.ok) throw new Error(loaded.detail);
+    const loaded = { data: historical.tokenAcceptance };
     expect(loaded.data.provenance.binarySha256).toBe(
       "41347bc4203bd1b073a617cd9cd147a96c9c09a36f8c7af5c013ca7be273cb77",
     );

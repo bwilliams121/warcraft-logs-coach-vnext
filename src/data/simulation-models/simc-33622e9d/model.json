@@ -1,0 +1,29 @@
+{
+  "manifestVersion": 2,
+  "modelId": "SIMC_33622E9D_LIVE_12_1_0_69587",
+  "simcCommit": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+  "gameDataBuild": "12.1.0.69587",
+  "binarySha256": "41347bc4203bd1b073a617cd9cd147a96c9c09a36f8c7af5c013ca7be273cb77",
+  "hotfixDate": "2026-09-10",
+  "snapshotCommittedAtUtc": "2026-09-10T20:43:00Z",
+  "dataHistory": [
+    {
+      "date": "2026-10-28",
+      "datasetId": "SIMC_CONSUMABLES",
+      "fromRevision": "simc-33622e9d-3",
+      "toRevision": "simc-33622e9d-4",
+      "kind": "PROVENANCE_METADATA_CORRECTION",
+      "semanticContentChanged": false,
+      "note": "Source label corrected: the v3 artifact recorded engine/item/consumable.cpp, a path that does not exist at 33622e9d; the recorded sha256 (1a2ad7ed...) was of engine/player/consumable.cpp. Regenerated with extractor v4 from the same five source files (hashes unchanged); semantic content byte-identical."
+    },
+    {
+      "date": "2026-10-28",
+      "datasetId": "SIMC_CONSUMABLE_TOKEN_ACCEPTANCE",
+      "fromRevision": "simc-33622e9d-1",
+      "toRevision": "simc-33622e9d-2",
+      "kind": "PROVENANCE_METADATA_CORRECTION",
+      "semanticContentChanged": false,
+      "note": "Re-measured on this model's binary against consumables simc-33622e9d-4; every token verdict identical to simc-33622e9d-1."
+    }
+  ]
+}

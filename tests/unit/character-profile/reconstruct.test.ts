@@ -22,6 +22,10 @@ import {
   subjectEvidence,
 } from "../../support/character/subject.js";
 import { jsonBytes } from "../../support/simulation/dev-blood-job.js";
+import { DEV_SIMULATION_MODEL_ID, modelPin } from "../../support/simulation/dev-blood-job.js";
+
+/** The historical simulation model these tests were written against (M11 model registry). */
+const HISTORICAL_MODEL = modelPin(DEV_SIMULATION_MODEL_ID);
 
 const binding = BLOOD_CHARACTER_BINDING;
 let base: ReconstructionInput;
@@ -105,7 +109,7 @@ describe("M11-G3-2 canonical subject reconstruction", () => {
     expect(slot(level, "legs").itemLevel.state).toBe("UNKNOWN");
     expect(codes(level)).toContain("ITEM_LEVEL_UNKNOWN");
     for (const profile of [gems, enchant, bonus, level]) {
-      expect(fidelityProbeJob(profile, binding).ok).toBe(false);
+      expect(fidelityProbeJob(profile, binding, HISTORICAL_MODEL).ok).toBe(false);
     }
   });
 
@@ -172,7 +176,7 @@ describe("M11-G3-2 canonical subject reconstruction", () => {
     const profile = reconstruct(base);
     expect(slot(profile, "shirt").bonusIds.state).toBe("UNKNOWN");
     expect(codes(profile)).not.toContain("BONUS_IDS_UNKNOWN");
-    const job = fidelityProbeJob(profile, binding);
+    const job = fidelityProbeJob(profile, binding, HISTORICAL_MODEL);
     expect(job.ok && job.value.character.gear.map((entry) => entry.slot)).not.toContain("shirt");
     // The same unknown on a stat-bearing slot blocks.
     const back = reconstruct(withPiece(14, (piece) => ({ ...piece, bonusIds: null })));
@@ -207,7 +211,7 @@ describe("M11-G3-2 canonical subject reconstruction", () => {
     expect(profile.identity.race.state).toBe("UNKNOWN");
     expect(codes(profile)).toContain("RACE_UNRESOLVED");
     expect(JSON.stringify(profile.identity.race)).not.toMatch(/mechagnome|human|orc|troll/);
-    const job = fidelityProbeJob(profile, binding);
+    const job = fidelityProbeJob(profile, binding, HISTORICAL_MODEL);
     expect(job.ok && job.value.character).toMatchObject({
       profileKind: "LOGGED_FIDELITY_PROBE",
       race: "none",
@@ -241,7 +245,7 @@ describe("M11-G3-2 canonical subject reconstruction", () => {
   });
 
   it("X/Y/Z. no raid buff, ideal consumable or added target enters the fidelity probe", () => {
-    const job = fidelityProbeJob(reconstruct(base), binding);
+    const job = fidelityProbeJob(reconstruct(base), binding, HISTORICAL_MODEL);
     if (!job.ok) throw new Error(job.failure.detail);
     const { character, environment } = job.value;
     expect(character.consumables).toEqual({

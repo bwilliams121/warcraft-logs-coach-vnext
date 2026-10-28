@@ -35,7 +35,7 @@ export async function runProfileFidelity(
   artifact: ApprovedEngineArtifact,
   launcher: EngineLauncher,
 ): Promise<SimulationOutcome<FidelityRun>> {
-  const job = fidelityProbeJob(profile, binding);
+  const job = fidelityProbeJob(profile, binding, artifact.model);
   if (!job.ok) return job;
   const body = JSON.stringify(job.value);
   const prepared = await prepareSimulation(job.value, new TextEncoder().encode(body).byteLength, artifact, [

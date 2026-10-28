@@ -40,6 +40,7 @@ import { closeServer, createRunnerServer, listen } from "../../runner/service/se
 import { PROFILE_READINESS_GATE_REVISION } from "../../src/character-profile/fidelity.js";
 import { ENVIRONMENT_PUBLISHABILITY_GATE_REVISION } from "../../src/environment/publishability.js";
 import { SIMULATION_JOB_CLASSES } from "../../src/simulation/job-class.js";
+import { simulationModelById } from "../../src/simulation/model-registry.js";
 import { prepareSimulation } from "../../src/simulation/prepare.js";
 import { READINESS_ATTESTATION_SCHEMA_VERSION } from "../../src/simulation/readiness-attestation.js";
 import { firstSemanticDifference } from "../../src/simulation/result.js";
@@ -60,8 +61,20 @@ type Json = Record<string, any>;
 describe.skipIf(IMAGE === undefined)("M11-G3-5 runner service on the exact pin", () => {
   it("startup, parity and capacity", { timeout: 3_600_000 }, async () => {
     mkdirSync(OUT, { recursive: true });
-    const artifact = APPROVED_ENGINE_ARTIFACTS[0];
-    if (artifact === undefined) throw new Error("no approved artifact");
+    // M11 model registry: SIMC_IMAGE hosts the historical 33622e9d model; NEW_IMAGE
+    // (optional) additionally hosts the 0a72e6a7 model. Each must be its model's
+    // registered image.
+    const historical = simulationModelById("SIMC_33622E9D_LIVE_12_1_0_69587");
+    const promoted = simulationModelById("SIMC_0A72E6A7_LIVE_12_1_0_69933");
+    if (historical === undefined || promoted === undefined) throw new Error("registry");
+    const artifact = historical.artifact;
+    expect(IMAGE).toBe(historical.imageId);
+    const NEW_IMAGE: string | undefined = process.env["NEW_IMAGE"];
+    if (NEW_IMAGE !== undefined) expect(NEW_IMAGE).toBe(promoted.imageId);
+    const hosted: { model: typeof historical; image: string }[] = [
+      { model: historical, image: IMAGE ?? "" },
+      ...(NEW_IMAGE === undefined ? [] : [{ model: promoted, image: NEW_IMAGE }]),
+    ];
     const report: Json = {
       host: { logicalCpu: availableParallelism() },
       binarySha256: artifact.binarySha256,
@@ -87,34 +100,41 @@ describe.skipIf(IMAGE === undefined)("M11-G3-5 runner service on the exact pin",
     // Bench = a development configuration: every class enabled explicitly; TEST-ONLY cache key.
     const integrity = await CacheIntegrity.fromSecret(BENCH_CACHE_SECRET);
     const service = (
-      imageRef: string,
-      options: { capacity?: RunnerCapacity; artifact?: typeof artifact } = {},
+      engines: readonly { readonly image: string; readonly artifact: typeof artifact }[],
+      options: { capacity?: RunnerCapacity } = {},
     ) => {
       const capacity = options.capacity ?? DEV_LOCAL_CAPACITY_V1;
-      const launcher = docker(imageRef, capacity);
       return composeSimulationService({
-        launcher,
+        engines: engines.map((engine) => {
+          const launcher = docker(engine.image, capacity);
+          return {
+            artifact: engine.artifact,
+            launcher,
+            prepareLauncher: async () => {
+              await launcher.resolveBinarySha256();
+            },
+          };
+        }),
         cache: new FileSystemSimulationCache(cacheDir()),
         cacheIntegrity: integrity,
         allowedJobClasses: SIMULATION_JOB_CLASSES,
         capacity,
         hostLogicalCpu: availableParallelism(),
-        prepareLauncher: async () => {
-          await launcher.resolveBinarySha256();
-        },
-        ...(options.artifact === undefined ? {} : { artifact: options.artifact }),
       });
     };
 
     try {
       // 1. Startup verification.
       const started = Date.now();
-      const local = service(IMAGE ?? "");
+      const allEngines = hosted.map((entry) => ({ image: entry.image, artifact: entry.model.artifact }));
+      const local = service(allEngines);
       const readiness = await local.start();
       report.startup = { ready: readiness.ready, checks: readiness.checks, selfTestMs: Date.now() - started };
       expect(readiness.ready).toBe(true);
-      const missing = service(`sha256:${"0".repeat(64)}`);
-      const wrong = service(IMAGE ?? "", { artifact: { ...artifact, binarySha256: "1".repeat(64) } });
+      const missing = service([{ image: `sha256:${"0".repeat(64)}`, artifact }]);
+      const wrong = service([
+        { image: IMAGE ?? "", artifact: { ...artifact, binarySha256: "1".repeat(64) } },
+      ]);
       const [missingReady, wrongReady] = [await missing.start(), await wrong.start()];
       report.startupFaults = { missingImage: missingReady, wrongApprovedBinary: wrongReady };
       expect(missingReady.ready).toBe(false);
@@ -123,19 +143,23 @@ describe.skipIf(IMAGE === undefined)("M11-G3-5 runner service on the exact pin",
       save();
 
       // 2. Parity: LOCAL in-process vs REMOTE over a loopback socket (separate service and cache).
-      const remoteService = service(IMAGE ?? "");
+      const remoteService = service(allEngines);
       expect((await remoteService.start()).ready).toBe(true);
       const server = createRunnerServer(
         new RunnerHttpHandler(remoteService, new RequestAuthenticator(new Map([["bench", BENCH_SECRET]]))),
       );
       const port = await listen(server, 0, "127.0.0.1");
       try {
-        const localBackend = new LocalSimulationBackend(local, artifact, RUNNER_SPEC_BINDINGS);
+        const localBackend = new LocalSimulationBackend(
+          local,
+          APPROVED_ENGINE_ARTIFACTS,
+          RUNNER_SPEC_BINDINGS,
+        );
         const remoteBackend = new RemoteSimulationBackend({
           baseUrl: `http://127.0.0.1:${String(port)}`,
           keyId: "bench",
           secret: BENCH_SECRET,
-          artifact,
+          artifacts: APPROVED_ENGINE_ARTIFACTS,
           bindings: RUNNER_SPEC_BINDINGS,
           pollIntervalMs: 250,
           deadlineMs: 300_000,
@@ -180,6 +204,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-5 runner service on the exact pin",
             schemaVersion:
               READINESS_ATTESTATION_SCHEMA_VERSION as typeof READINESS_ATTESTATION_SCHEMA_VERSION,
             jobClass: "PRODUCTION" as const,
+            simulationModelId: historical.id,
             profile: {
               hash: prepared.value.keys.profileHash,
               status: "SIMULATION_READY" as const,
@@ -196,6 +221,30 @@ describe.skipIf(IMAGE === undefined)("M11-G3-5 runner service on the exact pin",
           await localBackend.simulate(blockedRequest),
           await remoteBackend.simulate(blockedRequest),
         ];
+        if (NEW_IMAGE !== undefined) {
+          const promotedJob = devBloodJob("STANDARD_SIM_V1", "ELITE_REALISTIC_V1", promoted.id);
+          const pl = await localBackend.simulate({ job: promotedJob });
+          const pr = await remoteBackend.simulate({ job: promotedJob });
+          const ph = await remoteBackend.simulate({ job: promotedJob });
+          if (!pl.outcome.ok || !pr.outcome.ok) throw new Error(JSON.stringify([pl.outcome, pr.outcome]));
+          report.promotedParity = {
+            model: pl.outcome.value.model,
+            meanLocal: pl.outcome.value.dps.mean,
+            meanRemote: pr.outcome.value.dps.mean,
+            firstSemanticDifference: firstSemanticDifference(
+              pl.outcome.value,
+              pr.outcome.value,
+              RESULT_REPRODUCIBILITY_TOLERANCE,
+            ),
+            served: [pl.served, pr.served, ph.served],
+            cacheKeyDiffersFromHistorical: pl.served?.cacheKey !== l.value.served?.cacheKey,
+          };
+          save();
+          expect(report.promotedParity.firstSemanticDifference).toBeNull();
+          expect(pl.outcome.value.model.requestedSimcCommit).toBe(promoted.pin.simcCommit);
+          expect(ph.served?.cacheStatus).toBe("HIT");
+          expect(report.promotedParity.cacheKeyDiffersFromHistorical).toBe(true);
+        }
         report.parity = {
           localMs: l.ms,
           remoteMs: r.ms,

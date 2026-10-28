@@ -22,7 +22,11 @@
  *
  * Run deliberately (Docker Desktop running, image built):
  *
- *     SIMC_IMAGE=sha256:<image id> npx vitest run --config scripts/bench/vitest.config.ts scripts/bench/m11g3-simc-exact-pin.bench.ts
+ * M11 model registry: MODEL_ID names the simulation model to verify (default:
+ * the historical 33622e9d model). The model's OWN build record and registered
+ * identity are checked; output goes to .probe/m11g3/pin-bench/<short commit>/.
+ *
+ *     [MODEL_ID=<id>] SIMC_IMAGE=sha256:<image id> npx vitest run --config scripts/bench/vitest.config.ts scripts/bench/m11g3-simc-exact-pin.bench.ts
  */
 
 import { cpus, availableParallelism } from "node:os";
@@ -35,7 +39,8 @@ import { BUILD_RECIPE_REVISION } from "../../runner/approved-artifacts.js";
 import { DockerLauncher } from "../../runner/engine-launcher.js";
 import { DEFAULT_RUNNER_LIMITS } from "../../runner/limits.js";
 import { RUNNER_SPEC_BINDINGS } from "../../runner/spec-bindings.js";
-import { APPROVED_SIMC_MODEL, type ApprovedEngineArtifact } from "../../src/simulation/model.js";
+import type { ApprovedEngineArtifact } from "../../src/simulation/model.js";
+import { simulationModelById } from "../../src/simulation/model-registry.js";
 import { prepareSimulation } from "../../src/simulation/prepare.js";
 import { parseSimcJson } from "../../src/simulation/result-parser.js";
 import { firstSemanticDifference, type SimulationResult } from "../../src/simulation/result.js";
@@ -45,7 +50,10 @@ import { devBloodJob, jsonBytes } from "../../tests/support/simulation/dev-blood
 declare const process: any;
 
 const IMAGE: string | undefined = process.env["SIMC_IMAGE"];
-const OUT = join(".probe", "m11g3", "pin-bench");
+const MODEL_ID: string = process.env["MODEL_ID"] ?? "SIMC_33622E9D_LIVE_12_1_0_69587";
+const MODEL = simulationModelById(MODEL_ID);
+if (MODEL === undefined) throw new Error(`MODEL_ID ${MODEL_ID} is not a registered simulation model`);
+const OUT = join(".probe", "m11g3", "pin-bench", MODEL.pin.simcCommit.slice(0, 8));
 
 interface RunRecord {
   readonly label: string;
@@ -64,12 +72,14 @@ describe.skipIf(IMAGE === undefined)("M11-G3-1 exact-pin SimulationCraft runner"
     { timeout: 1_800_000 },
     async () => {
       mkdirSync(OUT, { recursive: true });
-      const record = JSON.parse(readFileSync(join("runner", "simc-build", "build-record.json"), "utf8")) as {
+      const record = JSON.parse(readFileSync(MODEL.buildRecord, "utf8")) as {
         binarySha256: string;
         simcCommit: string;
         imageId: string;
       };
-      expect(record.simcCommit).toBe(APPROVED_SIMC_MODEL.simcCommit);
+      expect(record.simcCommit).toBe(MODEL.pin.simcCommit);
+      expect(record.imageId).toBe(MODEL.imageId);
+      expect(record.binarySha256).toBe(MODEL.artifact.binarySha256);
       expect(IMAGE).toBe(record.imageId);
 
       const limits = { ...DEFAULT_RUNNER_LIMITS, maxWallClockMs: 120_000 };
@@ -85,7 +95,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-1 exact-pin SimulationCraft runner"
       const executedSha = await launcher.resolveBinarySha256();
       expect(executedSha, "image binary vs build record").toBe(record.binarySha256);
       const artifact: ApprovedEngineArtifact = {
-        model: APPROVED_SIMC_MODEL,
+        model: MODEL.pin,
         binarySha256: record.binarySha256,
         buildRecipeRevision: BUILD_RECIPE_REVISION,
       };
@@ -97,7 +107,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-1 exact-pin SimulationCraft runner"
         executionProfileId: string,
         keepRaw = false,
       ) => {
-        const job = devBloodJob(policyId, executionProfileId);
+        const job = devBloodJob(policyId, executionProfileId, MODEL_ID);
         const prepared = await prepareSimulation(job, jsonBytes(job), artifact, RUNNER_SPEC_BINDINGS);
         if (!prepared.ok) throw new Error(`${label}: ${prepared.failure.code} ${prepared.failure.detail}`);
         const launched = await launcher.launch({ input: prepared.value.input, timeoutMs: 120_000 });

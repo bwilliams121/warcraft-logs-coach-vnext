@@ -1,0 +1,347 @@
+{
+  "_golden": {
+    "source": "simulation model SIMC_0A72E6A7_LIVE_12_1_0_69933 (binary 79bf5a406b0ca16eb8e828ef017603b60fdee576a5cb3cf4acaacf93a08eea36)",
+    "job": "BOSS_ONLY_DIAGNOSTIC translation of the canonical subject environment, every consumable variant"
+  },
+  "purpose": "BOSS_ONLY_DIAGNOSTIC",
+  "variants": [
+    "flask=flask_of_thalassian_resistance_1,potion=potion_of_recklessness_1",
+    "flask=flask_of_thalassian_resistance_1,potion=potion_of_recklessness_2",
+    "flask=flask_of_thalassian_resistance_2,potion=potion_of_recklessness_1",
+    "flask=flask_of_thalassian_resistance_2,potion=potion_of_recklessness_2"
+  ],
+  "ledger": [
+    {
+      "component": "duration",
+      "written": "FIXED_EXACT_OBSERVED 345177 ms",
+      "basis": "OBSERVED",
+      "detail": "fixed_time=1, exact max_time, vary_combat_length=0 (RETROSPECTIVE_EXACT_FIGHT_END@1)"
+    },
+    {
+      "component": "primaryTarget",
+      "written": "SINGLE_TARGET",
+      "basis": "MODEL_ASSUMPTION",
+      "detail": "availability MODEL_ASSUMPTION"
+    },
+    {
+      "component": "raidBuffs.arcane_intellect",
+      "written": "1",
+      "basis": "OBSERVED",
+      "detail": "aura 1459 on the pull, never removed"
+    },
+    {
+      "component": "raidBuffs.battle_shout",
+      "written": "1",
+      "basis": "OBSERVED",
+      "detail": "aura 6673 on the pull, never removed"
+    },
+    {
+      "component": "raidBuffs.blessing_of_the_bronze",
+      "written": "1",
+      "basis": "OBSERVED",
+      "detail": "aura 381732 on the pull, never removed"
+    },
+    {
+      "component": "raidBuffs.mark_of_the_wild",
+      "written": "1",
+      "basis": "OBSERVED",
+      "detail": "aura 1126 on the pull, never removed"
+    },
+    {
+      "component": "raidBuffs.power_word_fortitude",
+      "written": "1",
+      "basis": "OBSERVED",
+      "detail": "aura 21562 on the pull, never removed"
+    },
+    {
+      "component": "raidBuffs.skyfury",
+      "written": "1",
+      "basis": "OBSERVED",
+      "detail": "aura 462854 on the pull, never removed"
+    },
+    {
+      "component": "raidBuffs.chaos_brand",
+      "written": "0",
+      "basis": "OMITTED_UNRESOLVED",
+      "detail": "presence UNKNOWN; not written — not a claim of absence"
+    },
+    {
+      "component": "raidBuffs.mystic_touch",
+      "written": "0",
+      "basis": "OMITTED_UNRESOLVED",
+      "detail": "presence UNKNOWN; not written — not a claim of absence"
+    },
+    {
+      "component": "raidBuffs.hunters_mark",
+      "written": "0",
+      "basis": "OMITTED_UNRESOLVED",
+      "detail": "presence UNKNOWN; not written — not a claim of absence"
+    },
+    {
+      "component": "raidBuffs.mortal_wounds",
+      "written": "0",
+      "basis": "INERT_AT_PIN",
+      "detail": "UNKNOWN, but inert at the pin: mortal_wounds on vs off is bit-identical"
+    },
+    {
+      "component": "raidBuffs.bleeding",
+      "written": "0",
+      "basis": "INERT_AT_PIN",
+      "detail": "UNKNOWN, but inert at the pin: bleeding on vs off is bit-identical"
+    },
+    {
+      "component": "bloodlust",
+      "written": "AT 471 ms (spell 32182)",
+      "basis": "ENGINE_WHOLE_SECOND",
+      "detail": "the engine fires it at 1000 ms (whole-second check); no default or second lust"
+    },
+    {
+      "component": "consumables.flask",
+      "written": "flask_of_thalassian_resistance_1 | flask_of_thalassian_resistance_2",
+      "basis": "OBSERVED",
+      "detail": "spell 1235057; rank UNKNOWN: every plausible rank is a variant (envelope)"
+    },
+    {
+      "component": "consumables.food",
+      "written": "NONE",
+      "basis": "OMITTED_UNRESOLVED",
+      "detail": "identity UNKNOWN; not written — not a claim of absence"
+    },
+    {
+      "component": "consumables.augmentation",
+      "written": "NONE",
+      "basis": "OMITTED_UNRESOLVED",
+      "detail": "identity UNKNOWN; not written — not a claim of absence"
+    },
+    {
+      "component": "consumables.potion",
+      "written": "potion_of_recklessness_1 | potion_of_recklessness_2",
+      "basis": "ACTUAL_SETUP_APL_TIMING",
+      "detail": "spell 1236994 was available (observed); timing is the elite APL's (POTION_TIMING_ELITE_APL_V1); the observed uses are evidence, not replayed"
+    },
+    {
+      "component": "consumables.temporaryEnchant.main_hand",
+      "written": "thalassian_phoenix_oil_2",
+      "basis": "MODEL_ASSUMPTION",
+      "detail": "enchant 8052 on the pull's gear; persistence MODEL_ASSUMPTION"
+    },
+    {
+      "component": "targetSchedule",
+      "written": "BOSS_ONLY",
+      "basis": "OMITTED_UNRESOLVED",
+      "detail": "2 engaged candidates left out: no availability interval is established; not a claim that none existed"
+    },
+    {
+      "component": "tankLoad",
+      "written": "STANDARD_TANK_LOAD_V1",
+      "basis": "MODEL_ASSUMPTION",
+      "detail": "revision 7397216ba23406188218ea9444e2387de05988156cabcc235cba06e99338aad1"
+    }
+  ],
+  "echoes": [
+    {
+      "variant": "flask=flask_of_thalassian_resistance_1,potion=potion_of_recklessness_1",
+      "targets": 1,
+      "raidEvents": ["tank_heal"],
+      "simulationLength": {
+        "min": 345.177,
+        "max": 345.177
+      },
+      "constantRaidBuffs": [
+        "arcane_intellect",
+        "battle_shout",
+        "blessing_of_the_bronze",
+        "mark_of_the_wild",
+        "power_word_fortitude",
+        "skyfury"
+      ],
+      "bloodlust": [
+        {
+          "spell": 2825,
+          "startCount": 1
+        }
+      ],
+      "bloodlustTime": 0.47100000000000003,
+      "consumables": {
+        "potion": "potion_of_recklessness_1",
+        "flask": "flask_of_thalassian_resistance_1",
+        "food": "disabled",
+        "augmentation": "disabled",
+        "temporaryEnchant": "main_hand:thalassian_phoenix_oil_2"
+      },
+      "expected": {
+        "provenance": "DIAGNOSTIC_RECONSTRUCTION",
+        "potion": "potion_of_recklessness_1",
+        "flask": "flask_of_thalassian_resistance_1",
+        "food": "NONE",
+        "augmentation": "NONE",
+        "temporaryEnchants": [
+          {
+            "slot": "main_hand",
+            "enchant": "thalassian_phoenix_oil_2"
+          }
+        ]
+      },
+      "options": {
+        "maxTime": 345.177,
+        "fixedTime": true,
+        "varyCombatLength": 0,
+        "optimalRaid": 0,
+        "desiredTargets": 1
+      }
+    },
+    {
+      "variant": "flask=flask_of_thalassian_resistance_1,potion=potion_of_recklessness_2",
+      "targets": 1,
+      "raidEvents": ["tank_heal"],
+      "simulationLength": {
+        "min": 345.177,
+        "max": 345.177
+      },
+      "constantRaidBuffs": [
+        "arcane_intellect",
+        "battle_shout",
+        "blessing_of_the_bronze",
+        "mark_of_the_wild",
+        "power_word_fortitude",
+        "skyfury"
+      ],
+      "bloodlust": [
+        {
+          "spell": 2825,
+          "startCount": 1
+        }
+      ],
+      "bloodlustTime": 0.47100000000000003,
+      "consumables": {
+        "potion": "potion_of_recklessness_2",
+        "flask": "flask_of_thalassian_resistance_1",
+        "food": "disabled",
+        "augmentation": "disabled",
+        "temporaryEnchant": "main_hand:thalassian_phoenix_oil_2"
+      },
+      "expected": {
+        "provenance": "DIAGNOSTIC_RECONSTRUCTION",
+        "potion": "potion_of_recklessness_2",
+        "flask": "flask_of_thalassian_resistance_1",
+        "food": "NONE",
+        "augmentation": "NONE",
+        "temporaryEnchants": [
+          {
+            "slot": "main_hand",
+            "enchant": "thalassian_phoenix_oil_2"
+          }
+        ]
+      },
+      "options": {
+        "maxTime": 345.177,
+        "fixedTime": true,
+        "varyCombatLength": 0,
+        "optimalRaid": 0,
+        "desiredTargets": 1
+      }
+    },
+    {
+      "variant": "flask=flask_of_thalassian_resistance_2,potion=potion_of_recklessness_1",
+      "targets": 1,
+      "raidEvents": ["tank_heal"],
+      "simulationLength": {
+        "min": 345.177,
+        "max": 345.177
+      },
+      "constantRaidBuffs": [
+        "arcane_intellect",
+        "battle_shout",
+        "blessing_of_the_bronze",
+        "mark_of_the_wild",
+        "power_word_fortitude",
+        "skyfury"
+      ],
+      "bloodlust": [
+        {
+          "spell": 2825,
+          "startCount": 1
+        }
+      ],
+      "bloodlustTime": 0.47100000000000003,
+      "consumables": {
+        "potion": "potion_of_recklessness_1",
+        "flask": "flask_of_thalassian_resistance_2",
+        "food": "disabled",
+        "augmentation": "disabled",
+        "temporaryEnchant": "main_hand:thalassian_phoenix_oil_2"
+      },
+      "expected": {
+        "provenance": "DIAGNOSTIC_RECONSTRUCTION",
+        "potion": "potion_of_recklessness_1",
+        "flask": "flask_of_thalassian_resistance_2",
+        "food": "NONE",
+        "augmentation": "NONE",
+        "temporaryEnchants": [
+          {
+            "slot": "main_hand",
+            "enchant": "thalassian_phoenix_oil_2"
+          }
+        ]
+      },
+      "options": {
+        "maxTime": 345.177,
+        "fixedTime": true,
+        "varyCombatLength": 0,
+        "optimalRaid": 0,
+        "desiredTargets": 1
+      }
+    },
+    {
+      "variant": "flask=flask_of_thalassian_resistance_2,potion=potion_of_recklessness_2",
+      "targets": 1,
+      "raidEvents": ["tank_heal"],
+      "simulationLength": {
+        "min": 345.177,
+        "max": 345.177
+      },
+      "constantRaidBuffs": [
+        "arcane_intellect",
+        "battle_shout",
+        "blessing_of_the_bronze",
+        "mark_of_the_wild",
+        "power_word_fortitude",
+        "skyfury"
+      ],
+      "bloodlust": [
+        {
+          "spell": 2825,
+          "startCount": 1
+        }
+      ],
+      "bloodlustTime": 0.47100000000000003,
+      "consumables": {
+        "potion": "potion_of_recklessness_2",
+        "flask": "flask_of_thalassian_resistance_2",
+        "food": "disabled",
+        "augmentation": "disabled",
+        "temporaryEnchant": "main_hand:thalassian_phoenix_oil_2"
+      },
+      "expected": {
+        "provenance": "DIAGNOSTIC_RECONSTRUCTION",
+        "potion": "potion_of_recklessness_2",
+        "flask": "flask_of_thalassian_resistance_2",
+        "food": "NONE",
+        "augmentation": "NONE",
+        "temporaryEnchants": [
+          {
+            "slot": "main_hand",
+            "enchant": "thalassian_phoenix_oil_2"
+          }
+        ]
+      },
+      "options": {
+        "maxTime": 345.177,
+        "fixedTime": true,
+        "varyCombatLength": 0,
+        "optimalRaid": 0,
+        "desiredTargets": 1
+      }
+    }
+  ]
+}

@@ -13,7 +13,7 @@ import { join } from "node:path";
 
 import { DirectLauncher, type EngineLauncher, type LaunchRequest } from "../../../runner/engine-launcher.js";
 import { DEFAULT_RUNNER_LIMITS, type RunnerLimits } from "../../../runner/limits.js";
-import { RUNNER_SPEC_BINDINGS } from "../../../runner/spec-bindings.js";
+import { RUNNER_MODEL_VALIDATIONS, RUNNER_SPEC_BINDINGS } from "../../../runner/spec-bindings.js";
 import { RequestAuthenticator } from "../../../runner/service/auth.js";
 import { MemorySimulationCache, type SimulationCache } from "../../../runner/service/cache.js";
 import { CacheIntegrity } from "../../../runner/service/cache-integrity.js";
@@ -37,16 +37,30 @@ import {
   READINESS_ATTESTATION_SCHEMA_VERSION,
   type ReadinessAttestation,
 } from "../../../src/simulation/readiness-attestation.js";
-import { APPROVED_SIMC_MODEL, type ApprovedEngineArtifact } from "../../../src/simulation/model.js";
+import type { ApprovedEngineArtifact } from "../../../src/simulation/model.js";
+import { resolveSimulationModel } from "../../../src/simulation/model-registry.js";
 import { signRunnerRequest, newNonce } from "../../../src/simulation/runner-protocol.js";
-import { devBloodJob, jsonBytes } from "./dev-blood-job.js";
+import { DEV_SIMULATION_MODEL_ID, devBloodJob, jsonBytes, modelPin } from "./dev-blood-job.js";
 
 declare const process: { execPath: string; cwd(): string };
 
 export const FAKE = join(process.cwd(), "tests", "support", "simulation", "fake-simc.mjs");
 export const FAKE_SHA = createHash("sha256").update(readFileSync(FAKE)).digest("hex");
+/** The registered 0a72e6a7 / 12.1.0.69933 simulation model (M11 model registry). */
+export const NEW_MODEL_ID = "SIMC_0A72E6A7_LIVE_12_1_0_69933";
+/** Fake-engine mode suffix that makes the fake report the 0a72e6a7 model's identity. */
+export const NEW_MODEL_FAKE_SUFFIX = "@0a72e6a746@12.1.0.69933";
+
+/** The fake engine standing in for the historical model (it reports 33622e9 / 12.1.0.69587). */
 export const FAKE_ARTIFACT: ApprovedEngineArtifact = {
-  model: APPROVED_SIMC_MODEL,
+  model: modelPin(DEV_SIMULATION_MODEL_ID),
+  binarySha256: FAKE_SHA,
+  buildRecipeRevision: "fake",
+};
+
+/** The same fake binary standing in for the 0a72e6a7 model (with NEW_MODEL_FAKE_SUFFIX). */
+export const FAKE_ARTIFACT_NEW: ApprovedEngineArtifact = {
+  model: modelPin(NEW_MODEL_ID),
   binarySha256: FAKE_SHA,
   buildRecipeRevision: "fake",
 };
@@ -76,11 +90,17 @@ export async function attestationFor(
   job: unknown,
   overrides: (attestation: Record<string, any>) => void = () => undefined,
 ): Promise<ReadinessAttestation> {
-  const prepared = await prepareSimulation(job, jsonBytes(job), FAKE_ARTIFACT, RUNNER_SPEC_BINDINGS);
+  const prepared = await prepareSimulation(
+    job,
+    jsonBytes(job),
+    [FAKE_ARTIFACT, FAKE_ARTIFACT_NEW],
+    RUNNER_SPEC_BINDINGS,
+  );
   if (!prepared.ok) throw new Error(prepared.failure.detail);
   const attestation: Record<string, any> = {
     schemaVersion: READINESS_ATTESTATION_SCHEMA_VERSION,
     jobClass: "PRODUCTION",
+    simulationModelId: modelIdOf(job),
     profile: {
       hash: prepared.value.keys.profileHash,
       status: "SIMULATION_READY",
@@ -114,11 +134,17 @@ export class ModeLauncher implements EngineLauncher {
   constructor(
     public mode = "ok",
     private readonly limits: RunnerLimits = TEST_LIMITS,
+    /** Appended to every mode: which model identity the fake reports. */
+    private readonly identitySuffix = "",
   ) {}
   async launch(request: LaunchRequest) {
     this.launches += 1;
     const launcher = new DirectLauncher(
-      { executable: process.execPath, leadingArgs: [FAKE, this.mode], binaryToHash: FAKE },
+      {
+        executable: process.execPath,
+        leadingArgs: [FAKE, `${this.mode}${this.identitySuffix}`],
+        binaryToHash: FAKE,
+      },
       this.limits,
     );
     return await launcher.launch(request);
@@ -128,15 +154,15 @@ export class ModeLauncher implements EngineLauncher {
 type Json = Record<string, any>;
 
 /** A DEVELOPMENT Blood job on the production execution profile; `variant` changes the environment key. */
-export function devJob(variant = 0, policyId = "STANDARD_SIM_V1"): Json {
-  const job = devBloodJob(policyId, "ELITE_REALISTIC_V1") as Json;
+export function devJob(variant = 0, policyId = "STANDARD_SIM_V1", modelId = DEV_SIMULATION_MODEL_ID): Json {
+  const job = devBloodJob(policyId, "ELITE_REALISTIC_V1", modelId) as Json;
   job.environment.durationMs = 60_000 + variant * 1_000;
   return job;
 }
 
 /** A PRODUCTION-class job: logged reconstruction, every provenance ACTUAL_OBSERVED. */
-export function productionJob(variant = 0): Json {
-  const job = devJob(variant);
+export function productionJob(variant = 0, modelId = DEV_SIMULATION_MODEL_ID): Json {
+  const job = devJob(variant, "STANDARD_SIM_V1", modelId);
   job.character.profileKind = "LOGGED_RECONSTRUCTION";
   job.character.consumables.provenance = "ACTUAL_OBSERVED";
   job.environment.raidBuffs.provenance = "ACTUAL_OBSERVED";
@@ -145,8 +171,8 @@ export function productionJob(variant = 0): Json {
 }
 
 /** A DIAGNOSTIC_RECONSTRUCTION job (never publishable). */
-export function diagnosticJob(variant = 0): Json {
-  const job = devJob(variant);
+export function diagnosticJob(variant = 0, modelId = DEV_SIMULATION_MODEL_ID): Json {
+  const job = devJob(variant, "STANDARD_SIM_V1", modelId);
   job.character.profileKind = "LOGGED_RECONSTRUCTION";
   job.character.consumables.provenance = "DIAGNOSTIC_RECONSTRUCTION";
   job.environment.raidBuffs.provenance = "DIAGNOSTIC_RECONSTRUCTION";
@@ -158,7 +184,10 @@ export const bytesOf = jsonBytes;
 
 export interface Harness {
   readonly service: SimulationService;
+  /** The first hosted engine's launcher. */
   readonly launcher: ModeLauncher;
+  /** Every hosted engine's launcher, by simulation model id. */
+  readonly launchers: Readonly<Record<string, ModeLauncher>>;
   readonly cache: SimulationCache;
   readonly events: ServiceEvent[];
 }
@@ -169,7 +198,11 @@ export async function startedService(
     mode?: string;
     cache?: SimulationCache;
     capacity?: RunnerCapacity;
+    /** Overrides the historical model's artifact (e.g. a wrong binary hash). */
     artifact?: ApprovedEngineArtifact;
+    /** Which simulation models the runner hosts (default: the historical model only). */
+    models?: readonly ("HISTORICAL" | "NEW")[];
+    modelValidations?: ComposeModelValidations;
     start?: boolean;
     hostLogicalCpu?: number;
     setTimer?: (callback: () => void, ms: number) => { cancel(): void };
@@ -180,24 +213,37 @@ export async function startedService(
     allowedJobClasses?: readonly SimulationJobClass[];
   } = {},
 ): Promise<Harness> {
-  const launcher = new ModeLauncher(options.mode ?? "ok");
   const cache = options.cache ?? new MemorySimulationCache();
   const events: ServiceEvent[] = [];
+  const hosted = options.models ?? ["HISTORICAL"];
+  const launchers: Record<string, ModeLauncher> = {};
+  const engines = hosted.map((which) => {
+    const artifact = which === "NEW" ? FAKE_ARTIFACT_NEW : (options.artifact ?? FAKE_ARTIFACT);
+    const launcher = new ModeLauncher(
+      options.mode ?? "ok",
+      TEST_LIMITS,
+      which === "NEW" ? NEW_MODEL_FAKE_SUFFIX : "",
+    );
+    launchers[which === "NEW" ? NEW_MODEL_ID : DEV_SIMULATION_MODEL_ID] = launcher;
+    return { artifact, launcher };
+  });
   const service = composeSimulationService({
-    launcher,
+    engines,
     cache,
+    ...(options.modelValidations === undefined ? {} : { modelValidations: options.modelValidations }),
     cacheIntegrity:
       options.cacheIntegrity === undefined ? await testCacheIntegrity() : options.cacheIntegrity,
     allowedJobClasses: options.allowedJobClasses ?? ALL_JOB_CLASSES,
     capacity: options.capacity ?? TEST_CAPACITY,
-    artifact: options.artifact ?? FAKE_ARTIFACT,
     log: (event) => events.push(event),
     ...(options.hostLogicalCpu === undefined ? {} : { hostLogicalCpu: options.hostLogicalCpu }),
     ...(options.setTimer === undefined ? {} : { setTimer: options.setTimer }),
     ...(options.clock === undefined ? {} : { clock: options.clock }),
   });
   if (options.start !== false) await service.start();
-  return { service, launcher, cache, events };
+  const first = engines[0]?.launcher;
+  if (first === undefined) throw new Error("no engine");
+  return { service, launcher: first, launchers, cache, events };
 }
 
 /**
@@ -237,19 +283,24 @@ export async function gatedService(
   let now = 1_000_000;
   const events: ServiceEvent[] = [];
   const service = new SimulationService({
-    artifact: FAKE_ARTIFACT,
+    engines: [
+      {
+        artifact: FAKE_ARTIFACT,
+        execute: gated.execute,
+        startupCheck: selfTestStartupCheck(
+          createExecutor(FAKE_ARTIFACT, new ModeLauncher("ok"), RUNNER_SPEC_BINDINGS, TEST_LIMITS),
+          FAKE_ARTIFACT,
+          RUNNER_SPEC_BINDINGS,
+        ),
+      },
+    ],
     bindings: RUNNER_SPEC_BINDINGS,
+    modelValidations: RUNNER_MODEL_VALIDATIONS,
     capacity,
     policy: SERVICE_POLICY_V1,
     cache,
     cacheIntegrity: await testCacheIntegrity(),
     allowedJobClasses: ALL_JOB_CLASSES,
-    execute: gated.execute,
-    startupCheck: selfTestStartupCheck(
-      createExecutor(FAKE_ARTIFACT, new ModeLauncher("ok"), RUNNER_SPEC_BINDINGS, TEST_LIMITS),
-      FAKE_ARTIFACT,
-      RUNNER_SPEC_BINDINGS,
-    ),
     clock: () => now,
     log: (event) => events.push(event),
     setTimer: (callback, ms) => {
@@ -340,4 +391,17 @@ export function inProcessFetch(
       headers: { "content-type": "application/json" },
     });
   }) as typeof fetch;
+}
+
+type ComposeModelValidations = NonNullable<
+  Parameters<typeof composeSimulationService>[0]["modelValidations"]
+>;
+
+/** The registered simulation model id a job names. */
+export function modelIdOf(job: unknown): string {
+  const pin = (job as { model?: { simcCommit: string; gameDataBuild: string } }).model;
+  if (pin === undefined) throw new Error("job has no model");
+  const model = resolveSimulationModel(pin);
+  if (!model.ok) throw new Error(model.failure.detail);
+  return model.value.id;
 }

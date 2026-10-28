@@ -178,10 +178,20 @@ describe("M11-G3-1 simulation layering", () => {
         expect(file, `${file} imports ${spec}`).toMatch(
           /^src\/specs\/[a-z]+\/[a-z_]+\/simulation-binding\.ts$/,
         );
-        expect(spec).toBe("../../../simulation/spec-binding.js");
+        // M11 model-registry amendment (reviewed): a spec's simulation binding
+        // also declares which simulation models it has validated, as a TYPE
+        // import of the registry's validation shape — never registry values.
+        expect(["../../../simulation/spec-binding.js", "../../../simulation/model-registry.js"]).toContain(
+          spec,
+        );
         expect(text).toMatch(
           /import type \{ SimulationSpecBinding \} from "\.\.\/\.\.\/\.\.\/simulation\/spec-binding\.js"/,
         );
+        if (spec.endsWith("model-registry.js")) {
+          expect(text).toMatch(
+            /import type \{ SpecSimulationModelValidation \} from "\.\.\/\.\.\/\.\.\/simulation\/model-registry\.js"/,
+          );
+        }
       }
     }
   });

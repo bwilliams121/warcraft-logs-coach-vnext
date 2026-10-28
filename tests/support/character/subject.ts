@@ -20,6 +20,8 @@ import manifest from "../../evidence/manifest.json";
 import statements from "../../fixtures/character/canonical-subject-user-statements.json";
 import { committedEvidenceArchiveFiles } from "../corpus/evidence-archive.js";
 import { bundleOf } from "../corpus/fight.js";
+import { simulationModelData, type SimulationModelData } from "../../../src/data/simulation-models/index.js";
+import { DEV_SIMULATION_MODEL_ID } from "../simulation/dev-blood-job.js";
 import { artifactJson, COMPARISONS, g2Archive, SUBJECT } from "../m11/g2-four-fights.js";
 
 const sha256 = (text: string): string => createHash("sha256").update(text).digest("hex");
@@ -130,9 +132,18 @@ export function withOwnerStatements(input: ReconstructionInput): ReconstructionI
   };
 }
 
-export function reconstructionInputOf(evidence: FightEvidence): ReconstructionInput {
+/**
+ * The canonical subject's reconstruction input FOR a named simulation model
+ * (M11 model registry). Tests that predate the registry default to the
+ * historical development model; a test about another model names it.
+ */
+export function reconstructionInputOf(
+  evidence: FightEvidence,
+  modelId: string = DEV_SIMULATION_MODEL_ID,
+): ReconstructionInput {
   const facts = readCombatantPullFacts(evidence.rawCombatantInfo);
   return {
+    simulationModel: simulationModelDataOrThrow(modelId),
     subject: { fightRef: evidence.fightRef, actorId: evidence.focusActorId },
     snapshot: evidence.snapshot,
     talentImport: evidence.talentImport,
@@ -144,4 +155,11 @@ export function reconstructionInputOf(evidence: FightEvidence): ReconstructionIn
       role: index === 0 ? "FIGHT_CONTEXT" : id.endsWith("seg-0-45") ? "COMBATANT_INFO" : "EVENTS",
     })),
   };
+}
+
+/** A named simulation model's pinned data, or a thrown test failure. */
+export function simulationModelDataOrThrow(modelId: string): SimulationModelData {
+  const loaded = simulationModelData(modelId);
+  if (!loaded.ok) throw new Error(loaded.detail);
+  return loaded.data;
 }

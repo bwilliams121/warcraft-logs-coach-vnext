@@ -53,10 +53,29 @@ const ENVIRONMENT_GATE_FILES = [
   "src/environment/translate.ts",
 ];
 
-/** Reviewed fingerprints, by revision. */
+/**
+ * Reviewed fingerprints, by revision.
+ *
+ * Re-pin history (same revision; meaning unchanged):
+ * - M11 model registry (2026-10-23): character-profile/reconstruct.ts and
+ *   environment/reconstruct.ts read consumable, token-acceptance and
+ *   raid-environment data from the NAMED simulation model's bundle (injected
+ *   through the reconstruction input) instead of module-level 33622e9d
+ *   singletons. Every rule, threshold and verdict is unchanged; the 33622e9d
+ *   reconstruction and publishability tests pass unmodified. Previous pins:
+ *   profile 2f3e68f0…, environment 6914caa3….
+ * - M11 model-registry closeout (2026-10-28): environment/reconstruct.ts takes
+ *   the caller's validated model applicability. Inside a validated window for
+ *   THIS model, the age-only MODEL_BUILD_LAG diagnostic becomes the
+ *   informational MODEL_SNAPSHOT_PRECEDES_LOG. Both are diagnostics, which
+ *   publishability never blocks on. Blockers, status, materiality and the
+ *   environment hash are identical with and without the applicability
+ *   (tests/unit/simulation/model-0a72e6a7-canonical.test.ts). Previous pin:
+ *   environment e26b184f….
+ */
 const PINNED: Record<string, string> = {
-  "profile-readiness-gate/1": "2f3e68f05ac39087f9153bca99e07136eea5d0cc9769b3029cb92b3cc212bf9d",
-  "environment-publishability-gate/1": "6914caa35efa6efa43dfd096195309eaa0a9dc752642e06de7caa970199b9fd2",
+  "profile-readiness-gate/1": "fbf0aace1f399d3ed70748a4fa00a3d19c396b6a567e5aedac61ebe8c284205b",
+  "environment-publishability-gate/1": "12b313594d4b69b92ae87cb12dd9cda1fe351feb1624026d0838a0c29800b2d9",
 };
 
 describe("M11-G3-5 readiness gate revisions", () => {

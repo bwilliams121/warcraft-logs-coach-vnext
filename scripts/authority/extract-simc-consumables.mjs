@@ -36,7 +36,17 @@
  *     --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
  *     --file-temporaryEnchant <temporary_enchant.inc> --file-itemData <item_data.inc> \
  *     --file-itemEffect <item_effect.inc> --file-clientDataVersion <client_data_version.inc> \
- *     --out src/data/game/consumables.json
+ *     --file-consumableCpp <consumable.cpp> \
+ *     --out src/data/simulation-models/<model>/consumables.json
+ *
+ * Version history:
+ *   3  the consumable.cpp source was LABELLED engine/item/consumable.cpp, a
+ *      path that does not exist at the pinned commits; the hash recorded was
+ *      of the real file (engine/player/consumable.cpp).
+ *   4  M11 model registry: the label is the real path, and an empty or
+ *      keyword-chain-less consumable.cpp fails closed. Extraction semantics
+ *      are unchanged: v3 and v4 artifacts from the same sources differ only in
+ *      provenance (path label, extractor version, artifact revision).
  */
 
 import { createHash } from "node:crypto";
@@ -49,7 +59,7 @@ import { format, resolveConfig } from "prettier";
 import { parseArgs, parseClientDataVersion, sourceHashProblem } from "./extract-simc-talents.mjs";
 
 const REPOSITORY = "https://github.com/simulationcraft/simc";
-const EXTRACTOR_VERSION = 3;
+const EXTRACTOR_VERSION = 4;
 const MIN_REQUIRED_LEVEL = 80;
 
 const SOURCES = {
@@ -57,7 +67,7 @@ const SOURCES = {
   itemData: "engine/dbc/generated/item_data.inc",
   itemEffect: "engine/dbc/generated/item_effect.inc",
   clientDataVersion: "engine/dbc/generated/client_data_version.inc",
-  consumableCpp: "engine/item/consumable.cpp",
+  consumableCpp: "engine/player/consumable.cpp",
 };
 
 /** The ordered augmentation keyword chain: [keyword, spell id] in source order. */
@@ -253,11 +263,15 @@ async function main() {
   for (const [key, path] of Object.entries(SOURCES)) {
     if (typeof args[`file-${key}`] !== "string") fail(`pass --file-${key}: local pinned copies only`);
     const buffer = readFileSync(args[`file-${key}`]);
+    if (buffer.length === 0) fail(`--file-${key} is empty: ${path}`);
     const sha256 = createHash("sha256").update(buffer).digest("hex");
     const problem = sourceHashProblem(path, args[`expect-${key}-sha256`], sha256);
     if (problem !== null) fail(problem);
     loaded[key] = buffer.toString("utf8");
     sources.push({ path, sha256, byteLength: buffer.length });
+  }
+  if (parseAugmentationDrivers(loaded.consumableCpp).length === 0) {
+    fail("consumable.cpp: no augmentation_t keyword chain found (wrong or truncated source)");
   }
   const clientDataWowVersion = parseClientDataVersion(loaded.clientDataVersion);
   if (clientDataWowVersion === null) fail("client_data_version.inc has no CLIENT_DATA_WOW_VERSION");
@@ -292,7 +306,7 @@ async function main() {
   const artifact = {
     artifactVersion: 1,
     datasetId: "SIMC_CONSUMABLES",
-    artifactRevision: `simc-${args.sha.slice(0, 8)}-3`,
+    artifactRevision: `simc-${args.sha.slice(0, 8)}-${String(EXTRACTOR_VERSION)}`,
     provenance: {
       repository: REPOSITORY,
       commitSha: args.sha,

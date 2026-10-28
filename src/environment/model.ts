@@ -352,11 +352,33 @@ export type EnvironmentIssueCode =
   | "ASSUMPTION_RECORDED"
   | "BLOODLUST_ENGINE_WHOLE_SECOND"
   | "ALLY_AURA_NOT_REPRESENTABLE"
+  /** The log postdates the model's data snapshot and no validated applicability window covers the fight. */
   | "MODEL_BUILD_LAG"
+  /**
+   * Informational only: the log postdates the model's data snapshot, but the
+   * fight is inside an explicitly validated applicability window, so model
+   * chronology is discharged. Not compatibility uncertainty.
+   */
+  | "MODEL_SNAPSHOT_PRECEDES_LOG"
   | "OBSERVED_ENGAGEMENT_ONLY"
   | "USER_PROVIDED_RECORDED"
   | "RANK_ENVELOPE_RECORDED"
   | "ENGINE_APPROXIMATION_RECORDED";
+
+/**
+ * The simulation model's validated applicability for this fight, as produced
+ * by model selection (a spec's production validation whose window contains
+ * the fight start). Declared here structurally: the environment does not read
+ * the model registry or any spec.
+ */
+export interface ValidatedModelApplicability {
+  readonly modelId: string;
+  readonly specKey: string;
+  readonly gameBuild: string;
+  readonly fightStartUtc: string;
+  readonly window: { readonly fromUtc: string; readonly toUtc: string };
+  readonly windowBasis: string;
+}
 
 export interface EnvironmentIssue {
   readonly code: EnvironmentIssueCode;
@@ -387,6 +409,11 @@ export interface EnvironmentReconstructionResult {
     /** Owner-approved, bounded engine approximations applied to observed facts, with both values. */
     readonly engineApproximations: readonly EngineApproximation[];
     readonly model: { readonly simcCommit: string; readonly gameDataBuild: string };
+    /** The applicability the caller supplied, and whether it covers THIS model and fight. */
+    readonly modelApplicability: {
+      readonly supplied: ValidatedModelApplicability | null;
+      readonly coversFight: boolean;
+    };
   };
 }
 
