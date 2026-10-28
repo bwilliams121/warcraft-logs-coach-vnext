@@ -1957,6 +1957,191 @@ fixture.
 
 ---
 
+# Autonomous Tranche Workflow
+
+This is standing behavior for all work in this repository. The owner may say
+something as short as "Start G4." or "Continue." and expect the whole workflow
+below without repeating it.
+
+Whenever the owner asks you to implement, continue, start or finish a
+milestone or tranche:
+
+1. Determine the current repository and milestone state from:
+   - CLAUDE.md
+   - agent/architecture.md
+   - agent/testing.md
+   - agent/follow-ups.md
+   - git history and status
+   - the current branch and PR state (`gh pr list`, `gh pr view`).
+
+2. If beginning new tranche work:
+   - update local main (`git fetch`, fast-forward only);
+   - create an appropriately named feature branch;
+   - never work directly on main.
+
+   If the tranche needs files that exist only on an unmerged feature branch,
+   stack the new branch on that branch and target the PR at it. GitHub
+   retargets the PR to main when the parent merges.
+
+3. Implement the tranche.
+
+4. Run all required focused validation.
+
+5. Maintain `agent/review-request.md` (the rolling, concise review request).
+
+6. Before committing, run the local OpenAI architecture review:
+
+       powershell -ExecutionPolicy Bypass -File scripts/review/openai-review.ps1
+
+7. Read `.probe/openai-review/latest.txt`.
+
+8. If the verdict is CHANGES_REQUIRED:
+   - fix the substantive findings;
+   - rerun the affected tests;
+   - update `agent/review-request.md`;
+   - rerun the OpenAI review;
+   - repeat until APPROVED or OWNER_DECISION_REQUIRED.
+
+9. If OWNER_DECISION_REQUIRED:
+   - stop and ask the owner only the actual decision, in plain English;
+   - do not dump the full tranche report unless requested;
+   - after the answer, record the decision in agent/architecture.md or
+     agent/follow-ups.md, implement it, revalidate and re-review.
+
+10. If APPROVED:
+    - inspect the full git status;
+    - ensure every intended tracked and untracked tranche file is included;
+    - preserve the intentionally excluded local files (below);
+    - run `git diff --check`;
+    - stage only the intended files;
+    - commit to the feature branch;
+    - push the branch.
+
+11. If the branch has no PR, create one with the GitHub CLI:
+
+        gh pr create --base main --head <branch> --title "<tranche title>" --body-file agent/review-request.md
+
+    For a stacked branch, `--base` is the parent feature branch. If the PR
+    already exists, update it (`gh pr edit --body-file agent/review-request.md`)
+    rather than creating another.
+
+12. Watch the real GitHub CI:
+
+        gh pr checks <number> --watch
+
+13. If CI fails:
+    - inspect the failed check or run with gh (`gh run view <id> --log-failed`);
+    - diagnose and fix routine implementation failures yourself;
+    - rerun the required local validation;
+    - rerun the OpenAI architecture review if code or architecture changed;
+    - commit and push the fixes;
+    - watch CI again.
+
+14. Read the GitHub PR reviews and comments with gh
+    (`gh pr view <number> --json reviews,comments`). Look specifically for
+    architecture-review verdicts (`VERDICT: ...`).
+
+15. If a GitHub review returns CHANGES_REQUIRED:
+    - fix it;
+    - validate;
+    - rerun the local OpenAI review;
+    - commit and push;
+    - allow another GitHub review cycle.
+
+16. If a GitHub review returns OWNER_DECISION_REQUIRED, stop and ask the owner
+    only the required decision.
+
+17. A tranche is complete only when all of these hold:
+    - the local OpenAI architecture review is APPROVED;
+    - the GitHub architecture review is APPROVED, when one is present;
+    - GitHub CI is GREEN.
+
+18. Once complete, tell the owner only:
+
+        "<tranche> is approved and CI is green. PR #<number> is ready to merge."
+
+## Owner Interruption Policy
+
+Do NOT interrupt the owner for:
+
+- branch creation;
+- staging;
+- commits;
+- pushes;
+- PR creation;
+- PR updates;
+- CI monitoring;
+- ordinary test failures;
+- ordinary CI failures;
+- review corrections;
+- staging-file enumeration;
+- routine implementation decisions.
+
+Interrupt the owner only for:
+
+- OWNER_DECISION_REQUIRED;
+- credentials or authentication problems;
+- destructive or irreversible actions;
+- production deployment;
+- merge authorization;
+- a genuine product or architecture decision.
+
+## Git Safety
+
+You may automatically:
+
+- create feature branches;
+- stage intended files;
+- commit;
+- push feature branches;
+- create and update PRs;
+- inspect CI;
+- inspect reviews;
+- fix CI and review findings.
+
+You may NOT automatically:
+
+- push directly to main;
+- force-push main;
+- merge PRs;
+- bypass required checks;
+- deploy to production.
+
+Merging remains owner-controlled unless the owner explicitly changes this
+policy.
+
+## Local File Exclusions
+
+Never stage, commit or delete these local files unless the owner explicitly
+changes this list:
+
+- .claude/
+- scripts/probe/wcl-external-candidate.probe.ts
+- scripts/probe/wcl-rankings-schema.probe.ts
+- scripts/probe/wcl-rankings-shape.probe.ts
+
+`.probe/` is gitignored and never committed.
+
+## OpenAI Review
+
+The local OpenAI reviewer (`scripts/review/openai-review.ps1`, policy in
+`agent/openai-review-policy.md`) remains read-only. Its output under
+`.probe/openai-review/` is transient and never authority.
+
+- Do not skip it.
+- Do not silently override a substantive reviewer finding.
+- If you disagree with a finding, rerun the review with the disputed evidence,
+  using the existing mechanism:
+
+      powershell -ExecutionPolicy Bypass -File scripts/review/openai-review.ps1 -DisputeFile <path>
+
+- Escalate only if the disagreement becomes a genuine owner-level
+  architecture or product decision.
+- Never treat an APPROVED verdict as permission to weaken an explicit rule in
+  this file or in agent/architecture.md.
+
+---
+
 # Reporting
 
 Reporting consumes structured findings.
