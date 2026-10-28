@@ -8960,6 +8960,164 @@ The character-profile MODEL_VERSION_COMPATIBILITY_UNKNOWN note now names the
 injected model's build (it was hard-coded "12.1.0.69587"). The profile gate
 fingerprint was re-pinned at the same revision.
 
+## M11-G4-2 — simulation publication (internal)
+
+**Status:** implemented, internal only (2026-10-28): `src/publication/`
+(`pipeline.ts`, `record.ts`, `attainment.ts`). G4 owns publication (G5
+optimization, G6 attribution).
+G4-1 resolves a log's simulation context. G4-2 decides what may be PUBLISHED
+from a simulation of the player's own logged fight, and under which gates.
+
+### Owner decisions (2026-10-28)
+
+1. **Content: the simulated value plus an attainment ratio.**
+   - The simulated DPS is published with its interval.
+   - The ratio (observed ÷ simulated) stays UNKNOWN (ATTAINMENT_NOT_COMPARABLE)
+     until G1's ACTUAL_DPS is PROVEN to count pets and guardians as the
+     engine's "player DPS including pets" does. Today it is corroborated,
+     not proven.
+2. **Exposure: internal only.**
+   - It is a service result.
+   - analysis/1, the public digests and every public route are unchanged.
+   - Public promotion is its own reviewed tranche.
+3. **Proof of the PUBLISHED path: synthetic gate inputs plus the real
+   engine.**
+   - This proves orchestration, NOT real-log reconstruction fidelity.
+   - Real subjects must resolve NOT_PUBLISHED with their exact first failing
+     gate.
+4. **Policy: STANDARD_SIM_V1, with exactly one escalation to
+   PRECISION_ESCALATED_V1.**
+   - It escalates only on SIMULATION_PRECISION_NOT_MET.
+   - If the escalated run also misses, the result is PRECISION_INSUFFICIENT,
+     never a less precise number.
+   - Both policies become the publication policies by this decision.
+
+### Pipeline (`src/publication/`, shared and spec-agnostic)
+
+The pipeline has two stages. Each gate runs in order; the first failure
+becomes `NOT_PUBLISHED` with `{gate, code, reasons}`, and nothing past it
+runs.
+
+**Stage A, readiness (no simulation of the fight itself).**
+
+1. **CONTEXT.**
+   - `resolveSimulationContext`, then `selectSimulationModel` with the spec's
+     validations.
+   - Failure codes are the resolver reason (CONTEXT_UNRESOLVED) or the
+     selection code.
+2. **CHARACTER.**
+   - Reconstruct the profile with the selected model's data.
+   - Build the G3-2 fidelity probe job on that model and read its engine
+     echo through a `ProfileEchoSource` port.
+   - `assessProfileFidelity` must give SIMULATION_READY.
+   - A probe transport or verification failure is CHARACTER /
+     FIDELITY_PROBE_FAILED with its code. It is never "not ready".
+   - **Implementation amendment.** The design said "through the backend",
+     but the G3-5 runner protocol returns no profile echo (the echo is read
+     from raw engine JSON runner-side, `runner/run-fidelity.ts`). Production
+     runners also refuse FIDELITY_PROBE jobs (PRODUCTION-only default).
+     - The CHARACTER gate therefore reads the echo through the port.
+     - Production passes `NO_PROFILE_ECHO_SOURCE`, so the gate fails closed
+       with CHARACTER / FIDELITY_PROBE_UNAVAILABLE. That is the correct
+       production result until a reviewed protocol extension carries the
+       echo and a deployment enables FIDELITY_PROBE (follow-up).
+     - Tests use the committed engine echo for exactly the probe job
+       (checked by profile hash).
+3. **ENVIRONMENT.**
+   - Reconstruct the environment with the selected model's data and its
+     applicability.
+   - `assessEnvironmentPublishability` with that model's spec facts must be
+     PUBLISHABLE.
+   - `translateEnvironment(CURRENT_SETUP)` must succeed.
+
+**Stage B, simulation (a plan from stage A, or a synthetic plan in tests).**
+
+4. **SIMULATION.**
+   - One PRODUCTION job per consumable variant (G3-4: run every variant and
+     report the envelope). Each job uses:
+     - `LOGGED_RECONSTRUCTION`;
+     - the profile's character, with gear built by the same mapping the
+       fidelity probe uses;
+     - the translated environment;
+     - ELITE_REALISTIC_V1 and STANDARD_SIM_V1.
+   - Each job must be `ceilingEligibility`-eligible and carry a readiness
+     attestation v3, built from the prepared job's hashes and the CURRENT
+     gate revisions.
+   - It runs through `SimulationBackend` (remote in production).
+   - **Failure handling:**
+     - SIMULATION_PRECISION_NOT_MET escalates once.
+     - Any other failure is NOT_PUBLISHED and keeps its own code. It is never
+       retried as a precision problem.
+       - SIMULATION_RESULT_INVALID covers verification failures, including
+         `settleTicket` refusals tagged transport BAD_RESPONSE (for example
+         MODEL_PROVENANCE_MISMATCH), and a result whose execution profile
+         revision is not the prepared job's.
+       - SIMULATION_UNAVAILABLE covers NETWORK, AUTH_REJECTED, TICKET_LOST,
+         CLIENT_DEADLINE and REQUEST_REFUSED transports, plus
+         RUNNER_UNAVAILABLE and SIMULATION_TIMEOUT.
+     - Any variant failing means the publication is NOT_PUBLISHED.
+
+**The record (`simulation-publication/1`).**
+
+- `status`, `gate`, `context`, `model`;
+- per-variant `{variantId, policy, mean, ci95, relativeStandardError}`;
+- `simulated`, the envelope across variants:
+  `{low: min ci95.lower, high: max ci95.upper, meanRange: [min, max]}`;
+- `observed`, the G1 ACTUAL_DPS state;
+- `attainment`: UNKNOWN with its reason, or KNOWN
+  `{low: observed ÷ high, high: observed ÷ low}` only when comparability is
+  PROVEN;
+- `provenance`: profile hash, environment hash(es), execution profile id and
+  the verified execution profile revision (`executionProfileRevisions`,
+  cross-checked against each prepared job; ELITE_REALISTIC_V1 is `5692cfec…`),
+  gate revisions, publication revision.
+
+It is an OBSERVATION. It carries no causal claim or coaching (CLAUDE.md
+"Damage Output Diagnosis"); attribution is G6.
+
+### Results
+
+- **Canonical subject (real evidence).** CONTEXT resolves 12.1.0.69933 and
+  selects 0a72e6a7.
+  - Without an echo source: CHARACTER / FIDELITY_PROBE_UNAVAILABLE.
+  - Without the owner's race statement: PROFILE_NOT_SIMULATION_READY.
+  - With both: ENVIRONMENT / ENVIRONMENT_NOT_PUBLISHABLE with its real
+    blockers; the backend is never called.
+  - Without a region: CONTEXT / CONTEXT_UNRESOLVED.
+- **The real runner service accepts the pipeline's PRODUCTION job and
+  attestation** (fake engine, PRODUCTION-only service), and the result
+  publishes.
+- **Real engine** (`scripts/bench/m11g42-publication.bench.ts`, 0a72e6a7
+  image, production job-class default, SYNTHETIC plan: canonical character
+  plus the development environment relabelled ACTUAL_OBSERVED for the bench):
+  - A 345,177 ms fight (the canonical length) PUBLISHES: 82,113 DPS, 95% CI
+    [81,988, 82,238], RSE 7.8e-4 under STANDARD_SIM_V1 (1,992 counted
+    iterations), no escalation.
+  - A 60,000 ms fight is PRECISION_INSUFFICIENT after exactly one escalation:
+    PRECISION_ESCALATED_V1 still measured RSE 9.03e-4 against its 6e-4 bound.
+    Short fights refuse rather than publish a less precise number, as
+    intended. The policies' bounds were calibrated on the 345 s fight.
+
+### Facts the design rests on
+
+- **No real subject can publish today.**
+  - The canonical environment is BLOCKED by TARGET_SCHEDULE_UNRESOLVED,
+    MATERIAL_RAID_BUFF_UNKNOWN, MATERIAL_CONSUMABLE_UNKNOWN,
+    SETUP_AURA_UNCLASSIFIED and PINNED_MODEL_MISSING_OBSERVED_EFFECT.
+  - The last holds on both registered models; the model-pin investigation
+    found the three auras absent from every SimC data set it audited. A
+    future model would be checked by the same gate.
+  - The development fixture is DEVELOPMENT_FIXTURE, which
+    `ceilingEligibility` refuses.
+- **The runner has no deployed host.** TLS, capacity and hosting remain open
+  (G3-5 follow-ups). Production use needs an owner-approved deployment; G4-2
+  wires against `SimulationBackend` only.
+- **Precision is already enforced.** The result parser and verification
+  return SIMULATION_PRECISION_NOT_MET (`result-verification.ts`).
+- **Only PRODUCTION jobs may publish.** The runner admits a PRODUCTION job
+  only with a valid attestation v3 for the job's model and the accepted gate
+  revisions (`readiness-attestation.ts`, `job-class.ts`).
+
 ---
 
 # Milestone 12 — Healer Foundation

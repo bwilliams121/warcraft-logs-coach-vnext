@@ -83,10 +83,10 @@ describe("M11-G4-1 simulation-context layering", () => {
     }
   });
 
-  it("nothing in src imports it yet", () => {
+  it("only the internal publication pipeline imports it (M11-G4-2)", () => {
     const importers = tsFiles("src")
       .filter((file) => !file.startsWith("src/simulation-context/"))
       .filter((file) => importsOf(file).some((spec) => /(^|\/)simulation-context\//.test(spec)));
-    expect(importers).toEqual([]);
+    expect(importers).toEqual(["src/publication/pipeline.ts"]);
   });
 });
