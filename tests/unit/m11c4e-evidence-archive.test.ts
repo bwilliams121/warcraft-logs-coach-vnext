@@ -111,6 +111,16 @@ const M11G2_NOTICE_LINE_EXCEPTION: Readonly<Record<string, number>> = {
   "wcl-g2-tables-cohort261-fight-31": 164445,
 };
 const M11G2_BYTES = Object.values(M11G2_NOTICE_LINE_EXCEPTION).reduce((sum, bytes) => sum + bytes, 0);
+
+/**
+ * M11-G4-1: the canonical report's Warcraft Logs region (one owner-authorized
+ * request): a single 206-byte report surface. Ordinary archive growth, named
+ * and pinned so it is reviewed rather than absorbed.
+ */
+const M11G4_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-g4-region-b1pm-fight-48": 206,
+};
+const M11G4_BYTES = Object.values(M11G4_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 const ARCHIVE_SEGMENT_PATH = `artifacts/wcl-events/${ARCHIVE_SEGMENT}.json`;
 const CORPUS_OPENER = "wcl-brewmaster-monk-gtkb-opener";
 const CORPUS_20_165 = "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165";
@@ -175,16 +185,19 @@ describe("the committed evidence archive", () => {
       ...Object.keys(M11G1_EVIDENCE),
       // M11-G2: the comparison fights' segments, contexts, tables and NPC surface.
       ...Object.keys(M11G2_NOTICE_LINE_EXCEPTION),
+      // M11-G4-1: the canonical report's region.
+      ...Object.keys(M11G4_EVIDENCE),
     ]);
     expect(loaded.archive.cases).toHaveLength(9);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(
-      308961 + 389605 + 387275 + M11E2_BYTES + M11G1_BYTES + M11G2_BYTES,
+      308961 + 389605 + 387275 + M11E2_BYTES + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES,
     );
     for (const [artifactId, bytes] of Object.entries({
       ...M11E2_NOTICE_LINE_EXCEPTION,
       ...M11G1_EVIDENCE,
       ...M11G2_NOTICE_LINE_EXCEPTION,
+      ...M11G4_EVIDENCE,
     })) {
       const entry = loaded.archive.artifacts.find((candidate) => candidate.record.artifactId === artifactId);
       expect(entry?.canonicalByteLength, artifactId).toBe(bytes);
@@ -212,11 +225,15 @@ describe("the committed evidence archive", () => {
     // crossing is pinned to the byte: 4,537,019 bytes (≈4.33 MiB) at M11-E2,
     // plus the 364,631 bytes of M11-G1 evidence: 4,901,650.
     // M11-G2 adds its own one-time exception, 12,162,150 bytes (≈11.60 MiB,
-    // within the ≈12.3 MiB approved): 17,063,800 bytes in all.
+    // within the ≈12.3 MiB approved): 17,063,800 bytes in all. M11-G4-1 adds
+    // 206 bytes of ordinary evidence: 17,064,006.
     expect(M11G1_BYTES).toBe(364631);
     expect(M11G2_BYTES).toBe(12162150);
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(4537019 + M11G1_BYTES + M11G2_BYTES);
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(17063800);
+    expect(M11G4_BYTES).toBe(206);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
+      4537019 + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES,
+    );
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(17064006);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

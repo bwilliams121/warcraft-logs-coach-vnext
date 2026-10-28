@@ -11408,6 +11408,81 @@ function g2Artifacts(f) {
   ];
 }
 
+// ---- M11-G4-1: the canonical report's region (owner-authorized single request) ----
+const G4_REGION_ARTIFACTS = [
+  artifact("wcl-g4-region-b1pm-fight-48", graphql("wcl-g4-region-b1pm-fight-48"), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    payloadKind: "WCL_GRAPHQL_DATA",
+    source: {
+      reportCode: "b1PmaKrd6CDfzngc",
+      fightId: 48,
+      reportRevision: 51,
+      sourceActorId: "NOT_APPLICABLE",
+      encounterId: 3455,
+      difficulty: 5,
+      capturedOn: "2026-10-28",
+      gameVersion: "UNAVAILABLE",
+      logVersion: "UNAVAILABLE",
+      ingestionScope: "UNAVAILABLE",
+      query: {
+        kind: "REPORT_SURFACES",
+        fightIds: [48],
+        surfaces: [
+          "code",
+          "revision",
+          "startTime",
+          "region { id slug name }",
+          "fights { id startTime endTime }",
+        ],
+      },
+      completeness: completeness(
+        NOT_APPLICABLE,
+        1,
+        NOT_APPLICABLE,
+        "COMPLETE",
+        "One typed, unpaginated request; revision 51, report start 1,790,816,486,629 and fight 48 [7,436,292 .. 7,781,469] equal the committed fight context (wcl-fight-context-b1pm-fight-48) exactly, so the region describes the same report state. region = {id 1, slug US}.",
+      ),
+      captureTooling: tooling(
+        "scripts/probe/g4-canonical-region.probe.ts (temporary, deleted after use; refused to run if its output already existed) driving src/wcl/token-provider.ts and graphql-client.ts",
+        UNAVAILABLE,
+        "G4CanonicalRegion(code: b1PmaKrd6CDfzngc): exactly one GraphQL request, owner-authorized on 2026-10-28, run once by hand at 2026-10-28T14:44:05Z",
+      ),
+      rawCaptureRetained: false,
+      rawCaptureLocation: ".probe/g4/wcl-canonical-region.json — gitignored, not retained in the repository",
+    },
+    transformations: [
+      {
+        kind: "SUBSET_SELECTION",
+        tooling: tooling(
+          "node -e (inline, recorded here)",
+          UNAVAILABLE,
+          "JSON.stringify(raw.outcome.data) + newline",
+        ),
+        detail:
+          "Kept the decoded GraphQL data object verbatim (compact JSON); the probe envelope (request time, query text, variables) is recorded in this provenance instead. The payload holds no names, servers, guilds, character ids or rate-limit data.",
+        invalidates: [],
+      },
+      {
+        kind: "CREDENTIAL_SHAPE_SCAN",
+        tooling: tooling(
+          "node -e (inline, recorded here)",
+          UNAVAILABLE,
+          "the sanitize-payloads FORBIDDEN list plus every .dev.vars value",
+        ),
+        detail: "No credential-shaped string and no configured secret value appears in the bytes.",
+        invalidates: [],
+      },
+    ],
+    coverageBasis: "Report surfaces, not events: no event coverage is granted.",
+    retainedFor:
+      "M11-G4-1: the canonical report's Warcraft Logs region, the region input of the SimulationContextResolver (src/simulation-context/).",
+    limitations: [
+      "Region only: the deployment interval it is resolved against comes from src/data/simulation-context/, not from Warcraft Logs.",
+    ],
+  }),
+];
+
 const G2_ARTIFACTS = [
   ...G2_FIGHTS.flatMap(g2Artifacts),
   artifact("wcl-g2-fight-npcs-comparisons", graphql("wcl-g2-fight-npcs-comparisons"), {
@@ -11648,6 +11723,7 @@ const EVIDENCE_ARTIFACTS = [
   ),
   ...G1_ARTIFACTS,
   ...G2_ARTIFACTS,
+  ...G4_REGION_ARTIFACTS,
 ];
 
 const RXAF_AUTHORITY = {

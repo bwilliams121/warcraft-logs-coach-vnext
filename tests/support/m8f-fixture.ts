@@ -83,6 +83,7 @@ export function candidateReport(options: {
     revision: options.revision ?? 22,
     startTimeUnixMs: 1_700_000_000_000,
     endTimeUnixMs: 1_700_000_900_000,
+    region: { state: "NOT_RETRIEVED" },
     logVersion: options.logVersion ?? 17,
     gameVersion: options.gameVersion === undefined ? 1 : options.gameVersion,
     actors: options.actors ?? [

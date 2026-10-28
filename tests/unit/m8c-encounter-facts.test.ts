@@ -64,6 +64,7 @@ function report(overrides: Partial<RawFightContextReport> = {}): RawFightContext
     revision: 3,
     startTimeUnixMs: 1_700_000_000_000,
     endTimeUnixMs: 1_700_000_900_000,
+    region: { state: "NOT_RETRIEVED" },
     logVersion: 17,
     gameVersion: 1,
     actors: [],

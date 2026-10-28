@@ -1,0 +1,540 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "LIVE_BUILD_OBSERVATIONS",
+  "generatorRevision": 1,
+  "provenance": {
+    "appearanceSource": {
+      "kind": "THIRD_PARTY_VERSION_SERVER_RECORDER",
+      "publisher": "wago.tools",
+      "url": "https://wago.tools/api/builds",
+      "retrievedAtUtc": "2026-10-28T14:49:19.120Z",
+      "responseSha256": "fb295a7b3ed15b8ab5f8609d2f992fa4bb129f945a1e57196458a6854726aee3",
+      "product": "wow",
+      "createdAtSemantics": "WAGO_OBSERVATION_TIME_TIMEZONE_UNDECLARED",
+      "regionRecorded": false
+    },
+    "identitySource": {
+      "kind": "BLIZZARD_CDN_BUILD_CONFIG",
+      "host": "level3.blizzard.com",
+      "path": "tpr/wow",
+      "lastModifiedSemantics": "BLIZZARD_CDN_OBJECT_LAST_MODIFIED"
+    },
+    "minVersion": "12.0.7",
+    "generator": "scripts/authority/capture-live-build-evidence.mjs"
+  },
+  "observations": [
+    {
+      "version": "12.0.7.68182",
+      "buildId": 68182,
+      "wago": {
+        "createdAtRaw": "2026-06-16 14:26:02",
+        "buildConfig": "f50c48c3afefa874e474e57d2405dd93",
+        "cdnConfig": "fb665ecbea0fb5665e1ca58b30227472",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/f5/0c/f50c48c3afefa874e474e57d2405dd93",
+        "retrievedAtUtc": "2026-10-28T14:49:21.758Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-06-15T22:52:50.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68182patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.0.7.68232",
+      "buildId": 68232,
+      "wago": {
+        "createdAtRaw": "2026-06-16 23:55:01",
+        "buildConfig": "a4d8fd2b48cfdc71faed5c403a736c68",
+        "cdnConfig": "75f5efa00f27bd95c698f4024c00cb81",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/a4/d8/a4d8fd2b48cfdc71faed5c403a736c68",
+        "retrievedAtUtc": "2026-10-28T14:49:21.709Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-06-16T23:37:32.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68232patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.0.7.68235",
+      "buildId": 68235,
+      "wago": {
+        "createdAtRaw": "2026-06-17 03:39:02",
+        "buildConfig": "9d40dfb399a5e38d263d301c1162b6e3",
+        "cdnConfig": "c04aae25c788be2d903d099232776718",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/9d/40/9d40dfb399a5e38d263d301c1162b6e3",
+        "retrievedAtUtc": "2026-10-28T14:49:21.657Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-06-17T02:45:02.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68235patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.0.7.68256",
+      "buildId": 68256,
+      "wago": {
+        "createdAtRaw": "2026-06-18 16:46:01",
+        "buildConfig": "03c2b83ef84786c476ab5d6b5696612d",
+        "cdnConfig": "080396f7a57021a4a0f4fbf0371c6de0",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/03/c2/03c2b83ef84786c476ab5d6b5696612d",
+        "retrievedAtUtc": "2026-10-28T14:49:21.603Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-06-18T15:22:23.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68256patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.0.7.68275",
+      "buildId": 68275,
+      "wago": {
+        "createdAtRaw": "2026-06-23 14:17:02",
+        "buildConfig": "7d4236927405a1a168e6571ee2a8e00b",
+        "cdnConfig": "fccf4c94de71f6d8543a63801ddbf0f2",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/7d/42/7d4236927405a1a168e6571ee2a8e00b",
+        "retrievedAtUtc": "2026-10-28T14:49:21.550Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-06-22T21:16:48.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68275patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.0.7.68367",
+      "buildId": 68367,
+      "wago": {
+        "createdAtRaw": "2026-06-30 00:45:02",
+        "buildConfig": "d39191da08bd9b3e9cceaad833b4d5ba",
+        "cdnConfig": "bebc96b5cfff6149becf9069d1fbb859",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/d3/91/d39191da08bd9b3e9cceaad833b4d5ba",
+        "retrievedAtUtc": "2026-10-28T14:49:21.492Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-06-29T19:46:34.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68367patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.0.7.68453",
+      "buildId": 68453,
+      "wago": {
+        "createdAtRaw": "2026-07-06 23:57:02",
+        "buildConfig": "34a1a445ae41066c7f7a6564892d8bdd",
+        "cdnConfig": "1deda1a1fd806f80590fc17ccbf4f852",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/34/a1/34a1a445ae41066c7f7a6564892d8bdd",
+        "retrievedAtUtc": "2026-10-28T14:49:21.434Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-07-06T23:44:13.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68453patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.0.7.68887",
+      "buildId": 68887,
+      "wago": {
+        "createdAtRaw": "2026-07-23 00:56:01",
+        "buildConfig": "0fcf22030198cca211997a998743ba7f",
+        "cdnConfig": "5eeeb7a664e41a88349215461af353bb",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/0f/cf/0fcf22030198cca211997a998743ba7f",
+        "retrievedAtUtc": "2026-10-28T14:49:21.381Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-07-23T00:11:46.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68887patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.0.7.68974",
+      "buildId": 68974,
+      "wago": {
+        "createdAtRaw": "2026-08-03 22:50:01",
+        "buildConfig": "96db6554c1ba271b52390175d50589f3",
+        "cdnConfig": "1354dece3c5f48240c3fe3dccb32a361",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/96/db/96db6554c1ba271b52390175d50589f3",
+        "retrievedAtUtc": "2026-10-28T14:49:21.337Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-03T19:19:19.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-68974patch12.0.7_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69214",
+      "buildId": 69214,
+      "wago": {
+        "createdAtRaw": "2026-08-10 22:33:02",
+        "buildConfig": "742fe96462414a88e1b1c35f5d09e2c5",
+        "cdnConfig": "58c5b154cd4305b529d77f8cabe995a0",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/74/2f/742fe96462414a88e1b1c35f5d09e2c5",
+        "retrievedAtUtc": "2026-10-28T14:49:21.290Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-10T22:00:17.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69214patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69273",
+      "buildId": 69273,
+      "wago": {
+        "createdAtRaw": "2026-08-11 20:32:02",
+        "buildConfig": "8fc12df3f3746ac3760a7edcd4cf0ec4",
+        "cdnConfig": "9a824cce21b48ebf0b11367ae32d1597",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/8f/c1/8fc12df3f3746ac3760a7edcd4cf0ec4",
+        "retrievedAtUtc": "2026-10-28T14:49:21.245Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-11T20:24:41.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69273patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69283",
+      "buildId": 69283,
+      "wago": {
+        "createdAtRaw": "2026-08-13 01:33:01",
+        "buildConfig": "f507aaae210daf1d12d95a4dfccbd040",
+        "cdnConfig": "ef40e270844344546c1c40da0cf600e8",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/f5/07/f507aaae210daf1d12d95a4dfccbd040",
+        "retrievedAtUtc": "2026-10-28T14:49:21.198Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-13T00:18:07.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69283patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69299",
+      "buildId": 69299,
+      "wago": {
+        "createdAtRaw": "2026-08-13 18:58:01",
+        "buildConfig": "bd275481f39b6f0d5fde63de0720e302",
+        "cdnConfig": "5ef8939f380eb23992bc3a57a829855e",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/bd/27/bd275481f39b6f0d5fde63de0720e302",
+        "retrievedAtUtc": "2026-10-28T14:49:21.154Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-13T02:52:10.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69299patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69323",
+      "buildId": 69323,
+      "wago": {
+        "createdAtRaw": "2026-08-17 20:17:02",
+        "buildConfig": "556a2f9961dfe98b258e3f0ec0370b97",
+        "cdnConfig": "08b17c5c06341772936f3da38a8f838c",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/55/6a/556a2f9961dfe98b258e3f0ec0370b97",
+        "retrievedAtUtc": "2026-10-28T14:49:21.076Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-15T01:09:16.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69323patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69382",
+      "buildId": 69382,
+      "wago": {
+        "createdAtRaw": "2026-08-18 00:59:01",
+        "buildConfig": "b0264e6e2f2ec76e5bbc7827cfe3a3e0",
+        "cdnConfig": "881d4b0faa88969de2c99ad18d10090e",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/b0/26/b0264e6e2f2ec76e5bbc7827cfe3a3e0",
+        "retrievedAtUtc": "2026-10-28T14:49:21.031Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-18T00:20:27.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69382patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69404",
+      "buildId": 69404,
+      "wago": {
+        "createdAtRaw": "2026-08-20 19:18:02",
+        "buildConfig": "cfacf8406f26370199753c06462477ff",
+        "cdnConfig": "bcb4e3ada71eeca015d6d77532b266f4",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/cf/ac/cfacf8406f26370199753c06462477ff",
+        "retrievedAtUtc": "2026-10-28T14:49:20.982Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-20T18:49:35.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69404patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69465",
+      "buildId": 69465,
+      "wago": {
+        "createdAtRaw": "2026-08-24 18:59:02",
+        "buildConfig": "f603957530b9ffb32f28f7151dc2eb60",
+        "cdnConfig": "7baad70b11959149f23e2a1f8fba1d9e",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/f6/03/f603957530b9ffb32f28f7151dc2eb60",
+        "retrievedAtUtc": "2026-10-28T14:49:20.925Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-24T18:28:20.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69465patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69497",
+      "buildId": 69497,
+      "wago": {
+        "createdAtRaw": "2026-08-25 14:17:02",
+        "buildConfig": "f5e9c4b067c202305fdb932fc0fb2182",
+        "cdnConfig": "e1e3bdf5fe4641505c1c543dab40b458",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/f5/e9/f5e9c4b067c202305fdb932fc0fb2182",
+        "retrievedAtUtc": "2026-10-28T14:49:20.874Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-08-24T23:58:37.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69497patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69587",
+      "buildId": 69587,
+      "wago": {
+        "createdAtRaw": "2026-09-01 14:10:02",
+        "buildConfig": "c9fa1a64b0170829cc5c5c98c71025c3",
+        "cdnConfig": "f321c713e2545259b44497c7628cef15",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/c9/fa/c9fa1a64b0170829cc5c5c98c71025c3",
+        "retrievedAtUtc": "2026-10-28T14:49:20.815Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-09-01T01:07:49.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69587patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69814",
+      "buildId": 69814,
+      "wago": {
+        "createdAtRaw": "2026-09-12 18:56:02",
+        "buildConfig": "9712ae9c84cc54111e9e3ddf9a6b8019",
+        "cdnConfig": "3bf5d9d33331e68f0899bd0e32ebdf4a",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/97/12/9712ae9c84cc54111e9e3ddf9a6b8019",
+        "retrievedAtUtc": "2026-10-28T14:49:20.768Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-09-12T18:45:21.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69814patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69875",
+      "buildId": 69875,
+      "wago": {
+        "createdAtRaw": "2026-09-18 19:51:02",
+        "buildConfig": "9258fbe8b88a178e130b0318b6b86217",
+        "cdnConfig": "5525ea1ce6668e895569c89c2d6a154c",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/92/58/9258fbe8b88a178e130b0318b6b86217",
+        "retrievedAtUtc": "2026-10-28T14:49:20.723Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-09-18T18:29:17.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69875patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.0.69933",
+      "buildId": 69933,
+      "wago": {
+        "createdAtRaw": "2026-09-22 14:18:01",
+        "buildConfig": "dcfc90fffd79ba00406ae46f5f657592",
+        "cdnConfig": "a9035bfebbe53afc0f656dd89f22df69",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/dc/fc/dcfc90fffd79ba00406ae46f5f657592",
+        "retrievedAtUtc": "2026-10-28T14:49:20.675Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-09-21T22:48:13.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-69933patch12.1.0_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.5.70340",
+      "buildId": 70340,
+      "wago": {
+        "createdAtRaw": "2026-10-13 07:55:02",
+        "buildConfig": "eba6b26286c312f520205084f491166b",
+        "cdnConfig": "014e7d95f4886872b1ffb61755752395",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/eb/a6/eba6b26286c312f520205084f491166b",
+        "retrievedAtUtc": "2026-10-28T14:49:20.619Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-10-12T16:18:14.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-70340patch12.1.5_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.5.70391",
+      "buildId": 70391,
+      "wago": {
+        "createdAtRaw": "2026-10-13 21:16:02",
+        "buildConfig": "334a36cf5f3c32a5f7a167405487fa14",
+        "cdnConfig": "087ddb1b942b63542c3ec30eb001681d",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/33/4a/334a36cf5f3c32a5f7a167405487fa14",
+        "retrievedAtUtc": "2026-10-28T14:49:20.565Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-10-13T20:30:57.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-70391patch12.1.5_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.5.70448",
+      "buildId": 70448,
+      "wago": {
+        "createdAtRaw": "2026-10-16 23:02:02",
+        "buildConfig": "88d5e8ef05ec5a8446cdec93d142d7c6",
+        "cdnConfig": "f065eade5276a5ac05606e60a4c5a1f7",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/88/d5/88d5e8ef05ec5a8446cdec93d142d7c6",
+        "retrievedAtUtc": "2026-10-28T14:49:20.523Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-10-16T22:43:19.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-70448patch12.1.5_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.5.70529",
+      "buildId": 70529,
+      "wago": {
+        "createdAtRaw": "2026-10-22 19:05:01",
+        "buildConfig": "18b43890bb75affcb09e78272ee9d00c",
+        "cdnConfig": "ccc89ec4bcc03f6cc1cc1c7861d9ed0f",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/18/b4/18b43890bb75affcb09e78272ee9d00c",
+        "retrievedAtUtc": "2026-10-28T14:49:20.424Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-10-21T20:41:24.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-70529patch12.1.5_Retail",
+        "buildNameMatchesVersion": true
+      }
+    },
+    {
+      "version": "12.1.5.70575",
+      "buildId": 70575,
+      "wago": {
+        "createdAtRaw": "2026-10-23 19:20:02",
+        "buildConfig": "d718abcc42604d8efbd35aecfa5bb75b",
+        "cdnConfig": "33ab93e2ba5f5ced1b32d7f92a939ed5",
+        "productConfig": "53020d32e1a25648c8e1eafd5771935f"
+      },
+      "blizzardCdn": {
+        "url": "http://level3.blizzard.com/tpr/wow/config/d7/18/d718abcc42604d8efbd35aecfa5bb75b",
+        "retrievedAtUtc": "2026-10-28T14:49:20.304Z",
+        "httpStatus": 200,
+        "lastModifiedUtc": "2026-10-23T18:15:38.000Z",
+        "contentMd5MatchesKey": true,
+        "buildName": "WOW-70575patch12.1.5_Retail",
+        "buildNameMatchesVersion": true
+      }
+    }
+  ]
+}

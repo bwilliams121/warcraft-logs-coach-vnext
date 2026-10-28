@@ -72,9 +72,13 @@ const ENVIRONMENT_GATE_FILES = [
  *   environment hash are identical with and without the applicability
  *   (tests/unit/simulation/model-0a72e6a7-canonical.test.ts). Previous pin:
  *   environment e26b184f….
+ * - M11-G4-1 (2026-10-28): the MODEL_VERSION_COMPATIBILITY_UNKNOWN note in
+ *   character-profile/reconstruct.ts names the injected model's build instead
+ *   of a hard-coded "12.1.0.69587". It is note text only; no blocker, check or
+ *   readiness rule changed. Previous pin: profile fbf0aace….
  */
 const PINNED: Record<string, string> = {
-  "profile-readiness-gate/1": "fbf0aace1f399d3ed70748a4fa00a3d19c396b6a567e5aedac61ebe8c284205b",
+  "profile-readiness-gate/1": "5849a241b340a576fd03f9230a6f47d5715b69b87fc8412e36d7a855f6e3a103",
   "environment-publishability-gate/1": "12b313594d4b69b92ae87cb12dd9cda1fe351feb1624026d0838a0c29800b2d9",
 };
 

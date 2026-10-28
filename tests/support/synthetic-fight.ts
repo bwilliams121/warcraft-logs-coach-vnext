@@ -496,6 +496,7 @@ export function syntheticFight(options: SyntheticFightOptions = {}): CombatFight
       revision: 1,
       startTimeUnixMs: 1_700_000_000_000,
       endTimeUnixMs: 1_700_000_900_000,
+      region: { state: "NOT_RETRIEVED" },
     },
     data: { logVersion: 17, gameVersion: 1 },
     fight: {
@@ -636,6 +637,7 @@ export function syntheticFightCore(options: SyntheticCoreOptions = {}): Normaliz
       revision: 1,
       startTimeUnixMs: 1_700_000_000_000,
       endTimeUnixMs: 1_700_000_900_000,
+      region: { state: "NOT_RETRIEVED" },
     },
     data: { logVersion: 17, gameVersion: 1 },
     fight: {

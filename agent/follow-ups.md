@@ -439,6 +439,64 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G4-1: what the SimulationContextResolver does not establish
+
+**Raised:** M11-G4-1 (2026-10-28).
+
+- **Coverage is US-only and three weeks deep.**
+  - Restart evidence exists only for US 2026-09-08, 09-22 and 09-29. No dated
+    report of an EU (or KR/TW/CN) maintenance window was found, so every
+    non-US log is REGION_NOT_COVERED.
+  - Builds 69814 and 69875 have no proven interval: no restart evidence was
+    curated for their weeks (a 2026-09-15 US report exists but was not
+    entered, since no model exists for either build).
+  - Done looks like: restart evidence curated per region and week, as each
+    week is needed, under the same source rules.
+- **No Blizzard-authored restart window was found.**
+  - Every restart source is a THIRD_PARTY_NEWS_REPORT (Blizzard Watch).
+    Blizzard's hotfix log tags some changes "[With weekly restarts]" but
+    states no region or time, so it does not establish a window.
+  - If Blizzard publishes region- and time-specific maintenance statements,
+    they replace or corroborate the reports.
+- **wago does not record region.**
+  - A wago observation is product-level. Applying it to region R relies on R's
+    restart evidence coming after the worst-case appearance; it does not prove
+    R's version server listed the build at the same moment.
+  - Today Blizzard's version server lists one build for every region (checked
+    2026-10-28). Historical per-region listings are not available.
+- **The 12 h boundary margin is a conservative policy, not a measurement.**
+  - It absorbs log-clock and upload-timezone error and maintenance overrun.
+  - Validating it would need logs with independently known times near a
+    deployment boundary.
+- **wago's timezone is undeclared.**
+  - Every observation trails Blizzard's CDN upload when read as UTC (minimum
+    7 min). That bounds wago's clock to at most 7 min ahead of UTC, but the
+    westward worst case (UTC−12) is still assumed.
+  - A published wago timezone would tighten every appearance bound by up to
+    12 h.
+- **Article bytes are not committed.**
+  - Third-party article bytes stay in gitignored `.probe/g4/sources/`; the
+    committed evidence keeps each source's URL, SHA-256, times and verbatim
+    excerpts.
+  - Re-verification after loss means re-fetching, and the page may have
+    changed.
+- **Stored raid-night/1 results become NOT_COMPATIBLE.**
+  - `NORMALIZATION_REVISION` moved to `m3.4`, so an `m3.3` cell no longer
+    compares with a fresh one, as the contract intends.
+  - Any persisted raid-night/1 cells need re-analysis to compare again.
+- **Nothing in production calls the resolver yet.**
+  - Production ingestion now carries `report.region`. G4 publication will
+    call the resolver; until then only tests and the canonical subject use it.
+- **G4 publication is not designed.**
+  - What is published, its statistics, labels, contract and runner
+    orchestration are the next G4 proposal. 12.1.5 compatibility review comes
+    after that foundation (owner decision).
+- **The calendar needs upkeep.**
+  - New builds need `scripts/authority/capture-live-build-evidence.mjs`
+    re-run, and new weeks need restart evidence.
+  - The newest observed build's interval ends at the observation retrieval
+    time, so stale evidence fails closed rather than extending.
+
 ## After M11 simulation-model registry: what the 69933 promotion does not establish
 
 **Raised:** M11 model registry (2026-10-23). **Owner decisions locked:**

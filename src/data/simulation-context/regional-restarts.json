@@ -1,0 +1,102 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "REGIONAL_RESTART_EVIDENCE",
+  "provenance": {
+    "curation": "HAND_ENTERED_FROM_ARCHIVED_SOURCES",
+    "curatedOn": "2026-10-28",
+    "ownerPolicy": "Blizzard-authored evidence is preferred when it establishes the fact; a dated reputable report may establish a specific region's maintenance window when Blizzard does not publish it. Third-party timing is never labelled Blizzard-authored (owner decision 2026-10-28).",
+    "blizzardAuthoredSearch": "No Blizzard-authored, region- and time-specific retail maintenance statement was found for these weeks (Blizzard forums search API, US/EU/CS, 2026-10-28). The Blizzard hotfix log's 2026-09-21 section tags two changes '[With weekly restarts]' but states no region or time, so it does not establish a window and is not recorded as restart evidence.",
+    "coverage": "US only. No dated report of an EU maintenance window was found for 2026-09-23 or 2026-09-30, so EU has no restart evidence and resolves nothing.",
+    "excerptNormalization": "Excerpts are verbatim except typographic apostrophes and en dashes, rendered as ASCII; HTML-entity apostrophes decoded."
+  },
+  "restarts": [
+    {
+      "restartId": "US-2026-09-08",
+      "region": "US",
+      "window": {
+        "fromUtc": "2026-09-08T14:00:00Z",
+        "toUtc": "2026-09-08T16:00:00Z"
+      },
+      "windowTimezoneInterpretation": "Pacific times on a September 2026 date are PDT (UTC-7)",
+      "sources": [
+        {
+          "evidenceClass": "THIRD_PARTY_NEWS_REPORT",
+          "publisher": "Blizzard Watch",
+          "url": "https://blizzardwatch.com/2026/09/08/almost-ordinary-world-warcraft-maintenance-day/",
+          "publishedAt": "2026-09-08T09:00:15-05:00",
+          "modifiedAt": "2026-09-15T00:56:21-05:00",
+          "sha256": "fdb7229f8cf8b87e41647cbbc7c8159bc84b5726f73946a9e41857b625eb241f",
+          "byteLength": 102653,
+          "retrievedAtUtc": "2026-10-28T14:48:40Z",
+          "localArchive": ".probe/g4/sources/bw-2026-09-08.html (gitignored, not committed: third-party article bytes)",
+          "claimedRegion": "Americas (US) realms: the schedule is stated in Pacific and Eastern time for all World of Warcraft realms",
+          "claimedWindow": "Here's the WoW maintenance schedule for Tuesday, September 8: Midnight: Offline from 7am - 9am pacific (10am - 12pm eastern)",
+          "claimedCompletion": "All World of Warcraft servers are back online!",
+          "excerpts": [
+            "Here's the WoW maintenance schedule for Tuesday, September 8: Midnight: Offline from 7am - 9am pacific (10am - 12pm eastern)",
+            "All World of Warcraft servers are back online!"
+          ]
+        }
+      ]
+    },
+    {
+      "restartId": "US-2026-09-22",
+      "region": "US",
+      "window": {
+        "fromUtc": "2026-09-22T14:00:00Z",
+        "toUtc": "2026-09-22T15:00:00Z"
+      },
+      "windowTimezoneInterpretation": "Pacific times on a September 2026 date are PDT (UTC-7)",
+      "sources": [
+        {
+          "evidenceClass": "THIRD_PARTY_NEWS_REPORT",
+          "publisher": "Blizzard Watch",
+          "url": "https://blizzardwatch.com/2026/09/22/super-speedy-one-hour-maintenance-world-warcraft-realms/",
+          "publishedAt": "2026-09-22T09:00:18-05:00",
+          "modifiedAt": "2026-09-22T10:52:39-05:00",
+          "sha256": "a41032754dbd7617b7d2465141dc58e1947caf829881b7c6bd2bdaca352d7aba",
+          "byteLength": 104915,
+          "retrievedAtUtc": "2026-10-28T14:42:29Z",
+          "localArchive": ".probe/g4/sources/bw-2026-09-22.html (gitignored, not committed: third-party article bytes)",
+          "claimedRegion": "Americas (US) realms: the schedule is stated in Pacific and Eastern time for all World of Warcraft realms",
+          "claimedWindow": "Here's the WoW maintenance schedule for Tuesday, September 22: Midnight: Offline from 7am - 8am pacific (10am - 11am eastern)",
+          "claimedCompletion": "All World of Warcraft realms are back online.",
+          "excerpts": [
+            "Here's the WoW maintenance schedule for Tuesday, September 22: Midnight: Offline from 7am - 8am pacific (10am - 11am eastern)",
+            "All World of Warcraft realms are back online.",
+            "A few hotfixes will be going live on Midnight realms, including minor changes to the Ula'tek encounter in Venomous Abyss and some additional class tuning."
+          ]
+        }
+      ]
+    },
+    {
+      "restartId": "US-2026-09-29",
+      "region": "US",
+      "window": {
+        "fromUtc": "2026-09-29T14:00:00Z",
+        "toUtc": "2026-09-29T15:00:00Z"
+      },
+      "windowTimezoneInterpretation": "Pacific times on a September 2026 date are PDT (UTC-7)",
+      "sources": [
+        {
+          "evidenceClass": "THIRD_PARTY_NEWS_REPORT",
+          "publisher": "Blizzard Watch",
+          "url": "https://blizzardwatch.com/2026/09/29/another-short-maintenance-day-world-warcraft-servers/",
+          "publishedAt": "2026-09-29T09:00:45-05:00",
+          "modifiedAt": "2026-09-29T14:25:00-05:00",
+          "sha256": "f5abed97c566d8e5546fe2c0d853da2e03ca7ad88b1237e0e2a71e4d5b7146d4",
+          "byteLength": 104683,
+          "retrievedAtUtc": "2026-10-28T14:42:30Z",
+          "localArchive": ".probe/g4/sources/bw-2026-09-29.html (gitignored, not committed: third-party article bytes)",
+          "claimedRegion": "Americas (US) realms: the schedule is stated in Pacific and Eastern time for all World of Warcraft realms",
+          "claimedWindow": "Here's the WoW maintenance schedule for Tuesday, September 29: Midnight: Offline from 7am - 8am pacific (10am - 11am eastern)",
+          "claimedCompletion": "All World of Warcraft realms are back online.",
+          "excerpts": [
+            "Here's the WoW maintenance schedule for Tuesday, September 29: Midnight: Offline from 7am - 8am pacific (10am - 11am eastern)",
+            "All World of Warcraft realms are back online."
+          ]
+        }
+      ]
+    }
+  ]
+}
