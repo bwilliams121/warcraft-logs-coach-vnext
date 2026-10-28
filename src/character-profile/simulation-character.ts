@@ -20,7 +20,7 @@
 
 import { fail, succeed, type SimulationOutcome } from "../simulation/failures.js";
 import { SIMULATION_JOB_SCHEMA_VERSION, type SimulationJob } from "../simulation/job.js";
-import { APPROVED_SIMC_MODEL } from "../simulation/model.js";
+import type { SimcModelPin } from "../simulation/model.js";
 import { simulationPolicyById } from "../simulation/simulation-policy.js";
 import type { CharacterSpecBinding } from "./binding.js";
 import type { CharacterProfile, Evidenced } from "./profile.js";
@@ -32,9 +32,15 @@ type JobGear = SimulationJob["character"]["gear"][number];
 type JobGems = JobGear extends { readonly gems: infer G } ? G : never;
 type JobEnchant = JobGear extends { readonly enchant: infer E } ? E : never;
 
+/**
+ * The probe runs on the simulation model the caller names (M11 model registry):
+ * there is no default model. The pin is written into the job as is; preparing
+ * the job resolves it through the registry.
+ */
 export function fidelityProbeJob(
   profile: CharacterProfile,
   binding: CharacterSpecBinding,
+  model: SimcModelPin,
 ): SimulationOutcome<SimulationJob> {
   const other = profile.blockers.filter((blocker) => blocker.code !== "RACE_UNRESOLVED");
   if (other.length > 0) {
@@ -77,7 +83,7 @@ export function fidelityProbeJob(
   if (policy === undefined) return fail("JOB_REJECTED", "fidelity probe policy missing");
   return succeed({
     schemaVersion: SIMULATION_JOB_SCHEMA_VERSION,
-    model: { simcCommit: APPROVED_SIMC_MODEL.simcCommit, gameDataBuild: APPROVED_SIMC_MODEL.gameDataBuild },
+    model: { simcCommit: model.simcCommit, gameDataBuild: model.gameDataBuild },
     character: {
       profileKind: "LOGGED_FIDELITY_PROBE",
       spec: binding.simulation.specKey,

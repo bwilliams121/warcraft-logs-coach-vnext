@@ -4,8 +4,9 @@
  * one function — there is no second builder or validator.
  *
  * Order: payload/schema validation (JOB_REJECTED / UNSUPPORTED_SPEC /
- * ENVIRONMENT_NOT_REPRESENTABLE) -> requested model
- * (UNSUPPORTED_MODEL_VERSION) -> execution profile and policy resolved from
+ * ENVIRONMENT_NOT_REPRESENTABLE) -> requested model, resolved through the
+ * simulation-model registry (UNSUPPORTED_MODEL_VERSION), and the caller's
+ * artifact for exactly that model (RUNNER_UNAVAILABLE) -> execution profile and policy resolved from
  * the versioned registries, where the job's policy must equal the registry
  * entry exactly (JOB_REJECTED) -> input text and cache keys.
  */
@@ -15,7 +16,8 @@ import { executionProfileById, type ExecutionProfile } from "./execution-profile
 import { fail, succeed, type SimulationOutcome } from "./failures.js";
 import { buildSimcInput } from "./input-builder.js";
 import { validateSimulationJob, type SimulationJob } from "./job.js";
-import { checkRequestedModel, type ApprovedEngineArtifact } from "./model.js";
+import type { ApprovedEngineArtifact } from "./model.js";
+import { resolveSimulationModel, type SimulationModel } from "./model-registry.js";
 import { simulationPolicyById, type SimulationPolicy } from "./simulation-policy.js";
 import type { SimulationSpecBinding } from "./spec-binding.js";
 
@@ -26,12 +28,16 @@ export interface PreparedSimulation {
   readonly policy: SimulationPolicy;
   readonly input: string;
   readonly keys: SimulationCacheKeys;
+  /** The registered simulation model the job names. */
+  readonly model: SimulationModel;
+  /** The caller's artifact for that model (the one keys and verification use). */
+  readonly artifact: ApprovedEngineArtifact;
 }
 
 export async function prepareSimulation(
   value: unknown,
   rawByteLength: number,
-  artifact: ApprovedEngineArtifact,
+  artifacts: ApprovedEngineArtifact | readonly ApprovedEngineArtifact[],
   bindings: readonly SimulationSpecBinding[],
 ): Promise<SimulationOutcome<PreparedSimulation>> {
   if (typeof value === "object" && value !== null) {
@@ -48,12 +54,17 @@ export async function prepareSimulation(
   if (!validated.ok) return validated;
   const { job, binding } = validated.value;
 
-  const model = checkRequestedModel(job.model);
+  const model = resolveSimulationModel(job.model);
   if (!model.ok) return model;
-  if (
-    artifact.model.simcCommit !== model.value.simcCommit ||
-    artifact.model.gameDataBuild !== model.value.gameDataBuild
-  ) {
+  const hosted: readonly ApprovedEngineArtifact[] = Array.isArray(artifacts)
+    ? artifacts
+    : [artifacts as ApprovedEngineArtifact];
+  const artifact = hosted.find(
+    (candidate) =>
+      candidate.model.simcCommit === model.value.pin.simcCommit &&
+      candidate.model.gameDataBuild === model.value.pin.gameDataBuild,
+  );
+  if (artifact === undefined) {
     return fail("RUNNER_UNAVAILABLE", "no approved engine artifact for the requested model");
   }
 
@@ -78,5 +89,5 @@ export async function prepareSimulation(
 
   const input = buildSimcInput(job, binding, profile, policy);
   const keys = await simulationCacheKeys(job, binding, artifact, profile, policy);
-  return succeed({ job, binding, profile, policy, input, keys });
+  return succeed({ job, binding, profile, policy, input, keys, model: model.value, artifact });
 }

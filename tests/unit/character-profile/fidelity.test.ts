@@ -10,7 +10,7 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { RUNNER_CHARACTER_BINDINGS } from "../../../runner/character-bindings.js";
-import { APPROVED_ENGINE_ARTIFACTS } from "../../../runner/approved-artifacts.js";
+import { approvedArtifactForPin } from "../../../src/simulation/approved-artifacts.js";
 import { assessProfileFidelity, GATED_CHECKS } from "../../../src/character-profile/fidelity.js";
 import type { CharacterProfile } from "../../../src/character-profile/profile.js";
 import {
@@ -30,6 +30,10 @@ import { BLOOD_CHARACTER_BINDING } from "../../../src/specs/deathknight/blood/ch
 import golden from "../../fixtures/simulation/simc-33622e9d-blood-subject-fidelity.json";
 import { reconstructionInputOf, subjectEvidence } from "../../support/character/subject.js";
 import { jsonBytes } from "../../support/simulation/dev-blood-job.js";
+import { DEV_SIMULATION_MODEL_ID, modelPin } from "../../support/simulation/dev-blood-job.js";
+
+/** The historical simulation model these tests were written against (M11 model registry). */
+const HISTORICAL_MODEL = modelPin(DEV_SIMULATION_MODEL_ID);
 
 const binding = BLOOD_CHARACTER_BINDING;
 const text = JSON.stringify(golden);
@@ -74,10 +78,10 @@ const item = (copy: MutableEcho, slot: string): MutableItem => {
 
 describe("M11-G3-2 profile fidelity on the exact-pin golden echo", () => {
   it("the golden report is the approved engine running the subject's own probe job", async () => {
-    const artifact = APPROVED_ENGINE_ARTIFACTS[0];
+    const artifact = approvedArtifactForPin(HISTORICAL_MODEL);
     if (artifact === undefined) throw new Error("no artifact");
     expect(RUNNER_CHARACTER_BINDINGS).toContain(binding);
-    const job = fidelityProbeJob(profile, binding);
+    const job = fidelityProbeJob(profile, binding, HISTORICAL_MODEL);
     if (!job.ok) throw new Error(job.failure.detail);
     const prepared = await prepareSimulation(job.value, jsonBytes(job.value), artifact, [binding.simulation]);
     if (!prepared.ok) throw new Error(prepared.failure.detail);

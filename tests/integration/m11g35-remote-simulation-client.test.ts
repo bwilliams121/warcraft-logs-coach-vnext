@@ -17,7 +17,6 @@ import { describe, expect, it } from "vitest";
 
 import { RequestAuthenticator } from "../../runner/service/auth.js";
 import { RUNNER_SPEC_BINDINGS } from "../../runner/spec-bindings.js";
-import { APPROVED_SIMC_MODEL } from "../../src/simulation/model.js";
 import { prepareSimulation } from "../../src/simulation/prepare.js";
 import {
   RUNNER_PATHS,
@@ -25,14 +24,19 @@ import {
   RUNNER_SERVICE_REVISION,
 } from "../../src/simulation/runner-protocol.js";
 import { decodeRunnerSecret, RemoteSimulationBackend } from "../../src/simulation-client/remote-client.js";
-import { devBloodJob, jsonBytes } from "../support/simulation/dev-blood-job.js";
+import {
+  DEV_SIMULATION_MODEL_ID,
+  devBloodJob,
+  jsonBytes,
+  modelPin,
+} from "../support/simulation/dev-blood-job.js";
 
 type Json = Record<string, any>;
 
 const SECRET_B64 = btoa("TEST-ONLY-workers-runner-hmac-key-not-a-secret");
 const SECRET = decodeRunnerSecret(SECRET_B64);
 const ARTIFACT = {
-  model: APPROVED_SIMC_MODEL,
+  model: modelPin(DEV_SIMULATION_MODEL_ID),
   binarySha256: "0".repeat(64),
   buildRecipeRevision: "test-recipe",
 } as const;
@@ -43,7 +47,7 @@ const client = (fetchImpl: typeof fetch, overrides: Json = {}) =>
     baseUrl: "https://runner.test.invalid",
     keyId: "worker-1",
     secret: SECRET,
-    artifact: ARTIFACT,
+    artifacts: [ARTIFACT],
     bindings: RUNNER_SPEC_BINDINGS,
     pollIntervalMs: 1,
     deadlineMs: 10_000,

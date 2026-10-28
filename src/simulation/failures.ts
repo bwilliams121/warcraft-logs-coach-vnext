@@ -5,6 +5,11 @@
 
 export const SIMULATION_FAILURE_CODES = [
   "UNSUPPORTED_MODEL_VERSION",
+  // Simulation-model selection (M11 model registry): no model for the log's
+  // context, a model the spec never validated, or a context that is unresolved.
+  "SIMULATION_MODEL_NOT_AVAILABLE",
+  "SIMULATION_MODEL_NOT_VALIDATED_FOR_SPEC",
+  "SIMULATION_MODEL_CONTEXT_UNRESOLVED",
   "UNSUPPORTED_SPEC",
   "PROFILE_RECONSTRUCTION_FAILED",
   "ENVIRONMENT_NOT_REPRESENTABLE",

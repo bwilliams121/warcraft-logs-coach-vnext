@@ -1,11 +1,10 @@
 /**
- * The approved SimulationCraft MODEL and how an engine artifact proves it is
- * that model (M11-G3-1).
+ * SimulationCraft MODEL IDENTITY and how an engine artifact proves it is that
+ * model (M11-G3-1).
  *
- * The pin is chosen by the owner and never moves automatically:
- *
- *   commit           33622e9d1662ff0e451691edf85a6b49cc9d11d9
- *   game-data build  12.1.0.69587
+ * Which models are approved, and where each applies, is the simulation-model
+ * registry (model-registry.ts). There is no default model: a job names its
+ * model (`job.model`) and it must resolve to exactly one registered model.
  *
  * An engine ARTIFACT is a specific built binary. Its identity is checked from
  * the engine's OWN structured output (JSON `git_revision` and the live client
@@ -27,12 +26,12 @@ export interface SimcModelPin {
   readonly gameDataBuild: string;
 }
 
-export const APPROVED_SIMC_MODEL: SimcModelPin = {
-  simcCommit: "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
-  gameDataBuild: "12.1.0.69587",
-};
-
-/** The pinned engine's maximum character level (engine/config.hpp:176 at the pin). */
+/**
+ * The maximum character level of EVERY registered simulation model
+ * (engine/config.hpp:176 is MAX_LEVEL = 90 at 33622e9d and at 0a72e6a746). A
+ * model with a different maximum must not be registered until this is split
+ * per model.
+ */
 export const PINNED_ENGINE_MAX_LEVEL = 90;
 
 /** One approved built engine artifact. */
@@ -112,18 +111,4 @@ export function verifyEngineIdentity(
     binarySha256: observed.binarySha256,
     buildRecipeRevision: approved.buildRecipeRevision,
   });
-}
-
-/** A job may only ask for the approved model; anything else is unsupported. */
-export function checkRequestedModel(requested: SimcModelPin): SimulationOutcome<SimcModelPin> {
-  if (
-    requested.simcCommit !== APPROVED_SIMC_MODEL.simcCommit ||
-    requested.gameDataBuild !== APPROVED_SIMC_MODEL.gameDataBuild
-  ) {
-    return fail(
-      "UNSUPPORTED_MODEL_VERSION",
-      `requested ${requested.simcCommit}/${requested.gameDataBuild}; approved ${APPROVED_SIMC_MODEL.simcCommit}/${APPROVED_SIMC_MODEL.gameDataBuild}`,
-    );
-  }
-  return succeed(APPROVED_SIMC_MODEL);
 }

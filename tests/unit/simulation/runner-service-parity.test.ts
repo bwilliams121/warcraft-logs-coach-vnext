@@ -29,6 +29,7 @@ import {
   devJob,
   diagnosticJob,
   FAKE_ARTIFACT,
+  FAKE_ARTIFACT_NEW,
   httpService,
   inProcessFetch,
   productionJob,
@@ -57,7 +58,7 @@ const remote = (fetchImpl: typeof fetch, overrides: Partial<RemoteRunnerOptions>
     baseUrl: "https://runner.test.invalid",
     keyId: TEST_KEY_ID,
     secret: TEST_SECRET,
-    artifact: FAKE_ARTIFACT,
+    artifacts: [FAKE_ARTIFACT, FAKE_ARTIFACT_NEW],
     bindings: RUNNER_SPEC_BINDINGS,
     pollIntervalMs: 5,
     deadlineMs: 20_000,
@@ -68,7 +69,11 @@ const remote = (fetchImpl: typeof fetch, overrides: Partial<RemoteRunnerOptions>
 
 const pair = async (options: Parameters<typeof httpService>[0] = {}) => {
   const h = await httpService(options);
-  const local = new LocalSimulationBackend(h.service, FAKE_ARTIFACT, RUNNER_SPEC_BINDINGS);
+  const local = new LocalSimulationBackend(
+    h.service,
+    [FAKE_ARTIFACT, FAKE_ARTIFACT_NEW],
+    RUNNER_SPEC_BINDINGS,
+  );
   const seen: { method: string; path: string }[] = [];
   return { h, local, remote: remote(inProcessFetch(() => h.handler, seen)), seen };
 };

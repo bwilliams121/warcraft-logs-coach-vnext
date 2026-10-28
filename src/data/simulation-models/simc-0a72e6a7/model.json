@@ -1,0 +1,29 @@
+{
+  "manifestVersion": 2,
+  "modelId": "SIMC_0A72E6A7_LIVE_12_1_0_69933",
+  "simcCommit": "0a72e6a74684d23c989b2d76143e429d2b4f1c91",
+  "gameDataBuild": "12.1.0.69933",
+  "binarySha256": "79bf5a406b0ca16eb8e828ef017603b60fdee576a5cb3cf4acaacf93a08eea36",
+  "hotfixDate": "2026-09-22",
+  "snapshotCommittedAtUtc": "2026-09-22T20:05:35Z",
+  "dataHistory": [
+    {
+      "date": "2026-10-28",
+      "datasetId": "SIMC_CONSUMABLES",
+      "fromRevision": "simc-0a72e6a7-3",
+      "toRevision": "simc-0a72e6a7-4",
+      "kind": "PROVENANCE_METADATA_CORRECTION",
+      "semanticContentChanged": false,
+      "note": "Regenerated with extractor v4 so the artifact is reproducible by the current extractor; the v3 artifact already carried the correct source label; semantic content byte-identical."
+    },
+    {
+      "date": "2026-10-28",
+      "datasetId": "SIMC_CONSUMABLE_TOKEN_ACCEPTANCE",
+      "fromRevision": "simc-0a72e6a7-1",
+      "toRevision": "simc-0a72e6a7-2",
+      "kind": "PROVENANCE_METADATA_CORRECTION",
+      "semanticContentChanged": false,
+      "note": "Re-measured on this model's binary against consumables simc-0a72e6a7-4; every token verdict identical to simc-0a72e6a7-1."
+    }
+  ]
+}

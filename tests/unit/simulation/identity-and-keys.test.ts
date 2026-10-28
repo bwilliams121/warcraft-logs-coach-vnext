@@ -14,7 +14,6 @@ import { canonicalJson, environmentHash, profileHash } from "../../../src/simula
 import { executionProfileById } from "../../../src/simulation/execution-profiles.js";
 import type { SimulationJob } from "../../../src/simulation/job.js";
 import {
-  APPROVED_SIMC_MODEL,
   verifyEngineIdentity,
   type ApprovedEngineArtifact,
   type ObservedEngineIdentity,
@@ -22,6 +21,10 @@ import {
 import { simulationPolicyById } from "../../../src/simulation/simulation-policy.js";
 import { BLOOD_SIMULATION_BINDING as BLOOD } from "../../../src/specs/deathknight/blood/simulation-binding.js";
 import { devBloodJob, TEST_ARTIFACT } from "../../support/simulation/dev-blood-job.js";
+import { DEV_SIMULATION_MODEL_ID, modelPin } from "../../support/simulation/dev-blood-job.js";
+
+/** The historical simulation model these tests were written against (M11 model registry). */
+const HISTORICAL_MODEL = modelPin(DEV_SIMULATION_MODEL_ID);
 
 const job = (): SimulationJob => JSON.parse(JSON.stringify(devBloodJob())) as SimulationJob;
 
@@ -34,7 +37,7 @@ const observed: ObservedEngineIdentity = {
 
 describe("M11-G3-1 model provenance", () => {
   it("R. the approved pin is 33622e9d / 12.1.0.69587", () => {
-    expect(APPROVED_SIMC_MODEL).toEqual({
+    expect(HISTORICAL_MODEL).toEqual({
       simcCommit: "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
       gameDataBuild: "12.1.0.69587",
     });
@@ -61,10 +64,10 @@ describe("M11-G3-1 model provenance", () => {
 
   it("R. the full revision is also accepted, and the result names the approved commit", () => {
     const full = verifyEngineIdentity(
-      { ...observed, reportedGitRevision: APPROVED_SIMC_MODEL.simcCommit },
+      { ...observed, reportedGitRevision: HISTORICAL_MODEL.simcCommit },
       TEST_ARTIFACT,
     );
-    expect(full.ok && full.value.simcCommit).toBe(APPROVED_SIMC_MODEL.simcCommit);
+    expect(full.ok && full.value.simcCommit).toBe(HISTORICAL_MODEL.simcCommit);
   });
 });
 

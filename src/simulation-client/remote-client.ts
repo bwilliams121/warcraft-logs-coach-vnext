@@ -53,7 +53,12 @@ export interface RemoteRunnerOptions {
   readonly keyId: string;
   /** From the Worker's secret binding; never logged or echoed. */
   readonly secret: Uint8Array;
-  readonly artifact: ApprovedEngineArtifact;
+  /**
+   * The approved artifacts the client verifies against (production:
+   * APPROVED_ENGINE_ARTIFACTS). The job names its simulation model; a result is
+   * verified only as that model's artifact.
+   */
+  readonly artifacts: readonly ApprovedEngineArtifact[];
   readonly bindings: readonly SimulationSpecBinding[];
   readonly pollIntervalMs: number;
   /** Whole-call deadline, including queueing. */
@@ -99,7 +104,7 @@ export class RemoteSimulationBackend implements SimulationBackend {
     const expected = await expectedResultIdentity(
       request.job,
       jobBytes,
-      this.options.artifact,
+      this.options.artifacts,
       this.options.bindings,
     );
     if (!expected.ok) return { backend: "REMOTE", outcome: expected };

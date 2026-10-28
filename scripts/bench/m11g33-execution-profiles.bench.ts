@@ -28,11 +28,11 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { APPROVED_ENGINE_ARTIFACTS } from "../../runner/approved-artifacts.js";
 import { DockerLauncher } from "../../runner/engine-launcher.js";
 import { DEFAULT_RUNNER_LIMITS } from "../../runner/limits.js";
 import { RUNNER_SPEC_BINDINGS } from "../../runner/spec-bindings.js";
 import { EXECUTION_PROFILES } from "../../src/simulation/execution-profiles.js";
+import { simulationModelById } from "../../src/simulation/model-registry.js";
 import { prepareSimulation } from "../../src/simulation/prepare.js";
 import { parseSimcJson } from "../../src/simulation/result-parser.js";
 import { devBloodJob, jsonBytes } from "../../tests/support/simulation/dev-blood-job.js";
@@ -41,16 +41,22 @@ import { goldenProjection } from "../../tests/support/simulation/golden.js";
 declare const process: any;
 
 const IMAGE: string | undefined = process.env["SIMC_IMAGE"];
-const OUT = join(".probe", "m11g3", "g33");
-const GOLDEN = join("tests", "fixtures", "simulation", "simc-33622e9d-blood-dev-standard.json");
+// M11 model registry: MODEL_ID names the simulation model (default: the historical
+// 33622e9d model); SIMC_IMAGE must be its registered image; the dev golden is per model.
+const MODEL_ID: string = process.env["MODEL_ID"] ?? "SIMC_33622E9D_LIVE_12_1_0_69587";
+const MODEL = simulationModelById(MODEL_ID);
+if (MODEL === undefined) throw new Error(`MODEL_ID ${MODEL_ID} is not a registered simulation model`);
+const SHORT = MODEL.pin.simcCommit.slice(0, 8);
+const GOLDEN = join("tests", "fixtures", "simulation", `simc-${SHORT}-blood-dev-standard.json`);
+const OUT = join(".probe", "m11g3", "g33", SHORT);
 
 type Json = Record<string, any>;
 
 describe.skipIf(IMAGE === undefined)("M11-G3-3 execution profiles on the exact pin", () => {
   it("measures, never selects", { timeout: 3_600_000 }, async () => {
     mkdirSync(OUT, { recursive: true });
-    const artifact = APPROVED_ENGINE_ARTIFACTS[0];
-    if (artifact === undefined) throw new Error("no approved artifact");
+    const artifact = MODEL.artifact;
+    expect(IMAGE, "SIMC_IMAGE must be the model's registered image").toBe(MODEL.imageId);
     const launcher = new DockerLauncher(
       {
         imageRef: IMAGE ?? "",
@@ -76,7 +82,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-3 execution profiles on the exact p
       };
     };
     const inputFor = async (policyId: string, profileId: string) => {
-      const job = devBloodJob(policyId, profileId);
+      const job = devBloodJob(policyId, profileId, MODEL_ID);
       const prepared = await prepareSimulation(job, jsonBytes(job), artifact, RUNNER_SPEC_BINDINGS);
       if (!prepared.ok) throw new Error(prepared.failure.detail);
       return prepared.value;
@@ -126,7 +132,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-3 execution profiles on the exact p
       if (profile.id === "SIMC_DEFAULT_PINNED" && process.env["WRITE_GOLDEN"] === "1") {
         const golden = goldenProjection(run.text, {
           source: `approved engine ${artifact.binarySha256}`,
-          job: "devBloodJob('STANDARD_SIM_V1', 'SIMC_DEFAULT_PINNED')",
+          job: `devBloodJob('STANDARD_SIM_V1', 'SIMC_DEFAULT_PINNED', '${MODEL_ID}')`,
           jobProfileHash: prepared.keys.profileHash,
         });
         writeFileSync(GOLDEN, `${JSON.stringify(golden, null, 1)}\n`, "utf8");

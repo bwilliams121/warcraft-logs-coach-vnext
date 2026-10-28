@@ -12,7 +12,7 @@
 
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { APPROVED_ENGINE_ARTIFACTS } from "../../../runner/approved-artifacts.js";
+import { approvedArtifactForPin } from "../../../src/simulation/approved-artifacts.js";
 import { assessProfileFidelity, GATED_CHECKS } from "../../../src/character-profile/fidelity.js";
 import type { CharacterProfile } from "../../../src/character-profile/profile.js";
 import { extractProfileEcho } from "../../../src/simulation/profile-echo.js";
@@ -33,6 +33,10 @@ import {
 } from "../../support/character/subject.js";
 import { subjectEnvironmentInput } from "../../support/environment/subject-environment.js";
 import { jsonBytes } from "../../support/simulation/dev-blood-job.js";
+import { DEV_SIMULATION_MODEL_ID, modelPin } from "../../support/simulation/dev-blood-job.js";
+
+/** The historical simulation model these tests were written against (M11 model registry). */
+const HISTORICAL_MODEL = modelPin(DEV_SIMULATION_MODEL_ID);
 
 const binding = BLOOD_CHARACTER_BINDING;
 let plain: CharacterProfile;
@@ -63,9 +67,9 @@ describe("M11-G3-4 canonical subject: owner-stated race", () => {
   });
 
   it("the golden is the approved engine running the stated subject's own probe job, race dwarf", async () => {
-    const artifact = APPROVED_ENGINE_ARTIFACTS[0];
+    const artifact = approvedArtifactForPin(HISTORICAL_MODEL);
     if (artifact === undefined) throw new Error("no artifact");
-    const job = fidelityProbeJob(stated, binding);
+    const job = fidelityProbeJob(stated, binding, HISTORICAL_MODEL);
     if (!job.ok) throw new Error(job.failure.detail);
     expect(job.value.character.race).toBe("dwarf");
     const prepared = await prepareSimulation(job.value, jsonBytes(job.value), artifact, [binding.simulation]);

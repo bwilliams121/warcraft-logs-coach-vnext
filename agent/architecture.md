@@ -8633,6 +8633,205 @@ Feasibility for a 1–2 minute product target:
 - So queue depth and wait must be re-derived from the observed mix before
   production. These are estimates from one host, not a load test.
 
+## M11 — simulation-model registry and 69933 Blood promotion
+
+**Status:** architecture approved (2026-10-23). The final closeout
+corrections are listed below (2026-10-28). G4 is not started; public analyzer
+authority is unchanged.
+
+### Two model concepts, never the same constant
+
+- **Analyzer authority model** (`src/simc/analyzer-authority-model.ts`):
+  SimulationCraft `33622e9d…` / `12.1.0.69587`, the commit every public
+  analyzer artifact was extracted from (`src/simc/data/*.apl.json` and the
+  analyzer data in `src/data/game`). It selects no simulation model.
+- **Simulation model** (`src/simulation/model-registry.ts`): one exact engine
+  plus Live game-data build used to simulate. Each entry records:
+  - the pin (commit, build) and the reported engine revision;
+  - the client-data snapshot: hotfix date and hash, the upstream data commit and
+    when it landed;
+  - the approved artifact (binary SHA-256, recipe), the immutable image id and
+    the build record.
+- **Separation.** `tests/contracts/m11-simulation-model-registry.test.ts` checks
+  that:
+  - every analyzer artifact is on the analyzer model;
+  - simulation code never imports `src/simc`, and `src/simc` never imports
+    simulation selection;
+  - no production code carries a global default model.
+
+### Registered simulation models (both permanent)
+
+| id | commit / build | binary | image |
+| --- | --- | --- | --- |
+| `SIMC_33622E9D_LIVE_12_1_0_69587` | 33622e9d / 12.1.0.69587 (hotfix 09-10) | 41347bc4… | sha256:8ab91e72… |
+| `SIMC_0A72E6A7_LIVE_12_1_0_69933` | 0a72e6a7 / 12.1.0.69933 (hotfix 09-22) | 79bf5a40… | sha256:efea14b4… |
+
+- `APPROVED_ENGINE_ARTIFACTS` is now a view of the registry, one artifact per
+  model.
+- The 0a72e6a7 artifact has its own build record,
+  `runner/simc-build/build-record-0a72e6a7.json`. It shares the recipe and base
+  digest with the historical one, but its apk toolchain differs (manifest
+  recorded). Its verification is VERIFIED by the exact-pin bench run with
+  `MODEL_ID`.
+
+### Applicability is spec-owned and evidence-bounded
+
+- A specialization declares which models it has validated for production, each
+  for ONE game build and a fight-time window bounded by client-data snapshots
+  shown equivalent for that spec: `SpecSimulationModelValidation`, in the spec's
+  `simulation-binding.ts`, outside the binding object so no cache key moves.
+- Blood validates:
+  - **33622e9d / 69587:** window [2026-09-10T20:43Z, 2026-09-13T00:34Z), basis
+    `SINGLE_SNAPSHOT_UNTIL_NEXT_LIVE_SNAPSHOT` (one data snapshot; the next Live
+    snapshot is another build).
+  - **0a72e6a7 / 69933:** window [2026-09-22T20:05:35Z, 2026-10-01T23:06:26Z),
+    basis `SNAPSHOTS_VERIFIED_EQUIVALENT_FOR_SPEC`. Blood-relevant data is
+    equivalent at snapshots 0a72e6a746, 7cbb6ef5ff (bit-identical Blood sims) and
+    698c86ba67. The canonical fight (2026-10-01T01:01Z) is inside it.
+- No other spec has validated any model.
+
+### Selection (`selectSimulationModel`, the Worker's job; G4 will call it)
+
+| Context | Result |
+| --- | --- |
+| Build unresolved, or fight time unresolved | SIMULATION_MODEL_CONTEXT_UNRESOLVED |
+| No registered model for the build (e.g. 12.1.5) | SIMULATION_MODEL_NOT_AVAILABLE |
+| Model exists, spec never validated it | SIMULATION_MODEL_NOT_VALIDATED_FOR_SPEC |
+| Validated, but the fight is outside every validated window | SIMULATION_MODEL_NOT_AVAILABLE |
+| More than one validated window matches (any models) | SIMULATION_MODEL_CONTEXT_UNRESOLVED |
+
+A successful selection returns the model AND its applicability: the one
+matching spec validation (spec, build, fight start, window, basis).
+
+There is no fallback to an older or newer model. A log's game build is not
+resolved automatically yet: the canonical subject's context is the approved
+investigation result, and resolving arbitrary logs is G4 work.
+
+### The job names its model; nothing selects one after construction
+
+- `job.model` (commit + build) must resolve to exactly one registered model
+  (else UNSUPPORTED_MODEL_VERSION).
+- `prepareSimulation` takes the caller's approved artifacts and uses only the
+  one for that model (else RUNNER_UNAVAILABLE). `PreparedSimulation` carries
+  `model` and `artifact`.
+- Cache keys, result provenance and result verification all derive from that
+  artifact.
+- Historical jobs keep working unchanged: same keys, same goldens.
+
+### Runner (G3-5)
+
+- The runner hosts one ENGINE per configured model (`SIMC_RUNNER_MODELS` =
+  `MODEL_ID=target`; DOCKER targets must equal the model's registered image).
+- Every engine proves its binary and runs its own self-test naming its model.
+  One failing engine keeps the runner NOT READY.
+- A job runs only on its model's engine. A model the runner does not host is
+  RUNNER_UNAVAILABLE; it is never substituted.
+- A PRODUCTION job also needs its spec to have validated the model
+  (SIMULATION_MODEL_NOT_VALIDATED_FOR_SPEC, checked before the cache).
+- **Readiness attestation schema 3** adds `simulationModelId`. Profile fidelity
+  and environment publishability are computed against one model, so the runner
+  refuses an attestation made for another model. Schema 2 is stale.
+
+### Simulation-model data (per model)
+
+- `src/data/simulation-models/<model>/` holds, per model:
+  - consumable identities;
+  - engine token acceptance;
+  - raid-environment identities and presence audit;
+  - a manifest (pin, binary, hotfix date, snapshot time and `dataHistory`).
+- **Moved data.** The 33622e9d files moved there byte for byte from
+  `src/data/game`. Their consumables provenance was then corrected; see the
+  closeout below.
+- **0a72e6a7 data.** It was extracted from the 0a72e6a7 sources (extractors fixed:
+  raid-environment v3 reads the client build from source; the consumables
+  source label is corrected and empty sources fail closed) and measured on its
+  engine (token acceptance).
+- **Same content.** The substantive content is identical across the two models:
+  22 of 67 tokens accepted, and the same presence audit.
+- **Injection.** Character-profile and environment reconstruction receive the
+  NAMED model's bundle as input. This was a mechanical gate change, re-pinned
+  under the same gate revisions (meaning unchanged).
+
+### Blood environment materiality is measured per model
+
+- `BLOOD_ENVIRONMENT_FACTS_BY_MODEL`: the 0a72e6a7 measurements moved with the
+  69933 rebalance (e.g. Chaos Brand 0.92% → 1.08%, potion presence 5.70% →
+  5.97%).
+- **No field changed materiality class** under ENVIRONMENT_MATERIALITY_V1 (0.5%).
+- The gate is evaluated with the facts of the model the job runs on.
+
+### Engine-contract difference: Consumption (measured, both models)
+
+At 0a72e6a7 Consumption's release spell (1263825) is a CHILD action
+`consumption_release` of `consumption` (upstream 5f3f05020a); at 33622e9d it is
+a separate top-level action. `scripts/bench/m11-consumption-release.bench.ts`
+runs an ENGINE-WRITTEN Consumption loadout (`spec_talents=consumption:1`,
+echoed import string) through the production path on both models.
+
+- Parse, verification and cache identity work on both models. The parser needs
+  no migration: one entry per top-level action, with compound amount.
+- **Breakdown granularity is model-dependent:**
+
+  | Model | Breakdown | Per iteration |
+  | --- | --- | --- |
+  | 33622e9d | `consumption` and `consumption_release` | 518,481 and 162,093 |
+  | 0a72e6a7 | one `consumption` entry, release included | 636,408 (release 150,614) |
+
+  Per-ability comparison ACROSS models must account for it. Within one model,
+  results are internally consistent.
+- Pinned by `tests/unit/simulation/consumption-release.test.ts` from the per-model
+  goldens.
+
+### Closeout (2026-10-28)
+
+**Historical consumables provenance (a metadata correction).**
+- **The defect.** The 33622e9d consumables artifact recorded its source as
+  `engine/item/consumable.cpp`, a path that does not exist at that commit.
+  The hash it recorded was of `engine/player/consumable.cpp`.
+- **Regeneration.** The consumables extractor is now v4: real path label, and
+  empty or chain-less sources fail closed. Both bundles were regenerated from
+  their hashed sources, which are unchanged:
+  - consumables revision `simc-<sha8>-3` → `-4`;
+  - token acceptance `-1` → `-2`, re-measured on each model's engine.
+- **No silent change.** No artifact keeps its old revision with new bytes.
+  Each model manifest (now v2) records the change in `dataHistory`. The
+  loader refuses a bundle whose history does not end at the loaded artifact
+  revisions.
+- **Semantics unchanged.** Semantic content and token verdicts are
+  byte-identical to the committed v3 artifacts (pinned semantic hash). The
+  readiness gates read code, not data revisions, so no gate fingerprint or
+  revision moved for this.
+
+**Model chronology vs validated applicability.**
+- Environment reconstruction takes the caller's `modelApplicability`
+  explicitly (null when there is none; no default).
+- **Window covers the fight.** The applicability names THIS model and build,
+  and its half-open window contains the fight start. Chronology is
+  discharged: the informational `MODEL_SNAPSHOT_PRECEDES_LOG` is recorded
+  instead of `MODEL_BUILD_LAG`. It does not imply compatibility uncertainty.
+- **Otherwise.** `MODEL_BUILD_LAG` (age-only diagnostic) is unchanged.
+  Selection outside a validated window already fails closed.
+- **Concrete blockers stay.** A specific observed effect the model cannot
+  represent still blocks under `PINNED_MODEL_MISSING_OBSERVED_EFFECT`;
+  applicability never resolves one.
+- **Gate impact.** Status, blockers, materiality and the environment hash are
+  identical with and without the applicability. The environment gate
+  fingerprint was re-pinned (same revision).
+- **Canonical result.** The 69933 Blood fight selects 0a72e6a7 with
+  `coversFight: true`. No MODEL_BUILD_LAG; the three missing effects
+  (1296934, 1303184, 1285644) still block.
+
+**Owner decisions** (recorded in `agent/follow-ups.md`):
+- The 33622e9d window stays narrow.
+- Automatic build and fight-context resolution is a distinct G4
+  `SimulationContextResolver` prerequisite, not part of ceiling math.
+- 12.1.5 is not registered. It gets its own compatibility review after the G4
+  foundation and before 12.1.5 or current-Live ceilings are published.
+- Existing approved artifacts are not rebuilt for package pinning. The next
+  model build first gets a hardened recipe revision pinning the immutable base
+  and exact package and toolchain inputs.
+- There is no cross-model Consumption normalization until a consumer needs it.
+
 ---
 
 # Milestone 12 — Healer Foundation

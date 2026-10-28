@@ -1,7 +1,7 @@
 {
   "artifactVersion": 1,
   "datasetId": "SIMC_CONSUMABLES",
-  "artifactRevision": "simc-33622e9d-3",
+  "artifactRevision": "simc-33622e9d-4",
   "provenance": {
     "repository": "https://github.com/simulationcraft/simc",
     "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
@@ -27,14 +27,14 @@
         "byteLength": 525
       },
       {
-        "path": "engine/item/consumable.cpp",
+        "path": "engine/player/consumable.cpp",
         "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
         "byteLength": 31244
       }
     ],
     "clientDataWowVersion": "12.1.0.69587",
     "method": "MACHINE_EXTRACTED_CONSUMABLE_JOIN",
-    "extractorVersion": 3,
+    "extractorVersion": 4,
     "scope": "item class 0 subclasses {\"1\":\"POTION\",\"3\":\"FLASK\",\"5\":\"FOOD\",\"8\":\"OTHER\"} with required level >= 80"
   },
   "temporaryEnchants": [

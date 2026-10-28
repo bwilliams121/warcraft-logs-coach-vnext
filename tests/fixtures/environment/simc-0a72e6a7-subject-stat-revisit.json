@@ -1,0 +1,22 @@
+{
+  "source": "approved engine 79bf5a406b0ca16eb8e828ef017603b60fdee576a5cb3cf4acaacf93a08eea36",
+  "basis": "development (= subject) gear and talents, race none (measurement only), the proven pull environment: six whole-fight raid buffs, flask, main-hand oil; no lust, potion, food or rune; buffed_stats at combat start",
+  "flaskRank2": {
+    "strength": 2535,
+    "stamina": 75432,
+    "critRating": 883,
+    "hasteRating": 703,
+    "masteryRating": 751,
+    "versatilityRating": 702,
+    "armor": 3685.726
+  },
+  "flaskRank1": {
+    "strength": 2535,
+    "stamina": 75432,
+    "critRating": 883,
+    "hasteRating": 703,
+    "masteryRating": 751,
+    "versatilityRating": 688,
+    "armor": 3685.726
+  }
+}

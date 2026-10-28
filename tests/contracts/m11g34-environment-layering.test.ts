@@ -53,7 +53,10 @@ describe("M11-G3-4 environment layering", () => {
       /^\.\/[a-z-]+\.js$/,
       /^\.\.\/character-profile\/(profile|pull-facts)\.js$/,
       /^\.\.\/combat-facts\/descriptors\.js$/,
-      /^\.\.\/data\/game\/(consumables|consumable-token-acceptance|raid-environment)\.js$/,
+      // M11 model-registry amendment (reviewed): consumables, token acceptance and
+      // raid-environment identities are simulation-model data, read from the
+      // NAMED model's bundle (src/data/simulation-models).
+      /^\.\.\/data\/simulation-models\/index\.js$/,
       /^\.\.\/engine\/evidence\/coverage\.js$/,
       /^\.\.\/engine\/normalization\/(combat-fight|normalized-events)\.js$/,
       /^\.\.\/engine\/state\/state-result\.js$/,

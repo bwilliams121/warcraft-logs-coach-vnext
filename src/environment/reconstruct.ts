@@ -40,22 +40,22 @@ import type {
 } from "../character-profile/profile.js";
 import type { CombatantPullFacts } from "../character-profile/pull-facts.js";
 import { actorsOwnedBy, bossSubtypeOf } from "../combat-facts/descriptors.js";
-import { engineAcceptsToken } from "../data/game/consumable-token-acceptance.js";
-import { consumableAuraFor, pinnedConsumables, type ConsumableAura } from "../data/game/consumables.js";
 import {
+  consumableAuraFor,
   defensiveAllyAura,
+  engineAcceptsToken,
   isSatedSpell,
   lustFamilyMember,
-  pinnedRaidEnvironment,
-  pinnedSpellPresence,
   raidBuffOverrideForAura,
+  spellPresence,
+  type ConsumableAura,
   type RaidBuffOverrideIdentity,
-} from "../data/game/raid-environment.js";
+  type SimulationModelData,
+} from "../data/simulation-models/index.js";
 import { inclusiveRange } from "../engine/evidence/coverage.js";
 import type { CombatFight } from "../engine/normalization/combat-fight.js";
 import type { AuraEvent, CombatEvent } from "../engine/normalization/normalized-events.js";
 import { gateAbsenceClaim } from "../engine/state/state-result.js";
-import { APPROVED_SIMC_MODEL } from "../simulation/model.js";
 import { RAID_BUFFS } from "../simulation/job.js";
 import type { EvidenceCategory } from "../wcl/evidence-capability.js";
 import {
@@ -110,10 +110,17 @@ import {
   type TargetCandidate,
   type TargetScheduleComponent,
   type TemporaryEnchantComponent,
+  type ValidatedModelApplicability,
 } from "./model.js";
 
 export interface EnvironmentReconstructionInput {
   readonly subject: { readonly fightRef: string; readonly actorId: number };
+  /**
+   * The simulation model the environment is reconstructed FOR (M11 model
+   * registry): its pinned consumable, token-acceptance and raid-environment
+   * data and its client-data build. Named by the caller; there is no default.
+   */
+  readonly simulationModel: SimulationModelData;
   /** The normalized fight, with its completeness. */
   readonly fight: CombatFight;
   /** The subject's raw pull facts (combatantinfo stats and aura list). */
@@ -129,6 +136,13 @@ export interface EnvironmentReconstructionInput {
   /** Spell ids the subject's own character profile owns (selected talents): a pull aura of these is the character's, not the environment's. */
   readonly characterOwnedSpellIds: { readonly actorId: number; readonly spellIds: readonly number[] } | null;
   readonly documents: readonly EnvironmentEvidenceDocument[];
+  /**
+   * The model's validated applicability for this fight, from model selection;
+   * null when the caller has none (e.g. a diagnostic run on a model chosen
+   * without a log context). Explicit: there is no default. It only discharges
+   * model chronology; it never resolves a specific missing effect.
+   */
+  readonly modelApplicability: ValidatedModelApplicability | null;
   /**
    * Explicit user statements (owner policy, M11-G3-4): an engine consumable
    * token, or "NONE". Used ONLY to fill an UNKNOWN identity; validated against
@@ -151,13 +165,12 @@ export const USER_STATED_NONE: ConsumableIdentity = { spellId: 0, itemIds: [] };
 /** Observations further apart than this start a new descriptive cluster. Never an availability boundary. */
 export const OBSERVATION_CLUSTER_GAP_MS = 10_000;
 
-/** The pinned client data's hotfix date (engine/dbc/generated/client_data_version.inc at 33622e9d). */
-export const PINNED_CLIENT_DATA_HOTFIX_DATE = "2026-09-10";
-
 const SUBJECT_AURAS_FIELD = "subject aura events";
 
 interface Ctx {
   readonly fight: CombatFight;
+  /** The named simulation model's pinned data. */
+  readonly data: SimulationModelData;
   readonly fightRef: string;
   readonly subjectId: number;
   readonly approximations: EngineApproximation[];
@@ -205,6 +218,7 @@ export function reconstructEnvironment(
   const fight = input.fight;
   const ctx: Ctx = {
     fight,
+    data: input.simulationModel,
     fightRef: input.subject.fightRef,
     approximations: [],
     subjectId: input.subject.actorId,
@@ -224,12 +238,6 @@ export function reconstructEnvironment(
   const use = (assumption: EnvironmentAssumption) => {
     ctx.assumptions.set(assumption.id, assumption);
   };
-
-  const raidData = pinnedRaidEnvironment();
-  const consumableData = pinnedConsumables();
-  if (!raidData.ok) block("raidBuffs", "PINNED_DATA_UNAVAILABLE", `raid environment: ${raidData.detail}`);
-  if (!consumableData.ok)
-    block("consumables", "PINNED_DATA_UNAVAILABLE", `consumables: ${consumableData.detail}`);
 
   // Subject-scoped inputs must be the subject's.
   const own = <T extends { readonly actorId: number }>(
@@ -258,9 +266,13 @@ export function reconstructEnvironment(
   const continuity = primaryTargetContinuous(ctx.fightRef, fight.fight.encounterId);
   const primaryTarget = reconstructPrimaryTarget(ctx, continuity);
   if (primaryTarget.availability.state === "MODEL_ASSUMPTION") use(continuity);
-  const raidBuffs = raidData.ok
-    ? reconstructRaidBuffs(ctx, raidData.data.raidBuffOverrides, pull, subjectAuras, primaryTarget)
-    : [];
+  const raidBuffs = reconstructRaidBuffs(
+    ctx,
+    ctx.data.raidEnvironment.raidBuffOverrides,
+    pull,
+    subjectAuras,
+    primaryTarget,
+  );
   const bloodlust = reconstructBloodlust(ctx, subjectAuras);
   const pullAuras = classifyPullAuras(ctx, pull, talentSpells);
   const consumables = reconstructConsumables(
@@ -406,19 +418,30 @@ export function reconstructEnvironment(
     );
   }
 
-  // MODEL_BUILD_LAG: diagnostic by age alone. A SPECIFIC observed effect that is
-  // absent from the pinned spell data (audited) cannot be represented by the
-  // pinned model: that is a material incompatibility and blocks.
+  // Model chronology. A SPECIFIC observed effect that is absent from the pinned
+  // spell data (audited) cannot be represented by the pinned model: that is a
+  // material incompatibility and blocks, whatever the applicability. Age alone
+  // is MODEL_BUILD_LAG (a diagnostic) unless a validated applicability window
+  // for THIS model contains the fight start: then chronology is discharged and
+  // only the informational MODEL_SNAPSHOT_PRECEDES_LOG is recorded.
   const logDate = new Date(fight.report.startTimeUnixMs).toISOString().slice(0, 10);
-  const absent = unclassifiedSelf.filter((aura) => pinnedSpellPresence(aura.spellId) === false);
+  const applicabilityCovers = coversFight(input.modelApplicability, ctx.data, fight);
+  const absent = unclassifiedSelf.filter((aura) => spellPresence(ctx.data, aura.spellId) === false);
   for (const aura of absent) {
     block(
       "pullAuras",
       "PINNED_MODEL_MISSING_OBSERVED_EFFECT",
-      `subject pull aura ${String(aura.spellId)} is absent from the pinned spell data (client data ${APPROVED_SIMC_MODEL.gameDataBuild}, hotfix ${PINNED_CLIENT_DATA_HOTFIX_DATE}; log ${logDate}): its effect cannot be represented`,
+      `subject pull aura ${String(aura.spellId)} is absent from the pinned spell data (client data ${ctx.data.manifest.gameDataBuild}, hotfix ${ctx.data.manifest.hotfixDate}; log ${logDate}): its effect cannot be represented`,
     );
   }
-  if (logDate > PINNED_CLIENT_DATA_HOTFIX_DATE) {
+  if (logDate > ctx.data.manifest.hotfixDate && applicabilityCovers && input.modelApplicability !== null) {
+    const applicability = input.modelApplicability;
+    note(
+      "duration",
+      "MODEL_SNAPSHOT_PRECEDES_LOG",
+      `informational: log ${logDate} follows the model's client-data snapshot (hotfix ${ctx.data.manifest.hotfixDate}, ${ctx.data.manifest.gameDataBuild}); the fight is inside the validated applicability window [${applicability.window.fromUtc}, ${applicability.window.toUtc}) for ${applicability.specKey} (${applicability.windowBasis}): model chronology discharged`,
+    );
+  } else if (logDate > ctx.data.manifest.hotfixDate) {
     const specific = [
       ...unclassifiedSelf.map(
         (aura) =>
@@ -431,7 +454,7 @@ export function reconstructEnvironment(
     note(
       "duration",
       "MODEL_BUILD_LAG",
-      `log ${logDate} is newer than the pinned client data (hotfix ${PINNED_CLIENT_DATA_HOTFIX_DATE}, ${APPROVED_SIMC_MODEL.gameDataBuild}); age alone does not block${specific.length > 0 ? `; specific gaps (each blocks under its own code): ${specific.join("; ")}` : ""}`,
+      `log ${logDate} is newer than the pinned client data (hotfix ${ctx.data.manifest.hotfixDate}, ${ctx.data.manifest.gameDataBuild}); age alone does not block${specific.length > 0 ? `; specific gaps (each blocks under its own code): ${specific.join("; ")}` : ""}`,
     );
   }
 
@@ -451,13 +474,9 @@ export function reconstructEnvironment(
       : "READY";
 
   const pinnedDataRevisions = [
-    ...(raidData.ok
-      ? [{ datasetId: raidData.data.datasetId, revision: raidData.data.artifactRevision }]
-      : []),
-    ...(consumableData.ok
-      ? [{ datasetId: consumableData.data.datasetId, revision: consumableData.data.artifactRevision }]
-      : []),
-  ];
+    ctx.data.revisions.find((entry) => entry.datasetId === "SIMC_RAID_ENVIRONMENT"),
+    ctx.data.revisions.find((entry) => entry.datasetId === "SIMC_CONSUMABLES"),
+  ].filter((entry) => entry !== undefined);
 
   return {
     schemaVersion: ENVIRONMENT_RECONSTRUCTION_SCHEMA_VERSION,
@@ -485,9 +504,31 @@ export function reconstructEnvironment(
       documents: input.documents,
       pinnedData: pinnedDataRevisions,
       engineApproximations: ctx.approximations,
-      model: { simcCommit: APPROVED_SIMC_MODEL.simcCommit, gameDataBuild: APPROVED_SIMC_MODEL.gameDataBuild },
+      model: { simcCommit: ctx.data.manifest.simcCommit, gameDataBuild: ctx.data.manifest.gameDataBuild },
+      modelApplicability: { supplied: input.modelApplicability, coversFight: applicabilityCovers },
     },
   };
+}
+
+/**
+ * A supplied applicability discharges chronology only when it names THIS
+ * model and build and its half-open window contains this fight's start.
+ * Anything else (absent, another model, another build, outside the window,
+ * unparseable times) leaves chronology undischarged.
+ */
+function coversFight(
+  applicability: ValidatedModelApplicability | null,
+  data: SimulationModelData,
+  fight: CombatFight,
+): boolean {
+  if (applicability === null) return false;
+  if (applicability.modelId !== data.manifest.modelId) return false;
+  if (applicability.gameBuild !== data.manifest.gameDataBuild) return false;
+  const start = fight.report.startTimeUnixMs + fight.fight.startTimeMs;
+  const from = Date.parse(applicability.window.fromUtc);
+  const to = Date.parse(applicability.window.toUtc);
+  if (!Number.isFinite(start) || Number.isNaN(from) || Number.isNaN(to)) return false;
+  return from <= start && start < to;
 }
 
 // ---------------------------------------------------------------------------
@@ -894,7 +935,7 @@ function reconstructBloodlust(ctx: Ctx, subjectAuras: Gate): BloodlustComponent 
       event.kind === "AURA" &&
       event.target?.actorId === ctx.subjectId &&
       event.abilityGameId !== null &&
-      lustFamilyMember(event.abilityGameId)?.inPinnedData === true,
+      lustFamilyMember(ctx.data, event.abilityGameId)?.inPinnedData === true,
   );
   const satedObservations = ctx.fight.events
     .filter(
@@ -903,7 +944,7 @@ function reconstructBloodlust(ctx: Ctx, subjectAuras: Gate): BloodlustComponent 
         event.target?.actorId === ctx.subjectId &&
         event.abilityGameId !== null &&
         event.operation === "APPLIED" &&
-        isSatedSpell(event.abilityGameId),
+        isSatedSpell(ctx.data, event.abilityGameId),
     )
     .map((event) => ({ spellId: event.abilityGameId ?? 0, atMs: rel(ctx, event.reportTimeMs) }));
   const field = "subject lust-family aura events";
@@ -949,7 +990,7 @@ function reconstructBloodlust(ctx: Ctx, subjectAuras: Gate): BloodlustComponent 
     source,
   });
   const equivalence = (spellId: number): LustApplication["equivalence"] =>
-    lustFamilyMember(spellId)?.equivalentToEngineBloodlust === true
+    lustFamilyMember(ctx.data, spellId)?.equivalentToEngineBloodlust === true
       ? "ENGINE_BLOODLUST_EQUIVALENT"
       : "NOT_EQUIVALENT";
   for (const event of lustEvents) {
@@ -1079,12 +1120,12 @@ function classifyPullAuras(
     const sourceRole: PullAuraRecord["sourceRole"] =
       aura.sourceId === null ? "UNKNOWN" : aura.sourceId === ctx.subjectId ? "SUBJECT" : "ALLY";
     let classification: PullAuraRecord["classification"];
-    if (raidBuffOverrideForAura(aura.spellId) !== null) classification = "RAID_BUFF";
-    else if (lustFamilyMember(aura.spellId)?.inPinnedData === true) classification = "LUST_FAMILY";
-    else if (isSatedSpell(aura.spellId)) classification = "SATED";
-    else if (consumableAuraFor(aura.spellId) !== null) classification = "CONSUMABLE";
+    if (raidBuffOverrideForAura(ctx.data, aura.spellId) !== null) classification = "RAID_BUFF";
+    else if (lustFamilyMember(ctx.data, aura.spellId)?.inPinnedData === true) classification = "LUST_FAMILY";
+    else if (isSatedSpell(ctx.data, aura.spellId)) classification = "SATED";
+    else if (consumableAuraFor(ctx.data, aura.spellId) !== null) classification = "CONSUMABLE";
     else if (sourceRole === "SUBJECT" && talentSpells.has(aura.spellId)) classification = "CHARACTER_TALENT";
-    else if (sourceRole === "ALLY" && defensiveAllyAura(aura.spellId) !== null)
+    else if (sourceRole === "ALLY" && defensiveAllyAura(ctx.data, aura.spellId) !== null)
       classification = "DEFENSIVE_ALLY_EXCLUDED";
     else
       classification =
@@ -1114,11 +1155,11 @@ function rankOf(aura: ConsumableAura): Evidenced<ConsumableRank> {
  * token (none chosen). Representable only when the token selects one item level
  * unambiguously AND the approved engine accepted it (token-acceptance table).
  */
-function rankOptionsOf(aura: ConsumableAura): RankOption[] {
+function rankOptionsOf(data: SimulationModelData, aura: ConsumableAura): RankOption[] {
   return aura.rankOptions.map((option) => ({
     itemLevel: option.itemLevel,
     token: option.token,
-    representable: option.unambiguous && engineAcceptsToken(aura.spellId, option.token),
+    representable: option.unambiguous && engineAcceptsToken(data, aura.spellId, option.token),
   }));
 }
 
@@ -1132,6 +1173,7 @@ type Report = (component: EnvironmentComponent, code: EnvironmentIssue["code"], 
 
 /** Resolves a user-stated consumable token against the pinned data: the aura it selects, or why it cannot. */
 function userConsumable(
+  data: SimulationModelData,
   kind: SetupConsumableKind,
   stated: UserProvidedConsumable,
 ):
@@ -1151,9 +1193,7 @@ function userConsumable(
       },
     };
   }
-  const loaded = pinnedConsumables();
-  if (!loaded.ok) return { ok: false, detail: loaded.detail };
-  for (const aura of loaded.data.consumableAuras) {
+  for (const aura of data.consumables.consumableAuras) {
     if (CONSUMABLE_KIND[aura.kind] !== kind) continue;
     const option = aura.rankOptions.find((candidate) => candidate.token === stated.token);
     if (option === undefined) continue;
@@ -1163,7 +1203,7 @@ function userConsumable(
         detail: `token ${stated.token} does not select one item level unambiguously at the pin`,
       };
     }
-    if (!engineAcceptsToken(aura.spellId, option.token)) {
+    if (!engineAcceptsToken(data, aura.spellId, option.token)) {
       return {
         ok: false,
         detail: `token ${stated.token} names a pinned ${kind.toLowerCase()}, but the approved engine cannot build its effect (token-acceptance table): not representable, so the statement cannot make the environment simulation-ready`,
@@ -1217,11 +1257,11 @@ function reconstructConsumables(
     const stated = statedFor[kind];
     const hit = (pull?.auras ?? [])
       .filter((aura) => aura.sourceId === ctx.subjectId)
-      .map((aura) => consumableAuraFor(aura.spellId))
+      .map((aura) => consumableAuraFor(ctx.data, aura.spellId))
       .find((aura): aura is ConsumableAura => aura !== null && CONSUMABLE_KIND[aura.kind] === kind);
     if (hit === undefined) {
       if (stated !== undefined) {
-        const resolved = userConsumable(kind, stated);
+        const resolved = userConsumable(ctx.data, kind, stated);
         if (resolved.ok) {
           note(
             "consumables",
@@ -1285,7 +1325,7 @@ function reconstructConsumables(
       kind,
       identity: known(identity, "WCL_COMBATANTINFO", `auras[${String(hit.spellId)}]`),
       rank: rankOf(hit),
-      rankOptions: rankOptionsOf(hit),
+      rankOptions: rankOptionsOf(ctx.data, hit),
       presence,
       unclassifiedCandidates: [],
     };
@@ -1332,8 +1372,7 @@ function temporaryEnchantOf(
       },
     ];
   }
-  const loaded = pinnedConsumables();
-  const enchantSpells = new Set(loaded.ok ? loaded.data.temporaryEnchants.map((row) => row.spellId) : []);
+  const enchantSpells = new Set(ctx.data.consumables.temporaryEnchants.map((row) => row.spellId));
   const replacement = ctx.fight.events.find(
     (event) =>
       event.kind === "CAST" &&
@@ -1341,7 +1380,7 @@ function temporaryEnchantOf(
       event.abilityGameId !== null &&
       enchantSpells.has(event.abilityGameId),
   );
-  if (!loaded.ok || replacement !== undefined) {
+  if (replacement !== undefined) {
     return [
       {
         slot: entry.slot,
@@ -1372,14 +1411,14 @@ function reconstructPotion(ctx: Ctx, subjectAuras: Gate): PotionComponent {
       event.castPhase === "COMPLETE" &&
       event.source?.actorId === ctx.subjectId &&
       event.abilityGameId !== null &&
-      consumableAuraFor(event.abilityGameId)?.kind === "POTION",
+      consumableAuraFor(ctx.data, event.abilityGameId)?.kind === "POTION",
   );
   const potionAuraEvents = ctx.fight.events.filter(
     (event): event is AuraEvent =>
       event.kind === "AURA" &&
       event.target?.actorId === ctx.subjectId &&
       event.abilityGameId !== null &&
-      consumableAuraFor(event.abilityGameId)?.kind === "POTION",
+      consumableAuraFor(ctx.data, event.abilityGameId)?.kind === "POTION",
   );
   const castCoverage = gate(ctx, "CASTS", ctx.subjectId);
   const spellIds = [...new Set([...casts, ...potionAuraEvents].map((event) => event.abilityGameId ?? 0))];
@@ -1420,7 +1459,7 @@ function reconstructPotion(ctx: Ctx, subjectAuras: Gate): PotionComponent {
     };
   }
   const spellId = spellIds[0] ?? 0;
-  const aura = consumableAuraFor(spellId);
+  const aura = consumableAuraFor(ctx.data, spellId);
   const identity =
     aura === null
       ? unknownFact<ConsumableIdentity>("not in pinned data", "PINNED_GAME_DATA", "consumables")
@@ -1431,7 +1470,7 @@ function reconstructPotion(ctx: Ctx, subjectAuras: Gate): PotionComponent {
         );
   const rank: Evidenced<ConsumableRank> =
     aura === null ? { state: "NOT_APPLICABLE", reason: "identity unknown" } : rankOf(aura);
-  const rankOptions = aura === null ? [] : rankOptionsOf(aura);
+  const rankOptions = aura === null ? [] : rankOptionsOf(ctx.data, aura);
   if (!subjectAuras.ok) {
     return {
       ...base,

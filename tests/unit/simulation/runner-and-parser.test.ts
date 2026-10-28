@@ -22,7 +22,7 @@ import { RUNNER_SPEC_BINDINGS } from "../../../runner/spec-bindings.js";
 import { executionProfileById, type ExecutionProfile } from "../../../src/simulation/execution-profiles.js";
 import { executionProfileRevision } from "../../../src/simulation/execution-revision.js";
 import type { SimulationJob } from "../../../src/simulation/job.js";
-import { APPROVED_SIMC_MODEL, type ApprovedEngineArtifact } from "../../../src/simulation/model.js";
+import type { ApprovedEngineArtifact } from "../../../src/simulation/model.js";
 import { prepareSimulation } from "../../../src/simulation/prepare.js";
 import {
   MAX_ENGINE_OUTPUT_BYTES,
@@ -35,13 +35,17 @@ import {
   simulationPolicyById,
 } from "../../../src/simulation/simulation-policy.js";
 import { devBloodJob, jsonBytes } from "../../support/simulation/dev-blood-job.js";
+import { DEV_SIMULATION_MODEL_ID, modelPin } from "../../support/simulation/dev-blood-job.js";
+
+/** The historical simulation model these tests were written against (M11 model registry). */
+const HISTORICAL_MODEL = modelPin(DEV_SIMULATION_MODEL_ID);
 
 declare const process: { execPath: string; cwd(): string };
 
 const FAKE = join(process.cwd(), "tests", "support", "simulation", "fake-simc.mjs");
 const FAKE_SHA = createHash("sha256").update(readFileSync(FAKE)).digest("hex");
 const ARTIFACT: ApprovedEngineArtifact = {
-  model: APPROVED_SIMC_MODEL,
+  model: HISTORICAL_MODEL,
   binarySha256: FAKE_SHA,
   buildRecipeRevision: "fake",
 };
@@ -80,7 +84,7 @@ describe("M11-G3-1 runner: one job, end to end through the fake engine", () => {
     const result = report.outcome.value;
     expect(result.schemaVersion).toBe("simulation-result/1");
     expect(result.model).toEqual({
-      requestedSimcCommit: APPROVED_SIMC_MODEL.simcCommit,
+      requestedSimcCommit: HISTORICAL_MODEL.simcCommit,
       reportedGitRevision: "33622e9",
       gameDataBuild: "12.1.0.69587",
       binarySha256: FAKE_SHA,
@@ -406,7 +410,7 @@ describe("M11-G3-3 execution-profile provenance through a real run", () => {
   it("R. result provenance records the profile revision and its effective settings", async () => {
     const fake = join(process.cwd(), "tests", "support", "simulation", "fake-simc.mjs");
     const artifact: ApprovedEngineArtifact = {
-      model: APPROVED_SIMC_MODEL,
+      model: HISTORICAL_MODEL,
       binarySha256: createHash("sha256").update(readFileSync(fake)).digest("hex"),
       buildRecipeRevision: "fake",
     };
@@ -428,6 +432,6 @@ describe("M11-G3-3 execution-profile provenance through a real run", () => {
       revision: await executionProfileRevision(V1),
       effectiveSettings: { sim: V1.sim, player: V1.player },
     });
-    expect(report.outcome.value.model.requestedSimcCommit).toBe(APPROVED_SIMC_MODEL.simcCommit);
+    expect(report.outcome.value.model.requestedSimcCommit).toBe(HISTORICAL_MODEL.simcCommit);
   });
 });

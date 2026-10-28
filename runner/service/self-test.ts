@@ -14,7 +14,7 @@
  */
 
 import { fail, succeed, type SimulationOutcome } from "../../src/simulation/failures.js";
-import { APPROVED_SIMC_MODEL, type ApprovedEngineArtifact } from "../../src/simulation/model.js";
+import type { ApprovedEngineArtifact, SimcModelPin } from "../../src/simulation/model.js";
 import { expectedResultIdentity, verifySimulationResult } from "../../src/simulation/result-verification.js";
 import type { SimulationSpecBinding } from "../../src/simulation/spec-binding.js";
 import { simulationPolicyById } from "../../src/simulation/simulation-policy.js";
@@ -22,12 +22,13 @@ import type { ExecuteJob } from "./service.js";
 
 export const SELF_TEST_POLICY_ID = "BENCHMARK_300_T1";
 
-export function selfTestJob(): unknown {
+/** The self-test job for one engine: it names THAT engine's model. */
+export function selfTestJob(model: SimcModelPin): unknown {
   const policy = simulationPolicyById(SELF_TEST_POLICY_ID);
   if (policy === undefined) throw new Error(`self-test: unknown policy ${SELF_TEST_POLICY_ID}`);
   return {
     schemaVersion: "simulation-job/1",
-    model: { simcCommit: APPROVED_SIMC_MODEL.simcCommit, gameDataBuild: APPROVED_SIMC_MODEL.gameDataBuild },
+    model: { simcCommit: model.simcCommit, gameDataBuild: model.gameDataBuild },
     character: {
       profileKind: "DEVELOPMENT_FIXTURE",
       spec: "deathknight/blood",
@@ -84,7 +85,7 @@ export function selfTestStartupCheck(
   bindings: readonly SimulationSpecBinding[],
 ): () => Promise<SimulationOutcome<null>> {
   return async () => {
-    const job = selfTestJob();
+    const job = selfTestJob(artifact.model);
     const bytes = new TextEncoder().encode(JSON.stringify(job)).byteLength;
     const expected = await expectedResultIdentity(job, bytes, artifact, bindings);
     if (!expected.ok) return expected;

@@ -1,0 +1,248 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_RAID_ENVIRONMENT",
+  "artifactRevision": "simc-0a72e6a7-2",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "0a72e6a74684d23c989b2d76143e429d2b4f1c91",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "250fa3d9dec31099800c150c8ee99f102ef574f3f345877398bf00c260abe860",
+        "byteLength": 29516880
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "116380c20789dd431b9ea5508455434c4de4f4055c31492514907f14c85bf3d1",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69933",
+    "method": "MACHINE_EXTRACTED_SPELL_EQUIVALENCE",
+    "extractorVersion": 3
+  },
+  "engineBloodlust": { "spellId": 2825, "durationMs": 40000 },
+  "lustFamily": [
+    {
+      "spellId": 2825,
+      "name": "Bloodlust",
+      "inPinnedData": true,
+      "durationMs": 40000,
+      "equivalentToEngineBloodlust": true
+    },
+    {
+      "spellId": 32182,
+      "name": "Heroism",
+      "inPinnedData": true,
+      "durationMs": 40000,
+      "equivalentToEngineBloodlust": true
+    },
+    {
+      "spellId": 80353,
+      "name": "Time Warp",
+      "inPinnedData": true,
+      "durationMs": 40000,
+      "equivalentToEngineBloodlust": false
+    },
+    {
+      "spellId": 264667,
+      "name": "Primal Rage",
+      "inPinnedData": true,
+      "durationMs": 40000,
+      "equivalentToEngineBloodlust": false
+    },
+    {
+      "spellId": 390386,
+      "name": "Fury of the Aspects",
+      "inPinnedData": true,
+      "durationMs": 40000,
+      "equivalentToEngineBloodlust": false
+    }
+  ],
+  "satedFamily": [
+    { "spellId": 57723, "name": "Exhaustion", "inPinnedData": true, "durationMs": 600000 },
+    { "spellId": 57724, "name": "Sated", "inPinnedData": true, "durationMs": 600000 },
+    { "spellId": 80354, "name": "Temporal Displacement", "inPinnedData": true, "durationMs": 600000 },
+    { "spellId": 264689, "inPinnedData": false },
+    { "spellId": 390435, "inPinnedData": false }
+  ],
+  "raidBuffOverrides": [
+    {
+      "override": "arcane_intellect",
+      "spellId": 1459,
+      "side": "PLAYER_AURA",
+      "citation": "sim.cpp:2719",
+      "name": "Arcane Intellect",
+      "auraSpellIds": [1459]
+    },
+    {
+      "override": "battle_shout",
+      "spellId": 6673,
+      "side": "PLAYER_AURA",
+      "citation": "sim.cpp:2723",
+      "name": "Battle Shout",
+      "auraSpellIds": [6673]
+    },
+    {
+      "override": "mark_of_the_wild",
+      "spellId": 1126,
+      "side": "PLAYER_AURA",
+      "citation": "sim.cpp:2727",
+      "name": "Mark of the Wild",
+      "auraSpellIds": [1126]
+    },
+    {
+      "override": "power_word_fortitude",
+      "spellId": 21562,
+      "side": "PLAYER_AURA",
+      "citation": "sim.cpp:2730",
+      "name": "Power Word: Fortitude",
+      "auraSpellIds": [21562]
+    },
+    {
+      "override": "skyfury",
+      "spellId": 462854,
+      "side": "PLAYER_AURA",
+      "citation": "player.cpp:2203",
+      "name": "Skyfury",
+      "auraSpellIds": [462854]
+    },
+    {
+      "override": "blessing_of_the_bronze",
+      "spellId": 364342,
+      "side": "PLAYER_AURA",
+      "citation": "player.cpp:16437 (per-class trigger of 364342: effect N = class, alphabetical)",
+      "name": "Blessing of the Bronze",
+      "auraSpellIds": [
+        364342, 381732, 381741, 381746, 381748, 381749, 381750, 381751, 381752, 381753, 381754, 381756,
+        381757, 381758
+      ],
+      "classTriggers": [
+        { "effectIndex": 0, "triggerSpellId": 381732 },
+        { "effectIndex": 1, "triggerSpellId": 381741 },
+        { "effectIndex": 2, "triggerSpellId": 381746 },
+        { "effectIndex": 3, "triggerSpellId": 381748 },
+        { "effectIndex": 4, "triggerSpellId": 381749 },
+        { "effectIndex": 5, "triggerSpellId": 381750 },
+        { "effectIndex": 6, "triggerSpellId": 381751 },
+        { "effectIndex": 7, "triggerSpellId": 381752 },
+        { "effectIndex": 8, "triggerSpellId": 381753 },
+        { "effectIndex": 9, "triggerSpellId": 381754 },
+        { "effectIndex": 10, "triggerSpellId": 381756 },
+        { "effectIndex": 11, "triggerSpellId": 381757 },
+        { "effectIndex": 12, "triggerSpellId": 381758 }
+      ]
+    },
+    {
+      "override": "chaos_brand",
+      "spellId": 1490,
+      "side": "TARGET_DEBUFF",
+      "citation": "player.cpp:4880",
+      "name": "Chaos Brand",
+      "auraSpellIds": [1490]
+    },
+    {
+      "override": "mystic_touch",
+      "spellId": 113746,
+      "side": "TARGET_DEBUFF",
+      "citation": "player.cpp:4883",
+      "name": "Mystic Touch",
+      "auraSpellIds": [113746]
+    },
+    {
+      "override": "hunters_mark",
+      "spellId": 259556,
+      "side": "TARGET_DEBUFF",
+      "citation": "player.cpp:4888",
+      "name": "Hunter's Mark",
+      "auraSpellIds": [259556]
+    },
+    {
+      "override": "mortal_wounds",
+      "spellId": 115804,
+      "side": "TARGET_DEBUFF",
+      "citation": "player.cpp:4876",
+      "name": "Mortal Wounds",
+      "auraSpellIds": [115804]
+    },
+    {
+      "override": "bleeding",
+      "spellId": null,
+      "side": "TARGET_DEBUFF",
+      "citation": "player.cpp:4872 (generic, no spell)",
+      "name": null,
+      "auraSpellIds": []
+    }
+  ],
+  "defensiveAllyAuras": [
+    {
+      "spellId": 465,
+      "name": "Devotion Aura",
+      "effects": [
+        {
+          "spellId": 465,
+          "effectIndex": 0,
+          "type": 65,
+          "subtype": 87,
+          "baseValue": -3,
+          "triggerSpellId": 0,
+          "subtypeName": "MOD_DAMAGE_PERCENT_TAKEN"
+        },
+        {
+          "spellId": 465,
+          "effectIndex": 1,
+          "type": 6,
+          "subtype": 285,
+          "baseValue": -3,
+          "triggerSpellId": 344218,
+          "subtypeName": "LINKED_SPELL_WITH_VALUE"
+        },
+        {
+          "spellId": 344218,
+          "effectIndex": 0,
+          "type": 6,
+          "subtype": 4,
+          "baseValue": 0,
+          "triggerSpellId": 0,
+          "subtypeName": "DUMMY"
+        }
+      ]
+    },
+    {
+      "spellId": 1246768,
+      "name": "Power Word: Shield",
+      "effects": [
+        {
+          "spellId": 1246768,
+          "effectIndex": 0,
+          "type": 6,
+          "subtype": 69,
+          "baseValue": 0,
+          "triggerSpellId": 0,
+          "subtypeName": "SCHOOL_ABSORB"
+        }
+      ]
+    },
+    {
+      "spellId": 41635,
+      "name": "Prayer of Mending",
+      "effects": [
+        {
+          "spellId": 41635,
+          "effectIndex": 0,
+          "type": 6,
+          "subtype": 4,
+          "baseValue": 0,
+          "triggerSpellId": 0,
+          "subtypeName": "DUMMY"
+        }
+      ]
+    }
+  ],
+  "spellPresenceAudit": [
+    { "spellId": 1285644, "inPinnedData": false, "name": null },
+    { "spellId": 1296934, "inPinnedData": false, "name": null },
+    { "spellId": 1303171, "inPinnedData": true, "name": "Vantus Rune: Tides" },
+    { "spellId": 1303184, "inPinnedData": false, "name": null }
+  ]
+}

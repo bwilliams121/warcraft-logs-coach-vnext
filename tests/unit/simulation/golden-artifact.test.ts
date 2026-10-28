@@ -15,13 +15,18 @@
 import { describe, expect, it } from "vitest";
 
 import { APPROVED_ENGINE_ARTIFACTS } from "../../../runner/approved-artifacts.js";
+import { approvedArtifactForPin } from "../../../src/simulation/approved-artifacts.js";
 import { RUNNER_SPEC_BINDINGS } from "../../../runner/spec-bindings.js";
 import { prepareSimulation } from "../../../src/simulation/prepare.js";
 import { parseSimcJson, type ParseContext } from "../../../src/simulation/result-parser.js";
 import golden from "../../fixtures/simulation/simc-33622e9d-blood-dev-standard.json";
 import { devBloodJob, jsonBytes } from "../../support/simulation/dev-blood-job.js";
 
-const ARTIFACT = APPROVED_ENGINE_ARTIFACTS[0];
+/** This golden is the 33622e9d model's (M11 model registry: one artifact per registered model). */
+const ARTIFACT = approvedArtifactForPin({
+  simcCommit: "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+  gameDataBuild: "12.1.0.69587",
+});
 
 async function context(): Promise<ParseContext> {
   if (ARTIFACT === undefined) throw new Error("no approved artifact");
@@ -45,7 +50,12 @@ const text = JSON.stringify(golden);
 
 describe("M11-G3-1 golden exact-pin artifact", () => {
   it("is the approved engine's own identity", () => {
-    expect(APPROVED_ENGINE_ARTIFACTS).toHaveLength(1);
+    // Exactly the two registered models; the historical artifact is unchanged.
+    expect(APPROVED_ENGINE_ARTIFACTS.map((artifact) => artifact.binarySha256)).toEqual([
+      "41347bc4203bd1b073a617cd9cd147a96c9c09a36f8c7af5c013ca7be273cb77",
+      "79bf5a406b0ca16eb8e828ef017603b60fdee576a5cb3cf4acaacf93a08eea36",
+    ]);
+    expect(ARTIFACT?.binarySha256).toBe("41347bc4203bd1b073a617cd9cd147a96c9c09a36f8c7af5c013ca7be273cb77");
     expect(golden.git_revision).toBe("33622e9d16");
     expect(golden.no_networking).toBe(true);
     expect(golden.sim.options.dbc.Live.wow_version).toBe("12.1.0.69587");

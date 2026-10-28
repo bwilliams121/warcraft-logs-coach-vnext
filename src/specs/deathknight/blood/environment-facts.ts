@@ -200,3 +200,58 @@ export const BLOOD_ENVIRONMENT_FACTS: EnvironmentSpecFacts = {
   ],
   potionTiming: { owner: "BUILT_IN_APL", aplLines: BLOOD_APL_POTION_LINES },
 };
+
+/**
+ * The 0a72e6a7 simulation model's measurements (M11 model registry): the SAME
+ * bench, character, profile and baseline as above, run on that model's engine
+ * (binary 79bf5a40…; MODEL_ID=SIMC_0A72E6A7_LIVE_12_1_0_69933). Every
+ * relative change moved with the 69933 Blood rebalance, but no field changed
+ * MATERIALITY CLASS under ENVIRONMENT_MATERIALITY_V1 (0.5%): the same fields
+ * are material, non-material and identical as at 33622e9d.
+ */
+const MEASURED_0A72E6A7: Readonly<Record<string, number>> = {
+  FLASK_RANK: -0.0016924398234489102,
+  FLASK_PRESENCE: -0.02628822696198574,
+  FOOD_PRESENCE: 0.012788736434583114,
+  AUGMENTATION_PRESENCE: 0.005853361362683218,
+  POTION_PRESENCE: 0.059657877561566375,
+  POTION_RANK: -0.0027062577770317064,
+  BLOODLUST_WHOLE_SECOND: 0.0031250902377659706,
+  BLOODLUST_PRESENCE: -0.040163505669419064,
+  "RAID_BUFF:chaos_brand": 0.010845020185899612,
+  "RAID_BUFF:mystic_touch": 0.034372177710505714,
+  "RAID_BUFF:hunters_mark": 0.03149353179372438,
+  "RAID_BUFF:mortal_wounds": -6.661338147750939e-16,
+  "RAID_BUFF:bleeding": 1.1102230246251565e-15,
+  "RAID_BUFF:arcane_intellect": 0,
+  "RAID_BUFF:battle_shout": -0.042734746476750796,
+  "RAID_BUFF:blessing_of_the_bronze": 0,
+  "RAID_BUFF:mark_of_the_wild": -0.025399036825974997,
+  "RAID_BUFF:power_word_fortitude": -0.0016134235346039194,
+  "RAID_BUFF:skyfury": -0.03764409858941187,
+};
+
+export const BLOOD_ENVIRONMENT_FACTS_0A72E6A7: EnvironmentSpecFacts = {
+  ...BLOOD_ENVIRONMENT_FACTS,
+  basis: {
+    ...BLOOD_ENVIRONMENT_FACTS.basis,
+    bench:
+      "scripts/bench/m11g34-environment.bench.ts (MODEL_ID=SIMC_0A72E6A7_LIVE_12_1_0_69933, binary 79bf5a40…)",
+  },
+  measurements: BLOOD_ENVIRONMENT_FACTS.measurements.map((measurement) => {
+    const relativeChange = MEASURED_0A72E6A7[measurement.field];
+    if (relativeChange === undefined) throw new Error(`no 0a72e6a7 measurement for ${measurement.field}`);
+    return { ...measurement, relativeChange };
+  }),
+};
+
+/**
+ * Blood's environment facts BY SIMULATION MODEL (M11 model registry): the
+ * materiality gate is evaluated with the facts measured on the model the job
+ * will run on. A model with no measured facts has none here, and callers must
+ * not substitute another model's.
+ */
+export const BLOOD_ENVIRONMENT_FACTS_BY_MODEL: Readonly<Record<string, EnvironmentSpecFacts>> = {
+  SIMC_33622E9D_LIVE_12_1_0_69587: BLOOD_ENVIRONMENT_FACTS,
+  SIMC_0A72E6A7_LIVE_12_1_0_69933: BLOOD_ENVIRONMENT_FACTS_0A72E6A7,
+};

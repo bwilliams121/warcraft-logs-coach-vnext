@@ -21,7 +21,11 @@
  *   shirt/tabard detail; model-version compatibility unknown.
  */
 
-import { consumableAuraFor, temporaryEnchantFor } from "../data/game/consumables.js";
+import {
+  consumableAuraFor,
+  temporaryEnchantFor,
+  type SimulationModelData,
+} from "../data/simulation-models/index.js";
 import { decodeTalentLoadout, reconcileLoadout } from "../data/game/talent-loadout.js";
 import { isEmptyGearSlot } from "../engine/normalization/combatant-info.js";
 import type {
@@ -61,6 +65,12 @@ export interface ReconstructionInput {
   /** Spell ids of casts sourced by the subject (e.g. a potion). */
   readonly subjectCasts: { readonly actorId: number; readonly spellIds: readonly number[] } | null;
   readonly documents: readonly EvidenceDocument[];
+  /**
+   * The simulation model the profile is reconstructed FOR (M11 model registry):
+   * consumable and temporary-enchant identities come from that model's pinned
+   * data. Named by the caller; there is no default.
+   */
+  readonly simulationModel: SimulationModelData;
   /**
    * Explicit user statements (M11-G3-4 race policy). Used ONLY where no
    * authoritative evidence resolves the field; never a default, never
@@ -129,7 +139,7 @@ export function reconstructCharacterProfile(
 
   const talents = reconstructTalents(input, snapshot, binding, block);
   const equipment = GEAR_SLOT_MAPPINGS.map((mapping) =>
-    reconstructSlot(mapping, snapshot, binding, block, note),
+    reconstructSlot(input.simulationModel, mapping, snapshot, binding, block, note),
   );
   if (equipment.some((record) => record.craftedStats.state === "KNOWN")) {
     note(
@@ -162,7 +172,7 @@ export function reconstructCharacterProfile(
     identity: { specKey: binding.simulation.specKey, classId, specId, level, race },
     talents,
     equipment,
-    setupFacts: { consumables: reconstructConsumables(pullFacts, subjectId, casts) },
+    setupFacts: { consumables: reconstructConsumables(input.simulationModel, pullFacts, subjectId, casts) },
     evidence: { subject: input.subject, documents: input.documents },
     blockers,
     diagnostics,
@@ -313,6 +323,7 @@ function reconstructTalents(
 const notApplicable = <T>(reason: string): Evidenced<T> => ({ state: "NOT_APPLICABLE", reason });
 
 function reconstructSlot(
+  data: SimulationModelData,
   mapping: GearSlotMapping,
   snapshot: CombatantSnapshot | null,
   binding: CharacterSpecBinding,
@@ -376,7 +387,7 @@ function reconstructSlot(
   const temporary = enchantOf(piece.temporaryEnchant, field("temporaryEnchant"));
   let temporaryEnchant: TemporaryEnchantEvidence;
   if (temporary.state === "KNOWN") {
-    const identity = temporaryEnchantFor(temporary.value);
+    const identity = temporaryEnchantFor(data, temporary.value);
     if (identity === null)
       note("TEMPORARY_ENCHANT_NOT_IN_PINNED_DATA", `${mapping.slot}: enchant ${String(temporary.value)}`);
     temporaryEnchant = known(
@@ -446,6 +457,7 @@ const CONSUMABLE_KIND: Record<string, ConsumableKind> = {
 };
 
 function reconstructConsumables(
+  data: SimulationModelData,
   pullFacts: CombatantPullFacts | null,
   subjectId: number,
   casts: readonly number[] | null,
@@ -456,7 +468,7 @@ function reconstructConsumables(
   >();
   for (const aura of pullFacts?.auras ?? []) {
     if (aura.sourceId !== subjectId) continue;
-    const pinned = consumableAuraFor(aura.spellId);
+    const pinned = consumableAuraFor(data, aura.spellId);
     const kind = pinned === null ? undefined : CONSUMABLE_KIND[pinned.kind];
     if (pinned === null || kind === undefined || kind === "POTION" || found.has(kind)) continue;
     found.set(kind, {
@@ -467,7 +479,7 @@ function reconstructConsumables(
     });
   }
   for (const spellId of casts ?? []) {
-    const pinned = consumableAuraFor(spellId);
+    const pinned = consumableAuraFor(data, spellId);
     if (pinned?.kind !== "POTION" || found.has("POTION")) continue;
     found.set("POTION", {
       spellId,

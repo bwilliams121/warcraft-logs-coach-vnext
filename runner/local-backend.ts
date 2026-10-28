@@ -21,13 +21,14 @@ export class LocalSimulationBackend implements SimulationBackend {
 
   constructor(
     private readonly service: SimulationService,
-    private readonly artifact: ApprovedEngineArtifact,
+    /** The approved artifacts results are verified against (the job names its model). */
+    private readonly artifacts: readonly ApprovedEngineArtifact[],
     private readonly bindings: readonly SimulationSpecBinding[],
   ) {}
 
   async simulate(request: SimulationRequest, signal?: AbortSignal): Promise<BackendRun> {
     const jobBytes = new TextEncoder().encode(JSON.stringify(request.job) ?? "").byteLength;
-    const expected = await expectedResultIdentity(request.job, jobBytes, this.artifact, this.bindings);
+    const expected = await expectedResultIdentity(request.job, jobBytes, this.artifacts, this.bindings);
     if (!expected.ok) return { backend: "LOCAL", outcome: expected };
     const submission = await this.service.submit({
       job: request.job,

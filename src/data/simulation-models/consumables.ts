@@ -1,30 +1,40 @@
 /**
- * Pinned CONSUMABLE identities (M11-G3-2), machine-extracted from the pinned
- * SimulationCraft data by scripts/authority/extract-simc-consumables.mjs.
+ * CONSUMABLE identities of ONE simulation model (M11-G3-2; per model since the
+ * M11 model registry), machine-extracted from that model's SimulationCraft
+ * data by scripts/authority/extract-simc-consumables.mjs.
  *
  * - temporary enchant id -> the engine's temporary_enchant token and rank;
  * - consumable aura spell id -> kind (FLASK / FOOD / POTION / OTHER) and the
  *   items that apply it. Several items (quality ranks, "Fleeting" variants) may
  *   share one aura, so an aura identifies the consumable, not its rank.
- *
  * - rank options (M11-G3-4): per item level, the engine token that selects it
- *   and whether that selection is unambiguous at the pin.
+ *   and whether that selection is unambiguous in that model's data.
  *
- * A spell absent from the table is UNKNOWN to the pinned model — never "not a
+ * A spell absent from the table is UNKNOWN to that model — never "not a
  * consumable".
  */
 
 import { z } from "zod";
 
-import artifact from "./consumables.json";
+const commit = z.string().regex(/^[0-9a-f]{40}$/);
 
-const schema = z.object({
+export const consumablesSchema = z.object({
   artifactVersion: z.literal(1),
   datasetId: z.literal("SIMC_CONSUMABLES"),
   artifactRevision: z.string(),
   provenance: z.object({
-    commitSha: z.literal("33622e9d1662ff0e451691edf85a6b49cc9d11d9"),
-    clientDataWowVersion: z.literal("12.1.0.69587"),
+    commitSha: commit,
+    clientDataWowVersion: z.string(),
+    sources: z
+      .array(
+        z.object({
+          path: z.string().regex(/^engine\//),
+          sha256: z.string().regex(/^[0-9a-f]{64}$/),
+          byteLength: z.number().int().positive(),
+        }),
+      )
+      .min(1),
+    extractorVersion: z.number().int().positive(),
   }),
   temporaryEnchants: z.array(
     z.object({
@@ -65,32 +75,6 @@ const schema = z.object({
   ),
 });
 
-export type PinnedConsumables = z.infer<typeof schema>;
+export type PinnedConsumables = z.infer<typeof consumablesSchema>;
 export type ConsumableAura = PinnedConsumables["consumableAuras"][number];
 export type TemporaryEnchantIdentity = PinnedConsumables["temporaryEnchants"][number];
-
-export type ConsumablesLoad =
-  { readonly ok: true; readonly data: PinnedConsumables } | { readonly ok: false; readonly detail: string };
-
-let cached: ConsumablesLoad | null = null;
-
-export function pinnedConsumables(): ConsumablesLoad {
-  if (cached !== null) return cached;
-  const parsed = schema.safeParse(artifact);
-  cached = parsed.success
-    ? { ok: true, data: parsed.data }
-    : { ok: false, detail: parsed.error.issues[0]?.message ?? "invalid consumables artifact" };
-  return cached;
-}
-
-export function consumableAuraFor(spellId: number): ConsumableAura | null {
-  const loaded = pinnedConsumables();
-  return loaded.ok ? (loaded.data.consumableAuras.find((aura) => aura.spellId === spellId) ?? null) : null;
-}
-
-export function temporaryEnchantFor(enchantId: number): TemporaryEnchantIdentity | null {
-  const loaded = pinnedConsumables();
-  return loaded.ok
-    ? (loaded.data.temporaryEnchants.find((entry) => entry.enchantId === enchantId) ?? null)
-    : null;
-}

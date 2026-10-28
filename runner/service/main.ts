@@ -39,36 +39,42 @@ const emit = (record: object): void => {
 async function main(): Promise<void> {
   const config = loadRunnerConfig(process.env);
   const limits = limitsForCapacity(config.capacity, DEFAULT_RUNNER_LIMITS);
-  let launcher: EngineLauncher;
-  let prepareLauncher: (() => Promise<void>) | undefined;
-  if (config.launcher.mode === "DIRECT") {
-    launcher = new DirectLauncher({ executable: config.launcher.executable }, limits);
-  } else {
+  // One engine per hosted simulation model (M11 model registry); each proves its
+  // own binary hash and runs its own self-test before the runner is READY.
+  const engines = config.models.map((hosted) => {
+    if (config.launcher.mode === "DIRECT") {
+      return {
+        artifact: hosted.model.artifact,
+        launcher: new DirectLauncher({ executable: hosted.target }, limits) as EngineLauncher,
+      };
+    }
     const docker = new DockerLauncher(
       {
-        imageRef: config.launcher.imageRef,
+        imageRef: hosted.target,
         dockerExecutable: config.launcher.dockerExecutable,
         cpus: config.capacity.threadsPerJob,
         cliEnv: process.env,
       },
       limits,
     );
-    launcher = docker;
-    prepareLauncher = async () => {
-      await docker.resolveBinarySha256();
+    return {
+      artifact: hosted.model.artifact,
+      launcher: docker as EngineLauncher,
+      prepareLauncher: async () => {
+        await docker.resolveBinarySha256();
+      },
     };
-  }
+  });
   const cacheIntegrity =
     config.cacheMacKey === null ? null : await CacheIntegrity.fromSecret(config.cacheMacKey);
   const service = composeSimulationService({
-    launcher,
+    engines,
     cache: new FileSystemSimulationCache(config.cacheDirectory),
     cacheIntegrity,
     allowedJobClasses: config.allowedJobClasses,
     capacity: config.capacity,
     hostLogicalCpu: availableParallelism(),
     log: (event) => emit({ source: "service", ...event }),
-    ...(prepareLauncher === undefined ? {} : { prepareLauncher }),
   });
   const handler = new RunnerHttpHandler(service, new RequestAuthenticator(config.keys), (event) =>
     emit({ source: "http", ...event }),
@@ -82,6 +88,7 @@ async function main(): Promise<void> {
     port,
     capacity: config.capacity.id,
     launcher: config.launcher.mode,
+    models: config.models.map((hosted) => hosted.model.id),
     jobClasses: config.allowedJobClasses,
   });
   const readiness = await service.start();

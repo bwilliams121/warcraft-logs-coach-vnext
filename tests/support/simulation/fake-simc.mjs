@@ -9,7 +9,11 @@
 // end-to-end test cross-checks the builder against an engine-shaped echo.
 import { readFileSync, writeFileSync } from "node:fs";
 
-const [mode, jobPath, jsonArg, ...rest] = process.argv.slice(2);
+// M11 model registry: a mode may carry `@<git revision>@<live build>` so a test
+// can run a fake engine that reports ANOTHER model's identity
+// (e.g. `ok@0a72e6a746@12.1.0.69933`). Without the suffix nothing changes.
+const [rawMode, jobPath, jsonArg, ...rest] = process.argv.slice(2);
+const [mode, fakeRevision, fakeBuild] = (rawMode ?? "").split("@");
 if (rest.length > 0 || !jsonArg?.startsWith("json2=")) {
   process.stderr.write(`unexpected arguments: ${process.argv.slice(3).join(" ")}\n`);
   process.exit(64);
@@ -106,7 +110,7 @@ if (mode === "hang" || mode?.startsWith("hang-pid:")) {
     build_time: "00:00:00",
     timestamp: 1,
     no_networking: true,
-    git_revision: mode === "wrong-revision" ? "af05b9e" : "33622e9",
+    git_revision: mode === "wrong-revision" ? "af05b9e" : (fakeRevision ?? "33622e9"),
     git_branch: "midnight",
     sim: {
       options: {
@@ -142,7 +146,11 @@ if (mode === "hang" || mode?.startsWith("hang-pid:")) {
         default_aura_delay: secs(sim.default_aura_delay),
         default_aura_delay_stddev: secs(sim.default_aura_delay_stddev),
         dbc: {
-          Live: { build_level: 69587, wow_version: "12.1.0.69587", hotfix_hash: "f".repeat(64) },
+          Live: {
+            build_level: Number((fakeBuild ?? "12.1.0.69587").split(".")[3]),
+            wow_version: fakeBuild ?? "12.1.0.69587",
+            hotfix_hash: "f".repeat(64),
+          },
           version_used: "Live",
         },
       },

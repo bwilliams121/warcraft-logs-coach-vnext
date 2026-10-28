@@ -11,6 +11,7 @@
  *   schema version   current attestation schema            JOB_REJECTED
  *   job class        PRODUCTION, and the job is PRODUCTION JOB_REJECTED
  *   hashes           equal the hashes recomputed from the job JOB_REJECTED
+ *   simulation model the model the job names (schema 3)      JOB_REJECTED
  *   gate revisions   in the accepted (current) set           JOB_REJECTED
  *   statuses         SIMULATION_READY / PUBLISHABLE          PROFILE_RECONSTRUCTION_FAILED /
  *                                                            ENVIRONMENT_NOT_REPRESENTABLE
@@ -23,6 +24,11 @@
  * enforces that, and pins each gate's code fingerprint so a gate change forces
  * an explicit revision decision.
  *
+ * SCHEMA 3 (M11 model registry): profile fidelity and environment
+ * publishability are each computed against ONE simulation model (its engine
+ * echo, its pinned data), so the attestation names that model and the runner
+ * refuses it for a job on any other. Schema 2 attestations are stale.
+ *
  * Worker-safe: zod only.
  */
 
@@ -30,7 +36,7 @@ import { z } from "zod";
 
 import { fail, type SimulationOutcome } from "./failures.js";
 
-export const READINESS_ATTESTATION_SCHEMA_VERSION = "simulation-readiness-attestation/2";
+export const READINESS_ATTESTATION_SCHEMA_VERSION = "simulation-readiness-attestation/3";
 
 /**
  * Gate revisions this runner accepts. One current revision each: when a gate's
@@ -49,6 +55,8 @@ export const readinessAttestationSchema = z
   .object({
     schemaVersion: z.literal(READINESS_ATTESTATION_SCHEMA_VERSION),
     jobClass: z.literal("PRODUCTION"),
+    /** The registered simulation model the gates were evaluated for. */
+    simulationModelId: z.string().regex(/^[A-Z][A-Z0-9_]{0,95}$/),
     profile: z
       .object({
         hash: hex64,
@@ -73,7 +81,11 @@ export type ReadinessAttestation = z.infer<typeof readinessAttestationSchema>;
  */
 export function checkReadinessAttestation(
   value: unknown,
-  recomputed: { readonly profileHash: string; readonly environmentHash: string },
+  recomputed: {
+    readonly profileHash: string;
+    readonly environmentHash: string;
+    readonly simulationModelId: string;
+  },
 ): SimulationOutcome<never> | null {
   if (value === undefined) return fail("JOB_REJECTED", "a PRODUCTION job requires a readiness attestation");
   const version = (value as { schemaVersion?: unknown } | null)?.schemaVersion;
@@ -97,6 +109,12 @@ export function checkReadinessAttestation(
     attestation.environment.hash !== recomputed.environmentHash
   ) {
     return fail("JOB_REJECTED", "readiness attestation does not describe this job");
+  }
+  if (attestation.simulationModelId !== recomputed.simulationModelId) {
+    return fail(
+      "JOB_REJECTED",
+      `readiness attestation was made for simulation model ${attestation.simulationModelId}, not ${recomputed.simulationModelId}`,
+    );
   }
   if (
     !(ACCEPTED_READINESS_GATE_REVISIONS.profile as readonly string[]).includes(

@@ -439,6 +439,82 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11 simulation-model registry: what the 69933 promotion does not establish
+
+**Raised:** M11 model registry (2026-10-23). **Owner decisions locked:**
+2026-10-28 (closeout).
+
+- **A log's game build is not resolved automatically.** OWNER DECISION:
+  automatic game-build and fight-context resolution belongs to G4, as a
+  distinct `SimulationContextResolver` prerequisite, NOT inside ceiling math.
+  - `selectSimulationModel` takes a resolved build and fight time.
+  - The canonical subject's context (12.1.0.69933, 2026-10-01T01:01Z) is the
+    approved investigation result, not something the code derives from a log.
+  - The resolver must fail closed with SIMULATION_MODEL_CONTEXT_UNRESOLVED when
+    it cannot resolve.
+- **The 33622e9d window is narrow by construction.** OWNER DECISION: keep it
+  narrow; do not gather evidence to widen it now.
+  - Its basis is `SINGLE_SNAPSHOT_UNTIL_NEXT_LIVE_SNAPSHOT`: one data snapshot
+    until the next Live snapshot, which is another build.
+- **12.1.5 has no model.** OWNER DECISION: do not register 12.1.5 yet.
+  - 12.1.5 logs resolve to SIMULATION_MODEL_NOT_AVAILABLE; there is no
+    fallback to 69933.
+  - 12.1.5 gets a separate compatibility review AFTER the G4 foundation and
+    BEFORE ceilings are published for 12.1.5 or current-Live logs.
+  - That review covers a new registered model (pin, build, image, build record,
+    per-model data, goldens) and a Blood validation.
+- **The 0a72e6a7 window ends at the last snapshot shown equivalent.** A later
+  69933 hotfix snapshot extends it only after a Blood equivalence check like the
+  one for 7cbb6ef5ff and 698c86ba67.
+- **Only Blood is validated.** Every other spec is
+  SIMULATION_MODEL_NOT_VALIDATED_FOR_SPEC on both models. Protection was
+  deliberately not migrated.
+- **Consumption breakdown granularity differs across models.**
+  - 33622e9d reports `consumption` and `consumption_release` as separate
+    breakdown entries; 0a72e6a7 reports one compound `consumption` entry.
+  - Any consumer comparing per-ability breakdowns across models must map the
+    two shapes; within one model, results are consistent. No consumer does this
+    today.
+  - OWNER DECISION: no cross-model Consumption normalization layer yet. The
+    known shape difference is preserved, pinned by
+    `tests/unit/simulation/consumption-release.test.ts`. Normalization is
+    added only when an actual consumer needs cross-model per-ability
+    comparison.
+- **The apk toolchain drifted between the two builds.**
+  - The two artifacts share the recipe and base image digest, but the Alpine
+    package set resolved differently (the toolchain manifest is recorded per
+    build record).
+  - Both binaries are verified by their own exact-pin runs. Rebuilding
+    reproducibly from the recipe alone is not established for either.
+  - OWNER DECISION: do not rebuild existing approved artifacts merely to change
+    package pinning.
+  - BEFORE THE NEXT MODEL BUILD, introduce a hardened build-recipe revision.
+    It pins the immutable base plus the exact package and toolchain inputs, as
+    far as practical.
+- **RESOLVED (2026-10-28): the historical consumables source label.**
+  - The v3 artifact recorded `engine/item/consumable.cpp`, a path that does
+    not exist at 33622e9d. Its hash was of `engine/player/consumable.cpp`.
+  - Regenerated with extractor v4 from the same five hashed sources:
+    consumables `simc-33622e9d-3` → `-4`, token acceptance `-1` → `-2`
+    (re-measured on the 33622e9d binary). The 0a72e6a7 bundle moved the same
+    way, for extractor reproducibility.
+  - Semantic content and token verdicts are byte-identical, pinned by a
+    semantic hash. The change is recorded in each model manifest's
+    `dataHistory`.
+- **The environment stays BLOCKED on both models.** The promotion resolves
+  none of the G3-4 blockers. The three absent auras stay
+  PINNED_MODEL_MISSING_OBSERVED_EFFECT naming 12.1.0.69933.
+  - Inside a validated applicability window, chronology is discharged:
+    MODEL_SNAPSHOT_PRECEDES_LOG (informational), not MODEL_BUILD_LAG.
+  - Outside one, MODEL_BUILD_LAG stays a diagnostic.
+
+**Done would look like:**
+- G4's `SimulationContextResolver` resolves build and fight time from the log
+  and selects through the registry.
+- Per-spec validations are added only with equivalence evidence.
+- A 12.1.5 model is registered after its compatibility review.
+- The next model build uses the hardened recipe revision.
+
 ## After M11-G3-5: what the runner service does not establish
 
 **Raised:** M11-G3-5 (2026-10-22).

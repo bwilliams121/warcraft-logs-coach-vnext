@@ -19,21 +19,37 @@
  *   "ideal raid" default.
  */
 
-import { APPROVED_SIMC_MODEL } from "../../../src/simulation/model.js";
+import { simulationModelById } from "../../../src/simulation/model-registry.js";
 import { simulationPolicyById } from "../../../src/simulation/simulation-policy.js";
 
 export const DEV_BLOOD_DURATION_MS = 345_177;
+
+/**
+ * The simulation model development fixtures use unless a test names another
+ * (M11 model registry). Test-only: production code has no default model.
+ */
+export const DEV_SIMULATION_MODEL_ID = "SIMC_33622E9D_LIVE_12_1_0_69587";
+
+export function modelPin(modelId: string) {
+  const model = simulationModelById(modelId);
+  if (model === undefined) throw new Error(`unknown simulation model ${modelId}`);
+  return model.pin;
+}
 
 const KNOWN_NONE = { kind: "KNOWN_NONE" } as const;
 const enchant = (enchantId: number) => ({ kind: "KNOWN", enchantId }) as const;
 const gems = (...gemIds: number[]) => ({ kind: "KNOWN", gemIds }) as const;
 
-export function devBloodJob(policyId = "STANDARD_SIM_V1", executionProfileId = "SIMC_DEFAULT_PINNED") {
+export function devBloodJob(
+  policyId = "STANDARD_SIM_V1",
+  executionProfileId = "SIMC_DEFAULT_PINNED",
+  modelId = DEV_SIMULATION_MODEL_ID,
+) {
   const policy = simulationPolicyById(policyId);
   if (policy === undefined) throw new Error(`unknown policy ${policyId}`);
   return {
     schemaVersion: "simulation-job/1",
-    model: { simcCommit: APPROVED_SIMC_MODEL.simcCommit, gameDataBuild: APPROVED_SIMC_MODEL.gameDataBuild },
+    model: { ...modelPin(modelId) },
     character: {
       profileKind: "DEVELOPMENT_FIXTURE",
       spec: "deathknight/blood",
@@ -185,7 +201,7 @@ export function devBloodJob(policyId = "STANDARD_SIM_V1", executionProfileId = "
 
 /** A fixed stand-in artifact for tests that never run an engine. */
 export const TEST_ARTIFACT = {
-  model: APPROVED_SIMC_MODEL,
+  model: modelPin(DEV_SIMULATION_MODEL_ID),
   binarySha256: "0".repeat(64),
   buildRecipeRevision: "test-recipe",
 } as const;

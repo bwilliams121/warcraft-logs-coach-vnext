@@ -15,7 +15,11 @@
  *
  * No DPS is reported: the probe is not a performance simulation.
  *
- *     SIMC_IMAGE=sha256:<image id> npx vitest run --config scripts/bench/vitest.config.ts scripts/bench/m11g32-profile-fidelity.bench.ts
+ * M11 model registry: MODEL_ID names the simulation model (default: the
+ * historical 33622e9d model); SIMC_IMAGE must be that model's registered image,
+ * and goldens are written per model (simc-<short commit>-…).
+ *
+ *     [MODEL_ID=<id>] SIMC_IMAGE=sha256:<image id> [WRITE_GOLDEN=1] npx vitest run --config scripts/bench/vitest.config.ts scripts/bench/m11g32-profile-fidelity.bench.ts
  */
 
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -23,7 +27,6 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { APPROVED_ENGINE_ARTIFACTS } from "../../runner/approved-artifacts.js";
 import { DockerLauncher } from "../../runner/engine-launcher.js";
 import { DEFAULT_RUNNER_LIMITS } from "../../runner/limits.js";
 import { runProfileFidelity } from "../../runner/run-fidelity.js";
@@ -31,6 +34,7 @@ import { semanticProfileHash } from "../../src/character-profile/profile-hash.js
 import { readCombatantPullFacts } from "../../src/character-profile/pull-facts.js";
 import { reconstructCharacterProfile } from "../../src/character-profile/reconstruct.js";
 import { renderReconstructionReport } from "../../src/character-profile/report.js";
+import { simulationModelById } from "../../src/simulation/model-registry.js";
 import { BLOOD_CHARACTER_BINDING } from "../../src/specs/deathknight/blood/character-binding.js";
 import {
   reconstructionInputOf,
@@ -42,13 +46,18 @@ import { goldenProjection } from "../../tests/support/simulation/golden.js";
 declare const process: any;
 
 const IMAGE: string | undefined = process.env["SIMC_IMAGE"];
-const OUT = join(".probe", "m11g3", "g32");
-const GOLDEN = join("tests", "fixtures", "simulation", "simc-33622e9d-blood-subject-fidelity.json");
+const MODEL_ID: string = process.env["MODEL_ID"] ?? "SIMC_33622E9D_LIVE_12_1_0_69587";
+const MODEL = simulationModelById(MODEL_ID);
+if (MODEL === undefined) throw new Error(`MODEL_ID ${MODEL_ID} is not a registered simulation model`);
+/** Golden/output names carry the model: simc-<first 8 of the commit>-… */
+const SHORT = MODEL.pin.simcCommit.slice(0, 8);
+const OUT = join(".probe", "m11g3", "g32", SHORT);
+const GOLDEN = join("tests", "fixtures", "simulation", `simc-${SHORT}-blood-subject-fidelity.json`);
 const GOLDEN_USER_RACE = join(
   "tests",
   "fixtures",
   "simulation",
-  "simc-33622e9d-blood-subject-fidelity-user-race.json",
+  `simc-${SHORT}-blood-subject-fidelity-user-race.json`,
 );
 
 describe.skipIf(IMAGE === undefined)("M11-G3-2 exact-pin profile fidelity", () => {
@@ -57,8 +66,8 @@ describe.skipIf(IMAGE === undefined)("M11-G3-2 exact-pin profile fidelity", () =
     { timeout: 600_000 },
     async () => {
       mkdirSync(OUT, { recursive: true });
-      const artifact = APPROVED_ENGINE_ARTIFACTS[0];
-      if (artifact === undefined) throw new Error("no approved artifact");
+      const artifact = MODEL.artifact;
+      expect(IMAGE, "SIMC_IMAGE must be the model's registered image").toBe(MODEL.imageId);
       const launcher = new DockerLauncher(
         {
           imageRef: IMAGE ?? "",
@@ -71,7 +80,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-2 exact-pin profile fidelity", () =
       expect(await launcher.resolveBinarySha256()).toBe(artifact.binarySha256);
 
       const evidence = await subjectEvidence();
-      const input = reconstructionInputOf(evidence);
+      const input = reconstructionInputOf(evidence, MODEL_ID);
       const profile = reconstructCharacterProfile(input, BLOOD_CHARACTER_BINDING);
       const hash = await semanticProfileHash(profile);
       const run = await runProfileFidelity(

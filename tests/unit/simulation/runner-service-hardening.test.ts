@@ -44,6 +44,7 @@ import {
   FAKE_ARTIFACT,
   httpService,
   ModeLauncher,
+  modelIdOf,
   productionJob,
   settle,
   signedRequest,
@@ -110,6 +111,7 @@ describe("M11-G3-5 hardening 1: revision-bound readiness attestation", () => {
     expect(attestation).toEqual({
       schemaVersion: READINESS_ATTESTATION_SCHEMA_VERSION,
       jobClass: "PRODUCTION",
+      simulationModelId: "SIMC_33622E9D_LIVE_12_1_0_69587",
       profile: {
         hash: expect.stringMatching(/^[0-9a-f]{64}$/),
         status: "SIMULATION_READY",
@@ -259,9 +261,13 @@ describe("M11-G3-5 hardening 1: revision-bound readiness attestation", () => {
   it("the pure check agrees (Worker-safe, no runner state)", async () => {
     const job = productionJob();
     const keys = await keysOf(job);
-    expect(checkReadinessAttestation(await attestationFor(job), keys)).toBeNull();
+    const recomputed = { ...keys, simulationModelId: modelIdOf(job) };
+    expect(checkReadinessAttestation(await attestationFor(job), recomputed)).toBeNull();
     expect(
-      checkReadinessAttestation(await attestationFor(job, (a) => (a.profile.gateRevision = "x/1")), keys),
+      checkReadinessAttestation(
+        await attestationFor(job, (a) => (a.profile.gateRevision = "x/1")),
+        recomputed,
+      ),
     ).toMatchObject({
       ok: false,
       failure: { code: "JOB_REJECTED" },
@@ -485,11 +491,10 @@ describe("M11-G3-5 hardening 3: job-class deployment allowlist", () => {
     ]);
     expect(() => parseJobClasses("PRODUCTION,EVERYTHING")).toThrow(/unknown job class/);
     const service = composeSimulationService({
-      launcher: new ModeLauncher("ok"),
+      engines: [{ artifact: FAKE_ARTIFACT, launcher: new ModeLauncher("ok") }],
       cache: new MemorySimulationCache(),
       cacheIntegrity: await testCacheIntegrity(),
       capacity: TEST_CAPACITY,
-      artifact: FAKE_ARTIFACT,
     });
     await service.start();
     const production = await service.submit({

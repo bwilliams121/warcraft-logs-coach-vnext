@@ -145,15 +145,20 @@ export interface ExpectedResultIdentity {
   readonly prepared: PreparedSimulation;
 }
 
+/**
+ * The identity is recomputed from the job: the job names its simulation model,
+ * the registry resolves it, and the artifact is the caller's approved artifact
+ * for exactly that model. A result for any other model cannot verify.
+ */
 export async function expectedResultIdentity(
   job: unknown,
   rawByteLength: number,
-  artifact: ApprovedEngineArtifact,
+  artifacts: ApprovedEngineArtifact | readonly ApprovedEngineArtifact[],
   bindings: readonly SimulationSpecBinding[],
 ): Promise<SimulationOutcome<ExpectedResultIdentity>> {
-  const prepared = await prepareSimulation(job, rawByteLength, artifact, bindings);
+  const prepared = await prepareSimulation(job, rawByteLength, artifacts, bindings);
   if (!prepared.ok) return prepared;
-  return succeed({ artifact, prepared: prepared.value });
+  return succeed({ artifact: prepared.value.artifact, prepared: prepared.value });
 }
 
 const sameJson = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
