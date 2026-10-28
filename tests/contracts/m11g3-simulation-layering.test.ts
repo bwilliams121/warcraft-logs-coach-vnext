@@ -164,7 +164,10 @@ describe("M11-G3-1 simulation layering", () => {
         !name.startsWith("src/simulation/") &&
         !name.startsWith("src/simulation-client/") &&
         !name.startsWith("src/character-profile/") &&
-        !name.startsWith("src/environment/"),
+        !name.startsWith("src/environment/") &&
+        // M11-G4-2 amendment: the internal publication pipeline composes the
+        // simulation path; nothing imports it (m11g4-publication-layering).
+        !name.startsWith("src/publication/"),
     )) {
       const text = code(file);
       for (const spec of importsOf(file).filter((candidate) => /simulation\//.test(candidate))) {

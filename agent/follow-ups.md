@@ -439,6 +439,44 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G4-2: what internal publication does not establish
+
+**Raised:** M11-G4-2 (2026-10-28).
+
+- **No production fidelity echo.**
+  - The CHARACTER gate reads the probe's engine echo through
+    `ProfileEchoSource`. The G3-5 runner protocol carries no echo, and
+    production runners refuse FIDELITY_PROBE jobs, so production passes
+    `NO_PROFILE_ECHO_SOURCE` and every log stops at CHARACTER /
+    FIDELITY_PROBE_UNAVAILABLE.
+  - Done looks like: a reviewed protocol extension that returns the echo
+    for FIDELITY_PROBE results (validated like any result), plus a deployment
+    that enables FIDELITY_PROBE alongside PRODUCTION.
+- **No real subject publishes.**
+  - The canonical fight stops at ENVIRONMENT. Its missing effects hold on
+    both registered models and on every data set the model-pin
+    investigation audited.
+  - The PUBLISHED path is proven on a synthetic plan only (owner decision 3):
+    orchestration, not real-log fidelity.
+- **Attainment is always UNKNOWN today.**
+  - `ACTUAL_DPS_ENGINE_COMPARABILITY` is NOT_PROVEN: G1's ACTUAL_DPS pet and
+    guardian inclusion is corroborated, not proven.
+  - Proving it, with evidence that the WCL table total and the engine's
+    player-plus-pets DPS count the same actors, flips the constant in one
+    reviewed change.
+- **Precision bounds refuse short fights.**
+  - On the real engine a 60 s fight missed both policies (escalated RSE
+    9.03e-4 > 6e-4), while a 345 s fight publishes at STANDARD_SIM_V1 (RSE
+    7.8e-4).
+  - The bounds were calibrated on the 345 s fight. Whether short fights
+    should publish is a precision and cost question for a later owner
+    decision; today they refuse, as designed.
+- **Internal only; nothing calls it.**
+  - No route, service or projection imports `src/publication/`, and the
+    runner has no deployed host.
+  - Public promotion (a contract and digest change) and deployment are
+    separate, owner-controlled steps.
+
 ## After M11-G4-1: what the SimulationContextResolver does not establish
 
 **Raised:** M11-G4-1 (2026-10-28).

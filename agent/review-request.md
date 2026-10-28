@@ -4,180 +4,148 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M11-G4-1: SimulationContextResolver, the G4 publication foundation. Branch
-`m11-g4-simulation-context-resolver`, from main at 07dd902.
-
-## Review cycle 3: response to CHANGES_REQUIRED (cycle 2)
-
-1. **Unrepresentable fight time.**
-   - `resolve.ts` now builds the Date and checks `getTime()` before
-     `toISOString()`. A finite sum outside Date's ±8.64e15 ms range resolves
-     FIGHT_TIME_UNRESOLVED with `fightStartUtc` and `gameBuild` null.
-   - New test: ±8,640,000,000,000,001, ±8.64e15 ± 1 via the fight offset, and
-     +Infinity; none throws, all FIGHT_TIME_UNRESOLVED.
-   - Same class closed on the evidence side: evidence timestamps must fall in
-     years 2000–2999, so the +12 h and margin arithmetic can never leave
-     Date's range. New test: 1999, 3000 and +275760 timestamps are refused at
-     load, with no throw.
-   - Validation:
-     - resolver, layering and G3 layering tests: 38 pass;
-     - typecheck and prettier clean;
-     - full suite after this fix: 335 files, 9,806 tests, all pass (964 s).
+M11-G4-2: internal simulation publication, the implementation of the
+APPROVED settled design. Branch `m11-g4-2-publication-design`, from main at
+8effb78.
 
 ## Review cycle 2: responses to CHANGES_REQUIRED (cycle 1)
 
-1. **Normalization revision.**
-   - `NORMALIZATION_REVISION` `m3.3` → `m3.4` (`src/engine/normalization/combat-fight.ts`,
-     with a doc paragraph). The pin in `tests/contracts/normalization-boundary.test.ts`
-     and the `tests/support/aggregation-fixture.ts` constant are updated.
-   - Public delta (documented in architecture.md and follow-ups.md, as at the
-     M11-F bump): raid-night/1 ANALYZED cells carry `"m3.4"`, so stored `m3.3`
-     cells compare NOT_COMPATIBLE.
-   - analysis/1 carries no normalization revision. The public digests were
-     re-run after the bump and are unchanged (600/600). The corpus and
-     evidence gates were re-run (PASSED), with the committed reports
-     unchanged.
-2. **Conflicting restart accounts.** `intervals.ts` now finds records in one
-   region whose windows overlap but differ.
-   - Neither record proves anything, and every build whose span they touch
-     gets RESTART_EVIDENCE_CONFLICT in that region.
-   - The resolver reports DEPLOYMENT_EVIDENCE_CONFLICT for a fight in that
-     span. Identical accounts corroborate rather than conflict.
-   - New test: the reviewer's reproduction (a second 09-29 account ending
-     09-30T13:00Z). Fights at 09-30T04:00Z and at the canonical time are
-     DEPLOYMENT_EVIDENCE_CONFLICT; the untouched 69587 span still resolves.
-3. **Invalid timestamps.** `evidence.ts` refuses timestamps that are not real
-   instants: the syntax and a round-trip calendar check. This covers the
-   retrieval time, wago `created_at`, CDN `Last-Modified` and restart windows.
-   - New test: each of four unreal timestamps fails to load and resolves
-     DEPLOY_EVIDENCE_INVALID without throwing (`2026-99-99…`, `2026-02-30`,
-     `T25:48`, `2026-13-01`).
+1. **Failure classification.**
+   - `settleTicket` refusals tagged transport BAD_RESPONSE are now
+     SIMULATION_RESULT_INVALID.
+   - SIMULATION_UNAVAILABLE covers only NETWORK, AUTH_REJECTED,
+     TICKET_LOST, CLIENT_DEADLINE and REQUEST_REFUSED transports, plus
+     RUNNER_UNAVAILABLE and SIMULATION_TIMEOUT.
+   - The transport is kept in the reasons.
+   - New regression: the scripted backend returns the REAL `settleTicket`
+     output for a ticket whose cache key is not the job's (via
+     `expectedResultIdentity`). The result is SIMULATION_RESULT_INVALID with
+     MODEL_PROVENANCE_MISMATCH and "transport BAD_RESPONSE", from exactly one
+     call. The classification table also gains CLIENT_DEADLINE,
+     SIMULATION_TIMEOUT and MODEL_PROVENANCE_MISMATCH + BAD_RESPONSE.
+2. **Execution profile revision.**
+   - The record's provenance gains `executionProfileRevisions`, the
+     verified result's `executionProfile.revision`.
+   - It is cross-checked against each prepared job's
+     `keys.executionProfileRevision`; a mismatch is SIMULATION_RESULT_INVALID
+     (new test).
+   - The real-runner test asserts `[ELITE_REALISTIC_V1 revision]`.
+   - The real-engine bench was re-run: PUBLISHED with
+     `["5692cfece9870b95028ed41ebada3bf858c624e5a8d784ce677eada203d9190c"]`,
+     ELITE_REALISTIC_V1's frozen revision. The 60 s case is still
+     PRECISION_INSUFFICIENT.
+3. **Validation after the fixes:**
+   - publication unit and contract tests: 21 pass;
+   - focused suites: 121 files, 5,175 tests, pass;
+   - full suite: 337 files, 9,838 tests, all pass (968 s);
+   - typecheck, prettier and `git diff --check` clean.
 
 ## Intended change
 
-Resolve a log's `SimulationGameContext` (spec, client build, fight start) for
-`selectSimulationModel`, without ceiling math. The owner made four decisions
-on 2026-10-28, recorded in `agent/architecture.md` under "M11-G4-1":
+Implement `agent/architecture.md` "M11-G4-2 — simulation publication
+(internal)" as approved:
 
-- the build authority is a region-aware deploy calendar;
-- build appearance comes from wago.tools, as observations, with identity
-  verified on Blizzard's CDN;
-- regional restart evidence is Blizzard plus dated reputable news reports,
-  never a weekly-cadence assumption;
-- exactly one WCL request may be made, for the canonical report's region.
+- a shared, spec-agnostic, internal pipeline;
+- stage A readiness: CONTEXT, CHARACTER, ENVIRONMENT;
+- stage B simulation: one attested PRODUCTION job per consumable variant,
+  with one precision escalation;
+- an observation-only `simulation-publication/1` record.
 
 ## Files / surfaces changed
 
-- **New domain `src/simulation-context/`:**
-  - `evidence.ts`: zod-validated datasets. A dataset that fails validation
-    yields no evidence.
-  - `intervals.ts`: proven per-region intervals with conservative bounds and
-    a 12 h margin.
-  - `resolve.ts`: the resolver and its UNRESOLVED reasons.
-- **New data `src/data/simulation-context/`:**
-  - `build-observations.json`: 27 wago builds, all verified on Blizzard's
-    CDN, generated by the new `scripts/authority/capture-live-build-evidence.mjs`.
-  - `regional-restarts.json`: three US Blizzard Watch reports with SHA-256,
-    times, claimed region and window, and excerpts. The article bytes stay
-    local in `.probe/` and are not committed (third-party copyright).
-- **Ingestion:**
-  - `src/wcl/fight-context-query.ts`: the query requests `region { slug }`;
-    `ReportRegion` is KNOWN, NOT_SUPPLIED or NOT_RETRIEVED.
-  - `src/engine/normalization/combat-fight.ts`: `report.region`.
-  - `src/wcl/ingest-fight.ts` and `src/wcl/rankings/candidate-metadata-query.ts`
-    (NOT_RETRIEVED; not selected there).
-- **Evidence archive:**
-  - new `tests/evidence/artifacts/wcl-graphql/wcl-g4-region-b1pm-fight-48.json`
-    (206 B);
-  - `scripts/corpus/build-manifest.mjs` (declaration, kind REPORT_SURFACES);
-  - regenerated `tests/evidence/manifest.json` and `tests/evidence/report.json`
-    (only the new artifact).
-- **Carried fix.** The `MODEL_VERSION_COMPATIBILITY_UNKNOWN` note in
-  `src/character-profile/reconstruct.ts` now names the injected model's build;
-  it was hard-coded "12.1.0.69587", which was wrong for the 0a72e6a7 model.
-  The profile gate fingerprint was re-pinned at the same revision, with a
-  history note.
+- **New `src/publication/`:**
+  - `record.ts`: record, gate and failure codes;
+  - `attainment.ts`: envelope and attainment;
+  - `pipeline.ts`: `assessPublicationReadiness`, `runPublication`,
+    `publishSimulation`, `currentSetupJob`, `NO_PROFILE_ECHO_SOURCE`.
+- **`src/character-profile/simulation-character.ts`:** extracted
+  `loggedJobCharacter` (the one G3-2 level, race, talents and gear mapping),
+  now used by `fidelityProbeJob` and the production job.
+  - Behavior-preserving: the fidelity-probe profile hashes and goldens are
+    unchanged.
+  - This file is not in a gate fingerprint.
 - **Tests:**
-  - new `tests/unit/simulation-context/{resolver,report-region}.test.ts` and
-    `tests/contracts/m11g4-simulation-context-layering.test.ts`;
-  - amended `tests/contracts/m11g3-simulation-layering.test.ts` (the resolver
-    may TYPE-import `SimulationGameContext`);
-  - `tests/unit/m11c4e-evidence-archive.test.ts` pins the new artifact (+206 B);
-  - `tests/unit/simulation/model-0a72e6a7-canonical.test.ts` checks the
-    version note names each model's own build; everything else is still equal;
-  - the support `subjectGameContext` now comes from the resolver, not a
-    hard-coded build;
-  - test fight builders carry region NOT_RETRIEVED.
-- **Docs:** `agent/architecture.md` (the PROPOSED section replaced by the
-  decided design), `agent/testing.md`, `agent/follow-ups.md`.
+  - new `tests/unit/publication/pipeline.test.ts` (15) and
+    `tests/contracts/m11g4-publication-layering.test.ts`;
+  - amended layering contracts, so that `src/publication/` may compose
+    them: `m11g3-simulation-layering`, `m11g34-environment-layering` and
+    `m11g4-simulation-context-layering`. The new publication contract then
+    forbids any importer of `src/publication/`.
+- **New bench:** `scripts/bench/m11g42-publication.bench.ts` (real engine,
+  Docker).
+- **Docs:** `agent/architecture.md` (status, implementation amendment,
+  results), `agent/testing.md`, `agent/follow-ups.md`.
 
-## Decisions made (implementation, within the owner's rules)
+## Design amendment found during implementation (please assess)
 
-- **Appearance upper bound.** wago `created_at` + 12 h, the UTC−12 worst case,
-  because the timezone is undeclared. As a consequence the 09-22 US restart
-  does not prove 69933, and the 09-29 restart does.
-- **Identity.** Verified only when the Blizzard CDN config's MD5 equals its
-  key and its `build-name` matches. A build that fails gets no interval, and
-  neither does its predecessor (whose end bound is unknown).
-- **End bound.** The next build's Blizzard CDN `Last-Modified`, a
-  Blizzard-origin lower bound on availability. The newest build is bounded by
-  the observation retrieval time instead, so stale evidence fails closed.
-- **Restart.** The first restart in the region whose explicit window
-  (≤ 24 h) starts at or after appearance and ends before the next build's
-  availability.
-- **Margin.** A 12 h margin on both interval edges; a fight inside it is
-  NEAR_DEPLOYMENT_BOUNDARY.
-- **Region matching.** The WCL slug is compared case-insensitively;
-  NOT_RETRIEVED and NOT_SUPPLIED are never regions.
+The approved design said the CHARACTER gate runs the fidelity probe "through
+the backend". That is not possible today:
+
+- the G3-5 runner protocol returns a `SimulationResult` with no profile echo
+  (the echo is read from raw engine JSON runner-side, in
+  `runner/run-fidelity.ts`);
+- production runners refuse FIDELITY_PROBE jobs (PRODUCTION-only default).
+
+The implementation therefore:
+
+- reads the echo through a `ProfileEchoSource` port;
+- passes `NO_PROFILE_ECHO_SOURCE` in production, so every log fails closed
+  at CHARACTER / FIDELITY_PROBE_UNAVAILABLE;
+- records the protocol extension and the FIDELITY_PROBE deployment as a
+  follow-up, rather than changing the G3-5 protocol and deployment policy
+  inside this tranche;
+- in tests, accepts a committed engine echo only when the probe job's
+  profile hash equals the golden's.
 
 ## Validation
 
-- **Results:**
-  - Canonical: archived region US, checked against the committed context
-    (revision 51, same times), resolves to 12.1.0.69933 and selects
-    0a72e6a7.
-  - Derived US intervals: 69587 [09-09T04:00Z, 09-12T06:45Z) and 69933
-    [09-30T03:00Z, 10-12T04:18Z).
-  - EU is REGION_NOT_COVERED, and all older captures are REGION_UNRESOLVED.
-- **Focused tests:**
-  - simulation-context, simulation, environment, character-profile, WCL and
-    ingestion units, and the remote-client integration: pass;
-  - all contracts: 94 files, 4,857 tests, pass;
-  - the archive unit test: 22 tests, pass.
-- **Gates:**
-  - `npm run test:evidence`: PASSED (2 workerd runs byte-identical; report
-    regenerated with `--write-report`, diff = the new artifact only).
-  - `npm run test:corpus`: PASSED (2 workerd runs, committed report
-    unchanged). It was run because ingestion changed.
+- **Unit (15, pass):**
+  - canonical stage A on real evidence: no region → CONTEXT; no echo source →
+    CHARACTER / FIDELITY_PROBE_UNAVAILABLE (0a72e6a7 selected); echo failure →
+    FIDELITY_PROBE_FAILED; no race statement → PROFILE_NOT_SIMULATION_READY;
+    ready character → ENVIRONMENT / ENVIRONMENT_NOT_PUBLISHABLE with
+    TARGET_SCHEDULE_UNRESOLVED and MATERIAL_CONSUMABLE_UNKNOWN among its
+    blockers, and the backend is never called;
+  - the REAL runner service (fake engine, PRODUCTION-only) accepts the
+    pipeline's job and attestation, and the result publishes;
+  - the attestation fields are checked;
+  - all variants run; the envelope is computed; one failing variant means
+    NOT_PUBLISHED;
+  - exactly one escalation, then PRECISION_INSUFFICIENT;
+  - verification and transport failures are never retried;
+  - an unresolved race never becomes a job;
+  - the attainment interval is gated on PROVEN comparability.
+- **Real engine** (Docker 0a72e6a7, production job-class default, synthetic
+  plan):
+  - 345,177 ms PUBLISHED: 82,113 DPS, CI [81,988, 82,238], RSE 7.8e-4 at
+    STANDARD_SIM_V1.
+  - 60,000 ms PRECISION_INSUFFICIENT after one escalation (RSE 9.03e-4 >
+    6e-4).
+- **Focused suites:** publication, simulation-context, simulation,
+  environment, character-profile, all contracts and the remote-client
+  integration: 121 files, 5,173 tests, pass.
 - **Public digests unchanged:** restricted `ddd1629c…681d`, full
-  `d8d4376f…054a1`, 600/600 analyses, none changed.
-- **Full suite** (`npm test -- --maxWorkers=1 --testTimeout=30000`).
-  - The first run caught the 3 evidence-archive pins (list, bytes, report),
-    which are now updated deliberately.
-  - Cycle-1 run: 335 files, 9,802 tests, all pass (972 s).
-  - Cycle-2 run, after the three fixes: 335 files, 9,804 tests, all pass
-    (971 s).
-- **Checks:** typecheck clean; prettier check clean; `git diff --check` clean.
+  `d8d4376f…054a1`, 600/600 analyses.
+- **Gates not run:** the corpus and evidence gates; no ingestion, corpus or
+  evidence surface changed. CI runs both.
+- **Checks:** typecheck clean; prettier check clean; `git diff --check`
+  clean.
+- **Full suite** (`npm test -- --maxWorkers=1 --testTimeout=30000`): 337
+  files, 9,836 tests, all pass (978 s).
 
 ## External / network activity
 
-- **WCL:** exactly ONE GraphQL request, owner-authorized: the canonical
-  region, 2026-10-28T14:44Z. The probe script was deleted after use.
-- **Other services:** wago.tools API; Blizzard version server and CDN;
-  Blizzard forums search API; blizzardwatch.com, news.blizzard.com and web
-  search for maintenance evidence; GitHub (gh).
+Local Docker engine runs (bench). No Warcraft Logs requests.
 
 ## Known limitations
 
-These are in `agent/follow-ups.md`, "After M11-G4-1":
+These are in `agent/follow-ups.md`, "After M11-G4-2":
 
-- coverage is US-only and three weeks deep;
-- no Blizzard-authored restart window was found;
-- wago records no region;
-- the 12 h margin is a policy, not a measurement;
-- article bytes are not committed;
-- no production caller yet;
-- the G4 publication design is next.
+- no production fidelity echo;
+- no real subject publishes;
+- attainment is always UNKNOWN today;
+- precision bounds refuse short fights;
+- nothing calls the pipeline, and the runner has no deployed host.
 
 ## Owner questions
 

@@ -1784,6 +1784,25 @@ simulation-context resolver (M11-G4-1, tests/unit/simulation-context/{resolver,r
   out-of-range times                           -> fight start outside Date range (either sign, or infinite) FIGHT_TIME_UNRESOLVED; evidence years outside 2000-2999 refused
   conflicting restart accounts                 -> overlapping-but-different windows: DEPLOYMENT_EVIDENCE_CONFLICT in the span they touch; identical accounts corroborate
   normalization revision                       -> m3.4 pinned (additive report.region); raid-night/1 cells carry it, analysis/1 does not
+
+simulation publication (M11-G4-2, tests/unit/publication/pipeline.test.ts, contracts/m11g4-publication-layering.test.ts, scripts/bench/m11g42-publication.bench.ts):
+  canonical, no region                         -> CONTEXT / CONTEXT_UNRESOLVED (REGION_UNRESOLVED)
+  canonical, no echo source (production)       -> CHARACTER / FIDELITY_PROBE_UNAVAILABLE, model 0a72e6a7 selected
+  canonical, echo failure                      -> CHARACTER / FIDELITY_PROBE_FAILED with the code, never "not ready"
+  canonical, no race statement                 -> CHARACTER / PROFILE_NOT_SIMULATION_READY
+  canonical, ready character                   -> ENVIRONMENT / ENVIRONMENT_NOT_PUBLISHABLE with its real blockers; backend never called
+  golden echo                                  -> used only when the probe job profile hash equals the golden one
+  real runner service (fake engine)            -> PRODUCTION-only service accepts the pipeline job and attestation; PUBLISHED
+  attestation                                  -> PRODUCTION, the job model id, current gate revisions, prepared hashes
+  variants                                     -> every variant runs; envelope = [min ci95.lower, max ci95.upper]; one failure -> NOT_PUBLISHED
+  precision                                    -> one escalation only on SIMULATION_PRECISION_NOT_MET; second miss PRECISION_INSUFFICIENT (2 calls)
+  other failures                               -> SIMULATION_RESULT_INVALID / SIMULATION_UNAVAILABLE with the code, never retried
+  real settleTicket refusal (BAD_RESPONSE)     -> SIMULATION_RESULT_INVALID with MODEL_PROVENANCE_MISMATCH, one call, never "unavailable"
+  execution profile revision                   -> published records carry the verified revision; a result naming another revision is SIMULATION_RESULT_INVALID
+  unresolved race                              -> JOB_CONSTRUCTION_FAILED, no backend call
+  attainment                                   -> interval only when observed KNOWN and comparability PROVEN; today NOT_PROVEN -> UNKNOWN
+  real engine (bench, Docker 0a72e6a7)         -> 345 s PUBLISHED (RSE 7.8e-4); 60 s PRECISION_INSUFFICIENT after one escalation
+  layering                                     -> internal: nothing in src imports src/publication; spec-agnostic; no coaching vocabulary
   report region decode                         -> KNOWN only for a non-empty slug; null/malformed NOT_SUPPLIED; absent key NOT_RETRIEVED; query requests region{slug}
   layering                                     -> spec-agnostic; imports own evidence, zod, two types; no SimC/snapshot/ceiling vocabulary; nothing in src imports it
   Consumption                                  -> parses and verifies on both; breakdown granularity model-dependent (pinned)

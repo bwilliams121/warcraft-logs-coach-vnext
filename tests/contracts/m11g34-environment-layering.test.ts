@@ -133,7 +133,12 @@ describe("M11-G3-4 environment layering", () => {
     const importers = outside.filter((file) =>
       importsOf(file).some((spec) => /(^|\/)environment\//.test(spec)),
     );
-    expect(importers).toEqual(["src/specs/deathknight/blood/environment-facts.ts"]);
+    // M11-G4-2 amendment: the internal publication pipeline composes the
+    // environment gate. Nothing imports the pipeline (m11g4-publication-layering).
+    expect(importers).toEqual([
+      "src/publication/pipeline.ts",
+      "src/specs/deathknight/blood/environment-facts.ts",
+    ]);
   });
 
   it("environment facts live in the spec trees, and only Blood has them", () => {
