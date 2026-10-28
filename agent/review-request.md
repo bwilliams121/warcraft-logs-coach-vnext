@@ -4,134 +4,91 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M11-G4-2: internal simulation publication, the implementation of the
-APPROVED settled design. Branch `m11-g4-2-publication-design`, from main at
-8effb78.
-
-## Review cycle 2: responses to CHANGES_REQUIRED (cycle 1)
-
-1. **Failure classification.**
-   - `settleTicket` refusals tagged transport BAD_RESPONSE are now
-     SIMULATION_RESULT_INVALID.
-   - SIMULATION_UNAVAILABLE covers only NETWORK, AUTH_REJECTED,
-     TICKET_LOST, CLIENT_DEADLINE and REQUEST_REFUSED transports, plus
-     RUNNER_UNAVAILABLE and SIMULATION_TIMEOUT.
-   - The transport is kept in the reasons.
-   - New regression: the scripted backend returns the REAL `settleTicket`
-     output for a ticket whose cache key is not the job's (via
-     `expectedResultIdentity`). The result is SIMULATION_RESULT_INVALID with
-     MODEL_PROVENANCE_MISMATCH and "transport BAD_RESPONSE", from exactly one
-     call. The classification table also gains CLIENT_DEADLINE,
-     SIMULATION_TIMEOUT and MODEL_PROVENANCE_MISMATCH + BAD_RESPONSE.
-2. **Execution profile revision.**
-   - The record's provenance gains `executionProfileRevisions`, the
-     verified result's `executionProfile.revision`.
-   - It is cross-checked against each prepared job's
-     `keys.executionProfileRevision`; a mismatch is SIMULATION_RESULT_INVALID
-     (new test).
-   - The real-runner test asserts `[ELITE_REALISTIC_V1 revision]`.
-   - The real-engine bench was re-run: PUBLISHED with
-     `["5692cfece9870b95028ed41ebada3bf858c624e5a8d784ce677eada203d9190c"]`,
-     ELITE_REALISTIC_V1's frozen revision. The 60 s case is still
-     PRECISION_INSUFFICIENT.
-3. **Validation after the fixes:**
-   - publication unit and contract tests: 21 pass;
-   - focused suites: 121 files, 5,175 tests, pass;
-   - full suite: 337 files, 9,838 tests, all pass (968 s);
-   - typecheck, prettier and `git diff --check` clean.
+M11-G4-3: the profile echo travels through the runner. Branch
+`m11-g4-3-remote-profile-echo`, from main at a09be25 (G4-2 merged).
 
 ## Intended change
 
-Implement `agent/architecture.md` "M11-G4-2 — simulation publication
-(internal)" as approved:
+This resolves the first G4-2 follow-up. Production could not evaluate the
+publication CHARACTER gate, because the runner returned no profile echo.
+Now:
 
-- a shared, spec-agnostic, internal pipeline;
-- stage A readiness: CONTEXT, CHARACTER, ENVIRONMENT;
-- stage B simulation: one attested PRODUCTION job per consumable variant,
-  with one precision escalation;
-- an observation-only `simulation-publication/1` record.
+- a LOGGED_FIDELITY_PROBE result carries the engine's profile echo;
+- verification requires the echo exactly on probes;
+- publication gets `backendProfileEchoSource(backend)`.
+
+Deployment policy is unchanged: the production job-class default stays
+PRODUCTION only.
 
 ## Files / surfaces changed
 
-- **New `src/publication/`:**
-  - `record.ts`: record, gate and failure codes;
-  - `attainment.ts`: envelope and attainment;
-  - `pipeline.ts`: `assessPublicationReadiness`, `runPublication`,
-    `publishSimulation`, `currentSetupJob`, `NO_PROFILE_ECHO_SOURCE`.
-- **`src/character-profile/simulation-character.ts`:** extracted
-  `loggedJobCharacter` (the one G3-2 level, race, talents and gear mapping),
-  now used by `fidelityProbeJob` and the production job.
-  - Behavior-preserving: the fidelity-probe profile hashes and goldens are
-    unchanged.
-  - This file is not in a gate fingerprint.
+- **Simulation core:**
+  - `src/simulation/profile-echo.ts`: new strict `profileEchoSchema` for the
+    transported echo.
+  - `src/simulation/result.ts`: optional `profileEcho` on `SimulationResult`,
+    documented as probe-only.
+  - `src/simulation/result-parser.ts`: `RESULT_PARSER_REVISION`
+    `SIMC_JSON_2_PARSER_V2` → `V3`. A probe result gets
+    `extractProfileEcho(text)`; a failed extraction is that typed failure.
+  - `src/simulation/result-verification.ts`: the schema accepts the echo
+    (strict), and presence must equal "job is a probe" (else
+    MODEL_PROVENANCE_MISMATCH).
+- **Publication.** `src/publication/pipeline.ts`: `backendProfileEchoSource`
+  runs the probe on a backend and returns the verified echo. A probe served
+  as another class, or a result without an echo, is a typed failure. The
+  docs and reason text were updated.
+- **Fake engine.** `tests/support/simulation/fake-simc.mjs` emits item
+  `ilevel` and `collected_data.buffed_stats`, so a fake probe yields an echo.
 - **Tests:**
-  - new `tests/unit/publication/pipeline.test.ts` (15) and
-    `tests/contracts/m11g4-publication-layering.test.ts`;
-  - amended layering contracts, so that `src/publication/` may compose
-    them: `m11g3-simulation-layering`, `m11g34-environment-layering` and
-    `m11g4-simulation-context-layering`. The new publication contract then
-    forbids any importer of `src/publication/`.
-- **New bench:** `scripts/bench/m11g42-publication.bench.ts` (real engine,
-  Docker).
-- **Docs:** `agent/architecture.md` (status, implementation amendment,
-  results), `agent/testing.md`, `agent/follow-ups.md`.
+  - new `tests/unit/simulation/profile-echo-transport.test.ts` (6);
+  - parser-revision pins updated:
+    - `model-registry.test.ts`: V3, with a note that G4-3 moved it
+      deliberately;
+    - `runner-service-cache.test.ts`: the "another parser" hypothetical is
+      now V2.
+- **New bench:** `scripts/bench/m11g43-remote-profile-echo.bench.ts`.
+- **Docs:** `agent/architecture.md` (new section "M11-G4-3", plus a G4-2
+  pointer), `agent/testing.md`, `agent/follow-ups.md` (the G4-2 echo
+  follow-up is RESOLVED; the deployment choice remains).
 
-## Design amendment found during implementation (please assess)
+## Decisions made
 
-The approved design said the CHARACTER gate runs the fidelity probe "through
-the backend". That is not possible today:
-
-- the G3-5 runner protocol returns a `SimulationResult` with no profile echo
-  (the echo is read from raw engine JSON runner-side, in
-  `runner/run-fidelity.ts`);
-- production runners refuse FIDELITY_PROBE jobs (PRODUCTION-only default).
-
-The implementation therefore:
-
-- reads the echo through a `ProfileEchoSource` port;
-- passes `NO_PROFILE_ECHO_SOURCE` in production, so every log fails closed
-  at CHARACTER / FIDELITY_PROBE_UNAVAILABLE;
-- records the protocol extension and the FIDELITY_PROBE deployment as a
-  follow-up, rather than changing the G3-5 protocol and deployment policy
-  inside this tranche;
-- in tests, accepts a committed engine echo only when the probe job's
-  profile hash equals the golden's.
+- **Where the echo is attached.** In the parser, which already holds the
+  raw engine JSON, rather than in the service or transport layer.
+- **Parser revision bump.** It changes every parsed-result key, so no
+  cached V2 probe result without an echo is ever served.
+- **`RUNNER_PROTOCOL` not bumped.** Verification already fails closed on a
+  `provenance.parserRevision` mismatch, so a V2 runner with a V3 Worker (or
+  the reverse) cannot exchange results.
+- **Production job-class default unchanged.** Enabling FIDELITY_PROBE in a
+  publication deployment is left to the owner-controlled deployment.
 
 ## Validation
 
-- **Unit (15, pass):**
-  - canonical stage A on real evidence: no region → CONTEXT; no echo source →
-    CHARACTER / FIDELITY_PROBE_UNAVAILABLE (0a72e6a7 selected); echo failure →
-    FIDELITY_PROBE_FAILED; no race statement → PROFILE_NOT_SIMULATION_READY;
-    ready character → ENVIRONMENT / ENVIRONMENT_NOT_PUBLISHABLE with
-    TARGET_SCHEDULE_UNRESOLVED and MATERIAL_CONSUMABLE_UNKNOWN among its
-    blockers, and the backend is never called;
-  - the REAL runner service (fake engine, PRODUCTION-only) accepts the
-    pipeline's job and attestation, and the result publishes;
-  - the attestation fields are checked;
-  - all variants run; the envelope is computed; one failing variant means
-    NOT_PUBLISHED;
-  - exactly one escalation, then PRECISION_INSUFFICIENT;
-  - verification and transport failures are never retried;
-  - an unresolved race never becomes a job;
-  - the attainment interval is gated on PROVEN comparability.
-- **Real engine** (Docker 0a72e6a7, production job-class default, synthetic
-  plan):
-  - 345,177 ms PUBLISHED: 82,113 DPS, CI [81,988, 82,238], RSE 7.8e-4 at
-    STANDARD_SIM_V1.
-  - 60,000 ms PRECISION_INSUFFICIENT after one escalation (RSE 9.03e-4 >
-    6e-4).
+- **New transport tests (6, pass):**
+  - parser V3 attaches exactly the direct `extractProfileEcho` reading of the
+    committed 0a72e6a7 probe golden, and no echo on the dev standard golden;
+  - verification accepts a probe with its echo, and refuses a probe without
+    one, a malformed echo, and an echo on a non-probe;
+  - LOCAL and REMOTE (in-process HTTP) deliver equal echoes;
+  - a PRODUCTION-only runner refuses the probe (JOB_REJECTED);
+  - stage A through a probe-enabled fake runner reaches CHARACTER /
+    PROFILE_NOT_SIMULATION_READY on the transported, synthetic fake echo.
+- **Real engine** (Docker 0a72e6a7, PRODUCTION + FIDELITY_PROBE): canonical
+  stage A gives CHARACTER SIMULATION_READY on the transported real-engine
+  echo, and the first failing gate is ENVIRONMENT
+  (TARGET_SCHEDULE_UNRESOLVED, SETUP_AURA_UNCLASSIFIED,
+  PINNED_MODEL_MISSING_OBSERVED_EFFECT, …), in 1.3 s.
 - **Focused suites:** publication, simulation-context, simulation,
   environment, character-profile, all contracts and the remote-client
-  integration: 121 files, 5,173 tests, pass.
-- **Public digests unchanged:** restricted `ddd1629c…681d`, full
-  `d8d4376f…054a1`, 600/600 analyses.
-- **Gates not run:** the corpus and evidence gates; no ingestion, corpus or
-  evidence surface changed. CI runs both.
-- **Checks:** typecheck clean; prettier check clean; `git diff --check`
-  clean.
-- **Full suite** (`npm test -- --maxWorkers=1 --testTimeout=30000`): 337
-  files, 9,836 tests, all pass (978 s).
+  integration: 122 files, 5,182 tests, pass.
+- **Public digests unchanged:** 600/600.
+- **Checks:** typecheck clean; prettier clean; `git diff --check` clean.
+- **Earlier timing failure.** One focused run while developing showed
+  `runner-service-queue` "graceful shutdown…" failing once. It passed alone
+  (12/12) and in the focused run above; it is a timing-sensitive test.
+- **Full suite** (`npm test -- --maxWorkers=1 --testTimeout=30000`): 338
+  files, 9,845 tests, all pass (877 s), including `runner-service-queue`.
 
 ## External / network activity
 
@@ -139,13 +96,10 @@ Local Docker engine runs (bench). No Warcraft Logs requests.
 
 ## Known limitations
 
-These are in `agent/follow-ups.md`, "After M11-G4-2":
-
-- no production fidelity echo;
-- no real subject publishes;
-- attainment is always UNKNOWN today;
-- precision bounds refuse short fights;
-- nothing calls the pipeline, and the runner has no deployed host.
+- A publication deployment must enable FIDELITY_PROBE (owner, at deploy
+  time).
+- No real subject passes ENVIRONMENT, so publication still produces nothing
+  on real logs (G4-2 follow-up).
 
 ## Owner questions
 

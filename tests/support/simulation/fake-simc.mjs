@@ -63,7 +63,7 @@ if (mode === "hang" || mode?.startsWith("hang-pid:")) {
     // Like the pinned report (report_json.cpp:387), stat-less items (here the
     // cosmetic shirt and tabard) are not echoed.
     if (section === "player" && value.startsWith(",id=")) {
-      if (key !== "shirt" && key !== "tabard") gear[key] = { encoded_item: `item${value}` };
+      if (key !== "shirt" && key !== "tabard") gear[key] = { encoded_item: `item${value}`, ilevel: 276 };
     } else if (section === "player") player[key] = value;
     else sim[key] = value;
   }
@@ -184,7 +184,20 @@ if (mode === "hang" || mode?.startsWith("hang-pid:")) {
           food: player.food,
           augmentation: player.augmentation,
           temporary_enchant: player.temporary_enchant,
-          collected_data: { dps: sample(meanDps, meanDps * 0.034, iterations - threads) },
+          collected_data: {
+            dps: sample(meanDps, meanDps * 0.034, iterations - threads),
+            // M11-G4-3: what a profile echo reads (fixed, plausible values).
+            buffed_stats: {
+              attribute: { strength: 50000, agility: 1000, stamina: 300000, intellect: 1000 },
+              stats: {
+                crit_rating: 10000,
+                haste_rating: 12000,
+                mastery_rating: 14000,
+                versatility_rating: 5000,
+                armor: 90000,
+              },
+            },
+          },
           stats: [
             {
               id: 206930,

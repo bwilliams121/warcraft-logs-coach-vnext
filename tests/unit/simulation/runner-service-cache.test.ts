@@ -111,7 +111,7 @@ describe("M11-G3-5 cache keys (AA–AF)", () => {
         }),
       );
     expect(await recompute(RESULT_PARSER_REVISION)).toBe(keys.parsedResultKey);
-    expect(await recompute("SIMC_JSON_2_PARSER_V3")).not.toBe(keys.parsedResultKey);
+    expect(await recompute("SIMC_JSON_2_PARSER_V2")).not.toBe(keys.parsedResultKey);
     const h = await startedService();
     const first = await run(h, devJob());
     const expected = await expectedResultIdentity(

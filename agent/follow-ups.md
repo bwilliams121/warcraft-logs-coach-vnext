@@ -443,15 +443,13 @@ carries no normalization revision.
 
 **Raised:** M11-G4-2 (2026-10-28).
 
-- **No production fidelity echo.**
-  - The CHARACTER gate reads the probe's engine echo through
-    `ProfileEchoSource`. The G3-5 runner protocol carries no echo, and
-    production runners refuse FIDELITY_PROBE jobs, so production passes
-    `NO_PROFILE_ECHO_SOURCE` and every log stops at CHARACTER /
-    FIDELITY_PROBE_UNAVAILABLE.
-  - Done looks like: a reviewed protocol extension that returns the echo
-    for FIDELITY_PROBE results (validated like any result), plus a deployment
-    that enables FIDELITY_PROBE alongside PRODUCTION.
+- **RESOLVED (M11-G4-3): production fidelity echo.**
+  - A FIDELITY_PROBE result now carries the engine echo (parser V3), and
+    `backendProfileEchoSource` reads it through any backend.
+  - Remaining: a publication deployment must enable FIDELITY_PROBE alongside
+    PRODUCTION. The production default stays PRODUCTION only, and under it
+    CHARACTER fails closed with JOB_REJECTED. That is a deployment choice for
+    the owner.
 - **No real subject publishes.**
   - The canonical fight stops at ENVIRONMENT. Its missing effects hold on
     both registered models and on every data set the model-pin

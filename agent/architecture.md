@@ -9020,7 +9020,9 @@ runs.
      - Production passes `NO_PROFILE_ECHO_SOURCE`, so the gate fails closed
        with CHARACTER / FIDELITY_PROBE_UNAVAILABLE. That is the correct
        production result until a reviewed protocol extension carries the
-       echo and a deployment enables FIDELITY_PROBE (follow-up).
+       echo and a deployment enables FIDELITY_PROBE. The protocol extension
+       is done in M11-G4-3; enabling the job class remains a deployment
+       choice.
      - Tests use the committed engine echo for exactly the probe job
        (checked by profile hash).
 3. **ENVIRONMENT.**
@@ -9117,6 +9119,50 @@ It is an OBSERVATION. It carries no causal claim or coaching (CLAUDE.md
 - **Only PRODUCTION jobs may publish.** The runner admits a PRODUCTION job
   only with a valid attestation v3 for the job's model and the accepted gate
   revisions (`readiness-attestation.ts`, `job-class.ts`).
+
+## M11-G4-3 — the profile echo travels through the runner
+
+**Status:** implemented (2026-10-28). This resolves the first G4-2
+follow-up: the CHARACTER gate could not run in production because the runner
+returned no profile echo.
+
+- **Parser (`SIMC_JSON_2_PARSER_V3`).**
+  - `parseSimcJson` attaches `profileEcho` (the `extractProfileEcho` reading
+    of the same report) to a LOGGED_FIDELITY_PROBE job's result, and only to
+    it. Every other result is unchanged.
+  - The revision bump moves every parsed-result key, so a cached V2 probe
+    result without an echo is never served.
+- **Verification.**
+  - `simulationResultSchema` validates the echo with the strict
+    `profileEchoSchema`. A malformed echo is SIMULATION_OUTPUT_MALFORMED.
+  - `verifySimulationResult` requires the echo exactly when the job is a
+    fidelity probe (otherwise MODEL_PROVENANCE_MISMATCH, "profileEcho
+    presence"). A ceiling result can never carry one, and a probe result
+    must.
+- **Transport.**
+  - LOCAL and REMOTE deliver the same echo; REMOTE was tested over the
+    in-process HTTP handler.
+  - `RUNNER_PROTOCOL` is unchanged. A runner/Worker parser-revision mismatch
+    already fails verification (`provenance.parserRevision`), so mixed
+    versions fail closed.
+- **Publication.**
+  - `backendProfileEchoSource(backend)` runs the probe job on a
+    `SimulationBackend` and returns the verified echo. A probe served as
+    another class, or a result without an echo, is a typed failure.
+- **Deployment policy unchanged.**
+  - The production job-class default stays PRODUCTION only (G3-5). Under it
+    the probe is refused (JOB_REJECTED), and CHARACTER fails closed as
+    FIDELITY_PROBE_FAILED.
+  - A publication deployment must enable FIDELITY_PROBE alongside PRODUCTION
+    (`SIMC_RUNNER_JOB_CLASSES=PRODUCTION,FIDELITY_PROBE`). That choice belongs
+    to the deployment, which is owner-controlled.
+- **Real engine** (`scripts/bench/m11g43-remote-profile-echo.bench.ts`, Docker
+  0a72e6a7, PRODUCTION + FIDELITY_PROBE):
+  - Stage A on the canonical fight with the owner's race statement selects
+    0a72e6a7.
+  - CHARACTER is SIMULATION_READY on the transported real-engine echo.
+  - The first failing gate is ENVIRONMENT with the canonical blockers (1.3 s
+    wall).
 
 ---
 

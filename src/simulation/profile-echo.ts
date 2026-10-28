@@ -54,6 +54,47 @@ export interface ProfileEcho {
   };
 }
 
+/**
+ * The TRANSPORTED echo (M11-G4-3): a FIDELITY_PROBE result carries the echo
+ * `extractProfileEcho` read runner-side; the Worker validates it with this
+ * strict schema before the fidelity gate reads it.
+ */
+export const profileEchoSchema = z
+  .object({
+    race: z.string(),
+    level: z.number().int(),
+    specialization: z.string(),
+    role: z.string(),
+    talents: z.string(),
+    items: z.array(
+      z
+        .object({
+          slot: z.string(),
+          itemId: z.number().int().positive(),
+          itemLevel: z.number(),
+          bonusIds: z.array(z.number().int()),
+          gemIds: z.array(z.number().int()),
+          enchantId: z.number().int().positive().nullable(),
+        })
+        .strict(),
+    ),
+    observedSpellIds: z.array(z.number().int().positive()),
+    pullStats: z
+      .object({
+        strength: z.number(),
+        agility: z.number(),
+        stamina: z.number(),
+        intellect: z.number(),
+        critRating: z.number(),
+        hasteRating: z.number(),
+        masteryRating: z.number(),
+        versatilityRating: z.number(),
+        armor: z.number(),
+      })
+      .strict(),
+  })
+  .strict();
+
 /** An action entry; its `children` are read recursively by `collectIds`. */
 const node = z.object({ id: z.number().optional(), children: z.array(z.unknown()).optional() });
 
