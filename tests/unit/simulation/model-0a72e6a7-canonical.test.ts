@@ -123,7 +123,19 @@ describe("M11 promoted model: development golden", () => {
 
 describe("M11 promoted model: canonical Blood character", () => {
   it("reconstructs identically from the promoted model's data (no field appears or disappears)", () => {
-    expect(stated).toEqual(statedHistorical);
+    // M11-G4-1: the compatibility note names EACH model's own build (it was
+    // hard-coded to 12.1.0.69587); everything else is identical.
+    const versionNote = (profile: CharacterProfile) =>
+      profile.diagnostics.find((issue) => issue.code === "MODEL_VERSION_COMPATIBILITY_UNKNOWN")?.detail;
+    expect(versionNote(stated)).toContain("compatibility with client data 12.1.0.69933 is unknown");
+    expect(versionNote(statedHistorical)).toContain("compatibility with client data 12.1.0.69587 is unknown");
+    const withoutVersionNote = (profile: CharacterProfile) => ({
+      ...profile,
+      diagnostics: profile.diagnostics.filter(
+        (issue) => issue.code !== "MODEL_VERSION_COMPATIBILITY_UNKNOWN",
+      ),
+    });
+    expect(withoutVersionNote(stated)).toEqual(withoutVersionNote(statedHistorical));
     expect(stated.blockers).toEqual([]);
   });
 

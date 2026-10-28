@@ -149,7 +149,7 @@ export function reconstructCharacterProfile(
   }
   note(
     "MODEL_VERSION_COMPATIBILITY_UNKNOWN",
-    "the log's client build is not in the evidence (gameVersion/logVersion do not discriminate builds), so compatibility with client data 12.1.0.69587 is unknown",
+    `the log's client build is not in the evidence (gameVersion/logVersion do not discriminate builds), so compatibility with client data ${input.simulationModel.manifest.gameDataBuild} is unknown`,
   );
 
   const pullFacts = input.pullFacts?.actorId === subjectId ? input.pullFacts.facts : null;

@@ -142,8 +142,9 @@ describe("the normalized model contains no gameplay vocabulary", () => {
   it("records a normalization revision so results stay traceable", () => {
     expect(NORMALIZATION_REVISION).toMatch(/^m\d+\.\d+$/);
     // M11-F: bumped for the M11-E1 and M11-F model changes (shape and meaning).
+    // M11-G4-1: bumped for the additive `report.region`.
     // A model change without a bump is what this pin makes visible in review.
-    expect(NORMALIZATION_REVISION).toBe("m3.3");
+    expect(NORMALIZATION_REVISION).toBe("m3.4");
   });
 });
 

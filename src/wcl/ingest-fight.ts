@@ -380,6 +380,7 @@ export async function ingestFightCore(
         revision: report.revision,
         startTimeUnixMs: report.startTimeUnixMs,
         endTimeUnixMs: report.endTimeUnixMs,
+        region: report.region,
       },
       data: { logVersion: report.logVersion, gameVersion: report.gameVersion },
       fight: {

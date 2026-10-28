@@ -194,6 +194,8 @@ export function decodeCandidateMetadata(data: unknown): DecodeOutcome<CandidateM
         fights,
         archiveStatus: decodeArchiveStatus(report),
         zone: report["zone"],
+        // Not selected by this document.
+        region: { state: "NOT_RETRIEVED" },
       },
     },
   };

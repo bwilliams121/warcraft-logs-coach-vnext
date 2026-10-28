@@ -19,6 +19,12 @@ import { reconstructCharacterProfile } from "../../../src/character-profile/reco
 import type { EnvironmentReconstructionInput } from "../../../src/environment/reconstruct.js";
 import type { CombatFight } from "../../../src/engine/normalization/combat-fight.js";
 import { BLOOD_CHARACTER_BINDING } from "../../../src/specs/deathknight/blood/character-binding.js";
+import { COMMITTED_DEPLOY_CALENDAR_EVIDENCE } from "../../../src/simulation-context/evidence.js";
+import {
+  resolveSimulationContext,
+  type SimulationContextResolution,
+} from "../../../src/simulation-context/resolve.js";
+import { decodeReportRegion, type ReportRegion } from "../../../src/wcl/fight-context-query.js";
 import {
   selectSimulationModel,
   type SimulationGameContext,
@@ -84,19 +90,60 @@ export async function subjectFight(): Promise<CombatFight> {
 
 const sha256 = (text: string): string => createHash("sha256").update(text).digest("hex");
 
+/** The archived M11-G4-1 region capture of the canonical report. */
+export const SUBJECT_REGION_ARTIFACT_ID = "wcl-g4-region-b1pm-fight-48";
+
 /**
- * The canonical subject's resolved game context. The build (Live
- * 12.1.0.69933) is the approved M11 model-pin investigation result — resolving
- * a log's build automatically is G4 work; the fight start is the committed
- * fight context's.
+ * The canonical report's Warcraft Logs region, from the archived G4-1 capture.
+ * It is used only after checking that the capture describes the SAME report
+ * state as the committed fight context (code, revision, report start, fight
+ * 48's bounds).
  */
-export function subjectGameContext(): SimulationGameContext {
+export function subjectRegion(): ReportRegion {
+  const captured = (
+    artifactJson(SUBJECT_REGION_ARTIFACT_ID) as { reportData: { report: Record<string, unknown> } }
+  ).reportData.report;
+  const { fight, reportStartUnixMs, code } = subjectContextFight();
+  const context = artifactJson(SUBJECT.contextId) as { reportData: { report: { revision: number } } };
+  const capturedFight = (captured["fights"] as { id: number; startTime: number; endTime: number }[]).find(
+    (entry) => entry.id === SUBJECT.fightId,
+  );
+  if (
+    captured["code"] !== code ||
+    captured["revision"] !== context.reportData.report.revision ||
+    captured["startTime"] !== reportStartUnixMs ||
+    capturedFight?.startTime !== fight.startTime ||
+    capturedFight.endTime !== fight.endTime
+  ) {
+    throw new Error(
+      `${SUBJECT_REGION_ARTIFACT_ID} does not describe the committed fight context's report state`,
+    );
+  }
+  return decodeReportRegion(captured);
+}
+
+/**
+ * The canonical subject's simulation context, RESOLVED by the G4-1
+ * SimulationContextResolver from committed evidence: the fight context's
+ * times, the archived region, and the committed deploy-calendar evidence.
+ */
+export function subjectContextResolution(): SimulationContextResolution {
   const { fight, reportStartUnixMs } = subjectContextFight();
-  return {
-    specKey: "deathknight/blood",
-    gameBuild: "12.1.0.69933",
-    fightStartUtc: new Date(reportStartUnixMs + fight.startTime).toISOString(),
-  };
+  return resolveSimulationContext(
+    {
+      specKey: "deathknight/blood",
+      fight: {
+        report: { startTimeUnixMs: reportStartUnixMs, region: subjectRegion() },
+        fight: { startTimeMs: fight.startTime },
+      },
+    },
+    COMMITTED_DEPLOY_CALENDAR_EVIDENCE,
+  );
+}
+
+/** The canonical subject's resolved game context (see `subjectContextResolution`). */
+export function subjectGameContext(): SimulationGameContext {
+  return subjectContextResolution().context;
 }
 
 /**

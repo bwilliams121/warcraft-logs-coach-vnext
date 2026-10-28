@@ -349,6 +349,13 @@
       "payloadKind": "WCL_GRAPHQL_DATA",
       "provenanceKind": "SANITIZED_CAPTURE",
       "sha256": "f4beb89d53f8040808899bd9f94c102fb6e30d6782c1bee89552f080efbcbe85"
+    },
+    {
+      "artifactId": "wcl-g4-region-b1pm-fight-48",
+      "byteLength": 206,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "babc6e5a384f3cc80b4edde18da9bf0a814a83334d1f46aea92122572562fdf2"
     }
   ],
   "byLayer": [
@@ -649,8 +656,8 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 17034790,
-    "artifacts": 50,
+    "artifactBytes": 17034996,
+    "artifacts": 51,
     "assertions": 21,
     "cases": 9,
     "declared": 0,

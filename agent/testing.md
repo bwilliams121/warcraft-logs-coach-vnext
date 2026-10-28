@@ -1768,6 +1768,24 @@ simulation-model registry (M11, tests/unit/simulation/{model-registry,runner-ser
   applicability not covering model+fight       -> MODEL_BUILD_LAG stays (null, other model, other build, window outside or ending at the start, unparseable)
   data bundle load (tests/unit/simulation/model-data-bundle.test.ts) -> history must end at the loaded revisions; stale v3 revision, foreign provenance, v1 manifest, sourceless consumables refused
   consumables provenance                       -> real source paths, extractor v4, semantic hash = committed v3 content, token verdicts unchanged
+
+simulation-context resolver (M11-G4-1, tests/unit/simulation-context/{resolver,report-region}.test.ts, contracts/m11g4-simulation-context-layering.test.ts):
+  committed evidence                           -> loads; all 27 builds verified on Blizzard CDN; restart sources THIRD_PARTY_NEWS_REPORT, never Blizzard-labelled
+  derived intervals                            -> exactly US 69587 [09-09T04:00Z, 09-12T06:45Z) and US 69933 [09-30T03:00Z, 10-12T04:18Z); 09-22 restart does not prove 69933
+  canonical fight                              -> archived region US (same report state as the committed context) -> 12.1.0.69933 -> 0a72e6a7
+  region NOT_RETRIEVED / NOT_SUPPLIED / EU      -> UNRESOLVED (REGION_UNRESOLVED / REGION_NOT_COVERED) -> SIMULATION_MODEL_CONTEXT_UNRESOLVED
+  interval edges                               -> inclusive start, exclusive end; inside the 12 h margin NEAR_DEPLOYMENT_BOUNDARY
+  no date-only / nearest-build inference       -> 09-14, 09-25, 10-20 NO_PROVEN_DEPLOYMENT_INTERVAL although builds were listed
+  historical model                             -> 09-11 resolves 69587 -> 33622e9d; 09-09 resolves 69587 but selection NOT_AVAILABLE (outside validation window)
+  identity unverified / CDN after observation  -> no interval (and NEXT_BUILD_UNBOUNDED for the build before) / SOURCES_CONFLICT
+  restart imprecise (> 24 h) or missing        -> NO_PROVEN_DEPLOYMENT_INTERVAL; a restart in another region proves nothing here
+  invalid evidence, non-finite fight time      -> DEPLOY_EVIDENCE_INVALID, FIGHT_TIME_UNRESOLVED
+  unreal calendar timestamps                   -> retrieval, wago, CDN and restart times refused at load; DEPLOY_EVIDENCE_INVALID, never a throw
+  out-of-range times                           -> fight start outside Date range (either sign, or infinite) FIGHT_TIME_UNRESOLVED; evidence years outside 2000-2999 refused
+  conflicting restart accounts                 -> overlapping-but-different windows: DEPLOYMENT_EVIDENCE_CONFLICT in the span they touch; identical accounts corroborate
+  normalization revision                       -> m3.4 pinned (additive report.region); raid-night/1 cells carry it, analysis/1 does not
+  report region decode                         -> KNOWN only for a non-empty slug; null/malformed NOT_SUPPLIED; absent key NOT_RETRIEVED; query requests region{slug}
+  layering                                     -> spec-agnostic; imports own evidence, zod, two types; no SimC/snapshot/ceiling vocabulary; nothing in src imports it
   Consumption                                  -> parses and verifies on both; breakdown granularity model-dependent (pinned)
   runner config                                -> registered ids only, registered image per model, no repeats
 ```

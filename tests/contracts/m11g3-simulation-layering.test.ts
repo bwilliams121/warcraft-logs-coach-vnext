@@ -175,6 +175,16 @@ describe("M11-G3-1 simulation layering", () => {
           expect(spec, file).toBe("../../../simulation/execution-activity.js");
           continue;
         }
+        // M11-G4-1 amendment: the SimulationContextResolver produces the
+        // selection input, so it names the registry's context TYPE — never a
+        // registry value, never a model.
+        if (file === "src/simulation-context/resolve.ts") {
+          expect(spec, file).toBe("../simulation/model-registry.js");
+          expect(text).toMatch(
+            /import type \{ SimulationGameContext \} from "\.\.\/simulation\/model-registry\.js"/,
+          );
+          continue;
+        }
         expect(file, `${file} imports ${spec}`).toMatch(
           /^src\/specs\/[a-z]+\/[a-z_]+\/simulation-binding\.ts$/,
         );

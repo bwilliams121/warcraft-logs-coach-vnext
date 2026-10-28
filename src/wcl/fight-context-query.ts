@@ -34,6 +34,9 @@ export const FIGHT_CONTEXT_QUERY = `query CoachFightContext($code: String!, $fig
       revision
       startTime
       endTime
+      region {
+        slug
+      }
       archiveStatus {
         isArchived
         isAccessible
@@ -132,6 +135,29 @@ export interface RawArchiveStatus {
   readonly archiveDate: number | null;
 }
 
+/**
+ * `Report.region` (M11-G4-1), evidence for the simulation-context resolver.
+ *
+ * - KNOWN: Warcraft Logs supplied a non-empty `slug` (e.g. "US").
+ * - NOT_SUPPLIED: the field was requested but came back null or malformed.
+ * - NOT_RETRIEVED: the payload has no `region` key at all, as in every
+ *   capture made before the field was requested. Absence is never a region.
+ */
+export type ReportRegion =
+  | { readonly state: "KNOWN"; readonly slug: string }
+  | { readonly state: "NOT_SUPPLIED" }
+  | { readonly state: "NOT_RETRIEVED" };
+
+export function decodeReportRegion(report: Record<string, unknown>): ReportRegion {
+  if (!("region" in report)) return { state: "NOT_RETRIEVED" };
+  const raw = report["region"];
+  if (!isRecord(raw)) return { state: "NOT_SUPPLIED" };
+  const slug = raw["slug"];
+  return typeof slug === "string" && slug.trim().length > 0
+    ? { state: "KNOWN", slug }
+    : { state: "NOT_SUPPLIED" };
+}
+
 export interface RawFightContextReport {
   readonly code: string;
   readonly revision: number;
@@ -161,6 +187,7 @@ export interface RawFightContextReport {
    * client-credentials token. Absent status is NOT treated as "not archived".
    */
   readonly archiveStatus: RawArchiveStatus | null;
+  readonly region: ReportRegion;
 }
 
 export interface FightContextPayload {
@@ -245,6 +272,7 @@ export function decodeFightContext(data: unknown): DecodeOutcome<FightContextPay
         phases: readArray(report, "phases") ?? [],
         fights,
         archiveStatus: decodeArchiveStatus(report),
+        region: decodeReportRegion(report),
         // Passed through untouched. A report with no supported zone is normal.
         zone: report["zone"],
       },

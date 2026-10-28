@@ -15,6 +15,7 @@
 
 import type { HostilitySelector, EventRetrievalPlanSummary } from "../../wcl/retrieval-plan.js";
 import type { IngestionScope } from "../../services/ingestion-scope.js";
+import type { ReportRegion } from "../../wcl/fight-context-query.js";
 import type { StreamProvenance } from "../../wcl/retrieval-types.js";
 import type { CombatAbility } from "./abilities.js";
 import type { CombatActor } from "./actors.js";
@@ -49,8 +50,11 @@ import type { CombatEvent, MalformedRawObservation } from "./normalized-events.j
  * ids (a missed bump at the time), M11-E1's `DamageEvent.tickField` and
  * `overkillAmount`, and M11-F's `DEATH` and `RESURRECTION` variants — raw
  * `death` now normalizes as `DEATH` rather than `UNSUPPORTED_TYPE`.
+ *
+ * `m3.4` (M11-G4-1) adds `report.region` (`Report.region.slug` as KNOWN,
+ * NOT_SUPPLIED or NOT_RETRIEVED), an additive shape change.
  */
-export const NORMALIZATION_REVISION = "m3.3";
+export const NORMALIZATION_REVISION = "m3.4";
 
 /**
  * Was the FIGHT finished? Entirely separate from whether we RETRIEVED it.
@@ -123,6 +127,8 @@ export interface CombatFight {
     readonly revision: number;
     readonly startTimeUnixMs: number;
     readonly endTimeUnixMs: number;
+    /** `Report.region` as retrieved (M11-G4-1); NOT_RETRIEVED is never a region. */
+    readonly region: ReportRegion;
   };
   readonly data: {
     readonly logVersion: number;
