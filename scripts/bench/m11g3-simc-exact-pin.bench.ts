@@ -35,7 +35,6 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { BUILD_RECIPE_REVISION } from "../../runner/approved-artifacts.js";
 import { DockerLauncher } from "../../runner/engine-launcher.js";
 import { DEFAULT_RUNNER_LIMITS } from "../../runner/limits.js";
 import { RUNNER_SPEC_BINDINGS } from "../../runner/spec-bindings.js";
@@ -76,10 +75,13 @@ describe.skipIf(IMAGE === undefined)("M11-G3-1 exact-pin SimulationCraft runner"
         binarySha256: string;
         simcCommit: string;
         imageId: string;
+        buildRecipeRevision: string;
       };
       expect(record.simcCommit).toBe(MODEL.pin.simcCommit);
       expect(record.imageId).toBe(MODEL.imageId);
       expect(record.binarySha256).toBe(MODEL.artifact.binarySha256);
+      // M11-G4-5: the recipe is per model (simc-build/1 or /2), never a global.
+      expect(record.buildRecipeRevision).toBe(MODEL.artifact.buildRecipeRevision);
       expect(IMAGE).toBe(record.imageId);
 
       const limits = { ...DEFAULT_RUNNER_LIMITS, maxWallClockMs: 120_000 };
@@ -97,7 +99,7 @@ describe.skipIf(IMAGE === undefined)("M11-G3-1 exact-pin SimulationCraft runner"
       const artifact: ApprovedEngineArtifact = {
         model: MODEL.pin,
         binarySha256: record.binarySha256,
-        buildRecipeRevision: BUILD_RECIPE_REVISION,
+        buildRecipeRevision: MODEL.artifact.buildRecipeRevision,
       };
 
       const runs: RunRecord[] = [];

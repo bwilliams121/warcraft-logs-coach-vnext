@@ -9364,3 +9364,199 @@ The architecture is successful when:
     not have.
 
 29. Role modules reconstruct facts and never become universal role evaluators.
+
+---
+
+## M11-G4-5 — 12.1.5 compatibility review
+
+**Status:** review complete (2026-10-29). **Recommendation: do NOT register
+a 12.1.5 model yet.** Nothing is registered. Analyzer authority stays on
+33622e9d, and 0a72e6a7 stays the only Blood production model for 69933.
+Promotion needs the owner decisions listed at the end.
+
+### What Live is, and when
+
+- Current Live is **12.1.5.70575** in every region (version server). It is the
+  newest wago.tools observation; earlier 12.1.5 builds 70340, 70391, 70448 and
+  70529 were each superseded within days.
+- **Proven US interval** (G4-1 resolver, committed evidence): `[2026-10-28T03:00Z,
+  2026-10-29T01:28:51Z)`.
+  - Start: the US restart of 2026-10-27, 14:00–15:00Z (Blizzard Watch,
+    `US-2026-10-27`, added to `regional-restarts.json`), plus 12 h.
+  - End: 70575 is the newest build, so the end is the observations' retrieval
+    time (recaptured 2026-10-29T13:28Z) minus 12 h.
+  - The earlier 12.1.5 builds have no restart evidence and stay unresolved
+    (`NO_RESTART_EVIDENCE`).
+  - EU has no restart evidence, so EU fights stay `REGION_NOT_COVERED`.
+
+### The candidate
+
+- **SimC snapshots.** Upstream has four Live 70575 game-data snapshots:
+  - `ec3422d640` (2026-10-23T21:06:16Z, hotfix 2026-10-23,
+    `e41bd6f1…`): the first;
+  - `12aa5dc041` (2026-10-24);
+  - `47ad36940f` (2026-10-27);
+  - `6a4500db0f` (2026-10-28T00:32:44Z).
+  - Midnight HEAD (`710c2408bf`, 2026-10-28T13:36Z) has no later Live data.
+  - Between the snapshots, only `sc_spell_data.inc` and
+    `client_data_version.inc` change. No Death Knight spell changes, and no
+    item effect changes. Code changes are DH, Hunter and Shaman only. Blood
+    data is therefore equivalent across the four snapshots.
+- **Candidate pin:** `ec3422d6409c9c0dc826e56da010396082a0608e` / 12.1.5.70575.
+- **Built with the hardened recipe `simc-build/2`** (`runner/simc-build/v2/`).
+  - Base `alpine@sha256:294b683c…` (3.24.2).
+  - Full package closure locked: 60 build packages, 18 runtime packages.
+    Both stages are verified equal to their lock, in the image and again
+    offline.
+  - PGO training run with fixed seeds (`deterministic=1`); not bit-reproducible (below).
+  - Results: image `sha256:8de515f4…`, binary `b1913546…`, Alpine clang
+    22.1.3, 1,808 s.
+  - The build record stays in `.probe/g4/` (not committed: the model is not
+    registered).
+- **Exact-pin identity verified.**
+  - `git_revision ec3422d640`; Live `12.1.5.70575`; `no_networking`.
+  - Deterministic: repeated runs bit-identical.
+  - STANDARD RSE 7.79e-4; ESCALATED 3.96e-4.
+- **Per-model data regenerated with the candidate engine:**
+  - consumables `simc-ec3422d6-4`, raid environment `simc-ec3422d6-2`;
+  - semantic hashes equal to 0a72's;
+  - token acceptance measured 22/67, identical to 0a72.
+
+### Blood semantics, 69933 → 70575
+
+- **APL.** The built-in Blood APL is identical; every APL change is in
+  `unholy()`.
+- **DK module code.** The diff is Unholy-only:
+  - Festering Scythe GCD;
+  - Putrefy gating;
+  - Scourge Strike target cap;
+  - army_claw spec gate;
+  - the Blightfall warning removed;
+  - a commented-out hotfix block.
+- **Game data.** 150 spells changed. The Death Knight-relevant ones:
+  - Gift of the San'layn 434152/434153 gain two spell labels; effects are
+    unchanged.
+  - Transfusion 1280386's duration goes from infinite to 10 s; effects are
+    unchanged.
+- **Core engine changes:**
+  - `report_json` stat summing (#11963);
+  - gear runes;
+  - chain-multiplier passives;
+  - racial buff lookup;
+  - opt-in raid_event pulls (off by default);
+  - the DUNGEON tank dummy no longer pauses.
+- **Decisive finding: the standardized tank load changed meaning.**
+  - What changed. The 12.1.5 client data (already in PTR 69848) moved the
+    Mythic-raid expected-stat modifiers from difficulty 16 to difficulty 233.
+    The rows are identical, including expansion row 487 with
+    armor-constant ×1.649.
+  - Why the engine misses it. SimulationCraft still reads
+    `difficulty_e::MYTHIC` (16) for the Mythic tank dummy (`sc_enemy.cpp`,
+    `get_armor_constant_mod`), so the candidate's Mythic dummy gets ×1.0.
+    No upstream commit up to midnight HEAD addresses this.
+  - Effect under the same job:
+    - the dummy's physical melee hits are 34.6% weaker (234,415 → 153,322
+      mean);
+    - bleed damage is unchanged (+1.8%);
+    - incoming DPS −23.7%;
+    - Blood's healing −10…−45% (Death Strike heal −22%, Rune of Sanguination
+      −45%);
+    - Blood Draw −88%.
+  - DPS moves −0.44% (82,311.5 → 81,952.5). The part of that due to the tank
+    load, rather than to the 70575 data, is not separated.
+  - Consequence: under this candidate, STANDARD_TANK_LOAD_V1
+    ("SimulationCraft's standardized Mythic tank dummy") is no longer the
+    load it was at 69933. Its meaning depends on the engine, which the name
+    hides.
+- **Other benches on the candidate:**
+  - Fidelity: the canonical subject is MATCH with the owner race and
+    PARTIAL (race only) without it, as at 0a72.
+  - Execution profiles: pass.
+  - Publication (synthetic): PUBLISHED at the canonical length; short fight
+    PRECISION_INSUFFICIENT, as at 0a72.
+  - Environment materiality: every field keeps its ENVIRONMENT_MATERIALITY_V1
+    class. The closest is BLOODLUST_WHOLE_SECOND at 0.41%.
+    - Against 0a72's committed facts, the environment bench fails (15
+      measurements differ, as expected for another model).
+    - With the candidate's own measured facts (scratch only), it passes
+      fully: 0 mismatches, plus the stat-revisit, rank-token and round-trip
+      assertions.
+
+### Applicability: why registering now would cover no fight
+
+- Blood windows are bounded by verified snapshots
+  (`SNAPSHOTS_VERIFIED_EQUIVALENT_FOR_SPEC`). The candidate's window could be
+  at most `[2026-10-23T21:06:16Z, 2026-10-28T00:32:44Z)`.
+- The resolver cannot prove 70575 before 2026-10-28T03:00Z. The two do not
+  overlap, so no fight would select the candidate.
+- A 70575 fight resolves to its build and then fails closed with
+  `SIMULATION_MODEL_NOT_AVAILABLE`. It is never sent to 0a72e6a7; a resolver
+  test pins this.
+- This is structural. A snapshot-bounded window only reaches a deployment
+  interval once a later Live snapshot exists and is verified, so every
+  extension waits for the next upstream data update.
+
+### Hardened recipe (`runner/simc-build/v2/`)
+
+- Owner closeout decision: the next build pins the immutable base and the
+  exact package and toolchain inputs. simc-build/1 is unchanged; its
+  approved artifacts keep their recipe.
+- What v2 pins:
+  - the committed digest (`alpine.digest`), pulled by digest; no tag is ever
+    resolved;
+  - exact-version lockfiles for both stages, installed `name=version`, and
+    `diff`ed against `apk info -v`, so a stage fails on any drift;
+  - the commit, which has no default and is verified by full hash;
+  - `deterministic=1` on the PGO training run (seeds only; see Reproducibility).
+- `build.mjs` re-checks:
+  - the commit;
+  - the build-stage vs final-image binary hash;
+  - both package manifests against the locks, offline (`TOOLCHAIN_DRIFT`).
+  - It then writes `simc-build-record/2` with the lock hashes.
+- `--no-cache` rebuilds every layer, which is how reproducibility is checked.
+- The recipe revision is per artifact. The exact-pin bench now takes it from
+  the model rather than from the global `BUILD_RECIPE_REVISION`, and checks
+  it against the build record.
+
+### Reproducibility
+
+A second `--no-cache` build used identical inputs (recipe, both lockfiles,
+both installed package sets, commit ec3422d6). It produced a **different
+binary**: image `8f980e04…`, binary `1fa9954e…`, against `b1913546…`.
+
+- **The recipe pins its inputs but is not bit-reproducible.**
+- **Embedded build time.** The engine embeds `__DATE__`/`__TIME__` (the
+  `build_date`/`build_time` of `report_json`): 13:18:09 vs 14:01:47 UTC.
+- **Different optimised code.** The binaries differ by 57 KB (159,565,224 vs
+  159,622,176 bytes). The PGO training run is multi-threaded (engine default
+  `threads=0` = all cores). `deterministic=1` fixes seeds but not
+  scheduling, so the merged profile, and with it the optimised code, can
+  differ.
+- **Nothing relies on reproducibility.** An artifact is approved by its own
+  binary hash, and the runner refuses any other. As at simc-build/1, a
+  rebuild is a new artifact that needs its own registration. A candidate
+  hardening (simc-build/3) is a follow-up.
+
+### Recommendation and owner decisions before promotion
+
+**Do not register now.**
+
+- Under the current window basis, the candidate would cover no fight.
+- On a 12.1.5 model, STANDARD_TANK_LOAD_V1 would silently mean a different
+  incoming-damage load.
+
+Promotion needs:
+
+1. **Tank load.** Choose one:
+   - wait for an upstream fix of the difficulty-233 lookup and pin that
+     snapshot;
+   - accept a new, separately named tank model whose meaning is the
+     engine's Mythic dummy at that model.
+   A local engine patch would leave upstream-pinned provenance and is not
+   recommended.
+2. **Window basis.** Choose one:
+   - wait for a later Live 70575 snapshot, verified Blood-equivalent, so the
+     window extends past 2026-10-28T03:00Z;
+   - approve a new basis, for example "verified no newer Live snapshot as of
+     a recorded check". That trades evidence for latency.
+3. **EU.** EU coverage needs EU restart evidence.

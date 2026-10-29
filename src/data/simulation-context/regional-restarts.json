@@ -97,6 +97,35 @@
           ]
         }
       ]
+    },
+    {
+      "restartId": "US-2026-10-27",
+      "region": "US",
+      "window": {
+        "fromUtc": "2026-10-27T14:00:00Z",
+        "toUtc": "2026-10-27T15:00:00Z"
+      },
+      "windowTimezoneInterpretation": "Pacific times on 2026-10-27 are PDT (UTC-7); US DST ends 2026-11-01",
+      "sources": [
+        {
+          "evidenceClass": "THIRD_PARTY_NEWS_REPORT",
+          "publisher": "Blizzard Watch",
+          "url": "https://blizzardwatch.com/2026/10/27/short-maintenance-day-world-warcraft-praise-elune/",
+          "publishedAt": "2026-10-27T09:00:00-05:00",
+          "modifiedAt": "2026-10-27T10:05:46-05:00",
+          "retrievedAtUtc": "2026-10-29T12:56:05Z",
+          "sha256": "a6c5254debc27fa32b7718598c266c659d274b5b95312e1a5573b1df55286e95",
+          "byteLength": 103291,
+          "localArchive": ".probe/g4/sources/bw-2026-10-27.html (gitignored, not committed: third-party article bytes)",
+          "claimedRegion": "Americas (US) realms: the schedule is stated in Pacific and Eastern time for all World of Warcraft realms",
+          "claimedWindow": "Here is the WoW maintenance schedule for Tuesday, October 27: Midnight: Offline from 7am - 8am pacific (10am - 11am eastern)",
+          "claimedCompletion": "All World of Warcraft servers are back online!",
+          "excerpts": [
+            "Here is the WoW maintenance schedule for Tuesday, October 27: Midnight: Offline from 7am - 8am pacific (10am - 11am eastern)",
+            "All World of Warcraft servers are back online!"
+          ]
+        }
+      ]
     }
   ]
 }

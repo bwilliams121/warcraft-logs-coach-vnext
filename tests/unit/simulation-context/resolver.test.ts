@@ -75,7 +75,7 @@ describe("committed deploy-calendar evidence", () => {
         expect(source.sha256).toMatch(/^[0-9a-f]{64}$/);
       }
     }
-    expect(evidence.restarts.restarts.map((restart) => restart.region)).toEqual(["US", "US", "US"]);
+    expect(evidence.restarts.restarts.map((restart) => restart.region)).toEqual(["US", "US", "US", "US"]);
   });
 
   it("derives exactly the proven US intervals, each with its basis", () => {
@@ -92,7 +92,15 @@ describe("committed deploy-calendar evidence", () => {
     ).toEqual([
       ["US", "12.1.0.69587", "2026-09-09T04:00:00.000Z", "2026-09-12T06:45:21.000Z", "US-2026-09-08"],
       ["US", "12.1.0.69933", "2026-09-30T03:00:00.000Z", "2026-10-12T04:18:14.000Z", "US-2026-09-29"],
+      // M11-G4-5: Live 12.1.5.70575 after the 2026-10-27 US restart. It is the
+      // newest observed build, so the interval ends 12 h before the
+      // observations were retrieved (no next build is known).
+      ["US", "12.1.5.70575", "2026-10-28T03:00:00.000Z", "2026-10-29T01:28:51.141Z", "US-2026-10-27"],
     ]);
+    expect(calendar.intervals[2]?.basis.end).toEqual({
+      kind: "OBSERVATIONS_RETRIEVED",
+      retrievedAtUtc: "2026-10-29T13:28:51.141Z",
+    });
     const promoted = calendar.intervals[1];
     expect(promoted?.basis.appearance).toEqual({
       wagoCreatedAtRaw: "2026-09-22 14:18:01",
@@ -196,7 +204,7 @@ describe("fail-closed resolution", () => {
         context: { gameBuild: null },
       });
     }
-    // After the newest proven interval (12.1.5 era): no model, and no fallback either way.
+    // Early 12.1.5 builds (70340..70529) have no restart proof: no model, and no fallback either way.
     expect(resolveAt("2026-10-20T12:00:00Z").reason).toBe("NO_PROVEN_DEPLOYMENT_INTERVAL");
   });
 
@@ -208,6 +216,17 @@ describe("fail-closed resolution", () => {
     // Proven 69587 but before Blood's validated window: NOT_AVAILABLE, never the other model.
     const early = selectSimulationModel(resolveAt("2026-09-09T12:00:00Z").context, RUNNER_MODEL_VALIDATIONS);
     expect(early.ok ? "OK" : early.failure.code).toBe("SIMULATION_MODEL_NOT_AVAILABLE");
+  });
+
+  it("M11-G4-5: a proven 12.1.5.70575 fight has no Blood model and never falls back to 69933", () => {
+    const resolution = resolveAt("2026-10-28T12:00:00Z");
+    expect(resolution).toMatchObject({ status: "RESOLVED", context: { gameBuild: "12.1.5.70575" } });
+    const selected = selectSimulationModel(resolution.context, RUNNER_MODEL_VALIDATIONS);
+    expect(selected.ok ? selected.value.model.id : selected.failure.code).toBe(
+      "SIMULATION_MODEL_NOT_AVAILABLE",
+    );
+    // The restart day itself is inside the boundary margin.
+    expect(resolveAt("2026-10-27T20:00:00Z").reason).toBe("NEAR_DEPLOYMENT_BOUNDARY");
   });
 
   it("a non-finite fight time is FIGHT_TIME_UNRESOLVED with no fight start", () => {
@@ -300,7 +319,8 @@ describe("evidence rules", () => {
       reason: "NEXT_BUILD_UNBOUNDED",
       spanUtc: null,
     });
-    expect(calendar.intervals.map((interval) => interval.version)).toEqual(["12.1.0.69587"]);
+    // 70575 rests on its own identity and restart, not on 70340's.
+    expect(calendar.intervals.map((interval) => interval.version)).toEqual(["12.1.0.69587", "12.1.5.70575"]);
   });
 
   it("an observation that precedes the build's own CDN config (even in the worst case) is a source conflict", () => {
