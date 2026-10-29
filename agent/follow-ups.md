@@ -456,12 +456,21 @@ carries no normalization revision.
     investigation audited.
   - The PUBLISHED path is proven on a synthetic plan only (owner decision 3):
     orchestration, not real-log fidelity.
-- **Attainment is always UNKNOWN today.**
-  - `ACTUAL_DPS_ENGINE_COMPARABILITY` is NOT_PROVEN: G1's ACTUAL_DPS pet and
-    guardian inclusion is corroborated, not proven.
-  - Proving it, with evidence that the WCL table total and the engine's
-    player-plus-pets DPS count the same actors, flips the constant in one
-    reviewed change.
+- **RESOLVED (M11-G4-4) for single-target observations: attainment
+  comparability.**
+  - Both sides are proven to count pets: the WCL table is reconciled to the
+    unit from events, and the engine's DPS from its own breakdown.
+  - `assessDpsComparability` makes attainment KNOWN only when the
+    observation's own total reconciles to the unit against its owner and pet
+    events (`reconcileObservedAttribution`), for the DamageDone table
+    source, log version 17, and observed damage to exactly one target.
+  - A caller must therefore supply complete owner and pet damage events for
+    the subject fight; without them attribution is UNRECONCILED.
+  - Remaining: multi-target observations stay NOT_PROVEN, because a job is
+    single target.
+  - The reconciliation is one fight on log version 17. Other attribution
+    rules Warcraft Logs may apply (for example Augmentation credit) are not
+    evidenced, and a new log version needs its own reconciliation.
 - **Precision bounds refuse short fights.**
   - On the real engine a 60 s fight missed both policies (escalated RSE
     9.03e-4 > 6e-4), while a 345 s fight publishes at STANDARD_SIM_V1 (RSE
@@ -897,15 +906,18 @@ never one instance, and no finer attribution is claimed.
 **Raised:** M11-G1 (2026-10-09). Each item is unproven or refused today, never
 guessed.
 
-**M1 is still NOT_YET_PROVEN.** ACTUAL_DPS reads WCL's DamageDone table total,
-which differs from the normalized raw-amount owner rollup for the same subject
-(45,802,009 vs 45,709,411). Explaining the 92,598 difference (absorbed damage,
-pets outside the vouch, or anything else) needs evidence; until then no
-normalized sum stands in for WCL's figure.
+**M1 is still NOT_YET_PROVEN.** ACTUAL_DPS reads WCL's DamageDone table
+total, which differs from the normalized raw-amount owner rollup for the same
+subject (45,802,009 vs 45,709,411). No normalized sum stands in for WCL's
+figure.
+- **Explained (M11-G4-4).** The 92,598 difference is +2,092,963 absorbed,
+  −1,810,023 redirected Blessing of Sacrifice, and −190,342 Bombardments
+  credited to another player
+  (`tests/unit/publication/dps-comparability-evidence.test.ts`).
 
-**Pet inclusion in the table total is corroborated, not proven.** The total
-minus the table's listed pets lands near the direct-player raw sum, but nothing
-pins which pets WCL rolls in. Nothing depends on it today.
+**Pet inclusion in the table total: PROVEN (M11-G4-4) for this fight.** Every
+listed pet's table total equals its own events' amount + absorbed, and the
+total reconciles to the unit. The proof covers one fight under log version 17.
 
 **NAME_AND_SERVER identity degrades to NAME_ONLY across surfaces.** Rankings
 spell realms with spaces ("Tarren Mill", "Area 52"); `masterData` does not

@@ -7,6 +7,8 @@
  * recommendation; attribution is G6.
  */
 
+import type { ObservedAttribution } from "./attribution.js";
+
 export const SIMULATION_PUBLICATION_SCHEMA_VERSION = "simulation-publication/1";
 export const PUBLICATION_REVISION = "simulation-publication-pipeline/1";
 
@@ -56,7 +58,17 @@ export interface VariantSimulation {
 
 /** Observed DPS as the caller established it (G1 ACTUAL_DPS), never computed here. */
 export type ObservedDps =
-  | { readonly state: "KNOWN"; readonly dps: number; readonly source: string }
+  | {
+      readonly state: "KNOWN";
+      readonly dps: number;
+      readonly source: string;
+      /** The Warcraft Logs log version the figure was read under; null if not known. */
+      readonly logVersion: number | null;
+      /** How many distinct targets the observed damage went to; null if not known. */
+      readonly targetCount: number | null;
+      /** Whether the total provably counts what the engine counts (`reconcileObservedAttribution`). */
+      readonly attribution: ObservedAttribution;
+    }
   | { readonly state: "UNKNOWN"; readonly reason: string };
 
 /**
@@ -99,6 +111,8 @@ export interface SimulationPublication {
   readonly variants: readonly VariantSimulation[];
   readonly simulated: SimulatedEnvelope | null;
   readonly observed: ObservedDps;
+  /** Whether observed and simulated DPS measure the same thing (M11-G4-4). */
+  readonly comparability: { readonly state: DpsComparability; readonly reasons: readonly string[] };
   readonly attainment: Attainment;
   readonly provenance: {
     readonly executionProfileId: string | null;
