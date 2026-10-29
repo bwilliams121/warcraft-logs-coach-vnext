@@ -1828,7 +1828,7 @@ DPS comparability (M11-G4-4, tests/unit/publication/dps-comparability-evidence.t
   Consumption                                  -> parses and verifies on both; breakdown granularity model-dependent (pinned)
   runner config                                -> registered ids only, registered image per model, no repeats
 
-12.1.5 compatibility review (M11-G4-5, tests/contracts/m11g45-simc-build-recipe.test.ts, tests/unit/simulation-context/resolver.test.ts):
+12.1.5 compatibility review (M11-G4-5, tests/contracts/m11g4-simc-build-recipes.test.ts, tests/unit/simulation-context/resolver.test.ts):
   simc-build/2 base                            -> committed sha256 digest; both stages FROM alpine@${ALPINE_DIGEST}; no tag
   simc-build/2 locks                           -> sorted, unique, exact name-version-rN entries; clang in the build closure
   simc-build/2 install                         -> each stage installs its own lock pinned and diffs apk info -v against it; no unpinned apk add
@@ -1837,6 +1837,18 @@ DPS comparability (M11-G4-4, tests/unit/publication/dps-comparability-evidence.t
   70575 interval                               -> US [2026-10-28T03:00Z, 2026-10-29T01:28:51.141Z) on US-2026-10-27, end OBSERVATIONS_RETRIEVED
   70575 fight                                  -> RESOLVED 12.1.5.70575, selection SIMULATION_MODEL_NOT_AVAILABLE (never 0a72e6a7); restart day NEAR_DEPLOYMENT_BOUNDARY
   exact-pin bench                              -> the artifact's recipe revision comes from the model and must equal the build record's
+
+reproducible engine recipe (M11-G4-6, tests/contracts/m11g4-simc-build-recipes.test.ts, tests/unit/simulation/engine-json-compare.test.ts, scripts/bench/m11g46-functional-reproduction.bench.ts):
+  simc-build/2 and /3                          -> the simc-build/2 base, lock, install and engine checks hold for both (describe.each)
+  simc-build/3 inputs                          -> same digest and same lock entries as simc-build/2
+  SOURCE_DATE_EPOCH                            -> the commit's committer time, written in the clone step, exported before both make invocations
+  PGO training                                 -> exactly "single_actor_batch=1 iterations=100 deterministic=1 threads=1"
+  record / script                              -> simc-build-record/3 with pgoProfileSha256; --expect-binary mismatch fails NOT_REPRODUCED
+  frozen                                       -> simc-build/1 hash = its records; simc-build/2 hash = the G4-5 candidate record (4005f4d4…)
+  two --no-cache v3 builds (local)             -> same epoch time embedded; PGO profile and binary differ; --expect-binary -> NOT_REPRODUCED
+  engine JSON comparison                       -> structural: {logs:[]} != {}, [1] != {"0":1}, [1] != [1,{}], null != {}, own keys only; only timestamp, build_date/time, sim.statistics excluded
+  functional reproduction (bench, Docker)      -> v3a vs v3b and v3a vs v2 candidate: 0 differing paths over 45,691 primitive leaves, single thread, both execution profiles (these jobs only)
+  negative control (bench, Docker)             -> v3a vs approved 0a72e6a7: engine identity differs, 29,842 paths differ -> fails
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture

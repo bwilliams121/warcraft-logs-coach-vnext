@@ -469,15 +469,24 @@ owner decision or an upstream event.
 - **Unseparated DPS effect.** The −0.44% Blood DPS change at 70575 is not
   split between the tank load and the 70575 data (Gift of the San'layn
   labels, Transfusion duration). A tank-load fix would need a re-measure.
-- **simc-build/2 is not bit-reproducible.** Two `--no-cache` builds from
-  identical inputs gave different binaries (`b1913546…` vs `1fa9954e…`,
-  57 KB apart).
-  - Causes identified: the embedded `__DATE__`/`__TIME__`, and a
-    multi-threaded PGO training run (`threads=0`).
-  - Candidate simc-build/3: a fixed `SOURCE_DATE_EPOCH` (check that the
-    pinned clang honours it), `threads=1` on the training run, then two
-    `--no-cache` builds to prove equality.
-  - This blocks nothing: artifacts are approved by binary hash.
+- **PARTLY RESOLVED (M11-G4-6): simc-build/2 is not bit-reproducible.** Two
+  `--no-cache` builds from identical inputs gave different binaries
+  (`b1913546…` vs `1fa9954e…`, 57 KB apart).
+  - simc-build/3 fixes the embedded build time: `SOURCE_DATE_EPOCH` is the
+    commit's time.
+  - It also trains single-threaded, but the PGO profile still varies, so the
+    binaries still differ.
+  - For the tested development Blood jobs (two execution profiles), engine
+    output was identical single-threaded across A, B and the v2 candidate.
+  - `m11g46-functional-reproduction.bench.ts` repeats that check for the
+    jobs it runs.
+  - Remaining:
+    - Profile independence for other specs, inputs and future rebuilds is
+      unproven.
+    - Each rebuilt artifact still needs its own approval by binary hash.
+    - The training run's variable counters are not identified.
+    - Optional: bit-identical binaries would need the PGO profile pinned as
+      a distributed input, or no PGO.
 - **What promotion would commit:**
   - the `simc-build/2` build record;
   - the `simc-ec3422d6` data bundle (manifest v2, tokens measured);

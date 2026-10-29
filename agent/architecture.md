@@ -9560,3 +9560,123 @@ Promotion needs:
    - approve a new basis, for example "verified no newer Live snapshot as of
      a recorded check". That trades evidence for latency.
 3. **EU.** EU coverage needs EU restart evidence.
+
+---
+
+## M11-G4-6 — reproducible engine recipe (`simc-build/3`)
+
+**Status:** implemented (2026-10-29).
+
+- simc-build/3 makes the engine's embedded build time a function of the
+  commit.
+- It does NOT make the binary bit-identical: the LLVM PGO training profile
+  still varies between runs.
+- What is shown instead is narrower: **functional equivalence for the tested
+  builds and jobs**. The two v3 builds and the G4-5 v2 candidate give
+  identical single-threaded engine output for the development Blood jobs
+  tested.
+- `scripts/bench/m11g46-functional-reproduction.bench.ts` repeats that check
+  for any two images and jobs it runs.
+- This does not prove profile independence for arbitrary inputs, specs or
+  future rebuilds.
+- Approval is unchanged: every artifact, including a rebuild, is approved by
+  its own binary hash.
+
+The G4-5 review found that `simc-build/2` pins every input but is not
+bit-reproducible: two `--no-cache` builds of identical inputs differed. The
+aim is that anyone can re-derive an approved engine from its committed
+recipe, lockfiles and commit, and check it independently of our build host.
+
+### Recipe (`runner/simc-build/v3/`)
+
+simc-build/3 keeps every simc-build/2 pin: the same digest, the same exact
+package closures, the same exact-commit checkout and the same make
+invocation. It removes the two identified causes:
+
+- **Embedded build time.** The engine embeds `__DATE__`/`__TIME__` (the
+  `build_date`/`build_time` of `report_json`).
+  - `SOURCE_DATE_EPOCH` is now the checked-out commit's own committer time
+    (`git log -1 --format=%ct`). It is exported before both compiles.
+  - Verified: the pinned clang 22.1.3 honours it for `__DATE__`/`__TIME__`.
+  - The build time becomes a function of the commit, so it is stable.
+- **Multi-threaded PGO training.** The training run now passes `threads=1` as
+  well as `deterministic=1`. This removes thread scheduling as a source; it
+  did not make the profile stable (Evidence).
+- **Diagnostics.** The image carries the epoch and the merged PGO profile's
+  SHA-256. A non-reproduction can then be localised to the profile or to the
+  compile.
+- **`build.mjs --expect-binary <sha256>`.**
+  - It writes `simc-build-record/3` with `pgoProfileSha256` and
+    `reproduction {state, expectedBinarySha256}`.
+  - It then fails `NOT_REPRODUCED` unless the binary hashes as expected.
+- **simc-build/1 and /2 are frozen.** Contract tests pin their Dockerfile
+  hashes to the records of the artifacts they built.
+- **Functional reproduction bench**
+  (`scripts/bench/m11g46-functional-reproduction.bench.ts`).
+  - Runs the same prepared single-threaded dev Blood jobs (BENCHMARK_300_T1,
+    both execution profiles) on two images.
+  - Requires the same engine identity and a full structural match of the
+    raw engine JSON (`tests/support/simulation/engine-json.ts`): container
+    kinds, array lengths, own key sets, empty containers and every primitive.
+    Only wall-clock statistics, `timestamp` and the build-host time fields
+    are excluded.
+  - A pass is evidence for the jobs it ran, not for every input. It approves
+    nothing.
+
+### Evidence
+
+All from local Docker builds and runs (`--network none` for engine runs);
+records and outputs are in `.probe/g46/`.
+
+- **Two `--no-cache` builds of `ec3422d6`.** The inputs were identical:
+  recipe `bf82d406…`, both locks, both installed package sets, and epoch
+  1792789576 (2026-10-23T21:06:16Z).
+  - A: image `ca4d35b9…`, binary `9805c832…`, PGO profile `307e2abe…`.
+  - B: image `6d219c3c…`, binary `8b2ee5b5…`, PGO profile `f5fe2bd5…`.
+  - B failed `--expect-binary` with `NOT_REPRODUCED`, as designed.
+- **The build time is fixed.** Both binaries embed `Oct 23 2026 21:06:16`, the
+  commit's time. The G4-5 v2 builds embedded each build's own clock (13:18:09
+  vs 14:01:47).
+- **The PGO profile is the remaining variable.**
+  - The merged profile differs between A and B, although the training run
+    was single-threaded with fixed seeds. The optimised code differs with it:
+    sizes 159,690,336 vs 159,754,856 bytes.
+  - The cause inside the training run is not identified. Likely candidates
+    are counters on address-dependent paths (ASLR) or wall-clock-dependent
+    paths; this is not verified.
+- **For the tested jobs, results did not depend on the profile.** The
+  development Blood job, single-threaded and deterministic, produced
+  bit-identical engine JSON on A, A again, B and the G4-5 v2 candidate
+  (`b1913546…`, a third profile and a different recipe):
+  - at 2,000 iterations (ad hoc flat-leaf comparison): 45,947 leaves, 0
+    differing;
+  - in the committed bench (structural comparison) at 300 iterations under
+    SIMC_DEFAULT_PINNED and ELITE_REALISTIC_V1: 45,691 primitive leaves
+    each, 0 differing paths, both A vs B and A vs v2.
+- **Negative control.** The same bench against the approved 0a72e6a7 engine
+  fails on engine identity (`ec3422d640` vs `0a72e6a746`); 29,842 paths
+  differ.
+- **Multi-threaded runs are not a reproduction test.** At `threads=8`, the
+  SAME binary differs from itself in the last bits of 5,829–6,149 leaves
+  between runs, because per-thread results merge in a scheduling-dependent
+  order. Binaries differ from each other by the same amount (5,667–5,706).
+  This matches the existing exact-pin contract: multi-threaded runs
+  reproduce within `RESULT_REPRODUCIBILITY_TOLERANCE`, single-threaded runs
+  bit-identically.
+
+### What this means
+
+- **There is no general reproducibility guarantee.**
+  - The binary hash is not re-derivable while PGO is used.
+  - Functional equivalence is shown only for the builds and jobs above.
+  - A rebuilt engine is a new artifact. It needs its own approval, which may
+    cite a functional-reproduction bench run as supporting evidence for the
+    jobs that run covered.
+- **`threads=1` on the training run is kept but not credited.** It removes
+  one scheduling source, but the profile still varied.
+- **Bit-identical binaries would need one of:**
+  - the PGO profile pinned as a distributed build input;
+  - no PGO, which is slower and diverges from the official recipe.
+  Neither is needed for the approval model, because approval is by binary
+  hash. Whether stronger reproducibility is wanted is optional and the
+  owner's call.
