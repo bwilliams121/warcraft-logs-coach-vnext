@@ -55,10 +55,10 @@ import type { SimulationSpecBinding } from "../simulation/spec-binding.js";
 import type { DeployCalendarEvidenceLoad } from "../simulation-context/evidence.js";
 import { resolveSimulationContext, type SimulationContextFight } from "../simulation-context/resolve.js";
 import { attainmentOf, envelopeOf } from "./attainment.js";
+import { assessDpsComparability } from "./comparability.js";
 import {
   PUBLICATION_REVISION,
   SIMULATION_PUBLICATION_SCHEMA_VERSION,
-  type DpsComparability,
   type ObservedDps,
   type PublicationGateFailure,
   type SimulationPublication,
@@ -69,12 +69,6 @@ export const PUBLICATION_EXECUTION_PROFILE_ID = "ELITE_REALISTIC_V1";
 /** Owner decision 2026-10-28: the standard policy, then exactly one escalation. */
 export const PUBLICATION_POLICY_ID = "STANDARD_SIM_V1";
 export const PUBLICATION_ESCALATION_POLICY_ID = "PRECISION_ESCALATED_V1";
-
-/**
- * Observed G1 ACTUAL_DPS vs the engine's "player DPS including pets": pet
- * inclusion is corroborated, not proven (G1), so attainment stays UNKNOWN.
- */
-export const ACTUAL_DPS_ENGINE_COMPARABILITY: DpsComparability = "NOT_PROVEN";
 
 /** A specialization's publication inputs. */
 export interface PublicationSpecBinding {
@@ -191,7 +185,8 @@ function notPublished(
     variants: extra.variants ?? [],
     simulated: null,
     observed,
-    attainment: attainmentOf(observed, null, ACTUAL_DPS_ENGINE_COMPARABILITY),
+    comparability: assessDpsComparability(observed),
+    attainment: attainmentOf(observed, null, assessDpsComparability(observed).state),
     provenance: {
       executionProfileId: extra.variants === undefined ? null : PUBLICATION_EXECUTION_PROFILE_ID,
       executionProfileRevisions: [],
@@ -550,7 +545,8 @@ export async function runPublication(
     variants,
     simulated,
     observed: plan.observed,
-    attainment: attainmentOf(plan.observed, simulated, ACTUAL_DPS_ENGINE_COMPARABILITY),
+    comparability: assessDpsComparability(plan.observed),
+    attainment: attainmentOf(plan.observed, simulated, assessDpsComparability(plan.observed).state),
     provenance: {
       executionProfileId: PUBLICATION_EXECUTION_PROFILE_ID,
       executionProfileRevisions: [...executionProfileRevisions].sort(),

@@ -1811,6 +1811,18 @@ profile echo transport (M11-G4-3, tests/unit/simulation/profile-echo-transport.t
   production job-class default                 -> the probe is refused (JOB_REJECTED); never an echo
   stage A through a probe-enabled runner       -> CHARACTER is decided by the fidelity gate on the transported echo
   real engine (bench, Docker 0a72e6a7)         -> canonical stage A: CHARACTER SIMULATION_READY on the real echo; first failing gate ENVIRONMENT
+
+DPS comparability (M11-G4-4, tests/unit/publication/dps-comparability-evidence.test.ts, pipeline.test.ts):
+  WCL pets                                     -> each owned pet's table total = its events' amount + absorbed against hostile NPCs
+  WCL targets                                  -> each add row = owner + pets amount + absorbed; boss row also minus Bombardments (190,342)
+  WCL total                                    -> owner + pets (amount + absorbed) to hostile NPCs minus Bombardments = 45,802,009; friendly damage is only Blessing of Sacrifice and excluded
+  WCL overkill                                 -> amount excludes overkill (the one overkill event)
+  engine                                       -> DPS x duration = own damage actions + pet damage (< 1e-12); not without pets; healing not counted
+  rule                                         -> PROVEN only with RECONCILED attribution, the DamageDone table source, log version 17 and one target; otherwise NOT_PROVEN with reasons
+  attribution                                  -> canonical RECONCILED (Bombardments excluded); +/-1 unit, an unexcluded credited ability, PARTIAL/ABSENT coverage, or a dropped pet -> UNRECONCILED
+  metadata alone                               -> same source, version and one target with UNRECONCILED attribution -> NOT_PROVEN
+  canonical                                    -> 3 targets: NOT_PROVEN, attainment UNKNOWN
+  comparable published record                  -> attainment KNOWN [observed / envelope.high, observed / envelope.low]
   report region decode                         -> KNOWN only for a non-empty slug; null/malformed NOT_SUPPLIED; absent key NOT_RETRIEVED; query requests region{slug}
   layering                                     -> spec-agnostic; imports own evidence, zod, two types; no SimC/snapshot/ceiling vocabulary; nothing in src imports it
   Consumption                                  -> parses and verifies on both; breakdown granularity model-dependent (pinned)

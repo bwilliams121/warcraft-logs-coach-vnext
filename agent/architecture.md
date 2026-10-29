@@ -9164,6 +9164,65 @@ returned no profile echo.
   - The first failing gate is ENVIRONMENT with the canonical blockers (1.3 s
     wall).
 
+## M11-G4-4 — DPS comparability: when attainment may be KNOWN
+
+**Status:** implemented (2026-10-28). The G4-2 owner decision kept attainment
+UNKNOWN until G1's ACTUAL_DPS was PROVEN to count pets and guardians as the
+engine's DPS does. Both sides are now proven from committed evidence, and
+comparability is a per-publication assessment rather than a global
+constant.
+
+- **Warcraft Logs, reconciled to the unit** (canonical subject: full-fight
+  owned-pet events plus the G1 DamageDone table, log version 17):
+  - table total = Σ (amount + absorbed) over the player and its owned pets
+    against hostile NPCs, minus damage Warcraft Logs credits to another
+    player (Bombardments, 190,342);
+  - 45,992,351 − 190,342 = 45,802,009;
+  - every pet row and every add row matches its events;
+  - friendly-target damage (redirected Blessing of Sacrifice, 6940) is
+    excluded;
+  - `amount` excludes overkill.
+  - This also explains G1's open 92,598 gap between the raw-amount rollup
+    and the table: +2,092,963 absorbed, −1,810,023 redirected Blessing of
+    Sacrifice, −190,342 Bombardments.
+- **Engine** (real 0a72e6a7 golden): player DPS × duration = own damage
+  actions + pet damage (relative error < 1e-12). Healing and absorb actions
+  are not counted.
+- **Remaining difference: targets.**
+  - The table counts every hostile target, but a simulation job is single
+    target (`additionalTargets` must be empty).
+  - The engine also records damage before the target's health cap
+    (`stats->add_result(result_amount)` at the pin), so overkill would only
+    differ on a target that dies mid-simulation. A fixed-time single target
+    cannot.
+- **Rule** (`src/publication/comparability.ts`,
+  `assessDpsComparability`). Comparability is PROVEN only when the observed
+  DPS meets all four conditions:
+  - its OWN attribution is RECONCILED (`src/publication/attribution.ts`);
+  - it is the DamageDone table total;
+  - it was read under an evidenced log version (17);
+  - it went to exactly one target.
+  Otherwise it is NOT_PROVEN with reasons, and attainment stays UNKNOWN
+  (ATTAINMENT_NOT_COMPARABLE). Metadata alone never proves comparability.
+- **Attribution, per observation** (`reconcileObservedAttribution`).
+  - The observation's table total must equal, to the unit, Σ (amount +
+    absorbed) over the player and its owned pets against hostile targets.
+    Friendly-target damage is never counted.
+  - The only permitted subtraction is damage from abilities PROVEN to be
+    credited to another player (`CREDITED_TO_OTHER_PLAYER_ABILITIES`:
+    Bombardments, with its evidence).
+  - Incomplete owner or pet coverage, any unexplained difference (even one
+    unit), or a credited ability the total did NOT exclude is UNRECONCILED.
+    An attribution rule not yet seen in evidence therefore fails closed.
+- **Record.** `ObservedDps` (KNOWN) now carries `logVersion`,
+  `targetCount` and `attribution`; the record carries
+  `comparability {state, reasons}`.
+- **Canonical subject.** Its attribution reconciles (Bombardments excluded),
+  but it hit 3 targets, so it is NOT_PROVEN (and its environment is BLOCKED
+  anyway). A comparable single-target observation
+  over a published envelope gives attainment KNOWN `[observed ÷ high,
+  observed ÷ low]`.
+
 ---
 
 # Milestone 12 — Healer Foundation

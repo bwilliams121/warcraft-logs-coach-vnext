@@ -24,7 +24,6 @@ import type { EnvironmentReconstructionInput } from "../../../src/environment/re
 import type { EnvironmentTranslation } from "../../../src/environment/translate.js";
 import { attainmentOf, envelopeOf } from "../../../src/publication/attainment.js";
 import {
-  ACTUAL_DPS_ENGINE_COMPARABILITY,
   assessPublicationReadiness,
   NO_PROFILE_ECHO_SOURCE,
   PUBLICATION_ESCALATION_POLICY_ID,
@@ -64,7 +63,7 @@ import {
   subjectEnvironmentInput,
   subjectRegion,
 } from "../../support/environment/subject-environment.js";
-import { subjectObservedPerformance } from "../../support/m11/g2-four-fights.js";
+import { canonicalObservedDps } from "../../support/publication/canonical-observed.js";
 import {
   FAKE_ARTIFACT,
   FAKE_ARTIFACT_NEW,
@@ -98,13 +97,9 @@ beforeAll(async () => {
   );
 });
 
-/** The canonical subject's G1 ACTUAL_DPS, as the caller establishes it. */
+/** The canonical subject's G1 ACTUAL_DPS, as the caller establishes it (table log version and targets). */
 function canonicalObserved(): ObservedDps {
-  const performance = subjectObservedPerformance() as { actualDps: Json };
-  const actual = performance.actualDps;
-  return actual["status"] === "OBSERVED"
-    ? { state: "KNOWN", dps: actual["value"], source: actual["source"] }
-    : { state: "UNKNOWN", reason: String(actual["status"]) };
+  return canonicalObservedDps();
 }
 
 function canonicalSubject(options: {
@@ -239,8 +234,10 @@ describe("stage A on the real canonical evidence", () => {
     for (const code of ["TARGET_SCHEDULE_UNRESOLVED", "MATERIAL_CONSUMABLE_UNKNOWN"]) {
       expect(codes, code).toContain(code);
     }
-    // Observed DPS is carried, but nothing was simulated.
+    // Observed DPS is carried, but nothing was simulated; three targets are not comparable.
     expect(outcome.publication.observed.state).toBe("KNOWN");
+    expect(outcome.publication.comparability.state).toBe("NOT_PROVEN");
+    expect(outcome.publication.comparability.reasons.join(" ")).toContain("3 targets");
     expect(outcome.publication.simulated).toBeNull();
   });
 
@@ -287,7 +284,14 @@ function syntheticPlan(variantCount = 1): PublicationPlan {
     profile: stated,
     character: BLOOD_CHARACTER_BINDING,
     translation,
-    observed: { state: "KNOWN", dps: 45_000, source: "SYNTHETIC" },
+    observed: {
+      state: "KNOWN",
+      dps: 45_000,
+      source: "SYNTHETIC",
+      logVersion: null,
+      targetCount: null,
+      attribution: { state: "UNRECONCILED", reason: "synthetic plan" },
+    },
   };
 }
 
@@ -383,8 +387,8 @@ describe("stage B on a synthetic plan", () => {
     expect(publication.provenance.profileHash).toMatch(/^[0-9a-f]{64}$/);
     // The verified result's execution profile revision, cross-checked against the prepared job.
     expect(publication.provenance.executionProfileRevisions).toEqual([ELITE_REVISION]);
-    // Owner decision 1: the ratio stays UNKNOWN until comparability is proven.
-    expect(ACTUAL_DPS_ENGINE_COMPARABILITY).toBe("NOT_PROVEN");
+    // The synthetic plan's observed DPS is not a reconciled source: not comparable.
+    expect(publication.comparability.state).toBe("NOT_PROVEN");
     expect(publication.attainment).toEqual({ state: "UNKNOWN", reason: "ATTAINMENT_NOT_COMPARABLE" });
   });
 
@@ -484,6 +488,22 @@ describe("stage B on a synthetic plan", () => {
     expect(publication.gate?.reasons.join(" ")).toContain("execution profile revision");
   });
 
+  it("a comparable observation (reconciled table source, log version 17, one target) makes attainment KNOWN", async () => {
+    const backend = new ScriptedBackend([success(50_000, 500)]);
+    const comparable: ObservedDps = {
+      state: "KNOWN",
+      dps: 45_000,
+      source: "WCL_DAMAGE_DONE_TABLE_TOTAL_PER_FIGHT_SECOND",
+      logVersion: 17,
+      targetCount: 1,
+      attribution: { state: "RECONCILED", excluded: [] },
+    };
+    const publication = await runPublication({ ...syntheticPlan(), observed: comparable }, deps({ backend }));
+    expect(publication.status).toBe("PUBLISHED");
+    expect(publication.comparability).toEqual({ state: "PROVEN", reasons: [] });
+    expect(publication.attainment).toEqual({ state: "KNOWN", low: 45_000 / 50_500, high: 45_000 / 49_500 });
+  });
+
   it("a profile whose race is unresolved never becomes a PRODUCTION job", async () => {
     const unstated = reconstructCharacterProfile(
       reconstructionInputOf(evidence, NEW_MODEL_ID),
@@ -509,7 +529,14 @@ describe("derived values", () => {
 
   it("attainment is an interval over the envelope only when observed is KNOWN and comparability PROVEN", () => {
     const envelope = envelopeOf([variant(50_000, 49_000, 51_000)]);
-    const observed: ObservedDps = { state: "KNOWN", dps: 40_800, source: "x" };
+    const observed: ObservedDps = {
+      state: "KNOWN",
+      dps: 40_800,
+      source: "x",
+      logVersion: 17,
+      targetCount: 1,
+      attribution: { state: "RECONCILED", excluded: [] },
+    };
     expect(attainmentOf(observed, envelope, "PROVEN")).toEqual({
       state: "KNOWN",
       low: 0.8,

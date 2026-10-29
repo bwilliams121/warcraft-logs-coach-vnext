@@ -41,6 +41,8 @@ describe("M11-G4-2 publication layering", () => {
   it("finds the modules it guards", () => {
     expect(PUBLICATION.sort()).toEqual([
       "src/publication/attainment.ts",
+      "src/publication/attribution.ts",
+      "src/publication/comparability.ts",
       "src/publication/pipeline.ts",
       "src/publication/record.ts",
     ]);
@@ -48,7 +50,7 @@ describe("M11-G4-2 publication layering", () => {
 
   it("composes shared gates only", () => {
     const allowed = [
-      /^\.\/(attainment|record)\.js$/,
+      /^\.\/(attainment|attribution|comparability|record)\.js$/,
       /^\.\.\/character-profile\/(binding|fidelity|profile|reconstruct|simulation-character)\.js$/,
       /^\.\.\/data\/simulation-models\/index\.js$/,
       /^\.\.\/environment\/(materiality|model|publishability|reconstruct|translate)\.js$/,

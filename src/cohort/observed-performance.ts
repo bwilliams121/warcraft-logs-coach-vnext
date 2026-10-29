@@ -16,8 +16,9 @@
  *
  * It is never computed from normalized raw `amount` events: the same capture
  * shows that sum (45,709,411) is NOT the Warcraft Logs total (45,802,009),
- * and M1 remains NOT_YET_PROVEN. Whether `total` includes the listed pets is
- * corroborated but not proven, and nothing here depends on it.
+ * and M1 remains NOT_YET_PROVEN. M11-G4-4 reconciled `total` to the unit for
+ * the canonical subject (owner + owned pets, amount + absorbed, hostile NPCs
+ * only, minus damage credited to another player); nothing here depends on it.
  *
  * The subject's own ranking row is NOT required. When it exists and its
  * amount disagrees with the table, the surfaces no longer mean what the
