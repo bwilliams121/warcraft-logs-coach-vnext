@@ -439,6 +439,54 @@ carries no normalization revision.
 - add availability;
 - hostility authority (N5).
 
+## After M11-G4-5: what stands between 12.1.5 and a registered model
+
+**Raised:** M11-G4-5 (2026-10-29). Nothing is registered. Each item is an
+owner decision or an upstream event.
+
+- **Tank-load meaning.** Under the 70575 data, SimulationCraft's Mythic tank
+  dummy loses the Mythic armor-constant modifier (×1.649). The data moved
+  from difficulty 16 to 233, and the engine still reads 16. Incoming physical
+  damage drops 35% and Blood's healing drops 10–45%.
+  - STANDARD_TANK_LOAD_V1 would silently mean a different load on a 12.1.5
+    model.
+  - Options:
+    - wait for an upstream fix and pin a later snapshot;
+    - accept it as a NEW, separately named tank model whose meaning is
+      engine-specific;
+    - (not recommended) a local engine patch, which leaves upstream-pinned
+      provenance.
+- **Validation window vs proven deployment.** A snapshot-bounded Blood window
+  ends at the last verified Live snapshot. That snapshot (6a4500db0f,
+  2026-10-28T00:32:44Z) predates the first provable 70575 fight time
+  (2026-10-28T03:00Z, US).
+  - A useful window needs either a later Live 70575 snapshot, verified Blood
+    equivalent, or a new window basis approved by the owner, for example
+    "no newer Live snapshot as of a recorded check".
+  - Every extension otherwise waits on upstream.
+- **EU.** No EU restart evidence is recorded, so EU fights stay
+  `REGION_NOT_COVERED` for every model.
+- **Unseparated DPS effect.** The −0.44% Blood DPS change at 70575 is not
+  split between the tank load and the 70575 data (Gift of the San'layn
+  labels, Transfusion duration). A tank-load fix would need a re-measure.
+- **simc-build/2 is not bit-reproducible.** Two `--no-cache` builds from
+  identical inputs gave different binaries (`b1913546…` vs `1fa9954e…`,
+  57 KB apart).
+  - Causes identified: the embedded `__DATE__`/`__TIME__`, and a
+    multi-threaded PGO training run (`threads=0`).
+  - Candidate simc-build/3: a fixed `SOURCE_DATE_EPOCH` (check that the
+    pinned clang honours it), `threads=1` on the training run, then two
+    `--no-cache` builds to prove equality.
+  - This blocks nothing: artifacts are approved by binary hash.
+- **What promotion would commit:**
+  - the `simc-build/2` build record;
+  - the `simc-ec3422d6` data bundle (manifest v2, tokens measured);
+  - the golden projections;
+  - Blood environment facts measured on the candidate (all classes
+    unchanged);
+  - the registry entry and the Blood validation.
+  - All exist in the scratch review and are not committed.
+
 ## After M11-G4-2: what internal publication does not establish
 
 **Raised:** M11-G4-2 (2026-10-28).

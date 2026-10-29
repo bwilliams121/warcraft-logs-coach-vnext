@@ -7,8 +7,8 @@
       "kind": "THIRD_PARTY_VERSION_SERVER_RECORDER",
       "publisher": "wago.tools",
       "url": "https://wago.tools/api/builds",
-      "retrievedAtUtc": "2026-10-28T14:49:19.120Z",
-      "responseSha256": "fb295a7b3ed15b8ab5f8609d2f992fa4bb129f945a1e57196458a6854726aee3",
+      "retrievedAtUtc": "2026-10-29T13:28:51.141Z",
+      "responseSha256": "3d7d8085f8342155368d19f6545eb9c149e54b3725f4a2e5f10facaf19a95def",
       "product": "wow",
       "createdAtSemantics": "WAGO_OBSERVATION_TIME_TIMEZONE_UNDECLARED",
       "regionRecorded": false
@@ -34,7 +34,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/f5/0c/f50c48c3afefa874e474e57d2405dd93",
-        "retrievedAtUtc": "2026-10-28T14:49:21.758Z",
+        "retrievedAtUtc": "2026-10-29T13:28:54.639Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-06-15T22:52:50.000Z",
         "contentMd5MatchesKey": true,
@@ -53,7 +53,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/a4/d8/a4d8fd2b48cfdc71faed5c403a736c68",
-        "retrievedAtUtc": "2026-10-28T14:49:21.709Z",
+        "retrievedAtUtc": "2026-10-29T13:28:54.596Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-06-16T23:37:32.000Z",
         "contentMd5MatchesKey": true,
@@ -72,7 +72,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/9d/40/9d40dfb399a5e38d263d301c1162b6e3",
-        "retrievedAtUtc": "2026-10-28T14:49:21.657Z",
+        "retrievedAtUtc": "2026-10-29T13:28:54.229Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-06-17T02:45:02.000Z",
         "contentMd5MatchesKey": true,
@@ -91,7 +91,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/03/c2/03c2b83ef84786c476ab5d6b5696612d",
-        "retrievedAtUtc": "2026-10-28T14:49:21.603Z",
+        "retrievedAtUtc": "2026-10-29T13:28:54.186Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-06-18T15:22:23.000Z",
         "contentMd5MatchesKey": true,
@@ -110,7 +110,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/7d/42/7d4236927405a1a168e6571ee2a8e00b",
-        "retrievedAtUtc": "2026-10-28T14:49:21.550Z",
+        "retrievedAtUtc": "2026-10-29T13:28:54.133Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-06-22T21:16:48.000Z",
         "contentMd5MatchesKey": true,
@@ -129,7 +129,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/d3/91/d39191da08bd9b3e9cceaad833b4d5ba",
-        "retrievedAtUtc": "2026-10-28T14:49:21.492Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.794Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-06-29T19:46:34.000Z",
         "contentMd5MatchesKey": true,
@@ -148,7 +148,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/34/a1/34a1a445ae41066c7f7a6564892d8bdd",
-        "retrievedAtUtc": "2026-10-28T14:49:21.434Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.745Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-07-06T23:44:13.000Z",
         "contentMd5MatchesKey": true,
@@ -167,7 +167,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/0f/cf/0fcf22030198cca211997a998743ba7f",
-        "retrievedAtUtc": "2026-10-28T14:49:21.381Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.680Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-07-23T00:11:46.000Z",
         "contentMd5MatchesKey": true,
@@ -186,7 +186,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/96/db/96db6554c1ba271b52390175d50589f3",
-        "retrievedAtUtc": "2026-10-28T14:49:21.337Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.625Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-03T19:19:19.000Z",
         "contentMd5MatchesKey": true,
@@ -205,7 +205,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/74/2f/742fe96462414a88e1b1c35f5d09e2c5",
-        "retrievedAtUtc": "2026-10-28T14:49:21.290Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.586Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-10T22:00:17.000Z",
         "contentMd5MatchesKey": true,
@@ -224,7 +224,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/8f/c1/8fc12df3f3746ac3760a7edcd4cf0ec4",
-        "retrievedAtUtc": "2026-10-28T14:49:21.245Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.533Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-11T20:24:41.000Z",
         "contentMd5MatchesKey": true,
@@ -243,7 +243,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/f5/07/f507aaae210daf1d12d95a4dfccbd040",
-        "retrievedAtUtc": "2026-10-28T14:49:21.198Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.484Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-13T00:18:07.000Z",
         "contentMd5MatchesKey": true,
@@ -262,7 +262,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/bd/27/bd275481f39b6f0d5fde63de0720e302",
-        "retrievedAtUtc": "2026-10-28T14:49:21.154Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.409Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-13T02:52:10.000Z",
         "contentMd5MatchesKey": true,
@@ -281,7 +281,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/55/6a/556a2f9961dfe98b258e3f0ec0370b97",
-        "retrievedAtUtc": "2026-10-28T14:49:21.076Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.372Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-15T01:09:16.000Z",
         "contentMd5MatchesKey": true,
@@ -300,7 +300,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/b0/26/b0264e6e2f2ec76e5bbc7827cfe3a3e0",
-        "retrievedAtUtc": "2026-10-28T14:49:21.031Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.322Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-18T00:20:27.000Z",
         "contentMd5MatchesKey": true,
@@ -319,7 +319,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/cf/ac/cfacf8406f26370199753c06462477ff",
-        "retrievedAtUtc": "2026-10-28T14:49:20.982Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.277Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-20T18:49:35.000Z",
         "contentMd5MatchesKey": true,
@@ -338,7 +338,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/f6/03/f603957530b9ffb32f28f7151dc2eb60",
-        "retrievedAtUtc": "2026-10-28T14:49:20.925Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.225Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-24T18:28:20.000Z",
         "contentMd5MatchesKey": true,
@@ -357,7 +357,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/f5/e9/f5e9c4b067c202305fdb932fc0fb2182",
-        "retrievedAtUtc": "2026-10-28T14:49:20.874Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.175Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-08-24T23:58:37.000Z",
         "contentMd5MatchesKey": true,
@@ -376,7 +376,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/c9/fa/c9fa1a64b0170829cc5c5c98c71025c3",
-        "retrievedAtUtc": "2026-10-28T14:49:20.815Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.118Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-09-01T01:07:49.000Z",
         "contentMd5MatchesKey": true,
@@ -395,7 +395,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/97/12/9712ae9c84cc54111e9e3ddf9a6b8019",
-        "retrievedAtUtc": "2026-10-28T14:49:20.768Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.066Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-09-12T18:45:21.000Z",
         "contentMd5MatchesKey": true,
@@ -414,7 +414,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/92/58/9258fbe8b88a178e130b0318b6b86217",
-        "retrievedAtUtc": "2026-10-28T14:49:20.723Z",
+        "retrievedAtUtc": "2026-10-29T13:28:53.009Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-09-18T18:29:17.000Z",
         "contentMd5MatchesKey": true,
@@ -433,7 +433,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/dc/fc/dcfc90fffd79ba00406ae46f5f657592",
-        "retrievedAtUtc": "2026-10-28T14:49:20.675Z",
+        "retrievedAtUtc": "2026-10-29T13:28:52.946Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-09-21T22:48:13.000Z",
         "contentMd5MatchesKey": true,
@@ -452,7 +452,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/eb/a6/eba6b26286c312f520205084f491166b",
-        "retrievedAtUtc": "2026-10-28T14:49:20.619Z",
+        "retrievedAtUtc": "2026-10-29T13:28:52.894Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-10-12T16:18:14.000Z",
         "contentMd5MatchesKey": true,
@@ -471,7 +471,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/33/4a/334a36cf5f3c32a5f7a167405487fa14",
-        "retrievedAtUtc": "2026-10-28T14:49:20.565Z",
+        "retrievedAtUtc": "2026-10-29T13:28:52.841Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-10-13T20:30:57.000Z",
         "contentMd5MatchesKey": true,
@@ -490,7 +490,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/88/d5/88d5e8ef05ec5a8446cdec93d142d7c6",
-        "retrievedAtUtc": "2026-10-28T14:49:20.523Z",
+        "retrievedAtUtc": "2026-10-29T13:28:52.763Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-10-16T22:43:19.000Z",
         "contentMd5MatchesKey": true,
@@ -509,7 +509,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/18/b4/18b43890bb75affcb09e78272ee9d00c",
-        "retrievedAtUtc": "2026-10-28T14:49:20.424Z",
+        "retrievedAtUtc": "2026-10-29T13:28:52.661Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-10-21T20:41:24.000Z",
         "contentMd5MatchesKey": true,
@@ -528,7 +528,7 @@
       },
       "blizzardCdn": {
         "url": "http://level3.blizzard.com/tpr/wow/config/d7/18/d718abcc42604d8efbd35aecfa5bb75b",
-        "retrievedAtUtc": "2026-10-28T14:49:20.304Z",
+        "retrievedAtUtc": "2026-10-29T13:28:52.524Z",
         "httpStatus": 200,
         "lastModifiedUtc": "2026-10-23T18:15:38.000Z",
         "contentMd5MatchesKey": true,

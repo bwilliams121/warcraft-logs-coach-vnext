@@ -21,7 +21,12 @@
 import { SIMULATION_MODELS } from "./model-registry.js";
 import type { ApprovedEngineArtifact, SimcModelPin } from "./model.js";
 
-/** Revision of the build recipe (runner/simc-build/Dockerfile). Bump on any recipe change. */
+/**
+ * Revision of the ORIGINAL build recipe (runner/simc-build/Dockerfile), which
+ * built every registered model so far. The recipe is per artifact: each
+ * model's `artifact.buildRecipeRevision` is authoritative, and the hardened
+ * recipe runner/simc-build/v2/ is `simc-build/2` (M11-G4-5).
+ */
 export const BUILD_RECIPE_REVISION = "simc-build/1";
 
 export const APPROVED_ENGINE_ARTIFACTS: readonly ApprovedEngineArtifact[] = SIMULATION_MODELS.map(

@@ -1827,6 +1827,16 @@ DPS comparability (M11-G4-4, tests/unit/publication/dps-comparability-evidence.t
   layering                                     -> spec-agnostic; imports own evidence, zod, two types; no SimC/snapshot/ceiling vocabulary; nothing in src imports it
   Consumption                                  -> parses and verifies on both; breakdown granularity model-dependent (pinned)
   runner config                                -> registered ids only, registered image per model, no repeats
+
+12.1.5 compatibility review (M11-G4-5, tests/contracts/m11g45-simc-build-recipe.test.ts, tests/unit/simulation-context/resolver.test.ts):
+  simc-build/2 base                            -> committed sha256 digest; both stages FROM alpine@${ALPINE_DIGEST}; no tag
+  simc-build/2 locks                           -> sorted, unique, exact name-version-rN entries; clang in the build closure
+  simc-build/2 install                         -> each stage installs its own lock pinned and diffs apk info -v against it; no unpinned apk add
+  simc-build/2 engine                          -> SIMC_COMMIT has no default and is verified; PGO training deterministic=1; SC_NO_NETWORKING both passes; unprivileged user
+  simc-build/1                                 -> Dockerfile hash equals both committed v1 build records' recipeSha256
+  70575 interval                               -> US [2026-10-28T03:00Z, 2026-10-29T01:28:51.141Z) on US-2026-10-27, end OBSERVATIONS_RETRIEVED
+  70575 fight                                  -> RESOLVED 12.1.5.70575, selection SIMULATION_MODEL_NOT_AVAILABLE (never 0a72e6a7); restart day NEAR_DEPLOYMENT_BOUNDARY
+  exact-pin bench                              -> the artifact's recipe revision comes from the model and must equal the build record's
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture
