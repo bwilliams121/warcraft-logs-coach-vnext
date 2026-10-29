@@ -1803,6 +1803,14 @@ simulation publication (M11-G4-2, tests/unit/publication/pipeline.test.ts, contr
   attainment                                   -> interval only when observed KNOWN and comparability PROVEN; today NOT_PROVEN -> UNKNOWN
   real engine (bench, Docker 0a72e6a7)         -> 345 s PUBLISHED (RSE 7.8e-4); 60 s PRECISION_INSUFFICIENT after one escalation
   layering                                     -> internal: nothing in src imports src/publication; spec-agnostic; no coaching vocabulary
+
+profile echo transport (M11-G4-3, tests/unit/simulation/profile-echo-transport.test.ts, scripts/bench/m11g43-remote-profile-echo.bench.ts):
+  parser V3                                    -> a probe result carries exactly the extractProfileEcho reading of the same report; non-probe results carry none
+  verification                                 -> echo required exactly on probes (else MODEL_PROVENANCE_MISMATCH); a malformed echo is SIMULATION_OUTPUT_MALFORMED; an echo on a non-probe result is refused
+  LOCAL / REMOTE                               -> both deliver the same echo from a probe-enabled runner
+  production job-class default                 -> the probe is refused (JOB_REJECTED); never an echo
+  stage A through a probe-enabled runner       -> CHARACTER is decided by the fidelity gate on the transported echo
+  real engine (bench, Docker 0a72e6a7)         -> canonical stage A: CHARACTER SIMULATION_READY on the real echo; first failing gate ENVIRONMENT
   report region decode                         -> KNOWN only for a non-empty slug; null/malformed NOT_SUPPLIED; absent key NOT_RETRIEVED; query requests region{slug}
   layering                                     -> spec-agnostic; imports own evidence, zod, two types; no SimC/snapshot/ceiling vocabulary; nothing in src imports it
   Consumption                                  -> parses and verifies on both; breakdown granularity model-dependent (pinned)

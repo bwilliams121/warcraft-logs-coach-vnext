@@ -84,10 +84,12 @@ export interface PublicationSpecBinding {
 }
 
 /**
- * Reads a fidelity probe's engine echo. The remote runner protocol carries no
- * echo and production runners refuse FIDELITY_PROBE jobs (G3-5), so production
- * has no source yet: callers pass `NO_PROFILE_ECHO_SOURCE` and the CHARACTER
- * gate fails closed.
+ * Reads a fidelity probe's engine echo. Since M11-G4-3 a FIDELITY_PROBE result
+ * carries the echo through the runner (`backendProfileEchoSource`). A runner
+ * must ENABLE the FIDELITY_PROBE job class for it (the production default is
+ * PRODUCTION only); without it the probe is refused and the CHARACTER gate
+ * fails closed (FIDELITY_PROBE_FAILED with JOB_REJECTED).
+ * `NO_PROFILE_ECHO_SOURCE` remains for callers that have no runner at all.
  */
 export type ProfileEchoSource = (
   job: SimulationJob,
@@ -95,6 +97,36 @@ export type ProfileEchoSource = (
 ) => Promise<SimulationOutcome<ProfileEcho>> | null;
 
 export const NO_PROFILE_ECHO_SOURCE: ProfileEchoSource = () => null;
+
+/**
+ * The echo of a FIDELITY_PROBE run on `backend` (LOCAL or REMOTE), read from
+ * the verified result. The backend has already re-verified the result against
+ * the probe job (`settleTicket`), including that the echo is present exactly
+ * because the job is a probe.
+ */
+export function backendProfileEchoSource(backend: SimulationBackend): ProfileEchoSource {
+  return async (job) => {
+    const run = await backend.simulate({ job });
+    if (!run.outcome.ok) return run.outcome;
+    if (run.served !== undefined && run.served.jobClass !== "FIDELITY_PROBE") {
+      return {
+        ok: false,
+        failure: { code: "MODEL_PROVENANCE_MISMATCH", detail: `probe served as ${run.served.jobClass}` },
+      };
+    }
+    const echo = run.outcome.value.profileEcho;
+    if (echo === undefined) {
+      return {
+        ok: false,
+        failure: {
+          code: "SIMULATION_OUTPUT_MALFORMED",
+          detail: "fidelity probe result carries no profile echo",
+        },
+      };
+    }
+    return { ok: true, value: echo };
+  };
+}
 
 /** The subject's evidence, as builders over the SELECTED model's data. */
 export interface PublicationSubject {
@@ -241,9 +273,7 @@ export async function assessPublicationReadiness(
       {
         gate: "CHARACTER",
         code: "FIDELITY_PROBE_UNAVAILABLE",
-        reasons: [
-          "no profile-echo source: the runner protocol carries no echo and production runners refuse FIDELITY_PROBE jobs",
-        ],
+        reasons: ["no profile-echo source: no runner is available to run the fidelity probe"],
       },
       { modelId: model.id },
     );

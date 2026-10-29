@@ -20,6 +20,7 @@
 import { z } from "zod";
 
 import { fail, succeed, type SimulationOutcome } from "./failures.js";
+import { profileEchoSchema } from "./profile-echo.js";
 import { INPUT_BUILDER_REVISION } from "./input-builder.js";
 import type { ApprovedEngineArtifact } from "./model.js";
 import { prepareSimulation, type PreparedSimulation } from "./prepare.js";
@@ -117,6 +118,7 @@ export const simulationResultSchema = z
     petBreakdown: z
       .array(z.object({ petName: z.string(), meanDamagePerIteration: finite }).strict())
       .optional(),
+    profileEcho: profileEchoSchema.optional(),
     diagnostics: z
       .object({ engineWallSeconds: finite, engineCpuSeconds: finite, eventsProcessed: finite })
       .strict(),
@@ -224,6 +226,8 @@ export function verifySimulationResult(
     return mismatch("actionBreakdown presence");
   if ((result.petBreakdown !== undefined) !== job.requestedOutputs.petBreakdown)
     return mismatch("petBreakdown presence");
+  if ((result.profileEcho !== undefined) !== (job.character.profileKind === "LOGGED_FIDELITY_PROBE"))
+    return mismatch("profileEcho presence");
 
   if (!(result.dps.mean > 0) || result.iterations.counted < 1) {
     return fail("SIMULATION_OUTPUT_MALFORMED", "result: no positive mean DPS over counted iterations");

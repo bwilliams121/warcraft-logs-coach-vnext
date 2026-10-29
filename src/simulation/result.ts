@@ -12,6 +12,7 @@
  */
 
 import type { ExecutionPlayerSettings, ExecutionSimSettings } from "./execution-profiles.js";
+import type { ProfileEcho } from "./profile-echo.js";
 
 export const SIMULATION_RESULT_SCHEMA_VERSION = "simulation-result/1";
 
@@ -63,6 +64,13 @@ export interface SimulationResult {
     readonly relativeStandardError: number;
     readonly ci95: { readonly lower: number; readonly upper: number };
   };
+  /**
+   * The engine's profile echo (M11-G4-3): present on, and only on, a
+   * LOGGED_FIDELITY_PROBE job's result, so the Worker's fidelity gate can read
+   * it through the runner. Never present on a ceiling, diagnostic or
+   * development result.
+   */
+  readonly profileEcho?: ProfileEcho;
   readonly actionBreakdown?: readonly SimulationActionBreakdownEntry[];
   readonly petBreakdown?: readonly SimulationPetBreakdownEntry[];
   readonly diagnostics: {

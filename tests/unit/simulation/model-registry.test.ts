@@ -185,7 +185,8 @@ describe("M11 model resolution, preparation and cache identity", () => {
   });
 
   it("adding a model moved no unrelated revision: parser, input builder, execution profile, gates", async () => {
-    expect(RESULT_PARSER_REVISION).toBe("SIMC_JSON_2_PARSER_V2");
+    // M11-G4-3 moved the parser deliberately (fidelity probes carry the profile echo).
+    expect(RESULT_PARSER_REVISION).toBe("SIMC_JSON_2_PARSER_V3");
     expect(INPUT_BUILDER_REVISION).toBe("simc-input-builder/2");
     const elite = executionProfileById("ELITE_REALISTIC_V1");
     if (elite === undefined) throw new Error("profile");

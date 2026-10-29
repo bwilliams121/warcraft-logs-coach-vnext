@@ -26,6 +26,7 @@ import { z } from "zod";
 
 import type { ExecutionProfile } from "./execution-profiles.js";
 import { fail, succeed, type SimulationOutcome } from "./failures.js";
+import { extractProfileEcho } from "./profile-echo.js";
 import { INPUT_BUILDER_REVISION, SIMULATED_PLAYER_NAME, SIMULATED_TARGET_NAME } from "./input-builder.js";
 import type { SimulationJob } from "./job.js";
 import { verifyEngineIdentity, type ApprovedEngineArtifact } from "./model.js";
@@ -38,7 +39,11 @@ import {
 import type { SimulationPolicy } from "./simulation-policy.js";
 import type { SimulationSpecBinding } from "./spec-binding.js";
 
-export const RESULT_PARSER_REVISION = "SIMC_JSON_2_PARSER_V2";
+/**
+ * V3 (M11-G4-3): a LOGGED_FIDELITY_PROBE result carries the engine's profile
+ * echo; every other result is unchanged.
+ */
+export const RESULT_PARSER_REVISION = "SIMC_JSON_2_PARSER_V3";
 export const SUPPORTED_REPORT_VERSION = "2.0.0";
 export const MAX_ENGINE_OUTPUT_BYTES = 5 * 1024 * 1024;
 
@@ -316,6 +321,11 @@ export function parseSimcJson(
       bloodlustProvenance: job.environment.bloodlust.provenance,
     },
   };
+  if (job.character.profileKind === "LOGGED_FIDELITY_PROBE") {
+    const echo = extractProfileEcho(text);
+    if (!echo.ok) return echo;
+    return succeed({ ...result, profileEcho: echo.value });
+  }
   return succeed(result);
 }
 
