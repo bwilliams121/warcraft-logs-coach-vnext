@@ -29,7 +29,13 @@ export default defineConfig({
       {
         plugins: [
           cloudflareTest({
-            wrangler: { configPath: "./wrangler.jsonc" },
+            // The TEST-ONLY copy of wrangler.jsonc, in a directory with no
+            // `.dev.vars`: wrangler reads `.dev.vars` beside the config it is
+            // given, so pointing at the production config made every test run
+            // read the developer's real credentials. The copy is pinned equal
+            // to the production config by
+            // tests/contracts/test-hygiene-dev-vars.test.ts.
+            wrangler: { configPath: "./tests/workers/wrangler.jsonc" },
             // The pool defaults this to true, which makes it attempt Cloudflare
             // account authentication. We declare no remote bindings, and the
             // suite must run offline with no credentials — including in CI.

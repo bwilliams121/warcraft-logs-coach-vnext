@@ -12,8 +12,36 @@ hygiene and clarity items.
 ## TEST-HYGIENE: make the normal offline test suite independent of production `.dev.vars`
 
 **Raised:** M7-F closeout (2026-09-15). **Do after:** M7 closeout.
+**Resolved in TEST-HYGIENE (2026-10-30).**
 
-### What happens today
+### Resolution
+
+The shape chosen was the first one: the pool is pointed at a committed config
+with nothing secret beside it. Wrangler reads `.dev.vars` from the directory of
+the config it is given, and the pool passes no env-file option. So the
+`workers` project now uses `tests/workers/wrangler.jsonc`, a test-only copy of
+the production config in a directory that holds no `.dev.vars` or `.env`.
+
+- `tests/contracts/test-hygiene-dev-vars.test.ts` pins:
+  - the pointer;
+  - equality of every normalized setting with the production config;
+  - the empty secrets set in that directory;
+  - Miniflare options that carry only `ENVIRONMENT`.
+- Each of these mutations fails it:
+  - a fake `.dev.vars` beside the copy;
+  - the pool pointed back at the root config;
+  - a drifted `cpu_ms`.
+- The run no longer prints `Using secrets defined in .dev.vars` (0 times,
+  against 4 for the same files under the old pointer). The contract test file
+  appears in every `npm test` run under its name.
+- Unchanged:
+  - the two-project split;
+  - the sentinel bindings and the outbound guard;
+  - `vitest.probe.config.ts`, still the only credential-loading config.
+
+The text below is the record as raised.
+
+### What happened before
 
 `npm test` runs two Vitest projects. The `workers` project uses
 `@cloudflare/vitest-pool-workers` pointed at `wrangler.jsonc`, and that pool reads
