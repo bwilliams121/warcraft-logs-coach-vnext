@@ -21,6 +21,7 @@ import { assassinationObservedDecisionView } from "../../src/specs/rogue/assassi
 import { toPlayerFightCell } from "../../src/aggregation/cell-projection.js";
 import type { FightAnalysis } from "../../src/services/result.js";
 import { M5D2_ACTOR, m5d2Fight, m5d2State } from "../support/m5d2-fixture.js";
+import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 const analysis = analyzeObservedAssassinationDecisions({
   state: m5d2State(),
@@ -59,6 +60,7 @@ const fightAnalysis: FightAnalysis = {
   analyzerId: "rogue-assassination-observed-decisions",
   scope: "PLAYER_CONTEXT",
   analysis,
+  preparation: PREPARATION_NOT_ASSESSED,
   observedDecisions: analysis.status === "ANALYZED" ? assassinationObservedDecisionView(analysis) : null,
 };
 

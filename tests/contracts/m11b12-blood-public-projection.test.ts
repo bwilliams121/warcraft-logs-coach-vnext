@@ -66,6 +66,7 @@ import { BLOOD_DEATH_KNIGHT_ANALYZER_ID } from "../../src/specs/deathknight/bloo
 import { MCP_TEST_ENV } from "../support/analysis-transports.js";
 import { countedProductionCatalog } from "../support/catalog.js";
 import { corpusBundleState, corpusState } from "../support/corpus/fight.js";
+import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 const BLOOD = 14;
 const BLOOD45 = "wcl-blood-death-knight-a7r6-rotational-45s";
@@ -116,6 +117,7 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId = BLOOD
     analyzerId: BLOOD_DEATH_KNIGHT_ANALYZER_ID,
     scope: "PLAYER_CONTEXT",
     analysis,
+    preparation: PREPARATION_NOT_ASSESSED,
     observedDecisions: BLOOD_DEATH_KNIGHT_REGISTRATION.observedDecisionView(analysis),
   };
 }
@@ -532,6 +534,7 @@ describe("the non-analyzed statuses are public and carry no decisions", () => {
       analyzerId: BLOOD_DEATH_KNIGHT_ANALYZER_ID,
       scope: "PLAYER_CONTEXT",
       analysis,
+      preparation: PREPARATION_NOT_ASSESSED,
       observedDecisions: null,
     });
     expect(PublicAnalysisResultSchema.safeParse(projected).success).toBe(true);

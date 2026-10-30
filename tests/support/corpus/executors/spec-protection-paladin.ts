@@ -1021,6 +1021,8 @@ export function publicProjection(
     analyzerId: PROTECTION_PALADIN_ANALYZER_ID,
     scope: "PLAYER_CONTEXT",
     analysis,
+    // No retrieved fight is assessed here: these executors project the analyzer's result only.
+    preparation: { state: "NOT_ASSESSED", reason: "NO_FIGHT_RETRIEVED" } as const,
     observedDecisions: PROTECTION_PALADIN_REGISTRATION.observedDecisionView(analysis),
   };
 

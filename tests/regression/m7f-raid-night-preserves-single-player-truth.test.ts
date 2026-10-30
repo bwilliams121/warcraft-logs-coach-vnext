@@ -85,6 +85,7 @@ import {
   REVISION,
   runNight,
 } from "../support/raid-night-orchestration-fixture.js";
+import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 const OTHER_ROGUE = 23;
 const THIRD_ROGUE = 24;
@@ -201,6 +202,7 @@ function referenceCell(actorId: number): PlayerFightResult {
       analyzerId: ENABLED_ANALYZERS[0]?.analyzerId ?? "",
       scope: "PLAYER_CONTEXT",
       analysis: reference,
+      preparation: PREPARATION_NOT_ASSESSED,
       observedDecisions:
         reference.status === "ANALYZED" ? assassinationObservedDecisionView(reference) : null,
     },

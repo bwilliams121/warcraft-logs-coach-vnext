@@ -1,0 +1,994 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "PREPARATION_CONSUMABLES",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "method": "MACHINE_EXTRACTED_SHARED_COOLDOWN_CLASSIFICATION",
+    "extractorVersion": 1,
+    "rules": {
+      "HEALTH_POTION": "every spell on shared cooldown category 30, except healthstones",
+      "COMBAT_POTION": "every spell on shared cooldown category 4",
+      "HEALTHSTONE": "name ends in 'Healthstone', heals directly (effect 10 or 136), has a cooldown category",
+      "racialAbilities": "never classified: a race mask or a racial_spells.inc entry stops the extraction"
+    }
+  },
+  "anchors": [
+    { "spellId": 6262, "name": "Healthstone", "kind": "HEALTHSTONE" },
+    { "spellId": 1234768, "name": "Silvermoon Health Potion", "kind": "HEALTH_POTION" },
+    { "spellId": 1236994, "name": "Potion of Recklessness", "kind": "COMBAT_POTION" }
+  ],
+  "consumables": [
+    {
+      "spellId": 6262,
+      "name": "Healthstone",
+      "kind": "HEALTHSTONE",
+      "cooldownCategory": 1711,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 17528,
+      "name": "Mighty Rage",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 20000
+    },
+    {
+      "spellId": 17531,
+      "name": "Restore Mana",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 17712,
+      "name": "Lifestone Healing",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 28495,
+      "name": "Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 28499,
+      "name": "Restore Mana",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 40408,
+      "name": "Unbreakable",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": true,
+      "auraDurationMs": 10000
+    },
+    {
+      "spellId": 43185,
+      "name": "Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 55004,
+      "name": "Nitro Boosts",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 82184,
+      "name": "Spinal Healing Injector",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 84348,
+      "name": "Invisibility Field",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 94548,
+      "name": "Cardboard Assassin",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 105704,
+      "name": "Alchemist's Rejuvenation",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 105707,
+      "name": "Darkwater Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 8000
+    },
+    {
+      "spellId": 105708,
+      "name": "Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 105709,
+      "name": "Restore Mana",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 130649,
+      "name": "Life Spirit",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 6000
+    },
+    {
+      "spellId": 130650,
+      "name": "Water Spirit",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 6000
+    },
+    {
+      "spellId": 134998,
+      "name": "Brawler's Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 139493,
+      "name": "Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 156436,
+      "name": "Draenic Mana Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 156438,
+      "name": "Healing Tonic",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 156445,
+      "name": "Draenic Rejuvenation Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 170221,
+      "name": "Elemental Fragment",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": true,
+      "auraDurationMs": 600000
+    },
+    {
+      "spellId": 170403,
+      "name": "Ashran Health Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 175790,
+      "name": "Draenic Swiftness Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 8000
+    },
+    {
+      "spellId": 175817,
+      "name": "Draenic Living Action Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 3000
+    },
+    {
+      "spellId": 175821,
+      "name": "Pure Rage",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 176114,
+      "name": "Brawler's Healing Tonic",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 188016,
+      "name": "Ancient Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 188017,
+      "name": "Ancient Mana Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 188018,
+      "name": "Ancient Rejuvenation Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 188024,
+      "name": "Skystep Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 8000
+    },
+    {
+      "spellId": 200452,
+      "name": "Legion Healthstone",
+      "kind": "HEALTHSTONE",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 212198,
+      "name": "Crimson Vial",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": true,
+      "auraDurationMs": 6000
+    },
+    {
+      "spellId": 223573,
+      "name": "Spirit Berries",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 223595,
+      "name": "Sunfruit",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 230038,
+      "name": "Brawler's Healing Tonic",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 230039,
+      "name": "Brawler's Potion of Prolonged Power",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": true,
+      "auraDurationMs": 60000
+    },
+    {
+      "spellId": 236326,
+      "name": "Rage",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 237875,
+      "name": "Valorous Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 242538,
+      "name": "Void Meld",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 250870,
+      "name": "Coastal Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 250871,
+      "name": "Coastal Mana Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 250872,
+      "name": "Coastal Rejuvenation Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 250878,
+      "name": "Lightfoot Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 8000
+    },
+    {
+      "spellId": 251645,
+      "name": "Astral Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 265476,
+      "name": "Endless Tincture of Renewed Combat",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 290365,
+      "name": "Sapphire of Brilliance",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 60000
+    },
+    {
+      "spellId": 290367,
+      "name": "Emerald of Vigor",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 293795,
+      "name": "Silas' Vial of Continuous Curing",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 294622,
+      "name": "Brawler's Coastal Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 301308,
+      "name": "Abyssal Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 307192,
+      "name": "Spiritual Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 307193,
+      "name": "Spiritual Mana Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 307194,
+      "name": "Spiritual Rejuvenation Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 331974,
+      "name": "Soulful Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 331978,
+      "name": "Soulful Mana Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 337317,
+      "name": "Gorm Protein Burst",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 15000
+    },
+    {
+      "spellId": 342890,
+      "name": "Unhindered Passing",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 5000
+    },
+    {
+      "spellId": 344314,
+      "name": "Potion of the Psychopomp's Speed",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 8000
+    },
+    {
+      "spellId": 359867,
+      "name": "Cosmic Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 370511,
+      "name": "Refreshing Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 370607,
+      "name": "Aerated Mana Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 370816,
+      "name": "Shocking Disclosure",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 371024,
+      "name": "Elemental Potion of Power",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 371028,
+      "name": "Elemental Potion of Ultimate Power",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 371033,
+      "name": "Potion of Frozen Focus",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 10000
+    },
+    {
+      "spellId": 371039,
+      "name": "Potion of Withering Vitality",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 371055,
+      "name": "Delicate Suspension of Spores",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 12000
+    },
+    {
+      "spellId": 371149,
+      "name": "Potion of Chilled Clarity",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 371151,
+      "name": "Potion of Chilled Clarity",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 371152,
+      "name": "Potion of Chilled Clarity",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 371164,
+      "name": "Potion of Gusts",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 371166,
+      "name": "Potion of Gusts",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 371167,
+      "name": "Potion of Gusts",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 371622,
+      "name": "Residual Neural Channeling Agent",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 18000
+    },
+    {
+      "spellId": 384044,
+      "name": "Supercollide-O-Tron",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 1500
+    },
+    {
+      "spellId": 384081,
+      "name": "Plane Displacer",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 18000
+    },
+    {
+      "spellId": 384098,
+      "name": "Alarm-O-Turret",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 385520,
+      "name": "Breath of Neltharion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 6000
+    },
+    {
+      "spellId": 386279,
+      "name": "D.U.C.K.O.Y.",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 15000
+    },
+    {
+      "spellId": 407949,
+      "name": "Shadowflame Rockets",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 8000
+    },
+    {
+      "spellId": 415569,
+      "name": "Dreamwalker's Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 423414,
+      "name": "Potion of Withering Dreams",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 431416,
+      "name": "Algari Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 431418,
+      "name": "Algari Mana Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 431419,
+      "name": "Cavedweller's Delight",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 431422,
+      "name": "Slumbering Soul Serum",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 10000
+    },
+    {
+      "spellId": 431432,
+      "name": "Draught of Shocking Revelations",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 25000
+    },
+    {
+      "spellId": 431914,
+      "name": "Potion of Unwavering Focus",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 20000
+    },
+    {
+      "spellId": 431925,
+      "name": "Frontline Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 6000
+    },
+    {
+      "spellId": 431932,
+      "name": "Tempered Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 431941,
+      "name": "Potion of the Reborn Cheetah",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 20000
+    },
+    {
+      "spellId": 452767,
+      "name": "Heartseeking Health Injector",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 452883,
+      "name": "Lightning Tether",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 8000
+    },
+    {
+      "spellId": 452930,
+      "name": "Demonic Healthstone",
+      "kind": "HEALTHSTONE",
+      "cooldownCategory": 2566,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 453040,
+      "name": "Potion Bomb of Speed",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 453162,
+      "name": "Potion Bomb of Recovery",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 453205,
+      "name": "Potion Bomb of Power",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 457737,
+      "name": "Squirming Swarm Sac",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 11000
+    },
+    {
+      "spellId": 457757,
+      "name": "Elemental Fusion Bomb",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 5000
+    },
+    {
+      "spellId": 460074,
+      "name": "Grotesque Vial",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": true,
+      "auraDurationMs": 3600000
+    },
+    {
+      "spellId": 1234768,
+      "name": "Silvermoon Health Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 1235568,
+      "name": "Light's Preservation",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 1236590,
+      "name": "Basic Rejuvenation Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 1236616,
+      "name": "Light's Potential",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 1236648,
+      "name": "Lightfused Mana Potion",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 1236652,
+      "name": "Enlightened",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 1236994,
+      "name": "Potion of Recklessness",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 1236998,
+      "name": "Draught of Rampant Abandon",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 1238009,
+      "name": "Invigorating Healing Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    },
+    {
+      "spellId": 1238443,
+      "name": "Potion of Zealotry",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 1239479,
+      "name": "Potion of Devoured Dreams",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 10000
+    },
+    {
+      "spellId": 1247091,
+      "name": "Shrouded in Shadows",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 60000
+    },
+    {
+      "spellId": 1263074,
+      "name": "Amani Extract",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": true,
+      "auraDurationMs": 20000
+    },
+    {
+      "spellId": 1295015,
+      "name": "Alluring Nostrum",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 1295132,
+      "name": "Liquid Luster",
+      "kind": "COMBAT_POTION",
+      "cooldownCategory": 4,
+      "appliesAura": true,
+      "auraDurationMs": 30000
+    },
+    {
+      "spellId": 1295247,
+      "name": "Concentrated Silvermoon Health Potion",
+      "kind": "HEALTH_POTION",
+      "cooldownCategory": 30,
+      "appliesAura": false,
+      "auraDurationMs": null
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import {
   serviceFailure,
   type AnalysisServiceResult,
   type FightAnalysis,
+  PREPARATION_NOT_ASSESSED,
 } from "../../src/services/result.js";
 import type { FightIdentity } from "../../src/wcl/types.js";
 import { CURRENT_UNSUPPORTED_SUBJECT } from "../support/unsupported-subject.js";
@@ -26,6 +27,7 @@ const ANALYSIS: FightAnalysis = {
   // The observed identity of a specialization no analyzer covers (Warrior/Arms
   // since M10-D made Protection Paladin public). A fixture label only.
   analysis: specNotSupported(CURRENT_UNSUPPORTED_SUBJECT.observedSpecId),
+  preparation: PREPARATION_NOT_ASSESSED,
   observedDecisions: null,
 };
 

@@ -64,6 +64,7 @@ import { DECISION_EXCLUSION_REASONS } from "../../src/specs/rogue/assassination/
 import { MCP_TEST_ENV } from "../support/analysis-transports.js";
 import { countedProductionCatalog } from "../support/catalog.js";
 import { corpusBundleState, corpusState } from "../support/corpus/fight.js";
+import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 const RET_ACTOR = 6;
 const RET45 = "wcl-retribution-paladin-a7r6-rotational-45s";
@@ -116,6 +117,7 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId = RET_A
     analyzerId: RETRIBUTION_PALADIN_ANALYZER_ID,
     scope: "PLAYER_CONTEXT",
     analysis,
+    preparation: PREPARATION_NOT_ASSESSED,
     observedDecisions: RETRIBUTION_PALADIN_REGISTRATION.observedDecisionView(analysis),
   };
 }
@@ -564,6 +566,7 @@ describe("the non-analyzed statuses", () => {
       analyzerId: RETRIBUTION_PALADIN_ANALYZER_ID,
       scope: "PLAYER_CONTEXT",
       analysis,
+      preparation: PREPARATION_NOT_ASSESSED,
       observedDecisions: null,
     });
     expect(PublicAnalysisResultSchema.safeParse(projected).success).toBe(true);

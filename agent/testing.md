@@ -1849,6 +1849,24 @@ reproducible engine recipe (M11-G4-6, tests/contracts/m11g4-simc-build-recipes.t
   engine JSON comparison                       -> structural: {logs:[]} != {}, [1] != {"0":1}, [1] != [1,{}], null != {}, own keys only; only timestamp, build_date/time, sim.statistics excluded
   functional reproduction (bench, Docker)      -> v3a vs v3b and v3a vs v2 candidate: 0 differing paths over 45,691 primitive leaves, single thread, both execution profiles (these jobs only)
   negative control (bench, Docker)             -> v3a vs approved 0a72e6a7: engine identity differs, 29,842 paths differ -> fails
+
+consumable status (PREP-1, tests/unit/preparation/*, tests/unit/preparation-consumables-extraction.test.ts, tests/contracts/preparation-{service,layering}.test.ts):
+  never omitted                                -> HEALTH_POTION, HEALTHSTONE, COMBAT_POTION always present (every case, including identity-load failure)
+  COMPLETE coverage                            -> observed counts; zero only here; each use keeps spell, name, timing, evidence
+  PARTIAL / ABSENT / unverified casts          -> every kind UNKNOWN, never 0; observedAtLeast keeps the seen uses
+  out-of-scope player                          -> UNKNOWN (INSUFFICIENT_SCOPE)
+  PARTIAL auras                                -> only COMBAT_POTION UNKNOWN (a pre-pull potion could be hidden)
+  fight < longest combat-potion buff (60 s)    -> COMBAT_POTION UNKNOWN with its lower bound
+  pre-pull combat potion                       -> buff removal with no in-fight application or cast = one BEFORE_PULL use; an in-fight buff's removal is not a second
+  other players, cast beginnings, outside fight -> not counted
+  unclassified "Potion"/"Healthstone" cast     -> affected kinds UNKNOWN (UNCLASSIFIED_CANDIDATE), not zero; ordinary class abilities are not candidates
+  unclassified "Potion" buff only              -> COMBAT_POTION UNKNOWN even under COMPLETE coverage with no cast (unknown pre-pull potion)
+  unmatched removal, incomplete coverage       -> a use with timing UNRESOLVED, never BEFORE_PULL (casts PARTIAL or auras PARTIAL)
+  racial abilities                             -> never classified (extractor fails on race mask or racial_spells.inc entry); racial casts never count
+  identity data                                -> on the analyzer authority pin; anchors, slot classification, no talent modifiers; agrees with simulation-model POTION auras; names match WCL master data; malformed/duplicate/anchor-less fails closed
+  service                                      -> ASSESSED for analyzed requests; same report when the analyzer declines; requirement unioned, widens nothing; unsupported spec NOT_ASSESSED with no ingestion
+  layering                                     -> producer reads only fight, shared evidence primitives and its data; no specialization imports it
+  mutations (manual)                           -> dropping the cast gate fails 3 tests; dropping pre-pull open-buff tracking fails 1; always-BEFORE_PULL fails 1; dropping aura candidates fails 1
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture
