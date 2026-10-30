@@ -661,6 +661,51 @@ the digests in the manifest alone.
 
 ---
 
+## Contents after PREP-4
+
+Contract version 2, unchanged. Fifty-one artifacts, one hundred and
+eighty-two cases, seven hundred and seventy-five assertions.
+
+**No new Warcraft Logs request.** Two SANITIZED_CAPTURE actor slices were
+cut from the M11-E2 capture that `tests/evidence/` already describes
+(`b1PmaKrd6CDfzngc` fight 48, the unfiltered whole-fight All stream,
+twenty-eight pages, terminal, revision 51 before and after).
+
+- **How they were cut.** `sanitize-probe-7` `--actor-slice <actor> <to>
+  --from <from> --families <cast,begincast,empowerstart,empowerend, the ten
+  aura types,combatantinfo> --compact`. They retain other players of that
+  pull, who used real consumables.
+- **`wcl-b1pm-fight-48-mage-121-prepull-65s`** (1,135 events, the first 65
+  s).
+  - A Light's Potential buff is removed at +28.3 s with no application or
+    cast in the window: a real pre-pull combat potion.
+  - Grants CASTS, AURAS, COMBATANT_INFO and GEAR for actor 121.
+- **`wcl-b1pm-fight-48-shaman-122-health-consumables-20s`** (331 events, a
+  20 s mid-fight window).
+  - A Healthstone and a Silvermoon Health Potion, 1.1 s apart.
+  - Grants CASTS and AURAS only, because there is no combatantinfo
+    mid-fight.
+
+**Cases.** Each slice has a normalization census.
+`APPLICATION_SERVICE.FIGHT_ANALYSIS` gained an optional `expected.preparation`
+(count state, count or lower bound, reason codes, and each use's spell and
+timing). Two cases run the real service for these unsupported subjects (the
+PREP-2 path):
+
+- the Mage reports combat potion OBSERVED 1 (`BEFORE_PULL`), and health
+  potion and healthstone OBSERVED 0;
+- the Shaman reports health potion and healthstone OBSERVED 1 each, and
+  combat potion UNKNOWN (`FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF`,
+  lower bound 0), never zero.
+
+**Size.** The corpus total is 5,706,262 bytes, under the owner's 5.5 MiB
+notice line. A whole-fight slice for a third subject (452 KB) was cut and
+discarded because it would have crossed the line; the line was not moved.
+
+No existing case, artifact or expectation changed.
+
+---
+
 ## Contents after M11-B1
 
 Contract version 2, unchanged. Thirty-nine artifacts, one hundred and

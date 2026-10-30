@@ -145,9 +145,13 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // M11-D2-A3 added three COMBAT_STATE cases and twelve assertions: the pool
     // owner of five changes in its ownership capture, of the resourceless pet
     // capture's four, and of the mid-fight window's three same-actor changes.
-    expect(result.summary.cases).toBe(178);
-    expect(result.summary.assertions).toBe(767);
-    expect(result.summary.passed).toBe(767);
+    // PREP-4 added four cases and eight assertions over two real consumable
+    // slices of the fight-48 capture: each slice's normalization census
+    // (three each), and the unsupported Evoker's and Mage's assessed
+    // consumable status through the application service (one each).
+    expect(result.summary.cases).toBe(182);
+    expect(result.summary.assertions).toBe(775);
+    expect(result.summary.passed).toBe(775);
   });
 
   it("covers every layer", async () => {

@@ -1044,6 +1044,192 @@
       }
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-mage-121-prepull-65s",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-mage-121-prepull-65s.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "4da87074764adc984ee3f00a15e389a7a56ecf62cf8a028c9c9c1664a4760388",
+      "byteLength": 154720,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json wcl-b1pm-fight-48-mage-121-prepull-65s.json --actor-slice 121 7501292 --from 7436291 --families cast,begincast,empowerstart,empowerend,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for ACTOR 121 with --from 7436291 (exclusive) and the bound 7501292 (inclusive), restricted by --families to the fifteen listed raw types (casts, the ten aura types, combatantinfo). In place and order preserved; written as compact JSON (--compact). 1,135 events over the first 65 s: a Light's Potential (1,236,616) buff removed at +28.3 s with no application and no cast in the window — the potion was taken before the pull — and no health potion or healthstone cast (the Mage's health potion is at +227.7 s, outside this window).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "COMBATANT_INFO", "GEAR"],
+              "actorScope": [121],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7436292,
+                  "toReportTimeMs": 7501292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 121 over [7,436,292 .. 7,501,292] by the predicate 'every event actor 121 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). CASTS as the source of its own casts (cast, begincast, empowerstart, empowerend); AURAS as their source or target (the ten aura types). COMBATANT_INFO and GEAR as the subject of its combatantinfo at the pull. RESOURCES, DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted (resourcechange, damage, heal and the rest are excluded)."
+        },
+        "retainedFor": "PREP-4: a real pre-pull combat potion, seen only as its buff removal, so the shared preparation producer's BEFORE_PULL path is proven on Warcraft Logs bytes. The corpus fight is the slice's own window, longer than the longest combat-potion buff (60 s).",
+        "limitations": [
+          "Casts, auras and the combatant snapshot only: no damage, healing, absorb, resource or summon event is retained, so the consumables' heals themselves are not in these bytes — only their casts.",
+          "One player of a twenty-player pull, over one window; nothing about any other player or any other part of the fight is retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-shaman-122-health-consumables-20s.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "1e165768e56147a8ccacc9f463a791783bc6c41359c0fa85c6772172b78dbcd4",
+      "byteLength": 41392,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json wcl-b1pm-fight-48-shaman-122-health-consumables-20s.json --actor-slice 122 7748000 --from 7728000 --families cast,begincast,empowerstart,empowerend,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,combatantinfo --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for ACTOR 122 with --from 7728000 (exclusive) and the bound 7748000 (inclusive), restricted by --families to the fifteen listed raw types (casts, the ten aura types, combatantinfo). In place and order preserved; written as compact JSON (--compact). 331 events over a 20 s mid-fight window: Healthstone (6,262) cast at 7,737,881 (+301.6 s) and Silvermoon Health Potion (1,234,768) cast at 7,739,019 (+302.7 s); no combat-potion event (the Shaman's Potion of Recklessness is at +34.8 s, outside this window).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS"],
+              "actorScope": [122],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7728001,
+                  "toReportTimeMs": 7748000
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 122 over [7,728,001 .. 7,748,000] by the predicate 'every event actor 122 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). CASTS as the source of its own casts (cast, begincast, empowerstart, empowerend); AURAS as their source or target (the ten aura types). COMBATANT_INFO and GEAR are NOT granted: the window starts mid-fight and holds no combatantinfo. RESOURCES, DAMAGE, HEALING, ABSORBS and SUMMONS are NOT granted (resourcechange, damage, heal and the rest are excluded)."
+        },
+        "retainedFor": "PREP-4: real health potion and Healthstone use, so the producer's OBSERVED counts are proven on Warcraft Logs bytes; and, over a window shorter than the longest combat-potion buff, a combat potion that stays UNKNOWN rather than zero.",
+        "limitations": [
+          "Casts, auras and the combatant snapshot only: no damage, healing, absorb, resource or summon event is retained, so the consumables' heals themselves are not in these bytes — only their casts.",
+          "One player of a twenty-player pull, over one window; nothing about any other player or any other part of the fight is retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "path": "artifacts/wcl-events/wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165.json",
       "encoding": "JSON",
@@ -5055,6 +5241,123 @@
       ]
     },
     {
+      "caseId": "application-service.unsupported-mage-reports-a-real-prepull-combat-potion",
+      "artifactId": "wcl-b1pm-fight-48-mage-121-prepull-65s",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analysis-service.ts unsupportedSpec (PREP-2); src/analysis/preparation/consumable-status.ts; src/data/game/preparation-consumables.json",
+      "purpose": "An Arcane Mage is unsupported, so no analyzer runs and the fight is retrieved for preparation alone. Over the first 65 s the shared producer counts the real pre-pull Light's Potential — seen only as its buff removal at +28.3 s, under COMPLETE cast and aura coverage — as one combat potion use with timing BEFORE_PULL, and reports zero health potions and zero healthstones as observed facts.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "params": {
+            "subject": {
+              "actorId": 121,
+              "className": "Mage",
+              "specName": "Arcane"
+            },
+            "expected": {
+              "status": "SPEC_NOT_SUPPORTED",
+              "specId": null,
+              "analyzerId": null,
+              "scope": "PLAYER_CONTEXT",
+              "preparation": {
+                "healthPotion": {
+                  "countState": "OBSERVED",
+                  "count": 0,
+                  "uses": []
+                },
+                "healthstone": {
+                  "countState": "OBSERVED",
+                  "count": 0,
+                  "uses": []
+                },
+                "combatPotion": {
+                  "countState": "OBSERVED",
+                  "count": 1,
+                  "uses": [
+                    {
+                      "spellId": 1236616,
+                      "timing": "BEFORE_PULL"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "Product intent requires every report to carry consumable status regardless of gameplay support (PREP-2). A potion taken before the pull has its cast outside the fight; the producer counts it from the buff removal only when no in-fight application or cast could be missing and the window outlasts the longest combat-potion buff. Zero is reported only under that COMPLETE coverage."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": [
+        "tests/unit/preparation/consumable-status.test.ts",
+        "tests/contracts/preparation-service.test.ts"
+      ]
+    },
+    {
+      "caseId": "application-service.unsupported-shaman-reports-real-health-potion-and-healthstone",
+      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analysis-service.ts unsupportedSpec (PREP-2); src/analysis/preparation/consumable-status.ts; src/data/game/preparation-consumables.json",
+      "purpose": "Over a 20 s window, the unsupported Shaman's real Healthstone and Silvermoon Health Potion are complete OBSERVED counts of one each; the combat potion is UNKNOWN (the window is shorter than the longest combat-potion buff, so a potion taken before it could be hidden), never zero.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "params": {
+            "subject": {
+              "actorId": 122,
+              "className": "Shaman",
+              "specName": "Restoration"
+            },
+            "expected": {
+              "status": "SPEC_NOT_SUPPORTED",
+              "specId": null,
+              "analyzerId": null,
+              "scope": "PLAYER_CONTEXT",
+              "preparation": {
+                "healthPotion": {
+                  "countState": "OBSERVED",
+                  "count": 1,
+                  "uses": [
+                    {
+                      "spellId": 1234768,
+                      "timing": "IN_FIGHT"
+                    }
+                  ]
+                },
+                "healthstone": {
+                  "countState": "OBSERVED",
+                  "count": 1,
+                  "uses": [
+                    {
+                      "spellId": 6262,
+                      "timing": "IN_FIGHT"
+                    }
+                  ]
+                },
+                "combatPotion": {
+                  "countState": "UNKNOWN",
+                  "observedAtLeast": 0,
+                  "reasonCodes": ["FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF"],
+                  "uses": []
+                }
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "The health potion and Healthstone are cast-only facts, complete under the slice's CASTS grant for actor 122 over its window. The combat potion needs the window to outlast the longest combat-potion buff; it does not, so the producer reports UNKNOWN with that reason and a lower bound of zero rather than an observed zero."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/preparation/consumable-status.test.ts"]
+    },
+    {
       "caseId": "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-for-preparation-only",
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "owningLayer": "APPLICATION_SERVICE",
@@ -6961,6 +7264,66 @@
         "tests/regression/ingestion-preserves-event-order.test.ts",
         "tests/regression/m5c3a-garrote-remains-and-core-dot.test.ts"
       ]
+    },
+    {
+      "caseId": "normalization.b1pm-mage-prepull-slice-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-mage-121-prepull-65s",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --families",
+      "purpose": "The 1,135-event family-filtered actor-121 slice of the first 65 s normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 1135
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "Exactly the families the --families option retained, for actor 121, between the recorded bounds, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts"]
+    },
+    {
+      "caseId": "normalization.b1pm-shaman-health-consumable-slice-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 331-event family-filtered actor-122 slice of a 20 s mid-fight window normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 331
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "Exactly the families the --families option retained, for actor 122, between the recorded exclusive --from and inclusive bound, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts"]
     },
     {
       "caseId": "normalization.blood-death-knight-165s-bundle-composes-three-parts-into-one-complete-fight",

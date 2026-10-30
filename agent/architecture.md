@@ -9971,3 +9971,42 @@ internal. See `agent/follow-ups.md`.
   `passRatio` and `percentage` still fail it.
 - The single-player-truth regression builds its reference cell's
   preparation as the services do.
+
+---
+
+## PREP-4 — real consumable evidence in the regression corpus
+
+**Status:** implemented (2026-10-30). Until now, the health-potion and
+healthstone paths were proven only on synthetic fights; no committed fight
+contained a real use. Real evidence was already on disk: the M11-E2 capture
+(`b1PmaKrd6CDfzngc` fight 48), authorized at M11-E2. It is the whole-fight,
+unfiltered All stream, so it holds every raider's events. **No new Warcraft
+Logs request was made.**
+
+**Two regression-corpus actor slices** of other players in that pull:
+
+- **Actor 121 (Mage / Arcane), the first 65 s.** A Light's Potential buff is
+  removed at +28.3 s with no application or cast in the window: a real
+  pre-pull combat potion.
+- **Actor 122 (Shaman / Restoration), a 20 s mid-fight window.** A
+  Healthstone and a Silvermoon Health Potion, 1.1 s apart.
+- **How they were cut.** Cast, aura and combatantinfo families only, each
+  granting exactly what its window and families vouch for. The mid-fight
+  window has no combatantinfo, so it grants CASTS and AURAS only.
+
+**Through the real service.** `APPLICATION_SERVICE.FIGHT_ANALYSIS` gained
+an optional `expected.preparation`. Both subjects are unsupported, so the
+cases run the PREP-2 path end to end:
+
+- **The Mage:** combat potion OBSERVED 1 (`BEFORE_PULL`); health potion and
+  healthstone OBSERVED 0, as observed facts under COMPLETE coverage.
+- **The Shaman:** health potion and healthstone OBSERVED 1 each (named
+  spells, `IN_FIGHT`); combat potion UNKNOWN
+  (`FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF`, lower bound 0), never
+  zero.
+
+**Size policy respected.** The owner's 5.5 MiB regression-corpus notice
+line stands, with the total now 5,706,262 bytes. A whole-fight slice of a
+third subject (452 KB, all three kinds) was cut and discarded because it
+would have crossed the line. That evidence still exists in the gitignored
+capture if the evidence archive is ever the right home for it.

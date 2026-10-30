@@ -1888,6 +1888,12 @@ raid-night consumable status (PREP-3, tests/contracts/raid-night-preparation.tes
   gate (tightened)                             -> NOT_INGESTED with ANY present cell (unsupported, unresolved, analyzed, unavailable) -> PROCESSING_CELL_MISMATCH; all-absent NOT_INGESTED accepted
   single-player truth                          -> the raid-night cell's preparation equals the single-player cell's (same focused view)
   m8d no-ratio guard                           -> words and word prefixes (matchRate, passRatio, percentage fail); "preparation" passes
+
+real consumable evidence (PREP-4, corpus APPLICATION_SERVICE.FIGHT_ANALYSIS with expected.preparation; slices of b1Pma fight 48, no new request):
+  Mage 121, first 65 s                         -> combat potion OBSERVED 1 (Light's Potential, BEFORE_PULL); health potion and healthstone OBSERVED 0
+  Shaman 122, 20 s mid-fight                   -> health potion OBSERVED 1 (1234768) and healthstone OBSERVED 1 (6262), IN_FIGHT; combat potion UNKNOWN (FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF, lower bound 0)
+  slices                                       -> normalization census each (count, order, every type recognised); grants only what window and families vouch for
+  mutations (corpus APPLICATION_SERVICE layer) -> no pre-pull removal counted fails the Mage case (combat potion 0 vs 1 BEFORE_PULL); no short-window guard fails the Shaman case (OBSERVED 0 vs UNKNOWN); restored, gate passes
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture

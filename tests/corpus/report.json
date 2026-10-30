@@ -99,6 +99,20 @@
       "sha256": "304e10d387d906d947efffd8e935f8d4dc2919d905b9e9b93c6ff792b3f8b131"
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-mage-121-prepull-65s",
+      "byteLength": 154720,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "4da87074764adc984ee3f00a15e389a7a56ecf62cf8a028c9c9c1664a4760388"
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "byteLength": 41392,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "1e165768e56147a8ccacc9f463a791783bc6c41359c0fa85c6772172b78dbcd4"
+    },
+    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "byteLength": 203455,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -360,8 +374,8 @@
       "passed": 24
     },
     {
-      "assertions": 156,
-      "cases": 43,
+      "assertions": 162,
+      "cases": 45,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
@@ -381,7 +395,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 156
+      "passed": 162
     },
     {
       "assertions": 82,
@@ -539,13 +553,13 @@
       "passed": 35
     },
     {
-      "assertions": 13,
-      "cases": 9,
+      "assertions": 15,
+      "cases": 11,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 13
+      "passed": 15
     },
     {
       "assertions": 14,
@@ -689,6 +703,34 @@
       "caseId": "application-service.retribution-paladin-subject-is-analyzed-under-player-context",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-retribution-paladin-a7r6-rotational-45s"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-mage-121-prepull-65s",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.unsupported-mage-reports-a-real-prepull-combat-potion",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-mage-121-prepull-65s"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.unsupported-shaman-reports-real-health-potion-and-healthstone",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-shaman-122-health-consumables-20s"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",
@@ -1391,6 +1433,54 @@
       "caseId": "normalization.assassination-slices-normalize-cleanly",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-mage-121-prepull-65s",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-mage-prepull-slice-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-mage-121-prepull-65s"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-shaman-health-consumable-slice-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-shaman-122-health-consumables-20s"]
     },
     {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
@@ -6789,15 +6879,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 5510150,
-    "artifacts": 49,
-    "assertions": 767,
-    "cases": 178,
+    "artifactBytes": 5706262,
+    "artifacts": 51,
+    "assertions": 775,
+    "cases": 182,
     "declared": 0,
-    "executable": 767,
+    "executable": 775,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 767
+    "passed": 775
   }
 }

@@ -130,9 +130,11 @@ Still open, none of them an owner decision:
 - **RESOLVED (PREP-3): raid night.** Every present cell carries the compact
   status, and all-unanalyzable fights are retrieved (owner decisions,
   agent/architecture.md "PREP-3").
-- **No real use is committed.** No committed fight contains a health potion
-  or healthstone use; a future capture that does should become a corpus
-  case.
+- **RESOLVED (PREP-4): no real use was committed.** Two regression-corpus
+  slices of the existing fight-48 capture now carry a real pre-pull combat
+  potion, a Healthstone and a Silvermoon Health Potion, asserted through the
+  service. No new Warcraft Logs request was made. A whole fight with all
+  three kinds for one player is not committed, because of the 5.5 MiB line.
 - **The MCP tool description** does not yet mention consumable status. The
   outputSchema advertises the field.
 
