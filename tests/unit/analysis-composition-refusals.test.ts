@@ -119,13 +119,21 @@ describe("an unsupported specialization", () => {
     expect(analyze).not.toHaveBeenCalled();
   });
 
-  it("retrieves no combat events at all", async () => {
-    // The spec is fully determined by M2 identity, so paginating a whole log to
-    // report that we were never going to analyze it would be pure waste.
-    const { ingest, deps } = spies(UNSUPPORTED_WCL_IDENTITY.className, UNSUPPORTED_WCL_IDENTITY.specName);
-    await analyzeFight(REQUEST, deps);
+  it("retrieves the fight once, for the shared preparation producer alone (PREP-2)", async () => {
+    // Owner decision PREP-2: every report carries consumable status, so an
+    // unsupported specialization's fight is retrieved for preparation alone,
+    // with the producer's own requirement (PLAYER_CONTEXT, no resources). It
+    // used to retrieve nothing; the analyzer still never runs.
+    const { ingest, analyze, deps } = spies(
+      UNSUPPORTED_WCL_IDENTITY.className,
+      UNSUPPORTED_WCL_IDENTITY.specName,
+    );
+    const result = await analyzeFight(REQUEST, deps);
 
-    expect(ingest).not.toHaveBeenCalled();
+    expect(ingest).toHaveBeenCalledTimes(1);
+    expect(ingest.mock.calls[0]?.[0]).toMatchObject({ scope: "PLAYER_CONTEXT", includeResources: false });
+    expect(analyze).not.toHaveBeenCalled();
+    expect(result.ok && result.analysis.preparation.state).toBe("ASSESSED");
   });
 
   it("names no supported spec and claims no analyzer", async () => {
@@ -136,7 +144,8 @@ describe("an unsupported specialization", () => {
     if (!result.ok) return;
     expect(result.analysis.specId).toBeNull();
     expect(result.analysis.analyzerId).toBeNull();
-    expect(result.analysis.scope).toBeNull();
+    // What was retrieved, for preparation alone (PREP-2); no analyzer claimed it.
+    expect(result.analysis.scope).toBe("PLAYER_CONTEXT");
   });
 
   it("says out loud that no analysis was attempted", async () => {
@@ -183,7 +192,8 @@ describe("an unsupported specialization", () => {
         `${className}/${specName}=SPEC_NOT_SUPPORTED`,
       );
       expect(analyze, `${className}/${specName} reached the Rogue analyzer`).not.toHaveBeenCalled();
-      expect(ingest, `${className}/${specName} spent ingestion`).not.toHaveBeenCalled();
+      // One retrieval, for preparation alone (PREP-2), never for an analyzer.
+      expect(ingest, `${className}/${specName} retrievals`).toHaveBeenCalledTimes(1);
     }
   });
 

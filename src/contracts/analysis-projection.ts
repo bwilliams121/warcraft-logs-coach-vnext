@@ -38,7 +38,12 @@
 import type { EvidenceLocator } from "../engine/evidence/locator.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { requirePublicSpecId } from "../findings/spec-id.js";
-import { assertNever, type FightAnalysis } from "../services/result.js";
+import type {
+  ConsumableStatus,
+  ConsumableUnknownReason,
+  ConsumableUse,
+} from "../analysis/preparation/consumable-status.js";
+import { assertNever, type FightAnalysis, type PreparationOutcome } from "../services/result.js";
 import {
   CAPABILITY,
   PUBLIC_ANALYSIS_SCHEMA_VERSION,
@@ -112,6 +117,67 @@ function projectLocator(locator: EvidenceLocator): PublicEvidenceLocator {
   };
 }
 
+/**
+ * The shared preparation producer's report, field for field. Nothing is
+ * derived or judged here: the kinds are renamed to the public keys, and the
+ * internal identity-load detail (a validation message) is not published.
+ */
+function projectPreparation(preparation: PreparationOutcome) {
+  if (preparation.state === "NOT_ASSESSED") {
+    return { assessment: "NOT_ASSESSED", reason: preparation.reason } as const;
+  }
+  const { report } = preparation;
+  return {
+    assessment: "ASSESSED",
+    category: report.category,
+    authority: report.authority,
+    identityData: report.identityData,
+    statuses: {
+      healthPotion: projectConsumableStatus(report.statuses.HEALTH_POTION),
+      healthstone: projectConsumableStatus(report.statuses.HEALTHSTONE),
+      combatPotion: projectConsumableStatus(report.statuses.COMBAT_POTION),
+    },
+  } as const;
+}
+
+function projectConsumableUse(use: ConsumableUse) {
+  return { spellId: use.spellId, name: use.name, timing: use.timing, evidence: projectLocator(use.evidence) };
+}
+
+function projectConsumableReason(reason: ConsumableUnknownReason) {
+  switch (reason.code) {
+    case "CAST_COVERAGE":
+    case "AURA_COVERAGE":
+      // The gate's vocabulary is validated against the public enum by the
+      // final parse; a gate outside it fails the projection closed.
+      return { code: reason.code, gate: reason.gate };
+    case "FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF":
+      return {
+        code: reason.code,
+        fightDurationMs: reason.fightDurationMs,
+        longestBuffMs: reason.longestBuffMs,
+      };
+    case "UNCLASSIFIED_CANDIDATE":
+      return { code: reason.code, spellId: reason.spellId, abilityName: reason.abilityName };
+    case "IDENTITY_DATA_UNAVAILABLE":
+      return { code: reason.code };
+    default:
+      return assertNever(reason);
+  }
+}
+
+function projectConsumableStatus(status: ConsumableStatus) {
+  const uses = status.uses.map(projectConsumableUse);
+  return status.state === "OBSERVED"
+    ? ({ countState: "OBSERVED", count: status.count, uses } as const)
+    : ({
+        countState: "UNKNOWN",
+        reasons: status.reasons.map(projectConsumableReason),
+        observedAtLeast: status.observedAtLeast,
+        uses,
+      } as const);
+}
+
 function projectIdentity(analysis: FightAnalysis): PublicIdentity {
   const { identity } = analysis;
   return {
@@ -159,6 +225,8 @@ function projectCommon(analysis: FightAnalysis) {
     },
     capability: CAPABILITY,
     analyzerId: analysis.analyzerId,
+    // Specialization-independent, on every status (PREP-2).
+    preparation: projectPreparation(analysis.preparation),
     // `analysis.scope` is NOT projected. It is ingestion orchestration — which
     // evidence to fetch — and publishing it would let a retrieval setting be
     // read as analysis completeness. The coverage block is what discloses that.

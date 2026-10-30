@@ -1867,6 +1867,16 @@ consumable status (PREP-1, tests/unit/preparation/*, tests/unit/preparation-cons
   service                                      -> ASSESSED for analyzed requests; same report when the analyzer declines; requirement unioned, widens nothing; unsupported spec NOT_ASSESSED with no ingestion
   layering                                     -> producer reads only fight, shared evidence primitives and its data; no specialization imports it
   mutations (manual)                           -> dropping the cast gate fails 3 tests; dropping pre-pull open-buff tracking fails 1; always-BEFORE_PULL fails 1; dropping aura candidates fails 1
+
+public consumable status (PREP-2, tests/contracts/preparation-{public-projection,service}.test.ts, corpus APPLICATION_SERVICE cases):
+  every status                                 -> `preparation` on ANALYZED and every unanalyzed variant; all three consumables, schema-valid
+  unsupported specialization                   -> ONE retrieval, PREPARATION_REQUIREMENT only (PLAYER_CONTEXT, no resources); no analyzer runs; scope PLAYER_CONTEXT; ASSESSED
+  unsupported, retrieval fails / report changed -> still SPEC_NOT_SUPPORTED; preparation NOT_ASSESSED (RETRIEVAL_FAILED); scope null
+  UNKNOWN on the wire                          -> countState UNKNOWN, reasons coded, observedAtLeast, and no `count` key
+  NOT_ASSESSED on the wire                     -> {assessment, reason} only
+  no leak                                      -> identity-load detail not published (reason is the code alone); no `state` key anywhere (m6c guard)
+  vocabularies                                 -> unknown codes, use timings, not-assessed reasons pinned equal to producer/services; gate outside the public four fails the projection closed
+  superseded pins (updated, owner decision)    -> refusals, m10d Arms invariance, m6c scope: one preparation-only retrieval instead of zero; corpus cases scope PLAYER_CONTEXT, renamed case id
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture

@@ -160,7 +160,7 @@ describe("the corpus cases that pin the subject agree with the fixture", () => {
     // rather than an unnoticed pairing; it is not the real subject.
     const pinned = new Set(UNSUPPORTED_SUBJECT_CORPUS_CASES);
     const premises = new Set([
-      "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing",
+      "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-for-preparation-only",
       "public-contract.analysis-parity-for-an-unsupported-spec",
     ]);
     const naming = manifest.cases.filter((kase) =>

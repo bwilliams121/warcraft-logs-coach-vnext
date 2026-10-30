@@ -317,13 +317,25 @@ identity, recipient survival, and observed cooldown overlap.
 Preparation is a first-class analysis category independent of rotational APL
 decisions, and runs in parallel with specialization evaluation.
 
-**Product intent, not yet implemented.** No preparation analyzer exists under
-`src/` today and schema `warcraft-logs-coach.analysis/1` carries no consumable
-or preparation field; the requirement below describes what the product must
-eventually emit, and nothing in the current output should be read as a
-consumable status.
+**Implemented (PREP-1, PREP-2).** The shared producer is
+`src/analysis/preparation/`. Every public analysis result of schema
+`warcraft-logs-coach.analysis/1` carries a `preparation` block, on every
+status, unsupported specializations included:
 
-Every analysis report must eventually include a status for:
+- `assessment: "ASSESSED"`, with `statuses.healthPotion`,
+  `statuses.healthstone` and `statuses.combatPotion`. Each status is either:
+  - `countState: "OBSERVED"` with a complete `count`, where zero is reported
+    only under COMPLETE coverage;
+  - `countState: "UNKNOWN"` with its reasons, and `observedAtLeast` as a lower
+    bound, never a count.
+- or `assessment: "NOT_ASSESSED"` with the reason (for example, retrieval
+  failed).
+
+A use is any use of the shared cooldown slot, and each use is named. The
+field is optional in the v1 schema only so that adding it was not a version
+change; this build always emits it.
+
+Every analysis report includes a status for:
 
 - health potion usage
 - healthstone usage

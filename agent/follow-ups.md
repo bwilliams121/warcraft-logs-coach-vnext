@@ -118,17 +118,27 @@ required is a schema-v2 decision. None of that is M11-A work.
 - contract tests for "never omitted" and "never zero from PARTIAL, ABSENT or
   unverified coverage".
 
-Still open, each an owner decision (agent/architecture.md "PREP-1"):
+**RESOLVED for the single-fight analysis result (PREP-2, 2026-10-30).** All
+three owner decisions were taken (agent/architecture.md "PREP-2"):
 
-1. **The public field** (contract and digest change). Until then, the README
-   still labels the requirement as not yet emitted.
-2. **Unsupported specializations.** Ingest for preparation alone, at a real
-   Warcraft Logs cost per request? Today they get NOT_ASSESSED.
-3. **Slot semantics** for "combat potion" and "health potion".
+- the public field ships on every status;
+- unsupported specializations retrieve the fight for preparation alone;
+- the shared-cooldown slot definition stays.
 
-Also open, and not an owner decision: no committed fight contains a health
-potion or healthstone use. A future capture that does should become a
-corpus case.
+Still open, none of them an owner decision:
+
+- **Raid night.**
+  - The raid-night public document has no per-player analysis documents,
+    so its players' consumable status is internal only.
+  - Its unanalyzable players are still not ingested (the zero-ingestion
+    rule for fights where nobody is analyzable).
+  - Exposing per-player consumable status there is a raid-night contract
+    design question for a later tranche.
+- **No real use is committed.** No committed fight contains a health potion
+  or healthstone use; a future capture that does should become a corpus
+  case.
+- **The MCP tool description** does not yet mention consumable status. The
+  outputSchema advertises the field.
 
 ## After M11-A3: shared-engine candidates the audit named
 
@@ -187,7 +197,7 @@ the most of the remaining M11 population (`agent/m11-a3-authority-audit.md`
   them. The milestone that registers the first one designs the wiring.
 - **Two M9-C corpus cases pair the unsupported identity with actor 19's
   evidence** as a declared identity premise
-  (`application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing`,
+  (`application-service.unsupported-spec-runs-no-analyzer-and-retrieves-for-preparation-only`,
   `public-contract.analysis-parity-for-an-unsupported-spec`). Recorded in
   `m11a2-unsupported-subject.test.ts`; they are not the real subject and
   were left as they are.

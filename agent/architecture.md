@@ -9819,3 +9819,85 @@ paths are proven on synthetic fights.
    included)? Or a narrower throughput / health-potion-item definition? The
    data names every use, so a narrower rule is a data change, not a
    re-capture.
+
+---
+
+## PREP-2 — consumable status on every public report
+
+**Status:** implemented (2026-10-30). This closes the "Always-Report
+Consumables" product-intent gap for the single-fight analysis result.
+
+### Owner decisions (2026-10-30)
+
+1. **Public field: yes, now.** An additive `preparation` block on the v1
+   public analysis result. Public output changes, intentionally.
+2. **Unsupported specializations: retrieve the fight.** Every report carries
+   the status, so an unsupported specialization's fight is retrieved for the
+   preparation producer alone. This is an accepted real Warcraft Logs cost
+   per request.
+3. **Definition: the shared cooldown slot**, as built in PREP-1. Every use of
+   the health-potion or combat-potion cooldown counts, and each use is named.
+
+### Public contract (`src/contracts/analysis-contract.ts`)
+
+- **Where.** `preparation` is in the common fields, so it appears on EVERY
+  status.
+  - It is optional in the schema only: adding an optional field is not a
+    version change. The projection always emits it.
+  - The unanalyzed-variant rule ("nothing analysis-shaped") is amended
+    explicitly. Consumable status is observed use, not gameplay evaluation,
+    has no zero-denominator reading, and is what makes an unsupported
+    report useful rather than empty.
+- **Shape.**
+  - `{assessment: "ASSESSED", category: "PREPARATION", authority:
+    "WCL_OBSERVED_FACT", identityData {RUNTIME_GAME_DATA revision, client
+    build} | null, statuses {healthPotion, healthstone, combatPotion}}`;
+  - or `{assessment: "NOT_ASSESSED", reason}`.
+  - Each status is `{countState: "OBSERVED", count, uses}` or
+    `{countState: "UNKNOWN", reasons, observedAtLeast, uses}`. An UNKNOWN
+    status has no `count` key.
+  - A use is `{spellId, name, timing, evidence}`, with the evidence locator
+    as on decisions.
+- **Discriminators are `assessment` and `countState`, never `state`.** The
+  wire bans `state` so no internal state object can pass as contract (m6c
+  guard).
+- **Vocabularies** (unknown codes, use timings, not-assessed reasons) are
+  pinned equal to the producer's and the services'.
+- **Coverage gates** published are the four the shared gate returns. Any
+  other gate fails the projection closed.
+- **Not published:** the identity-load validation detail (only the code).
+
+### Service (`analyzeFight`)
+
+- An unsupported specialization (both paths: no identity mapping, no public
+  analyzer) retrieves the fight ONCE, with scope derived from
+  `PREPARATION_REQUIREMENT` alone (PLAYER_CONTEXT, no resources). The
+  derived scope is passed in; no literal scope exists.
+- The analyzer still never runs, and `scope` records what was retrieved.
+- A retrieval failure, or a report revision changed since preflight, keeps
+  the SPEC_NOT_SUPPORTED answer, with preparation `NOT_ASSESSED
+  (RETRIEVAL_FAILED)` and `scope: null`. A correct answer is not turned into
+  an error.
+- Supported specializations are unchanged from PREP-1.
+
+### Corpus and existing tests
+
+Tests that pinned "unsupported = zero ingestion" encoded the superseded
+decision. They now pin exactly one preparation-only retrieval
+(`PLAYER_CONTEXT`, no resources) and no analyzer run:
+
+- `analysis-composition-refusals`, the m10d Arms Warrior invariance and m6c;
+- the two corpus APPLICATION_SERVICE cases (scope `PLAYER_CONTEXT`). The
+  case whose id said "retrieves-nothing" is renamed
+  `…-retrieves-for-preparation-only`, and the corpus report is regenerated
+  from execution.
+
+The per-spec public projection tests build preparation exactly as the
+service does.
+
+### Not covered
+
+The raid-night public document carries no per-player analysis documents, so
+nothing public changed there. Raid night's unanalyzable players are still
+not ingested, and the preparation of the players it does analyze stays
+internal. See `agent/follow-ups.md`.

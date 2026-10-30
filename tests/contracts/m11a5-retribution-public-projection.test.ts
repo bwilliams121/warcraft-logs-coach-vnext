@@ -25,6 +25,7 @@
  * Only projection and withholding differ, and both are asserted here.
  */
 
+import { assessConsumableStatus } from "../../src/analysis/preparation/consumable-status.js";
 import { describe, expect, it } from "vitest";
 
 import { toPlayerFightCell } from "../../src/aggregation/cell-projection.js";
@@ -117,7 +118,8 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId = RET_A
     analyzerId: RETRIBUTION_PALADIN_ANALYZER_ID,
     scope: "PLAYER_CONTEXT",
     analysis,
-    preparation: PREPARATION_NOT_ASSESSED,
+    // As the service builds it: the shared producer over the same fight.
+    preparation: { state: "ASSESSED", report: assessConsumableStatus(state.fight, actorId) },
     observedDecisions: RETRIBUTION_PALADIN_REGISTRATION.observedDecisionView(analysis),
   };
 }

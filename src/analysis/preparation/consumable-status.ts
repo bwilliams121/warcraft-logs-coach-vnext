@@ -64,7 +64,17 @@ export const CONSUMABLE_STATUS_REVISION = "preparation-consumable-status/1" as c
  * application seen, under incomplete coverage. It is a use, but whether it
  * was taken before the pull cannot be shown.
  */
-export type ConsumableUseTiming = "IN_FIGHT" | "BEFORE_PULL" | "UNRESOLVED";
+export const CONSUMABLE_USE_TIMINGS = ["IN_FIGHT", "BEFORE_PULL", "UNRESOLVED"] as const;
+export type ConsumableUseTiming = (typeof CONSUMABLE_USE_TIMINGS)[number];
+
+/** Every UNKNOWN reason code this producer can emit (pinned equal to the public enum). */
+export const CONSUMABLE_UNKNOWN_CODES = [
+  "CAST_COVERAGE",
+  "AURA_COVERAGE",
+  "FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF",
+  "UNCLASSIFIED_CANDIDATE",
+  "IDENTITY_DATA_UNAVAILABLE",
+] as const;
 
 export interface ConsumableUse {
   readonly spellId: number;

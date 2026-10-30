@@ -23,6 +23,7 @@
  * asserted here on the real opener.
  */
 
+import { assessConsumableStatus } from "../../src/analysis/preparation/consumable-status.js";
 import { describe, expect, it } from "vitest";
 
 import { toPlayerFightCell } from "../../src/aggregation/cell-projection.js";
@@ -58,7 +59,6 @@ import {
 import { PROTECTION_OFFENSIVE_AUTHORITY } from "../../src/specs/paladin/protection/authority-bindings.js";
 import { PROTECTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/protection/spec.js";
 import { corpusBundleState, corpusState } from "../support/corpus/fight.js";
-import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 const PROT_ACTOR = 7;
 const OPENER = "wcl-protection-paladin-a7r6-opener";
@@ -113,7 +113,8 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed): FightAnalysis 
     analyzerId: PROTECTION_PALADIN_ANALYZER_ID,
     scope: "PLAYER_CONTEXT",
     analysis,
-    preparation: PREPARATION_NOT_ASSESSED,
+    // As the service builds it: the shared producer over the same fight.
+    preparation: { state: "ASSESSED", report: assessConsumableStatus(state.fight, identity.player.sourceId) },
     observedDecisions: PROTECTION_PALADIN_REGISTRATION.observedDecisionView(analysis),
   };
 }
