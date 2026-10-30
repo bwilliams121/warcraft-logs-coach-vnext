@@ -88,8 +88,11 @@ describe("the committed corpus loads", () => {
     // M11-D2-A3 added one sanitized capture (five resourcechange events proving
     // standalone pool ownership) and three COMBAT_STATE cases: over it, over the
     // resourceless pet capture, and the same-actor control over the mid-fight window.
-    expect(loaded.artifacts).toHaveLength(49);
-    expect(loaded.cases).toHaveLength(178);
+    // PREP-4 added two sanitized actor slices of the fight-48 capture (real
+    // consumable use by actors 121 and 122) and four cases: a normalization
+    // census and an APPLICATION_SERVICE consumable-status case for each.
+    expect(loaded.artifacts).toHaveLength(51);
+    expect(loaded.cases).toHaveLength(182);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -119,6 +122,8 @@ describe("the committed corpus loads", () => {
       "wcl-assassination-kingsbane-cooldown",
       "wcl-assassination-vanish-ambush-gate",
       "wcl-aura-stack-absolute",
+      "wcl-b1pm-fight-48-mage-121-prepull-65s",
+      "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
       "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
       "wcl-blood-death-knight-a7r6-rotational-45s",
@@ -293,7 +298,8 @@ describe("provenance is honest about lineage", () => {
       for (const transformation of entry.record.provenance.transformations) {
         if (transformation.tooling.name !== "scripts/sanitize-probe.mjs") continue;
         expect(transformation.tooling.revision, entry.record.artifactId).toMatch(
-          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[23456]$/,
+          // sanitize-probe-7 (M11-E2.1's --compact) cut the PREP-4 slices.
+          migrated ? /^UNAVAILABLE$/ : /^sanitize-probe-[234567]$/,
         );
       }
     }
@@ -363,6 +369,10 @@ describe("retained coverage is granted only where the capture predicate supports
     "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165",
     // M11-C4f: the same predicate for actor 11 over the M11-C4f capture.
     "wcl-brewmaster-monk-rxaf-opener",
+    // PREP-4: the same predicate for actors 121 and 122 over the M11-E2
+    // fight-48 capture (casts, auras and combatantinfo only).
+    "wcl-b1pm-fight-48-mage-121-prepull-65s",
+    "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
   ];
 
   it("grants nothing on any property-based or index-based selection", async () => {

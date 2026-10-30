@@ -17,7 +17,9 @@ import {
   ANALYZER_REGISTRATIONS,
   PRODUCTION_CATALOG,
 } from "../../../../src/services/analyzer-registry.js";
+import type { PreparationOutcome } from "../../../../src/services/result.js";
 import { resolveSpecIdentity } from "../../../../src/services/spec-identity.js";
+import type { ConsumableStatus } from "../../../../src/analysis/preparation/consumable-status.js";
 import { isSpecId } from "../../../../src/findings/spec-id.js";
 import type { CombatFight } from "../../../../src/engine/normalization/combat-fight.js";
 import type { FightIdentity } from "../../../../src/wcl/types.js";
@@ -56,6 +58,33 @@ function identityFor(
   };
 }
 
+/**
+ * The service's preparation outcome in the case's compact form: per
+ * consumable, the count state with its count or lower bound, the reason codes
+ * when UNKNOWN, and each use's spell and timing. NOT_ASSESSED is kept as such,
+ * so it can never compare equal to an assessed expectation.
+ */
+function preparationView(outcome: PreparationOutcome): unknown {
+  if (outcome.state === "NOT_ASSESSED") return { notAssessed: outcome.reason };
+  const view = (status: ConsumableStatus) => {
+    const uses = status.uses.map((use) => ({ spellId: use.spellId, timing: use.timing }));
+    return status.state === "OBSERVED"
+      ? { countState: "OBSERVED", count: status.count, uses }
+      : {
+          countState: "UNKNOWN",
+          observedAtLeast: status.observedAtLeast,
+          reasonCodes: status.reasons.map((reason) => reason.code),
+          uses,
+        };
+  };
+  const { statuses } = outcome.report;
+  return {
+    healthPotion: view(statuses.HEALTH_POTION),
+    healthstone: view(statuses.HEALTHSTONE),
+    combatPotion: view(statuses.COMBAT_POTION),
+  };
+}
+
 export async function fightAnalysis(
   corpus: LoadedCorpus,
   artifact: LoadedArtifact,
@@ -83,6 +112,10 @@ export async function fightAnalysis(
     specId: result.analysis.specId,
     analyzerId: result.analysis.analyzerId,
     scope: result.analysis.scope,
+    // PREP-4: compared only when the case pins it.
+    ...(params.expected.preparation === undefined
+      ? {}
+      : { preparation: preparationView(result.analysis.preparation) }),
   };
   if (JSON.stringify(actual) !== JSON.stringify(params.expected)) {
     return fail("the service produced a different analysis envelope than the case pins", {

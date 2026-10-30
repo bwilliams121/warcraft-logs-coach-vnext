@@ -636,6 +636,31 @@ const BREWMASTER_BUNDLE_PARAMS = {
   declaredHoles: BUNDLE_PARAMS.declaredHoles,
 } as const;
 
+/** One consumable's expected status in a corpus case (PREP-4): the count, and every use's spell and timing. */
+const CORPUS_CONSUMABLE_USE = z
+  .object({
+    spellId: z.number().int().positive(),
+    timing: z.enum(["IN_FIGHT", "BEFORE_PULL", "UNRESOLVED"]),
+  })
+  .strict();
+const CORPUS_CONSUMABLE_STATUS = z.discriminatedUnion("countState", [
+  z
+    .object({
+      countState: z.literal("OBSERVED"),
+      count: z.number().int().nonnegative(),
+      uses: z.array(CORPUS_CONSUMABLE_USE),
+    })
+    .strict(),
+  z
+    .object({
+      countState: z.literal("UNKNOWN"),
+      observedAtLeast: z.number().int().nonnegative(),
+      reasonCodes: z.array(z.string().min(1)).min(1),
+      uses: z.array(CORPUS_CONSUMABLE_USE),
+    })
+    .strict(),
+]);
+
 export const ASSERTION_KINDS = {
   // ---- NORMALIZATION -------------------------------------------------------
   "NORMALIZATION.EVENT_COUNT_PRESERVED": {
@@ -3389,6 +3414,20 @@ export const ASSERTION_KINDS = {
             analyzerId: z.string().nullable(),
             /** `null` when no analyzer ran and nothing was retrieved. */
             scope: z.enum(["PLAYER_CONTEXT", "FULL_RAID"]).nullable(),
+            /**
+             * PREP-4, optional: the consumable status the shared preparation
+             * producer assessed over this artifact for the subject, per
+             * consumable, with each use's spell and timing. A case without it
+             * asserts nothing about preparation.
+             */
+            preparation: z
+              .object({
+                healthPotion: CORPUS_CONSUMABLE_STATUS,
+                healthstone: CORPUS_CONSUMABLE_STATUS,
+                combatPotion: CORPUS_CONSUMABLE_STATUS,
+              })
+              .strict()
+              .optional(),
           })
           .strict(),
       })
@@ -3397,7 +3436,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "The real application service over the artifact — preflight and ingestion faked, everything between them production — derives exactly this ingestion scope from the enabled analyzers, recognizes exactly this specialization and analyzer, and reports exactly this status. Never a transport.",
+      "The real application service over the artifact — preflight and ingestion faked, everything between them production — derives exactly this ingestion scope from the enabled analyzers, recognizes exactly this specialization and analyzer, and reports exactly this status. Never a transport. When `expected.preparation` is present, the subject's consumable status must be ASSESSED and equal it: count state, count or lower bound, reason codes, and each use's spell and timing.",
   },
 
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION": {

@@ -25,6 +25,8 @@ describe("coverage is measured from the corpus", () => {
     expect(report.cases.declared).toBe(0);
     expect(report.artifacts.sourceCaptures.map((s) => `${s.reportCode}/${String(s.fightId)}`)).toEqual([
       "A7R6kxPJ1hC8YQ4w/7",
+      // PREP-4: the M11-E2 fight-48 capture, sliced for two other players.
+      "b1PmaKrd6CDfzngc/48",
       "encounter 3420/difficulty 4",
       "gtKb2xHn87pNcFfW/22",
       "qJ1pgB49ZrRNVmCd/6",
@@ -57,6 +59,8 @@ describe("coverage is measured from the corpus", () => {
       "wcl-assassination-garrote-dot-remains",
       "wcl-assassination-high-parse-opener",
       "wcl-assassination-kingsbane-cooldown",
+      "wcl-b1pm-fight-48-mage-121-prepull-65s",
+      "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
       "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
       "wcl-blood-death-knight-a7r6-rotational-45s",
