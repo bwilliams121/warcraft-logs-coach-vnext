@@ -17,6 +17,7 @@
  * the stopping points and the dispatch trace are INTERNAL.
  */
 
+import { assessConsumableStatus } from "../../src/analysis/preparation/consumable-status.js";
 import { describe, expect, it } from "vitest";
 
 import { toPlayerFightCell } from "../../src/aggregation/cell-projection.js";
@@ -154,7 +155,8 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId: number
     analyzerId: BREWMASTER_MONK_ANALYZER_ID,
     scope: "PLAYER_CONTEXT",
     analysis,
-    preparation: PREPARATION_NOT_ASSESSED,
+    // As the service builds it: the shared producer over the same fight.
+    preparation: { state: "ASSESSED", report: assessConsumableStatus(state.fight, actorId) },
     observedDecisions: BREWMASTER_MONK_REGISTRATION.observedDecisionView(analysis),
   };
 }

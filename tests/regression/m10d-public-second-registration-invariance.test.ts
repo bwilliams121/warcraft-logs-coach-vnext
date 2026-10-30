@@ -371,7 +371,7 @@ describe("the REAL Protection Paladin subject through the application service", 
 
 describe("the REAL Arms Warrior subject keeps the unsupported path", () => {
   for (const { label, registry, calls } of catalogs()) {
-    it(`${label}: SPEC_NOT_SUPPORTED, zero ingestion, neither analyzer runs`, async () => {
+    it(`${label}: SPEC_NOT_SUPPORTED, one preparation-only retrieval, neither analyzer runs`, async () => {
       const run = runFor(ARMS_SUBJECT, registry);
       const result = await analyzeFight(run.request, run.deps);
       expect(result.ok).toBe(true);
@@ -380,14 +380,23 @@ describe("the REAL Arms Warrior subject keeps the unsupported path", () => {
       expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
       expect(result.analysis.specId).toBeNull();
       expect(result.analysis.analyzerId).toBeNull();
-      expect(result.analysis.scope).toBeNull();
+      // PREP-2 (owner decision): the fight is retrieved once, for the shared
+      // preparation producer alone, never for an analyzer.
+      expect(result.analysis.scope).toBe("PLAYER_CONTEXT");
       expect(result.analysis.observedDecisions).toBeNull();
-      expect(run.ingest).not.toHaveBeenCalled();
+      expect(run.ingest).toHaveBeenCalledTimes(1);
+      expect(run.ingest.mock.calls[0]?.[0]).toMatchObject({
+        scope: "PLAYER_CONTEXT",
+        includeResources: false,
+      });
+      expect(result.analysis.preparation.state).toBe("ASSESSED");
       expect(calls[PROTECTION_PALADIN_ANALYZER_ID]).toBe(0);
       expect(calls[ASSASSINATION_ANALYZER_ID]).toBe(0);
       const projected = projectAnalysisResult(result.analysis);
       expect(projected.status).toBe("SPEC_NOT_SUPPORTED");
       expect(projected.specialization).toEqual({ specId: null, gameplaySupported: false });
+      // The unsupported report carries consumable status, so it is not empty.
+      expect(projected.preparation?.assessment).toBe("ASSESSED");
       expect(projected.identity.player).toMatchObject(UNSUPPORTED_WCL_IDENTITY);
       if (projected.status === "ANALYZED") return;
       expect(projected.detail).toContain(CURRENT_UNSUPPORTED_SUBJECT.observedSpecId);

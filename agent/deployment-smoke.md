@@ -726,6 +726,14 @@ and **no** `decisions`, `coverage` or `authority` field. This is still the most
 important negative on the list: an unsupported spec must not read as clean
 play.
 
+Since PREP-2, also expect a `preparation` block with `assessment`
+`ASSESSED` (or `NOT_ASSESSED` with a reason) and all three of
+`statuses.healthPotion`, `statuses.healthstone` and `statuses.combatPotion`,
+each `countState` `OBSERVED` or `UNKNOWN`. The request now retrieves the
+fight's events for that block. This is an owner-approved per-request cost;
+budget the unit count accordingly, about one fight retrieval in addition to
+preflight.
+
 ## M10-6. MCP `tools/list`
 
 As M8-9: exactly the three tools. Then read the two descriptions as a model

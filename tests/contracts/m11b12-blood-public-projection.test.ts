@@ -29,6 +29,7 @@
  * 9 REJECTED, 72 UNKNOWN over the committed bundle, exactly M11-B10's.
  */
 
+import { assessConsumableStatus } from "../../src/analysis/preparation/consumable-status.js";
 import { describe, expect, it } from "vitest";
 
 import { toPlayerFightCell } from "../../src/aggregation/cell-projection.js";
@@ -117,7 +118,8 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId = BLOOD
     analyzerId: BLOOD_DEATH_KNIGHT_ANALYZER_ID,
     scope: "PLAYER_CONTEXT",
     analysis,
-    preparation: PREPARATION_NOT_ASSESSED,
+    // As the service builds it: the shared producer over the same fight.
+    preparation: { state: "ASSESSED", report: assessConsumableStatus(state.fight, actorId) },
     observedDecisions: BLOOD_DEATH_KNIGHT_REGISTRATION.observedDecisionView(analysis),
   };
 }

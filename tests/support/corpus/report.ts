@@ -241,7 +241,7 @@ export const KNOWN_EVIDENCE_GAPS: readonly EvidenceGap[] = [
     owner: "M9",
     closedBy: [
       "application-service.derives-player-context-scope-and-selects-the-assassination-analyzer",
-      "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing",
+      "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-for-preparation-only",
       "application-service.high-parse-subject-is-analyzed-under-player-context",
     ],
   },

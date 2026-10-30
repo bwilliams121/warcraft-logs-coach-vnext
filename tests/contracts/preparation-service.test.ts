@@ -5,10 +5,9 @@
  *   fight alone: its report is the same whether the analyzer analyzes or not.
  * - Its declared requirement is unioned into ingestion and never widens it:
  *   PLAYER_CONTEXT, and no resources the analyzer did not already ask for.
- * - An unsupported specialization is still answered before ingestion, so its
- *   preparation is disclosed as NOT_ASSESSED (no fight retrieved) rather than
- *   shown as a status. Public exposure and unsupported-spec ingestion are
- *   owner decisions (agent/follow-ups.md).
+ * - An unsupported specialization's fight is retrieved for the producer alone
+ *   (owner decision PREP-2), so its report carries the status too. A failed
+ *   retrieval keeps the unsupported answer and discloses NOT_ASSESSED.
  */
 
 import { describe, expect, it, vi } from "vitest";
@@ -93,13 +92,42 @@ describe("preparation runs with every analyzed request", () => {
   });
 });
 
-describe("an unsupported specialization", () => {
-  it("is still answered before ingestion: preparation is disclosed NOT_ASSESSED, never a status", async () => {
-    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, identityFor("Fire", "Mage"));
+describe("an unsupported specialization (PREP-2: retrieved for preparation alone)", () => {
+  const mage = identityFor("Fire", "Mage");
+
+  it("retrieves the fight once with the producer's own requirement, assesses it, and runs no analyzer", async () => {
+    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, mage);
     const result = await analyzeFight(request, serviceDeps);
     if (!result.ok) throw new Error(result.error.message);
     expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(result.analysis.preparation).toEqual({ state: "NOT_ASSESSED", reason: "NO_FIGHT_RETRIEVED" });
-    expect(ingest).not.toHaveBeenCalled();
+    expect(result.analysis.analyzerId).toBeNull();
+    expect(ingest).toHaveBeenCalledTimes(1);
+    expect(ingest.mock.calls[0]?.[0]).toMatchObject({ scope: "PLAYER_CONTEXT", includeResources: false });
+    expect(result.analysis.scope).toBe("PLAYER_CONTEXT");
+    expect(result.analysis.preparation).toEqual({
+      state: "ASSESSED",
+      report: assessConsumableStatus(fight, M5D2_ACTOR),
+    });
+  });
+
+  it("a retrieval failure keeps the unsupported answer and discloses NOT_ASSESSED (RETRIEVAL_FAILED)", async () => {
+    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, mage);
+    ingest.mockImplementation(
+      async () => ({ ok: false, failure: { reason: "UPSTREAM_UNAVAILABLE" } }) as never,
+    );
+    const result = await analyzeFight(request, serviceDeps);
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.state).toBe("SPEC_NOT_SUPPORTED");
+    expect(result.analysis.scope).toBeNull();
+    expect(result.analysis.preparation).toEqual({ state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" });
+  });
+
+  it("a report replaced between preflight and retrieval is not assessed", async () => {
+    const { serviceDeps, ingest } = deps(ANALYZER_REGISTRATIONS, mage);
+    const replaced = { ...fight, report: { ...fight.report, revision: fight.report.revision + 1 } };
+    ingest.mockImplementation(async () => ({ ok: true, fight: replaced, rateLimit: undefined }));
+    const result = await analyzeFight(request, serviceDeps);
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.analysis.preparation).toEqual({ state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" });
   });
 });

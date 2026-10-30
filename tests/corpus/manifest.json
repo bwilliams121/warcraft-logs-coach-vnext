@@ -4733,7 +4733,7 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
       "contractUnderTest": "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-      "purpose": "Actor 4 of the same fight, the Arms Warrior the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec, no analyzer and a null scope. The slice holds none of actor 4's events, and none is needed: the answer is fully determined by identity, before any retrieval.",
+      "purpose": "Actor 4 of the same fight, the Arms Warrior the committed context proves, yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT; the slice holds none of actor 4's events, which leaves its consumable status UNKNOWN rather than zero.",
       "assertions": [
         {
           "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
@@ -4747,14 +4747,14 @@
               "status": "SPEC_NOT_SUPPORTED",
               "specId": null,
               "analyzerId": null,
-              "scope": null
+              "scope": "PLAYER_CONTEXT"
             }
           }
         }
       ],
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
-        "text": "The unsupported path Protection Paladin used to prove, kept by a real captured identity that remains unsupported. Neither registered analyzer runs and nothing is ingested."
+        "text": "The unsupported path Protection Paladin used to prove, kept by a real captured identity that remains unsupported. Neither registered analyzer runs; the only retrieval is for preparation (PREP-2)."
       },
       "authority": null,
       "limitations": [],
@@ -5055,11 +5055,11 @@
       ]
     },
     {
-      "caseId": "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-nothing",
+      "caseId": "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-for-preparation-only",
       "artifactId": "wcl-assassination-d2-decision-corpus",
       "owningLayer": "APPLICATION_SERVICE",
       "contractUnderTest": "src/services/analysis-service.ts unsupportedSpec; spec-identity.ts",
-      "purpose": "The same actor identified as Warrior/Arms — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec, no analyzer and a null scope: nothing was retrieved because nothing was going to read it, and the status is explicit rather than an empty report.",
+      "purpose": "The same actor identified as Warrior/Arms — the canonical unsupported identity, a real participant of the same A7R6 kill — yields SPEC_NOT_SUPPORTED from the service with no spec and no analyzer. The fight is retrieved once, for the shared preparation producer alone (PREP-2), so the scope is PLAYER_CONTEXT: the report still carries consumable status, and the status is explicit rather than an empty report.",
       "assertions": [
         {
           "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
@@ -5073,14 +5073,14 @@
               "status": "SPEC_NOT_SUPPORTED",
               "specId": null,
               "analyzerId": null,
-              "scope": null
+              "scope": "PLAYER_CONTEXT"
             }
           }
         }
       ],
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
-        "text": "An unsupported specialization is fully determined by identity, so the service answers before spending a single Warcraft Logs point on events — and it answers with a status, never with a well-formed report of zero findings that reads as clean play. (Until M10-D this case used Paladin/Protection, which is supported now.)"
+        "text": "An unsupported specialization is fully determined by identity, so no analyzer runs, and it answers with a status, never with a well-formed report of zero findings that reads as clean play. Owner decision PREP-2: every report carries consumable status, so the fight is retrieved for preparation alone, with the producer's own requirement. (Until M10-D this case used Paladin/Protection, which is supported now; until PREP-2 nothing was retrieved.)"
       },
       "authority": null,
       "limitations": [],

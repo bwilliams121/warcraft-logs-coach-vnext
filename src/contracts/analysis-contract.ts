@@ -459,6 +459,143 @@ export const CoverageSchema = z
   .strict();
 
 // ---------------------------------------------------------------------------
+// Preparation: consumable status (PREP-2)
+// ---------------------------------------------------------------------------
+
+/** Why a consumable count is UNKNOWN. Never a negative; each is a stated limit. */
+export const PUBLIC_CONSUMABLE_UNKNOWN_CODES = [
+  "CAST_COVERAGE",
+  "AURA_COVERAGE",
+  "FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF",
+  "UNCLASSIFIED_CANDIDATE",
+  "IDENTITY_DATA_UNAVAILABLE",
+] as const;
+
+/** Which coverage check failed, for CAST_COVERAGE / AURA_COVERAGE. */
+export const PUBLIC_COVERAGE_GATES = [
+  "CAPABILITY_UNVERIFIED",
+  "CAPABILITY_NOT_OBSERVABLE",
+  "INSUFFICIENT_SCOPE",
+  "INSUFFICIENT_COVERAGE",
+] as const;
+
+/**
+ * When a use happened. UNRESOLVED: a combat-potion buff removal with no
+ * in-fight cast or application seen, under incomplete coverage — a use, with
+ * no claim about when it was taken.
+ */
+export const PUBLIC_CONSUMABLE_USE_TIMINGS = ["IN_FIGHT", "BEFORE_PULL", "UNRESOLVED"] as const;
+
+/** Why preparation was not assessed. Nothing is claimed about consumables. */
+export const PUBLIC_PREPARATION_NOT_ASSESSED_REASONS = ["NO_FIGHT_RETRIEVED", "RETRIEVAL_FAILED"] as const;
+
+const ConsumableUseSchema = z
+  .object({
+    spellId: z.number().int().positive(),
+    /** The spell's name in the pinned game data. */
+    name: z.string().min(1),
+    timing: z.enum(PUBLIC_CONSUMABLE_USE_TIMINGS),
+    /** The cast, or the buff removal that reveals the use. */
+    evidence: EvidenceLocatorSchema,
+  })
+  .strict();
+
+const ConsumableUnknownReasonSchema = z.discriminatedUnion("code", [
+  z.object({ code: z.literal("CAST_COVERAGE"), gate: z.enum(PUBLIC_COVERAGE_GATES) }).strict(),
+  z.object({ code: z.literal("AURA_COVERAGE"), gate: z.enum(PUBLIC_COVERAGE_GATES) }).strict(),
+  z
+    .object({
+      code: z.literal("FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF"),
+      fightDurationMs: z.number().int().nonnegative(),
+      longestBuffMs: z.number().int().positive(),
+    })
+    .strict(),
+  z
+    .object({
+      code: z.literal("UNCLASSIFIED_CANDIDATE"),
+      spellId: z.number().int().positive(),
+      abilityName: z.string().min(1),
+    })
+    .strict(),
+  z.object({ code: z.literal("IDENTITY_DATA_UNAVAILABLE") }).strict(),
+]);
+
+/**
+ * One consumable's status. The discriminators are `countState` and (on the
+ * block) `assessment`, never `state`: that key is reserved from the wire so
+ * no internal state object can be mistaken for part of the contract.
+ *
+ *   OBSERVED  `count` is complete. Zero is reported only under COMPLETE
+ *             coverage for the player over the whole fight.
+ *   UNKNOWN   the count could not be established. `observedAtLeast` is the
+ *             uses actually seen: a lower bound, never a count.
+ */
+export const ConsumableStatusSchema = z.discriminatedUnion("countState", [
+  z
+    .object({
+      countState: z.literal("OBSERVED"),
+      count: z.number().int().nonnegative(),
+      uses: z.array(ConsumableUseSchema),
+    })
+    .strict(),
+  z
+    .object({
+      countState: z.literal("UNKNOWN"),
+      reasons: z.array(ConsumableUnknownReasonSchema).min(1),
+      observedAtLeast: z.number().int().nonnegative(),
+      uses: z.array(ConsumableUseSchema),
+    })
+    .strict(),
+]);
+
+/**
+ * The consumable status every report carries (product intent "Always-Report
+ * Consumables"). It is SPECIALIZATION-INDEPENDENT: produced by the shared
+ * preparation producer from the observed fight, never from gameplay
+ * evaluation, so it appears on every status, unsupported specializations
+ * included.
+ *
+ * - A use is any use of the shared cooldown slot (owner decision): every
+ *   spell on the health-potion cooldown is a health potion use, every spell on
+ *   the combat-potion cooldown a combat potion use, and each use is named.
+ * - Uses are observed Warcraft Logs facts (`WCL_OBSERVED_FACT`). Which spell is
+ *   which consumable is runtime game data (`RUNTIME_GAME_DATA`), identified by
+ *   revision and client build.
+ * - There is no judgment here: no "should have used", no score.
+ */
+export const PreparationSchema = z.discriminatedUnion("assessment", [
+  z
+    .object({
+      assessment: z.literal("ASSESSED"),
+      category: z.literal("PREPARATION"),
+      authority: z.literal("WCL_OBSERVED_FACT"),
+      identityData: z
+        .object({
+          authority: z.literal("RUNTIME_GAME_DATA"),
+          artifactRevision: z.string().min(1),
+          clientDataWowVersion: z.string().min(1),
+        })
+        .strict()
+        .nullable(),
+      /** All three, always. A consumable is never omitted. */
+      statuses: z
+        .object({
+          healthPotion: ConsumableStatusSchema,
+          healthstone: ConsumableStatusSchema,
+          combatPotion: ConsumableStatusSchema,
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      assessment: z.literal("NOT_ASSESSED"),
+      reason: z.enum(PUBLIC_PREPARATION_NOT_ASSESSED_REASONS),
+    })
+    .strict(),
+]);
+
+// ---------------------------------------------------------------------------
 // The result
 // ---------------------------------------------------------------------------
 
@@ -469,6 +606,12 @@ const commonFields = {
   capability: CapabilitySchema,
   /** Which registered analyzer ran, or `null` when none did. */
   analyzerId: z.string().nullable(),
+  /**
+   * Consumable status (PREP-2). OPTIONAL IN THE SCHEMA ONLY, so adding it is
+   * not a version change (the rule above). This build always emits it, on
+   * every status.
+   */
+  preparation: PreparationSchema.optional(),
   // THERE IS DELIBERATELY NO `evidenceScope` HERE.
   //
   // Ingestion scope tells the application which evidence to RETRIEVE. It is not
@@ -507,6 +650,12 @@ export const AnalyzedResultSchema = z
  * `coverage` with zeroes, no `authority`. An empty decision list with a zero
  * denominator reads to a player as "no mistakes found", and the only reliable
  * defence is that the fields do not exist to be misread.
+ *
+ * `preparation` (in the common fields) is deliberately NOT gameplay-shaped and
+ * is allowed here (PREP-2). It reports observed consumable use, not
+ * evaluation: it makes no claim about rotation and has no zero-denominator
+ * reading. Product intent requires it on every report, and it is what makes
+ * an unsupported specialization's report useful rather than empty.
  */
 function unanalyzedResult<T extends (typeof PUBLIC_ANALYSIS_STATUSES)[number]>(status: T) {
   return z

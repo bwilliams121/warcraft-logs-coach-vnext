@@ -44,11 +44,11 @@ import {
 import { assessConsumableStatus } from "../analysis/preparation/consumable-status.js";
 import { PREPARATION_REQUIREMENT } from "../analysis/preparation/requirement.js";
 import type { CombatIngestionPort } from "./ingestion-port.js";
-import { deriveIngestionScope } from "./ingestion-scope.js";
+import { deriveIngestionScope, type IngestionScope } from "./ingestion-scope.js";
 import {
   assertNever,
-  PREPARATION_NOT_ASSESSED,
   serviceFailure,
+  type PreparationOutcome,
   type AnalysisResultState,
   type AnalysisServiceResult,
   type FightAnalysis,
@@ -302,22 +302,61 @@ function resultStateFor(analysis: FightAnalysis): AnalysisResultState {
  * specialization. Returning an error instead would push callers toward retrying
  * or discarding a perfectly correct answer.
  *
- * Every analyzer-specific field is `null` because no analyzer ran, and no
- * combat events were retrieved to produce it. Preparation is NOT_ASSESSED for
- * the same reason: there is no retrieved fight to assess. That is disclosed,
- * never shown as a status.
+ * Every analyzer-specific field is `null` because no analyzer ran.
+ *
+ * PREPARATION STILL RUNS (owner decision, PREP-2). Product intent requires the
+ * consumable status in every report, regardless of gameplay support. So the
+ * fight is retrieved for the shared preparation producer ALONE: its scope
+ * derives from `PREPARATION_REQUIREMENT` only (PLAYER_CONTEXT, no resources).
+ * That is a real Warcraft Logs cost per unsupported request, accepted by the
+ * owner.
+ *
+ * A retrieval failure here does not turn this correct answer into an error.
+ * The unsupported status stands, and preparation is disclosed NOT_ASSESSED
+ * (RETRIEVAL_FAILED). `scope` is what was actually retrieved, or `null` when
+ * nothing was.
  */
-function unsupportedSpec(identity: FightIdentity, observedSpecId: string): AnalysisServiceResult {
+async function unsupportedSpec(
+  identity: FightIdentity,
+  observedSpecId: string,
+  retrieve: (scope: IngestionScope) => ReturnType<CombatIngestionPort>,
+): Promise<AnalysisServiceResult> {
+  const retrieval = await preparationAlone(identity, retrieve);
   const analysis: FightAnalysis = {
     identity,
     specId: null,
     analyzerId: null,
-    scope: null,
+    scope: retrieval.scope,
     analysis: specNotSupported(observedSpecId),
     observedDecisions: null,
-    preparation: PREPARATION_NOT_ASSESSED,
+    preparation: retrieval.preparation,
   };
   return { ok: true, state: resultStateFor(analysis), analysis };
+}
+
+/** The ingestion request for preparation alone, from the producer's own declared requirement. */
+const PREPARATION_ALONE_SCOPE = deriveIngestionScope([PREPARATION_REQUIREMENT]);
+
+async function preparationAlone(
+  identity: FightIdentity,
+  retrieve: (scope: IngestionScope) => ReturnType<CombatIngestionPort>,
+): Promise<{ readonly scope: IngestionScope | null; readonly preparation: PreparationOutcome }> {
+  const failed = {
+    scope: null,
+    preparation: { state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" },
+  } as const;
+  if (!PREPARATION_ALONE_SCOPE.ok) return failed;
+  const ingested = await retrieve(PREPARATION_ALONE_SCOPE.scope);
+  // The same identity-consistency check as the analyzed path: a report
+  // replaced between preflight and ingestion is not the report identified.
+  if (!ingested.ok || ingested.fight.report.revision !== identity.report.revision) return failed;
+  return {
+    scope: PREPARATION_ALONE_SCOPE.scope,
+    preparation: {
+      state: "ASSESSED",
+      report: assessConsumableStatus(ingested.fight, identity.player.sourceId),
+    },
+  };
 }
 
 /**
@@ -408,6 +447,20 @@ export async function analyzeFight(
   // it here avoids paginating an entire combat log in order to report that we
   // were never going to analyze it. Nothing is lost by answering early: the
   // analyzer's own spec gate would return the same status from the same fact.
+  // Retrieval for the shared PREPARATION producer alone, used when no
+  // analyzer will run (PREP-2). Its scope is the producer's own requirement.
+  const retrievePreparationAlone = (scope: IngestionScope) =>
+    deps.ingest(
+      {
+        reportCode: parsed.request.reportCode,
+        fightId: parsed.request.fightId,
+        sourceId: parsed.request.sourceId,
+        scope,
+        includeResources: PREPARATION_REQUIREMENT.includeResources,
+      },
+      config.config.wcl,
+    );
+
   const resolved = resolveSpecIdentity(identity.player);
   if (!resolved.ok) {
     if (resolved.reason === "IDENTITY_NOT_USABLE") {
@@ -420,7 +473,7 @@ export async function analyzeFight(
       );
     }
     const { className, specName } = resolved.observed;
-    return unsupportedSpec(identity, `${className}/${specName}`);
+    return unsupportedSpec(identity, `${className}/${specName}`, retrievePreparationAlone);
   }
 
   // PUBLIC lookup only. An internal-only registration for this specialization
@@ -431,7 +484,7 @@ export async function analyzeFight(
   // evaluated.
   const analyzer = analyzerForSpec(resolved.specId, catalog.catalog);
   if (analyzer === null) {
-    return unsupportedSpec(identity, resolved.specId);
+    return unsupportedSpec(identity, resolved.specId, retrievePreparationAlone);
   }
 
   // ---- evidence breadth, from THE SELECTED ANALYZER AND NOTHING ELSE ----

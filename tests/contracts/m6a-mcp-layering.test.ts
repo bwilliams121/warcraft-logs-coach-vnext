@@ -311,7 +311,9 @@ describe("the public contract stays transport-neutral and secret-free", () => {
     // spec-id narrowing instead. Both are shared vocabulary under src/findings.
     const specifiers = importSpecifiersOf("src/contracts/analysis-projection.ts");
 
+    // PREP-2: the preparation report's TYPES (projected field for field).
     expect([...specifiers].sort()).toEqual([
+      "../analysis/preparation/consumable-status.js",
       "../engine/evidence/locator.js",
       "../findings/observed-decision-view.js",
       "../findings/spec-id.js",

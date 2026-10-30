@@ -215,12 +215,23 @@ export interface FightAnalysis {
 
 /**
  * Whether the preparation producer ran. NOT_ASSESSED is a disclosed gap, not a
- * status: no fight was retrieved (an unsupported specialization is answered
- * before ingestion), so there was nothing to assess, and nothing is claimed.
+ * status, and nothing is claimed:
+ *
+ *   NO_FIGHT_RETRIEVED  no fight was retrieved for this player (raid night's
+ *                       unanalyzable players; constructed test analyses).
+ *   RETRIEVAL_FAILED    the fight was requested for preparation alone (an
+ *                       unsupported specialization, PREP-2) and retrieval
+ *                       failed or the report changed. The unsupported answer
+ *                       itself still stands.
  */
+export const PREPARATION_NOT_ASSESSED_REASONS = ["NO_FIGHT_RETRIEVED", "RETRIEVAL_FAILED"] as const;
+
 export type PreparationOutcome =
   | { readonly state: "ASSESSED"; readonly report: ConsumableStatusReport }
-  | { readonly state: "NOT_ASSESSED"; readonly reason: "NO_FIGHT_RETRIEVED" };
+  | {
+      readonly state: "NOT_ASSESSED";
+      readonly reason: (typeof PREPARATION_NOT_ASSESSED_REASONS)[number];
+    };
 
 export const PREPARATION_NOT_ASSESSED: PreparationOutcome = {
   state: "NOT_ASSESSED",

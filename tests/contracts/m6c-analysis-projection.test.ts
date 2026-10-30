@@ -707,7 +707,9 @@ describe("ingestion scope stays internal", () => {
     // wire, not the orchestration: the service still derives scope from the
     // selected analyzer and still records what it retrieved.
     expect(ANALYZED.scope).toBe("PLAYER_CONTEXT");
-    expect(UNSUPPORTED.scope).toBeNull();
+    // PREP-2: an unsupported specialization's fight is retrieved for the
+    // shared preparation producer alone, and the scope records that.
+    expect(UNSUPPORTED.scope).toBe("PLAYER_CONTEXT");
   });
 
   it("replaces it with no placeholder", () => {
