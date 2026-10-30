@@ -127,13 +127,9 @@ three owner decisions were taken (agent/architecture.md "PREP-2"):
 
 Still open, none of them an owner decision:
 
-- **Raid night.**
-  - The raid-night public document has no per-player analysis documents,
-    so its players' consumable status is internal only.
-  - Its unanalyzable players are still not ingested (the zero-ingestion
-    rule for fights where nobody is analyzable).
-  - Exposing per-player consumable status there is a raid-night contract
-    design question for a later tranche.
+- **RESOLVED (PREP-3): raid night.** Every present cell carries the compact
+  status, and all-unanalyzable fights are retrieved (owner decisions,
+  agent/architecture.md "PREP-3").
 - **No real use is committed.** No committed fight contains a health potion
   or healthstone use; a future capture that does should become a corpus
   case.

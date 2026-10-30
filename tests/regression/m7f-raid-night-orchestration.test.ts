@@ -127,9 +127,10 @@ describe("one ingestion per needed fight, never one per player", () => {
 });
 
 describe("zero ingestion when no selected player needs it", () => {
-  it("retrieves nothing when every present specialization is unsupported", async () => {
-    // Arms Warrior has no registered analyzer. Paginating this pull would
-    // spend a full retrieval on evidence nothing can read.
+  it("retrieves an all-unsupported fight once, for consumable status (PREP-3)", async () => {
+    // Arms Warrior has no registered analyzer, but a present player always
+    // needs the fight: every report carries their consumable status (owner
+    // decision PREP-3). Until PREP-3 this pull was skipped.
     const snapshot = assassinationSnapshot({
       fightIds: [1],
       sourceIds: [ARMS],
@@ -140,14 +141,16 @@ describe("zero ingestion when no selected player needs it", () => {
 
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, ports));
 
-    expect(ports.ingestedFightIds()).toEqual([]);
-    expect(aggregate.fights[0]?.processingOutcome).toBe("NOT_INGESTED");
-    expect(aggregate.coverage.fightsNotIngested).toBe(1);
-    expect(aggregate.coverage.fightsIngested).toBe(0);
+    expect(ports.ingestedFightIds()).toEqual([1]);
+    expect(aggregate.fights[0]?.processingOutcome).toBe("INGESTED");
+    expect(aggregate.coverage.fightsNotIngested).toBe(0);
+    expect(aggregate.coverage.fightsIngested).toBe(1);
     expect(aggregate.coverage.fightsFailed).toBe(0);
-    // The player is still reported, truthfully.
+    // The player is still reported as unsupported, now with an assessed status.
     expect(aggregate.coverage.cellsSpecNotSupported).toBe(1);
     expect(aggregate.status).toBe("NO_ANALYZED_CELLS");
+    const cell = aggregate.cells[0];
+    expect(cell?.kind === "NOT_ANALYZED" && cell.preparation.assessment).toBe("ASSESSED");
   });
 
   it("retrieves nothing when every selected player is absent", async () => {
@@ -166,7 +169,7 @@ describe("zero ingestion when no selected player needs it", () => {
     expect(aggregate.status).toBe("NO_ANALYZED_CELLS");
   });
 
-  it("retrieves nothing for a mix of absent and unsupported", async () => {
+  it("retrieves once for a mix of absent and unsupported (the unsupported player is present)", async () => {
     const snapshot = assassinationSnapshot({
       fightIds: [1],
       sourceIds: [ARMS, M5D2_ACTOR],
@@ -179,7 +182,7 @@ describe("zero ingestion when no selected player needs it", () => {
     const ports = fakePorts({ snapshot });
 
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, ports));
-    expect(ports.ingestedFightIds()).toEqual([]);
+    expect(ports.ingestedFightIds()).toEqual([1]);
     expect(aggregate.coverage.cellsAbsent).toBe(1);
     expect(aggregate.coverage.cellsSpecNotSupported).toBe(1);
   });
@@ -202,8 +205,9 @@ describe("zero ingestion when no selected player needs it", () => {
     expect(aggregate.coverage.cellsSpecNotSupported).toBe(1);
   });
 
-  it("ingests only the fights that need it in a mixed night", async () => {
-    // Fight 2 is all-unsupported; the others are not. One retrieval is skipped.
+  it("ingests every fight with a present player in a mixed night (PREP-3)", async () => {
+    // Fight 2 is all-unsupported; the others are not. Since PREP-3 fight 2 is
+    // retrieved too, for the present player's consumable status.
     // The Rogue is reported as an unsupported Rogue spec on fight 2 — a real
     // pair (Rogue/Outlaw), since a class does not change between pulls.
     const snapshot = assassinationSnapshot({
@@ -214,9 +218,9 @@ describe("zero ingestion when no selected player needs it", () => {
     const ports = fakePorts({ snapshot });
 
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1, 2, 3] }, ports));
-    expect(ports.ingestedFightIds()).toEqual([1, 3]);
-    expect(aggregate.coverage.fightsIngested).toBe(2);
-    expect(aggregate.coverage.fightsNotIngested).toBe(1);
+    expect(ports.ingestedFightIds()).toEqual([1, 2, 3]);
+    expect(aggregate.coverage.fightsIngested).toBe(3);
+    expect(aggregate.coverage.fightsNotIngested).toBe(0);
     // The identity the domain claims still holds.
     expect(aggregate.coverage.fightsIncluded).toBe(
       aggregate.coverage.fightsIngested +
@@ -261,8 +265,8 @@ describe("a mixed roster keeps every status distinct", () => {
     expect(aggregate.roster).toHaveLength(1);
     expect(aggregate.roster[0]?.observedSpecNames).toEqual(["Assassination", "Outlaw"]);
     expect(aggregate.roster[0]?.specChanged).toBe(true);
-    // Fight 2's Outlaw has no analyzer, so the pull is not retrieved.
-    expect(ports.ingestedFightIds()).toEqual([1]);
+    // Fight 2's Outlaw has no analyzer; the pull is retrieved for consumable status only (PREP-3).
+    expect(ports.ingestedFightIds()).toEqual([1, 2]);
     expect(aggregate.trendEvidence.series[0]?.comparability[0]?.sameSpec).toBe("DIFFERENT");
     // No direction label anywhere.
     expect(JSON.stringify(aggregate.trendEvidence)).not.toMatch(/improv|regress|better|worse/i);
@@ -281,10 +285,12 @@ describe("a mixed roster keeps every status distinct", () => {
     const aggregate = aggregateOf(await runNight({ reportCode: REPORT_CODE, fightIds: [1] }, ports));
     const cell = aggregate.cells[0];
 
-    expect(ports.ingestedFightIds()).toEqual([]);
+    // Present, so retrieved for consumable status (PREP-3); still no analyzer.
+    expect(ports.ingestedFightIds()).toEqual([1]);
     expect(cell?.kind).toBe("ANALYSIS_UNAVAILABLE");
     if (cell?.kind !== "ANALYSIS_UNAVAILABLE") return;
     expect(cell.reason).toBe("SPECIALIZATION_UNRESOLVED");
+    expect(cell.preparation.assessment).toBe("ASSESSED");
     expect(cell.specName).toBeNull();
     expect(aggregate.coverage.cellsSpecNotSupported).toBe(0);
     expect(aggregate.coverage.cellsAnalysisUnavailable).toBe(1);

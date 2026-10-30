@@ -61,7 +61,11 @@
 
 import * as z from "zod";
 
-import { CapabilitySchema } from "./analysis-contract.js";
+import {
+  CapabilitySchema,
+  PUBLIC_CONSUMABLE_UNKNOWN_CODES,
+  PUBLIC_PREPARATION_NOT_ASSESSED_REASONS,
+} from "./analysis-contract.js";
 import {
   ANALYSIS_UNAVAILABLE_REASONS,
   NON_ANALYZED_STATUSES,
@@ -250,6 +254,60 @@ export const CellProvenanceSchema = z
   .strict();
 
 // ---------------------------------------------------------------------------
+// Cell consumable status (PREP-3)
+// ---------------------------------------------------------------------------
+
+/**
+ * One consumable, COMPACT: a complete count, or UNKNOWN with the lower bound
+ * and its reason codes. An UNKNOWN never carries a `count`. The named uses and
+ * their evidence stay in the single-fight document at `analysisRef`, the same
+ * way the decision arrays do.
+ */
+const CellConsumableStatusSchema = z.discriminatedUnion("countState", [
+  z.object({ countState: z.literal("OBSERVED"), count: z.number().int().nonnegative() }).strict(),
+  z
+    .object({
+      countState: z.literal("UNKNOWN"),
+      observedAtLeast: z.number().int().nonnegative(),
+      reasonCodes: z.array(z.enum(PUBLIC_CONSUMABLE_UNKNOWN_CODES)).min(1),
+    })
+    .strict(),
+]);
+
+/**
+ * A present player's consumable status in this pull (owner decision, PREP-3):
+ * health potion, healthstone and combat potion, never omitted. It is
+ * specialization-independent, so it is on every present cell kind, an
+ * unsupported or unresolved specialization included. It is NOT_ASSESSED only
+ * when the fight's retrieval failed.
+ *
+ * OPTIONAL IN THE SCHEMA ONLY (an additive v1 field); this build always emits
+ * it on present cells.
+ */
+export const CellPreparationSchema = z.discriminatedUnion("assessment", [
+  z
+    .object({
+      assessment: z.literal("ASSESSED"),
+      statuses: z
+        .object({
+          healthPotion: CellConsumableStatusSchema,
+          healthstone: CellConsumableStatusSchema,
+          combatPotion: CellConsumableStatusSchema,
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      assessment: z.literal("NOT_ASSESSED"),
+      reason: z.enum(PUBLIC_PREPARATION_NOT_ASSESSED_REASONS),
+    })
+    .strict(),
+]);
+
+export type PublicCellPreparation = z.infer<typeof CellPreparationSchema>;
+
+// ---------------------------------------------------------------------------
 // Cells
 // ---------------------------------------------------------------------------
 
@@ -288,6 +346,7 @@ export const AnalyzedCellSchema = z
     provenance: CellProvenanceSchema,
     counts: CellCountsSchema,
     analysisRef: AnalysisRefSchema,
+    preparation: CellPreparationSchema.optional(),
   })
   .strict();
 
@@ -307,6 +366,7 @@ export const NotAnalyzedCellSchema = z
     /** Author-written explanation of what was not done, and why. */
     detail: z.string().min(1),
     analysisRef: AnalysisRefSchema,
+    preparation: CellPreparationSchema.optional(),
   })
   .strict();
 
@@ -344,6 +404,7 @@ export const AnalysisUnavailableCellSchema = z
     ...cellIdentityFields,
     specName: z.string().nullable(),
     reason: z.enum(PUBLIC_ANALYSIS_UNAVAILABLE_REASONS),
+    preparation: CellPreparationSchema.optional(),
   })
   .strict();
 

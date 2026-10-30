@@ -1877,6 +1877,17 @@ public consumable status (PREP-2, tests/contracts/preparation-{public-projection
   no leak                                      -> identity-load detail not published (reason is the code alone); no `state` key anywhere (m6c guard)
   vocabularies                                 -> unknown codes, use timings, not-assessed reasons pinned equal to producer/services; gate outside the public four fails the projection closed
   superseded pins (updated, owner decision)    -> refusals, m10d Arms invariance, m6c scope: one preparation-only retrieval instead of zero; corpus cases scope PLAYER_CONTEXT, renamed case id
+
+raid-night consumable status (PREP-3, tests/contracts/raid-night-preparation.test.ts, tests/unit/raid-night-input-gate.test.ts, m7f regressions):
+  all-unanalyzable fight                       -> ONE retrieval, includeResources false, talentImportActorId = a present player; INGESTED; NOT_ANALYZED cell with ASSESSED preparation
+  all-absent fight                             -> still NOT_INGESTED, zero retrieval; ABSENT cells carry no preparation
+  present cell kinds                           -> ANALYZED and NOT_ANALYZED (and ANALYSIS_UNAVAILABLE) all carry preparation
+  failed retrieval                             -> INGESTION_FAILED; ANALYSIS_UNAVAILABLE (FIGHT_INGESTION_FAILED); preparation NOT_ASSESSED (RETRIEVAL_FAILED), never a zero
+  public cell                                  -> schema-valid compact form; no uses/evidence/spellId on the night; absent cell has no preparation key
+  compact form                                 -> OBSERVED count; UNKNOWN observedAtLeast + each reason code once, no count
+  gate (tightened)                             -> NOT_INGESTED with ANY present cell (unsupported, unresolved, analyzed, unavailable) -> PROCESSING_CELL_MISMATCH; all-absent NOT_INGESTED accepted
+  single-player truth                          -> the raid-night cell's preparation equals the single-player cell's (same focused view)
+  m8d no-ratio guard                           -> words and word prefixes (matchRate, passRatio, percentage fail); "preparation" passes
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture

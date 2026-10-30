@@ -656,8 +656,19 @@ describe("player progression", () => {
   it("computes no rate, ratio or percentage for a player", () => {
     const progression = build(night([{ fightId: 1 }, { fightId: 2 }], analyzed));
     const serialized = JSON.stringify(only(progression).players[0]);
+    // Checked as WORDS (split on non-letters and camelCase), each refused as a
+    // word or a word prefix: \`matchRate\`, \`passRatio\` and \`percentage\` all
+    // fail. A substring check would also refuse \`preparation\` (PREP-3), which
+    // contains "ratio" and is no ratio.
+    const words = serialized
+      .split(/[^A-Za-z]+/)
+      .flatMap((token) => token.split(/(?=[A-Z])/))
+      .map((word) => word.toLowerCase());
     for (const banned of ["rate", "ratio", "percent", "accuracy", "score", "grade"]) {
-      expect(serialized.toLowerCase()).not.toContain(banned);
+      expect(
+        words.filter((word) => word.startsWith(banned)),
+        banned,
+      ).toEqual([]);
     }
   });
 });

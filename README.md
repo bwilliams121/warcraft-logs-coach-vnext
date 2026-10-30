@@ -331,6 +331,10 @@ status, unsupported specializations included:
 - or `assessment: "NOT_ASSESSED"` with the reason (for example, retrieval
   failed).
 
+The raid-night report (PREP-3) carries the same three statuses in compact
+form on every present player's cell. Each is a count, or `UNKNOWN` with a
+lower bound and reason codes; the named uses stay in the single-fight report.
+
 A use is any use of the shared cooldown slot, and each use is named. The
 field is optional in the v1 schema only so that adding it was not a version
 change; this build always emits it.
