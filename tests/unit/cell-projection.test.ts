@@ -264,6 +264,7 @@ describe("cells that have no analysis object at all", () => {
       sourceId: ROGUE,
       specName: "Assassination",
       reason: "FIGHT_INGESTION_FAILED",
+      preparation: { state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" },
     });
 
     expect(cell.kind).toBe("ANALYSIS_UNAVAILABLE");

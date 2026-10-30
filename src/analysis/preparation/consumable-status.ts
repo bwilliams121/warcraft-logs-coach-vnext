@@ -67,6 +67,13 @@ export const CONSUMABLE_STATUS_REVISION = "preparation-consumable-status/1" as c
 export const CONSUMABLE_USE_TIMINGS = ["IN_FIGHT", "BEFORE_PULL", "UNRESOLVED"] as const;
 export type ConsumableUseTiming = (typeof CONSUMABLE_USE_TIMINGS)[number];
 
+/**
+ * Why a player's preparation was NOT assessed at all (the services' outcome,
+ * declared here so the aggregation domain can name it without reaching the
+ * services): no fight was retrieved for the player, or its retrieval failed.
+ */
+export const PREPARATION_NOT_ASSESSED_REASONS = ["NO_FIGHT_RETRIEVED", "RETRIEVAL_FAILED"] as const;
+
 /** Every UNKNOWN reason code this producer can emit (pinned equal to the public enum). */
 export const CONSUMABLE_UNKNOWN_CODES = [
   "CAST_COVERAGE",

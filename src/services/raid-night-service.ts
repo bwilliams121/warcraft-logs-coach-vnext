@@ -51,7 +51,12 @@
  */
 
 import { createCombatState } from "../engine/state/combat-state.js";
-import { absentCell, analysisUnavailableCell, toPlayerFightCell } from "../aggregation/cell-projection.js";
+import {
+  absentCell,
+  analysisUnavailableCell,
+  cellPreparationOf,
+  toPlayerFightCell,
+} from "../aggregation/cell-projection.js";
 import type { PlayerFightResult } from "../aggregation/cell.js";
 import { aggregateRaidNight } from "../aggregation/roster-aggregator.js";
 import {
@@ -95,7 +100,18 @@ import type {
 import { MAX_RAID_NIGHT_CELLS, MAX_RAID_NIGHT_PLAYERS, type RaidNightRequest } from "./raid-night-request.js";
 import type { RaidNightRunResult } from "./raid-night-runner.js";
 import { resolveSpecIdentity } from "./spec-identity.js";
-import { serviceFailure, type ServiceErrorCode } from "./result.js";
+import {
+  PREPARATION_NOT_ASSESSED,
+  serviceFailure,
+  type PreparationOutcome,
+  type ServiceErrorCode,
+} from "./result.js";
+
+/** A fight whose retrieval failed: nothing was assessed, and nothing is claimed. */
+const PREPARATION_RETRIEVAL_FAILED: PreparationOutcome = {
+  state: "NOT_ASSESSED",
+  reason: "RETRIEVAL_FAILED",
+};
 
 export interface RaidNightServiceDeps {
   readonly env: Env;
@@ -452,19 +468,22 @@ export async function analyzeRaidNight(
       (entry): entry is Exclude<PlannedPlayer, { kind: "SUPPORTED" }> => entry.kind !== "SUPPORTED",
     );
 
-    // ---- ZERO INGESTION when nobody needs it ----
+    const present = planned.filter((entry) => entry.kind !== "ABSENT");
+
+    // ---- ZERO INGESTION when nobody present needs it ----
     //
-    // Everybody absent, every present specialization unsupported, or a mix. The
-    // fight is still in the snapshot and still gets a summary; what it does not
-    // get is a pagination nothing would have read.
+    // Everybody absent. The fight is still in the snapshot and still gets a
+    // summary; what it does not get is a pagination nothing would have read.
     //
-    // Expressed as "every planned player is unanalyzable" rather than
-    // "supported.length === 0" so the narrowing is the condition itself — the two
-    // cannot drift apart, and the loop below cannot be handed a supported player.
-    if (unanalyzable.length === planned.length) {
+    // PREP-3 (owner decision): a PRESENT player always needs the fight, even
+    // with an unsupported or unresolved specialization, because every report
+    // carries their consumable status. So a fight whose present players are
+    // all unanalyzable is retrieved for the shared preparation producer alone.
+    // Only an all-absent fight is skipped now.
+    if (present.length === 0) {
       fightOutcomes.push({ fightId, outcome: "NOT_INGESTED" satisfies FightProcessingOutcome });
       for (const entry of unanalyzable) {
-        cells.push(cellForUnanalyzed(analysisSnapshot, fightId, entry));
+        cells.push(cellForUnanalyzed(analysisSnapshot, fightId, entry, PREPARATION_NOT_ASSESSED));
       }
       continue;
     }
@@ -496,9 +515,10 @@ export async function analyzeRaidNight(
         reportCode: request.reportCode,
         fightId,
         // The context query's only per-actor field is the talent import code,
-        // which nothing here reads. One supported player is named so the request
-        // is well-formed; the focused views decide who it describes.
-        talentImportActorId: supported[0]?.sourceId ?? 0,
+        // which nothing here reads. One present player (a supported one when
+        // there is one) is named so the request is well-formed; the focused
+        // views decide who it describes.
+        talentImportActorId: supported[0]?.sourceId ?? present[0]?.sourceId ?? 0,
         includeResources,
         expectedReportRevision: r0,
       },
@@ -528,6 +548,7 @@ export async function analyzeRaidNight(
                 sourceId: entry.sourceId,
                 specName: specNameOf(analysisSnapshot, fightId, entry.sourceId),
                 reason: "FIGHT_INGESTION_FAILED",
+                preparation: PREPARATION_RETRIEVAL_FAILED,
               }),
         );
       }
@@ -553,8 +574,8 @@ export async function analyzeRaidNight(
 
     // ---- one player at a time, over the ONE shared core ----
     for (const entry of planned) {
-      if (entry.kind !== "SUPPORTED") {
-        cells.push(cellForUnanalyzed(analysisSnapshot, fightId, entry));
+      if (entry.kind === "ABSENT") {
+        cells.push(cellForUnanalyzed(analysisSnapshot, fightId, entry, PREPARATION_NOT_ASSESSED));
         continue;
       }
 
@@ -566,6 +587,16 @@ export async function analyzeRaidNight(
         scope.scope,
         scope.ownedPetEvidence === true ? { ownedPetEvidence: true } : undefined,
       );
+      // The shared producer over this player's own focused view, for EVERY
+      // present player, analyzable or not, and independent of any analyzer.
+      const preparation = {
+        state: "ASSESSED",
+        report: assessConsumableStatus(focused, entry.sourceId),
+      } as const;
+      if (entry.kind !== "SUPPORTED") {
+        cells.push(cellForUnanalyzed(analysisSnapshot, fightId, entry, preparation));
+        continue;
+      }
       const state = createCombatState(focused);
       // Through `runAnalyzer`, which checks the result is the registration's
       // own. A mismatch is a deployment defect and fails the whole night: a
@@ -596,8 +627,7 @@ export async function analyzeRaidNight(
           analysis,
           observedDecisions:
             analysis.status === "ANALYZED" ? observedDecisionViewOf(registry, analysis) : null,
-          // The shared producer over this player's focused view, independent of the analyzer.
-          preparation: { state: "ASSESSED", report: assessConsumableStatus(focused, entry.sourceId) },
+          preparation,
         },
         // From the core that actually produced this analysis, never a literal.
         normalizationRevision: core.provenance.normalizationRevision,
@@ -812,6 +842,8 @@ function cellForUnanalyzed(
   snapshot: ReportRosterSnapshot,
   fightId: number,
   entry: Exclude<PlannedPlayer, { kind: "SUPPORTED" }>,
+  /** The present player's consumable status (ignored for an absent one, who has none). */
+  preparation: PreparationOutcome,
 ): PlayerFightResult {
   const reportCode = snapshot.identity.reportCode;
   switch (entry.kind) {
@@ -829,6 +861,7 @@ function cellForUnanalyzed(
           `No gameplay analyzer is registered for '${entry.specName}', so no rotational decision was evaluated ` +
           `and no gameplay analysis was attempted. This is a limit of the analyzer's current coverage, not a ` +
           `statement about how the fight was played.`,
+        preparation: cellPreparationOf(preparation),
       };
     case "SPEC_UNRESOLVED":
       return analysisUnavailableCell({
@@ -839,6 +872,7 @@ function cellForUnanalyzed(
         // does not invent one.
         specName: null,
         reason: "SPECIALIZATION_UNRESOLVED",
+        preparation,
       });
   }
 }

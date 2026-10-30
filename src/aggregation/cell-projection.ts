@@ -36,13 +36,16 @@
  * called it; this module only reshapes.
  */
 
-import type { FightAnalysis } from "../services/result.js";
+import type { ConsumableStatus } from "../analysis/preparation/consumable-status.js";
+import type { FightAnalysis, PreparationOutcome } from "../services/result.js";
 import { playerKeyOf } from "../wcl/roster-snapshot.js";
 import type {
   AnalysisUnavailableReason,
   CellCounts,
   CellRecurrence,
   CellTally,
+  CellConsumableStatus,
+  CellPreparation,
   NonAnalyzedStatus,
   PlayerFightResult,
 } from "./cell.js";
@@ -157,6 +160,7 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
         // The M6 vocabulary, unchanged. The union above is exactly these four.
         status: result.status satisfies NonAnalyzedStatus,
         detail: result.detail,
+        preparation: cellPreparationOf(fightAnalysis.preparation),
       },
     };
   }
@@ -248,6 +252,8 @@ export function toPlayerFightCell(input: CellProjectionInput): CellProjection {
       },
       counts,
       recurrence,
+      // Compact: counts or lower bounds and reason codes, never the uses.
+      preparation: cellPreparationOf(fightAnalysis.preparation),
       // NOTHING ELSE CROSSES. `result.comparisons` and `result.excluded` end
       // here, along with every `rawBlocker`, every `observedActionRejected`,
       // every evidence locator and the ingestion scope. The heavy analysis is
@@ -296,6 +302,8 @@ export function analysisUnavailableCell(options: {
   /** M7-C's per-fight fact, passed through. `null` when WCL supplied none. */
   readonly specName: string | null;
   readonly reason: AnalysisUnavailableReason;
+  /** The player's consumable status: assessed when the fight was retrieved, else NOT_ASSESSED. */
+  readonly preparation: PreparationOutcome;
 }): PlayerFightResult {
   return {
     kind: "ANALYSIS_UNAVAILABLE",
@@ -304,5 +312,34 @@ export function analysisUnavailableCell(options: {
     sourceId: options.sourceId,
     specName: options.specName,
     reason: options.reason,
+    preparation: cellPreparationOf(options.preparation),
+  };
+}
+
+/**
+ * The COMPACT cell form of a preparation outcome (PREP-3): per consumable, a
+ * complete count, or UNKNOWN with the lower bound and its reason codes (each
+ * once, in first-seen order). The uses and their evidence do not cross into the
+ * cell; they stay in the single-fight report.
+ */
+export function cellPreparationOf(outcome: PreparationOutcome): CellPreparation {
+  if (outcome.state === "NOT_ASSESSED") return { assessment: "NOT_ASSESSED", reason: outcome.reason };
+  const { statuses } = outcome.report;
+  return {
+    assessment: "ASSESSED",
+    statuses: {
+      healthPotion: compactStatus(statuses.HEALTH_POTION),
+      healthstone: compactStatus(statuses.HEALTHSTONE),
+      combatPotion: compactStatus(statuses.COMBAT_POTION),
+    },
+  };
+}
+
+function compactStatus(status: ConsumableStatus): CellConsumableStatus {
+  if (status.state === "OBSERVED") return { countState: "OBSERVED", count: status.count };
+  return {
+    countState: "UNKNOWN",
+    observedAtLeast: status.observedAtLeast,
+    reasonCodes: [...new Set(status.reasons.map((reason) => reason.code))],
   };
 }

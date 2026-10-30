@@ -26,7 +26,13 @@
  * timestamp could reach the public payload.
  */
 
-import type { CellCounts, CellAnalysisProvenance, PlayerFightResult } from "../aggregation/cell.js";
+import type {
+  CellAnalysisProvenance,
+  CellConsumableStatus,
+  CellCounts,
+  CellPreparation,
+  PlayerFightResult,
+} from "../aggregation/cell.js";
 import type {
   BatchFailure,
   CoverageSummary,
@@ -46,6 +52,7 @@ import {
   type PublicAnalysisRef,
   type PublicCell,
   type PublicCellCounts,
+  type PublicCellPreparation,
   type PublicCoverageSummary,
   type PublicFightSummary,
   type PublicPlayerSummary,
@@ -121,6 +128,30 @@ function analysisRefFor(reportCode: string, cell: PlayerFightResult): PublicAnal
  * raid-night document still calls it identically; a second implementation would
  * be a second place for a variant to drift.
  */
+/** The cell's compact consumable status, copied field for field (never aliased). */
+function projectCellPreparation(preparation: CellPreparation): PublicCellPreparation {
+  if (preparation.assessment === "NOT_ASSESSED") {
+    return { assessment: "NOT_ASSESSED", reason: preparation.reason };
+  }
+  type PublicStatus = Extract<PublicCellPreparation, { assessment: "ASSESSED" }>["statuses"]["healthPotion"];
+  const status = (entry: CellConsumableStatus): PublicStatus =>
+    entry.countState === "OBSERVED"
+      ? { countState: "OBSERVED", count: entry.count }
+      : {
+          countState: "UNKNOWN",
+          observedAtLeast: entry.observedAtLeast,
+          reasonCodes: [...entry.reasonCodes],
+        };
+  return {
+    assessment: "ASSESSED",
+    statuses: {
+      healthPotion: status(preparation.statuses.healthPotion),
+      healthstone: status(preparation.statuses.healthstone),
+      combatPotion: status(preparation.statuses.combatPotion),
+    },
+  };
+}
+
 export function projectCell(reportCode: string, cell: PlayerFightResult): PublicCell {
   switch (cell.kind) {
     case "ABSENT":
@@ -141,6 +172,7 @@ export function projectCell(reportCode: string, cell: PlayerFightResult): Public
         provenance: projectProvenance(cell.provenance),
         counts: projectCounts(cell.counts),
         analysisRef: analysisRefFor(reportCode, cell),
+        preparation: projectCellPreparation(cell.preparation),
         // `cell.recurrence` is NOT projected. Its patterns are already summed
         // into the night's three collections, and publishing them twice would
         // put two copies of one fact on the wire.
@@ -155,6 +187,7 @@ export function projectCell(reportCode: string, cell: PlayerFightResult): Public
         status: cell.status,
         detail: cell.detail,
         analysisRef: analysisRefFor(reportCode, cell),
+        preparation: projectCellPreparation(cell.preparation),
       };
     case "ANALYSIS_UNAVAILABLE":
       return {
@@ -164,6 +197,8 @@ export function projectCell(reportCode: string, cell: PlayerFightResult): Public
         sourceId: cell.sourceId,
         specName: cell.specName,
         reason: cell.reason,
+        // Assessed when the fight was retrieved; NOT_ASSESSED when it failed.
+        preparation: projectCellPreparation(cell.preparation),
       };
   }
 }

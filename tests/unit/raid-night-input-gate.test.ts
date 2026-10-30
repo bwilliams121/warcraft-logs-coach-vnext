@@ -325,6 +325,7 @@ describe("the gate proves cells agree with the factual snapshot", () => {
       sourceId: PALADIN,
       specName: null,
       reason: "FIGHT_INGESTION_FAILED",
+      preparation: { state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" },
     });
     const outcomes: readonly FightProcessingRecord[] = [
       { fightId: 1, outcome: "INGESTION_FAILED" },
@@ -336,6 +337,7 @@ describe("the gate proves cells agree with the factual snapshot", () => {
       sourceId: ROGUE,
       specName: "Assassination",
       reason: "FIGHT_INGESTION_FAILED",
+      preparation: { state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" },
     });
     expect(defectOf(verify([nulled, unavailableRogue, PALADIN_ABSENT, matchCell(2, ROGUE)], outcomes))).toBe(
       "SPEC_MISMATCH",
@@ -359,6 +361,7 @@ describe("the gate proves cells agree with what happened to the fight", () => {
     sourceId: ROGUE,
     specName: "Assassination",
     reason: "FIGHT_INGESTION_FAILED",
+    preparation: { state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" },
   });
 
   function verify(cell: PlayerFightResult, outcome: FightProcessingOutcome): RaidNightVerification {
@@ -394,6 +397,48 @@ describe("the gate proves cells agree with what happened to the fight", () => {
       nonAnalyzedFightAnalysis({ fightId: 1, sourceId: ROGUE, status: "SPEC_NOT_SUPPORTED" }),
     );
     expect(defectOf(verify(notAnalyzed, "INGESTION_FAILED"))).toBe("PROCESSING_CELL_MISMATCH");
+  });
+
+  it("PREP-3: refuses ANY present cell on a NOT_INGESTED fight, an unsupported or unresolved one included", () => {
+    // A present player always needs the fight for their consumable status, so a
+    // skipped retrieval with someone present is an orchestration defect.
+    const unsupported = cellOf(
+      nonAnalyzedFightAnalysis({ fightId: 1, sourceId: ROGUE, status: "SPEC_NOT_SUPPORTED" }),
+    );
+    const unresolved = analysisUnavailableCell({
+      fightId: 1,
+      reportCode: REPORT_CODE,
+      sourceId: ROGUE,
+      specName: null,
+      reason: "SPECIALIZATION_UNRESOLVED",
+      preparation: { state: "NOT_ASSESSED", reason: "NO_FIGHT_RETRIEVED" },
+    });
+    for (const cell of [unsupported, matchCell(1, ROGUE), UNAVAILABLE]) {
+      expect(defectOf(verify(cell, "NOT_INGESTED")), cell.kind).toBe("PROCESSING_CELL_MISMATCH");
+    }
+    const unresolvedSnapshot = snapshotFor({
+      players: [rosterPlayerFor({ sourceId: ROGUE })],
+      fights: [rosterFightFor({ fightId: 1, participants: [{ sourceId: ROGUE, specName: null }] })],
+    });
+    const verification = verifyRaidNightInput(verified(), {
+      snapshot: unresolvedSnapshot,
+      fightOutcomes: [{ fightId: 1, outcome: "NOT_INGESTED" }],
+      cells: [unresolved],
+    });
+    expect(defectOf(verification)).toBe("PROCESSING_CELL_MISMATCH");
+  });
+
+  it("PREP-3: accepts NOT_INGESTED when every player was absent", () => {
+    const absentSnapshot = snapshotFor({
+      players: [rosterPlayerFor({ sourceId: ROGUE })],
+      fights: [rosterFightFor({ fightId: 1, participants: [] })],
+    });
+    const verification = verifyRaidNightInput(verified(), {
+      snapshot: absentSnapshot,
+      fightOutcomes: [{ fightId: 1, outcome: "NOT_INGESTED" }],
+      cells: [absentCell({ fightId: 1, reportCode: REPORT_CODE, sourceId: ROGUE })],
+    });
+    expect(verification.ok).toBe(true);
   });
 
   it("leaves absence unaffected by what happened to the fight", () => {

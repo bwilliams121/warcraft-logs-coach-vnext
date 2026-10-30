@@ -6,7 +6,10 @@
  * is exactly one result shape.
  */
 
-import type { ConsumableStatusReport } from "../analysis/preparation/consumable-status.js";
+import {
+  PREPARATION_NOT_ASSESSED_REASONS,
+  type ConsumableStatusReport,
+} from "../analysis/preparation/consumable-status.js";
 import type { SpecAnalysisEnvelope } from "../findings/analysis-envelope.js";
 import type { SpecId } from "../findings/finding.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
@@ -224,7 +227,7 @@ export interface FightAnalysis {
  *                       failed or the report changed. The unsupported answer
  *                       itself still stands.
  */
-export const PREPARATION_NOT_ASSESSED_REASONS = ["NO_FIGHT_RETRIEVED", "RETRIEVAL_FAILED"] as const;
+export { PREPARATION_NOT_ASSESSED_REASONS };
 
 export type PreparationOutcome =
   | { readonly state: "ASSESSED"; readonly report: ConsumableStatusReport }

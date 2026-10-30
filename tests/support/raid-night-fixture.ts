@@ -107,6 +107,7 @@ export function unavailable(
     sourceId,
     specName,
     reason,
+    preparation: { state: "NOT_ASSESSED", reason: "NO_FIGHT_RETRIEVED" },
   });
 }
 

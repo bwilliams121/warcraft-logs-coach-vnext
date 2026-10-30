@@ -9901,3 +9901,73 @@ The raid-night public document carries no per-player analysis documents, so
 nothing public changed there. Raid night's unanalyzable players are still
 not ingested, and the preparation of the players it does analyze stays
 internal. See `agent/follow-ups.md`.
+
+---
+
+## PREP-3 — consumable status in the raid night
+
+**Status:** implemented (2026-10-30). This closes the raid-night half of the
+"Always-Report Consumables" requirement.
+
+### Owner decisions (2026-10-30)
+
+1. **Compact per cell.** Each present player's cell carries the three
+   consumables as a complete count, or UNKNOWN with a lower bound and reason
+   codes. Named uses and evidence stay in the single-fight report.
+2. **Retrieve "nobody analyzable" fights.** A fight whose present players
+   are all unsupported or unresolved is retrieved once, for consumable
+   status. This is accepted per-fight cost, consistent with PREP-2.
+
+### Orchestration (`raid-night-service.ts`)
+
+- **Zero ingestion now means everyone absent.** Any present player, with an
+  unsupported or unresolved specialization included, needs the fight.
+- **Scope.** The fight's requirement is the selected analyzers' plus
+  `PREPARATION_REQUIREMENT`. A preparation-only fight therefore retrieves with
+  no resources. `talentImportActorId` names a supported player when there is
+  one, else a present one.
+- **Assessment.** Every present player is assessed from their OWN focused
+  view (`assessConsumableStatus(focused, sourceId)`), independently of any
+  analyzer, so a raid-night cell's preparation equals the single-player one
+  (regression-tested).
+- **Failure.** The existing fight-failure semantics are unchanged: a
+  non-fatal failure gives present players ANALYSIS_UNAVAILABLE
+  (FIGHT_INGESTION_FAILED), and a fatal one fails the night, as for any
+  fight. Their preparation is NOT_ASSESSED (RETRIEVAL_FAILED), never zero.
+
+### Domain (`src/aggregation/`)
+
+- **Cells.** `PlayerFightResult` present kinds (ANALYZED, NOT_ANALYZED,
+  ANALYSIS_UNAVAILABLE) carry a required compact `CellPreparation`, built
+  once by `cellPreparationOf`. The full report stays releasable, as with all
+  analysis. ABSENT carries none.
+- **The M7-D gate is tightened.** A NOT_INGESTED fight with ANY present cell
+  is `PROCESSING_CELL_MISMATCH`, an unresolved specialization included, so
+  an orchestration bug that skips a needed retrieval fails closed.
+  NOT_INGESTED is coherent only when everyone was absent.
+- **Layering.** The not-assessed reasons moved into the preparation module
+  (re-exported by the services), so `cell.ts` names them without reaching
+  the services, as the aggregation layering requires.
+
+### Public raid-night contract
+
+- **Field.** `preparation` (optional in the schema, always emitted on
+  present cells) is on ANALYZED, NOT_ANALYZED and ANALYSIS_UNAVAILABLE
+  cells.
+- **Shape.**
+  - `{assessment: ASSESSED, statuses{healthPotion, healthstone,
+    combatPotion}}`, or `{assessment: NOT_ASSESSED, reason}`;
+  - each status is `{countState: OBSERVED, count}` or `{countState:
+    UNKNOWN, observedAtLeast, reasonCodes}`, with no count when UNKNOWN.
+- **Vocabulary.** The codes and reasons reuse the single-fight contract's
+  public vocabularies. The projection copies; it never aliases.
+
+### Test changes required by the decision
+
+- m7f orchestration: an all-unsupported or unresolved fight is now retrieved
+  once (`INGESTED`) instead of skipped.
+- m8d: its no-ratio guard now checks whole words (and word prefixes) instead
+  of substrings, because "preparation" contains "ratio". `matchRate`,
+  `passRatio` and `percentage` still fail it.
+- The single-player-truth regression builds its reference cell's
+  preparation as the services do.

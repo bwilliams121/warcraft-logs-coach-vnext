@@ -434,6 +434,7 @@ describe("an ingestion failure invents no analysis", () => {
         sourceId: ROGUE,
         specName: "Assassination",
         reason: "FIGHT_INGESTION_FAILED",
+        preparation: { state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" },
       }),
       analysisUnavailableCell({
         fightId: 1,
@@ -441,6 +442,7 @@ describe("an ingestion failure invents no analysis", () => {
         sourceId: PALADIN,
         specName: "Protection",
         reason: "FIGHT_INGESTION_FAILED",
+        preparation: { state: "NOT_ASSESSED", reason: "RETRIEVAL_FAILED" },
       }),
     ],
   });

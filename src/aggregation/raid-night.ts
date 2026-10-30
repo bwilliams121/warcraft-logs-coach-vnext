@@ -60,9 +60,12 @@ import type { PlayerFightResult } from "./cell.js";
  *
  * `NOT_INGESTED` WAS ADDED IN M7-F, AND WHY MATTERS
  *
- * Orchestration must not retrieve a fight no selected player needs analyzed —
- * everybody absent, or every present player's specialization unsupported. That
- * is the single largest cost saving in a mixed roster, and M7-A requires it.
+ * Orchestration must not retrieve a fight no selected player needs — since
+ * PREP-3, that means EVERYBODY ABSENT. A present player always needs the fight,
+ * even with an unsupported or unresolved specialization, because every report
+ * carries their consumable status (owner decision). Until PREP-3, a fight whose
+ * present players were all unsupported was skipped too; that saving was traded
+ * for the always-reported status.
  *
  * But it left the vocabulary unable to state what happened. `INGESTED` would be
  * a plain lie: no event request was issued. `INGESTION_FAILED` would be worse,
@@ -554,10 +557,23 @@ function checkAgainstProcessing(
     return "PROCESSING_RECORD_MISSING";
   }
 
+  // NOT_INGESTED: retrieval was deliberately skipped because no selected player
+  // needed it. Since PREP-3 that is only coherent when nobody was present:
+  // every present player needs the fight for their consumable status, whatever
+  // their specialization. Absent cells returned above, so ANY present cell here
+  // means orchestration skipped a retrieval a player needed. It is refused,
+  // whatever its kind, before the identity-only exception below. An ANALYZED
+  // cell would claim decisions from evidence never fetched; a SPEC_NOT_SUPPORTED
+  // or unresolved cell would carry no assessed consumable status.
+  if (outcome === "NOT_INGESTED") {
+    return "PROCESSING_CELL_MISMATCH";
+  }
+
   // A cell whose analysis was unavailable for a reason UNRELATED to the fight is
-  // consistent with any outcome. `SPECIALIZATION_UNRESOLVED` is a fact about the
-  // participant's own identity data, and it is true whether or not events were
-  // retrieved — so it is judged on its own meaning rather than against the fight.
+  // consistent with either retrieval outcome. `SPECIALIZATION_UNRESOLVED` is a
+  // fact about the participant's own identity data, and it is true whether or
+  // not events were retrieved — so it is judged on its own meaning rather than
+  // against the fight.
   if (cell.kind === "ANALYSIS_UNAVAILABLE" && cell.reason === "SPECIALIZATION_UNRESOLVED") {
     return null;
   }
@@ -567,18 +583,6 @@ function checkAgainstProcessing(
       // Nothing was retrieved, so nothing could have been analyzed. The only
       // truthful cell for a present player is the matching unavailability.
       return cell.kind === "ANALYSIS_UNAVAILABLE" && cell.reason === "FIGHT_INGESTION_FAILED"
-        ? null
-        : "PROCESSING_CELL_MISMATCH";
-
-    case "NOT_INGESTED":
-      // Retrieval was deliberately skipped because no selected player needed it.
-      // That is only coherent when every present player is one who could not
-      // have been analyzed anyway: a specialization with no registered analyzer.
-      //
-      // An ANALYZED cell here would claim decisions from evidence that was never
-      // fetched, and FIGHT_INGESTION_FAILED would invent an outage to explain a
-      // decision — so both are refused.
-      return cell.kind === "NOT_ANALYZED" && cell.status === "SPEC_NOT_SUPPORTED"
         ? null
         : "PROCESSING_CELL_MISMATCH";
 

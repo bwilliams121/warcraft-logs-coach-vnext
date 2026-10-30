@@ -116,6 +116,7 @@ function analyzedCell(
     provenance: provenance(options.provenance ?? {}),
     counts: counts(),
     recurrence: { rejectedPatterns: [], evidenceLimitations: [], exclusionPatterns: [] },
+    preparation: { assessment: "NOT_ASSESSED", reason: "NO_FIGHT_RETRIEVED" },
   };
 }
 
@@ -133,6 +134,7 @@ const UNAVAILABLE_CELL: PlayerFightResult = {
   sourceId: 5,
   specName: null,
   reason: "SPECIALIZATION_UNRESOLVED",
+  preparation: { assessment: "NOT_ASSESSED", reason: "NO_FIGHT_RETRIEVED" },
 };
 
 const NOT_ANALYZED_CELL: PlayerFightResult = {
@@ -143,6 +145,7 @@ const NOT_ANALYZED_CELL: PlayerFightResult = {
   specName: "Frost",
   status: "SPEC_NOT_SUPPORTED",
   detail: "No analyzer is registered for this specialization.",
+  preparation: { assessment: "NOT_ASSESSED", reason: "NO_FIGHT_RETRIEVED" },
 };
 
 function deepFreeze<T>(value: T): T {

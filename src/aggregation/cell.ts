@@ -34,6 +34,11 @@
  * `correctCount`, because MATCH means authority-compatible and nothing more.
  */
 
+import type {
+  CONSUMABLE_UNKNOWN_CODES,
+  PREPARATION_NOT_ASSESSED_REASONS,
+} from "../analysis/preparation/consumable-status.js";
+
 /**
  * One tallied key and how often it occurred.
  *
@@ -189,6 +194,39 @@ export const ANALYSIS_UNAVAILABLE_REASONS = [
 ] as const satisfies readonly AnalysisUnavailableReason[];
 
 /**
+ * A present player's consumable status in COMPACT form (PREP-3).
+ *
+ * Derived once, at cell construction, from the shared preparation producer's
+ * full report, so the heavy report stays releasable like every other piece of
+ * analysis. Each consumable is a complete count or UNKNOWN with a lower bound
+ * and its reason codes. The named uses and their evidence stay in the
+ * single-fight report.
+ *
+ * Shaped like the public cell field, so the projection copies it.
+ */
+export type CellConsumableStatus =
+  | { readonly countState: "OBSERVED"; readonly count: number }
+  | {
+      readonly countState: "UNKNOWN";
+      readonly observedAtLeast: number;
+      readonly reasonCodes: readonly (typeof CONSUMABLE_UNKNOWN_CODES)[number][];
+    };
+
+export type CellPreparation =
+  | {
+      readonly assessment: "ASSESSED";
+      readonly statuses: {
+        readonly healthPotion: CellConsumableStatus;
+        readonly healthstone: CellConsumableStatus;
+        readonly combatPotion: CellConsumableStatus;
+      };
+    }
+  | {
+      readonly assessment: "NOT_ASSESSED";
+      readonly reason: (typeof PREPARATION_NOT_ASSESSED_REASONS)[number];
+    };
+
+/**
  * One (fight, player) cell.
  *
  * `playerKey` is M7-C's within-report key. `sourceId` is carried alongside it
@@ -225,6 +263,8 @@ export type PlayerFightResult =
       readonly provenance: CellAnalysisProvenance;
       readonly counts: CellCounts;
       readonly recurrence: CellRecurrence;
+      /** Consumable status (PREP-3), specialization-independent. */
+      readonly preparation: CellPreparation;
     } & CellIdentity)
   /** Present; the analyzer ran or was selected, and truthfully concluded nothing. */
   | ({
@@ -234,6 +274,8 @@ export type PlayerFightResult =
       readonly status: NonAnalyzedStatus;
       /** The author-written explanation the analysis produced. */
       readonly detail: string;
+      /** Consumable status (PREP-3), specialization-independent. */
+      readonly preparation: CellPreparation;
     } & CellIdentity)
   /**
    * Present, participation known, and no analyzer ran — see
@@ -245,6 +287,12 @@ export type PlayerFightResult =
       /** M7-C's per-fight fact. `null` when Warcraft Logs supplied none. */
       readonly specName: string | null;
       readonly reason: AnalysisUnavailableReason;
+      /**
+       * Consumable status (PREP-3). Assessed even here when the fight was
+       * retrieved (an unresolved specialization does not stop it), and
+       * NOT_ASSESSED (RETRIEVAL_FAILED) when the fight's retrieval failed.
+       */
+      readonly preparation: CellPreparation;
     } & CellIdentity);
 
 /** The discriminants of `PlayerFightResult`. Canonical, for parity assertions. */

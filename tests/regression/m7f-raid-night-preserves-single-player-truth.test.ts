@@ -51,6 +51,7 @@
  * follows: locate by fact, never by canonical position.
  */
 
+import { assessConsumableStatus } from "../../src/analysis/preparation/consumable-status.js";
 import { NORMALIZATION_REVISION } from "../../src/engine/normalization/combat-fight.js";
 import { projectCell } from "../../src/contracts/raid-night-projection.js";
 import { describe, expect, it } from "vitest";
@@ -85,7 +86,6 @@ import {
   REVISION,
   runNight,
 } from "../support/raid-night-orchestration-fixture.js";
-import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 const OTHER_ROGUE = 23;
 const THIRD_ROGUE = 24;
@@ -202,7 +202,11 @@ function referenceCell(actorId: number): PlayerFightResult {
       analyzerId: ENABLED_ANALYZERS[0]?.analyzerId ?? "",
       scope: "PLAYER_CONTEXT",
       analysis: reference,
-      preparation: PREPARATION_NOT_ASSESSED,
+      // The shared producer over the same single-player view, as the services run it.
+      preparation: {
+        state: "ASSESSED",
+        report: assessConsumableStatus(focusedFightFor(core, actorId, "PLAYER_CONTEXT"), actorId),
+      },
       observedDecisions:
         reference.status === "ANALYZED" ? assassinationObservedDecisionView(reference) : null,
     },
