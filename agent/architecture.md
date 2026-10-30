@@ -9680,3 +9680,142 @@ records and outputs are in `.probe/g46/`.
   Neither is needed for the approval model, because approval is by binary
   hash. Whether stronger reproducibility is wanted is optional and the
   owner's call.
+
+
+---
+
+## PREP-1 — consumable status: the shared preparation producer (internal)
+
+**Status:** implemented, internal only (2026-10-29). Owner choice: consumable
+status first, built internally; public exposure comes back to the owner. The
+analysis service now produces, for every analyzed player, the health-potion,
+healthstone and combat-potion status the product intent requires. No public
+document carries it yet, and an unsupported specialization still gets none
+(see "Owner decisions pending").
+
+### Producer (`src/analysis/preparation/`)
+
+`assessConsumableStatus(fight, actorId)` is a pure function of the
+normalized fight and the identity data. It is a PARALLEL producer: it never
+reads a specialization result, and no specialization imports it
+(`tests/contracts/preparation-layering.test.ts`).
+
+- **Statuses.** All three kinds are always present (a kind is never
+  omitted):
+  - `OBSERVED {count, uses}`: the count is complete. Zero is reported only
+    under COMPLETE coverage for the player over the whole fight.
+  - `UNKNOWN {reasons, observedAtLeast, uses}`: the uses seen are a lower
+    bound, never a count. Every reason is kept.
+- **Uses.**
+  - Every kind counts the player's completed casts of a classified spell
+    inside the fight. The cast gate is `gateAbsenceClaim` over CASTS, for the
+    player, over the fight window; it checks capability, actor scope and
+    coverage, in that order.
+  - A combat potion taken BEFORE the pull has its cast outside the fight. It
+    is counted from a buff removal with no in-fight application or cast.
+    - That removal is always a use.
+    - Its timing is BEFORE_PULL only under COMPLETE cast AND aura coverage.
+      Otherwise the missing cast or application could sit in a gap, so the
+      timing is UNRESOLVED (review cycle 1).
+  - The pull snapshot (COMBATANT_INFO) carries no auras. So a fight shorter
+    than the longest combat-potion buff (60 s in this data) leaves the combat
+    potion UNKNOWN: a pre-pull buff could outlast it unseen.
+  - Each use keeps its spell, name, timing (IN_FIGHT or BEFORE_PULL) and its
+    evidence locator.
+- **Fail-closed identity.**
+  - A completed player cast of a spell outside the data whose Warcraft Logs
+    ability name says "Potion" or "Healthstone" makes the affected kinds
+    UNKNOWN (`UNCLASSIFIED_CANDIDATE`). A consumable newer than the data is
+    therefore never read as no use.
+  - So does an unknown buff on the player named "Potion" (combat potion). An
+    unknown pre-pull potion is seen only as its buff (review cycle 1).
+  - Identity data that fails validation makes every kind UNKNOWN.
+- **Authority.** Uses are `WCL_OBSERVED_FACT`. Which spell is which
+  consumable is `RUNTIME_GAME_DATA`, named by artifact revision and client
+  build. These live on the report, not in the rotation authority vocabulary
+  (`DecisionAuthorityKind` stays `SIMC_APL` only).
+- **Racial abilities** are never classified: the extractor fails if one
+  would be, and the analyzer cannot count an unclassified spell.
+
+### Identity data (`src/data/game/preparation-consumables.json`)
+
+Machine-extracted by `scripts/authority/extract-preparation-consumables.mjs`
+from the ANALYZER AUTHORITY model's client data (33622e9d, 12.1.0.69587). The
+registry contract requires every analyzer runtime artifact to be on that pin.
+
+- **Classification is the client's shared cooldowns, not names:**
+  - HEALTH_POTION: every spell on shared cooldown category 30, except
+    healthstones (41 spells);
+  - COMBAT_POTION: every spell on category 4 (75 spells);
+  - HEALTHSTONE: a direct heal named "…Healthstone" with its own cooldown
+    category (6262, 452930, and Legion's 200452). This excludes the
+    "Empowered Healthstone" talent modifiers, which are auras.
+- **A category is a SLOT.** Old potions, engineering injectors and mana
+  potions count as uses of the slot whose cooldown they share. Each use is
+  named.
+- **Guards.**
+  - Anchor rows check the column layout before anything is classified:
+    Healthstone, Silvermoon Health Potion and Potion of Recklessness must
+    read their known categories and effects.
+  - A race mask or a `racial_spells.inc` entry stops the extraction.
+  - The loader fails closed on a malformed, duplicated or anchor-less
+    artifact.
+- **Corroboration.**
+  - Every simulation-model POTION aura (the independent item-effect join) is
+    a COMBAT_POTION here.
+  - Names match Warcraft Logs' own ability names in committed report master
+    data: Healthstone, Demonic Healthstone, both Silvermoon potions and three
+    combat potions.
+
+### Services
+
+- `FightAnalysis.preparation` is required:
+  - `ASSESSED {report}` when a fight was retrieved;
+  - `NOT_ASSESSED {NO_FIGHT_RETRIEVED}` when none was.
+- `analyzeFight` assesses right after state construction, before and
+  independently of the analyzer. An analyzer that returns
+  AUTHORITY_NOT_AVAILABLE leaves the same report (tested).
+- The raid-night service assesses each player's focused view.
+- Ingestion scope is derived from the selected analyzer's requirement
+  unioned with the producer's declared `PREPARATION_REQUIREMENT`
+  (PLAYER_CONTEXT, no resources). It widens nothing today, and a future
+  wider producer could not be silently under-fetched.
+- An unsupported specialization is still answered before ingestion, so its
+  preparation is NOT_ASSESSED.
+
+### Evidence on real fights
+
+Over the 36 committed event slices, with each slice's vouched subject:
+
+- **COMPLETE slices:** health potion and healthstone are OBSERVED 0.
+- **PARTIAL or out-of-scope slices:** UNKNOWN with the gate's reason, never
+  0.
+- **Combat potion:**
+  - UNKNOWN on every slice shorter than 60 s, keeping its lower bound (for
+    example ≥1 for the Blood 45 s slice, which contains the subject's potion
+    cast);
+  - OBSERVED 1 on the 145 s Brewmaster segment, whose window starts after
+    the potion, from the buff removal.
+
+No committed fight contains a health potion or healthstone USE, so those
+paths are proven on synthetic fights.
+
+### Owner decisions pending (before the requirement is met publicly)
+
+1. **Public exposure.**
+   - Today no public document carries the statuses.
+   - Exposing them is a public-contract and digest change: an additive field
+     on the strict v1 schemas, including the unanalyzed variants, whose
+     current rule forbids analysis-shaped fields.
+2. **Unsupported specializations.**
+   - Product intent requires the status even when gameplay is unsupported.
+   - Today such a request spends no Warcraft Logs points and retrieves no
+     fight.
+   - Meeting the intent means ingesting for preparation alone, which is a
+     real per-request cost.
+3. **Slot semantics.** Is "combat potion" every use of the shared
+   combat-potion cooldown (mana and utility potions included), and "health
+   potion" every use of the health-potion cooldown (injectors and vials
+   included)? Or a narrower throughput / health-potion-item definition? The
+   data names every use, so a narrower rule is a data change, not a
+   re-capture.

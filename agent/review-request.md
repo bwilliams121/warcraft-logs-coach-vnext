@@ -4,161 +4,161 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M11-G4-6: the reproducible engine recipe (`simc-build/3`) and functional
-reproduction. Branch `m11-g4-6-reproducible-engine-recipe`, from main at
-1d3b3d1 (G4-5 merged).
+PREP-1: consumable status, the shared preparation producer (internal).
+Branch `preparation-consumable-status`, from main at 2702048 (G4-6 merged).
 
-This follows the G4-5 finding that `simc-build/2` pins every input but two
-`--no-cache` builds still produced different binaries. No model is
-registered or changed. Analyzer authority, model selection and approval by
-binary hash are unchanged.
+Owner choice: "Consumable status (Recommended)". This closes the product-intent
+gap internally. Public exposure was explicitly to come back to the owner.
 
 ## Review cycle 2: response to CHANGES_REQUIRED (cycle 1)
 
-1. **The comparator lost structure.** Fixed.
-   - The bench now uses `tests/support/simulation/engine-json.ts`
-     `differingPaths`, a full structural comparison. Container kinds (object,
-     array, null, primitive), array lengths, own key sets, empty containers
-     and every primitive (`Object.is`) must agree.
-   - The exclusions are unchanged: `timestamp`, `build_date`/`build_time`,
-     `sim.statistics`.
-   - New `tests/unit/simulation/engine-json-compare.test.ts` (9 tests) pins
-     the demonstrated false positives as differences:
-     - `{logs:[]}` vs `{}`;
-     - `[1]` vs `{"0":1}`;
-     - `[1]` vs `[1,{}]`;
-     - `null` vs `{}`;
-     - prototype-named keys (own keys only);
-     - exact primitives.
-   - It also checks that the view removes only the excluded fields.
-   - All three benches were rerun with it. A vs B and A vs v2: 0 differing
-     paths in both execution profiles. The negative control vs 0a72e6a7
-     fails (29,842 paths).
-2. **Claims exceeded the evidence.** Scoped in `agent/architecture.md`
-   (status, bench, evidence, "What this means"), `agent/follow-ups.md`, the
-   contract test header and the bench header.
-   - Functional equivalence is stated only for the tested builds and the
-     development Blood jobs (two execution profiles).
-   - General profile independence, for other specs, inputs or future
-     rebuilds, is stated as unproven.
-   - Every rebuilt artifact still needs its own approval by binary hash.
-3. **Stale staging note.** Corrected below: the test-file rename is staged.
+1. **Unclassified potion evidence on auras.** Fixed.
+   - A buff on the player that is outside the identity data and named
+     "Potion" now makes COMBAT_POTION UNKNOWN (`UNCLASSIFIED_CANDIDATE`,
+     once per spell).
+   - Regression: under COMPLETE coverage, with no cast at all, an unknown
+     potion buff removed during the fight cannot produce an observed zero.
+     Health potion and healthstone stay OBSERVED 0, and an unknown buff not
+     named "Potion" is not a candidate.
+2. **BEFORE_PULL under incomplete coverage.** Fixed.
+   - New timing `UNRESOLVED`. An unmatched removal is still a use (it counts
+     toward `observedAtLeast`), but is labelled BEFORE_PULL only when cast
+     AND aura coverage are COMPLETE.
+   - Regression: with PARTIAL casts, or with PARTIAL auras, and the gap
+     after 90 s, the timing is UNRESOLVED and the status UNKNOWN with
+     observedAtLeast 1.
+3. **Mutations.** Reverting either fix fails its regression (1 test each).
+4. **Docs.** `agent/architecture.md` and `agent/testing.md` updated.
 
 ## Intended change
 
-1. **`runner/simc-build/v3/`.** This is simc-build/2 plus:
-   - `SOURCE_DATE_EPOCH` = the checked-out commit's committer time, exported
-     for both compiles. The pinned clang 22.1.3 was verified to honour it for
-     `__DATE__`/`__TIME__`.
-   - A single-threaded PGO training run (`threads=1`).
-   - The image carries the epoch and the merged PGO profile's SHA-256.
-   - `build.mjs` writes `simc-build-record/3` and accepts
-     `--expect-binary <sha256>`. A mismatch is recorded and then fails
-     `NOT_REPRODUCED`.
-   - Digest and lock entries are reused unchanged from v2.
-2. **`scripts/bench/m11g46-functional-reproduction.bench.ts`.**
-   - Runs the same prepared single-threaded dev Blood jobs on two images.
-   - Requires the same git revision and a full structural match of the raw
-     engine JSON (`tests/support/simulation/engine-json.ts`, unit-tested).
-     Only wall-clock statistics, `timestamp` and build-host time are
-     excluded.
-   - A pass is evidence for the jobs it ran.
-3. **Contract test** `tests/contracts/m11g4-simc-build-recipes.test.ts`
-   (renamed from the G4-5 file):
-   - the v2 checks now run for v2 and v3 (`describe.each`);
-   - v3-specific checks: reused inputs, the epoch from the commit exported
-     before both makes, the exact training options, the record and
-     `NOT_REPRODUCED`;
-   - v1 and v2 recipes are frozen by hash (v2 = the G4-5 candidate record's
-     `4005f4d4…`).
-4. **Docs:** `agent/architecture.md` "M11-G4-6", `agent/follow-ups.md`
-   (G4-5 item partly resolved), `agent/testing.md`.
+1. **Identity data:** `src/data/game/preparation-consumables.json` with
+   loader `.ts`, extracted by
+   `scripts/authority/extract-preparation-consumables.mjs` (+ `.d.mts`).
+   - Source: the ANALYZER AUTHORITY pin (33622e9d, 12.1.0.69587), as the
+     registry contract requires for analyzer runtime data.
+   - Classification by the client's shared cooldowns:
+     - HEALTH_POTION: category 30, 41 spells;
+     - COMBAT_POTION: category 4, 75 spells;
+     - HEALTHSTONE: direct heals named "…Healthstone", 3 spells. The
+       "Empowered Healthstone" talent auras are excluded.
+   - Anchor rows guard the column layout. Racial abilities stop the
+     extraction.
+2. **Producer:** `src/analysis/preparation/consumable-status.ts`,
+   `requirement.ts`.
+   - `assessConsumableStatus(fight, actorId)` returns all three statuses,
+     always: OBSERVED with a count (zero only under COMPLETE coverage), or
+     UNKNOWN with reasons and a lower bound.
+   - Pre-pull combat potions are detected from a buff removal with no
+     in-fight application or cast. The combat potion is UNKNOWN when the
+     fight is shorter than the longest combat-potion buff (60 s); the pull
+     snapshot carries no auras.
+   - An unclassified cast named "Potion"/"Healthstone" fails closed to
+     UNKNOWN.
+   - Authority: uses `WCL_OBSERVED_FACT`, identities `RUNTIME_GAME_DATA`
+     (revision recorded).
+3. **Services:**
+   - `FightAnalysis.preparation` is required (`ASSESSED {report}` |
+     `NOT_ASSESSED {NO_FIGHT_RETRIEVED}`).
+   - `analyzeFight` assesses after state construction, independently of
+     the analyzer. The raid-night service assesses each player's focused
+     view.
+   - Scope is derived from the analyzer's requirement unioned with
+     `PREPARATION_REQUIREMENT` (PLAYER_CONTEXT, no resources); it widens
+     nothing.
+   - Unsupported specs are still answered before ingestion, so their
+     preparation is NOT_ASSESSED.
+4. **Public output:** unchanged. No projection reads `preparation`.
 
-## Results (evidence in `.probe/g46/`)
+## Decisions made (please assess)
 
-- **Two `--no-cache` v3 builds of ec3422d6, from identical inputs** (recipe
-  `bf82d406…`, locks, installed sets, epoch):
-  - A: binary `9805c832…`, PGO profile `307e2abe…`.
-  - B: binary `8b2ee5b5…`, PGO profile `f5fe2bd5…`.
-  - B failed `NOT_REPRODUCED`.
-  - **Build time fixed:** both embed `Oct 23 2026 21:06:16`, the commit's
-    time.
-  - **Binary NOT bit-identical:** the PGO profile itself varies between runs
-    despite one thread and fixed seeds. The cause is not identified.
-- **For the tested jobs, engine output is identical across profiles.**
-  Single-threaded engine JSON:
-  - 2,000 iterations, ad hoc: A, A again, B and the G4-5 v2 candidate
-    `b1913546…` (45,947 leaves, 0 differing);
-  - committed bench at 300 iterations under both execution profiles,
-    structural comparison: A vs B and A vs v2, 0 differing paths over 45,691
-    primitive leaves.
-  - Not shown for other specs, inputs or future rebuilds.
-- **Negative control:** against the approved 0a72e6a7 engine the bench FAILS
-  (identity differs; 29,842 paths differ).
-- **Multi-threaded output is not a reproduction test.** The same binary
-  differs from itself in the last bits of about 6,000 leaves at `threads=8`
-  (merge order). This matches the existing exact-pin contract:
-  multi-threaded runs reproduce within tolerance, single-threaded runs
-  bit-identically.
+- **A separate report type, not `Finding`.** `Finding` is shaped for
+  rotation decisions (decision point, judgment, actionability), and contract
+  tests keep WCL_OBSERVED_FACT and RUNTIME_GAME_DATA out of the rotation
+  authority type. The report records `category: "PREPARATION"` and both
+  authorities explicitly.
+- **`src/analysis/preparation/`** (the architecture's planned location). It
+  uses `gateAbsenceClaim` (shared engine state). It does not use the
+  combat-facts layer, which is restricted to its reviewed consumers.
+- **Categories are slots.** Mana and utility potions count as combat-potion
+  uses; injectors and vials as health-potion uses. Every use is named. This
+  is listed as an owner decision below.
+- **Test-only changes to existing tests** (no assertion weakened):
+  - FightAnalysis literals gain `preparation: NOT_ASSESSED`;
+  - the m7b equivalence reconstruction now mirrors the service (unioned
+    requirement, assessed preparation) and compares `preparation` field by
+    field;
+  - the m7f orchestration allow-list names the producer modules explicitly;
+  - the two corpus spec executors use an inline literal, so they still do
+    not reach the services.
 
-## Decision made (please assess)
+## Evidence
 
-There is no general reproducibility guarantee. The binary is not
-bit-identical, and functional equivalence is shown only for the tested builds
-and jobs. The bench lets a future rebuild's approval cite equivalence for the
-jobs it runs.
+- **Real corpus (36 committed slices, vouched subject):**
+  - COMPLETE slices: health potion and healthstone OBSERVED 0.
+  - PARTIAL or out-of-scope slices: UNKNOWN, never 0.
+  - Combat potion: UNKNOWN when the window is under 60 s, with its lower
+    bound (≥1 on the Blood 45 s slice); OBSERVED 1 on the 145 s Brewmaster
+    segment, from the buff removal.
+- **Data corroboration:**
+  - every simulation-model POTION aura (independent item-effect join) is a
+    COMBAT_POTION;
+  - names match Warcraft Logs master data for 7 ids (Healthstone, Demonic
+    Healthstone, both Silvermoon potions, three combat potions).
+- **Mutations:** removing the cast gate fails 3 tests; removing pre-pull
+  open-buff tracking fails 1.
 
-- Approval stays by binary hash; a rebuild remains a new artifact.
-- `threads=1` on the training run is kept, but it is not credited with
-  stabilising the profile.
-- Bit-identical binaries would need the PGO profile distributed as a pinned
-  input, or PGO removed (slower, off the official recipe). That is recorded
-  as an optional follow-up, not done.
+## Owner decisions needed (before the requirement is met publicly)
+
+1. Public field: an additive field on the strict v1 schemas, a contract and
+   digest change.
+2. Unsupported specializations: ingest for preparation alone, at a real
+   Warcraft Logs cost per request?
+3. Slot semantics, or a narrower definition of "combat potion" and "health
+   potion".
 
 ## Files / surfaces changed
 
-- `runner/simc-build/v3/{Dockerfile,build.mjs,alpine.digest,toolchain-build.lock,toolchain-runtime.lock}` (new).
-- `scripts/bench/m11g46-functional-reproduction.bench.ts` (new).
-- `tests/support/simulation/engine-json.ts` and
-  `tests/unit/simulation/engine-json-compare.test.ts` (new).
-- `tests/contracts/m11g4-simc-build-recipes.test.ts` (renamed from
-  `m11g45-simc-build-recipe.test.ts`, extended).
-- `agent/{architecture,follow-ups,testing,review-request}.md`.
+- New:
+  - `src/analysis/preparation/{consumable-status,requirement}.ts`;
+  - `src/data/game/preparation-consumables.{json,ts}`;
+  - `scripts/authority/extract-preparation-consumables.{mjs,d.mts}`;
+  - tests: `tests/unit/preparation/{consumable-status,preparation-consumables-data}.test.ts`,
+    `tests/unit/preparation-consumables-extraction.test.ts`,
+    `tests/contracts/preparation-{service,layering}.test.ts`.
+- Changed: `src/services/{result,analysis-service,raid-night-service}.ts`;
+  the test literals and allow-list noted above;
+  `agent/{architecture,follow-ups,testing,review-request}.md`.
 
 ## Validation
 
-- **Recipe contract:** 15/15 pass, covering v2 and v3 shared checks, v3
-  specifics and frozen v1/v2.
-- **Engine JSON comparator:** 9/9 pass.
-- **Benches (real Docker, rerun with the structural comparator):** A vs B
-  pass; A vs v2 candidate pass; the negative control vs 0a72e6a7 fails as
-  intended.
-- **Contracts suite in parallel:** 4 unrelated Protection tests hit the
-  default 5 s timeout under parallel load. Alone they pass, and the full
-  suite passes. No timeout was changed.
+- **New tests:**
+  - producer 18/18 (cycle 2 adds 2 regressions);
+  - data 8/8;
+  - extractor rules 9/9;
+  - service 4/4;
+  - layering 101/101.
+- **Affected existing tests:** m7b equivalence 3/3 (deep-equal including
+  `preparation`); m7f, m9a and the registry contract pass.
+- **Artifact:** byte-identical to a fresh extraction from the pinned
+  33622e9d sources.
 - **Public digests unchanged:** 600/600 byte-identical.
 - **Checks:** typecheck clean; prettier clean; `git diff --check` clean.
 - **Full suite** (`npm test -- --maxWorkers=1 --testTimeout=30000`):
-  341 files, 9,898 tests, all pass (994 s).
+  346 files, 10,052 tests, all pass (994 s, rerun after cycle 2).
 
 ## External / network activity
 
-- No Warcraft Logs requests.
-- Build reads: Docker Hub (Alpine by digest), Alpine mirrors (exact
-  versions), GitHub (SimC clone).
-- Local Docker: two v3 builds; engine runs with `--network none`.
+None. No Warcraft Logs requests. The SimC sources are read from the local
+pinned clone (`git show` at 33622e9d).
 
 ## Known limitations
 
-- The PGO profile's variable counters are not identified.
-- Functional reproduction is shown for the Blood dev jobs (two execution
-  profiles), not for every spec or input.
-
-## Owner questions
-
-None blocking. Optional: whether bit-identical binaries (a pinned PGO profile
-or no PGO) are ever wanted beyond functional reproduction.
+- No committed fight contains a health potion or healthstone use; those
+  paths are proven on synthetic fights.
+- The identity data is 12.1.0.69587. A newer consumable not named
+  "Potion"/"Healthstone" would not be recognised. Named ones fail closed.
 
 ## Staged / committed
 
-Only the test-file rename (`git mv`) is staged. Nothing is committed.
+Nothing is staged or committed.

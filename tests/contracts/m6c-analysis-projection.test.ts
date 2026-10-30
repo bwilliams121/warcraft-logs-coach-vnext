@@ -39,6 +39,7 @@ import type { FightIdentity, PreflightPort } from "../../src/wcl/types.js";
 import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
 import { M5D2_ACTOR, m5d2Fight, m5d2State } from "../support/m5d2-fixture.js";
 import { ASSASSINATION_ACTOR_B, m5aState } from "../support/m5a-fixture.js";
+import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 const ENV: Env = {
   ENVIRONMENT: "test",
@@ -118,6 +119,7 @@ function wrap(analysis: ObservedAssassinationAnalysis): FightAnalysis {
     analyzerId: "rogue-assassination-observed-decisions",
     scope: "PLAYER_CONTEXT",
     analysis,
+    preparation: PREPARATION_NOT_ASSESSED,
     observedDecisions: analysis.status === "ANALYZED" ? assassinationObservedDecisionView(analysis) : null,
   };
 }

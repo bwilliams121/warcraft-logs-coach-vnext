@@ -123,6 +123,11 @@ describe("orchestration holds no wire contract and no transport", () => {
       // Types only: the seam hands out two values the loop already holds, and
       // never the core they live on.
       "../engine/normalization/encounter-facts.js",
+      // The shared PREPARATION producer (consumable status) and its declared
+      // ingestion requirement: a parallel finding producer every analyzed
+      // player gets, unioned into the fight's requirement like any analyzer's.
+      "../analysis/preparation/consumable-status.js",
+      "../analysis/preparation/requirement.js",
       "./",
     ];
     for (const path of ORCHESTRATION_MODULES) {

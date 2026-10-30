@@ -41,10 +41,13 @@ import {
   specNotSupported,
   type AnalyzerRegistration,
 } from "./analyzer-registry.js";
+import { assessConsumableStatus } from "../analysis/preparation/consumable-status.js";
+import { PREPARATION_REQUIREMENT } from "../analysis/preparation/requirement.js";
 import type { CombatIngestionPort } from "./ingestion-port.js";
-import { deriveIngestionScopeFor } from "./ingestion-scope.js";
+import { deriveIngestionScope } from "./ingestion-scope.js";
 import {
   assertNever,
+  PREPARATION_NOT_ASSESSED,
   serviceFailure,
   type AnalysisResultState,
   type AnalysisServiceResult,
@@ -300,7 +303,9 @@ function resultStateFor(analysis: FightAnalysis): AnalysisResultState {
  * or discarding a perfectly correct answer.
  *
  * Every analyzer-specific field is `null` because no analyzer ran, and no
- * combat events were retrieved to produce it.
+ * combat events were retrieved to produce it. Preparation is NOT_ASSESSED for
+ * the same reason: there is no retrieved fight to assess. That is disclosed,
+ * never shown as a status.
  */
 function unsupportedSpec(identity: FightIdentity, observedSpecId: string): AnalysisServiceResult {
   const analysis: FightAnalysis = {
@@ -310,6 +315,7 @@ function unsupportedSpec(identity: FightIdentity, observedSpecId: string): Analy
     scope: null,
     analysis: specNotSupported(observedSpecId),
     observedDecisions: null,
+    preparation: PREPARATION_NOT_ASSESSED,
   };
   return { ok: true, state: resultStateFor(analysis), analysis };
 }
@@ -444,8 +450,11 @@ export async function analyzeFight(
   // `deriveIngestionScope` still does the deciding, so scope remains one
   // function's job — it is simply asked about the requirement that actually
   // applies.
-  const requirement = analyzer.requirement;
-  const scope = deriveIngestionScopeFor([analyzer]);
+  // The shared PREPARATION producer always runs alongside the selected
+  // analyzer, so its declared requirement is part of the union: adding it can
+  // never silently narrow, and today never widens, what is retrieved.
+  const requirements = [analyzer.requirement, PREPARATION_REQUIREMENT];
+  const scope = deriveIngestionScope(requirements);
   if (!scope.ok) {
     // Unreachable by construction: derivation fails only on an empty list, and
     // the list is one selected analyzer. Handled rather than asserted because a
@@ -468,7 +477,7 @@ export async function analyzeFight(
       fightId: parsed.request.fightId,
       sourceId: parsed.request.sourceId,
       scope: scope.scope,
-      includeResources: requirement.includeResources,
+      includeResources: requirements.some((requirement) => requirement.includeResources),
       ...(scope.ownedPetEvidence === true ? { ownedPetEvidence: true as const } : {}),
     },
     config.config.wcl,
@@ -493,6 +502,13 @@ export async function analyzeFight(
 
   // ---- M4: derived factual state ----
   const state = createCombatState(ingested.fight);
+
+  // ---- shared PREPARATION, in parallel with the analyzer ----
+  //
+  // From the normalized fight alone, before and independently of the
+  // specialization analyzer: its status does not depend on whether that
+  // analyzer analyzes, lacks authority or lacks evidence.
+  const preparation = assessConsumableStatus(ingested.fight, identity.player.sourceId);
 
   // ---- M5: the analyzer's own facade, invoked exactly once ----
   //
@@ -529,6 +545,7 @@ export async function analyzeFight(
     // describes, by the registration that produced it.
     observedDecisions:
       analysis.status === "ANALYZED" ? observedDecisionViewOf(catalog.catalog, analysis) : null,
+    preparation: { state: "ASSESSED", report: preparation },
   };
 
   return { ok: true, state: resultStateFor(fightAnalysis), analysis: fightAnalysis };

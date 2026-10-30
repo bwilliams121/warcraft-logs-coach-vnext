@@ -53,6 +53,7 @@ import { countedProductionCatalog } from "../support/catalog.js";
 import { committedEvidenceArchiveFiles } from "../support/corpus/evidence-archive.js";
 import { corpusState, stateOfBundle } from "../support/corpus/fight.js";
 import { committedCorpusFiles, validateEvidenceArchive } from "../support/corpus/loader.js";
+import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 type Analyzed = Extract<BrewmasterMonkAnalysis, { status: "ANALYZED" }>;
 
@@ -153,6 +154,7 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId: number
     analyzerId: BREWMASTER_MONK_ANALYZER_ID,
     scope: "PLAYER_CONTEXT",
     analysis,
+    preparation: PREPARATION_NOT_ASSESSED,
     observedDecisions: BREWMASTER_MONK_REGISTRATION.observedDecisionView(analysis),
   };
 }
@@ -442,6 +444,7 @@ describe("the refusal documents are public and carry no decisions", () => {
       analyzerId: BREWMASTER_MONK_ANALYZER_ID,
       scope: "PLAYER_CONTEXT",
       analysis,
+      preparation: PREPARATION_NOT_ASSESSED,
       observedDecisions: null,
     });
     expect(PublicAnalysisResultSchema.safeParse(projected).success).toBe(true);

@@ -109,6 +109,27 @@ carrying the three statuses, and contract tests proving the category is never
 omitted and never reads zero from `PARTIAL`/`ABSENT` coverage. Making the field
 required is a schema-v2 decision. None of that is M11-A work.
 
+**PARTLY RESOLVED (PREP-1, 2026-10-29).** The producer exists and runs:
+
+- `src/analysis/preparation/consumable-status.ts`, with identity data on the
+  analyzer authority pin;
+- `FightAnalysis.preparation` for every analyzed player, in single-player
+  analysis and raid night;
+- contract tests for "never omitted" and "never zero from PARTIAL, ABSENT or
+  unverified coverage".
+
+Still open, each an owner decision (agent/architecture.md "PREP-1"):
+
+1. **The public field** (contract and digest change). Until then, the README
+   still labels the requirement as not yet emitted.
+2. **Unsupported specializations.** Ingest for preparation alone, at a real
+   Warcraft Logs cost per request? Today they get NOT_ASSESSED.
+3. **Slot semantics** for "combat potion" and "health potion".
+
+Also open, and not an owner decision: no committed fight contains a health
+potion or healthstone use. A future capture that does should become a
+corpus case.
+
 ## After M11-A3: shared-engine candidates the audit named
 
 **Raised:** M11-A3 (2026-09-17). Each is an ENGINE milestone with its own

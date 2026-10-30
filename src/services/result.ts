@@ -6,6 +6,7 @@
  * is exactly one result shape.
  */
 
+import type { ConsumableStatusReport } from "../analysis/preparation/consumable-status.js";
 import type { SpecAnalysisEnvelope } from "../findings/analysis-envelope.js";
 import type { SpecId } from "../findings/finding.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
@@ -203,7 +204,28 @@ export interface FightAnalysis {
    * same place, so the two describe one result.
    */
   readonly observedDecisions: ObservedDecisionView | null;
+  /**
+   * The shared PREPARATION producer's consumable status (health potion,
+   * healthstone, combat potion), produced in parallel with — and never from —
+   * the specialization result. Always present: ASSESSED over the retrieved
+   * fight, or NOT_ASSESSED with the reason, never omitted.
+   */
+  readonly preparation: PreparationOutcome;
 }
+
+/**
+ * Whether the preparation producer ran. NOT_ASSESSED is a disclosed gap, not a
+ * status: no fight was retrieved (an unsupported specialization is answered
+ * before ingestion), so there was nothing to assess, and nothing is claimed.
+ */
+export type PreparationOutcome =
+  | { readonly state: "ASSESSED"; readonly report: ConsumableStatusReport }
+  | { readonly state: "NOT_ASSESSED"; readonly reason: "NO_FIGHT_RETRIEVED" };
+
+export const PREPARATION_NOT_ASSESSED: PreparationOutcome = {
+  state: "NOT_ASSESSED",
+  reason: "NO_FIGHT_RETRIEVED",
+};
 
 export type AnalysisServiceResult =
   | { readonly ok: true; readonly state: AnalysisResultState; readonly analysis: FightAnalysis }

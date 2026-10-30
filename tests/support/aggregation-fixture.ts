@@ -23,6 +23,7 @@ import type {
 import { assassinationObservedDecisionView } from "../../src/specs/rogue/assassination/registration.js";
 import type { EvidenceLocator } from "../../src/engine/evidence/locator.js";
 import { CURRENT_UNSUPPORTED_SUBJECT } from "./unsupported-subject.js";
+import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 
 export const REPORT_CODE = "aBcDeFgH12345678";
 export const REVISION = 30;
@@ -201,6 +202,7 @@ export function analyzedFightAnalysis(options: {
     scope: "PLAYER_CONTEXT",
     analysis,
     // The registration's own view, as the service attaches it.
+    preparation: PREPARATION_NOT_ASSESSED,
     observedDecisions: assassinationObservedDecisionView(analysis),
   };
 }
@@ -229,6 +231,7 @@ export function nonAnalyzedFightAnalysis(options: {
       specId: supported ? "rogue/assassination" : CURRENT_UNSUPPORTED_SUBJECT.observedSpecId,
       detail: options.detail ?? `no analysis: ${options.status}`,
     },
+    preparation: PREPARATION_NOT_ASSESSED,
     observedDecisions: null,
   };
 }

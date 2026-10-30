@@ -80,7 +80,9 @@ import {
   type AnalyzerRegistration,
   type ValidatedAnalyzerCatalog,
 } from "./analyzer-registry.js";
-import { deriveIngestionScopeFor } from "./ingestion-scope.js";
+import { assessConsumableStatus } from "../analysis/preparation/consumable-status.js";
+import { PREPARATION_REQUIREMENT } from "../analysis/preparation/requirement.js";
+import { deriveIngestionScope } from "./ingestion-scope.js";
 import type {
   FightCoreIngestionPort,
   RaidNightDiagnostic,
@@ -474,14 +476,19 @@ export async function analyzeRaidNight(
     // retrieves, and unioning the whole registry would pay for evidence nothing
     // here can read.
     const selectedAnalyzers = supported.map((entry) => entry.analyzer);
-    const scope = deriveIngestionScopeFor(selectedAnalyzers);
+    // Plus the shared PREPARATION producer, which runs for every analyzed player.
+    const requirements = [
+      ...selectedAnalyzers.map((analyzer) => analyzer.requirement),
+      PREPARATION_REQUIREMENT,
+    ];
+    const scope = deriveIngestionScope(requirements);
     if (!scope.ok) {
       return failure(
         "INTERNAL_ERROR",
         "No ingestion scope could be derived for the selected analyzers, so no combat events were retrieved.",
       );
     }
-    const includeResources = selectedAnalyzers.some((analyzer) => analyzer.requirement.includeResources);
+    const includeResources = requirements.some((requirement) => requirement.includeResources);
 
     // ---- ONE ingestion for this fight, pinned to R0 ----
     const ingested = await deps.ingestFightCore(
@@ -589,6 +596,8 @@ export async function analyzeRaidNight(
           analysis,
           observedDecisions:
             analysis.status === "ANALYZED" ? observedDecisionViewOf(registry, analysis) : null,
+          // The shared producer over this player's focused view, independent of the analyzer.
+          preparation: { state: "ASSESSED", report: assessConsumableStatus(focused, entry.sourceId) },
         },
         // From the core that actually produced this analysis, never a literal.
         normalizationRevision: core.provenance.normalizationRevision,

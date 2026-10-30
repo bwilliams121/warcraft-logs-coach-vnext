@@ -43,6 +43,8 @@
  * is what `m5d2Fight()` applies.
  */
 
+import { assessConsumableStatus } from "../../src/analysis/preparation/consumable-status.js";
+import { PREPARATION_REQUIREMENT } from "../../src/analysis/preparation/requirement.js";
 import { describe, expect, it } from "vitest";
 
 import { analyzeFight } from "../../src/services/analysis-service.js";
@@ -192,7 +194,9 @@ async function viaReusableCore(): Promise<FightAnalysis> {
   const analyzer = analyzerForSpec(resolved.specId);
   if (analyzer === null) throw new Error("no analyzer registered");
 
-  const scope = deriveIngestionScope([analyzer.requirement]);
+  // As the service derives it: the analyzer's requirement and the shared
+  // PREPARATION producer's.
+  const scope = deriveIngestionScope([analyzer.requirement, PREPARATION_REQUIREMENT]);
   if (!scope.ok) throw new Error(`no scope: ${scope.reason}`);
 
   const outcome = await ingestFightCore(
@@ -225,6 +229,8 @@ async function viaReusableCore(): Promise<FightAnalysis> {
     analyzerId: analyzer.analyzerId,
     scope: scope.scope,
     analysis,
+    // The shared producer over the same fight, exactly as the service runs it.
+    preparation: { state: "ASSESSED", report: assessConsumableStatus(fight, identity.player.sourceId) },
     // The registration's view, attached exactly as the service attaches it.
     observedDecisions:
       analysis.status === "ANALYZED" ? observedDecisionViewOf(PRODUCTION_CATALOG, analysis) : null,
@@ -268,6 +274,9 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
     expect(viaCore.analysis).toEqual(viaService.analysis);
     // M10-A: the registration's view of the analysis travels with it.
     expect(viaCore.observedDecisions).toEqual(viaService.observedDecisions);
+    // The shared PREPARATION producer, assessed over the same retrieved fight.
+    expect(viaCore.preparation).toEqual(viaService.preparation);
+    expect(viaService.preparation.state).toBe("ASSESSED");
 
     // And no field exists on one side that the other does not supply.
     expect(Object.keys(viaCore).sort()).toEqual(Object.keys(viaService).sort());
@@ -276,6 +285,7 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
       "analyzerId",
       "identity",
       "observedDecisions",
+      "preparation",
       "scope",
       "specId",
     ]);
