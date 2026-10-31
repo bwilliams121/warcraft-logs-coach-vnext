@@ -10096,3 +10096,84 @@ made. The real timeline is asserted over those bytes:
 - a killing blow with overkill 81,824 and 0 hit points.
 
 The corpus stays under the 5.5 MiB line (5,748,495 bytes).
+
+## M12-B — Healer Foundation: damage episodes (internal)
+
+**Status:** implemented (2026-10-31). This is the second tranche of
+Milestone 12.
+
+**Owner decision (2026-10-31): healer evidence policy.**
+
+- The regression corpus stays at 5.5 MiB. Its remaining ~18.6 KB is treated
+  as exhausted.
+- The full real evidence needed to establish healer behavior goes to the
+  evidence archive.
+- From that evidence, derive the smallest deterministic regression fixture
+  that protects the proven behavior.
+- Never weaken evidence or discard meaningful context to fit.
+- If several M12 slices produce genuinely minimal fixtures that cannot fit,
+  stop and bring a measured proposal: the extra size, and what it buys.
+- The limit is never raised preemptively for one tranche.
+
+**What it adds.** `damageEpisodesOf(fight, gapMs = 2 000)`
+(`src/healing/damage-episodes.ts`, revision `healing-damage-episodes/1`,
+authority `WCL_OBSERVED_FACT`) answers when damage arrived on the raid and
+on whom.
+
+- **Inputs.** Every DAMAGE event whose target is in the declared friendly
+  roster, grouped by ability into episodes of hits no more than `gapMs`
+  apart.
+- **Per episode:** first and last hit, hit count, the reported sources, and
+  per target the hit count and the lowest observed health. Health comes only
+  from a snapshot of that same target instance (the M12-A identity rule).
+- **Grouping only.** The gap is a grouping parameter, not a judgement.
+  Nothing is labelled raid-wide, dangerous or healable here; a consumer
+  applies its own declared threshold.
+- **The roster is declared.** It is `breadth.friendlyActorsInScope`, which
+  production fills only under FULL_RAID.
+  - Without it the report is `ROSTER_NOT_IN_SCOPE`, with no episode list at
+    all. An empty list would read as "the raid took no damage".
+  - This is the first reader of that field.
+- **Coverage is all or nothing for the roster.** An episode is COMPLETE only
+  when DAMAGE coverage holds for EVERY roster player over
+  `[first hit - gapMs, last hit + gapMs]`. Then no hit of that ability is
+  missing inside it and none sits close enough outside to have extended it.
+  Otherwise it is UNKNOWN, and records:
+  - `beyondFightEdge`: the margin runs past the evidence;
+  - `uncoveredActors`, each with the shared gate's reason.
+- **Never:** totals (follow-up M1), damage dealt by the raid, cause or
+  avoidability.
+
+**Evidence plumbing (test support and tooling, no production change).**
+
+- **Slicer.** `scripts/sanitize-probe.mjs --friendly-players-slice` (revision
+  `sanitize-probe-8`) derives the roster from a committed fight context's
+  `friendlyPlayers`.
+- **Loader.** `tests/support/corpus/` gained the `FIGHT_FRIENDLY_PLAYERS`
+  actor-slice mode. The loader re-derives and re-checks the roster exactly
+  as it does for owned-pet slices.
+- **Fight builder.** A bundle of such slices builds a FULL_RAID fight with
+  that roster in scope.
+
+**Evidence.**
+
+- **Archive.** Three friendly-players segments of the M11-E2 capture
+  (fight +69.5 s to +77.0 s, 974,973 bytes, ordinary archive growth). No new
+  Warcraft Logs request was made.
+- **The real result**, checked against values derived independently from
+  the raw bytes:
+  - 15 episodes, 5 COMPLETE;
+  - ability 1,285,979: four ticks on all twenty players from source 180#1,
+    with each target's lowest health;
+  - ability 1,282,525: twenty players at once;
+  - the raid tick at the window's start is UNKNOWN (`beyondFightEdge`).
+- **Regression corpus: no fixture committed.**
+  - The smallest fixture that can prove one COMPLETE episode is 230,811
+    bytes: episode 1,282,525 with its ±2 s margin, damage families only,
+    whole roster. A grant-free fixture of just its 20 hits (~9 KB) could
+    not prove COMPLETE.
+  - Neither fits the exhausted capacity, and this is one tranche, so per
+    the owner decision the measurement is recorded
+    (`agent/follow-ups.md` "Regression-corpus ledger").
+  - The behavior is protected in every `npm test` by unit tests that read
+    the committed archive segments, which is the M11-E2 precedent.

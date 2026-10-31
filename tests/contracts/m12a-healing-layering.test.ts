@@ -76,7 +76,7 @@ const HEALING_MODULES = allPaths().filter((path) => path.startsWith("src/healing
 
 describe("the healing domain exists and is fully covered by these checks", () => {
   it("captured every module under src/healing", () => {
-    expect(HEALING_MODULES).toEqual(["src/healing/death-timeline.ts"]);
+    expect(HEALING_MODULES).toEqual(["src/healing/damage-episodes.ts", "src/healing/death-timeline.ts"]);
   });
 });
 

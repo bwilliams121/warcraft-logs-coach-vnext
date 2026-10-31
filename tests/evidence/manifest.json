@@ -3,6 +3,327 @@
   "corpusId": "warcraft-logs-coach-vnext.evidence-archive",
   "artifacts": [
     {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-69500-72500",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-friendly-players.seg-69500-72500.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "1ed6ab168ec3e9ea0572f542132b6485433ada1c3335d3191328dfc1a1fe0c11",
+      "byteLength": 363527,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-friendly-players.seg-69500-72500.json --friendly-players-slice 48 7508792 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7505792 --families damage,extraattacks,heal,absorbed,healabsorbed,death --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --friendly-players-slice predicate: the roster DERIVED from the committed context — fight 48's twenty WCL friendlyPlayers, each a Player in the master data, no pets — keeping every event whose sourceID or targetID is on the roster, with --from 7505792 (exclusive) and the bound 7508792 (inclusive), restricted by --families to the six listed raw types. In place and order preserved; written as compact JSON (--compact). 925 events: 331 heals, 500 damage, 86 absorbed, 5 extraattacks, 3 healabsorbed.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["DAMAGE", "HEALING", "ABSORBS"],
+              "actorScope": [1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7505793,
+                  "toReportTimeMs": 7508792
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for every one of fight 48's twenty friendly players over [7,505,793 .. 7,508,792] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The roster is re-derived by the loader from wcl-fight-context-b1pm-fight-48. DAMAGE as source or target (damage, extraattacks); HEALING as source or target (heal); ABSORBS as source or target (absorbed, healabsorbed). DEATHS is NOT granted (death events are positive facts only; none lies in this window). CASTS, AURAS, RESOURCES, SUMMONS, COMBATANT_INFO and GEAR are NOT granted (their families are excluded). The segment is one part of a three-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M12-B: real raid damage for the shared damage-episode primitive — two raid-wide episodes whole, on every friendly player, with every heal and absorb around them — so the episode grouping, its COMPLETE coverage over the whole roster and each target's lowest observed health are proven on Warcraft Logs bytes. The heals and absorbs are retained as the context later healer tranches (coverage of these episodes) read.",
+        "limitations": [
+          "One segment of a 7.5 s window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "Damage, healing, absorb and death families only: no cast, aura, resource or summon event is retained, so nothing here says what any player did or could have done, or which cooldown or defensive was active.",
+          "Friendly players only: pets, and events between other actors (enemy on enemy), are not retained.",
+          "Raw amounts are verbatim; what Warcraft Logs' amount fields mean in its accounting is follow-up M1 and is not settled by these bytes.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FIGHT_FRIENDLY_PLAYERS",
+          "fightId": 48,
+          "playerActorIds": [1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170],
+          "rosterAuthority": "WCL_FIGHT_FRIENDLY_PLAYERS",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": ["damage", "extraattacks", "heal", "absorbed", "healabsorbed", "death"],
+          "actorsWithRetainedEvents": [
+            1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170
+          ],
+          "actorsWithoutRetainedEvents": []
+        }
+      }
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-72500-75500",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-friendly-players.seg-72500-75500.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "b69166ff3468f10e77e4f111d7b5298a47fb49ecdc716e4a62cee32730b3f82c",
+      "byteLength": 410296,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-friendly-players.seg-72500-75500.json --friendly-players-slice 48 7511792 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7508792 --families damage,extraattacks,heal,absorbed,healabsorbed,death --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --friendly-players-slice predicate: the roster DERIVED from the committed context — fight 48's twenty WCL friendlyPlayers, each a Player in the master data, no pets — keeping every event whose sourceID or targetID is on the roster, with --from 7508792 (exclusive) and the bound 7511792 (inclusive), restricted by --families to the six listed raw types. In place and order preserved; written as compact JSON (--compact). 1038 events: 539 heals, 404 damage, 91 absorbed, 4 extraattacks.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["DAMAGE", "HEALING", "ABSORBS"],
+              "actorScope": [1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7508793,
+                  "toReportTimeMs": 7511792
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for every one of fight 48's twenty friendly players over [7,508,793 .. 7,511,792] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The roster is re-derived by the loader from wcl-fight-context-b1pm-fight-48. DAMAGE as source or target (damage, extraattacks); HEALING as source or target (heal); ABSORBS as source or target (absorbed, healabsorbed). DEATHS is NOT granted (death events are positive facts only; none lies in this window). CASTS, AURAS, RESOURCES, SUMMONS, COMBATANT_INFO and GEAR are NOT granted (their families are excluded). The segment is one part of a three-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M12-B: real raid damage for the shared damage-episode primitive — two raid-wide episodes whole, on every friendly player, with every heal and absorb around them — so the episode grouping, its COMPLETE coverage over the whole roster and each target's lowest observed health are proven on Warcraft Logs bytes. The heals and absorbs are retained as the context later healer tranches (coverage of these episodes) read.",
+        "limitations": [
+          "One segment of a 7.5 s window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "Damage, healing, absorb and death families only: no cast, aura, resource or summon event is retained, so nothing here says what any player did or could have done, or which cooldown or defensive was active.",
+          "Friendly players only: pets, and events between other actors (enemy on enemy), are not retained.",
+          "Raw amounts are verbatim; what Warcraft Logs' amount fields mean in its accounting is follow-up M1 and is not settled by these bytes.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FIGHT_FRIENDLY_PLAYERS",
+          "fightId": 48,
+          "playerActorIds": [1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170],
+          "rosterAuthority": "WCL_FIGHT_FRIENDLY_PLAYERS",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": ["damage", "extraattacks", "heal", "absorbed", "healabsorbed", "death"],
+          "actorsWithRetainedEvents": [
+            1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170
+          ],
+          "actorsWithoutRetainedEvents": []
+        }
+      }
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-75500-77000",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-friendly-players.seg-75500-77000.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "52454331935981afbc1d74ba1289470f9f43f513d90861365e7c2cbb9c97b3c3",
+      "byteLength": 201150,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-friendly-players.seg-75500-77000.json --friendly-players-slice 48 7513292 --catalog tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json --from 7511792 --families damage,extraattacks,heal,absorbed,healabsorbed,death --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --friendly-players-slice predicate: the roster DERIVED from the committed context — fight 48's twenty WCL friendlyPlayers, each a Player in the master data, no pets — keeping every event whose sourceID or targetID is on the roster, with --from 7511792 (exclusive) and the bound 7513292 (inclusive), restricted by --families to the six listed raw types. In place and order preserved; written as compact JSON (--compact). 511 events: 311 heals, 162 damage, 36 absorbed, 2 healabsorbed.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["DAMAGE", "HEALING", "ABSORBS"],
+              "actorScope": [1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7511793,
+                  "toReportTimeMs": 7513292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for every one of fight 48's twenty friendly players over [7,511,793 .. 7,513,292] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The roster is re-derived by the loader from wcl-fight-context-b1pm-fight-48. DAMAGE as source or target (damage, extraattacks); HEALING as source or target (heal); ABSORBS as source or target (absorbed, healabsorbed). DEATHS is NOT granted (death events are positive facts only; none lies in this window). CASTS, AURAS, RESOURCES, SUMMONS, COMBATANT_INFO and GEAR are NOT granted (their families are excluded). The segment is one part of a three-part bundle that the composer joins by adjacency."
+        },
+        "retainedFor": "M12-B: real raid damage for the shared damage-episode primitive — two raid-wide episodes whole, on every friendly player, with every heal and absorb around them — so the episode grouping, its COMPLETE coverage over the whole roster and each target's lowest observed health are proven on Warcraft Logs bytes. The heals and absorbs are retained as the context later healer tranches (coverage of these episodes) read.",
+        "limitations": [
+          "One segment of a 7.5 s window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+          "Damage, healing, absorb and death families only: no cast, aura, resource or summon event is retained, so nothing here says what any player did or could have done, or which cooldown or defensive was active.",
+          "Friendly players only: pets, and events between other actors (enemy on enemy), are not retained.",
+          "Raw amounts are verbatim; what Warcraft Logs' amount fields mean in its accounting is follow-up M1 and is not settled by these bytes.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ],
+        "actorSlice": {
+          "mode": "FIGHT_FRIENDLY_PLAYERS",
+          "fightId": 48,
+          "playerActorIds": [1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170],
+          "rosterAuthority": "WCL_FIGHT_FRIENDLY_PLAYERS",
+          "catalogArtifactId": "wcl-fight-context-b1pm-fight-48",
+          "families": ["damage", "extraattacks", "heal", "absorbed", "healabsorbed", "death"],
+          "actorsWithRetainedEvents": [
+            1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170
+          ],
+          "actorsWithoutRetainedEvents": []
+        }
+      }
+    },
+    {
       "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
       "path": "artifacts/wcl-events/wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45.json",
       "encoding": "JSON",
@@ -5756,6 +6077,96 @@
     }
   ],
   "cases": [
+    {
+      "caseId": "normalization.b1pm-friendly-players-seg-69500-72500-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-69500-72500",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --friendly-players-slice --from --families",
+      "purpose": "The 925-event family-filtered friendly-players segment (fight +69.5 s .. +72.5 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 925
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, for the derived roster, between the recorded exclusive --from and inclusive bound, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/healing/damage-episodes.test.ts"]
+    },
+    {
+      "caseId": "normalization.b1pm-friendly-players-seg-72500-75500-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-72500-75500",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --friendly-players-slice --from --families",
+      "purpose": "The 1,038-event family-filtered friendly-players segment (fight +72.5 s .. +75.5 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 1038
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, for the derived roster, between the recorded exclusive --from and inclusive bound, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/healing/damage-episodes.test.ts"]
+    },
+    {
+      "caseId": "normalization.b1pm-friendly-players-seg-75500-77000-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-75500-77000",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --friendly-players-slice --from --families",
+      "purpose": "The 511-event family-filtered friendly-players segment (fight +75.5 s .. +77 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 511
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the families the --families option retained, for the derived roster, between the recorded exclusive --from and inclusive bound, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/healing/damage-episodes.test.ts"]
+    },
     {
       "caseId": "normalization.brewmaster-monk-full-fight-bundle-composes-three-parts-into-one-complete-fight",
       "artifactId": "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",

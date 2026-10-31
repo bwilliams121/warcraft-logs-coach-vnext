@@ -11736,6 +11736,98 @@ const RXAF_AUTHORITY = {
 };
 const RXAF_BUNDLE = { historyArtifactIds: [BREWMASTER_RXAF_OPENER], declaredHoles: [] };
 
+// --------------------------------------------------------------------------
+// M12-B (2026-10-31): raid damage evidence for the shared damage-episode
+// primitive (src/healing/damage-episodes.ts). Owner direction (2026-10-31):
+// full real healer evidence goes to this archive; the regression corpus stays
+// at its 5.5 MiB line and takes only a minimal derived fixture, if any fits.
+//
+// Three chronological --friendly-players-slice segments of the same M11-E2
+// capture (b1PmaKrd6CDfzngc fight 48): every damage, heal and absorb event
+// sourced by or targeting one of the fight's twenty WCL friendly players over
+// fight +69.5 s .. +77.0 s. The window holds two raid-wide episodes whole —
+// Ability 1,285,979 (twenty players, four ticks over 3 s) and 1,282,525
+// (twenty players at once) — with at least 2 s of covered margin either side.
+// No new Warcraft Logs request was made.
+// --------------------------------------------------------------------------
+
+const SLICER_REVISION_8 = "sanitize-probe-8";
+const M12B_FAMILIES = "damage,extraattacks,heal,absorbed,healabsorbed,death";
+const M12B_ROSTER = [1, 2, 3, 5, 7, 8, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 121, 122, 164, 170];
+const M12B_SEGMENT = (from, to) => `wcl-b1pm-fight-48-friendly-players.seg-${String(from)}-${String(to)}`;
+const M12B_SEGMENTS = [
+  [69500, 72500, 925, "331 heals, 500 damage, 86 absorbed, 5 extraattacks, 3 healabsorbed"],
+  [72500, 75500, 1038, "539 heals, 404 damage, 91 absorbed, 4 extraattacks"],
+  [75500, 77000, 511, "311 heals, 162 damage, 36 absorbed, 2 healabsorbed"],
+];
+
+function m12b_segment([fromRel, toRel, count, types]) {
+  const file = M12B_SEGMENT(fromRel, toRel);
+  const fromMs = B1PM_START + fromRel;
+  const toMs = B1PM_START + toRel;
+  return artifact(file, wcl(file), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    source: B1PM_EVENTS_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/${file}.json --friendly-players-slice 48 ${String(toMs)} --catalog tests/evidence/artifacts/wcl-graphql/${B1PM_CONTEXT}.json --from ${String(fromMs)} --families ${M12B_FAMILIES} --compact`,
+        `The twenty-eight page records concatenated in page order, then the --friendly-players-slice predicate: the roster DERIVED from the committed context — fight 48's twenty WCL friendlyPlayers, each a Player in the master data, no pets — keeping every event whose sourceID or targetID is on the roster, with --from ${String(fromMs)} (exclusive) and the bound ${String(toMs)} (inclusive), restricted by --families to the six listed raw types. In place and order preserved; written as compact JSON (--compact). ${String(count)} events: ${types}.`,
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_8),
+      credential_scan(SLICER_REVISION_8),
+    ],
+    grants: [
+      {
+        categories: ["DAMAGE", "HEALING", "ABSORBS"],
+        actorScope: M12B_ROSTER,
+        ranges: [{ fromReportTimeMs: fromMs + 1, toReportTimeMs: toMs }],
+      },
+    ],
+    actorSlice: {
+      mode: "FIGHT_FRIENDLY_PLAYERS",
+      fightId: 48,
+      playerActorIds: M12B_ROSTER,
+      rosterAuthority: "WCL_FIGHT_FRIENDLY_PLAYERS",
+      catalogArtifactId: B1PM_CONTEXT,
+      families: M12B_FAMILIES.split(","),
+      actorsWithRetainedEvents: M12B_ROSTER,
+      actorsWithoutRetainedEvents: [],
+    },
+    coverageBasis: `The retained families are complete for every one of fight 48's twenty friendly players over [${(fromMs + 1).toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every event any of them sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). The roster is re-derived by the loader from ${B1PM_CONTEXT}. DAMAGE as source or target (damage, extraattacks); HEALING as source or target (heal); ABSORBS as source or target (absorbed, healabsorbed). DEATHS is NOT granted (death events are positive facts only; none lies in this window). CASTS, AURAS, RESOURCES, SUMMONS, COMBATANT_INFO and GEAR are NOT granted (their families are excluded). The segment is one part of a three-part bundle that the composer joins by adjacency.`,
+    retainedFor:
+      "M12-B: real raid damage for the shared damage-episode primitive — two raid-wide episodes whole, on every friendly player, with every heal and absorb around them — so the episode grouping, its COMPLETE coverage over the whole roster and each target's lowest observed health are proven on Warcraft Logs bytes. The heals and absorbs are retained as the context later healer tranches (coverage of these episodes) read.",
+    limitations: [
+      "One segment of a 7.5 s window: on its own it grants no coverage before its first millisecond and proves nothing about continuity across its boundaries; only the composed bundle does.",
+      "Damage, healing, absorb and death families only: no cast, aura, resource or summon event is retained, so nothing here says what any player did or could have done, or which cooldown or defensive was active.",
+      "Friendly players only: pets, and events between other actors (enemy on enemy), are not retained.",
+      "Raw amounts are verbatim; what Warcraft Logs' amount fields mean in its accounting is follow-up M1 and is not settled by these bytes.",
+      "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+      NO_NAMES,
+      VERSION_SCOPE,
+    ],
+  });
+}
+
+const M12B_EVIDENCE_ARTIFACTS = M12B_SEGMENTS.map(m12b_segment);
+const M12B_EVIDENCE_CASES = M12B_SEGMENTS.map(([fromRel, toRel, count]) =>
+  kase(
+    `normalization.b1pm-friendly-players-seg-${String(fromRel)}-${String(toRel)}-normalizes-whole-and-in-order`,
+    M12B_SEGMENT(fromRel, toRel),
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --friendly-players-slice --from --families",
+    `The ${count.toLocaleString("en-US")}-event family-filtered friendly-players segment (fight +${String(fromRel / 1000)} s .. +${String(toRel / 1000)} s) normalizes with every raw type recognised and every event kept in capture order.`,
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: count }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "The census is of the segment, never of the fight: exactly the families the --families option retained, for the derived roster, between the recorded exclusive --from and inclusive bound, and nothing else.",
+    { related: ["tests/unit/sanitize-probe.test.ts", "tests/unit/healing/damage-episodes.test.ts"] },
+  ),
+);
+
 const EVIDENCE_CASES = [
   // ---- M11-C4f: the neutral second subject's fixed 165 s window ----
   kase(
@@ -12521,8 +12613,8 @@ const manifest = EVIDENCE_ROOT
   ? {
       contractVersion: 2,
       corpusId: "warcraft-logs-coach-vnext.evidence-archive",
-      artifacts: [...EVIDENCE_ARTIFACTS].sort(byId("artifactId")),
-      cases: [...EVIDENCE_CASES].sort(byId("caseId")),
+      artifacts: [...EVIDENCE_ARTIFACTS, ...M12B_EVIDENCE_ARTIFACTS].sort(byId("artifactId")),
+      cases: [...EVIDENCE_CASES, ...M12B_EVIDENCE_CASES].sort(byId("caseId")),
     }
   : {
       contractVersion: 2,

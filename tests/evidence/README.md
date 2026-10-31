@@ -71,6 +71,53 @@ pseudonyms. See `m11g1-cohort-capture.md`.
 
 The M11-G2 comparison-fight evidence is the three G1 cohort fights at E2 parity: 25 owned-pet segments, three contexts, three table surfaces and one NPC surface. It has its own one-time, byte-pinned size exception. The captures were server-filtered and certify no category, so every slice withholds its grants. See `m11g2-comparison-capture.md`.
 
+## Friendly-players slices and healer evidence (M12-B)
+
+**Owner direction (2026-10-31).** Healer evidence is split between the two
+roots:
+
+- The full real evidence needed to establish healer behavior belongs here.
+- The regression corpus keeps its 5.5 MiB line and takes only the smallest
+  deterministic fixture derived from that evidence. Its remaining capacity is
+  treated as exhausted.
+- Evidence is never weakened, and context never discarded, to fit.
+- If several healer slices each need a genuinely minimal fixture that cannot
+  fit, that becomes a measured proposal to the owner. The line is never
+  raised preemptively for one tranche.
+
+**The slice mode.** An artifact may declare `provenance.actorSlice` with mode
+`FIGHT_FRIENDLY_PLAYERS`. That is the
+`scripts/sanitize-probe.mjs --friendly-players-slice` predicate (revision
+`sanitize-probe-8`): every event sourced by or targeting one of the named
+fight's Warcraft Logs `friendlyPlayers`, read from a committed fight context.
+The roster is never typed by hand.
+
+The loader re-derives the roster on every load and refuses
+(`ACTOR_SLICE_INVALID`) when any of these hold:
+
+- the fight is listed other than once;
+- an id is not exactly one `Player` in the master data;
+- the declared roster differs from the derived one;
+- the slice names another fight;
+- a grant's scope is not exactly the roster;
+- a retained event lies outside the predicate or the granted range;
+- the activity split does not match;
+- a grant names a category whose families were not retained.
+
+A bundle of such slices composes into a FULL_RAID fight whose
+`friendlyActorsInScope` is that roster.
+
+**M12-B evidence.** `wcl-b1pm-fight-48-friendly-players.seg-*` is three
+compact segments (974,973 bytes) of the M11-E2 capture.
+
+- They cover fight +69.5 s to +77.0 s, with damage, heal, absorb and death
+  families for all twenty friendly players.
+- They grant DAMAGE, HEALING and ABSORBS for the roster.
+- This is ordinary archive growth, named and pinned by
+  `tests/unit/m11c4e-evidence-archive.test.ts`. Without the M11-E2 and
+  M11-G2 exceptions the archive stays under its 4 MiB line.
+- No new Warcraft Logs request was made.
+
 ## Execution and promotion
 
 `npm run test:evidence` (`scripts/corpus/gate.mjs --root evidence`) runs four

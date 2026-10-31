@@ -592,6 +592,59 @@ function ownedSetFromCatalog(
   return { ok: true, owned: owned.sort((a, b) => a - b) };
 }
 
+/**
+ * The friendly-players roster of one fight (M12-B), the same rule
+ * `scripts/sanitize-probe.mjs deriveFriendlyPlayerRoster` cuts with: the fight
+ * listed exactly once, a non-empty `friendlyPlayers` of distinct integers,
+ * each a `Player` listed exactly once in the master data. Ascending.
+ */
+function friendlyRosterFromCatalog(
+  catalog: unknown,
+  fightId: number,
+):
+  | { readonly ok: true; readonly roster: readonly number[] }
+  | { readonly ok: false; readonly reason: string } {
+  const report = (
+    catalog as {
+      reportData?: { report?: { fights?: unknown; masterData?: { actors?: unknown } } };
+    } | null
+  )?.reportData?.report;
+  const fights = report?.fights;
+  const actors = report?.masterData?.actors;
+  if (!Array.isArray(fights)) return { ok: false, reason: "the catalog holds no fights array" };
+  if (!Array.isArray(actors)) return { ok: false, reason: "the catalog holds no masterData.actors array" };
+  const matching = (fights as readonly Record<string, unknown>[]).filter((fight) => fight["id"] === fightId);
+  if (matching.length !== 1) {
+    return {
+      ok: false,
+      reason: `fight ${String(fightId)} is listed ${String(matching.length)} times, not once`,
+    };
+  }
+  const roster = matching[0]?.["friendlyPlayers"];
+  if (!Array.isArray(roster) || roster.length === 0) {
+    return { ok: false, reason: `fight ${String(fightId)} has no friendlyPlayers roster` };
+  }
+  const seen = new Set<number>();
+  for (const id of roster as readonly unknown[]) {
+    if (typeof id !== "number" || !Number.isSafeInteger(id)) {
+      return { ok: false, reason: `fight ${String(fightId)} lists a non-integer friendly player` };
+    }
+    if (seen.has(id)) return { ok: false, reason: `friendly player ${String(id)} is listed more than once` };
+    seen.add(id);
+    const listed = (actors as readonly Record<string, unknown>[]).filter((actor) => actor["id"] === id);
+    if (listed.length !== 1) {
+      return {
+        ok: false,
+        reason: `friendly player ${String(id)} is listed ${String(listed.length)} times in the master data, not once`,
+      };
+    }
+    if (listed[0]?.["type"] !== "Player") {
+      return { ok: false, reason: `friendly player ${String(id)} is not a Player in the master data` };
+    }
+  }
+  return { ok: true, roster: [...seen].sort((a, b) => a - b) };
+}
+
 /** Raw types per granted category, from the supported-family contracts. GEAR is read from combatantinfo. */
 function rawTypesFeeding(category: string): readonly string[] {
   const feeding = category === "GEAR" ? "COMBATANT_INFO" : category;
@@ -627,11 +680,11 @@ function actorSliceErrors(
   };
   const source = artifact.provenance.source;
   if (artifact.payloadKind !== "WCL_EVENT_ARRAY" || source === null) {
-    fail("an owned-pet actor slice is a captured WCL event array");
+    fail("an actor-set slice is a captured WCL event array");
     return errors;
   }
 
-  // ---- the owned set, re-derived from the committed catalog ----
+  // ---- the actor set, re-derived from the committed catalog ----
   const catalog = loadedById.get(slice.catalogArtifactId);
   if (catalog === undefined || catalog.record.payloadKind !== "WCL_GRAPHQL_DATA") {
     fail(`catalog ${slice.catalogArtifactId} is not a loaded WCL_GRAPHQL_DATA artifact`);
@@ -641,30 +694,50 @@ function actorSliceErrors(
   if (catalogSource?.reportCode !== source.reportCode || catalogSource.fightId !== source.fightId) {
     fail(`catalog ${slice.catalogArtifactId} is not from this artifact's report and fight`);
   }
-  const derived = ownedSetFromCatalog(catalog.json, slice.focusActorId);
-  if (!derived.ok) {
-    fail(`the catalog cannot establish ownership: ${derived.reason}`);
-    return errors;
+  let scope: number[];
+  if (slice.mode === "FIGHT_FRIENDLY_PLAYERS") {
+    if (slice.fightId !== source.fightId) {
+      fail(`names fight ${String(slice.fightId)}, but its capture is of fight ${String(source.fightId)}`);
+    }
+    const derived = friendlyRosterFromCatalog(catalog.json, slice.fightId);
+    if (!derived.ok) {
+      fail(`the catalog cannot establish the friendly roster: ${derived.reason}`);
+      return errors;
+    }
+    if (!sameList(derived.roster, slice.playerActorIds)) {
+      fail(
+        `declares roster [${slice.playerActorIds.join(", ")}] but the catalog's friendlyPlayers give [${derived.roster.join(", ")}]`,
+      );
+    }
+    scope = [...derived.roster];
+  } else {
+    const derived = ownedSetFromCatalog(catalog.json, slice.focusActorId);
+    if (!derived.ok) {
+      fail(`the catalog cannot establish ownership: ${derived.reason}`);
+      return errors;
+    }
+    if (!sameList(derived.owned, slice.ownedActorIds)) {
+      fail(
+        `declares owned actors [${slice.ownedActorIds.join(", ")}] but the catalog's petOwner links give [${derived.owned.join(", ")}]`,
+      );
+    }
+    scope = [slice.focusActorId, ...derived.owned].sort((a, b) => a - b);
   }
-  if (!sameList(derived.owned, slice.ownedActorIds)) {
-    fail(
-      `declares owned actors [${slice.ownedActorIds.join(", ")}] but the catalog's petOwner links give [${derived.owned.join(", ")}]`,
-    );
-  }
-  const scope = [slice.focusActorId, ...derived.owned].sort((a, b) => a - b);
   const scopeSet = new Set(scope);
+  const actorlessFamilies = slice.mode === "FIGHT_FRIENDLY_PLAYERS" ? [] : slice.actorlessFamilies;
+  const grantsWithheld = slice.mode === "FIGHT_FRIENDLY_PLAYERS" ? undefined : slice.grantsWithheld;
 
   // ---- grants: exactly the derived scope, only categories the families feed ----
   const families = new Set(slice.families);
-  for (const type of slice.actorlessFamilies) {
+  for (const type of actorlessFamilies) {
     if (!families.has(type)) fail(`actorless family ${type} is not a retained family`);
   }
   const grants = artifact.provenance.retainedCoverage.grants;
-  if (slice.grantsWithheld === undefined && grants.length === 0) {
-    fail("an owned-pet actor slice must state its grant, or record why it is withheld");
+  if (grantsWithheld === undefined && grants.length === 0) {
+    fail("an actor-set slice must state its grant, or record why it is withheld");
   }
-  if (slice.grantsWithheld !== undefined && grants.length > 0) {
-    fail("an owned-pet actor slice that withholds its grants must hold none");
+  if (grantsWithheld !== undefined && grants.length > 0) {
+    fail("an actor-set slice that withholds its grants must hold none");
   }
   for (const [ordinal, grant] of grants.entries()) {
     if (
@@ -690,12 +763,12 @@ function actorSliceErrors(
   // With grants withheld, the predicate is checked over the capture's own window.
   const query = source.query;
   const ranges =
-    slice.grantsWithheld === undefined
+    grantsWithheld === undefined
       ? grants.flatMap((grant) => grant.ranges)
       : "startTimeMs" in query && typeof query.startTimeMs === "number" && typeof query.endTimeMs === "number"
         ? [{ fromReportTimeMs: query.startTimeMs, toReportTimeMs: query.endTimeMs }]
         : [];
-  if (slice.grantsWithheld !== undefined && ranges.length === 0) {
+  if (grantsWithheld !== undefined && ranges.length === 0) {
     fail("a slice that withholds its grants needs an events capture with a recorded window");
   }
   const granted = (timestamp: unknown): boolean =>
@@ -703,7 +776,7 @@ function actorSliceErrors(
     ranges.some((range) => timestamp >= range.fromReportTimeMs && timestamp <= range.toReportTimeMs);
 
   // ---- every retained event satisfies the predicate ----
-  const actorless = new Set(slice.actorlessFamilies);
+  const actorless = new Set(actorlessFamilies);
   const active = new Set<number>();
   const events = eventsById.get(artifact.artifactId) ?? [];
   let outside = 0;

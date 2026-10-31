@@ -648,7 +648,7 @@ describe("compact re-slicing", () => {
       const record = recordOf(id);
       const slice = record.provenance.actorSlice;
       const range = record.provenance.retainedCoverage.grants[0]?.ranges[0];
-      if (slice === undefined || range === undefined) throw new Error(id);
+      if (slice?.mode !== "FOCUS_WITH_OWNED_PETS" || range === undefined) throw new Error(id);
       const recut = ownedPetSlice(rawEvents, derived.actorScope, {
         fromMs: range.fromReportTimeMs - 1,
         untilMs: range.toReportTimeMs,

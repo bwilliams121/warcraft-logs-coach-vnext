@@ -3970,6 +3970,44 @@ const ownedPetActorSlice = z
   .strict();
 export type OwnedPetActorSlice = z.infer<typeof ownedPetActorSlice>;
 
+/**
+ * A FRIENDLY-PLAYERS ACTOR SLICE (M12-B): the artifact is the
+ * `scripts/sanitize-probe.mjs --friendly-players-slice` predicate over its
+ * capture — every event of a listed family whose `sourceID` or `targetID` is
+ * one of the named fight's Warcraft Logs `friendlyPlayers`. A healer question
+ * ranges over the whole raid, so its evidence must be complete for every
+ * friendly player at once.
+ *
+ * Never taken on trust, exactly like the owned-pet slice. The loader
+ * re-derives the roster from the named catalog (a committed fight context of
+ * the same report and fight: the fight listed once, every roster id a
+ * `Player` listed once in the master data) and refuses unless it equals
+ * `playerActorIds`; every grant's actor scope is exactly the roster; every
+ * retained event satisfies the predicate inside the granted range; the
+ * activity split matches the events; and every granted category is fed only
+ * by retained families. There are no actorless families.
+ */
+const friendlyPlayersActorSlice = z
+  .object({
+    mode: z.literal("FIGHT_FRIENDLY_PLAYERS"),
+    fightId: z.number().int(),
+    /** Ascending. Derived from the catalog, never chosen. */
+    playerActorIds: z.array(z.number().int()).min(1),
+    rosterAuthority: z.literal("WCL_FIGHT_FRIENDLY_PLAYERS"),
+    /** The committed fight context the roster is read from. */
+    catalogArtifactId: identifier,
+    /** The raw types `--families` retained. */
+    families: z.array(z.string().regex(/^[a-z]+$/)).min(1),
+    /** Roster members that are the source or target of a retained event. Ascending. */
+    actorsWithRetainedEvents: z.array(z.number().int()),
+    /** Roster members that are neither. Ascending. */
+    actorsWithoutRetainedEvents: z.array(z.number().int()),
+  })
+  .strict();
+export type FriendlyPlayersActorSlice = z.infer<typeof friendlyPlayersActorSlice>;
+
+const actorSliceSchema = z.discriminatedUnion("mode", [ownedPetActorSlice, friendlyPlayersActorSlice]);
+
 const provenanceSchema = z
   .object({
     kind: z.enum(PROVENANCE_KINDS),
@@ -3987,8 +4025,12 @@ const provenanceSchema = z
     limitations: z.array(z.string().min(1)),
     /** Present only on a negative-control derivative (M11-C4h); see `castAbilitySubstitution`. */
     substitution: castAbilitySubstitution.optional(),
-    /** Present only on an owned-pet actor slice (M11-E2.1); see `ownedPetActorSlice`. */
-    actorSlice: ownedPetActorSlice.optional(),
+    /**
+     * Present only on an actor-set slice: owned-pet (M11-E2.1, see
+     * `ownedPetActorSlice`) or friendly-players (M12-B, see
+     * `friendlyPlayersActorSlice`).
+     */
+    actorSlice: actorSliceSchema.optional(),
   })
   .strict();
 
