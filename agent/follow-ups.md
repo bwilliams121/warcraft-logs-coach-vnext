@@ -260,8 +260,10 @@ Still open, none of them an owner decision:
   potion, a Healthstone and a Silvermoon Health Potion, asserted through the
   service. No new Warcraft Logs request was made. A whole fight with all
   three kinds for one player is not committed, because of the 5.5 MiB line.
-- **The MCP tool description** does not yet mention consumable status. The
-  outputSchema advertises the field.
+- **RESOLVED (PREP-5): the MCP tool descriptions.** Both
+  `analyze_warcraft_log` and `analyze_raid_night` now describe the
+  consumable status they carry. The schema did not change
+  (agent/architecture.md "PREP-5").
 
 ## After M11-A3: shared-engine candidates the audit named
 
