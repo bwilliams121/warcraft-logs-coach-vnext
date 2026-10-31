@@ -85,8 +85,9 @@ mergeSha: d4798ef5378affb50b67f0cc39afe7250bfaf2e0
 ### M12-C: Healer Foundation, healing and absorbs received during damage episodes (internal)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M12-B
+branch: autopilot/m12-c
 wcl: NONE
 publicContract: NONE
 ```
