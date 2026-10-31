@@ -20,11 +20,53 @@ preemptively for one tranche.
 | Tranche | Smallest fixture that proves the behavior | Bytes | Committed |
 | --- | --- | ---: | --- |
 | M12-B | One COMPLETE damage episode (1,282,525) with its ±2 s margin: damage and extraattacks for all 20 friendly players over 4.005 s, granted DAMAGE | 230,811 | no; protected by archive-reading unit tests |
+| M12-D | The Restoration Shaman's casts and begincasts over the whole fight, granted CASTS, so "these are all its healing-cooldown casts" is COMPLETE | 119,216 | no; protected by archive-reading unit tests |
 
 A grant-free fixture of only the episode's 20 hits would be ~9 KB, but it
 could not prove COMPLETE coverage, which is the behavior at stake. When a
 second row appears, the measured proposal is the sum of the rows plus the
 current total (5,748,495 bytes), with what each row buys.
+
+---
+
+## After M12-D: what the Restoration Shaman evaluator does not yet do
+
+**Raised:** M12-D (2026-10-31).
+
+- **Not registered, not published.** Nothing in production calls it, and no
+  public field carries its results. Registering it needs a registration shape
+  for an evaluator with no SimulationCraft authority, the FULL_RAID scope
+  derived from `RESTORATION_SHAMAN_REQUIRED_INPUTS`, and a shared finding
+  shape for the ASSIGNMENT, COOLDOWN and HEALING_DECISION categories
+  (`src/findings/authority.ts` knows only ROTATION). Until then the
+  unregistered-tree exceptions in `m11a2-cross-spec-isolation` and
+  `m10a-cross-spec-isolation` stand.
+- **No plan input.** Assignment evaluation runs only on a plan a caller
+  constructs. The input format and transport are M12-E (owner decision).
+- **MISSED, EARLY and LATE are unreachable.** A miss needs positive proof
+  the ability was ready in the window. That needs Restoration cooldowns
+  pinned the way M10-C5 pins them (`extract-simc-ability-cooldowns.mjs`:
+  DBC record, modifier census, a hand-reviewed absence proof against
+  `sc_shaman.cpp`), plus the pre-pull state. Early and late need a rule for
+  which cast answers which assignment. `PLAN_MAY_NEED_REVIEW` is not built.
+- **No alive or incapacitated state.** MET rests on the observed cast. No
+  other outcome claims the player could act.
+- **Overlap is not effect.** The 10 s span is a reporting window. Spirit Link
+  Totem's and Ascendance's real effect windows need AURAS evidence, which
+  the committed raid segments exclude. No real cooldown use lies inside the
+  M12-B damage window (+69.5 s to +77.0 s), so overlap is proven on
+  synthetic fights only.
+- **No "who else is a healer".** Other-healer coverage proper still needs
+  specialization identity for every roster player; the evaluator reads only
+  its own subject's identity.
+- **The healing domain has one consumer.** The M12-A milestone guard
+  (`tests/contracts/m12a-healing-layering.test.ts`) now names this evaluator;
+  the "no consumer" notes in the M12-A, M12-B and M12-C entries below are
+  superseded by that, and nothing else changed for them.
+- **Healing Tide Totem is identified from the pinned row only.** No
+  committed evidence holds its cast.
+- **No client-build gate.** As for the other pinned datasets, `CombatFight`
+  exposes no build key.
 
 ---
 

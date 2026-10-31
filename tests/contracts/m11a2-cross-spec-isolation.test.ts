@@ -143,6 +143,21 @@ const TREES: readonly SpecTree[] = (() => {
   });
 })();
 
+/**
+ * M12-D: specialization trees that are evaluators WITHOUT a registration.
+ *
+ * A healer evaluator has no SimulationCraft authority, so it has no SpecId,
+ * no registration.ts and no APL artifact (CLAUDE.md "Healer Model Limits").
+ * It is named here, exactly, and every isolation rule (R1, R3, R4, R5) still
+ * applies to it; only the registration rules (R2's importer list, R6, the
+ * one-APL-per-tree count) exclude it, because it registers nothing. A tree is
+ * added here only by its own reviewed tranche.
+ */
+const UNREGISTERED_EVALUATOR_TREES: readonly string[] = ["shaman/restoration"];
+const REGISTERED_TREES: readonly SpecTree[] = TREES.filter(
+  (tree) => !UNREGISTERED_EVALUATOR_TREES.includes(tree.specId),
+);
+
 const ROSTER = (() => {
   const loaded = pinnedSpecRoster();
   if (!loaded.ok) throw new Error(`roster failed to load: ${loaded.reason}`);
@@ -223,16 +238,27 @@ function ownerOf(
 // ---------------------------------------------------------------------------
 
 describe("discovery", () => {
-  it("finds every specialization tree, each with a registration module", () => {
+  it("finds every specialization tree, each registered one with a registration module", () => {
     expect(TREES.length).toBeGreaterThan(0);
     for (const tree of TREES) {
-      expect(tree.files, tree.root).toContain(`${tree.root}registration.ts`);
       expect(ROSTER_KEYS.has(tree.specId), `${tree.specId} is not a roster specialization`).toBe(true);
+      if (UNREGISTERED_EVALUATOR_TREES.includes(tree.specId)) {
+        expect(tree.files, tree.root).not.toContain(`${tree.root}registration.ts`);
+      } else {
+        expect(tree.files, tree.root).toContain(`${tree.root}registration.ts`);
+      }
     }
   });
 
-  it("the discovered trees are exactly the known SpecIds", () => {
-    expect(TREES.map((tree) => tree.specId)).toEqual([...SPEC_IDS].sort());
+  it("the registered trees are exactly the known SpecIds, and every unregistered tree exists and is no SpecId", () => {
+    expect(REGISTERED_TREES.map((tree) => tree.specId)).toEqual([...SPEC_IDS].sort());
+    for (const specId of UNREGISTERED_EVALUATOR_TREES) {
+      expect(
+        TREES.map((tree) => tree.specId),
+        specId,
+      ).toContain(specId);
+      expect([...SPEC_IDS] as string[], specId).not.toContain(specId);
+    }
   });
 
   it("every frozen exception still exists, so the exception list cannot silently outlive its subject", () => {
@@ -270,7 +296,7 @@ describe("R2 — spec-owned interpretation stays inside its tree", () => {
     }
     expect([...importers.keys()]).toEqual(["src/services/analyzer-registry.ts"]);
     const imported = (importers.get("src/services/analyzer-registry.ts") ?? []).sort();
-    expect(imported).toEqual(TREES.map((tree) => `${tree.root}registration.ts`));
+    expect(imported).toEqual(REGISTERED_TREES.map((tree) => `${tree.root}registration.ts`));
   });
 });
 
@@ -388,7 +414,7 @@ describe("R7 — the frozen exceptions are exactly these, and are not a pattern"
 
   it("every APL artifact is loaded from exactly one place, and that place belongs to its specialization", () => {
     const artifacts = ALL_FILES.filter((path) => specOfAplArtifact(path) !== null);
-    expect(artifacts.length).toBe(TREES.length);
+    expect(artifacts.length).toBe(REGISTERED_TREES.length);
     for (const artifact of artifacts) {
       const owner = ownerOf(artifact);
       const importers = TS_FILES.filter((file) => importsOf(file).some((edge) => edge.resolved === artifact));

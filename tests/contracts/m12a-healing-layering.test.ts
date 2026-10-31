@@ -182,9 +182,24 @@ describe("there is nowhere to branch on a specialization or write a judgement", 
  * own the verdicts) and, when it is published, the application service. The
  * milestone that adds one amends this guard explicitly, naming the consumer,
  * under its own review.
+ *
+ * M12-D names the first: the Restoration Shaman evaluator, which owns the
+ * verdicts these facts feed. It is itself unregistered, so nothing in the
+ * analysis service, the contracts, the API or MCP reaches the healing domain.
  */
-describe("nothing in production reads it yet", () => {
-  const OUTSIDE = allPaths().filter((path) => !path.startsWith("src/healing/"));
+const HEALING_CONSUMERS = ["src/specs/shaman/restoration/evaluator.ts"];
+
+describe("only the named consumers read it", () => {
+  const OUTSIDE = allPaths().filter(
+    (path) => !path.startsWith("src/healing/") && !HEALING_CONSUMERS.includes(path),
+  );
+
+  it("every named consumer exists and is a specialization evaluator", () => {
+    for (const path of HEALING_CONSUMERS) {
+      expect(allPaths(), path).toContain(path);
+      expect(path.startsWith("src/specs/"), path).toBe(true);
+    }
+  });
 
   it("found modules to check", () => {
     expect(OUTSIDE.length).toBeGreaterThan(100);

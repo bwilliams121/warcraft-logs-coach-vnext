@@ -22,6 +22,20 @@
       "sha256": "52454331935981afbc1d74ba1289470f9f43f513d90861365e7c2cbb9c97b3c3"
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-0-180",
+      "byteLength": 62043,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "84c031962e680af89f59c5a4beb897df48801a7f54e086fefd5cd7bedbc7ae60"
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-180-345",
+      "byteLength": 57173,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "7a7e62166bd7084b087a66ad49123b88e3d08c948d66f6ef05219a5300ce8388"
+    },
+    {
       "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
       "byteLength": 492175,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -381,8 +395,8 @@
   ],
   "byLayer": [
     {
-      "assertions": 21,
-      "cases": 7,
+      "assertions": 27,
+      "cases": 9,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
@@ -393,7 +407,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 21
+      "passed": 27
     },
     {
       "assertions": 9,
@@ -482,6 +496,54 @@
       "caseId": "normalization.b1pm-friendly-players-seg-75500-77000-normalizes-whole-and-in-order",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-b1pm-fight-48-friendly-players.seg-75500-77000"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-0-180",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-restoration-shaman-122-casts-seg-0-180-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-0-180"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-180-345",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-restoration-shaman-122-casts-seg-180-345-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-180-345"]
     },
     {
       "artifactId": "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",
@@ -749,15 +811,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 18009969,
-    "artifacts": 54,
-    "assertions": 30,
-    "cases": 12,
+    "artifactBytes": 18129185,
+    "artifacts": 56,
+    "assertions": 36,
+    "cases": 14,
     "declared": 0,
-    "executable": 30,
+    "executable": 36,
     "failed": 0,
     "largestArtifactBytes": 499916,
     "notExecuted": 0,
-    "passed": 30
+    "passed": 36
   }
 }

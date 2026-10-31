@@ -11828,6 +11828,79 @@ const M12B_EVIDENCE_CASES = M12B_SEGMENTS.map(([fromRel, toRel, count]) =>
   ),
 );
 
+// --------------------------------------------------------------------------
+// M12-D (2026-10-31): the first healer specialization evaluator (Restoration
+// Shaman, owner decision 2026-10-31). Every cast and begincast sourced by or
+// targeting actor 122 — fight 48's Restoration Shaman — over the whole fight,
+// cut from the same M11-E2 capture. It proves which identified healing
+// cooldowns that player actually cast, and when. No new Warcraft Logs request
+// was made.
+// --------------------------------------------------------------------------
+
+const M12D_SUBJECT = 122;
+const M12D_SEGMENT = (from, to) =>
+  `wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-${String(from)}-${String(to)}`;
+const M12D_FAMILIES = "cast,begincast";
+// [segment seconds from, to, exclusive --from, inclusive bound, events, casts, begincasts, sourced by 122]
+const M12D_SEGMENTS = [
+  [0, 180, B1PM_START - 1, B1PM_START + 180000, 209, 146, 63, 199],
+  [180, 345, B1PM_START + 180000, B1PM_END, 192, 135, 57, 176],
+];
+
+function m12d_segment([fromS, toS, fromMs, toMs, count, casts, begincasts, sourced]) {
+  const file = M12D_SEGMENT(fromS, toS);
+  return artifact(file, wcl(file), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    source: B1PM_EVENTS_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/${file}.json --actor-slice ${String(M12D_SUBJECT)} ${String(toMs)} --from ${String(fromMs)} --families ${M12D_FAMILIES} --compact`,
+        `The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor 122: every event whose sourceID or targetID is 122, with --from ${String(fromMs)} (exclusive) and the bound ${String(toMs)} (inclusive), restricted by --families to cast and begincast. In place and order preserved; written as compact JSON (--compact). ${String(count)} of 271,011 events: ${String(casts)} casts and ${String(begincasts)} begincasts (${String(sourced)} sourced by 122, ${String(count - sourced)} cast on 122 by others).`,
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_8),
+      credential_scan(SLICER_REVISION_8),
+    ],
+    grants: [
+      {
+        categories: ["CASTS"],
+        actorScope: [M12D_SUBJECT],
+        ranges: [{ fromReportTimeMs: fromMs + 1, toReportTimeMs: toMs }],
+      },
+    ],
+    coverageBasis: `CASTS is complete for actor 122 over [${(fromMs + 1).toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every cast or begincast actor 122 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets and totems included. The segment is one part of a two-part bundle, joined by adjacency, that spans the whole fight.`,
+    retainedFor:
+      "M12-D: the Restoration Shaman's real casts over the whole canonical fight, so the evaluator's identification of its healing cooldowns (two Spirit Link Totem and two Ascendance casts) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that establishes the player's class and specialization.",
+    limitations: [
+      "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+      "Casts and begincasts only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+      "Actor 122 only: its totems' own casts (for example Spirit Link Totem's pulses, sourced by the totem) are not retained.",
+      "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+      NO_NAMES,
+      VERSION_SCOPE,
+    ],
+  });
+}
+
+const M12D_EVIDENCE_ARTIFACTS = M12D_SEGMENTS.map(m12d_segment);
+const M12D_EVIDENCE_CASES = M12D_SEGMENTS.map(([fromS, toS, , , count]) =>
+  kase(
+    `normalization.b1pm-restoration-shaman-122-casts-seg-${String(fromS)}-${String(toS)}-normalizes-whole-and-in-order`,
+    M12D_SEGMENT(fromS, toS),
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+    `The ${String(count)}-event cast-only segment of actor 122 (fight +${String(fromS)} s .. +${String(toS)} s) normalizes with every raw type recognised and every event kept in capture order.`,
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: count }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "The census is of the segment, never of the fight: exactly the cast and begincast events sourced by or targeting actor 122 in its range, and nothing else.",
+    { related: ["tests/unit/specs/restoration-shaman-evaluator.test.ts"] },
+  ),
+);
+
 const EVIDENCE_CASES = [
   // ---- M11-C4f: the neutral second subject's fixed 165 s window ----
   kase(
@@ -12613,8 +12686,10 @@ const manifest = EVIDENCE_ROOT
   ? {
       contractVersion: 2,
       corpusId: "warcraft-logs-coach-vnext.evidence-archive",
-      artifacts: [...EVIDENCE_ARTIFACTS, ...M12B_EVIDENCE_ARTIFACTS].sort(byId("artifactId")),
-      cases: [...EVIDENCE_CASES, ...M12B_EVIDENCE_CASES].sort(byId("caseId")),
+      artifacts: [...EVIDENCE_ARTIFACTS, ...M12B_EVIDENCE_ARTIFACTS, ...M12D_EVIDENCE_ARTIFACTS].sort(
+        byId("artifactId"),
+      ),
+      cases: [...EVIDENCE_CASES, ...M12B_EVIDENCE_CASES, ...M12D_EVIDENCE_CASES].sort(byId("caseId")),
     }
   : {
       contractVersion: 2,

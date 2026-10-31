@@ -10259,6 +10259,124 @@ There is no new corpus fixture, because no new behavior needs one beyond the
 M12-B ledger row. The archive-reading unit tests protect it in every
 `npm test`.
 
+## M12-D — the first healer specialization evaluator: Restoration Shaman (internal)
+
+**Status:** implemented (2026-10-31). This is the fourth tranche of
+Milestone 12 (autopilot queue entry M12-D).
+
+**Owner decision (2026-10-31).** Restoration Shaman is the first healer
+specialization, because the canonical fight (b1PmaKrd6CDfzngc fight 48)
+already holds one, actor 122, whose identity committed evidence establishes.
+Its v1 verdict scope and the runtime-data ownership are recorded in
+`agent/autopilot-queue.md` "M12-D".
+
+**What it adds.** `evaluateRestorationShaman({ fight, identity, plan })`
+(`src/specs/shaman/restoration/evaluator.ts`, revision
+`restoration-shaman-evaluator/1`). It is pure and internal.
+
+- **Identity first.** The preflight identity must name this fight, class
+  "Shaman" and specialization "Restoration". The fight's master data must
+  list the actor as a Shaman player. Otherwise the result is
+  `IDENTITY_REFUSED` (`IDENTITY_MISMATCH`, `NOT_THIS_SPECIALIZATION`,
+  `IDENTITY_UNRESOLVED`, `IDENTITY_CONFLICT`), with nothing evaluated.
+- **ASSIGNMENT.** Its authority is a supplied raid cooldown plan
+  (`RAID_COOLDOWN_PLAN`, citing the plan's source).
+  - No plan: `NO_AUTHORITY_AVAILABLE` (`NO_RAID_COOLDOWN_PLAN`).
+    Assignments are never inferred from casts, the player's or another
+    healer's.
+  - The plan's entries are the normalized `CooldownAssignment` of "Raid
+    Cooldown Assignments": player, ability, planned time, a tolerance the
+    plan states, and the source. How a plan is written and supplied stays
+    M12-E's owner decision. Nothing in production supplies one yet.
+  - `ASSIGNMENT_MET`: the player's own completed cast of the planned ability
+    lies inside the window. That cast is the actionability proof
+    (`PROVEN_ACTIONABLE_BY_OBSERVED_EXECUTION`).
+  - `ASSIGNMENT_NOT_ACTIONABLE`: a COMPLETED encounter ended before the
+    window opened. The fight's end is the positive evidence.
+  - `ASSIGNMENT_UNKNOWN` otherwise, with its reason. No cast in a
+    COMPLETE-covered window is `READINESS_NOT_ESTABLISHED`: nothing pinned
+    proves the ability was ready, and a miss needs that proof. A coverage
+    gap is the gate's reason, never inactivity. The nearest observed casts
+    are attached as context, never classified early or late.
+  - So `ASSIGNMENT_MISSED`, `_EARLY` and `_LATE`, and `PLAN_MAY_NEED_REVIEW`,
+    are not reachable in v1 (follow-up "After M12-D").
+- **COOLDOWN.** Observational, `WCL_OBSERVED_FACT`. It lists every
+  identified healing cooldown the player cast.
+  - A use is a completed `cast` sourced by the player inside the encounter,
+    bounds inclusive. A begincast, an aura
+    of the same id, another player's cast and the totem's own cast are not.
+    In the real fight, Ascendance's aura is applied seven times and cast
+    twice.
+  - The listing is COMPLETE only under CASTS coverage of the player over the
+    whole fight and with no completed cast of the player that carries no
+    ability id (any such cast could be an unlisted cooldown). Otherwise it is
+    UNKNOWN with the gate's reason or `UNIDENTIFIED_SUBJECT_CAST`, and the
+    known uses are kept. An assignment window holding such a cast is
+    `UNIDENTIFIED_SUBJECT_CAST` too, never "no cast".
+  - Per use, it lists the M12-B damage episodes overlapping
+    `[cast, cast + 10 s]` (a reporting span, not an effect duration). Per
+    player each episode hit, it gives the count of M12-C entries from the
+    player and its Warcraft Logs-stated pets, with that list's coverage.
+    Counting the pets is this specialization's decision; the shared
+    primitive still never attributes a pet to its owner.
+  - The overlap list carries its own `listing` coverage. It is COMPLETE only
+    when DAMAGE holds for every roster player over the span widened by the
+    episode gap on both sides, inside the fight, with no ability-less roster
+    hit there (the M12-B episode rule). Otherwise it is UNKNOWN
+    (`beyondFightEdge`, `uncoveredActors`, `unidentifiedHitsInSpan`), and an
+    empty list is not "no overlap".
+  - Without the FULL_RAID roster the overlap is `ROSTER_NOT_IN_SCOPE`.
+  - No verdict: nothing says a cooldown should or should not have been used.
+- **HEALING_DECISION.** Always `NO_AUTHORITY_AVAILABLE`
+  (`NO_APPROVED_PER_CAST_HEALER_MODEL`).
+- **No confidence field.** The repository has no confidence vocabulary yet
+  (`m5-boundary-and-vocabulary` bans one). The status carries the evidence
+  grade.
+
+**Runtime data.** `src/data/game/shaman-restoration-healing-cooldowns.{json,ts}`
+holds healing-cooldown identity only: Spirit Link Totem (98008), Ascendance
+(114052) and Healing Tide Totem (108280).
+
+- Each entry is a verbatim specialization-tree row of the pinned
+  SimulationCraft `trait_data.inc` (commit 33622e9d, client data
+  12.1.0.69587, file hashes recorded), checked by the loader against the
+  identity it claims. Ascendance and Healing Tide Totem share a choice node.
+- The selection of which traits are healing cooldowns is hand reviewed and
+  recorded per entry.
+- No cooldown, charge or duration is claimed.
+- It is spec-owned data, so `m11a2-cross-spec-isolation` R3 lets only the
+  Restoration tree import it. Nothing goes into `src/healing/`.
+
+**An unregistered evaluator tree.** A healer has no SimulationCraft
+authority, so the tree has no `SpecId`, `registration.ts` or APL artifact.
+
+- `m11a2-cross-spec-isolation` names it as the one unregistered evaluator
+  tree. R1, R3, R4 and R5 still apply to it. Only the registration rules
+  exclude it.
+- `m10a-cross-spec-isolation` lists it and pins that it has no
+  registration.
+- `m12a-healing-layering` names the evaluator as the healing domain's one
+  consumer.
+- `m5c1-gcd-semantics` admits the exact `"ASSIGNMENT_NOT_ACTIONABLE"` literal
+  in that one file, with its evidence-bearing reason. The actionability
+  vocabulary itself still has two members.
+- `RESTORATION_SHAMAN_REQUIRED_INPUTS` declares FULL_RAID. Nothing derives a
+  scope from it until the evaluator is registered.
+
+**Evidence.** Two `--actor-slice` segments of the M11-E2 capture hold every
+cast and begincast of actor 122 over the whole fight (119,216 bytes,
+archive). No new Warcraft Logs request was made. The real result, checked
+against the raw bytes:
+
+- four healing-cooldown casts: Ascendance at 7,469,039 and 7,666,386,
+  Spirit Link Totem at 7,543,726 and 7,776,617, listing COMPLETE;
+- the player's sources are 122 plus its seven stated pets;
+- a test plan over the real casts gives MET, UNKNOWN
+  (`READINESS_NOT_ESTABLISHED`) and NOT_ACTIONABLE after the kill.
+
+No regression-corpus fixture is committed (ledger row in
+`agent/follow-ups.md`).
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

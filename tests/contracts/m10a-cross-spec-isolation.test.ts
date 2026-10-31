@@ -106,7 +106,7 @@ function classPrefixOfModule(resolved: string): string | null {
 }
 
 describe("the sweep has something to sweep", () => {
-  it("finds the Assassination tree, the two Paladin trees, the Blood Death Knight tree and, since M11-C2, the Brewmaster Monk tree", () => {
+  it("finds the Assassination tree, the two Paladin trees, the Blood Death Knight tree, since M11-C2 the Brewmaster Monk tree and, since M12-D, the unregistered Restoration Shaman evaluator tree", () => {
     const trees = new Set(SPEC_FILES.map(specTreeOf).filter((tree): tree is string => tree !== null));
     expect([...trees].sort()).toEqual([
       "src/specs/deathknight/blood",
@@ -114,8 +114,10 @@ describe("the sweep has something to sweep", () => {
       "src/specs/paladin/protection",
       "src/specs/paladin/retribution",
       "src/specs/rogue/assassination",
+      "src/specs/shaman/restoration",
     ]);
     expect(existsSync("src/specs/paladin/protection/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/shaman/restoration/registration.ts")).toBe(false);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
   });
 
