@@ -46,6 +46,15 @@
   Do not launch Claude: evaluate the merge gate for the tranche's existing PR
   and stop. Combine with -NoMerge for a pure decision dry run.
 
+.PARAMETER Reaudit
+  With -TrancheId: re-audit that tranche's existing transcripts under the
+  CURRENT audit rules (after an audit-rule fix), then stop. Each record is
+  rebuilt from the same transcript file; attempt numbers and an owner's
+  ownerConfirmed are kept, and the candidate is re-bound only to the SHA the
+  run itself reported, checked against the head observed now. A saved
+  AUDIT_CONFIRMATION stop is cleared only if no record still needs the owner.
+  No model is launched and nothing is merged.
+
 .PARAMETER SelfTest
   Run the offline self-tests (queue parsing, gate logic, argument quoting,
   transcript audit) and exit. No model, no network.
@@ -59,6 +68,7 @@ param(
   [switch]$NoMerge,
   [switch]$GateOnly,
   [switch]$SelfTest,
+  [switch]$Reaudit,
   [string]$ClaudePath = "",
   [int]$ClaudeTimeoutMinutes = 360,
   [int]$CiTimeoutMinutes = 90,
@@ -771,9 +781,11 @@ function Get-MaxAuditAttempt([string]$id) {
 }
 
 # Audits one transcript. Conservative: it is auditable only when the stream
-# opens with Claude's system init event and every line parses as JSON, except
-# a LAST line that is a truncated JSON object (a message cut off mid-write was
-# never executed). Empty, garbage-only or init-less output proves nothing.
+# holds Claude's system init event, nothing but other SYSTEM events precede it
+# (no action can happen before init; Claude 2.1 opens with a
+# session_state_changed event), and every line parses as JSON, except a LAST
+# line that is a truncated JSON object (a message cut off mid-write was never
+# executed). Empty, garbage-only or init-less output proves nothing.
 # The candidate a run is bound to is the head SHA the RUN ITSELF reported
 # (AUTOPILOT_SHA), and only when it is the head actually observed at audit
 # time (exact, or an unambiguous prefix of at least 7 characters). A head
@@ -793,15 +805,23 @@ function New-AuditRecord([int]$attempt, [string]$transcript, [string]$path, [str
   $auditable = $lines.Count -gt 0
   $why = ""
   if (-not $auditable) { $why = "empty transcript" }
+  $seenInit = $false
   for ($i = 0; $auditable -and $i -lt $lines.Count; $i++) {
     $parsed = $null
     try { $parsed = $lines[$i] | ConvertFrom-Json } catch { $parsed = $null }
-    if ($i -eq 0 -and ($null -eq $parsed -or [string]$parsed.type -ne "system" -or [string]$parsed.subtype -ne "init")) { $auditable = $false; $why = "no init event"; break }
+    if (-not $seenInit -and $null -ne $parsed) {
+      $ptype = if ($null -ne $parsed.PSObject.Properties["type"]) { [string]$parsed.type } else { "" }
+      $psub = if ($null -ne $parsed.PSObject.Properties["subtype"]) { [string]$parsed.subtype } else { "" }
+      if ($ptype -eq "system" -and $psub -eq "init") { $seenInit = $true; continue }
+      if ($ptype -ne "system") { $auditable = $false; $why = "a $ptype event precedes the init event"; break }
+      continue
+    }
     if ($null -eq $parsed) {
       $lastTruncatedObject = ($i -eq $lines.Count - 1) -and $lines[$i].TrimStart().StartsWith("{")
       if (-not $lastTruncatedObject) { $auditable = $false; $why = "line $($i + 1) is not JSON" }
     }
   }
+  if ($auditable -and -not $seenInit) { $auditable = $false; $why = "no init event" }
   $hits = Test-TranscriptWcl $transcript
   $sha = [System.BitConverter]::ToString((New-Object System.Security.Cryptography.SHA256Managed).ComputeHash([System.Text.Encoding]::UTF8.GetBytes($transcript))).Replace("-", "").ToLowerInvariant()
   # The run's own result travels with its audit, so a decision Claude asked
@@ -858,6 +878,36 @@ function Resume-InterruptedAttempts($entry) {
     $recovered.status = "RECOVERED"
     Set-AuditRecord $entry.Id $recovered
   }
+}
+
+# One audit record, any status, as a log line (strict mode: STARTED and
+# WITHDRAWN records carry no audit fields).
+function Format-AuditRecord($r) {
+  $field = { param($name) if ($null -ne $r.PSObject.Properties[$name]) { $r.$name } else { $null } }
+  $status = [string](& $field "status")
+  if ($status -eq "STARTED" -or $status -eq "WITHDRAWN") { return "attempt $(& $field 'attempt'): status $status (no audit fields)" }
+  $auditable = [bool](& $field "auditable")
+  $why = if ($auditable) { "" } else { " ($(& $field 'unauditableReason'))" }
+  return "attempt $(& $field 'attempt'): status $status, auditable $auditable$why, hits $(@(& $field 'wclHits').Count), candidate '$(& $field 'candidateSha')' ($(& $field 'candidateBinding'))"
+}
+
+# Rebuilds every COMPLETED or RECOVERED record of a tranche from its own
+# transcript under the current rules (see -Reaudit). Returns the new records.
+function Update-AuditRecords([string]$id, [string]$observedHead) {
+  foreach ($r in @(Read-AuditRecords $id | Where-Object { $_.status -eq "COMPLETED" -or $_.status -eq "RECOVERED" })) {
+    $path = [string]$r.transcript
+    $text = if (Test-Path $path) { [System.IO.File]::ReadAllText($path, [System.Text.Encoding]::UTF8) } else { "" }
+    $fresh = New-AuditRecord ([int]$r.attempt) $text $path $observedHead
+    $fresh.status = [string]$r.status
+    # The run's decision belongs to the queue as it was when the run was
+    # audited: keep that identity, so a decision the queue has since resolved
+    # never becomes unresolved again because of a re-audit.
+    if ($null -ne $r.PSObject.Properties["queueHash"]) { $fresh.queueHash = [string]$r.queueHash }
+    if (Test-OwnerConfirmed $r) { $fresh | Add-Member -NotePropertyName ownerConfirmed -NotePropertyValue $true -Force }
+    $fresh | Add-Member -NotePropertyName reaudited -NotePropertyValue (Get-Date).ToString("o") -Force
+    Set-AuditRecord $id $fresh
+  }
+  return @(Read-AuditRecords $id)
 }
 
 # Pure: what the recorded audits allow. Missing or interrupted evidence blocks
@@ -1390,6 +1440,11 @@ ownerDecision: Pick the first healer spec.
   Check "an empty transcript is not auditable" (-not (New-AuditRecord 1 "" "t" "s").auditable)
   Check "a garbage-only transcript is not auditable" (-not (New-AuditRecord 1 "not json" "t" "s").auditable)
   Check "a transcript without the init event is not auditable" (-not (New-AuditRecord 1 '{"type":"result"}' "t" "s").auditable)
+  $preInit = '{"type":"system","subtype":"session_state_changed"}'
+  Check "system events before init (Claude 2.1 session_state_changed) stay auditable" ((New-AuditRecord 1 ($preInit + "`n" + $init + "`n" + '{"type":"result"}') "t" "s").auditable)
+  $actionFirst = '{"type":"assistant","message":{"content":[{"type":"tool_use","name":"Bash","input":{"command":"ls"}}]}}'
+  Check "an action before the init event is not auditable" (-not (New-AuditRecord 1 ($actionFirst + "`n" + $init) "t" "s").auditable)
+  Check "system events with no init at all are not auditable" (-not (New-AuditRecord 1 ($preInit + "`n" + $preInit) "t" "s").auditable)
   Check "a garbage final line is not auditable" (-not (New-AuditRecord 1 ($init + "`noops") "t" "s").auditable)
   Check "clean evidence for the head passes" ((Test-AuditEvidence @($clean) 1 "sha1" "NONE").Reasons.Count -eq 0)
   Check "no evidence blocks the merge" ((Test-AuditEvidence @() 0 "sha1" "NONE").Reasons.Count -eq 1)
@@ -1649,6 +1704,35 @@ setTimeout(() => {}, 60000);
   Check "an excluded path never enters the reviewed tree" ($excludedTree -eq $changedTree)
   Remove-Item -Recurse -Force $repoDir
 
+  # ---- -Reaudit rebuilds records from the same transcripts under current rules ----
+  $raId = "T-REAUDIT"
+  $raPath = Get-AuditPath $raId
+  if (Test-Path $raPath) { Remove-Item -Force $raPath }
+  $raTranscript = Join-Path $script:Dir "reaudit-transcript.jsonl"
+  [System.IO.File]::WriteAllText($raTranscript, ($preInit + "`n" + $init + "`n" + '{"type":"result","is_error":false,"result":"ok\nAUTOPILOT_RESULT: READY_FOR_GATE\nAUTOPILOT_PR: 9\nAUTOPILOT_SHA: sha7\nAUTOPILOT_DECISION: NONE"}'), (New-Object System.Text.UTF8Encoding $false))
+  # The record as the OLD rule wrote it: unauditable "no init event".
+  Set-AuditRecord $raId ([pscustomobject]@{ attempt = 1; status = "COMPLETED"; transcript = $raTranscript; auditable = $false; unauditableReason = "no init event"; wclHits = @(); candidateSha = "sha7"; result = "READY_FOR_GATE"; decision = "NONE"; queueHash = "x"; at = "x" })
+  $re = @(Update-AuditRecords $raId "sha7")
+  Check "-Reaudit makes a wrongly rejected transcript auditable, keeping its attempt and binding" ($re.Count -eq 1 -and $re[0].attempt -eq 1 -and $re[0].auditable -and $re[0].candidateSha -eq "sha7" -and $re[0].status -eq "COMPLETED")
+  Check "-Reaudit re-binds only to the SHA the run reported (a moved head stays unbound)" ((@(Update-AuditRecords $raId "sha8"))[0].candidateSha -eq "")
+  [System.IO.File]::WriteAllText($raTranscript, "garbage", (New-Object System.Text.UTF8Encoding $false))
+  Check "-Reaudit never turns garbage into evidence" (-not (@(Update-AuditRecords $raId "sha7"))[0].auditable)
+  # Mixed history: WITHDRAWN, STARTED and COMPLETED records together.
+  [System.IO.File]::WriteAllText($raTranscript, ($preInit + "`n" + $init + "`n" + '{"type":"result","is_error":false,"result":"stop\nAUTOPILOT_RESULT: OWNER_DECISION_REQUIRED\nAUTOPILOT_PR: NONE\nAUTOPILOT_SHA: NONE\nAUTOPILOT_DECISION: pick A or B"}'), (New-Object System.Text.UTF8Encoding $false))
+  if (Test-Path $raPath) { Remove-Item -Force $raPath }
+  Set-AuditRecord $raId ([pscustomobject]@{ attempt = 1; status = "WITHDRAWN"; transcript = "never"; at = "x" })
+  Set-AuditRecord $raId ([pscustomobject]@{ attempt = 2; status = "COMPLETED"; transcript = $raTranscript; auditable = $true; unauditableReason = ""; wclHits = @(); candidateSha = ""; result = "OWNER_DECISION_REQUIRED"; decision = "pick A or B"; queueHash = "hash-at-the-time"; at = "x" })
+  Set-AuditRecord $raId ([pscustomobject]@{ attempt = 3; status = "STARTED"; transcript = "running"; at = "x" })
+  $mixed = $null
+  $crashed = ""
+  try { $mixed = @(Update-AuditRecords $raId "sha7"); $lines = @($mixed | ForEach-Object { Format-AuditRecord $_ }) } catch { $crashed = $_.Exception.Message }
+  Check "-Reaudit completes over a mixed WITHDRAWN/STARTED/COMPLETED history" ($crashed -eq "" -and $mixed.Count -eq 3 -and $lines.Count -eq 3)
+  Check "...leaves STARTED and WITHDRAWN records as they were" ($mixed[0].status -eq "WITHDRAWN" -and $mixed[2].status -eq "STARTED")
+  Check "...and a STARTED record still blocks the gate" (@((Test-AuditEvidence $mixed 3 "sha7" "NONE").Reasons | Where-Object { $_ -match "interrupted" }).Count -eq 1)
+  Check "-Reaudit keeps the run's original queue identity" ($mixed[1].queueHash -eq "hash-at-the-time")
+  Check "...so an owner decision the queue has since resolved stays resolved" ((Get-OwnerBlock (New-State) @($mixed[0], $mixed[1]) $raId (Get-QueueHash)) -eq "")
+  Remove-Item -Force $raTranscript, $raPath
+
   # ---- the tranche loop, with GitHub, Claude and merging stubbed ----
   $script:StubMerges = 0
   $script:StubStopAfterClaude = $false
@@ -1898,6 +1982,26 @@ try {
   Write-Log "supervisor starting (MaxTranches $MaxTranches, MaxRuntimeMinutes $MaxRuntimeMinutes, NoMerge $([bool]$NoMerge), GateOnly $([bool]$GateOnly), queue $QueueFile)"
   Invoke-Preflight
   $state = Initialize-State
+  if ($Reaudit) {
+    if ($TrancheId -eq "") { throw "REFUSED: -Reaudit needs -TrancheId" }
+    $queue = Read-Queue
+    $target = @($queue | Where-Object { $_.Id -eq $TrancheId })
+    if ($target.Count -ne 1) { throw "REFUSED: tranche $TrancheId is not in the queue" }
+    $records = Update-AuditRecords $TrancheId (Get-CandidateSha $target[0])
+    foreach ($r in $records) { Write-Log ("re-audited " + (Format-AuditRecord $r)) }
+    if ($null -ne $state.blocked -and [string]$state.blocked.tranche -eq $TrancheId -and $null -ne $state.blocked.PSObject.Properties["kind"] -and [string]$state.blocked.kind -eq "AUDIT_CONFIRMATION") {
+      $still = Get-OwnerBlock (New-State) $records $TrancheId (Get-QueueHash)
+      if ($still -eq "") {
+        $state.blocked = $null; Save-State $state
+        $note = Join-Path $script:Dir "OWNER_DECISION_REQUIRED.md"
+        if (Test-Path $note) { Remove-Item -Force $note }
+        Write-Log "the AUDIT_CONFIRMATION stop on $TrancheId is cleared: every record is auditable and shows no Warcraft Logs activity"
+      }
+      else { Write-Log "the stop on $TrancheId stays: $still" }
+    }
+    Set-Status @{ supervisorState = "IDLE"; phase = "REAUDITED"; currentTranche = $TrancheId; stopReason = $null }
+    exit 0
+  }
 
   if ($TrancheId -ne "") {
     $block = Get-OwnerBlock $state (Read-AuditRecords $TrancheId) $TrancheId (Get-QueueHash)

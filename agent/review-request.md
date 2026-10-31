@@ -19,6 +19,95 @@ tranche PR when every gate passes. This is recorded in CLAUDE.md "Git
 Safety" and `agent/architecture.md` "AUTOPILOT". Everything else in Git
 Safety stands.
 
+## Review cycle 18: response to CHANGES_REQUIRED (cycle 17)
+
+1. **Re-audit keeps the run's queue identity.** `Update-AuditRecords` now
+   carries each record's original `queueHash` onto the rebuilt record. An
+   owner decision the queue has since resolved stays resolved: the record
+   still belongs to the queue as it was when the run was audited.
+2. **Re-audit handles every status.**
+   - The new strict-safe `Format-AuditRecord` prints STARTED and WITHDRAWN
+     records as "(no audit fields)" and the rest with their audit fields.
+     `-Reaudit` logs through it.
+   - `Update-AuditRecords` rewrites only COMPLETED and RECOVERED records,
+     leaving STARTED and WITHDRAWN exactly as they were.
+- **Regressions.** On a mixed history (WITHDRAWN, then a COMPLETED record
+  whose run asked for an owner decision under an older queue hash, then
+  STARTED), `-Reaudit`:
+  - completes without error and formats all three;
+  - leaves the WITHDRAWN and STARTED records as they were;
+  - leaves the STARTED record still blocking the gate ("interrupted");
+  - keeps the COMPLETED record's `queueHash` ("hash-at-the-time");
+  - and so the decision resolved since stays resolved (`Get-OwnerBlock`
+    gives "").
+- **Live.** `-TrancheId AUTOPILOT-DRYRUN -Reaudit` again gives attempt 1
+  COMPLETED, auditable, 0 hits, bound to 11ff225.
+- **Totals.** `-SelfTest` now runs 155 checks, all passing.
+
+## Review cycle 17: the end-to-end dry run, and the audit defect it found
+
+**The dry run (real, unattended).** The supervisor ran `-MaxTranches 1
+-NoMerge` on a temporary one-entry queue in `.probe/`, holding a
+documentation-only tranche stacked on `autopilot-supervisor`.
+
+- **Claude ran the whole workflow non-interactively.** The launch went
+  through the redacting launcher, not `--bare`, so CLAUDE.md loaded. It
+  took 14 minutes and produced:
+  - the branch `autopilot/autopilot-dryrun`;
+  - the doc commit 11ff225;
+  - its own local Codex review, APPROVED;
+  - PR #17 against `autopilot-supervisor`;
+  - the result READY_FOR_GATE, with the head SHA it reported.
+- **Exact-candidate binding held.** The reviewed tree that Claude's Codex
+  run recorded (`89270da5`) equals PR #17's head tree.
+- **CI on PR #17 is green:** verify and corpus both pass.
+- **The supervisor stopped, fail-closed, on its own audit rule.** It
+  reported "transcript ... cannot be audited (no init event)" and
+  NORMAL_BLOCKED (exit 0).
+  - Claude Code 2.1.310's stream opens with a `system/session_state_changed`
+    event, then `system/init`.
+  - The cycle-3 rule required init on line 1.
+
+**Fixes:**
+
+- **Init rule.** A transcript must hold the init event, only SYSTEM events
+  may precede it (an action before init is unauditable), and every line
+  parses (except a truncated last line).
+- **`-Reaudit` (with `-TrancheId`).** It rebuilds every COMPLETED or
+  RECOVERED record from its own transcript under the current rules.
+  - It keeps attempt numbers and any `ownerConfirmed`.
+  - It re-binds only to the SHA the run itself reported, checked against
+    the head observed now.
+  - It clears a saved AUDIT_CONFIRMATION stop only if no record still needs
+    the owner.
+  - No model is launched and nothing is merged.
+
+**Regressions:**
+
+- a session_state_changed event before init is auditable;
+- an action before init is not;
+- system events without init are not;
+- `Update-AuditRecords` makes a wrongly rejected transcript auditable
+  (attempt and binding kept);
+- a moved head stays unbound;
+- garbage never becomes evidence.
+
+`-SelfTest` now runs 150 checks, all passing.
+
+**Decision dry runs** (no model launched, with the working-tree supervisor
+and the dry run's own preserved review verdict in the slot):
+
+- `-TrancheId AUTOPILOT-DRYRUN -Reaudit` re-audited attempt 1: auditable,
+  0 Warcraft Logs hits, candidate bound to 11ff225 ("the run reported
+  11ff225..."). The AUDIT_CONFIRMATION stop was cleared.
+- `-TrancheId AUTOPILOT-DRYRUN -GateOnly -NoMerge` returned
+  READY_TO_MERGE for PR #17 at 11ff225, so every gate is green. It then
+  logged "WOULD_MERGE ... stacked on autopilot-supervisor; the supervisor
+  merges only into main", and nothing was merged.
+- **Live negative control:** the same gate with an extra required check
+  `nonexistent-check` returned RETRYABLE_FAILURE "required check
+  'nonexistent-check' has not reported", giving GATE_NOT_READY.
+
 ## Review cycle 16: a strict-mode defect found by the first dry run
 
 Cycle 15 was APPROVED and committed (9a3f920; its tree equals the recorded
@@ -668,7 +757,7 @@ scope.
     lock.
   - **Logs and state.** Under `.probe/autopilot/` with secrets redacted:
     `status.json` (heartbeat) and `state.json` (crash-safe, atomic writes).
-  - **`-SelfTest`.** 144 offline checks (cycle 16): queue parsing and refusals, base
+  - **`-SelfTest`.** 155 offline checks (cycle 18): queue parsing and refusals, base
     defaulting, argument quoting, the transcript audit, result markers,
     redaction, verdict ordering, readiness, audit evidence, and the real
     tranche loop under stubs (cycle 2).
@@ -746,7 +835,8 @@ scope.
   68/68 at cycle 4, 77/77 at cycle 5, 81/81 at cycle 6, 89/89 at cycle 7,
   96/96 at cycle 8, 101/101 at cycle 9, 105/105 at cycle 10, 116/116 at cycle 11,
   123/123 at cycle 12, 128/128 at cycle 13, 134/134 at cycle 14,
-  140/140 at cycle 15, 144/144 now.
+  140/140 at cycle 15, 144/144 at cycle 16, 150/150 at cycle 17,
+  155/155 now.
 - **Single instance.** With the lock file held exclusively, a second
   supervisor printed "another supervisor holds ..." and exited 0.
 - **Gate-only on a real tranche.** `-TrancheId M12-B -GateOnly -NoMerge`
@@ -773,7 +863,8 @@ scope.
   first." and the exact `openai-review.ps1` command.
 - **Scheduled task.** `install-autopilot-task.ps1 -WhatIf` printed the
   definition. `Get-ScheduledTask` confirms that no task exists.
-- **Not yet run:** the end-to-end dry run, with a real Claude run, Codex
+- **The end-to-end dry run** (see cycle 17 for the results). As planned at
+  cycle 1: the end-to-end dry run, with a real Claude run, Codex
   review, PR and CI on a harmless documentation-only tranche, and the merge
   gate on it with `-NoMerge`. It needs this branch pushed, because the dry
   tranche stacks on it. It runs after this review and commit, and any fix

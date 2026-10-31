@@ -20,6 +20,7 @@ It orchestrates the existing machinery and replaces none of it:
 | Graceful stop | `powershell -ExecutionPolicy Bypass -File scripts/autopilot/stop.ps1` |
 | Offline self-test | `powershell -ExecutionPolicy Bypass -File scripts/autopilot/run-project.ps1 -SelfTest` |
 | Gate decision only | `... run-project.ps1 -TrancheId <ID> -GateOnly -NoMerge` |
+| Re-audit after an audit-rule fix | `... run-project.ps1 -TrancheId <ID> -Reaudit` (no model; rebuilds records from the same transcripts) |
 | Auto-start at logon | `powershell -ExecutionPolicy Bypass -File scripts/autopilot/install-autopilot-task.ps1` (the owner runs it; `-WhatIf` previews, `-Uninstall` removes) |
 
 Other parameters:
@@ -185,7 +186,8 @@ Attempt numbers continue past the highest recorded attempt.
 **What the audit counts.** It counts only executed actions: shell commands,
 web tools and MCP tools, including a subagent's. It never counts a file read
 or an edit that merely mentions the probe. A transcript is auditable only if
-it opens with Claude's init event and every line parses, except a truncated
+it holds Claude's init event, only system events precede it, and every
+line parses, except a truncated
 final JSON object. A message cut off mid-write was never executed. An
 unauditable transcript goes to the owner rather than to a retry, because no
 retry can prove what an unreadable run did. It stops the tranche immediately, after
