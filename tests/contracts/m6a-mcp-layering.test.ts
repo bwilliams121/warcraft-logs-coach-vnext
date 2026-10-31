@@ -170,6 +170,9 @@ describe("MCP cannot reach gameplay machinery", () => {
       "src/services/encounter-context-runner",
       "src/services/encounter-context-request",
       "src/services/result",
+      // M12-E: the optional raidCooldownPlan INPUT shape, zod only. The
+      // application parser shared with REST still decides what a plan means.
+      "src/contracts/raid-cooldown-plan-input-contract",
       "src/runtime/rate-limit",
       "src/runtime/bearer-auth",
     ]);

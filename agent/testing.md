@@ -4124,6 +4124,39 @@ Its real-evidence block composes the two M12-D cast segments with the
 committed fight context. The four healing-cooldown casts it expects are
 derived from the raw bytes independently.
 
+**Raid cooldown plan input (M12-E).** The negative cases:
+
+- `tests/unit/raid-plan/timeline-note-import.test.ts`: the owner's example
+  imports with string phases; `tag:everyone`, a role, a group, two names, a
+  reminder, a header, a line without `ph`, `time` or `tag`, a malformed or
+  repeated field and an over-long line are diagnostics, never assignments;
+  `countdown` is not a tolerance; `bossSpell` does not move the time;
+  diacritics are kept; too many assignments refuses the note.
+- `tests/unit/raid-plan/resolve.test.ts`: a plan for another encounter or
+  difficulty is never applied, and an unreported difficulty is UNKNOWN; a
+  name resolves only to exactly one roster player (case-insensitive,
+  diacritics significant, realm exact), never with an unnamed roster player
+  or without the FULL_RAID roster; a phase-relative time never resolves,
+  even phase "1" in a phased fight.
+- `tests/unit/raid-cooldown-plan-request.test.ts`: tolerance is never
+  assumed; a numeric phase, an unknown key, a named difficulty and a
+  non-letter name reject the request; limits reject rather than truncate.
+- `tests/unit/specs/restoration-shaman-evaluator.test.ts`: a mismatched plan
+  is `NO_AUTHORITY_AVAILABLE`, an unbindable one `UNKNOWN`; a phase-relative
+  entry and an unresolved name that may be this player's are UNKNOWN, never
+  MET; another ability for this player is not evaluated; a diacritic-differing
+  name is another player. Real evidence: MET / UNKNOWN / NOT_ACTIONABLE under
+  the committed roster, `PLAYER_NOT_RESOLVED` without it.
+- `tests/contracts/m12e-raid-cooldown-plan-input.test.ts`: a request without
+  a plan produces no `raidCooldownPlan` key; with one, only that key is
+  added; it is `NOT_EVALUATED` on every status, MISMATCHED for another
+  encounter or difficulty; an invalid plan is `INVALID_REQUEST`; the MCP
+  input shape and the parser agree; `src/raid-plan/` imports no
+  specialization and names none.
+- `tests/integration/m12e-raid-cooldown-plan-transports.test.ts`: REST and
+  MCP return the identical document for the same plan, and both refuse an
+  invalid one.
+
 ---
 
 # Healer Per-Cast Authority Negative Test

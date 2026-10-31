@@ -90,7 +90,14 @@ describe("parseAnalysisRequest", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(Object.keys(result.request).sort()).toEqual(["fightId", "reportCode", "sourceId"]);
+      // M12-E added the optional plan, null when none was supplied. Still no scope.
+      expect(Object.keys(result.request).sort()).toEqual([
+        "fightId",
+        "raidCooldownPlan",
+        "reportCode",
+        "sourceId",
+      ]);
+      expect(result.request.raidCooldownPlan).toBeNull();
     }
   });
 });

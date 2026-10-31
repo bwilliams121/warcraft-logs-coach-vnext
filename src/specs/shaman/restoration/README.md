@@ -13,10 +13,17 @@ as the one unregistered evaluator tree).
 
 | Category | Authority | Outcomes |
 | --- | --- | --- |
-| ASSIGNMENT | a supplied raid cooldown plan | `NO_AUTHORITY_AVAILABLE` without a plan; per entry for this player `ASSIGNMENT_MET`, `ASSIGNMENT_NOT_ACTIONABLE`, `ASSIGNMENT_UNKNOWN` |
+| ASSIGNMENT | a supplied raid cooldown plan (`USER_PROVIDED_RAID_PLAN`, M12-E) | `NO_AUTHORITY_AVAILABLE` without a plan or for a plan bound to another encounter or difficulty; `UNKNOWN` when the binding cannot be established; per entry for this player `ASSIGNMENT_MET`, `ASSIGNMENT_NOT_ACTIONABLE`, `ASSIGNMENT_UNKNOWN` |
 | COOLDOWN | `WCL_OBSERVED_FACT` | the identified healing cooldowns the player cast, and overlapping damage episodes with the player's healing in them; no verdict |
 | HEALING_DECISION | none | always `NO_AUTHORITY_AVAILABLE` |
 
+- **The plan** is the shared normalized `RaidCooldownPlan`
+  (`src/raid-plan/`), resolved against the fight there. Only this player's
+  entries for the three identified healing cooldowns are evaluated; its other
+  entries are `notEvaluated` (`ABILITY_NOT_REGISTERED`). An entry that may
+  name this player but is not uniquely resolved is `PLAYER_NOT_RESOLVED`; a
+  phase-relative time is `PLANNED_TIME_UNRESOLVED` (no reviewed phase-label
+  map).
 - **MET** needs the player's own completed cast of the planned ability in
   `[planned - tolerance, planned + tolerance]`. That cast is the
   actionability proof.

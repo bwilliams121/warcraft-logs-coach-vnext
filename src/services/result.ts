@@ -15,6 +15,9 @@ import type { SpecId } from "../findings/finding.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import type { FightIdentity } from "../wcl/types.js";
 import type { IngestionScope } from "./ingestion-scope.js";
+import type { RaidCooldownPlanDisclosure } from "./raid-cooldown-plan-disclosure.js";
+
+export type { RaidCooldownPlanDisclosure };
 
 /**
  * Outcome states of a completed analysis.
@@ -214,6 +217,12 @@ export interface FightAnalysis {
    * fight, or NOT_ASSESSED with the reason, never omitted.
    */
   readonly preparation: PreparationOutcome;
+  /**
+   * What the service received as the caller's raid cooldown plan (M12-E).
+   * Present exactly when the request supplied one; absent means the request
+   * carried no plan, and nothing else. Input facts, never a verdict.
+   */
+  readonly raidCooldownPlan?: RaidCooldownPlanDisclosure;
 }
 
 /**

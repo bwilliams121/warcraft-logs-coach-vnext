@@ -36,10 +36,14 @@ import {
   pinnedRestorationShamanHealingCooldowns,
 } from "../../../src/data/game/shaman-restoration-healing-cooldowns.js";
 import artifactJson from "../../../src/data/game/shaman-restoration-healing-cooldowns.json";
+import type {
+  PlannedTime,
+  RaidCooldownAssignment,
+  RaidCooldownPlan,
+} from "../../../src/raid-plan/raid-cooldown-plan.js";
 import {
   evaluateRestorationShaman,
   type AssignmentResult,
-  type PlannedCooldownAssignment,
   type RestorationShamanEvaluation,
 } from "../../../src/specs/shaman/restoration/evaluator.js";
 import type { EvidenceCategory } from "../../../src/wcl/evidence-capability.js";
@@ -66,11 +70,18 @@ const SLT = 98008;
 const ASCENDANCE = 114052;
 const CHAIN_HEAL = 1064;
 
+/** Roster names, letters only. The subject's is the identity's `player.name`. */
+const NAMES: Readonly<Record<number, string>> = {
+  5: "Warrior",
+  [OTHER_HEALER]: "Priest",
+  [SHAMAN]: "Subject",
+};
+
 const actor = (actorId: number, subType: string, rawType = "Player", petOwnerActorId: number | null = null) =>
   ({
     actorId,
     gameId: null,
-    name: null,
+    name: NAMES[actorId] ?? null,
     server: null,
     actorType: rawType === "Player" ? "PLAYER" : rawType === "Pet" ? "PET" : "NPC",
     rawType,
@@ -186,29 +197,56 @@ function evaluated(result: RestorationShamanEvaluation) {
   return result;
 }
 
+/** The synthetic fight's encounter (tests/support/synthetic-fight.ts). */
+const ENCOUNTER = { encounterId: 2900, difficulty: 5 };
+
+/** A pull-relative plan entry, written in report time for readability. */
 const assign = (
   plannedReportTimeMs: number,
   toleranceMs = 2_000,
-  overrides: Partial<PlannedCooldownAssignment> = {},
-): PlannedCooldownAssignment => ({
-  assignmentId: `a-${String(plannedReportTimeMs)}`,
-  actorId: SHAMAN,
-  abilityGameId: SLT,
-  plannedReportTimeMs,
+  overrides: {
+    readonly assignmentId?: string;
+    readonly abilityId?: number;
+    readonly name?: string;
+    readonly plannedTime?: PlannedTime;
+  } = {},
+  fightStartMs = START,
+): RaidCooldownAssignment => ({
+  assignmentId: overrides.assignmentId ?? `a-${String(plannedReportTimeMs)}`,
+  player: { name: overrides.name ?? "Subject", realm: null },
+  abilityId: overrides.abilityId ?? SLT,
+  plannedTime: overrides.plannedTime ?? {
+    kind: "FIGHT_RELATIVE",
+    offsetMs: plannedReportTimeMs - fightStartMs,
+  },
   toleranceMs,
-  ...overrides,
+  toleranceSource: "ASSIGNMENT",
+  source: { lineNumber: null, index: 0, rawLine: null },
+  context: { bossSpellId: null },
 });
 
+const planOf = (
+  assignments: readonly RaidCooldownAssignment[],
+  encounter: RaidCooldownPlan["encounter"] = ENCOUNTER,
+): RaidCooldownPlan => ({
+  schema: "raid-cooldown-plan/1",
+  authority: "USER_PROVIDED_RAID_PLAN",
+  encounter,
+  source: { format: "STRUCTURED", label: "test plan" },
+  tolerance: { defaultToleranceMs: null },
+  assignments,
+  importDiagnostics: [],
+});
+
+/** Evaluates a plan bound to the fight's own encounter. */
 function resultsOf(
   fight: CombatFight,
-  assignments: readonly PlannedCooldownAssignment[],
+  assignments: readonly RaidCooldownAssignment[],
+  identity: FightIdentity = identityFor(fight),
 ): readonly AssignmentResult[] {
+  const encounter = { encounterId: fight.fight.encounterId, difficulty: fight.fight.difficulty ?? -1 };
   const result = evaluated(
-    evaluateRestorationShaman({
-      fight,
-      identity: identityFor(fight),
-      plan: { source: "test plan", assignments },
-    }),
+    evaluateRestorationShaman({ fight, identity, plan: planOf(assignments, encounter) }),
   );
   if (result.assignment.status !== "EVALUATED") throw new Error("expected an evaluated plan");
   return result.assignment.results;
@@ -396,11 +434,11 @@ describe("only casts inside the encounter count, its bounds inclusive", () => {
   it("an outside cast never meets an assignment; a boundary cast does", () => {
     const results = resultsOf(fight, [
       assign(START - 500, 100, { assignmentId: "pre-pull" }),
-      assign(END + 500, 100, { assignmentId: "post-kill", abilityGameId: ASCENDANCE }),
-      assign(START, 0, { assignmentId: "at-start", abilityGameId: ASCENDANCE }),
+      assign(END + 500, 100, { assignmentId: "post-kill", abilityId: ASCENDANCE }),
+      assign(START, 0, { assignmentId: "at-start", abilityId: ASCENDANCE }),
       assign(END, 0, { assignmentId: "at-end" }),
     ]);
-    expect(results.map((entry) => [entry.assignmentId, entry.status])).toEqual([
+    expect(results.map((entry) => [entry.assignment.assignmentId, entry.status])).toEqual([
       ["pre-pull", "ASSIGNMENT_UNKNOWN"],
       ["post-kill", "ASSIGNMENT_NOT_ACTIONABLE"],
       ["at-start", "ASSIGNMENT_MET"],
@@ -554,8 +592,13 @@ describe("assignment execution under a supplied plan", () => {
     const [result] = resultsOf(fightOf(raw), [assign(40_000)]);
     expect(result).toEqual({
       status: "ASSIGNMENT_UNKNOWN",
-      assignmentId: "a-40000",
+      assignment: expect.objectContaining({
+        assignmentId: "a-40000",
+        abilityGameId: SLT,
+        toleranceMs: 2_000,
+      }),
       reason: "READINESS_NOT_ESTABLISHED",
+      resolution: null,
       nearestObservedCasts: {
         before: expect.objectContaining({ reportTimeMs: 10_000 }),
         after: expect.objectContaining({ reportTimeMs: 70_000 }),
@@ -594,19 +637,31 @@ describe("assignment execution under a supplied plan", () => {
     expect(open).toMatchObject({ status: "ASSIGNMENT_UNKNOWN", reason: "WINDOW_OUTSIDE_FIGHT" });
   });
 
-  it("an ability outside the identified cooldowns, or an invalid entry, is UNKNOWN", () => {
-    const results = resultsOf(fightOf(raw), [
-      assign(30_000, 2_000, { abilityGameId: CHAIN_HEAL, assignmentId: "chain" }),
-      assign(30_000, -1, { assignmentId: "bad" }),
-    ]);
+  it("an invalid hand-built entry is UNKNOWN, never evaluated", () => {
+    const [bad] = resultsOf(fightOf(raw), [assign(30_000, -1, { assignmentId: "bad" })]);
+    expect(bad).toMatchObject({ status: "ASSIGNMENT_UNKNOWN", reason: "ASSIGNMENT_INVALID" });
+  });
+
+  it("the player's entry for an ability it does not identify is listed, never evaluated or reinterpreted", () => {
+    const fight = fightOf(raw);
+    const result = evaluated(
+      evaluateRestorationShaman({
+        fight,
+        identity: identityFor(fight),
+        // Chain Heal is cast in the window, and Wind Shear is a kick: neither is a registered healing cooldown.
+        plan: planOf([
+          assign(30_000, 2_000, { abilityId: CHAIN_HEAL, assignmentId: "chain" }),
+          assign(30_000, 2_000, { abilityId: 57994, assignmentId: "kick" }),
+        ]),
+      }),
+    );
+    if (result.assignment.status !== "EVALUATED") throw new Error("expected an evaluated plan");
+    expect(result.assignment.results).toEqual([]);
     expect(
-      results.map((entry) => [
-        entry.assignmentId,
-        entry.status === "ASSIGNMENT_UNKNOWN" ? entry.reason : null,
-      ]),
+      result.assignment.notEvaluated.map((entry) => [entry.assignment.assignmentId, entry.reason]),
     ).toEqual([
-      ["chain", "ABILITY_NOT_IDENTIFIED"],
-      ["bad", "ASSIGNMENT_INVALID"],
+      ["chain", "ABILITY_NOT_REGISTERED"],
+      ["kick", "ABILITY_NOT_REGISTERED"],
     ]);
   });
 
@@ -616,16 +671,119 @@ describe("assignment execution under a supplied plan", () => {
       evaluateRestorationShaman({
         fight,
         identity: identityFor(fight),
-        plan: { source: "test plan", assignments: [assign(12_000, 2_000, { actorId: OTHER_HEALER })] },
+        plan: planOf([assign(12_000, 2_000, { name: "Priest" })]),
       }),
     );
     expect(result.assignment).toEqual({
       category: "ASSIGNMENT",
       status: "EVALUATED",
-      authority: { kind: "RAID_COOLDOWN_PLAN", source: "test plan" },
+      authority: { kind: "USER_PROVIDED_RAID_PLAN", format: "STRUCTURED", label: "test plan" },
       results: [],
+      notEvaluated: [],
       assignmentsForOtherPlayers: 1,
     });
+  });
+});
+
+describe("the supplied plan is the only authority, bound to this fight (M12-E)", () => {
+  const raw = [cast(10_000, SHAMAN, SLT)];
+
+  it("a plan for another encounter or difficulty is NO_AUTHORITY_AVAILABLE, never applied", () => {
+    const fight = fightOf(raw);
+    for (const encounter of [
+      { encounterId: 3429, difficulty: 5 },
+      { encounterId: 2900, difficulty: 4 },
+    ]) {
+      const result = evaluated(
+        evaluateRestorationShaman({
+          fight,
+          identity: identityFor(fight),
+          plan: planOf([assign(12_000)], encounter),
+        }),
+      );
+      expect(result.assignment).toEqual({
+        category: "ASSIGNMENT",
+        status: "NO_AUTHORITY_AVAILABLE",
+        reason: "PLAN_NOT_FOR_THIS_FIGHT",
+        binding: { state: "MISMATCHED", planned: encounter, observed: ENCOUNTER },
+      });
+    }
+  });
+
+  it("a fight with no reported difficulty cannot be bound: UNKNOWN, not NO_AUTHORITY_AVAILABLE", () => {
+    const base = fightOf(raw);
+    const fight: CombatFight = { ...base, fight: { ...base.fight, difficulty: null } };
+    const result = evaluated(
+      evaluateRestorationShaman({ fight, identity: identityFor(fight), plan: planOf([assign(12_000)]) }),
+    );
+    expect(result.assignment).toEqual({
+      category: "ASSIGNMENT",
+      status: "UNKNOWN",
+      reason: "ENCOUNTER_BINDING_UNKNOWN",
+      binding: { state: "UNKNOWN", reason: "FIGHT_DIFFICULTY_NOT_REPORTED" },
+    });
+  });
+
+  it("a phase-relative entry is UNKNOWN: no phase boundary is guessed, even with the cast right there", () => {
+    const [result] = resultsOf(fightOf(raw), [
+      assign(10_000, 2_000, { plannedTime: { kind: "PHASE_RELATIVE", phase: "1", offsetMs: 9_000 } }),
+    ]);
+    expect(result).toMatchObject({
+      status: "ASSIGNMENT_UNKNOWN",
+      reason: "PLANNED_TIME_UNRESOLVED",
+      resolution: { state: "UNRESOLVED", reason: "PHASE_LABEL_NOT_MAPPED" },
+      nearestObservedCasts: { before: null, after: null },
+    });
+  });
+
+  it("a name that may be this player's but is not uniquely resolved is UNKNOWN, never MET", () => {
+    const twins = new Map(ACTORS);
+    twins.set(5, { ...actor(5, "Warrior"), name: "subject" });
+    const [ambiguous] = resultsOf(fightOf(raw, { actors: twins }), [assign(10_000)]);
+    expect(ambiguous).toMatchObject({
+      status: "ASSIGNMENT_UNKNOWN",
+      reason: "PLAYER_NOT_RESOLVED",
+      resolution: { state: "UNRESOLVED", reason: "AMBIGUOUS", candidateActorIds: [5, SHAMAN] },
+    });
+    const [unscoped] = resultsOf(fightOf(raw, { scope: "PLAYER_CONTEXT" }), [assign(10_000)]);
+    expect(unscoped).toMatchObject({
+      status: "ASSIGNMENT_UNKNOWN",
+      reason: "PLAYER_NOT_RESOLVED",
+      resolution: { reason: "ROSTER_NOT_IN_SCOPE" },
+    });
+  });
+
+  it("this player's own name with no name in the roster is UNKNOWN, never another player's entry", () => {
+    const unnamed = new Map(ACTORS);
+    unnamed.set(SHAMAN, { ...actor(SHAMAN, "Shaman"), name: null });
+    const fight = fightOf(raw, { actors: unnamed });
+    const result = evaluated(
+      evaluateRestorationShaman({ fight, identity: identityFor(fight), plan: planOf([assign(10_000)]) }),
+    );
+    if (result.assignment.status !== "EVALUATED") throw new Error("expected an evaluated plan");
+    expect(result.assignment.assignmentsForOtherPlayers).toBe(0);
+    expect(result.assignment.results).toEqual([
+      expect.objectContaining({
+        status: "ASSIGNMENT_UNKNOWN",
+        reason: "PLAYER_NOT_RESOLVED",
+        resolution: { state: "UNRESOLVED", reason: "ROSTER_NAMES_INCOMPLETE", candidateActorIds: [] },
+      }),
+    ]);
+  });
+
+  it("names match case-insensitively but never across diacritics", () => {
+    const [cased] = resultsOf(fightOf(raw), [assign(10_000, 2_000, { name: "SUBJECT" })]);
+    expect(cased?.status).toBe("ASSIGNMENT_MET");
+    const fight = fightOf(raw);
+    const result = evaluated(
+      evaluateRestorationShaman({
+        fight,
+        identity: identityFor(fight),
+        plan: planOf([assign(10_000, 2_000, { name: "Subjéct" })]),
+      }),
+    );
+    if (result.assignment.status !== "EVALUATED") throw new Error("expected an evaluated plan");
+    expect([result.assignment.results, result.assignment.assignmentsForOtherPlayers]).toEqual([[], 1]);
   });
 });
 
@@ -639,6 +797,7 @@ describe("the real Restoration Shaman in the evidence archive (b1PmaKrd6CDfzngc 
   let fight: CombatFight;
   let identity: FightIdentity;
   let rawCasts: readonly Raw[];
+  let roster: readonly number[];
 
   beforeAll(async () => {
     const loaded = await loadCommittedEvidenceArchive();
@@ -663,6 +822,8 @@ describe("the real Restoration Shaman in the evidence archive (b1PmaKrd6CDfzngc 
           fights: {
             startTime: number;
             endTime: number;
+            encounterID: number;
+            difficulty: number;
             kill: boolean;
             friendlyPlayers: number[];
             friendlySpecs: string[];
@@ -672,6 +833,7 @@ describe("the real Restoration Shaman in the evidence archive (b1PmaKrd6CDfzngc 
     };
     const fightRow = context.reportData.report.fights[0];
     if (fightRow === undefined) throw new Error("no fight");
+    roster = fightRow.friendlyPlayers;
     // The composer bounds its fight by the events it holds; the encounter's
     // real bounds are the committed context's, which the grants also span.
     expect([fightRow.startTime, fightRow.endTime, fightRow.kill]).toEqual([FIGHT_START, FIGHT_END, true]);
@@ -679,6 +841,8 @@ describe("the real Restoration Shaman in the evidence archive (b1PmaKrd6CDfzngc 
       ...composed.fight,
       fight: {
         ...composed.fight.fight,
+        encounterId: fightRow.encounterID,
+        difficulty: fightRow.difficulty,
         startTimeMs: fightRow.startTime,
         endTimeMs: fightRow.endTime,
         durationMs: fightRow.endTime - fightRow.startTime,
@@ -727,19 +891,33 @@ describe("the real Restoration Shaman in the evidence archive (b1PmaKrd6CDfzngc 
     expect(result.healingDecision.status).toBe("NO_AUTHORITY_AVAILABLE");
   });
 
-  it("a test plan over the real casts: met, unknown, and not actionable after the kill", () => {
-    const results = resultsOf(fight, [
-      assign(7_544_000, 2_000, { assignmentId: "slt-1" }),
-      assign(7_636_292, 3_000, { assignmentId: "slt-200s" }),
-      assign(7_790_000, 2_000, { assignmentId: "after-kill" }),
-    ]).map((entry) => [
-      entry.assignmentId,
-      entry.status === "ASSIGNMENT_UNKNOWN" ? entry.reason : entry.status,
+  it("a test plan over the real casts and the committed roster: met, unknown, and not actionable after the kill", () => {
+    // The roster is the committed context's friendlyPlayers; the names are its master data.
+    expect([fight.fight.encounterId, fight.fight.difficulty]).toEqual([3455, 5]);
+    const name = fight.actors.get(SHAMAN)?.name;
+    if (name === null || name === undefined) throw new Error("no name for 122");
+    const rostered: CombatFight = {
+      ...fight,
+      breadth: { ...fight.breadth, scope: "FULL_RAID", friendlyActorsInScope: roster },
+    };
+    const entry = (at: number, tolerance: number, assignmentId: string) =>
+      assign(at, tolerance, { assignmentId, name }, FIGHT_START);
+    const results = resultsOf(rostered, [
+      entry(7_544_000, 2_000, "slt-1"),
+      entry(7_636_292, 3_000, "slt-200s"),
+      entry(7_790_000, 2_000, "after-kill"),
+    ]).map((result) => [
+      result.assignment.assignmentId,
+      result.status === "ASSIGNMENT_UNKNOWN" ? result.reason : result.status,
     ]);
     expect(results).toEqual([
       ["slt-1", "ASSIGNMENT_MET"],
       ["slt-200s", "READINESS_NOT_ESTABLISHED"],
       ["after-kill", "ASSIGNMENT_NOT_ACTIONABLE"],
     ]);
+    // Without the roster the same name is not proven unique: UNKNOWN, not MET.
+    const named = { ...identity, player: { ...identity.player, name } };
+    const [unscoped] = resultsOf(fight, [entry(7_544_000, 2_000, "slt-1")], named);
+    expect(unscoped).toMatchObject({ status: "ASSIGNMENT_UNKNOWN", reason: "PLAYER_NOT_RESOLVED" });
   });
 });
