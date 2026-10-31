@@ -39,35 +39,13 @@ $latestMeta = Join-Path $outDir "latest.meta.json"
 if (Test-Path $latest) { Remove-Item -Force $latest }
 if (Test-Path $latestMeta) { Remove-Item -Force $latestMeta }
 
-# The git tree id of the working tree under review: HEAD plus every change,
-# staged or not, tracked or untracked (respecting .gitignore), minus the
-# protected local files (CLAUDE.md "Local File Exclusions"). It is built in a
-# throwaway index, so the real index is never touched. The project autopilot
-# (scripts/autopilot/run-project.ps1) merges only a commit whose tree equals
-# the tree an APPROVED review saw.
-function Get-ReviewedTreeId {
-  # Native stderr (git's line-ending warnings) must not terminate under "Stop"
-  # in Windows PowerShell 5.1; each step is judged by its exit code.
-  $ErrorActionPreference = "Continue"
-  $index = Join-Path $outDir "reviewed-tree.index"
-  if (Test-Path $index) { Remove-Item -Force $index }
-  $previous = $env:GIT_INDEX_FILE
-  $env:GIT_INDEX_FILE = $index
-  try {
-    & git -C $repoRoot read-tree HEAD
-    if ($LASTEXITCODE -ne 0) { return $null }
-    & git -C $repoRoot add -A -- . ":(exclude).claude" ":(exclude)scripts/probe/wcl-external-candidate.probe.ts" ":(exclude)scripts/probe/wcl-rankings-schema.probe.ts" ":(exclude)scripts/probe/wcl-rankings-shape.probe.ts" 2>$null
-    if ($LASTEXITCODE -ne 0) { return $null }
-    $tree = (& git -C $repoRoot write-tree)
-    if ($LASTEXITCODE -ne 0) { return $null }
-    return "$tree".Trim()
-  }
-  finally {
-    if ($null -eq $previous) { Remove-Item Env:GIT_INDEX_FILE -ErrorAction SilentlyContinue } else { $env:GIT_INDEX_FILE = $previous }
-    if (Test-Path $index) { Remove-Item -Force $index }
-  }
-}
-$treeBefore = Get-ReviewedTreeId
+# The git tree id of the working tree under review (scripts/review/reviewed-tree.ps1):
+# everything staging would commit, minus the protected local files (CLAUDE.md
+# "Local File Exclusions"). The project autopilot merges only a commit whose
+# tree equals the tree an APPROVED review saw.
+. (Join-Path $PSScriptRoot "reviewed-tree.ps1")
+$reviewExclusions = @(".claude", "scripts/probe/wcl-external-candidate.probe.ts", "scripts/probe/wcl-rankings-schema.probe.ts", "scripts/probe/wcl-rankings-shape.probe.ts")
+$treeBefore = Get-ReviewedTreeId $repoRoot $outDir $reviewExclusions
 $headBefore = "$(& git -C $repoRoot rev-parse HEAD)".Trim()
 
 $codex = Get-Command "codex.cmd" -ErrorAction SilentlyContinue
@@ -148,7 +126,7 @@ if (Test-Path $latest) {
   }
   # Bind the verdict to what was reviewed. If the working tree changed while
   # the review ran, no tree id is recorded and no merge can rely on it.
-  $treeAfter = Get-ReviewedTreeId
+  $treeAfter = Get-ReviewedTreeId $repoRoot $outDir $reviewExclusions
   $headAfter = "$(& git -C $repoRoot rev-parse HEAD)".Trim()
   $stable = ($null -ne $treeBefore) -and ($treeBefore -eq $treeAfter) -and ($headBefore -eq $headAfter)
   $meta = [ordered]@{

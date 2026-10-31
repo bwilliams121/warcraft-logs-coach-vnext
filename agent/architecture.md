@@ -10196,7 +10196,7 @@ the roadmap queue is `agent/autopilot-queue.md`.
 - **Binding approval to the candidate.** `scripts/review/openai-review.ps1`
   now also writes `.probe/openai-review/latest.meta.json`: the verdict plus
   the git tree id of the reviewed working tree. That tree is computed in a
-  throwaway index, excludes the protected local files, and is withheld if it
+  throwaway copy of the real index (so git's stat cache decides, exactly as for a commit), excludes the protected local files, and is withheld if it
   changed during the review. The gate requires the PR head's tree to equal
   it, so an APPROVED verdict authorizes exactly one candidate.
 - **Why the supervisor enforces checks.** The private repository's plan has

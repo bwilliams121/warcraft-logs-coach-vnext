@@ -1579,6 +1579,62 @@ setTimeout(() => {}, 60000);
   }
   Check "a head that moved before merging refuses the merge" ($sameOutcome -like "RECOVERABLE:*changed before merging*" -and @($script:GhCalls | Where-Object { $_ -like "pr merge*" }).Count -eq 0)
 
+  # ---- the reviewed tree equals the commit tree, CRLF-over-LF included ----
+  . (Join-Path $script:Repo "scripts\review\reviewed-tree.ps1")
+  $repoDir = Join-Path $script:Dir "tree-repo"
+  if (Test-Path $repoDir) { Remove-Item -Recurse -Force $repoDir }
+  New-Item -ItemType Directory -Force -Path $repoDir | Out-Null
+  $gitOk = $true
+  $ErrorActionPreference = "Continue"
+  foreach ($cmd in @(
+      @("init", "-q"), @("config", "user.email", "selftest@example.invalid"), @("config", "user.name", "selftest"),
+      @("config", "core.autocrlf", "false"), @("config", "commit.gpgsign", "false"))) {
+    & git -C $repoDir @cmd 2>$null | Out-Null; if ($LASTEXITCODE -ne 0) { $gitOk = $false }
+  }
+  [System.IO.File]::WriteAllText((Join-Path $repoDir "a.txt"), "one`ntwo`n", (New-Object System.Text.UTF8Encoding $false))
+  [System.IO.File]::WriteAllText((Join-Path $repoDir "b.txt"), "keep`n", (New-Object System.Text.UTF8Encoding $false))
+  & git -C $repoDir add -A 2>$null | Out-Null
+  & git -C $repoDir commit -q -m base 2>$null | Out-Null
+  # Re-check the files out with CRLF (autocrlf true), recording their stat in
+  # the index, then turn autocrlf off: LF blobs, CRLF files, a clean status.
+  & git -C $repoDir config core.autocrlf true 2>$null | Out-Null
+  Remove-Item -Force (Join-Path $repoDir "a.txt"), (Join-Path $repoDir "b.txt")
+  & git -C $repoDir checkout -- . 2>$null | Out-Null
+  # Old files, refreshed while autocrlf was on: not racily clean, so git trusts
+  # their stat afterwards, exactly as in a long-lived checkout.
+  foreach ($f in @("a.txt", "b.txt")) { (Get-Item (Join-Path $repoDir $f)).LastWriteTime = (Get-Date).AddHours(-1) }
+  & git -C $repoDir update-index --refresh -q 2>$null | Out-Null
+  & git -C $repoDir config core.autocrlf false 2>$null | Out-Null
+  $headTree = "$(& git -C $repoDir rev-parse 'HEAD^{tree}')".Trim()
+  $eol = "$(& git -C $repoDir ls-files --eol a.txt)"
+  $status = "$(& git -C $repoDir status --porcelain)"
+  $ErrorActionPreference = "Stop"
+  Check "the disposable repo reproduces LF blobs under CRLF files with a clean status" ($gitOk -and $eol -match "i/lf" -and $eol -match "w/crlf" -and $status.Trim() -eq "")
+  # The OLD calculation (read-tree HEAD into an empty index) re-hashes the CRLF files.
+  $oldIndex = Join-Path $script:Dir "old-tree.index"
+  if (Test-Path $oldIndex) { Remove-Item -Force $oldIndex }
+  $ErrorActionPreference = "Continue"
+  $env:GIT_INDEX_FILE = $oldIndex
+  & git -C $repoDir read-tree HEAD 2>$null | Out-Null
+  & git -C $repoDir add -A 2>$null | Out-Null
+  $oldTree = "$(& git -C $repoDir write-tree)".Trim()
+  Remove-Item Env:GIT_INDEX_FILE
+  $ErrorActionPreference = "Stop"
+  Remove-Item -Force $oldIndex -ErrorAction SilentlyContinue
+  Check "the old calculation does NOT equal the tree a commit would make (the defect)" ($oldTree -ne $headTree)
+  $realIndexPath = Join-Path $repoDir ".git\index"
+  $indexBefore = (Get-FileHash -Algorithm SHA256 $realIndexPath).Hash
+  $newTree = Get-ReviewedTreeId $repoDir $script:Dir @()
+  Check "the copied-index calculation equals the commit tree" ($newTree -eq $headTree)
+  Check "the real index is left untouched" ((Get-FileHash -Algorithm SHA256 $realIndexPath).Hash -eq $indexBefore)
+  [System.IO.File]::WriteAllText((Join-Path $repoDir "b.txt"), "changed`r`n", (New-Object System.Text.UTF8Encoding $false))
+  $changedTree = Get-ReviewedTreeId $repoDir $script:Dir @()
+  Check "a real content change alters the reviewed tree" ($changedTree -ne $headTree -and $null -ne $changedTree)
+  [System.IO.File]::WriteAllText((Join-Path $repoDir "secret.local"), "x", (New-Object System.Text.UTF8Encoding $false))
+  $excludedTree = Get-ReviewedTreeId $repoDir $script:Dir @("secret.local")
+  Check "an excluded path never enters the reviewed tree" ($excludedTree -eq $changedTree)
+  Remove-Item -Recurse -Force $repoDir
+
   # ---- the tranche loop, with GitHub, Claude and merging stubbed ----
   $script:StubMerges = 0
   $script:StubStopAfterClaude = $false

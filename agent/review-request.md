@@ -19,6 +19,51 @@ tranche PR when every gate passes. This is recorded in CLAUDE.md "Git
 Safety" and `agent/architecture.md` "AUTOPILOT". Everything else in Git
 Safety stands.
 
+## Review cycle 15: a binding defect found after APPROVED (cycle 14)
+
+Cycle 14 was APPROVED and committed (bdbca74 on `autopilot-supervisor`).
+Checking the committed tree against the tree the review recorded showed a
+mismatch: commit 31a2ec25 against reviewed 8468669f.
+
+- **Why.** Three tracked files (`.gitignore`, `.dev.vars.example`,
+  `agent/product-intent.md`) are checked out here with CRLF over LF blobs
+  (`git ls-files --eol`: `i/lf w/crlf`, `core.autocrlf` false).
+  `Get-ReviewedTreeId` built its tree from `read-tree HEAD` in an empty
+  index with no stat cache, so `git add -A` re-hashed those files into CRLF
+  blobs. A real commit uses the existing index, whose stat cache treats them
+  as unchanged.
+- **Effect.** No reviewed tree on this machine would ever have equalled a
+  committed tree, and the gate would have refused every candidate. It fails
+  closed, but it is useless.
+- **Fix** (`scripts/review/openai-review.ps1`). The reviewed tree is built
+  from a throwaway COPY of the real index, keeping the stat cache, so
+  `git add -A` (excluding the protected files) produces exactly what
+  staging everything would commit.
+- **Verified.** With only this fix in the working tree, the computed tree
+  differs from HEAD's tree in exactly one path,
+  `scripts/review/openai-review.ps1`, and no longer in the CRLF files. After
+  this review the new commit's tree is compared with the recorded reviewed
+  tree again.
+- **Docs.** `agent/autopilot.md` and `agent/architecture.md` now say "a
+  throwaway copy of the real index".
+- **Regression** (cycle 15, as review required).
+  - The calculation now lives in `scripts/review/reviewed-tree.ps1` (new,
+    `Get-ReviewedTreeId RepoRoot WorkDir Exclude`). `openai-review.ps1`
+    dot-sources it.
+  - The autopilot self-test reproduces the condition in a disposable repo:
+    LF blobs committed with autocrlf off, re-checked out as CRLF with
+    autocrlf on, back-dated an hour and `update-index --refresh`ed (so not
+    racily clean), then autocrlf turned off. That gives `ls-files --eol`
+    `i/lf w/crlf` and a clean status.
+  - It then asserts:
+    - the OLD calculation (`read-tree HEAD` into an empty index) does NOT
+      equal HEAD's tree;
+    - `Get-ReviewedTreeId` DOES equal it;
+    - the real `.git/index` hash is unchanged;
+    - a real content change alters the tree;
+    - an excluded path never enters it.
+  - `-SelfTest` now runs 140 checks, all passing.
+
 ## Review cycle 14: response to CHANGES_REQUIRED (cycle 13)
 
 **A grant never exempts detected Warcraft Logs activity.** I took the
@@ -591,7 +636,7 @@ scope.
     lock.
   - **Logs and state.** Under `.probe/autopilot/` with secrets redacted:
     `status.json` (heartbeat) and `state.json` (crash-safe, atomic writes).
-  - **`-SelfTest`.** 134 offline checks (cycle 14): queue parsing and refusals, base
+  - **`-SelfTest`.** 140 offline checks (cycle 15): queue parsing and refusals, base
     defaulting, argument quoting, the transcript audit, result markers,
     redaction, verdict ordering, readiness, audit evidence, and the real
     tranche loop under stubs (cycle 2).
@@ -668,7 +713,8 @@ scope.
 - **`-SelfTest`.** 20/20 at cycle 1, 42/42 at cycle 2, 58/58 at cycle 3,
   68/68 at cycle 4, 77/77 at cycle 5, 81/81 at cycle 6, 89/89 at cycle 7,
   96/96 at cycle 8, 101/101 at cycle 9, 105/105 at cycle 10, 116/116 at cycle 11,
-  123/123 at cycle 12, 128/128 at cycle 13, 134/134 now.
+  123/123 at cycle 12, 128/128 at cycle 13, 134/134 at cycle 14,
+  140/140 now.
 - **Single instance.** With the lock file held exclusively, a second
   supervisor printed "another supervisor holds ..." and exited 0.
 - **Gate-only on a real tranche.** `-TrancheId M12-B -GateOnly -NoMerge`
@@ -712,7 +758,7 @@ merge settings and protection, which returned 403, and PR state). One
 Not yet committed. The intended files are:
 
 - `scripts/autopilot/{run-project,status,stop,install-autopilot-task}.ps1`,
-  `scripts/autopilot/run-claude.mjs`
+  `scripts/autopilot/run-claude.mjs`, `scripts/review/reviewed-tree.ps1`
 - `scripts/review/openai-review.ps1`
 - `agent/autopilot-queue.md`, `agent/autopilot.md`
 - `CLAUDE.md`, `agent/architecture.md`, `agent/follow-ups.md`,
