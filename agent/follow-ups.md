@@ -1274,3 +1274,25 @@ Every remaining gap has a canonical owner (`KNOWN_EVIDENCE_GAPS`,
 - The A7R6 events captures list `sourceActorId: 19` and `PLAYER_CONTEXT`; the
   fight-context capture is recorded `FULL_RAID` because master data is
   report-wide. Neither is a claim about ingestion scope derivation.
+
+---
+
+## After AUTOPILOT: what the supervisor does not yet do
+
+**Raised:** AUTOPILOT (2026-10-31).
+
+- **Claude binary.** No Claude Code CLI is installed on PATH. The supervisor
+  falls back to the binary bundled with Zed's agent integration, which needs
+  no Zed window but can move when Zed updates. Installing the CLI, or
+  passing `-ClaudePath`, removes the dependency.
+- **Concurrency is 1.** Running two tranches at once needs a per-tranche
+  review packet in place of the rolling `agent/review-request.md`, and
+  per-worktree review output in place of the single
+  `.probe/openai-review/latest*` slot (`agent/autopilot.md`
+  "Parallelism").
+- **GitHub cannot enforce checks.** Without branch protection on this plan,
+  the supervisor's gate is the only enforcement of required checks. A plan
+  with branch protection would let GitHub enforce them too.
+- **Older layering guards.** The m11e1-style import regex in older
+  layering guards misses bare `import "x"` and dynamic `import()`. M12-A
+  widened only its own copy.

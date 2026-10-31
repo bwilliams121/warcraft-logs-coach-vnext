@@ -10177,3 +10177,33 @@ on whom.
     (`agent/follow-ups.md` "Regression-corpus ledger").
   - The behavior is protected in every `npm test` by unit tests that read
     the committed archive segments, which is the M11-E2 precedent.
+
+## AUTOPILOT — the local project supervisor (tooling)
+
+**Status:** implemented (2026-10-31), owner request. This is tooling and
+changes no analyzer behavior. The operating guide is `agent/autopilot.md`;
+the roadmap queue is `agent/autopilot-queue.md`.
+
+- **What it does.** `scripts/autopilot/run-project.ps1` runs the existing
+  Autonomous Tranche Workflow unattended. It launches Claude Code
+  non-interactively (never `--bare`, so CLAUDE.md loads), then verifies
+  repository and GitHub state itself.
+- **Merging.** It merges only through a verified gate (`agent/autopilot.md`
+  "The merge gate"): squash, head pinned, never `--admin`.
+- **Owner policy change (2026-10-31).** The autopilot may merge, and only
+  the autopilot (CLAUDE.md "Git Safety"). Deployment, secrets and new
+  Warcraft Logs requests stay with the owner.
+- **Binding approval to the candidate.** `scripts/review/openai-review.ps1`
+  now also writes `.probe/openai-review/latest.meta.json`: the verdict plus
+  the git tree id of the reviewed working tree. That tree is computed in a
+  throwaway index, excludes the protected local files, and is withheld if it
+  changed during the review. The gate requires the PR head's tree to equal
+  it, so an APPROVED verdict authorizes exactly one candidate.
+- **Why the supervisor enforces checks.** The private repository's plan has
+  no branch protection or rulesets (HTTP 403), and `allow_auto_merge` is
+  false. GitHub cannot enforce required checks, so the supervisor's gate
+  does, and it merges directly once every check is verified.
+- **Durable versus transient state.** The queue is tracked. Heartbeat,
+  attempts, ledger and locks live in the gitignored `.probe/autopilot/`. A
+  merge is written into the queue by the next tranche's PR, so no PR exists
+  only to record state.
