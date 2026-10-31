@@ -19,6 +19,38 @@ tranche PR when every gate passes. This is recorded in CLAUDE.md "Git
 Safety" and `agent/architecture.md` "AUTOPILOT". Everything else in Git
 Safety stands.
 
+## Review cycle 16: a strict-mode defect found by the first dry run
+
+Cycle 15 was APPROVED and committed (9a3f920; its tree equals the recorded
+reviewed tree `1799756e`). The first end-to-end dry run, on a temporary
+ONE-entry queue in `.probe/`, failed at startup before launching Claude:
+FATAL "The property 'Count' cannot be found on this object."
+
+- **Cause.** In `ConvertFrom-QueueText`, `($ids | Select-Object
+  -Unique).Count` unrolls to a bare string when the queue has one entry,
+  and strict mode rejects `.Count` on it. Every self-test queue had three
+  entries.
+- **The same hazard** was in the main-path parse of `requiredChecks`: an
+  `if` expression unrolls a one-element array.
+- **Fixes:**
+  - `@($ids | Select-Object -Unique).Count`;
+  - a new `Get-RequiredChecks(queueText)` that always returns an array
+    (`return , @(...)`), now used by the main path.
+  - A sweep of every `.Count` in the script found every other site
+    already wrapped in `@()` or a collection type.
+- **Diagnosability.** The FATAL handler now also logs the first frames of
+  `ScriptStackTrace`. That is how this was located (`ConvertFrom-QueueText`
+  line 334, from `Read-Queue`).
+- **Regressions:**
+  - a single-entry queue parses (the old code crashes on it);
+  - a single required check is an array of one;
+  - two checks parse in order;
+  - no `requiredChecks` line gives an empty array.
+- **Live.** `-GateOnly -NoMerge` on the one-entry dry-run queue now gets
+  past parsing and correctly reports "no open PR for
+  autopilot/autopilot-dryrun" (no Claude launch).
+- **Totals.** `-SelfTest` now runs 144 checks, all passing.
+
 ## Review cycle 15: a binding defect found after APPROVED (cycle 14)
 
 Cycle 14 was APPROVED and committed (bdbca74 on `autopilot-supervisor`).
@@ -636,7 +668,7 @@ scope.
     lock.
   - **Logs and state.** Under `.probe/autopilot/` with secrets redacted:
     `status.json` (heartbeat) and `state.json` (crash-safe, atomic writes).
-  - **`-SelfTest`.** 140 offline checks (cycle 15): queue parsing and refusals, base
+  - **`-SelfTest`.** 144 offline checks (cycle 16): queue parsing and refusals, base
     defaulting, argument quoting, the transcript audit, result markers,
     redaction, verdict ordering, readiness, audit evidence, and the real
     tranche loop under stubs (cycle 2).
@@ -714,7 +746,7 @@ scope.
   68/68 at cycle 4, 77/77 at cycle 5, 81/81 at cycle 6, 89/89 at cycle 7,
   96/96 at cycle 8, 101/101 at cycle 9, 105/105 at cycle 10, 116/116 at cycle 11,
   123/123 at cycle 12, 128/128 at cycle 13, 134/134 at cycle 14,
-  140/140 now.
+  140/140 at cycle 15, 144/144 now.
 - **Single instance.** With the lock file held exclusively, a second
   supervisor printed "another supervisor holds ..." and exited 0.
 - **Gate-only on a real tranche.** `-TrancheId M12-B -GateOnly -NoMerge`

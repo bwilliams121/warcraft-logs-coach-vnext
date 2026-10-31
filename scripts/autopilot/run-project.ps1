@@ -331,11 +331,19 @@ function ConvertFrom-QueueText([string]$text) {
       })
   }
   $ids = @($entries | ForEach-Object { $_.Id })
-  if (($ids | Select-Object -Unique).Count -ne $ids.Count) { throw "queue: duplicate tranche id" }
+  if (@($ids | Select-Object -Unique).Count -ne $ids.Count) { throw "queue: duplicate tranche id" }
   foreach ($e in $entries) {
     foreach ($d in $e.DependsOn) { if ($ids -notcontains $d) { throw "queue: tranche $($e.Id) depends on unknown $d" } }
   }
   return , $entries.ToArray()
+}
+
+# The queue's requiredChecks line, always as an array (strict mode: a single
+# check must not unroll into a bare string).
+function Get-RequiredChecks([string]$queueText) {
+  $m = [regex]::Match($queueText, '(?m)^requiredChecks:\s*(.+)$')
+  if (-not $m.Success) { return , @() }
+  return , @($m.Groups[1].Value -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
 }
 
 function Read-Queue {
@@ -1278,6 +1286,12 @@ ownerDecision: Pick the first healer spec.
 "@
   $q = ConvertFrom-QueueText $sample
   Check "parses three entries" ($q.Count -eq 3)
+  # Strict mode: one entry, and one required check, must not unroll to scalars.
+  $one = ConvertFrom-QueueText (@("### ONLY-1: Just one", "", '```autopilot', "status: READY", "dependsOn: none", '```') -join "`n")
+  Check "a single-entry queue parses (no scalar unrolling)" (@($one).Count -eq 1 -and @($one)[0].Id -eq "ONLY-1")
+  Check "a single required check is still an array" ((Get-RequiredChecks "requiredChecks: verify").Count -eq 1)
+  Check "two required checks parse" (((Get-RequiredChecks "x`nrequiredChecks: verify, corpus`n") -join "|") -eq "verify|corpus")
+  Check "no requiredChecks line is an empty array" ((Get-RequiredChecks "nothing").Count -eq 0)
   Check "default branch is autopilot/<id>" ($q[1].Branch -eq "autopilot/t-2")
   Check "dependencies parsed" (($q[1].DependsOn -join ",") -eq "T-1")
   Check "pr parsed" ($q[0].Pr -eq 15)
@@ -1898,8 +1912,7 @@ try {
   Invoke-Git @("fetch", "origin", "--prune") | Out-Null
   $queuePath = if ([System.IO.Path]::IsPathRooted($QueueFile)) { $QueueFile } else { Join-Path $script:Repo $QueueFile }
   $queueText = Get-Content -Raw -Encoding UTF8 $queuePath
-  $checksMatch = [regex]::Match($queueText, '(?m)^requiredChecks:\s*(.+)$')
-  $expectedChecks = if ($checksMatch.Success) { @($checksMatch.Groups[1].Value -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" }) } else { @() }
+  $expectedChecks = Get-RequiredChecks $queueText
   if ($expectedChecks.Count -eq 0) { throw "FATAL: the queue declares no requiredChecks; a green CI cannot be verified" }
 
   while ($true) {
@@ -1951,6 +1964,7 @@ catch {
   }
   else {
     Write-Log "FATAL: $message"
+    Write-Log ("at: " + (($_.ScriptStackTrace -split "`r?`n" | Select-Object -First 4) -join " <- "))
     Set-Status @{ supervisorState = "FATAL"; stopReason = $message }
     $exitCode = 2
   }
