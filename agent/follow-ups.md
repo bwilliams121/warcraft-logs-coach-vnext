@@ -28,6 +28,28 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M12-C: what the received-during-episodes primitive does not yet do
+
+**Raised:** M12-C (2026-10-31).
+
+- **No consumer and no public surface.** The milestone guard in
+  `tests/contracts/m12a-healing-layering.test.ts` still holds.
+- **No owner attribution.** A pet, totem or guardian is reported as its own
+  source. Folding it into its owner needs a verified owner relation for
+  allied pets, which this primitive deliberately does not read.
+- **No "who is a healer".** Sources are any actor. Naming which sources are
+  healers, and so "other-healer coverage" proper, needs specialization
+  identity for every roster player. That belongs to the first healer
+  evaluator (queue entry M12-D, an owner decision).
+- **No pre-episode shields.** An absorb applied before the first hit shows
+  only through its `absorbed` events in the window. Shield application and
+  remaining value need AURAS, which these segments exclude.
+- **Raw amounts only.** "Healing received", overheal share and absorbed
+  share wait on follow-up M1.
+- **One window, one fight.** As in M12-B.
+
+---
+
 ## After M12-B: what the damage-episode primitive does not yet do
 
 **Raised:** M12-B (2026-10-31).

@@ -4070,6 +4070,22 @@ Healer evidence follows the 2026-10-31 owner policy: full evidence in the
 archive, minimal derived fixtures in the corpus, and a recorded ledger when
 they do not fit.
 
+**Received during episodes (M12-C).**
+`tests/unit/healing/received-during-episodes.test.ts` covers the negative
+cases:
+
+- no FULL_RAID roster means no episode report, never an empty one;
+- an empty list is "nothing received" only under COMPLETE coverage, and is
+  otherwise UNKNOWN with `INSUFFICIENT_SCOPE` or `INSUFFICIENT_COVERAGE`;
+- sources are verbatim: a pet stays its own source, a missing source is
+  kept, and a heal absorb is not a damage absorb;
+- healing outside the window, or on a player the episode did not hit, is not
+  listed;
+- nothing is summed.
+
+Its real-evidence block reads the same three archive segments, with
+expected counts derived from the raw bytes independently.
+
 ---
 
 # Healer Per-Cast Authority Negative Test

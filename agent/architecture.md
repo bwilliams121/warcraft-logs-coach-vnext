@@ -10178,6 +10178,59 @@ on whom.
   - The behavior is protected in every `npm test` by unit tests that read
     the committed archive segments, which is the M11-E2 precedent.
 
+## M12-C — Healer Foundation: healing and absorbs received during damage episodes (internal)
+
+**Status:** implemented (2026-10-31). This is the third tranche of
+Milestone 12 (autopilot queue entry M12-C).
+
+**What it adds.** `receivedDuringEpisodesOf(fight, { gapMs = 2 000,
+trailingMs = 2 000 })` (`src/healing/received-during-episodes.ts`, revision
+`healing-received-during-episodes/1`, authority `WCL_OBSERVED_FACT`) answers
+WHAT healing and absorbs reached the players a damage episode hit, and from
+whom.
+
+- **Built on M12-B.** It runs `damageEpisodesOf` and reports per episode. No
+  roster means `ROSTER_NOT_IN_SCOPE`, with no episode list at all.
+- **Window.** From the episode's first hit to its last hit plus
+  `trailingMs`. It is cut at the fight's end, and the cut is recorded
+  (`clampedBy: "FIGHT_END"`). The trailing span is a reporting window, not a
+  judgement of how fast healing ought to arrive.
+- **Per player the episode hit:** every HEALING and ABSORB event targeting
+  that player in the window. They are grouped by the reported source and
+  kept with their raw fields verbatim.
+  - A pet or guardian is its own source and is never folded into an owner.
+  - A missing source is kept, under `null`.
+  - `DAMAGE_ABSORBED` and `HEAL_ABSORBED` stay distinct kinds.
+- **Per-category coverage.** HEALING and ABSORBS each carry the shared
+  absence gate's result for that player over that window. An empty list is
+  "nothing was received" only under COMPLETE. Otherwise it is UNKNOWN with
+  the gate's reason.
+- **The player set is the episode's.** Whether it is complete is the
+  episode's own DAMAGE coverage, carried in `episode.coverage`.
+- **Overlap is stated.** Windows of overlapping episodes overlap, so one
+  event can be listed under several episodes. That is one more reason
+  nothing is added up.
+- **Never:** totals (follow-up M1), a verdict on any healer, an attribution
+  of a pet to its owner, or anything spec-specific.
+
+**Boundary.** It is unchanged. The new module is added by name to
+`tests/contracts/m12a-healing-layering.test.ts`. Nothing in production
+imports `src/healing/`.
+
+**Evidence.** The three M12-B archive segments already retain every heal and
+absorb in their window. No new Warcraft Logs request was made, and the
+corpus and archive bytes are unchanged. The real result was checked against
+counts derived independently from the raw segment bytes:
+
+- episode 1,282,525: window 7,510,308 to 7,512,313, 20 players, 356 heals,
+  44 damage absorbs and 1 heal absorb, every list COMPLETE;
+- episode 1,285,979: 779 heals, 127 damage absorbs and 2 heal absorbs;
+  guardian 129#4 is listed under its own instance.
+
+There is no new corpus fixture, because no new behavior needs one beyond the
+M12-B ledger row. The archive-reading unit tests protect it in every
+`npm test`.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
