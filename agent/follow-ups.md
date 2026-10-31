@@ -9,6 +9,42 @@ hygiene and clarity items.
 
 ---
 
+## After M12-A: what the death-timeline primitive does not yet do
+
+**Raised:** M12-A (2026-10-30). None of these is an owner decision yet.
+
+- **No consumer and no public surface.** `deathTimelinesOf` is internal, and
+  nothing in production imports `src/healing/` (a milestone guard in
+  `tests/contracts/m12a-healing-layering.test.ts`). The first healer
+  specialization evaluator, or a publication of the timelines, must:
+  - declare FULL_RAID through its requirement;
+  - amend that guard by name.
+- **No owning corpus layer.** `src/healing/` is not in `OWNING_LAYERS`, so its
+  real-evidence assertions live in `tests/unit/healing/death-timeline.test.ts`
+  over a committed corpus artifact (the M11-E1 combat-facts precedent). A
+  `HEALING` layer with its own assertion kind is the shape when it is
+  published.
+- **One real player death.** The M11-E2 capture holds exactly one friendly
+  player death (actor 5). Not yet exercised on real bytes:
+  - heal absorbs;
+  - a second death of the same player;
+  - a death under PARTIAL retrieval.
+
+  Synthetic cases cover them.
+- **Resurrection is still unregistered.** The capture holds one `resurrect`
+  (actor 5 at 7,753,355, outside the committed window). Registering the raw
+  type needs committed evidence and its own review (M11-F
+  `resurrectionContractFor`).
+- **Raw amounts only.** Totals, "damage taken" and "effective healing" wait
+  on follow-up M1.
+- **Not yet built from the M12 list:**
+  - raid damage windows;
+  - healing cooldown coverage;
+  - other-healer coverage;
+  - assignment input.
+
+---
+
 ## TEST-HYGIENE: make the normal offline test suite independent of production `.dev.vars`
 
 **Raised:** M7-F closeout (2026-09-15). **Do after:** M7 closeout.

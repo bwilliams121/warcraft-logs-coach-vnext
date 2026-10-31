@@ -149,9 +149,11 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // slices of the fight-48 capture: each slice's normalization census
     // (three each), and the unsupported Evoker's and Mage's assessed
     // consumable status through the application service (one each).
-    expect(result.summary.cases).toBe(182);
-    expect(result.summary.assertions).toBe(775);
-    expect(result.summary.passed).toBe(775);
+    // M12-A added one case and three assertions: the normalization census of
+    // the real death slice the shared death-timeline primitive reads.
+    expect(result.summary.cases).toBe(183);
+    expect(result.summary.assertions).toBe(778);
+    expect(result.summary.passed).toBe(778);
   });
 
   it("covers every layer", async () => {

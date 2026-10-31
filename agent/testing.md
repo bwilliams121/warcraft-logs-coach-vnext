@@ -4033,6 +4033,20 @@ A future raid damage model should test:
 
 Test the event model before sophisticated healer coaching depends on it.
 
+**Death timelines (M12-A).** `tests/unit/healing/death-timeline.test.ts`
+proves the first shared healing primitive on synthetic fights and on the one
+real player death committed in the corpus. The negative cases are the point:
+
+- a heal gap or an out-of-scope ally is UNKNOWN, never a complete empty list;
+- nothing after the death is read;
+- an entry at the death's millisecond is marked, not ordered;
+- another actor's snapshot is never the dying actor's health;
+- another instance's events never join the timeline;
+- no total is computed from raw amounts.
+
+`tests/contracts/m12a-healing-layering.test.ts` keeps `src/healing/` free of
+specialization branching and judgement vocabulary.
+
 ---
 
 # Healer Per-Cast Authority Negative Test

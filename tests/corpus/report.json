@@ -113,6 +113,13 @@
       "sha256": "1e165768e56147a8ccacc9f463a791783bc6c41359c0fa85c6772172b78dbcd4"
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-warrior-5-death-5s",
+      "byteLength": 42233,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "93b302884229e94c573d856ee672266f1e88b6c336be8b4f03a7c95fcffd5c17"
+    },
+    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "byteLength": 203455,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -374,8 +381,8 @@
       "passed": 24
     },
     {
-      "assertions": 162,
-      "cases": 45,
+      "assertions": 165,
+      "cases": 46,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_CATALOG",
@@ -395,7 +402,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 162
+      "passed": 165
     },
     {
       "assertions": 82,
@@ -1481,6 +1488,30 @@
       "caseId": "normalization.b1pm-shaman-health-consumable-slice-normalizes-whole-and-in-order",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-b1pm-fight-48-shaman-122-health-consumables-20s"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-warrior-5-death-5s",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-warrior-death-slice-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-warrior-5-death-5s"]
     },
     {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
@@ -6879,15 +6910,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 5706262,
-    "artifacts": 51,
-    "assertions": 775,
-    "cases": 182,
+    "artifactBytes": 5748495,
+    "artifacts": 52,
+    "assertions": 778,
+    "cases": 183,
     "declared": 0,
-    "executable": 775,
+    "executable": 778,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 775
+    "passed": 778
   }
 }

@@ -10031,3 +10031,68 @@ This changes no runtime behaviour, and the deployed config is untouched.
   Change both files together.
 - **Credential loading stays in one place.** `vitest.probe.config.ts` remains
   the only config that reads `.dev.vars`.
+
+## M12-A — Healer Foundation: death timelines (internal)
+
+**Status:** implemented (2026-10-30). This is the first tranche of
+Milestone 12. Owner choice: "Start Healer Foundation".
+
+**What it adds.** `src/healing/`, the shared healing domain. Its first
+primitive is `deathTimelinesOf(fight, actorId, lookbackMs = 10 000)`
+(`src/healing/death-timeline.ts`, revision `healing-death-timeline/1`). It
+reports what happened TO an actor before each of its positive deaths
+(M11-F `observedDeathsOf`):
+
+- damage taken, healing received, and damage or healing absorbed;
+- each entry with its raw fields verbatim and its reported source;
+- the dying actor's own health snapshot, when Warcraft Logs attached one of
+  that same actor instance (never another actor's).
+
+Its authority is `WCL_OBSERVED_FACT`.
+
+**What it refuses to say.**
+
+- **No totals.** The accounting meaning of raw `amount` is follow-up M1,
+  still not proven.
+- **No "no healing was received".** Each of DAMAGE, HEALING and ABSORBS
+  carries its own coverage from the shared absence gate, over that actor and
+  that window.
+  - COMPLETE means the list is complete for that category.
+  - Otherwise the category is UNKNOWN with the gate's reason
+    (`INSUFFICIENT_SCOPE` for an ally under PLAYER_CONTEXT,
+    `INSUFFICIENT_COVERAGE`, `CAPABILITY_UNVERIFIED`), and the entries are
+    what was observed.
+- **Nothing after the death.** Entries at the death's millisecond are marked
+  `atDeathTime`, because retrieval order is not game order.
+- **No inferred killer.** The killer is never taken from the last hit.
+- **No overlap between timelines.** A window never reaches back past the
+  fight start or the same instance's previous death.
+- **Nothing about unobserved deaths** (`absenceSemantics: "NONE"`).
+
+**Boundary.** `src/healing/` reconstructs facts. Healer specialization
+evaluators under `src/specs/<class>/<spec>/` will own verdicts.
+`tests/contracts/m12a-healing-layering.test.ts` pins four rules:
+
+- it imports only the engine and the capability vocabulary;
+- it calls no clock, randomness or network primitive;
+- it declares no specialization or judgement vocabulary;
+- nothing in production imports it yet. This is a milestone guard, amended
+  by name when the first consumer lands.
+
+**Scope.** No production consumer exists, so no analyzer declares
+FULL_RAID yet. The primitive needs no scope rule of its own: under
+PLAYER_CONTEXT an ally's categories come back `INSUFFICIENT_SCOPE` through
+the shared gate. The consumer that publishes it must declare FULL_RAID
+through its requirement (CLAUDE.md "Ingestion Scope Derivation").
+
+**Evidence.** The 5 s before the one friendly player death in the M11-E2
+capture (actor 5, Warrior) is committed as
+`wcl-b1pm-fight-48-warrior-5-death-5s`. No new Warcraft Logs request was
+made. The real timeline is asserted over those bytes:
+
+- 13 damage-taken, 38 healing-received and 3 absorb entries;
+- COMPLETE in all three categories;
+- killer 161 with ability 1,295,173;
+- a killing blow with overkill 81,824 and 0 hit points.
+
+The corpus stays under the 5.5 MiB line (5,748,495 bytes).

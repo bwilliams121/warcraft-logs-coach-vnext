@@ -1230,6 +1230,100 @@
       }
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-warrior-5-death-5s",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-warrior-5-death-5s.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "93b302884229e94c573d856ee672266f1e88b6c336be8b4f03a7c95fcffd5c17",
+      "byteLength": 42233,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json wcl-b1pm-fight-48-warrior-5-death-5s.json --actor-slice 5 7749235 --from 7744235 --families damage,extraattacks,heal,absorbed,healabsorbed,death --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for ACTOR 5 with --from 7744235 (exclusive) and the bound 7749235 (inclusive), restricted by --families to the six listed raw types (damage, extraattacks, heal, absorbed, healabsorbed, death). In place and order preserved; written as compact JSON (--compact). 103 events: 60 damage (13 taken by actor 5, the last its killing blow carrying overkill 81,824 and a target snapshot of 0 hit points), 1 extraattacks, 38 heals received from several healers, 3 damage absorbs on actor 5, and the death of actor 5 at 7,749,235 with killer 161 and killing ability 1,295,173.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-7",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["DAMAGE", "HEALING", "ABSORBS"],
+              "actorScope": [5],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7744236,
+                  "toReportTimeMs": 7749235
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 5 over [7,744,236 .. 7,749,235] by the predicate 'every event actor 5 sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). DAMAGE as source or target (damage, extraattacks); HEALING as source or target (heal); ABSORBS as source or target (absorbed, healabsorbed). DEATHS is NOT granted: the death event is retained as a positive fact only. CASTS, AURAS, RESOURCES, SUMMONS, COMBATANT_INFO and GEAR are NOT granted (their families are excluded)."
+        },
+        "retainedFor": "M12-A: the shared death-timeline primitive (src/healing/death-timeline.ts) over a real player death — the damage taken, healing received and absorbs in the seconds before it, each with the dying actor's own health snapshot Warcraft Logs attached — so its COMPLETE coverage, its entries and the killing blow are proven on Warcraft Logs bytes. The corpus fight is the slice's own window.",
+        "limitations": [
+          "Damage, healing, absorb and death events only: no cast, aura, resource or summon event is retained, so nothing here says what any healer or the Warrior did or could have done.",
+          "One player of a twenty-player pull, over the 5 s before one death; nothing about any other player or any other part of the fight is retained. The resurrection of actor 5 at 7,753,355 lies outside the window and is not retained.",
+          "Raw amounts are verbatim; what Warcraft Logs' amount fields mean in its accounting is follow-up M1 and is not settled by these bytes.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "path": "artifacts/wcl-events/wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165.json",
       "encoding": "JSON",
@@ -7324,6 +7418,36 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/sanitize-probe.test.ts"]
+    },
+    {
+      "caseId": "normalization.b1pm-warrior-death-slice-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-warrior-5-death-5s",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 103-event family-filtered actor-5 slice of the 5 s before its death normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 103
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "Exactly the families the --families option retained, for actor 5, between the recorded exclusive --from and inclusive bound, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/healing/death-timeline.test.ts"]
     },
     {
       "caseId": "normalization.blood-death-knight-165s-bundle-composes-three-parts-into-one-complete-fight",
