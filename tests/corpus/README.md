@@ -661,6 +661,43 @@ the digests in the manifest alone.
 
 ---
 
+## Contents after M12-A
+
+Contract version 2, unchanged. Fifty-two artifacts, one hundred and
+eighty-three cases, seven hundred and seventy-eight assertions.
+
+**No new Warcraft Logs request.** One more SANITIZED_CAPTURE actor slice of
+the same M11-E2 capture (`b1PmaKrd6CDfzngc` fight 48), for the first shared
+healing primitive, `src/healing/death-timeline.ts`.
+
+- **`wcl-b1pm-fight-48-warrior-5-death-5s`** (103 events, 42,233 bytes).
+  - The 5 s up to and including the death of actor 5 (Warrior) at
+    7,749,235. It is the one friendly player death in the capture.
+  - Cut with `sanitize-probe-7` `--actor-slice 5 7749235 --from 7744235
+    --families damage,extraattacks,heal,absorbed,healabsorbed,death
+    --compact`.
+  - Grants DAMAGE, HEALING and ABSORBS for actor 5 over
+    [7,744,236 .. 7,749,235]. DEATHS is not granted: the death is retained
+    as a positive fact only.
+  - The killing blow carries raw `overkill` 81,824 and a target snapshot of 0
+    hit points.
+- **Its case** is a normalization census (three assertions). The timeline
+  itself is asserted over these bytes in
+  `tests/unit/healing/death-timeline.test.ts`:
+  - 13 damage-taken entries, 38 healing-received entries and 3 absorbs;
+  - COMPLETE coverage in all three categories;
+  - the reported killer and killing ability;
+  - every heal source, the Warrior's own heals included.
+
+  `src/healing/` has no owning corpus layer yet. That follows the M11-E1
+  combat-facts precedent and is recorded in `agent/follow-ups.md`.
+
+**Size.** The corpus total is 5,748,495 bytes, still under the owner's
+5.5 MiB notice line. The 5 s bound is what keeps it there: a 10 s window
+(80 KB) would have crossed it.
+
+---
+
 ## Contents after PREP-4
 
 Contract version 2, unchanged. Fifty-one artifacts, one hundred and

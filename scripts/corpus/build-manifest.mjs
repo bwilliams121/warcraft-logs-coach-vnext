@@ -12442,6 +12442,73 @@ const PREP_CASES = [
   ),
 ];
 
+// --------------------------------------------------------------------------
+// M12-A: a real player death for the shared death-timeline primitive.
+//
+// One actor slice of the same fight-48 capture: actor 5 (Warrior), the 5 s up
+// to and including its death at 7,749,235 (+312.9 s). The capture holds one
+// friendly player death; this is it. Damage, healing and absorb families are
+// retained so the timeline's three categories are each granted for actor 5
+// over the window; the death event is retained as the positive fact the
+// timeline hangs on (DEATHS is not granted: no absence of a death is claimed).
+// --------------------------------------------------------------------------
+
+const M12A_FAMILIES = "damage,extraattacks,heal,absorbed,healabsorbed,death";
+const M12A_WARRIOR = 5;
+const M12A_DEATH_ARTIFACT = "wcl-b1pm-fight-48-warrior-5-death-5s";
+const [M12A_FROM, M12A_TO] = [7744235, 7749235];
+
+const M12A_ARTIFACTS = [
+  artifact(M12A_DEATH_ARTIFACT, wcl(M12A_DEATH_ARTIFACT), {
+    kind: "SANITIZED_CAPTURE",
+    source: B1PM_EVENTS_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ${M12A_DEATH_ARTIFACT}.json --actor-slice ${String(M12A_WARRIOR)} ${String(M12A_TO)} --from ${String(M12A_FROM)} --families ${M12A_FAMILIES} --compact`,
+        `The twenty-eight page records concatenated in page order, then the --actor-slice predicate for ACTOR ${String(M12A_WARRIOR)} with --from ${String(M12A_FROM)} (exclusive) and the bound ${String(M12A_TO)} (inclusive), restricted by --families to the six listed raw types (damage, extraattacks, heal, absorbed, healabsorbed, death). In place and order preserved; written as compact JSON (--compact). 103 events: 60 damage (13 taken by actor 5, the last its killing blow carrying overkill 81,824 and a target snapshot of 0 hit points), 1 extraattacks, 38 heals received from several healers, 3 damage absorbs on actor 5, and the death of actor 5 at 7,749,235 with killer 161 and killing ability 1,295,173.`,
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_7),
+      credential_scan(SLICER_REVISION_7),
+    ],
+    grants: [
+      {
+        categories: ["DAMAGE", "HEALING", "ABSORBS"],
+        actorScope: [M12A_WARRIOR],
+        ranges: [{ fromReportTimeMs: M12A_FROM + 1, toReportTimeMs: M12A_TO }],
+      },
+    ],
+    coverageBasis: `The retained families are complete for actor ${String(M12A_WARRIOR)} over [${(M12A_FROM + 1).toLocaleString("en-US")} .. ${M12A_TO.toLocaleString("en-US")}] by the predicate 'every event actor ${String(M12A_WARRIOR)} sources or is targeted by, of a retained family, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). DAMAGE as source or target (damage, extraattacks); HEALING as source or target (heal); ABSORBS as source or target (absorbed, healabsorbed). DEATHS is NOT granted: the death event is retained as a positive fact only. CASTS, AURAS, RESOURCES, SUMMONS, COMBATANT_INFO and GEAR are NOT granted (their families are excluded).`,
+    retainedFor:
+      "M12-A: the shared death-timeline primitive (src/healing/death-timeline.ts) over a real player death — the damage taken, healing received and absorbs in the seconds before it, each with the dying actor's own health snapshot Warcraft Logs attached — so its COMPLETE coverage, its entries and the killing blow are proven on Warcraft Logs bytes. The corpus fight is the slice's own window.",
+    limitations: [
+      "Damage, healing, absorb and death events only: no cast, aura, resource or summon event is retained, so nothing here says what any healer or the Warrior did or could have done.",
+      "One player of a twenty-player pull, over the 5 s before one death; nothing about any other player or any other part of the fight is retained. The resurrection of actor 5 at 7,753,355 lies outside the window and is not retained.",
+      "Raw amounts are verbatim; what Warcraft Logs' amount fields mean in its accounting is follow-up M1 and is not settled by these bytes.",
+      "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+      NO_NAMES,
+      VERSION_SCOPE,
+    ],
+  }),
+];
+
+const M12A_CASES = [
+  kase(
+    "normalization.b1pm-warrior-death-slice-normalizes-whole-and-in-order",
+    M12A_DEATH_ARTIFACT,
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+    "The 103-event family-filtered actor-5 slice of the 5 s before its death normalizes with every raw type recognised and every event kept in capture order.",
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: 103 }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "Exactly the families the --families option retained, for actor 5, between the recorded exclusive --from and inclusive bound, and nothing else.",
+    { related: ["tests/unit/sanitize-probe.test.ts", "tests/unit/healing/death-timeline.test.ts"] },
+  ),
+];
+
 const rootIndex = process.argv.indexOf("--root");
 const rootArgument = rootIndex === -1 ? "corpus" : process.argv[rootIndex + 1];
 if (rootArgument !== "corpus" && rootArgument !== "evidence") {
@@ -12460,8 +12527,8 @@ const manifest = EVIDENCE_ROOT
   : {
       contractVersion: 2,
       corpusId: "warcraft-logs-coach-vnext.regression-corpus",
-      artifacts: [...ARTIFACTS, ...PREP_ARTIFACTS].sort(byId("artifactId")),
-      cases: [...CASES, ...PREP_CASES].sort(byId("caseId")),
+      artifacts: [...ARTIFACTS, ...PREP_ARTIFACTS, ...M12A_ARTIFACTS].sort(byId("artifactId")),
+      cases: [...CASES, ...PREP_CASES, ...M12A_CASES].sort(byId("caseId")),
     };
 
 // `--out <path>` writes elsewhere, which is how scripts/corpus/gate.mjs checks

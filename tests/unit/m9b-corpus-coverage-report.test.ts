@@ -61,6 +61,7 @@ describe("coverage is measured from the corpus", () => {
       "wcl-assassination-kingsbane-cooldown",
       "wcl-b1pm-fight-48-mage-121-prepull-65s",
       "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "wcl-b1pm-fight-48-warrior-5-death-5s",
       "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
       "wcl-blood-death-knight-a7r6-rotational-45s",

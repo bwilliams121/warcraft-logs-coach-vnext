@@ -91,8 +91,11 @@ describe("the committed corpus loads", () => {
     // PREP-4 added two sanitized actor slices of the fight-48 capture (real
     // consumable use by actors 121 and 122) and four cases: a normalization
     // census and an APPLICATION_SERVICE consumable-status case for each.
-    expect(loaded.artifacts).toHaveLength(51);
-    expect(loaded.cases).toHaveLength(182);
+    // M12-A added one sanitized actor slice of the same capture (the 5 s before
+    // actor 5's death, for the shared death-timeline primitive) and its
+    // normalization census.
+    expect(loaded.artifacts).toHaveLength(52);
+    expect(loaded.cases).toHaveLength(183);
     expect(loaded.coverage.declared).toBe(0);
   });
 
@@ -105,7 +108,7 @@ describe("the committed corpus loads", () => {
     expect(caseIds).toEqual([...caseIds].sort());
   });
 
-  it("holds thirty-seven sanitized captures, five derivations and six synthetics", async () => {
+  it("holds thirty-eight sanitized captures, five derivations and six synthetics", async () => {
     const loaded = await corpus();
     const byKind = new Map<string, string[]>();
     for (const entry of loaded.artifacts) {
@@ -124,6 +127,7 @@ describe("the committed corpus loads", () => {
       "wcl-aura-stack-absolute",
       "wcl-b1pm-fight-48-mage-121-prepull-65s",
       "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "wcl-b1pm-fight-48-warrior-5-death-5s",
       "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
       "wcl-blood-death-knight-a7r6-rotational-165s.seg-45-105",
       "wcl-blood-death-knight-a7r6-rotational-45s",
@@ -213,6 +217,8 @@ describe("the committed corpus loads", () => {
     // corpus goes to the separate evidence archive (tests/evidence/,
     // M11-C4e), which has its own budget and is never loaded by this corpus.
     // The 6 MiB ceiling itself is unchanged and is enforced by the loader.
+    // PREP-4 left 5,706,262 bytes; M12-A's 42,233-byte death slice
+    // (bounded at 5 s to stay under the line) leaves 5,748,495.
     expect(loaded.totalArtifactBytes).toBeLessThan(5.5 * 1024 * 1024);
     for (const entry of loaded.artifacts) {
       expect(entry.canonicalByteLength, entry.record.artifactId).toBeLessThan(512 * 1024);
@@ -373,6 +379,9 @@ describe("retained coverage is granted only where the capture predicate supports
     // fight-48 capture (casts, auras and combatantinfo only).
     "wcl-b1pm-fight-48-mage-121-prepull-65s",
     "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+    // M12-A: the same predicate for actor 5 over the same capture (damage,
+    // healing, absorb and death events only).
+    "wcl-b1pm-fight-48-warrior-5-death-5s",
   ];
 
   it("grants nothing on any property-based or index-based selection", async () => {
