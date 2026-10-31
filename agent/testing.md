@@ -4091,6 +4091,39 @@ cases:
 Its real-evidence block reads the same three archive segments, with
 expected counts derived from the raw bytes independently.
 
+**The first healer evaluator (M12-D).**
+`tests/unit/specs/restoration-shaman-evaluator.test.ts` covers the negative
+cases:
+
+- no raid plan is ASSIGNMENT `NO_AUTHORITY_AVAILABLE`, never UNKNOWN, even
+  when the player and another healer both cast the cooldown;
+- per-cast spell choice is `NO_AUTHORITY_AVAILABLE` whatever was cast;
+- an assignment with no cast in its window is `ASSIGNMENT_UNKNOWN`
+  (`READINESS_NOT_ESTABLISHED`, or the coverage gate's reason), never a miss;
+  a cast just outside the tolerance is context, never early or late;
+- `ASSIGNMENT_NOT_ACTIONABLE` needs a COMPLETED encounter that ended before
+  the window; an in-progress fight is UNKNOWN;
+- a cast before the pull or after the kill is not a use and meets no
+  assignment; casts exactly at either bound are;
+- a use is the player's own completed cast: not a begincast, an aura of the
+  same id, another player's cast or the totem's own cast;
+- a cast-coverage gap, or a completed cast of the player with no ability id,
+  makes the cooldown listing UNKNOWN (another player's ability-less cast does
+  not); an ability-less cast in an assignment window is
+  `UNIDENTIFIED_SUBJECT_CAST`, never "no cast";
+- overlap with damage episodes is `ROSTER_NOT_IN_SCOPE` without FULL_RAID,
+  and an empty overlap list is "no overlap" only under its COMPLETE listing:
+  absent DAMAGE, a gap in the span, a gap in the grouping margin before it,
+  an ability-less roster hit, or a span past the fight's end is UNKNOWN
+  (with a COMPLETE empty-list control);
+- a mismatched, wrong-specialization, unresolved or contradictory identity
+  stops evaluation;
+- unusable runtime data stops evaluation.
+
+Its real-evidence block composes the two M12-D cast segments with the
+committed fight context. The four healing-cooldown casts it expects are
+derived from the raw bytes independently.
+
 ---
 
 # Healer Per-Cast Authority Negative Test

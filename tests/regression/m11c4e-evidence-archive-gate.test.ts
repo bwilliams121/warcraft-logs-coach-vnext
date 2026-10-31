@@ -62,9 +62,11 @@ describe("the committed evidence archive executes clean under workerd", { timeou
     // M11-C4i: plus the second subject's resolved REJECTED (one case, one assertion).
     // M12-B: plus one normalization census per friendly-players raid damage
     // segment (three cases, three assertions each).
-    expect(result.summary.cases).toBe(12);
-    expect(result.summary.assertions).toBe(30);
-    expect(result.summary.passed).toBe(30);
+    // M12-D: plus one normalization census per Restoration Shaman cast segment
+    // (two cases, three assertions each).
+    expect(result.summary.cases).toBe(14);
+    expect(result.summary.assertions).toBe(36);
+    expect(result.summary.passed).toBe(36);
   });
 
   it("is deterministic across runs", async () => {

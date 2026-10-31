@@ -136,6 +136,18 @@ const M12B_EVIDENCE: Readonly<Record<string, number>> = {
   "wcl-b1pm-fight-48-friendly-players.seg-75500-77000": 201150,
 };
 const M12B_BYTES = Object.values(M12B_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+
+/**
+ * M12-D: the canonical Restoration Shaman's (actor 122) casts and begincasts
+ * over the whole fight, two compact segments of the M11-E2 capture, for the
+ * first healer specialization evaluator. Ordinary archive growth (119,216
+ * bytes), named and pinned like M12-B.
+ */
+const M12D_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-0-180": 62043,
+  "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-180-345": 57173,
+};
+const M12D_BYTES = Object.values(M12D_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 const ARCHIVE_SEGMENT_PATH = `artifacts/wcl-events/${ARCHIVE_SEGMENT}.json`;
 const CORPUS_OPENER = "wcl-brewmaster-monk-gtkb-opener";
 const CORPUS_20_165 = "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165";
@@ -184,6 +196,8 @@ describe("the committed evidence archive", () => {
     expect(loaded.archive.artifacts.map((entry) => entry.record.artifactId)).toEqual([
       // M12-B: the friendly-players raid damage segments (code-point order puts them first).
       ...Object.keys(M12B_EVIDENCE),
+      // M12-D: the Restoration Shaman's cast segments.
+      ...Object.keys(M12D_EVIDENCE),
       // M11-E2.1: the canonical Blood Death Knight owned-pet segments, code-point order.
       "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
       "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-113-151",
@@ -205,11 +219,19 @@ describe("the committed evidence archive", () => {
       // M11-G4-1: the canonical report's region.
       ...Object.keys(M11G4_EVIDENCE),
     ]);
-    // M12-B added one normalization census per raid damage segment.
-    expect(loaded.archive.cases).toHaveLength(12);
+    // M12-B added one normalization census per raid damage segment, M12-D one per cast segment.
+    expect(loaded.archive.cases).toHaveLength(14);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(
-      308961 + 389605 + 387275 + M11E2_BYTES + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES + M12B_BYTES,
+      308961 +
+        389605 +
+        387275 +
+        M11E2_BYTES +
+        M11G1_BYTES +
+        M11G2_BYTES +
+        M11G4_BYTES +
+        M12B_BYTES +
+        M12D_BYTES,
     );
     for (const [artifactId, bytes] of Object.entries({
       ...M11E2_NOTICE_LINE_EXCEPTION,
@@ -217,6 +239,7 @@ describe("the committed evidence archive", () => {
       ...M11G2_NOTICE_LINE_EXCEPTION,
       ...M11G4_EVIDENCE,
       ...M12B_EVIDENCE,
+      ...M12D_EVIDENCE,
     })) {
       const entry = loaded.archive.artifacts.find((candidate) => candidate.record.artifactId === artifactId);
       expect(entry?.canonicalByteLength, artifactId).toBe(bytes);
@@ -246,15 +269,17 @@ describe("the committed evidence archive", () => {
     // M11-G2 adds its own one-time exception, 12,162,150 bytes (≈11.60 MiB,
     // within the ≈12.3 MiB approved): 17,063,800 bytes in all. M11-G4-1 adds
     // 206 bytes of ordinary evidence: 17,064,006. M12-B adds 974,973 bytes of
-    // ordinary raid damage evidence: 18,038,979.
+    // ordinary raid damage evidence: 18,038,979. M12-D adds 119,216 bytes of
+    // ordinary Restoration Shaman cast evidence: 18,158,195.
     expect(M11G1_BYTES).toBe(364631);
     expect(M11G2_BYTES).toBe(12162150);
     expect(M11G4_BYTES).toBe(206);
     expect(M12B_BYTES).toBe(974973);
+    expect(M12D_BYTES).toBe(119216);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
-      4537019 + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES + M12B_BYTES,
+      4537019 + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES + M12B_BYTES + M12D_BYTES,
     );
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(18038979);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(18158195);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

@@ -118,6 +118,18 @@ compact segments (974,973 bytes) of the M11-E2 capture.
   M11-G2 exceptions the archive stays under its 4 MiB line.
 - No new Warcraft Logs request was made.
 
+**M12-D evidence.** `wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-*`
+is two compact `--actor-slice` segments (119,216 bytes) of the same capture.
+
+- Together they cover the whole fight: every `cast` and `begincast` sourced
+  by or targeting actor 122, the canonical Restoration Shaman.
+- They grant CASTS for actor 122 only. Its totems' own casts are not
+  retained.
+- The bundle, with the committed fight context as its catalog, is what the
+  Restoration Shaman evaluator's real-evidence tests read.
+- Ordinary archive growth, pinned in the same test. No new Warcraft Logs
+  request was made.
+
 ## Execution and promotion
 
 `npm run test:evidence` (`scripts/corpus/gate.mjs --root evidence`) runs four

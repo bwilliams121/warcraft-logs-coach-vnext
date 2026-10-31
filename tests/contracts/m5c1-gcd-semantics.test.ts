@@ -608,8 +608,23 @@ describe("M5-A and M5-B are untouched by execution lane", () => {
     expect(declaring).toEqual(["src/simc/action-applicability.ts"]);
 
     // Nowhere in src/ does actionability vocabulary acquire a negative member.
+    //
+    // ONE NAMED EXCEPTION (M12-D). agent/architecture.md "Raid Cooldown
+    // Assignments" names `ASSIGNMENT_NOT_ACTIONABLE` as an assignment-execution
+    // outcome, and the Restoration Shaman evaluator issues it only on positive
+    // evidence: a COMPLETED encounter whose end precedes the planned window.
+    // It is an assignment outcome, not a member of the actionability
+    // vocabulary (still two members, pinned in m5b). The exact literal, in
+    // that one file, carrying that one reason, is all the exception admits.
+    const ASSIGNMENT_OUTCOME = '"ASSIGNMENT_NOT_ACTIONABLE"';
+    const ASSIGNMENT_EVALUATOR = "src/specs/shaman/restoration/evaluator.ts";
+    const evaluator = codeOf(ASSIGNMENT_EVALUATOR);
+    expect(evaluator).toContain(ASSIGNMENT_OUTCOME);
+    expect(evaluator).toContain('reason: "ENCOUNTER_ENDED_BEFORE_WINDOW"');
+    expect(evaluator).toContain("fightEndReportTimeMs");
     for (const path of filesUnder("src")) {
-      const code = codeOf(path);
+      const raw = codeOf(path);
+      const code = path === ASSIGNMENT_EVALUATOR ? raw.split(ASSIGNMENT_OUTCOME).join("") : raw;
       expect(code, `${path} declares NOT_ACTIONABLE`).not.toContain("NOT_ACTIONABLE");
       expect(code, `${path} declares PROVEN_NOT_ACTIONABLE`).not.toContain("PROVEN_NOT_ACTIONABLE");
     }

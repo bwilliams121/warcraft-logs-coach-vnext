@@ -118,11 +118,13 @@ owner policy (agent/architecture.md "M12-B").
 ### PREP-5: The MCP tool description mentions consumable status
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/prep-5
 wcl: NONE
 publicContract: EXPECTED
+pr: 19
+mergeSha: 5e6ce70fe22c2af75018f14863f47c0c52874741
 ```
 
 **Direction.** `agent/follow-ups.md` "PRODUCT-INTENT GAP", in the "Still
@@ -136,16 +138,67 @@ This is the only public change, so `publicContract` is `EXPECTED`.
 ### M12-D: First healer specialization evaluator
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
+status: PR_OPEN
 dependsOn: M12-C
+branch: autopilot/m12-d
 wcl: NONE
 publicContract: NONE
-ownerDecision: Which healer specialization comes first, and which evidence-grounded verdict categories its v1 evaluator may issue (per-cast spell choice stays NO_AUTHORITY_AVAILABLE). This also decides where healing-cooldown identity lives: that spec module's runtime data.
 ```
 
 **Direction.** Healer verdicts belong to `src/specs/<class>/<spec>/`
-(CLAUDE.md "Role Module Boundary"). The architecture names no first healer
-spec and no v1 verdict list.
+(CLAUDE.md "Role Module Boundary").
+
+**OWNER DECISION (2026-10-31): Restoration Shaman is the first healer
+specialization.**
+
+Why Restoration Shaman:
+
+- The existing canonical fight (b1PmaKrd6CDfzngc fight 48) already contains
+  a Restoration Shaman, actor 122.
+- Committed evidence already establishes that subject's class and spec
+  identity.
+- Reusing captured evidence is preferred over picking a healer arbitrarily.
+
+**Restoration Shaman v1 verdict scope.**
+
+1. **ASSIGNMENT.**
+   - Supported only when an explicit, authoritative raid cooldown plan is
+     supplied.
+   - The evaluator may decide whether the named Restoration Shaman cooldown
+     assignment was executed.
+   - Valid outcomes: met/correct, missed/incorrect, NOT_ACTIONABLE, UNKNOWN,
+     or NO_AUTHORITY_AVAILABLE, as appropriate.
+   - Assignments are never inferred from what other healers did.
+2. **COOLDOWN.**
+   - Without an explicit raid plan, cooldown use is observational and
+     informational only.
+   - It may report when an identified Restoration Shaman healing cooldown was
+     used, and its observable overlap with damage episodes and healing
+     coverage.
+   - It must not conclude that a cooldown should or should not have been used
+     from timing, damage magnitude, HPS or comparison behavior alone.
+3. **HEALING_DECISION.** Per-cast spell-choice coaching remains
+   NO_AUTHORITY_AVAILABLE in v1. No correct/incorrect verdict for ordinary
+   healing spell selection until an explicitly approved, machine-usable healer
+   authority is integrated.
+4. **Shared factual context.** Death timelines, damage episodes, healing
+   received, absorbs and other-healer coverage remain WCL_OBSERVED_FACT
+   shared healing primitives. The evaluator may consume them as evidence but
+   must not turn them into unsupported causal blame.
+
+**Runtime-data ownership.** Restoration Shaman healing-cooldown identity and
+spec-specific cooldown metadata belong in the Restoration Shaman
+specialization and runtime-data module. Spec-specific cooldown identity never
+goes into generic `src/healing/`.
+
+**Evidence and network.**
+
+- Prefer deriving M12-D evidence from the existing canonical capture and
+  archive.
+- No new Warcraft Logs request is authorized by this decision.
+- If the required real evidence cannot be derived from already-authorized
+  retained material, stop with OWNER_DECISION_REQUIRED rather than make a new
+  request.
 
 ### M12-E: Raid cooldown assignment input
 
