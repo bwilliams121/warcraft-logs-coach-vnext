@@ -329,7 +329,7 @@ describe("the committed corpus holds no stable player identifier", () => {
 
   it("records the sanitizer revisions the scripts export, so a manifest cannot claim a revision that does not exist", () => {
     expect(SANITIZE_PAYLOADS_REVISION).toBe("sanitize-payloads-3");
-    expect(SANITIZER_REVISION).toBe("sanitize-probe-7");
+    expect(SANITIZER_REVISION).toBe("sanitize-probe-8");
     expect(G1_SANITIZER_REVISION).toBe("sanitize-g1-cohort-1");
     expect(G2_SANITIZER_REVISION).toBe("sanitize-g2-comparisons-1");
     const revisions = new Set<string>();
@@ -347,7 +347,7 @@ describe("the committed corpus holds no stable player identifier", () => {
     // Every recorded revision is one the tooling has had; the current ones are among them.
     for (const revision of revisions) {
       expect(revision).toMatch(
-        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[123]|sanitize-probe-[234567]|sanitize-g1-cohort-1|sanitize-g2-comparisons-1|derive-gap-1|derive-substitution-1)$/,
+        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[123]|sanitize-probe-[2345678]|sanitize-g1-cohort-1|sanitize-g2-comparisons-1|derive-gap-1|derive-substitution-1)$/,
       );
     }
     expect(revisions.has(SANITIZE_PAYLOADS_REVISION)).toBe(true);

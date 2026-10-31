@@ -17,6 +17,7 @@
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --decision-slice <subject> <target,target>
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice <subject> [<toReportTimeMs>] [--from <exclusiveFromMs>] [--families <type,type,...>]
  *     node scripts/sanitize-probe.mjs <input.json> <output-name> --actor-slice-with-owned-pets <focus> [<toReportTimeMs>] --catalog <context.json> [--from <exclusiveFromMs>] [--families <type,type,...>] [--actorless-families <type,type,...>]
+ *     node scripts/sanitize-probe.mjs <input.json> <output-name> --friendly-players-slice <fightId> [<toReportTimeMs>] --catalog <context.json> [--from <exclusiveFromMs>] [--families <type,type,...>]
  *
  * Any mode accepts a trailing `--compact`.
  *
@@ -98,6 +99,18 @@
  * are subject to the actor predicate like any other. Every listed type must
  * also be in `--families`.
  *
+ * `--friendly-players-slice` (M12-B) is the `--actor-slice` predicate over
+ * the fight's FRIENDLY PLAYER ROSTER: every actor id in the Warcraft Logs
+ * `friendlyPlayers` list of the named fight in the fight context given by
+ * `--catalog`. The roster is never typed on the command line. A healer
+ * question ranges over the whole raid (who was hit, who was healed), so its
+ * evidence must be complete for every friendly player at once. Derivation
+ * fails closed, and nothing is written, when the fight is absent or listed
+ * twice, its roster is empty, holds a non-integer or a duplicate, or names an
+ * actor the master data does not list exactly once as a `Player`. Pets are
+ * not in the roster. `--from`, the bound and `--families` behave exactly as
+ * for `--actor-slice`; there are no actorless families.
+ *
  * `--compact` (M11-E2.1) writes the slice as compact JSON — no whitespace
  * between tokens — instead of the default two-space indentation. It changes
  * bytes, never content: the same events, the same order, each event's keys in
@@ -132,7 +145,7 @@ const FORBIDDEN = ["client_secret", "access_token", "authorization", "bearer ", 
  * M9-B predates this field, and their manifest entries record UNAVAILABLE —
  * a fact about those captures, not something to backfill.
  */
-export const SANITIZER_REVISION = "sanitize-probe-7";
+export const SANITIZER_REVISION = "sanitize-probe-8";
 
 /** Where a reviewed slice lands: the regression corpus, never a loose fixture directory. */
 export const OUTPUT_ROOT = "tests/corpus/artifacts/wcl-events";
@@ -256,6 +269,60 @@ export function actorSlice(events, subject, untilMs = null, families = null, fro
     if (fromMs !== null && !(typeof event.timestamp === "number" && event.timestamp > fromMs)) return false;
     return untilMs === null || (typeof event.timestamp === "number" && event.timestamp <= untilMs);
   });
+}
+
+/**
+ * The roster of a `--friendly-players-slice`, DERIVED from a fight context:
+ * the named fight's Warcraft Logs `friendlyPlayers`, each a `Player` in the
+ * master data, ascending. Exported for tests. Returns a discriminated result;
+ * every refusal names the fact that made the catalog unusable.
+ */
+export function deriveFriendlyPlayerRoster(context, fightId) {
+  const report = context?.reportData?.report;
+  const fights = report?.fights;
+  const actors = report?.masterData?.actors;
+  if (!Array.isArray(fights))
+    return { ok: false, error: "the catalog holds no reportData.report.fights array" };
+  if (!Array.isArray(actors)) {
+    return { ok: false, error: "the catalog holds no reportData.report.masterData.actors array" };
+  }
+  if (!Number.isSafeInteger(fightId)) {
+    return { ok: false, error: `fight ${String(fightId)} is not an integer fight id` };
+  }
+  const matching = fights.filter((fight) => fight?.id === fightId);
+  if (matching.length !== 1) {
+    return {
+      ok: false,
+      error: `fight ${fightId} is listed ${matching.length} times in the catalog, not once`,
+    };
+  }
+  const roster = matching[0].friendlyPlayers;
+  if (!Array.isArray(roster) || roster.length === 0) {
+    return { ok: false, error: `fight ${fightId} has no friendlyPlayers roster` };
+  }
+  const seen = new Set();
+  for (const id of roster) {
+    if (!Number.isSafeInteger(id)) {
+      return { ok: false, error: `fight ${fightId} lists a non-integer friendly player` };
+    }
+    if (seen.has(id))
+      return { ok: false, error: `fight ${fightId} lists friendly player ${id} more than once` };
+    seen.add(id);
+    const listed = actors.filter((actor) => actor?.id === id);
+    if (listed.length !== 1) {
+      return {
+        ok: false,
+        error: `friendly player ${id} is listed ${listed.length} times in the master data, not once`,
+      };
+    }
+    if (listed[0].type !== "Player") {
+      return {
+        ok: false,
+        error: `friendly player ${id} is a ${String(listed[0].type)} in the master data, not a Player`,
+      };
+    }
+  }
+  return { ok: true, fightId, roster: [...seen].sort((a, b) => a - b) };
 }
 
 /**
@@ -391,7 +458,7 @@ function main() {
 
   if (inputPath === undefined || outputName === undefined) {
     console.error(
-      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs] [--from exclusiveFromMs] [--families type,type] | --actor-slice-with-owned-pets focus [toReportTimeMs] --catalog context.json [--from exclusiveFromMs] [--families type,type] [--actorless-families type,type]] [--compact]",
+      "usage: node scripts/sanitize-probe.mjs <input.json> <output-name> [--head N | --per-type N | --where key=value N | --indices i,j,k | --decision-slice subject target,target | --actor-slice subject [toReportTimeMs] [--from exclusiveFromMs] [--families type,type] | --actor-slice-with-owned-pets focus [toReportTimeMs] --catalog context.json [--from exclusiveFromMs] [--families type,type] [--actorless-families type,type] | --friendly-players-slice fightId [toReportTimeMs] --catalog context.json [--from exclusiveFromMs] [--families type,type]] [--compact]",
     );
     process.exit(1);
   }
@@ -403,7 +470,66 @@ function main() {
 
   let sliced;
   let ownedPetReport = null;
-  if (mode === "--actor-slice-with-owned-pets") {
+  let rosterReport = null;
+  if (mode === "--friendly-players-slice") {
+    const fightId = Number(countRaw);
+    const rest = args.slice(4);
+    const valued = ["--catalog", "--from", "--families"];
+    const options = new Map();
+    const positional = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      const token = rest[i];
+      if (valued.includes(token)) {
+        if (options.has(token) || rest[i + 1] === undefined) {
+          console.error(`usage: --friendly-players-slice: ${token} given twice or without a value`);
+          process.exit(1);
+        }
+        options.set(token, rest[i + 1]);
+        i += 1;
+      } else positional.push(token);
+    }
+    const untilMs = positional[0] === undefined ? null : Number(positional[0]);
+    const fromMs = options.has("--from") ? Number(options.get("--from")) : null;
+    if (
+      !Number.isSafeInteger(fightId) ||
+      !options.has("--catalog") ||
+      (untilMs !== null && !Number.isSafeInteger(untilMs)) ||
+      (fromMs !== null && !Number.isSafeInteger(fromMs)) ||
+      (fromMs !== null && untilMs !== null && !(fromMs < untilMs)) ||
+      positional.length > 1
+    ) {
+      console.error(
+        "usage: --friendly-players-slice <fight id> [<toReportTimeMs>] --catalog <context.json> [--from <exclusiveFromMs>] [--families <type,...>]  (from < to)",
+      );
+      process.exit(1);
+    }
+    const derived = deriveFriendlyPlayerRoster(
+      JSON.parse(readFileSync(options.get("--catalog"), "utf8")),
+      fightId,
+    );
+    if (!derived.ok) {
+      console.error(`refusing to slice: ${derived.error}`);
+      process.exit(1);
+    }
+    let families = null;
+    if (options.has("--families")) {
+      const selection = parseFamilySelection(options.get("--families"));
+      if (!selection.ok) {
+        console.error(selection.error);
+        process.exit(1);
+      }
+      families = selection.families;
+    }
+    sliced = ownedPetSlice(events, derived.roster, { untilMs, fromMs, families, actorlessFamilies: [] });
+    const active = actorsWithRetainedEvents(sliced, derived.roster);
+    rosterReport = {
+      fightId: derived.fightId,
+      playerActorIds: derived.roster,
+      rosterAuthority: "WCL_FIGHT_FRIENDLY_PLAYERS",
+      actorsWithRetainedEvents: active,
+      actorsWithoutRetainedEvents: derived.roster.filter((id) => !active.includes(id)),
+    };
+  } else if (mode === "--actor-slice-with-owned-pets") {
     const focus = Number(countRaw);
     const rest = args.slice(4);
     const valued = ["--catalog", "--from", "--families", "--actorless-families"];
@@ -587,6 +713,7 @@ function main() {
   console.log(`  sha256:     ${createHash("sha256").update(canonical).digest("hex")}`);
   console.log(`  byteLength: ${canonical.length}`);
   if (ownedPetReport !== null) console.log(`  ownedPets:  ${JSON.stringify(ownedPetReport)}`);
+  if (rosterReport !== null) console.log(`  roster:     ${JSON.stringify(rosterReport)}`);
   console.log(
     `  tooling:    { name: "scripts/sanitize-probe.mjs", revision: "${SANITIZER_REVISION}", invocation: "${argv.join(" ")}" }`,
   );

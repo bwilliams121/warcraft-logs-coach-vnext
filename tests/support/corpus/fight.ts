@@ -622,6 +622,18 @@ export function bundleOverEvidence(
   }
   const catalog = options.catalog === undefined ? null : catalogOf(options.catalog, first.source, window);
   if (catalog !== null) categories.ACTORS = catalog.evidence;
+  // M12-B: a bundle of friendly-players slices vouches for the whole derived
+  // roster, which is what a FULL_RAID declaration is. Every part must name the
+  // same roster (their grants already share one actor scope).
+  const rosters = parts.map((part) => {
+    const slice = part.record.provenance.actorSlice;
+    return slice?.mode === "FIGHT_FRIENDLY_PLAYERS" ? JSON.stringify(slice.playerActorIds) : null;
+  });
+  if (new Set(rosters).size !== 1) {
+    throw new BundleCompositionError("parts disagree on whether, or which, friendly roster they vouch for");
+  }
+  const firstSlice = first.record.provenance.actorSlice;
+  const roster = firstSlice?.mode === "FIGHT_FRIENDLY_PLAYERS" ? firstSlice.playerActorIds : null;
   const fight = syntheticFight({
     events: normalized.events,
     malformedObservations: normalized.malformedObservations,
@@ -629,6 +641,7 @@ export function bundleOverEvidence(
     endTimeMs: window.toReportTimeMs,
     categories,
     ...(catalog === null ? {} : { actors: catalog.actors }),
+    ...(roster === null ? {} : { scope: "FULL_RAID" as const, friendlyActorsInScope: roster }),
   });
   return { fight, coveredRanges, holes, events: rawEvents.length };
 }

@@ -76,6 +76,23 @@ export type OwnedPetScope =
  */
 export function deriveOwnedPetScope(context: unknown, focusActorId: number): OwnedPetScope;
 
+export type FriendlyPlayerRoster =
+  | {
+      readonly ok: true;
+      readonly fightId: number;
+      /** Ascending; the fight's WCL `friendlyPlayers`, each a Player in the master data. */
+      readonly roster: readonly number[];
+    }
+  | { readonly ok: false; readonly error: string };
+
+/**
+ * Derives a `--friendly-players-slice` roster from a fight context (M12-B):
+ * the named fight's `friendlyPlayers`. Refuses a fight listed other than once,
+ * an empty roster, a non-integer or repeated id, and an id the master data
+ * does not list exactly once as a `Player`. Pets are never in the roster.
+ */
+export function deriveFriendlyPlayerRoster(context: unknown, fightId: number): FriendlyPlayerRoster;
+
 /**
  * The `--actor-slice-with-owned-pets` predicate: every event whose sourceID or
  * targetID is in `actorScope`, plus events of an `actorlessFamilies` type

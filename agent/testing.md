@@ -4047,6 +4047,29 @@ real player death committed in the corpus. The negative cases are the point:
 `tests/contracts/m12a-healing-layering.test.ts` keeps `src/healing/` free of
 specialization branching and judgement vocabulary.
 
+**Damage episodes (M12-B).** `tests/unit/healing/damage-episodes.test.ts`
+covers the negative cases:
+
+- no FULL_RAID roster means no episode list, never an empty one;
+- one uncovered roster player, a coverage gap in the margin, or a margin
+  past the fight's edge makes an episode UNKNOWN and names why;
+- damage dealt by the raid is never an episode;
+- another actor's snapshot is never a target's health;
+- nothing is summed.
+
+Its real-evidence block reads the three friendly-players segments in the
+evidence archive. Its expected values were derived from the raw bytes
+independently of the primitive. `tests/unit/m12b-friendly-players-slice.test.ts`
+covers the rest:
+
+- the slicer's roster refusals;
+- a byte-exact re-cut of the committed segments;
+- the loader's `ACTOR_SLICE_INVALID` refusals.
+
+Healer evidence follows the 2026-10-31 owner policy: full evidence in the
+archive, minimal derived fixtures in the corpus, and a recorded ledger when
+they do not fit.
+
 ---
 
 # Healer Per-Cast Authority Negative Test

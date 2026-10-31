@@ -9,6 +9,45 @@ hygiene and clarity items.
 
 ---
 
+## Regression-corpus ledger: healer fixtures that did not fit (M12)
+
+**Raised:** M12-B (2026-10-31). Owner decision, the same day: the corpus
+stays at 5.5 MiB, and its remaining ~18.6 KB is treated as exhausted. A
+measured increase is proposed only when several M12 slices each need a
+genuinely minimal fixture that cannot fit. The limit is never raised
+preemptively for one tranche.
+
+| Tranche | Smallest fixture that proves the behavior | Bytes | Committed |
+| --- | --- | ---: | --- |
+| M12-B | One COMPLETE damage episode (1,282,525) with its ±2 s margin: damage and extraattacks for all 20 friendly players over 4.005 s, granted DAMAGE | 230,811 | no; protected by archive-reading unit tests |
+
+A grant-free fixture of only the episode's 20 hits would be ~9 KB, but it
+could not prove COMPLETE coverage, which is the behavior at stake. When a
+second row appears, the measured proposal is the sum of the rows plus the
+current total (5,748,495 bytes), with what each row buys.
+
+---
+
+## After M12-B: what the damage-episode primitive does not yet do
+
+**Raised:** M12-B (2026-10-31).
+
+- **No consumer and no public surface**, as with M12-A. The milestone guard
+  in `tests/contracts/m12a-healing-layering.test.ts` still holds.
+- **The roster is players only.** Pets and guardians that take raid damage
+  are not in `friendlyPlayers` and are not in episodes.
+- **Grouping is by ability only.** Two enemies casting the same ability
+  overlap into one episode, and the sources list both. A tick-heavy ability
+  every ~2 s (1,284,561 in fight 48) splits or joins with `gapMs`, which is a
+  parameter and not a finding.
+- **No healing coverage yet.** The archive segments retain every heal and
+  absorb around the episodes, so the next tranche (healing received during
+  an episode, other-healer coverage) needs no new capture for this window.
+  Cooldown coverage would need AURAS, which these segments exclude.
+- **One window, one fight.** No second report has been examined.
+
+---
+
 ## After M12-A: what the death-timeline primitive does not yet do
 
 **Raised:** M12-A (2026-10-30). None of these is an owner decision yet.

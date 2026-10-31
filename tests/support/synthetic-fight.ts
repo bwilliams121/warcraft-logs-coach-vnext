@@ -396,6 +396,8 @@ export interface SyntheticFightOptions {
   readonly endTimeMs?: number | undefined;
   readonly focusActorId?: number | undefined;
   readonly scope?: IngestionScope | undefined;
+  /** The declared friendly roster in scope (production fills it only under FULL_RAID). Empty by default. */
+  readonly friendlyActorsInScope?: readonly number[] | undefined;
   readonly hostilityStreams?: readonly HostilitySelector[] | undefined;
   readonly actors?: ReadonlyMap<number, CombatActor> | undefined;
   readonly abilities?: ReadonlyMap<number, CombatAbility> | undefined;
@@ -488,7 +490,7 @@ export function syntheticFight(options: SyntheticFightOptions = {}): CombatFight
     breadth: {
       scope: options.scope ?? "PLAYER_CONTEXT",
       focusActorIds: [options.focusActorId ?? 5],
-      friendlyActorsInScope: [],
+      friendlyActorsInScope: [...(options.friendlyActorsInScope ?? [])],
     },
     completeness,
     report: {

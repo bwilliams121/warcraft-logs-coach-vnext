@@ -121,6 +121,21 @@ const M11G4_EVIDENCE: Readonly<Record<string, number>> = {
   "wcl-g4-region-b1pm-fight-48": 206,
 };
 const M11G4_BYTES = Object.values(M11G4_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+
+/**
+ * M12-B: raid damage evidence for the shared damage-episode primitive — three
+ * compact friendly-players segments of the M11-E2 capture (fight +69.5 s ..
+ * +77.0 s, every friendly player). Owner direction (2026-10-31): full healer
+ * evidence goes to this archive. Ordinary archive growth (974,973 bytes),
+ * named and pinned so it is reviewed rather than absorbed: the archive without
+ * the M11-E2 and M11-G2 exceptions, M12-B included, stays under the line.
+ */
+const M12B_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-b1pm-fight-48-friendly-players.seg-69500-72500": 363527,
+  "wcl-b1pm-fight-48-friendly-players.seg-72500-75500": 410296,
+  "wcl-b1pm-fight-48-friendly-players.seg-75500-77000": 201150,
+};
+const M12B_BYTES = Object.values(M12B_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 const ARCHIVE_SEGMENT_PATH = `artifacts/wcl-events/${ARCHIVE_SEGMENT}.json`;
 const CORPUS_OPENER = "wcl-brewmaster-monk-gtkb-opener";
 const CORPUS_20_165 = "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165";
@@ -167,6 +182,8 @@ describe("the committed evidence archive", () => {
     expect(loaded.archive.rootId).toBe("EVIDENCE_ARCHIVE");
     expect(loaded.corpus.rootId).toBe("REGRESSION_CORPUS");
     expect(loaded.archive.artifacts.map((entry) => entry.record.artifactId)).toEqual([
+      // M12-B: the friendly-players raid damage segments (code-point order puts them first).
+      ...Object.keys(M12B_EVIDENCE),
       // M11-E2.1: the canonical Blood Death Knight owned-pet segments, code-point order.
       "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
       "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-113-151",
@@ -188,16 +205,18 @@ describe("the committed evidence archive", () => {
       // M11-G4-1: the canonical report's region.
       ...Object.keys(M11G4_EVIDENCE),
     ]);
-    expect(loaded.archive.cases).toHaveLength(9);
+    // M12-B added one normalization census per raid damage segment.
+    expect(loaded.archive.cases).toHaveLength(12);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(
-      308961 + 389605 + 387275 + M11E2_BYTES + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES,
+      308961 + 389605 + 387275 + M11E2_BYTES + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES + M12B_BYTES,
     );
     for (const [artifactId, bytes] of Object.entries({
       ...M11E2_NOTICE_LINE_EXCEPTION,
       ...M11G1_EVIDENCE,
       ...M11G2_NOTICE_LINE_EXCEPTION,
       ...M11G4_EVIDENCE,
+      ...M12B_EVIDENCE,
     })) {
       const entry = loaded.archive.artifacts.find((candidate) => candidate.record.artifactId === artifactId);
       expect(entry?.canonicalByteLength, artifactId).toBe(bytes);
@@ -226,14 +245,16 @@ describe("the committed evidence archive", () => {
     // plus the 364,631 bytes of M11-G1 evidence: 4,901,650.
     // M11-G2 adds its own one-time exception, 12,162,150 bytes (≈11.60 MiB,
     // within the ≈12.3 MiB approved): 17,063,800 bytes in all. M11-G4-1 adds
-    // 206 bytes of ordinary evidence: 17,064,006.
+    // 206 bytes of ordinary evidence: 17,064,006. M12-B adds 974,973 bytes of
+    // ordinary raid damage evidence: 18,038,979.
     expect(M11G1_BYTES).toBe(364631);
     expect(M11G2_BYTES).toBe(12162150);
     expect(M11G4_BYTES).toBe(206);
+    expect(M12B_BYTES).toBe(974973);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
-      4537019 + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES,
+      4537019 + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES + M12B_BYTES,
     );
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(17064006);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(18038979);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

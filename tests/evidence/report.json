@@ -1,6 +1,27 @@
 {
   "artifacts": [
     {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-69500-72500",
+      "byteLength": 363527,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "1ed6ab168ec3e9ea0572f542132b6485433ada1c3335d3191328dfc1a1fe0c11"
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-72500-75500",
+      "byteLength": 410296,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "b69166ff3468f10e77e4f111d7b5298a47fb49ecdc716e4a62cee32730b3f82c"
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-75500-77000",
+      "byteLength": 201150,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "52454331935981afbc1d74ba1289470f9f43f513d90861365e7c2cbb9c97b3c3"
+    },
+    {
       "artifactId": "wcl-blood-death-knight-b1pm-full-fight-owned-pets.seg-0-45",
       "byteLength": 492175,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -360,8 +381,8 @@
   ],
   "byLayer": [
     {
-      "assertions": 12,
-      "cases": 4,
+      "assertions": 21,
+      "cases": 7,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
@@ -372,7 +393,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 12
+      "passed": 21
     },
     {
       "assertions": 9,
@@ -390,6 +411,78 @@
     }
   ],
   "cases": [
+    {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-69500-72500",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-friendly-players-seg-69500-72500-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-friendly-players.seg-69500-72500"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-72500-75500",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-friendly-players-seg-72500-75500-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-friendly-players.seg-72500-75500"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-friendly-players.seg-75500-77000",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-friendly-players-seg-75500-77000-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-friendly-players.seg-75500-77000"]
+    },
     {
       "artifactId": "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",
       "assertions": [
@@ -656,15 +749,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 17034996,
-    "artifacts": 51,
-    "assertions": 21,
-    "cases": 9,
+    "artifactBytes": 18009969,
+    "artifacts": 54,
+    "assertions": 30,
+    "cases": 12,
     "declared": 0,
-    "executable": 21,
+    "executable": 30,
     "failed": 0,
     "largestArtifactBytes": 499916,
     "notExecuted": 0,
-    "passed": 21
+    "passed": 30
   }
 }
