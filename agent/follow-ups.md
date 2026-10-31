@@ -29,6 +29,40 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M12-E: what the raid cooldown plan input does not yet do
+
+**Raised:** M12-E (2026-10-31).
+
+- **Phase-relative times never resolve.** Placing `ph:2.5` in a fight needs
+  a reviewed, per-encounter map from a plan's phase labels to the fight's
+  observed `phases`, including what to do when a phase is entered more than
+  once. None exists, so every note assignment is
+  `PLANNED_TIME_UNRESOLVED`. Only `FIGHT_RELATIVE` entries can be judged.
+  This is the largest coverage gap, and building the map needs committed
+  phase evidence for each mapped encounter.
+- **No assignment is evaluated publicly.** The disclosure always says
+  `NOT_EVALUATED` / `NO_PUBLIC_ASSIGNMENT_EVALUATOR`, until a healer
+  evaluator is registered ("After M12-D", first bullet). Publishing its
+  verdicts needs a public assignment-result shape.
+- **Difficulty is a Warcraft Logs id.** Accepting "MYTHIC" needs a reviewed
+  difficulty-name authority (the same gap that blocks the raid `fight_style`
+  binding, M11-F).
+- **Realms are compared exactly, case aside.** "Area52" is not matched to
+  "Area 52". Accepting a note's realm spelling needs a reviewed realm-slug
+  source.
+- **No roster enrichment from the note.** The owner allowed an importer to
+  read an explicit name-realm roster or invite list in the note. Not built:
+  a name without a realm resolves only when unique in the fight.
+- **One player per tag.** `tag:A B` is `TAG_NOT_A_SINGLE_PLAYER`, never split
+  into guessed per-player assignments. The format's multi-player semantics
+  are not established.
+- **`bossSpell` is context only.** No reviewed event-anchor model exists.
+- **Plans are not stored.** A caller resupplies the plan per request.
+- **Timeline-note text fields with `;`.** A `text:` value containing a
+  semicolon makes the line `MALFORMED_FIELD`.
+
+---
+
 ## After M12-D: what the Restoration Shaman evaluator does not yet do
 
 **Raised:** M12-D (2026-10-31).
@@ -41,8 +75,9 @@ current total (5,748,495 bytes), with what each row buys.
   (`src/findings/authority.ts` knows only ROTATION). Until then the
   unregistered-tree exceptions in `m11a2-cross-spec-isolation` and
   `m10a-cross-spec-isolation` stand.
-- **No plan input.** Assignment evaluation runs only on a plan a caller
-  constructs. The input format and transport are M12-E (owner decision).
+- **No plan input.** Superseded by M12-E: the evaluator consumes the shared
+  normalized `RaidCooldownPlan`, which a request can supply. It still runs
+  only when called directly, because it is not registered.
 - **MISSED, EARLY and LATE are unreachable.** A miss needs positive proof
   the ability was ready in the window. That needs Restoration cooldowns
   pinned the way M10-C5 pins them (`extract-simc-ability-cooldowns.mjs`:

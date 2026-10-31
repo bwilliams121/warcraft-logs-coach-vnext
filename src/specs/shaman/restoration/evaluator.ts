@@ -5,9 +5,19 @@
  * Owner decision (2026-10-31, agent/autopilot-queue.md "M12-D"): Restoration
  * Shaman first, with exactly three decision categories in v1.
  *
- * ASSIGNMENT. Authority is a supplied raid cooldown plan, and nothing else.
+ * ASSIGNMENT. Authority is a supplied raid cooldown plan, and nothing else:
+ * the shared normalized `RaidCooldownPlan` (M12-E), resolved against this
+ * fight by `src/raid-plan/resolve.ts`.
  * - No plan: NO_AUTHORITY_AVAILABLE. Assignments are never inferred from what
- *   other healers did.
+ *   other healers did. A plan for another encounter or difficulty is no
+ *   authority for this fight either: NO_AUTHORITY_AVAILABLE. A plan whose
+ *   binding cannot be established (no reported difficulty) is UNKNOWN.
+ * - Only this player's assignments of its identified healing cooldowns are
+ *   evaluated. Its other assignments (a kick, a CC, an unregistered id) are
+ *   listed as not evaluated, never reinterpreted.
+ * - An assignment whose player cannot be resolved but may be this player, or
+ *   whose planned time cannot be resolved (a phase label with no reviewed
+ *   map), is ASSIGNMENT_UNKNOWN with that reason.
  * - A plan entry for this player and one of its identified healing cooldowns:
  *   - ASSIGNMENT_MET when the player's own cast of that ability lies in the
  *     planned window. The cast is the positive actionability evidence.
@@ -36,6 +46,19 @@ import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type { CombatFight } from "../../../engine/normalization/combat-fight.js";
 import type { CastEvent } from "../../../engine/normalization/normalized-events.js";
 import { gateAbsenceClaim, type UnknownReason } from "../../../engine/state/state-result.js";
+import type {
+  PlannedTime,
+  PlanSourceReference,
+  RaidCooldownPlan,
+} from "../../../raid-plan/raid-cooldown-plan.js";
+import {
+  namesMatch,
+  resolveRaidCooldownPlan,
+  type EncounterBinding,
+  type PlannedTimeResolution,
+  type PlayerResolution,
+  type ResolvedAssignment,
+} from "../../../raid-plan/resolve.js";
 import {
   pinnedRestorationShamanHealingCooldowns,
   type RestorationShamanHealingCooldownLoad,
@@ -60,25 +83,15 @@ import {
 /** The span after a cast within which an episode is reported as overlapping. A reporting window, not an effect duration. */
 export const DEFAULT_COOLDOWN_OVERLAP_SPAN_MS = 10_000;
 
-/**
- * One planned cooldown, in the normalized form agent/architecture.md "Raid
- * Cooldown Assignments" sketches (player, ability, planned time, tolerance,
- * source). How a plan is written and supplied is M12-E's owner decision; it
- * maps onto this. Nothing in production supplies one yet.
- */
-export interface PlannedCooldownAssignment {
+/** Which plan entry a result is about, traced back to the supplied plan. */
+export interface AssignmentReference {
   readonly assignmentId: string;
-  readonly actorId: number;
   readonly abilityGameId: number;
-  readonly plannedReportTimeMs: number;
+  readonly plannedTime: PlannedTime;
   /** Either side of the planned time. Stated by the plan, never defaulted here. */
   readonly toleranceMs: number;
-}
-
-export interface RaidCooldownPlan {
-  /** Who authored the plan, verbatim. The authority every assignment verdict cites. */
-  readonly source: string;
-  readonly assignments: readonly PlannedCooldownAssignment[];
+  readonly toleranceSource: "ASSIGNMENT" | "PLAN_DEFAULT";
+  readonly source: PlanSourceReference;
 }
 
 export interface ObservedCooldownCast {
@@ -91,7 +104,10 @@ export interface ObservedCooldownCast {
 
 export type AssignmentUnknownReason =
   | "ASSIGNMENT_INVALID"
-  | "ABILITY_NOT_IDENTIFIED"
+  /** The plan names a player who may be this one, but no unique roster match is established. */
+  | "PLAYER_NOT_RESOLVED"
+  /** The planned time could not be placed in this fight (a phase label with no reviewed map). */
+  | "PLANNED_TIME_UNRESOLVED"
   | "WINDOW_OUTSIDE_FIGHT"
   | "READINESS_NOT_ESTABLISHED"
   /** A completed cast by the player with no ability id lies in the window: it could be this one. */
@@ -101,28 +117,44 @@ export type AssignmentUnknownReason =
 export type AssignmentResult =
   | {
       readonly status: "ASSIGNMENT_MET";
-      readonly assignmentId: string;
+      readonly assignment: AssignmentReference;
       readonly window: { readonly fromReportTimeMs: number; readonly toReportTimeMs: number };
       readonly cast: ObservedCooldownCast;
       readonly actionability: ActionabilityEvidence;
     }
   | {
       readonly status: "ASSIGNMENT_NOT_ACTIONABLE";
-      readonly assignmentId: string;
+      readonly assignment: AssignmentReference;
       readonly window: { readonly fromReportTimeMs: number; readonly toReportTimeMs: number };
       readonly reason: "ENCOUNTER_ENDED_BEFORE_WINDOW";
       readonly fightEndReportTimeMs: number;
     }
   | {
       readonly status: "ASSIGNMENT_UNKNOWN";
-      readonly assignmentId: string;
+      readonly assignment: AssignmentReference;
       readonly reason: AssignmentUnknownReason;
+      /** For PLAYER_NOT_RESOLVED and PLANNED_TIME_UNRESOLVED, the shared resolver's own answer. */
+      readonly resolution:
+        | Extract<PlayerResolution, { state: "UNRESOLVED" }>
+        | Extract<PlannedTimeResolution, { state: "UNRESOLVED" }>
+        | null;
       /** The player's observed casts of the ability nearest the window, as context. Never classified early or late. */
       readonly nearestObservedCasts: {
         readonly before: ObservedCooldownCast | null;
         readonly after: ObservedCooldownCast | null;
       };
     };
+
+export interface PlanAuthority {
+  readonly kind: RaidCooldownPlan["authority"];
+  readonly format: RaidCooldownPlan["source"]["format"];
+  readonly label: string | null;
+}
+
+export interface NotEvaluatedAssignment {
+  readonly assignment: AssignmentReference;
+  readonly reason: "ABILITY_NOT_REGISTERED";
+}
 
 export type AssignmentEvaluation =
   | {
@@ -132,10 +164,29 @@ export type AssignmentEvaluation =
     }
   | {
       readonly category: "ASSIGNMENT";
+      readonly status: "NO_AUTHORITY_AVAILABLE";
+      /** The plan is for another encounter or difficulty: no authority for this fight. */
+      readonly reason: "PLAN_NOT_FOR_THIS_FIGHT";
+      readonly binding: Extract<EncounterBinding, { state: "MISMATCHED" }>;
+    }
+  | {
+      readonly category: "ASSIGNMENT";
+      readonly status: "UNKNOWN";
+      readonly reason: "ENCOUNTER_BINDING_UNKNOWN";
+      readonly binding: Extract<EncounterBinding, { state: "UNKNOWN" }>;
+    }
+  | {
+      readonly category: "ASSIGNMENT";
       readonly status: "EVALUATED";
-      readonly authority: { readonly kind: "RAID_COOLDOWN_PLAN"; readonly source: string };
-      /** One per plan entry naming this player, in plan order. Empty when the plan assigns this player nothing. */
+      readonly authority: PlanAuthority;
+      /**
+       * One per plan entry of an identified healing cooldown that names this
+       * player, or may name it, in plan order. Empty when there is none.
+       */
       readonly results: readonly AssignmentResult[];
+      /** This player's entries of an ability this specialization does not identify. Never evaluated. */
+      readonly notEvaluated: readonly NotEvaluatedAssignment[];
+      /** Entries resolved to another player, or unresolved with no way to be this one. */
       readonly assignmentsForOtherPlayers: number;
     };
 
@@ -239,7 +290,7 @@ export interface RestorationShamanInput {
   readonly fight: CombatFight;
   /** The identity preflight's result for the player under evaluation. */
   readonly identity: FightIdentity;
-  /** The authoritative raid cooldown plan, or `null` when none was supplied. */
+  /** The caller's normalized raid cooldown plan, or `null` when none was supplied. */
   readonly plan: RaidCooldownPlan | null;
   readonly overlapSpanMs?: number;
   /** Test seam: the runtime dataset. */
@@ -286,45 +337,71 @@ function castsOf(fight: CombatFight, subject: number, ids: ReadonlySet<number>):
   return casts.sort((a, b) => a.reportTimeMs - b.reportTimeMs || a.position - b.position);
 }
 
+function referenceOf({ assignment }: ResolvedAssignment): AssignmentReference {
+  return {
+    assignmentId: assignment.assignmentId,
+    abilityGameId: assignment.abilityId,
+    plannedTime: assignment.plannedTime,
+    toleranceMs: assignment.toleranceMs,
+    toleranceSource: assignment.toleranceSource,
+    source: assignment.source,
+  };
+}
+
+type UnknownResult = Extract<AssignmentResult, { status: "ASSIGNMENT_UNKNOWN" }>;
+
+function unresolvedResult(
+  entry: AssignmentReference,
+  reason: "PLAYER_NOT_RESOLVED" | "PLANNED_TIME_UNRESOLVED",
+  resolution: NonNullable<UnknownResult["resolution"]>,
+): AssignmentResult {
+  // No window was placed, so no observed cast is nearer to it than another.
+  return {
+    status: "ASSIGNMENT_UNKNOWN",
+    assignment: entry,
+    reason,
+    resolution,
+    nearestObservedCasts: { before: null, after: null },
+  };
+}
+
 function evaluateAssignment(
   fight: CombatFight,
   subject: number,
-  identified: ReadonlySet<number>,
   casts: readonly ObservedCooldownCast[],
   unidentifiedCastTimes: readonly number[],
-  entry: PlannedCooldownAssignment,
+  entry: AssignmentReference,
+  plannedReportTimeMs: number,
 ): AssignmentResult {
   const ofAbility = casts.filter((cast) => cast.abilityGameId === entry.abilityGameId);
   const unknown = (reason: AssignmentUnknownReason, from: number, to: number): AssignmentResult => ({
     status: "ASSIGNMENT_UNKNOWN",
-    assignmentId: entry.assignmentId,
+    assignment: entry,
     reason,
+    resolution: null,
     nearestObservedCasts: {
       before: [...ofAbility].reverse().find((cast) => cast.reportTimeMs < from) ?? null,
       after: ofAbility.find((cast) => cast.reportTimeMs > to) ?? null,
     },
   });
   if (
-    !Number.isSafeInteger(entry.plannedReportTimeMs) ||
+    !Number.isSafeInteger(plannedReportTimeMs) ||
     !Number.isSafeInteger(entry.toleranceMs) ||
     entry.toleranceMs < 0
   ) {
-    return unknown("ASSIGNMENT_INVALID", entry.plannedReportTimeMs, entry.plannedReportTimeMs);
+    return unknown("ASSIGNMENT_INVALID", plannedReportTimeMs, plannedReportTimeMs);
   }
   const window = {
-    fromReportTimeMs: entry.plannedReportTimeMs - entry.toleranceMs,
-    toReportTimeMs: entry.plannedReportTimeMs + entry.toleranceMs,
+    fromReportTimeMs: plannedReportTimeMs - entry.toleranceMs,
+    toReportTimeMs: plannedReportTimeMs + entry.toleranceMs,
   };
-  if (!identified.has(entry.abilityGameId)) {
-    return unknown("ABILITY_NOT_IDENTIFIED", window.fromReportTimeMs, window.toReportTimeMs);
-  }
   const met = ofAbility.find(
     (cast) => cast.reportTimeMs >= window.fromReportTimeMs && cast.reportTimeMs <= window.toReportTimeMs,
   );
   if (met !== undefined) {
     return {
       status: "ASSIGNMENT_MET",
-      assignmentId: entry.assignmentId,
+      assignment: entry,
       window,
       cast: met,
       actionability: provenActionableByObservedExecution({
@@ -341,7 +418,7 @@ function evaluateAssignment(
       return unknown("WINDOW_OUTSIDE_FIGHT", window.fromReportTimeMs, window.toReportTimeMs);
     return {
       status: "ASSIGNMENT_NOT_ACTIONABLE",
-      assignmentId: entry.assignmentId,
+      assignment: entry,
       window,
       reason: "ENCOUNTER_ENDED_BEFORE_WINDOW",
       fightEndReportTimeMs: endTimeMs,
@@ -430,6 +507,73 @@ function overlapOf(
   });
 }
 
+function evaluatePlan(
+  fight: CombatFight,
+  identity: FightIdentity,
+  plan: RaidCooldownPlan | null,
+  identified: ReadonlySet<number>,
+  casts: readonly ObservedCooldownCast[],
+  unidentifiedCastTimes: readonly number[],
+): AssignmentEvaluation {
+  if (plan === null) {
+    return { category: "ASSIGNMENT", status: "NO_AUTHORITY_AVAILABLE", reason: "NO_RAID_COOLDOWN_PLAN" };
+  }
+  const resolved = resolveRaidCooldownPlan(plan, fight);
+  if (resolved.state === "NOT_BOUND") {
+    const { binding } = resolved;
+    return binding.state === "MISMATCHED"
+      ? {
+          category: "ASSIGNMENT",
+          status: "NO_AUTHORITY_AVAILABLE",
+          reason: "PLAN_NOT_FOR_THIS_FIGHT",
+          binding,
+        }
+      : { category: "ASSIGNMENT", status: "UNKNOWN", reason: "ENCOUNTER_BINDING_UNKNOWN", binding };
+  }
+
+  const subject = identity.player.sourceId;
+  const results: AssignmentResult[] = [];
+  const notEvaluated: NotEvaluatedAssignment[] = [];
+  let assignmentsForOtherPlayers = 0;
+  for (const entry of resolved.assignments) {
+    const { player, time } = entry;
+    const mine = player.state === "RESOLVED" && player.actorId === subject;
+    // Unresolved, but this player is among the name matches, or the name is
+    // the one preflight established for this player (the roster may lack it,
+    // or name it nowhere): it may be this one, whatever the reason.
+    const maybeMine =
+      player.state === "UNRESOLVED" &&
+      (player.candidateActorIds.includes(subject) ||
+        namesMatch(entry.assignment.player.name, identity.player.name));
+    if (!mine && !maybeMine) {
+      assignmentsForOtherPlayers += 1;
+      continue;
+    }
+    const reference = referenceOf(entry);
+    if (!identified.has(entry.assignment.abilityId)) {
+      notEvaluated.push({ assignment: reference, reason: "ABILITY_NOT_REGISTERED" });
+      continue;
+    }
+    if (player.state === "UNRESOLVED") {
+      results.push(unresolvedResult(reference, "PLAYER_NOT_RESOLVED", player));
+    } else if (time.state === "UNRESOLVED") {
+      results.push(unresolvedResult(reference, "PLANNED_TIME_UNRESOLVED", time));
+    } else {
+      results.push(
+        evaluateAssignment(fight, subject, casts, unidentifiedCastTimes, reference, time.plannedReportTimeMs),
+      );
+    }
+  }
+  return {
+    category: "ASSIGNMENT",
+    status: "EVALUATED",
+    authority: { kind: plan.authority, format: plan.source.format, label: plan.source.label },
+    results,
+    notEvaluated,
+    assignmentsForOtherPlayers,
+  };
+}
+
 /** Evaluates one Restoration Shaman in one fight. Pure. */
 export function evaluateRestorationShaman(input: RestorationShamanInput): RestorationShamanEvaluation {
   const revision = RESTORATION_SHAMAN_EVALUATOR_REVISION;
@@ -477,20 +621,7 @@ export function evaluateRestorationShaman(input: RestorationShamanInput): Restor
       ? { state: "UNKNOWN", reason: "UNIDENTIFIED_SUBJECT_CAST", unidentifiedCasts }
       : { state: "COMPLETE" };
 
-  const assignment: AssignmentEvaluation =
-    plan === null
-      ? { category: "ASSIGNMENT", status: "NO_AUTHORITY_AVAILABLE", reason: "NO_RAID_COOLDOWN_PLAN" }
-      : {
-          category: "ASSIGNMENT",
-          status: "EVALUATED",
-          authority: { kind: "RAID_COOLDOWN_PLAN", source: plan.source },
-          results: plan.assignments
-            .filter((entry) => entry.actorId === subject)
-            .map((entry) =>
-              evaluateAssignment(fight, subject, identified, casts, unidentifiedCastTimes, entry),
-            ),
-          assignmentsForOtherPlayers: plan.assignments.filter((entry) => entry.actorId !== subject).length,
-        };
+  const assignment = evaluatePlan(fight, identity, plan, identified, casts, unidentifiedCastTimes);
 
   return {
     revision,

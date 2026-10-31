@@ -138,11 +138,13 @@ This is the only public change, so `publicContract` is `EXPECTED`.
 ### M12-D: First healer specialization evaluator
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M12-C
 branch: autopilot/m12-d
 wcl: NONE
 publicContract: NONE
+pr: 20
+mergeSha: 8a6cff50e001884550aa424dcd903986ddbc6efa
 ```
 
 **Direction.** Healer verdicts belong to `src/specs/<class>/<spec>/`
@@ -203,16 +205,126 @@ goes into generic `src/healing/`.
 ### M12-E: Raid cooldown assignment input
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
+status: PR_OPEN
 dependsOn: M12-C
+branch: autopilot/m12-e
 wcl: NONE
 publicContract: EXPECTED
-ownerDecision: What an authoritative raid cooldown plan looks like as input (format, how it is supplied, and how a player and planned time are named). Without a plan, assignment analysis stays NO_AUTHORITY_AVAILABLE.
 ```
 
 **Direction.** CLAUDE.md "Healer Cooldown Assignments" and
 `agent/architecture.md` "Raid Cooldown Assignments" define the evaluation
-outcomes. Neither defines the plan's input format or transport.
+outcomes. The owner decision below defines the plan input.
+
+**OWNER DECISION (2026-10-31): the authoritative raid cooldown plan is an
+EXPLICIT USER-PROVIDED INPUT.**
+
+- The analyzer never infers a raid cooldown assignment from Warcraft Logs,
+  other healers, comparison players or observed cooldown timing.
+- If no plan is supplied, ASSIGNMENT is NO_AUTHORITY_AVAILABLE.
+
+1. **Canonical plan model.** The authority is a normalized, structured
+   `RaidCooldownPlan`.
+   - Fields: schema/revision, encounter, source, tolerance policy and
+     `assignments[]`.
+   - Each assignment has: player, `abilityId`, `plannedTime`, `toleranceMs`,
+     and a source evidence reference.
+   - Specialization evaluators consume the normalized plan, never arbitrary
+     prose.
+2. **How it is supplied.** For v1, an optional `raidCooldownPlan` on the
+   fight-analysis request.
+   - REST and MCP feed the same application-service input with the same plan
+     semantics. There is no separate gameplay logic in REST, MCP or a future
+     UI.
+   - M12-E does not persist a guild or raid plan globally. A caller may
+     resupply the same encounter plan for several pulls; storing and reusing
+     plans in a UI is out of scope.
+3. **Real raid-note import.** Support an import and normalization boundary
+   for the semicolon timeline-note format of the owner's Mythic Coiled Altar
+   example (`time:3;ph:2;tag:Jymblu;spellid:98008;`,
+   `time:34;ph:2.5;tag:Jymblu;spellid:98008;`).
+   - The importer produces the normalized plan. Evaluators never consume the
+     raw text, which is source evidence.
+   - Notes contain unrelated material: raid reminders, `tag:everyone`,
+     text/display instructions, orb, CC, interrupt, external and group-soak
+     assignments, and non-healer abilities. A line carrying a `spellid` is
+     NOT automatically a healer cooldown assignment.
+   - Only normalized assignments matching a specialization's registered
+     cooldown identities are evaluated by that specialization.
+   - Unrecognized lines may be kept as import diagnostics or source evidence,
+     but never silently become gameplay assignments.
+4. **Encounter identity.** A plan is bound to at least `encounterId` and
+   `difficulty` (for example 3429, MYTHIC). A plan for another encounter or
+   difficulty is never applied: a mismatch fails closed.
+5. **Player identity.** A character name plus an optional realm.
+   - A name without a realm is valid only when it resolves to exactly one
+     player in the analyzed fight's roster.
+   - Unicode and diacritics are preserved, never stripped. Normal WoW case
+     normalization is acceptable. No fuzzy matching and no guessed aliases.
+   - Zero matches leaves the assignment unresolved. Several matches leaves it
+     unresolved unless the realm or another explicit identifier
+     disambiguates it.
+   - An importer may enrich identity from an explicit name-realm
+     roster/invite list in the source note.
+   - Identity is never derived from class or spec assumptions.
+6. **Ability identity.** The numeric spell or ability ID (for example
+   `abilityId: 98008`).
+   - The specialization evaluator resolves it against its own reviewed
+     runtime-data cooldown identities.
+   - Display-name string matching is never gameplay authority.
+   - Unknown or unregistered IDs are never silently reinterpreted.
+7. **Planned time.** The primary v1 model is PHASE_RELATIVE:
+   `{ kind: PHASE_RELATIVE, phase: "2", offsetMs: 3000 }`.
+   - `phase` is a STRING, never a float, because real plans use "1", "2",
+     "2.5", "3".
+   - `offsetMs` is relative to the start of that named encounter phase. It
+     converts to report or fight time only when the analyzed fight gives
+     enough evidence to resolve that phase boundary. Otherwise ASSIGNMENT is
+     UNKNOWN; a phase boundary is never guessed.
+   - An explicit `{ kind: FIGHT_RELATIVE, offsetMs }` is also allowed, for
+     plans that genuinely use pull-relative timing. A phase-relative line is
+     never converted to fight-relative timing by assumption.
+8. **Optional boss-event context.** Source fields such as `bossSpell:<id>`
+   are preserved as plan context. In v1 they do NOT replace the
+   phase-relative planned time unless a future reviewed event-anchor model
+   supports that. No boss-event timing semantics are invented.
+9. **Tolerance.** Tolerance is explicit authority input, given per
+   assignment or as a plan-level default the assignments inherit.
+   - There is no hidden analyzer-created tolerance.
+   - If the source format encodes none, the caller must supply the
+     plan-level tolerance.
+   - Source fields such as `countdown` are not tolerance.
+   - Tolerance is never inferred from observed player behavior.
+10. **Source and evidence.** The plan's authority source is
+    `USER_PROVIDED_RAID_PLAN`. Findings must trace back to the supplied plan.
+    For imported notes, keep where practical:
+    - the source format;
+    - the source line or a stable reference, and the raw relevant line;
+    - the normalized player, spell ID and planned time;
+    - the tolerance source;
+    - the plan revision or digest.
+11. **Specialization consumption.** The plan is whole-raid shared input.
+    - Each evaluator consumes only the assignments for its analyzed player and
+      its reviewed cooldown identities. For example, M12-D's Restoration
+      Shaman evaluator consumes that Shaman's assignments for its registered
+      healing cooldown IDs.
+    - The shared plan and input layer contains no `if spec === ...`.
+      Spec-specific interpretation stays in `src/specs/<class>/<spec>/`.
+12. **Authority semantics.** Supplying a plan means "this is the raid's
+    authoritative assignment plan for judging execution", not "this plan is
+    optimal".
+    - A player who follows a supplied assignment is never blamed because
+      another strategy might have been better. Plan quality is a separate
+      concern.
+    - No plan: NO_AUTHORITY_AVAILABLE.
+    - Plan supplied, but the required fight, identity or timing evidence is
+      missing: UNKNOWN.
+    - Plan and evidence sufficient: the specialization evaluator judges
+      execution under its approved verdict semantics.
+13. **Network and evidence.** No new Warcraft Logs request is authorized.
+    M12-E uses synthetic and import fixtures plus already-authorized committed
+    evidence. If it needs new live Warcraft Logs evidence, stop with
+    OWNER_DECISION_REQUIRED.
 
 ### M13-A: Augmentation Foundation
 

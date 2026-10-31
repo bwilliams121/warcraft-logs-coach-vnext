@@ -29,6 +29,7 @@ import type { McpServer } from "@modelcontextprotocol/server";
 
 import { projectAnalysisResult } from "../../contracts/analysis-projection.js";
 import { PublicAnalysisResultSchema } from "../../contracts/analysis-contract.js";
+import { RaidCooldownPlanInputSchema } from "../../contracts/raid-cooldown-plan-input-contract.js";
 import type { AnalysisRunner } from "../../services/analysis-runner.js";
 import { checkAnalysisRateLimit, type RateLimiterPort } from "../../runtime/rate-limit.js";
 import { toolErrorBody, toolErrorForServiceCode, transportToolError } from "../tool-errors.js";
@@ -107,6 +108,13 @@ export function analyzeToolDescription(descriptions: PublicSpecializationDescrip
     "zero use. assessment NOT_ASSESSED means the fight was not retrieved and nothing is claimed about",
     "consumables. These are observed facts only: they do NOT say a consumable should have been used.",
     "",
+    "An optional raidCooldownPlan supplies the raid's own cooldown assignment plan, as structured",
+    "assignments or as a timeline note (time:3;ph:2;tag:Name;spellid:98008;). It is the only authority",
+    "for assignments: none is ever inferred when it is absent. When supplied, the result carries",
+    "raidCooldownPlan with its digest, whether it is bound to this fight's encounter and difficulty,",
+    "and the note lines not imported. Its assignmentEvaluation is always NOT_EVALUATED: this tool does",
+    "NOT say whether any assignment was met, missed, early or late.",
+    "",
     "Partial coverage is expected: most decisions typically resolve to UNKNOWN, and casts whose",
     "execution lane is not established are excluded from the denominator entirely. Read the coverage",
     "disclosure before characterizing the fight, and do not compute a correctness percentage from",
@@ -148,6 +156,7 @@ export const AnalyzeWarcraftLogInputSchema = z.discriminatedUnion("source", [
             "https://www.warcraftlogs.com/reports/<code>#fight=8&source=15 . Select the player on " +
             "Warcraft Logs before copying the URL. fight=last is not supported.",
         ),
+      raidCooldownPlan: RaidCooldownPlanInputSchema.optional(),
     })
     .strict(),
   z
@@ -164,6 +173,7 @@ export const AnalyzeWarcraftLogInputSchema = z.discriminatedUnion("source", [
         .int()
         .nonnegative()
         .describe("Warcraft Logs actor (source) ID of the player to analyze."),
+      raidCooldownPlan: RaidCooldownPlanInputSchema.optional(),
     })
     .strict(),
 ]);
@@ -198,9 +208,12 @@ export interface AnalyzeToolDeps {
  * would be handing the service a key it would rightly reject.
  */
 function toApplicationInput(input: AnalyzeWarcraftLogInput): unknown {
+  // The plan passes through unchanged: the application parser alone decides
+  // what it means, exactly as for a REST body.
+  const plan = input.raidCooldownPlan === undefined ? {} : { raidCooldownPlan: input.raidCooldownPlan };
   return input.source === "url"
-    ? { reportUrl: input.reportUrl }
-    : { reportCode: input.reportCode, fightId: input.fightId, sourceId: input.sourceId };
+    ? { reportUrl: input.reportUrl, ...plan }
+    : { reportCode: input.reportCode, fightId: input.fightId, sourceId: input.sourceId, ...plan };
 }
 
 function errorResult(error: ReturnType<typeof transportToolError>) {

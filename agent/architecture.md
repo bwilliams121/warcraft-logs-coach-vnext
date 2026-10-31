@@ -10377,6 +10377,123 @@ against the raw bytes:
 No regression-corpus fixture is committed (ledger row in
 `agent/follow-ups.md`).
 
+## M12-E — raid cooldown assignment input
+
+**Status:** implemented (2026-10-31). This is the fifth tranche of
+Milestone 12 (autopilot queue entry M12-E). Public contract: EXPECTED.
+
+**Owner decision (2026-10-31).** The authoritative raid cooldown plan is an
+EXPLICIT USER-PROVIDED INPUT. The thirteen points are recorded in
+`agent/autopilot-queue.md` "M12-E". It refines "Raid Cooldown Assignments"
+above: the conceptual `CooldownAssignment` is now the normalized
+`RaidCooldownAssignment`, and `plannedEvent` is kept only as context
+(`bossSpellId`), never as timing.
+
+**The normalized plan** (`src/raid-plan/raid-cooldown-plan.ts`, schema
+`raid-cooldown-plan/1`, authority `USER_PROVIDED_RAID_PLAN`). It is shared,
+whole-raid input with no gameplay meaning.
+
+- `encounter`: `encounterId` and `difficulty`. `difficulty` is the Warcraft
+  Logs fight difficulty id, compared verbatim. The repository has no
+  reviewed difficulty-name authority (M11-F), so "MYTHIC" is never mapped to
+  a number.
+- `source`: format (`STRUCTURED` or `TIMELINE_NOTE`) and an optional label.
+- `tolerance.defaultToleranceMs`: the plan-level default, when supplied.
+- `assignments[]`: `assignmentId`, `player` (name plus optional realm, NFC,
+  diacritics kept), `abilityId`, `plannedTime`, `toleranceMs` with its
+  `toleranceSource` (`ASSIGNMENT` or `PLAN_DEFAULT`), `source` (note line
+  number and raw line, or structured index), and `context.bossSpellId`.
+- `plannedTime` is `PHASE_RELATIVE { phase: string, offsetMs }` or
+  `FIGHT_RELATIVE { offsetMs }`. A phase is a string label, never a number.
+- `importDiagnostics[]`: note lines not imported, with a code and the raw
+  line.
+
+**How it is supplied.** An optional `raidCooldownPlan` on the analysis
+request, in one of two forms, parsed by one application parser
+(`src/services/raid-cooldown-plan-request.ts`) that REST reaches with the
+body and MCP with the tool argument:
+
+- `STRUCTURED`: the assignments themselves. Each must end up with a
+  tolerance, its own or the plan default; none is ever created.
+- `TIMELINE_NOTE`: the note text. `defaultToleranceMs` is required, because
+  the format encodes no tolerance and `countdown` is not one.
+
+Unknown keys are rejected, not ignored. An invalid plan rejects the request
+(`INVALID_REQUEST` with `INVALID_REQUEST_SHAPE` or `REQUEST_LIMIT_EXCEEDED`
+issues); it never becomes "no plan". Nothing is persisted.
+
+**The note importer** (`src/raid-plan/timeline-note-import.ts`). A line
+becomes an assignment only with `time` (seconds, up to three decimals,
+converted without floating point), `ph`, exactly one named player in `tag`,
+and a numeric `spellid`. Everything else is a diagnostic:
+`NOT_A_TIMELINE_LINE`, `NO_SPELL_ID`, `NO_TIME`, `NO_PHASE` (never assumed
+pull-relative), `NO_TAG`, `TAG_NOT_A_PLAYER` (everyone, a role or a group),
+`TAG_NOT_A_SINGLE_PLAYER`, `MALFORMED_FIELD`, `LINE_TOO_LONG`. A line with a
+spell id is still not a healer cooldown: which ids matter is each
+specialization's runtime data.
+
+**Resolution against a fight** (`src/raid-plan/resolve.ts`). Shared and
+fact-only; no `if spec === ...`.
+
+- Binding: encounter id and difficulty must both equal the fight's. A
+  mismatch is `NOT_BOUND` and resolves nothing. A fight with no reported
+  difficulty is UNKNOWN.
+- Player: exactly one roster player (`breadth.friendlyActorsInScope`) with
+  that name, case-insensitive after NFC, diacritics significant; a realm,
+  when given, must equal the roster player's server, case aside. Otherwise
+  unresolved: `ROSTER_NOT_IN_SCOPE` (no FULL_RAID roster),
+  `ROSTER_NAMES_INCOMPLETE` (an unnamed roster player, or a needed server
+  missing), `NO_MATCH` or `AMBIGUOUS`, with the name-matching candidates as
+  context. Never by class or specialization, never fuzzily.
+- Time: `FIGHT_RELATIVE` resolves from the pull. `PHASE_RELATIVE` stays
+  unresolved (`PHASE_LABEL_NOT_MAPPED`): no reviewed map from a plan's phase
+  label to the fight's observed phases exists, so even "1" is not assumed to
+  be Warcraft Logs phase 1.
+
+**Restoration Shaman consumption** (`src/specs/shaman/restoration/`,
+unchanged revision `restoration-shaman-evaluator/1`, still internal). The
+evaluator now takes the normalized plan and resolves it itself.
+
+- No plan: `NO_AUTHORITY_AVAILABLE` / `NO_RAID_COOLDOWN_PLAN`.
+- A plan for another encounter or difficulty: `NO_AUTHORITY_AVAILABLE` /
+  `PLAN_NOT_FOR_THIS_FIGHT`. It is no standard for this fight.
+- An unbindable plan: `UNKNOWN` / `ENCOUNTER_BINDING_UNKNOWN`. There is a
+  standard, but not the evidence to apply it.
+- Bound: authority `{ kind: USER_PROVIDED_RAID_PLAN, format, label }`. The
+  player's entries for an unidentified ability are `notEvaluated`
+  (`ABILITY_NOT_REGISTERED`), never reinterpreted; M12-D's
+  `ABILITY_NOT_IDENTIFIED` UNKNOWN is gone. An entry that may be this
+  player's but is unresolved is `ASSIGNMENT_UNKNOWN` / `PLAYER_NOT_RESOLVED`;
+  an unresolved time is `PLANNED_TIME_UNRESOLVED`; both carry the resolver's
+  answer. Resolved entries keep M12-D's MET / NOT_ACTIONABLE / UNKNOWN rules.
+  Every result carries its `AssignmentReference` (id, ability, planned time,
+  tolerance and its source, source line).
+
+**The public disclosure** (`raidCooldownPlan` on the analysis result,
+`analysis/1`, optional). It is present exactly when the request supplied a
+plan, so every request without one produces the document it did before. It
+carries the authority, schema, format, label, a SHA-256 digest of the
+normalized plan's canonical JSON, the encounter, `encounterBinding`
+(MATCHED, MISMATCHED, UNKNOWN), the assignment count, the import
+diagnostics as a tally, and `assignmentEvaluation: NOT_EVALUATED` with the
+first reason that applies: `PLAN_NOT_FOR_THIS_FIGHT`,
+`ENCOUNTER_BINDING_UNKNOWN` or `NO_PUBLIC_ASSIGNMENT_EVALUATOR`. No public
+analyzer evaluates assignments, so no document can read as "every
+assignment was met". It appears on every status, SPEC_NOT_SUPPORTED
+included.
+
+**Public input.** The MCP tool's input gains an optional `raidCooldownPlan`
+on both forms (`src/contracts/raid-cooldown-plan-input-contract.ts`, shape
+only; the application parser decides meaning), and its description says a
+plan is never inferred and never evaluated here. REST accepts the same field
+in the body.
+
+**Evidence and network.** No Warcraft Logs request. Synthetic and note
+fixtures, plus the committed M12-D evidence: under the committed context's
+roster (`friendlyPlayers`) and master-data name, a pull-relative plan over
+actor 122's real casts gives MET, UNKNOWN and NOT_ACTIONABLE; without the
+roster, the same name is `PLAYER_NOT_RESOLVED`.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

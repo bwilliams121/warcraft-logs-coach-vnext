@@ -4,162 +4,128 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M12-D: First healer specialization evaluator (Restoration Shaman, internal).
-Autopilot queue entry M12-D. Branch `autopilot/m12-d`, from main at 5e6ce70.
+M12-E: Raid cooldown assignment input. Autopilot queue entry M12-E. Branch
+`autopilot/m12-e`, from main at 8a6cff5.
 
 - **Owner decision (2026-10-31)**, recorded in `agent/autopilot-queue.md`
-  "M12-D": Restoration Shaman first; v1 scope ASSIGNMENT (only with a
-  supplied plan), COOLDOWN (observational), HEALING_DECISION
-  (NO_AUTHORITY_AVAILABLE); cooldown identity in that spec's runtime data.
-- Warcraft Logs: none. The new evidence is cut from the already-authorized,
-  locally retained M11-E2 capture (`.probe/m11e2/pages.json`).
-- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/`,
-  `src/mcp/` or `src/services/` changed. The evaluator is not registered.
-- Queue bookkeeping: PREP-5 recorded MERGED (PR #19, 5e6ce70); M12-D set
-  PR_OPEN. M12-C was already recorded.
+  "M12-E" (13 points): the authoritative raid cooldown plan is an EXPLICIT
+  USER-PROVIDED INPUT; no plan means ASSIGNMENT is NO_AUTHORITY_AVAILABLE.
+  The decision text itself is part of this diff (the queue entry moves from
+  OWNER_DECISION_REQUIRED to PR_OPEN).
+- Warcraft Logs: none. Synthetic and note fixtures, plus the committed M12-D
+  evidence.
+- **Public contract: EXPECTED** (declared by the queue). Precisely:
+  1. **Request input (REST body and MCP tool argument):** a new optional
+     `raidCooldownPlan`, either
+     `{ format: "STRUCTURED", encounterId, difficulty, label?, defaultToleranceMs?, assignments: [{ player: { name, realm? }, abilityId, plannedTime: { kind: "PHASE_RELATIVE", phase: string, offsetMs } | { kind: "FIGHT_RELATIVE", offsetMs }, toleranceMs?, bossSpellId? }] }`
+     or `{ format: "TIMELINE_NOTE", encounterId, difficulty, label?, defaultToleranceMs, text }`.
+     An invalid plan is `INVALID_REQUEST` with existing issue codes
+     (`INVALID_REQUEST_SHAPE`, `REQUEST_LIMIT_EXCEEDED`). No new error code.
+  2. **MCP tool:** both `analyze_warcraft_log` input variants gain the
+     optional field (`src/contracts/raid-cooldown-plan-input-contract.ts`,
+     shape only); the description gains one paragraph saying a plan is never
+     inferred and its assignments are NOT_EVALUATED by this tool.
+  3. **Result (`analysis/1`, optional, additive):** `raidCooldownPlan`
+     (`RaidCooldownPlanDisclosureSchema`), present ONLY when a plan was
+     supplied, on every status. Fields: `authority`
+     (`USER_PROVIDED_RAID_PLAN`), `schema` (`raid-cooldown-plan/1`), `format`,
+     `label`, `digest` (SHA-256 hex of the normalized plan's canonical JSON),
+     `encounter`, `encounterBinding` (MATCHED / MISMATCHED / UNKNOWN),
+     `assignmentCount`, `importDiagnostics` (tally), `assignmentEvaluation:
+     { state: NOT_EVALUATED, reason: PLAN_NOT_FOR_THIS_FIGHT |
+     ENCOUNTER_BINDING_UNKNOWN | NO_PUBLIC_ASSIGNMENT_EVALUATOR }`.
+     A request without a plan produces a byte-identical document (no key);
+     the corpus and evidence gates' committed reports are unchanged.
+- Queue bookkeeping: M12-D recorded MERGED (PR #20, 8a6cff5); M12-E PR_OPEN.
+  M12-C and PREP-5 were already recorded MERGED.
 
 ## What it adds
 
-`src/specs/shaman/restoration/evaluator.ts` — `evaluateRestorationShaman`
-(pure, revision `restoration-shaman-evaluator/1`).
+**`src/raid-plan/` (shared input, no gameplay meaning, no spec branch):**
 
-- **Identity first.** The preflight `FightIdentity` must name this report and
-  fight, class "Shaman", specialization "Restoration"; the fight's master
-  data must list the actor as a Shaman player. Otherwise `IDENTITY_REFUSED`
-  (`IDENTITY_MISMATCH` / `NOT_THIS_SPECIALIZATION` / `IDENTITY_UNRESOLVED` /
-  `IDENTITY_CONFLICT`), nothing evaluated. Unusable runtime data:
-  `RUNTIME_DATA_UNAVAILABLE`.
-- **ASSIGNMENT**, authority `RAID_COOLDOWN_PLAN` (the plan's source):
-  - no plan → `NO_AUTHORITY_AVAILABLE` / `NO_RAID_COOLDOWN_PLAN`; never
-    inferred from anyone's casts;
-  - entries are the architecture's normalized CooldownAssignment (player,
-    ability, planned time, plan-stated tolerance, source). The input
-    format/transport stays M12-E's owner decision; nothing in production
-    supplies a plan;
-  - `ASSIGNMENT_MET`: the player's own completed cast of the planned ability
-    inside `[planned − tol, planned + tol]`; the cast is the actionability
-    proof (`provenActionableByObservedExecution`);
-  - `ASSIGNMENT_NOT_ACTIONABLE` (`ENCOUNTER_ENDED_BEFORE_WINDOW`): only a
-    COMPLETED fight whose end precedes the window;
-  - `ASSIGNMENT_UNKNOWN` otherwise: `READINESS_NOT_ESTABLISHED` for no cast in
-    a COMPLETE-covered window (nothing pinned proves readiness, so a miss is
-    unprovable), the CASTS gate's reason for a coverage gap,
-    `WINDOW_OUTSIDE_FIGHT`, `ABILITY_NOT_IDENTIFIED`, `ASSIGNMENT_INVALID`.
-    Nearest observed casts are context only;
-  - MISSED / EARLY / LATE / PLAN_MAY_NEED_REVIEW are deliberately
-    unreachable in v1 (follow-up "After M12-D" says what would unlock them).
-- **COOLDOWN**, `WCL_OBSERVED_FACT`, no verdict:
-  - a use is a completed `cast` sourced by the player of an identified
-    ability — not a begincast, an aura of the same id (real Ascendance: 7
-    applications, 2 casts), another player's cast, or the totem's cast;
-  - listing COMPLETE only under the player's CASTS coverage over the whole
-    fight, else UNKNOWN with the gate's reason;
-  - per use, the M12-B episodes overlapping `[cast, cast + 10 s]` (a
-    reporting span, not an effect duration), with, per player hit, the count
-    of M12-C entries from the player and its WCL-stated pets plus that list's
-    coverage. Counting stated pets is this spec's decision; `src/healing/`
-    still never attributes pets. Without FULL_RAID: `ROSTER_NOT_IN_SCOPE`.
-  - **(review cycle 2)** each overlap now carries `listing`: COMPLETE only
-    when DAMAGE holds for every roster player over `[cast − gapMs, cast +
-    span + gapMs]`, inside the fight, with no ability-less roster hit there
-    (the M12-B episode-coverage rule applied to the span); otherwise UNKNOWN
-    with `beyondFightEdge`, `uncoveredActors` (gate reasons) and
-    `unidentifiedHitsInSpan`. Observed episodes are still listed. New tests:
-    absent DAMAGE, a gap in the span, a gap in the margin before the span
-    (uncertain boundary) with its covered counterpart, an ability-less hit,
-    a span past the fight end, and a COMPLETE empty-list control.
-  - **(review cycle 3)** the cooldown listing is now UNKNOWN
-    (`UNIDENTIFIED_SUBJECT_CAST`, with `unidentifiedCasts`) when a completed
-    cast of the player inside the fight carries no ability id, even under
-    COMPLETE CASTS coverage; known uses are kept. An assignment window
-    holding such a cast resolves `UNIDENTIFIED_SUBJECT_CAST` rather than
-    `READINESS_NOT_ESTABLISHED`. New tests: the listing case, a control where
-    another player's ability-less cast leaves it COMPLETE, and the
-    assignment-window case. The real fight's listing stays COMPLETE (actor
-    122 has no ability-less cast).
-  - **(review cycle 4)** a use (and so MET evidence, and the unidentified
-    casts) must lie inside the encounter, bounds inclusive; the normalizer
-    keeps out-of-range events flagged, and the evaluator now ignores them.
-    New tests: identified casts before the pull and after the kill neither
-    list nor meet an assignment (the post-kill one is NOT_ACTIONABLE), with
-    controls exactly at the start and end that list and meet.
-- **HEALING_DECISION**: always `NO_AUTHORITY_AVAILABLE` /
-  `NO_APPROVED_PER_CAST_HEALER_MODEL`.
-- No confidence field: `m5-boundary-and-vocabulary` bans a confidence
-  vocabulary in `src/specs`; the status carries the evidence grade.
-- `spec.ts` declares `RESTORATION_SHAMAN_REQUIRED_INPUTS` (FULL_RAID, ACTORS,
-  CASTS, DAMAGE, HEALING, ABSORBS). Nothing derives a scope from it until
-  registration (follow-up).
+- `raid-cooldown-plan.ts`: the normalized `RaidCooldownPlan` /
+  `RaidCooldownAssignment` (player name + optional realm, `abilityId`,
+  `plannedTime`, `toleranceMs` + `toleranceSource`, source line/index and raw
+  line, `context.bossSpellId`), import-diagnostic vocabulary, limits.
+- `timeline-note-import.ts`: the semicolon note importer. An assignment needs
+  `time`, `ph`, one named player in `tag`, and `spellid`; everything else is a
+  diagnostic (`everyone`/role/group tags, several names, reminders, text, no
+  `ph` — never assumed pull-relative). `countdown` is not tolerance;
+  `bossSpell` is context only; the caller's `defaultToleranceMs` is the only
+  tolerance. Seconds → ms without floating point.
+- `resolve.ts`: binding (encounter id AND Warcraft Logs difficulty id equal;
+  unreported difficulty → UNKNOWN; mismatch → NOT_BOUND, nothing resolved);
+  player (exactly one `friendlyActorsInScope` player, NFC + case-insensitive,
+  diacritics significant, realm exact; else ROSTER_NOT_IN_SCOPE /
+  ROSTER_NAMES_INCOMPLETE / NO_MATCH / AMBIGUOUS with candidates as
+  context); time (FIGHT_RELATIVE from the pull; PHASE_RELATIVE always
+  `PHASE_LABEL_NOT_MAPPED`: no reviewed label→phase map exists, a boundary is
+  never guessed).
+- `digest.ts`: local canonical JSON + WebCrypto SHA-256 (no analysis path may
+  import `src/simulation`).
 
-## Runtime data
+**Application service:** `parseAnalysisRequest` parses the plan beside
+either identifier form (one parser for REST and MCP); preflight still gets
+identifiers only; `discloseRaidCooldownPlan` (binding from the preflight
+identity) is attached to every success result, including SPEC_NOT_SUPPORTED.
+No analyzer reads the plan.
 
-`src/data/game/shaman-restoration-healing-cooldowns.{json,ts}`: identity only
-— Spirit Link Totem 98008, Ascendance 114052, Healing Tide Totem 108280
-(Ascendance/HTT share choice node 81032).
+**Restoration Shaman (still internal, unregistered):** consumes the normalized
+plan and resolves it itself. No plan → NO_AUTHORITY_AVAILABLE; plan for
+another encounter/difficulty → NO_AUTHORITY_AVAILABLE
+(`PLAN_NOT_FOR_THIS_FIGHT`); unbindable → UNKNOWN
+(`ENCOUNTER_BINDING_UNKNOWN`). Only this player's entries for its registered
+healing-cooldown ids are evaluated; its other entries are `notEvaluated`
+(`ABILITY_NOT_REGISTERED`, replacing M12-D's `ABILITY_NOT_IDENTIFIED`
+UNKNOWN). An unresolved name that may be this player (the subject is a
+name-matching candidate, or the name equals the preflight identity's name,
+whatever the resolver's reason — including a roster that names the subject
+nowhere) → `PLAYER_NOT_RESOLVED`, never counted as another player's;
+unresolved time → `PLANNED_TIME_UNRESOLVED`. Every result carries an
+`AssignmentReference` back to the plan entry. M12-D's MET / NOT_ACTIONABLE /
+UNKNOWN rules are unchanged; MISSED/EARLY/LATE remain unreachable.
 
-- Each entry carries its verbatim `trait_data.inc` row from the pinned SimC
-  commit 33622e9d (client 12.1.0.69587); the four source-file hashes equal
-  those already recorded for that commit in the Blood datasets. I checked
-  each row verbatim against the local pinned checkout.
-- The loader re-parses each row (tree 2, class 7, entry, node, spell, name,
-  spec 264) and the choice-sibling coherence, failing closed.
-- No cooldown, charge or duration is claimed; the selection of healing
-  cooldowns is hand-reviewed per entry.
+## Fail-closed points worth checking
 
-## Guard amendments (each by name, nothing loosened beyond it)
+- UNKNOWN vs NO_AUTHORITY_AVAILABLE: a plan for another fight is "no
+  standard for this fight" (NO_AUTHORITY); an unbindable plan is "a standard
+  without the evidence to apply it" (UNKNOWN).
+- No guessed phase boundary, difficulty name, realm spelling, alias or
+  tolerance; a phase is never numeric.
+- An invalid plan never degrades to "no plan".
+- A supplied plan can never read as "assignments met": the public disclosure
+  is always NOT_EVALUATED.
 
-- `m12a-healing-layering`: "nothing in production reads it yet" becomes
-  "only the named consumers read it", naming exactly
-  `src/specs/shaman/restoration/evaluator.ts`.
-- `m11a2-cross-spec-isolation`: `UNREGISTERED_EVALUATOR_TREES =
-  ["shaman/restoration"]`. R1/R3/R4/R5 apply to it unchanged; only the
-  registration rules (registration.ts present, trees == SpecIds, R2's
-  importer list, one APL per tree) exclude it, and it is pinned to have no
-  registration.ts and no SpecId.
-- `m10a-cross-spec-isolation`: the tree list includes it; pinned to have no
-  registration.
-- `m5c1-gcd-semantics` "no negative ACTIONABILITY state": the exact literal
-  `"ASSIGNMENT_NOT_ACTIONABLE"` is admitted in that one file only, which must
-  also carry `reason: "ENCOUNTER_ENDED_BEFORE_WINDOW"` and
-  `fightEndReportTimeMs`. It is the outcome named in architecture "Raid
-  Cooldown Assignments", not an actionability member (the two-member
-  vocabulary in `src/findings/actionability.ts` is unchanged).
-  `PROVEN_NOT_ACTIONABLE` stays banned everywhere.
+## Tests and validation
 
-## Evidence
+New: `tests/unit/raid-plan/timeline-note-import.test.ts`,
+`tests/unit/raid-plan/resolve.test.ts`,
+`tests/unit/raid-cooldown-plan-request.test.ts`,
+`tests/contracts/m12e-raid-cooldown-plan-input.test.ts`,
+`tests/integration/m12e-raid-cooldown-plan-transports.test.ts`. Updated:
+`tests/unit/specs/restoration-shaman-evaluator.test.ts` (normalized plan,
+binding, resolution, real evidence under the committed roster),
+Review cycle 1 fix: the subject with a null roster name and a plan entry
+naming it (preflight name) is now `PLAYER_NOT_RESOLVED` with
+`assignmentsForOtherPlayers: 0` (regression added).
+`tests/contracts/m6a-mcp-layering.test.ts` (allowlists the input-contract
+module), `tests/unit/analysis-request.test.ts` (request keys now include
+`raidCooldownPlan: null`; still no scope).
 
-Two `--actor-slice 122 --families cast,begincast --compact` segments of the
-M11-E2 capture (whole fight, 209 + 192 events, 119,216 bytes), archive only,
-granting CASTS for actor 122. Two normalization-census archive cases.
-`build-manifest.mjs`, `tests/evidence/manifest.json` and `report.json`
-regenerated; m11c4e pins updated (14 cases / 36 assertions; 18,158,195
-bytes). Corpus bytes unchanged; ledger row added.
+- `npm run typecheck`: clean. `npm run format:check`: clean.
+- `npm test`: 10,708 passed; 14 failed, all 5 s timeouts in pre-existing
+  slow tests (simulation runner service, Protection projections, corpus
+  harness). The same set fails identically on an origin/main worktree on
+  this machine under the same load; each touched M12-E test passes.
+- `npm run test:corpus`: PASSED (183 cases / 778 assertions, committed
+  report matches). `npm run test:evidence`: PASSED (14 / 36).
 
-The real test composes the segments through the sanctioned `bundleOf` with
-the committed fight context as catalog (the m9a corpus-layering rule), takes
-the encounter bounds from that context, and asserts, against values derived
-from the raw bytes: four healing-cooldown casts (Ascendance 7,469,039 and
-7,666,386; SLT 7,543,726 and 7,776,617), listing COMPLETE, sources 122 + 7
-stated pets, overlap `ROSTER_NOT_IN_SCOPE`, both NO_AUTHORITY results, and a
-test plan giving MET / READINESS_NOT_ESTABLISHED / NOT_ACTIONABLE.
+## Docs
 
-## Validation
+`agent/architecture.md` "M12-E"; `agent/follow-ups.md` "After M12-E" (phase
+label map, public assignment evaluation, difficulty names, realm spelling,
+note roster enrichment, multi-name tags, bossSpell anchors, persistence) and
+M12-D's "No plan input" bullet superseded; `agent/testing.md`;
+`src/specs/shaman/restoration/README.md`.
 
-- `tests/unit/specs/restoration-shaman-evaluator.test.ts`: 37 passed.
-- Amended guards + m9a + m5 boundary: 2,257 passed.
-- `npm run typecheck`, `npm run format:check`: clean.
-- `npm run test:evidence`: PASSED (byte-identical workerd reports, committed
-  report matches). `npm run test:corpus`: PASSED (183 cases / 778
-  assertions).
-- `npm test`: 10,617 passed, 13 failed — all "Test timed out in 5000ms" in
-  Protection/Retribution projection, raid-night, encounter-context and
-  simulation-runner files this tranche does not touch. The same 10 files
-  rerun with `--testTimeout=120000`: 146/146 passed. CI is the arbiter.
-
-## Questions for the reviewer
-
-1. Is defining the normalized assignment input locally in the spec tree
-   (pending M12-E's format/transport decision) acceptable, versus leaving
-   ASSIGNMENT permanently NO_AUTHORITY_AVAILABLE until M12-E?
-2. Are the four named guard amendments the right shape for the first
-   unregistered evaluator tree?
+🤖 Generated with [Claude Code](https://claude.com/claude-code)

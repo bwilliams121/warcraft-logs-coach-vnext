@@ -43,7 +43,12 @@ import type {
   ConsumableUnknownReason,
   ConsumableUse,
 } from "../analysis/preparation/consumable-status.js";
-import { assertNever, type FightAnalysis, type PreparationOutcome } from "../services/result.js";
+import {
+  assertNever,
+  type FightAnalysis,
+  type PreparationOutcome,
+  type RaidCooldownPlanDisclosure,
+} from "../services/result.js";
 import {
   CAPABILITY,
   PUBLIC_ANALYSIS_SCHEMA_VERSION,
@@ -204,6 +209,25 @@ function projectIdentity(analysis: FightAnalysis): PublicIdentity {
   };
 }
 
+/** The supplied plan's disclosure, field for field (M12-E). */
+function projectRaidCooldownPlan(plan: RaidCooldownPlanDisclosure) {
+  return {
+    authority: plan.authority,
+    schema: plan.schema,
+    format: plan.format,
+    label: plan.label,
+    digest: plan.digest,
+    encounter: { encounterId: plan.encounter.encounterId, difficulty: plan.encounter.difficulty },
+    encounterBinding: plan.encounterBinding,
+    assignmentCount: plan.assignmentCount,
+    importDiagnostics: plan.importDiagnostics.map((row) => ({ key: row.code, count: row.count })),
+    assignmentEvaluation: {
+      state: plan.assignmentEvaluation.state,
+      reason: plan.assignmentEvaluation.reason,
+    },
+  } as const;
+}
+
 /**
  * Common fields, identical across every status.
  *
@@ -227,6 +251,10 @@ function projectCommon(analysis: FightAnalysis) {
     analyzerId: analysis.analyzerId,
     // Specialization-independent, on every status (PREP-2).
     preparation: projectPreparation(analysis.preparation),
+    // Only when a plan was supplied: a request without one projects unchanged.
+    ...(analysis.raidCooldownPlan === undefined
+      ? {}
+      : { raidCooldownPlan: projectRaidCooldownPlan(analysis.raidCooldownPlan) }),
     // `analysis.scope` is NOT projected. It is ingestion orchestration — which
     // evidence to fetch — and publishing it would let a retrieval setting be
     // read as analysis completeness. The coverage block is what discloses that.

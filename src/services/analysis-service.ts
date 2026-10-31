@@ -54,6 +54,10 @@ import {
   type FightAnalysis,
   type ServiceErrorCode,
 } from "./result.js";
+import {
+  discloseRaidCooldownPlan,
+  type RaidCooldownPlanDisclosure,
+} from "./raid-cooldown-plan-disclosure.js";
 import { resolveSpecIdentity } from "./spec-identity.js";
 
 export { ENABLED_ANALYSIS_REQUIREMENTS } from "./analyzer-registry.js";
@@ -320,6 +324,7 @@ async function unsupportedSpec(
   identity: FightIdentity,
   observedSpecId: string,
   retrieve: (scope: IngestionScope) => ReturnType<CombatIngestionPort>,
+  plan: RaidCooldownPlanDisclosure | null,
 ): Promise<AnalysisServiceResult> {
   const retrieval = await preparationAlone(identity, retrieve);
   const analysis: FightAnalysis = {
@@ -330,8 +335,16 @@ async function unsupportedSpec(
     analysis: specNotSupported(observedSpecId),
     observedDecisions: null,
     preparation: retrieval.preparation,
+    ...withPlan(plan),
   };
   return { ok: true, state: resultStateFor(analysis), analysis };
+}
+
+/** The plan disclosure, present exactly when the request supplied a plan. */
+function withPlan(plan: RaidCooldownPlanDisclosure | null): {
+  raidCooldownPlan?: RaidCooldownPlanDisclosure;
+} {
+  return plan === null ? {} : { raidCooldownPlan: plan };
 }
 
 /** The ingestion request for preparation alone, from the producer's own declared requirement. */
@@ -432,13 +445,30 @@ export async function analyzeFight(
     return serviceFailure("INTERNAL_ERROR", describeCatalogDefects(catalog.defects));
   }
 
-  const preflight = await deps.preflight(parsed.request, config.config.wcl);
+  // Preflight is handed the identifiers only: the plan is not Warcraft Logs input.
+  const preflight = await deps.preflight(
+    {
+      reportCode: parsed.request.reportCode,
+      fightId: parsed.request.fightId,
+      sourceId: parsed.request.sourceId,
+    },
+    config.config.wcl,
+  );
   if (!preflight.ok) {
     const { code, message } = describePreflightFailure(preflight.failure.reason);
     return serviceFailure(code, message);
   }
 
   const identity = preflight.identity;
+
+  // ---- the caller's raid cooldown plan, disclosed on every result (M12-E) ----
+  //
+  // Input facts only: what was received and whether it binds to this fight.
+  // No registered analyzer consumes a plan, so nothing here evaluates one.
+  const planDisclosure =
+    parsed.request.raidCooldownPlan === null
+      ? null
+      : await discloseRaidCooldownPlan(parsed.request.raidCooldownPlan, identity);
 
   // ---- specialization identity, resolved before any evidence is retrieved ----
   //
@@ -473,7 +503,7 @@ export async function analyzeFight(
       );
     }
     const { className, specName } = resolved.observed;
-    return unsupportedSpec(identity, `${className}/${specName}`, retrievePreparationAlone);
+    return unsupportedSpec(identity, `${className}/${specName}`, retrievePreparationAlone, planDisclosure);
   }
 
   // PUBLIC lookup only. An internal-only registration for this specialization
@@ -484,7 +514,7 @@ export async function analyzeFight(
   // evaluated.
   const analyzer = analyzerForSpec(resolved.specId, catalog.catalog);
   if (analyzer === null) {
-    return unsupportedSpec(identity, resolved.specId, retrievePreparationAlone);
+    return unsupportedSpec(identity, resolved.specId, retrievePreparationAlone, planDisclosure);
   }
 
   // ---- evidence breadth, from THE SELECTED ANALYZER AND NOTHING ELSE ----
@@ -599,6 +629,7 @@ export async function analyzeFight(
     observedDecisions:
       analysis.status === "ANALYZED" ? observedDecisionViewOf(catalog.catalog, analysis) : null,
     preparation: { state: "ASSESSED", report: preparation },
+    ...withPlan(planDisclosure),
   };
 
   return { ok: true, state: resultStateFor(fightAnalysis), analysis: fightAnalysis };

@@ -8,9 +8,15 @@
  *
  * There is deliberately no ingestion-scope field. Callers do not select scope —
  * see `ingestion-scope.ts`.
+ *
+ * `raidCooldownPlan` (M12-E) is optional, beside either form. It is the
+ * caller's explicit raid cooldown plan, parsed and normalized by
+ * `raid-cooldown-plan-request.ts`; absent means no plan was supplied.
  */
 
+import type { RaidCooldownPlan } from "../raid-plan/raid-cooldown-plan.js";
 import { parseReportUrl } from "../wcl/report-url.js";
+import { parseRaidCooldownPlanField, RAID_COOLDOWN_PLAN_FIELD } from "./raid-cooldown-plan-request.js";
 import type { RequestIssue } from "./result.js";
 
 export interface AnalysisRequestInput {
@@ -24,10 +30,19 @@ export interface AnalysisRequest {
   readonly reportCode: string;
   readonly fightId: number;
   readonly sourceId: number;
+  /** The caller's normalized raid cooldown plan, or `null` when none was supplied. */
+  readonly raidCooldownPlan: RaidCooldownPlan | null;
 }
+
+/** The fight and player identifiers alone. */
+type RequestIdentifiers = Omit<AnalysisRequest, "raidCooldownPlan">;
 
 export type AnalysisRequestParseResult =
   | { readonly ok: true; readonly request: AnalysisRequest }
+  | { readonly ok: false; readonly issues: readonly RequestIssue[] };
+
+type IdentifiersParseResult =
+  | { readonly ok: true; readonly request: RequestIdentifiers }
   | { readonly ok: false; readonly issues: readonly RequestIssue[] };
 
 /** Field names that would let a caller influence ingestion scope. Rejected outright. */
@@ -72,9 +87,22 @@ function validateId(
  *
  * Accepts either a Warcraft Logs URL or the explicit identifier triple, never a
  * mixture: a conflicting request is rejected rather than resolved by a silent
- * precedence rule the caller cannot see.
+ * precedence rule the caller cannot see. An invalid `raidCooldownPlan` rejects
+ * the request; it is never dropped to "no plan".
  */
 export function parseAnalysisRequest(input: unknown): AnalysisRequestParseResult {
+  const identifiers = parseIdentifiers(input);
+  const plan = isRecord(input)
+    ? parseRaidCooldownPlanField(input[RAID_COOLDOWN_PLAN_FIELD])
+    : ({ ok: true, plan: null } as const);
+  if (!identifiers.ok) {
+    return { ok: false, issues: plan.ok ? identifiers.issues : [...identifiers.issues, ...plan.issues] };
+  }
+  if (!plan.ok) return { ok: false, issues: plan.issues };
+  return { ok: true, request: { ...identifiers.request, raidCooldownPlan: plan.plan } };
+}
+
+function parseIdentifiers(input: unknown): IdentifiersParseResult {
   if (!isRecord(input)) {
     return {
       ok: false,

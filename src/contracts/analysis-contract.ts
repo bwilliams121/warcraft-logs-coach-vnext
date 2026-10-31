@@ -596,6 +596,68 @@ export const PreparationSchema = z.discriminatedUnion("assessment", [
 ]);
 
 // ---------------------------------------------------------------------------
+// Raid cooldown plan input disclosure (M12-E)
+// ---------------------------------------------------------------------------
+
+/** Why a supplied note line was not imported as an assignment. */
+export const PUBLIC_PLAN_IMPORT_DIAGNOSTIC_CODES = [
+  "NOT_A_TIMELINE_LINE",
+  "NO_SPELL_ID",
+  "NO_TIME",
+  "NO_PHASE",
+  "NO_TAG",
+  "TAG_NOT_A_PLAYER",
+  "TAG_NOT_A_SINGLE_PLAYER",
+  "MALFORMED_FIELD",
+  "LINE_TOO_LONG",
+] as const;
+
+/** Why the plan's assignments were not evaluated. */
+export const PUBLIC_PLAN_NOT_EVALUATED_REASONS = [
+  "PLAN_NOT_FOR_THIS_FIGHT",
+  "ENCOUNTER_BINDING_UNKNOWN",
+  "NO_PUBLIC_ASSIGNMENT_EVALUATOR",
+] as const;
+
+/**
+ * What the service received as the caller's raid cooldown plan. Present
+ * exactly when the request supplied `raidCooldownPlan`.
+ *
+ * INPUT FACTS, NOT A VERDICT. The plan is the caller's authority for judging
+ * assignment execution (`USER_PROVIDED_RAID_PLAN`), never a claim that it is
+ * optimal, and never inferred. `encounterBinding` compares the plan's
+ * encounter id and Warcraft Logs difficulty id with the analyzed fight's: a
+ * MISMATCHED plan is not applied, and UNKNOWN means the fight reported no
+ * difficulty.
+ *
+ * `assignmentEvaluation` is always NOT_EVALUATED in this schema: no public
+ * analyzer evaluates assignments yet. A supplied plan therefore says nothing
+ * about whether any assignment was met, missed, early or late.
+ */
+export const RaidCooldownPlanDisclosureSchema = z
+  .object({
+    authority: z.literal("USER_PROVIDED_RAID_PLAN"),
+    schema: z.literal("raid-cooldown-plan/1"),
+    format: z.enum(["STRUCTURED", "TIMELINE_NOTE"]),
+    label: z.string().nullable(),
+    /** SHA-256 (hex) of the canonical JSON of the normalized plan. */
+    digest: z.string().regex(/^[0-9a-f]{64}$/),
+    encounter: z
+      .object({ encounterId: z.number().int().positive(), difficulty: z.number().int().nonnegative() })
+      .strict(),
+    encounterBinding: z.enum(["MATCHED", "MISMATCHED", "UNKNOWN"]),
+    assignmentCount: z.number().int().nonnegative(),
+    importDiagnostics: tallyOf(PUBLIC_PLAN_IMPORT_DIAGNOSTIC_CODES),
+    assignmentEvaluation: z
+      .object({
+        state: z.literal("NOT_EVALUATED"),
+        reason: z.enum(PUBLIC_PLAN_NOT_EVALUATED_REASONS),
+      })
+      .strict(),
+  })
+  .strict();
+
+// ---------------------------------------------------------------------------
 // The result
 // ---------------------------------------------------------------------------
 
@@ -612,6 +674,12 @@ const commonFields = {
    * every status.
    */
   preparation: PreparationSchema.optional(),
+  /**
+   * The supplied raid cooldown plan (M12-E). Optional, so adding it is not a
+   * version change; emitted only when the request supplied a plan, so a
+   * request without one produces exactly the document it produced before.
+   */
+  raidCooldownPlan: RaidCooldownPlanDisclosureSchema.optional(),
   // THERE IS DELIBERATELY NO `evidenceScope` HERE.
   //
   // Ingestion scope tells the application which evidence to RETRIEVE. It is not
