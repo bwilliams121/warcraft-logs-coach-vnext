@@ -343,6 +343,26 @@ child environment; the workers pool answers 503 to any outbound fetch, and
 `tests/regression/m9c-corpus-network-isolation.test.ts` proves that path
 fails actionably from inside the harness.
 
+## The normal suite reads no credentials file (TEST-HYGIENE)
+
+`npm test` must not read `.dev.vars`, which on a developer machine holds real
+Warcraft Logs credentials. Wrangler reads `.dev.vars` (or `.env`) from the
+directory of the config file it is given, and the Workers pool passes it only
+a config path. So the `workers` project points at `tests/workers/wrangler.jsonc`,
+a test-only copy of the production config in a directory with no secrets file.
+`tests/contracts/test-hygiene-dev-vars.test.ts` proves four things:
+
+- the pool points at the copy;
+- the copy's normalized settings equal the production config's (only the
+  file's own path differs), so the tests boot the Worker that ships;
+- the copy's directory holds no `.dev.vars*` or `.env*` file;
+- the Miniflare options built from the copy carry only `ENVIRONMENT`.
+
+The run no longer prints `Using secrets defined in .dev.vars`.
+`vitest.probe.config.ts` stays the only config that reads `.dev.vars`, and the
+only thing that can spend Warcraft Logs points. The outbound guard and the
+sentinel bindings are unchanged.
+
 Mutation discipline: when the corpus grows, prove it has teeth by applying a
 real defect to production code, running the gate, recording the failing case
 and its expected/actual, restoring by hand and confirming with `git diff`. A

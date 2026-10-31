@@ -856,7 +856,11 @@ workers   tests/integration, tests/regression  real workerd via Miniflare
 Run one at a time with `npm.cmd run test:unit` or `npm.cmd run test:workers`.
 
 The suite is offline. No test reaches Warcraft Logs, and no test requires real
-credentials — tests that need them construct obvious sentinel values.
+credentials — tests that need them construct obvious sentinel values. Nor does
+it read your `.dev.vars`: the workers project boots from
+`tests/workers/wrangler.jsonc`, a test-only copy of `wrangler.jsonc` in a
+directory with no secrets file. A contract test keeps the two configs equal.
+Change them together.
 
 Offline is enforced, not just intended: Warcraft Logs code takes an injected
 `fetch`, and the workers project blocks all outbound network at the runtime

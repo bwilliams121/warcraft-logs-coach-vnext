@@ -4,110 +4,123 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-PREP-4: real consumable evidence in the regression corpus. Branch
-`preparation-real-evidence`, from main at ceafe5f (PREP-3 merged).
+TEST-HYGIENE: the default offline test suite reads no `.dev.vars`. Branch
+`test-hygiene-dev-vars`, from main at 788248b (PREP-4 merged).
 
-Owner choice: "Real potion-use evidence". The health-potion and healthstone
-paths were proven only on synthetic fights.
+Owner choice: "Test suite hygiene". This resolves the TEST-HYGIENE follow-up
+in `agent/follow-ups.md` (raised at M7-F). The follow-up is explicit about
+scope: it is not an invitation to redesign the test runner, the two-project
+split or the Miniflare bindings, and none of them is changed.
 
-## Review cycle 2: response to CHANGES_REQUIRED (cycle 1)
+## The defect
 
-Finding: no production mutation was shown to be caught by the new cases. Two
-mutations of `src/analysis/preparation/consumable-status.ts` were run through
-the corpus APPLICATION_SERVICE layer
-(`npx vitest run tests/unit/m9b-corpus-harness.test.ts -t APPLICATION_SERVICE`).
-Each is caught by exactly the new case it targets.
-
-- **M1: the pre-pull removal is no longer counted**
-  (`if (false && !openCombatBuffs.has(spellId))`).
-  - FAILED: `application-service.unsupported-mage-reports-a-real-prepull-combat-potion`.
-  - expected `combatPotion {countState: OBSERVED, count: 1, uses:
-    [{spellId: 1236616, timing: BEFORE_PULL}]}`.
-  - actual `combatPotion {countState: OBSERVED, count: 0, uses: []}`.
-- **M2: the short-window guard is removed**
-  (`if (false && durationMs < identities.maxCombatPotionAuraDurationMs)`).
-  - FAILED: `application-service.unsupported-shaman-reports-real-health-potion-and-healthstone`.
-  - expected `combatPotion {countState: UNKNOWN, observedAtLeast: 0,
-    reasonCodes: [FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF], uses: []}`.
-  - actual `combatPotion {countState: OBSERVED, count: 0, uses: []}`: the
-    false zero the guard prevents.
-- **Restore.** Production was restored byte for byte (`git diff --quiet --
-  src` clean), and `npm run test:corpus` PASSED again: 182 cases and 775
-  assertions, two byte-identical workerd runs, report matching.
+- **The cause.** Wrangler's `getVarsForDev` loads `.dev.vars` (or, failing
+  that, `.env`) from the directory of the config file it is given.
+  `@cloudflare/vitest-pool-workers` calls `unstable_getMiniflareWorkerOptions`
+  with only a config path, and no env-file option exists on that path.
+- **The effect.** Pointing the pool at the production `wrangler.jsonc` made
+  every `npm test` read the developer's `.dev.vars`, which holds real Warcraft
+  Logs credentials, and print `Using secrets defined in .dev.vars` once per
+  worker.
+- **Why it was contained.**
+  - The sentinel `miniflare.bindings` override the loaded values.
+  - The outbound guard answers every request locally.
+  - Defence in depth should not depend on those two lines alone.
 
 ## What changed
 
-**No new Warcraft Logs request.** The M11-E2 capture (`b1PmaKrd6CDfzngc`
-fight 48, authorized at M11-E2) is the unfiltered whole-fight All stream, so
-it already holds every raider's real consumable use. An offline scan of it
-found casts of Healthstone, Demonic Healthstone and both Silvermoon potions
-by seven players.
-
-1. **Two SANITIZED_CAPTURE regression-corpus slices** (`sanitize-probe-7`
-   `--actor-slice … --families <casts, ten aura types, combatantinfo>
-   --compact`).
-   - `wcl-b1pm-fight-48-mage-121-prepull-65s`: 1,135 events, the first 65 s.
-     A Light's Potential buff is removed at +28.3 s with no application or
-     cast in the window: a real pre-pull potion. It grants CASTS, AURAS,
-     COMBATANT_INFO and GEAR for actor 121.
-   - `wcl-b1pm-fight-48-shaman-122-health-consumables-20s`: 331 events, 20 s
-     mid-fight. A Healthstone (7,737,881) and a Silvermoon Health Potion
-     (7,739,019). It grants CASTS and AURAS only (no combatantinfo
-     mid-fight).
-2. **`APPLICATION_SERVICE.FIGHT_ANALYSIS`** gains an optional
-   `expected.preparation`: per consumable, the count state, count or lower
-   bound, reason codes, and each use's spell and timing. The executor
-   compares the service's assessed report in that form. NOT_ASSESSED never
-   equals an assessed expectation. Existing cases don't carry it and are
-   unchanged.
-3. **Four cases.**
-   - A normalization census for each slice.
-   - The unsupported Mage: combat potion OBSERVED 1 (BEFORE_PULL), health
-     potion and healthstone OBSERVED 0.
-   - The unsupported Shaman: health potion and healthstone OBSERVED 1
-     (IN_FIGHT, named spells), combat potion UNKNOWN
-     (`FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF`, lower bound 0).
-4. **Pins updated for the additions:**
-   - artifact and case counts (51 and 182), and the gate's case and
-     assertion totals (182 and 775);
-   - the sanitized-capture, actor-slice and coverage-retaining lists;
-   - the source-capture list;
-   - the allowed slicer revisions now include `sanitize-probe-7`, the
-     revision that cut these slices (already used by the evidence archive).
-   - The corpus report is regenerated from execution.
-5. **Docs:** `tests/corpus/README.md` and
-   `agent/{architecture,follow-ups,testing,review-request}.md`.
-
-## Decision made (please assess)
-
-**The owner's 5.5 MiB regression-corpus notice line is respected and NOT
-moved.** The total is 5,706,262 bytes. A whole-fight slice for a third
-subject (actor 16, all three kinds, 452 KB) was cut first. It would have
-crossed the line (the storage test failed), so it was discarded and replaced
-by actor 122's 20 s window.
+- **`tests/workers/wrangler.jsonc` (new).** A test-only copy of the production
+  config, in a directory holding no secrets file. Only the two
+  repository-relative paths (`$schema`, `main`) are rebased.
+- **`vitest.config.ts`.** The workers project's `configPath` now points at the
+  copy, with a comment saying why. Nothing else in the file changed: the
+  sentinel bindings, `outboundService` and `remoteBindings: false` are as
+  before.
+- **`tests/contracts/test-hygiene-dev-vars.test.ts` (new, node project).**
+  It asserts four things:
+  1. `vitest.config.ts` has exactly one `configPath`, and it is the copy.
+  2. `unstable_readConfig` of both files is deep-equal once `configPath` and
+     `userConfigPath` are removed. So `main` resolves to the same
+     `src/api/worker.ts`, and the name, compatibility date, vars, limits,
+     ratelimits and observability all match.
+  3. `tests/workers/` holds no file matching `^\.(dev\.vars|env)(\..*)?$`.
+  4. `unstable_getMiniflareWorkerOptions(copy)` carries binding keys
+     `["ENVIRONMENT"]` and nothing else. This holds whatever the repository
+     root holds.
+- **Docs.**
+  - `agent/follow-ups.md`: TEST-HYGIENE is marked resolved, with the shape
+    chosen; the original record is kept.
+  - `agent/testing.md`: new section.
+  - `agent/architecture.md`: short TEST-HYGIENE section.
+  - `README.md`: the Verify section says the suite reads no `.dev.vars` and
+    that the two configs must be changed together.
 
 ## Validation
 
-- **Corpus gate** (`npm run test:corpus -- --write-report`, then
-  `npm run test:corpus`): PASSED. 182 cases and 775 assertions under
-  workerd; two separate runs are byte-identical, and the committed report
-  matches the execution.
-- **Corpus unit tests:** manifest and coverage report 43/43, including the
-  storage-ceiling test, under the 5.5 MiB line.
-- **Checks:** typecheck clean; prettier clean; `git diff --check` clean.
-- **Full suite** (`npm test -- --maxWorkers=1 --testTimeout=30000`): 348
-  files, 10,069 tests, all pass (1,074 s).
+- **Mutation proofs.** Each mutation was applied, run against the contract
+  test and restored by hand; `git status` and `git diff` confirm the
+  restoration.
+  - A fake `.dev.vars` (`WCL_CLIENT_ID=fake-mutation-sentinel`) beside the
+    copy: assertions 3 and 4 fail.
+  - The pool pointed back at `./wrangler.jsonc`: assertion 1 fails.
+  - `cpu_ms` changed in the copy: assertion 2 fails.
+- **The output claim, A/B on the same four workers files.**
+  - With the new pointer: `Using secrets defined in .dev.vars` printed 0 times.
+  - With main's `vitest.config.ts` (stashed): it printed 4 times.
+- **Binding check, run directly.** The Miniflare options from the copy give
+  `ENVIRONMENT` only. From the production config on this machine they give
+  `ENVIRONMENT,WCL_CLIENT_ID,WCL_CLIENT_SECRET,ANALYSIS_AUTH_TOKEN`.
+- **Static checks.** `npm run typecheck` is clean.
+- **Contract test.** 4/4 pass.
+- **Workers project.** It boots from the copy and runs: 71/75 files and
+  1188/1195 tests passed.
+  - All 7 failures are 5 s default-timeout overruns under heavy local load.
+  - The same four files were rerun with main's config under the same load,
+    and the same `m8g-encounter-context-composition` test timed out
+    (5.6 s against 5 s), so the overruns are not caused by this change.
+  - Timeouts were not changed.
+- **Full suite.** See the next section.
+
+## Full suite
+
+`npm test` on a heavily loaded machine reported 349 files and 10,074 tests, of
+which 16 tests failed. `Using secrets defined in .dev.vars` printed 0 times.
+
+- **Timeouts (14).** 12 overran the 5 s default and 1 its own 20 s timeout.
+- **Shared-tmpdir races (2).** These are the known `wlc-simc-*` counting
+  races between parallel runner tests: `runner-and-parser` U and
+  `runner-service-queue` W.
+- **Reruns, serially.**
+  - The 10 failing node files plus the new contract test: 11/11 files and
+    161/161 tests passed.
+  - The 3 failing workers files: 38/39 passed. The one failure is the same
+    m8g test, at 5.68 s against its 5 s timeout. It also fails with main's
+    config under the same load (shown above).
+- **The node project is untouched by this change**, apart from the new test.
+- **CI is the authority** for the unloaded run.
 
 ## External / network activity
 
-None. No Warcraft Logs requests. The slices come from a gitignored capture
-already on disk.
+None. No Warcraft Logs request was made, and no credential was read by any
+test or printed anywhere. The binding check above lists key names only.
 
 ## Known limitations
 
-- No single committed slice holds all three kinds for one player over a
-  whole fight. The 5.5 MiB line rules it out in the regression corpus.
+- The copy must be kept equal to the production config by hand. The contract
+  test fails on any drift and names the field.
+- Assertion 4 shows that no secrets file is read from the copy's directory.
+  It relies on wrangler's current loading rule, which the A/B above
+  demonstrates on the installed version.
 
 ## Staged / committed
 
-Nothing is staged or committed.
+Committed after the local review returned APPROVED. The committed files are:
+
+- `vitest.config.ts`
+- `tests/workers/wrangler.jsonc`
+- `tests/contracts/test-hygiene-dev-vars.test.ts`
+- `agent/follow-ups.md`, `agent/testing.md`, `agent/architecture.md`,
+  `agent/review-request.md`
+- `README.md`
+
+`.claude/` and the three local `scripts/probe/*.probe.ts` files stay excluded.

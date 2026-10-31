@@ -1,0 +1,41 @@
+{
+  // TEST-ONLY copy of ../../wrangler.jsonc for the `workers` Vitest project.
+  //
+  // WHY A SEPARATE FILE. Wrangler reads `.dev.vars` from the directory of the
+  // config it is given, and @cloudflare/vitest-pool-workers gives it only a
+  // config path (no env-file option). Pointing the pool at the production
+  // config therefore made every `npm test` read the developer's real
+  // `.dev.vars`, which holds Warcraft Logs credentials. This directory never
+  // holds a `.dev.vars` or `.env` file, so the test pool reads none.
+  //
+  // KEPT IDENTICAL BY TEST. tests/contracts/test-hygiene-dev-vars.test.ts
+  // requires every setting here to equal the production config's, with only
+  // the two repository-relative paths (`$schema`, `main`) rebased to this
+  // directory. Change ../../wrangler.jsonc and this file together.
+  //
+  // The test bindings (sentinel credentials, the offline outbound guard) are
+  // set in vitest.config.ts, never here.
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "warcraft-logs-coach-vnext",
+  "main": "../../src/api/worker.ts",
+  "compatibility_date": "2026-08-22",
+  "observability": {
+    "enabled": true,
+  },
+  "vars": {
+    "ENVIRONMENT": "development",
+  },
+  "limits": {
+    "cpu_ms": 120000,
+  },
+  "ratelimits": [
+    {
+      "name": "ANALYSIS_RATE_LIMITER",
+      "namespace_id": "6401",
+      "simple": {
+        "limit": 10,
+        "period": 60,
+      },
+    },
+  ],
+}

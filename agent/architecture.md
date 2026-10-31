@@ -10010,3 +10010,24 @@ line stands, with the total now 5,706,262 bytes. A whole-fight slice of a
 third subject (452 KB, all three kinds) was cut and discarded because it
 would have crossed the line. That evidence still exists in the gitignored
 capture if the evidence archive is ever the right home for it.
+
+## TEST-HYGIENE — the offline suite reads no credentials file
+
+**Status:** implemented (2026-10-30). Resolves the TEST-HYGIENE follow-up.
+
+The `workers` Vitest project boots the Worker from
+`tests/workers/wrangler.jsonc` rather than the production `wrangler.jsonc`.
+This changes no runtime behaviour, and the deployed config is untouched.
+
+- **Why a copy.** Wrangler loads `.dev.vars` (or `.env`) from the directory of
+  the config it is given. `@cloudflare/vitest-pool-workers` passes only a
+  config path. Pointing it at the production config therefore made every
+  `npm test` read the developer's real Warcraft Logs credentials, even though
+  the sentinel bindings and the outbound guard kept them from being used.
+- **Why it cannot drift.** `tests/contracts/test-hygiene-dev-vars.test.ts`
+  requires the copy's normalized settings (`unstable_readConfig`) to equal the
+  production config's, apart from the file's own path. The relative `$schema`
+  and `main` are rebased, so `main` resolves to the same `src/api/worker.ts`.
+  Change both files together.
+- **Credential loading stays in one place.** `vitest.probe.config.ts` remains
+  the only config that reads `.dev.vars`.
