@@ -85,11 +85,13 @@ mergeSha: d4798ef5378affb50b67f0cc39afe7250bfaf2e0
 ### M12-C: Healer Foundation, healing and absorbs received during damage episodes (internal)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M12-B
 branch: autopilot/m12-c
 wcl: NONE
 publicContract: NONE
+pr: 18
+mergeSha: b27317d6255c4db685ac6fa87b81c34ed0fc9cc8
 ```
 
 **Direction.**
@@ -116,8 +118,9 @@ owner policy (agent/architecture.md "M12-B").
 ### PREP-5: The MCP tool description mentions consumable status
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
+branch: autopilot/prep-5
 wcl: NONE
 publicContract: EXPECTED
 ```

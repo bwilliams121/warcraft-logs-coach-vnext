@@ -10011,6 +10011,34 @@ third subject (452 KB, all three kinds) was cut and discarded because it
 would have crossed the line. That evidence still exists in the gitignored
 capture if the evidence archive is ever the right home for it.
 
+## PREP-5 — the MCP tool descriptions state the consumable status
+
+**Status:** implemented (2026-10-31), autopilot queue entry PREP-5. It
+closes the last open item of the preparation PRODUCT-INTENT GAP.
+
+- **What changed.** One paragraph in each MCP tool description:
+  `analyzeToolDescription` and `raidNightToolDescription`. The outputSchemas
+  already advertised `preparation`. No schema, projection or analysis
+  changed, and the REST surface is untouched.
+- **What the paragraph says.**
+  - The status is always carried: on every single-fight status,
+    SPEC_NOT_SUPPORTED included, and on every present raid-night cell.
+  - It covers health potion, healthstone and combat potion, and it is
+    specialization-independent, not gameplay analysis.
+  - OBSERVED is a complete count. UNKNOWN carries its reasons and
+    `observedAtLeast`, a lower bound and not a count. Zero is reported only
+    under complete coverage.
+  - NOT_ASSESSED claims nothing.
+  - It is an observed fact. It never says a consumable should have been
+    used.
+- **Why it matters.** The description is the only documentation a model
+  reads before interpreting a result. Without it, `observedAtLeast` reads as
+  a count and an absent use reads as a mistake.
+- **Pinned.** `tests/contracts/prep5-tool-description-consumables.test.ts`
+  pins the phrases. It also requires every field and value the paragraph
+  names to exist in that tool's advertised output schema, so the prose
+  cannot drift from the contract.
+
 ## TEST-HYGIENE — the offline suite reads no credentials file
 
 **Status:** implemented (2026-10-30). Resolves the TEST-HYGIENE follow-up.

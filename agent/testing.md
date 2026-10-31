@@ -1914,6 +1914,11 @@ real consumable evidence (PREP-4, corpus APPLICATION_SERVICE.FIGHT_ANALYSIS with
   Shaman 122, 20 s mid-fight                   -> health potion OBSERVED 1 (1234768) and healthstone OBSERVED 1 (6262), IN_FIGHT; combat potion UNKNOWN (FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF, lower bound 0)
   slices                                       -> normalization census each (count, order, every type recognised); grants only what window and families vouch for
   mutations (corpus APPLICATION_SERVICE layer) -> no pre-pull removal counted fails the Mage case (combat potion 0 vs 1 BEFORE_PULL); no short-window guard fails the Shaman case (OBSERVED 0 vs UNKNOWN); restored, gate passes
+
+MCP tool descriptions state the consumable status (PREP-5, tests/contracts/prep5-tool-description-consumables.test.ts):
+  both tools                                   -> always carried (every status incl. SPEC_NOT_SUPPORTED / every present cell); observedAtLeast is a lower bound, NOT a count; zero only under complete coverage; UNKNOWN never zero; NOT_ASSESSED claims nothing; no "should have been used"
+  prose tied to contract                       -> every field/value the paragraph names (preparation, countState, OBSERVED, UNKNOWN, reasons|reasonCodes, observedAtLeast, NOT_ASSESSED) is in that tool's advertised output schema
+  negative                                     -> no consumable judgment phrase (should use, forgot, missed a potion, failed to use, potion score)
 ```
 
 The G3-4 materiality numbers, the stat-revisit fixture
