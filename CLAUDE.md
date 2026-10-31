@@ -2110,6 +2110,29 @@ You may NOT automatically:
 Merging remains owner-controlled unless the owner explicitly changes this
 policy.
 
+**Owner change (2026-10-31): the project autopilot may merge.**
+
+- **Who may merge.** The supervisor `scripts/autopilot/run-project.ps1` may
+  merge a tranche PR, but only when every merge gate in `agent/autopilot.md`
+  is verified:
+  - the local OpenAI review APPROVED the exact committed tree;
+  - required CI checks are green;
+  - no GitHub review requests changes;
+  - no owner decision is pending;
+  - public contract changes match the tranche's declaration;
+  - there was no unauthorized Warcraft Logs activity.
+- **How it merges.** Squash, with the head pinned
+  (`--match-head-commit`), never `--admin`, never bypassing a check.
+- **What stays manual.** A Claude session the supervisor launches never
+  merges, and neither does any agent working outside the supervisor.
+  Production deployment, secret changes and new Warcraft Logs requests stay
+  with the owner.
+
+When the supervisor launches you, end your final message with the
+`AUTOPILOT_RESULT / AUTOPILOT_PR / AUTOPILOT_SHA / AUTOPILOT_DECISION` lines
+its prompt specifies, and stop with `OWNER_DECISION_REQUIRED` (naming the one
+decision) for any stop condition in `agent/autopilot.md`.
+
 ## Local File Exclusions
 
 Never stage, commit or delete these local files unless the owner explicitly

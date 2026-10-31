@@ -35,7 +35,18 @@ $repoRoot = [System.IO.Path]::GetFullPath($repoRoot)
 $outDir = Join-Path $repoRoot ".probe\openai-review"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 $latest = Join-Path $outDir "latest.txt"
+$latestMeta = Join-Path $outDir "latest.meta.json"
 if (Test-Path $latest) { Remove-Item -Force $latest }
+if (Test-Path $latestMeta) { Remove-Item -Force $latestMeta }
+
+# The git tree id of the working tree under review (scripts/review/reviewed-tree.ps1):
+# everything staging would commit, minus the protected local files (CLAUDE.md
+# "Local File Exclusions"). The project autopilot merges only a commit whose
+# tree equals the tree an APPROVED review saw.
+. (Join-Path $PSScriptRoot "reviewed-tree.ps1")
+$reviewExclusions = @(".claude", "scripts/probe/wcl-external-candidate.probe.ts", "scripts/probe/wcl-rankings-schema.probe.ts", "scripts/probe/wcl-rankings-shape.probe.ts")
+$treeBefore = Get-ReviewedTreeId $repoRoot $outDir $reviewExclusions
+$headBefore = "$(& git -C $repoRoot rev-parse HEAD)".Trim()
 
 $codex = Get-Command "codex.cmd" -ErrorAction SilentlyContinue
 if ($null -eq $codex) { $codex = Get-Command "codex" -ErrorAction SilentlyContinue }
@@ -109,9 +120,27 @@ if (Test-Path $latest) {
   Write-Host ""
   Write-Host "===== OpenAI architecture review (.probe/openai-review/latest.txt) ====="
   Write-Host $review
-  if ($review -notmatch '(?m)^\s*VERDICT:\s*(APPROVED|CHANGES_REQUIRED|OWNER_DECISION_REQUIRED)\s*$') {
+  $verdictMatch = [regex]::Match($review, '(?m)^\s*VERDICT:\s*(APPROVED|CHANGES_REQUIRED|OWNER_DECISION_REQUIRED)\s*$')
+  if (-not $verdictMatch.Success) {
     Write-Warning "openai-review: the review has no recognised VERDICT line"
   }
+  # Bind the verdict to what was reviewed. If the working tree changed while
+  # the review ran, no tree id is recorded and no merge can rely on it.
+  $treeAfter = Get-ReviewedTreeId $repoRoot $outDir $reviewExclusions
+  $headAfter = "$(& git -C $repoRoot rev-parse HEAD)".Trim()
+  $stable = ($null -ne $treeBefore) -and ($treeBefore -eq $treeAfter) -and ($headBefore -eq $headAfter)
+  $meta = [ordered]@{
+    verdict = $(if ($verdictMatch.Success) { $verdictMatch.Groups[1].Value } else { "NONE" })
+    reviewedTree = $(if ($stable) { $treeBefore } else { $null })
+    treeStable = $stable
+    head = $headBefore
+    reviewedAt = (Get-Date).ToString("o")
+    codexExitCode = $exitCode
+  }
+  $json = $meta | ConvertTo-Json
+  [System.IO.File]::WriteAllText($latestMeta, $json, (New-Object System.Text.UTF8Encoding $false))
+  Copy-Item -Force $latestMeta (Join-Path $outDir "review-$stamp.meta.json")
+  if (-not $stable) { Write-Warning "openai-review: the working tree changed during the review; no reviewed tree is recorded" }
 }
 else {
   Write-Warning "openai-review: Codex wrote no final message (exit code $exitCode)"
