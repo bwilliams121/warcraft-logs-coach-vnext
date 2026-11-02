@@ -147,6 +147,14 @@ nothing. Ordinary archive growth, pinned in
 `tests/unit/m11c4e-evidence-archive.test.ts`. See
 `m13a-augmentation-capture.md`.
 
+**M13-D evidence.** `wcl-m13d-certification-tables-aug1-fight-1` (62,316
+bytes): Warcraft Logs tables for the same M13-A fight. They are the trusted
+side of the completeness certificates. The artifact grants no category
+coverage. Certified predicate coverage is computed from it and the M13-A
+segments by reviewed code (`src/engine/evidence/filtered-capture-certification.ts`),
+never claimed in the manifest. Ordinary archive growth. See
+`m13d-certification.md`.
+
 ## Execution and promotion
 
 `npm run test:evidence` (`scripts/corpus/gate.mjs --root evidence`) runs four

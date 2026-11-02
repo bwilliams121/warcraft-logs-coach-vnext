@@ -512,16 +512,104 @@ specialization importing another's private runtime data.
 ### M13-D: Complete real coverage for Augmentation support observations
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
+status: PR_OPEN
 dependsOn: M13-C
-wcl: NONE
+branch: autopilot/m13-d
+wcl: OWNER-GRANT: agent/autopilot-queue.md M13-D owner decision (2026-11-02); M13-D only; reviewed completeness certificates for the EXISTING M13-A report, fight and interval only (no other report, fight, Evoker, discovery or ranking query); only the Warcraft Logs table and context requests needed to prove or refuse exact certificates for M13-A's filtered friendly CASTS, its filtered Augmentation support AURA stream, and friendly DEATHS where M13 conclusions consume them; no unfiltered capture, no damage or healing retrieval; at most 15 new Warcraft Logs HTTP requests including revision and context re-checks
 publicContract: NONE
-ownerDecision: How to obtain COMPLETE real coverage for Augmentation support observations, given that M13-A's server-filtered Casts/Buffs/Deaths capture is OBSERVED_ONLY. Either authorize the Warcraft Logs table requests that a reviewed completeness certificate for the filtered streams needs (the existing M11-G2 rule allows a filtered capture a grant only through an exact certificate against a trusted table over the same interval and predicate), or authorize a bounded unfiltered capture of the same fight (which also retrieves damage and healing). Each is a new Warcraft Logs request that the M13-A grant does not cover.
 ```
 
 **Direction.** `agent/follow-ups.md` "After M13-A" (no coverage on the real
 evidence). The autopilot never silently chooses broader Warcraft Logs
 retrieval.
+
+**OWNER DECISION (2026-11-02): the REVIEWED COMPLETENESS-CERTIFICATE path.**
+No unfiltered full-fight capture now. The goal is COMPLETE coverage for the
+existing M13-A filtered Augmentation evidence, certified against trusted
+Warcraft Logs table results under the existing M11-G2 coverage rules.
+
+1. **Subject.** ONLY the exact report and fight that M13-A selected and
+   captured, over its interval.
+   - No other report, fight or Augmentation Evoker.
+   - No ranking or comparison discovery, and no growth of the evidence
+     population.
+2. **Authorized requests.** Only the Warcraft Logs table and context requests
+   needed to decide whether M13-A's filtered streams can receive an exact,
+   reviewed certificate.
+   - The M11-G2 rule is never weakened. A filtered capture earns coverage
+     only when a trusted table proves the same relevant facts over the SAME
+     report, fight, interval, actor or roster scope as applicable, event
+     family, and predicate or filter semantics.
+   - The streams to consider are:
+     - friendly CASTS over the captured interval;
+     - the filtered BUFF/AURA stream for the reviewed Augmentation support
+       abilities;
+     - friendly DEATHS over the same interval, if the M13 support
+       conclusions that consume it need certification.
+   - Request only the table surfaces and metadata needed to prove or refuse
+     those certificates.
+3. **Request bound.** A hard cap of 15 new Warcraft Logs HTTP requests,
+   including any revision or context re-check. Use fewer whenever possible.
+   - The request plan is bounded before execution.
+   - If exact certification cannot be established within 15, stop with
+     OWNER_DECISION_REQUIRED before exceeding the cap.
+4. **No automatic fallback.** If Warcraft Logs exposes no trusted table able
+   to certify a required stream under the exact rule, STOP with
+   OWNER_DECISION_REQUIRED. Never switch to an unfiltered capture. Never
+   treat any of these as completeness proof:
+   - approximate counts;
+   - similar predicates;
+   - apparent agreement;
+   - a table count equal to the event count under a non-equivalent query;
+   - an absence of observed discrepancy;
+   - plausible-looking events;
+   - a belief that the filter is exhaustive.
+5. **Certificate semantics.** A certificate is evidence about COMPLETENESS
+   only, never gameplay authority.
+   - It proves nothing about recipient quality, correct Prescience or Ebon
+     Might targets, correct Breath of Eons timing, or optimal play.
+   - SUPPORT_TARGETING stays NO_AUTHORITY_AVAILABLE without an approved
+     recipient-quality model.
+   - A certificate may only upgrade factual observation coverage where the
+     predicate and interval are proven complete.
+6. **Evidence and provenance.** Anyone must be able to answer "why is this
+   filtered stream considered COMPLETE?" from committed evidence, offline.
+   Record, as appropriate:
+   - the report and fight identity, and the exact interval;
+   - the filtered-event query and predicate;
+   - the trusted table query and predicate, and the table result used;
+   - the event-side result;
+   - the revision identity;
+   - the equality or reconciliation rule;
+   - the certificate outcome, or the refusal reason.
+
+   Certificates are deterministic. Real evidence goes to the evidence
+   archive; only the smallest deterministic fixtures go to regression tests.
+   Evidence is never weakened to fit the regression corpus.
+7. **Network scope.** This grant covers M13-D completeness certification on
+   the existing M13-A fight ONLY. It does not authorize:
+   - an unfiltered capture;
+   - damage or healing retrieval merely because a table exposes it;
+   - more Augmentation subjects;
+   - comparison or ranking queries;
+   - broader M14 evidence acquisition;
+   - simulation work;
+   - production deployment.
+
+   If any of those becomes necessary, stop with OWNER_DECISION_REQUIRED.
+8. **Success condition.** A reviewed, evidence-backed certificate mechanism
+   that truthfully marks the relevant existing M13-A support observations
+   COMPLETE where the exact evidence supports it.
+   - Partial success is acceptable: certify only the proven categories, and
+     keep the rest OBSERVED_ONLY or UNKNOWN as appropriate. Completeness is
+     never all-or-nothing by manufacture.
+   - If a remaining unproven category stops M13-E from proceeding safely,
+     stop with OWNER_DECISION_REQUIRED and state precisely what is missing.
+9. **Autopilot audit.** Record every Warcraft Logs request made under this
+   grant in the tranche's review evidence. The normal supervisor audit
+   remains in force. If the supervisor then stops for confirmation of
+   detected Warcraft Logs activity, the request ledger is preserved for the
+   owner to verify that every request stayed within this grant.
 
 ### M13-E: Augmentation evaluator orchestration and registration (internal)
 
@@ -788,11 +876,13 @@ difference).
 ### M15-D: Advanced report presentation
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M15-B
 branch: autopilot/m15-d
 wcl: NONE
 publicContract: EXPECTED
+pr: 33
+mergeSha: ce6a63e32baf1d0f8da63b11f8ccf6b4de466997
 ```
 
 **Scope.** Richer markdown and JSON report rendering from structured findings:

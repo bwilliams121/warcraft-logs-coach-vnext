@@ -4,175 +4,208 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M15-D: Advanced report presentation. Autopilot queue entry M15-D. Branch
-`autopilot/m15-d`, from main at 0ccf829.
+M13-D: Complete real coverage for Augmentation support observations.
+Autopilot queue entry M13-D. Branch `autopilot/m13-d`, from main at ce6a63e.
 
-- **Direction** (queue entry; architecture "Milestone 15", "M15-A", "M15-B";
-  CLAUDE.md "Reporting", "Reported Coverage", "Findings", "Evidence",
-  "UNKNOWN", "Top Logs Cannot Suppress Findings Merely by Similarity"):
-  richer markdown and JSON report rendering from structured findings,
-  grouped by decision category, each finding with its evidence ("why did it
-  tell me this?") and actionability, suppressions with their machine-readable
-  reasons, and a coverage section. Presentation only: no new findings, no
-  re-evaluation, no Warcraft Logs access.
-- **Warcraft Logs requests: none.** Synthetic views/records, and the
-  committed M11-G2 subject fight through `analyzeFight` with in-memory
-  preflight/ingest doubles.
-- Queue bookkeeping: M15-B (#32, 0ccf829) recorded MERGED; M15-D PR_OPEN.
-  M12-C through M15-A were already recorded MERGED with their PRs and SHAs.
+- **Direction.** Owner decision 2026-11-02 (queue entry M13-D): the
+  REVIEWED COMPLETENESS-CERTIFICATE path for the EXISTING M13-A report,
+  fight and interval only. Certificates are completeness evidence, never
+  gameplay authority. Partial success is acceptable; nothing is certified by
+  approximation.
+- **Public contract: NONE.** No change under `src/contracts/`, `src/api/` or
+  `src/mcp/`.
+- **Queue bookkeeping.** M15-D (#33, ce6a63e) is recorded MERGED, and M13-D
+  is PR_OPEN. M12-C through M15-B were already recorded MERGED with the PRs
+  and SHAs the supervisor listed (verified).
 
-## Public contract change (EXPECTED), precisely
+## Warcraft Logs request ledger (grant: at most 15)
 
-`src/contracts/analysis-contract.ts`, under `warcraft-logs-coach.analysis/1`
-(version unchanged):
+The plan was recorded before any request in `.probe/m13d/certification-plan.md`
+(gitignored), with a worst case of 9. A fetch-level counter refused a 16th
+request. Ledger (`.probe/m13d/ledger.json`):
 
-- New optional common field **`report: ReportSchema.optional()`** on EVERY
-  status (ANALYZED and the four non-analyzed ones). Optional in the schema
-  only, the additive rule used by `preparation`, `diagnosis` and `tldr`; the
-  single-fight service emits it on every status. Raid-night cells: unchanged,
-  no report.
-- `ReportSchema`, discriminated on `assessment`:
-  - `ASSESSED`: `revision: "fight-report/1"`, `assessmentScope: "PARTIAL"`
-    (literal); `coverage` {`gameplay`, `preparation`, `damageDiagnosis`:
-    the TLDR's own shapes, now shared consts; `recordsByDisposition`: exactly
-    7 rows, one per disposition, zero included; `disclosures` ≥ 1 from the
-    TLDR disclosure list}; `categories[]` {`category`, `prioritized[]`,
-    `informational[]`, `carried[]` of `ReportEntrySchema`}; `suppressions[]`
-    {category, `suppressionReason` (one of the 4 named environmental
-    reasons, never null), `reasonCode`, `subjectToken`, `records` > 0};
-    `markdown` (non-empty string); `magnitude: "NOT_USED"`; `findingEffect:
-    {confidence: "NONE", suppression: "NONE"}`.
-  - `NOT_ASSESSED`: `revision` and `reason` (INVALID_REPORT_CONFIG,
-    FINDINGS_NOT_RESTATABLE, FINDINGS_REFUSED, COVERAGE_INCONSISTENT) only.
-- Entry schemas, one per section; each category array admits ONLY its own
-  section's entries (`prioritized: ReportPrioritizedEntrySchema[]`,
-  `informational: ReportInformationalEntrySchema[]`,
-  `carried: ReportCarriedEntrySchema[]`; `ReportEntrySchema` is their union).
-  Common fields: itemKind, producer, authority, actionability, subjectToken,
-  occurrences, first/last fight time, evidence locators.
-  - `PRIORITIZED`: `position` ≥ 1, disposition literal
-    `AUTHORITY_DIVERGENCE`, a divergence standing, `stateEvidence` literal
-    PROVEN, ≥ 1 evidence locator, reasonCode/suppressionReason null.
-  - `INFORMATIONAL`: one variant per disposition (AUTHORITY_CONSISTENT,
-    OBSERVED_FACT), `standing` equal to it, position, reasonCode and
-    suppressionReason null.
-  - `CARRIED`: one variant per disposition (SUPPRESSED, UNKNOWN,
-    NO_AUTHORITY_AVAILABLE, UNSUPPORTED), `standing` equal to it, position
-    null, `reasonCode` required. `suppressionReason` is a named
-    environmental reason for SUPPRESSED and null for every other
-    disposition.
-- New exported vocabularies `PUBLIC_REPORT_NOT_ASSESSED_REASONS`,
-  `PUBLIC_REPORT_DISPOSITIONS`, `PUBLIC_REPORT_STATE_EVIDENCE`,
-  `PUBLIC_REPORT_ACTIONABILITY`, `PUBLIC_REPORT_SUPPRESSION_REASONS`, and
-  `ReportSchema`, `ReportEntrySchema`, `PublicReport`. Each list is declared
-  independently and pinned equal to `src/reporting/` by test.
-- The TLDR schema is byte-for-byte equivalent: its inline gameplay,
-  preparation and damage-diagnosis sub-schemas were only extracted into
-  shared consts (`TldrGameplaySchema`, `TldrPreparationSchema`,
-  `TldrDamageDiagnosisSchema`, not exported).
-- `src/contracts/analysis-projection.ts`: `projectReport`, field by field,
-  via the `FightAnalysis` type (no new import). The TLDR projection's
-  sub-blocks were extracted into helpers that both use; TLDR output is
-  unchanged (its tests pass unmodified).
-- `src/mcp/tools/analyze-warcraft-log.ts`: one description paragraph saying
-  what the report is and is not. Input schema unchanged; the output schema is
-  `PublicAnalysisResultSchema`, so it gains `report`.
-- No `src/api/` change: REST and MCP both call `projectAnalysisResult`.
+| # | Kind | Host / path | Outcome |
+| --- | --- | --- | --- |
+| 1 | TOKEN | www.warcraftlogs.com /oauth/token | OK |
+| 2 | T1_TABLES | www.warcraftlogs.com /api/v2/client | OK |
 
-## What changed internally
+Request 2 was ONE composed query on the M13-A report (real code only in
+gitignored `.probe/m13a/summary.json`). It asked for `revision` (10, the
+same as at the M13-A capture), `fights(fightIDs: [1])` and these tables,
+all over startTime 165857 and endTime 316612:
 
-- `src/reporting/fight-report.ts` (new): `buildFightReport(input, config)`
-  calls `restateFight`, then `reportFindings(records, context, config)`,
-  which runs `prioritizeFindings` and lays out coverage, categories and
-  suppressions. `renderReportMarkdown(body)` is a pure function of the
-  structured body. `fight-report-config/1` holds only the M15-A aggregation
-  config: the report lists every item.
-- `src/reporting/tldr.ts`: `restateFight` (the restatement and coverage
-  consistency check, moved out of `buildFightTldr` unchanged) and
-  `coverageDisclosures` (the disclosure rule minus the TLDR-only
-  `DIVERGENCES_NOT_LISTED`) are extracted and shared. The prose helpers
-  (`plural`, `clock`, `STANDING_SENTENCES`, `consumableText`) are exported.
-  TLDR behavior is unchanged.
-- `src/reporting/restatement.ts`: the preparation adapter's `subjectToken` is
-  the consumable kind (was null), so an entry names its fact. Preparation
-  records have `aggregationKey: null` and are never grouped, so prioritization
-  is unaffected.
-- `src/services/analysis-service.ts`: `presentationOf(input)` builds the TLDR
-  and the report from ONE input on both the analyzed and unsupported paths,
-  so they describe the same restated findings. The diagnosis reading
-  (`tldrDiagnosisOf`) and the M14-F guard are unchanged.
-  `src/services/result.ts`: `FightAnalysis.report?`.
+- `table(Buffs, Friendlies, abilityID X)` for X in 395152, 410089, 395296;
+- `table(Casts, Friendlies, sourceID R)` for the 20 friendly players.
+
+It cost 1 rate-limit point. There was no events, deaths, damage, healing,
+ranking, discovery, other-report, other-fight or other-Evoker request. The
+conditional per-target requests (T2) were not needed.
+
+## What changed
+
+1. **Certified predicate coverage** (`src/engine/evidence/certified-coverage.ts`,
+   new). `FightCompleteness.certifiedCoverage?` holds `AURA_WINDOWS`
+   coverage (one ability; every friendly target except an exclusion list)
+   and `COMPLETED_CASTS` coverage (one source; only the listed abilities).
+   - `gateCertifiedAbsenceClaim` (state-result.ts) runs the unchanged
+     category gate first. Only a claim that STATES a predicate inside the
+     coverage can pass on certified coverage.
+   - `gateContinuityClaim` takes an optional `predicate`.
+   - No existing caller's semantics change: no predicate means category
+     coverage only.
+2. **Certification** (`src/engine/evidence/filtered-capture-certification.ts`,
+   new, pure). It compares the fight's OWN normalized events with the
+   decoded tables. `withCertifiedCoverage` always recomputes the
+   certification before attaching, so a certificate of other events can
+   never be reused. The rules are in architecture "M13-D"; in short:
+   - **Binding:** code, revision, fight id, exact bounds and every table's
+     request interval must match, or nothing is certified.
+   - **Auras:** strict windows equal the table bands element for element;
+     applications plus refreshes equal `totalUses`; no stated instance; no
+     stack change. A failing target is excluded. An ability-less or
+     target-less buff refuses the ability.
+   - **Casts:** an ability the table LISTS with an equal count. A zero is
+     never certified. An unidentified or instanced cast refuses the actor; a
+     source-less cast refuses its ability.
+3. **Decoder** (`src/wcl/filtered-capture-tables.ts`, new, fail-closed).
+   - Each table's request arguments must be committed beside it and must
+     match its alias's predicate.
+   - Refused: a dropped surface, a repeated target or an unknown field.
+   - It reuses the M11-G2 ability-table decoder (`abilityTableOf`, now
+     exported).
+4. **Consumers.**
+   - `supportAuraWindowsOf`: its listing states `AURA_WINDOWS` over every
+     friendly target, and continuity states one recipient's track.
+   - `recipientCooldownOverlap`: states the recipient's `COMPLETED_CASTS` of
+     its listed ids.
+   - The Augmentation support-cast listing: states the subject's
+     `COMPLETED_CASTS` of EVERY support cast id.
+5. **Evidence.**
+   - `wcl-m13d-certification-tables-aug1-fight-1` (62,316 bytes; archive;
+     `REPORT_SURFACES`; grants nothing).
+   - The deterministic sanitizer `scripts/corpus/sanitize-m13d-tables.mjs`.
+   - The manifest regenerated by `build-manifest.mjs`.
+   - Provenance doc `tests/evidence/m13d-certification.md`.
+   - Archive byte pins updated (`m11c4e-evidence-archive.test.ts`:
+     18,724,542).
+
+## Real result
+
+| Stream | Outcome |
+| --- | --- |
+| Ebon Might 395152 (13 targets, 173 windows) | CERTIFIED: the ally listing is COMPLETE, every window's continuity is established, support time is AT_LEAST with only INITIAL_STATE_NOT_RESOLVED |
+| Self Ebon Might 395296 | CERTIFIED: the self listing is COMPLETE |
+| Prescience 410089 | CERTIFIED_EXCEPT_TARGETS [36, 50, 52]: pets with stated instances, and the table is per actor. The listing stays OBSERVED_ONLY; the other 12 targets' windows are established |
+| Completed casts | 303 (actor, ability) pairs proven, 28 not (unlisted abilities; empowered spells, where the table counts cast + empowerend) |
+| Subject support casts | 395152, 409311 and 403631 proven. 442204 was never cast and is unproven, so the listing stays UNKNOWN |
+| Deaths | Not requested: no M13 conclusion gates on death completeness (survival is positive-only) |
+
+SUPPORT_TARGETING and SUPPORT_TIMING stay NO_AUTHORITY_AVAILABLE. Category
+coverage stays ABSENT. Cooldown overlap is unchanged: no real recipient has
+a reviewed identity.
+
+**Does anything block M13-E?** No. M13-E (internal registration) does not
+need COMPLETE coverage: UNKNOWN and OBSERVED_ONLY are safe there. The
+remaining gaps are recorded in follow-ups "After M13-D".
 
 ## Decisions for the reviewer
 
-1. **Structure is the contract; markdown is derived.** The markdown is
-   rendered by `src/reporting/` from the body and copied by the projection.
-   A test re-renders it from the PUBLISHED fields and requires equality, so
-   the text can say nothing the JSON does not.
-2. **Coverage first, PARTIAL always.** Same disclosures rule as the TLDR. The
-   markdown opens with "Partial analysis... It is not a complete assessment."
-   and the Coverage section precedes the findings.
-3. **Three sections, never mixed, schema-enforced.** UNKNOWN and SUPPRESSED
-   can never be PRIORITIZED. A suppression must name one of the four
-   environmental reasons. A divergence entry must be PROVEN with evidence.
-4. **Every item is listed exactly once.** The report does not truncate; the
-   TLDR remains the short form. The report's prioritized head equals the
-   TLDR's highlights (tested).
-5. **Each entry answers "why".** Producer, authority, state evidence,
-   reason/suppression reason, actionability and standing (with the TLDR's
-   standing sentence: "Whether the authority's alternative was possible is
-   not proven"), plus evidence locators. The markdown shows the count and
-   the first locator.
-6. **No new vocabulary of judgment.** No correctness, blame or score words in
-   the prose (tested, beyond the M6-B sweep). "Not evidence of clean play"
-   is the only use of "clean play", and it denies it.
-
-## Existing tests changed, and why
-
-- `tests/support/tldr.ts`: `withExpectedTldr` also attaches the report the
-  service builds (`expectedReportOf`), so the public-projection and m7b
-  tests that build an expected `FightAnalysis` keep comparing the whole
-  analysis. Their assertions are unchanged.
-- `tests/regression/m7b-fight-analysis-equivalence.test.ts`: compares
-  `report` and lists it in the key set.
-- `tests/contracts/m15a-reporting-layering.test.ts`: `fight-report.ts` in the
-  module list; the service and result type also import it.
-
-## Real evidence
-
-The subject's Blood analysis through `analyzeFight` (no WCL): ROTATION's
-prioritized, informational and carried occurrences equal the view's
-rejected, matched and UNKNOWN (224) counts. The 45-occurrence `heart_strike`
-PATTERN is at position 1, `DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN`,
-and nothing is actionable. There are no suppressions, and DECISIONS_UNKNOWN
-and DAMAGE_DIAGNOSIS_NOT_ASSESSED are disclosed. The projected document
-validates, its `report` equals the internal one, and its markdown re-renders
-from the published fields. Every prioritized locator is a published decision,
-and the rest of the document is identical with and without the report. The
-same fight with an Arms identity carries a report with PREPARATION only and
-"this is not evidence of clean play". Size: the report adds ~53 KB to a
-233 KB document (markdown 8.3 KB); see follow-ups "After M15-D".
+1. **Predicate coverage, not a category grant.** Granting AURAS or CASTS
+   from a 15-id or per-ability proof would vouch for streams nobody
+   certified. The coverage carries its predicate, and only a claim stating a
+   predicate inside it can use it.
+2. **Certificate over the fight's own events.** The certificate is computed
+   from what the analysis reads, so it cannot be stale or carried onto other
+   events.
+3. **Exactness.** Bands are WCL's computed active intervals, and equality
+   with every observed window (plus uses = applications + refreshes) proves
+   the window structure per target actor. Where the per-actor table cannot
+   tell instances apart, the target is excluded, never assumed.
+4. **Friendly recipients.** Both surfaces are `hostilityType: Friendlies`, so
+   a certified listing is complete for friendly recipients only (documented
+   in the support module).
+5. **Inclusive interval.** The events surface (`coverage.ts`, live-probed)
+   and the tables (M11-G2) both include `endTime`, so the certified range is
+   `[165857, 316612]`, the range the evaluator asks for.
 
 ## Validation
 
-- `npx tsc --noEmit`: clean. `prettier --check .`: clean.
-- Focused: `m15d-fight-report` (27), `m15d-report-contract`, all
-  `tests/contracts` plus `m15b` unit, `analysis-composition` and `m7b`:
-  113 files / 6239 tests pass.
+- `npx tsc --noEmit`: clean. `npx prettier --check .`: clean.
+- Focused: `tests/unit/m13d-filtered-capture-certification.test.ts` (19), the
+  Augmentation evaluator (21), `m11c4e-evidence-archive` (22), `m9c` and all
+  of `tests/contracts` pass.
+- `npm run test:corpus`: PASSED. `npm run test:evidence`: PASSED, with
+  `tests/evidence/report.json` regenerated (`--write-report`) for the new
+  artifact.
+- Full `npx vitest run --testTimeout=180000`: 380/383 files, 11712/11715
+  tests. Of the 3 failures:
+  - The `m11g2-comparison-facts-layering` failure was real: the decoder had
+    imported the post-hoc G2 table decoder. Fixed with a local Casts-leaf
+    decoder; the guard now passes.
+  - `m9b-corpus-harness` (Protection) and `runner-service-queue` W are the
+    load-dependent tests noted in M15-D. Both pass alone (37/37).
+- Existing tests changed: `m11c4e-evidence-archive` (byte pins for the new
+  artifact) and `m9c-sanitize-payloads` (the new sanitizer revision). No
+  existing assertion was weakened.
 
-## Review cycle 2 (local review CHANGES_REQUIRED, both fixed)
+## Review cycle 2 (local review CHANGES_REQUIRED, fixed)
 
-1. Category arrays are now section-specific schemas; tests prove a
-   PRIORITIZED, INFORMATIONAL or CARRIED entry is rejected in each other
-   array.
-2. SUPPRESSED requires a named environmental reason, and UNKNOWN /
-   NO_AUTHORITY_AVAILABLE / UNSUPPORTED require null; a carried or
-   informational entry's standing must equal its disposition. Negative
-   tests cover each mismatch.
-- `npm run test:corpus`: PASSED (183 cases / 778 assertions, two workerd
-  runs byte-identical, matches the committed report).
-- Full `npx vitest run --testTimeout=180000`: 380/382 files, 11676/11678
-  tests. The 2 failures (`runner-service-queue` W, a temp-directory leftover
-  check shared with parallel simulation tests, and `m9b-corpus-harness`
-  Protection) touch no reporting code, differ between runs under load, and
-  both files pass alone (37/37). CI is the arbiter.
+1. `withCertifiedCoverage` now REPLACES the fight's certified coverage with
+   the fresh certification's coverage. Inherited coverage is never merged,
+   so a copy whose events changed cannot keep stale proof.
+2. New regression tests ("re-certification never inherits coverage"):
+   - a certified fight copied with an ally removal and the cast dropped, but
+     with its certified completeness kept: re-certification excludes the
+     ally, the listing is OBSERVED_ONLY, that window is NOT_ESTABLISHED, and
+     the cast claim fails;
+   - re-certification against tables of another revision: refused, and no
+     coverage remains;
+   - a narrower request: only the requested coverage remains.
+   Focused: 43/43 pass, and tsc is clean.
+
+## Review cycle 3 (local review CHANGES_REQUIRED, fixed)
+
+1. A Casts-table ability LISTED with a zero total is now `ZERO_TOTAL`, never
+   MATCH, so it gets no coverage: a zero is never certified, listed or not.
+   The test asserts the attached coverage omits it, that
+   `gateCertifiedAbsenceClaim` refuses it, and the `ZERO_TOTAL` comparison.
+   The real-evidence pins are unchanged (303 proven, 28 not). Focused: 43/43
+   pass, and tsc is clean.
+
+## Review cycle 4 (local review CHANGES_REQUIRED, fixed)
+
+1. `AURA_WINDOWS` coverage carries `provenTargetActorIds`: matched targets
+   that the Friendlies table itself LISTS. A `ONE_TARGET` claim passes only
+   for one of them, so friendly membership is the table's listing, never
+   "not excluded". New negative tests:
+   - a hostile target (the boss) with X events: excluded, its window
+     NOT_ESTABLISHED, the listing OBSERVED_ONLY, and its claim refused;
+   - an actor absent from both the events and the table: refused, even
+     under an otherwise clean listing.
+   The real-evidence pins are unchanged. Focused: 44/44 pass, and tsc is
+   clean.
+
+## Review cycle 5 (local review CHANGES_REQUIRED, fixed)
+
+1. **Scope.** `gateCertifiedAbsenceClaim` admits certified coverage only when
+   the category gate refused for INSUFFICIENT_COVERAGE. Capability and scope
+   refusals stand. Every actor the predicate names must be inside the
+   category's declared actor scope, and a listing over every friendly target
+   needs the actor-global (FULL_RAID) scope. New tests, with the same exact
+   tables and the same present events:
+   - PLAYER_CONTEXT: the ally listing, ally continuity and ally casts are all
+     INSUFFICIENT_SCOPE;
+   - FULL_RAID: all three are proven;
+   - an UNVERIFIED category stays CAPABILITY_UNVERIFIED.
+2. **Revision.** `NORMALIZATION_REVISION` `m3.5` → `m3.6` (additive
+   `completeness.certifiedCoverage`), following the M13-B precedent:
+   - the contract pin (`normalization-boundary.test.ts`) and the test
+     fixture constant are updated;
+   - the delta is documented in architecture "M13-D": the value of ANALYZED
+     raid-night/1 cells' `provenance.normalizationRevision` changes, with no
+     schema change, as at M13-B under publicContract NONE.
+3. The trailing whitespace (CRLF from appends) is removed, and
+   `git diff --check` is clean.
+
+Focused: the M13-D tests, the Augmentation evaluator and
+normalization-boundary pass (78/78), and tsc is clean.

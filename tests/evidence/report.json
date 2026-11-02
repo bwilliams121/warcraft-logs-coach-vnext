@@ -412,6 +412,13 @@
       "payloadKind": "WCL_GRAPHQL_DATA",
       "provenanceKind": "SANITIZED_CAPTURE",
       "sha256": "74ed02fd1c05ce4cd948c7dd9eaeacab13c7155e243a86efadf180170056996c"
+    },
+    {
+      "artifactId": "wcl-m13d-certification-tables-aug1-fight-1",
+      "byteLength": 62316,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "aa1512b8c035380a9992a5e35fc489ae41e91283d1ff2081c9112f76bc569156"
     }
   ],
   "byLayer": [
@@ -880,8 +887,8 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 18633216,
-    "artifacts": 59,
+    "artifactBytes": 18695532,
+    "artifacts": 60,
     "assertions": 42,
     "cases": 16,
     "declared": 0,

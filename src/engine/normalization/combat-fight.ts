@@ -58,8 +58,13 @@ import type { CombatEvent, MalformedRawObservation } from "./normalized-events.j
  * `m3.5` (M13-B) adds `friendlySpecializations`: each friendly player's
  * Warcraft Logs-stated specialization, or why none is established. An additive
  * shape change.
+ *
+ * `m3.6` (M13-D) adds the optional `completeness.certifiedCoverage`:
+ * predicate-scoped coverage a filtered capture earned by an exact table
+ * certificate. An additive shape change. Absent means none, and no category's
+ * coverage changes; ingestion never sets it.
  */
-export const NORMALIZATION_REVISION = "m3.5";
+export const NORMALIZATION_REVISION = "m3.6";
 
 /**
  * Was the FIGHT finished? Entirely separate from whether we RETRIEVED it.

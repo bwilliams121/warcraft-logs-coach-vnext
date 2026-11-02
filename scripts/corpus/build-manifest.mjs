@@ -12093,6 +12093,86 @@ const M13A_EVIDENCE_CASES = [
   ),
 );
 
+// --------------------------------------------------------------------------
+// M13-D (2026-11-02): the certification tables for the EXISTING M13-A fight
+// (owner grant 2026-11-02, agent/autopilot-queue.md "M13-D"). Plan recorded
+// before any request (.probe/m13d/certification-plan.md). 2 Warcraft Logs
+// HTTP requests (1 OAuth, 1 composed table request), cap 15. No events, no
+// other report or fight, no damage or healing.
+// --------------------------------------------------------------------------
+
+const M13D_SANITIZER = "scripts/corpus/sanitize-m13d-tables.mjs";
+const M13D_SANITIZER_REVISION = "sanitize-m13d-tables-1";
+const M13D_INVOCATION = "node scripts/corpus/sanitize-m13d-tables.mjs .probe/m13d .probe/m13a <out>";
+const M13D_TABLES = "wcl-m13d-certification-tables-aug1-fight-1";
+const M13D_EVIDENCE_ARTIFACTS = [
+  artifact(M13D_TABLES, graphql(M13D_TABLES), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    payloadKind: "WCL_GRAPHQL_DATA",
+    source: {
+      ...m13aSource(
+        tooling(
+          ".probe/m13d/certify.probe.ts (temporary, gitignored) through src/wcl/token-provider.ts and graphql-client.ts, with a fetch-level counter refusing a 16th Warcraft Logs HTTP request",
+          UNAVAILABLE,
+          "tables: one composed request (revision, fight bounds, three Buffs tables by ability, twenty Casts tables by source); planned in .probe/m13d/certification-plan.md before running, run by hand on 2026-11-02 (2 Warcraft Logs HTTP requests in total, cap 15)",
+        ),
+        ".probe/m13d/tables-T1.json and query-T1.graphql — gitignored, not retained in the repository",
+        {
+          kind: "REPORT_SURFACES",
+          fightIds: [1],
+          surfaces: [
+            "revision",
+            "fights(fightIDs: [1]) { id startTime endTime }",
+            `table(Buffs, hostilityType Friendlies, abilityID X) over [${String(M13A_START)} .. ${String(M13A_END)}] for X in 395152, 410089, 395296`,
+            `table(Casts, hostilityType Friendlies, sourceID R) over [${String(M13A_START)} .. ${String(M13A_END)}] for each of the twenty friendly players R`,
+          ],
+        },
+        completeness(
+          NOT_APPLICABLE,
+          1,
+          NOT_APPLICABLE,
+          "COMPLETE",
+          "One unpaginated request. revision 10 (as at the M13-A capture); fight 1 [165,857 .. 316,612]; every table over exactly that interval.",
+        ),
+        "UNAVAILABLE",
+      ),
+      capturedOn: "2026-11-02",
+    },
+    transformations: [
+      {
+        kind: "SUBSET_SELECTION",
+        tooling: tooling(M13D_SANITIZER, M13D_SANITIZER_REVISION, M13D_INVOCATION),
+        detail:
+          "rateLimitData removed. Buffs tables keep startTime, endTime, totalTime and per target aura id, type, totalUses, totalUptime and bands; Casts tables keep totalTime and per entry (subentries kept) guid, type, actor, total, hit/tick/miss/tickMiss counts and composite. Names, icons, the per-target guid, source lists and detail breakdowns are dropped. Each table's request arguments are added as tableArguments, parsed from the recorded query document. Compact JSON.",
+        invalidates: [],
+      },
+      {
+        kind: "IDENTIFIER_REMAP",
+        tooling: tooling(M13D_SANITIZER, M13D_SANITIZER_REVISION, M13D_INVOCATION),
+        detail: "report code -> M13AAUGAAAAAAAAA (the M13-A pseudonym).",
+        invalidates: ["ORIGINAL_IDENTIFIERS"],
+      },
+      {
+        kind: "CREDENTIAL_SHAPE_SCAN",
+        tooling: tooling(M13D_SANITIZER, M13D_SANITIZER_REVISION, "implicit on every write"),
+        detail:
+          "The sanitizer refuses to write a credential-shaped value, the real report code, or any player name or server of the M13-A context. Nothing was found.",
+        invalidates: [],
+      },
+    ],
+    coverageBasis:
+      "Warcraft Logs-computed aggregates, not events: the artifact grants no category coverage. It is the trusted table side of the M13-D certificates (src/engine/evidence/filtered-capture-certification.ts), which compare it with the M13-A segments' own events and attach predicate coverage only where they are equal.",
+    retainedFor:
+      "M13-D: completeness certificates for the M13-A filtered capture — the Ebon Might, Prescience and self Ebon Might buff windows on every friendly target, and each friendly player's completed casts.",
+    limitations: [
+      "Warcraft Logs documents table data as not frozen: the values are those of the capture date, at report revision 10.",
+      "The Buffs tables are per target ACTOR: they cannot tell a pet's instances apart. The Casts tables omit whole abilities and count an empowered spell's cast and empowerend events.",
+      ...M13A_LIMITATIONS,
+    ],
+  }),
+];
+
 const EVIDENCE_CASES = [
   // ---- M11-C4f: the neutral second subject's fixed 165 s window ----
   kase(
@@ -12883,6 +12963,7 @@ const manifest = EVIDENCE_ROOT
         ...M12B_EVIDENCE_ARTIFACTS,
         ...M12D_EVIDENCE_ARTIFACTS,
         ...M13A_EVIDENCE_ARTIFACTS,
+        ...M13D_EVIDENCE_ARTIFACTS,
       ].sort(byId("artifactId")),
       cases: [...EVIDENCE_CASES, ...M12B_EVIDENCE_CASES, ...M12D_EVIDENCE_CASES, ...M13A_EVIDENCE_CASES].sort(
         byId("caseId"),

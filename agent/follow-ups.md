@@ -263,6 +263,37 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M13-D: what the certified coverage does not establish
+
+**Raised:** M13-D (2026-11-02).
+
+- **Prescience on three pets.** Actors 36, 50 and 52 hold Prescience on
+  stated instances, and the Buffs table is per actor, so their windows are
+  not proven and the Prescience listing stays OBSERVED_ONLY. No
+  instance-level table surface is known. Proving them would need an
+  unfiltered aura capture or a new surface: an owner decision.
+- **The support-cast listing stays UNKNOWN.** 442204 (Scalecommander Breath
+  of Eons) was never cast, and a zero is never certified because the Casts
+  table omits whole abilities. The listing becomes COMPLETE only if some
+  trusted surface proves that the table counts 442204, or if the support
+  cast identities are narrowed by a proven hero-talent path. Neither exists.
+- **Empowered spells.** The Casts table counts `cast` + `empowerend`, while
+  the normalizer leaves `empowerend` envelope-only. Certifying empowered
+  spells needs a reviewed decision on what an empowered cast's completion is.
+- **Friendly recipients only.** Both the capture and the table are
+  `hostilityType: Friendlies`. A certified listing says nothing about a buff
+  on a hostile actor.
+- **No production path.** Production ingestion never retrieves the tables,
+  so no production fight carries certified coverage. Adding that would mean
+  new requests per analysis, which is an owner decision.
+- **No deaths certificate.** Nothing consumes death completeness. If a
+  later conclusion needs "no death", that needs its own certificate (the
+  Deaths table).
+- **Table data is not frozen.** The tables are pinned at revision 10 on
+  2026-11-02. A later re-check could differ.
+
+---
+
 ## After M13-C: what the recipient cooldown registry does not establish
 
 **Raised:** M13-C (2026-11-02).
@@ -316,12 +347,8 @@ current total (5,748,495 bytes), with what each row buys.
   Augmentation evaluator. Registering it needs FULL_RAID derivation from
   `AUGMENTATION_EVOKER_REQUIRED_INPUTS` and a public shape for support
   observations.
-- **No coverage on the real evidence.** The capture is server-filtered
-  (dataType families and an ability filter, as the grant required), so it
-  grants nothing and every real listing is OBSERVED_ONLY. A COMPLETE real
-  listing needs either an unfiltered capture (which would retrieve damage
-  and healing, outside this grant) or a reviewed table certificate for
-  filtered aura and cast streams. Either is an owner decision.
+- **No coverage on the real evidence.** Partly resolved by M13-D (table
+  certificates; see "After M13-D"). The category grants are still withheld.
 - **No recipient cooldown identity.** Resolved for the six pinned
   specializations by M13-C (`src/data/game/recipient-cooldown-identities.*`;
   see "After M13-C").

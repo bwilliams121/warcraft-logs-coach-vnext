@@ -6559,6 +6559,99 @@
           "gameVersion 1 / logVersion 17 only."
         ]
       }
+    },
+    {
+      "artifactId": "wcl-m13d-certification-tables-aug1-fight-1",
+      "path": "artifacts/wcl-graphql/wcl-m13d-certification-tables-aug1-fight-1.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "aa1512b8c035380a9992a5e35fc489ae41e91283d1ff2081c9112f76bc569156",
+      "byteLength": 62316,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "M13AAUGAAAAAAAAA",
+          "fightId": 1,
+          "reportRevision": 10,
+          "sourceActorId": 1,
+          "encounterId": 3429,
+          "difficulty": 5,
+          "capturedOn": "2026-11-02",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "REPORT_SURFACES",
+            "fightIds": [1],
+            "surfaces": [
+              "revision",
+              "fights(fightIDs: [1]) { id startTime endTime }",
+              "table(Buffs, hostilityType Friendlies, abilityID X) over [165857 .. 316612] for X in 395152, 410089, 395296",
+              "table(Casts, hostilityType Friendlies, sourceID R) over [165857 .. 316612] for each of the twenty friendly players R"
+            ]
+          },
+          "completeness": {
+            "eventsReturned": "NOT_APPLICABLE",
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "COMPLETE",
+            "evidence": "One unpaginated request. revision 10 (as at the M13-A capture); fight 1 [165,857 .. 316,612]; every table over exactly that interval."
+          },
+          "captureTooling": {
+            "name": ".probe/m13d/certify.probe.ts (temporary, gitignored) through src/wcl/token-provider.ts and graphql-client.ts, with a fetch-level counter refusing a 16th Warcraft Logs HTTP request",
+            "revision": "UNAVAILABLE",
+            "invocation": "tables: one composed request (revision, fight bounds, three Buffs tables by ability, twenty Casts tables by source); planned in .probe/m13d/certification-plan.md before running, run by hand on 2026-11-02 (2 Warcraft Logs HTTP requests in total, cap 15)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m13d/tables-T1.json and query-T1.graphql — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 10
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13d-tables.mjs",
+              "revision": "sanitize-m13d-tables-1",
+              "invocation": "node scripts/corpus/sanitize-m13d-tables.mjs .probe/m13d .probe/m13a <out>"
+            },
+            "detail": "rateLimitData removed. Buffs tables keep startTime, endTime, totalTime and per target aura id, type, totalUses, totalUptime and bands; Casts tables keep totalTime and per entry (subentries kept) guid, type, actor, total, hit/tick/miss/tickMiss counts and composite. Names, icons, the per-target guid, source lists and detail breakdowns are dropped. Each table's request arguments are added as tableArguments, parsed from the recorded query document. Compact JSON.",
+            "invalidates": []
+          },
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13d-tables.mjs",
+              "revision": "sanitize-m13d-tables-1",
+              "invocation": "node scripts/corpus/sanitize-m13d-tables.mjs .probe/m13d .probe/m13a <out>"
+            },
+            "detail": "report code -> M13AAUGAAAAAAAAA (the M13-A pseudonym).",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13d-tables.mjs",
+              "revision": "sanitize-m13d-tables-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, the real report code, or any player name or server of the M13-A context. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Warcraft Logs-computed aggregates, not events: the artifact grants no category coverage. It is the trusted table side of the M13-D certificates (src/engine/evidence/filtered-capture-certification.ts), which compare it with the M13-A segments' own events and attach predicate coverage only where they are equal."
+        },
+        "retainedFor": "M13-D: completeness certificates for the M13-A filtered capture — the Ebon Might, Prescience and self Ebon Might buff windows on every friendly target, and each friendly player's completed casts.",
+        "limitations": [
+          "Warcraft Logs documents table data as not frozen: the values are those of the capture date, at report revision 10.",
+          "The Buffs tables are per target ACTOR: they cannot tell a pet's instances apart. The Casts tables omit whole abilities and count an empowered spell's cast and empowerend events.",
+          "The report is a third party's: its code is the pseudonym M13AAUGAAAAAAAAA; names, servers and player gameIDs are not retained.",
+          "A Mythic WIPE: the encounter did not end in a kill.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
     }
   ],
   "cases": [

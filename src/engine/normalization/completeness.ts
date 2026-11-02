@@ -18,6 +18,7 @@ import {
   type RetrievalSource,
 } from "../../wcl/evidence-capability.js";
 import type { StreamCompleteness } from "../../wcl/retrieval-types.js";
+import type { CertifiedCoverage } from "../evidence/certified-coverage.js";
 import {
   classifyCoverage,
   intersectRangeLists,
@@ -55,6 +56,13 @@ export interface FightCompleteness {
   readonly streams: readonly StreamCompleteness[];
   /** Every category is always present. A category never simply goes missing. */
   readonly categories: Readonly<Record<EvidenceCategory, CategoryEvidence>>;
+  /**
+   * M13-D: coverage a filtered capture earned by an exact table certificate,
+   * for its stated predicate only (`certified-coverage.ts`). Absent means none.
+   * Read only by a claim that states a predicate inside it; it never changes
+   * a category above.
+   */
+  readonly certifiedCoverage?: readonly CertifiedCoverage[];
 }
 
 const STATE_SEVERITY: Record<CoverageState, number> = { COMPLETE: 0, PARTIAL: 1, ABSENT: 2 };

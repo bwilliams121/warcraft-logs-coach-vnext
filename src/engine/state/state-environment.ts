@@ -21,7 +21,8 @@ import type { EvidenceCategory } from "../../wcl/evidence-capability.js";
 import { inclusiveRange } from "../evidence/coverage.js";
 import type { CombatFight } from "../normalization/combat-fight.js";
 import type { CombatEvent } from "../normalization/normalized-events.js";
-import { gateAbsenceClaim, type AbsenceGate } from "./state-result.js";
+import type { ClaimPredicate } from "../evidence/certified-coverage.js";
+import { gateAbsenceClaim, gateCertifiedAbsenceClaim, type AbsenceGate } from "./state-result.js";
 import {
   isMonotonic,
   type PositionResolution,
@@ -44,6 +45,12 @@ export interface ContinuityGateInput {
   /** The instant the claim is carried through to. */
   readonly toReportTimeMs: number;
   readonly actorId: number | null;
+  /**
+   * M13-D: the predicate the claim is about, when the caller can state one.
+   * Then certified predicate coverage may prove it where category coverage
+   * cannot (`gateCertifiedAbsenceClaim`). Absent: category coverage only.
+   */
+  readonly predicate?: ClaimPredicate;
 }
 
 /**
@@ -72,12 +79,15 @@ export function gateContinuityClaim(environment: StateEnvironment, input: Contin
     return { ok: false, reason: "NON_MONOTONIC_TIME" };
   }
 
-  return gateAbsenceClaim({
+  const claim = {
     completeness: environment.fight.completeness,
     category: input.category,
     range: inclusiveRange(input.fromReportTimeMs, input.toReportTimeMs),
     actorId: input.actorId,
-  });
+  };
+  return input.predicate === undefined
+    ? gateAbsenceClaim(claim)
+    : gateCertifiedAbsenceClaim({ ...claim, predicate: input.predicate });
 }
 
 /**

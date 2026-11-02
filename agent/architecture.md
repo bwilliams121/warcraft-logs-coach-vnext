@@ -10757,6 +10757,110 @@ is a reviewed specialization (the Blood and Brewmaster players received
 neither buff), so every real lookup is UNSUPPORTED or UNKNOWN, and overlap
 stays NO_COOLDOWN_IDENTITY. The IDENTIFIED path is proven synthetically.
 
+## M13-D — Certified coverage for the M13-A filtered capture
+
+Milestone 13 (autopilot queue entry M13-D). Public contract: NONE. Owner
+decision 2026-11-02: the reviewed completeness-certificate path, for the
+existing M13-A report, fight and interval only, at most 15 Warcraft Logs
+requests. Two were made. See `tests/evidence/m13d-certification.md`.
+
+**The problem.** Category coverage (`CategoryCoverage`) vouches for every
+event of a family. A server-filtered capture can never earn that: the M13-A
+aura stream holds fifteen ability ids, so an AURAS grant would vouch for
+every other aura too. The M11-G2 rule allows a filtered capture coverage only
+where a trusted table proves the same facts over the same report, revision,
+fight, interval, actor scope, family and predicate.
+
+**Certified predicate coverage** (`src/engine/evidence/certified-coverage.ts`).
+`FightCompleteness.certifiedCoverage` (optional; absent means none) holds
+coverage that carries its predicate:
+
+- `AURA_WINDOWS` — one buff ability. A listing over every friendly target is
+  proven only when `excludedTargetActorIds` is empty. One target's track is
+  proven only for an actor in `provenTargetActorIds`: one the Friendlies
+  table itself lists and the certificate matched. Friendly membership is
+  never inferred, so hostile, unresolved and unexamined actors are never
+  proven one at a time;
+- `COMPLETED_CASTS` — one source actor; only the listed abilities are proven.
+
+A claim is admitted only when it STATES a predicate inside the coverage
+(`gateCertifiedAbsenceClaim`; `gateContinuityClaim` takes an optional
+`predicate`). The category gate runs first and is unchanged. A claim that
+states no predicate, which is every pre-M13-D caller, is decided by category
+coverage alone. Certified coverage never alters a category, never crosses
+categories, and an empty ability list proves nothing.
+
+**Certification** (`src/engine/evidence/filtered-capture-certification.ts`,
+pure). It compares the fight's OWN normalized events with decoded tables
+(`src/wcl/filtered-capture-tables.ts`, fail-closed; each table's request
+arguments are committed with it, because the Casts surface does not echo its
+interval).
+
+- **Binding.** Report code, report revision, fight id and exact fight bounds
+  must equal the fight's, and every table's request interval must equal the
+  bounds. Otherwise the whole certification is refused.
+- **AURA_WINDOWS.** `table(Buffs, Friendlies, abilityID X)` lists every
+  friendly target actor holding X, from any source. For each target in the
+  union of table and event targets, the X events must form strict windows,
+  state no instance (the table is per actor) and contain no stack change.
+  The windows must EQUAL the bands, element for element, and applications
+  plus refreshes must EQUAL `totalUses`. A failing target is excluded. A buff
+  event with no ability, or an X event with no target, refuses X outright.
+- **COMPLETED_CASTS.** `table(Casts, Friendlies, sourceID A)`. An ability is
+  proven when the table LISTS it (A's own leaves) with a total EQUAL to A's
+  completed `cast` events. The table omits whole abilities, so a zero is
+  never certified. It counts an empowered spell's `empowerend` events too,
+  which the normalizer does not treat as completed casts, so empowered spells
+  differ and are not proven. An unidentified or instanced cast of A refuses A;
+  a source-less cast refuses its ability.
+- **No reconciliation.** There is no tolerance, no "totals agree", and no
+  open bound mapped to the fight end. The interval is inclusive at both ends,
+  because the events surface (`coverage.ts`) and the tables (M11-G2) both
+  include `endTime`.
+- `withCertifiedCoverage` always recomputes the certification from the fight
+  it attaches to. No production path retrieves tables, so production fights
+  carry none.
+
+**Consumers.** `supportAuraWindowsOf`'s listing states `AURA_WINDOWS` over
+every friendly target, and its continuity gate states one recipient's track.
+With certified coverage the listing is complete for FRIENDLY recipients,
+which is what both the capture and the table cover. `recipientCooldownOverlap`
+states the recipient's `COMPLETED_CASTS` of its listed cooldowns. The support
+cast listing states the subject's `COMPLETED_CASTS` of EVERY support cast id,
+a never-cast id included.
+
+**Real result** (M13-A fight, revision 10):
+
+- Ebon Might (395152, 13 targets, 173 windows) and the Evoker's own Ebon
+  Might (395296) are CERTIFIED. Ally listings are COMPLETE, every window's
+  continuity is established, and support time is AT_LEAST with only
+  INITIAL_STATE_NOT_RESOLVED. It is still never exact.
+- Prescience (410089) is CERTIFIED_EXCEPT_TARGETS [36, 50, 52]: pets whose
+  events state an instance. Their windows stay NOT_ESTABLISHED and the
+  listing stays OBSERVED_ONLY.
+- Casts: 303 (actor, ability) pairs are proven and 28 are not (omitted
+  abilities, empowered spells). For the subject, 395152, 409311 and 403631
+  are proven; 442204 (never cast) is not, so the support-cast listing stays
+  UNKNOWN.
+- DEATHS: no request. No M13 conclusion gates on death completeness, because
+  survival is positive-only.
+- SUPPORT_TARGETING and SUPPORT_TIMING stay NO_AUTHORITY_AVAILABLE. A
+  certificate is completeness evidence only.
+
+**Scope.** Certification fills a COVERAGE gap only. `gateCertifiedAbsenceClaim`
+admits certified coverage only when the category gate refused for
+INSUFFICIENT_COVERAGE. Every actor the predicate names must be inside the
+category's declared actor scope, and a listing over every friendly target
+needs the actor-global scope that only FULL_RAID declares. So a
+PLAYER_CONTEXT fight never learns ally completeness from a table.
+
+**Revision.** `NORMALIZATION_REVISION` `m3.5` → `m3.6` (additive shape
+change: the optional `completeness.certifiedCoverage`). As at the M13-B
+bump, the intentional public delta is the VALUE of every ANALYZED
+raid-night/1 cell's `provenance.normalizationRevision` (`"m3.6"`), so a
+stored `m3.5` result compares NOT_COMPATIBLE. No schema changes; analysis/1
+carries no normalization revision and its digests are unchanged.
+
 ## M14-A — Comparison timing alignment foundation (post-hoc)
 
 Milestone 14 (autopilot queue entry M14-A). Public contract: NONE. No

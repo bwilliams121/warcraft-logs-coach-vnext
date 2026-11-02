@@ -28,7 +28,7 @@ import { PREPARATION_NOT_ASSESSED } from "../../src/services/result.js";
 export const REPORT_CODE = "aBcDeFgH12345678";
 export const REVISION = 30;
 /** The repository's current normalization revision; a test pins it to the production constant. */
-export const NORMALIZATION_REVISION = "m3.5";
+export const NORMALIZATION_REVISION = "m3.6";
 
 function locator(ordinal: number): EvidenceLocator {
   return {
