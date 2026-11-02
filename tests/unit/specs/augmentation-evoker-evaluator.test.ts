@@ -348,7 +348,7 @@ describe("the Augmentation evaluator (synthetic)", () => {
         dataset: { ok: false, reason: "NO_ENTRIES" },
       }),
     ).toEqual({
-      revision: "augmentation-evoker-evaluator/1",
+      revision: "augmentation-evoker-evaluator/2",
       state: "RUNTIME_DATA_UNAVAILABLE",
       reason: "NO_ENTRIES",
     });
@@ -560,6 +560,38 @@ describe("the real Augmentation Evoker in the evidence archive (M13AAUGAAAAAAAAA
     expect(ownership.get(27)).toEqual({ kind: "OWNED_BY", ownerActorId: 20 });
     expect(ownership.get(52)).toEqual({ kind: "OWNER_NOT_STATED" });
     expect(ownership.get(18)).toEqual({ kind: "NOT_A_PET" });
+  });
+
+  it("M13-B: every Ebon Might recipient carries the specialization the fight context states, never one from class", () => {
+    const result = evaluated(evaluateAugmentationEvoker({ fight, identity }));
+    const stated = new Map(
+      (result.allyBuffs[0]?.windows ?? []).map((entry) => {
+        const specialization = entry.recipientSpecialization;
+        return [
+          entry.window.recipient.actorId,
+          specialization.state === "STATED" ? `${specialization.specName} ${specialization.className}` : null,
+        ];
+      }),
+    );
+    expect([...stated.entries()].sort(([a], [b]) => a - b)).toEqual([
+      [3, "Balance Druid"],
+      [4, "Arms Warrior"],
+      [6, "Frost Mage"],
+      [7, "Enhancement Shaman"],
+      [10, "Shadow Priest"],
+      [11, "Arcane Mage"],
+      [14, "Marksmanship Hunter"],
+      [15, "Havoc DemonHunter"],
+      [16, "Havoc DemonHunter"],
+      [17, "Subtlety Rogue"],
+      [18, "Marksmanship Hunter"],
+      [19, "Demonology Warlock"],
+      [20, "Affliction Warlock"],
+    ]);
+    // A Prescience pet recipient is not a roster player: UNKNOWN, not its owner's (17, Subtlety).
+    const pet = (result.allyBuffs[1]?.windows ?? []).find((entry) => entry.window.recipient.actorId === 50);
+    expect(pet?.window.recipientIdentity).toMatchObject({ catalog: "LISTED", actorType: "PET" });
+    expect(pet?.recipientSpecialization).toEqual({ state: "UNKNOWN", reason: "NOT_IN_FRIENDLY_ROSTER" });
   });
 
   it("recipient deaths: none lies inside a proven span, and each ended window's next death is the raw one", () => {

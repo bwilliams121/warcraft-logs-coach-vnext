@@ -331,11 +331,13 @@ EXPLICIT USER-PROVIDED INPUT.**
 ### M13-A: Augmentation Foundation
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/m13-a
 wcl: OWNER-GRANT: agent/autopilot-queue.md M13-A owner decision (2026-11-01); M13-A only; one public raid fight containing an Augmentation Evoker, chosen as the first eligible candidate in a fixed neutral order (at most 10 candidate metadata/context checks); for that one fight only report/fight metadata, master data, fight context and friendly roster, and full-fight CASTS, AURAS (Ebon Might, Prescience, Breath of Eons), DEATHS, combatant/spec identity and pet/summon ownership where needed; no damage, healing, resource, ranking or comparison data; at most 50 Warcraft Logs requests in total
 publicContract: NONE
+pr: 22
+mergeSha: edb5f6e8b72e3a4f38a869285a35127f9e9fe363
 ```
 
 **OWNER DECISION (2026-11-01): one bounded Warcraft Logs evidence campaign
@@ -444,12 +446,390 @@ It does NOT authorize any of these, or any other expansion of M13 scope:
      detected Warcraft Logs activity, the audit record is preserved for the
      owner to verify that every request stayed inside this grant.
 
-### M11-G4-5-R: Register a 12.1.5 simulation model
+### M13-B: Recipient specialization state in the combat model
+
+```autopilot
+status: PR_OPEN
+dependsOn: M13-A
+branch: autopilot/m13-b
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/follow-ups.md` "After M13-A" (no recipient
+specialization) and "After M12-D" (no "who else is a healer"). The fight
+context's `friendlySpecs` is not carried into `CombatFight`; recipients carry
+class (`subType`) only.
+
+**Scope.** Carry each friendly player's Warcraft Logs-stated specialization,
+from fight-context master data, into the normalized combat model as observed
+identity. Both Augmentation support and other-healer coverage can then read
+it without guessing from class.
+
+- Fail closed: a player with no stated spec, or a stated spec that conflicts
+  with the authoritative identity rules, is UNKNOWN, never a default. No
+  specialization is inferred from abilities cast.
+- Preserve completeness and evidence semantics. Bump the normalization
+  revision if the repository's rules require it, and keep parity tests for
+  existing consumers byte-stable.
+- No public contract change unless technically unavoidable; if it becomes
+  unavoidable, stop and declare it.
+
+### M13-C: Shared, reviewed recipient cooldown identity
+
+```autopilot
+status: READY
+dependsOn: M13-B
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/follow-ups.md` "After M13-A" (no recipient cooldown
+identity): observable overlap needs reviewed cooldown ids per recipient
+specialization, and a spec evaluator may not import another specialization's
+private data.
+
+**Scope.** A shared, reviewed mechanism through which support analysis asks
+"which observable cooldown ids does specialization X have?", without one
+specialization importing another's private runtime data.
+
+- Shared plumbing and data only. It makes no gameplay-quality judgement and
+  has no `if spec === ...` gameplay evaluator.
+- Every identity carries provenance and versioning (source, build or pin,
+  revision), following the runtime-data provenance rules.
+- Fail closed: a specialization with no reviewed cooldown data is UNKNOWN or
+  unsupported, never an empty "no cooldowns".
+- Cover only what proves the architecture (for example the specializations
+  already pinned, plus the M13-A fight's recipients where reviewed data
+  exists). Full-roster generation is a later tranche if it would make this
+  one too large.
+
+### M13-D: Complete real coverage for Augmentation support observations
 
 ```autopilot
 status: OWNER_DECISION_REQUIRED
+dependsOn: M13-C
+wcl: NONE
+publicContract: NONE
+ownerDecision: How to obtain COMPLETE real coverage for Augmentation support observations, given that M13-A's server-filtered Casts/Buffs/Deaths capture is OBSERVED_ONLY. Either authorize the Warcraft Logs table requests that a reviewed completeness certificate for the filtered streams needs (the existing M11-G2 rule allows a filtered capture a grant only through an exact certificate against a trusted table over the same interval and predicate), or authorize a bounded unfiltered capture of the same fight (which also retrieves damage and healing). Each is a new Warcraft Logs request that the M13-A grant does not cover.
+```
+
+**Direction.** `agent/follow-ups.md` "After M13-A" (no coverage on the real
+evidence). The autopilot never silently chooses broader Warcraft Logs
+retrieval.
+
+### M13-E: Augmentation evaluator orchestration and registration (internal)
+
+```autopilot
+status: READY
+dependsOn: M13-C, M13-D
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/follow-ups.md` "After M13-A" (not registered, not
+published): registering needs FULL_RAID derivation from
+`AUGMENTATION_EVOKER_REQUIRED_INPUTS`.
+
+**Scope.** Wire the Augmentation evaluator into normal internal analysis.
+
+- Its declared FULL_RAID requirement must flow into the derived ingestion
+  scope; no hand-picked scope.
+- Its results stay internal, like the M10-D internal-only partition.
+- SUPPORT_TARGETING quality stays NO_AUTHORITY_AVAILABLE while no approved
+  recipient-quality model exists. Do not invent a targeting model.
+- Remove the corresponding unregistered-tree exceptions in the
+  cross-spec-isolation guards.
+
+### M13-F: Public Augmentation support observations
+
+```autopilot
+status: READY
+dependsOn: M13-E
+wcl: NONE
+publicContract: EXPECTED
+```
+
+**Scope.** Expose the trustworthy observable Augmentation support facts
+through the shared application service, so REST and MCP get identical
+semantics:
+
+- buff uptime and state;
+- recipient identity and survival;
+- observable recipient cooldown overlap;
+- support cooldown timing and coverage.
+
+Rules:
+
+- Coverage disclosure, UNKNOWN and NO_AUTHORITY_AVAILABLE semantics are
+  preserved on the wire.
+- Never expose a recipient-quality conclusion.
+- The report must not read as a complete assessment of the Augmentation
+  player.
+
+### M14-A: Comparison timing alignment foundation
+
+```autopilot
+status: READY
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Choose among the options recorded in agent/follow-ups.md "After M11-G4-5" (tank-load meaning under the 70575 data, the Blood validation-window basis, EU coverage).
 ```
+
+**Direction.** `agent/architecture.md` "Milestone 14" (timing alignment),
+CLAUDE.md "Comparable Logs", and the post-hoc comparison facts of M11-G2
+(`src/comparison-facts/`).
+
+**Scope.** A post-hoc, factual alignment of a subject fight and comparison
+fights onto shared encounter landmarks: pull, observed phases, intermissions,
+target transitions, cooldown windows. It answers "at the same encounter
+moment, what did each fight show?".
+
+- Alignment needs evidence: a landmark absent from a fight is UNKNOWN, never
+  interpolated.
+- Comparison coverage stays AT_LEAST, as M11-G2 established: no
+  certification is implied.
+- Post-hoc only. Nothing on the authority branch (`src/simc`, `src/specs`)
+  imports it, under the existing layering guards.
+- Use the retained subject and M11-G2 cohort fights in the evidence archive;
+  no new capture.
+
+### M14-B: Multi-log consensus
+
+```autopilot
+status: READY
+dependsOn: M14-A
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** CLAUDE.md "Comparison Consensus".
+
+**Scope.** Explicit CONSENSUS / SPLIT / INSUFFICIENT outcomes over aligned
+comparison facts.
+
+- A single parse is never consensus.
+- SPLIT and INSUFFICIENT make no confident environmental claim.
+- Minimum-sample and agreement thresholds are configurable, named and
+  documented, never hidden in ad-hoc code. Initial values are recorded as
+  CANDIDATE until validated on more real logs; that validation is a recorded
+  follow-up, not a reason to stop.
+- Consensus is context only. It never suppresses a finding or lowers
+  confidence, except through a named environmental reason (INTERMISSION,
+  TARGET_UNAVAILABLE, FORCED_DOWNTIME, PHASE_TRANSITION).
+
+### M14-C: Strategy-context representation
+
+```autopilot
+status: READY
+dependsOn: M14-B
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** A structured representation of encounter strategy context derived
+from consensus: common downtime, target transitions, common cooldown holds and
+phase behavior. Each item maps to a named environmental or actionability
+reason where the evidence supports one.
+
+- Context is attached to findings and never becomes rotational authority.
+- Top-log behavior is never correctness: more casts, more uptime, more damage
+  or a higher parse is never truth.
+
+### M14-D: Factual damage-delta decomposition
+
+```autopilot
+status: READY
+dependsOn: M14-A
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/architecture.md` "Milestone 14" (damage diagnosis,
+performance deltas), CLAUDE.md "Damage Output Diagnosis", the M11-G2 damage
+ledgers and the M11-G4-4 DPS comparability rules.
+
+**Scope.** Decompose subject-versus-comparison damage differences factually,
+by ability, target class, window and pet sub-actor tree, as observations.
+
+- No causal claim.
+- Where raw `amount` semantics (follow-up M1) or AT_LEAST comparison coverage
+  limit a figure, it is a bound or UNKNOWN, never a point estimate.
+- "Rupture damage per minute was lower" is allowed. "You failed to cast enough
+  Ruptures" is not.
+
+### M14-E: Causal evidence linkage (internal)
+
+```autopilot
+status: READY
+dependsOn: M14-C, M14-D
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Link damage-delta components to decision-level evidence that could
+support a causal statement:
+
+- APL decision outcomes;
+- cast opportunities and uptime;
+- resource state and buff windows;
+- target choice and cooldown alignment;
+- encounter actionability.
+
+Rules:
+
+- A link records its evidence and its limits.
+- A numeric delta with no decision-level link stays an observation.
+- The authority verifier (spec evaluators, SimulationCraft) and this factual
+  causal analysis stay separate modules. Neither feeds the other's verdicts
+  until a reviewed coaching projection combines them (M14-F).
+- Comparison behavior never moves confidence.
+
+### M14-F: Reviewed diagnosis projection and public integration
+
+```autopilot
+status: READY
+dependsOn: M14-E
+wcl: NONE
+publicContract: EXPECTED
+```
+
+**Scope.** The reviewed coaching projection that combines authority-backed
+findings with linked causal evidence. It exposes diagnosis through the shared
+application service, with structured evidence, UNKNOWN preserved and coverage
+disclosed.
+
+- A causal coaching statement appears only where an authority-backed finding
+  and its decision-level link both exist.
+- Unlinked deltas are labelled observations.
+- Comparison context is attached, never authority.
+
+### M15-A: Finding aggregation and prioritization foundation
+
+```autopilot
+status: READY
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/architecture.md` "Milestone 15", CLAUDE.md "Timing
+Tolerance", "Findings" and "Reporting".
+
+**Scope.** Aggregate repeated small findings into patterns, and rank
+structured findings by evidence quality and actionability.
+
+- Ranking consumes structured findings only; reporting never invents one.
+- UNKNOWN, NO_AUTHORITY_AVAILABLE, SUPPRESSED and unsupported results are
+  carried and labelled. They never rank as failures and never inflate
+  confidence.
+- Aggregation thresholds are configurable and documented.
+
+### M15-B: TLDR from trustworthy findings
+
+```autopilot
+status: READY
+dependsOn: M15-A
+wcl: NONE
+publicContract: EXPECTED
+```
+
+**Scope.** A short TLDR generated from the prioritized trustworthy findings
+and the analysis coverage.
+
+- It always discloses partial coverage: "we could only analyze part of this
+  fight" is distinct from "found little to fix".
+- It never turns UNKNOWN into certainty or SUPPRESSED into failure.
+- Exposed through the shared service: REST and MCP identical.
+
+### M15-C: Evidence-grounded impact estimation
+
+```autopilot
+status: OWNER_DECISION_REQUIRED
+dependsOn: M15-B
+wcl: NONE
+publicContract: NONE
+ownerDecision: What authority may estimate a finding's impact. Options: the published SimulationCraft model, which today exists only for Blood on 69933, with every other spec or build reporting UNKNOWN; observed factual deltas from M14-D, which are bounds and never causal by themselves; or no numeric impact, only an evidence-quality and actionability ordering. This sets what "impact" means on every report.
+```
+
+**Direction.** `agent/architecture.md` "Milestone 15" (impact estimation),
+CLAUDE.md "Confidence" (confidence must not simply reflect the size of a
+difference).
+
+### M15-D: Advanced report presentation
+
+```autopilot
+status: READY
+dependsOn: M15-B
+wcl: NONE
+publicContract: EXPECTED
+```
+
+**Scope.** Richer markdown and JSON report rendering from structured findings:
+
+- grouped by decision category;
+- each finding with its evidence ("why did it tell me this?") and
+  actionability;
+- suppressions with their machine-readable reasons;
+- a coverage section.
+
+Presentation only: no new findings, no re-evaluation, no Warcraft Logs
+access.
+
+### M15-E: Optional scoring
+
+```autopilot
+status: OWNER_DECISION_REQUIRED
+dependsOn: M15-C
+wcl: NONE
+publicContract: EXPECTED
+ownerDecision: Whether the product shows a score at all, and if so its scale, what it summarizes (which decision categories, and whether impact from M15-C contributes), and how low coverage is disclosed in it. UNKNOWN, NO_AUTHORITY_AVAILABLE and unsupported results never contribute a penalty under any choice.
+```
+
+**Direction.** `agent/architecture.md` "Milestone 15": optional scoring, and
+only trustworthy findings may influence a score.
+
+### M15-F: Product hardening and final coverage disclosure
+
+```autopilot
+status: READY
+dependsOn: M15-D, M13-F, M14-F
+wcl: NONE
+publicContract: EXPECTED
+```
+
+**Scope.** End-to-end hardening across the public surfaces:
+
+- consistent coverage disclosure on every report shape (supported, partial,
+  unsupported specialization, raid night);
+- REST and MCP parity;
+- negative tests from CLAUDE.md "Mandatory Negative-Test Philosophy" over the
+  integrated reports.
+
+No new analysis capability.
+
+### M11-G4-5-R: Register a 12.1.5 simulation model
+
+```autopilot
+status: BLOCKED
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+```
+
+**DEFERRED by owner decision (2026-11-02). This is not an open owner
+decision.** The 12.1.5 / 70575 model is NOT registered: the supervisor never
+selects this entry, and it is no longer an OWNER_DECISION_REQUIRED blocker.
+The full decision is in `agent/follow-ups.md` ("After M11-G4-5") and
+`agent/architecture.md` ("M11-G4-5 — 12.1.5 compatibility review").
+
+**Re-open trigger.** Create a FRESH, reviewed model-registration tranche
+(never revive the current candidate) only when BOTH hold:
+
+- a later upstream SimulationCraft snapshot fixes the Mythic difficulty /
+  tank-load issue, or otherwise restores an explicitly reviewed, stable
+  tank-load meaning;
+- the Blood validation window overlaps a provable deployment interval under
+  the existing snapshot-equivalence rules.
+
+EU coverage stays independently optional and never blocks this.

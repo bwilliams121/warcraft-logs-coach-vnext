@@ -29,6 +29,29 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M13-B: what the stated specializations do not establish
+
+**Raised:** M13-B (2026-11-02).
+
+- **No role.** Nothing says which specializations heal, tank or damage.
+  "Other-healer coverage" (After M12-C, After M12-D) needs a reviewed,
+  versioned specialization-to-role source in runtime data, never a list
+  typed into a role module.
+- **No class/specialization compatibility check.** A stated name that is
+  not a specialization of the player's class (a corrupt "Restoration
+  Warrior") is carried verbatim as STATED. Refusing it needs a reviewed
+  class-to-specialization table with provenance; none exists. Today the
+  only per-player identity check is the identity preflight's, for the
+  analysed subject.
+- **No public surface.** No contract reads the field. Recipient
+  specialization reaches only the internal, unregistered Augmentation
+  evaluator.
+- **One fight context per ingestion.** A stated specialization is the
+  fight's, never the night's: raid-night roster discovery keeps its own
+  per-fight `specName`, and nothing reconciles the two.
+
+---
+
 ## After M13-A: what the Augmentation Foundation does not yet do
 
 **Raised:** M13-A (2026-11-02).
@@ -47,8 +70,9 @@ current total (5,748,495 bytes), with what each row buys.
   per recipient specialization; only a caller can supply them today. A
   shared, reviewed cross-specialization registry is the missing piece, and
   a spec evaluator may not import another specialization's data.
-- **No recipient specialization.** The fight context's `friendlySpecs` is
-  not carried into `CombatFight`; recipients carry class (`subType`) only.
+- **No recipient specialization.** Resolved by M13-B:
+  `CombatFight.friendlySpecializations`, and each LISTED recipient's
+  `specialization` (see "After M13-B").
 - **A Mythic wipe, one subject.** No kill was available in the fixed order;
   no second subject is authorized.
 - **Breath of Eons auras are observations only.** The pinned sources bind no
@@ -125,7 +149,9 @@ current total (5,748,495 bytes), with what each row buys.
   synthetic fights only.
 - **No "who else is a healer".** Other-healer coverage proper still needs
   specialization identity for every roster player; the evaluator reads only
-  its own subject's identity.
+  its own subject's identity. Since M13-B every roster player's stated
+  specialization is on `CombatFight`; a reviewed specialization-to-role
+  source is what remains ("After M13-B").
 - **The healing domain has one consumer.** The M12-A milestone guard
   (`tests/contracts/m12a-healing-layering.test.ts`) now names this evaluator;
   the "no consumer" notes in the M12-A, M12-B and M12-C entries below are
@@ -708,6 +734,55 @@ carries no normalization revision.
 
 **Raised:** M11-G4-5 (2026-10-29). Nothing is registered. Each item is an
 owner decision or an upstream event.
+
+**OWNER DECISION (2026-11-02): DEFERRED; do NOT register the 12.1.5 / 70575
+model yet.** This is a deliberate deferral, not an open decision. The
+autopilot queue entry M11-G4-5-R is `BLOCKED` with its re-open trigger.
+
+1. **Tank-load meaning: WAIT FOR AN UPSTREAM SIMULATIONCRAFT FIX.**
+   - Never register 70575 under STANDARD_TANK_LOAD_V1: the Mythic tank dummy
+     no longer represents the approved incoming-damage load.
+   - Never accept the broken Mythic-dummy behavior as a new normal just to
+     register 12.1.5.
+   - Never patch the engine locally.
+   - Why: the 70575 data moved the Mythic expected-stat modifier from
+     difficulty 16 to 233 while the engine still reads 16, so physical
+     incoming damage, and with it Blood healing, change materially. Reusing
+     STANDARD_TANK_LOAD_V1 would silently change the meaning of an approved
+     model.
+   - A later upstream snapshot that fixes the difficulty lookup may be
+     evaluated as a NEW candidate.
+2. **Blood validation window: KEEP THE SNAPSHOT-BOUNDED EVIDENCE STANDARD.**
+   - A weaker basis such as "no newer Live snapshot existed as of a recorded
+     check" is never introduced to extend the window.
+   - A window extends only when a later Live snapshot exists and is verified
+     Blood-equivalent under the existing rules.
+   - Why: the current candidate's verified window ends before the first
+     provable 70575 US fight. Weakening the basis would trade correctness for
+     latency, and simulation publication is not worth weakening fail-closed
+     semantics.
+3. **EU coverage: DEFERRED.** US-only coverage is acceptable for now.
+   - EU fights keep failing closed as `REGION_NOT_COVERED` until EU restart
+     and deployment evidence is deliberately curated under the US source
+     rules.
+   - Future US model registration is never blocked on EU evidence.
+4. **Current result.** The 70575 candidate stays NOT REGISTERED. Logs
+   resolving to 12.1.5 / 70575 keep returning the existing typed
+   model-not-available result, with no fallback to an older model.
+5. **Re-open trigger.** Revisit only when BOTH hold:
+   - a later upstream SimulationCraft snapshot fixes the Mythic difficulty
+     and tank-load issue, or otherwise restores an explicitly reviewed,
+     stable tank-load meaning;
+   - the Blood validation window overlaps a provable deployment interval under
+     the existing snapshot-equivalence rules.
+
+   Then create a FRESH, reviewed model-registration tranche; the current
+   candidate is never silently revived. EU coverage stays independently
+   optional and may be added later.
+6. **Not done by this decision.** No model registration, no Warcraft Logs
+   request, no deployment.
+
+The items below are kept as the record of the options considered.
 
 - **Tank-load meaning.** Under the 70575 data, SimulationCraft's Mythic tank
   dummy loses the Mythic armor-constant modifier (×1.649). The data moved

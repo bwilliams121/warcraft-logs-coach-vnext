@@ -398,6 +398,7 @@ export async function ingestFightCore(
       },
       actors: actors.actors,
       abilities: abilities.abilities,
+      friendlySpecializations: fight.friendlySpecializations,
       talentImport: { actorId: request.talentImportActorId, code: fight.talentImportCode },
       // M8 context, from the SAME context response as everything above — no
       // second round trip, and therefore the same report snapshot and the same

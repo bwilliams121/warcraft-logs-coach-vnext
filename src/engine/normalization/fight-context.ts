@@ -8,9 +8,15 @@
 
 import { isRecord, readInteger, readNullableInteger, readString } from "../../wcl/decode.js";
 import type { RawFightContextReport } from "../../wcl/fight-context-query.js";
+import { isUsableSpecName, readFriendlyRoster, resolvePlayerActor } from "../../wcl/report-roster-facts.js";
 import { normalizeAbilities, type AbilityCatalog } from "./abilities.js";
 import { normalizeActors, type ActorCatalog } from "./actors.js";
 import { mapFinality, type CombatPhase, type FightFinality } from "./combat-fight.js";
+import type {
+  FriendlySpecializations,
+  SpecializationUnknownReason,
+  StatedSpecialization,
+} from "./friendly-specializations.js";
 import {
   normalizeEncounterOutcome,
   normalizeZone,
@@ -31,6 +37,8 @@ export interface NormalizedFightHeader {
   readonly finality: FightFinality;
   readonly inProgressRaw: boolean | null;
   readonly friendlyPlayers: readonly number[];
+  /** M13-B: each player in `friendlyPlayers`, with its stated specialization or why none is established. */
+  readonly friendlySpecializations: FriendlySpecializations;
   readonly talentImportCode: string | null;
   /**
    * Pull-level outcome metadata, verbatim.
@@ -141,6 +149,65 @@ function normalizePhases(
   return phases;
 }
 
+function notEstablished(reason: SpecializationUnknownReason): StatedSpecialization {
+  return { state: "UNKNOWN", reason };
+}
+
+/**
+ * M13-B: every friendly player's stated specialization, from the raw fight
+ * record and the report's raw actor list. See `friendly-specializations.ts`.
+ *
+ * The rules are `report-roster-facts.ts`'s, called and never restated: the
+ * alignment of `friendlyPlayers` with `friendlySpecs`, the strict resolution of
+ * the id to one Player actor with a name and a class, and what counts as a
+ * usable specialization string. Each player fails closed alone; only a
+ * misaligned roster refuses everyone, because then no index can be trusted.
+ *
+ * `friendlyPlayers` is the header's own list, so the keys are exactly the
+ * roster the model already holds. Actor id `0` is real; comparisons are `===`.
+ */
+export function readFriendlySpecializations(
+  rawFight: Record<string, unknown>,
+  rawActors: readonly unknown[],
+  friendlyPlayers: readonly number[],
+): FriendlySpecializations {
+  const byActorId = new Map<number, StatedSpecialization>();
+  const roster = readFriendlyRoster(rawFight);
+
+  for (const actorId of friendlyPlayers) {
+    if (byActorId.has(actorId)) continue;
+    if (roster === undefined) {
+      byActorId.set(actorId, notEstablished("ROSTER_NOT_ALIGNED"));
+      continue;
+    }
+    const indexes = roster.friendlyPlayers.flatMap((id, index) => (id === actorId ? [index] : []));
+    const index = indexes[0];
+    if (index === undefined) {
+      // Unreachable while both lists come from one record; closed, not assumed.
+      byActorId.set(actorId, notEstablished("ROSTER_NOT_ALIGNED"));
+      continue;
+    }
+    if (indexes.length > 1) {
+      byActorId.set(actorId, notEstablished("DUPLICATE_PARTICIPANT"));
+      continue;
+    }
+    const actor = resolvePlayerActor(rawActors, actorId);
+    if (!actor.ok) {
+      byActorId.set(actorId, notEstablished(actor.reason));
+      continue;
+    }
+    const specName = roster.friendlySpecs[index];
+    byActorId.set(
+      actorId,
+      isUsableSpecName(specName)
+        ? { state: "STATED", specName, className: actor.actor.className, rosterIndex: index }
+        : notEstablished("NOT_STATED"),
+    );
+  }
+
+  return { source: "WCL_FIGHT_CONTEXT_FRIENDLY_SPECS", byActorId };
+}
+
 export function normalizeFightContext(report: RawFightContextReport, fightId: number): FightContextOutcome {
   if (report.fights.length === 0) {
     return { ok: false, reason: "FIGHT_NOT_FOUND" };
@@ -176,6 +243,7 @@ export function normalizeFightContext(report: RawFightContextReport, fightId: nu
   }
 
   const inProgressRaw = readBooleanOrNull(rawFight, "inProgress");
+  const friendlyPlayers = readIntegerArray(rawFight, "friendlyPlayers");
 
   return {
     ok: true,
@@ -191,7 +259,8 @@ export function normalizeFightContext(report: RawFightContextReport, fightId: nu
       durationMs: endTimeMs - startTimeMs,
       finality: mapFinality(inProgressRaw),
       inProgressRaw,
-      friendlyPlayers: readIntegerArray(rawFight, "friendlyPlayers"),
+      friendlyPlayers,
+      friendlySpecializations: readFriendlySpecializations(rawFight, report.actors, friendlyPlayers),
       // Documented null for Classic and pre-Dragonflight fights. Recorded
       // unparsed: decoding it into talent ids needs runtime game data.
       talentImportCode: readString(rawFight, "talentImportCode") ?? null,

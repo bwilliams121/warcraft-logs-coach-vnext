@@ -4198,6 +4198,30 @@ derived from the raw bytes independently.
   only the engine, holds no spell id, compares no class, declares no
   judgement word, and has exactly one named consumer.
 
+**Recipient specialization state (M13-B).** The negative cases:
+
+- `tests/unit/m13b-friendly-specializations.test.ts`: a missing, blank,
+  null, non-string or literal "unknown" entry is UNKNOWN / NOT_STATED and
+  never a default; a misaligned roster (short, long, absent or non-array
+  specs, or a non-integer participant) refuses every player rather than
+  zipping; a duplicated participant, a pet, an NPC, an id missing from the
+  catalog, an ambiguous id, the `-1` sentinel, an actor record with no type
+  and a player with no class are each UNKNOWN with their own rule, and none touches another player; actor
+  id `0` is stated like any other; an actor outside the roster (an owned
+  pet, an enemy) is NOT_IN_FRIENDLY_ROSTER, never its owner's; a cast of
+  another specialization's ability never establishes one; every focused
+  view, under either scope, holds the core's same object; a refused roster
+  leaves `friendlyPlayers` and the ingestion unchanged. Real evidence: the
+  committed M13-A fight context states all twenty players' specializations
+  with their classes.
+- `tests/unit/specs/augmentation-evoker-evaluator.test.ts`: on the real
+  fight the thirteen Ebon Might recipients carry their own stated
+  specializations, and a pet recipient is NOT_IN_FRIENDLY_ROSTER, never its
+  owner's. `src/support/` stays free of specialization vocabulary
+  (`tests/contracts/m13a-support-layering.test.ts`, unchanged).
+- `tests/contracts/normalization-boundary.test.ts`: the revision is pinned
+  at `m3.5`, and the new model file exposes no `unknown`.
+
 ---
 
 # Healer Per-Cast Authority Negative Test

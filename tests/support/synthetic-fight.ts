@@ -47,6 +47,7 @@ import type { EncounterOutcomeFacts, ZoneMetadata } from "../../src/engine/norma
 import type { StreamCompleteness } from "../../src/wcl/retrieval-types.js";
 import type { CombatActor } from "../../src/engine/normalization/actors.js";
 import type { CombatAbility } from "../../src/engine/normalization/abilities.js";
+import type { FriendlySpecializations } from "../../src/engine/normalization/friendly-specializations.js";
 import {
   sourceRef,
   targetRef,
@@ -416,6 +417,17 @@ export interface SyntheticFightOptions {
   readonly categories?: Partial<Record<EvidenceCategory, CategoryEvidence>> | undefined;
   /** Actor scope applied to every category built from `observedCategories`. `null` means all actors. */
   readonly actorScope?: readonly number[] | null | undefined;
+  /** M13-B stated specializations. Defaults to none stated for anyone. */
+  readonly friendlySpecializations?: FriendlySpecializations | undefined;
+}
+
+/**
+ * No stated specialization for anyone: every lookup is UNKNOWN /
+ * NOT_IN_FRIENDLY_ROSTER. The honest default for a test that has not said what
+ * Warcraft Logs stated.
+ */
+export function noFriendlySpecializations(): FriendlySpecializations {
+  return { source: "WCL_FIGHT_CONTEXT_FRIENDLY_SPECS", byActorId: new Map() };
 }
 
 export function syntheticFight(options: SyntheticFightOptions = {}): CombatFight {
@@ -518,6 +530,7 @@ export function syntheticFight(options: SyntheticFightOptions = {}): CombatFight
     },
     actors: options.actors ?? new Map(),
     abilities: options.abilities ?? new Map(),
+    friendlySpecializations: options.friendlySpecializations ?? noFriendlySpecializations(),
     talentImportCode: null,
     phases: options.phases ?? [],
     events: options.events ?? [],
@@ -545,6 +558,8 @@ export interface SyntheticCoreOptions {
   readonly encounterOutcome?: EncounterOutcomeFacts | undefined;
   /** M8-C report-level context. Defaults to no zone. */
   readonly zone?: ZoneMetadata | undefined;
+  /** M13-B stated specializations. Defaults to none stated for anyone. */
+  readonly friendlySpecializations?: FriendlySpecializations | undefined;
 }
 
 /**
@@ -657,6 +672,7 @@ export function syntheticFightCore(options: SyntheticCoreOptions = {}): Normaliz
     },
     actors: options.actors ?? new Map(),
     abilities: options.abilities ?? new Map(),
+    friendlySpecializations: options.friendlySpecializations ?? noFriendlySpecializations(),
     phases: options.phases ?? [],
     events: options.events ?? [],
     malformedObservations: options.malformedObservations ?? [],
