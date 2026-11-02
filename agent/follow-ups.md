@@ -29,6 +29,34 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M14-D: what the damage-delta decomposition does not establish
+
+**Raised:** M14-D (2026-11-02).
+
+- **No amount delta below the whole fight.** The subject has only the G1 raid
+  entry: no per-actor or window tables. So per-ability and windowed amount
+  deltas are UNKNOWN, and only event counts decompose there. Per-actor
+  tables for the subject (a new, owner-authorized request) would make them
+  table-against-table.
+- **Raw amounts never subtract** until follow-up M1 proves what `amount`
+  means. Then a proven measure (for example `OBSERVED_EFFECTIVE_DAMAGE_SUM`)
+  can be decomposed the same way.
+- **Event counts against the comparisons are bounds.** Every comparison
+  capture is uncertified (After M11-G2). An upper bound proves only
+  `SUBJECT_LOWER`, never `SUBJECT_HIGHER`. Certification would make the
+  counts EXACT.
+- **A damage event is not damage.** A count includes every observed damage
+  event, whatever its size or raw hit type. A count delta says how many
+  events differed, not how much damage.
+- **Same log version only.** Tables under different log versions are never
+  subtracted. Whether a log-version change alters table semantics is
+  unmeasured.
+- **No cause.** A delta is an observation. Linking one to decision-level
+  evidence (APL outcomes, cast opportunities, uptime, actionability) is
+  M14-E.
+
+---
+
 ## After M14-C: what strategy context does not establish
 
 **Raised:** M14-C (2026-11-02).

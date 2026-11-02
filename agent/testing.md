@@ -1653,6 +1653,20 @@ strategy context (M14-C, tests/unit/m14c-strategy-context.test.ts, same G2 layer
   TARGET_UNAVAILABLE / FORCED_DOWNTIME         -> never named (no evidence source)
   real fights                                  -> 22 focus-behavior items, no reason; phase evidence UNKNOWN per fight
   attachment                                   -> reasons in effect at the moment; CONTEXT_ONLY, no suppression, no confidence
+damage-delta decomposition (M14-D, tests/unit/m14d-damage-delta.test.ts, same G2 layering guard):
+  EXACT - EXACT / EXACT - AT_LEAST             -> EXACT / NO_MORE_THAN, never EXACT against an uncertified capture
+  bound with the wrong sign                    -> direction UNDECIDED (real boss-subtype rate vs COHORT261)
+  component absent: COMPLETE / uncertified     -> EXACT 0 / UNKNOWN NO_INFORMATIVE_LOWER_BOUND, never zero
+  raw amount delta, even both EXACT            -> UNKNOWN RAW_AMOUNT_MEANING_NOT_PROVEN (M1)
+  table vs table                               -> EXACT (real raid entry 45,802,009 vs 59,295,730 / 58,873,321 / 62,896,995)
+  subject has no per-actor table               -> every per-ability table delta UNKNOWN
+  pet not listed / no raid entry / log version -> NOT_LISTED_IN_TABLE / NO_RAID_ENTRY / LOG_VERSION_DIFFERS, never zero
+  focus-only table amount                      -> UNKNOWN TABLE_STATES_NO_FOCUS_ONLY_AMOUNT (never total minus pets)
+  pet kinds / target classes                   -> by game id across reports / one class with or without an enemy list
+  aligned window on a bound / outside fight    -> UNKNOWN ANCHOR_NOT_EXACT / WINDOW_OUTSIDE_RECORDED_FIGHT, never clipped
+  equal rates, different durations             -> EQUAL in integer arithmetic
+  sentences                                    -> only for a proven direction; no causal or prescriptive word
+  every decomposition                          -> OBSERVATION_ONLY, causalClaim NONE, NOT_COMBINED, residual NOT_COMPUTED, no finding effect
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

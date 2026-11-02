@@ -632,11 +632,13 @@ comparison facts.
 ### M14-C: Strategy-context representation
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M14-B
 branch: autopilot/m14-c
 wcl: NONE
 publicContract: NONE
+pr: 27
+mergeSha: 0f1c9827039602ae5f083c9fe94773684d4dac65
 ```
 
 **Scope.** A structured representation of encounter strategy context derived
@@ -651,8 +653,9 @@ reason where the evidence supports one.
 ### M14-D: Factual damage-delta decomposition
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M14-A
+branch: autopilot/m14-d
 wcl: NONE
 publicContract: NONE
 ```
