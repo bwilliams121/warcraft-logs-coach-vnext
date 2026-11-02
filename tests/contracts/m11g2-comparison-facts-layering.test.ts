@@ -60,6 +60,8 @@ describe("W: post-hoc G2 modules cannot feed authority", () => {
   it("found every G2 module", () => {
     expect(FACTS).toEqual([
       "src/comparison-facts/cast-facts.ts",
+      // M14-B: multi-log consensus, under the same post-hoc rules.
+      "src/comparison-facts/consensus.ts",
       "src/comparison-facts/cooldown-windows.ts",
       "src/comparison-facts/damage-ledger.ts",
       "src/comparison-facts/environment-profile.ts",

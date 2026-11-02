@@ -29,6 +29,34 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M14-B: what multi-log consensus does not establish
+
+**Raised:** M14-B (2026-11-02).
+
+- **The thresholds are CANDIDATE.** Minimum sample 3, agreement 2/3 and a
+  5 s tolerance were chosen, not measured. Validating them needs more real
+  comparison fights of phased encounters with certified (EXACT) anchors.
+  Until then every outcome cites the CANDIDATE set by id. "Done" is a
+  recorded validation and a `VALIDATED` set.
+- **No real consensus exists yet.** Every comparison anchor except the
+  recorded end is NO_LATER_THAN (After M11-G2), so every target-transition
+  and cooldown-window row is INSUFFICIENT. Certifying the comparison captures
+  (M13-D-style table certificates) is what would make them decisive.
+- **One tolerance for every landmark.** An intermission start and a recorded
+  end may deserve different tolerances. Per-nature tolerances wait for the
+  validation above.
+- **Independence is not checked.** Two comparison fights by the same player
+  or guild count as two voters. The comparison selection decides who is in
+  the cohort; consensus does not deduplicate players.
+- **A bound never votes.** A NO_LATER_THAN anchor earlier than every group
+  member does prove that fight disagrees, but it abstains. That only makes
+  SPLIT rarer (INSUFFICIENT instead), never CONSENSUS more likely.
+- **No named environmental reason.** Mapping an ENCOUNTER_STATE consensus to
+  INTERMISSION or PHASE_TRANSITION, with the subject's own encounter
+  evidence, is M14-C.
+
+---
+
 ## After M14-A: what timing alignment does not establish
 
 **Raised:** M14-A (2026-11-02).

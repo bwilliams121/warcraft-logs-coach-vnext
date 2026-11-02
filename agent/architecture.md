@@ -10823,6 +10823,65 @@ uncertified.
 - The first 30 s after pull: the subject has EXACT 78 cast and 172 damage
   events; the comparisons have AT_LEAST counts.
 
+## M14-B — Multi-log consensus (post-hoc)
+
+Milestone 14 (autopilot queue entry M14-B). Public contract: NONE. No
+Warcraft Logs request: the M14-A alignment of the committed archive fights.
+
+**Question.** "Do the comparison fights agree on when this landmark
+happened?" `src/comparison-facts/consensus.ts` reads only an M14-A
+alignment's anchors and slices no fight. It lives in the M11-G2 post-hoc
+domain, under the same layering guard.
+
+**Outcomes** (CLAUDE.md "Comparison Consensus"), per landmark except `PULL`
+(offset 0 by definition):
+
+- `CONSENSUS`: a unique tolerance-wide group of EXACT comparison anchors that
+  has at least the minimum sample AND is at least the agreement share of ALL
+  comparison fights. It carries the group's fight refs and their own min/max
+  values, never a mean.
+- `SPLIT`: the decisive anchors already prove that no group can qualify, even
+  if every abstaining fight joined the largest group
+  (`DISAGREEMENT_PROVEN`), or two different groups of the same size qualify
+  (`NO_UNIQUE_AGREEING_GROUP`). No value is carried.
+- `INSUFFICIENT`: fewer decisive anchors than the minimum sample
+  (`BELOW_MINIMUM_SAMPLE`), or abstentions could still decide
+  (`ABSTENTIONS_COULD_DECIDE`). No value is carried.
+
+**Voters.** Comparison fights only; the subject never votes. Only an EXACT
+anchor is a value. NO_LATER_THAN (uncertified capture) and UNKNOWN anchors
+abstain with their reason. An abstention counts in the share's denominator
+and never as agreeing. The same rule as the APL short-circuit: an undecided
+voter can block consensus, never manufacture it.
+
+**Thresholds** are one named, versioned data set,
+`COMPARISON_CONSENSUS_THRESHOLDS_V1` (`M14B_COMPARISON_CONSENSUS_V1`,
+status `CANDIDATE`): minimum sample 3, agreement 2/3 (an integer fraction,
+so no floating-point boundary), tolerance 5000 ms, inclusive. Callers may
+pass another set. Every set is validated first: a minimum sample below 2
+(one parse as consensus), a share that is not a strict majority, a
+non-integer or negative tolerance, or an empty id is REFUSED.
+
+**Context only.** Every evaluation carries `use: CONTEXT_ONLY` and
+`findingEffect: { suppression: NONE, confidence: NONE }`, and nothing outside
+the post-hoc domain may import it. Each row names its `nature`:
+`ENCOUNTER_STATE` (phase, intermission), `FOCUS_BEHAVIOR` (first damage on an
+NPC, cooldown window) or `FIGHT_RECORD` (recorded end). Only an
+ENCOUNTER_STATE consensus can ever back a named environmental reason, and
+mapping it to one (INTERMISSION, PHASE_TRANSITION, ...) together with the
+subject's own encounter evidence is M14-C's job. A FOCUS_BEHAVIOR consensus
+says what comparison players did, never what was right.
+
+**Real evidence** (three uncertified comparisons):
+
+- `RECORDED_FIGHT_END` (329.4 / 336.3 / 359.9 s) is SPLIT,
+  DISAGREEMENT_PROVEN, under 5 s. A 31 s tolerance makes it CONSENSUS over
+  exactly that range, which proves the thresholds are live configuration.
+- All 22 FOCUS_BEHAVIOR rows (3 target transitions, 19 Dancing Rune Weapon
+  ordinals) are INSUFFICIENT with 0 decisive votes: every comparison anchor
+  is a bound.
+- No ENCOUNTER_STATE row exists: no fight holds phase evidence (After M14-A).
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
