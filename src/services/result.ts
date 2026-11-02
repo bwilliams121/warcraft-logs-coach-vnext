@@ -14,6 +14,7 @@ import type { DiagnosisOutcome } from "../diagnosis/diagnosis.js";
 import type { SpecAnalysisEnvelope } from "../findings/analysis-envelope.js";
 import type { SpecId } from "../findings/finding.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import type { FightTldr } from "../reporting/tldr.js";
 import type { FightIdentity } from "../wcl/types.js";
 import type { IngestionScope } from "./ingestion-scope.js";
 import type { RaidCooldownPlanDisclosure } from "./raid-cooldown-plan-disclosure.js";
@@ -171,7 +172,8 @@ export interface ServiceError {
  * plus the identity the analysis was run against. It does not reshape, rank,
  * summarise or reinterpret anything the analyzer said — an application layer
  * that edited a gameplay result would be a second analyzer with a smaller
- * vocabulary.
+ * vocabulary. The diagnosis and the TLDR sit BESIDE the result, built from
+ * its published view by their own modules, and never edit it.
  *
  * THIS IS NOT A WIRE CONTRACT. `analysis` is the analyzer's internal type, and
  * it may contain more structure than any interface should publish. Projecting a
@@ -232,6 +234,13 @@ export interface FightAnalysis {
    * envelopes no diagnosis ran for (raid night).
    */
   readonly diagnosis?: DiagnosisOutcome;
+  /**
+   * The TLDR (M15-B), built LAST, from the restated findings of the view and
+   * the preparation report plus the coverage, by `src/reporting/`. It edits
+   * nothing it summarizes. The single-fight service sets it on every status;
+   * absent on constructed analyses and on raid-night cells.
+   */
+  readonly tldr?: FightTldr;
 }
 
 /**

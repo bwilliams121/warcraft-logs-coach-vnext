@@ -331,6 +331,85 @@ function projectDiagnosis(outcome: DiagnosisOutcome) {
   } as const;
 }
 
+type TldrOutcome = NonNullable<FightAnalysis["tldr"]>;
+type TldrConsumableOutcome = Extract<
+  Extract<TldrOutcome, { assessment: "ASSESSED" }>["preparation"],
+  { assessment: "ASSESSED" }
+>["healthPotion"];
+
+function projectTldrConsumable(consumable: TldrConsumableOutcome) {
+  return consumable.countState === "OBSERVED"
+    ? { countState: consumable.countState, count: consumable.count }
+    : { countState: consumable.countState };
+}
+
+/** The TLDR, field for field (M15-B). Nothing is derived or reworded here. */
+function projectTldr(tldr: TldrOutcome) {
+  if (tldr.assessment === "NOT_ASSESSED")
+    return { assessment: tldr.assessment, revision: tldr.revision, reason: tldr.reason } as const;
+  const { gameplay, preparation, damageDiagnosis } = tldr;
+  return {
+    assessment: tldr.assessment,
+    revision: tldr.revision,
+    assessmentScope: tldr.assessmentScope,
+    headline: tldr.headline,
+    gameplay:
+      gameplay.status === "ANALYZED"
+        ? {
+            status: gameplay.status,
+            eligibleDecisions: gameplay.eligibleDecisions,
+            resolvedDecisions: gameplay.resolvedDecisions,
+            unknownDecisions: gameplay.unknownDecisions,
+            excludedCasts: gameplay.excludedCasts,
+          }
+        : { status: gameplay.status },
+    highlights: tldr.highlights.map((highlight) => ({
+      position: highlight.position,
+      itemKind: highlight.itemKind,
+      category: highlight.category,
+      standing: highlight.standing,
+      subjectToken: highlight.subjectToken,
+      occurrences: highlight.occurrences,
+      firstFightTimeMs: highlight.firstFightTimeMs,
+      lastFightTimeMs: highlight.lastFightTimeMs,
+      evidence: highlight.evidence.map(projectLocator),
+    })),
+    divergences: {
+      items: tldr.divergences.items,
+      records: tldr.divergences.records,
+      actionableRecords: tldr.divergences.actionableRecords,
+      notListedItems: tldr.divergences.notListedItems,
+    },
+    notAssessed: tldr.notAssessed.map((row) => ({
+      category: row.category,
+      disposition: row.disposition,
+      records: row.records,
+    })),
+    preparation:
+      preparation.assessment === "ASSESSED"
+        ? {
+            assessment: preparation.assessment,
+            healthPotion: projectTldrConsumable(preparation.healthPotion),
+            healthstone: projectTldrConsumable(preparation.healthstone),
+            combatPotion: projectTldrConsumable(preparation.combatPotion),
+          }
+        : { assessment: preparation.assessment, reason: preparation.reason },
+    damageDiagnosis:
+      damageDiagnosis === null
+        ? null
+        : damageDiagnosis.assessment === "ASSESSED"
+          ? { assessment: damageDiagnosis.assessment, statements: damageDiagnosis.statements }
+          : { assessment: damageDiagnosis.assessment, reason: damageDiagnosis.reason },
+    disclosures: [...tldr.disclosures],
+    lines: [...tldr.lines],
+    magnitude: tldr.magnitude,
+    findingEffect: {
+      confidence: tldr.findingEffect.confidence,
+      suppression: tldr.findingEffect.suppression,
+    },
+  } as const;
+}
+
 /**
  * Common fields, identical across every status.
  *
@@ -358,6 +437,8 @@ function projectCommon(analysis: FightAnalysis) {
     ...(analysis.raidCooldownPlan === undefined
       ? {}
       : { raidCooldownPlan: projectRaidCooldownPlan(analysis.raidCooldownPlan) }),
+    // Only when the service built one (M15-B); the single-fight service always does.
+    ...(analysis.tldr === undefined ? {} : { tldr: projectTldr(analysis.tldr) }),
     // `analysis.scope` is NOT projected. It is ingestion orchestration — which
     // evidence to fetch — and publishing it would let a retrieval setting be
     // read as analysis completeness. The coverage block is what discloses that.

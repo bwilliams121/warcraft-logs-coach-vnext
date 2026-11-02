@@ -338,6 +338,8 @@ describe("nothing below the contract may import it", () => {
     "src/wcl",
     // M14-F: the diagnosis projection sits below the contract too.
     "src/diagnosis",
+    // M15-B: the TLDR's reporting module too.
+    "src/reporting",
   ];
 
   for (const root of LOWER_ROOTS) {

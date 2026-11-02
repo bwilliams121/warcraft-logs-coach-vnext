@@ -41,10 +41,10 @@
  *
  * Records group only when EVERYTHING that decides their standing is equal:
  * producer, category, specialization, disposition, authority, reason code,
- * suppression reason, state evidence, actionability and the producer's
- * aggregation key. So a pattern has exactly its members' standing, a proven
- * member is never diluted by an unproven one, and an UNKNOWN never pools
- * with a divergence. A group at or above its category threshold is reported
+ * suppression reason, state evidence, actionability, the producer's
+ * aggregation key and its subject token. So a pattern has exactly its
+ * members' standing and subject, a proven member is never diluted by an
+ * unproven one, and an UNKNOWN never pools with a divergence. A group at or above its category threshold is reported
  * as one PATTERN item; below it, every member stays a SINGLE item.
  */
 
@@ -124,6 +124,7 @@ export interface ReportItem {
   readonly stateEvidence: StateEvidenceState;
   readonly actionability: ActionabilityLevel;
   readonly aggregationKey: string | null;
+  readonly subjectToken: string | null;
   /** Members by fight time, then id. One for a SINGLE. */
   readonly findingIds: readonly string[];
   readonly occurrences: number;
@@ -270,6 +271,7 @@ function groupKeyOf(record: ReportableFinding): string {
     record.stateEvidence,
     record.actionability,
     record.aggregationKey,
+    record.subjectToken,
   ]);
 }
 
@@ -304,6 +306,7 @@ function itemOf(members: readonly ReportableFinding[], itemKind: ReportItem["ite
     stateEvidence: first.stateEvidence,
     actionability: first.actionability,
     aggregationKey: first.aggregationKey,
+    subjectToken: first.subjectToken,
     findingIds: members.map((member) => member.findingId),
     occurrences: members.length,
     firstFightTimeMs: times.length === 0 ? null : Math.min(...times),

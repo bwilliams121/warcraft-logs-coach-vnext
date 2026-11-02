@@ -64,6 +64,7 @@ function rec(fields: Partial<ReportableFinding> = {}): ReportableFinding {
     fightTimeMs: next * 100,
     evidence: [loc(next)],
     aggregationKey: null,
+    subjectToken: null,
     ...fields,
   };
 }

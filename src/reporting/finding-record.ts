@@ -168,4 +168,11 @@ export interface ReportableFinding {
   readonly evidence: readonly EvidenceLocator[];
   /** Null: never aggregated. Otherwise equal keys (with equal standing) may form a pattern. */
   readonly aggregationKey: string | null;
+  /**
+   * What the finding is about, as the producer named it (the observed action
+   * token for a decision), or null. Carried verbatim for display (M15-B) and
+   * compared for aggregation, so a pattern has one subject. Never ranked on,
+   * never parsed.
+   */
+  readonly subjectToken: string | null;
 }

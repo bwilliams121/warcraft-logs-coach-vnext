@@ -29,6 +29,27 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M15-B: what the TLDR does not establish
+
+**Raised:** M15-B (2026-11-02).
+
+- **Two producers feed it.** The TLDR summarizes the observed-decision view
+  and the preparation report, the two restated producers. Healer assignment
+  results, Augmentation support observations and diagnosis statements are
+  disclosed only as a state (diagnosis) or not at all, until each has a
+  reviewed M15-A adapter.
+- **No highlight is actionable on real evidence.** Every real divergence
+  stands `DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN` (After M15-A), so
+  the TLDR always says the authority's alternative was not proven possible.
+- **`maxHighlights` = 3 is a presentation choice**, not validated with
+  readers. It changes no finding; the rest are counted and disclosed.
+- **Prose is English templates.** `lines` are fixed sentences over the
+  structured fields; no localization, and consumers should read the fields.
+- **Raid night carries no TLDR.** Its contract is unchanged; a per-cell or
+  per-night summary needs its own decision about what a night-level
+  coverage sentence says.
+
+---
 ## After M15-A: what finding prioritization does not establish
 
 **Raised:** M15-A (2026-11-02).
@@ -51,8 +72,7 @@ current total (5,748,495 bytes), with what each row buys.
 - **The view adapter's aggregation key is shared-code-defined** (outcome +
   observed token + reason). A specialization that needs a different notion of
   "the same pattern" should own its key through its registration.
-- **Not wired.** Nothing calls `prioritizeFindings` in the service; M15-B
-  exposes it with the TLDR.
+- **Wired by M15-B** through the TLDR (see "After M15-B").
 
 ---
 

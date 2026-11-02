@@ -11272,6 +11272,81 @@ actionable**: the view proves only the observed cast. The leading item is the
 45-occurrence Heart Strike rejection pattern, standing
 `DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN`.
 
+## M15-B — TLDR from trustworthy findings
+
+Milestone 15 (autopilot queue entry M15-B). Public contract: EXPECTED, an
+additive optional `tldr` block on every status under `analysis/1`. No
+Warcraft Logs request: synthetic views and the committed M11-G2 subject fight
+through the service with in-memory doubles.
+
+**Question.** "In a few lines, what did this analysis establish, and how much
+of the fight could it examine?" `src/reporting/tldr.ts` restates the
+registration's observed-decision view and the preparation report through the
+M15-A adapters, prioritizes them, and summarizes. It creates no finding:
+every highlight is a prioritized item, every count is a producer's own.
+
+**Coverage first.** `assessmentScope` is the literal PARTIAL, the first line
+is always the coverage sentence, and `disclosures` is never empty. The
+headline speaks about the analyzed decisions only:
+
+- `GAMEPLAY_NOT_ANALYZED`: no analyzer ran, or it did not analyze. "This is
+  not evidence of clean play."
+- `NO_DECISION_RESOLVED`: analyzed, nothing resolved; nothing is claimed.
+- `AUTHORITY_DIVERGENCES_IN_ANALYZED_DECISIONS`: at least one prioritized
+  item.
+- `NO_AUTHORITY_DIVERGENCE_IN_ANALYZED_DECISIONS`: resolved decisions, none
+  rejected, "not the whole fight".
+
+So "we could only analyze part of this fight" (coverage line, disclosures)
+is always stated apart from "found little to fix" (headline).
+
+**What it carries.** Gameplay coverage (eligible, resolved, UNKNOWN,
+excluded) read from the view; up to `maxHighlights` (default 3,
+`fight-tldr-config/1`, integer 1..10, a presentation choice) prioritized
+items with position, kind, category, standing, the producer's
+`subjectToken`, occurrences, time span and decision locators; divergence
+counts including `notListedItems` and `actionableRecords`; a tally of
+carried non-assessments by category and disposition; each consumable as
+OBSERVED with its count or UNKNOWN with none; the diagnosis state;
+`magnitude: NOT_USED`; `findingEffect` NONE; and author-templated `lines`
+over those fields. The structured fields are the contract.
+
+**Never.** UNKNOWN is counted, never highlighted, and an UNKNOWN consumable
+has no count. SUPPRESSED is tallied, never highlighted. Highlights keep the
+prioritized order (evidence quality, then actionability); no magnitude,
+damage, comparison or confidence is read. A highlight whose alternative is
+unproven says so.
+
+**Fail closed** (`NOT_ASSESSED` with a reason, never a partial summary): an
+invalid config, an output an adapter refuses, a record prioritization
+refuses, or a view whose coverage counts disagree with its own decisions
+(`COVERAGE_INCONSISTENT`).
+
+**M15-A record change.** `ReportableFinding` gains `subjectToken` (the
+observed action token from the view adapter, null for preparation). It is in
+the aggregation group key, so a pattern has one subject; ranking never reads
+it.
+
+**Service and layering.** The single-fight service builds the TLDR last,
+beside the result, on every status (the unsupported path too), and attaches
+it to `FightAnalysis.tldr`. It reads the diagnosis state through one
+restating function (`tldrDiagnosisOf`: assessed or not, and the statement
+count), so `src/reporting/` never imports the diagnosis domain; the M14-F
+guard admits exactly that one reading. `src/reporting/` is imported only by
+the service and the result type; the public projection reads the TLDR
+through the result type and copies it field by field. REST and MCP publish
+the same projection. Raid-night cells carry no TLDR.
+
+**Contract.** Every TLDR vocabulary is declared in
+`src/contracts/analysis-contract.ts` and pinned to the reporting module's by
+`tests/contracts/m15b-tldr-contract.test.ts`. No key names a score, rank,
+rating, percentage or correctness (the M6-C sweep runs over it).
+
+**Real evidence** (the subject's Blood analysis): headline
+`AUTHORITY_DIVERGENCES_IN_ANALYZED_DECISIONS`, counts equal to the view's
+coverage, the 45-occurrence `heart_strike` pattern first with standing
+`DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN`, 0 actionable records, 224
+UNKNOWN rotation decisions tallied, diagnosis NOT_ASSESSED disclosed.
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

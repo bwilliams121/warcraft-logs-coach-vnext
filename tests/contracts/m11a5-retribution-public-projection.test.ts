@@ -43,6 +43,7 @@ import {
 } from "../../src/contracts/analysis-contract.js";
 import { projectAnalysisResult } from "../../src/contracts/analysis-projection.js";
 import { DIAGNOSIS_NOT_RETRIEVED } from "../../src/diagnosis/diagnosis.js";
+import { withExpectedTldr } from "../support/tldr.js";
 import type { CombatState } from "../../src/engine/state/combat-state.js";
 import { ANALYSIS_STATUSES } from "../../src/findings/analysis-envelope.js";
 import { analyzeFight, type AnalysisServiceDeps } from "../../src/services/analysis-service.js";
@@ -113,7 +114,8 @@ function identityFor(state: CombatState, actorId: number): FightIdentity {
 
 /** The application envelope the service builds around a Retribution analysis. */
 function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId = RET_ACTOR): FightAnalysis {
-  return {
+  // M15-B: with the TLDR the service builds beside it.
+  return withExpectedTldr({
     identity: identityFor(state, actorId),
     specId: "paladin/retribution",
     analyzerId: RETRIBUTION_PALADIN_ANALYZER_ID,
@@ -124,7 +126,7 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId = RET_A
     observedDecisions: RETRIBUTION_PALADIN_REGISTRATION.observedDecisionView(analysis),
     // As the service builds it (M14-F): no comparison evidence is retrieved.
     diagnosis: DIAGNOSIS_NOT_RETRIEVED,
-  };
+  });
 }
 
 const INPUTS: readonly {

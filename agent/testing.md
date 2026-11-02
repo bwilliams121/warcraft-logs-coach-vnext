@@ -1702,7 +1702,20 @@ finding prioritization (M15-A, tests/unit/m15a-finding-prioritization.test.ts, c
   view adapter                                 -> OBSERVED_EXECUTION is OBSERVED_EXECUTION_ONLY, never actionable; unreviewed word refuses
   real Blood fight                             -> 0 refused, 0 actionable, 224 UNKNOWN carried, leading item the 45-occurrence pattern
   every result                                 -> magnitude NOT_USED; no confidence/severity/score/impact field
-  layering                                     -> reads restated inputs only; no comparison-facts, WCL or evaluator import; no importer yet
+  layering                                     -> reads restated inputs only; no comparison-facts, WCL or evaluator import; importers: service + result type (M15-B)
+fight TLDR (M15-B, tests/unit/m15b-fight-tldr.test.ts, contracts/m15b-tldr-contract.test.ts):
+  every status                                 -> assessmentScope PARTIAL, coverage sentence first, >= 1 disclosure; schema forbids COMPLETE / empty
+  nothing resolved vs none diverged            -> NO_DECISION_RESOLVED vs NO_AUTHORITY_DIVERGENCE_IN_ANALYZED_DECISIONS; both still PARTIAL
+  unsupported specialization                   -> GAMEPLAY_NOT_ANALYZED, no highlights, "not evidence of clean play", consumables still summarized
+  UNKNOWN decisions                            -> counted and tallied, never highlighted
+  UNKNOWN consumable                           -> { countState: UNKNOWN } with no count; "UNKNOWN (not zero)"; schema forbids a count
+  SUPPRESSED record                            -> tallied as not assessed, never highlighted or counted as a divergence
+  refused record / unreviewed word / bad config -> NOT_ASSESSED with its reason, never a partial summary
+  coverage disagreeing with the view's decisions -> NOT_ASSESSED COVERAGE_INCONSISTENT; a divergence without analyzed gameplay too
+  highlights                                   -> the prioritized order, standing carried, rest counted + DIVERGENCES_NOT_LISTED; input order irrelevant
+  sentences                                    -> no correctness, blame or score word
+  real Blood fight                             -> counts equal the view's coverage; 45-occurrence heart_strike pattern first; 0 actionable; 224 UNKNOWN
+  public projection                            -> schema-valid, equals the internal TLDR, highlights locate published decisions; nothing else changes
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

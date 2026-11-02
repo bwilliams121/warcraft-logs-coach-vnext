@@ -8,9 +8,12 @@ import { describe, expect, it } from "vitest";
  *                    observed-decision view type, the preparation status
  *                    type and kind list; never the post-hoc comparison-facts
  *                    domain, whose one outside reader stays src/diagnosis/
- *   importers        none yet (M15-B wires it to the service); never an
- *                    analyzer, SimulationCraft, finding, shared analysis,
- *                    role or Warcraft Logs module
+ *   importers        since M15-B only the analysis service (which builds the
+ *                    TLDR beside the result) and the service result type;
+ *                    never an analyzer, SimulationCraft, finding, shared
+ *                    analysis, role, diagnosis or Warcraft Logs module, and
+ *                    not the public projection (it reads the TLDR through
+ *                    the result type)
  *   no raw data      no Warcraft Logs, combat state or normalization import,
  *                    so reporting cannot inspect raw data to invent a finding
  */
@@ -51,6 +54,7 @@ describe("finding prioritization's place in the tree", () => {
       "src/reporting/finding-record.ts",
       "src/reporting/prioritization.ts",
       "src/reporting/restatement.ts",
+      "src/reporting/tldr.ts",
     ]);
   });
 
@@ -74,7 +78,7 @@ describe("finding prioritization's place in the tree", () => {
     expect(runtime).toEqual(["src/reporting/restatement.ts -> src/data/game/preparation-consumables.ts"]);
   });
 
-  it("nothing imports it yet", () => {
+  it("is imported only by the analysis service and the service result type (M15-B)", () => {
     const edges = paths.flatMap((path) =>
       path.startsWith("src/reporting/")
         ? []
@@ -83,7 +87,10 @@ describe("finding prioritization's place in the tree", () => {
             .filter((target) => target.startsWith("src/reporting/"))
             .map((target) => `${path} -> ${target}`),
     );
-    expect(edges).toEqual([]);
+    expect(edges).toEqual([
+      "src/services/analysis-service.ts -> src/reporting/tldr.ts",
+      "src/services/result.ts -> src/reporting/tldr.ts",
+    ]);
   });
 
   it("names no confidence, severity, score or impact field", () => {

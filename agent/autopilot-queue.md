@@ -730,11 +730,13 @@ disclosed.
 ### M15-A: Finding aggregation and prioritization foundation
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/m15-a
 wcl: NONE
 publicContract: NONE
+pr: 31
+mergeSha: 6fa228b94f655417bda5f88204a607af31b66b13
 ```
 
 **Direction.** `agent/architecture.md` "Milestone 15", CLAUDE.md "Timing
@@ -752,8 +754,9 @@ structured findings by evidence quality and actionability.
 ### M15-B: TLDR from trustworthy findings
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M15-A
+branch: autopilot/m15-b
 wcl: NONE
 publicContract: EXPECTED
 ```
