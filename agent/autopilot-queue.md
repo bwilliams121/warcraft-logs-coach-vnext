@@ -708,11 +708,13 @@ Rules:
 ### M14-F: Reviewed diagnosis projection and public integration
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M14-E
 branch: autopilot/m14-f
 wcl: NONE
 publicContract: EXPECTED
+pr: 30
+mergeSha: 58fe668a879bcead275683a68e03cbd6b31646d5
 ```
 
 **Scope.** The reviewed coaching projection that combines authority-backed
@@ -728,8 +730,9 @@ disclosed.
 ### M15-A: Finding aggregation and prioritization foundation
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
+branch: autopilot/m15-a
 wcl: NONE
 publicContract: NONE
 ```

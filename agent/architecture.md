@@ -11185,6 +11185,93 @@ statement**. The twelve whole-fight M14-E links are
 `DIRECTION_UNDECIDED`. Decision evidence: 307 records, 83 resolved, 224
 UNKNOWN, none outside every component.
 
+## M15-A — Finding aggregation and prioritization foundation
+
+Milestone 15 (autopilot queue entry M15-A). Internal: no public contract
+change, nothing wired into the service yet (M15-B does that). No Warcraft
+Logs request: synthetic records and the committed M11-G2 subject fight.
+
+**Question.** "Of the structured findings the producers already made, which
+deserve attention first, and which repeat enough to be one pattern?"
+`src/reporting/` reads restated records only. It queries nothing,
+re-evaluates nothing and creates no finding: every output item is one input
+record or a group of them, and every input appears exactly once, in an item
+or in `refused`.
+
+**The restated record** (`finding-record.ts`, `ReportableFinding`). Producer
+vocabularies stay with their producers. One reviewed adapter per producer
+(`restatement.ts`) maps the producer's status words onto a disposition and
+copies the rest; an unreviewed word refuses the whole restatement. The
+record carries an explicit authority (`NO_AUTHORITY_AVAILABLE` exactly when
+the disposition is), `stateEvidence` PROVEN/INCOMPLETE, an actionability
+level, locators, and the producer's own opaque `aggregationKey` (null: never
+aggregated). It has no confidence, severity, score or impact field.
+
+Dispositions: `AUTHORITY_DIVERGENCE` (an APL REJECTED), `AUTHORITY_CONSISTENT`,
+`OBSERVED_FACT`, and the non-assessments `SUPPRESSED` (with one of
+CLAUDE.md's four named environmental reasons), `UNKNOWN`,
+`NO_AUTHORITY_AVAILABLE` and `UNSUPPORTED`, each with a reason code. There
+is no separate negative-actionability disposition: `m5c1-gcd-semantics`
+admits no such vocabulary in `src/` beyond the one assignment outcome, so a
+proven restriction is carried as SUPPRESSED with its named reason.
+Actionability levels, strongest first: `DECISION_PROVEN_ACTIONABLE`,
+`OBSERVED_EXECUTION_ONLY` (the observed cast proves that ability usable,
+never the authority's alternative), `NOT_EVALUATED`, `UNKNOWN`. There is no
+ACTIONABLE default.
+
+**Adapters.** Observed-decision view: REJECTED → divergence, MATCH →
+consistent, both PROVEN; UNKNOWN → UNKNOWN with the decisive blocker class,
+else the basis; `OBSERVED_EXECUTION` → `OBSERVED_EXECUTION_ONLY`,
+`NOT_ESTABLISHED` → `NOT_EVALUATED`; key = outcome + observed token +
+reason. Preparation consumable status: all three kinds, always; OBSERVED →
+`OBSERVED_FACT` (a zero under COMPLETE coverage is a fact, never a failure),
+UNKNOWN → UNKNOWN with the sorted unknown codes; never aggregated.
+
+**Sections** (`prioritization.ts`, `finding-prioritization/1`):
+
+- `prioritized`: divergences only, and only with PROVEN state and at least
+  one locator; a divergence without either is refused, not ranked. Ordered by
+  state evidence, then actionability standing
+  (`ACTIONABLE_AUTHORITY_DIVERGENCE`,
+  `DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN`,
+  `DIVERGENCE_ACTIONABILITY_NOT_ESTABLISHED`), then occurrences, category,
+  first fight time and item id. Only the first standing is actionable.
+- `informational`: consistent results and observed facts. Never failures.
+- `carried`: every non-assessment, labelled with its reason. Never ranked.
+- `refused`: records with a named problem (duplicate id, unknown vocabulary,
+  missing authority or reason, authority/disposition mismatch, suppression
+  without a named reason or a reason on anything else, empty key, bad time).
+
+The result states `magnitude: NOT_USED` and `findingEffect: { confidence:
+NONE, suppression: NONE, score: NONE }`. `summary.includesNonAssessments` is
+true whenever anything is carried or refused, so the set cannot read as a
+complete assessment.
+
+**Aggregation** (`aggregation-config.ts`, `finding-aggregation/1`). Records
+group only when producer, category, specialization, disposition, authority,
+reason code, suppression reason, state evidence, actionability and key are
+all equal, so a pattern has exactly its members' standing and nothing is
+diluted or inflated. A group at or above its category's
+`minOccurrencesForPattern` (default 3, per-category overrides, integer ≥ 2)
+is one PATTERN item with its members, first/last time and the union of their
+locators; below it, each member is a SINGLE. An invalid config refuses the
+whole call rather than being applied. Order is independent of input order.
+
+**Layering** (`tests/contracts/m15a-reporting-layering.test.ts`).
+`src/reporting/` imports only itself, the locator type, the observed-decision
+view type, the preparation status type and the preparation kind list (its only
+runtime import). It never imports the post-hoc comparison-facts domain: the
+suppression reasons are declared locally and pinned equal to M14-C's
+`EnvironmentalReason` by a test. Nothing imports it yet.
+
+**Real evidence** (the subject's Blood analysis, through the service): 307
+decisions and 3 consumable kinds restate with nothing refused. The 83
+resolved decisions split into informational MATCHes and prioritized
+rejections; 224 UNKNOWN decisions are carried. **No divergence is
+actionable**: the view proves only the observed cast. The leading item is the
+45-occurrence Heart Strike rejection pattern, standing
+`DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN`.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
