@@ -36,6 +36,7 @@ import {
 } from "../../../src/engine/normalization/event-normalizer.js";
 import type { CombatActor } from "../../../src/engine/normalization/actors.js";
 import { normalizeFightContext } from "../../../src/engine/normalization/fight-context.js";
+import type { FriendlySpecializations } from "../../../src/engine/normalization/friendly-specializations.js";
 import { VERIFIED_DIRECTION_FIELDS } from "../../../src/engine/normalization/raw-event-fields.js";
 import {
   indexContracts,
@@ -460,7 +461,11 @@ function catalogOf(
   catalog: CatalogEvidence,
   source: CaptureSource,
   window: TimeRangeMs,
-): { readonly actors: ReadonlyMap<number, CombatActor>; readonly evidence: CategoryEvidence } {
+): {
+  readonly actors: ReadonlyMap<number, CombatActor>;
+  readonly friendlySpecializations: FriendlySpecializations;
+  readonly evidence: CategoryEvidence;
+} {
   const catalogSource = catalog.record.provenance.source;
   if (
     catalog.record.payloadKind !== "WCL_GRAPHQL_DATA" ||
@@ -486,6 +491,8 @@ function catalogOf(
   const degraded = normalized.actors.unusableEntryCount > 0;
   return {
     actors: normalized.actors.actors,
+    // M13-B: decoded from the same context by the production rules.
+    friendlySpecializations: normalized.fight.friendlySpecializations,
     evidence: {
       capability: "OBSERVABLE",
       source: EVIDENCE_CAPABILITY_REGISTRY.ACTORS,
@@ -640,7 +647,9 @@ export function bundleOverEvidence(
     startTimeMs: window.fromReportTimeMs,
     endTimeMs: window.toReportTimeMs,
     categories,
-    ...(catalog === null ? {} : { actors: catalog.actors }),
+    ...(catalog === null
+      ? {}
+      : { actors: catalog.actors, friendlySpecializations: catalog.friendlySpecializations }),
     ...(roster === null ? {} : { scope: "FULL_RAID" as const, friendlyActorsInScope: roster }),
   });
   return { fight, coveredRanges, holes, events: rawEvents.length };

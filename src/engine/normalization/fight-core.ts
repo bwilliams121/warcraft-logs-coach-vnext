@@ -123,6 +123,8 @@ export interface NormalizedFightCore {
 
   readonly actors: ReadonlyMap<number, CombatActor>;
   readonly abilities: ReadonlyMap<number, CombatAbility>;
+  /** M13-B. Actor-independent: report-context identity, shared by every view. */
+  readonly friendlySpecializations: CombatFight["friendlySpecializations"];
   readonly phases: readonly CombatPhase[];
 
   /** Retrieval order. Never re-sorted, never deduplicated. */
@@ -148,8 +150,9 @@ export interface NormalizedFightCore {
    * `ReportFight.friendlyPlayers`, verbatim. The raid, as the API reports it.
    *
    * Held because evidence-scope derivation needs to know which actors are ally
-   * raid state. It is NOT a roster model and carries no specs — `friendlySpecs`
-   * is deliberately absent, because nothing at this boundary reads it.
+   * raid state. It is NOT a roster model and carries no specs: the stated
+   * specializations are `friendlySpecializations` (M13-B), decoded under the
+   * shared roster rules rather than zipped against this list.
    */
   readonly friendlyPlayers: readonly number[];
 
@@ -277,6 +280,8 @@ export function focusedFightFor(
     fight: core.fight,
     actors: core.actors,
     abilities: core.abilities,
+    // Report-context identity, like `actors`: the same object for every view.
+    friendlySpecializations: core.friendlySpecializations,
     // The code belongs to ONE actor. Carrying another player's build here would
     // be a fabricated fact, so every other view gets `null`.
     //

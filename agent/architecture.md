@@ -9374,6 +9374,22 @@ a 12.1.5 model yet.** Nothing is registered. Analyzer authority stays on
 33622e9d, and 0a72e6a7 stays the only Blood production model for 69933.
 Promotion needs the owner decisions listed at the end.
 
+**Owner decision (2026-11-02): DEFERRED, not registered.**
+
+- **Tank load.** Wait for an upstream SimulationCraft fix to the Mythic
+  difficulty lookup: never STANDARD_TANK_LOAD_V1 on 70575, never a new
+  normal for the broken dummy, never a local engine patch.
+- **Validation window.** Keep the snapshot-bounded Blood standard: no weaker
+  window basis.
+- **EU.** Coverage is deferred, and EU stays `REGION_NOT_COVERED`.
+- **Today.** 12.1.5 / 70575 logs keep the typed model-not-available result,
+  with no fallback.
+- **Re-open.** Only as a fresh, reviewed registration tranche, once an
+  upstream fix AND a validation window overlapping a provable deployment
+  interval both exist.
+
+The full decision is in `agent/follow-ups.md` ("After M11-G4-5").
+
 ### What Live is, and when
 
 - Current Live is **12.1.5.70575** in every region (version server). It is the
@@ -10615,6 +10631,68 @@ under the 2026-10-11 rule the slices grant nothing: the corpus contract
 gained the capture-query kind `FILTERED_EVENT_STREAMS`, and the loader's
 FILTERED_CAPTURE_GRANTED rule covers it. Everything read from this evidence
 is OBSERVED_ONLY. See `tests/evidence/m13a-augmentation-capture.md`.
+
+## M13-B — Recipient specialization state in the combat model
+
+Milestone 13 (autopilot queue entry M13-B). Public contract: NONE. No
+Warcraft Logs request: the field is decoded from the fight context every
+ingestion already retrieves.
+
+**What changed.** `CombatFight.friendlySpecializations` (and the same object
+on `NormalizedFightCore`) holds, for every id in the fight's
+`friendlyPlayers`, the Warcraft Logs-stated specialization as observed
+identity (`src/engine/normalization/friendly-specializations.ts`):
+
+- `STATED`: the `friendlySpecs` entry at the player's roster index,
+  verbatim, with the player's class (`subType`) and the index. The class
+  travels with it because one name is several specializations
+  ("Restoration", "Holy", "Frost").
+- `UNKNOWN` with the rule that refused it, never a default:
+  - `NOT_STATED`: missing, blank, non-string, or WCL's literal "unknown";
+  - `ROSTER_NOT_ALIGNED`: the two arrays are not index-aligned (length
+    mismatch, missing, or a non-integer participant), so EVERY player is
+    refused, never zipped to the shorter list;
+  - `DUPLICATE_PARTICIPANT`;
+  - the shared actor-resolution failures (`NOT_IN_CATALOG`, including the
+    `-1` sentinel; `AMBIGUOUS_ACTOR_ID`; `NOT_A_PLAYER`;
+    `ACTOR_RECORD_MALFORMED`; `IDENTITY_UNUSABLE` for a player with no
+    class);
+  - `NOT_IN_FRIENDLY_ROSTER` from the lookup `statedSpecializationOf`, for
+    a pet, an enemy or a player who sat the pull out. A pet never inherits
+    its owner's specialization.
+
+**One set of rules.** The decoder (`readFriendlySpecializations` in
+`fight-context.ts`) calls `report-roster-facts.ts`'s `readFriendlyRoster`,
+`resolvePlayerActor` and `isUsableSpecName`, the rules the identity
+preflight and roster discovery already share. Nothing is inferred from
+class or from abilities cast. A refused player fails closed alone; ingestion
+never fails on this field, and `friendlyPlayers` is unchanged.
+
+**Scope.** Report-context identity, like the actor catalog's class: every
+focused view, under PLAYER_CONTEXT or FULL_RAID, holds the same object.
+Scope fences absence claims over ally EVENT state (`breadth`,
+`completeness`); a stated specialization is neither. Whether a decision may
+read ally state at all is still the evaluator's declared scope.
+
+**What it is not.** No role ("is a healer"), no class/specialization
+compatibility check: both need reviewed runtime game data that does not
+exist yet. A stated name that is not a real specialization of the class is
+carried verbatim (follow-ups "After M13-B").
+
+**First consumer.** The Augmentation evaluator (`/2`): each ally window
+carries `recipientSpecialization`. It is read in the specialization, not in
+`src/support/`, whose M13-A layering guard keeps specialization vocabulary
+out of the shared role module. On the real M13-A fight all 20 friendly
+players are STATED, the thirteen Ebon Might recipients read their own
+specializations, and a pet recipient is NOT_IN_FRIENDLY_ROSTER. No coaching
+reads it.
+
+**Revision.** `NORMALIZATION_REVISION` `m3.4` → `m3.5` (additive shape
+change, as the repository contract requires). As at the M11-G4-1 bump, the
+intentional public delta is the VALUE of every ANALYZED raid-night/1 cell's
+`provenance.normalizationRevision` (`"m3.5"`), so a stored `m3.4` result
+compares NOT_COMPATIBLE. No schema changes; analysis/1 carries no
+normalization revision and its digests are unchanged.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 

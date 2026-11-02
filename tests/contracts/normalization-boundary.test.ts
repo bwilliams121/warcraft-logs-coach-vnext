@@ -143,8 +143,9 @@ describe("the normalized model contains no gameplay vocabulary", () => {
     expect(NORMALIZATION_REVISION).toMatch(/^m\d+\.\d+$/);
     // M11-F: bumped for the M11-E1 and M11-F model changes (shape and meaning).
     // M11-G4-1: bumped for the additive `report.region`.
+    // M13-B: bumped for the additive `friendlySpecializations`.
     // A model change without a bump is what this pin makes visible in review.
-    expect(NORMALIZATION_REVISION).toBe("m3.4");
+    expect(NORMALIZATION_REVISION).toBe("m3.5");
   });
 });
 
@@ -170,6 +171,7 @@ describe("the raw boundary holds", () => {
     const MODEL_SURFACE = [
       "src/engine/normalization/normalized-events.ts",
       "src/engine/normalization/combat-fight.ts",
+      "src/engine/normalization/friendly-specializations.ts",
       "src/engine/normalization/completeness.ts",
       "src/engine/evidence/locator.ts",
       "src/engine/evidence/coverage.ts",

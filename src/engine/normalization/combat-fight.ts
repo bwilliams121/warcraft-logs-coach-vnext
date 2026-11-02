@@ -20,6 +20,7 @@ import type { StreamProvenance } from "../../wcl/retrieval-types.js";
 import type { CombatAbility } from "./abilities.js";
 import type { CombatActor } from "./actors.js";
 import type { FightCompleteness } from "./completeness.js";
+import type { FriendlySpecializations } from "./friendly-specializations.js";
 import type { CombatEvent, MalformedRawObservation } from "./normalized-events.js";
 
 /**
@@ -53,8 +54,12 @@ import type { CombatEvent, MalformedRawObservation } from "./normalized-events.j
  *
  * `m3.4` (M11-G4-1) adds `report.region` (`Report.region.slug` as KNOWN,
  * NOT_SUPPLIED or NOT_RETRIEVED), an additive shape change.
+ *
+ * `m3.5` (M13-B) adds `friendlySpecializations`: each friendly player's
+ * Warcraft Logs-stated specialization, or why none is established. An additive
+ * shape change.
  */
-export const NORMALIZATION_REVISION = "m3.4";
+export const NORMALIZATION_REVISION = "m3.5";
 
 /**
  * Was the FIGHT finished? Entirely separate from whether we RETRIEVED it.
@@ -151,6 +156,14 @@ export interface CombatFight {
 
   readonly actors: ReadonlyMap<number, CombatActor>;
   readonly abilities: ReadonlyMap<number, CombatAbility>;
+  /**
+   * M13-B: each friendly player's Warcraft Logs-stated specialization (the
+   * fight context's `friendlySpecs`), as observed identity. UNKNOWN, with the
+   * rule that refused it, when none is established; never inferred from class
+   * or casts. Report-context identity like `actors`, so it is held for every
+   * friendly player whatever the scope. See `friendly-specializations.ts`.
+   */
+  readonly friendlySpecializations: FriendlySpecializations;
   /**
    * Factual string from `ReportFight.talentImportCode`. NOT parsed in M3.
    *

@@ -22,6 +22,11 @@
  *   span (never "alive"), and the recipient's own casts of caller-identified
  *   cooldowns inside it (NO_COOLDOWN_IDENTITY when none is supplied: no
  *   reviewed cross-specialization cooldown registry exists yet);
+ * - each recipient's Warcraft Logs-stated specialization (M13-B), read from
+ *   `CombatFight.friendlySpecializations`: UNKNOWN with the reason when none
+ *   is established, and a pet recipient is NOT_IN_FRIENDLY_ROSTER, never its
+ *   owner's. Read here rather than in `src/support/`, which holds no
+ *   specialization vocabulary;
  * - the Evoker's own Ebon Might windows;
  * - proven support time per ability (active spans only: continuity
  *   established): always a lower bound, since a carried-in buff is never
@@ -36,6 +41,10 @@
 import { inclusiveRange } from "../../../engine/evidence/coverage.js";
 import type { EvidenceLocator } from "../../../engine/evidence/locator.js";
 import type { CombatFight } from "../../../engine/normalization/combat-fight.js";
+import {
+  statedSpecializationOf,
+  type StatedSpecialization,
+} from "../../../engine/normalization/friendly-specializations.js";
 import { gateAbsenceClaim, type UnknownReason } from "../../../engine/state/state-result.js";
 import {
   AUGMENTATION_SUPPORT_ABILITY_KEYS,
@@ -147,6 +156,8 @@ export function supportTargetingStatus(
 
 export interface RecipientWindowFacts {
   readonly window: SupportAuraWindow;
+  /** M13-B: the recipient's stated specialization, observed identity only. */
+  readonly recipientSpecialization: StatedSpecialization;
   readonly survival: RecipientSurvival;
   readonly cooldownOverlap: CooldownOverlap;
 }
@@ -296,6 +307,10 @@ export function evaluateAugmentationEvoker(input: AugmentationEvokerInput): Augm
         listing: listed.listing,
         windows: toAllies.map((window) => ({
           window,
+          recipientSpecialization: statedSpecializationOf(
+            fight.friendlySpecializations,
+            window.recipient.actorId,
+          ),
           survival: recipientSurvivalDuring(fight, window),
           cooldownOverlap: recipientCooldownOverlap(fight, window, cooldownIdentity),
         })),

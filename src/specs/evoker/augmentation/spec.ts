@@ -6,7 +6,8 @@
  * `friendlySpecs` "Augmentation").
  */
 
-export const AUGMENTATION_EVOKER_EVALUATOR_REVISION = "augmentation-evoker-evaluator/1" as const;
+/** `/2` (M13-B): each ally window carries its recipient's stated specialization. */
+export const AUGMENTATION_EVOKER_EVALUATOR_REVISION = "augmentation-evoker-evaluator/2" as const;
 
 export const AUGMENTATION_EVOKER_WCL_CLASS_NAME = "Evoker";
 export const AUGMENTATION_EVOKER_WCL_SPEC_NAME = "Augmentation";
