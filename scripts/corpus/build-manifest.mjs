@@ -11901,6 +11901,198 @@ const M12D_EVIDENCE_CASES = M12D_SEGMENTS.map(([fromS, toS, , , count]) =>
   ),
 );
 
+// --------------------------------------------------------------------------
+// M13-A (2026-11-02): the ONE bounded Augmentation Evoker capture (owner grant
+// 2026-11-01, agent/autopilot-queue.md "M13-A"). Subject chosen by a fixed
+// neutral order recorded before looking (.probe/m13a/capture-plan.md): the
+// first eligible fight of the best non-empty tier among the ten most recent
+// public reports of zone 53 — a Mythic wipe, no Mythic or Heroic kill with an
+// Augmentation Evoker being listed. 7 Warcraft Logs HTTP requests (1 OAuth, 1
+// listing, 1 context, 1 page each of Casts, filtered Buffs and Deaths, 1
+// revision re-check). Every stream is server-filtered, so nothing is granted.
+// --------------------------------------------------------------------------
+
+const M13A_SANITIZER = "scripts/corpus/sanitize-m13a-augmentation.mjs";
+const M13A_SANITIZER_REVISION = "sanitize-m13a-augmentation-1";
+const M13A_INVOCATION = "node scripts/corpus/sanitize-m13a-augmentation.mjs .probe/m13a <out>";
+const M13A_CODE = "M13AAUGAAAAAAAAA";
+const M13A_CONTEXT = "wcl-m13a-fight-context-aug1-fight-1";
+const M13A_SEGMENT = (name) => `wcl-m13a-aug1-fight-1-support.seg-${name}`;
+const [M13A_START, M13A_END, M13A_SPLIT] = [165857, 316612, 240857];
+const M13A_AURA_FILTER =
+  "ability.id in (395152, 395296, 412707, 413654, 423803, 426404, 225139, 409311, 410089, 403631, 403755, 403758, 409632, 409990, 442204)";
+const M13A_PROBE = (question) =>
+  tooling(
+    ".probe/m13a/capture.probe.ts (temporary, gitignored) through src/wcl/token-provider.ts and graphql-client.ts, with a fetch-level counter refusing a 51st Warcraft Logs HTTP request",
+    UNAVAILABLE,
+    `${question}; planned in .probe/m13a/capture-plan.md before running, run by hand on 2026-11-02 (7 Warcraft Logs HTTP requests in total, cap 50)`,
+  );
+const m13aSource = (captureTooling, rawCaptureLocation, q, comp, ingestionScope) => ({
+  reportCode: M13A_CODE,
+  fightId: 1,
+  reportRevision: 10,
+  sourceActorId: 1,
+  encounterId: 3429,
+  difficulty: 5,
+  capturedOn: "2026-11-02",
+  gameVersion: 1,
+  logVersion: 17,
+  ingestionScope,
+  query: q,
+  completeness: comp,
+  captureTooling,
+  rawCaptureRetained: false,
+  rawCaptureLocation,
+  reportRevisionAfterCapture: 10,
+});
+const m13aScan = {
+  kind: "CREDENTIAL_SHAPE_SCAN",
+  tooling: tooling(M13A_SANITIZER, M13A_SANITIZER_REVISION, "implicit on every write"),
+  detail:
+    "The sanitizer refuses to write a credential-shaped value, the real report code, or any player name or server it saw in the input. Nothing was found.",
+  invalidates: [],
+};
+const M13A_LIMITATIONS = [
+  "The report is a third party's: its code is the pseudonym M13AAUGAAAAAAAAA; names, servers and player gameIDs are not retained.",
+  "A Mythic WIPE: the encounter did not end in a kill.",
+  VERSION_SCOPE,
+];
+const M13A_EVENTS_SOURCE = m13aSource(
+  M13A_PROBE(
+    `events: three server-filtered streams over the whole fight [${String(M13A_START)} .. ${String(M13A_END)}] at limit 10,000, hostilityType Friendlies, no resources`,
+  ),
+  ".probe/m13a/casts.json, auras.json, deaths.json — gitignored, not retained in the repository",
+  {
+    kind: "FILTERED_EVENT_STREAMS",
+    hostilityType: "Friendlies",
+    includeResources: false,
+    limit: 10000,
+    startTimeMs: M13A_START,
+    endTimeMs: M13A_END,
+    streams: [
+      { dataType: "Casts", filterExpression: null, pagesRetrieved: 1, eventsReturned: 3650 },
+      { dataType: "Buffs", filterExpression: M13A_AURA_FILTER, pagesRetrieved: 1, eventsReturned: 498 },
+      { dataType: "Deaths", filterExpression: null, pagesRetrieved: 1, eventsReturned: 19 },
+    ],
+    merge:
+      "Stable merge by timestamp; equal timestamps keep stream order Casts, Buffs, Deaths, then each stream's own order. The relative order of events from different streams at one millisecond is the merge's, never Warcraft Logs'.",
+  },
+  completeness(
+    4167,
+    3,
+    null,
+    "COMPLETE",
+    "Each stream one page with nextPageTimestamp null. COMPLETE for the FILTERED queries only: each stream is what its server filter served. The revision read 10 in the context request and again after the last page.",
+  ),
+  "UNAVAILABLE",
+);
+const M13A_GRANTS_WITHHELD =
+  "NO coverage is granted. Every stream is server-filtered (a dataType family selection, and for auras an ability filterExpression); under the owner rule of 2026-10-11 a filtered capture earns a category grant only by an exact certificate against a trusted WCL table, and none was requested. Every retained event is a real observation; absence from these bytes proves nothing.";
+
+const M13A_EVIDENCE_ARTIFACTS = [
+  artifact(M13A_CONTEXT, graphql(M13A_CONTEXT), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    payloadKind: "WCL_GRAPHQL_DATA",
+    source: m13aSource(
+      M13A_PROBE("fight context: one FIGHT_CONTEXT_QUERY for fight 1 (actorID 1)"),
+      ".probe/m13a/context.json — gitignored, not retained in the repository",
+      { kind: "FIGHT_CONTEXT", fightIds: [1] },
+      completeness(
+        NOT_APPLICABLE,
+        1,
+        NOT_APPLICABLE,
+        "COMPLETE",
+        "A typed, unpaginated GraphQL field: revision 10; fight 1 a WIPE of encounter 3429 difficulty 5 [165,857 .. 316,612], two phase transitions; actor 1 Player / Evoker with Augmentation at its friendlySpecs index; twenty friendly players; exactly [46] state petOwner 1.",
+      ),
+      "FULL_RAID",
+    ),
+    transformations: [
+      {
+        kind: "IDENTIFIER_REMAP",
+        tooling: tooling(M13A_SANITIZER, M13A_SANITIZER_REVISION, M13A_INVOCATION),
+        detail: "report code -> M13AAUGAAAAAAAAA; every actor's name -> Actor<id>.",
+        invalidates: ["ORIGINAL_IDENTIFIERS"],
+      },
+      {
+        kind: "FIELD_REDACTION",
+        tooling: tooling(M13A_SANITIZER, M13A_SANITIZER_REVISION, M13A_INVOCATION),
+        detail:
+          "Every server set to null; every PLAYER's gameID (a stable character identifier) set to null. Report-local actor ids, types, subTypes, petOwner links, NPC and pet gameIDs, abilities, phases, fights and the subject's talent import code untouched. Compact JSON.",
+        invalidates: [],
+      },
+      m13aScan,
+    ],
+    coverageBasis:
+      "Report context, not events: master data, one fight header, phases, abilities and zone. It grants no event coverage. Its actor catalog is complete for the report (master data is unpaginated) and is the identity and ownership authority (WCL subType, petOwner) for the support facts; friendlySpecs establishes the subject's specialization.",
+    retainedFor:
+      "M13-A: the Augmentation Evoker subject's identity (actor 1, Evoker, Augmentation), the friendly roster, and the catalog every buff recipient's identity and ownership is read from.",
+    limitations: [
+      "The talent import code present is the subject's (the query argument), uninterpreted.",
+      "rateLimitData is kept as captured; it carries no identity.",
+      ...M13A_LIMITATIONS,
+    ],
+  }),
+  ...[
+    ["0-75", M13A_START - 1, M13A_SPLIT, 2364],
+    ["75-151", M13A_SPLIT, M13A_END, 1803],
+  ].map(([name, fromMs, toMs, count]) =>
+    artifact(M13A_SEGMENT(name), wcl(M13A_SEGMENT(name)), {
+      root: "EVIDENCE",
+      kind: "SANITIZED_CAPTURE",
+      source: M13A_EVENTS_SOURCE,
+      transformations: [
+        {
+          kind: "SUBSET_SELECTION",
+          tooling: tooling(M13A_SANITIZER, M13A_SANITIZER_REVISION, M13A_INVOCATION),
+          detail: `The three streams merged by the recorded rule, then (${String(fromMs)}, ${String(toMs)}] (fight start + 75 s is the cut): ${String(count)} of 4,167 events. Events verbatim (ids only, no names); compact JSON.`,
+          invalidates: ["PAGINATION_BEHAVIOUR"],
+        },
+        m13aScan,
+      ],
+      coverageBasis: M13A_GRANTS_WITHHELD,
+      retainedFor:
+        "M13-A: real observations of the Augmentation Foundation facts — Ebon Might and Prescience transitions from the Evoker and their recipients, the Evoker's support casts (Breath of Eons included), every friendly player's casts, and friendly deaths — for the shared src/support/ primitives and the Augmentation evaluator.",
+      limitations: [
+        "One of two segments: the bundle of both, with the context as catalog, is the whole fight.",
+        "Auras are ONLY the fifteen Ebon Might, Prescience and Breath of Eons spell ids of the pinned SimulationCraft spell data; no other aura, and no damage, healing, absorb, resource or summon event, was requested.",
+        "Casts and deaths are friendly-sourced or friendly-targeted only (hostilityType Friendlies).",
+        "Raw death events are positive facts only; no death-completeness claim is made.",
+        NO_NAMES,
+        ...M13A_LIMITATIONS,
+      ],
+    }),
+  ),
+];
+const M13A_EVIDENCE_CASES = [
+  [
+    "0-75",
+    2364,
+    "1,698 casts, 350 begincasts, 13 empowerstarts, 12 empowerends, 140 applybuffs, 28 refreshbuffs and 123 removebuffs",
+  ],
+  [
+    "75-151",
+    1803,
+    "1,305 casts, 255 begincasts, 9 empowerstarts, 8 empowerends, 95 applybuffs, 112 removebuffs and 19 deaths",
+  ],
+].map(([name, count, census]) =>
+  kase(
+    `normalization.m13a-aug1-fight-1-support-seg-${name}-normalizes-whole-and-in-order`,
+    M13A_SEGMENT(name),
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/corpus/sanitize-m13a-augmentation.mjs",
+    `The ${count.toLocaleString("en-US")}-event merged support segment (${census}) normalizes with every raw type recognised and every event kept in capture order.`,
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: count }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "The census is of the segment, never of the fight's activity: exactly what the three filtered streams served in its range, and nothing else.",
+    { related: ["tests/unit/specs/augmentation-evoker-evaluator.test.ts"] },
+  ),
+);
+
 const EVIDENCE_CASES = [
   // ---- M11-C4f: the neutral second subject's fixed 165 s window ----
   kase(
@@ -12686,10 +12878,15 @@ const manifest = EVIDENCE_ROOT
   ? {
       contractVersion: 2,
       corpusId: "warcraft-logs-coach-vnext.evidence-archive",
-      artifacts: [...EVIDENCE_ARTIFACTS, ...M12B_EVIDENCE_ARTIFACTS, ...M12D_EVIDENCE_ARTIFACTS].sort(
-        byId("artifactId"),
+      artifacts: [
+        ...EVIDENCE_ARTIFACTS,
+        ...M12B_EVIDENCE_ARTIFACTS,
+        ...M12D_EVIDENCE_ARTIFACTS,
+        ...M13A_EVIDENCE_ARTIFACTS,
+      ].sort(byId("artifactId")),
+      cases: [...EVIDENCE_CASES, ...M12B_EVIDENCE_CASES, ...M12D_EVIDENCE_CASES, ...M13A_EVIDENCE_CASES].sort(
+        byId("caseId"),
       ),
-      cases: [...EVIDENCE_CASES, ...M12B_EVIDENCE_CASES, ...M12D_EVIDENCE_CASES].sort(byId("caseId")),
     }
   : {
       contractVersion: 2,

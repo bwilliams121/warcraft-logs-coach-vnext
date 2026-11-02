@@ -29,6 +29,38 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M13-A: what the Augmentation Foundation does not yet do
+
+**Raised:** M13-A (2026-11-02).
+
+- **Not registered, not published.** Nothing in production calls the
+  Augmentation evaluator. Registering it needs FULL_RAID derivation from
+  `AUGMENTATION_EVOKER_REQUIRED_INPUTS` and a public shape for support
+  observations.
+- **No coverage on the real evidence.** The capture is server-filtered
+  (dataType families and an ability filter, as the grant required), so it
+  grants nothing and every real listing is OBSERVED_ONLY. A COMPLETE real
+  listing needs either an unfiltered capture (which would retrieve damage
+  and healing, outside this grant) or a reviewed table certificate for
+  filtered aura and cast streams. Either is an owner decision.
+- **No recipient cooldown identity.** Overlap needs reviewed cooldown ids
+  per recipient specialization; only a caller can supply them today. A
+  shared, reviewed cross-specialization registry is the missing piece, and
+  a spec evaluator may not import another specialization's data.
+- **No recipient specialization.** The fight context's `friendlySpecs` is
+  not carried into `CombatFight`; recipients carry class (`subType`) only.
+- **A Mythic wipe, one subject.** No kill was available in the fixed order;
+  no second subject is authorized.
+- **Breath of Eons auras are observations only.** The pinned sources bind no
+  aura to the Evoker or an ally; Temporal Wound (an enemy debuff) was not
+  requested.
+- **Recipient-quality model.** SUPPORT_TARGETING stays
+  NO_AUTHORITY_AVAILABLE until an approved, machine-usable model exists;
+  `supportTargetingStatus` is ready to answer UNKNOWN when one is declared
+  without the ally state it needs.
+
+---
+
 ## After M12-E: what the raid cooldown plan input does not yet do
 
 **Raised:** M12-E (2026-10-31).

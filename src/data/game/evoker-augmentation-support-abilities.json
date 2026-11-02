@@ -1,0 +1,83 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_EVOKER_AUGMENTATION_SUPPORT_ABILITIES",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/class_modules/sc_evoker.cpp",
+        "sha256": "91f34b4bcc311efc6c9a8d199dd766af9957a8b3ffd58e8703c3df32885a9976",
+        "byteLength": 378295
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "classId": 13,
+    "className": "Evoker",
+    "specId": 1473,
+    "specName": "Augmentation",
+    "extractedOn": "2026-11-02",
+    "method": "HAND_TRANSCRIBED_FROM_PINNED_TRAIT_ROWS_AND_MODULE_LINES",
+    "methodNote": "Each support ability's cast identity is the verbatim trait_data.inc row of a SPECIALIZATION-tree (tree_index 2) trait of class 13 whose id_spec names 1473. Each aura identity is the verbatim sc_evoker.cpp line that binds the buff to that spell id, at the pinned commit. Nothing else about the spells (cooldown, charges, duration, effect, pandemic) is claimed here.",
+    "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned datasets: CombatFight exposes no client-build key. The build is recorded for traceability."
+  },
+  "supportAbilities": [
+    {
+      "key": "EBON_MIGHT",
+      "displayNameEn": "Ebon Might",
+      "castAbilityGameIds": [395152],
+      "traitRow": "{ 2, 13, 115496,  93198, 1,  0, 120508,  395152,      0,      0,  1,  4, 100,                             \"Ebon Might\", { 1473,    0,    0,    0 }, {    0,    0,    0,    0 },   0, 0 }",
+      "allyAura": {
+        "abilityGameId": 395152,
+        "moduleLine": "make_buff_fallback<evoker_buff_t<stat_buff_t>>( is_ally, *this, \"ebon_might\", evoker->find_spell( 395152 ) );"
+      },
+      "selfAura": {
+        "abilityGameId": 395296,
+        "moduleLine": "talent.ebon_might_self_buff = find_spell( 395296 );"
+      },
+      "additionalCastLines": []
+    },
+    {
+      "key": "PRESCIENCE",
+      "displayNameEn": "Prescience",
+      "castAbilityGameIds": [409311],
+      "traitRow": "{ 2, 13, 115675,  93358, 1,  8, 120687,  409311,      0,      0,  6,  6, 100,                             \"Prescience\", { 1473,    0,    0,    0 }, {    0,    0,    0,    0 },   0, 0 }",
+      "allyAura": {
+        "abilityGameId": 410089,
+        "moduleLine": "talent.prescience_buff = find_spell( 410089 );"
+      },
+      "selfAura": null,
+      "additionalCastLines": []
+    },
+    {
+      "key": "BREATH_OF_EONS",
+      "displayNameEn": "Breath of Eons",
+      "castAbilityGameIds": [403631, 442204],
+      "traitRow": "{ 2, 13, 115536,  93234, 1,  0, 120548,  403631, 357210,      0,  4,  4, 100,                         \"Breath of Eons\", { 1473,    0,    0,    0 }, {    0,    0,    0,    0 },   0, 0 }",
+      "allyAura": null,
+      "selfAura": null,
+      "additionalCastLines": [
+        {
+          "abilityGameId": 442204,
+          "moduleLine": "talent.scalecommander.maneuverability_breath_of_eons  = find_spell( 442204 );"
+        }
+      ]
+    }
+  ]
+}

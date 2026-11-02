@@ -6262,6 +6262,303 @@
           "Region only: the deployment interval it is resolved against comes from src/data/simulation-context/, not from Warcraft Logs."
         ]
       }
+    },
+    {
+      "artifactId": "wcl-m13a-aug1-fight-1-support.seg-0-75",
+      "path": "artifacts/wcl-events/wcl-m13a-aug1-fight-1-support.seg-0-75.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "fb1fb8f51bcc85e1e0165b755e0cf81b83e1229596b019b8f9d65f8ba576daf8",
+      "byteLength": 236664,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "M13AAUGAAAAAAAAA",
+          "fightId": 1,
+          "reportRevision": 10,
+          "sourceActorId": 1,
+          "encounterId": 3429,
+          "difficulty": 5,
+          "capturedOn": "2026-11-02",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "FILTERED_EVENT_STREAMS",
+            "hostilityType": "Friendlies",
+            "includeResources": false,
+            "limit": 10000,
+            "startTimeMs": 165857,
+            "endTimeMs": 316612,
+            "streams": [
+              {
+                "dataType": "Casts",
+                "filterExpression": null,
+                "pagesRetrieved": 1,
+                "eventsReturned": 3650
+              },
+              {
+                "dataType": "Buffs",
+                "filterExpression": "ability.id in (395152, 395296, 412707, 413654, 423803, 426404, 225139, 409311, 410089, 403631, 403755, 403758, 409632, 409990, 442204)",
+                "pagesRetrieved": 1,
+                "eventsReturned": 498
+              },
+              {
+                "dataType": "Deaths",
+                "filterExpression": null,
+                "pagesRetrieved": 1,
+                "eventsReturned": 19
+              }
+            ],
+            "merge": "Stable merge by timestamp; equal timestamps keep stream order Casts, Buffs, Deaths, then each stream's own order. The relative order of events from different streams at one millisecond is the merge's, never Warcraft Logs'."
+          },
+          "completeness": {
+            "eventsReturned": 4167,
+            "pagesRetrieved": 3,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Each stream one page with nextPageTimestamp null. COMPLETE for the FILTERED queries only: each stream is what its server filter served. The revision read 10 in the context request and again after the last page."
+          },
+          "captureTooling": {
+            "name": ".probe/m13a/capture.probe.ts (temporary, gitignored) through src/wcl/token-provider.ts and graphql-client.ts, with a fetch-level counter refusing a 51st Warcraft Logs HTTP request",
+            "revision": "UNAVAILABLE",
+            "invocation": "events: three server-filtered streams over the whole fight [165857 .. 316612] at limit 10,000, hostilityType Friendlies, no resources; planned in .probe/m13a/capture-plan.md before running, run by hand on 2026-11-02 (7 Warcraft Logs HTTP requests in total, cap 50)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m13a/casts.json, auras.json, deaths.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 10
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13a-augmentation.mjs",
+              "revision": "sanitize-m13a-augmentation-1",
+              "invocation": "node scripts/corpus/sanitize-m13a-augmentation.mjs .probe/m13a <out>"
+            },
+            "detail": "The three streams merged by the recorded rule, then (165856, 240857] (fight start + 75 s is the cut): 2364 of 4,167 events. Events verbatim (ids only, no names); compact JSON.",
+            "invalidates": ["PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13a-augmentation.mjs",
+              "revision": "sanitize-m13a-augmentation-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, the real report code, or any player name or server it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "NO coverage is granted. Every stream is server-filtered (a dataType family selection, and for auras an ability filterExpression); under the owner rule of 2026-10-11 a filtered capture earns a category grant only by an exact certificate against a trusted WCL table, and none was requested. Every retained event is a real observation; absence from these bytes proves nothing."
+        },
+        "retainedFor": "M13-A: real observations of the Augmentation Foundation facts — Ebon Might and Prescience transitions from the Evoker and their recipients, the Evoker's support casts (Breath of Eons included), every friendly player's casts, and friendly deaths — for the shared src/support/ primitives and the Augmentation evaluator.",
+        "limitations": [
+          "One of two segments: the bundle of both, with the context as catalog, is the whole fight.",
+          "Auras are ONLY the fifteen Ebon Might, Prescience and Breath of Eons spell ids of the pinned SimulationCraft spell data; no other aura, and no damage, healing, absorb, resource or summon event, was requested.",
+          "Casts and deaths are friendly-sourced or friendly-targeted only (hostilityType Friendlies).",
+          "Raw death events are positive facts only; no death-completeness claim is made.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "The report is a third party's: its code is the pseudonym M13AAUGAAAAAAAAA; names, servers and player gameIDs are not retained.",
+          "A Mythic WIPE: the encounter did not end in a kill.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-m13a-aug1-fight-1-support.seg-75-151",
+      "path": "artifacts/wcl-events/wcl-m13a-aug1-fight-1-support.seg-75-151.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "2868821df4ae29ac8622316aa2f3f635d49d52462f31cf3a9a174b245903776d",
+      "byteLength": 181203,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "M13AAUGAAAAAAAAA",
+          "fightId": 1,
+          "reportRevision": 10,
+          "sourceActorId": 1,
+          "encounterId": 3429,
+          "difficulty": 5,
+          "capturedOn": "2026-11-02",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "UNAVAILABLE",
+          "query": {
+            "kind": "FILTERED_EVENT_STREAMS",
+            "hostilityType": "Friendlies",
+            "includeResources": false,
+            "limit": 10000,
+            "startTimeMs": 165857,
+            "endTimeMs": 316612,
+            "streams": [
+              {
+                "dataType": "Casts",
+                "filterExpression": null,
+                "pagesRetrieved": 1,
+                "eventsReturned": 3650
+              },
+              {
+                "dataType": "Buffs",
+                "filterExpression": "ability.id in (395152, 395296, 412707, 413654, 423803, 426404, 225139, 409311, 410089, 403631, 403755, 403758, 409632, 409990, 442204)",
+                "pagesRetrieved": 1,
+                "eventsReturned": 498
+              },
+              {
+                "dataType": "Deaths",
+                "filterExpression": null,
+                "pagesRetrieved": 1,
+                "eventsReturned": 19
+              }
+            ],
+            "merge": "Stable merge by timestamp; equal timestamps keep stream order Casts, Buffs, Deaths, then each stream's own order. The relative order of events from different streams at one millisecond is the merge's, never Warcraft Logs'."
+          },
+          "completeness": {
+            "eventsReturned": 4167,
+            "pagesRetrieved": 3,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Each stream one page with nextPageTimestamp null. COMPLETE for the FILTERED queries only: each stream is what its server filter served. The revision read 10 in the context request and again after the last page."
+          },
+          "captureTooling": {
+            "name": ".probe/m13a/capture.probe.ts (temporary, gitignored) through src/wcl/token-provider.ts and graphql-client.ts, with a fetch-level counter refusing a 51st Warcraft Logs HTTP request",
+            "revision": "UNAVAILABLE",
+            "invocation": "events: three server-filtered streams over the whole fight [165857 .. 316612] at limit 10,000, hostilityType Friendlies, no resources; planned in .probe/m13a/capture-plan.md before running, run by hand on 2026-11-02 (7 Warcraft Logs HTTP requests in total, cap 50)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m13a/casts.json, auras.json, deaths.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 10
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13a-augmentation.mjs",
+              "revision": "sanitize-m13a-augmentation-1",
+              "invocation": "node scripts/corpus/sanitize-m13a-augmentation.mjs .probe/m13a <out>"
+            },
+            "detail": "The three streams merged by the recorded rule, then (240857, 316612] (fight start + 75 s is the cut): 1803 of 4,167 events. Events verbatim (ids only, no names); compact JSON.",
+            "invalidates": ["PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13a-augmentation.mjs",
+              "revision": "sanitize-m13a-augmentation-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, the real report code, or any player name or server it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "NO coverage is granted. Every stream is server-filtered (a dataType family selection, and for auras an ability filterExpression); under the owner rule of 2026-10-11 a filtered capture earns a category grant only by an exact certificate against a trusted WCL table, and none was requested. Every retained event is a real observation; absence from these bytes proves nothing."
+        },
+        "retainedFor": "M13-A: real observations of the Augmentation Foundation facts — Ebon Might and Prescience transitions from the Evoker and their recipients, the Evoker's support casts (Breath of Eons included), every friendly player's casts, and friendly deaths — for the shared src/support/ primitives and the Augmentation evaluator.",
+        "limitations": [
+          "One of two segments: the bundle of both, with the context as catalog, is the whole fight.",
+          "Auras are ONLY the fifteen Ebon Might, Prescience and Breath of Eons spell ids of the pinned SimulationCraft spell data; no other aura, and no damage, healing, absorb, resource or summon event, was requested.",
+          "Casts and deaths are friendly-sourced or friendly-targeted only (hostilityType Friendlies).",
+          "Raw death events are positive facts only; no death-completeness claim is made.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "The report is a third party's: its code is the pseudonym M13AAUGAAAAAAAAA; names, servers and player gameIDs are not retained.",
+          "A Mythic WIPE: the encounter did not end in a kill.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-m13a-fight-context-aug1-fight-1",
+      "path": "artifacts/wcl-graphql/wcl-m13a-fight-context-aug1-fight-1.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "sha256": "74ed02fd1c05ce4cd948c7dd9eaeacab13c7155e243a86efadf180170056996c",
+      "byteLength": 86164,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "M13AAUGAAAAAAAAA",
+          "fightId": 1,
+          "reportRevision": 10,
+          "sourceActorId": 1,
+          "encounterId": 3429,
+          "difficulty": 5,
+          "capturedOn": "2026-11-02",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "FULL_RAID",
+          "query": {
+            "kind": "FIGHT_CONTEXT",
+            "fightIds": [1]
+          },
+          "completeness": {
+            "eventsReturned": "NOT_APPLICABLE",
+            "pagesRetrieved": 1,
+            "nextPageTimestamp": "NOT_APPLICABLE",
+            "state": "COMPLETE",
+            "evidence": "A typed, unpaginated GraphQL field: revision 10; fight 1 a WIPE of encounter 3429 difficulty 5 [165,857 .. 316,612], two phase transitions; actor 1 Player / Evoker with Augmentation at its friendlySpecs index; twenty friendly players; exactly [46] state petOwner 1."
+          },
+          "captureTooling": {
+            "name": ".probe/m13a/capture.probe.ts (temporary, gitignored) through src/wcl/token-provider.ts and graphql-client.ts, with a fetch-level counter refusing a 51st Warcraft Logs HTTP request",
+            "revision": "UNAVAILABLE",
+            "invocation": "fight context: one FIGHT_CONTEXT_QUERY for fight 1 (actorID 1); planned in .probe/m13a/capture-plan.md before running, run by hand on 2026-11-02 (7 Warcraft Logs HTTP requests in total, cap 50)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m13a/context.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 10
+        },
+        "transformations": [
+          {
+            "kind": "IDENTIFIER_REMAP",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13a-augmentation.mjs",
+              "revision": "sanitize-m13a-augmentation-1",
+              "invocation": "node scripts/corpus/sanitize-m13a-augmentation.mjs .probe/m13a <out>"
+            },
+            "detail": "report code -> M13AAUGAAAAAAAAA; every actor's name -> Actor<id>.",
+            "invalidates": ["ORIGINAL_IDENTIFIERS"]
+          },
+          {
+            "kind": "FIELD_REDACTION",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13a-augmentation.mjs",
+              "revision": "sanitize-m13a-augmentation-1",
+              "invocation": "node scripts/corpus/sanitize-m13a-augmentation.mjs .probe/m13a <out>"
+            },
+            "detail": "Every server set to null; every PLAYER's gameID (a stable character identifier) set to null. Report-local actor ids, types, subTypes, petOwner links, NPC and pet gameIDs, abilities, phases, fights and the subject's talent import code untouched. Compact JSON.",
+            "invalidates": []
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/corpus/sanitize-m13a-augmentation.mjs",
+              "revision": "sanitize-m13a-augmentation-1",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The sanitizer refuses to write a credential-shaped value, the real report code, or any player name or server it saw in the input. Nothing was found.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [],
+          "basis": "Report context, not events: master data, one fight header, phases, abilities and zone. It grants no event coverage. Its actor catalog is complete for the report (master data is unpaginated) and is the identity and ownership authority (WCL subType, petOwner) for the support facts; friendlySpecs establishes the subject's specialization."
+        },
+        "retainedFor": "M13-A: the Augmentation Evoker subject's identity (actor 1, Evoker, Augmentation), the friendly roster, and the catalog every buff recipient's identity and ownership is read from.",
+        "limitations": [
+          "The talent import code present is the subject's (the query argument), uninterpreted.",
+          "rateLimitData is kept as captured; it carries no identity.",
+          "The report is a third party's: its code is the pseudonym M13AAUGAAAAAAAAA; names, servers and player gameIDs are not retained.",
+          "A Mythic WIPE: the encounter did not end in a kill.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
     }
   ],
   "cases": [
@@ -6616,6 +6913,66 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/m11c4f-selection-frame.test.ts"]
+    },
+    {
+      "caseId": "normalization.m13a-aug1-fight-1-support-seg-0-75-normalizes-whole-and-in-order",
+      "artifactId": "wcl-m13a-aug1-fight-1-support.seg-0-75",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/corpus/sanitize-m13a-augmentation.mjs",
+      "purpose": "The 2,364-event merged support segment (1,698 casts, 350 begincasts, 13 empowerstarts, 12 empowerends, 140 applybuffs, 28 refreshbuffs and 123 removebuffs) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 2364
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight's activity: exactly what the three filtered streams served in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/augmentation-evoker-evaluator.test.ts"]
+    },
+    {
+      "caseId": "normalization.m13a-aug1-fight-1-support-seg-75-151-normalizes-whole-and-in-order",
+      "artifactId": "wcl-m13a-aug1-fight-1-support.seg-75-151",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/corpus/sanitize-m13a-augmentation.mjs",
+      "purpose": "The 1,803-event merged support segment (1,305 casts, 255 begincasts, 9 empowerstarts, 8 empowerends, 95 applybuffs, 112 removebuffs and 19 deaths) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 1803
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight's activity: exactly what the three filtered streams served in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/augmentation-evoker-evaluator.test.ts"]
     },
     {
       "caseId": "spec-brewmaster-monk.the-first-full-fight-segment-match-resolves-over-the-cross-tier-bundle",

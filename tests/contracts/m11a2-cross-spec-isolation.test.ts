@@ -152,8 +152,12 @@ const TREES: readonly SpecTree[] = (() => {
  * applies to it; only the registration rules (R2's importer list, R6, the
  * one-APL-per-tree count) exclude it, because it registers nothing. A tree is
  * added here only by its own reviewed tranche.
+ *
+ * M13-A adds the Augmentation Evoker support evaluator: it reports observable
+ * support facts and holds no SimulationCraft authority either (support
+ * targeting and timing are NO_AUTHORITY_AVAILABLE), so it registers nothing.
  */
-const UNREGISTERED_EVALUATOR_TREES: readonly string[] = ["shaman/restoration"];
+const UNREGISTERED_EVALUATOR_TREES: readonly string[] = ["evoker/augmentation", "shaman/restoration"];
 const REGISTERED_TREES: readonly SpecTree[] = TREES.filter(
   (tree) => !UNREGISTERED_EVALUATOR_TREES.includes(tree.specId),
 );

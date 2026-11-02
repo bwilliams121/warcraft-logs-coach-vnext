@@ -73,10 +73,16 @@ describe("M11-F evidence layering", () => {
     // module) on the events that targeted it before. It reconstructs facts,
     // declares no judgement and is imported by nothing in production yet
     // (tests/contracts/m12a-healing-layering.test.ts).
+    //
+    // AMENDED AT M13-A, explicitly: the shared support recipient facts report a
+    // buff recipient's positive deaths (observedDeathsOf, and nothing else from
+    // this module) inside and after a support window. Facts only: never
+    // "alive", no judgement (tests/contracts/m13a-support-layering.test.ts).
     expect(importersOf("src/engine/state/death-state.ts")).toEqual([
       "src/comparison-facts/environment-profile.ts",
       "src/engine/auras/aura-carriers.ts",
       "src/healing/death-timeline.ts",
+      "src/support/recipient-facts.ts",
     ]);
   });
 
