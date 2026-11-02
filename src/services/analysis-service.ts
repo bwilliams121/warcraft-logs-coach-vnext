@@ -36,7 +36,13 @@ import {
   type DiagnosisOutcome,
 } from "../diagnosis/diagnosis.js";
 import { createCombatState } from "../engine/state/combat-state.js";
-import { buildFightTldr, type TldrDiagnosisInput } from "../reporting/tldr.js";
+import { buildFightReport, type FightReport } from "../reporting/fight-report.js";
+import {
+  buildFightTldr,
+  type FightTldr,
+  type TldrDiagnosisInput,
+  type TldrInput,
+} from "../reporting/tldr.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import type { IngestionFailureReason } from "../wcl/ingest-fight.js";
 import type { FightIdentity, PreflightPort, WclFailureReason } from "../wcl/types.js";
@@ -182,6 +188,14 @@ function tldrDiagnosisOf(outcome: DiagnosisOutcome): TldrDiagnosisInput {
   return outcome.state === "ASSESSED"
     ? { assessment: "ASSESSED", statements: outcome.diagnosis.coverage.statements }
     : { assessment: "NOT_ASSESSED", reason: outcome.reason };
+}
+
+/**
+ * The TLDR (M15-B) and the report (M15-D), built beside the result from one
+ * input, so both describe the same restated findings.
+ */
+function presentationOf(input: TldrInput): { tldr: FightTldr; report: FightReport } {
+  return { tldr: buildFightTldr(input), report: buildFightReport(input) };
 }
 
 /** An ANALYZED result always has its registration's view; its absence is an orchestration defect. */
@@ -415,8 +429,9 @@ async function unsupportedSpec(
     observedDecisions: null,
     preparation: retrieval.preparation,
     ...withPlan(plan),
-    // M15-B: the TLDR says gameplay was not analyzed, and summarizes preparation.
-    tldr: buildFightTldr({
+    // M15-B / M15-D: the TLDR and the report say gameplay was not analyzed,
+    // and present preparation.
+    ...presentationOf({
       gameplay: { status: "SPEC_NOT_SUPPORTED" },
       preparation: retrieval.preparation,
       diagnosis: null,
@@ -720,8 +735,8 @@ export async function analyzeFight(
         )
       : null;
 
-  // ---- M15-B: the TLDR, from the restated findings and the coverage, last ----
-  const tldr = buildFightTldr({
+  // ---- M15-B / M15-D: the TLDR and the report, from the restated findings and the coverage, last ----
+  const presentation = presentationOf({
     gameplay:
       analysis.status !== "ANALYZED"
         ? { status: analysis.status }
@@ -745,7 +760,7 @@ export async function analyzeFight(
     preparation: { state: "ASSESSED", report: preparation },
     ...withPlan(planDisclosure),
     ...(diagnosis === null ? {} : { diagnosis }),
-    tldr,
+    ...presentation,
   };
 
   return { ok: true, state: resultStateFor(fightAnalysis), analysis: fightAnalysis };

@@ -343,26 +343,49 @@ function projectTldrConsumable(consumable: TldrConsumableOutcome) {
     : { countState: consumable.countState };
 }
 
+type TldrAssessedOutcome = Extract<TldrOutcome, { assessment: "ASSESSED" }>;
+
+function projectTldrGameplay(gameplay: TldrAssessedOutcome["gameplay"]) {
+  return gameplay.status === "ANALYZED"
+    ? {
+        status: gameplay.status,
+        eligibleDecisions: gameplay.eligibleDecisions,
+        resolvedDecisions: gameplay.resolvedDecisions,
+        unknownDecisions: gameplay.unknownDecisions,
+        excludedCasts: gameplay.excludedCasts,
+      }
+    : { status: gameplay.status };
+}
+
+function projectTldrPreparation(preparation: TldrAssessedOutcome["preparation"]) {
+  return preparation.assessment === "ASSESSED"
+    ? {
+        assessment: preparation.assessment,
+        healthPotion: projectTldrConsumable(preparation.healthPotion),
+        healthstone: projectTldrConsumable(preparation.healthstone),
+        combatPotion: projectTldrConsumable(preparation.combatPotion),
+      }
+    : { assessment: preparation.assessment, reason: preparation.reason };
+}
+
+function projectTldrDiagnosis(damageDiagnosis: TldrAssessedOutcome["damageDiagnosis"]) {
+  return damageDiagnosis === null
+    ? null
+    : damageDiagnosis.assessment === "ASSESSED"
+      ? { assessment: damageDiagnosis.assessment, statements: damageDiagnosis.statements }
+      : { assessment: damageDiagnosis.assessment, reason: damageDiagnosis.reason };
+}
+
 /** The TLDR, field for field (M15-B). Nothing is derived or reworded here. */
 function projectTldr(tldr: TldrOutcome) {
   if (tldr.assessment === "NOT_ASSESSED")
     return { assessment: tldr.assessment, revision: tldr.revision, reason: tldr.reason } as const;
-  const { gameplay, preparation, damageDiagnosis } = tldr;
   return {
     assessment: tldr.assessment,
     revision: tldr.revision,
     assessmentScope: tldr.assessmentScope,
     headline: tldr.headline,
-    gameplay:
-      gameplay.status === "ANALYZED"
-        ? {
-            status: gameplay.status,
-            eligibleDecisions: gameplay.eligibleDecisions,
-            resolvedDecisions: gameplay.resolvedDecisions,
-            unknownDecisions: gameplay.unknownDecisions,
-            excludedCasts: gameplay.excludedCasts,
-          }
-        : { status: gameplay.status },
+    gameplay: projectTldrGameplay(tldr.gameplay),
     highlights: tldr.highlights.map((highlight) => ({
       position: highlight.position,
       itemKind: highlight.itemKind,
@@ -385,27 +408,86 @@ function projectTldr(tldr: TldrOutcome) {
       disposition: row.disposition,
       records: row.records,
     })),
-    preparation:
-      preparation.assessment === "ASSESSED"
-        ? {
-            assessment: preparation.assessment,
-            healthPotion: projectTldrConsumable(preparation.healthPotion),
-            healthstone: projectTldrConsumable(preparation.healthstone),
-            combatPotion: projectTldrConsumable(preparation.combatPotion),
-          }
-        : { assessment: preparation.assessment, reason: preparation.reason },
-    damageDiagnosis:
-      damageDiagnosis === null
-        ? null
-        : damageDiagnosis.assessment === "ASSESSED"
-          ? { assessment: damageDiagnosis.assessment, statements: damageDiagnosis.statements }
-          : { assessment: damageDiagnosis.assessment, reason: damageDiagnosis.reason },
+    preparation: projectTldrPreparation(tldr.preparation),
+    damageDiagnosis: projectTldrDiagnosis(tldr.damageDiagnosis),
     disclosures: [...tldr.disclosures],
     lines: [...tldr.lines],
     magnitude: tldr.magnitude,
     findingEffect: {
       confidence: tldr.findingEffect.confidence,
       suppression: tldr.findingEffect.suppression,
+    },
+  } as const;
+}
+
+type ReportOutcome = NonNullable<FightAnalysis["report"]>;
+type ReportEntryOutcome = Extract<
+  ReportOutcome,
+  { assessment: "ASSESSED" }
+>["categories"][number]["carried"][number];
+
+function projectReportEntry(entry: ReportEntryOutcome) {
+  return {
+    section: entry.section,
+    position: entry.position,
+    itemKind: entry.itemKind,
+    disposition: entry.disposition,
+    standing: entry.standing,
+    producer: entry.producer,
+    authority: entry.authority,
+    stateEvidence: entry.stateEvidence,
+    actionability: entry.actionability,
+    reasonCode: entry.reasonCode,
+    suppressionReason: entry.suppressionReason,
+    subjectToken: entry.subjectToken,
+    occurrences: entry.occurrences,
+    firstFightTimeMs: entry.firstFightTimeMs,
+    lastFightTimeMs: entry.lastFightTimeMs,
+    evidence: entry.evidence.map(projectLocator),
+  };
+}
+
+/**
+ * The report (M15-D), field for field. Nothing is derived or reworded here:
+ * the markdown is the reporting module's, rendered from these same fields.
+ * The coverage sub-blocks share the TLDR's shapes.
+ */
+function projectReport(report: ReportOutcome) {
+  if (report.assessment === "NOT_ASSESSED")
+    return { assessment: report.assessment, revision: report.revision, reason: report.reason } as const;
+  const { coverage } = report;
+  return {
+    assessment: report.assessment,
+    revision: report.revision,
+    assessmentScope: report.assessmentScope,
+    coverage: {
+      gameplay: projectTldrGameplay(coverage.gameplay),
+      preparation: projectTldrPreparation(coverage.preparation),
+      damageDiagnosis: projectTldrDiagnosis(coverage.damageDiagnosis),
+      recordsByDisposition: coverage.recordsByDisposition.map((row) => ({
+        disposition: row.disposition,
+        records: row.records,
+      })),
+      disclosures: [...coverage.disclosures],
+    },
+    categories: report.categories.map((section) => ({
+      category: section.category,
+      prioritized: section.prioritized.map(projectReportEntry),
+      informational: section.informational.map(projectReportEntry),
+      carried: section.carried.map(projectReportEntry),
+    })),
+    suppressions: report.suppressions.map((row) => ({
+      category: row.category,
+      suppressionReason: row.suppressionReason,
+      reasonCode: row.reasonCode,
+      subjectToken: row.subjectToken,
+      records: row.records,
+    })),
+    markdown: report.markdown,
+    magnitude: report.magnitude,
+    findingEffect: {
+      confidence: report.findingEffect.confidence,
+      suppression: report.findingEffect.suppression,
     },
   } as const;
 }
@@ -439,6 +521,8 @@ function projectCommon(analysis: FightAnalysis) {
       : { raidCooldownPlan: projectRaidCooldownPlan(analysis.raidCooldownPlan) }),
     // Only when the service built one (M15-B); the single-fight service always does.
     ...(analysis.tldr === undefined ? {} : { tldr: projectTldr(analysis.tldr) }),
+    // M15-D: likewise the report.
+    ...(analysis.report === undefined ? {} : { report: projectReport(analysis.report) }),
     // `analysis.scope` is NOT projected. It is ingestion orchestration — which
     // evidence to fetch — and publishing it would let a retrieval setting be
     // read as analysis completeness. The coverage block is what discloses that.

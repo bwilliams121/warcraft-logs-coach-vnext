@@ -931,6 +931,52 @@ const TldrConsumableSchema = z.discriminatedUnion("countState", [
   z.object({ countState: z.literal("UNKNOWN") }).strict(),
 ]);
 
+/** Gameplay coverage, read from the observed-decision view; shared by the TLDR and the report. */
+const TldrGameplaySchema = z.discriminatedUnion("status", [
+  z
+    .object({
+      status: z.literal("ANALYZED"),
+      eligibleDecisions: z.number().int().nonnegative(),
+      resolvedDecisions: z.number().int().nonnegative(),
+      unknownDecisions: z.number().int().nonnegative(),
+      excludedCasts: z.number().int().nonnegative(),
+    })
+    .strict(),
+  z.object({ status: z.literal("SPEC_NOT_SUPPORTED") }).strict(),
+  z.object({ status: z.literal("AUTHORITY_NOT_AVAILABLE") }).strict(),
+  z.object({ status: z.literal("PROFILE_NOT_RESOLVED") }).strict(),
+  z.object({ status: z.literal("INSUFFICIENT_EVIDENCE") }).strict(),
+]);
+
+const TldrPreparationSchema = z.discriminatedUnion("assessment", [
+  z
+    .object({
+      assessment: z.literal("ASSESSED"),
+      healthPotion: TldrConsumableSchema,
+      healthstone: TldrConsumableSchema,
+      combatPotion: TldrConsumableSchema,
+    })
+    .strict(),
+  z
+    .object({
+      assessment: z.literal("NOT_ASSESSED"),
+      reason: z.enum(PUBLIC_PREPARATION_NOT_ASSESSED_REASONS),
+    })
+    .strict(),
+]);
+
+const TldrDamageDiagnosisSchema = z
+  .discriminatedUnion("assessment", [
+    z.object({ assessment: z.literal("ASSESSED"), statements: z.number().int().nonnegative() }).strict(),
+    z
+      .object({
+        assessment: z.literal("NOT_ASSESSED"),
+        reason: z.enum(PUBLIC_DIAGNOSIS_NOT_ASSESSED_REASONS),
+      })
+      .strict(),
+  ])
+  .nullable();
+
 /**
  * One prioritized item: a REJECTED observed decision, or a pattern of them
  * with the same subject and standing. `position` is its place in the
@@ -974,21 +1020,8 @@ export const TldrSchema = z.discriminatedUnion("assessment", [
       revision: z.literal("fight-tldr/1"),
       assessmentScope: z.literal("PARTIAL"),
       headline: z.enum(PUBLIC_TLDR_HEADLINES),
-      gameplay: z.discriminatedUnion("status", [
-        z
-          .object({
-            status: z.literal("ANALYZED"),
-            eligibleDecisions: z.number().int().nonnegative(),
-            resolvedDecisions: z.number().int().nonnegative(),
-            unknownDecisions: z.number().int().nonnegative(),
-            excludedCasts: z.number().int().nonnegative(),
-          })
-          .strict(),
-        z.object({ status: z.literal("SPEC_NOT_SUPPORTED") }).strict(),
-        z.object({ status: z.literal("AUTHORITY_NOT_AVAILABLE") }).strict(),
-        z.object({ status: z.literal("PROFILE_NOT_RESOLVED") }).strict(),
-        z.object({ status: z.literal("INSUFFICIENT_EVIDENCE") }).strict(),
-      ]),
+      gameplay: TldrGameplaySchema,
+
       highlights: z.array(TldrHighlightSchema),
       divergences: z
         .object({
@@ -1007,36 +1040,10 @@ export const TldrSchema = z.discriminatedUnion("assessment", [
           })
           .strict(),
       ),
-      preparation: z.discriminatedUnion("assessment", [
-        z
-          .object({
-            assessment: z.literal("ASSESSED"),
-            healthPotion: TldrConsumableSchema,
-            healthstone: TldrConsumableSchema,
-            combatPotion: TldrConsumableSchema,
-          })
-          .strict(),
-        z
-          .object({
-            assessment: z.literal("NOT_ASSESSED"),
-            reason: z.enum(PUBLIC_PREPARATION_NOT_ASSESSED_REASONS),
-          })
-          .strict(),
-      ]),
+      preparation: TldrPreparationSchema,
       /** Null when gameplay was not analyzed: no diagnosis runs then. */
-      damageDiagnosis: z
-        .discriminatedUnion("assessment", [
-          z
-            .object({ assessment: z.literal("ASSESSED"), statements: z.number().int().nonnegative() })
-            .strict(),
-          z
-            .object({
-              assessment: z.literal("NOT_ASSESSED"),
-              reason: z.enum(PUBLIC_DIAGNOSIS_NOT_ASSESSED_REASONS),
-            })
-            .strict(),
-        ])
-        .nullable(),
+      damageDiagnosis: TldrDamageDiagnosisSchema,
+
       disclosures: z.array(z.enum(PUBLIC_TLDR_DISCLOSURES)).min(1),
       lines: z.array(z.string().min(1)).min(1),
       magnitude: z.literal("NOT_USED"),
@@ -1048,6 +1055,221 @@ export const TldrSchema = z.discriminatedUnion("assessment", [
       assessment: z.literal("NOT_ASSESSED"),
       revision: z.literal("fight-tldr/1"),
       reason: z.enum(PUBLIC_TLDR_NOT_ASSESSED_REASONS),
+    })
+    .strict(),
+]);
+
+// ---------------------------------------------------------------------------
+// The report (M15-D)
+// ---------------------------------------------------------------------------
+
+/** Why no report was built. The rest of the document stands; nothing is reported. */
+export const PUBLIC_REPORT_NOT_ASSESSED_REASONS = [
+  "INVALID_REPORT_CONFIG",
+  "FINDINGS_NOT_RESTATABLE",
+  "FINDINGS_REFUSED",
+  "COVERAGE_INCONSISTENT",
+] as const;
+
+/** Every disposition a reported finding can have. */
+export const PUBLIC_REPORT_DISPOSITIONS = [
+  "AUTHORITY_DIVERGENCE",
+  "AUTHORITY_CONSISTENT",
+  "OBSERVED_FACT",
+  "SUPPRESSED",
+  "UNKNOWN",
+  "NO_AUTHORITY_AVAILABLE",
+  "UNSUPPORTED",
+] as const;
+
+/** Whether the state a conclusion rests on was proven. */
+export const PUBLIC_REPORT_STATE_EVIDENCE = ["PROVEN", "INCOMPLETE"] as const;
+
+/**
+ * What evidence there is that a decision was possible. There is no
+ * "actionable" default: OBSERVED_EXECUTION_ONLY proves the observed action
+ * usable and nothing about the authority's alternative.
+ */
+export const PUBLIC_REPORT_ACTIONABILITY = [
+  "DECISION_PROVEN_ACTIONABLE",
+  "OBSERVED_EXECUTION_ONLY",
+  "NOT_EVALUATED",
+  "UNKNOWN",
+] as const;
+
+/** The only reasons a finding may be suppressed: named environmental reasons. */
+export const PUBLIC_REPORT_SUPPRESSION_REASONS = [
+  "INTERMISSION",
+  "TARGET_UNAVAILABLE",
+  "FORCED_DOWNTIME",
+  "PHASE_TRANSITION",
+] as const;
+
+const reportEntryCommon = {
+  itemKind: z.enum(["SINGLE", "PATTERN"]),
+  /** Which producer concluded it, and on which explicit authority. */
+  producer: z.string().min(1),
+  authority: z.string().min(1),
+  actionability: z.enum(PUBLIC_REPORT_ACTIONABILITY),
+  /** What the finding is about, as the producer named it. */
+  subjectToken: z.string().min(1).nullable(),
+  occurrences: z.number().int().positive(),
+  firstFightTimeMs: z.number().nullable(),
+  lastFightTimeMs: z.number().nullable(),
+  /** Locates the finding's events in the published result. */
+  evidence: z.array(EvidenceLocatorSchema),
+};
+
+/**
+ * The three sections of a report category, which are never mixed:
+ *
+ *   PRIORITIZED    an authority divergence on proven state, with evidence,
+ *                  at its `position` in the evidence-then-actionability order
+ *   INFORMATIONAL  authority-consistent or an observed fact; never a failure
+ *   CARRIED        not an assessment of play, with its reason; never a failure
+ *
+ * Each category array admits only its own section's entries, and a non-
+ * divergence entry's `standing` is its disposition.
+ */
+export const ReportPrioritizedEntrySchema = z
+  .object({
+    section: z.literal("PRIORITIZED"),
+    position: z.number().int().positive(),
+    disposition: z.literal("AUTHORITY_DIVERGENCE"),
+    standing: z.enum(PUBLIC_TLDR_DIVERGENCE_STANDINGS),
+    stateEvidence: z.literal("PROVEN"),
+    reasonCode: z.null(),
+    suppressionReason: z.null(),
+    ...reportEntryCommon,
+    evidence: z.array(EvidenceLocatorSchema).min(1),
+  })
+  .strict();
+
+const informationalEntry = <D extends "AUTHORITY_CONSISTENT" | "OBSERVED_FACT">(disposition: D) =>
+  z
+    .object({
+      section: z.literal("INFORMATIONAL"),
+      position: z.null(),
+      disposition: z.literal(disposition),
+      standing: z.literal(disposition),
+      stateEvidence: z.enum(PUBLIC_REPORT_STATE_EVIDENCE),
+      reasonCode: z.null(),
+      suppressionReason: z.null(),
+      ...reportEntryCommon,
+    })
+    .strict();
+
+export const ReportInformationalEntrySchema = z.discriminatedUnion("disposition", [
+  informationalEntry("AUTHORITY_CONSISTENT"),
+  informationalEntry("OBSERVED_FACT"),
+]);
+
+const carriedEntry = <D extends (typeof PUBLIC_TLDR_NOT_ASSESSED_DISPOSITIONS)[number]>(disposition: D) =>
+  z
+    .object({
+      section: z.literal("CARRIED"),
+      position: z.null(),
+      disposition: z.literal(disposition),
+      standing: z.literal(disposition),
+      stateEvidence: z.enum(PUBLIC_REPORT_STATE_EVIDENCE),
+      /** The producer's reason, verbatim: a blocker, an unknown code. */
+      reasonCode: z.string().min(1),
+      /** Null: only a SUPPRESSED entry names an environmental reason. */
+      suppressionReason: z.null(),
+      ...reportEntryCommon,
+    })
+    .strict();
+
+export const ReportCarriedEntrySchema = z.discriminatedUnion("disposition", [
+  carriedEntry("SUPPRESSED").extend({
+    /** Always one of the named environmental reasons. */
+    suppressionReason: z.enum(PUBLIC_REPORT_SUPPRESSION_REASONS),
+  }),
+  carriedEntry("UNKNOWN"),
+  carriedEntry("NO_AUTHORITY_AVAILABLE"),
+  carriedEntry("UNSUPPORTED"),
+]);
+
+/** Any reported finding, whichever section it is in. */
+export const ReportEntrySchema = z.union([
+  ReportPrioritizedEntrySchema,
+  ReportInformationalEntrySchema,
+  ReportCarriedEntrySchema,
+]);
+
+/**
+ * The report (M15-D): every restated finding, grouped by decision category,
+ * with its evidence ("why did it tell me this?") and actionability; every
+ * suppression with its machine-readable reason; and a coverage section.
+ *
+ * Presentation only. It lists the same findings the TLDR summarizes, prioritized
+ * by the same rule; it creates no finding and re-evaluates nothing.
+ * `assessmentScope` is always PARTIAL and `coverage.disclosures` is never
+ * empty. UNKNOWN and SUPPRESSED findings are CARRIED entries with their
+ * reasons, never divergences. Nothing is ordered by magnitude or moves a
+ * confidence.
+ *
+ * `markdown` is the same report as text, rendered from these fields only and
+ * opening with the coverage section; the structured fields are the contract.
+ */
+export const ReportSchema = z.discriminatedUnion("assessment", [
+  z
+    .object({
+      assessment: z.literal("ASSESSED"),
+      revision: z.literal("fight-report/1"),
+      assessmentScope: z.literal("PARTIAL"),
+      coverage: z
+        .object({
+          gameplay: TldrGameplaySchema,
+          preparation: TldrPreparationSchema,
+          /** Null when gameplay was not analyzed: no diagnosis runs then. */
+          damageDiagnosis: TldrDamageDiagnosisSchema,
+          /** Every disposition, zero included. */
+          recordsByDisposition: z
+            .array(
+              z
+                .object({
+                  disposition: z.enum(PUBLIC_REPORT_DISPOSITIONS),
+                  records: z.number().int().nonnegative(),
+                })
+                .strict(),
+            )
+            .length(PUBLIC_REPORT_DISPOSITIONS.length),
+          disclosures: z.array(z.enum(PUBLIC_TLDR_DISCLOSURES)).min(1),
+        })
+        .strict(),
+      /** One section per decision category that has a finding, in category order. */
+      categories: z.array(
+        z
+          .object({
+            category: z.enum(PUBLIC_TLDR_CATEGORIES),
+            prioritized: z.array(ReportPrioritizedEntrySchema),
+            informational: z.array(ReportInformationalEntrySchema),
+            carried: z.array(ReportCarriedEntrySchema),
+          })
+          .strict(),
+      ),
+      suppressions: z.array(
+        z
+          .object({
+            category: z.enum(PUBLIC_TLDR_CATEGORIES),
+            suppressionReason: z.enum(PUBLIC_REPORT_SUPPRESSION_REASONS),
+            reasonCode: z.string().min(1),
+            subjectToken: z.string().min(1).nullable(),
+            records: z.number().int().positive(),
+          })
+          .strict(),
+      ),
+      markdown: z.string().min(1),
+      magnitude: z.literal("NOT_USED"),
+      findingEffect: z.object({ confidence: z.literal("NONE"), suppression: z.literal("NONE") }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      assessment: z.literal("NOT_ASSESSED"),
+      revision: z.literal("fight-report/1"),
+      reason: z.enum(PUBLIC_REPORT_NOT_ASSESSED_REASONS),
     })
     .strict(),
 ]);
@@ -1081,6 +1303,12 @@ const commonFields = {
    * it on every status. Raid-night cells do not carry it.
    */
   tldr: TldrSchema.optional(),
+  /**
+   * The report (M15-D). Optional in the schema only, like the TLDR; this
+   * build's single-fight service emits it on every status. Raid-night cells
+   * do not carry it.
+   */
+  report: ReportSchema.optional(),
   // THERE IS DELIBERATELY NO `evidenceScope` HERE.
   //
   // Ingestion scope tells the application which evidence to RETRIEVE. It is not
@@ -1174,3 +1402,4 @@ export type PublicAuthority = z.infer<typeof AuthoritySchema>;
 export type PublicEvidenceLocator = z.infer<typeof EvidenceLocatorSchema>;
 export type PublicDiagnosis = z.infer<typeof DiagnosisSchema>;
 export type PublicTldr = z.infer<typeof TldrSchema>;
+export type PublicReport = z.infer<typeof ReportSchema>;

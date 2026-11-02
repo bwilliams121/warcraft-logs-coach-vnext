@@ -286,6 +286,8 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
     expect(viaCore.diagnosis).toEqual(viaService.diagnosis);
     // M15-B: the TLDR, beside the analysis.
     expect(viaCore.tldr).toEqual(viaService.tldr);
+    // M15-D: the report, beside the analysis.
+    expect(viaCore.report).toEqual(viaService.report);
 
     // And no field exists on one side that the other does not supply.
     expect(Object.keys(viaCore).sort()).toEqual(Object.keys(viaService).sort());
@@ -296,6 +298,7 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
       "identity",
       "observedDecisions",
       "preparation",
+      "report",
       "scope",
       "specId",
       "tldr",

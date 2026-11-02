@@ -11347,6 +11347,64 @@ rating, percentage or correctness (the M6-C sweep runs over it).
 coverage, the 45-occurrence `heart_strike` pattern first with standing
 `DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN`, 0 actionable records, 224
 UNKNOWN rotation decisions tallied, diagnosis NOT_ASSESSED disclosed.
+
+## M15-D — Advanced report presentation
+
+Milestone 15 (autopilot queue entry M15-D). Public contract: EXPECTED, an
+additive optional `report` block on every status under `analysis/1`. No
+Warcraft Logs request.
+
+**Question.** "What did this analysis find, in which decision category, and
+why did it tell me this?" The TLDR answers in a few lines; the report lists
+everything. `src/reporting/fight-report.ts` uses the TLDR's own restatement
+(`restateFight`, extracted from `buildFightTldr` unchanged) and the M15-A
+`prioritizeFindings`, then lays the result out. Presentation only: no new
+finding, no re-evaluation, no new input.
+
+**Shape.** `coverage` first (gameplay counts, preparation, the diagnosis
+state, records for every disposition, disclosures that are never empty; the
+disclosure rule is shared with the TLDR as `coverageDisclosures`, without the
+TLDR-only `DIVERGENCES_NOT_LISTED`). Then `categories`: one section per
+decision category that has a finding, in `REPORTING_CATEGORIES` order, each
+split into M15-A's three sections, which never mix. `prioritized` holds proven
+divergences with their `position` in the M15-A order. `informational` holds
+authority-consistent results and observed facts. `carried` holds SUPPRESSED,
+UNKNOWN, NO_AUTHORITY_AVAILABLE and UNSUPPORTED, each with its reason code.
+Each entry carries producer, authority, state evidence, actionability, its
+divergence standing, subject, occurrences, time span and evidence locators.
+`suppressions` lists every SUPPRESSED item with its named environmental
+reason. `markdown` renders the same report as text.
+
+**Markdown is derived, never authored separately.** `renderReportMarkdown`
+is a pure function of the structured body. The public projection copies the
+string, and a test re-renders it from the published fields and requires the
+two to be equal. Producer strings sit inside code spans whose backticks are
+neutralized. The prose uses no correctness, blame or score vocabulary. "Not
+evidence of clean play" is the only phrase that names clean play, and it
+denies it.
+
+**Never.** Ordering by magnitude, damage, comparison or confidence
+(`magnitude: NOT_USED`, `findingEffect` NONE). Listing an UNKNOWN or
+SUPPRESSED item as a divergence: the schema enforces this, since a PRIORITIZED
+entry must be a PROVEN `AUTHORITY_DIVERGENCE` with evidence. Dropping an item:
+every restated record appears exactly once. Building from part of the
+findings: the same fail-closed reasons as the TLDR, with
+`INVALID_REPORT_CONFIG`.
+
+**Record change.** The preparation adapter's `subjectToken` is now the
+consumable kind (was null), so a report entry can name its fact. Preparation
+records are never aggregated, so no grouping changes.
+
+**Service and layering.** `presentationOf(input)` in the service builds the
+TLDR and the report from one input on both paths, so the diagnosis reading
+and the M14-F guard are unchanged. `src/reporting/` is still imported only by
+the service and the result type. Raid-night cells carry no report.
+
+**Real evidence** (the subject's Blood analysis): the ROTATION entries'
+occurrences equal the view's rejected, matched and UNKNOWN counts. The
+45-occurrence `heart_strike` pattern is at position 1, nothing is actionable,
+there are no suppressions, and the document validates. The report adds about
+53 KB to a 233 KB document; the markdown is 8.3 KB.
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
