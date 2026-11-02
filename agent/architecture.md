@@ -10757,6 +10757,72 @@ is a reviewed specialization (the Blood and Brewmaster players received
 neither buff), so every real lookup is UNSUPPORTED or UNKNOWN, and overlap
 stays NO_COOLDOWN_IDENTITY. The IDENTIFIED path is proven synthetically.
 
+## M14-A — Comparison timing alignment foundation (post-hoc)
+
+Milestone 14 (autopilot queue entry M14-A). Public contract: NONE. No
+Warcraft Logs request: the M11-E2 subject and the three M11-G2 comparison
+fights, from the committed evidence archive.
+
+**Question.** "At the same encounter moment, what did each fight show?"
+Never which fight did it right. `src/comparison-facts/timing-alignment.ts`
+lives in the M11-G2 post-hoc domain, under its layering guard (imports only
+engine, E1 combat facts and the domain; nothing outside the domain imports
+it; no forbidden judgement word).
+
+**Landmarks.** Keyed so they mean the same thing in every fight:
+
+- `PULL` (recorded start, offset 0) and `RECORDED_FIGHT_END` (EXACT only when
+  finality is COMPLETED);
+- `PHASE_START:<phaseId>` and `INTERMISSION_START#k`, from the typed phase
+  list behind the same ENCOUNTER_PHASES absence gate M4's `phaseAt` uses. An
+  unordered list is UNKNOWN (never sorted), and an unstated
+  `isIntermission` before ordinal k makes k and later UNKNOWN. Phase starts do
+  not depend on intermission flags;
+- `FIRST_FOCUS_DAMAGE_EVENT_ON_NPC:<gameId>`, a target transition, keyed by
+  game id because actor ids are report-local. Player targets never count;
+- `COOLDOWN_WINDOW_START:<windowKind>#k`, from the specialization's post-hoc
+  definition, which the caller supplies. There is no specialization branch.
+  A window whose start was not observed blocks its own ordinal and every
+  later one.
+
+**Anchor states** follow the evidence basis, never more:
+
+- `EXACT`: observed in an EXHAUSTIVE collection, or metadata.
+- `NO_LATER_THAN`: observed in an OBSERVED_ONLY collection. An unseen earlier
+  event may exist, and the k-th smallest of a superset is never later than
+  the k-th observed. This is M11-G2's AT_LEAST, for an instant.
+- `UNKNOWN`: with a reason. A landmark absent from a fight is UNKNOWN. It is
+  never interpolated, shifted from another fight or filled from a nominal
+  duration.
+
+The alignment carries `comparisonCoverage: AT_LEAST_UNCERTIFIED` and
+`interpolation: NONE`, and each fight's `phaseEvidence`, so a missing phase
+row cannot read as "no phases". It refuses fights of a different encounter
+or difficulty, an unestablished difficulty, and duplicate fight refs.
+
+**Moment facts** (`factsAtAlignedMoment`): `[landmark + from, landmark + to)`
+in each fight, summarized with the existing G2 cast and damage summaries, so
+counts keep EXACT / AT_LEAST / UNKNOWN and raw sums stay UNKNOWN when
+uncertified.
+
+- Only an EXACT anchor places a window. A NO_LATER_THAN anchor is
+  `ANCHOR_NOT_EXACT`, because a window on a bound would be a guessed instant.
+- A window outside the recorded fight is UNKNOWN, never clipped.
+- It recomputes the alignment from the inputs it slices and never accepts
+  one from the caller. An anchor is therefore always the anchor of that
+  fight, focus and evidence.
+
+**Real evidence** (encounter 2900, Mythic, four kills):
+
+- No fight holds phase evidence: ENCOUNTER_PHASES is CAPABILITY_UNVERIFIED
+  and the phase list is empty, so there is no phase or intermission row.
+- Three NPC target transitions. Game id 259181 is EXACT at 649 ms for the
+  subject and NO_LATER_THAN 1851 / 1140 / 17 ms for the comparisons.
+- 19 Dancing Rune Weapon window ordinals, with proc windows included (After
+  M11-G2). Ordinals the subject did not observe are UNKNOWN.
+- The first 30 s after pull: the subject has EXACT 78 cast and 172 damage
+  events; the comparisons have AT_LEAST counts.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

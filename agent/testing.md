@@ -1624,6 +1624,16 @@ comparison facts (M11-G2, tests/unit/m11g2-*.test.ts, contracts/m11g2-comparison
   post-hoc modules                             -> unreachable from SimC / specs / services (W)
   sanitizer / committed files                  -> byte-identical re-cut; pseudonyms only (X, Y)
   capture plan                                 -> <= 36, no rankings, never the subject, always filtered (Z, AA, AB, AC)
+timing alignment (M14-A, tests/unit/m14a-timing-alignment.test.ts, same G2 layering guard):
+  pull / recorded end                          -> EXACT 0 everywhere / EXACT only when COMPLETED
+  landmark one fight did not observe           -> UNKNOWN NOT_OBSERVED_IN_FIGHT, never shifted from another fight
+  observed under an uncertified basis          -> NO_LATER_THAN, never EXACT (real comparisons and synthetic)
+  phases behind an unverified capability       -> UNKNOWN with the gate reason; no phase row; phaseEvidence per fight
+  unordered phases / unstated intermission     -> UNKNOWN, never sorted / that ordinal and later UNKNOWN
+  window start not observed                    -> that ordinal and later UNKNOWN; no nominal duration
+  player target                                -> never a target-transition landmark
+  other encounter / difficulty / duplicate ref -> REFUSED
+  moment facts                                 -> EXACT anchors only; bound -> ANCHOR_NOT_EXACT; outside fight -> UNKNOWN, never clipped
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

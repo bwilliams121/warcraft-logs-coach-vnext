@@ -29,6 +29,33 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M14-A: what timing alignment does not establish
+
+**Raised:** M14-A (2026-11-02).
+
+- **No phase or intermission landmark on real evidence.** All four committed
+  fights hold ENCOUNTER_PHASES as CAPABILITY_UNVERIFIED with an empty
+  transition list. The phase path is proven synthetically only. A verified
+  phase capability on a phased encounter is needed before any phase row
+  appears.
+- **No targetability landmark.** TARGETABILITY is unverified and the combat
+  model carries no targetability events. "Boss became available" is not a
+  landmark until that capability exists.
+- **Comparison anchors are bounds.** Every comparison landmark except pull and
+  recorded end is NO_LATER_THAN, because no comparison capture is certified
+  (After M11-G2). Moment facts around those landmarks are UNKNOWN for the
+  comparisons. Certification would make them EXACT. Interpolation never will.
+- **A cooldown ordinal is an observed aura window, not a cast.** Blood's
+  Dancing Rune Weapon windows include proc windows, so `#k` aligns the k-th
+  observed window, not the k-th Dancing Rune Weapon cast.
+- **A first damage event is a relationship.** It says when the focus first
+  hit an NPC of that game id, not when the NPC appeared or became
+  attackable.
+- **No delta, consensus or judgement.** Differences between anchors are left
+  to M14-B (consensus) and M14-D (decomposition).
+
+---
+
 ## After M13-C: what the recipient cooldown registry does not establish
 
 **Raised:** M13-C (2026-11-02).
