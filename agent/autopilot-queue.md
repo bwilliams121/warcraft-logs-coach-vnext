@@ -653,11 +653,13 @@ reason where the evidence supports one.
 ### M14-D: Factual damage-delta decomposition
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M14-A
 branch: autopilot/m14-d
 wcl: NONE
 publicContract: NONE
+pr: 28
+mergeSha: 777b12a7ebad28f41c29ddcad4e9ed2b49934e1b
 ```
 
 **Direction.** `agent/architecture.md` "Milestone 14" (damage diagnosis,
@@ -676,8 +678,9 @@ by ability, target class, window and pet sub-actor tree, as observations.
 ### M14-E: Causal evidence linkage (internal)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M14-C, M14-D
+branch: autopilot/m14-e
 wcl: NONE
 publicContract: NONE
 ```

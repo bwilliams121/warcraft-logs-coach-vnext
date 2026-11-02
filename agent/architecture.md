@@ -11027,6 +11027,92 @@ or an action. Linking a delta to decision-level evidence is M14-E.
 - The first Dancing Rune Weapon window places no comparison window
   (`ANCHOR_NOT_EXACT`).
 
+## M14-E — Causal evidence linkage (post-hoc, internal)
+
+Milestone 14 (autopilot queue entry M14-E). Public contract: NONE. No
+Warcraft Logs request: the committed archive fights, the subject's real Blood
+decision results, and synthetic fights.
+
+**Question.** "For this observed difference, what decision-level evidence
+about the subject's own play exists in the same component and window, and
+what limits it?" Never "did this decision cause it".
+`src/comparison-facts/causal-linkage.ts` lives in the M11-G2 post-hoc domain,
+under the same layering guard. `linkCausalEvidence(input, definition,
+alignedWindows, records)` recomputes the M14-D decomposition from its inputs
+and never accepts one from the caller.
+
+**Two modules, neither feeding the other.** The authority verifier (spec
+evaluators, SimulationCraft) is never imported. The caller restates each
+decision result as a `DecisionEvidenceRecord`: plain data, as
+`attachStrategyContext` takes only a finding id and a time. A record has a
+kind (APL decision outcome, cast opportunity, uptime, resource state, buff
+window, target choice, cooldown alignment, encounter actionability), a basis
+(`AUTHORITY_BACKED` or `OBSERVED_FACT`), the producer's authority and status
+VERBATIM, a resolution (`RESOLVED`, `UNKNOWN`, `NO_AUTHORITY_AVAILABLE`), a
+half-open report-time interval, a scope and its locators. The linkage reads
+only the resolution, scope and interval. It never reads the producer's status,
+never re-evaluates a decision, and returns nothing to the authority branch.
+Restating a finding as a record, and interpreting the producer's status, is
+the reviewed projection's job (M14-F).
+
+**A link needs**, per delta row and comparison pair:
+
+1. a proven direction (`SUBJECT_LOWER` / `SUBJECT_HIGHER`); an UNDECIDED or
+   EQUAL delta has nothing to link to;
+2. the subject's own window placed;
+3. at least one RESOLVED record whose scope covers the component and whose
+   interval meets the subject window.
+
+Otherwise the pair is `OBSERVATION_ONLY` with a cause:
+`DIRECTION_UNDECIDED`, `DIRECTION_EQUAL`, `SUBJECT_WINDOW_UNKNOWN`,
+`NO_DECISION_EVIDENCE_IN_SCOPE` or `DECISION_EVIDENCE_UNRESOLVED`. UNKNOWN and
+NO_AUTHORITY_AVAILABLE records in scope are carried, kept distinct, and never
+count toward a link.
+
+**Scope** by component: `TOTAL` and `BY_WCL_TARGET_TYPE` take only
+`WHOLE_OUTPUT` records, because one ability's decisions never explain a total
+(M14-D computes no residual). `BY_SOURCE` takes `SOURCE` of that kind;
+`BY_ABILITY` takes `ABILITY` of that source kind naming the exact game id, or
+`SOURCE` of that kind; `BY_TARGET_CLASS` takes `TARGET_CLASS` of that class.
+Every component takes `WHOLE_OUTPUT`. Which ids a decision concerns (a cast id
+and its damage ids) is the producer's meaning, stated in the record and never
+guessed. An instant meets `[start, end)` only inside it.
+
+**Limits**, machine-readable on every pair: `COMPARISON_COVERAGE_UNCERTIFIED`
+and `COMPARISON_DECISIONS_NOT_EVALUATED` always; `DELTA_IS_A_BOUND`,
+`EVENT_COUNT_NOT_DAMAGE_AMOUNT`, `SUBJECT_COMPONENTS_OBSERVED_ONLY`,
+`UNRESOLVED_EVIDENCE_IN_SCOPE` and `NO_AUTHORITY_BACKED_EVIDENCE` where they
+hold.
+
+**Refusals.** A record from any fight but the subject's
+(`EVIDENCE_NOT_FROM_SUBJECT_FIGHT`: comparison decisions are never evaluated
+and comparison behavior is never decision evidence), a kind outside the
+vocabulary, a duplicate id, a non-integer or reversed interval, an interval
+outside the subject fight, an empty ability scope, an `OBSERVED_FACT` claiming
+NO_AUTHORITY_AVAILABLE, and a refused decomposition.
+
+**Linkage only.** Every result carries `decisionEvidenceSide: SUBJECT_ONLY`,
+`use: LINKAGE_ONLY`, `causalClaim: NONE`, `magnitudeAttribution: NONE`,
+`verdictFlow: NONE` and `findingEffect: { suppression: NONE, confidence:
+NONE }`. There is no confidence field. Comparison figures decide only whether
+a direction is proven; the subject's evidence in a component is the same
+whichever comparisons are supplied. Records in no component are listed
+(`evidenceInNoComponent`), never dropped.
+
+**Real evidence** (the subject's 307 Blood observed decisions: 45 REJECTED,
+38 MATCH, 224 UNKNOWN, restated in the test):
+
+- 13 LINKED pairs: the whole-fight Death Strike, Blood Boil, Marrowrend and
+  Vampiric Strike event-count rows against all three comparisons, and the
+  first-30 s Death Strike row against COHORT246. All are bounds
+  (`DELTA_IS_A_BOUND`).
+- The Death Strike link rests on 24 authority MATCHes. A link is not a fault.
+- The 45 Heart Strike REJECTED results link to nothing: that row's direction
+  is UNDECIDED against every comparison.
+- Death's Caress has only UNKNOWN results in scope:
+  `DECISION_EVIDENCE_UNRESOLVED`.
+- No total, table or raw-amount row links.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
