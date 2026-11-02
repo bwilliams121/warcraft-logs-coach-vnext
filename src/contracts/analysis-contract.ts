@@ -863,6 +863,196 @@ export const DiagnosisSchema = z.discriminatedUnion("assessment", [
 ]);
 
 // ---------------------------------------------------------------------------
+// TLDR (M15-B)
+// ---------------------------------------------------------------------------
+
+export const PUBLIC_TLDR_HEADLINES = [
+  "GAMEPLAY_NOT_ANALYZED",
+  "NO_DECISION_RESOLVED",
+  "AUTHORITY_DIVERGENCES_IN_ANALYZED_DECISIONS",
+  "NO_AUTHORITY_DIVERGENCE_IN_ANALYZED_DECISIONS",
+] as const;
+
+/** What a TLDR does not cover. Never empty: every TLDR discloses a limit. */
+export const PUBLIC_TLDR_DISCLOSURES = [
+  "GAMEPLAY_NOT_ANALYZED",
+  "ONLY_OBSERVED_DECISIONS_VERIFIED",
+  "DECISIONS_UNKNOWN",
+  "CASTS_EXCLUDED",
+  "DIVERGENCE_ACTIONABILITY_UNPROVEN",
+  "DIVERGENCES_NOT_LISTED",
+  "CONSUMABLE_COUNT_UNKNOWN",
+  "PREPARATION_NOT_ASSESSED",
+  "DAMAGE_DIAGNOSIS_NOT_ASSESSED",
+] as const;
+
+/** Why no TLDR was built. The rest of the document stands; nothing is summarized. */
+export const PUBLIC_TLDR_NOT_ASSESSED_REASONS = [
+  "INVALID_TLDR_CONFIG",
+  "FINDINGS_NOT_RESTATABLE",
+  "FINDINGS_REFUSED",
+  "COVERAGE_INCONSISTENT",
+] as const;
+
+/** The decision categories a summarized finding can belong to. */
+export const PUBLIC_TLDR_CATEGORIES = [
+  "ROTATION",
+  "RESOURCE",
+  "COOLDOWN",
+  "DEFENSIVE",
+  "ASSIGNMENT",
+  "HEALING_DECISION",
+  "SUPPORT_TARGETING",
+  "SUPPORT_TIMING",
+  "PREPARATION",
+] as const;
+
+/** The non-assessment dispositions a TLDR tallies. Never failures. */
+export const PUBLIC_TLDR_NOT_ASSESSED_DISPOSITIONS = [
+  "SUPPRESSED",
+  "UNKNOWN",
+  "NO_AUTHORITY_AVAILABLE",
+  "UNSUPPORTED",
+] as const;
+
+/**
+ * How much evidence there is that a divergence's alternative was possible.
+ * Only the first says it was; the other two say it was not proven.
+ */
+export const PUBLIC_TLDR_DIVERGENCE_STANDINGS = [
+  "ACTIONABLE_AUTHORITY_DIVERGENCE",
+  "DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN",
+  "DIVERGENCE_ACTIONABILITY_NOT_ESTABLISHED",
+] as const;
+
+const TldrConsumableSchema = z.discriminatedUnion("countState", [
+  z.object({ countState: z.literal("OBSERVED"), count: z.number().int().nonnegative() }).strict(),
+  /** No count: UNKNOWN is never zero. */
+  z.object({ countState: z.literal("UNKNOWN") }).strict(),
+]);
+
+/**
+ * One prioritized item: a REJECTED observed decision, or a pattern of them
+ * with the same subject and standing. `position` is its place in the
+ * evidence-quality-then-actionability order; nothing about magnitude decides
+ * it. `evidence` locates its decisions in `decisions`.
+ */
+export const TldrHighlightSchema = z
+  .object({
+    position: z.number().int().positive(),
+    itemKind: z.enum(["SINGLE", "PATTERN"]),
+    category: z.enum(PUBLIC_TLDR_CATEGORIES),
+    standing: z.enum(PUBLIC_TLDR_DIVERGENCE_STANDINGS),
+    /** The observed action token, as the producer named it. */
+    subjectToken: z.string().min(1).nullable(),
+    occurrences: z.number().int().positive(),
+    firstFightTimeMs: z.number().nullable(),
+    lastFightTimeMs: z.number().nullable(),
+    evidence: z.array(EvidenceLocatorSchema).min(1),
+  })
+  .strict();
+
+/**
+ * The TLDR (M15-B): a short summary of the prioritized findings and the
+ * analysis coverage, on every status.
+ *
+ * `assessmentScope` is always PARTIAL and the coverage sentence is always the
+ * first line: "we could only analyze part of this fight" is stated before,
+ * and separately from, any "found little to fix". The headline speaks about
+ * the ANALYZED decisions only. UNKNOWN decisions are counted, carried
+ * non-assessments are tallied, a consumable whose count is UNKNOWN has no
+ * count, and suppressed findings are never highlighted. Nothing here ranks by
+ * magnitude, moves a confidence or suppresses anything.
+ *
+ * `lines` are author-templated sentences over these same fields, for a reader
+ * who wants prose; the structured fields are the contract.
+ */
+export const TldrSchema = z.discriminatedUnion("assessment", [
+  z
+    .object({
+      assessment: z.literal("ASSESSED"),
+      revision: z.literal("fight-tldr/1"),
+      assessmentScope: z.literal("PARTIAL"),
+      headline: z.enum(PUBLIC_TLDR_HEADLINES),
+      gameplay: z.discriminatedUnion("status", [
+        z
+          .object({
+            status: z.literal("ANALYZED"),
+            eligibleDecisions: z.number().int().nonnegative(),
+            resolvedDecisions: z.number().int().nonnegative(),
+            unknownDecisions: z.number().int().nonnegative(),
+            excludedCasts: z.number().int().nonnegative(),
+          })
+          .strict(),
+        z.object({ status: z.literal("SPEC_NOT_SUPPORTED") }).strict(),
+        z.object({ status: z.literal("AUTHORITY_NOT_AVAILABLE") }).strict(),
+        z.object({ status: z.literal("PROFILE_NOT_RESOLVED") }).strict(),
+        z.object({ status: z.literal("INSUFFICIENT_EVIDENCE") }).strict(),
+      ]),
+      highlights: z.array(TldrHighlightSchema),
+      divergences: z
+        .object({
+          items: z.number().int().nonnegative(),
+          records: z.number().int().nonnegative(),
+          actionableRecords: z.number().int().nonnegative(),
+          notListedItems: z.number().int().nonnegative(),
+        })
+        .strict(),
+      notAssessed: z.array(
+        z
+          .object({
+            category: z.enum(PUBLIC_TLDR_CATEGORIES),
+            disposition: z.enum(PUBLIC_TLDR_NOT_ASSESSED_DISPOSITIONS),
+            records: z.number().int().positive(),
+          })
+          .strict(),
+      ),
+      preparation: z.discriminatedUnion("assessment", [
+        z
+          .object({
+            assessment: z.literal("ASSESSED"),
+            healthPotion: TldrConsumableSchema,
+            healthstone: TldrConsumableSchema,
+            combatPotion: TldrConsumableSchema,
+          })
+          .strict(),
+        z
+          .object({
+            assessment: z.literal("NOT_ASSESSED"),
+            reason: z.enum(PUBLIC_PREPARATION_NOT_ASSESSED_REASONS),
+          })
+          .strict(),
+      ]),
+      /** Null when gameplay was not analyzed: no diagnosis runs then. */
+      damageDiagnosis: z
+        .discriminatedUnion("assessment", [
+          z
+            .object({ assessment: z.literal("ASSESSED"), statements: z.number().int().nonnegative() })
+            .strict(),
+          z
+            .object({
+              assessment: z.literal("NOT_ASSESSED"),
+              reason: z.enum(PUBLIC_DIAGNOSIS_NOT_ASSESSED_REASONS),
+            })
+            .strict(),
+        ])
+        .nullable(),
+      disclosures: z.array(z.enum(PUBLIC_TLDR_DISCLOSURES)).min(1),
+      lines: z.array(z.string().min(1)).min(1),
+      magnitude: z.literal("NOT_USED"),
+      findingEffect: z.object({ confidence: z.literal("NONE"), suppression: z.literal("NONE") }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      assessment: z.literal("NOT_ASSESSED"),
+      revision: z.literal("fight-tldr/1"),
+      reason: z.enum(PUBLIC_TLDR_NOT_ASSESSED_REASONS),
+    })
+    .strict(),
+]);
+
+// ---------------------------------------------------------------------------
 // The result
 // ---------------------------------------------------------------------------
 
@@ -885,6 +1075,12 @@ const commonFields = {
    * request without one produces exactly the document it produced before.
    */
   raidCooldownPlan: RaidCooldownPlanDisclosureSchema.optional(),
+  /**
+   * The TLDR (M15-B). Optional in the schema only, so adding it is not a
+   * version change (the rule above); this build's single-fight service emits
+   * it on every status. Raid-night cells do not carry it.
+   */
+  tldr: TldrSchema.optional(),
   // THERE IS DELIBERATELY NO `evidenceScope` HERE.
   //
   // Ingestion scope tells the application which evidence to RETRIEVE. It is not
@@ -977,3 +1173,4 @@ export type PublicCoverage = z.infer<typeof CoverageSchema>;
 export type PublicAuthority = z.infer<typeof AuthoritySchema>;
 export type PublicEvidenceLocator = z.infer<typeof EvidenceLocatorSchema>;
 export type PublicDiagnosis = z.infer<typeof DiagnosisSchema>;
+export type PublicTldr = z.infer<typeof TldrSchema>;

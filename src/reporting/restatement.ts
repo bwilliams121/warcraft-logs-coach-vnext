@@ -106,6 +106,7 @@ export function restateObservedDecisions(
       fightTimeMs: decision.fightTimeMs,
       evidence: [decision.locator],
       aggregationKey: JSON.stringify([decision.outcome, decision.observedToken, reasonCode]),
+      subjectToken: decision.observedToken,
     });
   }
   return { kind: "RESTATED", records };
@@ -132,6 +133,7 @@ export function restateConsumableStatus(report: ConsumableStatusReport): Finding
       fightTimeMs: null,
       evidence: status.uses.map((use) => use.evidence),
       aggregationKey: null,
+      subjectToken: null,
     };
   });
   return { kind: "RESTATED", records };

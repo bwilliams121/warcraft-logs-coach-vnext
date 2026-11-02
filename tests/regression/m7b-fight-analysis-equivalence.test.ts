@@ -48,6 +48,7 @@ import { PREPARATION_REQUIREMENT } from "../../src/analysis/preparation/requirem
 import { describe, expect, it } from "vitest";
 
 import { DIAGNOSIS_NOT_RETRIEVED } from "../../src/diagnosis/diagnosis.js";
+import { withExpectedTldr } from "../support/tldr.js";
 import { analyzeFight } from "../../src/services/analysis-service.js";
 import {
   analyzerForSpec,
@@ -224,7 +225,8 @@ async function viaReusableCore(): Promise<FightAnalysis> {
     targetActorId: null,
   });
 
-  return {
+  // M15-B: the TLDR the service builds beside the analysis, from the same fields.
+  return withExpectedTldr({
     identity,
     specId: analyzer.specId,
     analyzerId: analyzer.analyzerId,
@@ -237,7 +239,7 @@ async function viaReusableCore(): Promise<FightAnalysis> {
       analysis.status === "ANALYZED" ? observedDecisionViewOf(PRODUCTION_CATALOG, analysis) : null,
     // M14-F: as the service attaches it with no comparison evidence, on ANALYZED only.
     ...(analysis.status === "ANALYZED" ? { diagnosis: DIAGNOSIS_NOT_RETRIEVED } : {}),
-  };
+  });
 }
 
 describe("the reusable core reproduces the complete FightAnalysis", () => {
@@ -282,6 +284,8 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
     expect(viaService.preparation.state).toBe("ASSESSED");
     // M14-F: the reviewed diagnosis projection, beside the analysis.
     expect(viaCore.diagnosis).toEqual(viaService.diagnosis);
+    // M15-B: the TLDR, beside the analysis.
+    expect(viaCore.tldr).toEqual(viaService.tldr);
 
     // And no field exists on one side that the other does not supply.
     expect(Object.keys(viaCore).sort()).toEqual(Object.keys(viaService).sort());
@@ -294,6 +298,7 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
       "preparation",
       "scope",
       "specId",
+      "tldr",
     ]);
   });
 });

@@ -36,6 +36,7 @@ import {
   type DiagnosisOutcome,
 } from "../diagnosis/diagnosis.js";
 import { createCombatState } from "../engine/state/combat-state.js";
+import { buildFightTldr, type TldrDiagnosisInput } from "../reporting/tldr.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import type { IngestionFailureReason } from "../wcl/ingest-fight.js";
 import type { FightIdentity, PreflightPort, WclFailureReason } from "../wcl/types.js";
@@ -170,6 +171,23 @@ async function diagnosisFor(
     evidence,
     view,
   );
+}
+
+/**
+ * The diagnosis state the TLDR discloses (M15-B): whether it was assessed,
+ * and how many statements it made. Restated here so `src/reporting/` never
+ * reads the diagnosis domain; nothing else of the outcome is passed on.
+ */
+function tldrDiagnosisOf(outcome: DiagnosisOutcome): TldrDiagnosisInput {
+  return outcome.state === "ASSESSED"
+    ? { assessment: "ASSESSED", statements: outcome.diagnosis.coverage.statements }
+    : { assessment: "NOT_ASSESSED", reason: outcome.reason };
+}
+
+/** An ANALYZED result always has its registration's view; its absence is an orchestration defect. */
+function requireView(view: ObservedDecisionView | null): ObservedDecisionView {
+  if (view === null) throw new Error("an ANALYZED result has no observed-decision view");
+  return view;
 }
 
 /**
@@ -397,6 +415,12 @@ async function unsupportedSpec(
     observedDecisions: null,
     preparation: retrieval.preparation,
     ...withPlan(plan),
+    // M15-B: the TLDR says gameplay was not analyzed, and summarizes preparation.
+    tldr: buildFightTldr({
+      gameplay: { status: "SPEC_NOT_SUPPORTED" },
+      preparation: retrieval.preparation,
+      diagnosis: null,
+    }),
   };
   return { ok: true, state: resultStateFor(analysis), analysis };
 }
@@ -696,6 +720,21 @@ export async function analyzeFight(
         )
       : null;
 
+  // ---- M15-B: the TLDR, from the restated findings and the coverage, last ----
+  const tldr = buildFightTldr({
+    gameplay:
+      analysis.status !== "ANALYZED"
+        ? { status: analysis.status }
+        : {
+            status: "ANALYZED",
+            specId: analyzer.specId,
+            authorityId: analysis.authority.authorityId,
+            view: requireView(observedDecisions),
+          },
+    preparation: { state: "ASSESSED", report: preparation },
+    diagnosis: diagnosis === null ? null : tldrDiagnosisOf(diagnosis),
+  });
+
   const fightAnalysis: FightAnalysis = {
     identity,
     specId: analyzer.specId,
@@ -706,6 +745,7 @@ export async function analyzeFight(
     preparation: { state: "ASSESSED", report: preparation },
     ...withPlan(planDisclosure),
     ...(diagnosis === null ? {} : { diagnosis }),
+    tldr,
   };
 
   return { ok: true, state: resultStateFor(fightAnalysis), analysis: fightAnalysis };

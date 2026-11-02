@@ -100,7 +100,11 @@ describe("the diagnosis projection's place in the tree", () => {
     // The outcome's one use: spread into the FightAnalysis, after the analysis it sits beside.
     const attached = service.indexOf("...(diagnosis === null ? {} : { diagnosis }),");
     expect(attached).toBeGreaterThan(diagnosed);
-    expect(service.slice(diagnosed).match(/[(,]\s*diagnosis\s*[,)]/g)).toBeNull();
+    // M15-B: its one other reading is the TLDR's disclosure of the diagnosis
+    // STATE (assessed or not, and the statement count), through one restating
+    // function. Nothing else of the outcome is passed anywhere.
+    expect(service.slice(diagnosed).match(/[(,]\s*diagnosis\s*[,)]/g)).toEqual(["(diagnosis)"]);
+    expect(service.slice(diagnosed)).toContain("diagnosis === null ? null : tldrDiagnosisOf(diagnosis)");
   });
 
   it("the deployed composition supplies no comparison evidence", () => {

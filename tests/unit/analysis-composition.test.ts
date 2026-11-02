@@ -173,7 +173,13 @@ describe("the composed path analyses the fixture", () => {
     const result = await analyzeFight(REQUEST, deps());
     const serialized = JSON.stringify(result);
 
-    for (const banned of ["tldr", "coaching", "score", "severity", "recommend", "optimal", "mistake"]) {
+    // M15-B: the TLDR is now an authorized field (autopilot queue "M15-B: TLDR
+    // from trustworthy findings"), so "tldr" left this list. What it must not
+    // be is held here instead: it is always PARTIAL, and it carries none of the
+    // words below, in its keys or its sentences.
+    if (!result.ok) throw new Error("not ok");
+    expect(result.analysis.tldr).toMatchObject({ assessment: "ASSESSED", assessmentScope: "PARTIAL" });
+    for (const banned of ["coaching", "score", "severity", "recommend", "optimal", "mistake"]) {
       expect(serialized.toLowerCase(), `result must not carry "${banned}"`).not.toContain(
         banned.toLowerCase(),
       );
