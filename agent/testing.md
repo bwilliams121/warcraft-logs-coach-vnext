@@ -1677,6 +1677,18 @@ causal evidence linkage (M14-E, tests/unit/m14e-causal-linkage.test.ts, same G2 
   comparisons supplied                         -> change only a direction; subject evidence per component identical
   real fights                                  -> 13 LINKED pairs, all bounds; Death Strike link rests on MATCHes (link is not a fault)
   every linkage                                -> LINKAGE_ONLY, causalClaim NONE, magnitude NONE, verdictFlow NONE, no confidence field
+diagnosis projection (M14-F, tests/unit/m14f-diagnosis-projection.test.ts, contracts/m14f-diagnosis-{contract,layering}.test.ts):
+  no comparison evidence (deployed service)    -> ANALYZED carries NOT_ASSESSED COMPARISON_EVIDENCE_NOT_RETRIEVED, never an empty diagnosis
+  evidence source throws / returns null        -> COMPARISON_RETRIEVAL_FAILED / NOT_RETRIEVED; the analysis itself unchanged
+  other player / fight / revision / spec       -> COMPARISON_EVIDENCE_NOT_FOR_THIS_FIGHT; the post-hoc fightRef label is not identity
+  other encounter / unreviewed outcome word    -> COMPARISON_NOT_COMPARABLE / DECISION_EVIDENCE_NOT_USABLE
+  link on MATCH decisions only                 -> NO_AUTHORITY_FINDING_IN_LINK (real: the 12 whole-fight M14-E links)
+  REJECTED casts, subject figure LOWER         -> FINDINGS_DO_NOT_MATCH_DIRECTION, never a statement
+  REJECTED casts, proven HIGHER, linked        -> one statement: findings by locator, every limit, magnitudeAttribution NONE
+  UNKNOWN decisions / undecided bound          -> DECISION_EVIDENCE_UNRESOLVED / DIRECTION_UNDECIDED (real: 45 Heart Strike REJECTED)
+  with or without diagnosis                    -> identical decisions and coverage; real: 0 statements, 307 records (224 UNKNOWN)
+  public vocabularies                          -> declared independently, pinned to the projection's; no confidence/score/suppression field
+  layering                                     -> only service, result type and projection import it; no analyzer or role module does
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

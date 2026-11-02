@@ -315,8 +315,10 @@ describe("the public contract stays transport-neutral and secret-free", () => {
     const specifiers = importSpecifiersOf("src/contracts/analysis-projection.ts");
 
     // PREP-2: the preparation report's TYPES (projected field for field).
+    // M14-F: the diagnosis projection's TYPES (projected field for field).
     expect([...specifiers].sort()).toEqual([
       "../analysis/preparation/consumable-status.js",
+      "../diagnosis/diagnosis.js",
       "../engine/evidence/locator.js",
       "../findings/observed-decision-view.js",
       "../findings/spec-id.js",
@@ -327,7 +329,16 @@ describe("the public contract stays transport-neutral and secret-free", () => {
 });
 
 describe("nothing below the contract may import it", () => {
-  const LOWER_ROOTS = ["src/specs", "src/engine", "src/simc", "src/findings", "src/services", "src/wcl"];
+  const LOWER_ROOTS = [
+    "src/specs",
+    "src/engine",
+    "src/simc",
+    "src/findings",
+    "src/services",
+    "src/wcl",
+    // M14-F: the diagnosis projection sits below the contract too.
+    "src/diagnosis",
+  ];
 
   for (const root of LOWER_ROOTS) {
     it(`${root} imports nothing from src/contracts`, () => {

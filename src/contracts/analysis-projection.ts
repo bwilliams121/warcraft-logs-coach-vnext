@@ -35,6 +35,13 @@
  * was selected.
  */
 
+import type {
+  CoachingStatement,
+  DeltaComponent,
+  DeltaValue,
+  DiagnosisObservation,
+  DiagnosisOutcome,
+} from "../diagnosis/diagnosis.js";
 import type { EvidenceLocator } from "../engine/evidence/locator.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { requirePublicSpecId } from "../findings/spec-id.js";
@@ -228,6 +235,102 @@ function projectRaidCooldownPlan(plan: RaidCooldownPlanDisclosure) {
   } as const;
 }
 
+function projectComponent(component: DeltaComponent) {
+  switch (component.dimension) {
+    case "TOTAL":
+      return { dimension: component.dimension };
+    case "BY_SOURCE":
+      return { dimension: component.dimension, sourceKind: component.sourceKind };
+    case "BY_ABILITY":
+      return {
+        dimension: component.dimension,
+        sourceKind: component.sourceKind,
+        abilityGameId: component.abilityGameId,
+      };
+    case "BY_TARGET_CLASS":
+      return { dimension: component.dimension, targetClass: component.targetClass };
+    case "BY_WCL_TARGET_TYPE":
+      return { dimension: component.dimension, wclTargetType: component.wclTargetType };
+    default:
+      return assertNever(component);
+  }
+}
+
+function projectDelta(delta: DeltaValue) {
+  return delta.kind === "UNKNOWN"
+    ? { kind: delta.kind, reason: delta.reason }
+    : { kind: delta.kind, value: delta.value };
+}
+
+function projectPair(pair: CoachingStatement | DiagnosisObservation) {
+  return {
+    rowId: pair.rowId,
+    windowId: pair.windowId,
+    measure: pair.measure,
+    component: projectComponent(pair.component),
+    comparisonFightRef: pair.comparisonFightRef,
+    perMinuteDelta: projectDelta(pair.perMinuteDelta),
+    limits: [...pair.limits],
+  };
+}
+
+/** The reviewed diagnosis projection's outcome, field for field (M14-F). Nothing is derived here. */
+function projectDiagnosis(outcome: DiagnosisOutcome) {
+  if (outcome.state === "NOT_ASSESSED")
+    return { assessment: "NOT_ASSESSED", reason: outcome.reason } as const;
+  const { diagnosis } = outcome;
+  return {
+    assessment: "ASSESSED",
+    comparisonFights: diagnosis.comparisonFightRefs.map((fightRef) => ({ fightRef })),
+    windowIds: [...diagnosis.windowIds],
+    statements: diagnosis.statements.map((statement) => ({
+      statementKind: statement.statementKind,
+      ...projectPair(statement),
+      direction: statement.direction,
+      findings: statement.findings.map(projectLocator),
+      environmentalContext: statement.environmentalContext.map((entry) => ({
+        itemId: entry.itemId,
+        reason: entry.reason,
+      })),
+      magnitudeAttribution: statement.magnitudeAttribution,
+    })),
+    observations: diagnosis.observations.map((observation) => ({
+      ...projectPair(observation),
+      direction: observation.direction,
+      cause: observation.cause,
+    })),
+    coverage: {
+      deltaRows: diagnosis.coverage.deltaRows,
+      pairs: diagnosis.coverage.pairs,
+      statements: diagnosis.coverage.statements,
+      observations: diagnosis.coverage.observations,
+      observationCauses: diagnosis.coverage.observationCauses.map((row) => ({
+        key: row.key,
+        count: row.count,
+      })),
+      decisionEvidence: {
+        records: diagnosis.coverage.decisionEvidence.records,
+        resolved: diagnosis.coverage.decisionEvidence.resolved,
+        unknown: diagnosis.coverage.decisionEvidence.unknown,
+        inNoComponent: diagnosis.coverage.decisionEvidence.inNoComponent,
+      },
+    },
+    encounterStateEvidence: diagnosis.encounterStateEvidence.map((entry) => ({
+      fightRef: entry.fightRef,
+      phaseEvidence: entry.phaseEvidence,
+    })),
+    strategyThresholds: { id: diagnosis.strategyThresholds.id, status: diagnosis.strategyThresholds.status },
+    comparisonCoverage: diagnosis.comparisonCoverage,
+    comparisonRole: diagnosis.comparisonRole,
+    decisionEvidenceSide: diagnosis.decisionEvidenceSide,
+    magnitudeAttribution: diagnosis.magnitudeAttribution,
+    findingEffect: {
+      suppression: diagnosis.findingEffect.suppression,
+      confidence: diagnosis.findingEffect.confidence,
+    },
+  } as const;
+}
+
 /**
  * Common fields, identical across every status.
  *
@@ -367,6 +470,9 @@ export function projectAnalysisResult(analysis: FightAnalysis): PublicAnalysisRe
         decisions: projectDecisions(view),
         exclusions: projectExclusions(view),
         coverage: projectCoverage(view),
+        // Only when the service ran the diagnosis projection (M14-F); the
+        // single-fight service always does on ANALYZED.
+        ...(analysis.diagnosis === undefined ? {} : { diagnosis: projectDiagnosis(analysis.diagnosis) }),
       });
     }
 

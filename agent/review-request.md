@@ -4,104 +4,133 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M14-E: Causal evidence linkage (internal). Autopilot queue entry M14-E.
-Branch `autopilot/m14-e`, from main at 777b12a.
+M14-F: Reviewed diagnosis projection and public integration. Autopilot queue
+entry M14-F. Branch `autopilot/m14-f`, from main at ca2bf1a.
 
 - **Direction** (queue entry; CLAUDE.md "Damage Output Diagnosis",
-  "Comparison Cannot Move Confidence", "UNKNOWN vs NO_AUTHORITY_AVAILABLE";
-  architecture "Milestone 14", "M14-D"): link damage-delta components to
-  decision-level evidence that could support a causal statement (APL decision
-  outcomes, cast opportunities and uptime, resource state and buff windows,
-  target choice and cooldown alignment, encounter actionability). A link
-  records its evidence and its limits. A delta with no decision-level link
-  stays an observation. The authority verifier and this causal analysis stay
-  separate modules; neither feeds the other's verdicts until M14-F. Comparison
-  behavior never moves confidence.
-- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or
-  `src/mcp/` changes.
-- **Warcraft Logs requests: none.** Committed archive fights, the subject's
-  real Blood decision results computed offline, synthetic fights.
-- Queue bookkeeping: M14-D (#28, 777b12a) recorded MERGED; M14-E PR_OPEN.
-  M12-C through M14-C were already recorded.
+  "Comparison Cannot Move Confidence", "Top Logs Cannot Suppress Findings
+  Merely by Similarity", "Reported Coverage", "Application Services";
+  architecture "M14-E"; follow-ups "After M14-E": the adapter from findings
+  to records "belongs with the M14-F projection, which may import both
+  sides"): combine authority-backed findings with linked causal evidence and
+  expose diagnosis through the shared application service, with structured
+  evidence, UNKNOWN preserved and coverage disclosed. A causal coaching
+  statement only where an authority-backed finding and its decision-level
+  link both exist; unlinked deltas labelled observations; comparison context
+  attached, never authority.
+- **Warcraft Logs requests: none.** Committed archive fights (the M11-G2
+  four-fight set) and synthetic fights. The comparison evidence port is a
+  test double over committed evidence.
+- Queue bookkeeping: M14-E (#29, ca2bf1a) recorded MERGED; M14-F PR_OPEN.
+  M12-C through M14-D were already recorded.
+
+## Public contract change (EXPECTED), precisely
+
+Under `warcraft-logs-coach.analysis/1` (unchanged), additive only:
+
+1. **`AnalyzedResultSchema.diagnosis`: a new OPTIONAL field**, on ANALYZED
+   results only (non-analyzed statuses unchanged and strict, so they cannot
+   carry it). Discriminated on `assessment`:
+   - `NOT_ASSESSED { reason }`, reason one of
+     `COMPARISON_EVIDENCE_NOT_RETRIEVED`, `COMPARISON_RETRIEVAL_FAILED`,
+     `COMPARISON_EVIDENCE_NOT_FOR_THIS_FIGHT`, `COMPARISON_NOT_COMPARABLE`,
+     `DECISION_EVIDENCE_NOT_USABLE`.
+   - `ASSESSED { comparisonFights[{fightRef}], windowIds[], statements[],
+     observations[], coverage{deltaRows, pairs, statements, observations,
+     observationCauses tally, decisionEvidence{records, resolved, unknown,
+     inNoComponent}}, encounterStateEvidence[{fightRef, phaseEvidence
+     HELD|UNKNOWN}], strategyThresholds{id,status}, comparisonCoverage
+     "AT_LEAST_UNCERTIFIED", comparisonRole "CONTEXT_ONLY",
+     decisionEvidenceSide "SUBJECT_ONLY", magnitudeAttribution "NONE",
+     findingEffect{suppression "NONE", confidence "NONE"} }`.
+   - A statement: `statementKind "AUTHORITY_FINDING_LINKED_TO_DELTA"`, rowId,
+     windowId, measure, component (5 dimensions), comparisonFightRef,
+     perMinuteDelta (EXACT / NO_MORE_THAN / NO_LESS_THAN value, or UNKNOWN
+     reason), limits, `direction "SUBJECT_HIGHER"` (literal), `findings` (≥1
+     decision EvidenceLocator), environmentalContext[{itemId, reason}],
+     `magnitudeAttribution "NONE"`.
+   - An observation: the same pair fields, direction (4 values), cause (7).
+   - New public vocabularies: `PUBLIC_DIAGNOSIS_NOT_ASSESSED_REASONS`,
+     `_MEASURES`, `_DIMENSIONS`, `_TARGET_CLASSES`, `_DELTA_BOUND_KINDS`,
+     `_DELTA_UNKNOWN_REASONS`, `_DIRECTIONS`, `_LIMITS`,
+     `_OBSERVATION_CAUSES`, `_ENVIRONMENTAL_REASONS`; declared independently
+     and pinned by test to `src/diagnosis/vocabulary.ts` (itself pinned at
+     compile time to the post-hoc unions).
+2. **What a consumer sees today:** the deployed service supplies no
+   comparison evidence, so every ANALYZED document gains exactly
+   `"diagnosis": {"assessment":"NOT_ASSESSED","reason":"COMPARISON_EVIDENCE_NOT_RETRIEVED"}`.
+   Nothing else in any document changes. REST and MCP share the projection.
+3. **MCP tool description:** one new paragraph saying what diagnosis is and
+   is not (NOT_ASSESSED means nothing is claimed; a statement does not say
+   how much; an observation is not a cause; comparison is context). The MCP
+   `outputSchema` is the public schema, so it advertises the field.
+4. Raid-night contract: unchanged (no diagnosis there; follow-up).
 
 ## What it adds
 
-**`src/comparison-facts/causal-linkage.ts`**, inside the M11-G2 post-hoc
-domain and under its layering guard (module list updated). It imports only
-the domain's own modules and the engine `EvidenceLocator` type. It never
-imports the authority branch (specs, simc, findings), and nothing outside the
-domain imports it. No forbidden word appears.
+**`src/diagnosis/`** (new): `decision-evidence.ts` (the reviewed adapter:
+view decision → M14-E record; MATCH/REJECTED → RESOLVED, UNKNOWN → UNKNOWN,
+any other outcome word refuses; ABILITY/FOCUS scope on exactly the observed
+id), `diagnosis.ts` (port types, subject binding, `diagnose`), and
+`vocabulary.ts`.
 
-`linkCausalEvidence(input, definition, alignedWindows, records)` recomputes
-the M14-D decomposition from its inputs (the anti-stale rule of M14-A/C/D).
+**A statement needs all of:** the pair LINKED by M14-E; a REJECTED decision
+among the resolved evidence (MATCH-only → `NO_AUTHORITY_FINDING_IN_LINK`: a
+link is not a fault); and `SUBJECT_HIGHER` (a rejected observed X can bear
+only on X being higher → otherwise `FINDINGS_DO_NOT_MATCH_DIRECTION`). The
+M14-E causes carry over unchanged. No magnitude; every limit carried; M14-C
+named reasons attached as context only, never suppression.
 
-**Decision evidence is caller-restated plain data** (`DecisionEvidenceRecord`,
-like `attachStrategyContext`'s finding moment): kind (the eight queue
-families), basis (`AUTHORITY_BACKED` / `OBSERVED_FACT`), the producer's
-authority and status VERBATIM, resolution (`RESOLVED` / `UNKNOWN` /
-`NO_AUTHORITY_AVAILABLE`, never merged), half-open report-time interval,
-scope, locators. The linkage reads only resolution, scope and interval. It
-never reads the producer's status and never re-evaluates a decision.
+**Service** (`analysis-service.ts`): optional `comparisonEvidence` port,
+called after `runAnalyzer` with the analyzed identity only; the outcome is
+spread into the `FightAnalysis` and passed nowhere else. The supplied subject
+must match report code, revision, fight id and bounds, player and spec (the
+post-hoc `fightRef` is a label, not identity). A throwing port is
+`COMPARISON_RETRIEVAL_FAILED`. Production composition wires none.
 
-**A link** (per delta row × comparison pair) needs a proven direction
-(SUBJECT_LOWER / SUBJECT_HIGHER), the subject's window placed, and at least
-one RESOLVED in-scope record meeting that window. Otherwise
-`OBSERVATION_ONLY` with a cause (`DIRECTION_UNDECIDED`, `DIRECTION_EQUAL`,
-`SUBJECT_WINDOW_UNKNOWN`, `NO_DECISION_EVIDENCE_IN_SCOPE`,
-`DECISION_EVIDENCE_UNRESOLVED`). Unresolved records are carried, distinct, and
-never support a link.
+**Layering:** M11-G2 guard admits `src/diagnosis/` as the post-hoc domain's
+only outside reader; new M14-F guard: diagnosis imports only the five
+post-hoc modules it combines, the locator type and the observed-decision
+view; only the service, `result.ts` and the public projection import it; no
+simc/specs/findings/analysis/engine/role module does; it is called after the
+analyzer; nothing outside the service names `comparisonEvidence`. M6-A
+projection-reach list gains `../diagnosis/diagnosis.js`; diagnosis joins the
+roots that may not import contracts.
 
-**Scope:** TOTAL / BY_WCL_TARGET_TYPE take only WHOLE_OUTPUT records (one
-ability never explains a total; no residual). BY_SOURCE ← SOURCE; BY_ABILITY ←
-ABILITY (same source kind, exact game id) or SOURCE; BY_TARGET_CLASS ←
-TARGET_CLASS. Ability-id relationships are the producer's statement, never
-guessed.
+## Real evidence (pinned)
 
-**Limits on every pair:** `COMPARISON_COVERAGE_UNCERTIFIED`,
-`COMPARISON_DECISIONS_NOT_EVALUATED`, and where they hold `DELTA_IS_A_BOUND`,
-`EVENT_COUNT_NOT_DAMAGE_AMOUNT`, `SUBJECT_COMPONENTS_OBSERVED_ONLY`,
-`UNRESOLVED_EVIDENCE_IN_SCOPE`, `NO_AUTHORITY_BACKED_EVIDENCE`.
-
-**Refusals:** a record from a non-subject fight (comparison decisions are
-never evaluated; comparison behavior is never decision evidence), a kind
-outside the vocabulary, duplicate id, non-integer/reversed interval, interval
-outside the subject fight, empty ability scope, an OBSERVED_FACT claiming
-NO_AUTHORITY_AVAILABLE, a refused decomposition.
-
-**Linkage only:** `decisionEvidenceSide: SUBJECT_ONLY`, `use: LINKAGE_ONLY`,
-`causalClaim: NONE`, `magnitudeAttribution: NONE`, `verdictFlow: NONE`,
-`findingEffect: { suppression: NONE, confidence: NONE }`; no confidence field
-exists. Comparisons decide only whether a direction is proven. Records in no
-component are listed, never dropped.
-
-## Real evidence (pinned in the test)
-
-The subject's real Blood observed decisions (307: 45 REJECTED, 38 MATCH, 224
-UNKNOWN), restated as records in the TEST, not in `src/`:
-
-- Exactly 13 LINKED pairs: whole-fight event-count rows for Death Strike,
-  Blood Boil, Marrowrend, Vampiric Strike vs all three comparisons, and
-  first-30 s Death Strike vs COHORT246; all bounds.
-- Death Strike's link rests on 24 MATCHes: a link is not a fault.
-- 45 Heart Strike REJECTED link nothing: that row's direction is UNDECIDED.
-- Death's Caress: only UNKNOWN in scope -> `DECISION_EVIDENCE_UNRESOLVED`.
-- No total, table or raw-amount row links.
-- Subject evidence per component is identical with one comparison or three.
+The subject's real Blood analysis through `analyzeFight` with a test port
+over the archive: ASSESSED, WHOLE_FIGHT, three comparisons, **0 statements**.
+The 12 whole-fight M14-E links → `NO_AUTHORITY_FINDING_IN_LINK`; Heart Strike
+(45 REJECTED) → `DIRECTION_UNDECIDED` ×3; decision evidence 307 / 83 resolved
+/ 224 UNKNOWN / 0 outside. Decisions and coverage identical with and without
+diagnosis. Without a port: NOT_ASSESSED.
 
 ## Tests
 
-- New `tests/unit/m14e-causal-linkage.test.ts` (24): real pins, comparison
-  independence, determinism and input immutability; synthetic link
-  requirements, EQUAL/UNDECIDED, UNKNOWN vs NO_AUTHORITY_AVAILABLE kept
-  distinct, facts-only limit, scope per dimension, half-open windows, unmatched
-  records listed, every refusal.
-- `tests/contracts/m11g2-comparison-facts-layering.test.ts` module list
-  updated.
-- Focused: M14-E, G2 layering; `tsc --noEmit`; prettier; plus the full suite.
+- New `tests/unit/m14f-diagnosis-projection.test.ts` (23): real pins through
+  the service, port request contents, binding refusals (player, spec, fight
+  id, revision, report code, bounds), throwing/null port, synthetic statement
+  (findings = REJECTED only), lower-direction, MATCH-only, UNKNOWN-only,
+  other-ability, undecided bound, encounter mismatch, unreviewed outcome,
+  out-of-fight decision, determinism.
+- New `tests/contracts/m14f-diagnosis-contract.test.ts`,
+  `tests/contracts/m14f-diagnosis-layering.test.ts`.
+- Updated: equivalence helpers in the Blood/Retribution/Brewmaster public
+  projection tests and the M7-B core reproduction build the envelope as the
+  service now does (diagnosis NOT_ASSESSED on ANALYZED); M6-A and M11-G2
+  layering lists.
+- `tsc --noEmit`, prettier, focused tests, full suite. Full suite: every
+  failure but one was a 5 s timeout under load and passed when the failed
+  files were re-run serially. The remaining one,
+  `m8g-encounter-context-composition` "byte-identical across success,
+  empty, rejection and total failure", times out at 5 s alone, and does the
+  same on main's tree with this change stashed: machine load, not this
+  tranche.
 
 ## Docs
 
-`agent/architecture.md` "M14-E"; `agent/follow-ups.md` "After M14-E" (a link
-is not a cause; no production adapter yet, M14-F; exact ability identity;
-undecided deltas link nothing; no factual record producer yet);
-`agent/testing.md` row block; queue bookkeeping.
+`agent/architecture.md` "M14-F"; `agent/follow-ups.md` "After M14-F" (no live
+comparison retrieval: owner decision; no statement on real evidence; one
+direction rule; whole fight only; named reasons never suppress; raid night
+has no diagnosis); `agent/testing.md` row block; queue bookkeeping.

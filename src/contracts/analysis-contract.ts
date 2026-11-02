@@ -658,6 +658,211 @@ export const RaidCooldownPlanDisclosureSchema = z
   .strict();
 
 // ---------------------------------------------------------------------------
+// Diagnosis (M14-F)
+// ---------------------------------------------------------------------------
+
+/** Why diagnosis was not assessed. Nothing is claimed about the fight's damage. */
+export const PUBLIC_DIAGNOSIS_NOT_ASSESSED_REASONS = [
+  "COMPARISON_EVIDENCE_NOT_RETRIEVED",
+  "COMPARISON_RETRIEVAL_FAILED",
+  "COMPARISON_EVIDENCE_NOT_FOR_THIS_FIGHT",
+  "COMPARISON_NOT_COMPARABLE",
+  "DECISION_EVIDENCE_NOT_USABLE",
+] as const;
+
+/** What a delta compares. Never mixed within one row. */
+export const PUBLIC_DIAGNOSIS_MEASURES = [
+  "DAMAGE_EVENT_COUNT",
+  "RAW_AMOUNT_FIELD_SUM",
+  "WCL_TABLE_AMOUNT",
+] as const;
+
+export const PUBLIC_DIAGNOSIS_DIMENSIONS = [
+  "TOTAL",
+  "BY_SOURCE",
+  "BY_ABILITY",
+  "BY_TARGET_CLASS",
+  "BY_WCL_TARGET_TYPE",
+] as const;
+
+export const PUBLIC_DIAGNOSIS_TARGET_CLASSES = [
+  "BOSS_SUBTYPE",
+  "NON_BOSS_NPC",
+  "PLAYER_TARGET",
+  "OTHER_TARGET",
+] as const;
+
+/** A per-minute delta, subject minus comparison: exact, or a bound. */
+export const PUBLIC_DIAGNOSIS_DELTA_BOUND_KINDS = ["EXACT", "NO_MORE_THAN", "NO_LESS_THAN"] as const;
+
+export const PUBLIC_DIAGNOSIS_DELTA_UNKNOWN_REASONS = [
+  "SUBJECT_FIGURE_UNKNOWN",
+  "COMPARISON_FIGURE_UNKNOWN",
+  "BOTH_FIGURES_LOWER_BOUNDS",
+  "RAW_AMOUNT_MEANING_NOT_PROVEN",
+  "LOG_VERSION_DIFFERS",
+] as const;
+
+/** Stated only where the delta or its bound proves it; otherwise UNDECIDED. */
+export const PUBLIC_DIAGNOSIS_DIRECTIONS = ["SUBJECT_LOWER", "SUBJECT_HIGHER", "EQUAL", "UNDECIDED"] as const;
+
+/** What a pair does not establish, machine-readable. */
+export const PUBLIC_DIAGNOSIS_LIMITS = [
+  "COMPARISON_COVERAGE_UNCERTIFIED",
+  "COMPARISON_DECISIONS_NOT_EVALUATED",
+  "DELTA_IS_A_BOUND",
+  "EVENT_COUNT_NOT_DAMAGE_AMOUNT",
+  "SUBJECT_COMPONENTS_OBSERVED_ONLY",
+  "UNRESOLVED_EVIDENCE_IN_SCOPE",
+  "NO_AUTHORITY_BACKED_EVIDENCE",
+] as const;
+
+/** Why a pair is an observation and not a coaching statement. */
+export const PUBLIC_DIAGNOSIS_OBSERVATION_CAUSES = [
+  "DIRECTION_UNDECIDED",
+  "DIRECTION_EQUAL",
+  "SUBJECT_WINDOW_UNKNOWN",
+  "NO_DECISION_EVIDENCE_IN_SCOPE",
+  "DECISION_EVIDENCE_UNRESOLVED",
+  "NO_AUTHORITY_FINDING_IN_LINK",
+  "FINDINGS_DO_NOT_MATCH_DIRECTION",
+] as const;
+
+export const PUBLIC_DIAGNOSIS_ENVIRONMENTAL_REASONS = [
+  "INTERMISSION",
+  "TARGET_UNAVAILABLE",
+  "FORCED_DOWNTIME",
+  "PHASE_TRANSITION",
+] as const;
+
+const DiagnosisComponentSchema = z.discriminatedUnion("dimension", [
+  z.object({ dimension: z.literal("TOTAL") }).strict(),
+  z.object({ dimension: z.literal("BY_SOURCE"), sourceKind: z.string().min(1) }).strict(),
+  z
+    .object({
+      dimension: z.literal("BY_ABILITY"),
+      sourceKind: z.string().min(1),
+      abilityGameId: z.number().int().nullable(),
+    })
+    .strict(),
+  z
+    .object({ dimension: z.literal("BY_TARGET_CLASS"), targetClass: z.enum(PUBLIC_DIAGNOSIS_TARGET_CLASSES) })
+    .strict(),
+  z.object({ dimension: z.literal("BY_WCL_TARGET_TYPE"), wclTargetType: z.string() }).strict(),
+]);
+
+const DiagnosisDeltaSchema = z.union([
+  z.object({ kind: z.enum(PUBLIC_DIAGNOSIS_DELTA_BOUND_KINDS), value: z.number() }).strict(),
+  z.object({ kind: z.literal("UNKNOWN"), reason: z.enum(PUBLIC_DIAGNOSIS_DELTA_UNKNOWN_REASONS) }).strict(),
+]);
+
+const diagnosedPairFields = {
+  rowId: z.string().min(1),
+  windowId: z.string().min(1),
+  measure: z.enum(PUBLIC_DIAGNOSIS_MEASURES),
+  component: DiagnosisComponentSchema,
+  comparisonFightRef: z.string().min(1),
+  /** subject − comparison, per minute. */
+  perMinuteDelta: DiagnosisDeltaSchema,
+  limits: z.array(z.enum(PUBLIC_DIAGNOSIS_LIMITS)),
+};
+
+/**
+ * A coaching statement: an authority finding about the subject's own play,
+ * linked to a proven difference from one comparison fight.
+ *
+ * It exists only where ALL hold: the pair is linked to resolved decision
+ * evidence in the same component and window; that evidence includes observed
+ * decisions the authority REJECTED (`findings`, by decision locator); and the
+ * subject's figure is HIGHER, the only direction a rejected observed cast can
+ * bear on. It never says how much of the difference the findings account for
+ * (`magnitudeAttribution: NONE`), and every limit is carried.
+ */
+export const DiagnosisStatementSchema = z
+  .object({
+    statementKind: z.literal("AUTHORITY_FINDING_LINKED_TO_DELTA"),
+    ...diagnosedPairFields,
+    direction: z.literal("SUBJECT_HIGHER"),
+    findings: z.array(EvidenceLocatorSchema).min(1),
+    /** Named environmental reasons in effect at a finding's moment. Context only: nothing is suppressed. */
+    environmentalContext: z.array(
+      z
+        .object({ itemId: z.string().min(1), reason: z.enum(PUBLIC_DIAGNOSIS_ENVIRONMENTAL_REASONS) })
+        .strict(),
+    ),
+    magnitudeAttribution: z.literal("NONE"),
+  })
+  .strict();
+
+/** A difference, or its absence, with no coaching statement, and why. An observation is not a cause. */
+export const DiagnosisObservationSchema = z
+  .object({
+    ...diagnosedPairFields,
+    direction: z.enum(PUBLIC_DIAGNOSIS_DIRECTIONS),
+    cause: z.enum(PUBLIC_DIAGNOSIS_OBSERVATION_CAUSES),
+  })
+  .strict();
+
+/**
+ * The reviewed diagnosis projection (M14-F), on ANALYZED results only.
+ *
+ * NOT_ASSESSED is a disclosed gap, never "nothing differed". This build's
+ * deployed service retrieves no comparison fights, so it publishes
+ * `COMPARISON_EVIDENCE_NOT_RETRIEVED`.
+ *
+ * ASSESSED carries one entry per damage-delta row and comparison fight:
+ * a statement or an observation, never both and never neither
+ * (`coverage.pairs = statements + observations`). Comparison fights are
+ * context: their captures are uncertified (`AT_LEAST_UNCERTIFIED`), their
+ * players' decisions are never evaluated, and nothing here moves a decision's
+ * outcome, suppresses one, or carries a confidence.
+ */
+export const DiagnosisSchema = z.discriminatedUnion("assessment", [
+  z
+    .object({
+      assessment: z.literal("ASSESSED"),
+      comparisonFights: z.array(z.object({ fightRef: z.string().min(1) }).strict()).min(1),
+      windowIds: z.array(z.string().min(1)),
+      statements: z.array(DiagnosisStatementSchema),
+      observations: z.array(DiagnosisObservationSchema),
+      coverage: z
+        .object({
+          deltaRows: z.number().int().nonnegative(),
+          pairs: z.number().int().nonnegative(),
+          statements: z.number().int().nonnegative(),
+          observations: z.number().int().nonnegative(),
+          observationCauses: tallyOf(PUBLIC_DIAGNOSIS_OBSERVATION_CAUSES),
+          decisionEvidence: z
+            .object({
+              records: z.number().int().nonnegative(),
+              resolved: z.number().int().nonnegative(),
+              unknown: z.number().int().nonnegative(),
+              inNoComponent: z.number().int().nonnegative(),
+            })
+            .strict(),
+        })
+        .strict(),
+      /** Per fight: whether phase transitions are held. UNKNOWN means no named reason could be found, not "no downtime". */
+      encounterStateEvidence: z
+        .array(z.object({ fightRef: z.string().min(1), phaseEvidence: z.enum(["HELD", "UNKNOWN"]) }).strict())
+        .min(1),
+      strategyThresholds: z.object({ id: z.string().min(1), status: z.string().min(1) }).strict(),
+      comparisonCoverage: z.literal("AT_LEAST_UNCERTIFIED"),
+      comparisonRole: z.literal("CONTEXT_ONLY"),
+      decisionEvidenceSide: z.literal("SUBJECT_ONLY"),
+      magnitudeAttribution: z.literal("NONE"),
+      findingEffect: z.object({ suppression: z.literal("NONE"), confidence: z.literal("NONE") }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      assessment: z.literal("NOT_ASSESSED"),
+      reason: z.enum(PUBLIC_DIAGNOSIS_NOT_ASSESSED_REASONS),
+    })
+    .strict(),
+]);
+
+// ---------------------------------------------------------------------------
 // The result
 // ---------------------------------------------------------------------------
 
@@ -708,6 +913,13 @@ export const AnalyzedResultSchema = z
     decisions: z.array(DecisionSchema),
     exclusions: z.array(ExclusionSchema),
     coverage: CoverageSchema,
+    /**
+     * The reviewed diagnosis projection (M14-F). Optional in the schema only,
+     * so adding it is not a version change (the rule above); this build's
+     * single-fight service emits it on every ANALYZED result. Never on the
+     * non-analyzed statuses: they carry nothing analysis-shaped.
+     */
+    diagnosis: DiagnosisSchema.optional(),
   })
   .strict();
 
@@ -764,3 +976,4 @@ export type PublicExclusion = z.infer<typeof ExclusionSchema>;
 export type PublicCoverage = z.infer<typeof CoverageSchema>;
 export type PublicAuthority = z.infer<typeof AuthoritySchema>;
 export type PublicEvidenceLocator = z.infer<typeof EvidenceLocatorSchema>;
+export type PublicDiagnosis = z.infer<typeof DiagnosisSchema>;

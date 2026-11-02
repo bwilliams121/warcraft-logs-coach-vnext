@@ -28,7 +28,15 @@
  */
 
 import { loadConfig, type Env } from "../config/env.js";
+import {
+  diagnose,
+  DIAGNOSIS_NOT_RETRIEVED,
+  type ComparisonEvidence,
+  type ComparisonEvidencePort,
+  type DiagnosisOutcome,
+} from "../diagnosis/diagnosis.js";
 import { createCombatState } from "../engine/state/combat-state.js";
+import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import type { IngestionFailureReason } from "../wcl/ingest-fight.js";
 import type { FightIdentity, PreflightPort, WclFailureReason } from "../wcl/types.js";
 import { parseAnalysisRequest } from "./analysis-request.js";
@@ -109,6 +117,59 @@ export interface AnalysisServiceDeps {
    * exactly that.
    */
   readonly registry?: readonly AnalyzerRegistration[] | undefined;
+  /**
+   * Comparison evidence for the reviewed diagnosis projection (M14-F).
+   *
+   * OPTIONAL, AND THE DEPLOYED COMPOSITION SUPPLIES NONE: no live comparison
+   * retrieval exists (agent/follow-ups.md "After M14-F"). Without it every
+   * ANALYZED result discloses diagnosis NOT_ASSESSED
+   * (COMPARISON_EVIDENCE_NOT_RETRIEVED), never an empty diagnosis.
+   */
+  readonly comparisonEvidence?: ComparisonEvidencePort | undefined;
+}
+
+/**
+ * The diagnosis beside an ANALYZED result. Runs after the analyzer, reads only
+ * the registration's view, and its outcome is attached to the envelope and
+ * nowhere else. A failing evidence source is a disclosed gap, never a failed
+ * analysis.
+ */
+async function diagnosisFor(
+  identity: FightIdentity,
+  specId: string,
+  authorityId: string,
+  view: ObservedDecisionView,
+  port: ComparisonEvidencePort | undefined,
+): Promise<DiagnosisOutcome> {
+  if (port === undefined) return DIAGNOSIS_NOT_RETRIEVED;
+  let evidence: ComparisonEvidence | null;
+  try {
+    evidence = await port({
+      reportCode: identity.report.code,
+      reportRevision: identity.report.revision,
+      fightId: identity.fight.id,
+      sourceId: identity.player.sourceId,
+      encounterId: identity.fight.encounterId,
+      difficulty: identity.fight.difficulty,
+      specId,
+    });
+  } catch {
+    return { state: "NOT_ASSESSED", reason: "COMPARISON_RETRIEVAL_FAILED" };
+  }
+  return diagnose(
+    {
+      reportCode: identity.report.code,
+      reportRevision: identity.report.revision,
+      fightId: identity.fight.id,
+      sourceId: identity.player.sourceId,
+      fightStartMs: identity.fight.startTime,
+      fightEndMs: identity.fight.endTime,
+      specId,
+      authorityId,
+    },
+    evidence,
+    view,
+  );
 }
 
 /**
@@ -617,19 +678,34 @@ export async function analyzeFight(
   }
   const { analysis } = run;
 
+  // The registration's own projection of its result — the only form in which
+  // shared projectors read the analysis. Built here, next to the analysis it
+  // describes, by the registration that produced it.
+  const observedDecisions =
+    analysis.status === "ANALYZED" ? observedDecisionViewOf(catalog.catalog, analysis) : null;
+
+  // ---- M14-F: the reviewed diagnosis projection, after and beside the result ----
+  const diagnosis =
+    analysis.status === "ANALYZED" && observedDecisions !== null
+      ? await diagnosisFor(
+          identity,
+          analyzer.specId,
+          analysis.authority.authorityId,
+          observedDecisions,
+          deps.comparisonEvidence,
+        )
+      : null;
+
   const fightAnalysis: FightAnalysis = {
     identity,
     specId: analyzer.specId,
     analyzerId: analyzer.analyzerId,
     scope: scope.scope,
     analysis,
-    // The registration's own projection of its result — the only form in which
-    // shared projectors read the analysis. Built here, next to the analysis it
-    // describes, by the registration that produced it.
-    observedDecisions:
-      analysis.status === "ANALYZED" ? observedDecisionViewOf(catalog.catalog, analysis) : null,
+    observedDecisions,
     preparation: { state: "ASSESSED", report: preparation },
     ...withPlan(planDisclosure),
+    ...(diagnosis === null ? {} : { diagnosis }),
   };
 
   return { ok: true, state: resultStateFor(fightAnalysis), analysis: fightAnalysis };
