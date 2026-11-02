@@ -14,6 +14,7 @@ import type { DiagnosisOutcome } from "../diagnosis/diagnosis.js";
 import type { SpecAnalysisEnvelope } from "../findings/analysis-envelope.js";
 import type { SpecId } from "../findings/finding.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import type { FightReport } from "../reporting/fight-report.js";
 import type { FightTldr } from "../reporting/tldr.js";
 import type { FightIdentity } from "../wcl/types.js";
 import type { IngestionScope } from "./ingestion-scope.js";
@@ -241,6 +242,13 @@ export interface FightAnalysis {
    * absent on constructed analyses and on raid-night cells.
    */
   readonly tldr?: FightTldr;
+  /**
+   * The report (M15-D): every restated finding grouped by decision category,
+   * with its evidence and actionability, the suppressions and the coverage,
+   * as structure and markdown. Built beside the TLDR from the same input by
+   * `src/reporting/`; set and absent exactly as the TLDR is.
+   */
+  readonly report?: FightReport;
 }
 
 /**

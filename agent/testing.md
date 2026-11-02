@@ -1702,7 +1702,7 @@ finding prioritization (M15-A, tests/unit/m15a-finding-prioritization.test.ts, c
   view adapter                                 -> OBSERVED_EXECUTION is OBSERVED_EXECUTION_ONLY, never actionable; unreviewed word refuses
   real Blood fight                             -> 0 refused, 0 actionable, 224 UNKNOWN carried, leading item the 45-occurrence pattern
   every result                                 -> magnitude NOT_USED; no confidence/severity/score/impact field
-  layering                                     -> reads restated inputs only; no comparison-facts, WCL or evaluator import; importers: service + result type (M15-B)
+  layering                                     -> reads restated inputs only; no comparison-facts, WCL or evaluator import; importers: service + result type (M15-B, M15-D)
 fight TLDR (M15-B, tests/unit/m15b-fight-tldr.test.ts, contracts/m15b-tldr-contract.test.ts):
   every status                                 -> assessmentScope PARTIAL, coverage sentence first, >= 1 disclosure; schema forbids COMPLETE / empty
   nothing resolved vs none diverged            -> NO_DECISION_RESOLVED vs NO_AUTHORITY_DIVERGENCE_IN_ANALYZED_DECISIONS; both still PARTIAL
@@ -1716,6 +1716,19 @@ fight TLDR (M15-B, tests/unit/m15b-fight-tldr.test.ts, contracts/m15b-tldr-contr
   sentences                                    -> no correctness, blame or score word
   real Blood fight                             -> counts equal the view's coverage; 45-occurrence heart_strike pattern first; 0 actionable; 224 UNKNOWN
   public projection                            -> schema-valid, equals the internal TLDR, highlights locate published decisions; nothing else changes
+fight report (M15-D, tests/unit/m15d-fight-report.test.ts, contracts/m15d-report-contract.test.ts):
+  every status                                 -> PARTIAL, >= 1 disclosure, markdown opens with "Partial analysis" and Coverage before findings
+  grouping                                     -> one section per category with a finding, category order; prioritized / informational / carried never mixed
+  every record                                 -> listed exactly once (occurrence sum = records by disposition); prioritized head = TLDR highlights
+  UNKNOWN / NO_AUTHORITY_AVAILABLE             -> CARRIED with reason code, position null, never a divergence; schema forbids either as PRIORITIZED
+  SUPPRESSED                                   -> CARRIED + listed under suppressions with its named reason; schema forbids an unnamed reason
+  UNKNOWN consumable                           -> CARRIED, never a zero; observed counts are informational facts
+  unsupported specialization                   -> PREPARATION only, "this is not evidence of clean play"
+  each entry                                   -> producer, authority, state evidence, actionability (+ standing), evidence locators, in JSON and markdown
+  markdown                                     -> pure function of the published fields; code spans cannot be broken; no correctness, blame or score word
+  refused record / unreviewed word / bad config / inconsistent coverage -> NOT_ASSESSED with its reason, never part of a report
+  real Blood fight                             -> counts equal the view's coverage; heart_strike pattern first; 0 actionable; 224 UNKNOWN carried
+  public projection                            -> schema-valid, equals the internal report, entries locate published decisions; nothing else changes
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

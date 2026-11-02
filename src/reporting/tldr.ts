@@ -247,10 +247,10 @@ function consumableOf(status: ConsumableStatus): TldrConsumable {
     : { countState: "UNKNOWN" };
 }
 
-const plural = (count: number, one: string, many: string): string =>
+export const plural = (count: number, one: string, many: string): string =>
   `${String(count)} ${count === 1 ? one : many}`;
 
-function clock(ms: number): string {
+export function clock(ms: number): string {
   const seconds = Math.floor(ms / 1000);
   return `${String(Math.floor(seconds / 60))}:${String(seconds % 60).padStart(2, "0")}`;
 }
@@ -261,24 +261,35 @@ function spanOf(highlight: TldrHighlight): string {
   return first === last ? `at ${clock(first)}` : `from ${clock(first)} to ${clock(last)}`;
 }
 
-const STANDING_SENTENCES: Readonly<Record<DivergenceStanding, string>> = {
+export const STANDING_SENTENCES: Readonly<Record<DivergenceStanding, string>> = {
   ACTIONABLE_AUTHORITY_DIVERGENCE: "The authority's alternative was proven possible.",
   DIVERGENCE_ALTERNATIVE_ACTIONABILITY_UNPROVEN:
     "Whether the authority's alternative was possible is not proven.",
   DIVERGENCE_ACTIONABILITY_NOT_ESTABLISHED: "Whether any alternative was possible was not established.",
 };
 
-const consumableText = (consumable: TldrConsumable): string =>
+export const consumableText = (consumable: TldrConsumable): string =>
   consumable.countState === "OBSERVED" ? String(consumable.count) : "UNKNOWN (not zero)";
 
 /**
- * The TLDR of one analyzed fight: restates the view's decisions and the
- * preparation report through their reviewed adapters, checks that the
- * restated decisions agree with the view's own coverage, and summarizes.
+ * One fight's findings, restated through the reviewed adapters, with the
+ * coverage context they are summarized against (M15-B; shared with the M15-D
+ * report so both describe the same records).
  */
-export function buildFightTldr(input: TldrInput, config: TldrConfig = DEFAULT_TLDR_CONFIG): FightTldr {
-  if (!validConfig(config)) return notAssessed("INVALID_TLDR_CONFIG");
+export type RestatedFight =
+  | {
+      readonly kind: "RESTATED";
+      readonly records: readonly ReportableFinding[];
+      readonly context: TldrContext;
+    }
+  | { readonly kind: "NOT_ASSESSED"; readonly reason: "FINDINGS_NOT_RESTATABLE" | "COVERAGE_INCONSISTENT" };
 
+/**
+ * Restates the view's decisions and the preparation report through their
+ * reviewed adapters and checks that the restated decisions agree with the
+ * view's own coverage.
+ */
+export function restateFight(input: TldrInput): RestatedFight {
   const records: ReportableFinding[] = [];
   const { gameplay } = input;
   if (gameplay.status === "ANALYZED") {
@@ -286,9 +297,9 @@ export function buildFightTldr(input: TldrInput, config: TldrConfig = DEFAULT_TL
       specId: gameplay.specId,
       authorityId: gameplay.authorityId,
     });
-    if (restated.kind === "REFUSED") return notAssessed("FINDINGS_NOT_RESTATABLE");
-    // The counts the TLDR states and the findings it summarizes must describe
-    // one result. A view whose coverage disagrees with its own decisions is
+    if (restated.kind === "REFUSED") return { kind: "NOT_ASSESSED", reason: "FINDINGS_NOT_RESTATABLE" };
+    // The counts stated and the findings summarized must describe one
+    // result. A view whose coverage disagrees with its own decisions is
     // never summarized.
     const { coverage } = gameplay.view;
     const count = (disposition: FindingDisposition) =>
@@ -300,18 +311,19 @@ export function buildFightTldr(input: TldrInput, config: TldrConfig = DEFAULT_TL
       count("UNKNOWN") !== coverage.unknown ||
       coverage.resolvedComparisons !== coverage.match + coverage.rejected
     )
-      return notAssessed("COVERAGE_INCONSISTENT");
+      return { kind: "NOT_ASSESSED", reason: "COVERAGE_INCONSISTENT" };
     records.push(...restated.records);
   }
   if (input.preparation.state === "ASSESSED") {
     const restated = restateConsumableStatus(input.preparation.report);
-    if (restated.kind === "REFUSED") return notAssessed("FINDINGS_NOT_RESTATABLE");
+    if (restated.kind === "REFUSED") return { kind: "NOT_ASSESSED", reason: "FINDINGS_NOT_RESTATABLE" };
     records.push(...restated.records);
   }
 
-  return summarizeFindings(
+  return {
+    kind: "RESTATED",
     records,
-    {
+    context: {
       gameplay:
         gameplay.status === "ANALYZED"
           ? {
@@ -333,8 +345,48 @@ export function buildFightTldr(input: TldrInput, config: TldrConfig = DEFAULT_TL
           : { assessment: "NOT_ASSESSED", reason: input.preparation.reason },
       diagnosis: input.diagnosis,
     },
-    config,
-  );
+  };
+}
+
+/**
+ * The TLDR of one analyzed fight: the restated findings and their coverage,
+ * summarized.
+ */
+export function buildFightTldr(input: TldrInput, config: TldrConfig = DEFAULT_TLDR_CONFIG): FightTldr {
+  if (!validConfig(config)) return notAssessed("INVALID_TLDR_CONFIG");
+  const restated = restateFight(input);
+  if (restated.kind === "NOT_ASSESSED") return notAssessed(restated.reason);
+  return summarizeFindings(restated.records, restated.context, config);
+}
+
+/**
+ * What the coverage context and the prioritized section do not establish,
+ * shared by the TLDR and the report (M15-D). `DIVERGENCES_NOT_LISTED` is the
+ * TLDR's own: the report lists every item.
+ */
+export function coverageDisclosures(
+  context: TldrContext,
+  prioritized: readonly RankedItem[],
+): ReadonlySet<TldrDisclosure> {
+  const { gameplay: coverage, preparation, diagnosis } = context;
+  const held = new Set<TldrDisclosure>();
+  if (coverage.status !== "ANALYZED") held.add("GAMEPLAY_NOT_ANALYZED");
+  else {
+    held.add("ONLY_OBSERVED_DECISIONS_VERIFIED");
+    if (coverage.unknownDecisions > 0) held.add("DECISIONS_UNKNOWN");
+    if (coverage.excludedCasts > 0) held.add("CASTS_EXCLUDED");
+  }
+  if (prioritized.some((item) => item.standing !== "ACTIONABLE_AUTHORITY_DIVERGENCE"))
+    held.add("DIVERGENCE_ACTIONABILITY_UNPROVEN");
+  if (preparation.assessment === "NOT_ASSESSED") held.add("PREPARATION_NOT_ASSESSED");
+  else if (
+    [preparation.healthPotion, preparation.healthstone, preparation.combatPotion].some(
+      (c) => c.countState === "UNKNOWN",
+    )
+  )
+    held.add("CONSUMABLE_COUNT_UNKNOWN");
+  if (diagnosis?.assessment === "NOT_ASSESSED") held.add("DAMAGE_DIAGNOSIS_NOT_ASSESSED");
+  return held;
 }
 
 /**
@@ -396,24 +448,8 @@ export function summarizeFindings(
           ? "NO_DECISION_RESOLVED"
           : "NO_AUTHORITY_DIVERGENCE_IN_ANALYZED_DECISIONS";
 
-  const held = new Set<TldrDisclosure>();
-  if (coverage.status !== "ANALYZED") held.add("GAMEPLAY_NOT_ANALYZED");
-  else {
-    held.add("ONLY_OBSERVED_DECISIONS_VERIFIED");
-    if (coverage.unknownDecisions > 0) held.add("DECISIONS_UNKNOWN");
-    if (coverage.excludedCasts > 0) held.add("CASTS_EXCLUDED");
-  }
-  if (prioritized.some((item) => item.standing !== "ACTIONABLE_AUTHORITY_DIVERGENCE"))
-    held.add("DIVERGENCE_ACTIONABILITY_UNPROVEN");
+  const held = new Set(coverageDisclosures(context, prioritized));
   if (divergences.notListedItems > 0) held.add("DIVERGENCES_NOT_LISTED");
-  if (preparation.assessment === "NOT_ASSESSED") held.add("PREPARATION_NOT_ASSESSED");
-  else if (
-    [preparation.healthPotion, preparation.healthstone, preparation.combatPotion].some(
-      (c) => c.countState === "UNKNOWN",
-    )
-  )
-    held.add("CONSUMABLE_COUNT_UNKNOWN");
-  if (diagnosisState?.assessment === "NOT_ASSESSED") held.add("DAMAGE_DIAGNOSIS_NOT_ASSESSED");
   const disclosures = TLDR_DISCLOSURES.filter((disclosure) => held.has(disclosure));
 
   // ---- the sentences, templated from the fields above and nothing else ----

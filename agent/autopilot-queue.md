@@ -754,11 +754,13 @@ structured findings by evidence quality and actionability.
 ### M15-B: TLDR from trustworthy findings
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M15-A
 branch: autopilot/m15-b
 wcl: NONE
 publicContract: EXPECTED
+pr: 32
+mergeSha: 0ccf829547898da3e6c2c43cfea92f4063f3f41b
 ```
 
 **Scope.** A short TLDR generated from the prioritized trustworthy findings
@@ -786,8 +788,9 @@ difference).
 ### M15-D: Advanced report presentation
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M15-B
+branch: autopilot/m15-d
 wcl: NONE
 publicContract: EXPECTED
 ```

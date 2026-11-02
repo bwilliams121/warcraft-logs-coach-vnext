@@ -29,6 +29,26 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M15-D: what the report does not establish
+
+**Raised:** M15-D (2026-11-02).
+
+- **Same two producers as the TLDR.** Healer assignment results,
+  Augmentation support observations and diagnosis statements are not report
+  entries until each has a reviewed M15-A adapter. The diagnosis appears
+  only as its state.
+- **No suppression exists on real evidence.** No restated producer emits
+  SUPPRESSED yet, so the suppressions section is always empty on real fights;
+  the path is proven synthetically.
+- **Size.** Every entry carries all its members' locators (≈ 53 KB on the
+  Blood fight). If documents grow, an owner decision could replace member
+  locators with references to `decisions` positions.
+- **English templates only.** The markdown is fixed English over the
+  structured fields; consumers should read the fields.
+- **Raid night carries no report**, as for the TLDR.
+
+---
+
 ## After M15-B: what the TLDR does not establish
 
 **Raised:** M15-B (2026-11-02).

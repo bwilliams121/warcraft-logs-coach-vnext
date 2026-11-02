@@ -32,7 +32,8 @@
  *   UNKNOWN  -> UNKNOWN, reason = the producer's unknown codes, sorted and
  *               joined. Never a zero.
  *   Whole-fight facts: no fight time, never aggregated, NOT_EVALUATED
- *   actionability (there is no decision to be possible).
+ *   actionability (there is no decision to be possible). The subject token
+ *   is the consumable kind.
  */
 
 import type { ConsumableStatusReport } from "../analysis/preparation/consumable-status.js";
@@ -133,7 +134,8 @@ export function restateConsumableStatus(report: ConsumableStatusReport): Finding
       fightTimeMs: null,
       evidence: status.uses.map((use) => use.evidence),
       aggregationKey: null,
-      subjectToken: null,
+      // The consumable kind, so a report can say which fact it is (M15-D).
+      subjectToken: kind,
     };
   });
   return { kind: "RESTATED", records };

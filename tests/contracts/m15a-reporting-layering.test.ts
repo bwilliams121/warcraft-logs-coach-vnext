@@ -9,7 +9,8 @@ import { describe, expect, it } from "vitest";
  *                    type and kind list; never the post-hoc comparison-facts
  *                    domain, whose one outside reader stays src/diagnosis/
  *   importers        since M15-B only the analysis service (which builds the
- *                    TLDR beside the result) and the service result type;
+ *                    TLDR, and since M15-D the report, beside the result) and
+ *                    the service result type;
  *                    never an analyzer, SimulationCraft, finding, shared
  *                    analysis, role, diagnosis or Warcraft Logs module, and
  *                    not the public projection (it reads the TLDR through
@@ -51,6 +52,7 @@ describe("finding prioritization's place in the tree", () => {
   it("found every reporting module", () => {
     expect(REPORTING).toEqual([
       "src/reporting/aggregation-config.ts",
+      "src/reporting/fight-report.ts",
       "src/reporting/finding-record.ts",
       "src/reporting/prioritization.ts",
       "src/reporting/restatement.ts",
@@ -78,7 +80,7 @@ describe("finding prioritization's place in the tree", () => {
     expect(runtime).toEqual(["src/reporting/restatement.ts -> src/data/game/preparation-consumables.ts"]);
   });
 
-  it("is imported only by the analysis service and the service result type (M15-B)", () => {
+  it("is imported only by the analysis service and the service result type (M15-B, M15-D)", () => {
     const edges = paths.flatMap((path) =>
       path.startsWith("src/reporting/")
         ? []
@@ -88,7 +90,9 @@ describe("finding prioritization's place in the tree", () => {
             .map((target) => `${path} -> ${target}`),
     );
     expect(edges).toEqual([
+      "src/services/analysis-service.ts -> src/reporting/fight-report.ts",
       "src/services/analysis-service.ts -> src/reporting/tldr.ts",
+      "src/services/result.ts -> src/reporting/fight-report.ts",
       "src/services/result.ts -> src/reporting/tldr.ts",
     ]);
   });
