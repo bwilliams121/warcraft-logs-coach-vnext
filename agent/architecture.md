@@ -10606,7 +10606,7 @@ unusable runtime data is RUNTIME_DATA_UNAVAILABLE.
 - Required inputs: FULL_RAID; ACTORS, CASTS, AURAS, DEATHS. Recipient
   cooldown identity is a caller input: no reviewed cross-specialization
   cooldown registry exists, and a spec evaluator may not import another
-  spec's data.
+  spec's data. (Superseded by M13-C: the shared reviewed registry.)
 
 **Runtime data (`src/data/game/evoker-augmentation-support-abilities.*`).**
 Pinned SimulationCraft 33622e9d: each cast identity is the verbatim
@@ -10693,6 +10693,69 @@ intentional public delta is the VALUE of every ANALYZED raid-night/1 cell's
 `provenance.normalizationRevision` (`"m3.5"`), so a stored `m3.4` result
 compares NOT_COMPATIBLE. No schema changes; analysis/1 carries no
 normalization revision and its digests are unchanged.
+
+## M13-C — Shared, reviewed recipient cooldown identity
+
+Milestone 13 (autopilot queue entry M13-C). Public contract: NONE. No
+Warcraft Logs request.
+
+**Problem.** Augmentation support overlap asks which of a RECIPIENT's casts
+were cooldowns. Cooldown ids are specialization runtime data, private to
+the owning tree (`m11a2-cross-spec-isolation` R3), so the Augmentation
+evaluator may not import Blood's or Restoration's datasets. Until now the ids
+were a caller input no production caller had.
+
+**Mechanism.** One shared, class-neutral dataset,
+`src/data/game/recipient-cooldown-identities.{json,ts}`
+(`REVIEWED_RECIPIENT_COOLDOWN_IDENTITIES`, revision `simc-33622e9d-m13c-1`).
+
+- Each entry names a pinned roster specialization (roster key and SimC spec
+  id, validated against `spec-roster`), the Warcraft Logs class and
+  specialization strings it answers (the committed fight contexts that state
+  them are cited and checked by test), its SOURCE dataset (id and revision),
+  its selection criterion, and the ids. The artifact carries the
+  SimulationCraft pin (33622e9d, client data 12.1.0.69587).
+- It imports no specialization dataset. The restated ids cannot drift: the
+  unit test re-derives every entry from its named source by its named
+  criterion and requires exactly the listed ids, display names and the same
+  pin.
+- Two named criteria, declared in the artifact: `PINNED_COOLDOWN_AT_LEAST_60S`
+  (pinned base or per-charge cooldown ≥ 60 000 ms; a selection rule only,
+  never a readiness claim) and `REVIEWED_HEALING_COOLDOWN` (the source's own
+  hand-reviewed healing-cooldown entries; no duration claimed).
+- Coverage: the six specializations already pinned. Blood: Dancing Rune
+  Weapon. Brewmaster: Invoke Niuzao, Exploding Keg. Protection: Divine Toll,
+  Sentinel, Avenging Wrath. Retribution: Divine Toll, Execution Sentence,
+  Avenging Wrath. Assassination: Kingsbane, Deathmark, Vanish. Restoration
+  Shaman: Spirit Link Totem, Ascendance, Healing Tide Totem.
+
+**Lookup** (`recipientCooldownIdentityOf(stated)`), a table read with no
+specialization branch, total and fail closed:
+
+- `IDENTIFIED`: ids with criterion, source and pin, always
+  `coverage: REVIEWED_SUBSET`. "None of these ids was cast" may be said; "no
+  cooldown was used" may not.
+- `UNKNOWN SPECIALIZATION_NOT_ESTABLISHED` with the M13-B reason (a pet is
+  NOT_IN_FRIENDLY_ROSTER, never its owner's), or `UNKNOWN
+  REGISTRY_UNAVAILABLE` when the artifact fails validation.
+- `UNSUPPORTED NO_REVIEWED_COOLDOWN_IDENTITY`: stated, but not reviewed.
+  Never an empty list.
+- The match is the stated class AND specialization, exactly: "Restoration"
+  Druid is not "Restoration" Shaman, "Death Knight" is not "DeathKnight".
+
+**Consumer.** The Augmentation evaluator (`/3`) replaces its caller input
+with the registry (test seam `cooldownRegistry`), and each ally window
+carries `recipientCooldownIdentity`, the lookup `cooldownOverlap` used. The
+shared `src/support/` primitive is unchanged: it still takes ids, knows no
+specialization and reads no game data. A new guard
+(`tests/contracts/m13c-recipient-cooldown-registry.test.ts`) pins the
+registry's imports, forbids literal class/specialization comparisons and
+spell-id literals in its code, and names its one consumer.
+
+**Real evidence.** On the M13-A fight no Ebon Might or Prescience recipient
+is a reviewed specialization (the Blood and Brewmaster players received
+neither buff), so every real lookup is UNSUPPORTED or UNKNOWN, and overlap
+stays NO_COOLDOWN_IDENTITY. The IDENTIFIED path is proven synthetically.
 
 ## AUTOPILOT — the local project supervisor (tooling)
 

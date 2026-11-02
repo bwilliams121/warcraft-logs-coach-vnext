@@ -1,0 +1,127 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "REVIEWED_RECIPIENT_COOLDOWN_IDENTITIES",
+  "artifactRevision": "simc-33622e9d-m13c-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "clientDataWowVersion": "12.1.0.69587",
+    "reviewedOn": "2026-11-02",
+    "method": "HAND_REVIEWED_SELECTION_FROM_PINNED_SPECIALIZATION_DATASETS",
+    "methodNote": "Each entry restates ability ids that one specialization's own pinned dataset (named per entry, same SimulationCraft commit and client data) already records, selected by the entry's named criterion. The shared registry imports no specialization dataset; tests/unit/data/recipient-cooldown-identities.test.ts re-derives every selection from its source dataset, so a restated id cannot drift from its source.",
+    "wclNameNote": "wclClassName and wclSpecName are the Warcraft Logs strings (actor subType, friendlySpecs entry) under which the committed fight contexts named in wclNameEvidence state this specialization. They are matched exactly: a stated name is never fuzzily mapped.",
+    "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned datasets: CombatFight exposes no client-build key. The build is recorded for traceability."
+  },
+  "criteria": {
+    "PINNED_COOLDOWN_AT_LEAST_60S": {
+      "minimumCooldownMs": 60000,
+      "definition": "Every ability of the source dataset whose pinned base cooldown, or pinned per-charge cooldown, is at least minimumCooldownMs. The pinned value is the unmodified DBC record: it is the selection rule only, never a readiness claim."
+    },
+    "REVIEWED_HEALING_COOLDOWN": {
+      "minimumCooldownMs": null,
+      "definition": "Every entry of the source dataset, whose own selection of the specialization's healing cooldowns is hand reviewed per entry. The source claims no cooldown duration."
+    }
+  },
+  "specializations": [
+    {
+      "rosterKey": "deathknight/blood",
+      "simcSpecId": 250,
+      "wclClassName": "DeathKnight",
+      "wclSpecName": "Blood",
+      "wclNameEvidence": [
+        "tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json",
+        "tests/evidence/artifacts/wcl-graphql/wcl-m13a-fight-context-aug1-fight-1.json"
+      ],
+      "source": {
+        "datasetId": "SIMC_DBC_DEATHKNIGHT_BLOOD_ABILITY_COOLDOWNS",
+        "artifactRevision": "simc-33622e9d-1"
+      },
+      "criterion": "PINNED_COOLDOWN_AT_LEAST_60S",
+      "cooldowns": [{ "abilityGameId": 49028, "displayNameEn": "Dancing Rune Weapon" }]
+    },
+    {
+      "rosterKey": "monk/brewmaster",
+      "simcSpecId": 268,
+      "wclClassName": "Monk",
+      "wclSpecName": "Brewmaster",
+      "wclNameEvidence": [
+        "tests/evidence/artifacts/wcl-graphql/wcl-fight-context-rxaf-fight-13.json",
+        "tests/evidence/artifacts/wcl-graphql/wcl-m13a-fight-context-aug1-fight-1.json"
+      ],
+      "source": {
+        "datasetId": "SIMC_DBC_MONK_BREWMASTER_ABILITY_COOLDOWNS",
+        "artifactRevision": "simc-33622e9d-1"
+      },
+      "criterion": "PINNED_COOLDOWN_AT_LEAST_60S",
+      "cooldowns": [
+        { "abilityGameId": 132578, "displayNameEn": "Invoke Niuzao, the Black Ox" },
+        { "abilityGameId": 325153, "displayNameEn": "Exploding Keg" }
+      ]
+    },
+    {
+      "rosterKey": "paladin/protection",
+      "simcSpecId": 66,
+      "wclClassName": "Paladin",
+      "wclSpecName": "Protection",
+      "wclNameEvidence": ["tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json"],
+      "source": {
+        "datasetId": "SIMC_DBC_PALADIN_PROTECTION_ABILITY_COOLDOWNS",
+        "artifactRevision": "simc-33622e9d-1"
+      },
+      "criterion": "PINNED_COOLDOWN_AT_LEAST_60S",
+      "cooldowns": [
+        { "abilityGameId": 375576, "displayNameEn": "Divine Toll" },
+        { "abilityGameId": 389539, "displayNameEn": "Sentinel" },
+        { "abilityGameId": 31884, "displayNameEn": "Avenging Wrath" }
+      ]
+    },
+    {
+      "rosterKey": "paladin/retribution",
+      "simcSpecId": 70,
+      "wclClassName": "Paladin",
+      "wclSpecName": "Retribution",
+      "wclNameEvidence": ["tests/evidence/artifacts/wcl-graphql/wcl-fight-context-rxaf-fight-13.json"],
+      "source": {
+        "datasetId": "SIMC_DBC_PALADIN_RETRIBUTION_ABILITY_COOLDOWNS",
+        "artifactRevision": "simc-33622e9d-1"
+      },
+      "criterion": "PINNED_COOLDOWN_AT_LEAST_60S",
+      "cooldowns": [
+        { "abilityGameId": 375576, "displayNameEn": "Divine Toll" },
+        { "abilityGameId": 343527, "displayNameEn": "Execution Sentence" },
+        { "abilityGameId": 31884, "displayNameEn": "Avenging Wrath" }
+      ]
+    },
+    {
+      "rosterKey": "rogue/assassination",
+      "simcSpecId": 259,
+      "wclClassName": "Rogue",
+      "wclSpecName": "Assassination",
+      "wclNameEvidence": ["tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json"],
+      "source": { "datasetId": "SIMC_DBC_ROGUE_ABILITY_COOLDOWNS", "artifactRevision": "simc-33622e9d-1" },
+      "criterion": "PINNED_COOLDOWN_AT_LEAST_60S",
+      "cooldowns": [
+        { "abilityGameId": 385627, "displayNameEn": "Kingsbane" },
+        { "abilityGameId": 360194, "displayNameEn": "Deathmark" },
+        { "abilityGameId": 1856, "displayNameEn": "Vanish" }
+      ]
+    },
+    {
+      "rosterKey": "shaman/restoration",
+      "simcSpecId": 264,
+      "wclClassName": "Shaman",
+      "wclSpecName": "Restoration",
+      "wclNameEvidence": ["tests/evidence/artifacts/wcl-graphql/wcl-fight-context-b1pm-fight-48.json"],
+      "source": {
+        "datasetId": "SIMC_DBC_SHAMAN_RESTORATION_HEALING_COOLDOWNS",
+        "artifactRevision": "simc-33622e9d-1"
+      },
+      "criterion": "REVIEWED_HEALING_COOLDOWN",
+      "cooldowns": [
+        { "abilityGameId": 98008, "displayNameEn": "Spirit Link Totem" },
+        { "abilityGameId": 114052, "displayNameEn": "Ascendance" },
+        { "abilityGameId": 108280, "displayNameEn": "Healing Tide Totem" }
+      ]
+    }
+  ]
+}

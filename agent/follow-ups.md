@@ -29,6 +29,28 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M13-C: what the recipient cooldown registry does not establish
+
+**Raised:** M13-C (2026-11-02).
+
+- **Six specializations only.** Every other one is UNSUPPORTED, including
+  all thirteen Ebon Might recipients of the real M13-A fight. Covering them
+  needs a reviewed extraction per specialization (the M10-C5 cooldown
+  extractor, or verbatim pinned rows); a full-roster generation is its own
+  tranche.
+- **A reviewed subset, not every cooldown.** The 60 s rule selects from
+  what each specialization's dataset pinned for its APL, so defensives and
+  utility cooldowns the APL never needed (Icebound Fortitude, Fortifying
+  Brew, Divine Shield) are absent. Consumers must keep reading
+  `REVIEWED_SUBSET`.
+- **No talent gate.** An id is listed whether or not the recipient took the
+  talent; overlap lists casts, so an untaken talent only never appears.
+- **No client-build gate**, as for the other pinned datasets.
+- **WCL strings are exact.** A context spelling a specialization
+  differently from the cited evidence is UNSUPPORTED until reviewed.
+
+---
+
 ## After M13-B: what the stated specializations do not establish
 
 **Raised:** M13-B (2026-11-02).
@@ -66,10 +88,9 @@ current total (5,748,495 bytes), with what each row buys.
   listing needs either an unfiltered capture (which would retrieve damage
   and healing, outside this grant) or a reviewed table certificate for
   filtered aura and cast streams. Either is an owner decision.
-- **No recipient cooldown identity.** Overlap needs reviewed cooldown ids
-  per recipient specialization; only a caller can supply them today. A
-  shared, reviewed cross-specialization registry is the missing piece, and
-  a spec evaluator may not import another specialization's data.
+- **No recipient cooldown identity.** Resolved for the six pinned
+  specializations by M13-C (`src/data/game/recipient-cooldown-identities.*`;
+  see "After M13-C").
 - **No recipient specialization.** Resolved by M13-B:
   `CombatFight.friendlySpecializations`, and each LISTED recipient's
   `specialization` (see "After M13-B").
