@@ -63,6 +63,8 @@ describe("W: post-hoc G2 modules cannot feed authority", () => {
       // M14-B: multi-log consensus, under the same post-hoc rules.
       "src/comparison-facts/consensus.ts",
       "src/comparison-facts/cooldown-windows.ts",
+      // M14-D: damage-delta decomposition, under the same post-hoc rules.
+      "src/comparison-facts/damage-delta.ts",
       "src/comparison-facts/damage-ledger.ts",
       "src/comparison-facts/environment-profile.ts",
       "src/comparison-facts/evidence-basis.ts",

@@ -10943,6 +10943,90 @@ ordinals), all INSUFFICIENT and `FOCUS_BEHAVIOR_NAMES_NO_REASON`. No phase or
 downtime item; every fight's phase evidence is UNKNOWN
 (`CAPABILITY_UNVERIFIED`). No named reason exists on real evidence.
 
+## M14-D — Factual damage-delta decomposition (post-hoc)
+
+Milestone 14 (autopilot queue entry M14-D). Public contract: NONE. No
+Warcraft Logs request: the committed archive fights and synthetic fights.
+
+**Question.** "Where, by ability, target class, window and sub-actor, did the
+subject's damage figures differ from each comparison fight's?" Never why.
+`src/comparison-facts/damage-delta.ts` lives in the M11-G2 post-hoc domain,
+under the same layering guard. `decomposeDamageDeltas(input, definition,
+alignedWindows)` recomputes the M14-A alignment from its inputs, like
+`factsAtAlignedMoment`.
+
+**Three measures, never mixed.** A delta compares one measure, one component
+and one window on both sides:
+
+- `DAMAGE_EVENT_COUNT` (authority `OBSERVED_DAMAGE_EVENTS`): the focus's and
+  its owned actors' damage events, EXACT / AT_LEAST / UNKNOWN as in M11-G2.
+- `RAW_AMOUNT_FIELD_SUM`: each fight's raw sum is shown as M11-G2 holds it,
+  but its delta is always UNKNOWN (`RAW_AMOUNT_MEANING_NOT_PROVEN`), even when
+  both sums are EXACT. A difference of unproven fields is not a damage
+  difference (follow-up M1).
+- `WCL_TABLE_AMOUNT`: whole-fight Warcraft Logs table amounts. The raid entry
+  (`WCL_RAID_DAMAGE_DONE_TABLE`: total, pets, target types) and the focus's
+  per-actor DamageDone leaves (`WCL_DAMAGE_DONE_TABLE`, per ability). A delta
+  needs the same surface on both sides and the same log version (M11-G4-4);
+  otherwise UNKNOWN (`LOG_VERSION_DIFFERS`). A pet or ability a table does not
+  list is `NOT_LISTED_IN_TABLE`, never zero. The raid entry's total includes
+  the pets, and no focus-only amount is derived by subtraction
+  (`TABLE_STATES_NO_FOCUS_ONLY_AMOUNT`).
+
+**Components.** `TOTAL`, `BY_SOURCE` (`FOCUS` or the definition's sub-actor
+kind, by catalog game id, so pets with different report-local actor ids
+align), `BY_ABILITY` (source kind and ability game id), `BY_TARGET_CLASS` and,
+for tables, `BY_WCL_TARGET_TYPE` (verbatim). A target class means the same in
+every fight: the subject's enemy list is not held, so the enemy-listed and
+other non-boss NPC labels merge into `NON_BOSS_NPC`.
+
+**Deltas** are per pair (subject − comparison), never combined across
+comparisons:
+
+| Subject | Comparison | Delta |
+| --- | --- | --- |
+| EXACT | EXACT | EXACT |
+| EXACT | AT_LEAST | NO_MORE_THAN |
+| AT_LEAST | EXACT | NO_LESS_THAN |
+| anything else | | UNKNOWN, with the reason |
+
+Each pair carries an absolute and a per-minute delta. Rates divide by the
+window's duration, or by the table's own stated duration. A direction
+(`SUBJECT_LOWER`, `SUBJECT_HIGHER`, `EQUAL`) is stated only where the delta
+or its bound proves it, compared in exact integer arithmetic. Otherwise it is
+`UNDECIDED`, so an upper bound never proves the subject higher.
+
+**Windows.** `WHOLE_FIGHT`, plus caller-requested `ALIGNED_MOMENT`s
+(`[landmark + from, landmark + to)` through M14-A). Only an EXACT anchor
+places a window. A window outside the recorded fight is UNKNOWN, never
+clipped. No table surface exists for an aligned moment, so it has no table
+rows. Each window records, per fight, whether its component list is
+EXHAUSTIVE or OBSERVED_ONLY. No residual is computed: components are not
+claimed to explain a total.
+
+**Observation only.** The decomposition carries `use: OBSERVATION_ONLY`,
+`causalClaim: NONE`, `acrossComparisons: NOT_COMBINED`, `residual:
+NOT_COMPUTED` and `findingEffect: { suppression: NONE, confidence: NONE }`.
+`observationSentence(row, pair, label, names)` words a proven direction only,
+for example "Rupture damage events per minute were lower in S than in C1."
+It returns `null` when the direction is UNDECIDED, and it never names a cause
+or an action. Linking a delta to decision-level evidence is M14-E.
+
+**Real evidence** (subject versus three uncertified comparisons):
+
+- Raid-entry totals: 45,802,009 against 59,295,730 / 58,873,321 / 62,896,995,
+  EXACT deltas, all `SUBJECT_LOWER` per minute. Risen Ghoul table amounts are
+  `SUBJECT_HIGHER` against all three.
+- Per-ability table deltas are all UNKNOWN: the subject has no per-actor
+  table.
+- Event counts are bounds. The total is 3,761 against ≥4,268 / ≥4,700 /
+  ≥4,240, so NO_MORE_THAN. The boss-subtype count against COHORT261 is
+  NO_MORE_THAN −98 events, but its per-minute bound is positive, so the
+  direction is UNDECIDED.
+- Every raw-amount delta is UNKNOWN.
+- The first Dancing Rune Weapon window places no comparison window
+  (`ANCHOR_NOT_EXACT`).
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

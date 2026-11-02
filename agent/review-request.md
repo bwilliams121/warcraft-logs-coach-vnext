@@ -4,91 +4,101 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M14-C: Strategy-context representation. Autopilot queue entry M14-C. Branch
-`autopilot/m14-c`, from main at f3c8b26.
+M14-D: Factual damage-delta decomposition. Autopilot queue entry M14-D.
+Branch `autopilot/m14-d`, from main at 0f1c982.
 
-- **Direction** (queue entry; CLAUDE.md "Comparable Logs", "Top Logs Cannot
-  Override Rotational Authority", "Top Logs Cannot Suppress Findings Merely
-  by Similarity", "Comparison Cannot Move Confidence"; architecture "M14-B"
-  hands the named-reason mapping to M14-C): a structured representation of
-  encounter strategy context derived from consensus (common downtime, target
-  transitions, common cooldown timing, phase behavior), each item mapped to
-  a named environmental reason only where the evidence supports one. Context
-  is attached to findings and never becomes rotational authority.
+- **Direction** (queue entry; CLAUDE.md "Damage Output Diagnosis",
+  "Comparable Logs", "Comparison Cannot Move Confidence"; architecture
+  "Milestone 14", the M11-G2 damage ledgers, the M11-G4-4 DPS comparability
+  rules): decompose subject-versus-comparison damage differences factually,
+  by ability, target class, window and pet sub-actor tree, as observations.
+  No causal claim. Where raw `amount` semantics (M1) or AT_LEAST coverage
+  limit a figure, it is a bound or UNKNOWN, never a point estimate.
 - **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or
   `src/mcp/` changes.
 - **Warcraft Logs requests: none.** The committed archive fights and
-  synthetic phased fights.
-- Queue bookkeeping: M14-B (#26, f3c8b26) recorded MERGED; M14-C PR_OPEN.
-  M12-C through M14-A were already recorded.
+  synthetic fights.
+- Queue bookkeeping: M14-C (#27, 0f1c982) recorded MERGED; M14-D PR_OPEN.
+  M12-C through M14-B were already recorded.
 
 ## What it adds
 
-**`src/comparison-facts/strategy-context.ts`**, inside the M11-G2 post-hoc
-domain and under its existing layering guard (module list updated). It
-imports only engine coverage/encounter-state helpers and the domain's own
-alignment and consensus. Nothing outside the domain imports it; no judgement
-word appears.
+**`src/comparison-facts/damage-delta.ts`**, inside the M11-G2 post-hoc domain
+and under its layering guard (module list updated). It imports only E1
+combat facts, the engine CombatFight type and the domain's own modules.
+Nothing outside the domain imports it; no forbidden word appears.
 
-`strategyContext(input, definition, thresholds = V1)` recomputes the M14-A
-alignment and M14-B consensus from its inputs (the anti-stale rule of
-`factsAtAlignedMoment`). One item per consensus row, whatever the outcome:
-`PHASE_START` -> `PHASE_BEHAVIOR`, `INTERMISSION_START` -> `COMMON_DOWNTIME`,
-`FIRST_FOCUS_DAMAGE_EVENT_ON_NPC` -> `TARGET_TRANSITION`,
-`COOLDOWN_WINDOW_START` -> `COOLDOWN_TIMING`. `PULL` and `RECORDED_FIGHT_END`
-are not strategy items.
+`decomposeDamageDeltas(input, definition, alignedWindows = [])` recomputes the
+M14-A alignment from its inputs (the `factsAtAlignedMoment` anti-stale rule).
 
-**Named reason** requires all three:
+**Three measures, never mixed** (one measure, one component, one window on
+both sides):
 
-1. ENCOUNTER_STATE nature (focus behavior never names a reason);
-2. CONSENSUS among comparison fights;
-3. the subject's OWN anchor EXACT, within the agreeing range ± tolerance.
+- `DAMAGE_EVENT_COUNT` (`OBSERVED_DAMAGE_EVENTS`): focus + owned actors'
+  damage events under the fight's tree coverage; EXACT / AT_LEAST / UNKNOWN.
+- `RAW_AMOUNT_FIELD_SUM`: each side's raw sum is shown as G2 holds it; the
+  delta is ALWAYS UNKNOWN `RAW_AMOUNT_MEANING_NOT_PROVEN`, even when both are
+  EXACT (M1).
+- `WCL_TABLE_AMOUNT`: whole fight only. Raid entry (total, pets by kind,
+  target types verbatim) and the focus's per-actor DamageDone leaves (per
+  ability). Delta only table-against-table under the same log version
+  (`LOG_VERSION_DIFFERS` otherwise, per M11-G4-4's evidenced-log-version
+  rule). Not listed -> `NOT_LISTED_IN_TABLE`, never 0. No focus-only amount
+  by subtraction (`TABLE_STATES_NO_FOCUS_ONLY_AMOUNT`).
 
-Then `INTERMISSION` over the subject's own k-th intermission interval, or
-`PHASE_TRANSITION` at the subject's own transition instant (no invented
-duration). Otherwise `NONE` with a cause (`FOCUS_BEHAVIOR_NAMES_NO_REASON`,
-`NO_COMPARISON_CONSENSUS`, `SUBJECT_ANCHOR_NOT_EXACT`,
-`SUBJECT_OUTSIDE_CONSENSUS_RANGE`). Comparisons only corroborate the
-subject's own Warcraft Logs evidence; they never supply a missing subject
-fact. `TARGET_UNAVAILABLE` and `FORCED_DOWNTIME` have no evidence source
-(targetability unverified) and are never named.
+**Components:** TOTAL; BY_SOURCE (`FOCUS` or definition kind by catalog game
+id); BY_ABILITY (source kind + ability game id); BY_TARGET_CLASS
+(BOSS_SUBTYPE / NON_BOSS_NPC / PLAYER_TARGET / OTHER_TARGET: enemy-listed and
+other NPC merged, because the subject's enemy list is not held, so a class
+means the same in every fight); BY_WCL_TARGET_TYPE.
 
-**Context only:** `use: CONTEXT_ONLY`, `rotationalAuthority: NONE`,
+**Deltas, per pair, never combined:** EXACT−EXACT = EXACT; EXACT−AT_LEAST =
+NO_MORE_THAN; AT_LEAST−EXACT = NO_LESS_THAN; otherwise UNKNOWN with reason.
+Absolute and per-minute. Direction (`SUBJECT_LOWER` / `SUBJECT_HIGHER` /
+`EQUAL`) only when the delta or bound proves it, compared in BigInt
+cross-multiplication; else `UNDECIDED`. A NO_MORE_THAN bound can only prove
+SUBJECT_LOWER.
+
+**Windows:** `WHOLE_FIGHT` plus caller `ALIGNED_MOMENT`s via
+`factsAtAlignedMoment` (EXACT anchors only; outside the fight UNKNOWN, never
+clipped; no table rows). Per fight per window, the component list claim
+(EXHAUSTIVE / OBSERVED_ONLY). No residual.
+
+**Observation only:** `use: OBSERVATION_ONLY`, `causalClaim: NONE`,
+`acrossComparisons: NOT_COMBINED`, `residual: NOT_COMPUTED`,
 `findingEffect: { suppression: NONE, confidence: NONE }`,
-`comparisonCoverage: AT_LEAST_UNCERTIFIED`, plus each fight's `phaseEvidence`
-so a missing downtime item never reads as "no downtime". Items carry no
-direction. `attachStrategyContext(context, moments)` reads only
-`{ findingId, reportTimeMs }` and returns the named reasons whose subject
-window contains the moment; it changes nothing about the finding. Using a
-named reason to suppress is left to the reviewed projection (M14-F). No
-cooldown "hold" is claimed: that needs availability, which no landmark
-carries.
+`comparisonCoverage: AT_LEAST_UNCERTIFIED`. `observationSentence` words only
+a proven direction ("Rupture damage events per minute were lower in S than in
+C1."), `null` when UNDECIDED; it names no cause or action.
 
 ## Real evidence (pinned in the test)
 
-- 22 items: 3 target transitions, 19 Dancing Rune Weapon ordinals; all
-  INSUFFICIENT and `FOCUS_BEHAVIOR_NAMES_NO_REASON`.
-- No phase or downtime item; all four fights' phase evidence UNKNOWN
-  (`CAPABILITY_UNVERIFIED`). Attachment adds no reason anywhere.
+- Raid-entry totals 45,802,009 (the M11-G4-4 reconciled figure) vs
+  59,295,730 / 58,873,321 / 62,896,995: EXACT, all SUBJECT_LOWER. Risen Ghoul
+  table amount SUBJECT_HIGHER vs all three.
+- Per-ability table deltas all UNKNOWN (subject has no per-actor table).
+- Event totals 3,761 vs ≥4,268 / ≥4,700 / ≥4,240 -> NO_MORE_THAN. Boss-subtype
+  vs COHORT261: NO_MORE_THAN −98 events but a positive per-minute bound ->
+  UNDECIDED.
+- Every raw delta UNKNOWN. DRW#1 window: every comparison ANCHOR_NOT_EXACT.
 
 ## Tests
 
-- New `tests/unit/m14c-strategy-context.test.ts`: real pins and determinism;
-  synthetic INTERMISSION over the subject's interval and PHASE_TRANSITION at
-  the instant, with corroborating refs; attachment (exclusive interval end,
-  no finding effect); subject phase evidence not held and unstated subject
-  intermission flag -> no reason despite comparison CONSENSUS; subject
-  outside the range -> no reason, no direction field; INSUFFICIENT and SPLIT
-  -> no reason; a cooldown-window CONSENSUS names nothing; the two
-  unsupported reasons never appear; refusals.
+- New `tests/unit/m14d-damage-delta.test.ts` (28): real pins and
+  determinism; synthetic EXACT deltas and wording; raw delta UNKNOWN even
+  both EXACT; absent component EXACT 0 under COMPLETE vs UNKNOWN uncertified;
+  integer EQUAL over different durations; target-class merge across enemy
+  list states; pet kinds by game id across actor ids; NOT_LISTED_IN_TABLE,
+  NO_RAID_ENTRY, LOG_VERSION_DIFFERS; window outside the fight; refusals;
+  no causal vocabulary in any sentence.
 - `tests/contracts/m11g2-comparison-facts-layering.test.ts` module list
   updated.
-- Focused: M14-C, G2 layering; `tsc --noEmit`; prettier; plus the full
+- Focused: M14-D, G2 layering; `tsc --noEmit`; prettier; plus the full
   suite.
 
 ## Docs
 
-`agent/architecture.md` "M14-C"; `agent/follow-ups.md` "After M14-C" (no
-named reason on real evidence, two reasons without an evidence source, no
-cooldown hold, a transition is an instant, nothing consumes it yet);
-`agent/testing.md` row block; queue bookkeeping.
+`agent/architecture.md` "M14-D"; `agent/follow-ups.md` "After M14-D" (no
+amount delta below the whole fight, raw never subtracts, counts are bounds,
+an event is not damage, same log version only, no cause); `agent/testing.md`
+row block; queue bookkeeping.
