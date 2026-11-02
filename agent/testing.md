@@ -1634,6 +1634,16 @@ timing alignment (M14-A, tests/unit/m14a-timing-alignment.test.ts, same G2 layer
   player target                                -> never a target-transition landmark
   other encounter / difficulty / duplicate ref -> REFUSED
   moment facts                                 -> EXACT anchors only; bound -> ANCHOR_NOT_EXACT; outside fight -> UNKNOWN, never clipped
+multi-log consensus (M14-B, tests/unit/m14b-consensus.test.ts, same G2 layering guard):
+  one comparison fight                         -> INSUFFICIENT BELOW_MINIMUM_SAMPLE; minimum sample < 2 -> REFUSED
+  subject anchor                               -> never a vote; never fills a missing comparison vote
+  NO_LATER_THAN / UNKNOWN anchor               -> abstains; counts against the share, never as agreeing
+  decisive anchors rule out any group          -> SPLIT DISAGREEMENT_PROVEN (real recorded ends at 5 s)
+  two equal qualifying groups                  -> SPLIT NO_UNIQUE_AGREEING_GROUP, never a picked winner
+  SPLIT / INSUFFICIENT                         -> no range, no agreeing fights
+  thresholds                                   -> named CANDIDATE set; malformed set REFUSED; another set changes the outcome
+  every evaluation                             -> CONTEXT_ONLY, findingEffect suppression NONE, confidence NONE
+  vote order                                   -> same outcome
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

@@ -575,11 +575,13 @@ Rules:
 ### M14-A: Comparison timing alignment foundation
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/m14-a
 wcl: NONE
 publicContract: NONE
+pr: 25
+mergeSha: 20c6d664c81aba466f43de431912ad62f0016639
 ```
 
 **Direction.** `agent/architecture.md` "Milestone 14" (timing alignment),
@@ -603,8 +605,9 @@ moment, what did each fight show?".
 ### M14-B: Multi-log consensus
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M14-A
+branch: autopilot/m14-b
 wcl: NONE
 publicContract: NONE
 ```
