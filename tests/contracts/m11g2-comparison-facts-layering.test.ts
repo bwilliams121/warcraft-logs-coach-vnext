@@ -68,6 +68,8 @@ describe("W: post-hoc G2 modules cannot feed authority", () => {
       "src/comparison-facts/four-fight-report.ts",
       "src/comparison-facts/sub-actor-tree.ts",
       "src/comparison-facts/target-classification.ts",
+      // M14-A: timing alignment, under the same post-hoc rules.
+      "src/comparison-facts/timing-alignment.ts",
     ]);
     expect(CAPTURE).toEqual([
       "src/wcl/comparison/comparison-capture.ts",

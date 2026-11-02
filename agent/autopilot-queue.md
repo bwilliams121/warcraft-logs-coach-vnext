@@ -480,11 +480,13 @@ it without guessing from class.
 ### M13-C: Shared, reviewed recipient cooldown identity
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M13-B
 branch: autopilot/m13-c
 wcl: NONE
 publicContract: NONE
+pr: 24
+mergeSha: 3330dc61160ff1d97228f8fe342868b9777fc374
 ```
 
 **Direction.** `agent/follow-ups.md` "After M13-A" (no recipient cooldown
@@ -573,8 +575,9 @@ Rules:
 ### M14-A: Comparison timing alignment foundation
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
+branch: autopilot/m14-a
 wcl: NONE
 publicContract: NONE
 ```
