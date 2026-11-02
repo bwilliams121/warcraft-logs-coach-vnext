@@ -678,11 +678,13 @@ by ability, target class, window and pet sub-actor tree, as observations.
 ### M14-E: Causal evidence linkage (internal)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M14-C, M14-D
 branch: autopilot/m14-e
 wcl: NONE
 publicContract: NONE
+pr: 29
+mergeSha: ca2bf1a44a3453272ca66f34af4518c829caf12c
 ```
 
 **Scope.** Link damage-delta components to decision-level evidence that could
@@ -706,8 +708,9 @@ Rules:
 ### M14-F: Reviewed diagnosis projection and public integration
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M14-E
+branch: autopilot/m14-f
 wcl: NONE
 publicContract: EXPECTED
 ```

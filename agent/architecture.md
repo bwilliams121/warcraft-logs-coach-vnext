@@ -11113,6 +11113,78 @@ whichever comparisons are supplied. Records in no component are listed
   `DECISION_EVIDENCE_UNRESOLVED`.
 - No total, table or raw-amount row links.
 
+## M14-F — Reviewed diagnosis projection and public integration
+
+Milestone 14 (autopilot queue entry M14-F). Public contract: EXPECTED, an
+additive optional `diagnosis` block on ANALYZED results under `analysis/1`.
+No Warcraft Logs request: the committed archive fights and synthetic fights.
+
+**Question.** "Is there an authority finding about the subject's own play,
+linked to this proven difference, that a coaching statement may rest on?"
+`src/diagnosis/` is the one module that reads both sides (After M14-E): the
+registration's published observed-decision view, and the post-hoc
+comparison-facts domain. It runs after the analyzer's result is final and
+returns data the service attaches beside it. Only the analysis service, the
+service result type and the public projection import it; no analyzer,
+SimulationCraft, finding, shared analysis or role module does
+(`tests/contracts/m14f-diagnosis-layering.test.ts`). The M11-G2 guard now
+admits `src/diagnosis/` as the post-hoc domain's only outside reader.
+
+**The reviewed adapter** (`decision-evidence.ts`) restates each compared
+observed decision as one M14-E record: `APL_DECISION_OUTCOME`,
+`AUTHORITY_BACKED`, MATCH/REJECTED → RESOLVED, UNKNOWN → UNKNOWN, the cast's
+instant, scope ABILITY/FOCUS on exactly the observed ability id. Any other
+outcome word refuses the restatement. Excluded casts are not decisions.
+
+**A coaching statement** (`AUTHORITY_FINDING_LINKED_TO_DELTA`) needs all of:
+
+1. the pair LINKED by M14-E (proven direction, subject window placed,
+   resolved evidence in scope);
+2. a REJECTED decision among that evidence. A MATCH is authority-compatible
+   evidence, never a finding: a MATCH-only link is the observation
+   `NO_AUTHORITY_FINDING_IN_LINK`;
+3. `SUBJECT_HIGHER`. A rejected observed cast of X says X was used where the
+   authority selected otherwise; it can bear on X's figure being higher,
+   never lower (`FINDINGS_DO_NOT_MATCH_DIRECTION`).
+
+A statement carries its findings by decision locator (the schema-v1 decision
+identity), every M14-E limit, `magnitudeAttribution: NONE`, and M14-C's named
+reasons in effect at a finding's moment as context. Every other pair is an
+observation with the M14-E cause or one of the two above, so
+`pairs = statements + observations`.
+
+**Comparison is context.** Diagnosis carries `comparisonCoverage:
+AT_LEAST_UNCERTIFIED`, `comparisonRole: CONTEXT_ONLY`, `decisionEvidenceSide:
+SUBJECT_ONLY` and `findingEffect: { suppression: NONE, confidence: NONE }`.
+Nothing changes a decision's outcome or the coverage block: a result with and
+without diagnosis has identical decisions and coverage. Each fight's phase
+evidence is disclosed so no named reason never reads as "no downtime". Whole
+fight only: no aligned-moment policy is reviewed.
+
+**Service.** `AnalysisServiceDeps.comparisonEvidence` is an optional port
+told only the analyzed identity. The supplied subject must be the analyzed
+report code, revision, fight id, fight bounds, player and specialization
+(the post-hoc `fightRef` is a label, not identity), else
+`COMPARISON_EVIDENCE_NOT_FOR_THIS_FIGHT`. A throwing port is
+`COMPARISON_RETRIEVAL_FAILED`, never a failed analysis. **The deployed
+composition supplies no port**: no live comparison retrieval exists, so every
+public ANALYZED document carries `NOT_ASSESSED`
+(`COMPARISON_EVIDENCE_NOT_RETRIEVED`). REST and MCP publish through the same
+projection; the MCP tool description says what the block is and is not.
+
+**Contract.** Every diagnosis vocabulary is declared in
+`src/contracts/analysis-contract.ts` independently and pinned to
+`src/diagnosis/vocabulary.ts`, whose lists are compile-time pinned to the
+post-hoc unions. The field is optional, so this is not a version change. It
+is absent from the non-analyzed statuses and from raid night.
+
+**Real evidence** (the subject's 307 Blood decisions, through the service with
+a test port over the archive): ASSESSED, whole fight, three comparisons, **no
+statement**. The twelve whole-fight M14-E links are
+`NO_AUTHORITY_FINDING_IN_LINK`; the 45 Heart Strike rejections are
+`DIRECTION_UNDECIDED`. Decision evidence: 307 records, 83 resolved, 224
+UNKNOWN, none outside every component.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

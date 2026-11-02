@@ -29,6 +29,36 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M14-F: what the public diagnosis does not establish
+
+**Raised:** M14-F (2026-11-02).
+
+- **The deployed service retrieves no comparison fights.** Every public
+  ANALYZED document carries diagnosis NOT_ASSESSED
+  (`COMPARISON_EVIDENCE_NOT_RETRIEVED`). The projection runs through the
+  service only with an injected `comparisonEvidence` port, which tests supply
+  over committed evidence. Live comparison retrieval needs an owner decision:
+  which comparison fights (the M11-G1 cohort rules or another selection), the
+  Warcraft Logs cost per request, and how the subject's post-hoc evidence
+  basis is established from a live retrieval rather than an archive grant.
+- **No statement exists on real evidence.** The twelve whole-fight M14-E links
+  rest on MATCH decisions (`NO_AUTHORITY_FINDING_IN_LINK`); the 45 Heart
+  Strike rejections sit on an UNDECIDED row. Certified comparison coverage
+  (After M11-G2) is what would decide more directions.
+- **One direction rule.** A rejected observed cast of X bears only on X's
+  figure being HIGHER. A rule for the authority's SELECTED action (its figure
+  being lower) needs a reviewed token-to-ability-id mapping owned by each
+  specialization; the observed-decision view carries only a token.
+- **Whole fight only.** Which aligned moments (opener, cooldown windows) to
+  diagnose is an unreviewed policy, so the service requests none.
+- **Named reasons never suppress.** M14-C's INTERMISSION / PHASE_TRANSITION
+  are attached to a statement as context. None exists on real evidence, and
+  how long after a transition a decision may still be affected is undecided.
+- **Raid night carries no diagnosis.** The raid-night contract is unchanged;
+  its cells are built without one.
+
+---
+
 ## After M14-E: what causal evidence linkage does not establish
 
 **Raised:** M14-E (2026-11-02).

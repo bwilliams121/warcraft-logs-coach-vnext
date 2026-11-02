@@ -47,6 +47,7 @@ import { assessConsumableStatus } from "../../src/analysis/preparation/consumabl
 import { PREPARATION_REQUIREMENT } from "../../src/analysis/preparation/requirement.js";
 import { describe, expect, it } from "vitest";
 
+import { DIAGNOSIS_NOT_RETRIEVED } from "../../src/diagnosis/diagnosis.js";
 import { analyzeFight } from "../../src/services/analysis-service.js";
 import {
   analyzerForSpec,
@@ -234,6 +235,8 @@ async function viaReusableCore(): Promise<FightAnalysis> {
     // The registration's view, attached exactly as the service attaches it.
     observedDecisions:
       analysis.status === "ANALYZED" ? observedDecisionViewOf(PRODUCTION_CATALOG, analysis) : null,
+    // M14-F: as the service attaches it with no comparison evidence, on ANALYZED only.
+    ...(analysis.status === "ANALYZED" ? { diagnosis: DIAGNOSIS_NOT_RETRIEVED } : {}),
   };
 }
 
@@ -277,12 +280,15 @@ describe("the reusable core reproduces the complete FightAnalysis", () => {
     // The shared PREPARATION producer, assessed over the same retrieved fight.
     expect(viaCore.preparation).toEqual(viaService.preparation);
     expect(viaService.preparation.state).toBe("ASSESSED");
+    // M14-F: the reviewed diagnosis projection, beside the analysis.
+    expect(viaCore.diagnosis).toEqual(viaService.diagnosis);
 
     // And no field exists on one side that the other does not supply.
     expect(Object.keys(viaCore).sort()).toEqual(Object.keys(viaService).sort());
     expect(Object.keys(viaCore).sort()).toEqual([
       "analysis",
       "analyzerId",
+      "diagnosis",
       "identity",
       "observedDecisions",
       "preparation",

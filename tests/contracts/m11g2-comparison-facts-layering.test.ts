@@ -97,8 +97,13 @@ describe("W: post-hoc G2 modules cannot feed authority", () => {
   });
 
   it("nothing outside the domain imports it — no SimC, spec, finding, service or report module", () => {
+    // M14-F: the reviewed diagnosis projection is the one reader outside the
+    // domain (After M14-E). It runs after a result is final and feeds nothing
+    // back (tests/contracts/m14f-diagnosis-layering.test.ts).
     expect(
-      importersOf("src/comparison-facts/").filter((edge) => !edge.startsWith("src/comparison-facts/")),
+      importersOf("src/comparison-facts/").filter(
+        (edge) => !edge.startsWith("src/comparison-facts/") && !edge.startsWith("src/diagnosis/"),
+      ),
     ).toEqual([]);
   });
 

@@ -10,6 +10,7 @@ import {
   PREPARATION_NOT_ASSESSED_REASONS,
   type ConsumableStatusReport,
 } from "../analysis/preparation/consumable-status.js";
+import type { DiagnosisOutcome } from "../diagnosis/diagnosis.js";
 import type { SpecAnalysisEnvelope } from "../findings/analysis-envelope.js";
 import type { SpecId } from "../findings/finding.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
@@ -223,6 +224,14 @@ export interface FightAnalysis {
    * carried no plan, and nothing else. Input facts, never a verdict.
    */
   readonly raidCooldownPlan?: RaidCooldownPlanDisclosure;
+  /**
+   * The reviewed diagnosis projection (M14-F), produced AFTER and beside the
+   * analyzer's result from its published view, never fed back into it. The
+   * single-fight service sets it on every ANALYZED result: ASSESSED, or
+   * NOT_ASSESSED with the reason. Absent on the other statuses, and on
+   * envelopes no diagnosis ran for (raid night).
+   */
+  readonly diagnosis?: DiagnosisOutcome;
 }
 
 /**

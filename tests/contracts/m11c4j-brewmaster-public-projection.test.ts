@@ -35,6 +35,7 @@ import {
   PublicAnalysisResultSchema,
 } from "../../src/contracts/analysis-contract.js";
 import { projectAnalysisResult } from "../../src/contracts/analysis-projection.js";
+import { DIAGNOSIS_NOT_RETRIEVED } from "../../src/diagnosis/diagnosis.js";
 import type { CombatState } from "../../src/engine/state/combat-state.js";
 import { analyzeFight, type AnalysisServiceDeps } from "../../src/services/analysis-service.js";
 import { internalAnalyzerForSpec, PRODUCTION_CATALOG } from "../../src/services/analyzer-registry.js";
@@ -158,6 +159,8 @@ function fightAnalysisOf(state: CombatState, analysis: Analyzed, actorId: number
     // As the service builds it: the shared producer over the same fight.
     preparation: { state: "ASSESSED", report: assessConsumableStatus(state.fight, actorId) },
     observedDecisions: BREWMASTER_MONK_REGISTRATION.observedDecisionView(analysis),
+    // As the service builds it (M14-F): no comparison evidence is retrieved.
+    diagnosis: DIAGNOSIS_NOT_RETRIEVED,
   };
 }
 
