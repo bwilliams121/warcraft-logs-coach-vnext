@@ -19,7 +19,7 @@ unregistered evaluator tree).
 Observations (`WCL_OBSERVED_FACT`, from `src/support/`): Ebon Might and
 Prescience windows per recipient with identity, deaths inside the observed
 span and the next death after the observed end, the recipient's casts of
-caller-supplied cooldown ids inside the active span (continuity
+its reviewed cooldown ids inside the active span (continuity
 established), and proven support time (a lower bound: a carried-in buff
 is never excluded); the Evoker's own
 Ebon Might windows. Nothing is a finding.
@@ -29,9 +29,17 @@ Ebon Might windows. Nothing is a finding.
 `src/data/game/evoker-augmentation-support-abilities.*`: pinned trait rows
 and `sc_evoker.cpp` lines at SimulationCraft 33622e9d. Identity only.
 
+Recipient cooldown ids (M13-C) come from the shared, reviewed
+`src/data/game/recipient-cooldown-identities.*`, looked up by each
+recipient's stated specialization. Each ally window carries the lookup:
+`IDENTIFIED` (a `REVIEWED_SUBSET`, never every cooldown), `UNKNOWN` (no
+established specialization, or the registry is unusable) or `UNSUPPORTED`
+(no reviewed data for that specialization).
+
 ## Never
 
 - "Wrong Prescience target", or any recipient ranking.
 - "Alive" from the absence of a death event.
 - A window extended to a nominal duration.
-- A recipient's cooldown identity guessed from its class.
+- A recipient's cooldown identity guessed from its class, or a pet's from its owner.
+- "No cooldown overlapped" from a reviewed subset or a missing identity.

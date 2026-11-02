@@ -35,6 +35,8 @@ import {
   pinnedAugmentationSupportAbilities,
 } from "../../../src/data/game/evoker-augmentation-support-abilities.js";
 import artifactJson from "../../../src/data/game/evoker-augmentation-support-abilities.json";
+import { pinnedRecipientCooldownIdentities } from "../../../src/data/game/recipient-cooldown-identities.js";
+import type { StatedSpecialization } from "../../../src/engine/normalization/friendly-specializations.js";
 import {
   evaluateAugmentationEvoker,
   supportTargetingStatus,
@@ -80,11 +82,19 @@ const ACTORS = new Map<number, CombatActor>([
   [BOSS, actor(BOSS, "Boss", "NPC")],
 ]);
 
+const stated = (className: string, specName: string, rosterIndex: number): StatedSpecialization => ({
+  state: "STATED",
+  className,
+  specName,
+  rosterIndex,
+});
+
 function fightOf(
   raw: readonly Raw[],
   options: {
     readonly categories?: Partial<Record<EvidenceCategory, CategoryEvidence>>;
     readonly actors?: ReadonlyMap<number, CombatActor>;
+    readonly specializations?: ReadonlyMap<number, StatedSpecialization>;
   } = {},
 ): CombatFight {
   const normalizer = createNormalizer({
@@ -115,6 +125,14 @@ function fightOf(
     actors: options.actors ?? ACTORS,
     scope: "FULL_RAID",
     friendlyActorsInScope: [EVOKER, ALLY, OTHER_ALLY],
+    ...(options.specializations === undefined
+      ? {}
+      : {
+          friendlySpecializations: {
+            source: "WCL_FIGHT_CONTEXT_FRIENDLY_SPECS",
+            byActorId: options.specializations,
+          },
+        }),
   });
 }
 
@@ -257,27 +275,97 @@ describe("the Augmentation evaluator (synthetic)", () => {
     // The Evoker's own Ebon Might is its self buff, never support to an ally.
     expect(ebon?.windows.some((entry) => entry.window.recipient.actorId === EVOKER)).toBe(false);
     expect(result.selfBuffs[0]?.windows.windows.map((window) => window.boundsDistanceMs)).toEqual([10_000]);
-    // No cooldown identity supplied: never an empty overlap.
+    // No stated specialization: the lookup is UNKNOWN with the reason, never an empty overlap.
     for (const entry of [...(ebon?.windows ?? []), ...(prescience?.windows ?? [])]) {
       expect(entry.cooldownOverlap).toEqual({ state: "NO_COOLDOWN_IDENTITY" });
+      expect(entry.recipientCooldownIdentity).toEqual({
+        state: "UNKNOWN",
+        reason: "SPECIALIZATION_NOT_ESTABLISHED",
+        specializationReason: "NOT_IN_FRIENDLY_ROSTER",
+      });
     }
     expect(JSON.stringify(result)).not.toMatch(/WRONG|INCORRECT|MISSED|SHOULD/);
   });
 
-  it("a caller-supplied cooldown identity lists the recipient's own cast inside the span", () => {
-    const fight = fightOf(SYNTHETIC);
+  it("M13-C: a recipient's reviewed cooldowns come from the shared registry, by its stated specialization", () => {
+    const AVENGING_WRATH = 31884;
+    const fight = fightOf(
+      // Timestamp order, or the monotonic continuity gate refuses the fixture.
+      [...SYNTHETIC, cast(10_000, ALLY, AVENGING_WRATH), cast(11_000, OTHER_ALLY, 12472)].sort(
+        (left, right) => (left["timestamp"] as number) - (right["timestamp"] as number),
+      ),
+      {
+        actors: new Map([...ACTORS, [ALLY, actor(ALLY, "Paladin")]]),
+        specializations: new Map([
+          [EVOKER, stated("Evoker", "Augmentation", 0)],
+          [ALLY, stated("Paladin", "Retribution", 1)],
+          [OTHER_ALLY, stated("Mage", "Frost", 2)],
+        ]),
+      },
+    );
+    const result = evaluated(evaluateAugmentationEvoker({ fight, identity: identityFor(fight) }));
+    const [ally, other] = result.allyBuffs[0]?.windows ?? [];
+    expect(ally?.recipientCooldownIdentity).toMatchObject({
+      state: "IDENTIFIED",
+      rosterKey: "paladin/retribution",
+      abilityGameIds: [375576, 343527, AVENGING_WRATH],
+      coverage: "REVIEWED_SUBSET",
+      criterion: "PINNED_COOLDOWN_AT_LEAST_60S",
+      source: { datasetId: "SIMC_DBC_PALADIN_RETRIBUTION_ABILITY_COOLDOWNS" },
+      dataset: { commitSha: "33622e9d1662ff0e451691edf85a6b49cc9d11d9" },
+    });
+    // The recipient's own casts of a reviewed id inside the span; the unlisted 777 is not one.
+    expect(ally?.cooldownOverlap).toMatchObject({
+      state: "LISTED",
+      casts: [{ abilityGameId: AVENGING_WRATH, reportTimeMs: 10_000 }],
+      listing: { state: "COMPLETE" },
+    });
+    // A stated specialization with no reviewed identity is UNSUPPORTED: never an empty list.
+    expect(other?.recipientCooldownIdentity).toEqual({
+      state: "UNSUPPORTED",
+      reason: "NO_REVIEWED_COOLDOWN_IDENTITY",
+      className: "Mage",
+      specName: "Frost",
+    });
+    expect(other?.cooldownOverlap).toEqual({ state: "NO_COOLDOWN_IDENTITY" });
+  });
+
+  it("M13-C: the stated class disambiguates a shared specialization name, and is never guessed", () => {
+    // "Restoration" is a Shaman and a Druid specialization; only the Shaman one is reviewed.
+    const fight = fightOf(SYNTHETIC, {
+      specializations: new Map([
+        [ALLY, stated("Druid", "Restoration", 0)],
+        [OTHER_ALLY, { state: "UNKNOWN", reason: "NOT_STATED" }],
+      ]),
+    });
+    const result = evaluated(evaluateAugmentationEvoker({ fight, identity: identityFor(fight) }));
+    const [ally, other] = result.allyBuffs[0]?.windows ?? [];
+    expect(ally?.recipientCooldownIdentity).toMatchObject({ state: "UNSUPPORTED", className: "Druid" });
+    expect(other?.recipientCooldownIdentity).toEqual({
+      state: "UNKNOWN",
+      reason: "SPECIALIZATION_NOT_ESTABLISHED",
+      specializationReason: "NOT_STATED",
+    });
+  });
+
+  it("M13-C: an unusable registry makes every lookup UNKNOWN, never an empty identity", () => {
+    const fight = fightOf(SYNTHETIC, {
+      specializations: new Map([[ALLY, stated("Paladin", "Retribution", 0)]]),
+    });
     const result = evaluated(
       evaluateAugmentationEvoker({
         fight,
         identity: identityFor(fight),
-        recipientCooldownIdentity: new Map([[ALLY, [777]]]),
+        cooldownRegistry: { ok: false, reason: "ROSTER_MISMATCH" },
       }),
     );
-    expect(result.allyBuffs[0]?.windows[0]?.cooldownOverlap).toMatchObject({
-      state: "LISTED",
-      casts: [{ abilityGameId: 777, reportTimeMs: 9_000 }],
-      listing: { state: "COMPLETE" },
+    const ally = result.allyBuffs[0]?.windows[0];
+    expect(ally?.recipientCooldownIdentity).toEqual({
+      state: "UNKNOWN",
+      reason: "REGISTRY_UNAVAILABLE",
+      detail: "ROSTER_MISMATCH",
     });
+    expect(ally?.cooldownOverlap).toEqual({ state: "NO_COOLDOWN_IDENTITY" });
   });
 
   it("the support-cast list is UNKNOWN without CASTS coverage, or with an unidentified Evoker cast", () => {
@@ -348,7 +436,7 @@ describe("the Augmentation evaluator (synthetic)", () => {
         dataset: { ok: false, reason: "NO_ENTRIES" },
       }),
     ).toEqual({
-      revision: "augmentation-evoker-evaluator/2",
+      revision: "augmentation-evoker-evaluator/3",
       state: "RUNTIME_DATA_UNAVAILABLE",
       reason: "NO_ENTRIES",
     });
@@ -651,11 +739,35 @@ describe("the real Augmentation Evoker in the evidence archive (M13AAUGAAAAAAAAA
     });
   });
 
-  it("cooldown overlap: NO_COOLDOWN_IDENTITY by default; with a supplied id, a real cast between the observed bounds is still not 'during the buff' without coverage", () => {
+  it("M13-C: no real recipient has reviewed cooldown data, so every lookup is UNSUPPORTED or UNKNOWN, never empty", () => {
+    const result = evaluated(evaluateAugmentationEvoker({ fight, identity }));
+    const states = new Map<string, number>();
+    for (const observation of result.allyBuffs) {
+      for (const entry of observation.windows) {
+        const lookup = entry.recipientCooldownIdentity;
+        const key =
+          lookup.state === "UNSUPPORTED"
+            ? `UNSUPPORTED ${lookup.specName} ${lookup.className}`
+            : lookup.state === "UNKNOWN" && lookup.reason === "SPECIALIZATION_NOT_ESTABLISHED"
+              ? `UNKNOWN ${lookup.specializationReason}`
+              : lookup.state;
+        states.set(key, (states.get(key) ?? 0) + 1);
+        expect(entry.cooldownOverlap).toEqual({ state: "NO_COOLDOWN_IDENTITY" });
+      }
+    }
+    // The pinned Blood (12) and Brewmaster (13) players received neither buff.
+    expect([...states.keys()].some((key) => key === "IDENTIFIED")).toBe(false);
+    expect([...states.keys()].some((key) => key.startsWith("UNSUPPORTED Arms Warrior"))).toBe(true);
+    expect([...states.keys()].some((key) => key === "UNKNOWN NOT_IN_FRIENDLY_ROSTER")).toBe(true);
+  });
+
+  it("cooldown overlap: with a registry naming a real recipient cast, the cast between the observed bounds is still not 'during the buff' without coverage", () => {
     const plain = evaluated(evaluateAugmentationEvoker({ fight, identity }));
     const first = plain.allyBuffs[0]?.windows.find((entry) => entry.window.boundsDistanceMs !== null);
     if (first === undefined) throw new Error("no bounded window");
     expect(first.cooldownOverlap).toEqual({ state: "NO_COOLDOWN_IDENTITY" });
+    const recipientSpecialization = first.recipientSpecialization;
+    if (recipientSpecialization.state !== "STATED") throw new Error("recipient not stated");
     const { fromReportTimeMs: from, toReportTimeMs: to } = first.window.observedSpan;
     // The raw bytes do hold a cast by this recipient between the window's observed bounds.
     const recipientCast = raw.find(
@@ -666,13 +778,28 @@ describe("the real Augmentation Evoker in the evidence archive (M13AAUGAAAAAAAAA
         (event["timestamp"] as number) < to,
     );
     if (recipientCast === undefined) throw new Error("no recipient cast in the first window");
+    // A hypothetical registry entry for the recipient's stated specialization (test seam only).
+    const pinned = pinnedRecipientCooldownIdentities();
+    if (!pinned.ok) throw new Error(pinned.reason);
     const supplied = evaluated(
       evaluateAugmentationEvoker({
         fight,
         identity,
-        recipientCooldownIdentity: new Map([
-          [first.window.recipient.actorId, [recipientCast["abilityGameID"] as number]],
-        ]),
+        cooldownRegistry: {
+          ...pinned,
+          specializations: [
+            {
+              rosterKey: "hypothetical/recipient",
+              simcSpecId: 1,
+              wclClassName: recipientSpecialization.className,
+              wclSpecName: recipientSpecialization.specName,
+              wclNameEvidence: [],
+              source: { datasetId: "HYPOTHETICAL", artifactRevision: "0" },
+              criterion: "PINNED_COOLDOWN_AT_LEAST_60S",
+              cooldowns: [{ abilityGameId: recipientCast["abilityGameID"] as number, displayNameEn: "x" }],
+            },
+          ],
+        },
       }),
     );
     const same = supplied.allyBuffs[0]?.windows.find(

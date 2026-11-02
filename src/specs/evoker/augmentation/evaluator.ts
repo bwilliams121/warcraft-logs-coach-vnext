@@ -19,9 +19,13 @@
  * primitives over the specialization's own pinned identities:
  * - each Ebon Might and Prescience window on each recipient, with recipient
  *   identity from the actor catalog, its observed deaths inside the observed
- *   span (never "alive"), and the recipient's own casts of caller-identified
- *   cooldowns inside it (NO_COOLDOWN_IDENTITY when none is supplied: no
- *   reviewed cross-specialization cooldown registry exists yet);
+ *   span (never "alive"), and the recipient's own casts of its reviewed
+ *   cooldowns inside it. Since M13-C the ids come from the shared reviewed
+ *   registry (`src/data/game/recipient-cooldown-identities.ts`), looked up by
+ *   the recipient's stated specialization; each window carries that lookup,
+ *   so NO_COOLDOWN_IDENTITY always says why (specialization UNKNOWN, or no
+ *   reviewed identity: UNSUPPORTED). The ids are a REVIEWED_SUBSET: "none of
+ *   these was cast" is never "no cooldown was used";
  * - each recipient's Warcraft Logs-stated specialization (M13-B), read from
  *   `CombatFight.friendlySpecializations`: UNKNOWN with the reason when none
  *   is established, and a pet recipient is NOT_IN_FRIENDLY_ROSTER, never its
@@ -53,11 +57,16 @@ import {
   type AugmentationSupportAbilityLoad,
 } from "../../../data/game/evoker-augmentation-support-abilities.js";
 import {
+  pinnedRecipientCooldownIdentities,
+  recipientCooldownIdentityOf,
+  type RecipientCooldownIdentityResolution,
+  type RecipientCooldownRegistryLoad,
+} from "../../../data/game/recipient-cooldown-identities.js";
+import {
   recipientCooldownOverlap,
   recipientSurvivalDuring,
   supportTimeOf,
   type CooldownOverlap,
-  type RecipientCooldownIdentity,
   type RecipientSurvival,
   type SupportTime,
 } from "../../../support/recipient-facts.js";
@@ -158,6 +167,8 @@ export interface RecipientWindowFacts {
   readonly window: SupportAuraWindow;
   /** M13-B: the recipient's stated specialization, observed identity only. */
   readonly recipientSpecialization: StatedSpecialization;
+  /** M13-C: the reviewed cooldown ids `cooldownOverlap` used, or why there are none. */
+  readonly recipientCooldownIdentity: RecipientCooldownIdentityResolution;
   readonly survival: RecipientSurvival;
   readonly cooldownOverlap: CooldownOverlap;
 }
@@ -237,13 +248,10 @@ export interface AugmentationEvokerInput {
   readonly fight: CombatFight;
   /** The identity preflight's result for the player under evaluation. */
   readonly identity: FightIdentity;
-  /**
-   * Reviewed cooldown ability ids per recipient actor. Absent: every
-   * recipient's overlap is NO_COOLDOWN_IDENTITY.
-   */
-  readonly recipientCooldownIdentity?: RecipientCooldownIdentity;
   /** Test seam: the runtime dataset. */
   readonly dataset?: AugmentationSupportAbilityLoad;
+  /** Test seam: the shared reviewed recipient cooldown registry. */
+  readonly cooldownRegistry?: RecipientCooldownRegistryLoad;
 }
 
 type Refusal = Extract<AugmentationEvokerEvaluation, { state: "IDENTITY_REFUSED" }>["reason"];
@@ -277,7 +285,22 @@ export function evaluateAugmentationEvoker(input: AugmentationEvokerInput): Augm
   if (!dataset.ok) return { revision, state: "RUNTIME_DATA_UNAVAILABLE", reason: dataset.reason };
 
   const subject = identity.player.sourceId;
-  const cooldownIdentity: RecipientCooldownIdentity = input.recipientCooldownIdentity ?? new Map();
+  const registry = input.cooldownRegistry ?? pinnedRecipientCooldownIdentities();
+  // One lookup per recipient actor, by its own stated specialization: a pet is
+  // NOT_IN_FRIENDLY_ROSTER, never its owner's.
+  const lookups = new Map<number, RecipientCooldownIdentityResolution>();
+  const cooldownIdentity = new Map<number, readonly number[]>();
+  const lookupOf = (actorId: number): RecipientCooldownIdentityResolution => {
+    const known = lookups.get(actorId);
+    if (known !== undefined) return known;
+    const resolved = recipientCooldownIdentityOf(
+      statedSpecializationOf(fight.friendlySpecializations, actorId),
+      registry,
+    );
+    lookups.set(actorId, resolved);
+    if (resolved.state === "IDENTIFIED") cooldownIdentity.set(actorId, resolved.abilityGameIds);
+    return resolved;
+  };
   const fightRange = inclusiveRange(fight.fight.startTimeMs, fight.fight.endTimeMs);
 
   const allyBuffs: AllyBuffObservation[] = [];
@@ -305,15 +328,19 @@ export function evaluateAugmentationEvoker(input: AugmentationEvokerInput): Augm
         ability: key,
         auraAbilityGameId: auraId,
         listing: listed.listing,
-        windows: toAllies.map((window) => ({
-          window,
-          recipientSpecialization: statedSpecializationOf(
-            fight.friendlySpecializations,
-            window.recipient.actorId,
-          ),
-          survival: recipientSurvivalDuring(fight, window),
-          cooldownOverlap: recipientCooldownOverlap(fight, window, cooldownIdentity),
-        })),
+        windows: toAllies.map((window) => {
+          const recipientCooldownIdentity = lookupOf(window.recipient.actorId);
+          return {
+            window,
+            recipientSpecialization: statedSpecializationOf(
+              fight.friendlySpecializations,
+              window.recipient.actorId,
+            ),
+            recipientCooldownIdentity,
+            survival: recipientSurvivalDuring(fight, window),
+            cooldownOverlap: recipientCooldownOverlap(fight, window, cooldownIdentity),
+          };
+        }),
         supportTime: supportTimeOf({ ...listed, windows: toAllies }, [auraId]),
         ambiguousTransitions: listed.ambiguousTransitions.length,
       });

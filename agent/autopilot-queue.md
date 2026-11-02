@@ -449,11 +449,13 @@ It does NOT authorize any of these, or any other expansion of M13 scope:
 ### M13-B: Recipient specialization state in the combat model
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M13-A
 branch: autopilot/m13-b
 wcl: NONE
 publicContract: NONE
+pr: 23
+mergeSha: 509e30f1c88d6e5224dde310a05d605aa93ed01f
 ```
 
 **Direction.** `agent/follow-ups.md` "After M13-A" (no recipient
@@ -478,8 +480,9 @@ it without guessing from class.
 ### M13-C: Shared, reviewed recipient cooldown identity
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M13-B
+branch: autopilot/m13-c
 wcl: NONE
 publicContract: NONE
 ```
