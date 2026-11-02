@@ -249,10 +249,21 @@ export type AugmentationEvokerEvaluation =
       readonly supportTargeting: SupportTargetingStatus;
     };
 
+/**
+ * The subject identity the gate reads. The identity preflight's
+ * `FightIdentity` is one; M13-E's registration facade builds one from the
+ * normalized fight's own report, fight and stated specialization.
+ */
+export interface AugmentationSubjectIdentity {
+  readonly report: Pick<FightIdentity["report"], "code">;
+  readonly fight: Pick<FightIdentity["fight"], "id">;
+  readonly player: Pick<FightIdentity["player"], "sourceId" | "className" | "specName">;
+}
+
 export interface AugmentationEvokerInput {
   readonly fight: CombatFight;
-  /** The identity preflight's result for the player under evaluation. */
-  readonly identity: FightIdentity;
+  /** The identity of the player under evaluation (the preflight's, or the facade's). */
+  readonly identity: AugmentationSubjectIdentity;
   /** Test seam: the runtime dataset. */
   readonly dataset?: AugmentationSupportAbilityLoad;
   /** Test seam: the shared reviewed recipient cooldown registry. */
@@ -261,7 +272,7 @@ export interface AugmentationEvokerInput {
 
 type Refusal = Extract<AugmentationEvokerEvaluation, { state: "IDENTITY_REFUSED" }>["reason"];
 
-function identityRefusal(fight: CombatFight, identity: FightIdentity): Refusal | null {
+function identityRefusal(fight: CombatFight, identity: AugmentationSubjectIdentity): Refusal | null {
   if (identity.report.code !== fight.report.code || identity.fight.id !== fight.fight.id) {
     return "IDENTITY_MISMATCH";
   }

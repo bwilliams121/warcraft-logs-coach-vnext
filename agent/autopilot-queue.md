@@ -512,11 +512,13 @@ specialization importing another's private runtime data.
 ### M13-D: Complete real coverage for Augmentation support observations
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M13-C
 branch: autopilot/m13-d
 wcl: OWNER-GRANT: agent/autopilot-queue.md M13-D owner decision (2026-11-02); M13-D only; reviewed completeness certificates for the EXISTING M13-A report, fight and interval only (no other report, fight, Evoker, discovery or ranking query); only the Warcraft Logs table and context requests needed to prove or refuse exact certificates for M13-A's filtered friendly CASTS, its filtered Augmentation support AURA stream, and friendly DEATHS where M13 conclusions consume them; no unfiltered capture, no damage or healing retrieval; at most 15 new Warcraft Logs HTTP requests including revision and context re-checks
 publicContract: NONE
+pr: 34
+mergeSha: 423cb48d5c4957b451e7c13097b31d3d710ed8e1
 ```
 
 **Direction.** `agent/follow-ups.md` "After M13-A" (no coverage on the real
@@ -614,8 +616,9 @@ Warcraft Logs table results under the existing M11-G2 coverage rules.
 ### M13-E: Augmentation evaluator orchestration and registration (internal)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M13-C, M13-D
+branch: autopilot/m13-e
 wcl: NONE
 publicContract: NONE
 ```

@@ -61,11 +61,13 @@ import {
   resolveAuthorityForDomain,
   type AuthorityAccess,
   type AuthorityDomainBinding,
+  type DecisionDomain,
 } from "./authority-domain.js";
 import {
   declaredDomainsOf,
   requirementFromCapabilities,
   type DecisionCapability,
+  type StateRequirements,
 } from "./decision-capability.js";
 import type { ObservedDecisionView } from "./observed-decision-view.js";
 import type { SpecId } from "./spec-id.js";
@@ -109,7 +111,7 @@ export interface AnalyzerDefinition<TAnalysis extends SpecAnalysisEnvelope> {
    */
   readonly displayName: string;
   readonly exposure: AnalyzerExposure;
-  readonly capabilities: readonly DecisionCapability[];
+  readonly capabilities: readonly DecisionCapability<DecisionDomain>[];
   readonly authorityBindings: readonly AuthorityDomainBinding[];
   /**
    * Author-written public limitation prose per surface (M11-A2), composed
@@ -136,7 +138,7 @@ export interface AnalyzerRegistration {
   readonly exposure: AnalyzerExposure;
   /** See `AnalyzerDefinition.publicLimits`. Always present on a row. */
   readonly publicLimits: PublicLimitsProse;
-  readonly capabilities: readonly DecisionCapability[];
+  readonly capabilities: readonly DecisionCapability<DecisionDomain>[];
   readonly authorityBindings: readonly AuthorityDomainBinding[];
   /**
    * The ingestion requirement, DERIVED from `capabilities`.
@@ -256,17 +258,19 @@ function freezeStrings(values: readonly string[]): readonly string[] {
   return Object.freeze([...values]);
 }
 
-function snapshotCapability(capability: DecisionCapability): DecisionCapability {
+function snapshotCapability(
+  capability: DecisionCapability<DecisionDomain>,
+): DecisionCapability<DecisionDomain> {
   const { requirements } = capability;
   return Object.freeze({
     capabilityId: capability.capabilityId,
     domain: capability.domain,
     requirements: Object.freeze({
       scope: requirements.scope,
-      resources: freezeStrings(requirements.resources) as DecisionCapability["requirements"]["resources"],
+      resources: freezeStrings(requirements.resources) as StateRequirements["resources"],
       evidenceCategories: freezeStrings(
         requirements.evidenceCategories,
-      ) as DecisionCapability["requirements"]["evidenceCategories"],
+      ) as StateRequirements["evidenceCategories"],
       targetModel: requirements.targetModel,
       ...(requirements.ownedPetEvidence === true ? { ownedPetEvidence: true as const } : {}),
     }),

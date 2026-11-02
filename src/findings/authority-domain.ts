@@ -79,6 +79,43 @@ export const AUTHORITY_DOMAINS = Object.freeze([
 ] as const satisfies readonly AuthorityDomain[]);
 
 /**
+ * Decision families NO provider kind may govern in this build (M13-E).
+ *
+ * The support categories of CLAUDE.md "Decision Categories". A capability may
+ * declare one, so a registration can say truthfully "I am asked this, and I
+ * hold no standard for it", but nothing can bind one: a binding's `domain` is
+ * an `AuthorityDomain`, and `PROVIDER_DOMAIN_COMPATIBILITY` names none of
+ * these. So a declared provider-less domain always resolves
+ * `NO_PINNED_AUTHORITY_FOR_DOMAIN`. Making one bindable is the same
+ * architectural act as widening the compatibility table: it needs an approved,
+ * machine-usable model of that decision.
+ *
+ * Kept apart from `AUTHORITY_DOMAINS` on purpose. That list is what a
+ * specialization's per-domain results enumerate ("every question this
+ * analyzer is asked about its own play"); support targeting and timing are
+ * questions about the play of a supporter, and are not added to every other
+ * specialization's results.
+ */
+export type ProviderlessDomain =
+  /** Who received a support buff. No approved recipient-quality model exists. */
+  | "SUPPORT_TARGETING"
+  /** When a support ability was used. No approved support-timing standard exists. */
+  | "SUPPORT_TIMING";
+
+export const PROVIDERLESS_DOMAINS = Object.freeze([
+  "SUPPORT_TARGETING",
+  "SUPPORT_TIMING",
+] as const satisfies readonly ProviderlessDomain[]);
+
+/** Every family a capability may declare: the bindable ones and the provider-less ones. */
+export type DecisionDomain = AuthorityDomain | ProviderlessDomain;
+
+export const DECISION_DOMAINS = Object.freeze([
+  ...AUTHORITY_DOMAINS,
+  ...PROVIDERLESS_DOMAINS,
+] as const satisfies readonly DecisionDomain[]);
+
+/**
  * Which provider kinds may govern which domains.
  *
  * Complete over `DecisionAuthorityKind`, so adding a provider kind without
@@ -116,16 +153,16 @@ export type AuthorityDomainBinding = {
 export type AuthorityResolution =
   | {
       readonly outcome: "AUTHORITY_AVAILABLE";
-      readonly domain: AuthorityDomain;
+      readonly domain: DecisionDomain;
       readonly kind: "SIMC_APL";
       readonly binding: AuthorityDomainBinding;
       readonly authority: AplAuthority;
     }
-  | { readonly outcome: "DOMAIN_NOT_DECLARED"; readonly domain: AuthorityDomain }
-  | { readonly outcome: "NO_PINNED_AUTHORITY_FOR_DOMAIN"; readonly domain: AuthorityDomain }
+  | { readonly outcome: "DOMAIN_NOT_DECLARED"; readonly domain: DecisionDomain }
+  | { readonly outcome: "NO_PINNED_AUTHORITY_FOR_DOMAIN"; readonly domain: DecisionDomain }
   | {
       readonly outcome: "AUTHORITY_LOAD_FAILED";
-      readonly domain: AuthorityDomain;
+      readonly domain: DecisionDomain;
       readonly binding: AuthorityDomainBinding;
       readonly reason: string;
       readonly detail: string;
@@ -146,14 +183,21 @@ export const AUTHORITY_RESOLUTION_OUTCOMES = [
  * Takes the registration's own declared domains and bindings and nothing
  * else, so there is no path by which a caller obtains another specialization's
  * binding: the function never sees one.
+ *
+ * A provider-less domain (M13-E) is never bound, so once declared it resolves
+ * NO_PINNED_AUTHORITY_FOR_DOMAIN by the same rule as an unbound tank domain;
+ * the explicit check below holds even for a forged binding naming one.
  */
 export function resolveAuthorityForDomain(
-  declaredDomains: readonly AuthorityDomain[],
+  declaredDomains: readonly DecisionDomain[],
   bindings: readonly AuthorityDomainBinding[],
-  domain: AuthorityDomain,
+  domain: DecisionDomain,
 ): AuthorityResolution {
   if (!declaredDomains.includes(domain)) {
     return { outcome: "DOMAIN_NOT_DECLARED", domain };
+  }
+  if (!isAuthorityDomain(domain)) {
+    return { outcome: "NO_PINNED_AUTHORITY_FOR_DOMAIN", domain };
   }
   const binding = bindings.find((candidate) => candidate.domain === domain);
   if (binding === undefined) {
@@ -177,5 +221,10 @@ export function resolveAuthorityForDomain(
  * domain. Built by the registration and handed to the analyzer at call time.
  */
 export interface AuthorityAccess {
-  forDomain(domain: AuthorityDomain): AuthorityResolution;
+  forDomain(domain: DecisionDomain): AuthorityResolution;
+}
+
+/** Whether a declared family is one a provider kind could ever bind. */
+export function isAuthorityDomain(domain: DecisionDomain): domain is AuthorityDomain {
+  return (AUTHORITY_DOMAINS as readonly string[]).includes(domain);
 }

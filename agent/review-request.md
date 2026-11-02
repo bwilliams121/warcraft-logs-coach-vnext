@@ -4,208 +4,153 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M13-D: Complete real coverage for Augmentation support observations.
-Autopilot queue entry M13-D. Branch `autopilot/m13-d`, from main at ce6a63e.
+M13-E: Augmentation evaluator orchestration and registration (internal).
+Autopilot queue entry M13-E. Branch `autopilot/m13-e`, from main at 423cb48.
 
-- **Direction.** Owner decision 2026-11-02 (queue entry M13-D): the
-  REVIEWED COMPLETENESS-CERTIFICATE path for the EXISTING M13-A report,
-  fight and interval only. Certificates are completeness evidence, never
-  gameplay authority. Partial success is acceptable; nothing is certified by
-  approximation.
+- **Direction.** Queue entry M13-E and follow-ups "After M13-A" (not
+  registered): register the Augmentation evaluator for internal analysis, its
+  declared FULL_RAID requirement flowing into the DERIVED ingestion scope;
+  results stay internal; SUPPORT_TARGETING stays NO_AUTHORITY_AVAILABLE; no
+  targeting model; remove the unregistered-tree exceptions in the
+  cross-spec-isolation guards.
 - **Public contract: NONE.** No change under `src/contracts/`, `src/api/` or
-  `src/mcp/`.
-- **Queue bookkeeping.** M15-D (#33, ce6a63e) is recorded MERGED, and M13-D
-  is PR_OPEN. M12-C through M15-B were already recorded MERGED with the PRs
-  and SHAs the supervisor listed (verified).
+  `src/mcp/`. No public document, raid-night cell or MCP description changes.
+- **Warcraft Logs: NONE.** No request, probe or probe config was run.
+- **Queue bookkeeping.** M13-D (#34, 423cb48) recorded MERGED; M13-E is
+  PR_OPEN with its branch. Every other tranche the supervisor listed was
+  already recorded MERGED with the same PR and SHA (verified).
 
-## Warcraft Logs request ledger (grant: at most 15)
+## The problem
 
-The plan was recorded before any request in `.probe/m13d/certification-plan.md`
-(gitignored), with a worst case of 9. A fetch-level counter refused a 16th
-request. Ledger (`.probe/m13d/ledger.json`):
+The registration model was built for observed-decision verification:
 
-| # | Kind | Host / path | Outcome |
-| --- | --- | --- | --- |
-| 1 | TOKEN | www.warcraftlogs.com /oauth/token | OK |
-| 2 | T1_TABLES | www.warcraftlogs.com /api/v2/client | OK |
+- an ANALYZED envelope must cite a decision authority its registration binds
+  (`RESULT_CITES_FOREIGN_AUTHORITY`);
+- a capability's domain had to be an `AuthorityDomain`, i.e. one a provider
+  could bind;
+- every registered tree owned an APL artifact.
 
-Request 2 was ONE composed query on the M13-A report (real code only in
-gitignored `.probe/m13a/summary.json`). It asked for `revision` (10, the
-same as at the M13-A capture), `fights(fightIDs: [1])` and these tables,
-all over startTime 165857 and endTime 316612:
-
-- `table(Buffs, Friendlies, abilityID X)` for X in 395152, 410089, 395296;
-- `table(Casts, Friendlies, sourceID R)` for the 20 friendly players.
-
-It cost 1 rate-limit point. There was no events, deaths, damage, healing,
-ranking, discovery, other-report, other-fight or other-Evoker request. The
-conditional per-target requests (T2) were not needed.
+The Augmentation evaluator has no decision authority at all, so it could not
+be registered, and `AUGMENTATION_EVOKER_REQUIRED_INPUTS` (FULL_RAID) reached
+no scope derivation.
 
 ## What changed
 
-1. **Certified predicate coverage** (`src/engine/evidence/certified-coverage.ts`,
-   new). `FightCompleteness.certifiedCoverage?` holds `AURA_WINDOWS`
-   coverage (one ability; every friendly target except an exclusion list)
-   and `COMPLETED_CASTS` coverage (one source; only the listed abilities).
-   - `gateCertifiedAbsenceClaim` (state-result.ts) runs the unchanged
-     category gate first. Only a claim that STATES a predicate inside the
-     coverage can pass on certified coverage.
-   - `gateContinuityClaim` takes an optional `predicate`.
-   - No existing caller's semantics change: no predicate means category
-     coverage only.
-2. **Certification** (`src/engine/evidence/filtered-capture-certification.ts`,
-   new, pure). It compares the fight's OWN normalized events with the
-   decoded tables. `withCertifiedCoverage` always recomputes the
-   certification before attaching, so a certificate of other events can
-   never be reused. The rules are in architecture "M13-D"; in short:
-   - **Binding:** code, revision, fight id, exact bounds and every table's
-     request interval must match, or nothing is certified.
-   - **Auras:** strict windows equal the table bands element for element;
-     applications plus refreshes equal `totalUses`; no stated instance; no
-     stack change. A failing target is excluded. An ability-less or
-     target-less buff refuses the ability.
-   - **Casts:** an ability the table LISTS with an equal count. A zero is
-     never certified. An unidentified or instanced cast refuses the actor; a
-     source-less cast refuses its ability.
-3. **Decoder** (`src/wcl/filtered-capture-tables.ts`, new, fail-closed).
-   - Each table's request arguments must be committed beside it and must
-     match its alias's predicate.
-   - Refused: a dropped surface, a repeated target or an unknown field.
-   - It reuses the M11-G2 ability-table decoder (`abilityTableOf`, now
-     exported).
-4. **Consumers.**
-   - `supportAuraWindowsOf`: its listing states `AURA_WINDOWS` over every
-     friendly target, and continuity states one recipient's track.
-   - `recipientCooldownOverlap`: states the recipient's `COMPLETED_CASTS` of
-     its listed ids.
-   - The Augmentation support-cast listing: states the subject's
-     `COMPLETED_CASTS` of EVERY support cast id.
-5. **Evidence.**
-   - `wcl-m13d-certification-tables-aug1-fight-1` (62,316 bytes; archive;
-     `REPORT_SURFACES`; grants nothing).
-   - The deterministic sanitizer `scripts/corpus/sanitize-m13d-tables.mjs`.
-   - The manifest regenerated by `build-manifest.mjs`.
-   - Provenance doc `tests/evidence/m13d-certification.md`.
-   - Archive byte pins updated (`m11c4e-evidence-archive.test.ts`:
-     18,724,542).
+1. **Provider-less decision domains** (`src/findings/authority-domain.ts`).
+   - `PROVIDERLESS_DOMAINS` = SUPPORT_TARGETING, SUPPORT_TIMING (CLAUDE.md
+     "Decision Categories"); `DecisionDomain` = `AuthorityDomain` ∪ those.
+   - A capability may declare one: `DecisionCapability<TDomain>` defaults to
+     `AuthorityDomain`, so no existing specialization's types, payloads or
+     corpus outputs change. Registrations hold the wide type.
+   - Nothing can bind one. A binding's `domain` stays `AuthorityDomain`;
+     `PROVIDER_DOMAIN_COMPATIBILITY` is unchanged (SIMC_APL →
+     OFFENSIVE_ROTATION only); a forged binding fails catalog validation
+     (`PROVIDER_DOMAIN_INCOMPATIBLE`); `resolveAuthorityForDomain` answers
+     `NO_PINNED_AUTHORITY_FOR_DOMAIN` for a declared provider-less domain
+     whatever the bindings say.
+   - Kept OUT of `AUTHORITY_DOMAINS`, which each specialization's per-domain
+     results enumerate, so no tank/Ret payload grew support rows.
+2. **The registration** (`src/specs/evoker/augmentation/registration.ts`,
+   new; INTERNAL_ONLY; `evoker/augmentation` added to `SpecId` and
+   `INTERNAL_ONLY_SPEC_IDS`, not to `PUBLIC_SPEC_IDS`, the identity table or
+   the contract enum).
+   - Two capabilities (SUPPORT_TARGETING, SUPPORT_TIMING), both built FROM
+     `AUGMENTATION_EVOKER_REQUIRED_INPUTS` (FULL_RAID; ACTORS, CASTS, AURAS,
+     DEATHS; no resources; NO_TARGET). The requirement is derived FULL_RAID;
+     `deriveIngestionScopeFor([registration, PREPARATION])` = FULL_RAID with
+     the Augmentation analyzer contributing. No bindings.
+   - Result: an UNANALYZED envelope with a spec-owned payload (`domains` read
+     from the registration's own access, `subjectSpecialization`,
+     `evaluation`).
+     - `AUTHORITY_NOT_AVAILABLE`: the evaluator ran; no support decision has a
+       standard, so none was evaluated; the observations ride along.
+     - `INSUFFICIENT_EVIDENCE`: no stated specialization (a pet, an unlisted
+       actor), a refused identity, or unusable pinned data. No fact.
+     - Never ANALYZED: there is no decision authority to cite, and runtime game
+       data (support-ability identities) is never presented as one. No
+       observed-decision view (throws rather than returning an empty view).
+   - Identity: `SpecAnalysisInput` has no preflight identity, so the facade
+     feeds the evaluator's existing gate the fight's report code and fight id
+     and the subject's M13-B `friendlySpecializations` entry, the same
+     `friendlySpecs` entry preflight reads. The evaluator input type is
+     narrowed to the fields the gate reads (`AugmentationSubjectIdentity`;
+     `FightIdentity` still satisfies it, evaluator unchanged otherwise).
+3. **Catalog.** `ANALYZER_REGISTRATIONS` lists the row (six rows, five
+   PUBLIC). `analyzerForSpec` never selects it.
+4. **Guards.** The `evoker/augmentation` unregistered-tree exception is
+   removed from `m11a2-cross-spec-isolation` and `m10a-cross-spec-isolation`.
+   `m11a2` names it as the one registered tree with no APL artifact
+   (`AUTHORITY_FREE_REGISTERED_TREES`, asserted to be registered and to own
+   no APL); every other registered tree still owns exactly one.
+5. **Corpus.** New owning layer `SPEC_AUGMENTATION_EVOKER` (`SPEC_LAYER_OF`
+   total over `SpecId`), assertion kind
+   `SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT` (NO_AUTHORITY_AVAILABLE
+   class; driven through the internal lookup and `runAnalyzer`), and two
+   cases: the registration over an unstated subject (FULL_RAID derived, both
+   families NO_PINNED, INSUFFICIENT_EVIDENCE, no evaluator result) and
+   `APPLICATION_SERVICE.INTERNAL_REGISTRATION` (internal yes, public null,
+   identity unresolved). Manifest regenerated; `report.json` rewritten from
+   the workerd execution (185 cases / 780 assertions).
+6. **Docs.** Architecture "M13-E"; follow-ups "After M13-E" (and the M13-A /
+   M13-B bullets it resolves); the Augmentation README; `spec-id.ts` and
+   registry headers.
 
-## Real result
+## Tests
 
-| Stream | Outcome |
-| --- | --- |
-| Ebon Might 395152 (13 targets, 173 windows) | CERTIFIED: the ally listing is COMPLETE, every window's continuity is established, support time is AT_LEAST with only INITIAL_STATE_NOT_RESOLVED |
-| Self Ebon Might 395296 | CERTIFIED: the self listing is COMPLETE |
-| Prescience 410089 | CERTIFIED_EXCEPT_TARGETS [36, 50, 52]: pets with stated instances, and the table is per actor. The listing stays OBSERVED_ONLY; the other 12 targets' windows are established |
-| Completed casts | 303 (actor, ability) pairs proven, 28 not (unlisted abilities; empowered spells, where the table counts cast + empowerend) |
-| Subject support casts | 395152, 409311 and 403631 proven. 442204 was never cast and is unproven, so the listing stays UNKNOWN |
-| Deaths | Not requested: no M13 conclusion gates on death completeness (survival is positive-only) |
-
-SUPPORT_TARGETING and SUPPORT_TIMING stay NO_AUTHORITY_AVAILABLE. Category
-coverage stays ABSENT. Cooldown overlap is unchanged: no real recipient has
-a reviewed identity.
-
-**Does anything block M13-E?** No. M13-E (internal registration) does not
-need COMPLETE coverage: UNKNOWN and OBSERVED_ONLY are safe there. The
-remaining gaps are recorded in follow-ups "After M13-D".
-
-## Decisions for the reviewer
-
-1. **Predicate coverage, not a category grant.** Granting AURAS or CASTS
-   from a 15-id or per-ability proof would vouch for streams nobody
-   certified. The coverage carries its predicate, and only a claim stating a
-   predicate inside it can use it.
-2. **Certificate over the fight's own events.** The certificate is computed
-   from what the analysis reads, so it cannot be stale or carried onto other
-   events.
-3. **Exactness.** Bands are WCL's computed active intervals, and equality
-   with every observed window (plus uses = applications + refreshes) proves
-   the window structure per target actor. Where the per-actor table cannot
-   tell instances apart, the target is excluded, never assumed.
-4. **Friendly recipients.** Both surfaces are `hostilityType: Friendlies`, so
-   a certified listing is complete for friendly recipients only (documented
-   in the support module).
-5. **Inclusive interval.** The events surface (`coverage.ts`, live-probed)
-   and the tables (M11-G2) both include `endTime`, so the certified range is
-   `[165857, 316612]`, the range the evaluator asks for.
+- New `tests/unit/specs/augmentation-evoker-registration.test.ts` (12):
+  - the row, its capabilities from REQUIRED_INPUTS, no bindings, derived
+    FULL_RAID requirement and scope derivation;
+  - support families NO_PINNED, OFFENSIVE_ROTATION DOMAIN_NOT_DECLARED; a
+    forged SUPPORT_TARGETING binding refused by the catalog and ignored by
+    resolution; the view throws;
+  - real M13-A Evoker (archive) through the internal path:
+    AUTHORITY_NOT_AVAILABLE whose `evaluation` deep-equals the evaluator's
+    under a preflight identity; SUPPORT_TARGETING NO_AUTHORITY_AVAILABLE;
+  - negatives: another stated specialization → IDENTITY_REFUSED
+    NOT_THIS_SPECIALIZATION; a pet → NOT_IN_FRIENDLY_ROSTER, no evaluation;
+    unusable data → INSUFFICIENT_EVIDENCE; a PUBLIC request for an
+    Augmentation Evoker → SPEC_NOT_SUPPORTED, 0 Augmentation runs, only
+    PLAYER_CONTEXT retrieved.
+- Existing tests updated because the catalog/partition genuinely changed (no
+  assertion weakened; several strengthened with the internal row's absence
+  from public lookups):
+  - partition pins (`m10a-spec-partition`, `m10d-public-registration`,
+    `m11b2`, `m11c2`, `m11-promotion-evidence-gate`, which also now reports
+    Augmentation's internal readiness: not ready, by design);
+  - catalog snapshots (`m10a-registry-integrity`, `m10c-protection-authority-binding`,
+    `m11a-registration-list-complete`, `m11a2-spec-module-conformance` with
+    the M13-A archive identity evidence, `m11a2-spec-roster` 35 → 34,
+    `m10d-public-second-registration-invariance`);
+  - exhaustive call maps in the public transport and raid-night tests gain
+    `evoker-augmentation-support-observations: 0`;
+  - corpus pins (cases 183 → 185, assertions 778 → 780, layers, executor ring).
 
 ## Validation
 
 - `npx tsc --noEmit`: clean. `npx prettier --check .`: clean.
-- Focused: `tests/unit/m13d-filtered-capture-certification.test.ts` (19), the
-  Augmentation evaluator (21), `m11c4e-evidence-archive` (22), `m9c` and all
-  of `tests/contracts` pass.
-- `npm run test:corpus`: PASSED. `npm run test:evidence`: PASSED, with
-  `tests/evidence/report.json` regenerated (`--write-report`) for the new
-  artifact.
-- Full `npx vitest run --testTimeout=180000`: 380/383 files, 11712/11715
-  tests. Of the 3 failures:
-  - The `m11g2-comparison-facts-layering` failure was real: the decoder had
-    imported the post-hoc G2 table decoder. Fixed with a local Casts-leaf
-    decoder; the guard now passes.
-  - `m9b-corpus-harness` (Protection) and `runner-service-queue` W are the
-    load-dependent tests noted in M15-D. Both pass alone (37/37).
-- Existing tests changed: `m11c4e-evidence-archive` (byte pins for the new
-  artifact) and `m9c-sanitize-payloads` (the new sanitizer revision). No
-  existing assertion was weakened.
+  `git diff --check`: clean.
+- Focused: the new registration test, the Augmentation evaluator test, all
+  of `tests/contracts` and the corpus unit tests pass.
+- `npm run test:corpus`: PASSED (two byte-identical workerd runs, committed
+  report matches). `npm run test:evidence`: PASSED (unchanged).
+- Full `npx vitest run`: 11740/11761. Every failure is a default-5 s timeout
+  under machine load (STACK_TRACE_ERROR) plus the known load-dependent
+  `runner-service-queue` W; rerun with `--testTimeout=180000` all pass except
+  `m9b-corpus-harness` (Protection) and `runner-service-queue` W, which pass
+  alone (the same pair noted in M13-D and M15-D).
 
-## Review cycle 2 (local review CHANGES_REQUIRED, fixed)
+## Decisions for the reviewer
 
-1. `withCertifiedCoverage` now REPLACES the fight's certified coverage with
-   the fresh certification's coverage. Inherited coverage is never merged,
-   so a copy whose events changed cannot keep stale proof.
-2. New regression tests ("re-certification never inherits coverage"):
-   - a certified fight copied with an ally removal and the cast dropped, but
-     with its certified completeness kept: re-certification excludes the
-     ally, the listing is OBSERVED_ONLY, that window is NOT_ESTABLISHED, and
-     the cast claim fails;
-   - re-certification against tables of another revision: refused, and no
-     coverage remains;
-   - a narrower request: only the requested coverage remains.
-   Focused: 43/43 pass, and tsc is clean.
-
-## Review cycle 3 (local review CHANGES_REQUIRED, fixed)
-
-1. A Casts-table ability LISTED with a zero total is now `ZERO_TOTAL`, never
-   MATCH, so it gets no coverage: a zero is never certified, listed or not.
-   The test asserts the attached coverage omits it, that
-   `gateCertifiedAbsenceClaim` refuses it, and the `ZERO_TOTAL` comparison.
-   The real-evidence pins are unchanged (303 proven, 28 not). Focused: 43/43
-   pass, and tsc is clean.
-
-## Review cycle 4 (local review CHANGES_REQUIRED, fixed)
-
-1. `AURA_WINDOWS` coverage carries `provenTargetActorIds`: matched targets
-   that the Friendlies table itself LISTS. A `ONE_TARGET` claim passes only
-   for one of them, so friendly membership is the table's listing, never
-   "not excluded". New negative tests:
-   - a hostile target (the boss) with X events: excluded, its window
-     NOT_ESTABLISHED, the listing OBSERVED_ONLY, and its claim refused;
-   - an actor absent from both the events and the table: refused, even
-     under an otherwise clean listing.
-   The real-evidence pins are unchanged. Focused: 44/44 pass, and tsc is
-   clean.
-
-## Review cycle 5 (local review CHANGES_REQUIRED, fixed)
-
-1. **Scope.** `gateCertifiedAbsenceClaim` admits certified coverage only when
-   the category gate refused for INSUFFICIENT_COVERAGE. Capability and scope
-   refusals stand. Every actor the predicate names must be inside the
-   category's declared actor scope, and a listing over every friendly target
-   needs the actor-global (FULL_RAID) scope. New tests, with the same exact
-   tables and the same present events:
-   - PLAYER_CONTEXT: the ally listing, ally continuity and ally casts are all
-     INSUFFICIENT_SCOPE;
-   - FULL_RAID: all three are proven;
-   - an UNVERIFIED category stays CAPABILITY_UNVERIFIED.
-2. **Revision.** `NORMALIZATION_REVISION` `m3.5` → `m3.6` (additive
-   `completeness.certifiedCoverage`), following the M13-B precedent:
-   - the contract pin (`normalization-boundary.test.ts`) and the test
-     fixture constant are updated;
-   - the delta is documented in architecture "M13-D": the value of ANALYZED
-     raid-night/1 cells' `provenance.normalizationRevision` changes, with no
-     schema change, as at M13-B under publicContract NONE.
-3. The trailing whitespace (CRLF from appends) is removed, and
-   `git diff --check` is clean.
-
-Focused: the M13-D tests, the Augmentation evaluator and
-normalization-boundary pass (78/78), and tsc is clean.
+1. **Provider-less domains instead of widening `AUTHORITY_DOMAINS`.** Adding
+   the support families to `AUTHORITY_DOMAINS` would add two
+   DOMAIN_NOT_DECLARED rows to every tank and Retribution payload and rewrite
+   their corpus expectations, for questions those analyzers are never asked.
+   A separate, never-bindable vocabulary keeps authority per decision
+   category without touching other specializations.
+2. **AUTHORITY_NOT_AVAILABLE, not ANALYZED.** The envelope status summarizes
+   decision authority; with none for either family the honest status is
+   AUTHORITY_NOT_AVAILABLE, and the observations are carried as facts in the
+   payload. Making ANALYZED authority-optional would weaken the ownership
+   check every other registration relies on.
+3. **Identity from `friendlySpecializations`.** Same source and roster rules
+   as preflight; refused or unstated identity yields no fact, never a default.

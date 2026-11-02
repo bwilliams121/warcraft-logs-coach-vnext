@@ -64,17 +64,18 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set is empty again since M11-C4j, and its machinery is dormant rather than removed", () => {
+  it("the internal-only set holds exactly Augmentation Evoker since M13-E, and it is never public", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
     // Blood Death Knight measurement slice from M11-B2, was empty again from
-    // M11-B12, held the Brewmaster Monk measurement slice from M11-C2, and is
-    // empty again since M11-C4j moved that id across. The next specialization
-    // is expected to arrive here first, as all four of its predecessors did.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
-    expect(typeof requirePublicSpecId).toBe("function");
-    expect(typeof InternalSpecExposureError).toBe("function");
-    for (const id of SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
+    // M11-B12, held the Brewmaster Monk measurement slice from M11-C2, was
+    // empty again from M11-C4j, and holds Augmentation Evoker since M13-E: the
+    // first registration with no decision authority (support observations).
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["evoker/augmentation"]);
+    expect(isSpecId("evoker/augmentation")).toBe(true);
+    expect(isPublicSpecId("evoker/augmentation")).toBe(false);
+    expect(() => requirePublicSpecId("evoker/augmentation")).toThrow(InternalSpecExposureError);
+    for (const id of PUBLIC_SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
   });
 

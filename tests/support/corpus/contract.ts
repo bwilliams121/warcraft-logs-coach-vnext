@@ -376,6 +376,8 @@ export const OWNING_LAYERS = {
   SPEC_BLOOD_DEATH_KNIGHT: ["src/specs/deathknight/blood/"],
   /** M11-C2. The Brewmaster Monk evaluator (INTERNAL_ONLY until M11-C4j) and nothing else. */
   SPEC_BREWMASTER_MONK: ["src/specs/monk/brewmaster/"],
+  /** M13-E. The INTERNAL_ONLY Augmentation Evoker support-observation evaluator and nothing else. */
+  SPEC_AUGMENTATION_EVOKER: ["src/specs/evoker/augmentation/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -405,6 +407,7 @@ export const SPEC_LAYER_OF = {
   "paladin/retribution": "SPEC_RETRIBUTION_PALADIN",
   "deathknight/blood": "SPEC_BLOOD_DEATH_KNIGHT",
   "monk/brewmaster": "SPEC_BREWMASTER_MONK",
+  "evoker/augmentation": "SPEC_AUGMENTATION_EVOKER",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -3131,6 +3134,42 @@ export const ASSERTION_KINDS = {
     requiresAuthority: false,
     description:
       "The Brewmaster facade refuses this specialization with SPEC_NOT_SUPPORTED before any Brewmaster rule runs: no comparisons, no domains, no authority.",
+  },
+
+  // ---- SPEC_AUGMENTATION_EVOKER (M13-E, INTERNAL_ONLY) ---------------------
+  //
+  // The first registration that binds no decision authority. Driven through
+  // the production catalog's INTERNAL lookup and `runAnalyzer`, never the
+  // evaluator directly, so the case pins the registration as orchestration
+  // holds it.
+  "SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT": {
+    owningLayer: "SPEC_AUGMENTATION_EVOKER",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            /** The registration's DERIVED ingestion scope. */
+            requiredScope: z.enum(["PLAYER_CONTEXT", "FULL_RAID"]),
+            /** The unanalyzed status: an authority-free registration is never ANALYZED. */
+            status: z.enum(["AUTHORITY_NOT_AVAILABLE", "INSUFFICIENT_EVIDENCE"]),
+            /** Each declared family and its resolution from the registration's own access, in order. */
+            domains: z.array(z.object({ domain: z.string().min(1), resolution: z.string().min(1) }).strict()),
+            /** `STATED`, or the UNKNOWN reason the subject's specialization was refused for. */
+            subjectSpecialization: z.string().min(1),
+            /** The evaluator's state, or `null` when no identity could be fed to it. */
+            evaluationState: z.string().min(1).nullable(),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "Through the production catalog's internal lookup, the INTERNAL_ONLY Augmentation Evoker registration derives this ingestion scope, resolves each declared support family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a support fact for a subject whose identity is not established. The public lookup never selects it.",
   },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------

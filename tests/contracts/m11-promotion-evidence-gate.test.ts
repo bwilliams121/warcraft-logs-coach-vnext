@@ -582,18 +582,32 @@ describe("M11-C4j: Brewmaster Monk passes BOTH global gates in PUBLIC mode, on t
 });
 
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("no production INTERNAL_ONLY registration exists since M11-C4j, and the partition agrees", () => {
+  it("the one production INTERNAL_ONLY registration is Augmentation Evoker since M13-E, and the partition agrees", () => {
     // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
-    // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it. The
-    // synthetic module below still exercises the branch independently of
-    // whichever real row holds the half, and the next specialization is
-    // expected to arrive here first.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it.
+    // Augmentation Evoker arrived here in M13-E. The synthetic module below
+    // still exercises the branch independently of whichever real row holds
+    // the half.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["evoker/augmentation"]);
     expect(
       PRODUCTION_CATALOG.registrations
         .filter((row) => row.exposure === "INTERNAL_ONLY")
         .map((row) => row.specId),
-    ).toEqual([]);
+    ).toEqual(["evoker/augmentation"]);
+  });
+
+  it("Augmentation Evoker's internal readiness is reported, and is not ready: it has no decision evidence, by design", async () => {
+    // It binds no decision authority (support targeting and timing are
+    // NO_AUTHORITY_AVAILABLE), so no corpus case can show it a real decision
+    // coverage, and this gate can never make it publishable as an
+    // observed-decision analyzer. Its public shape is M13-F's, not this gate's.
+    const tiers = await tiersPromise;
+    const module = MODULES.find((candidate) => candidate.identity.specId === "evoker/augmentation");
+    if (module === undefined) throw new Error("no Augmentation module");
+    const readiness = evaluate(tiers, "evoker/augmentation", "INTERNAL_ONLY", internalPairing(module));
+    expect(readiness.exposure).toBe("INTERNAL_ONLY");
+    expect(readiness.qualifyingAssertions).toEqual([]);
+    expect(readiness.evidenceReady).toBe(false);
   });
 
   it("the internal pairing finds nothing for Brewmaster Monk now that the identity table resolves it (M11-C4j)", async () => {

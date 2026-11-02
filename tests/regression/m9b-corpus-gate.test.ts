@@ -151,9 +151,9 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // consumable status through the application service (one each).
     // M12-A added one case and three assertions: the normalization census of
     // the real death slice the shared death-timeline primitive reads.
-    expect(result.summary.cases).toBe(183);
-    expect(result.summary.assertions).toBe(778);
-    expect(result.summary.passed).toBe(778);
+    expect(result.summary.cases).toBe(185);
+    expect(result.summary.assertions).toBe(780);
+    expect(result.summary.passed).toBe(780);
   });
 
   it("covers every layer", async () => {

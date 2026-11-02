@@ -41,9 +41,9 @@
  * becoming reachable by a public request — as Protection Paladin was from
  * M10-C until M10-D made it public, Retribution Paladin from M11-A4 until
  * M11-A5, Blood Death Knight from M11-B2 until M11-B12, and Brewmaster Monk
- * from M11-C2 until M11-C4j. Since M11-C4j every registration is PUBLIC again
- * and the internal-only machinery is dormant; it is kept because the next
- * specialization arrives through it.
+ * from M11-C2 until M11-C4j. From M11-C4j every registration was PUBLIC and
+ * the internal-only machinery dormant, until Augmentation Evoker arrived
+ * through it in M13-E.
  *
  * INJECTED CATALOGS MUST BE COMPLETE. The public-set equality below applies to
  * an injected catalog exactly as to the production one: a test that wants to
@@ -69,6 +69,7 @@ import { validateCapabilities, type CapabilityDefectRecord } from "../findings/d
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { isPublicSpecId, isSpecId, PUBLIC_SPEC_IDS, type SpecId } from "../findings/spec-id.js";
 import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../specs/deathknight/blood/registration.js";
+import { AUGMENTATION_EVOKER_REGISTRATION } from "../specs/evoker/augmentation/registration.js";
 import { BREWMASTER_MONK_REGISTRATION } from "../specs/monk/brewmaster/registration.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
@@ -423,7 +424,8 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Five rows, all PUBLIC since M11-C4j. A publicly unsupported
+ * Six rows: five PUBLIC (all PUBLIC from M11-C4j until M13-E) and, since
+ * M13-E, Augmentation Evoker INTERNAL_ONLY. A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
  * internal lookup and tests, and is never selected for a public request —
@@ -440,6 +442,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   BLOOD_DEATH_KNIGHT_REGISTRATION,
   // INTERNAL_ONLY from M11-C2; PUBLIC since M11-C4j.
   BREWMASTER_MONK_REGISTRATION,
+  // INTERNAL_ONLY since M13-E: binds no authority; its support facts have no public shape yet (M13-F).
+  AUGMENTATION_EVOKER_REGISTRATION,
 ]);
 
 /**

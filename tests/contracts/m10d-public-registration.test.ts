@@ -54,7 +54,7 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the five public ids since M11-C4j; internal-only: empty again", () => {
+  it("public partition: the five public ids since M11-C4j; internal-only: Augmentation Evoker since M13-E", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -62,7 +62,7 @@ describe("the five sites agree", () => {
       "deathknight/blood",
       "monk/brewmaster",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["evoker/augmentation"]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -97,13 +97,16 @@ describe("the five sites agree", () => {
     // M11-C2 put a fifth, INTERNAL_ONLY row in — the Brewmaster Monk
     // measurement slice — NOT among the enabled analyzers, and M11-C4j made
     // it PUBLIC by the same move after the global observation and
-    // discrimination gates passed on two independent subjects.
+    // discrimination gates passed on two independent subjects. M13-E put a
+    // sixth, INTERNAL_ONLY row in — Augmentation Evoker support observations —
+    // NOT among the enabled analyzers.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
       ["paladin/retribution", "PUBLIC"],
       ["deathknight/blood", "PUBLIC"],
       ["monk/brewmaster", "PUBLIC"],
+      ["evoker/augmentation", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -190,6 +193,7 @@ describe("the complete-catalog helper", () => {
       "paladin-retribution-observed-decisions": 0,
       "deathknight-blood-observed-decisions": 0,
       "monk-brewmaster-observed-decisions": 0,
+      "evoker-augmentation-support-observations": 0,
     });
   });
 });

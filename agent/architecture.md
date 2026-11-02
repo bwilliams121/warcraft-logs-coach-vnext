@@ -10861,6 +10861,70 @@ raid-night/1 cell's `provenance.normalizationRevision` (`"m3.6"`), so a
 stored `m3.5` result compares NOT_COMPATIBLE. No schema changes; analysis/1
 carries no normalization revision and its digests are unchanged.
 
+## M13-E — Augmentation evaluator orchestration and registration (internal)
+
+Milestone 13 (autopilot queue entry M13-E). Public contract: NONE. No
+Warcraft Logs request.
+
+**The problem.** The registration model was built for observed-decision
+verification: an ANALYZED envelope must cite a decision authority its
+registration binds, a capability's domain had to be one a provider could
+bind, and every registered tree owned an APL. The Augmentation evaluator has
+no decision authority at all (SUPPORT_TARGETING and SUPPORT_TIMING are
+NO_AUTHORITY_AVAILABLE), so it could not be registered, and its FULL_RAID
+requirement reached no scope derivation.
+
+**Provider-less decision domains** (`src/findings/authority-domain.ts`).
+`PROVIDERLESS_DOMAINS` = SUPPORT_TARGETING, SUPPORT_TIMING (CLAUDE.md
+"Decision Categories"); `DecisionDomain` = `AuthorityDomain` ∪ those. A
+capability may declare one (`DecisionCapability<TDomain>`, defaulting to the
+bindable domains, so no existing specialization changed). Nothing can bind
+one: a binding's `domain` is an `AuthorityDomain`, `PROVIDER_DOMAIN_COMPATIBILITY`
+names none, a forged binding fails catalog validation
+(`PROVIDER_DOMAIN_INCOMPATIBLE`), and `resolveAuthorityForDomain` answers
+`NO_PINNED_AUTHORITY_FOR_DOMAIN` for a declared provider-less domain whatever
+the bindings say. They are kept out of `AUTHORITY_DOMAINS`, which each
+specialization's per-domain results enumerate, so no other specialization's
+payload changed. Making one bindable needs an approved, machine-usable model
+of that decision: an architectural act, like widening the compatibility
+table.
+
+**Registration** (`src/specs/evoker/augmentation/registration.ts`,
+INTERNAL_ONLY; `evoker/augmentation` in `INTERNAL_ONLY_SPEC_IDS`).
+
+- Two capabilities, SUPPORT_TARGETING and SUPPORT_TIMING, both declared from
+  `AUGMENTATION_EVOKER_REQUIRED_INPUTS` (FULL_RAID; ACTORS, CASTS, AURAS,
+  DEATHS; NO_TARGET). The registration's requirement is therefore DERIVED as
+  FULL_RAID, and `deriveIngestionScopeFor` over it widens to FULL_RAID: no
+  hand-picked scope. No bindings.
+- The result is an UNANALYZED envelope carrying a spec-owned payload: the
+  per-family resolutions read from the registration's own access, the
+  subject's stated specialization, and the evaluator's result.
+  `AUTHORITY_NOT_AVAILABLE` when the evaluator ran (observations,
+  WCL_OBSERVED_FACT, no finding); `INSUFFICIENT_EVIDENCE` when the subject has
+  no stated specialization, its identity is refused or the pinned support
+  data is unusable. Never ANALYZED, so `RESULT_CITES_FOREIGN_AUTHORITY` keeps
+  its meaning and no runtime game data is presented as decision authority.
+  Shared orchestration reads only `status`, `specId` and `detail` of an
+  unanalyzed envelope, so the payload reaches no projector. There is no
+  observed-decision view (it throws rather than returning an empty one).
+- Identity: `SpecAnalysisInput` carries no preflight identity, so the facade
+  feeds the evaluator's gate (now typed `AugmentationSubjectIdentity`, which
+  `FightIdentity` satisfies) the fight's report code and fight id and the
+  subject's `friendlySpecializations` entry, the same `friendlySpecs` entry
+  preflight reads. On the real M13-A Evoker the facts equal the evaluator's
+  under a preflight identity.
+
+**Reachability.** `analyzerForSpec` never selects it and the identity table
+does not resolve Evoker/Augmentation, so a public request for an Augmentation
+Evoker stays SPEC_NOT_SUPPORTED, runs nothing and retrieves only the
+preparation producer's PLAYER_CONTEXT. Raid-night cells, REST and MCP are
+unchanged. The unregistered-tree exception for `evoker/augmentation` is gone
+from both cross-spec-isolation guards; `m11a2` names it as the one
+registered tree with no APL artifact. The corpus gained the
+`SPEC_AUGMENTATION_EVOKER` layer and two cases (the registration's result for
+an unstated subject; its internal-only lookups).
+
 ## M14-A — Comparison timing alignment foundation (post-hoc)
 
 Milestone 14 (autopilot queue entry M14-A). Public contract: NONE. No

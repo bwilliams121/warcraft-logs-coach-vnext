@@ -98,9 +98,15 @@ const MODULES: readonly Discovered[] = Object.entries(REGISTRATION_MODULES)
  * fight-context artifact and the actor in it. Test-owned; the module itself
  * carries no artifact id.
  */
-const IDENTITY_EVIDENCE: Readonly<
-  Record<string, { readonly artifactId: string; readonly fightId: number; readonly sourceId: number }>
-> = {
+interface IdentityEvidence {
+  readonly artifactId: string;
+  readonly fightId: number;
+  readonly sourceId: number;
+  /** M13-E: the artifact is in the evidence archive (`tests/evidence/`), not the routine corpus. */
+  readonly archive?: true;
+}
+
+const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
   "rogue/assassination": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 19 },
   "paladin/protection": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 7 },
   // M11-A4: actor 6 of the same fight, the Retribution Paladin the committed context reports.
@@ -109,14 +115,31 @@ const IDENTITY_EVIDENCE: Readonly<
   "deathknight/blood": { artifactId: "wcl-fight-context-a7r6-fight-7", fightId: 7, sourceId: 14 },
   // M11-C2: actor 4 of gtKb fight 22, the Brewmaster Monk the committed context reports.
   "monk/brewmaster": { artifactId: "wcl-fight-context-gtkb-fight-22", fightId: 22, sourceId: 4 },
+  // M13-E: actor 1 of the M13-A capture (pseudonym M13AAUGAAAAAAAAA fight 1), the
+  // Augmentation Evoker its committed context reports. Archive evidence only.
+  "evoker/augmentation": {
+    artifactId: "wcl-m13a-fight-context-aug1-fight-1",
+    fightId: 1,
+    sourceId: 1,
+    archive: true,
+  },
 };
 
-function wclIdentityOf(evidence: {
-  readonly artifactId: string;
-  readonly fightId: number;
-  readonly sourceId: number;
-}) {
-  const raw = JSON.parse(committedArtifactText(evidence.artifactId)) as {
+const ARCHIVE_GRAPHQL: Record<string, string> = import.meta.glob("../evidence/artifacts/wcl-graphql/*.json", {
+  eager: true,
+  query: "?raw",
+  import: "default",
+});
+
+function evidenceText(evidence: IdentityEvidence): string {
+  if (evidence.archive !== true) return committedArtifactText(evidence.artifactId);
+  const text = ARCHIVE_GRAPHQL[`../evidence/artifacts/wcl-graphql/${evidence.artifactId}.json`];
+  if (text === undefined) throw new Error(`no archive artifact ${evidence.artifactId}`);
+  return text;
+}
+
+function wclIdentityOf(evidence: IdentityEvidence) {
+  const raw = JSON.parse(evidenceText(evidence)) as {
     readonly reportData: {
       readonly report: {
         readonly masterData: { readonly actors: readonly { id: number; type: string; subType: string }[] };
@@ -315,7 +338,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the five public modules, each with zero supplemental analyses", () => {
+  it("is exactly the five public modules and the INTERNAL_ONLY Augmentation module, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -334,6 +357,8 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "PUBLIC", 0],
+      // M13-E: INTERNAL_ONLY, binding no decision authority.
+      ["AUGMENTATION_EVOKER_MODULE", "evoker/augmentation", "INTERNAL_ONLY", 0],
       ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
