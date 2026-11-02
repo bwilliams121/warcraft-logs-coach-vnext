@@ -29,6 +29,36 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M14-E: what causal evidence linkage does not establish
+
+**Raised:** M14-E (2026-11-02).
+
+- **A link is not a cause.** It says decision-level evidence exists in the
+  same component and window. It never says how much of a delta the evidence
+  accounts for, nor that the player erred. On real evidence the Death Strike
+  link rests on authority MATCHes. Turning a link into a coaching statement,
+  and reading the producer's status (REJECTED, MATCH, ...), is M14-F's
+  reviewed projection.
+- **No production adapter yet.** The real Blood results are restated as
+  records in the M14-E test. A reviewed adapter from findings and observed
+  decisions to records belongs with the M14-F projection, which may import
+  both sides. M14-E's linkage never imports the authority branch.
+- **Ability identity is exact.** A record links an ability row only through
+  the game ids it names. Cast-id-to-damage-id relationships (a cast whose
+  damage events carry another id) must be stated by the spec-owned producer,
+  never guessed. The M14-E test names only cast ids, so such rows stay
+  `NO_DECISION_EVIDENCE_IN_SCOPE`.
+- **Undecided deltas link nothing.** Every comparison capture is uncertified,
+  so most event-count deltas are bounds and many are UNDECIDED. The 45 real
+  Heart Strike rejections link to nothing for that reason. Certified
+  comparison coverage (After M11-G2) would decide more directions.
+- **No factual record producer.** Uptime, resource, buff-window,
+  target-choice, cooldown-alignment and actionability records are in the
+  vocabulary and proven on synthetic data. No module yet produces them from
+  the subject fight.
+
+---
+
 ## After M14-D: what the damage-delta decomposition does not establish
 
 **Raised:** M14-D (2026-11-02).

@@ -1667,6 +1667,16 @@ damage-delta decomposition (M14-D, tests/unit/m14d-damage-delta.test.ts, same G2
   equal rates, different durations             -> EQUAL in integer arithmetic
   sentences                                    -> only for a proven direction; no causal or prescriptive word
   every decomposition                          -> OBSERVATION_ONLY, causalClaim NONE, NOT_COMBINED, residual NOT_COMPUTED, no finding effect
+causal evidence linkage (M14-E, tests/unit/m14e-causal-linkage.test.ts, same G2 layering guard):
+  UNDECIDED / EQUAL delta                      -> OBSERVATION_ONLY, never LINKED (real: 45 Heart Strike REJECTED link nothing)
+  only UNKNOWN / NO_AUTHORITY_AVAILABLE        -> DECISION_EVIDENCE_UNRESOLVED, kept distinct (real: Death's Caress)
+  ability record vs TOTAL                      -> NO_DECISION_EVIDENCE_IN_SCOPE; only WHOLE_OUTPUT reaches a total
+  pet-scoped / other-class / other-window      -> no link; half-open window, instant at the end outside
+  record from a comparison fight               -> REFUSED EVIDENCE_NOT_FROM_SUBJECT_FIGHT
+  observed fact claiming NO_AUTHORITY          -> REFUSED; facts-only link carries NO_AUTHORITY_BACKED_EVIDENCE
+  comparisons supplied                         -> change only a direction; subject evidence per component identical
+  real fights                                  -> 13 LINKED pairs, all bounds; Death Strike link rests on MATCHes (link is not a fault)
+  every linkage                                -> LINKAGE_ONLY, causalClaim NONE, magnitude NONE, verdictFlow NONE, no confidence field
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

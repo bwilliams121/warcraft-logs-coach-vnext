@@ -4,101 +4,104 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M14-D: Factual damage-delta decomposition. Autopilot queue entry M14-D.
-Branch `autopilot/m14-d`, from main at 0f1c982.
+M14-E: Causal evidence linkage (internal). Autopilot queue entry M14-E.
+Branch `autopilot/m14-e`, from main at 777b12a.
 
 - **Direction** (queue entry; CLAUDE.md "Damage Output Diagnosis",
-  "Comparable Logs", "Comparison Cannot Move Confidence"; architecture
-  "Milestone 14", the M11-G2 damage ledgers, the M11-G4-4 DPS comparability
-  rules): decompose subject-versus-comparison damage differences factually,
-  by ability, target class, window and pet sub-actor tree, as observations.
-  No causal claim. Where raw `amount` semantics (M1) or AT_LEAST coverage
-  limit a figure, it is a bound or UNKNOWN, never a point estimate.
+  "Comparison Cannot Move Confidence", "UNKNOWN vs NO_AUTHORITY_AVAILABLE";
+  architecture "Milestone 14", "M14-D"): link damage-delta components to
+  decision-level evidence that could support a causal statement (APL decision
+  outcomes, cast opportunities and uptime, resource state and buff windows,
+  target choice and cooldown alignment, encounter actionability). A link
+  records its evidence and its limits. A delta with no decision-level link
+  stays an observation. The authority verifier and this causal analysis stay
+  separate modules; neither feeds the other's verdicts until M14-F. Comparison
+  behavior never moves confidence.
 - **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or
   `src/mcp/` changes.
-- **Warcraft Logs requests: none.** The committed archive fights and
-  synthetic fights.
-- Queue bookkeeping: M14-C (#27, 0f1c982) recorded MERGED; M14-D PR_OPEN.
-  M12-C through M14-B were already recorded.
+- **Warcraft Logs requests: none.** Committed archive fights, the subject's
+  real Blood decision results computed offline, synthetic fights.
+- Queue bookkeeping: M14-D (#28, 777b12a) recorded MERGED; M14-E PR_OPEN.
+  M12-C through M14-C were already recorded.
 
 ## What it adds
 
-**`src/comparison-facts/damage-delta.ts`**, inside the M11-G2 post-hoc domain
-and under its layering guard (module list updated). It imports only E1
-combat facts, the engine CombatFight type and the domain's own modules.
-Nothing outside the domain imports it; no forbidden word appears.
+**`src/comparison-facts/causal-linkage.ts`**, inside the M11-G2 post-hoc
+domain and under its layering guard (module list updated). It imports only
+the domain's own modules and the engine `EvidenceLocator` type. It never
+imports the authority branch (specs, simc, findings), and nothing outside the
+domain imports it. No forbidden word appears.
 
-`decomposeDamageDeltas(input, definition, alignedWindows = [])` recomputes the
-M14-A alignment from its inputs (the `factsAtAlignedMoment` anti-stale rule).
+`linkCausalEvidence(input, definition, alignedWindows, records)` recomputes
+the M14-D decomposition from its inputs (the anti-stale rule of M14-A/C/D).
 
-**Three measures, never mixed** (one measure, one component, one window on
-both sides):
+**Decision evidence is caller-restated plain data** (`DecisionEvidenceRecord`,
+like `attachStrategyContext`'s finding moment): kind (the eight queue
+families), basis (`AUTHORITY_BACKED` / `OBSERVED_FACT`), the producer's
+authority and status VERBATIM, resolution (`RESOLVED` / `UNKNOWN` /
+`NO_AUTHORITY_AVAILABLE`, never merged), half-open report-time interval,
+scope, locators. The linkage reads only resolution, scope and interval. It
+never reads the producer's status and never re-evaluates a decision.
 
-- `DAMAGE_EVENT_COUNT` (`OBSERVED_DAMAGE_EVENTS`): focus + owned actors'
-  damage events under the fight's tree coverage; EXACT / AT_LEAST / UNKNOWN.
-- `RAW_AMOUNT_FIELD_SUM`: each side's raw sum is shown as G2 holds it; the
-  delta is ALWAYS UNKNOWN `RAW_AMOUNT_MEANING_NOT_PROVEN`, even when both are
-  EXACT (M1).
-- `WCL_TABLE_AMOUNT`: whole fight only. Raid entry (total, pets by kind,
-  target types verbatim) and the focus's per-actor DamageDone leaves (per
-  ability). Delta only table-against-table under the same log version
-  (`LOG_VERSION_DIFFERS` otherwise, per M11-G4-4's evidenced-log-version
-  rule). Not listed -> `NOT_LISTED_IN_TABLE`, never 0. No focus-only amount
-  by subtraction (`TABLE_STATES_NO_FOCUS_ONLY_AMOUNT`).
+**A link** (per delta row × comparison pair) needs a proven direction
+(SUBJECT_LOWER / SUBJECT_HIGHER), the subject's window placed, and at least
+one RESOLVED in-scope record meeting that window. Otherwise
+`OBSERVATION_ONLY` with a cause (`DIRECTION_UNDECIDED`, `DIRECTION_EQUAL`,
+`SUBJECT_WINDOW_UNKNOWN`, `NO_DECISION_EVIDENCE_IN_SCOPE`,
+`DECISION_EVIDENCE_UNRESOLVED`). Unresolved records are carried, distinct, and
+never support a link.
 
-**Components:** TOTAL; BY_SOURCE (`FOCUS` or definition kind by catalog game
-id); BY_ABILITY (source kind + ability game id); BY_TARGET_CLASS
-(BOSS_SUBTYPE / NON_BOSS_NPC / PLAYER_TARGET / OTHER_TARGET: enemy-listed and
-other NPC merged, because the subject's enemy list is not held, so a class
-means the same in every fight); BY_WCL_TARGET_TYPE.
+**Scope:** TOTAL / BY_WCL_TARGET_TYPE take only WHOLE_OUTPUT records (one
+ability never explains a total; no residual). BY_SOURCE ← SOURCE; BY_ABILITY ←
+ABILITY (same source kind, exact game id) or SOURCE; BY_TARGET_CLASS ←
+TARGET_CLASS. Ability-id relationships are the producer's statement, never
+guessed.
 
-**Deltas, per pair, never combined:** EXACT−EXACT = EXACT; EXACT−AT_LEAST =
-NO_MORE_THAN; AT_LEAST−EXACT = NO_LESS_THAN; otherwise UNKNOWN with reason.
-Absolute and per-minute. Direction (`SUBJECT_LOWER` / `SUBJECT_HIGHER` /
-`EQUAL`) only when the delta or bound proves it, compared in BigInt
-cross-multiplication; else `UNDECIDED`. A NO_MORE_THAN bound can only prove
-SUBJECT_LOWER.
+**Limits on every pair:** `COMPARISON_COVERAGE_UNCERTIFIED`,
+`COMPARISON_DECISIONS_NOT_EVALUATED`, and where they hold `DELTA_IS_A_BOUND`,
+`EVENT_COUNT_NOT_DAMAGE_AMOUNT`, `SUBJECT_COMPONENTS_OBSERVED_ONLY`,
+`UNRESOLVED_EVIDENCE_IN_SCOPE`, `NO_AUTHORITY_BACKED_EVIDENCE`.
 
-**Windows:** `WHOLE_FIGHT` plus caller `ALIGNED_MOMENT`s via
-`factsAtAlignedMoment` (EXACT anchors only; outside the fight UNKNOWN, never
-clipped; no table rows). Per fight per window, the component list claim
-(EXHAUSTIVE / OBSERVED_ONLY). No residual.
+**Refusals:** a record from a non-subject fight (comparison decisions are
+never evaluated; comparison behavior is never decision evidence), a kind
+outside the vocabulary, duplicate id, non-integer/reversed interval, interval
+outside the subject fight, empty ability scope, an OBSERVED_FACT claiming
+NO_AUTHORITY_AVAILABLE, a refused decomposition.
 
-**Observation only:** `use: OBSERVATION_ONLY`, `causalClaim: NONE`,
-`acrossComparisons: NOT_COMBINED`, `residual: NOT_COMPUTED`,
-`findingEffect: { suppression: NONE, confidence: NONE }`,
-`comparisonCoverage: AT_LEAST_UNCERTIFIED`. `observationSentence` words only
-a proven direction ("Rupture damage events per minute were lower in S than in
-C1."), `null` when UNDECIDED; it names no cause or action.
+**Linkage only:** `decisionEvidenceSide: SUBJECT_ONLY`, `use: LINKAGE_ONLY`,
+`causalClaim: NONE`, `magnitudeAttribution: NONE`, `verdictFlow: NONE`,
+`findingEffect: { suppression: NONE, confidence: NONE }`; no confidence field
+exists. Comparisons decide only whether a direction is proven. Records in no
+component are listed, never dropped.
 
 ## Real evidence (pinned in the test)
 
-- Raid-entry totals 45,802,009 (the M11-G4-4 reconciled figure) vs
-  59,295,730 / 58,873,321 / 62,896,995: EXACT, all SUBJECT_LOWER. Risen Ghoul
-  table amount SUBJECT_HIGHER vs all three.
-- Per-ability table deltas all UNKNOWN (subject has no per-actor table).
-- Event totals 3,761 vs ≥4,268 / ≥4,700 / ≥4,240 -> NO_MORE_THAN. Boss-subtype
-  vs COHORT261: NO_MORE_THAN −98 events but a positive per-minute bound ->
-  UNDECIDED.
-- Every raw delta UNKNOWN. DRW#1 window: every comparison ANCHOR_NOT_EXACT.
+The subject's real Blood observed decisions (307: 45 REJECTED, 38 MATCH, 224
+UNKNOWN), restated as records in the TEST, not in `src/`:
+
+- Exactly 13 LINKED pairs: whole-fight event-count rows for Death Strike,
+  Blood Boil, Marrowrend, Vampiric Strike vs all three comparisons, and
+  first-30 s Death Strike vs COHORT246; all bounds.
+- Death Strike's link rests on 24 MATCHes: a link is not a fault.
+- 45 Heart Strike REJECTED link nothing: that row's direction is UNDECIDED.
+- Death's Caress: only UNKNOWN in scope -> `DECISION_EVIDENCE_UNRESOLVED`.
+- No total, table or raw-amount row links.
+- Subject evidence per component is identical with one comparison or three.
 
 ## Tests
 
-- New `tests/unit/m14d-damage-delta.test.ts` (28): real pins and
-  determinism; synthetic EXACT deltas and wording; raw delta UNKNOWN even
-  both EXACT; absent component EXACT 0 under COMPLETE vs UNKNOWN uncertified;
-  integer EQUAL over different durations; target-class merge across enemy
-  list states; pet kinds by game id across actor ids; NOT_LISTED_IN_TABLE,
-  NO_RAID_ENTRY, LOG_VERSION_DIFFERS; window outside the fight; refusals;
-  no causal vocabulary in any sentence.
+- New `tests/unit/m14e-causal-linkage.test.ts` (24): real pins, comparison
+  independence, determinism and input immutability; synthetic link
+  requirements, EQUAL/UNDECIDED, UNKNOWN vs NO_AUTHORITY_AVAILABLE kept
+  distinct, facts-only limit, scope per dimension, half-open windows, unmatched
+  records listed, every refusal.
 - `tests/contracts/m11g2-comparison-facts-layering.test.ts` module list
   updated.
-- Focused: M14-D, G2 layering; `tsc --noEmit`; prettier; plus the full
-  suite.
+- Focused: M14-E, G2 layering; `tsc --noEmit`; prettier; plus the full suite.
 
 ## Docs
 
-`agent/architecture.md` "M14-D"; `agent/follow-ups.md` "After M14-D" (no
-amount delta below the whole fight, raw never subtracts, counts are bounds,
-an event is not damage, same log version only, no cause); `agent/testing.md`
-row block; queue bookkeeping.
+`agent/architecture.md` "M14-E"; `agent/follow-ups.md` "After M14-E" (a link
+is not a cause; no production adapter yet, M14-F; exact ability identity;
+undecided deltas link nothing; no factual record producer yet);
+`agent/testing.md` row block; queue bookkeeping.
