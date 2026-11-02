@@ -10882,6 +10882,67 @@ says what comparison players did, never what was right.
   is a bound.
 - No ENCOUNTER_STATE row exists: no fight holds phase evidence (After M14-A).
 
+## M14-C — Strategy-context representation (post-hoc)
+
+Milestone 14 (autopilot queue entry M14-C). Public contract: NONE. No
+Warcraft Logs request: the M14-A/M14-B results over the committed archive
+fights, and synthetic phased fights.
+
+**Question.** "What encounter strategy do the comparison fights have in
+common, and does any of it name an environmental reason in the subject's
+fight?" `src/comparison-facts/strategy-context.ts` lives in the M11-G2
+post-hoc domain, under the same layering guard. Like `factsAtAlignedMoment`,
+`strategyContext(input, definition, thresholds)` recomputes the alignment and
+consensus from its inputs and never accepts them from the caller.
+
+**Items.** One per consensus row, whatever the outcome, so "nothing in
+common was shown" never reads as "no row":
+
+| Landmark | Item kind | Nature |
+| --- | --- | --- |
+| `PHASE_START:<id>` | `PHASE_BEHAVIOR` | ENCOUNTER_STATE |
+| `INTERMISSION_START#k` | `COMMON_DOWNTIME` | ENCOUNTER_STATE |
+| `FIRST_FOCUS_DAMAGE_EVENT_ON_NPC:<gameId>` | `TARGET_TRANSITION` | FOCUS_BEHAVIOR |
+| `COOLDOWN_WINDOW_START:<kind>#k` | `COOLDOWN_TIMING` | FOCUS_BEHAVIOR |
+
+`PULL` and `RECORDED_FIGHT_END` are not strategy items. A cooldown item is
+shared window timing. A HOLD (available but withheld) needs availability,
+which no landmark carries, so no item claims one.
+
+**Named environmental reason.** All three are required:
+
+1. an ENCOUNTER_STATE row (focus behavior is what comparison players did,
+   never what the encounter did);
+2. a CONSENSUS outcome;
+3. the subject's own anchor EXACT and inside the agreeing range widened by
+   the threshold tolerance.
+
+Warcraft Logs is authoritative for the subject's fight. Comparisons only
+corroborate; they never supply a missing subject fact. `INTERMISSION_START#k`
+names `INTERMISSION` over the subject's own k-th intermission interval;
+`PHASE_START:<id>` names `PHASE_TRANSITION` at the subject's transition
+instant, with no invented duration. Otherwise the item carries `NONE` with a
+cause: `FOCUS_BEHAVIOR_NAMES_NO_REASON`, `NO_COMPARISON_CONSENSUS`,
+`SUBJECT_ANCHOR_NOT_EXACT`, `SUBJECT_OUTSIDE_CONSENSUS_RANGE`.
+`TARGET_UNAVAILABLE` and `FORCED_DOWNTIME` are in the vocabulary but have no
+evidence source (targetability is unverified and carries no events), so they
+are never named.
+
+**Context, never authority.** Every representation carries
+`use: CONTEXT_ONLY`, `rotationalAuthority: NONE` and
+`findingEffect: { suppression: NONE, confidence: NONE }`. Items have no
+direction: a subject outside the consensus is a fact, not a fault.
+`attachStrategyContext(context, moments)` takes only a finding id and its
+report time, and returns the named reasons whose subject window contains it.
+It changes nothing about the finding. Using a named reason to suppress is the
+reviewed projection's job (M14-F). Each fight's `phaseEvidence` is carried,
+so a missing downtime item cannot read as "no downtime".
+
+**Real evidence:** 22 items (3 target transitions, 19 Dancing Rune Weapon
+ordinals), all INSUFFICIENT and `FOCUS_BEHAVIOR_NAMES_NO_REASON`. No phase or
+downtime item; every fight's phase evidence is UNKNOWN
+(`CAPABILITY_UNVERIFIED`). No named reason exists on real evidence.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

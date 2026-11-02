@@ -68,6 +68,8 @@ describe("W: post-hoc G2 modules cannot feed authority", () => {
       "src/comparison-facts/evidence-basis.ts",
       "src/comparison-facts/fight-facts.ts",
       "src/comparison-facts/four-fight-report.ts",
+      // M14-C: strategy context, under the same post-hoc rules.
+      "src/comparison-facts/strategy-context.ts",
       "src/comparison-facts/sub-actor-tree.ts",
       "src/comparison-facts/target-classification.ts",
       // M14-A: timing alignment, under the same post-hoc rules.

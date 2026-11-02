@@ -1644,6 +1644,15 @@ multi-log consensus (M14-B, tests/unit/m14b-consensus.test.ts, same G2 layering 
   thresholds                                   -> named CANDIDATE set; malformed set REFUSED; another set changes the outcome
   every evaluation                             -> CONTEXT_ONLY, findingEffect suppression NONE, confidence NONE
   vote order                                   -> same outcome
+strategy context (M14-C, tests/unit/m14c-strategy-context.test.ts, same G2 layering guard):
+  encounter-state CONSENSUS + subject EXACT    -> INTERMISSION over the subject's own interval / PHASE_TRANSITION at its instant
+  subject phase evidence not held / flag null  -> NONE SUBJECT_ANCHOR_NOT_EXACT; comparisons never supply the subject fact
+  subject outside agreeing range +- tolerance  -> NONE SUBJECT_OUTSIDE_CONSENSUS_RANGE; no direction field
+  SPLIT / INSUFFICIENT                         -> item kept, NONE NO_COMPARISON_CONSENSUS
+  target transition / cooldown window          -> NONE FOCUS_BEHAVIOR_NAMES_NO_REASON, even under CONSENSUS
+  TARGET_UNAVAILABLE / FORCED_DOWNTIME         -> never named (no evidence source)
+  real fights                                  -> 22 focus-behavior items, no reason; phase evidence UNKNOWN per fight
+  attachment                                   -> reasons in effect at the moment; CONTEXT_ONLY, no suppression, no confidence
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)
