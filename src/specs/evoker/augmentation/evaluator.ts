@@ -49,7 +49,11 @@ import {
   statedSpecializationOf,
   type StatedSpecialization,
 } from "../../../engine/normalization/friendly-specializations.js";
-import { gateAbsenceClaim, type UnknownReason } from "../../../engine/state/state-result.js";
+import {
+  gateAbsenceClaim,
+  gateCertifiedAbsenceClaim,
+  type UnknownReason,
+} from "../../../engine/state/state-result.js";
 import {
   AUGMENTATION_SUPPORT_ABILITY_KEYS,
   pinnedAugmentationSupportAbilities,
@@ -200,7 +204,8 @@ export interface SupportTimingObservation {
   readonly casts: readonly SupportCast[];
   /**
    * COMPLETE: every support-ability cast by the Evoker in the fight is listed.
-   * Needs the Evoker's CASTS coverage over the fight, no completed cast of the
+   * Needs the Evoker's CASTS coverage over the fight (or, M13-D, certified
+   * coverage of its completed casts of every support cast id), no completed cast of the
    * Evoker without an ability id, and no completed support-ability (or
    * ability-less) cast whose source is not stated: any of those could be an
    * unlisted support cast.
@@ -393,11 +398,13 @@ export function evaluateAugmentationEvoker(input: AugmentationEvokerInput): Augm
       locator: event.locator,
     });
   }
-  const castGate = gateAbsenceClaim({
+  const castGate = gateCertifiedAbsenceClaim({
     completeness: fight.completeness,
     category: "CASTS",
     range: fightRange,
     actorId: subject,
+    // M13-D: certified coverage must prove EVERY support cast id, a never-cast one included.
+    predicate: { kind: "COMPLETED_CASTS", sourceActorId: subject, abilityGameIds: [...castKeys.keys()] },
   });
   const listing: SupportTimingObservation["listing"] = !castGate.ok
     ? { state: "UNKNOWN", reason: castGate.reason, unidentifiedCasts, unattributedCasts }

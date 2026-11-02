@@ -160,6 +160,15 @@ const M13A_EVIDENCE: Readonly<Record<string, number>> = {
   "wcl-m13a-fight-context-aug1-fight-1": 86164,
 };
 const M13A_BYTES = Object.values(M13A_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+/**
+ * M13-D: the certification tables of the existing M13-A fight (owner grant
+ * 2026-11-02): one sanitized composed table response. Ordinary archive growth
+ * (62,316 bytes), named and pinned like M13-A.
+ */
+const M13D_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-m13d-certification-tables-aug1-fight-1": 62316,
+};
+const M13D_BYTES = Object.values(M13D_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 const ARCHIVE_SEGMENT_PATH = `artifacts/wcl-events/${ARCHIVE_SEGMENT}.json`;
 const CORPUS_OPENER = "wcl-brewmaster-monk-gtkb-opener";
 const CORPUS_20_165 = "wcl-brewmaster-monk-gtkb-rotational-165s.seg-20-165";
@@ -232,6 +241,8 @@ describe("the committed evidence archive", () => {
       ...Object.keys(M11G4_EVIDENCE),
       // M13-A: the Augmentation Evoker capture's segments and fight context.
       ...Object.keys(M13A_EVIDENCE),
+      // M13-D: the certification tables of the M13-A fight.
+      ...Object.keys(M13D_EVIDENCE),
     ]);
     // M12-B added one normalization census per raid damage segment, M12-D one per cast
     // segment, M13-A one per merged support segment.
@@ -247,7 +258,8 @@ describe("the committed evidence archive", () => {
         M11G4_BYTES +
         M12B_BYTES +
         M12D_BYTES +
-        M13A_BYTES,
+        M13A_BYTES +
+        M13D_BYTES,
     );
     for (const [artifactId, bytes] of Object.entries({
       ...M11E2_NOTICE_LINE_EXCEPTION,
@@ -257,6 +269,7 @@ describe("the committed evidence archive", () => {
       ...M12B_EVIDENCE,
       ...M12D_EVIDENCE,
       ...M13A_EVIDENCE,
+      ...M13D_EVIDENCE,
     })) {
       const entry = loaded.archive.artifacts.find((candidate) => candidate.record.artifactId === artifactId);
       expect(entry?.canonicalByteLength, artifactId).toBe(bytes);
@@ -288,17 +301,19 @@ describe("the committed evidence archive", () => {
     // 206 bytes of ordinary evidence: 17,064,006. M12-B adds 974,973 bytes of
     // ordinary raid damage evidence: 18,038,979. M12-D adds 119,216 bytes of
     // ordinary Restoration Shaman cast evidence: 18,158,195. M13-A adds 504,031
-    // bytes of ordinary Augmentation Evoker evidence: 18,662,226.
+    // bytes of ordinary Augmentation Evoker evidence: 18,662,226. M13-D adds
+    // 62,316 bytes of ordinary certification tables: 18,724,542.
     expect(M11G1_BYTES).toBe(364631);
     expect(M11G2_BYTES).toBe(12162150);
     expect(M11G4_BYTES).toBe(206);
     expect(M12B_BYTES).toBe(974973);
     expect(M12D_BYTES).toBe(119216);
     expect(M13A_BYTES).toBe(504031);
+    expect(M13D_BYTES).toBe(62316);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
-      4537019 + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES + M12B_BYTES + M12D_BYTES + M13A_BYTES,
+      4537019 + M11G1_BYTES + M11G2_BYTES + M11G4_BYTES + M12B_BYTES + M12D_BYTES + M13A_BYTES + M13D_BYTES,
     );
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(18662226);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(18724542);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

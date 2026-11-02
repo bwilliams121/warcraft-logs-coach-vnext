@@ -19,7 +19,8 @@
  *   identity per recipient, from reviewed runtime data. A recipient without
  *   one is NO_COOLDOWN_IDENTITY, never an empty overlap.
  * - Never "no cooldown overlapped". An empty overlap list is complete only
- *   when the recipient's CASTS coverage over the span is COMPLETE.
+ *   when the recipient's CASTS coverage over the span is COMPLETE, or (M13-D)
+ *   certified coverage proves its completed casts of every listed cooldown.
  * - Never a verdict on timing or recipient choice.
  * - Never an exact support total. Complete transition coverage does not
  *   resolve INITIAL state: a buff applied before the range (a pre-pull
@@ -35,7 +36,7 @@ import type { EvidenceLocator } from "../engine/evidence/locator.js";
 import type { CombatFight } from "../engine/normalization/combat-fight.js";
 import type { ActorRef } from "../engine/normalization/normalized-events.js";
 import { observedDeathsOf } from "../engine/state/death-state.js";
-import { gateAbsenceClaim, type UnknownReason } from "../engine/state/state-result.js";
+import { gateCertifiedAbsenceClaim, type UnknownReason } from "../engine/state/state-result.js";
 
 import type { SupportAuraWindow, SupportAuraWindows } from "./support-aura-windows.js";
 
@@ -209,11 +210,13 @@ export function recipientCooldownOverlap(
       atSpanBound: atBound(span, event.reportTimeMs),
     });
   }
-  const gate = gateAbsenceClaim({
+  const gate = gateCertifiedAbsenceClaim({
     completeness: fight.completeness,
     category: "CASTS",
     range: span,
     actorId: window.recipient.actorId,
+    // M13-D: certified coverage of exactly these cooldowns' completed casts may prove it.
+    predicate: { kind: "COMPLETED_CASTS", sourceActorId: window.recipient.actorId, abilityGameIds: ids },
   });
   return {
     state: "LISTED",

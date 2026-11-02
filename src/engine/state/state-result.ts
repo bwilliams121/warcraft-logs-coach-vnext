@@ -30,6 +30,11 @@
  */
 
 import type { EvidenceCategory } from "../../wcl/evidence-capability.js";
+import {
+  CATEGORY_OF_PREDICATE,
+  certifiedCoverageCovers,
+  type ClaimPredicate,
+} from "../evidence/certified-coverage.js";
 import { classifyCoverage, intersectRangeLists, type TimeRangeMs } from "../evidence/coverage.js";
 import type { EvidenceLocator } from "../evidence/locator.js";
 import type { FightCompleteness } from "../normalization/completeness.js";
@@ -372,6 +377,45 @@ function gateClaim(input: Omit<AbsenceGateInput, "actorId">, actors: AbsenceClai
 export function gateAbsenceClaim(input: AbsenceGateInput): AbsenceGate {
   const { actorId, ...rest } = input;
   return gateClaim(rest, actorId === null ? { kind: "NOT_ACTOR_SPECIFIC" } : { kind: "ONE_ACTOR", actorId });
+}
+
+/**
+ * An absence claim that states its PREDICATE (M13-D): the category gate
+ * first, unchanged; when it refuses, the fight's certified predicate coverage
+ * (`certified-coverage.ts`) may still prove exactly this predicate over the
+ * whole range. Otherwise the category gate's reason stands. A predicate of the
+ * other category is a caller error and never passes.
+ *
+ * Certification fills a COVERAGE gap only. It never overrides capability or
+ * declared scope: when the category gate refuses for any reason but
+ * INSUFFICIENT_COVERAGE, that reason stands. And every actor the predicate is
+ * about must be inside the category's declared actor scope. A listing over
+ * every friendly target needs the actor-global (`null`) scope only FULL_RAID
+ * declares, so a PLAYER_CONTEXT fight never learns ally completeness from a
+ * table, however exact.
+ */
+export function gateCertifiedAbsenceClaim(
+  input: AbsenceGateInput & { readonly predicate: ClaimPredicate },
+): AbsenceGate {
+  const { predicate, ...claim } = input;
+  const general = gateAbsenceClaim(claim);
+  if (general.ok) return general;
+  if (CATEGORY_OF_PREDICATE[predicate.kind] !== claim.category) return general;
+  if (general.reason !== "INSUFFICIENT_COVERAGE") return general;
+  const evidence = claim.completeness.categories[claim.category];
+  const scope = evidence.capability === "OBSERVABLE" ? evidence.coverage.actorScope : [];
+  const subjects =
+    predicate.kind === "COMPLETED_CASTS"
+      ? [predicate.sourceActorId]
+      : predicate.targets.kind === "ONE_TARGET"
+        ? [predicate.targets.actorId]
+        : null;
+  const inScope =
+    scope === null || (subjects !== null && subjects.every((actorId) => scope.includes(actorId)));
+  if (!inScope) return { ok: false, reason: "INSUFFICIENT_SCOPE" };
+  return certifiedCoverageCovers(claim.completeness.certifiedCoverage ?? [], predicate, claim.range)
+    ? { ok: true }
+    : general;
 }
 
 /**

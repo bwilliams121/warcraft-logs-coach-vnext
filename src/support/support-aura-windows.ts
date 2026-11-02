@@ -38,8 +38,9 @@
  * Between them it is proven continuously active only when continuity is
  * ESTABLISHED: the engine's continuity gate (`gateContinuityClaim`) holds —
  * retrieval order is a timeline (monotonic time) and the supporter's AURAS
- * coverage over the whole observed span is COMPLETE, so no transition of this
- * track can be missing — no transition inside it is a stack removal that does
+ * coverage over the whole observed span is COMPLETE — or (M13-D) certified
+ * coverage proves this recipient's track of the ability — so no transition of
+ * this track can be missing — no transition inside it is a stack removal that does
  * not prove the aura survived (a resulting count of zero, or none stated:
  * `src/engine/auras/aura-state.ts` fails those closed too), and no
  * same-ability transition with an unstated source lies inside it (so none can
@@ -51,7 +52,11 @@
  *
  * - No "the buff was down". An empty or short list is complete only when the
  *   supporter's AURAS coverage over the asked range is COMPLETE (the shared
- *   absence gate). Otherwise `listing` is OBSERVED_ONLY with the reason.
+ *   absence gate), or (M13-D) certified coverage proves every friendly
+ *   recipient's tracks of the asked abilities over it ? the listing is then
+ *   complete for FRIENDLY recipients, which is what both the capture and the
+ *   certifying table cover. Otherwise `listing` is OBSERVED_ONLY with the
+ *   reason.
  * - No recipient owner by inference. A pet's owner is WCL `petOwner` only; a
  *   pet without one is OWNER_NOT_STATED, never guessed.
  * - No other source's aura, and no guess about an ambiguous one. A buff
@@ -75,7 +80,7 @@ import type { CombatFight } from "../engine/normalization/combat-fight.js";
 import type { ActorRef, AuraEvent } from "../engine/normalization/normalized-events.js";
 import { createCombatState } from "../engine/state/combat-state.js";
 import { gateContinuityClaim } from "../engine/state/state-environment.js";
-import { gateAbsenceClaim, type UnknownReason } from "../engine/state/state-result.js";
+import { gateCertifiedAbsenceClaim, type UnknownReason } from "../engine/state/state-result.js";
 
 export const SUPPORT_AURA_WINDOWS_REVISION = "support-aura-windows/1" as const;
 
@@ -356,6 +361,12 @@ export function supportAuraWindowsOf(
       fromReportTimeMs: from,
       toReportTimeMs: to,
       actorId: query.supporterActorId,
+      // M13-D: certified coverage of exactly this recipient's track may prove it.
+      predicate: {
+        kind: "AURA_WINDOWS",
+        abilityGameIds: [window.abilityGameId],
+        targets: { kind: "ONE_TARGET", actorId: window.recipient.actorId },
+      },
     });
     const continuity: SupportAuraWindow["continuity"] = !gate.ok
       ? { state: "NOT_ESTABLISHED", reason: gate.reason }
@@ -387,11 +398,17 @@ export function supportAuraWindowsOf(
       left.abilityGameId - right.abilityGameId,
   );
 
-  const gate = gateAbsenceClaim({
+  const gate = gateCertifiedAbsenceClaim({
     completeness: fight.completeness,
     category: "AURAS",
     range,
     actorId: query.supporterActorId,
+    // M13-D: certified coverage of every friendly recipient's tracks may prove the listing.
+    predicate: {
+      kind: "AURA_WINDOWS",
+      abilityGameIds: query.auraAbilityGameIds,
+      targets: { kind: "EVERY_FRIENDLY_TARGET" },
+    },
   });
   return {
     revision: SUPPORT_AURA_WINDOWS_REVISION,
