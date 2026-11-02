@@ -605,11 +605,13 @@ moment, what did each fight show?".
 ### M14-B: Multi-log consensus
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M14-A
 branch: autopilot/m14-b
 wcl: NONE
 publicContract: NONE
+pr: 26
+mergeSha: f3c8b26e3dfe4119e3db346db391485a028a90ff
 ```
 
 **Direction.** CLAUDE.md "Comparison Consensus".
@@ -630,8 +632,9 @@ comparison facts.
 ### M14-C: Strategy-context representation
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M14-B
+branch: autopilot/m14-c
 wcl: NONE
 publicContract: NONE
 ```

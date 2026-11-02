@@ -29,6 +29,30 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M14-C: what strategy context does not establish
+
+**Raised:** M14-C (2026-11-02).
+
+- **No named reason on real evidence.** No committed fight holds phase
+  evidence (After M14-A), so the INTERMISSION / PHASE_TRANSITION path is
+  proven synthetically only. A verified phase capability on a phased
+  encounter, with certified comparison anchors, is needed first.
+- **TARGET_UNAVAILABLE and FORCED_DOWNTIME are never named.** Targetability
+  is unverified and the combat model carries no targetability events. "Done"
+  is a verified targetability capability and a reviewed landmark for it.
+- **No cooldown hold.** A COOLDOWN_TIMING item is shared window timing. A
+  hold needs the cooldown's availability, which is spec-owned and not in the
+  post-hoc domain.
+- **A phase transition is an instant.** PHASE_TRANSITION applies at the
+  subject's transition timestamp only. How long after a transition a finding
+  may still be affected is a projection decision (M14-F), never a guessed
+  duration here.
+- **Nothing consumes it yet.** Attachment returns context beside a finding
+  moment and suppresses nothing. The reviewed projection (M14-F) decides how
+  a named reason is used.
+
+---
+
 ## After M14-B: what multi-log consensus does not establish
 
 **Raised:** M14-B (2026-11-02).
@@ -53,7 +77,7 @@ current total (5,748,495 bytes), with what each row buys.
   SPLIT rarer (INSUFFICIENT instead), never CONSENSUS more likely.
 - **No named environmental reason.** Mapping an ENCOUNTER_STATE consensus to
   INTERMISSION or PHASE_TRANSITION, with the subject's own encounter
-  evidence, is M14-C.
+  evidence, is M14-C (done; see "After M14-C").
 
 ---
 
