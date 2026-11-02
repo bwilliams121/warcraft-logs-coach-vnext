@@ -4,133 +4,96 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M14-F: Reviewed diagnosis projection and public integration. Autopilot queue
-entry M14-F. Branch `autopilot/m14-f`, from main at ca2bf1a.
+M15-A: Finding aggregation and prioritization foundation. Autopilot queue
+entry M15-A. Branch `autopilot/m15-a`, from main at 58fe668.
 
-- **Direction** (queue entry; CLAUDE.md "Damage Output Diagnosis",
-  "Comparison Cannot Move Confidence", "Top Logs Cannot Suppress Findings
-  Merely by Similarity", "Reported Coverage", "Application Services";
-  architecture "M14-E"; follow-ups "After M14-E": the adapter from findings
-  to records "belongs with the M14-F projection, which may import both
-  sides"): combine authority-backed findings with linked causal evidence and
-  expose diagnosis through the shared application service, with structured
-  evidence, UNKNOWN preserved and coverage disclosed. A causal coaching
-  statement only where an authority-backed finding and its decision-level
-  link both exist; unlinked deltas labelled observations; comparison context
-  attached, never authority.
-- **Warcraft Logs requests: none.** Committed archive fights (the M11-G2
-  four-fight set) and synthetic fights. The comparison evidence port is a
-  test double over committed evidence.
-- Queue bookkeeping: M14-E (#29, ca2bf1a) recorded MERGED; M14-F PR_OPEN.
-  M12-C through M14-D were already recorded.
+- **Direction** (queue entry; architecture "Milestone 15"; CLAUDE.md "Timing
+  Tolerance", "Findings", "Reporting", "Comparison Cannot Move Confidence",
+  "UNKNOWN vs NO_AUTHORITY_AVAILABLE", "ACTIONABLE Requires Positive
+  Evidence"): aggregate repeated small findings into patterns and rank
+  structured findings by evidence quality and actionability. Ranking consumes
+  structured findings only; UNKNOWN, NO_AUTHORITY_AVAILABLE, SUPPRESSED and
+  unsupported results are carried and labelled, never ranked as failures,
+  never inflate confidence; thresholds configurable and documented.
+- **Public contract: none.** Nothing under `src/contracts/`, `src/api/` or
+  `src/mcp/` changes. Nothing in the service calls the new module (M15-B
+  wires it with the TLDR).
+- **Warcraft Logs requests: none.** Synthetic records, and the committed
+  M11-G2 subject fight through the application service with in-memory
+  preflight/ingest doubles.
+- Queue bookkeeping: M14-F (#30, 58fe668) recorded MERGED; M15-A PR_OPEN.
+  M12-C through M14-E were already recorded.
 
-## Public contract change (EXPECTED), precisely
+## What changed
 
-Under `warcraft-logs-coach.analysis/1` (unchanged), additive only:
+New `src/reporting/` (internal):
 
-1. **`AnalyzedResultSchema.diagnosis`: a new OPTIONAL field**, on ANALYZED
-   results only (non-analyzed statuses unchanged and strict, so they cannot
-   carry it). Discriminated on `assessment`:
-   - `NOT_ASSESSED { reason }`, reason one of
-     `COMPARISON_EVIDENCE_NOT_RETRIEVED`, `COMPARISON_RETRIEVAL_FAILED`,
-     `COMPARISON_EVIDENCE_NOT_FOR_THIS_FIGHT`, `COMPARISON_NOT_COMPARABLE`,
-     `DECISION_EVIDENCE_NOT_USABLE`.
-   - `ASSESSED { comparisonFights[{fightRef}], windowIds[], statements[],
-     observations[], coverage{deltaRows, pairs, statements, observations,
-     observationCauses tally, decisionEvidence{records, resolved, unknown,
-     inNoComponent}}, encounterStateEvidence[{fightRef, phaseEvidence
-     HELD|UNKNOWN}], strategyThresholds{id,status}, comparisonCoverage
-     "AT_LEAST_UNCERTIFIED", comparisonRole "CONTEXT_ONLY",
-     decisionEvidenceSide "SUBJECT_ONLY", magnitudeAttribution "NONE",
-     findingEffect{suppression "NONE", confidence "NONE"} }`.
-   - A statement: `statementKind "AUTHORITY_FINDING_LINKED_TO_DELTA"`, rowId,
-     windowId, measure, component (5 dimensions), comparisonFightRef,
-     perMinuteDelta (EXACT / NO_MORE_THAN / NO_LESS_THAN value, or UNKNOWN
-     reason), limits, `direction "SUBJECT_HIGHER"` (literal), `findings` (≥1
-     decision EvidenceLocator), environmentalContext[{itemId, reason}],
-     `magnitudeAttribution "NONE"`.
-   - An observation: the same pair fields, direction (4 values), cause (7).
-   - New public vocabularies: `PUBLIC_DIAGNOSIS_NOT_ASSESSED_REASONS`,
-     `_MEASURES`, `_DIMENSIONS`, `_TARGET_CLASSES`, `_DELTA_BOUND_KINDS`,
-     `_DELTA_UNKNOWN_REASONS`, `_DIRECTIONS`, `_LIMITS`,
-     `_OBSERVATION_CAUSES`, `_ENVIRONMENTAL_REASONS`; declared independently
-     and pinned by test to `src/diagnosis/vocabulary.ts` (itself pinned at
-     compile time to the post-hoc unions).
-2. **What a consumer sees today:** the deployed service supplies no
-   comparison evidence, so every ANALYZED document gains exactly
-   `"diagnosis": {"assessment":"NOT_ASSESSED","reason":"COMPARISON_EVIDENCE_NOT_RETRIEVED"}`.
-   Nothing else in any document changes. REST and MCP share the projection.
-3. **MCP tool description:** one new paragraph saying what diagnosis is and
-   is not (NOT_ASSESSED means nothing is claimed; a statement does not say
-   how much; an observation is not a cause; comparison is context). The MCP
-   `outputSchema` is the public schema, so it advertises the field.
-4. Raid-night contract: unchanged (no diagnosis there; follow-up).
+- `finding-record.ts`: the restated `ReportableFinding` record and its
+  vocabularies (dispositions, state evidence, actionability levels,
+  categories, suppression reasons). No confidence/severity/score/impact.
+- `aggregation-config.ts`: `finding-aggregation/1`; default pattern
+  threshold 3, per-category overrides, validated (integer ≥ 2, known
+  categories, known revision). An invalid config refuses the call.
+- `prioritization.ts`: `prioritizeFindings(records, config)` →
+  `prioritized` (proven divergences only, ranked), `informational`,
+  `carried`, `refused`, `summary`; `magnitude: NOT_USED`,
+  `findingEffect: {confidence, suppression, score: NONE}`.
+- `restatement.ts`: the two reviewed adapters (observed-decision view;
+  preparation consumable status).
 
-## What it adds
+Tests: `tests/unit/m15a-finding-prioritization.test.ts`,
+`tests/contracts/m15a-reporting-layering.test.ts`. Docs: architecture
+"M15-A", testing.md, follow-ups "After M15-A", queue.
 
-**`src/diagnosis/`** (new): `decision-evidence.ts` (the reviewed adapter:
-view decision → M14-E record; MATCH/REJECTED → RESOLVED, UNKNOWN → UNKNOWN,
-any other outcome word refuses; ABILITY/FOCUS scope on exactly the observed
-id), `diagnosis.ts` (port types, subject binding, `diagnose`), and
-`vocabulary.ts`.
+## Decisions for the reviewer
 
-**A statement needs all of:** the pair LINKED by M14-E; a REJECTED decision
-among the resolved evidence (MATCH-only → `NO_AUTHORITY_FINDING_IN_LINK`: a
-link is not a fault); and `SUBJECT_HIGHER` (a rejected observed X can bear
-only on X being higher → otherwise `FINDINGS_DO_NOT_MATCH_DIRECTION`). The
-M14-E causes carry over unchanged. No magnitude; every limit carried; M14-C
-named reasons attached as context only, never suppression.
+1. **Restated records, not producer types.** Ranking reads one shared
+   record; each producer has one reviewed adapter that maps its status words
+   and refuses an unreviewed word (the M14-F adapter pattern). Ranking never
+   branches on a producer's vocabulary or a specialization.
+2. **Only `AUTHORITY_DIVERGENCE` with PROVEN state and ≥ 1 locator is
+   ranked.** A divergence on INCOMPLETE state, or with no locator, is
+   refused, not trusted. Every non-assessment is carried with its reason
+   code; NO_AUTHORITY_AVAILABLE ⇔ authority `NO_AUTHORITY_AVAILABLE` is
+   enforced both ways, so UNKNOWN and NO_AUTHORITY_AVAILABLE cannot be
+   swapped.
+3. **Actionability is not overclaimed.** The view's `OBSERVED_EXECUTION`
+   maps to `OBSERVED_EXECUTION_ONLY` (the cast proves the observed ability
+   usable, never the authority's alternative), so no view record reaches
+   `ACTIONABLE_AUTHORITY_DIVERGENCE`. Only `DECISION_PROVEN_ACTIONABLE`
+   does, and no producer emits it yet (follow-up).
+4. **Ordering** is state evidence → actionability standing → occurrences →
+   category → first time → id. No magnitude, delta, comparison behavior or
+   confidence is a record field, so none can be read.
+5. **Aggregation never inflates.** The group key includes everything that
+   decides standing (producer, category, spec, disposition, authority,
+   reason, suppression reason, state evidence, actionability, the producer's
+   opaque key), so a pattern has exactly its members' standing; an UNKNOWN
+   never pools with a divergence. A pattern changes item count only.
+6. **No negative-actionability disposition.** `m5c1-gcd-semantics` forbids
+   that vocabulary anywhere in `src/` beyond the one assignment outcome; the
+   test is unchanged, and a proven restriction is carried as SUPPRESSED with
+   its named reason.
+7. **Suppression** needs one of CLAUDE.md's four named environmental
+   reasons; declared locally (pinned equal to M14-C's `EnvironmentalReason`
+   by a test) so `src/reporting/` does not become a second outside reader of
+   the post-hoc comparison-facts domain. The module itself suppresses
+   nothing.
+8. **Preparation**: all three kinds always; a zero under COMPLETE coverage
+   is `OBSERVED_FACT` (informational), UNKNOWN is carried, never a zero.
 
-**Service** (`analysis-service.ts`): optional `comparisonEvidence` port,
-called after `runAnalyzer` with the analyzed identity only; the outcome is
-spread into the `FightAnalysis` and passed nowhere else. The supplied subject
-must match report code, revision, fight id and bounds, player and spec (the
-post-hoc `fightRef` is a label, not identity). A throwing port is
-`COMPARISON_RETRIEVAL_FAILED`. Production composition wires none.
+## Real evidence
 
-**Layering:** M11-G2 guard admits `src/diagnosis/` as the post-hoc domain's
-only outside reader; new M14-F guard: diagnosis imports only the five
-post-hoc modules it combines, the locator type and the observed-decision
-view; only the service, `result.ts` and the public projection import it; no
-simc/specs/findings/analysis/engine/role module does; it is called after the
-analyzer; nothing outside the service names `comparisonEvidence`. M6-A
-projection-reach list gains `../diagnosis/diagnosis.js`; diagnosis joins the
-roots that may not import contracts.
+The subject's Blood analysis through `analyzeFight` (no WCL): 307 decisions
+and 3 consumable kinds restate with 0 refused; prioritized records equal the
+view's rejected count, carried equal its 224 UNKNOWN plus any UNKNOWN
+consumable; 0 actionable divergences; the leading item is the 45-occurrence
+(Heart Strike) rejection PATTERN.
 
-## Real evidence (pinned)
+## Validation
 
-The subject's real Blood analysis through `analyzeFight` with a test port
-over the archive: ASSESSED, WHOLE_FIGHT, three comparisons, **0 statements**.
-The 12 whole-fight M14-E links → `NO_AUTHORITY_FINDING_IN_LINK`; Heart Strike
-(45 REJECTED) → `DIRECTION_UNDECIDED` ×3; decision evidence 307 / 83 resolved
-/ 224 UNKNOWN / 0 outside. Decisions and coverage identical with and without
-diagnosis. Without a port: NOT_ASSESSED.
-
-## Tests
-
-- New `tests/unit/m14f-diagnosis-projection.test.ts` (23): real pins through
-  the service, port request contents, binding refusals (player, spec, fight
-  id, revision, report code, bounds), throwing/null port, synthetic statement
-  (findings = REJECTED only), lower-direction, MATCH-only, UNKNOWN-only,
-  other-ability, undecided bound, encounter mismatch, unreviewed outcome,
-  out-of-fight decision, determinism.
-- New `tests/contracts/m14f-diagnosis-contract.test.ts`,
-  `tests/contracts/m14f-diagnosis-layering.test.ts`.
-- Updated: equivalence helpers in the Blood/Retribution/Brewmaster public
-  projection tests and the M7-B core reproduction build the envelope as the
-  service now does (diagnosis NOT_ASSESSED on ANALYZED); M6-A and M11-G2
-  layering lists.
-- `tsc --noEmit`, prettier, focused tests, full suite. Full suite: every
-  failure but one was a 5 s timeout under load and passed when the failed
-  files were re-run serially. The remaining one,
-  `m8g-encounter-context-composition` "byte-identical across success,
-  empty, rejection and total failure", times out at 5 s alone, and does the
-  same on main's tree with this change stashed: machine load, not this
-  tranche.
-
-## Docs
-
-`agent/architecture.md` "M14-F"; `agent/follow-ups.md` "After M14-F" (no live
-comparison retrieval: owner decision; no statement on real evidence; one
-direction rule; whole fight only; named reasons never suppress; raid night
-has no diagnosis); `agent/testing.md` row block; queue bookkeeping.
+- `npx tsc --noEmit`: clean.
+- Focused: `m15a-finding-prioritization` (23), `m15a-reporting-layering`
+  (5), `m11g2-comparison-facts-layering` (21): pass.
+- Full `npx vitest run`: see the PR / CI.
+- `prettier --check` on changed files: clean.

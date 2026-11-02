@@ -29,6 +29,33 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M15-A: what finding prioritization does not establish
+
+**Raised:** M15-A (2026-11-02).
+
+- **No producer proves an authority alternative actionable.** The
+  observed-decision view proves only the observed cast
+  (`OBSERVED_EXECUTION_ONLY`), so on real evidence nothing reaches
+  `ACTIONABLE_AUTHORITY_DIVERGENCE`. That needs a reviewed per-decision
+  actionability source (encounter targetability with COMPLETE coverage, or a
+  spec-owned usability proof for the authority's selected action).
+- **The default pattern threshold (3) is not validated** against real logs
+  (CLAUDE.md "Timing Tolerance"). No per-category override is set.
+- **Two producers are restated.** The healer assignment results (M12-D),
+  Augmentation support observations (M13) and the diagnosis outcome (M14-F)
+  have no adapter yet; each needs its own reviewed mapping. The record has no
+  negative-actionability disposition (the m5c1 sweep forbids that
+  vocabulary), so `ASSIGNMENT_NOT_ACTIONABLE`'s restatement is undecided:
+  SUPPRESSED needs one of the four named environmental reasons, and
+  "encounter ended before the window" is not obviously one of them.
+- **The view adapter's aggregation key is shared-code-defined** (outcome +
+  observed token + reason). A specialization that needs a different notion of
+  "the same pattern" should own its key through its registration.
+- **Not wired.** Nothing calls `prioritizeFindings` in the service; M15-B
+  exposes it with the TLDR.
+
+---
+
 ## After M14-F: what the public diagnosis does not establish
 
 **Raised:** M14-F (2026-11-02).

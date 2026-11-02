@@ -1689,6 +1689,20 @@ diagnosis projection (M14-F, tests/unit/m14f-diagnosis-projection.test.ts, contr
   with or without diagnosis                    -> identical decisions and coverage; real: 0 statements, 307 records (224 UNKNOWN)
   public vocabularies                          -> declared independently, pinned to the projection's; no confidence/score/suppression field
   layering                                     -> only service, result type and projection import it; no analyzer or role module does
+finding prioritization (M15-A, tests/unit/m15a-finding-prioritization.test.ts, contracts/m15a-reporting-layering.test.ts):
+  UNKNOWN / NO_AUTHORITY / SUPPRESSED / UNSUPPORTED -> carried with reason; never ranked, never failures
+  UNKNOWN naming no authority / NAA naming one -> refused AUTHORITY_DISPOSITION_MISMATCH; the two never interchange
+  divergence on INCOMPLETE state / no locator  -> refused, never ranked
+  SUPPRESSED without a named reason (or "similar top logs") -> refused; a reason on a non-suppressed record refused
+  MATCH / observed fact (incl. zero potions)   -> informational, never a failure
+  divergences                                  -> by actionability standing first; a pattern never outranks stronger standing
+  aggregation                                  -> only identical standing pools; UNKNOWN never pools with a divergence; per-category threshold
+  invalid config (threshold < 2, non-integer, unknown category/revision) -> whole call refused, never applied
+  input order permuted                         -> identical output; every input placed exactly once
+  view adapter                                 -> OBSERVED_EXECUTION is OBSERVED_EXECUTION_ONLY, never actionable; unreviewed word refuses
+  real Blood fight                             -> 0 refused, 0 actionable, 224 UNKNOWN carried, leading item the 45-occurrence pattern
+  every result                                 -> magnitude NOT_USED; no confidence/severity/score/impact field
+  layering                                     -> reads restated inputs only; no comparison-facts, WCL or evaluator import; no importer yet
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)
