@@ -3713,6 +3713,34 @@ const captureQuery = z.union([
       surfaces: z.array(z.string().min(1)).min(1),
     })
     .strict(),
+  // M13-A: several server-filtered event streams of ONE fight window, each a
+  // family `dataType` and optionally a verbatim `filterExpression`, merged into
+  // one artifact by the recorded rule. Every stream is a server filter, so an
+  // artifact captured this way retains no coverage (loader rule
+  // FILTERED_CAPTURE_GRANTED), exactly like `actorFilter`.
+  z
+    .object({
+      kind: z.literal("FILTERED_EVENT_STREAMS"),
+      hostilityType: z.literal("Friendlies"),
+      includeResources: z.literal(false),
+      limit: recordedInt,
+      startTimeMs: recordedInt,
+      endTimeMs: recordedInt,
+      streams: z
+        .array(
+          z
+            .object({
+              dataType: z.enum(["Casts", "Buffs", "Deaths"]),
+              filterExpression: z.union([z.string().min(1), z.null()]),
+              pagesRetrieved: recordedInt,
+              eventsReturned: recordedInt,
+            })
+            .strict(),
+        )
+        .min(1),
+      merge: z.string().min(1),
+    })
+    .strict(),
 ]);
 
 /**

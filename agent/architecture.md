@@ -10494,6 +10494,128 @@ roster (`friendlyPlayers`) and master-data name, a pull-relative plan over
 actor 122's real casts gives MET, UNKNOWN and NOT_ACTIONABLE; without the
 roster, the same name is `PLAYER_NOT_RESOLVED`.
 
+## M13-A — Augmentation Foundation (internal)
+
+Milestone 13 (autopilot queue entry M13-A). Public contract: NONE.
+
+**Owner decision (2026-11-01)**, recorded in `agent/autopilot-queue.md`
+"M13-A": one bounded Warcraft Logs evidence campaign whose sole purpose is
+real committed evidence for M13's initial observable facts. Recipient
+quality stays NO_AUTHORITY_AVAILABLE; no target-quality coaching, recipient
+inference, parse optimization or comparison.
+
+**Shared support primitives (`src/support/`, facts only).** The role module
+of "Augmentation Architecture". It imports only the engine and the
+capability vocabulary, knows no spell id (the caller supplies them), never
+compares a class, and declares no judgement word
+(`tests/contracts/m13a-support-layering.test.ts`). Its one consumer is the
+Augmentation evaluator.
+
+- `support-aura-windows.ts`: one supporter's buff windows per (recipient
+  instance, ability), from that supporter's own transitions in retrieval
+  order. An application opens a window with an OBSERVED start; a refresh or
+  stack change proves it active; a removal closes it OBSERVED. A window first
+  seen as a refresh or removal starts NOT_OBSERVED; a re-application with no
+  removal ends the previous one NOT_OBSERVED; a window open at the end ends
+  NOT_OBSERVED. Nothing is extended to a nominal duration or the fight end.
+  `observedSpan` is earliest to latest observed transition; the aura is
+  proven active only AT those instants. Continuity between them is
+  ESTABLISHED only when the engine's `gateContinuityClaim` holds (monotonic
+  time, then the supporter's COMPLETE AURAS coverage over the whole observed
+  span; review cycle 6), no stack removal inside it leaves zero or an
+  unstated count (as `aura-state.ts` rules), and no AMBIGUOUS buff transition
+  that could touch the recipient lies inside it; only then
+  is `activeSpan` set, and only an active span is ever read as "on this
+  recipient throughout" (review cycle 1). Another source's aura is a
+  different aura. AMBIGUOUS transitions (review cycle 2) are those that might
+  be one of the supporter's tracks but cannot be attributed: the asked
+  ability with no stated source, the supporter's or an unstated source's
+  buff with no ability id, the supporter's asked ability with no stated
+  target (which could be any recipient's), or with no stated instance while
+  that actor's instances are elsewhere told apart (review cycle 4: either
+  side's unstated instance makes two references possibly the same). Any of them in range keeps the
+  listing OBSERVED_ONLY (`AMBIGUOUS_TRANSITIONS`). Recipient identity is the actor catalog
+  only: a pet's owner is WCL `petOwner`, else `OWNER_NOT_STATED`. The list
+  is COMPLETE only under the supporter's COMPLETE AURAS coverage
+  (`gateAbsenceClaim`), else OBSERVED_ONLY with the reason.
+- `recipient-facts.ts`:
+  - survival: the recipient instance's observed deaths inside the observed
+    span (a fact whatever the continuity), and its first observed death after
+    an OBSERVED end with the
+    distance. Never "alive" (M11-F). The real capture shows why the second
+    exists: Warcraft Logs removes the buff a few milliseconds BEFORE the
+    holder's death event (removal 298,966, death 299,003), so no death lies
+    inside a span. A fact, not a cause, and no threshold.
+  - cooldown overlap: the recipient INSTANCE's own completed casts of
+    CALLER-SUPPLIED ability ids inside the ACTIVE span; NO_COOLDOWN_IDENTITY
+    without an identity, never an empty list; CONTINUITY_NOT_ESTABLISHED
+    without an active span; COMPLETE only under the recipient's CASTS
+    coverage AND with no AMBIGUOUS cast in the span (`AMBIGUOUS_CASTS`): an
+    ability-less cast of that instance, or a listed-id or ability-less cast
+    whose source is unstated or whose instance cannot be told apart. Any of
+    those could be a listed cooldown of this recipient.
+  - proven support time: the union of active spans, overall and per
+    recipient, and peak concurrent active windows (one span ending at the
+    millisecond another starts is NOT a proven overlap: the count takes ends
+    before starts). Never exact (review cycle 5): complete transition
+    coverage does not resolve INITIAL state, since a buff applied before the
+    range (a pre-pull Prescience) carries in with no transition, and no aura
+    event is never "inactive". So both are AT_LEAST, always with
+    `INITIAL_STATE_NOT_RESOLVED` among the caveats, and UNKNOWN (never "at
+    least 0") when nothing is proven. On the real, ungranted capture every window's
+    continuity is NOT_ESTABLISHED, so support time is UNKNOWN and no overlap
+    is claimed there.
+
+**Augmentation Evoker evaluator (`src/specs/evoker/augmentation/`,
+internal, unregistered).** Identity gate as M12-D (report and fight, class
+Evoker, spec Augmentation, catalog Player/Evoker, else IDENTITY_REFUSED);
+unusable runtime data is RUNTIME_DATA_UNAVAILABLE.
+
+- SUPPORT_TARGETING: NO_AUTHORITY_AVAILABLE
+  (`NO_APPROVED_RECIPIENT_QUALITY_MODEL`). `supportTargetingStatus` holds
+  the rule that keeps the two failure states apart: with a declared model
+  whose required ally category is not covered for a recipient over its
+  span, UNKNOWN naming that recipient, category and reason. No v1 caller
+  declares a model.
+- SUPPORT_TIMING: NO_AUTHORITY_AVAILABLE
+  (`NO_APPROVED_SUPPORT_TIMING_STANDARD`), with the facts
+  (`WCL_OBSERVED_FACT`): every Ebon Might, Prescience and Breath of Eons cast
+  by the Evoker, COMPLETE only under its CASTS coverage, with no
+  ability-less Evoker cast and no source-less cast that could be a support
+  cast (`UNATTRIBUTED_CAST`).
+- Observations: Ebon Might and Prescience windows on allies (the Evoker's
+  own copy of an ally aura id is excluded), each with survival and cooldown
+  overlap, and proven support time; the Evoker's own Ebon Might windows.
+  Nothing is a finding, so actionability is not evaluated.
+- Required inputs: FULL_RAID; ACTORS, CASTS, AURAS, DEATHS. Recipient
+  cooldown identity is a caller input: no reviewed cross-specialization
+  cooldown registry exists, and a spec evaluator may not import another
+  spec's data.
+
+**Runtime data (`src/data/game/evoker-augmentation-support-abilities.*`).**
+Pinned SimulationCraft 33622e9d: each cast identity is the verbatim
+`trait_data.inc` row (class 13, spec 1473: Ebon Might 395152, Prescience
+409311, Breath of Eons 403631), each aura identity the verbatim
+`sc_evoker.cpp` line binding it (Ebon Might ally 395152 and self 395296,
+Prescience 410089), and Breath of Eons' Scalecommander cast 442204 its own
+module line. The parser refuses a row or line that does not name the id it
+claims. No duration, pandemic, cooldown or charge is claimed.
+
+**Evidence (archive, server-filtered, no grants).** Subject chosen by a
+fixed neutral order recorded before any request: the ten most recent public
+reports of zone 53, best non-empty tier (Mythic kill, Heroic kill, Mythic
+wipe, ...), first eligible fight, lowest Augmentation actor id. It yielded a
+Mythic WIPE of encounter 3429 (no listed Mythic or Heroic kill had an
+Augmentation Evoker), actor 1, committed as `M13AAUGAAAAAAAAA` fight 1. Seven
+Warcraft Logs HTTP requests of the 50 allowed. Three full-fight streams,
+each one page: Casts (3,650), Buffs filtered to the fifteen pinned
+Ebon Might / Prescience / Breath of Eons spell ids (498), Deaths (19),
+hostilityType Friendlies, no resources. Every stream is server-filtered, so
+under the 2026-10-11 rule the slices grant nothing: the corpus contract
+gained the capture-query kind `FILTERED_EVENT_STREAMS`, and the loader's
+FILTERED_CAPTURE_GRANTED rule covers it. Everything read from this evidence
+is OBSERVED_ONLY. See `tests/evidence/m13a-augmentation-capture.md`.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

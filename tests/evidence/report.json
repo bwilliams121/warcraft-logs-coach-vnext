@@ -391,12 +391,33 @@
       "payloadKind": "WCL_GRAPHQL_DATA",
       "provenanceKind": "SANITIZED_CAPTURE",
       "sha256": "babc6e5a384f3cc80b4edde18da9bf0a814a83334d1f46aea92122572562fdf2"
+    },
+    {
+      "artifactId": "wcl-m13a-aug1-fight-1-support.seg-0-75",
+      "byteLength": 236664,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "fb1fb8f51bcc85e1e0165b755e0cf81b83e1229596b019b8f9d65f8ba576daf8"
+    },
+    {
+      "artifactId": "wcl-m13a-aug1-fight-1-support.seg-75-151",
+      "byteLength": 181203,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "2868821df4ae29ac8622316aa2f3f635d49d52462f31cf3a9a174b245903776d"
+    },
+    {
+      "artifactId": "wcl-m13a-fight-context-aug1-fight-1",
+      "byteLength": 86164,
+      "payloadKind": "WCL_GRAPHQL_DATA",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "74ed02fd1c05ce4cd948c7dd9eaeacab13c7155e243a86efadf180170056996c"
     }
   ],
   "byLayer": [
     {
-      "assertions": 27,
-      "cases": 9,
+      "assertions": 33,
+      "cases": 11,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
@@ -407,7 +428,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 27
+      "passed": 33
     },
     {
       "assertions": 9,
@@ -649,6 +670,54 @@
       "referencedArtifactIds": ["wcl-brewmaster-monk-rxaf-rotational-165s.seg-20-165"]
     },
     {
+      "artifactId": "wcl-m13a-aug1-fight-1-support.seg-0-75",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.m13a-aug1-fight-1-support-seg-0-75-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-m13a-aug1-fight-1-support.seg-0-75"]
+    },
+    {
+      "artifactId": "wcl-m13a-aug1-fight-1-support.seg-75-151",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.m13a-aug1-fight-1-support-seg-75-151-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-m13a-aug1-fight-1-support.seg-75-151"]
+    },
+    {
       "artifactId": "wcl-brewmaster-monk-gtkb-full-fight.seg-165-285",
       "assertions": [
         {
@@ -811,15 +880,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 18129185,
-    "artifacts": 56,
-    "assertions": 36,
-    "cases": 14,
+    "artifactBytes": 18633216,
+    "artifacts": 59,
+    "assertions": 42,
+    "cases": 16,
     "declared": 0,
-    "executable": 36,
+    "executable": 42,
     "failed": 0,
     "largestArtifactBytes": 499916,
     "notExecuted": 0,
-    "passed": 36
+    "passed": 42
   }
 }

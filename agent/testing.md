@@ -4157,6 +4157,47 @@ derived from the raw bytes independently.
   MCP return the identical document for the same plan, and both refuse an
   invalid one.
 
+**Augmentation Foundation (M13-A).** The negative cases:
+
+- `tests/unit/support/support-primitives.test.ts`: a missing removal is
+  never an expiry (end NOT_OBSERVED, no duration, no extension); a window
+  first seen as a refresh or removal starts NOT_OBSERVED; a re-application
+  without removal ends the previous window NOT_OBSERVED; another source's
+  aura is never this supporter's, and an unstated source is not read
+  through, and a coverage gap or an unattributed transition between two
+  observations leaves continuity NOT_ESTABLISHED (no active span, no support
+  time, no overlap); overlap matches the recipient instance, never another
+  instance of the same actor; an ambiguous transition (no source, no
+  ability id, or no target) keeps the listing OBSERVED_ONLY and breaks the
+  continuity it could touch; an ability-less recipient cast, or a
+  source-less cast of a listed id, keeps overlap OBSERVED_ONLY; touching
+  windows are never a proven overlap, in either event order; a stack removal
+  to zero, or retrieval order running backwards in time, leaves continuity
+  NOT_ESTABLISHED; an empty list is complete only under the supporter's COMPLETE
+  AURAS coverage (INSUFFICIENT_SCOPE for coverage of others); a pet's owner
+  is `petOwner` only; no death event is never "alive"; an unobserved end
+  anchors no "after"; overlap without an identity is NO_COOLDOWN_IDENTITY;
+  support time and concurrency are never exact, because coverage never
+  resolves a carried-in buff (a buff applied before a queried subrange, or
+  a carry-in recipient beside an observed window): AT_LEAST with
+  INITIAL_STATE_NOT_RESOLVED, or UNKNOWN, never "at least 0".
+- `tests/unit/specs/augmentation-evoker-evaluator.test.ts`: SUPPORT_TARGETING
+  is NO_AUTHORITY_AVAILABLE with no model (case A) and UNKNOWN with a
+  declared model whose ally state is missing (case B), never substituted;
+  SUPPORT_TIMING has no standard; no output names a wrong, missed or
+  incorrect anything; the Evoker's own Ebon Might is not support; the
+  support-cast list is UNKNOWN without CASTS coverage or with an
+  unidentified cast; wrong or contradictory identity stops evaluation;
+  tampered runtime data is refused. Real evidence: the 22 support casts, the
+  window starts and ends equal to the raw applications and removals, pet
+  ownership, recipient deaths (none inside a span; each next death equals
+  the raw one), and a supplied id's real overlap, all OBSERVED_ONLY.
+- `tests/unit/m13a-sanitize-augmentation.test.ts`: the stream merge order,
+  and that no real code, name, server or player gameID survives.
+- `tests/contracts/m13a-support-layering.test.ts`: `src/support/` imports
+  only the engine, holds no spell id, compares no class, declares no
+  judgement word, and has exactly one named consumer.
+
 ---
 
 # Healer Per-Cast Authority Negative Test

@@ -205,11 +205,13 @@ goes into generic `src/healing/`.
 ### M12-E: Raid cooldown assignment input
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M12-C
 branch: autopilot/m12-e
 wcl: NONE
 publicContract: EXPECTED
+pr: 21
+mergeSha: 83f09e19a85113b646641cd8412c462e9be1a210
 ```
 
 **Direction.** CLAUDE.md "Healer Cooldown Assignments" and
@@ -329,12 +331,118 @@ EXPLICIT USER-PROVIDED INPUT.**
 ### M13-A: Augmentation Foundation
 
 ```autopilot
-status: OWNER_DECISION_REQUIRED
+status: PR_OPEN
 dependsOn: none
-wcl: NONE
+branch: autopilot/m13-a
+wcl: OWNER-GRANT: agent/autopilot-queue.md M13-A owner decision (2026-11-01); M13-A only; one public raid fight containing an Augmentation Evoker, chosen as the first eligible candidate in a fixed neutral order (at most 10 candidate metadata/context checks); for that one fight only report/fight metadata, master data, fight context and friendly roster, and full-fight CASTS, AURAS (Ebon Might, Prescience, Breath of Eons), DEATHS, combatant/spec identity and pet/summon ownership where needed; no damage, healing, resource, ranking or comparison data; at most 50 Warcraft Logs requests in total
 publicContract: NONE
-ownerDecision: Authorize (or supply) a Warcraft Logs capture of a fight with an Augmentation Evoker: no committed evidence contains one, and gathering it is a new Warcraft Logs request.
 ```
+
+**OWNER DECISION (2026-11-01): one bounded Warcraft Logs evidence campaign
+for the Augmentation Foundation.**
+
+Its sole purpose is real committed evidence that proves M13's initial
+observable facts:
+
+- Augmentation actor and spec identity;
+- ally and raid roster state;
+- Ebon Might state and recipients;
+- Prescience state and recipients;
+- Breath of Eons timing;
+- recipient alive or dead state;
+- observable recipient cooldown overlap;
+- support-window timing and coverage.
+
+It does NOT authorize any of these, or any other expansion of M13 scope:
+
+- target-quality coaching;
+- recipient-quality inference;
+- parse optimization;
+- comparison shopping.
+
+1. **Subject selection.** It is neutral and deterministic. Choose a fixed
+   discovery ordering BEFORE looking, then take the FIRST candidate it
+   yields that meets all of these:
+   - public and accessible;
+   - a raid encounter;
+   - Mythic preferred, from the current raid content if readily available;
+   - a completed kill preferred where available;
+   - at least one Augmentation Evoker whose identity can be established;
+   - enough event access for the evidence requirements.
+
+   Never select on parse percentile, high or low performance, how well the
+   Augmentation player seems to have played, the conclusion the fight would
+   produce, or how any recipient choice looks. Do not outcome-shop.
+
+   A small, bounded candidate walk is allowed: at most 10 candidate
+   metadata or context checks. If no eligible subject is found within that
+   bound, stop with OWNER_DECISION_REQUIRED.
+2. **Data for the ONE selected fight.** Only what M13 foundation evidence
+   needs:
+   - report and fight metadata;
+   - master data and actor identity;
+   - fight context and the friendly roster;
+   - full-fight events establishing CASTS;
+   - aura applications, removals, refreshes and stacks as required for Ebon
+     Might and Prescience;
+   - Breath of Eons cast and aura timing;
+   - DEATHS and recipient survival;
+   - observable cooldown casts by friendly players;
+   - actor, pet ownership or summon identity only where required to avoid
+     misattribution;
+   - combatant and spec identity where needed.
+
+   The capture may cover the whole friendly roster, because M13 needs ally
+   state.
+
+   Do not retrieve damage, healing or resource data merely because it is
+   available. If one more event family is genuinely necessary to prove one
+   of the authorized facts above, add the smallest necessary family and
+   document why in the review packet.
+
+   No comparison, ranking or performance data after selection without
+   another owner decision.
+3. **Request bound.** A hard cap of 50 Warcraft Logs requests for the whole
+   campaign, counting candidate discovery and context checks as well as the
+   capture. Use fewer whenever possible.
+   - The request plan is bounded before execution.
+   - If the capture cannot finish within the cap, stop with
+     OWNER_DECISION_REQUIRED before exceeding it.
+   - No second subject is authorized.
+4. **Evidence handling.** The project's existing evidence and privacy rules
+   apply:
+   - full real evidence goes to the evidence archive;
+   - only the smallest deterministic regression fixtures are derived for
+     routine tests;
+   - the existing sanitization and pseudonymization policy applies;
+   - provenance must identify the report, fight, actor and spec, capture
+     scope, transformations and completeness;
+   - completeness claims are never weakened to shrink fixtures;
+   - no raw credentials or unrelated player-identifying information are
+     committed.
+5. **Authority semantics.** The capture establishes observable facts only.
+   - Augmentation v1 may reason about buff uptime and state, buff recipient
+     identity, recipient survival, observable recipient cooldown overlap,
+     support cooldown timing and coverage.
+   - It establishes NO authority for recipient quality. Until an approved,
+     machine-usable recipient-quality model exists, SUPPORT_TARGETING
+     quality is NO_AUTHORITY_AVAILABLE.
+   - If such an authority later exists but the required ally evidence is
+     missing, SUPPORT_TARGETING is UNKNOWN.
+   - A higher parse or a different recipient composition is never turned
+     into rotational truth.
+6. **Network scope.** This grant applies to M13-A only.
+   - It does not authorize additional Augmentation subjects, broader raid
+     corpus expansion, comparison-log acquisition, simulation-model work,
+     production deployment or unrelated Warcraft Logs research.
+   - If M13-A finds any of those necessary, stop with
+     OWNER_DECISION_REQUIRED.
+7. **Autopilot audit.** The existing supervisor audit still applies.
+   - Record every Warcraft Logs request made under this grant in the
+     tranche's review evidence.
+   - If, after the capture, the supervisor stops for owner confirmation of
+     detected Warcraft Logs activity, the audit record is preserved for the
+     owner to verify that every request stayed inside this grant.
 
 ### M11-G4-5-R: Register a 12.1.5 simulation model
 

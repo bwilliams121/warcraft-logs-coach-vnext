@@ -130,6 +130,23 @@ is two compact `--actor-slice` segments (119,216 bytes) of the same capture.
 - Ordinary archive growth, pinned in the same test. No new Warcraft Logs
   request was made.
 
+## Server-filtered event streams (M13-A)
+
+A source query may be `FILTERED_EVENT_STREAMS`: several event streams of one
+fight window, each a `dataType` family and optionally a verbatim
+`filterExpression`, merged into one artifact by a recorded rule. Every such
+stream is a server filter, so the artifact retains no coverage; the loader's
+`FILTERED_CAPTURE_GRANTED` rule refuses any grant, exactly as for
+`actorFilter`.
+
+**M13-A evidence.** `wcl-m13a-fight-context-aug1-fight-1` and the two
+`wcl-m13a-aug1-fight-1-support.seg-*` segments (504,031 bytes): the one
+owner-authorized Augmentation Evoker capture, pseudonym `M13AAUGAAAAAAAAA`.
+Casts, the three support auras and deaths over the whole fight, granting
+nothing. Ordinary archive growth, pinned in
+`tests/unit/m11c4e-evidence-archive.test.ts`. See
+`m13a-augmentation-capture.md`.
+
 ## Execution and promotion
 
 `npm run test:evidence` (`scripts/corpus/gate.mjs --root evidence`) runs four

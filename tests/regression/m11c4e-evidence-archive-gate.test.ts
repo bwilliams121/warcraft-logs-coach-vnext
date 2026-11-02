@@ -64,9 +64,11 @@ describe("the committed evidence archive executes clean under workerd", { timeou
     // segment (three cases, three assertions each).
     // M12-D: plus one normalization census per Restoration Shaman cast segment
     // (two cases, three assertions each).
-    expect(result.summary.cases).toBe(14);
-    expect(result.summary.assertions).toBe(36);
-    expect(result.summary.passed).toBe(36);
+    // M13-A: plus one normalization census per merged Augmentation support
+    // segment (two cases, three assertions each).
+    expect(result.summary.cases).toBe(16);
+    expect(result.summary.assertions).toBe(42);
+    expect(result.summary.passed).toBe(42);
   });
 
   it("is deterministic across runs", async () => {

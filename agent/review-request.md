@@ -4,128 +4,208 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M12-E: Raid cooldown assignment input. Autopilot queue entry M12-E. Branch
-`autopilot/m12-e`, from main at 8a6cff5.
+M13-A: Augmentation Foundation. Autopilot queue entry M13-A. Branch
+`autopilot/m13-a`, from main at 83f09e1.
 
-- **Owner decision (2026-10-31)**, recorded in `agent/autopilot-queue.md`
-  "M12-E" (13 points): the authoritative raid cooldown plan is an EXPLICIT
-  USER-PROVIDED INPUT; no plan means ASSIGNMENT is NO_AUTHORITY_AVAILABLE.
-  The decision text itself is part of this diff (the queue entry moves from
-  OWNER_DECISION_REQUIRED to PR_OPEN).
-- Warcraft Logs: none. Synthetic and note fixtures, plus the committed M12-D
-  evidence.
-- **Public contract: EXPECTED** (declared by the queue). Precisely:
-  1. **Request input (REST body and MCP tool argument):** a new optional
-     `raidCooldownPlan`, either
-     `{ format: "STRUCTURED", encounterId, difficulty, label?, defaultToleranceMs?, assignments: [{ player: { name, realm? }, abilityId, plannedTime: { kind: "PHASE_RELATIVE", phase: string, offsetMs } | { kind: "FIGHT_RELATIVE", offsetMs }, toleranceMs?, bossSpellId? }] }`
-     or `{ format: "TIMELINE_NOTE", encounterId, difficulty, label?, defaultToleranceMs, text }`.
-     An invalid plan is `INVALID_REQUEST` with existing issue codes
-     (`INVALID_REQUEST_SHAPE`, `REQUEST_LIMIT_EXCEEDED`). No new error code.
-  2. **MCP tool:** both `analyze_warcraft_log` input variants gain the
-     optional field (`src/contracts/raid-cooldown-plan-input-contract.ts`,
-     shape only); the description gains one paragraph saying a plan is never
-     inferred and its assignments are NOT_EVALUATED by this tool.
-  3. **Result (`analysis/1`, optional, additive):** `raidCooldownPlan`
-     (`RaidCooldownPlanDisclosureSchema`), present ONLY when a plan was
-     supplied, on every status. Fields: `authority`
-     (`USER_PROVIDED_RAID_PLAN`), `schema` (`raid-cooldown-plan/1`), `format`,
-     `label`, `digest` (SHA-256 hex of the normalized plan's canonical JSON),
-     `encounter`, `encounterBinding` (MATCHED / MISMATCHED / UNKNOWN),
-     `assignmentCount`, `importDiagnostics` (tally), `assignmentEvaluation:
-     { state: NOT_EVALUATED, reason: PLAN_NOT_FOR_THIS_FIGHT |
-     ENCOUNTER_BINDING_UNKNOWN | NO_PUBLIC_ASSIGNMENT_EVALUATOR }`.
-     A request without a plan produces a byte-identical document (no key);
-     the corpus and evidence gates' committed reports are unchanged.
-- Queue bookkeeping: M12-D recorded MERGED (PR #20, 8a6cff5); M12-E PR_OPEN.
-  M12-C and PREP-5 were already recorded MERGED.
+- **Owner decision (2026-11-01)**, recorded in `agent/autopilot-queue.md`
+  "M13-A": one bounded Warcraft Logs evidence campaign for real committed
+  evidence of M13's observable facts; recipient quality stays
+  NO_AUTHORITY_AVAILABLE; no target-quality coaching, recipient inference,
+  parse optimization or comparison. The decision text itself is part of
+  this diff (the entry moves from OWNER_DECISION_REQUIRED to PR_OPEN).
+- **Public contract: NONE.** Nothing under `src/contracts/`, `src/api/` or
+  `src/mcp/` changes. The evaluator is unregistered.
+- Queue bookkeeping: M12-E recorded MERGED (PR #21, 83f09e1); M12-C, PREP-5
+  and M12-D were already recorded MERGED; M13-A PR_OPEN.
+
+## Warcraft Logs requests (every one, under the M13-A grant)
+
+Plan recorded before the first request (`.probe/m13a/capture-plan.md`,
+gitignored). A fetch-level counter refused any 51st HTTP request. Run once,
+2026-11-02. **7 HTTP requests in total** (ledger: `.probe/m13a/ledger.json`;
+the real report code is in `.probe/m13a/summary.json`, both gitignored, for
+the owner's audit):
+
+| # | Request | Purpose | Outcome |
+| --- | --- | --- | --- |
+| 1 | OAuth client-credentials token (`/oauth/token`) | transport | OK |
+| 2 | `reportData.reports(zoneID: 53, limit: 10, page: 1)` with each report's encounter fights (id, encounterID, difficulty, kill, bounds, friendlyPlayers, friendlySpecs) | candidate discovery: 10 reports = the candidate checks | OK, 46 eligible fights, none a Mythic or Heroic kill |
+| 3 | production `FIGHT_CONTEXT_QUERY`, the selected fight, actorID = subject | report/fight metadata, master data, roster, identity gate | OK; gate passed on the first candidate |
+| 4 | events `dataType: Casts`, hostilityType Friendlies, whole fight, limit 10,000, no resources | CASTS | 1 page, 3,650 events, terminal |
+| 5 | events `dataType: Buffs`, Friendlies, `filterExpression: ability.id in (…15 ids)` | AURAS (Ebon Might, Prescience, Breath of Eons only) | 1 page, 498 events, terminal |
+| 6 | events `dataType: Deaths`, Friendlies | DEATHS | 1 page, 19 events, terminal |
+| 7 | `REPORT_REVISION_QUERY` | revision re-check | 10, unchanged |
+
+The fifteen ids are every spell named Ebon Might, Prescience or Breath of
+Eons in the pinned SimulationCraft `sc_spell_data.inc` (33622e9d). Not
+requested: damage, healing, absorbs, resources, rankings, comparison,
+combatantinfo, summons events (ownership is master-data `petOwner`), debuffs,
+any second fight or subject. No other network call was made except one
+GitHub raw download of the pinned SimulationCraft `sc_evoker.cpp`
+(33622e9d) for the aura-identity lines.
+
+**Selection rule (fixed before looking):** zone 53 (The Venomous Abyss,
+current, from the committed b1Pma context); report start time descending,
+then code; fights by id; tiers Mythic kill > Heroic kill > Mythic wipe >
+Heroic wipe > other; first eligible fight of the best non-empty tier; subject
+the lowest Augmentation actor id. Result: a Mythic WIPE of encounter 3429,
+fight 1, actor 1 (Player / Evoker / Augmentation). No parse, performance or
+recipient field was read for selection.
 
 ## What it adds
 
-**`src/raid-plan/` (shared input, no gameplay meaning, no spec branch):**
+**Evidence (archive, 504,031 bytes, no grants).**
+`scripts/corpus/sanitize-m13a-augmentation.mjs` (deterministic; refuses the
+real code, any player name or server, credential shapes): the context
+(code -> `M13AAUGAAAAAAAAA`, names -> `Actor<id>`, servers and player gameIDs
+null) and the three streams merged by timestamp (ties: Casts, Buffs, Deaths,
+then stream order) cut at +75 s into two segments. The corpus contract gains
+the capture-query kind `FILTERED_EVENT_STREAMS`
+(`tests/support/corpus/contract.ts`), and the loader's
+`FILTERED_CAPTURE_GRANTED` rule now covers it: every stream is a server
+filter, so under the 2026-10-11 owner rule nothing is granted. Composed, the
+bundle has CASTS/AURAS ABSENT and DEATHS UNVERIFIED: every real fact is
+OBSERVED_ONLY. Archive pins updated (16 cases / 42 assertions; 18,662,226
+bytes); report regenerated by the gate.
 
-- `raid-cooldown-plan.ts`: the normalized `RaidCooldownPlan` /
-  `RaidCooldownAssignment` (player name + optional realm, `abilityId`,
-  `plannedTime`, `toleranceMs` + `toleranceSource`, source line/index and raw
-  line, `context.bossSpellId`), import-diagnostic vocabulary, limits.
-- `timeline-note-import.ts`: the semicolon note importer. An assignment needs
-  `time`, `ph`, one named player in `tag`, and `spellid`; everything else is a
-  diagnostic (`everyone`/role/group tags, several names, reminders, text, no
-  `ph` — never assumed pull-relative). `countdown` is not tolerance;
-  `bossSpell` is context only; the caller's `defaultToleranceMs` is the only
-  tolerance. Seconds → ms without floating point.
-- `resolve.ts`: binding (encounter id AND Warcraft Logs difficulty id equal;
-  unreported difficulty → UNKNOWN; mismatch → NOT_BOUND, nothing resolved);
-  player (exactly one `friendlyActorsInScope` player, NFC + case-insensitive,
-  diacritics significant, realm exact; else ROSTER_NOT_IN_SCOPE /
-  ROSTER_NAMES_INCOMPLETE / NO_MATCH / AMBIGUOUS with candidates as
-  context); time (FIGHT_RELATIVE from the pull; PHASE_RELATIVE always
-  `PHASE_LABEL_NOT_MAPPED`: no reviewed label→phase map exists, a boundary is
-  never guessed).
-- `digest.ts`: local canonical JSON + WebCrypto SHA-256 (no analysis path may
-  import `src/simulation`).
+**Runtime data** `src/data/game/evoker-augmentation-support-abilities.*`:
+verbatim trait rows (class 13, spec 1473) for the casts and verbatim
+`sc_evoker.cpp` lines for the auras (Ebon Might ally 395152 / self 395296,
+Prescience 410089, Breath of Eons 403631 + Scalecommander 442204). The parser
+refuses a row or line that does not name its id. Identity only.
 
-**Application service:** `parseAnalysisRequest` parses the plan beside
-either identifier form (one parser for REST and MCP); preflight still gets
-identifiers only; `discloseRaidCooldownPlan` (binding from the preflight
-identity) is attached to every success result, including SPEC_NOT_SUPPORTED.
-No analyzer reads the plan.
+**`src/support/` (shared, facts only, no spell id, no class comparison):**
 
-**Restoration Shaman (still internal, unregistered):** consumes the normalized
-plan and resolves it itself. No plan → NO_AUTHORITY_AVAILABLE; plan for
-another encounter/difficulty → NO_AUTHORITY_AVAILABLE
-(`PLAN_NOT_FOR_THIS_FIGHT`); unbindable → UNKNOWN
-(`ENCOUNTER_BINDING_UNKNOWN`). Only this player's entries for its registered
-healing-cooldown ids are evaluated; its other entries are `notEvaluated`
-(`ABILITY_NOT_REGISTERED`, replacing M12-D's `ABILITY_NOT_IDENTIFIED`
-UNKNOWN). An unresolved name that may be this player (the subject is a
-name-matching candidate, or the name equals the preflight identity's name,
-whatever the resolver's reason — including a roster that names the subject
-nowhere) → `PLAYER_NOT_RESOLVED`, never counted as another player's;
-unresolved time → `PLANNED_TIME_UNRESOLVED`. Every result carries an
-`AssignmentReference` back to the plan entry. M12-D's MET / NOT_ACTIONABLE /
-UNKNOWN rules are unchanged; MISSED/EARLY/LATE remain unreachable.
+- `support-aura-windows.ts`: per (recipient instance, ability) windows from
+  the supporter's own transitions; OBSERVED / NOT_OBSERVED bounds (first
+  transition not an application; re-applied without removal; no removal);
+  never extended; `observedSpan` (active only at its observations) and
+  `activeSpan` (set only when continuity is ESTABLISHED: COMPLETE AURAS
+  coverage for the supporter over the span and no unattributed same-ability
+  transition inside); recipient identity from the catalog (`petOwner` or
+  OWNER_NOT_STATED); listing COMPLETE only under the supporter's AURAS
+  coverage.
+- `recipient-facts.ts`: survival (deaths inside the observed span; the next death
+  after an OBSERVED end with its distance — real logs remove the buff before
+  the death event; never "alive"), cooldown overlap (caller-supplied ids,
+  the recipient INSTANCE's casts, active span only; NO_COOLDOWN_IDENTITY or
+  CONTINUITY_NOT_ESTABLISHED otherwise; COMPLETE only under the recipient's
+  CASTS coverage), proven support time over active spans (AT_LEAST with
+  caveats, always including INITIAL_STATE_NOT_RESOLVED, or UNKNOWN; never
+  exact, never "at least 0") and peak concurrent active windows (a lower
+  bound).
+
+**Review cycle 1 (CHANGES_REQUIRED, both fixed).** (1) The stretch between
+two observed transitions was treated as proven active without continuity;
+now only an established `activeSpan` feeds support time, concurrency and
+overlap (new negatives: coverage gap, unattributed removal; on the real
+ungranted capture support time is UNKNOWN and overlap is
+CONTINUITY_NOT_ESTABLISHED). (2) Overlap matched the actor but not the
+instance; it now matches the recipient instance (regression: two instances
+of one pet).
+
+**Review cycle 2 (CHANGES_REQUIRED, both fixed).** (1) Ambiguous buff
+transitions — the asked ability with no source, the supporter's (or an
+unstated source's) buff with no ability id, the supporter's asked ability
+with no target — now keep the window listing OBSERVED_ONLY
+(`AMBIGUOUS_TRANSITIONS`) and break the continuity of any window they could
+touch (`AMBIGUOUS_TRANSITION_INSIDE`); regressions: source-less windows
+only (never COMPLETE, never exact zero), an ability-less removal inside a
+window, a target-less removal, and another actor's ability-less buff
+changing nothing. (2) A completed recipient-instance cast with no ability id
+inside the active span makes overlap OBSERVED_ONLY
+(`UNIDENTIFIED_RECIPIENT_CAST`, renamed in cycle 3), keeping the identified casts.
+
+**Review cycle 3 (CHANGES_REQUIRED, both fixed).** (1) A source-less cast
+(or an instance that cannot be told apart) of a listed id or of no id now
+keeps recipient overlap OBSERVED_ONLY (`AMBIGUOUS_CASTS`, with
+`unidentifiedCasts` and `unattributedCasts`), and a source-less support-id
+or ability-less cast keeps the Evoker's support-cast list UNKNOWN
+(`UNATTRIBUTED_CAST`); controls: another actor's cast and a source-less
+unrelated cast change nothing. (2) Peak concurrency no longer invents an
+order at an equal millisecond: ends are taken before starts for the proven
+count, and the count is EXACT only when the other order gives the same
+number; regressions for touching windows in both event orders, a genuine
+overlap and windows 1 ms apart.
+
+**Review cycle 4 (CHANGES_REQUIRED, fixed).** An unstated recipient
+instance could be any instance of its actor. A supporter transition with no
+instance, on an (actor, ability) whose other transitions state instances, is
+now ambiguous (`INSTANCE_NOT_STATED`) and forms no window; continuity treats
+two references as possibly the same when either instance is unstated, so
+such a transition (or a source-less one naming an instance) breaks every
+compatible window. Regressions in both directions check continuity, support
+time, concurrency and overlap stay conservative.
+
+**Review cycle 5 (CHANGES_REQUIRED, fixed).** Complete transition coverage
+never resolves initial state: a buff applied before the range carries in
+with no transition (a pre-pull Prescience), and no aura event is never
+"inactive". The EXACT support-time and concurrency variants are removed:
+support time is AT_LEAST with `INITIAL_STATE_NOT_RESOLVED` always among its
+caveats, or UNKNOWN; concurrency is AT_LEAST or UNKNOWN. Regressions: a buff
+applied before a queried subrange with no transition inside it (COMPLETE
+listing, still UNKNOWN), and a carry-in recipient beside a fully observed
+window; the old "COMPLETE empty listing is exact zero" test is replaced.
+
+**Review cycle 6 (CHANGES_REQUIRED, both fixed).** (1) A stack removal to
+zero or to an unstated count no longer proves the aura active: the window's
+continuity is NOT_ESTABLISHED (`UNPROVEN_STACK_REMOVAL_INSIDE`), as
+`aura-state.ts` already rules; control: a positive resulting count still
+does. (2) Continuity now goes through the engine's own
+`gateContinuityClaim` (via `createCombatState`), which requires monotonic
+time before coverage; regression: retrieval order running backwards in time
+leaves every window NOT_ESTABLISHED (`NON_MONOTONIC_TIME`), with no support
+time and no concurrency.
+
+**`src/specs/evoker/augmentation/` (internal, unregistered):** identity gate;
+SUPPORT_TARGETING NO_AUTHORITY_AVAILABLE, with `supportTargetingStatus`
+giving UNKNOWN for a declared model missing ally state (case B; no v1 caller
+declares one); SUPPORT_TIMING NO_AUTHORITY_AVAILABLE with the support casts
+as facts (COMPLETE only under CASTS coverage and no unidentified cast);
+ally-buff and self-buff observations. No finding, so no actionability.
 
 ## Fail-closed points worth checking
 
-- UNKNOWN vs NO_AUTHORITY_AVAILABLE: a plan for another fight is "no
-  standard for this fight" (NO_AUTHORITY); an unbindable plan is "a standard
-  without the evidence to apply it" (UNKNOWN).
-- No guessed phase boundary, difficulty name, realm spelling, alias or
-  tolerance; a phase is never numeric.
-- An invalid plan never degrades to "no plan".
-- A supplied plan can never read as "assignments met": the public disclosure
-  is always NOT_EVALUATED.
+- UNKNOWN vs NO_AUTHORITY_AVAILABLE for SUPPORT_TARGETING (no model vs a
+  model without ally state), never substituted; no "wrong target" anywhere.
+- A missing removal is never an expiry; no nominal duration anywhere.
+- Observed span is not active span: only an established activeSpan feeds
+  support time, concurrency and overlap.
+- Overlap matches the recipient instance, never just the actor.
+- No death event is never "alive"; the after-end death is a fact with a
+  distance, no threshold, no cause.
+- A filtered capture can never grant coverage (loader rule extended).
+- Pet ownership only from `petOwner`; actor 52 really has none.
+- `src/support/` has exactly one consumer and imports no specialization.
 
 ## Tests and validation
 
-New: `tests/unit/raid-plan/timeline-note-import.test.ts`,
-`tests/unit/raid-plan/resolve.test.ts`,
-`tests/unit/raid-cooldown-plan-request.test.ts`,
-`tests/contracts/m12e-raid-cooldown-plan-input.test.ts`,
-`tests/integration/m12e-raid-cooldown-plan-transports.test.ts`. Updated:
-`tests/unit/specs/restoration-shaman-evaluator.test.ts` (normalized plan,
-binding, resolution, real evidence under the committed roster),
-Review cycle 1 fix: the subject with a null roster name and a plan entry
-naming it (preflight name) is now `PLAYER_NOT_RESOLVED` with
-`assignmentsForOtherPlayers: 0` (regression added).
-`tests/contracts/m6a-mcp-layering.test.ts` (allowlists the input-contract
-module), `tests/unit/analysis-request.test.ts` (request keys now include
-`raidCooldownPlan: null`; still no scope).
+New: `tests/unit/support/support-primitives.test.ts`,
+`tests/unit/specs/augmentation-evoker-evaluator.test.ts` (synthetic + the
+real archive evidence, expectations derived from raw bytes),
+`tests/unit/m13a-sanitize-augmentation.test.ts`,
+`tests/contracts/m13a-support-layering.test.ts`. Updated guards, each naming
+the new module explicitly: `m10a`/`m11a2` cross-spec isolation (unregistered
+`evoker/augmentation` tree), `m11f` evidence layering (death-state importer
+`src/support/recipient-facts.ts`), `m9c` sanitizer revisions, `m11c4e`
+archive pins (unit and workerd gate).
 
 - `npm run typecheck`: clean. `npm run format:check`: clean.
-- `npm test`: 10,708 passed; 14 failed, all 5 s timeouts in pre-existing
-  slow tests (simulation runner service, Protection projections, corpus
-  harness). The same set fails identically on an origin/main worktree on
-  this machine under the same load; each touched M12-E test passes.
-- `npm run test:corpus`: PASSED (183 cases / 778 assertions, committed
-  report matches). `npm run test:evidence`: PASSED (14 / 36).
+- Every new and amended test passes. `npm test`: the only failures are 5 s
+  timeouts in pre-existing slow tests (simulation runner service,
+  Protection projections, raid-night/workers regressions, corpus harness);
+  each passes alone, and an origin/main worktree fails the same way under
+  the same machine load.
+- `npm run test:corpus`: PASSED. `npm run test:evidence`: PASSED (two
+  byte-identical workerd runs; committed report matches).
 
 ## Docs
 
-`agent/architecture.md` "M12-E"; `agent/follow-ups.md` "After M12-E" (phase
-label map, public assignment evaluation, difficulty names, realm spelling,
-note roster enrichment, multi-name tags, bossSpell anchors, persistence) and
-M12-D's "No plan input" bullet superseded; `agent/testing.md`;
-`src/specs/shaman/restoration/README.md`.
+`agent/architecture.md` "M13-A"; `agent/follow-ups.md` "After M13-A"
+(registration, no real coverage, no recipient cooldown identity or
+specialization, one wipe subject, Breath of Eons auras, recipient-quality
+model); `agent/testing.md`; `tests/evidence/README.md`;
+`tests/evidence/m13a-augmentation-capture.md`;
+`src/specs/evoker/augmentation/README.md`.
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)

@@ -1358,19 +1358,22 @@ export async function validateCorpus(
   for (const artifact of artifactsById.values()) {
     errors.push(...substitutionErrors(artifact, lineageById, eventsById));
   }
-  // A filtered capture retains no coverage (the documented `actorFilter` rule).
+  // A filtered capture retains no coverage (the documented `actorFilter` rule,
+  // and M13-A's family-selected FILTERED_EVENT_STREAMS).
   for (const artifact of artifactsById.values()) {
     const query = artifact.provenance.source?.query;
-    if (
-      query !== undefined &&
-      "actorFilter" in query &&
-      query.actorFilter !== "NONE" &&
-      artifact.provenance.retainedCoverage.grants.length > 0
-    ) {
+    if (query === undefined || artifact.provenance.retainedCoverage.grants.length === 0) continue;
+    const filter =
+      "actorFilter" in query && query.actorFilter !== "NONE"
+        ? JSON.stringify(query.actorFilter)
+        : "kind" in query && query.kind === "FILTERED_EVENT_STREAMS"
+          ? JSON.stringify(query.streams.map((stream) => [stream.dataType, stream.filterExpression]))
+          : null;
+    if (filter !== null) {
       errors.push({
         code: "FILTERED_CAPTURE_GRANTED",
         subject: { artifactId: artifact.artifactId },
-        message: `artifact ${artifact.artifactId}: a capture filtered by ${JSON.stringify(query.actorFilter)} retains no coverage, but it grants some`,
+        message: `artifact ${artifact.artifactId}: a capture filtered by ${filter} retains no coverage, but it grants some`,
       });
     }
   }

@@ -15,6 +15,7 @@ import {
 } from "../../scripts/corpus/sanitize-payloads.mjs";
 import { G1_SANITIZER_REVISION } from "../../scripts/corpus/sanitize-g1-cohort.mjs";
 import { G2_SANITIZER_REVISION } from "../../scripts/corpus/sanitize-g2-comparisons.mjs";
+import { M13A_SANITIZER_REVISION } from "../../scripts/corpus/sanitize-m13a-augmentation.mjs";
 import { committedEventArray, committedManifest } from "../support/corpus/artifacts.js";
 import { committedCorpusFiles, loadCorpusOrThrow } from "../support/corpus/loader.js";
 import { committedEvidenceArchiveFiles } from "../support/corpus/evidence-archive.js";
@@ -332,6 +333,7 @@ describe("the committed corpus holds no stable player identifier", () => {
     expect(SANITIZER_REVISION).toBe("sanitize-probe-8");
     expect(G1_SANITIZER_REVISION).toBe("sanitize-g1-cohort-1");
     expect(G2_SANITIZER_REVISION).toBe("sanitize-g2-comparisons-1");
+    expect(M13A_SANITIZER_REVISION).toBe("sanitize-m13a-augmentation-1");
     const revisions = new Set<string>();
     // M11-E2.1: the current revisions first cut evidence-archive artifacts, so
     // both committed roots are read.
@@ -347,12 +349,13 @@ describe("the committed corpus holds no stable player identifier", () => {
     // Every recorded revision is one the tooling has had; the current ones are among them.
     for (const revision of revisions) {
       expect(revision).toMatch(
-        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[123]|sanitize-probe-[2345678]|sanitize-g1-cohort-1|sanitize-g2-comparisons-1|derive-gap-1|derive-substitution-1)$/,
+        /^(UNAVAILABLE|NOT_APPLICABLE|sanitize-payloads-[123]|sanitize-probe-[2345678]|sanitize-g1-cohort-1|sanitize-g2-comparisons-1|sanitize-m13a-augmentation-1|derive-gap-1|derive-substitution-1)$/,
       );
     }
     expect(revisions.has(SANITIZE_PAYLOADS_REVISION)).toBe(true);
     expect(revisions.has(SANITIZER_REVISION)).toBe(true);
     expect(revisions.has(G1_SANITIZER_REVISION)).toBe(true);
     expect(revisions.has(G2_SANITIZER_REVISION)).toBe(true);
+    expect(revisions.has(M13A_SANITIZER_REVISION)).toBe(true);
   });
 });
