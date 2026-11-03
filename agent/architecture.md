@@ -3803,7 +3803,8 @@ is true and decides nothing — so comparisons against it return UNKNOWN. That i
 the honest outcome rather than a weakness.
 
 An ability with a cast time or a channel would need its own anchor and is not
-covered by this contract.
+covered by this contract. (ONB-S4 supplies the shared cast and channel
+decision anchor; this cooldown contract is unchanged.)
 
 ### A bound is carried as a bound
 
@@ -11957,6 +11958,161 @@ never clean, low coverage never complete, UNKNOWN never highlighted or zero,
 UNKNOWN vs NO_AUTHORITY_AVAILABLE, no inferred assignment, nothing actionable
 without evidence, no score key, consumables never omitted, no racial
 finding.
+
+## ONB-S4 — Shared cast and channel decision anchor
+
+Autopilot queue entry ONB-S4. Internal shared engine only: no public contract
+change, no specialization module changes, no Warcraft Logs request.
+
+**Question.** "When was this action decided, and was the actor casting at
+instant t?" Every observed-decision model so far anchors on the completed
+`cast`, which is right for an instant and wrong for a cast-time spell (decided
+at its `begincast`) or a channel. Cohort D casters need the right anchor, and
+CLAUDE.md "Decision Points" forbids missed-action findings while a cast or
+channel is in progress.
+
+**Where.** `src/engine/game-state/casting/cast-decision-anchor.ts`,
+`buildCastTimeline({ state, actorId, profile })`. It imports only engine
+modules. The specialization supplies a `CastAnchorProfile`:
+
+- `executionOf(id)`: `INSTANT`, `CAST_TIME`, `CHANNEL`, or `null` (not
+  reviewed).
+- `castTimeAt(completion)`: what the specialization can prove about that one
+  execution's cast time. `INSTANT` covers, for example, a consumed
+  instant-cast proc. `POSITIVE` carries `exactMs` only when every input is
+  known. `UNKNOWN` means the cast may have been made instant.
+- `channelDurationAt(completion)`: a proven upper bound, or `UNKNOWN`.
+
+`hastedCastTime(base, castSpeed)` is the shared arithmetic: a zero base is
+INSTANT. A positive base is POSITIVE whatever the haste, exact only with a
+KNOWN `composite_spell_cast_speed()` multiplier. Invalid input is UNKNOWN,
+never clamped. Instant-cast procs are the specialization's to apply.
+
+**Pinned wire facts** (retained b1PmaKrd6CDfzngc fight 48 slices, no new
+request):
+
+- A hard cast records a begin, then a completion of the same ability by the
+  same source.
+- Arcane Missiles (5143) is recorded 20 times as `cast` with no `begincast`,
+  so a channel's `cast` is its start.
+- Same-millisecond retrieval order is not proven (M11-G2). The Restoration
+  Shaman slice holds both shapes: begin and completion in one millisecond,
+  and a completion followed by the next begin in one millisecond.
+
+NOT pinned, and never used as a proof: that every hard cast records a begin.
+
+**Anchors.** One per foreground completion of the actor (melee swings and
+id-less casts excluded):
+
+- INSTANT: `INSTANT_COMPLETION` at the cast. A begin of that ability in its
+  window is `CAST_EVIDENCE_CONFLICT`.
+- CHANNEL: `CHANNEL_START` at the cast. A begin of that ability in its window
+  is `CAST_EVIDENCE_CONFLICT`.
+- CAST_TIME: paired per ability, order-invariantly. Completions partition
+  time into windows. Begins strictly inside a window are placed. A begin in a
+  completion's own millisecond is one unknown bit (before or after it). A
+  completion pairs with the latest begin before it and after the previous
+  completion, so a later begin supersedes an interrupted one.
+  - Placements are enumerated for the completion and checked for consistency
+    one neighbour either side. A POSITIVE cast time cannot complete in its
+    begin's millisecond. An INSTANT execution is decided at its completion and
+    consumes only a begin in its own millisecond.
+  - The local check can only admit more placements than a global one would,
+    so it can only add ambiguity.
+  - When every consistent placement agrees, the result is
+    `OBSERVED_BEGINCAST`, but only when CASTS coverage for the actor is
+    COMPLETE from the begin to the completion, so no later begin can be
+    missing. It is `CAST_EVIDENCE_CONFLICT`, and its begin is released as
+    possibly still running, when any of these lies between the two:
+    - a different ability's begin or a channel start, including one in the
+      begin's own millisecond, whose order is not proven;
+    - another CAST_TIME ability's completion.
+  - No two proven casts (observed or derived) may overlap. Any that do are
+    all `CAST_EVIDENCE_CONFLICT`, their spans become possible spans back to
+    the previous completion, and their begins are released.
+  - When the placements disagree, the result is `BEGINCAST_PAIRING_AMBIGUOUS`,
+    with every candidate anchor listed. Two completions of one ability in one
+    millisecond, or two of its begins in one millisecond (a completion's own,
+    or the latest strictly inside a window), are ambiguous outright: which is
+    the latest is not proven, so neither begin is named the pair.
+  - When no begin pairs: with coverage COMPLETE over the window, the result is
+    `BEGINCAST_NOT_OBSERVED`. It is never inferred instant. With coverage
+    incomplete and a POSITIVE `exactMs`, the start derived is
+    completion − exactMs. It becomes `DERIVED_FROM_COMPLETION` only when it
+    contradicts nothing observed. Otherwise:
+    - before the previous completion of the ability, or with another cast
+      or channel starting inside it, or another hard cast completing inside
+      it, or overlapping another proven cast (see above):
+      `CAST_EVIDENCE_CONFLICT`;
+    - with coverage COMPLETE over the derived cast itself:
+      `BEGINCAST_NOT_OBSERVED` (its begin should have been seen).
+    Otherwise it is `CAST_TIME_UNKNOWN` (haste unknown, a possible instant
+    proc, or coverage), with the evidence reason. The first completion's
+    window opens before the pull, so absence is never proven for it.
+- An unreviewed ability is `EXECUTION_NOT_REVIEWED`. A non-monotonic fight is
+  `NON_MONOTONIC_TIME` throughout.
+
+**Unpaired begins.** A begin is SURELY paired only when every consistent
+placement pairs it with some completion. For a begin in a completion's own
+millisecond, that means the completion takes it in every placement, or, where
+it follows, the next completion takes it in every placement. Every other
+begin is reported, and keeps a possible span from itself to the actor's next
+cast or channel start (unbounded when there is none), because it may still
+have been running after any completion it was a candidate for:
+
+- `INTERRUPTED` only when no placement pairs it and CASTS coverage proves no
+  completion followed before that next start (or the fight end);
+- else UNKNOWN: `PAIRING_NOT_PROVEN` (some placement pairs it, or it
+  contradicts the reviewed execution), `EXECUTION_NOT_REVIEWED`, or the
+  coverage reason.
+
+**Occupancy.** `occupancyAt(t)` returns `CASTING`, `NOT_CASTING` or
+`UNKNOWN`. Spans are half-open `[from, to)`.
+
+- `CASTING` only inside a paired or derived hard cast.
+- `UNKNOWN` (`POSSIBLE` spans) inside a channel. The span runs from its start
+  to `min(start + proven bound, next cast or channel start)`, or is unbounded,
+  because a channel can be cancelled. Also `UNKNOWN`:
+  - after an unpaired begin, until the next start;
+  - before an unresolved completion, back to the earliest begin some
+    placement pairs. When a placement pairs no begin, it goes back to the
+    previous completion of the ability, or is unbounded.
+  - before AND after an unreviewed completion, or one whose INSTANT/CHANNEL
+    review a begin contradicts, from the previous completion to the next cast
+    start. Either may really have been a channel, and a contradicted review's
+    channel bound is not used.
+- `NOT_CASTING` only when no span covers t AND CASTS coverage for the actor
+  is COMPLETE from the pull to t. A missing page is never idle time.
+
+So no instant inside a cast or channel is ever NOT_CASTING, and no
+missed-action opportunity can be built on one.
+
+**Not modelled.** The GCD and its lanes, which stay the specialization's
+lane data. Empowered casts (`empowerstart` / `empowerend`). Channel end
+evidence from auras. Pushback. A hard cast begun before the pull (UNKNOWN:
+coverage starts at the pull). Recorded in `agent/follow-ups.md`.
+
+**Retained evidence, measured with test profiles** (not game data):
+
+- Mage 121, with cast times POSITIVE: every hard cast pairs (30451 ×6,
+  1295924 ×4), 20 channel starts, and one interrupted 1295924 begin. If
+  instant casts cannot be excluded, two back-to-back 30451 casts are
+  ambiguous.
+- Restoration Shaman 122 (whole fight, CASTS complete), with instant procs not
+  excluded:
+  - Chain Heal: 36 established, 49 ambiguous.
+  - Healing Wave: 16 established, 16 ambiguous.
+  - Three interrupted begins, no conflict. Fifty further begins are
+    `PAIRING_NOT_PROVEN`, mostly an instant Chain Heal's same-millisecond
+    begin, so the actor stays possibly casting until the next start.
+
+  The ambiguity is real: without a proven cast time, the same-millisecond
+  shapes do not determine the anchor.
+
+**No consumer yet.** No registered specialization reads the timeline, so no
+public decision changes. Cohort D representatives (ONB-D*) supply their
+profile and own what the anchor means for their decisions.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
