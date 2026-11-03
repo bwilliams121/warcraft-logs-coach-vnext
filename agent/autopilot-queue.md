@@ -926,11 +926,13 @@ only trustworthy findings may influence a score.
 ### M15-F: Product hardening and final coverage disclosure
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M15-D, M13-F, M14-F
 branch: autopilot/m15-f
 wcl: NONE
 publicContract: EXPECTED
+pr: 37
+mergeSha: 8cb47d1d37397a68be02d8a4145127dad73a24fe
 ```
 
 **Scope.** End-to-end hardening across the public surfaces:
@@ -942,6 +944,790 @@ publicContract: EXPECTED
   integrated reports.
 
 No new analysis capability.
+
+## Specialization onboarding (owner product decision, 2026-11-02)
+
+The project continues past M15 until EVERY playable specialization in the
+pinned roster (`src/data/game/spec-roster.json`) has a terminal disposition:
+PUBLIC (preferred), DEFERRED by owner decision, or BLOCKED on a documented
+authority or evidence condition.
+
+- **Progress record.** `agent/spec-onboarding-inventory.md` is the canonical
+  matrix and progress summary. Every onboarding tranche updates it.
+- **Empty is not done.** An empty queue while ordinary specializations remain
+  unsupported is NOT completion.
+
+**Rules for every onboarding entry (in addition to CLAUDE.md):**
+
+1. **Per-spec ownership.** Each specialization keeps its own module, runtime
+   data with provenance, authority and promotion gates under
+   `src/specs/<class>/<spec>/`.
+   - A cohort is a shared ENGINEERING pattern, never shared gameplay meaning.
+   - Shared machinery belongs only in ONB-S* tranches or an existing shared
+     module.
+   - No universal evaluator, and no `if spec === ...` in generic
+     infrastructure.
+2. **The internal tranche (rotational: ONB-A* to ONB-X*).** An internal
+   entry runs:
+   - **A. Authority, token and data review:** pinned APL, supported tokens
+     and applicability, state reconstruction, exclusions and UNKNOWN
+     behavior.
+   - **B. Internal implementation:** module, evaluator, runtime data,
+     synthetic fail-closed tests, and INTERNAL_ONLY registration with
+     derived scope.
+   - **C. Real-evidence validation:** on retained, already-authorized
+     evidence, meeting the observation, MATCH, discrimination and
+     negative-control requirements of the existing rotational promotion
+     gate, with corpus and archive assertions and cross-spec isolation.
+3. **The healer tranche (HEAL-*).** Healers have no SimulationCraft
+   rotational authority, so the APL review and the MATCH/discrimination gate
+   do not apply. The M12-D verdict limits are unchanged:
+   - HEALING_DECISION is NO_AUTHORITY_AVAILABLE;
+   - ASSIGNMENT is NO_AUTHORITY_AVAILABLE without a supplied plan;
+   - COOLDOWN is observational only.
+
+   Each healer internal entry instead runs:
+   - **A. Authority and data review:** the reviewed healing-cooldown identity
+     and runtime data with provenance, verdict categories and their authority,
+     the required inputs (FULL_RAID), and UNKNOWN behavior.
+   - **B. Internal implementation:** module, evaluator, runtime data,
+     synthetic fail-closed tests, and INTERNAL_ONLY registration with
+     derived scope.
+   - **C. Real-evidence validation**, on retained, already-authorized
+     evidence:
+     - real cooldown observations for the healer;
+     - real ASSIGNMENT outcomes against a supplied plan (ASSIGNMENT_MET and
+       its failure counterparts);
+     - identity validation and completeness handling, with PARTIAL or ABSENT
+       data giving UNKNOWN;
+     - the missing-plan path giving NO_AUTHORITY_AVAILABLE, never an inferred
+       assignment;
+     - negative controls: no HPS ranking, no per-cast spell-choice verdict,
+       and no cooldown-quality verdict without a plan;
+     - corpus and archive assertions and cross-spec isolation.
+
+   The healer public gate is defined by HEAL-AP from these requirements.
+   Healer followers meet it; they never meet a weakened gate.
+4. **The public tranche.** A public entry ("public") is the separate,
+   reviewed PUBLIC promotion: the promotion gate that applies to its
+   analyzer kind (rotational, or the HEAL-AP healer gate), public contract,
+   and REST/MCP parity and invariance.
+   - It promotes only the specializations that pass.
+   - A specialization that cannot pass stays INTERNAL_ONLY. It is recorded
+     in the inventory with its reason, and an evidence gap goes to ONB-EV.
+     Its cohort-mates still promote.
+5. **Owner stops.** Stop with OWNER_DECISION_REQUIRED only for a genuine
+   authority, evidence-semantics, public-meaning, network or deployment
+   choice. Ordinary implementation is never a stop.
+6. **Gates never weaken.** No existing gate is weakened because many
+   specializations remain.
+7. **Network.** `wcl: NONE` on every entry. No new Warcraft Logs permission
+   is granted here. Missing evidence is recorded for ONB-EV, never fetched.
+
+### ONB-S1: Shared precombat action-list execution for APL variables
+
+```autopilot
+status: READY
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/follow-ups.md` "After M11-D3-C2" (precombat
+variables): many Cohort A/B variables are assigned ONLY in the precombat
+list, so every read of them is an unknown incoming value.
+
+**Scope.** Execute the precombat list in the shared decision engine for
+VARIABLE assignment only. Pinned semantics apply: values persist into
+combat.
+
+- A value that depends on precombat state the evidence cannot establish
+  (buffs or resources before the pull) stays UNKNOWN.
+- Talent-, gear- and constant-derived values resolve where the evidence
+  establishes their inputs.
+- No public decision may change without a recorded reason. Re-measure the
+  public specs and pin any change.
+
+### ONB-S2: Shared APL variable combining operations
+
+```autopilot
+status: READY
+dependsOn: ONB-S1
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/follow-ups.md` "After M11-D3-C2" (combining
+operations): `add`, `sub`, `mul`, `div`, `pow`, `mod`, `min`, `max`,
+`floor`, `ceil` and `cycling_variable` are not modelled.
+
+**Scope.** Model them in the shared engine with pinned SimulationCraft
+semantics. An operand of unknown value yields UNKNOWN, never a guessed
+value. Prove the result against pinned source citations.
+
+### ONB-S3: Enemy-set and target-count authority model
+
+```autopilot
+status: OWNER_DECISION_REQUIRED
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+ownerDecision: Whether, and on what evidence, the analyzer may model the enemy set and target count that SimulationCraft conditions read (active_enemies, spell_targets, target_if FIRST mode and target-dependent if=). TARGET_COUNT is currently declared a permanent blocker in src/simc/decision-coverage.ts. Lifting it changes evidence semantics (which enemies count as present, targetable and in range) and gates the target-selection cohort (Windwalker, Guardian, Beast Mastery, Survival).
+```
+
+**Direction.** The M11-D0 census (pinned `target_if` semantics), CLAUDE.md
+"Multi-Target Support", and `agent/follow-ups.md` "After M11-D3-B".
+
+### ONB-S4: Shared cast and channel decision anchor
+
+```autopilot
+status: READY
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** CLAUDE.md "Decision Points" (cast time, channel time, GCD
+overlap, queuing) and the M11-D0 census Cohort D (casters need a cast or
+channel anchor).
+
+**Scope.** A shared decision-point model for cast-time and channelled
+actions. The decision is anchored at cast start, from `begincast` or
+derived from cast completion with reviewed cast-time data. Channels and
+interrupted casts are handled, and no artificial "missed action" exists
+while a cast or channel is in progress.
+
+- Where the anchor cannot be established (for example a missing
+  `begincast`, or haste unknown), the decision is UNKNOWN.
+- Shared plumbing only; casters own their meaning.
+
+### ONB-S5: Shared resource pooling and wait semantics
+
+```autopilot
+status: READY
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** The M11-D0 census Cohort C (pooling: Outlaw, Feral).
+
+**Scope.** Pinned semantics for `pool_resource`, `wait`, `wait_for` and
+pooling-gated lines in the shared engine: what the APL selects while
+pooling, and how an observed cast is compared against a pooling decision.
+Undecidable pooling states are UNKNOWN; continuous resources stay
+intervals.
+
+### ONB-S6: Shared pet actor mapping for pet-driven APL state
+
+```autopilot
+status: READY
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/follow-ups.md` "After M11-G3-1" (pets are not mapped
+to Warcraft Logs actors) and the M11-E2.1 owned-pet tooling.
+
+**Scope.** A shared, evidence-backed mapping between pinned SimulationCraft
+pet entities and Warcraft Logs pet actors (stated `petOwner`, summon
+events), plus pet-count and pet-active state for APL reads (for example
+`pet.X.active` and `buff.X.stack` on pets).
+
+- An ambiguous mapping is UNKNOWN, never a guess.
+- Pet-heavy specs (Demonology, Unholy, Beast Mastery) consume it.
+
+### ONB-EV: Neutral evidence campaign for specializations without retained real evidence
+
+```autopilot
+status: OWNER_DECISION_REQUIRED
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
+```
+
+**Direction.** The owner's onboarding evidence policy: neutral,
+outcome-independent acquisition, with no searching for a desired
+MATCH/REJECTED result. Until this is decided, the affected specializations
+stay INTERNAL_ONLY after their internal tranches, and nothing else waits on
+them.
+
+### HEAL-A: Restoration Shaman registration and healer finding shape (internal)
+
+```autopilot
+status: READY
+dependsOn: none
+wcl: NONE
+publicContract: NONE
+```
+
+**Direction.** `agent/follow-ups.md` "After M12-D" (not registered, not
+published): this needs a registration shape for an evaluator with no
+SimulationCraft authority, FULL_RAID derived from
+`RESTORATION_SHAMAN_REQUIRED_INPUTS`, and a shared finding shape for
+ASSIGNMENT, COOLDOWN and HEALING_DECISION (`src/findings/authority.ts`
+knows only ROTATION).
+
+**Scope.** Register Restoration Shaman INTERNAL_ONLY with that shared
+finding shape.
+
+- The M12-D verdict scope and the M12-E plan semantics apply unchanged.
+- HEALING_DECISION is NO_AUTHORITY_AVAILABLE.
+- ASSIGNMENT is NO_AUTHORITY_AVAILABLE without a supplied plan.
+- COOLDOWN is observational.
+- Remove the unregistered-tree exceptions.
+
+### HEAL-AP: Restoration Shaman public promotion
+
+```autopilot
+status: READY
+dependsOn: HEAL-A
+wcl: NONE
+publicContract: EXPECTED
+```
+
+**Scope.** Promote Restoration Shaman PUBLIC through a healer public result
+shape: assignment execution, cooldown observations, and shared factual
+healing context with coverage disclosure.
+
+- No HPS ranking, no inferred assignment, and no cooldown-quality verdict
+  without a plan.
+- Define and pin the healer promotion gate from rule 3's validation
+  requirements: real observations, assignment outcomes, identity,
+  completeness, missing-plan behavior and negative controls. It is
+  separate from the rotational gate, which stays unchanged, and it holds
+  the same quality bar as the existing public specs.
+
+### HEAL-B1: Holy Paladin, Restoration Druid and Mistweaver Monk (internal)
+
+```autopilot
+status: READY
+dependsOn: HEAL-A
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Three healer evaluators on the proven healer architecture. Each
+has its own reviewed healing-cooldown identity and runtime data under its
+own tree, and consumes the shared `RaidCooldownPlan` and the
+`src/healing/` primitives. The M12-D verdict-category limits apply to each.
+
+### HEAL-B1P: Holy Paladin, Restoration Druid and Mistweaver Monk (public)
+
+```autopilot
+status: READY
+dependsOn: HEAL-B1, HEAL-AP
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### HEAL-B2: Holy Priest (internal)
+
+```autopilot
+status: READY
+dependsOn: HEAL-B1
+wcl: NONE
+publicContract: NONE
+```
+
+### HEAL-B2P: Holy Priest (public)
+
+```autopilot
+status: READY
+dependsOn: HEAL-B2, HEAL-AP
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### HEAL-B3: Discipline Priest (internal, own representative)
+
+```autopilot
+status: READY
+dependsOn: HEAL-B1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Discipline heals substantially through damage (Atonement), a
+pattern the healing primitives do not yet represent. Treat it as its own
+representative:
+
+- Model what is observable (atonement application and damage-to-healing
+  attribution as reported) without per-cast quality verdicts.
+- Anything the evidence cannot attribute is UNKNOWN.
+
+### HEAL-B3P: Discipline Priest (public)
+
+```autopilot
+status: READY
+dependsOn: HEAL-B3, HEAL-AP
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### HEAL-B4: Preservation Evoker (internal, own representative)
+
+```autopilot
+status: READY
+dependsOn: HEAL-B1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Preservation combines empowered casts with a roster role the
+pinned data leaves UNKNOWN, so it is its own representative. Use the
+declared roster classification, never guess a role, and reuse ONB-S4's
+anchor if it has landed.
+
+### HEAL-B4P: Preservation Evoker (public)
+
+```autopilot
+status: READY
+dependsOn: HEAL-B4, HEAL-AP
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-A1: Havoc Demon Hunter (internal, Cohort A representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort A representative: an instant builder/spender list with
+no `run_action_list` and precombat-assigned variables. Its authority is
+already audited, and its real evidence is retained (fight 48).
+
+Known stops from the D3 probes:
+
+- `retarget_auto_attack,line_cd=1`;
+- `gcd.max` at `default[3]`.
+
+### ONB-A1P: Havoc Demon Hunter (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-A1
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-A2: Subtlety Rogue, Fury Warrior and Protection Warrior (internal, Cohort A)
+
+```autopilot
+status: READY
+dependsOn: ONB-A1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort A followers on Havoc's proven pattern.
+
+- Protection Warrior's tank meaning (offensive rotation, separated from
+  mitigation) stays its own.
+- Fury and Protection Warrior have no known retained evidence: record them
+  for ONB-EV if real-evidence validation cannot be met.
+
+### ONB-A2P: Subtlety Rogue, Fury Warrior and Protection Warrior (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-A2
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-B1: Arms Warrior (internal, Cohort B representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort B representative: `run_action_list` dispatch with
+cooldown windows. Real evidence is retained (fight 48), and the question
+`colossus-smash-window-fill` is already identified.
+
+### ONB-B1P: Arms Warrior (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-B1
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-B2: Frost Death Knight and Enhancement Shaman (internal, Cohort B)
+
+```autopilot
+status: READY
+dependsOn: ONB-B1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort B followers on Arms' proven pattern.
+
+- Frost DK relies on the M11-D1 numeric-`react` fix and multi-resource
+  (runes and Runic Power) state.
+- Enhancement's `bloodlust,line_cd=600` attributes.
+
+### ONB-B2P: Frost Death Knight and Enhancement Shaman (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-B2
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-B3: Devourer Demon Hunter (internal, own representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S1, ONB-S2
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Devourer is the newest specialization and is unusual: four
+`pick_up_fragment,…,line_cd=` pseudo-actions share one token and are never
+observed casts, its `void_ray_count` uses `op=add`, and its `react` is
+numeric. Handle it alone.
+
+- Pseudo-action timers stay UNKNOWN unless the evidence attributes them.
+- It is never forced into Cohort B.
+
+### ONB-B3P: Devourer Demon Hunter (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-B3
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-C1: Feral Druid (internal, Cohort C representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S5
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort C representative: pooling, plus form state. Real evidence
+is retained (fight 48). `rip-rake-snapshot-refresh` is a recorded question,
+for a later deep dive only.
+
+### ONB-C1P: Feral Druid (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-C1
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-C2: Outlaw Rogue (internal, Cohort C)
+
+```autopilot
+status: READY
+dependsOn: ONB-C1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort C follower. No retained evidence is known, so it is
+recorded for ONB-EV if real-evidence validation cannot be met.
+
+### ONB-C2P: Outlaw Rogue (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-C2
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-T1: Windwalker Monk (internal, Cohort T representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S3, ONB-S1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort T representative: target selection, under the ONB-S3
+authority decision. Real evidence is retained (fight 48).
+
+Settle the follow-up "Whole-line blocker classification for refused
+`target_if` lines" before any Windwalker-shaped authority becomes public.
+
+### ONB-T1P: Windwalker Monk (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-T1
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-T2: Guardian Druid, Beast Mastery Hunter and Survival Hunter (internal, Cohort T)
+
+```autopilot
+status: READY
+dependsOn: ONB-T1, ONB-S6
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort T followers.
+
+- Guardian keeps tank meaning separate from offense.
+- Beast Mastery uses ONB-S6 pet mapping; `barbed-shot-charge-capping` is a
+  recorded question.
+- Survival's `retarget` and `fight_style.dungeonroute` gate stay UNKNOWN
+  where unsupported. It has no retained evidence, so it is recorded for
+  ONB-EV if needed.
+
+### ONB-T2P: Guardian Druid, Beast Mastery Hunter and Survival Hunter (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-T2
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-D1: Destruction Warlock (internal, Cohort D representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S4
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort D representative on the ONB-S4 cast and channel anchor.
+Real evidence is retained. Ritual Clipping ownership stays
+`UNRESOLVED_DIABOLIST_HERO_TREE` (`agent/m11-spec-coaching-inventory.md`);
+it is a deep-dive question, not a blocker for the rotational slice.
+
+### ONB-D1P: Destruction Warlock (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-D1
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-D2: Elemental Shaman, Balance Druid and Shadow Priest (internal, Cohort D)
+
+```autopilot
+status: READY
+dependsOn: ONB-D1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort D casters with DoT maintenance and builder resources
+(Maelstrom, Astral Power, Insanity), each with its own meaning. Real
+evidence is retained for all three.
+
+### ONB-D2P: Elemental Shaman, Balance Druid and Shadow Priest (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-D2
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-D3: Arcane Mage and Frost Mage (internal, Cohort D)
+
+```autopilot
+status: READY
+dependsOn: ONB-D1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort D casters with charge/proc state and numeric `react` (the
+M11-D1 fix). Arcane's real evidence is retained (fight 48, actor 121).
+Frost Mage's must be verified, or it is recorded for ONB-EV.
+
+### ONB-D3P: Arcane Mage and Frost Mage (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-D3
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-D4: Affliction Warlock and Marksmanship Hunter (internal, Cohort D)
+
+```autopilot
+status: READY
+dependsOn: ONB-D1
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Cohort D casters with multi-DoT (Affliction) or cast-time
+shots (Marksmanship). Neither has known retained events, so record them
+for ONB-EV if needed.
+
+### ONB-D4P: Affliction Warlock and Marksmanship Hunter (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-D4
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-X1: Fire Mage (internal, own representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S4
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** A holdout from the M11-D0 census. Combustion windows and
+crit-proc chains (Heating Up and Hot Streak) need proc-state handling of
+their own. Real evidence is retained.
+
+### ONB-X1P: Fire Mage (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-X1
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-X2: Devastation Evoker (internal, own representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S4
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** A holdout. It has empowered casts (rank by hold time) and a
+roster role left UNKNOWN by the pinned data; use the declared M11
+classification. `empower-cast-usage` is a recorded question. Real evidence
+is retained (fight 48).
+
+### ONB-X2P: Devastation Evoker (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-X2
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-X3: Vengeance Demon Hunter (internal, own representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S1, ONB-S2
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** A holdout. Its in-combat variable programme combines `%`,
+`ceil` and charges (`agent/follow-ups.md` "After M11-D3-C2"), so it needs
+ONB-S2. Its tank meaning stays separate from offense. No retained evidence
+is known, so record it for ONB-EV if needed.
+
+### ONB-X3P: Vengeance Demon Hunter (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-X3
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-X4: Demonology Warlock (internal, own representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S4, ONB-S6
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** A holdout. Demon summons and imp counts use ONB-S6 pet mapping,
+and Tyrant setup is a recorded question. Ritual Clipping ownership stays
+unresolved and is not a blocker. Real evidence is retained (fight 48).
+
+### ONB-X4P: Demonology Warlock (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-X4
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-X5: Unholy Death Knight (internal, own representative)
+
+```autopilot
+status: READY
+dependsOn: ONB-S2, ONB-S6
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** A holdout from the M11-D0 census Cohort E, which is pet- and
+variable-heavy on top of `run_action_list` dispatch. It uses ONB-S6 and
+ONB-S2, and no retained events are known, so record it for ONB-EV if
+needed.
+
+### ONB-X5P: Unholy Death Knight (public)
+
+```autopilot
+status: READY
+dependsOn: ONB-X5
+wcl: NONE
+publicContract: EXPECTED
+```
+
+### ONB-Z: Specialization-onboarding completion matrix
+
+```autopilot
+status: READY
+dependsOn: M13-F, HEAL-AP, HEAL-B1P, HEAL-B2P, HEAL-B3P, HEAL-B4P, ONB-A1P, ONB-A2P, ONB-B1P, ONB-B2P, ONB-B3P, ONB-C1P, ONB-C2P, ONB-T1P, ONB-T2P, ONB-D1P, ONB-D2P, ONB-D3P, ONB-D4P, ONB-X1P, ONB-X2P, ONB-X3P, ONB-X4P, ONB-X5P
+wcl: NONE
+publicContract: NONE
+```
+
+**Scope.** Regenerate the roster matrix and progress summary in
+`agent/spec-onboarding-inventory.md` from the production registry, and
+verify that every playable specialization has a terminal disposition.
+
+- A specialization that is neither PUBLIC nor carrying a recorded owner
+  deferral or documented blocker fails this tranche: it is an open item,
+  not completion.
+- Add a contract test that pins the matrix against the registry and the
+  roster.
 
 ### M11-G4-5-R: Register a 12.1.5 simulation model
 
