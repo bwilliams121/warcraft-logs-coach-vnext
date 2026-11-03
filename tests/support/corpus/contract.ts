@@ -386,7 +386,7 @@ export const OWNING_LAYERS = {
   SPEC_RESTORATION_DRUID: ["src/specs/druid/restoration/"],
   /** HEAL-B1; PUBLIC since HEAL-B1P. The Mistweaver Monk healer evaluator and nothing else. */
   SPEC_MISTWEAVER_MONK: ["src/specs/monk/mistweaver/"],
-  /** HEAL-B2. The INTERNAL_ONLY Holy Priest healer evaluator and nothing else. */
+  /** HEAL-B2; PUBLIC since HEAL-B2P. The Holy Priest healer evaluator and nothing else. */
   SPEC_HOLY_PRIEST: ["src/specs/priest/holy/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
@@ -3335,7 +3335,7 @@ export const ASSERTION_KINDS = {
       "Through the production catalog's internal lookup (PUBLIC since HEAL-B1P, so the public lookup finds the same row), the Mistweaver Monk registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
   },
 
-  // ---- SPEC_HOLY_PRIEST (HEAL-B2, INTERNAL_ONLY) ---------------------
+  // ---- SPEC_HOLY_PRIEST (HEAL-B2; PUBLIC since HEAL-B2P) --------------
   //
   // A healer registration on Restoration Shaman's architecture, driven the
   // same way: through the production catalog's INTERNAL lookup and
@@ -3369,7 +3369,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "Through the production catalog's internal lookup, the INTERNAL_ONLY Holy Priest registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
+      "Through the production catalog's internal lookup (PUBLIC since HEAL-B2P, so the public lookup finds the same row), the Holy Priest registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
   },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------

@@ -279,6 +279,11 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
         analyzerId: "monk-mistweaver-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
+      }, // HEAL-B2P: Holy Priest, FULL_RAID by its declared healer inputs, no resources.
+      {
+        analyzerId: "priest-holy-healer-findings",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
       },
     ]);
   });

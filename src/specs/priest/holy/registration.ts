@@ -1,5 +1,5 @@
 /**
- * Holy Priest's analyzer registration (HEAL-B2, INTERNAL_ONLY).
+ * Holy Priest's analyzer registration (HEAL-B2; PUBLIC since HEAL-B2P).
  *
  * THIS IS WHERE HOLY PRIEST STATES WHAT IT IS, AND THE ONLY PLACE.
  *
@@ -29,8 +29,17 @@
  * - SCOPE. Every capability is declared from `HOLY_PRIEST_REQUIRED_INPUTS`,
  *   so the derived requirement is FULL_RAID by construction.
  *
- * INTERNAL_ONLY. No public description and no healer view: a public request
- * cannot reach this row. Its public shape and promotion are HEAL-B2P's.
+ * PUBLIC SINCE HEAL-B2P, AND WHAT THAT CHANGED. The five-site edit (the
+ * partition, the public contract's `specId` enum, the identity table, the
+ * `satisfies PublicSpecId` on `spec.ts`, and `exposure` below) plus the
+ * HEALER VIEW this registration builds from its own result (the shared
+ * `healer-view-projection.ts`), published as `healerFindings` exactly as
+ * Restoration Shaman's is (HEAL-AP). Reachability, not analysis: a public
+ * request for this identity dispatches this row, derives FULL_RAID from its
+ * declared requirement, and receives exactly the result the internal lookup
+ * produced. It passed the healer promotion gate
+ * (`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) first, on the
+ * canonical fight's Holy Priest (b1PmaKrd6CDfzngc fight 48, actor 2).
  */
 
 import type { SpecAnalysisInput, UnanalyzedEnvelope } from "../../../findings/analysis-envelope.js";
@@ -48,6 +57,8 @@ import {
 } from "../../../findings/decision-capability.js";
 import type { HealerFindingSet } from "../../../findings/healer-finding.js";
 import { healerFindingSetOf } from "../../../findings/healer-finding-projection.js";
+import type { HealerViewOutcome } from "../../../findings/healer-view.js";
+import { healerViewOfEvaluation } from "../../../findings/healer-view-projection.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import {
@@ -215,7 +226,8 @@ export function analyzeHolyPriest(
           "No pinned decision authority governs Holy Priest decisions: per-cast healing choice has no " +
           "approved model and healing-cooldown use is reported as observed facts only. Assignment execution is " +
           "judged only against a supplied raid cooldown plan that binds this fight, and each such result cites " +
-          "that plan; without one, assignments are not evaluated. This is not an assessment of the player.",
+          "that plan; without one, assignments are not evaluated. The results are reported in healerFindings; " +
+          "this is not an assessment of the player.",
         healerFindings: { assessment: "ASSESSED", set: healerFindingSetOf(specId, evaluation, plan) },
       };
   }
@@ -233,7 +245,44 @@ function noObservedDecisionView(analysis: never): ObservedDecisionView {
   );
 }
 
-/** The Holy Priest specialization module (HEAL-B2, INTERNAL_ONLY). */
+/**
+ * The view of this registration's own result (HEAL-B2P): the finding set and
+ * the facts each finding rests on. Shared code reads nothing else of the
+ * payload. NOT_ASSESSED passes through with its reason, never as an empty set.
+ */
+export function holyPriestHealerViewOf(analysis: HolyPriestAnalysis): HealerViewOutcome {
+  const outcome = analysis.healerFindings;
+  if (outcome.assessment === "NOT_ASSESSED") return { assessment: "NOT_ASSESSED", reason: outcome.reason };
+  if (analysis.evaluation?.state !== "EVALUATED") {
+    throw new Error("A Holy Priest finding set exists without an evaluated result.");
+  }
+  return { assessment: "ASSESSED", view: healerViewOfEvaluation(analysis.evaluation, outcome.set) };
+}
+
+/**
+ * What the public tool descriptions say about Holy Priest (HEAL-B2P). It is
+ * observation and plan-execution only, and the prose says so first.
+ */
+export const HOLY_PRIEST_LIMITS = Object.freeze({
+  analysis: [
+    "Holy Priest analysis reports HEALER FINDINGS ONLY, in healerFindings. ASSIGNMENT: with a supplied",
+    "raidCooldownPlan that binds this fight, each of the player's plan entries for an identified healing cooldown",
+    "(Divine Hymn, Apotheosis) is ASSIGNMENT_MET when the player's own cast lies in",
+    "the planned window, an outcome naming the encounter's end when the completed encounter ended before the window opened, and",
+    "UNKNOWN otherwise, with the reason: with no cast in the window, readiness is not established.",
+    "Without a plan, ASSIGNMENT is NO_AUTHORITY_AVAILABLE and no assignment is inferred. COOLDOWN: each observed",
+    "healing-cooldown use, with the damage episodes overlapping it and their coverage, as facts with no verdict.",
+    "HEALING_DECISION: per-cast spell choice has no approved model and is NO_AUTHORITY_AVAILABLE. The status is",
+    "AUTHORITY_NOT_AVAILABLE (no pinned decision authority). It does not rank healing, report HPS, judge whether a",
+    "cooldown should have been used, or judge the plan. A fact the evidence cannot establish is UNKNOWN.",
+  ].join("\n"),
+  raidNight: [
+    "Holy Priest cells evaluate no gameplay decision (AUTHORITY_NOT_AVAILABLE): a raid night carries no",
+    "raid cooldown plan, and the cells carry no healer findings.",
+  ].join("\n"),
+});
+
+/** The Holy Priest specialization module (HEAL-B2; PUBLIC since HEAL-B2P). */
 export const HOLY_PRIEST_MODULE: SpecModule = defineSpecModule({
   identity: {
     specId: HOLY_PRIEST_SPEC_ID,
@@ -242,14 +291,14 @@ export const HOLY_PRIEST_MODULE: SpecModule = defineSpecModule({
     wclClassName: HOLY_PRIEST_WCL_CLASS_NAME,
     wclSpecName: HOLY_PRIEST_WCL_SPEC_NAME,
   },
-  exposure: "INTERNAL_ONLY",
+  exposure: "PUBLIC",
   capabilities: HOLY_PRIEST_CAPABILITIES,
   authorityBindings: HOLY_PRIEST_AUTHORITY_BINDINGS,
-  // No public description: INTERNAL_ONLY. The public prose is HEAL-B2P's.
-  limitsProse: Object.freeze({ analysis: "", raidNight: "" }),
+  limitsProse: HOLY_PRIEST_LIMITS,
   supplementalAnalyses: [],
   analyze: (input, authority): HolyPriestAnalysis => analyzeHolyPriest(input, authority),
   observedDecisionView: noObservedDecisionView,
+  healerView: (analysis) => holyPriestHealerViewOf(analysis),
 });
 
 /** The row the production catalog lists. The module owns it. */

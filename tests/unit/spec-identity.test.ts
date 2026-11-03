@@ -94,7 +94,7 @@ describe("the supported identities", () => {
     expect(outcome("Paladin", "Brewmaster")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
-  it("recognizes exactly nine specializations", () => {
+  it("recognizes exactly ten specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
@@ -107,6 +107,7 @@ describe("the supported identities", () => {
       "shaman/restoration",
       "paladin/holy",
       "monk/mistweaver",
+      "priest/holy",
     ]);
   });
 
@@ -124,8 +125,10 @@ describe("the supported identities", () => {
     expect(outcome("Paladin", "Protection")).toBe("paladin/protection");
     expect(outcome("Paladin", "Holy")).toBe("paladin/holy");
     expect(outcome("Paladin", "Holyy")).toBe("UNSUPPORTED_SPECIALIZATION");
-    // Right spec name, wrong class: a Holy Priest is not a Holy Paladin.
-    expect(outcome("Priest", "Holy")).toBe("UNSUPPORTED_SPECIALIZATION");
+    // Right spec name, other class: a Holy Priest is not a Holy Paladin. Each
+    // resolves to its own id (Priest/Holy since HEAL-B2P), never the other.
+    expect(outcome("Priest", "Holy")).toBe("priest/holy");
+    expect(outcome("Shaman", "Holy")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Paladin", "Protection ")).toBe("paladin/protection");
     expect(outcome("Paladin", "Protectionn")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Paladin", "Retributionn")).toBe("UNSUPPORTED_SPECIALIZATION");
@@ -204,11 +207,11 @@ describe("no unsupported identity falls through to a supported specialization", 
     // The other two Rogue specs — the nearest misses, sharing a class.
     ["Rogue", "Outlaw"],
     ["Rogue", "Subtlety"],
-    // Holy, with the class another Holy specialization belongs to (HEAL-B1P
-    // made Paladin/Holy supported, so it is no longer a nearest miss here).
-    // Holy Priest is also registered INTERNAL_ONLY since HEAL-B2: never
-    // publicly resolvable.
-    ["Priest", "Holy"],
+    // Holy, with a class no Holy specialization belongs to (HEAL-B1P made
+    // Paladin/Holy supported and HEAL-B2P Priest/Holy, so neither is a
+    // nearest miss here any more).
+    ["Shaman", "Holy"],
+    ["Druid", "Holy"],
     // Restoration Druid: registered INTERNAL_ONLY, never publicly resolvable.
     ["Druid", "Restoration"],
     // The canonical captured unsupported identity: A7R6 fight 7, actor 4.

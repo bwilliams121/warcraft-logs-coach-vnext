@@ -1,10 +1,14 @@
-# Holy Priest (HEAL-B2, INTERNAL_ONLY)
+# Holy Priest (HEAL-B2; PUBLIC since HEAL-B2P)
 
 A healer specialization evaluator on the healer architecture Restoration
-Shaman proved (M12-D, HEAL-A) and HEAL-B1 repeated. Registered INTERNAL_ONLY:
-a public request cannot reach it. Its public shape and promotion are
-HEAL-B2P's. It is not an APL specialization: there is no SimulationCraft
-authority and no APL artifact.
+Shaman proved (M12-D, HEAL-A) and HEAL-B1 repeated. Registered INTERNAL_ONLY
+in HEAL-B2 and PUBLIC since HEAL-B2P, after passing the healer promotion gate
+(`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) on the canonical
+fight's Holy Priest (b1PmaKrd6CDfzngc fight 48, actor 2: three Apotheosis and
+three Divine Hymn casts, the listing COMPLETE). It publishes `healerFindings`
+through the shared healer view (`src/findings/healer-view-projection.ts`). It
+is not an APL specialization: there is no SimulationCraft authority and no APL
+artifact.
 
 ## Registration
 
@@ -62,3 +66,13 @@ is filtered, so its listing is UNKNOWN, never "these were all". The other
 identity subject (b1PmaKrd6CDfzngc fight 48, actor 2) has no cast in the
 committed friendly-players window; its sources are itself and its stated pet
 (94).
+
+## Real evidence (HEAL-B2P)
+
+`tests/evidence/artifacts/wcl-events/wcl-b1pm-fight-48-holy-priest-2-casts.seg-{0-180,180-345}.json`:
+every cast and begincast sourced by or targeting actor 2 over the whole fight,
+cut from the retained M11-E2 capture (no new Warcraft Logs request). CASTS is
+granted for actor 2 only; its pet's casts are not retained. Actor 2 casts
+Apotheosis at 7,470,226, 7,595,502 and 7,721,342 and Divine Hymn at 7,509,640,
+7,640,275 and 7,761,154; its fifteen Divine Hymn pulse casts (64844) are never
+uses.

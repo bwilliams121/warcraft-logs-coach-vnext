@@ -264,7 +264,7 @@ describe("what the tree registers today", () => {
       ["src/specs/paladin/holy/registration.ts", "HOLY_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/protection/registration.ts", "PROTECTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/retribution/registration.ts", "RETRIBUTION_PALADIN_REGISTRATION", "PUBLIC"],
-      ["src/specs/priest/holy/registration.ts", "HOLY_PRIEST_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/priest/holy/registration.ts", "HOLY_PRIEST_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],
       ["src/specs/shaman/restoration/registration.ts", "RESTORATION_SHAMAN_REGISTRATION", "PUBLIC"],
     ]);

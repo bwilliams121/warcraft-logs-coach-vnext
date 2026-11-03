@@ -433,11 +433,11 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Eleven rows: nine PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
- * Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1)
- * and two INTERNAL_ONLY: since HEAL-B1, Restoration Druid, the one healer
- * HEAL-B1P could not promote (no retained evidence of one), and since HEAL-B2,
- * Holy Priest, whose public promotion is HEAL-B2P.
+ * Eleven rows: ten PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
+ * Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1,
+ * Holy Priest in HEAL-B2) and one INTERNAL_ONLY: since HEAL-B1, Restoration
+ * Druid, the one healer HEAL-B1P could not promote (no retained evidence of
+ * one).
  * A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
@@ -464,7 +464,7 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   HOLY_PALADIN_REGISTRATION,
   RESTORATION_DRUID_REGISTRATION,
   MISTWEAVER_MONK_REGISTRATION,
-  // INTERNAL_ONLY since HEAL-B2: a fourth healer row on the same architecture. No public shape yet (HEAL-B2P).
+  // INTERNAL_ONLY from HEAL-B2; PUBLIC since HEAL-B2P. A fourth healer row on the same architecture.
   HOLY_PRIEST_REGISTRATION,
 ]);
 

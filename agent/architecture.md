@@ -12712,6 +12712,60 @@ No committed capture yet holds the fight-48 Holy Priest's whole-fight casts
 (the cut HEAL-B1P made for actors 1 and 9); see agent/follow-ups.md "After
 HEAL-B2".
 
+## HEAL-B2P — Holy Priest public promotion
+
+Autopilot queue entry HEAL-B2P. Public contract: EXPECTED (additive under
+`analysis/1`: one `specId` value, `priest/holy`). No Warcraft Logs request:
+new archive segments cut offline from the retained M11-E2 raw capture.
+
+**What passed.** The HEAL-AP healer promotion gate
+(`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) is unchanged in
+substance; it gained one pinned subject, and the subject passes every check
+through the public service:
+
+- Holy Priest, b1PmaKrd6CDfzngc fight 48 actor 2: three Apotheosis
+  (7,470,226, 7,595,502, 7,721,342) and three Divine Hymn (7,509,640,
+  7,640,275, 7,761,154) casts, the listing COMPLETE; a met Divine Hymn entry
+  (7,509,000 ± 2 s), a not-met Apotheosis entry (7,650,000 ± 3 s), one after
+  the encounter's end (7,790,000), and Flash Heal (not identified).
+- Its fifteen Divine Hymn pulse casts (64844) are never uses
+  (`tests/unit/specs/heal-b2-holy-priest.test.ts` pins this on the real
+  bytes), so the channel rule HEAL-B2 stated is now proven over a whole
+  fight, not only on synthetic events.
+
+**Evidence** (`tests/evidence/`, ordinary archive growth, 137,685 bytes). Two
+compact cast-only segments, `wcl-b1pm-fight-48-holy-priest-2-casts.seg-{0-180,180-345}`,
+cut by `sanitize-probe.mjs --actor-slice 2 --families cast,begincast
+--compact` exactly as HEAL-B1P cut actors 1 and 9 (the manifest records them
+as a third subject of the same block). Each grants CASTS for actor 2 over its
+range only; nothing is granted to its pet. The cut is from the whole-fight
+capture retrieved COMPLETE with no actor filter, so "these are all of its
+casts" holds. The archive without the two owner exceptions stays under the
+4 MiB notice line; the regression corpus is untouched apart from two re-pinned
+Holy Priest cases.
+
+**Reachability: the five-site promotion**, by the same reviewed edit as every
+earlier promotion: the partition (`INTERNAL_ONLY_SPEC_IDS` now holds
+`druid/restoration` alone), the public contract's `specId` enum, the identity
+table, the `satisfies PublicSpecId` on `spec.ts`, and the registration's
+`exposure`. The registration gains its healer view (the shared
+`healerViewOfEvaluation`) and public limits prose, copied from HEAL-B1P's.
+The evaluator, data and revision are unchanged (`holy-priest-evaluator/1`).
+
+**What a public request now receives.** A Priest/Holy identity dispatches its
+own row, derives FULL_RAID, and publishes `healerFindings` exactly as the
+other public healers do: AUTHORITY_NOT_AVAILABLE when evaluated,
+INSUFFICIENT_EVIDENCE otherwise, never ANALYZED. The plan disclosure, TLDR
+and report behavior is HEAL-AP's, unchanged. A raid-night cell for it is
+AUTHORITY_NOT_AVAILABLE (or INSUFFICIENT_EVIDENCE when the evidence states no
+specialization) and carries no healer findings and no plan. Discipline and
+Shadow Priests remain SPEC_NOT_SUPPORTED: the class alone never selects the
+row.
+
+**Not done here.** The shared healer registration helper ("After HEAL-B2")
+would rewrite four reviewed registrations; it is recorded as its own
+refactor in agent/follow-ups.md "After HEAL-B2P".
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

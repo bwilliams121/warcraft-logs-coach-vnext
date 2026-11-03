@@ -30,8 +30,9 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS TWO MEMBERS SINCE HEAL-B2 (Restoration Druid and
- * Holy Priest). It held Restoration Druid alone from HEAL-B1P, which promoted
+ * THE INTERNAL-ONLY SET HOLDS ONE MEMBER SINCE HEAL-B2P (Restoration Druid),
+ * which promoted Holy Priest. It held two from HEAL-B2 (Restoration Druid and
+ * Holy Priest), and Restoration Druid alone from HEAL-B1P, which promoted
  * Holy Paladin and Mistweaver Monk. It held three from HEAL-B1
  * (Holy Paladin, Restoration Druid and Mistweaver Monk), the first time it
  * held more than one. It was empty from HEAL-AP, which promoted Restoration Shaman (it held
@@ -97,6 +98,7 @@ export const PUBLIC_SPEC_IDS = Object.freeze([
   "shaman/restoration",
   "paladin/holy",
   "monk/mistweaver",
+  "priest/holy",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -180,12 +182,13 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  *
  * Holy Priest arrived here in HEAL-B2, a fourth healer registration on the
  * same architecture with its own reviewed healing-cooldown identity data
- * (Divine Hymn and Apotheosis). Its public shape and promotion are HEAL-B2P's;
- * until then the id stays here.
+ * (Divine Hymn and Apotheosis). HEAL-B2P moved it to `PUBLIC_SPEC_IDS` by
+ * the same five-site edit, with the shared healer view, after it passed the
+ * healer promotion gate on real evidence (its whole-fight casts in the
+ * canonical fight, cut from the retained capture).
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
-  "priest/holy",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

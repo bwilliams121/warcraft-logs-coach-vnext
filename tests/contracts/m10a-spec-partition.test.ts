@@ -56,6 +56,7 @@ describe("the known specialization ids are exactly partitioned", () => {
       "shaman/restoration",
       "paladin/holy",
       "monk/mistweaver",
+      "priest/holy",
     ]);
     expect(isPublicSpecId("paladin/holy")).toBe(true);
     expect(isPublicSpecId("monk/mistweaver")).toBe(true);
@@ -86,7 +87,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     // since HEAL-B1P, which promoted the other two (no retained evidence holds
     // a Restoration Druid event, so it cannot meet the healer gate). HEAL-B2
     // added Holy Priest, whose public promotion is HEAL-B2P.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["druid/restoration", "priest/holy"]);
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["druid/restoration"]);
     for (const id of INTERNAL_ONLY_SPEC_IDS) {
       expect(isSpecId(id), id).toBe(true);
       expect(isPublicSpecId(id), id).toBe(false);

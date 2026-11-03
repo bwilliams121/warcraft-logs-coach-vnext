@@ -1824,6 +1824,13 @@ Holy Paladin and Mistweaver Monk public (HEAL-B1P, tests/contracts/heal-ap-heale
   Restoration Druid                            -> still INTERNAL_ONLY; public request SPEC_NOT_SUPPORTED, no dispatch (no evidence for the gate)
   shared healer view                           -> Restoration Shaman's public tests unchanged over healer-view-projection.ts
   raid night                                   -> a stated-spec-less Mistweaver cell INSUFFICIENT_EVIDENCE, never SPEC_NOT_SUPPORTED, never Brewmaster's
+Holy Priest public (HEAL-B2P, tests/contracts/heal-ap-healer-promotion-gate.test.ts, heal-b1-healer-registrations.test.ts, heal-b2-holy-priest.test.ts):
+  gate subject                                 -> fight 48 Holy Priest 2 whole-fight casts; every HEAL-AP gate check passes
+  real uses                                    -> 3 Apotheosis + 3 Divine Hymn; listing COMPLETE; 15 pulse casts (64844) are never uses
+  plan entries                                 -> MET Divine Hymn (cast 7,509,640); not-met Apotheosis 7,650,000 ± 3 s; after the end; Flash Heal unregistered
+  registration                                 -> PUBLIC; both lookups the same row; identity table resolves Priest/Holy; public request dispatched once
+  identity                                     -> Priest/Holy resolves to priest/holy only; Shaman/Holy and Druid/Holy stay unsupported
+  Restoration Druid                            -> still the one INTERNAL_ONLY row; public request SPEC_NOT_SUPPORTED, no dispatch
 Holy Priest internal (HEAL-B2, tests/unit/specs/heal-b2-holy-priest.test.ts; a fourth case in heal-b1-healer-evaluators/registrations and healing-cooldown-identity-artifact):
   shared healer cases                          -> every HEAL-B1 evaluator and registration case passes for Holy Priest (other class: Paladin)
   artifact                                     -> exactly Divine Hymn 64843 and Apotheosis 200183, NORMAL; Discipline 256 / Shadow 258 refused; 64844 refused

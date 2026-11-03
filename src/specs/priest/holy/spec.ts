@@ -1,6 +1,6 @@
 /**
  * Holy Priest's identity and declared inputs (HEAL-B2, registered
- * INTERNAL_ONLY).
+ * INTERNAL_ONLY; PUBLIC since HEAL-B2P).
  *
  * The Warcraft Logs class and specialization strings are the ones the
  * committed fight contexts record for the identity subjects (b1PmaKrd6CDfzngc
@@ -8,12 +8,16 @@
  * `friendlySpecs` "Holy").
  */
 
-import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
+import type { PublicSpecId } from "../../../findings/spec-id.js";
 
 export const HOLY_PRIEST_EVALUATOR_REVISION = "holy-priest-evaluator/1" as const;
 
-/** The id. `InternalOnlySpecId`: the compile-time side of the exposure. */
-export const HOLY_PRIEST_SPEC_ID = "priest/holy" satisfies InternalOnlySpecId;
+/**
+ * The id. `PublicSpecId` since HEAL-B2P (it was `InternalOnlySpecId` in
+ * HEAL-B2): the compile-time side of the exposure, one of the five promotion
+ * sites.
+ */
+export const HOLY_PRIEST_SPEC_ID = "priest/holy" satisfies PublicSpecId;
 
 export const HOLY_PRIEST_ANALYZER_ID = "priest-holy-healer-findings";
 

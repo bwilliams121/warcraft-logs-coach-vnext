@@ -4,7 +4,8 @@
  * exactly as HEAL-A's registration test composes it, plus the service seams
  * the public tests drive it through. HEAL-B1P: the same composition for the
  * fight's Holy Paladin (actor 1) and Mistweaver Monk (actor 9), whose
- * whole-fight cast segments were cut from the same capture.
+ * whole-fight cast segments were cut from the same capture. HEAL-B2P: the same
+ * for the fight's Holy Priest (actor 2).
  *
  * Nothing here is fetched. The two fights are the same capture: `fight` at its
  * retrieved PLAYER_CONTEXT breadth, and `rostered` with the committed fight
@@ -38,6 +39,11 @@ export const MISTWEAVER_SUBJECT_ACTOR = 9;
 export const RESTORAL = 388615;
 export const INVOKE_YULON = 322118;
 export const VIVIFY = 116670;
+/** HEAL-B2P: the canonical fight's Holy Priest and its identified healing cooldowns. */
+export const HOLY_PRIEST_SUBJECT_ACTOR = 2;
+export const DIVINE_HYMN = 64843;
+export const APOTHEOSIS = 200183;
+export const FLASH_HEAL = 2061;
 
 const segmentsOf = (slug: string, actorId: number) => [
   `wcl-b1pm-fight-48-${slug}-${String(actorId)}-casts.seg-0-180`,
@@ -78,6 +84,15 @@ export async function loadMistweaverSubject(): Promise<RestorationSubject> {
     actorId: MISTWEAVER_SUBJECT_ACTOR,
     segments: segmentsOf("mistweaver-monk", MISTWEAVER_SUBJECT_ACTOR),
     pseudonym: "Subjectmonk",
+  });
+}
+
+/** HEAL-B2P: the canonical fight's Holy Priest, composed as the Restoration Shaman is. */
+export async function loadHolyPriestSubject(): Promise<RestorationSubject> {
+  return await loadCanonicalHealerSubject({
+    actorId: HOLY_PRIEST_SUBJECT_ACTOR,
+    segments: segmentsOf("holy-priest", HOLY_PRIEST_SUBJECT_ACTOR),
+    pseudonym: "Subjectpriest",
   });
 }
 

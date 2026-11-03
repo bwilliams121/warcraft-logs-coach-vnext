@@ -77,6 +77,7 @@ export const PUBLIC_SPEC_IDS = [
   "shaman/restoration",
   "paladin/holy",
   "monk/mistweaver",
+  "priest/holy",
 ] as const satisfies readonly SpecId[];
 
 type ListedSpecId = (typeof PUBLIC_SPEC_IDS)[number];

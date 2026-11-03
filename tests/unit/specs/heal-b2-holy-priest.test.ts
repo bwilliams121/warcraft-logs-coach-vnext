@@ -1,5 +1,6 @@
 /**
- * HEAL-B2: the Holy Priest evaluator and its INTERNAL_ONLY registration, over
+ * HEAL-B2: the Holy Priest evaluator and its registration (INTERNAL_ONLY in
+ * HEAL-B2, PUBLIC since HEAL-B2P), over
  * what is specific to it. The cases every healer evaluator and registration
  * shares (identity refusals, no-plan NO_AUTHORITY_AVAILABLE, plan outcomes,
  * coverage gaps, roster scope, exposure) run it through the HEAL-B1
@@ -21,6 +22,10 @@
  *   friendly-players window that carries no cast of its own: no use is
  *   listed, and the listing is UNKNOWN, never "no cooldown was used"; its
  *   sources are itself and its Warcraft Logs-stated pet (94);
+ * - HEAL-B2P: the same Holy Priest over its whole-fight casts (cut from the
+ *   retained capture, no actor filter): three Apotheosis and three Divine
+ *   Hymn uses, the listing COMPLETE, and none of its fifteen pulse casts is a
+ *   use;
  * - the M13-A Discipline and Shadow Priests (actors 9 and 10) are refused:
  *   the class alone is not the specialization.
  */
@@ -193,7 +198,7 @@ describe("Divine Hymn's healing pulses are not uses", () => {
   });
 });
 
-describe("the internal Holy Priest registration over committed real evidence", () => {
+describe("the Holy Priest registration over committed real evidence", () => {
   let m13a: CombatFight;
   let b1pm: CombatFight;
 
@@ -342,5 +347,40 @@ describe("the internal Holy Priest registration over committed real evidence", (
     expect(evaluation.cooldowns.subjectSources).toEqual([2, 94]);
     expect(setOf(analysis).findings).toEqual([]);
     expect(setOf(analysis).categories[1]).toMatchObject({ listing: { completeness: "UNKNOWN" } });
+  });
+
+  it("b1pm fight 48 Holy Priest (actor 2) over its whole-fight casts (HEAL-B2P): six uses, a COMPLETE listing, and no pulse is a use", async () => {
+    const loaded = await loadCommittedEvidenceArchive();
+    if (!loaded.ok) throw new Error(loaded.errors.map((error) => error.message).join("\n"));
+    const segments = [
+      "wcl-b1pm-fight-48-holy-priest-2-casts.seg-0-180",
+      "wcl-b1pm-fight-48-holy-priest-2-casts.seg-180-345",
+    ];
+    const whole = bundleOf(loaded.archive, segments, [], {
+      catalogArtifactId: "wcl-fight-context-b1pm-fight-48",
+    }).fight;
+    // The raw bytes: the subject's Divine Hymn pulses are casts of 64844.
+    let pulses = 0;
+    for (const segment of segments) {
+      const raw = readFileSync(`tests/evidence/artifacts/wcl-events/${segment}.json`, "utf8");
+      pulses += [...raw.matchAll(/"type":"cast","sourceID":2,[^{}]*"abilityGameID":64844,/g)].length;
+    }
+    expect(pulses).toBe(15);
+    const analysis = internalRun(whole, 2);
+    expect(analysis.status).toBe("AUTHORITY_NOT_AVAILABLE");
+    const evaluation = analysis.evaluation;
+    if (evaluation?.state !== "EVALUATED") throw new Error("not evaluated");
+    expect(evaluation.cooldowns.uses.map((use) => [use.cast.abilityGameId, use.cast.reportTimeMs])).toEqual([
+      [APOTHEOSIS, 7_470_226],
+      [DIVINE_HYMN, 7_509_640],
+      [APOTHEOSIS, 7_595_502],
+      [DIVINE_HYMN, 7_640_275],
+      [APOTHEOSIS, 7_721_342],
+      [DIVINE_HYMN, 7_761_154],
+    ]);
+    // The cut is from a capture retrieved with no actor filter: these are all of them.
+    expect(evaluation.cooldowns.listing).toMatchObject({ state: "COMPLETE" });
+    expect(setOf(analysis).categories[1]).toMatchObject({ listing: { completeness: "COMPLETE" } });
+    expect(JSON.stringify(analysis)).not.toMatch(/MISSED|wrong|incorrect|mistake|should/i);
   });
 });

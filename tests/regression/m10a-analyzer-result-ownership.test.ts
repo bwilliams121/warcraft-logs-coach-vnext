@@ -40,6 +40,7 @@ import { AUGMENTATION_EVOKER_REGISTRATION } from "../../src/specs/evoker/augment
 import { RESTORATION_SHAMAN_REGISTRATION } from "../../src/specs/shaman/restoration/registration.js";
 import { MISTWEAVER_MONK_REGISTRATION } from "../../src/specs/monk/mistweaver/registration.js";
 import { HOLY_PALADIN_REGISTRATION } from "../../src/specs/paladin/holy/registration.js";
+import { HOLY_PRIEST_REGISTRATION } from "../../src/specs/priest/holy/registration.js";
 import { analyzeObservedProtectionPaladinDecisions } from "../../src/specs/paladin/protection/observed-analysis.js";
 import { analyzeObservedAssassinationDecisions } from "../../src/specs/rogue/assassination/observed-analysis.js";
 import {
@@ -277,6 +278,7 @@ describe("a mismatched result cannot reach observedDecisionViewOf", () => {
       RESTORATION_SHAMAN_REGISTRATION,
       HOLY_PALADIN_REGISTRATION,
       MISTWEAVER_MONK_REGISTRATION,
+      HOLY_PRIEST_REGISTRATION,
     ]);
     const real = realAssassinationAnalysis();
     if (real.status !== "ANALYZED") throw new Error("expected ANALYZED");

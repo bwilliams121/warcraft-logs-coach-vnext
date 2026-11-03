@@ -395,7 +395,7 @@ describe("what the tree exports today", () => {
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       // HEAL-B2: a fourth healer on the same architecture, INTERNAL_ONLY.
-      ["HOLY_PRIEST_MODULE", "priest/holy", "INTERNAL_ONLY", 0],
+      ["HOLY_PRIEST_MODULE", "priest/holy", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
       ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],

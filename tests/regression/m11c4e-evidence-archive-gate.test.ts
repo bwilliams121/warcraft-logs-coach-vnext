@@ -68,9 +68,11 @@ describe("the committed evidence archive executes clean under workerd", { timeou
     // segment (two cases, three assertions each).
     // HEAL-B1P: plus one normalization census per Holy Paladin and Mistweaver
     // Monk cast segment (four cases, three assertions each).
-    expect(result.summary.cases).toBe(20);
-    expect(result.summary.assertions).toBe(54);
-    expect(result.summary.passed).toBe(54);
+    // HEAL-B2P: plus one normalization census per Holy Priest cast segment
+    // (two cases, three assertions each).
+    expect(result.summary.cases).toBe(22);
+    expect(result.summary.assertions).toBe(60);
+    expect(result.summary.passed).toBe(60);
   });
 
   it("is deterministic across runs", async () => {
