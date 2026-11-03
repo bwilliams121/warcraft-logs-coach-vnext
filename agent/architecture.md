@@ -12498,6 +12498,97 @@ untouched; "After HEAL-AP").
 only its own focused view to FULL_RAID. Its cell is AUTHORITY_NOT_AVAILABLE
 and carries no healer findings and no plan.
 
+## HEAL-B1 — Holy Paladin, Restoration Druid and Mistweaver Monk (internal)
+
+Autopilot queue entry HEAL-B1. Public contract: NONE. No Warcraft Logs
+request: committed evidence and the pinned SimulationCraft trait table only.
+The M12-D verdict-category limits and the M12-E plan semantics apply to each
+specialization unchanged.
+
+**The problem.** Restoration Shaman's evaluator held two kinds of code: what
+is Restoration Shaman's (its identity gate, its healing-cooldown data, that
+its totems count as its sources) and what is no specialization's (the plan
+rules of CLAUDE.md "Healer Cooldown Assignments", the observed-use and
+overlap facts, the artifact reader, the finding-set restatement). Three more
+healers would have meant three copies of the second kind (CLAUDE.md "Shared
+Finding Primitives").
+
+**What moved to shared code, unchanged in behavior.** Restoration Shaman's
+own tests, the HEAL-AP gate, its public projection tests and the corpus run
+unchanged over the moved code.
+
+- `src/healing/cooldown-use-context.ts`: a player's completed casts of
+  caller-given ability ids inside the encounter, its ability-less cast
+  times, the use listing's completeness, its Warcraft Logs-stated pet set,
+  and each use's overlapping damage episodes with their listing. Facts only;
+  `m12a-healing-layering` covers it (no specialization or judgement word), and
+  its consumers are the four healer evaluators. Which ids are cooldowns and
+  whether pets count stay the caller's decisions.
+- `src/findings/healer-assignment-execution.ts`: the plan rules (no plan,
+  another fight's plan, an unbindable plan, entry ownership, MET,
+  NOT_ACTIONABLE after a completed encounter's end, UNKNOWN with the reason,
+  ABILITY_NOT_REGISTERED). It never imports `src/healing/`. The `m5c1`
+  exception for the `"ASSIGNMENT_NOT_ACTIONABLE"` literal moved to this file
+  with it; still one issuing file, same evidence-bearing reason.
+- `src/findings/healer-finding-projection.ts`: `healerFindingSetOf(spec, …)`,
+  the HEAL-A restatement, called with each specialization's own id.
+- `src/data/game/healing-cooldown-identity-artifact.ts`: the artifact reader,
+  parameterized by dataset id, class id and specialization id. Two checks
+  were added, both met by the Restoration Shaman artifact: the entry's node
+  type must equal the row's `node_type`, and the cast id is the row's
+  `id_override_spell` when it has one (`trait_data.hpp`: the spell "for
+  display/activation in-game"), else `id_spell`. A CHOICE node may have no
+  identified sibling; a NORMAL node never has one.
+
+The Restoration Shaman evaluator re-exports the moved types under their old
+names; its revision is unchanged (`/2`), because its results are unchanged.
+
+**The three trees** (`src/specs/paladin/holy/`, `src/specs/druid/restoration/`,
+`src/specs/monk/mistweaver/`, revisions `holy-paladin-evaluator/1`,
+`restoration-druid-evaluator/1`, `mistweaver-monk-evaluator/1`). Each owns:
+
+- its identity gate (the stated class and specialization, and a player of
+  that class in the master data; otherwise IDENTITY_REFUSED);
+- its healing-cooldown identity data, a verbatim specialization-tree row per
+  entry of the pinned `trait_data.inc` (commit 33622e9d, client data
+  12.1.0.69587), selection hand reviewed and recorded per entry, nothing
+  about readiness claimed:
+  - Holy Paladin (class 2, spec 65): Aura Mastery 31821; Avenging Wrath 31884
+    and Avenging Crusader 216331 on one choice node (Crusader's talent spell
+    394088 is activated as 216331);
+  - Restoration Druid (11, 105): Tranquility 740, Flourish 197721; Incarnation:
+    Tree of Life 33891 and Convoke the Spirits 391528 on one choice node (only
+    the spec-105 Convoke row);
+  - Mistweaver Monk (10, 270): Revival 115310 and Restoral 388615; Invoke
+    Yu'lon 322118 and Invoke Chi-Ji 325197; two choice nodes;
+- that a use is its own completed cast (a channel once, at its cast), and that
+  its Warcraft Logs-stated pets count as its sources;
+- its registration, a copy of Restoration Shaman's HEAL-A shape: three
+  provider-less families declared from its REQUIRED_INPUTS (FULL_RAID derived),
+  no binding, never ANALYZED, AUTHORITY_NOT_AVAILABLE when evaluated and
+  INSUFFICIENT_EVIDENCE otherwise, the plan from `SpecAnalysisInput`, and no
+  healer view or public prose.
+
+**Reachability.** The three ids are in `INTERNAL_ONLY_SPEC_IDS` (its first
+time with more than one member). `analyzerForSpec` never selects them, the
+identity table does not resolve them, and a public request stays
+SPEC_NOT_SUPPORTED. The catalog has ten rows. The corpus gained three layers
+(`SPEC_HOLY_PALADIN`, `SPEC_RESTORATION_DRUID`, `SPEC_MISTWEAVER_MONK`) and six
+cases.
+
+**Real evidence** (committed, checked against the raw bytes):
+
+- the M13-A Holy Paladin (actor 5): Avenging Wrath at 184,987 and Aura
+  Mastery at 272,367, the only casts of identified ids. The capture is
+  filtered, so the listing is UNKNOWN (INSUFFICIENT_COVERAGE), and its
+  breadth gives ROSTER_NOT_IN_SCOPE overlap;
+- b1PmaKrd6CDfzngc fight 48, Holy Paladin actor 1 and Mistweaver actor 9, over
+  the friendly-players window that carries no cast of theirs: no use, listing
+  UNKNOWN, never "none used"; the Mistweaver's sources are its four stated
+  pets;
+- Restoration Druid: identity only (gtKb fight 22, actor 2, in the committed
+  context). No event capture holds one.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

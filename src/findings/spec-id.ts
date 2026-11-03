@@ -30,8 +30,10 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET IS EMPTY AGAIN SINCE HEAL-AP, which promoted
- * Restoration Shaman (it held that one member from HEAL-A). It was empty from
+ * THE INTERNAL-ONLY SET HOLDS THREE MEMBERS SINCE HEAL-B1 (Holy Paladin,
+ * Restoration Druid and Mistweaver Monk), the first time it has held more than
+ * one. It was empty from HEAL-AP, which promoted Restoration Shaman (it held
+ * that one member from HEAL-A). It was empty from
  * M13-F, which promoted Augmentation Evoker (it held that one member from
  * M13-E). Before that it held one member from M11-C2. It was empty
  * from M10-D (Protection public) until M11-A4 (Retribution arrived internal),
@@ -40,7 +42,7 @@
  * measurement slices and the M11-B11 promotion-readiness audit) until M11-C2,
  * when Brewmaster Monk arrived here first, as all three of its predecessors
  * did. The partition, the narrowing boundary and the registry's exposure
- * rules are live over that one member, and the compile-time proofs below hold
+ * rules are live over its members, and the compile-time proofs below hold
  * over any number of members, including none.
  *
  * THE NARROWING BOUNDARY, AND WHY IT THROWS
@@ -62,7 +64,10 @@ export type SpecId =
   | "deathknight/blood"
   | "monk/brewmaster"
   | "evoker/augmentation"
-  | "shaman/restoration";
+  | "shaman/restoration"
+  | "paladin/holy"
+  | "druid/restoration"
+  | "monk/mistweaver";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -72,6 +77,9 @@ export const SPEC_IDS = Object.freeze([
   "monk/brewmaster",
   "evoker/augmentation",
   "shaman/restoration",
+  "paladin/holy",
+  "druid/restoration",
+  "monk/mistweaver",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -150,9 +158,21 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * shared healer finding shape (`healer-finding.ts`). HEAL-AP moved it to
  * `PUBLIC_SPEC_IDS` by the same five-site edit, together with the reviewed
  * healer public result shape (`healerFindings`) and after the healer
- * promotion gate passed on real evidence. The set is empty again.
+ * promotion gate passed on real evidence. The set was empty again from
+ * HEAL-AP until HEAL-B1.
+ *
+ * Holy Paladin, Restoration Druid and Mistweaver Monk arrived here together in
+ * HEAL-B1, three healer registrations on Restoration Shaman's architecture:
+ * provider-less families, never ANALYZED, assignments judged only against a
+ * supplied plan, cooldown uses as observed facts, each with its own reviewed
+ * healing-cooldown identity data. Their public shape and promotion are
+ * HEAL-B1P's; until then the ids stay here.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
+  "paladin/holy",
+  "druid/restoration",
+  "monk/mistweaver",
+] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

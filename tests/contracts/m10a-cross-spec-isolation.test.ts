@@ -106,12 +106,15 @@ function classPrefixOfModule(resolved: string): string | null {
 }
 
 describe("the sweep has something to sweep", () => {
-  it("finds the Assassination tree, the two Paladin trees, the Blood Death Knight tree, since M11-C2 the Brewmaster Monk tree, since M12-D the Restoration Shaman evaluator tree (registered since HEAL-A) and, since M13-A, the Augmentation Evoker tree (registered since M13-E)", () => {
+  it("finds the Assassination tree, the two Paladin trees, the Blood Death Knight tree, since M11-C2 the Brewmaster Monk tree, since M12-D the Restoration Shaman evaluator tree (registered since HEAL-A) , since M13-A, the Augmentation Evoker tree (registered since M13-E) and, since HEAL-B1, the Holy Paladin, Restoration Druid and Mistweaver Monk healer trees", () => {
     const trees = new Set(SPEC_FILES.map(specTreeOf).filter((tree): tree is string => tree !== null));
     expect([...trees].sort()).toEqual([
       "src/specs/deathknight/blood",
+      "src/specs/druid/restoration",
       "src/specs/evoker/augmentation",
       "src/specs/monk/brewmaster",
+      "src/specs/monk/mistweaver",
+      "src/specs/paladin/holy",
       "src/specs/paladin/protection",
       "src/specs/paladin/retribution",
       "src/specs/rogue/assassination",
@@ -120,6 +123,9 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/paladin/protection/registration.ts")).toBe(true);
     expect(existsSync("src/specs/shaman/restoration/registration.ts")).toBe(true);
     expect(existsSync("src/specs/evoker/augmentation/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/paladin/holy/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/druid/restoration/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/monk/mistweaver/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
   });
 
@@ -186,8 +192,11 @@ describe("shared code reaches specializations only through the registration boun
       .sort();
     expect(specImports).toEqual([
       "src/specs/deathknight/blood/registration.js",
+      "src/specs/druid/restoration/registration.js",
       "src/specs/evoker/augmentation/registration.js",
       "src/specs/monk/brewmaster/registration.js",
+      "src/specs/monk/mistweaver/registration.js",
+      "src/specs/paladin/holy/registration.js",
       "src/specs/paladin/protection/registration.js",
       "src/specs/paladin/retribution/registration.js",
       "src/specs/rogue/assassination/registration.js",

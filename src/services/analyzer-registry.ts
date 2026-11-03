@@ -74,7 +74,10 @@ import type { ObservedDecisionView } from "../findings/observed-decision-view.js
 import { isPublicSpecId, isSpecId, PUBLIC_SPEC_IDS, type SpecId } from "../findings/spec-id.js";
 import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../specs/deathknight/blood/registration.js";
 import { AUGMENTATION_EVOKER_REGISTRATION } from "../specs/evoker/augmentation/registration.js";
+import { RESTORATION_DRUID_REGISTRATION } from "../specs/druid/restoration/registration.js";
 import { BREWMASTER_MONK_REGISTRATION } from "../specs/monk/brewmaster/registration.js";
+import { MISTWEAVER_MONK_REGISTRATION } from "../specs/monk/mistweaver/registration.js";
+import { HOLY_PALADIN_REGISTRATION } from "../specs/paladin/holy/registration.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
@@ -429,8 +432,10 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Seven rows, all PUBLIC since HEAL-AP (Augmentation Evoker was INTERNAL_ONLY
- * in M13-E, Restoration Shaman in HEAL-A). A publicly unsupported
+ * Ten rows: seven PUBLIC (all PUBLIC from HEAL-AP until HEAL-B1; Augmentation
+ * Evoker was INTERNAL_ONLY in M13-E, Restoration Shaman in HEAL-A) and, since
+ * HEAL-B1, Holy Paladin, Restoration Druid and Mistweaver Monk INTERNAL_ONLY.
+ * A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
  * internal lookup and tests, and is never selected for a public request —
@@ -451,6 +456,10 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   AUGMENTATION_EVOKER_REGISTRATION,
   // INTERNAL_ONLY from HEAL-A; PUBLIC since HEAL-AP. The first healer row: binds no pinned authority, publishes healer findings.
   RESTORATION_SHAMAN_REGISTRATION,
+  // INTERNAL_ONLY since HEAL-B1: healer rows on Restoration Shaman's architecture. No public shape yet (HEAL-B1P).
+  HOLY_PALADIN_REGISTRATION,
+  RESTORATION_DRUID_REGISTRATION,
+  MISTWEAVER_MONK_REGISTRATION,
 ]);
 
 /**

@@ -75,6 +75,10 @@ const EVERY_ANALYZER = [
   "evoker-augmentation-support-observations",
   // HEAL-A: INTERNAL_ONLY, so never dispatched by a public transport.
   "shaman-restoration-healer-findings",
+  // HEAL-B1: INTERNAL_ONLY, so never dispatched by a public transport.
+  "paladin-holy-healer-findings",
+  "druid-restoration-healer-findings",
+  "monk-mistweaver-healer-findings",
 ] as const;
 
 let nextId = 1;

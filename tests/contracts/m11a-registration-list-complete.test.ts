@@ -236,7 +236,7 @@ describe("the production catalog and the tree name the same registrations", () =
 // ---------------------------------------------------------------------------
 
 describe("what the tree registers today", () => {
-  it("is exactly Assassination Rogue, the two Paladins, Blood Death Knight, Brewmaster Monk, Augmentation Evoker and Restoration Shaman, all PUBLIC", () => {
+  it("is exactly Assassination Rogue, the two Paladins, Blood Death Knight, Brewmaster Monk, Augmentation Evoker and Restoration Shaman, all PUBLIC, plus the three INTERNAL_ONLY HEAL-B1 healers", () => {
     // A reviewed list, not the rule: the rules above scale to any number of
     // registrations. This snapshot exists so that a new registration module
     // is a VISIBLE change to this file, reviewed alongside the five-site
@@ -249,11 +249,15 @@ describe("what the tree registers today", () => {
     // arrived INTERNAL_ONLY at M13-E, binding no decision authority, and became
     // PUBLIC at M13-F with its support-observation view; Restoration Shaman
     // arrived INTERNAL_ONLY at HEAL-A as the first healer registration and became
-    // PUBLIC at HEAL-AP with its healer view.
+    // PUBLIC at HEAL-AP with its healer view; Holy Paladin, Restoration Druid
+    // and Mistweaver Monk arrived INTERNAL_ONLY at HEAL-B1 on its architecture.
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
       ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
+      ["src/specs/druid/restoration/registration.ts", "RESTORATION_DRUID_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/evoker/augmentation/registration.ts", "AUGMENTATION_EVOKER_REGISTRATION", "PUBLIC"],
       ["src/specs/monk/brewmaster/registration.ts", "BREWMASTER_MONK_REGISTRATION", "PUBLIC"],
+      ["src/specs/monk/mistweaver/registration.ts", "MISTWEAVER_MONK_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/paladin/holy/registration.ts", "HOLY_PALADIN_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/paladin/protection/registration.ts", "PROTECTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/retribution/registration.ts", "RETRIBUTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],

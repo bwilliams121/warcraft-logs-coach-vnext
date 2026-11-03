@@ -1,0 +1,86 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DRUID_RESTORATION_HEALING_COOLDOWNS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/trait_data.inc",
+        "sha256": "7818328b2f870167cffefcb4e6571ec582dc3399064ac9d69a390d9becaa66b2",
+        "byteLength": 686182
+      },
+      {
+        "path": "engine/dbc/trait_data.hpp",
+        "sha256": "87c5f11d99b9caae4f56839b0d0cfe89b64da4441017d5d066ba11be5b547e6b",
+        "byteLength": 3405
+      },
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "classId": 11,
+    "className": "Druid",
+    "specId": 105,
+    "specName": "Restoration",
+    "extractedOn": "2026-11-03",
+    "method": "EXTRACTED_VERBATIM_FROM_PINNED_TRAIT_ROWS",
+    "methodNote": "Each entry is the verbatim trait_data.inc row of a SPECIALIZATION-tree (tree_index 2) trait of class 11 whose id_spec names 105, read at the pinned commit; field order is trait_data.hpp's trait_data_t. Which of the spec's traits are healing cooldowns is a hand-reviewed selection, recorded per entry; nothing else about the spells (cooldown, charges, duration, effect) is claimed here. Since HEAL-B1 the cast id is the row's id_override_spell when it has one (trait_data.hpp: 'id_spell is overriden by id_override_spell for display/activation in-game'), and id_spell otherwise.",
+    "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned datasets: CombatFight exposes no client-build key. The build is recorded for traceability."
+  },
+  "healingCooldowns": [
+    {
+      "abilityGameId": 740,
+      "displayNameEn": "Tranquility",
+      "traitNodeEntryId": 103108,
+      "traitNodeId": 82054,
+      "nodeType": "NORMAL",
+      "choiceSiblingAbilityGameIds": [],
+      "pinnedRow": "{ 2, 11, 103108,  82054, 1,  8, 108113,     740,      0,      0,  5,  5, 100,                            \"Tranquility\", {  105,    0,    0,    0 }, {    0,    0,    0,    0 },   0, 0 }",
+      "useEvidence": "CAST_BY_SUBJECT",
+      "selectionNote": "The spec's channelled raid-wide healing cooldown. A use is the completed cast event; the channel's own ticks are not separate uses. Not observed in any committed evidence; identified from the pinned row only."
+    },
+    {
+      "abilityGameId": 33891,
+      "displayNameEn": "Incarnation: Tree of Life",
+      "traitNodeEntryId": 103120,
+      "traitNodeId": 82064,
+      "nodeType": "CHOICE",
+      "choiceSiblingAbilityGameIds": [391528],
+      "pinnedRow": "{ 2, 11, 103120,  82064, 1, 20, 108125,   33891,      0,      0,  8,  4, 100,              \"Incarnation: Tree of Life\", {  105,    0,    0,    0 }, {    0,    0,    0,    0 },   0, 2 }",
+      "useEvidence": "CAST_BY_SUBJECT",
+      "selectionNote": "Incarnation: Tree of Life, one choice of node 82064. Not observed in any committed evidence; identified from the pinned row only."
+    },
+    {
+      "abilityGameId": 391528,
+      "displayNameEn": "Convoke the Spirits",
+      "traitNodeEntryId": 103119,
+      "traitNodeId": 82064,
+      "nodeType": "CHOICE",
+      "choiceSiblingAbilityGameIds": [33891],
+      "pinnedRow": "{ 2, 11, 103119,  82064, 1, 20, 108124,  391528,      0,      0,  8,  4, 200,                    \"Convoke the Spirits\", {  105,    0,    0,    0 }, {    0,    0,    0,    0 },   0, 2 }",
+      "useEvidence": "CAST_BY_SUBJECT",
+      "selectionNote": "The Restoration (spec 105) row of Convoke the Spirits, the other choice of node 82064. The Balance, Feral and Guardian rows of the same spell are other specializations' trees and are not read here. Not observed in any committed evidence; identified from the pinned row only."
+    },
+    {
+      "abilityGameId": 197721,
+      "displayNameEn": "Flourish",
+      "traitNodeEntryId": 103106,
+      "traitNodeId": 82053,
+      "nodeType": "NORMAL",
+      "choiceSiblingAbilityGameIds": [],
+      "pinnedRow": "{ 2, 11, 103106,  82053, 1,  8, 108111,  197721,      0,      0,  6,  5, 300,                               \"Flourish\", {  105,    0,    0,    0 }, {    0,    0,    0,    0 },   0, 0 }",
+      "useEvidence": "CAST_BY_SUBJECT",
+      "selectionNote": "The spec's heal-over-time extension cooldown. Not observed in any committed evidence; identified from the pinned row only."
+    }
+  ]
+}

@@ -380,6 +380,12 @@ export const OWNING_LAYERS = {
   SPEC_AUGMENTATION_EVOKER: ["src/specs/evoker/augmentation/"],
   /** HEAL-A. The INTERNAL_ONLY Restoration Shaman healer evaluator and nothing else. */
   SPEC_RESTORATION_SHAMAN: ["src/specs/shaman/restoration/"],
+  /** HEAL-B1. The INTERNAL_ONLY Holy Paladin healer evaluator and nothing else. */
+  SPEC_HOLY_PALADIN: ["src/specs/paladin/holy/"],
+  /** HEAL-B1. The INTERNAL_ONLY Restoration Druid healer evaluator and nothing else. */
+  SPEC_RESTORATION_DRUID: ["src/specs/druid/restoration/"],
+  /** HEAL-B1. The INTERNAL_ONLY Mistweaver Monk healer evaluator and nothing else. */
+  SPEC_MISTWEAVER_MONK: ["src/specs/monk/mistweaver/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -411,6 +417,9 @@ export const SPEC_LAYER_OF = {
   "monk/brewmaster": "SPEC_BREWMASTER_MONK",
   "evoker/augmentation": "SPEC_AUGMENTATION_EVOKER",
   "shaman/restoration": "SPEC_RESTORATION_SHAMAN",
+  "paladin/holy": "SPEC_HOLY_PALADIN",
+  "druid/restoration": "SPEC_RESTORATION_DRUID",
+  "monk/mistweaver": "SPEC_MISTWEAVER_MONK",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -3210,6 +3219,117 @@ export const ASSERTION_KINDS = {
     requiresAuthority: false,
     description:
       "Through the production catalog's internal lookup (PUBLIC since HEAL-AP, so the public lookup finds the same row), the Restoration Shaman registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
+  },
+
+  // ---- SPEC_HOLY_PALADIN (HEAL-B1, INTERNAL_ONLY) ---------------------
+  //
+  // A healer registration on Restoration Shaman's architecture, driven the
+  // same way: through the production catalog's INTERNAL lookup and
+  // `runAnalyzer`, never the evaluator directly.
+  "SPEC_HOLY_PALADIN.REGISTRATION_RESULT": {
+    owningLayer: "SPEC_HOLY_PALADIN",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            /** The registration's DERIVED ingestion scope. */
+            requiredScope: z.enum(["PLAYER_CONTEXT", "FULL_RAID"]),
+            /** The unanalyzed status: an authority-free registration is never ANALYZED. */
+            status: z.enum(["AUTHORITY_NOT_AVAILABLE", "INSUFFICIENT_EVIDENCE"]),
+            /** Each declared family and its resolution from the registration's own access, in order. */
+            domains: z.array(z.object({ domain: z.string().min(1), resolution: z.string().min(1) }).strict()),
+            /** `STATED`, or the UNKNOWN reason the subject's specialization was refused for. */
+            subjectSpecialization: z.string().min(1),
+            /** The evaluator's state, or `null` when no identity could be fed to it. */
+            evaluationState: z.string().min(1).nullable(),
+            /** `ASSESSED`, or the reason no healer finding set was built. */
+            healerFindings: z.string().min(1),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "Through the production catalog's internal lookup, the INTERNAL_ONLY Holy Paladin registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
+  },
+
+  // ---- SPEC_RESTORATION_DRUID (HEAL-B1, INTERNAL_ONLY) ---------------------
+  //
+  // A healer registration on Restoration Shaman's architecture, driven the
+  // same way: through the production catalog's INTERNAL lookup and
+  // `runAnalyzer`, never the evaluator directly.
+  "SPEC_RESTORATION_DRUID.REGISTRATION_RESULT": {
+    owningLayer: "SPEC_RESTORATION_DRUID",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            /** The registration's DERIVED ingestion scope. */
+            requiredScope: z.enum(["PLAYER_CONTEXT", "FULL_RAID"]),
+            /** The unanalyzed status: an authority-free registration is never ANALYZED. */
+            status: z.enum(["AUTHORITY_NOT_AVAILABLE", "INSUFFICIENT_EVIDENCE"]),
+            /** Each declared family and its resolution from the registration's own access, in order. */
+            domains: z.array(z.object({ domain: z.string().min(1), resolution: z.string().min(1) }).strict()),
+            /** `STATED`, or the UNKNOWN reason the subject's specialization was refused for. */
+            subjectSpecialization: z.string().min(1),
+            /** The evaluator's state, or `null` when no identity could be fed to it. */
+            evaluationState: z.string().min(1).nullable(),
+            /** `ASSESSED`, or the reason no healer finding set was built. */
+            healerFindings: z.string().min(1),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "Through the production catalog's internal lookup, the INTERNAL_ONLY Restoration Druid registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
+  },
+
+  // ---- SPEC_MISTWEAVER_MONK (HEAL-B1, INTERNAL_ONLY) ---------------------
+  //
+  // A healer registration on Restoration Shaman's architecture, driven the
+  // same way: through the production catalog's INTERNAL lookup and
+  // `runAnalyzer`, never the evaluator directly.
+  "SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT": {
+    owningLayer: "SPEC_MISTWEAVER_MONK",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            /** The registration's DERIVED ingestion scope. */
+            requiredScope: z.enum(["PLAYER_CONTEXT", "FULL_RAID"]),
+            /** The unanalyzed status: an authority-free registration is never ANALYZED. */
+            status: z.enum(["AUTHORITY_NOT_AVAILABLE", "INSUFFICIENT_EVIDENCE"]),
+            /** Each declared family and its resolution from the registration's own access, in order. */
+            domains: z.array(z.object({ domain: z.string().min(1), resolution: z.string().min(1) }).strict()),
+            /** `STATED`, or the UNKNOWN reason the subject's specialization was refused for. */
+            subjectSpecialization: z.string().min(1),
+            /** The evaluator's state, or `null` when no identity could be fed to it. */
+            evaluationState: z.string().min(1).nullable(),
+            /** `ASSESSED`, or the reason no healer finding set was built. */
+            healerFindings: z.string().min(1),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "Through the production catalog's internal lookup, the INTERNAL_ONLY Mistweaver Monk registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
   },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------

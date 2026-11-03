@@ -153,9 +153,12 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // the real death slice the shared death-timeline primitive reads.
     // HEAL-A added two cases and two assertions: the INTERNAL_ONLY Restoration
     // Shaman registration's result and its internal-only reachability.
-    expect(result.summary.cases).toBe(187);
-    expect(result.summary.assertions).toBe(782);
-    expect(result.summary.passed).toBe(782);
+    // HEAL-B1 added six cases and six assertions: the result and internal-only
+    // reachability of each INTERNAL_ONLY healer registration (Holy Paladin,
+    // Restoration Druid, Mistweaver Monk).
+    expect(result.summary.cases).toBe(193);
+    expect(result.summary.assertions).toBe(788);
+    expect(result.summary.passed).toBe(788);
   });
 
   it("covers every layer", async () => {

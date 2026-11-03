@@ -68,7 +68,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set is empty again since HEAL-AP", () => {
+  it("the internal-only set holds the three HEAL-B1 healers", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
     // Blood Death Knight measurement slice from M11-B2, was empty again from
@@ -76,9 +76,15 @@ describe("the known specialization ids are exactly partitioned", () => {
     // empty again from M11-C4j, held Augmentation Evoker in M13-E (the first
     // registration with no decision authority), was empty again from M13-F,
     // which published its support observations, held Restoration Shaman (the
-    // first healer registration) in HEAL-A, and is empty again since HEAL-AP,
-    // which published its healer findings.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
+    // first healer registration) in HEAL-A, was empty again from HEAL-AP,
+    // which published its healer findings, and holds Holy Paladin, Restoration
+    // Druid and Mistweaver Monk since HEAL-B1.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["paladin/holy", "druid/restoration", "monk/mistweaver"]);
+    for (const id of INTERNAL_ONLY_SPEC_IDS) {
+      expect(isSpecId(id), id).toBe(true);
+      expect(isPublicSpecId(id), id).toBe(false);
+      expect(() => requirePublicSpecId(id), id).toThrow(InternalSpecExposureError);
+    }
     expect(isSpecId("shaman/restoration")).toBe(true);
     expect(requirePublicSpecId("shaman/restoration")).toBe("shaman/restoration");
     expect(isSpecId("evoker/augmentation")).toBe(true);
@@ -97,9 +103,9 @@ describe("the known specialization ids are exactly partitioned", () => {
       "Rogue/Assassination",
       "Paladin/Protection",
       "Paladin/Retribution",
-      "paladin/holy",
+      "Paladin/Holy",
       "deathknight/frost",
-      "monk/mistweaver",
+      "Monk/Mistweaver",
       "monk/windwalker",
       "Monk/Brewmaster",
       "warrior/arms",

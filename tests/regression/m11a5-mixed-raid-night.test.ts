@@ -175,6 +175,9 @@ describe("a Retribution Paladin alone", () => {
       "monk-brewmaster-observed-decisions": 0,
       "evoker-augmentation-support-observations": 0,
       "shaman-restoration-healer-findings": 0,
+      "paladin-holy-healer-findings": 0,
+      "druid-restoration-healer-findings": 0,
+      "monk-mistweaver-healer-findings": 0,
     });
     expectRetributionCell(cellOf(run.aggregate.cells, RETRIBUTION));
     expect(run.aggregate.coverage).toMatchObject({
@@ -210,6 +213,9 @@ describe("a mixed roster — Assassination, Protection, Retribution, Arms and an
       "monk-brewmaster-observed-decisions": 0,
       "evoker-augmentation-support-observations": 0,
       "shaman-restoration-healer-findings": 0,
+      "paladin-holy-healer-findings": 0,
+      "druid-restoration-healer-findings": 0,
+      "monk-mistweaver-healer-findings": 0,
     });
   });
 

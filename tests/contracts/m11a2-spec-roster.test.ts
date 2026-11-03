@@ -191,10 +191,13 @@ describe("the roster and the analyzers", () => {
     expect(rosterSpecialization("paladin/protection")).toMatchObject({ simcSpecId: 66, role: "TANK" });
   });
 
-  it("the roster confers no support: thirty-three rows have no registration (Brewmaster Monk registered at M11-C2, PUBLIC since M11-C4j; Augmentation Evoker INTERNAL_ONLY since M13-E; Restoration Shaman INTERNAL_ONLY since HEAL-A)", () => {
+  it("the roster confers no support: thirty rows have no registration (Brewmaster Monk registered at M11-C2, PUBLIC since M11-C4j; Augmentation Evoker INTERNAL_ONLY since M13-E; Restoration Shaman INTERNAL_ONLY since HEAL-A; Holy Paladin, Restoration Druid and Mistweaver Monk INTERNAL_ONLY since HEAL-B1)", () => {
     const registered = new Set(ANALYZER_REGISTRATIONS.map((registration) => registration.specId as string));
     const unregistered = roster().specializations.filter((row) => !registered.has(row.rosterKey));
-    expect(unregistered).toHaveLength(33);
+    expect(unregistered).toHaveLength(30);
+    expect(registered.has("paladin/holy")).toBe(true);
+    expect(registered.has("druid/restoration")).toBe(true);
+    expect(registered.has("monk/mistweaver")).toBe(true);
     expect(registered.has("shaman/restoration")).toBe(true);
     expect(registered.has("evoker/augmentation")).toBe(true);
     expect(registered.has("monk/brewmaster")).toBe(true);
