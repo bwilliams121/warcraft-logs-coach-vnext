@@ -72,6 +72,7 @@ const EVERY_ANALYZER = [
   "paladin-retribution-observed-decisions",
   "deathknight-blood-observed-decisions",
   BREWMASTER_MONK_ANALYZER_ID,
+  "evoker-augmentation-support-observations",
 ] as const;
 
 let nextId = 1;

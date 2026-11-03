@@ -560,13 +560,22 @@
       "passed": 35
     },
     {
-      "assertions": 15,
-      "cases": 11,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_AUGMENTATION_EVOKER",
+      "passed": 1
+    },
+    {
+      "assertions": 16,
+      "cases": 12,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 15
+      "passed": 16
     },
     {
       "assertions": 14,
@@ -590,6 +599,20 @@
       ],
       "authority": null,
       "caseId": "application-service.arms-warrior-subject-is-unsupported-on-the-same-evidence",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.augmentation-evoker-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -3261,6 +3284,20 @@
       "caseId": "spec-assassination.talent-tree-resolves-selected-not-selected-and-unknown",
       "owningLayer": "SPEC_ASSASSINATION",
       "referencedArtifactIds": ["wcl-assassination-vanish-ambush-gate"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-augmentation-evoker.unstated-subject-yields-no-support-fact",
+      "owningLayer": "SPEC_AUGMENTATION_EVOKER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-blood-death-knight-a7r6-rotational-165s.seg-105-165",
@@ -6912,13 +6949,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 778,
-    "cases": 183,
+    "assertions": 780,
+    "cases": 185,
     "declared": 0,
-    "executable": 778,
+    "executable": 780,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 778
+    "passed": 780
   }
 }

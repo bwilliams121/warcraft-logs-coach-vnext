@@ -182,7 +182,7 @@ describe("cross-spec authority access is refused structurally", () => {
     expect(Object.isFrozen(PROTECTION_PALADIN_REGISTRATION.authority)).toBe(true);
   });
 
-  it("the production catalog holds the five registrations, each citing only its own authority", () => {
+  it("the production catalog holds the six registrations, each citing only its own authority (Augmentation none)", () => {
     const cited = PRODUCTION_CATALOG.registrations.map((registration) => [
       registration.specId,
       registration.authorityBindings.map((binding) => binding.authorityId),
@@ -196,6 +196,8 @@ describe("cross-spec authority access is refused structurally", () => {
       ["paladin/retribution", ["SIMC_APL_PALADIN_RETRIBUTION"]],
       ["deathknight/blood", ["SIMC_APL_DEATHKNIGHT_BLOOD"]],
       ["monk/brewmaster", ["SIMC_APL_MONK_BREWMASTER"]],
+      // M13-E: binds no decision authority; its families are provider-less.
+      ["evoker/augmentation", []],
     ]);
   });
 });

@@ -95,7 +95,8 @@ describe("the committed corpus loads", () => {
     // actor 5's death, for the shared death-timeline primitive) and its
     // normalization census.
     expect(loaded.artifacts).toHaveLength(52);
-    expect(loaded.cases).toHaveLength(183);
+    // M13-E: two cases for the INTERNAL_ONLY Augmentation registration.
+    expect(loaded.cases).toHaveLength(185);
     expect(loaded.coverage.declared).toBe(0);
   });
 

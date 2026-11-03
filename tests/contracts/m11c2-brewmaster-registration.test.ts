@@ -127,7 +127,8 @@ describe("identity and partition", () => {
     // through M11-C4i, and the five sites moved in one reviewed edit.
     expect(isSpecId("monk/brewmaster")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    // Since M13-E the internal-only half holds Augmentation Evoker, never Brewmaster.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["evoker/augmentation"]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(FIVE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");

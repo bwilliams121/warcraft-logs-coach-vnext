@@ -153,14 +153,20 @@ const TREES: readonly SpecTree[] = (() => {
  * one-APL-per-tree count) exclude it, because it registers nothing. A tree is
  * added here only by its own reviewed tranche.
  *
- * M13-A adds the Augmentation Evoker support evaluator: it reports observable
- * support facts and holds no SimulationCraft authority either (support
- * targeting and timing are NO_AUTHORITY_AVAILABLE), so it registers nothing.
+ * M13-A added the Augmentation Evoker support evaluator here; M13-E removed
+ * it, because it is now registered (INTERNAL_ONLY, binding no authority).
  */
-const UNREGISTERED_EVALUATOR_TREES: readonly string[] = ["evoker/augmentation", "shaman/restoration"];
+const UNREGISTERED_EVALUATOR_TREES: readonly string[] = ["shaman/restoration"];
 const REGISTERED_TREES: readonly SpecTree[] = TREES.filter(
   (tree) => !UNREGISTERED_EVALUATOR_TREES.includes(tree.specId),
 );
+
+/**
+ * M13-E: registered trees that bind NO decision authority, and so own no APL
+ * artifact. Named exactly; each must be a registered tree. The one-APL-per-tree
+ * count below applies to every other registered tree.
+ */
+const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = ["evoker/augmentation"];
 
 const ROSTER = (() => {
   const loaded = pinnedSpecRoster();
@@ -418,7 +424,17 @@ describe("R7 — the frozen exceptions are exactly these, and are not a pattern"
 
   it("every APL artifact is loaded from exactly one place, and that place belongs to its specialization", () => {
     const artifacts = ALL_FILES.filter((path) => specOfAplArtifact(path) !== null);
-    expect(artifacts.length).toBe(REGISTERED_TREES.length);
+    for (const specId of AUTHORITY_FREE_REGISTERED_TREES) {
+      expect(
+        REGISTERED_TREES.map((tree) => tree.specId),
+        specId,
+      ).toContain(specId);
+      expect(
+        artifacts.map((artifact) => specOfAplArtifact(artifact)),
+        specId,
+      ).not.toContain(specId);
+    }
+    expect(artifacts.length).toBe(REGISTERED_TREES.length - AUTHORITY_FREE_REGISTERED_TREES.length);
     for (const artifact of artifacts) {
       const owner = ownerOf(artifact);
       const importers = TS_FILES.filter((file) => importsOf(file).some((edge) => edge.resolved === artifact));

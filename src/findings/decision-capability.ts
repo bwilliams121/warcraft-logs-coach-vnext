@@ -44,7 +44,7 @@ import {
   type IngestionScope,
 } from "../services/ingestion-scope.js";
 import { EVIDENCE_CATEGORIES, type EvidenceCategory } from "../wcl/evidence-capability.js";
-import { AUTHORITY_DOMAINS, type AuthorityDomain } from "./authority-domain.js";
+import { DECISION_DOMAINS, type AuthorityDomain, type DecisionDomain } from "./authority-domain.js";
 
 /**
  * How a capability addresses targets.
@@ -73,7 +73,13 @@ export interface StateRequirements {
   readonly ownedPetEvidence?: true;
 }
 
-export interface DecisionCapability {
+/**
+ * `TDomain` defaults to the bindable domains, which is every capability an
+ * APL-backed specialization declares. A registration holds the wider
+ * `DecisionCapability<DecisionDomain>`, so a specialization may also declare a
+ * provider-less family (M13-E) it is asked about and holds no standard for.
+ */
+export interface DecisionCapability<TDomain extends DecisionDomain = AuthorityDomain> {
   /** Stable identifier, unique within a registration. Not a display name. */
   readonly capabilityId: string;
   /**
@@ -88,7 +94,7 @@ export interface DecisionCapability {
    * exactly how a tank capability will be declared before any defensive
    * authority exists.
    */
-  readonly domain: AuthorityDomain;
+  readonly domain: TDomain;
   readonly requirements: StateRequirements;
 }
 
@@ -129,7 +135,7 @@ function includes<T extends string>(vocabulary: readonly T[], value: string): va
  * defect found rather than the first, so a reviewer sees the whole problem.
  */
 export function validateCapabilities(
-  capabilities: readonly DecisionCapability[],
+  capabilities: readonly DecisionCapability<DecisionDomain>[],
 ): readonly CapabilityDefectRecord[] {
   const defects: CapabilityDefectRecord[] = [];
   if (capabilities.length === 0) {
@@ -153,11 +159,11 @@ export function validateCapabilities(
     }
     seen.add(id);
 
-    if (!includes(AUTHORITY_DOMAINS, capability.domain)) {
+    if (!includes(DECISION_DOMAINS, capability.domain)) {
       defects.push({
         defect: "UNKNOWN_AUTHORITY_DOMAIN",
         capabilityId: id,
-        detail: `'${String(capability.domain)}' is not a declared authority domain`,
+        detail: `'${String(capability.domain)}' is not a declared decision domain`,
       });
     }
 
@@ -208,8 +214,10 @@ export function validateCapabilities(
 }
 
 /** The distinct domains a set of capabilities declares, in declaration order. */
-export function declaredDomainsOf(capabilities: readonly DecisionCapability[]): readonly AuthorityDomain[] {
-  const domains: AuthorityDomain[] = [];
+export function declaredDomainsOf<TDomain extends DecisionDomain>(
+  capabilities: readonly DecisionCapability<TDomain>[],
+): readonly TDomain[] {
+  const domains: TDomain[] = [];
   for (const capability of capabilities) {
     if (!domains.includes(capability.domain)) domains.push(capability.domain);
   }
@@ -230,7 +238,7 @@ const SCOPE_BREADTH: Readonly<Record<IngestionScope, number>> = { PLAYER_CONTEXT
  */
 export function requirementFromCapabilities(
   analyzerId: string,
-  capabilities: readonly DecisionCapability[],
+  capabilities: readonly DecisionCapability<DecisionDomain>[],
 ): AnalyzerRequirement {
   let requiredScope: IngestionScope = "PLAYER_CONTEXT";
   let includeResources = false;

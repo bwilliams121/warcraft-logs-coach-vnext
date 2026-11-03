@@ -30,7 +30,8 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS ONE MEMBER AGAIN SINCE M11-C2. It was empty
+ * THE INTERNAL-ONLY SET HOLDS ONE MEMBER AGAIN SINCE M13-E (Augmentation
+ * Evoker; see the set below). Before that it held one member from M11-C2. It was empty
  * from M10-D (Protection public) until M11-A4 (Retribution arrived internal),
  * empty again from M11-A5 until M11-B2 (Blood Death Knight arrived internal),
  * and empty again from M11-B12 (Blood moved to the public half after ten
@@ -57,7 +58,8 @@ export type SpecId =
   | "paladin/protection"
   | "paladin/retribution"
   | "deathknight/blood"
-  | "monk/brewmaster";
+  | "monk/brewmaster"
+  | "evoker/augmentation";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -65,6 +67,7 @@ export const SPEC_IDS = Object.freeze([
   "paladin/retribution",
   "deathknight/blood",
   "monk/brewmaster",
+  "evoker/augmentation",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -118,10 +121,21 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * and discrimination gates reported real MATCH and real REJECTED evidence for
  * it. Promotion changed REACHABILITY, not the analyzer: the slice it publishes
  * is exactly the slice it had, narrowed by one PUBLIC validation gate
- * (Shado-Pan hero tree — see the Brewmaster module). The set is empty again;
- * its machinery stays because the next specialization arrives through it.
+ * (Shado-Pan hero tree — see the Brewmaster module). The set was empty again
+ * from M11-C4j until M13-E.
+ *
+ * Augmentation Evoker arrived here in M13-E as the first registration that
+ * binds NO decision authority: its declared families, SUPPORT_TARGETING and
+ * SUPPORT_TIMING, are provider-less (`authority-domain.ts`), so every
+ * analysis it returns is AUTHORITY_NOT_AVAILABLE (or INSUFFICIENT_EVIDENCE)
+ * carrying its observable support facts, never ANALYZED. It is registered so
+ * its FULL_RAID requirement is derived like every other analyzer's. Its
+ * public shape for those facts is a separate tranche (M13-F); until then the
+ * id stays here.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
+  "evoker/augmentation",
+] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

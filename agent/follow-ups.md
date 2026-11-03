@@ -263,6 +263,33 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M13-E: what the Augmentation registration does not establish
+
+**Raised:** M13-E (2026-11-02).
+
+- **No public shape.** The registration is INTERNAL_ONLY and its support
+  facts ride on an unanalyzed envelope's payload that no projector reads.
+  Publishing them is M13-F: a reviewed public shape, with coverage
+  disclosure, UNKNOWN and NO_AUTHORITY_AVAILABLE preserved on the wire.
+- **No internal service entry.** The application service selects only
+  PUBLIC registrations, so the derived FULL_RAID scope is proven through the
+  registry, `deriveIngestionScopeFor` and the corpus, not through a live
+  `analyzeFight` run. When M13-F makes it reachable, the service derives
+  FULL_RAID from the same requirement.
+- **Production fights carry no certified coverage** (After M13-D), so over a
+  production FULL_RAID ingestion the facts' listings and continuity rest on
+  category coverage alone.
+- **Restoration Shaman is still unregistered.** The provider-less domain
+  mechanism would serve it too (ASSIGNMENT, COOLDOWN, HEALING_DECISION), but
+  its declared families and result shape are its own tranche; its
+  unregistered-tree exception stands.
+- **Envelope status is a summary.** `AUTHORITY_NOT_AVAILABLE` says "no support
+  decision has a standard", not "nothing was observed". A consumer reading
+  the status alone, without the payload, must not treat it as an empty
+  analysis.
+
+---
+
 ## After M13-D: what the certified coverage does not establish
 
 **Raised:** M13-D (2026-11-02).
@@ -331,8 +358,8 @@ current total (5,748,495 bytes), with what each row buys.
   only per-player identity check is the identity preflight's, for the
   analysed subject.
 - **No public surface.** No contract reads the field. Recipient
-  specialization reaches only the internal, unregistered Augmentation
-  evaluator.
+  specialization reaches only the internal Augmentation evaluator
+  (registered INTERNAL_ONLY since M13-E).
 - **One fight context per ingestion.** A stated specialization is the
   fight's, never the night's: raid-night roster discovery keeps its own
   per-fight `specName`, and nothing reconciles the two.
@@ -343,10 +370,9 @@ current total (5,748,495 bytes), with what each row buys.
 
 **Raised:** M13-A (2026-11-02).
 
-- **Not registered, not published.** Nothing in production calls the
-  Augmentation evaluator. Registering it needs FULL_RAID derivation from
-  `AUGMENTATION_EVOKER_REQUIRED_INPUTS` and a public shape for support
-  observations.
+- **Not registered, not published.** Registration resolved by M13-E
+  (INTERNAL_ONLY, FULL_RAID derived from `AUGMENTATION_EVOKER_REQUIRED_INPUTS`;
+  see "After M13-E"). A public shape for support observations is M13-F.
 - **No coverage on the real evidence.** Partly resolved by M13-D (table
   certificates; see "After M13-D"). The category grants are still withheld.
 - **No recipient cooldown identity.** Resolved for the six pinned

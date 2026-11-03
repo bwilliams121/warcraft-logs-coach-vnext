@@ -53,6 +53,7 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       "SPEC_RETRIBUTION_PALADIN",
       "SPEC_BLOOD_DEATH_KNIGHT",
       "SPEC_BREWMASTER_MONK",
+      "SPEC_AUGMENTATION_EVOKER",
       "APPLICATION_SERVICE",
     ]);
   });

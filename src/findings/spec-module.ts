@@ -74,7 +74,7 @@ import {
   type AnalyzerRegistration,
 } from "./analyzer-registration.js";
 import type { CombatState } from "../engine/state/combat-state.js";
-import type { AuthorityAccess, AuthorityDomainBinding } from "./authority-domain.js";
+import type { AuthorityAccess, AuthorityDomainBinding, DecisionDomain } from "./authority-domain.js";
 import {
   validateCapabilities,
   type DecisionCapability,
@@ -151,7 +151,7 @@ export interface SupplementalAnalysisDefinition<TFinding = unknown> {
 export interface SpecModuleDefinition<TAnalysis extends SpecAnalysisEnvelope> {
   readonly identity: SpecIdentityDefinition;
   readonly exposure: AnalyzerExposure;
-  readonly capabilities: readonly DecisionCapability[];
+  readonly capabilities: readonly DecisionCapability<DecisionDomain>[];
   readonly authorityBindings: readonly AuthorityDomainBinding[];
   readonly analyze: (input: SpecAnalysisInput, authority: AuthorityAccess) => TAnalysis;
   readonly observedDecisionView: (

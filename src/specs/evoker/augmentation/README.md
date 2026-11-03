@@ -1,13 +1,33 @@
-# Augmentation Evoker (M13-A, internal)
+# Augmentation Evoker (M13-A; registered INTERNAL_ONLY since M13-E)
 
 The Augmentation Foundation. Owner decision 2026-11-01
 (`agent/autopilot-queue.md` "M13-A").
 
-It is **not registered** with the analysis service and has no public
-surface. Nothing in production calls it. It holds no SimulationCraft
-authority: there is no `SpecId`, no registration and no APL artifact
-(`tests/contracts/m11a2-cross-spec-isolation.test.ts` names it as an
-unregistered evaluator tree).
+Since M13-E it is **registered INTERNAL_ONLY** (`registration.ts`,
+`evoker/augmentation` in `INTERNAL_ONLY_SPEC_IDS`). The internal lookup and
+tests reach it; no public request, raid-night cell, REST or MCP response
+selects it, and it has no public surface (M13-F). It holds no decision
+authority: no APL artifact, no binding. Its two declared families,
+SUPPORT_TARGETING and SUPPORT_TIMING, are PROVIDER-LESS domains
+(`src/findings/authority-domain.ts`) that resolve
+`NO_PINNED_AUTHORITY_FOR_DOMAIN` from its own access.
+
+## Registration (M13-E)
+
+- **Scope.** Both capabilities are declared from
+  `AUGMENTATION_EVOKER_REQUIRED_INPUTS`, so the derived requirement is
+  FULL_RAID (ACTORS, CASTS, AURAS, DEATHS; no resources; NO_TARGET).
+- **Result.** Never ANALYZED: an ANALYZED envelope cites a decision
+  authority, and there is none. `AUTHORITY_NOT_AVAILABLE` when the
+  evaluator ran (the payload carries its observations); `INSUFFICIENT_EVIDENCE`
+  when the subject has no stated specialization, its identity is refused, or
+  the pinned data is unusable (no fact reconstructed). There is no
+  observed-decision view.
+- **Identity.** The facade feeds the evaluator's gate the fight's own report
+  code and fight id and the subject's Warcraft Logs-stated class and
+  specialization (M13-B `friendlySpecializations`, the same `friendlySpecs`
+  entry preflight reads). A pet or an unlisted actor is NOT_IN_FRIENDLY_ROSTER,
+  never defaulted.
 
 ## Supported decision surface (v1)
 

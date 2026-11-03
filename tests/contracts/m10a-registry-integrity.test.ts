@@ -84,7 +84,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries five PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12) and Brewmaster Monk (since M11-C4j) — and no INTERNAL_ONLY row", () => {
+  it("carries five PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12) and Brewmaster Monk (since M11-C4j) — and, since M13-E, one INTERNAL_ONLY row (Augmentation Evoker)", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -97,6 +97,7 @@ describe("the production catalog", () => {
       [RETRIBUTION_PALADIN_ANALYZER_ID, "paladin/retribution", "PUBLIC"],
       ["deathknight-blood-observed-decisions", "deathknight/blood", "PUBLIC"],
       ["monk-brewmaster-observed-decisions", "monk/brewmaster", "PUBLIC"],
+      ["evoker-augmentation-support-observations", "evoker/augmentation", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
     // all five rows since M11-C4j (Brewmaster was the INTERNAL_ONLY row from
@@ -157,7 +158,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(5);
+    expect(catalog.registrations).toHaveLength(6);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {

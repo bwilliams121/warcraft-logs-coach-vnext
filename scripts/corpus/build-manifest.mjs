@@ -6451,6 +6451,67 @@ const BREWMASTER_CASES = [
     "A facade owns one specialization and answers for no other. Ownership is also enforced at runtime by the registration and the registry.",
     { related: ["tests/regression/m10a-analyzer-result-ownership.test.ts", ...BREWMASTER_RELATED] },
   ),
+
+  // ---- SPEC_AUGMENTATION_EVOKER (M13-E, INTERNAL_ONLY) ---------------------
+  kase(
+    "spec-augmentation-evoker.unstated-subject-yields-no-support-fact",
+    PP,
+    "SPEC_AUGMENTATION_EVOKER",
+    "src/specs/evoker/augmentation/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
+    "Through the production catalog's internal lookup, the Augmentation Evoker registration derives FULL_RAID from its declared support capabilities, resolves SUPPORT_TARGETING and SUPPORT_TIMING to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER and no evaluator result: no support fact is reconstructed for a subject whose identity is not established, and nothing is ANALYZED.",
+    [
+      a("SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT", {
+        actorId: TANK,
+        expected: {
+          requiredScope: "FULL_RAID",
+          status: "INSUFFICIENT_EVIDENCE",
+          domains: [
+            { domain: "SUPPORT_TARGETING", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "SUPPORT_TIMING", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+          ],
+          subjectSpecialization: "NOT_IN_FRIENDLY_ROSTER",
+          evaluationState: null,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Missing identity is not a default identity: a subject with no Warcraft Logs-stated specialization is never assumed to be the Augmentation Evoker the caller named. And no authority is not an UNKNOWN: both support families are NO_AUTHORITY_AVAILABLE by construction, which is why the registration can never produce an ANALYZED result.",
+    {
+      limitations: [
+        "This single-slice fight has no fight context, so every subject is NOT_IN_FRIENDLY_ROSTER; the real Augmentation Evoker's facts (M13-A, evidence archive) are pinned by tests/unit/specs/augmentation-evoker-registration.test.ts.",
+      ],
+      related: [
+        "tests/unit/specs/augmentation-evoker-registration.test.ts",
+        "tests/contracts/m11a2-cross-spec-isolation.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "application-service.augmentation-evoker-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Augmentation Evoker registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve evoker/augmentation, so no public request can select it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "evoker/augmentation",
+        expected: {
+          internalAnalyzerId: "evoker-augmentation-support-observations",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Its support facts have no reviewed public shape yet (M13-F), so registration changes what internal evaluation derives, not what a public request can reach.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
   kase(
     "application-service.brewmaster-monk-subject-is-publicly-supported-since-m11-c4j",
     BREWMASTER_GTKB,
