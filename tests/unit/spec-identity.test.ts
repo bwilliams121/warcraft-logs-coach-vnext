@@ -218,6 +218,7 @@ describe("no unsupported identity falls through to a supported specialization", 
     ["Warrior", "Arms"],
     // Other real specs.
     ["Evoker", "Devastation"],
+    // Discipline Priest: registered INTERNAL_ONLY since HEAL-B3, never publicly resolvable.
     ["Priest", "Discipline"],
     ["Death Knight", "Blood"],
     ["Warrior", "Fury"],

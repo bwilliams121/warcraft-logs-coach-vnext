@@ -89,7 +89,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries ten PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP), Holy Paladin and Mistweaver Monk (INTERNAL_ONLY in HEAL-B1, PUBLIC since HEAL-B1P) and Holy Priest (INTERNAL_ONLY in HEAL-B2, PUBLIC since HEAL-B2P), plus Restoration Druid INTERNAL_ONLY", () => {
+  it("carries ten PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP), Holy Paladin and Mistweaver Monk (INTERNAL_ONLY in HEAL-B1, PUBLIC since HEAL-B1P) and Holy Priest (INTERNAL_ONLY in HEAL-B2, PUBLIC since HEAL-B2P), plus Restoration Druid and Discipline Priest (since HEAL-B3) INTERNAL_ONLY", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -110,11 +110,13 @@ describe("the production catalog", () => {
       ["monk-mistweaver-healer-findings", "monk/mistweaver", "PUBLIC"],
       // HEAL-B2: a fourth healer row on the same architecture; PUBLIC since HEAL-B2P.
       ["priest-holy-healer-findings", "priest/holy", "PUBLIC"],
+      // HEAL-B3: a healer row on the same architecture that also reports observed Atonement, INTERNAL_ONLY.
+      ["priest-discipline-healer-findings", "priest/discipline", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
     // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), all
-    // seven from HEAL-AP, seven of ten in HEAL-B1, nine of ten in HEAL-B1P, nine of eleven in HEAL-B2, and ten of
-    // eleven since HEAL-B2P.
+    // seven from HEAL-AP, seven of ten in HEAL-B1, nine of ten in HEAL-B1P, nine of eleven in HEAL-B2, ten of
+    // eleven in HEAL-B2P, and ten of twelve since HEAL-B3.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
     expect(ENABLED_ANALYZERS).toHaveLength(10);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
@@ -175,7 +177,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(11);
+    expect(catalog.registrations).toHaveLength(12);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {

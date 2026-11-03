@@ -157,10 +157,12 @@ describe("the committed corpus executes clean under workerd", { timeout: GATE_TI
     // reachability of each INTERNAL_ONLY healer registration (Holy Paladin,
     // Restoration Druid, Mistweaver Monk).
     // HEAL-B2 added two cases and two assertions: the same pair for the
-    // INTERNAL_ONLY Holy Priest registration.
-    expect(result.summary.cases).toBe(195);
-    expect(result.summary.assertions).toBe(790);
-    expect(result.summary.passed).toBe(790);
+    // INTERNAL_ONLY Holy Priest registration. HEAL-B3 added two cases and two
+    // assertions: the same pair for the INTERNAL_ONLY Discipline Priest
+    // registration.
+    expect(result.summary.cases).toBe(197);
+    expect(result.summary.assertions).toBe(792);
+    expect(result.summary.passed).toBe(792);
   });
 
   it("covers every layer", async () => {

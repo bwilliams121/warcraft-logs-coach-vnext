@@ -1216,7 +1216,7 @@ status: OWNER_DECISION_REQUIRED
 dependsOn: none
 wcl: NONE
 publicContract: NONE
-ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by HEAL-B1P: Restoration Druid (identity only, gtKb2xHn87pNcFfW fight 22 actor 2; no committed or retained capture holds one of its events, so it cannot meet the healer promotion gate). The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
+ownerDecision: Authorize one bounded, neutral, deterministic Warcraft Logs evidence campaign for the specializations that have no retained, already-authorized real evidence. Known today: Fury Warrior, Protection Warrior, Outlaw Rogue, Survival Hunter and Vengeance Demon Hunter appear in no committed fight context, and onboarding tranches append any further spec whose review finds its evidence inadequate. Appended by HEAL-B1P: Restoration Druid (identity only, gtKb2xHn87pNcFfW fight 22 actor 2; no committed or retained capture holds one of its events, so it cannot meet the healer promotion gate). Appended by HEAL-B3: Discipline Priest (committed evidence is a filtered M13-A cast capture, actor 9, and Atonement applications by the G2 cohort246 fight 33 actor 88 onto another player; no committed or retained capture holds its whole-fight casts or any Atonement heal event, and fight 48 has no Discipline Priest, so HEAL-B3P cannot meet the healer promotion gate). The proposal is the smallest campaign: per spec, the first public raid fight in a fixed order containing it, with its actor slice (casts, auras, resources, combatant info), and no ranking or comparison data.
 ```
 
 **Direction.** The owner's onboarding evidence policy: neutral,
@@ -1335,11 +1335,13 @@ the fight-48 Holy Priest's whole-fight casts, not yet committed
 ### HEAL-B2P: Holy Priest (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-B2, HEAL-AP
 branch: autopilot/heal-b2p
 wcl: NONE
 publicContract: EXPECTED
+pr: 50
+mergeSha: 188fca2db853bddfba3f908321fe41b5f600b6cc
 ```
 
 **Outcome.** Holy Priest passed the HEAL-AP healer promotion gate on its
@@ -1351,8 +1353,9 @@ left (ONB-EV).
 ### HEAL-B3: Discipline Priest (internal, own representative)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-B1
+branch: autopilot/heal-b3
 wcl: NONE
 publicContract: NONE
 ```
@@ -1364,6 +1367,15 @@ representative:
 - Model what is observable (atonement application and damage-to-healing
   attribution as reported) without per-cast quality verdicts.
 - Anything the evidence cannot attribute is UNKNOWN.
+
+**Outcome.** Discipline Priest is registered INTERNAL_ONLY on the HEAL-B1
+healer architecture with its own pinned healing-cooldown identity (Power Word:
+Barrier, Ultimate Penitence, Evangelism) and its own pinned Atonement identity,
+and reports its observed Atonement applications and the Atonement heals
+Warcraft Logs reports as facts, the damage-to-heal link always UNKNOWN
+(agent/architecture.md "HEAL-B3"). HEAL-B3P's healer gate needs a Discipline
+Priest capture with whole-fight casts, which no committed or retained evidence
+holds (agent/follow-ups.md "After HEAL-B3"; appended to ONB-EV).
 
 ### HEAL-B3P: Discipline Priest (public)
 

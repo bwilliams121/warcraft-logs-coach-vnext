@@ -30,8 +30,9 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS ONE MEMBER SINCE HEAL-B2P (Restoration Druid),
- * which promoted Holy Priest. It held two from HEAL-B2 (Restoration Druid and
+ * THE INTERNAL-ONLY SET HOLDS TWO MEMBERS SINCE HEAL-B3 (Restoration Druid and
+ * Discipline Priest). It held Restoration Druid alone from HEAL-B2P, which
+ * promoted Holy Priest. It held two from HEAL-B2 (Restoration Druid and
  * Holy Priest), and Restoration Druid alone from HEAL-B1P, which promoted
  * Holy Paladin and Mistweaver Monk. It held three from HEAL-B1
  * (Holy Paladin, Restoration Druid and Mistweaver Monk), the first time it
@@ -71,7 +72,8 @@ export type SpecId =
   | "paladin/holy"
   | "druid/restoration"
   | "monk/mistweaver"
-  | "priest/holy";
+  | "priest/holy"
+  | "priest/discipline";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -85,6 +87,7 @@ export const SPEC_IDS = Object.freeze([
   "druid/restoration",
   "monk/mistweaver",
   "priest/holy",
+  "priest/discipline",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -186,9 +189,16 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * the same five-site edit, with the shared healer view, after it passed the
  * healer promotion gate on real evidence (its whole-fight casts in the
  * canonical fight, cut from the retained capture).
+ *
+ * Discipline Priest arrived here in HEAL-B3, a healer registration on the same
+ * architecture and its own representative: besides its reviewed
+ * healing-cooldown identity data (Power Word: Barrier, Ultimate Penitence,
+ * Evangelism) it reports its observed Atonement as facts. Its public shape
+ * and promotion are HEAL-B3P's; until then the id stays here.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
+  "priest/discipline",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

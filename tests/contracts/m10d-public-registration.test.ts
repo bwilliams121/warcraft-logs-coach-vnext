@@ -54,7 +54,7 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the nine public ids since HEAL-B1P; internal-only: Restoration Druid and, since HEAL-B2, Holy Priest (Augmentation Evoker held it in M13-E, Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1)", () => {
+  it("public partition: the nine public ids since HEAL-B1P; internal-only: Restoration Druid and, since HEAL-B3, Discipline Priest (Augmentation Evoker held it in M13-E, Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1, Holy Priest in HEAL-B2)", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -67,7 +67,7 @@ describe("the five sites agree", () => {
       "monk/mistweaver",
       "priest/holy",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -119,7 +119,8 @@ describe("the five sites agree", () => {
     // Mistweaver Monk PUBLIC by the same move, each after the healer gate
     // passed on its own real subject; Restoration Druid has no retained
     // evidence and stays INTERNAL_ONLY. HEAL-B2 put a fourth INTERNAL_ONLY
-    // healer row in, Holy Priest, NOT among the enabled analyzers.
+    // healer row in, Holy Priest, which HEAL-B2P made PUBLIC. HEAL-B3 put an
+    // INTERNAL_ONLY Discipline Priest row in, NOT among the enabled analyzers.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
@@ -133,6 +134,7 @@ describe("the five sites agree", () => {
       ["druid/restoration", "INTERNAL_ONLY"],
       ["monk/mistweaver", "PUBLIC"],
       ["priest/holy", "PUBLIC"],
+      ["priest/discipline", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -230,6 +232,7 @@ describe("the complete-catalog helper", () => {
       "druid-restoration-healer-findings": 0,
       "monk-mistweaver-healer-findings": 0,
       "priest-holy-healer-findings": 0,
+      "priest-discipline-healer-findings": 0,
     });
   });
 });

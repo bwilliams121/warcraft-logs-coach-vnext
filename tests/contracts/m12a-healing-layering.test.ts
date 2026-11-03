@@ -199,7 +199,9 @@ describe("there is nowhere to branch on a specialization or write a judgement", 
  * `src/findings/healer-assignment-execution.ts`, which does not import this
  * domain.
  *
- * HEAL-B2 names one more the same way: the Holy Priest evaluator.
+ * HEAL-B2 names one more the same way: the Holy Priest evaluator. HEAL-B3
+ * names the Discipline Priest evaluator; its Atonement observation
+ * (`src/specs/priest/discipline/atonement.ts`) does not read this domain.
  */
 const HEALING_CONSUMERS = [
   "src/specs/shaman/restoration/evaluator.ts",
@@ -207,6 +209,7 @@ const HEALING_CONSUMERS = [
   "src/specs/druid/restoration/evaluator.ts",
   "src/specs/monk/mistweaver/evaluator.ts",
   "src/specs/priest/holy/evaluator.ts",
+  "src/specs/priest/discipline/evaluator.ts",
 ];
 
 describe("only the named consumers read it", () => {

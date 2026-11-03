@@ -388,6 +388,8 @@ export const OWNING_LAYERS = {
   SPEC_MISTWEAVER_MONK: ["src/specs/monk/mistweaver/"],
   /** HEAL-B2; PUBLIC since HEAL-B2P. The Holy Priest healer evaluator and nothing else. */
   SPEC_HOLY_PRIEST: ["src/specs/priest/holy/"],
+  /** HEAL-B3. The INTERNAL_ONLY Discipline Priest healer evaluator and nothing else. */
+  SPEC_DISCIPLINE_PRIEST: ["src/specs/priest/discipline/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
 } as const;
@@ -423,6 +425,7 @@ export const SPEC_LAYER_OF = {
   "druid/restoration": "SPEC_RESTORATION_DRUID",
   "monk/mistweaver": "SPEC_MISTWEAVER_MONK",
   "priest/holy": "SPEC_HOLY_PRIEST",
+  "priest/discipline": "SPEC_DISCIPLINE_PRIEST",
 } as const satisfies Record<SpecId, OwningLayer>;
 
 /** The specialization-owned layers: exactly those a `SpecId` maps to. */
@@ -3370,6 +3373,43 @@ export const ASSERTION_KINDS = {
     requiresAuthority: false,
     description:
       "Through the production catalog's internal lookup (PUBLIC since HEAL-B2P, so the public lookup finds the same row), the Holy Priest registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
+  },
+
+  // ---- SPEC_DISCIPLINE_PRIEST (HEAL-B3, INTERNAL_ONLY) ----------------
+  //
+  // A healer registration on Restoration Shaman's architecture, driven the
+  // same way: through the production catalog's INTERNAL lookup and
+  // `runAnalyzer`, never the evaluator directly.
+  "SPEC_DISCIPLINE_PRIEST.REGISTRATION_RESULT": {
+    owningLayer: "SPEC_DISCIPLINE_PRIEST",
+    outcomeClass: "NO_AUTHORITY_AVAILABLE",
+    payloadKinds: ["WCL_EVENT_ARRAY"],
+    params: z
+      .object({
+        actorId: z.number().int(),
+        expected: z
+          .object({
+            /** The registration's DERIVED ingestion scope. */
+            requiredScope: z.enum(["PLAYER_CONTEXT", "FULL_RAID"]),
+            /** The unanalyzed status: an authority-free registration is never ANALYZED. */
+            status: z.enum(["AUTHORITY_NOT_AVAILABLE", "INSUFFICIENT_EVIDENCE"]),
+            /** Each declared family and its resolution from the registration's own access, in order. */
+            domains: z.array(z.object({ domain: z.string().min(1), resolution: z.string().min(1) }).strict()),
+            /** `STATED`, or the UNKNOWN reason the subject's specialization was refused for. */
+            subjectSpecialization: z.string().min(1),
+            /** The evaluator's state, or `null` when no identity could be fed to it. */
+            evaluationState: z.string().min(1).nullable(),
+            /** `ASSESSED`, or the reason no healer finding set was built. */
+            healerFindings: z.string().min(1),
+          })
+          .strict(),
+      })
+      .strict(),
+    execution: "EXECUTABLE",
+    runtime: "ANY",
+    requiresAuthority: false,
+    description:
+      "Through the production catalog's internal lookup, the INTERNAL_ONLY Discipline Priest registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
   },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------

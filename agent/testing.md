@@ -1839,6 +1839,19 @@ Holy Priest internal (HEAL-B2, tests/unit/specs/heal-b2-holy-priest.test.ts; a f
   real M13-A Discipline 9, Shadow 10           -> IDENTITY_REFUSED NOT_THIS_SPECIALIZATION; NOT_ASSESSED
   real fight 48 Holy Priest 2                  -> no use, listing UNKNOWN, never "none used"; sources 2 + stated pet 94
   registration                                 -> INTERNAL_ONLY; public lookup null; identity table refuses; public request SPEC_NOT_SUPPORTED, no dispatch
+Discipline Priest internal (HEAL-B3, tests/unit/specs/heal-b3-discipline-priest.test.ts; a fifth case in heal-b1-healer-evaluators/registrations):
+  shared healer cases                          -> every HEAL-B1 evaluator and registration case passes for Discipline Priest (other class: Paladin)
+  cooldown artifact                            -> exactly Power Word: Barrier 62618 + Ultimate Penitence 421453 (CHOICE, siblings) and Evangelism 472433 (NORMAL); Pain Suppression not identified
+  Atonement artifact                           -> buff 194384, heal 81751, same-name 81749/94472/451577/451769; tampered row, two buffs, spec 257 refused
+  applications                                 -> applybuff/refreshbuff from the subject's sources only; never a removal, a debuff, another priest's, or outside the encounter
+  healing as reported                          -> 81751 heals from the subject and its stated pet, counts per target; no amount/overheal/total key
+  damage link                                  -> always UNKNOWN DAMAGE_EVENT_LINK_NOT_REPORTED
+  listing                                      -> COMPLETE only under actor-global coverage; actor-scoped INSUFFICIENT_SCOPE; gap INSUFFICIENT_COVERAGE; sourceless UNATTRIBUTED_EVENT; ability-less UNIDENTIFIED_SUBJECT_EVENT; same-name SAME_NAME_SPELL_FROM_SUBJECT
+  finding set                                  -> unchanged three categories; Atonement adds no finding
+  real M13-A Discipline 9                      -> Evangelism 190,592 and 281,877, Ultimate Penitence 232,488 (raw-checked); every listing UNKNOWN; ROSTER_NOT_IN_SCOPE
+  real G2 cohort246 f33 Discipline 88          -> 7 Atonement applications onto actor 7 (raw-checked: 7 apply + 7 remove); listings UNKNOWN INSUFFICIENT_COVERAGE; heals excluded by the query, never "none"
+  real M13-A Holy 2, Shadow 10                 -> IDENTITY_REFUSED NOT_THIS_SPECIALIZATION; NOT_ASSESSED
+  registration                                 -> INTERNAL_ONLY; public lookup null; identity table refuses; public request SPEC_NOT_SUPPORTED, no dispatch
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

@@ -3,10 +3,12 @@
  * registrations, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since
  * HEAL-B1P; and the Holy Priest registration, INTERNAL_ONLY from HEAL-B2 and
  * PUBLIC since HEAL-B2P (its real-evidence checks are
- * tests/unit/specs/heal-b2-holy-priest.test.ts).
+ * tests/unit/specs/heal-b2-holy-priest.test.ts); and, since HEAL-B3, the
+ * INTERNAL_ONLY Discipline Priest registration (its real-evidence and
+ * Atonement checks are tests/unit/specs/heal-b3-discipline-priest.test.ts).
  *
  * What is pinned per registration:
- * - Restoration Druid is a listed INTERNAL_ONLY row; the public lookup, the
+ * - Restoration Druid and Discipline Priest are listed INTERNAL_ONLY rows; the public lookup, the
  *   public identity table and a public request never reach it. Holy Paladin,
  *   Mistweaver Monk and Holy Priest are listed PUBLIC rows: both lookups find the same
  *   row, the identity table resolves them, a public request dispatches them
@@ -56,6 +58,8 @@ import { MISTWEAVER_MONK_REGISTRATION } from "../../../src/specs/monk/mistweaver
 import { MISTWEAVER_MONK_REQUIRED_INPUTS } from "../../../src/specs/monk/mistweaver/spec.js";
 import { HOLY_PALADIN_REGISTRATION } from "../../../src/specs/paladin/holy/registration.js";
 import { HOLY_PALADIN_REQUIRED_INPUTS } from "../../../src/specs/paladin/holy/spec.js";
+import { DISCIPLINE_PRIEST_REGISTRATION } from "../../../src/specs/priest/discipline/registration.js";
+import { DISCIPLINE_PRIEST_REQUIRED_INPUTS } from "../../../src/specs/priest/discipline/spec.js";
 import { HOLY_PRIEST_REGISTRATION } from "../../../src/specs/priest/holy/registration.js";
 import { HOLY_PRIEST_REQUIRED_INPUTS } from "../../../src/specs/priest/holy/spec.js";
 import type { FightIdentity } from "../../../src/wcl/types.js";
@@ -140,6 +144,16 @@ const CASES: readonly Case[] = [
     specName: "Holy",
     required: HOLY_PRIEST_REQUIRED_INPUTS,
     exposure: "PUBLIC",
+  },
+  {
+    label: "Discipline Priest",
+    specId: "priest/discipline",
+    registration: DISCIPLINE_PRIEST_REGISTRATION,
+    analyzerId: "priest-discipline-healer-findings",
+    className: "Priest",
+    specName: "Discipline",
+    required: DISCIPLINE_PRIEST_REQUIRED_INPUTS,
+    exposure: "INTERNAL_ONLY",
   },
 ];
 
@@ -370,7 +384,12 @@ describe("the internal path over committed real evidence", () => {
   });
 
   it("a stated Holy Paladin run as another healer is refused, never evaluated as that one", () => {
-    for (const specId of ["druid/restoration", "monk/mistweaver", "priest/holy"] as const) {
+    for (const specId of [
+      "druid/restoration",
+      "monk/mistweaver",
+      "priest/holy",
+      "priest/discipline",
+    ] as const) {
       const analysis = internalRun(specId, m13a, 5);
       expect(analysis.status).toBe("INSUFFICIENT_EVIDENCE");
       expect(analysis.evaluation).toMatchObject({
