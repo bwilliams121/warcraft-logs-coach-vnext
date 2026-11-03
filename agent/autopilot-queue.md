@@ -1297,11 +1297,13 @@ own tree, and consumes the shared `RaidCooldownPlan` and the
 ### HEAL-B1P: Holy Paladin, Restoration Druid and Mistweaver Monk (public)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: HEAL-B1, HEAL-AP
 branch: autopilot/heal-b1p
 wcl: NONE
 publicContract: EXPECTED
+pr: 48
+mergeSha: f066fd39841ef16e0aeff21cc3d88f30290f9206
 ```
 
 **Outcome.** Holy Paladin and Mistweaver Monk passed the HEAL-AP healer
@@ -1314,11 +1316,19 @@ evidence gap is ONB-EV's (rule 4).
 ### HEAL-B2: Holy Priest (internal)
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-B1
+branch: autopilot/heal-b2
 wcl: NONE
 publicContract: NONE
 ```
+
+**Outcome.** Holy Priest is registered INTERNAL_ONLY on the HEAL-B1 healer
+architecture, with its own pinned healing-cooldown identity (Divine Hymn and
+Apotheosis), and is evaluated over committed real evidence (the M13-A Holy
+Priest's three observed casts; fight 48 actor 2). HEAL-B2P's healer gate needs
+the fight-48 Holy Priest's whole-fight casts, not yet committed
+(agent/follow-ups.md "After HEAL-B2").
 
 ### HEAL-B2P: Holy Priest (public)
 

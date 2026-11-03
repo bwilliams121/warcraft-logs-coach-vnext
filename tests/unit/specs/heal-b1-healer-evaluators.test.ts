@@ -1,5 +1,6 @@
 /**
- * HEAL-B1: the Holy Paladin, Restoration Druid and Mistweaver Monk evaluators.
+ * HEAL-B1: the Holy Paladin, Restoration Druid and Mistweaver Monk evaluators,
+ * and since HEAL-B2 the Holy Priest evaluator.
  *
  * Each is run through the same cases, because each must keep the M12-D
  * verdict-category limits on its own identity and its own data:
@@ -37,6 +38,7 @@ import type { RaidCooldownAssignment, RaidCooldownPlan } from "../../../src/raid
 import { evaluateRestorationDruid } from "../../../src/specs/druid/restoration/evaluator.js";
 import { evaluateMistweaverMonk } from "../../../src/specs/monk/mistweaver/evaluator.js";
 import { evaluateHolyPaladin } from "../../../src/specs/paladin/holy/evaluator.js";
+import { evaluateHolyPriest } from "../../../src/specs/priest/holy/evaluator.js";
 import type { EvidenceCategory } from "../../../src/wcl/evidence-capability.js";
 import { observableCategory, partialCategory, syntheticFight } from "../../support/synthetic-fight.js";
 
@@ -99,6 +101,8 @@ interface Case {
   readonly cooldownB: number;
   /** A spell of the same class that is not one of its identified healing cooldowns. */
   readonly notACooldown: number;
+  /** A class string that is not this specialization's class. */
+  readonly otherClassName: string;
 }
 
 const CASES: readonly Case[] = [
@@ -112,6 +116,7 @@ const CASES: readonly Case[] = [
     cooldownA: 31821, // Aura Mastery
     cooldownB: 216331, // Avenging Crusader, the activated override of talent spell 394088
     notACooldown: 6940, // Blessing of Sacrifice: an external, not identified
+    otherClassName: "Priest",
   },
   {
     label: "Restoration Druid",
@@ -123,6 +128,7 @@ const CASES: readonly Case[] = [
     cooldownA: 740, // Tranquility
     cooldownB: 391528, // Convoke the Spirits
     notACooldown: 102342, // Ironbark: an external, not identified
+    otherClassName: "Priest",
   },
   {
     label: "Mistweaver Monk",
@@ -134,6 +140,19 @@ const CASES: readonly Case[] = [
     cooldownA: 115310, // Revival
     cooldownB: 322118, // Invoke Yu'lon, the Jade Serpent
     notACooldown: 116849, // Life Cocoon: an external, not identified
+    otherClassName: "Priest",
+  },
+  {
+    label: "Holy Priest",
+    evaluate: evaluateHolyPriest as unknown as Evaluate,
+    revision: "holy-priest-evaluator/1",
+    className: "Priest",
+    specName: "Holy",
+    datasetId: "SIMC_DBC_PRIEST_HOLY_HEALING_COOLDOWNS",
+    cooldownA: 64843, // Divine Hymn
+    cooldownB: 200183, // Apotheosis
+    notACooldown: 47788, // Guardian Spirit: an external, not identified
+    otherClassName: "Paladin",
   },
 ];
 
@@ -293,7 +312,7 @@ describe.each(CASES)("$label", (testCase) => {
     const fight = fightOf(testCase, [cast(10_000, SUBJECT, testCase.cooldownA)]);
     it.each([
       ["another specialization", { specName: "Elsewhere" }, "NOT_THIS_SPECIALIZATION"],
-      ["another class", { className: "Priest" }, "NOT_THIS_SPECIALIZATION"],
+      ["another class", { className: testCase.otherClassName }, "NOT_THIS_SPECIALIZATION"],
       ["an actor the fight does not list", { sourceId: 999 }, "IDENTITY_UNRESOLVED"],
       ["an actor the fight lists as another class", { sourceId: OTHER_HEALER }, "IDENTITY_CONFLICT"],
       ["a pet of the subject", { sourceId: PET }, "IDENTITY_CONFLICT"],

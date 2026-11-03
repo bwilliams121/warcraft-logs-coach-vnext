@@ -182,12 +182,12 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 }
 
 describe("the production catalog", () => {
-  it("is exactly the nine PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F, Restoration Shaman since HEAL-AP, Holy Paladin and Mistweaver Monk since HEAL-B1P) plus Restoration Druid INTERNAL_ONLY, and both lookups answer alike for every public one", () => {
-    expect(ANALYZER_REGISTRATIONS).toHaveLength(10);
+  it("is exactly the nine PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F, Restoration Shaman since HEAL-AP, Holy Paladin and Mistweaver Monk since HEAL-B1P) plus Restoration Druid and Holy Priest INTERNAL_ONLY, and both lookups answer alike for every public one", () => {
+    expect(ANALYZER_REGISTRATIONS).toHaveLength(11);
     expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(9);
-    // HEAL-B1: one INTERNAL_ONLY healer row since HEAL-B1P, invisible to the public lookup.
+    // HEAL-B1: one INTERNAL_ONLY healer row since HEAL-B1P, and a second since HEAL-B2 (Holy Priest), invisible to the public lookup.
     const internal = ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY");
-    expect(internal.map((row) => row.specId)).toEqual(["druid/restoration"]);
+    expect(internal.map((row) => row.specId)).toEqual(["druid/restoration", "priest/holy"]);
     for (const row of internal)
       expect(analyzerForSpec(row.specId, PRODUCTION_CATALOG), row.specId).toBeNull();
     // The Holy Paladin and Mistweaver Monk rows were INTERNAL_ONLY in HEAL-B1; both lookups now find them.

@@ -1,10 +1,11 @@
 /**
  * HEAL-B1: the Holy Paladin, Restoration Druid and Mistweaver Monk
  * registrations, INTERNAL_ONLY; Holy Paladin and Mistweaver Monk PUBLIC since
- * HEAL-B1P.
+ * HEAL-B1P; and, since HEAL-B2, the INTERNAL_ONLY Holy Priest registration
+ * (its real-evidence checks are tests/unit/specs/heal-b2-holy-priest.test.ts).
  *
  * What is pinned per registration:
- * - Restoration Druid is the listed INTERNAL_ONLY row; the public lookup, the
+ * - Restoration Druid and Holy Priest are listed INTERNAL_ONLY rows; the public lookup, the
  *   public identity table and a public request never reach it. Holy Paladin
  *   and Mistweaver Monk are listed PUBLIC rows: both lookups find the same
  *   row, the identity table resolves them, a public request dispatches them
@@ -54,6 +55,8 @@ import { MISTWEAVER_MONK_REGISTRATION } from "../../../src/specs/monk/mistweaver
 import { MISTWEAVER_MONK_REQUIRED_INPUTS } from "../../../src/specs/monk/mistweaver/spec.js";
 import { HOLY_PALADIN_REGISTRATION } from "../../../src/specs/paladin/holy/registration.js";
 import { HOLY_PALADIN_REQUIRED_INPUTS } from "../../../src/specs/paladin/holy/spec.js";
+import { HOLY_PRIEST_REGISTRATION } from "../../../src/specs/priest/holy/registration.js";
+import { HOLY_PRIEST_REQUIRED_INPUTS } from "../../../src/specs/priest/holy/spec.js";
 import type { FightIdentity } from "../../../src/wcl/types.js";
 import { D2_REQUEST, MCP_TEST_ENV } from "../../support/analysis-transports.js";
 import { countedProductionCatalog } from "../../support/catalog.js";
@@ -126,6 +129,16 @@ const CASES: readonly Case[] = [
     specName: "Mistweaver",
     required: MISTWEAVER_MONK_REQUIRED_INPUTS,
     exposure: "PUBLIC",
+  },
+  {
+    label: "Holy Priest",
+    specId: "priest/holy",
+    registration: HOLY_PRIEST_REGISTRATION,
+    analyzerId: "priest-holy-healer-findings",
+    className: "Priest",
+    specName: "Holy",
+    required: HOLY_PRIEST_REQUIRED_INPUTS,
+    exposure: "INTERNAL_ONLY",
   },
 ];
 
@@ -356,7 +369,7 @@ describe("the internal path over committed real evidence", () => {
   });
 
   it("a stated Holy Paladin run as another healer is refused, never evaluated as that one", () => {
-    for (const specId of ["druid/restoration", "monk/mistweaver"] as const) {
+    for (const specId of ["druid/restoration", "monk/mistweaver", "priest/holy"] as const) {
       const analysis = internalRun(specId, m13a, 5);
       expect(analysis.status).toBe("INSUFFICIENT_EVIDENCE");
       expect(analysis.evaluation).toMatchObject({

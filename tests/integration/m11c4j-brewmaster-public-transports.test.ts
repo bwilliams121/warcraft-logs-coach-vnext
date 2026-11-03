@@ -79,6 +79,8 @@ const EVERY_ANALYZER = [
   "paladin-holy-healer-findings",
   "druid-restoration-healer-findings",
   "monk-mistweaver-healer-findings",
+  // HEAL-B2: Holy Priest INTERNAL_ONLY.
+  "priest-holy-healer-findings",
 ] as const;
 
 let nextId = 1;

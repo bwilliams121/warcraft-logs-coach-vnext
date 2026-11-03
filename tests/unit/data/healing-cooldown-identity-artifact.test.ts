@@ -1,6 +1,6 @@
 /**
  * HEAL-B1: the shared healing-cooldown identity reader and the four
- * specialization artifacts it reads.
+ * specialization artifacts it reads; since HEAL-B2, five (Holy Priest).
  *
  * - Each artifact loads under its own dataset, class and specialization, and
  *   under no other.
@@ -24,12 +24,17 @@ import {
   parseHolyPaladinHealingCooldowns,
   pinnedHolyPaladinHealingCooldowns,
 } from "../../../src/data/game/paladin-holy-healing-cooldowns.js";
+import holyPriestJson from "../../../src/data/game/priest-holy-healing-cooldowns.json";
+import {
+  parseHolyPriestHealingCooldowns,
+  pinnedHolyPriestHealingCooldowns,
+} from "../../../src/data/game/priest-holy-healing-cooldowns.js";
 import shamanJson from "../../../src/data/game/shaman-restoration-healing-cooldowns.json";
 import { pinnedRestorationShamanHealingCooldowns } from "../../../src/data/game/shaman-restoration-healing-cooldowns.js";
 
 const PIN = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 
-describe("the four pinned artifacts", () => {
+describe("the five pinned artifacts", () => {
   it.each([
     [
       "Restoration Shaman",
@@ -69,6 +74,14 @@ describe("the four pinned artifacts", () => {
         [325197, "CHOICE", [322118]],
       ],
     ],
+    [
+      "Holy Priest",
+      pinnedHolyPriestHealingCooldowns,
+      [
+        [64843, "NORMAL", []],
+        [200183, "NORMAL", []],
+      ],
+    ],
   ] as const)(
     "%s loads its entries, each its own verbatim row at the pinned commit",
     (_label, load, expected) => {
@@ -88,7 +101,7 @@ describe("the four pinned artifacts", () => {
   );
 
   it("claims nothing about cooldown, charges or duration", () => {
-    for (const artifact of [shamanJson, holyJson, druidJson, mistweaverJson]) {
+    for (const artifact of [shamanJson, holyJson, druidJson, mistweaverJson, holyPriestJson]) {
       for (const entry of artifact.healingCooldowns) {
         for (const key of Object.keys(entry)) expect(key).not.toMatch(/cooldownMs|charge|duration/i);
       }
@@ -114,6 +127,22 @@ describe("the four pinned artifacts", () => {
         specId: 264,
       }),
     ).toEqual({ ok: false, reason: "SPECIALIZATION_MISMATCH" });
+    // Discipline (256) and Shadow (258) are the same class, never the Holy Priest artifact.
+    for (const specId of [256, 258]) {
+      expect(
+        parseHealingCooldownIdentityArtifact(holyPriestJson, {
+          datasetId: "SIMC_DBC_PRIEST_HOLY_HEALING_COOLDOWNS",
+          classId: 5,
+          specId,
+        }),
+      ).toEqual({ ok: false, reason: "SPECIALIZATION_MISMATCH" });
+    }
+  });
+
+  it("a Holy Priest entry citing Divine Hymn's healing pulse (64844) instead of its cast is refused", () => {
+    const tampered = structuredClone(holyPriestJson);
+    tampered.healingCooldowns[0]!.abilityGameId = 64844;
+    expect(parseHolyPriestHealingCooldowns(tampered)).toEqual({ ok: false, reason: "PINNED_ROW_MISMATCH" });
   });
 });
 

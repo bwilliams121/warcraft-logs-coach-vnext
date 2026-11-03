@@ -80,6 +80,7 @@ import { MISTWEAVER_MONK_REGISTRATION } from "../specs/monk/mistweaver/registrat
 import { HOLY_PALADIN_REGISTRATION } from "../specs/paladin/holy/registration.js";
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
+import { HOLY_PRIEST_REGISTRATION } from "../specs/priest/holy/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
 import { RESTORATION_SHAMAN_REGISTRATION } from "../specs/shaman/restoration/registration.js";
 import type { AnalyzerRequirement } from "./ingestion-scope.js";
@@ -432,10 +433,11 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Ten rows: nine PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
+ * Eleven rows: nine PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
  * Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1)
- * and, since HEAL-B1, Restoration Druid INTERNAL_ONLY: it is the one healer
- * HEAL-B1P could not promote (no retained evidence of one).
+ * and two INTERNAL_ONLY: since HEAL-B1, Restoration Druid, the one healer
+ * HEAL-B1P could not promote (no retained evidence of one), and since HEAL-B2,
+ * Holy Priest, whose public promotion is HEAL-B2P.
  * A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
@@ -462,6 +464,8 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   HOLY_PALADIN_REGISTRATION,
   RESTORATION_DRUID_REGISTRATION,
   MISTWEAVER_MONK_REGISTRATION,
+  // INTERNAL_ONLY since HEAL-B2: a fourth healer row on the same architecture. No public shape yet (HEAL-B2P).
+  HOLY_PRIEST_REGISTRATION,
 ]);
 
 /**

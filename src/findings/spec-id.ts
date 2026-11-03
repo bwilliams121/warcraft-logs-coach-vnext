@@ -30,8 +30,9 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS ONE MEMBER SINCE HEAL-B1P (Restoration Druid),
- * which promoted Holy Paladin and Mistweaver Monk. It held three from HEAL-B1
+ * THE INTERNAL-ONLY SET HOLDS TWO MEMBERS SINCE HEAL-B2 (Restoration Druid and
+ * Holy Priest). It held Restoration Druid alone from HEAL-B1P, which promoted
+ * Holy Paladin and Mistweaver Monk. It held three from HEAL-B1
  * (Holy Paladin, Restoration Druid and Mistweaver Monk), the first time it
  * held more than one. It was empty from HEAL-AP, which promoted Restoration Shaman (it held
  * that one member from HEAL-A). It was empty from
@@ -68,7 +69,8 @@ export type SpecId =
   | "shaman/restoration"
   | "paladin/holy"
   | "druid/restoration"
-  | "monk/mistweaver";
+  | "monk/mistweaver"
+  | "priest/holy";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -81,6 +83,7 @@ export const SPEC_IDS = Object.freeze([
   "paladin/holy",
   "druid/restoration",
   "monk/mistweaver",
+  "priest/holy",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -174,9 +177,15 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * whole-fight casts in the canonical fight). Restoration Druid stays here: no
  * retained, authorized capture holds one of its events, so it cannot meet the
  * gate (agent/spec-onboarding-inventory.md; its evidence gap is ONB-EV's).
+ *
+ * Holy Priest arrived here in HEAL-B2, a fourth healer registration on the
+ * same architecture with its own reviewed healing-cooldown identity data
+ * (Divine Hymn and Apotheosis). Its public shape and promotion are HEAL-B2P's;
+ * until then the id stays here.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
+  "priest/holy",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

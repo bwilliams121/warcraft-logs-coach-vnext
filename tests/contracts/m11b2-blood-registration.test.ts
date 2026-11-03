@@ -107,8 +107,9 @@ describe("identity and partition", () => {
     // The internal-only half never holds Blood; it held Brewmaster Monk from
     // M11-C2 until M11-C4j, Augmentation Evoker in M13-E, Restoration Shaman
     // in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, and
-    // holds Restoration Druid alone since HEAL-B1P.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration"]);
+    // held Restoration Druid alone from HEAL-B1P, and holds it and Holy Priest
+    // since HEAL-B2.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/holy"]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(requirePublicSpecId("deathknight/blood")).toBe("deathknight/blood");

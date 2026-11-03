@@ -6699,6 +6699,68 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
+  // ---- SPEC_HOLY_PRIEST (HEAL-B2, INTERNAL_ONLY) ---------------------------------
+  kase(
+    "spec-holy-priest.unstated-subject-yields-no-healer-finding",
+    PP,
+    "SPEC_HOLY_PRIEST",
+    "src/specs/priest/holy/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
+    "Through the production catalog's internal lookup, the INTERNAL_ONLY Holy Priest registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
+    [
+      a("SPEC_HOLY_PRIEST.REGISTRATION_RESULT", {
+        actorId: TANK,
+        expected: {
+          requiredScope: "FULL_RAID",
+          status: "INSUFFICIENT_EVIDENCE",
+          domains: [
+            { domain: "COOLDOWN_ASSIGNMENT", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_COOLDOWN", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_DECISION", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+          ],
+          subjectSpecialization: "NOT_IN_FRIENDLY_ROSTER",
+          evaluationState: null,
+          healerFindings: "SUBJECT_SPECIALIZATION_NOT_STATED",
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Missing identity is not a default identity: a subject with no Warcraft Logs-stated specialization is never assumed to be the Holy Priest the caller named. And no pinned authority is not an UNKNOWN: every healer family is provider-less by construction, which is why the registration can never produce an ANALYZED result.",
+    {
+      limitations: [
+        "This single-slice fight has no fight context, so every subject is NOT_IN_FRIENDLY_ROSTER; the Holy Priest evaluator's results over stated identities are pinned by tests/unit/specs/heal-b2-holy-priest.test.ts.",
+      ],
+      related: [
+        "tests/unit/specs/heal-b2-holy-priest.test.ts",
+        "tests/contracts/m11a2-cross-spec-isolation.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "application-service.holy-priest-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Holy Priest registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve Priest/Holy, so no public request can select it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "priest/holy",
+        expected: {
+          internalAnalyzerId: "priest-holy-healer-findings",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Holy Priest is registered INTERNAL_ONLY in HEAL-B2 and its public promotion is HEAL-B2P's: registration changes what internal evaluation derives, not what a public request can reach.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
   // ---- SPEC_MISTWEAVER_MONK (HEAL-B1; PUBLIC since HEAL-B1P) ----------------------
   kase(
     "spec-mistweaver-monk.unstated-subject-yields-no-healer-finding",

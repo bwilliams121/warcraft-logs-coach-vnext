@@ -88,7 +88,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries nine PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP), Holy Paladin and Mistweaver Monk (INTERNAL_ONLY in HEAL-B1, PUBLIC since HEAL-B1P), plus Restoration Druid INTERNAL_ONLY", () => {
+  it("carries nine PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP), Holy Paladin and Mistweaver Monk (INTERNAL_ONLY in HEAL-B1, PUBLIC since HEAL-B1P), plus Restoration Druid and Holy Priest (since HEAL-B2) INTERNAL_ONLY", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -107,6 +107,8 @@ describe("the production catalog", () => {
       ["paladin-holy-healer-findings", "paladin/holy", "PUBLIC"],
       ["druid-restoration-healer-findings", "druid/restoration", "INTERNAL_ONLY"],
       ["monk-mistweaver-healer-findings", "monk/mistweaver", "PUBLIC"],
+      // HEAL-B2: a fourth healer row on the same architecture, INTERNAL_ONLY.
+      ["priest-holy-healer-findings", "priest/holy", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
     // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), all
@@ -170,7 +172,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(10);
+    expect(catalog.registrations).toHaveLength(11);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {
