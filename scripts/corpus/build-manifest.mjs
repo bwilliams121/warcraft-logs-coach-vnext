@@ -6512,6 +6512,69 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
+
+  // ---- SPEC_RESTORATION_SHAMAN (HEAL-A, INTERNAL_ONLY) ---------------------
+  kase(
+    "spec-restoration-shaman.unstated-subject-yields-no-healer-finding",
+    PP,
+    "SPEC_RESTORATION_SHAMAN",
+    "src/specs/shaman/restoration/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
+    "Through the production catalog's internal lookup, the Restoration Shaman registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED.",
+    [
+      a("SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT", {
+        actorId: TANK,
+        expected: {
+          requiredScope: "FULL_RAID",
+          status: "INSUFFICIENT_EVIDENCE",
+          domains: [
+            { domain: "COOLDOWN_ASSIGNMENT", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_COOLDOWN", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+            { domain: "HEALING_DECISION", resolution: "NO_PINNED_AUTHORITY_FOR_DOMAIN" },
+          ],
+          subjectSpecialization: "NOT_IN_FRIENDLY_ROSTER",
+          evaluationState: null,
+          healerFindings: "SUBJECT_SPECIALIZATION_NOT_STATED",
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Missing identity is not a default identity: a subject with no Warcraft Logs-stated specialization is never assumed to be the Restoration Shaman the caller named. And no pinned authority is not an UNKNOWN: every healer family is provider-less by construction, which is why the registration can never produce an ANALYZED result.",
+    {
+      limitations: [
+        "This single-slice fight has no fight context, so every subject is NOT_IN_FRIENDLY_ROSTER; the real Restoration Shaman's results (M12-D, evidence archive) are pinned by tests/unit/specs/restoration-shaman-registration.test.ts.",
+      ],
+      related: [
+        "tests/unit/specs/restoration-shaman-registration.test.ts",
+        "tests/contracts/m11a2-cross-spec-isolation.test.ts",
+      ],
+    },
+  ),
+  kase(
+    "application-service.restoration-shaman-registration-is-internal-only",
+    PP,
+    "APPLICATION_SERVICE",
+    "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
+    "The validated production catalog carries the Restoration Shaman registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve shaman/restoration, so no public request can select it.",
+    [
+      a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
+        specId: "shaman/restoration",
+        expected: {
+          internalAnalyzerId: "shaman-restoration-healer-findings",
+          publicAnalyzerId: null,
+          exposure: "INTERNAL_ONLY",
+          identityResolvesPublicly: false,
+        },
+      }),
+    ],
+    ["OWNED_CONTRACT"],
+    "Its healer findings have no reviewed public shape yet (HEAL-AP), so registration changes what internal evaluation derives, not what a public request can reach.",
+    {
+      related: [
+        "tests/contracts/m10a-registry-integrity.test.ts",
+        "tests/contracts/m10d-public-registration.test.ts",
+      ],
+    },
+  ),
   kase(
     "application-service.brewmaster-monk-subject-is-publicly-supported-since-m11-c4j",
     BREWMASTER_GTKB,

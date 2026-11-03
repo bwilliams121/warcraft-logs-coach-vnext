@@ -12328,6 +12328,86 @@ observed up to t, and the specialization queries `state.auras` on them.
 public decision changes. ONB-X4 (Demonology), ONB-X5 (Unholy) and ONB-T2
 (Beast Mastery) supply reviewed profiles and own what their pet atoms mean.
 
+## HEAL-A — Restoration Shaman registration and the healer finding shape (internal)
+
+Autopilot queue entry HEAL-A. Public contract: NONE. No Warcraft Logs
+request. The M12-D verdict scope and the M12-E plan semantics are unchanged.
+
+**The problem.** The M12-D evaluator could not be registered: no registration
+shape existed for an analyzer with no SimulationCraft authority whose
+assignment standard is request input, `RESTORATION_SHAMAN_REQUIRED_INPUTS`
+reached no scope derivation, and the only finding shape was the rotational
+one (`DecisionCategory` = ROTATION).
+
+**Healer provider-less domains** (`authority-domain.ts`).
+`PROVIDERLESS_DOMAINS` gains COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and
+HEALING_DECISION, by the M13-E mechanism: declarable, never bindable, always
+`NO_PINNED_AUTHORITY_FOR_DOMAIN`. COOLDOWN_ASSIGNMENT is provider-less on
+purpose: its only standard is the caller's raid cooldown plan, which is
+per-request input, never a pinned provider artifact. The plan therefore
+reaches the analyzer through `SpecAnalysisInput.raidCooldownPlan` (optional;
+absent or `null` is "no plan supplied"), which the analysis service fills
+from the request, untouched. No public analyzer reads it.
+
+**The healer finding shape** (`src/findings/healer-finding.ts`, internal).
+Kept apart from the rotational `Finding`; `DecisionCategory` stays ROTATION.
+
+- `categories`: exactly ASSIGNMENT, COOLDOWN, HEALING_DECISION, in order, each
+  with its resolution:
+  - ASSIGNMENT: NO_AUTHORITY_AVAILABLE (no plan, or another fight's plan),
+    UNKNOWN (plan supplied, binding unprovable), or EVALUATED_AGAINST_PLAN
+    citing the plan (`RaidPlanAuthorityRef`).
+  - COOLDOWN: OBSERVED, `WCL_OBSERVED_FACT`, with the listing's completeness.
+  - HEALING_DECISION: NO_AUTHORITY_AVAILABLE.
+- `findings`: one ASSIGNMENT finding per plan entry for the player (OUTCOME
+  with the spec-owned outcome string and shared `ActionabilityEvidence`, or
+  UNKNOWN with the reason), and one COOLDOWN finding per observed use (no
+  verdict field). Every finding names its authority.
+- `createHealerFindingSet` checks the authority rules instead of trusting
+  them: no ASSIGNMENT finding unless the category was evaluated against a
+  plan, and it must cite that plan; no COOLDOWN finding unless the category is
+  OBSERVED; one specialization; unique ids.
+- The outcome vocabulary is the specialization's (a plain string, as in the
+  observed-decision view), so the shared file declares no negative
+  actionability word. No confidence, severity, score, HPS or plan-quality
+  field exists.
+
+**Registration** (`src/specs/shaman/restoration/registration.ts`,
+INTERNAL_ONLY; `shaman/restoration` in `INTERNAL_ONLY_SPEC_IDS`).
+
+- Three capabilities declared from `RESTORATION_SHAMAN_REQUIRED_INPUTS`
+  (FULL_RAID; ACTORS, CASTS, DAMAGE, HEALING, ABSORBS; NO_TARGET). The
+  requirement is DERIVED as FULL_RAID. No bindings.
+- Envelope status, decided here: never ANALYZED, because ANALYZED cites a
+  pinned decision artifact (`AnalysisAuthorityMetadata`) and a request's plan
+  is not one.
+  - `AUTHORITY_NOT_AVAILABLE` when the evaluator ran. It means "no PINNED
+    decision authority". Plan-backed ASSIGNMENT results are in the finding
+    set, each citing the plan, and the envelope does not summarize them.
+  - `INSUFFICIENT_EVIDENCE` when the subject's specialization is not stated,
+    its identity is refused or the pinned data is unusable. No finding set
+    (`NOT_ASSESSED` with the reason), never an empty one.
+  - The public meaning of the status for a plan-evaluated healer result is
+    HEAL-AP's to define with the public shape.
+- Identity: as M13-E, from the fight's report and fight ids and the subject's
+  `friendlySpecializations` entry, plus the actor catalog's name for plan-name
+  matching. The evaluator's identity input is now
+  `RestorationShamanSubjectIdentity` (`FightIdentity` satisfies it) with a
+  nullable name. With no stated name, every unresolved plan entry may be the
+  subject's, so none is counted as another player's (evaluator revision `/2`).
+- The projection (`healer-findings.ts`) restates the evaluation and adds
+  nothing. An entry of an ability the specialization does not identify is
+  UNKNOWN `ABILITY_NOT_REGISTERED`: the plan is a standard for it, and the
+  reviewed identity to apply it is missing.
+
+**Reachability.** `analyzerForSpec` never selects it and the identity table
+does not resolve Shaman/Restoration, so a public request stays
+SPEC_NOT_SUPPORTED and the plan disclosure stays `NOT_EVALUATED` /
+`NO_PUBLIC_ASSIGNMENT_EVALUATOR`. The unregistered-tree exceptions are gone
+from both cross-spec-isolation guards (the list is empty), and `m11a2` names
+the tree as a second registered tree with no APL artifact. The corpus gained
+the `SPEC_RESTORATION_SHAMAN` layer and two cases.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

@@ -155,8 +155,10 @@ const TREES: readonly SpecTree[] = (() => {
  *
  * M13-A added the Augmentation Evoker support evaluator here; M13-E removed
  * it, because it is now registered (INTERNAL_ONLY, binding no authority).
+ * HEAL-A removed Restoration Shaman (named here since M12-D) for the same
+ * reason, so the list is empty: every specialization tree is registered.
  */
-const UNREGISTERED_EVALUATOR_TREES: readonly string[] = ["shaman/restoration"];
+const UNREGISTERED_EVALUATOR_TREES: readonly string[] = [];
 const REGISTERED_TREES: readonly SpecTree[] = TREES.filter(
   (tree) => !UNREGISTERED_EVALUATOR_TREES.includes(tree.specId),
 );
@@ -164,9 +166,10 @@ const REGISTERED_TREES: readonly SpecTree[] = TREES.filter(
 /**
  * M13-E: registered trees that bind NO decision authority, and so own no APL
  * artifact. Named exactly; each must be a registered tree. The one-APL-per-tree
- * count below applies to every other registered tree.
+ * count below applies to every other registered tree. HEAL-A added Restoration
+ * Shaman, the first healer registration.
  */
-const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = ["evoker/augmentation"];
+const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = ["evoker/augmentation", "shaman/restoration"];
 
 const ROSTER = (() => {
   const loaded = pinnedSpecRoster();

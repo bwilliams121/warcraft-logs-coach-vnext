@@ -106,7 +106,7 @@ function classPrefixOfModule(resolved: string): string | null {
 }
 
 describe("the sweep has something to sweep", () => {
-  it("finds the Assassination tree, the two Paladin trees, the Blood Death Knight tree, since M11-C2 the Brewmaster Monk tree, since M12-D the unregistered Restoration Shaman evaluator tree and, since M13-A, the Augmentation Evoker tree (registered since M13-E)", () => {
+  it("finds the Assassination tree, the two Paladin trees, the Blood Death Knight tree, since M11-C2 the Brewmaster Monk tree, since M12-D the Restoration Shaman evaluator tree (registered since HEAL-A) and, since M13-A, the Augmentation Evoker tree (registered since M13-E)", () => {
     const trees = new Set(SPEC_FILES.map(specTreeOf).filter((tree): tree is string => tree !== null));
     expect([...trees].sort()).toEqual([
       "src/specs/deathknight/blood",
@@ -118,7 +118,7 @@ describe("the sweep has something to sweep", () => {
       "src/specs/shaman/restoration",
     ]);
     expect(existsSync("src/specs/paladin/protection/registration.ts")).toBe(true);
-    expect(existsSync("src/specs/shaman/restoration/registration.ts")).toBe(false);
+    expect(existsSync("src/specs/shaman/restoration/registration.ts")).toBe(true);
     expect(existsSync("src/specs/evoker/augmentation/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
   });
@@ -179,7 +179,7 @@ describe("shared code reaches specializations only through the registration boun
       importSpecifiersOf(path).some((specifier) => resolveSpecifier(path, specifier).includes("src/specs/")),
     );
     expect(importers).toEqual(["src/services/analyzer-registry.ts"]);
-    // And it imports exactly the six registrations, nothing deeper.
+    // And it imports exactly the seven registrations, nothing deeper.
     const specImports = importSpecifiersOf("src/services/analyzer-registry.ts")
       .map((specifier) => resolveSpecifier("src/services/analyzer-registry.ts", specifier))
       .filter((resolved) => resolved.includes("src/specs/"))
@@ -191,6 +191,7 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/paladin/protection/registration.js",
       "src/specs/paladin/retribution/registration.js",
       "src/specs/rogue/assassination/registration.js",
+      "src/specs/shaman/restoration/registration.js",
     ]);
   });
 

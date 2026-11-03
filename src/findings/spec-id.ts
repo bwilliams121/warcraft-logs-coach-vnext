@@ -30,8 +30,9 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET IS EMPTY AGAIN SINCE M13-F, which promoted Augmentation
- * Evoker (it held that one member from M13-E). Before that it held one member from M11-C2. It was empty
+ * THE INTERNAL-ONLY SET HOLDS ONE MEMBER AGAIN SINCE HEAL-A (Restoration
+ * Shaman). It was empty from M13-F, which promoted Augmentation Evoker (it
+ * held that one member from M13-E). Before that it held one member from M11-C2. It was empty
  * from M10-D (Protection public) until M11-A4 (Retribution arrived internal),
  * empty again from M11-A5 until M11-B2 (Blood Death Knight arrived internal),
  * and empty again from M11-B12 (Blood moved to the public half after ten
@@ -59,7 +60,8 @@ export type SpecId =
   | "paladin/retribution"
   | "deathknight/blood"
   | "monk/brewmaster"
-  | "evoker/augmentation";
+  | "evoker/augmentation"
+  | "shaman/restoration";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -68,6 +70,7 @@ export const SPEC_IDS = Object.freeze([
   "deathknight/blood",
   "monk/brewmaster",
   "evoker/augmentation",
+  "shaman/restoration",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -134,9 +137,20 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * moved it to `PUBLIC_SPEC_IDS` by the same five-site edit, together with the
  * reviewed public shape of those facts (`supportObservations`). It is the
  * first public row that is never ANALYZED, so the decision-evidence promotion
- * gates do not apply to it: it publishes no decision. The set is empty again.
+ * gates do not apply to it: it publishes no decision. The set was empty again
+ * from M13-F until HEAL-A.
+ *
+ * Restoration Shaman arrived here in HEAL-A as the first healer registration.
+ * Like Augmentation it binds no pinned decision authority: its declared
+ * families (COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN, HEALING_DECISION) are
+ * provider-less, so it is never ANALYZED. Its assignment execution is judged
+ * only against a caller-supplied raid cooldown plan, and its results take the
+ * shared healer finding shape (`healer-finding.ts`). Its public result shape
+ * and healer promotion gate are HEAL-AP's; until then the id stays here.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
+  "shaman/restoration",
+] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

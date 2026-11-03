@@ -567,7 +567,8 @@ export async function analyzeFight(
   // ---- the caller's raid cooldown plan, disclosed on every result (M12-E) ----
   //
   // Input facts only: what was received and whether it binds to this fight.
-  // No registered analyzer consumes a plan, so nothing here evaluates one.
+  // No PUBLIC analyzer consumes a plan, so nothing here evaluates one. The plan
+  // is still handed to the selected analyzer below, untouched (HEAL-A).
   const planDisclosure =
     parsed.request.raidCooldownPlan === null
       ? null
@@ -711,6 +712,7 @@ export async function analyzeFight(
     actorId: identity.player.sourceId,
     specId: analyzer.specId,
     targetActorId: null,
+    raidCooldownPlan: parsed.request.raidCooldownPlan,
   });
   if (!run.ok) {
     return serviceFailure(

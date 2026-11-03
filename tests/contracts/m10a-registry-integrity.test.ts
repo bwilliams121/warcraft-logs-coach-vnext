@@ -85,7 +85,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries six PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j) and Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F)", () => {
+  it("carries six PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j) and Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) — and, since HEAL-A, Restoration Shaman INTERNAL_ONLY", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -99,11 +99,12 @@ describe("the production catalog", () => {
       ["deathknight-blood-observed-decisions", "deathknight/blood", "PUBLIC"],
       ["monk-brewmaster-observed-decisions", "monk/brewmaster", "PUBLIC"],
       ["evoker-augmentation-support-observations", "evoker/augmentation", "PUBLIC"],
+      ["shaman-restoration-healer-findings", "shaman/restoration", "INTERNAL_ONLY"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
-    // all six rows since M13-F (Augmentation was the INTERNAL_ONLY row in
-    // M13-E), and the derivation is what would drop a row the moment one went
-    // back to INTERNAL_ONLY.
+    // all six rows from M13-F until HEAL-A (Augmentation was the INTERNAL_ONLY
+    // row in M13-E), six of seven since HEAL-A, and the derivation is what drops
+    // the INTERNAL_ONLY Restoration Shaman row.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
     expect(ENABLED_ANALYZERS).toHaveLength(6);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
@@ -160,7 +161,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     const rows = catalog.registrations as AnalyzerRegistration[];
     expect(() => rows.push({ ...rogue, analyzerId: "second" })).toThrow(TypeError);
     expect(() => rows.push({ ...paladin, analyzerId: "third" })).toThrow(TypeError);
-    expect(catalog.registrations).toHaveLength(6);
+    expect(catalog.registrations).toHaveLength(7);
   });
 
   it("exposure cannot be flipped back to INTERNAL_ONLY", () => {
@@ -459,10 +460,20 @@ describe("the public set is one promise across the partition, the identity table
     );
   });
 
-  it("the exposure vocabulary is dormant, not gone: a PUBLIC row for an unknown id is still refused by name", () => {
-    // There is no internal-only id to expose, so PUBLIC_EXPOSURE_OF_INTERNAL_SPEC
-    // has no subject today. An id the build does not know at all is refused as
-    // UNKNOWN_SPEC_ID whatever its exposure says.
+  it("the INTERNAL_ONLY Restoration Shaman row cannot be flipped PUBLIC, and is invisible to the public lookup (HEAL-A)", () => {
+    expect(analyzerForSpec("shaman/restoration")).toBeNull();
+    expect(internalAnalyzerForSpec("shaman/restoration")?.exposure).toBe("INTERNAL_ONLY");
+    const flipped = ANALYZER_REGISTRATIONS.map((registration) =>
+      registration.specId === "shaman/restoration"
+        ? { ...registration, exposure: "PUBLIC" as const }
+        : registration,
+    );
+    expect(defectsOf(flipped)).toContain("PUBLIC_EXPOSURE_OF_INTERNAL_SPEC");
+  });
+
+  it("a PUBLIC row for an unknown id is still refused by name", () => {
+    // An id the build does not know at all is refused as UNKNOWN_SPEC_ID
+    // whatever its exposure says.
     const unknown = {
       ...fixtureRegistration({ exposure: "PUBLIC" }),
       specId: "warrior/arms" as AnalyzerRegistration["specId"],

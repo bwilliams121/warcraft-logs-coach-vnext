@@ -123,6 +123,14 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 1,
     archive: true,
   },
+  // HEAL-A: actor 122 of b1PmaKrd6CDfzngc fight 48, the Restoration Shaman the
+  // committed M12 context reports (the M12-D subject). Archive evidence only.
+  "shaman/restoration": {
+    artifactId: "wcl-fight-context-b1pm-fight-48",
+    fightId: 48,
+    sourceId: 122,
+    archive: true,
+  },
 };
 
 const ARCHIVE_GRAPHQL: Record<string, string> = import.meta.glob("../evidence/artifacts/wcl-graphql/*.json", {
@@ -338,7 +346,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the six public modules, each with zero supplemental analyses", () => {
+  it("is exactly the six public modules and, since HEAL-A, the INTERNAL_ONLY Restoration Shaman module, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -363,6 +371,8 @@ describe("what the tree exports today", () => {
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
+      // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority.
+      ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "INTERNAL_ONLY", 0],
     ]);
   });
 

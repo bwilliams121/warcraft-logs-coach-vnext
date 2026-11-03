@@ -96,7 +96,8 @@ describe("the committed corpus loads", () => {
     // normalization census.
     expect(loaded.artifacts).toHaveLength(52);
     // M13-E: two cases for the INTERNAL_ONLY Augmentation registration.
-    expect(loaded.cases).toHaveLength(185);
+    // HEAL-A: two cases for the INTERNAL_ONLY Restoration Shaman registration.
+    expect(loaded.cases).toHaveLength(187);
     expect(loaded.coverage.declared).toBe(0);
   });
 

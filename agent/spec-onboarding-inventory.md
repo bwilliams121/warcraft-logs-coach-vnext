@@ -64,14 +64,14 @@ never assumed.
   "rosterSource": "src/data/game/spec-roster.json",
   "playableTotal": 40,
   "public": 6,
-  "internalOnly": 0,
-  "foundation": 1,
+  "internalOnly": 1,
+  "foundation": 0,
   "blocked": 0,
   "deferred": 0,
   "notStarted": 33,
   "publiclySupportedPercent": 15,
   "terminallyDispositionedPercent": 15,
-  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman is FOUNDATION (M12-D evaluator, unregistered). Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution), ONB-S2 (shared variable combining operations), ONB-S4 (shared cast and channel decision anchor), ONB-S5 (shared pooling and wait semantics) and ONB-S6 (shared pet actor mapping) change no specialization's state."
+  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman is INTERNAL_ONLY since HEAL-A (registered, binding no pinned authority, healer finding shape); its public promotion and healer gate are HEAL-AP. Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution), ONB-S2 (shared variable combining operations), ONB-S4 (shared cast and channel decision anchor), ONB-S5 (shared pooling and wait semantics) and ONB-S6 (shared pet actor mapping) change no specialization's state."
 }
 ```
 
@@ -88,7 +88,7 @@ The percentages are `public / playableTotal` and
 | `deathknight/blood` | TANK | PUBLIC | COMMITTED | M11-B (terminal) |
 | `monk/brewmaster` | TANK | PUBLIC | COMMITTED | M11-C (terminal) |
 | `evoker/augmentation` | UNKNOWN (support) | PUBLIC | COMMITTED (M13-A, M13-D certified) | M13-A–M13-F (terminal) |
-| `shaman/restoration` | HEALER | FOUNDATION | RETAINED_RAW (fight 48, actor 122) | HEAL-A, HEAL-AP |
+| `shaman/restoration` | HEALER | INTERNAL_ONLY | COMMITTED (M12-D archive, fight 48, actor 122) | HEAL-A, HEAL-AP |
 | `paladin/holy` | HEALER | NOT_STARTED | RETAINED_RAW (fight 48 "Holy", class to verify) | HEAL-B1, HEAL-B1P |
 | `druid/restoration` | HEALER | NOT_STARTED | CONTEXT_ONLY | HEAL-B1, HEAL-B1P |
 | `monk/mistweaver` | HEALER | NOT_STARTED | RETAINED_RAW (fight 48) | HEAL-B1, HEAL-B1P |
@@ -123,7 +123,7 @@ The percentages are `public / playableTotal` and
 | `warlock/demonology` | DPS | NOT_STARTED | RETAINED_RAW (fight 48) | ONB-X4, ONB-X4P |
 | `deathknight/unholy` | DPS | NOT_STARTED | CONTEXT_ONLY | ONB-X5, ONB-X5P |
 
-Counts: 40 rows; PUBLIC 6, INTERNAL_ONLY 0, FOUNDATION 1, NOT_STARTED 33.
+Counts: 40 rows; PUBLIC 6, INTERNAL_ONLY 1, FOUNDATION 0, NOT_STARTED 33.
 
 ## Cohort design
 

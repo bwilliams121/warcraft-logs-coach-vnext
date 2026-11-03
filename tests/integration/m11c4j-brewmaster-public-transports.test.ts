@@ -73,6 +73,8 @@ const EVERY_ANALYZER = [
   "deathknight-blood-observed-decisions",
   BREWMASTER_MONK_ANALYZER_ID,
   "evoker-augmentation-support-observations",
+  // HEAL-A: INTERNAL_ONLY, so never dispatched by a public transport.
+  "shaman-restoration-healer-findings",
 ] as const;
 
 let nextId = 1;

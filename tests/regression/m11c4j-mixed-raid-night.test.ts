@@ -169,6 +169,7 @@ const NO_CALLS = {
   [BLOOD_DEATH_KNIGHT_ANALYZER_ID]: 0,
   [BREWMASTER_MONK_ANALYZER_ID]: 0,
   "evoker-augmentation-support-observations": 0,
+  "shaman-restoration-healer-findings": 0,
 };
 
 describe("a Brewmaster Monk alone", () => {

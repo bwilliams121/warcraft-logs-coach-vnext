@@ -286,10 +286,29 @@ export type RestorationShamanEvaluation =
       readonly healingDecision: HealingDecisionEvaluation;
     };
 
+/**
+ * The subject identity the gate and the plan reader use. The identity
+ * preflight's `FightIdentity` is one; HEAL-A's registration facade builds one
+ * from the normalized fight's own report, fight, actor name and stated
+ * specialization.
+ */
+export interface RestorationShamanSubjectIdentity {
+  readonly report: Pick<FightIdentity["report"], "code">;
+  readonly fight: Pick<FightIdentity["fight"], "id">;
+  readonly player: Pick<FightIdentity["player"], "sourceId" | "className" | "specName"> & {
+    /**
+     * The player's character name, or `null` when no source states it. Null
+     * never means "named nothing": every unresolved plan entry may then be
+     * this player's.
+     */
+    readonly name: string | null;
+  };
+}
+
 export interface RestorationShamanInput {
   readonly fight: CombatFight;
-  /** The identity preflight's result for the player under evaluation. */
-  readonly identity: FightIdentity;
+  /** The identity of the player under evaluation (the preflight's, or the facade's). */
+  readonly identity: RestorationShamanSubjectIdentity;
   /** The caller's normalized raid cooldown plan, or `null` when none was supplied. */
   readonly plan: RaidCooldownPlan | null;
   readonly overlapSpanMs?: number;
@@ -299,7 +318,7 @@ export interface RestorationShamanInput {
 
 type Refusal = Extract<RestorationShamanEvaluation, { state: "IDENTITY_REFUSED" }>["reason"];
 
-function identityRefusal(fight: CombatFight, identity: FightIdentity): Refusal | null {
+function identityRefusal(fight: CombatFight, identity: RestorationShamanSubjectIdentity): Refusal | null {
   if (identity.report.code !== fight.report.code || identity.fight.id !== fight.fight.id) {
     return "IDENTITY_MISMATCH";
   }
@@ -509,7 +528,7 @@ function overlapOf(
 
 function evaluatePlan(
   fight: CombatFight,
-  identity: FightIdentity,
+  identity: RestorationShamanSubjectIdentity,
   plan: RaidCooldownPlan | null,
   identified: ReadonlySet<number>,
   casts: readonly ObservedCooldownCast[],
@@ -540,11 +559,14 @@ function evaluatePlan(
     const mine = player.state === "RESOLVED" && player.actorId === subject;
     // Unresolved, but this player is among the name matches, or the name is
     // the one preflight established for this player (the roster may lack it,
-    // or name it nowhere): it may be this one, whatever the reason.
+    // or name it nowhere): it may be this one, whatever the reason. With no
+    // known name for this player, any unresolved entry may be this one.
+    const subjectName = identity.player.name;
     const maybeMine =
       player.state === "UNRESOLVED" &&
       (player.candidateActorIds.includes(subject) ||
-        namesMatch(entry.assignment.player.name, identity.player.name));
+        subjectName === null ||
+        namesMatch(entry.assignment.player.name, subjectName));
     if (!mine && !maybeMine) {
       assignmentsForOtherPlayers += 1;
       continue;

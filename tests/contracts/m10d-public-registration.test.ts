@@ -54,7 +54,7 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the six public ids since M13-F; internal-only: empty (Augmentation Evoker held it in M13-E)", () => {
+  it("public partition: the six public ids since M13-F; internal-only: Restoration Shaman since HEAL-A (Augmentation Evoker held it in M13-E)", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -63,7 +63,7 @@ describe("the five sites agree", () => {
       "monk/brewmaster",
       "evoker/augmentation",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["shaman/restoration"]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -103,7 +103,9 @@ describe("the five sites agree", () => {
     // sixth, INTERNAL_ONLY row in — Augmentation Evoker support observations —
     // NOT among the enabled analyzers, and M13-F made it PUBLIC by the same
     // move with its support-observation view. It publishes no decision, so
-    // the decision-evidence gates do not apply to it.
+    // the decision-evidence gates do not apply to it. HEAL-A put a seventh,
+    // INTERNAL_ONLY row in — Restoration Shaman, the first healer — NOT among
+    // the enabled analyzers.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
@@ -111,6 +113,7 @@ describe("the five sites agree", () => {
       ["deathknight/blood", "PUBLIC"],
       ["monk/brewmaster", "PUBLIC"],
       ["evoker/augmentation", "PUBLIC"],
+      ["shaman/restoration", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -199,6 +202,7 @@ describe("the complete-catalog helper", () => {
       "deathknight-blood-observed-decisions": 0,
       "monk-brewmaster-observed-decisions": 0,
       "evoker-augmentation-support-observations": 0,
+      "shaman-restoration-healer-findings": 0,
     });
   });
 });
