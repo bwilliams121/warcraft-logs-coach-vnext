@@ -30,9 +30,10 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS THREE MEMBERS SINCE HEAL-B1 (Holy Paladin,
- * Restoration Druid and Mistweaver Monk), the first time it has held more than
- * one. It was empty from HEAL-AP, which promoted Restoration Shaman (it held
+ * THE INTERNAL-ONLY SET HOLDS ONE MEMBER SINCE HEAL-B1P (Restoration Druid),
+ * which promoted Holy Paladin and Mistweaver Monk. It held three from HEAL-B1
+ * (Holy Paladin, Restoration Druid and Mistweaver Monk), the first time it
+ * held more than one. It was empty from HEAL-AP, which promoted Restoration Shaman (it held
  * that one member from HEAL-A). It was empty from
  * M13-F, which promoted Augmentation Evoker (it held that one member from
  * M13-E). Before that it held one member from M11-C2. It was empty
@@ -91,6 +92,8 @@ export const PUBLIC_SPEC_IDS = Object.freeze([
   "monk/brewmaster",
   "evoker/augmentation",
   "shaman/restoration",
+  "paladin/holy",
+  "monk/mistweaver",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -165,13 +168,15 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * HEAL-B1, three healer registrations on Restoration Shaman's architecture:
  * provider-less families, never ANALYZED, assignments judged only against a
  * supplied plan, cooldown uses as observed facts, each with its own reviewed
- * healing-cooldown identity data. Their public shape and promotion are
- * HEAL-B1P's; until then the ids stay here.
+ * healing-cooldown identity data. HEAL-B1P moved Holy Paladin and Mistweaver
+ * Monk to `PUBLIC_SPEC_IDS` by the same five-site edit, with the shared healer
+ * view, after each passed the healer promotion gate on real evidence (their
+ * whole-fight casts in the canonical fight). Restoration Druid stays here: no
+ * retained, authorized capture holds one of its events, so it cannot meet the
+ * gate (agent/spec-onboarding-inventory.md; its evidence gap is ONB-EV's).
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
-  "paladin/holy",
   "druid/restoration",
-  "monk/mistweaver",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

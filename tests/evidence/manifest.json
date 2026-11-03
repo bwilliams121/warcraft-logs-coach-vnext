@@ -324,6 +324,382 @@
       }
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "b659b3a50fa69a5b8f656f94fa274076f6632e91704aa9797e3970aa79ab9d4a",
+      "byteLength": 114638,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180.json --actor-slice 1 7616292 --from 7436291 --families cast,begincast --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor 1: every event whose sourceID or targetID is 1, with --from 7436291 (exclusive) and the bound 7616292 (inclusive), restricted by --families to cast and begincast. In place and order preserved; written as compact JSON (--compact). 315 of 271,011 events: 291 casts and 24 begincasts (305 sourced by 1, 10 cast on 1 by others).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS"],
+              "actorScope": [1],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7436292,
+                  "toReportTimeMs": 7616292
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS is complete for actor 1 over [7,436,292 .. 7,616,292] by the predicate 'every cast or begincast actor 1 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a two-part bundle, joined by adjacency, that spans the whole fight."
+        },
+        "retainedFor": "HEAL-B1P: the Holy Paladin's real casts over the whole canonical fight, so the healer promotion gate's observations (three Avenging Wrath and two Aura Mastery casts) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that establishes the player's class and specialization.",
+        "limitations": [
+          "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+          "Casts and begincasts only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+          "Actor 1 only: its pets' own casts are not retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "0176e86ea80a367cf1d6cd0af21a22d64a260b770f16a8e932ab6873f1b5cd47",
+      "byteLength": 103702,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345.json --actor-slice 1 7781469 --from 7616292 --families cast,begincast --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor 1: every event whose sourceID or targetID is 1, with --from 7616292 (exclusive) and the bound 7781469 (inclusive), restricted by --families to cast and begincast. In place and order preserved; written as compact JSON (--compact). 289 of 271,011 events: 262 casts and 27 begincasts (284 sourced by 1, 5 cast on 1 by others).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS"],
+              "actorScope": [1],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7616293,
+                  "toReportTimeMs": 7781469
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS is complete for actor 1 over [7,616,293 .. 7,781,469] by the predicate 'every cast or begincast actor 1 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a two-part bundle, joined by adjacency, that spans the whole fight."
+        },
+        "retainedFor": "HEAL-B1P: the Holy Paladin's real casts over the whole canonical fight, so the healer promotion gate's observations (three Avenging Wrath and two Aura Mastery casts) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that establishes the player's class and specialization.",
+        "limitations": [
+          "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+          "Casts and begincasts only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+          "Actor 1 only: its pets' own casts are not retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "2a8dcd41809f4a2510e8972349d2efd401531d2d699c488d815b9ee4a51f1cb8",
+      "byteLength": 95593,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180.json --actor-slice 9 7616292 --from 7436291 --families cast,begincast --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor 9: every event whose sourceID or targetID is 9, with --from 7436291 (exclusive) and the bound 7616292 (inclusive), restricted by --families to cast and begincast. In place and order preserved; written as compact JSON (--compact). 282 of 271,011 events: 241 casts and 41 begincasts (267 sourced by 9, 15 cast on 9 by others).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS"],
+              "actorScope": [9],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7436292,
+                  "toReportTimeMs": 7616292
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS is complete for actor 9 over [7,436,292 .. 7,616,292] by the predicate 'every cast or begincast actor 9 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a two-part bundle, joined by adjacency, that spans the whole fight."
+        },
+        "retainedFor": "HEAL-B1P: the Mistweaver Monk's real casts over the whole canonical fight, so the healer promotion gate's observations (three Invoke Yu'lon and two Restoral casts) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that establishes the player's class and specialization.",
+        "limitations": [
+          "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+          "Casts and begincasts only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+          "Actor 9 only: its pets' own casts are not retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "dfb4ca995c252e35bf7e7e29bed6e8b99d3b3a38a2867deb901affb89396a46f",
+      "byteLength": 89764,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345.json --actor-slice 9 7781469 --from 7616292 --families cast,begincast --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor 9: every event whose sourceID or targetID is 9, with --from 7616292 (exclusive) and the bound 7781469 (inclusive), restricted by --families to cast and begincast. In place and order preserved; written as compact JSON (--compact). 276 of 271,011 events: 221 casts and 55 begincasts (263 sourced by 9, 13 cast on 9 by others).",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS"],
+              "actorScope": [9],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7616293,
+                  "toReportTimeMs": 7781469
+                }
+              ]
+            }
+          ],
+          "basis": "CASTS is complete for actor 9 over [7,616,293 .. 7,781,469] by the predicate 'every cast or begincast actor 9 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a two-part bundle, joined by adjacency, that spans the whole fight."
+        },
+        "retainedFor": "HEAL-B1P: the Mistweaver Monk's real casts over the whole canonical fight, so the healer promotion gate's observations (three Invoke Yu'lon and two Restoral casts) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that establishes the player's class and specialization.",
+        "limitations": [
+          "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+          "Casts and begincasts only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+          "Actor 9 only: its pets' own casts are not retained.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-0-180",
       "path": "artifacts/wcl-events/wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-0-180.json",
       "encoding": "JSON",
@@ -6744,6 +7120,126 @@
       "authority": null,
       "limitations": [],
       "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/healing/damage-episodes.test.ts"]
+    },
+    {
+      "caseId": "normalization.b1pm-holy-paladin-1-casts-seg-0-180-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 315-event cast-only segment of actor 1 (fight +0 s .. +180 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 315
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the cast and begincast events sourced by or targeting actor 1 in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"]
+    },
+    {
+      "caseId": "normalization.b1pm-holy-paladin-1-casts-seg-180-345-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 289-event cast-only segment of actor 1 (fight +180 s .. +345 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 289
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the cast and begincast events sourced by or targeting actor 1 in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"]
+    },
+    {
+      "caseId": "normalization.b1pm-mistweaver-monk-9-casts-seg-0-180-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 282-event cast-only segment of actor 9 (fight +0 s .. +180 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 282
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the cast and begincast events sourced by or targeting actor 9 in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"]
+    },
+    {
+      "caseId": "normalization.b1pm-mistweaver-monk-9-casts-seg-180-345-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 276-event cast-only segment of actor 9 (fight +180 s .. +345 s) normalizes with every raw type recognised and every event kept in capture order.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 276
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the cast and begincast events sourced by or targeting actor 9 in its range, and nothing else."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"]
     },
     {
       "caseId": "normalization.b1pm-restoration-shaman-122-casts-seg-0-180-normalizes-whole-and-in-order",

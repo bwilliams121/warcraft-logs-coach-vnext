@@ -1817,6 +1817,13 @@ three internal healers (HEAL-B1, tests/unit/specs/heal-b1-healer-evaluators.test
   real fight 48 Holy Paladin 1, Mistweaver 9   -> no use, listing UNKNOWN, never "none used"; Mistweaver sources 9 + four stated pets
   artifact reader                              -> four artifacts load; cast id = row override (Avenging Crusader 216331, not 394088); node type, class/spec, siblings checked
   shared modules                               -> Restoration Shaman tests, the HEAL-AP gate and the corpus run unchanged over them
+Holy Paladin and Mistweaver Monk public (HEAL-B1P, tests/contracts/heal-ap-healer-promotion-gate.test.ts, heal-b1-healer-registrations.test.ts):
+  gate subjects                                -> fight 48 Holy Paladin 1 and Mistweaver 9 whole-fight casts; every HEAL-AP gate check passes for each
+  real uses                                    -> Holy Paladin 3 Avenging Wrath + 2 Aura Mastery; Mistweaver 3 Invoke Yu'lon + 2 Restoral; listing COMPLETE
+  registration                                 -> PUBLIC; both lookups the same row; identity table resolves; public request dispatched once
+  Restoration Druid                            -> still INTERNAL_ONLY; public request SPEC_NOT_SUPPORTED, no dispatch (no evidence for the gate)
+  shared healer view                           -> Restoration Shaman's public tests unchanged over healer-view-projection.ts
+  raid night                                   -> a stated-spec-less Mistweaver cell INSUFFICIENT_EVIDENCE, never SPEC_NOT_SUPPORTED, never Brewmaster's
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

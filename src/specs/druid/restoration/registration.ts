@@ -1,7 +1,7 @@
 /**
  * Restoration Druid's analyzer registration (HEAL-B1, INTERNAL_ONLY).
  *
- * THIS IS WHERE HOLY PALADIN STATES WHAT IT IS, AND THE ONLY PLACE.
+ * THIS IS WHERE RESTORATION DRUID STATES WHAT IT IS, AND THE ONLY PLACE.
  *
  * One row, owned by the specialization: its identity, its exposure, the three
  * healer families it is asked about and the evidence they consume, the

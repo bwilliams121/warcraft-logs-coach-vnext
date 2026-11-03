@@ -6575,13 +6575,13 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
-  // ---- SPEC_HOLY_PALADIN (HEAL-B1, INTERNAL_ONLY) ---------------------------
+  // ---- SPEC_HOLY_PALADIN (HEAL-B1; PUBLIC since HEAL-B1P) ----------------------
   kase(
     "spec-holy-paladin.unstated-subject-yields-no-healer-finding",
     PP,
     "SPEC_HOLY_PALADIN",
     "src/specs/paladin/holy/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
-    "Through the production catalog's internal lookup, the INTERNAL_ONLY Holy Paladin registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
+    "Through the production catalog (both lookups find the same row since HEAL-B1P), the Holy Paladin registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED.",
     [
       a("SPEC_HOLY_PALADIN.REGISTRATION_RESULT", {
         actorId: TANK,
@@ -6612,24 +6612,24 @@ const BREWMASTER_CASES = [
     },
   ),
   kase(
-    "application-service.holy-paladin-registration-is-internal-only",
+    "application-service.holy-paladin-registration-is-public-since-heal-b1p",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-    "The validated production catalog carries the Holy Paladin registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve Paladin/Holy, so no public request can select it.",
+    "RE-PINNED AT HEAL-B1P, INVERTING THE HEAL-B1 CASE. The validated production catalog carries the Holy Paladin registration PUBLIC, in either catalog order: both lookups find the same row, and the public identity table resolves Paladin/Holy to paladin/holy, so a public request selects it. The five public sites moved together in one reviewed edit (the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure), with the registration's healer view, after the healer promotion gate passed on the canonical fight's Holy Paladin.",
     [
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "paladin/holy",
         expected: {
           internalAnalyzerId: "paladin-holy-healer-findings",
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: "paladin-holy-healer-findings",
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Its healer findings have no reviewed public shape yet (HEAL-B1P), so registration changes what internal evaluation derives, not what a public request can reach.",
+    "Promotion changed reachability, not analysis: the registration still binds no pinned authority and is never ANALYZED; what a public request now receives is its healer findings (healerFindings), never an HPS ranking, an inferred assignment or a cooldown-quality verdict.",
     {
       related: [
         "tests/contracts/m10a-registry-integrity.test.ts",
@@ -6691,7 +6691,7 @@ const BREWMASTER_CASES = [
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Its healer findings have no reviewed public shape yet (HEAL-B1P), so registration changes what internal evaluation derives, not what a public request can reach.",
+    "Restoration Druid has no retained evidence for the healer promotion gate, so HEAL-B1P did not promote it: registration changes what internal evaluation derives, not what a public request can reach.",
     {
       related: [
         "tests/contracts/m10a-registry-integrity.test.ts",
@@ -6699,13 +6699,13 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
-  // ---- SPEC_MISTWEAVER_MONK (HEAL-B1, INTERNAL_ONLY) ---------------------------
+  // ---- SPEC_MISTWEAVER_MONK (HEAL-B1; PUBLIC since HEAL-B1P) ----------------------
   kase(
     "spec-mistweaver-monk.unstated-subject-yields-no-healer-finding",
     PP,
     "SPEC_MISTWEAVER_MONK",
     "src/specs/monk/mistweaver/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
-    "Through the production catalog's internal lookup, the INTERNAL_ONLY Mistweaver Monk registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
+    "Through the production catalog (both lookups find the same row since HEAL-B1P), the Mistweaver Monk registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED.",
     [
       a("SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT", {
         actorId: TANK,
@@ -6736,24 +6736,24 @@ const BREWMASTER_CASES = [
     },
   ),
   kase(
-    "application-service.mistweaver-monk-registration-is-internal-only",
+    "application-service.mistweaver-monk-registration-is-public-since-heal-b1p",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-    "The validated production catalog carries the Mistweaver Monk registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve Monk/Mistweaver, so no public request can select it.",
+    "RE-PINNED AT HEAL-B1P, INVERTING THE HEAL-B1 CASE. The validated production catalog carries the Mistweaver Monk registration PUBLIC, in either catalog order: both lookups find the same row, and the public identity table resolves Monk/Mistweaver to monk/mistweaver, so a public request selects it. The five public sites moved together in one reviewed edit (the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure), with the registration's healer view, after the healer promotion gate passed on the canonical fight's Mistweaver Monk.",
     [
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "monk/mistweaver",
         expected: {
           internalAnalyzerId: "monk-mistweaver-healer-findings",
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: "monk-mistweaver-healer-findings",
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Its healer findings have no reviewed public shape yet (HEAL-B1P), so registration changes what internal evaluation derives, not what a public request can reach.",
+    "Promotion changed reachability, not analysis: the registration still binds no pinned authority and is never ANALYZED; what a public request now receives is its healer findings (healerFindings), never an HPS ranking, an inferred assignment or a cooldown-quality verdict.",
     {
       related: [
         "tests/contracts/m10a-registry-integrity.test.ts",
@@ -12212,6 +12212,99 @@ const M12D_EVIDENCE_CASES = M12D_SEGMENTS.map(([fromS, toS, , , count]) =>
 );
 
 // --------------------------------------------------------------------------
+// HEAL-B1P (2026-11-03): the healer promotion gate's real subjects for Holy
+// Paladin and Mistweaver Monk. Every cast and begincast sourced by or
+// targeting fight 48's Holy Paladin (actor 1) and Mistweaver Monk (actor 9)
+// over the whole fight, cut from the same M11-E2 capture exactly as M12-D cut
+// actor 122's. No new Warcraft Logs request was made.
+// --------------------------------------------------------------------------
+
+const HEALB1P_SUBJECTS = [
+  {
+    actorId: 1,
+    slug: "holy-paladin",
+    label: "Holy Paladin",
+    cooldowns: "three Avenging Wrath and two Aura Mastery casts",
+    // [segment seconds from, to, exclusive --from, inclusive bound, events, casts, begincasts, sourced by the subject]
+    segments: [
+      [0, 180, B1PM_START - 1, B1PM_START + 180000, 315, 291, 24, 305],
+      [180, 345, B1PM_START + 180000, B1PM_END, 289, 262, 27, 284],
+    ],
+  },
+  {
+    actorId: 9,
+    slug: "mistweaver-monk",
+    label: "Mistweaver Monk",
+    cooldowns: "three Invoke Yu'lon and two Restoral casts",
+    segments: [
+      [0, 180, B1PM_START - 1, B1PM_START + 180000, 282, 241, 41, 267],
+      [180, 345, B1PM_START + 180000, B1PM_END, 276, 221, 55, 263],
+    ],
+  },
+];
+const HEALB1P_SEGMENT = (subject, from, to) =>
+  `wcl-b1pm-fight-48-${subject.slug}-${String(subject.actorId)}-casts.seg-${String(from)}-${String(to)}`;
+const HEALB1P_FAMILIES = "cast,begincast";
+
+function healb1p_segment(subject, [fromS, toS, fromMs, toMs, count, casts, begincasts, sourced]) {
+  const file = HEALB1P_SEGMENT(subject, fromS, toS);
+  const actor = String(subject.actorId);
+  return artifact(file, wcl(file), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    source: B1PM_EVENTS_SOURCE,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/${file}.json --actor-slice ${actor} ${String(toMs)} --from ${String(fromMs)} --families ${HEALB1P_FAMILIES} --compact`,
+        `The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor ${actor}: every event whose sourceID or targetID is ${actor}, with --from ${String(fromMs)} (exclusive) and the bound ${String(toMs)} (inclusive), restricted by --families to cast and begincast. In place and order preserved; written as compact JSON (--compact). ${String(count)} of 271,011 events: ${String(casts)} casts and ${String(begincasts)} begincasts (${String(sourced)} sourced by ${actor}, ${String(count - sourced)} cast on ${actor} by others).`,
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_8),
+      credential_scan(SLICER_REVISION_8),
+    ],
+    grants: [
+      {
+        categories: ["CASTS"],
+        actorScope: [subject.actorId],
+        ranges: [{ fromReportTimeMs: fromMs + 1, toReportTimeMs: toMs }],
+      },
+    ],
+    coverageBasis: `CASTS is complete for actor ${actor} over [${(fromMs + 1).toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every cast or begincast actor ${actor} sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (twenty-eight pages, terminal, revision 51 before and after). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a two-part bundle, joined by adjacency, that spans the whole fight.`,
+    retainedFor: `HEAL-B1P: the ${subject.label}'s real casts over the whole canonical fight, so the healer promotion gate's observations (${subject.cooldowns}) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that establishes the player's class and specialization.`,
+    limitations: [
+      "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+      "Casts and begincasts only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+      `Actor ${actor} only: its pets' own casts are not retained.`,
+      "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+      NO_NAMES,
+      VERSION_SCOPE,
+    ],
+  });
+}
+
+const HEALB1P_EVIDENCE_ARTIFACTS = HEALB1P_SUBJECTS.flatMap((subject) =>
+  subject.segments.map((segment) => healb1p_segment(subject, segment)),
+);
+const HEALB1P_EVIDENCE_CASES = HEALB1P_SUBJECTS.flatMap((subject) =>
+  subject.segments.map(([fromS, toS, , , count]) =>
+    kase(
+      `normalization.b1pm-${subject.slug}-${String(subject.actorId)}-casts-seg-${String(fromS)}-${String(toS)}-normalizes-whole-and-in-order`,
+      HEALB1P_SEGMENT(subject, fromS, toS),
+      "NORMALIZATION",
+      "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      `The ${String(count)}-event cast-only segment of actor ${String(subject.actorId)} (fight +${String(fromS)} s .. +${String(toS)} s) normalizes with every raw type recognised and every event kept in capture order.`,
+      [
+        a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: count }),
+        a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+        a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+      ],
+      ["VALIDATED_EVIDENCE"],
+      `The census is of the segment, never of the fight: exactly the cast and begincast events sourced by or targeting actor ${String(subject.actorId)} in its range, and nothing else.`,
+      { related: ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"] },
+    ),
+  ),
+);
+
+// --------------------------------------------------------------------------
 // M13-A (2026-11-02): the ONE bounded Augmentation Evoker capture (owner grant
 // 2026-11-01, agent/autopilot-queue.md "M13-A"). Subject chosen by a fixed
 // neutral order recorded before looking (.probe/m13a/capture-plan.md): the
@@ -13272,12 +13365,17 @@ const manifest = EVIDENCE_ROOT
         ...EVIDENCE_ARTIFACTS,
         ...M12B_EVIDENCE_ARTIFACTS,
         ...M12D_EVIDENCE_ARTIFACTS,
+        ...HEALB1P_EVIDENCE_ARTIFACTS,
         ...M13A_EVIDENCE_ARTIFACTS,
         ...M13D_EVIDENCE_ARTIFACTS,
       ].sort(byId("artifactId")),
-      cases: [...EVIDENCE_CASES, ...M12B_EVIDENCE_CASES, ...M12D_EVIDENCE_CASES, ...M13A_EVIDENCE_CASES].sort(
-        byId("caseId"),
-      ),
+      cases: [
+        ...EVIDENCE_CASES,
+        ...M12B_EVIDENCE_CASES,
+        ...M12D_EVIDENCE_CASES,
+        ...HEALB1P_EVIDENCE_CASES,
+        ...M13A_EVIDENCE_CASES,
+      ].sort(byId("caseId")),
     }
   : {
       contractVersion: 2,

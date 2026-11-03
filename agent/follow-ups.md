@@ -433,12 +433,43 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-B1P: what the public Holy Paladin and Mistweaver Monk do not establish
+
+**Raised:** HEAL-B1P (2026-11-03).
+
+- **Restoration Druid is still INTERNAL_ONLY.** No committed or retained
+  capture holds one of its events, so it cannot meet the healer promotion
+  gate. Its gap is appended to ONB-EV; promoting it needs authorized evidence
+  (an owner decision) and then a public tranche of its own, through the same
+  gate.
+- **Real healing context is never COMPLETE for either.** As for Restoration
+  Shaman ("After HEAL-AP"): the committed subjects are cast-only, so the
+  overlap listing with the roster declared is UNKNOWN. Unchanged.
+- **The pseudonyms are re-labelled for the public plan** (`Subjectpaladin`,
+  `Subjectmonk`), exactly as HEAL-AP's (`Subjectshaman`); actor ids and events
+  untouched.
+- **Three of the seven promoted identified abilities are still unobserved.**
+  Avenging Crusader, Revival and Invoke Chi-Ji (and Restoration Druid's four)
+  are identified from the pinned rows only; the new evidence observes Aura
+  Mastery, Avenging Wrath, Invoke Yu'lon and Restoral as completed casts. An
+  unobserved id can only leave a use unlisted, which the listing completeness
+  and READINESS_NOT_ESTABLISHED keep from becoming a miss.
+- **The healer view is shared; the registration facade is still copied.**
+  `healer-view-projection.ts` is the one restatement. The registrations stay
+  specialization-owned copies ("After HEAL-B1"), now with a view adapter and
+  prose each; revisit with the fifth healer.
+
+---
+
 ## After HEAL-B1: what the three internal healer registrations do not establish
 
 **Raised:** HEAL-B1 (2026-11-03).
 
 - **None of the three can pass the healer promotion gate on committed
-  evidence yet (HEAL-B1P).** The gate needs, per PUBLIC healer, a real subject
+  evidence yet (HEAL-B1P).** Resolved by HEAL-B1P for Holy Paladin and
+  Mistweaver Monk (whole-fight cast segments of fight 48 actors 1 and 9, cut
+  from the retained M11-E2 capture); Restoration Druid remains, see "After
+  HEAL-B1P". The gate needs, per PUBLIC healer, a real subject
   with a COMPLETE use listing, at least one use, and a met and a not-met plan
   entry over those uses. Holy Paladin's only real uses (M13-A actor 5,
   Avenging Wrath and Aura Mastery) sit in a filtered capture whose listing is

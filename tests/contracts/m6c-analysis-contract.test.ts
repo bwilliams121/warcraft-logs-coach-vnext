@@ -126,13 +126,14 @@ describe("the public vocabularies match the internal ones exactly", () => {
     expect([...PUBLIC_USABILITY_PROVENANCES]).toEqual(["OBSERVED_EXECUTION", "NOT_ESTABLISHED"]);
   });
 
-  it("publishes exactly the seven supported specializations", () => {
+  it("publishes exactly the nine supported specializations", () => {
     // Widened in M10-D, again in M11-A5 and again in M11-B12 under
     // analysis/1: growing this enum is how supported specializations arrive,
     // and narrowing it is what would need a version. M11-B12 widened this
     // enum and nothing else. M13-F appended evoker/augmentation, whose
     // documents are never ANALYZED (support observations only). HEAL-AP
     // appended shaman/restoration, likewise never ANALYZED (healer findings).
+    // HEAL-B1P appended paladin/holy and monk/mistweaver, likewise.
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -141,6 +142,8 @@ describe("the public vocabularies match the internal ones exactly", () => {
       "monk/brewmaster",
       "evoker/augmentation",
       "shaman/restoration",
+      "paladin/holy",
+      "monk/mistweaver",
     ]);
   });
 
@@ -295,7 +298,9 @@ describe("the schema is strict rather than permissive", () => {
     for (const specId of [
       "Paladin/Protection",
       "Paladin/Retribution",
-      "paladin/holy",
+      // INTERNAL_ONLY since HEAL-B1 (paladin/holy was this example until HEAL-B1P made it public).
+      "druid/restoration",
+      "Paladin/Holy",
       "warrior/protection",
       "",
     ]) {

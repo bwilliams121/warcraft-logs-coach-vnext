@@ -176,14 +176,16 @@ describe("an unsupported specialization", () => {
     // Warrior/Arms is the canonical captured unsupported identity (A7R6 fight 7,
     // actor 4); the others are stated names. Paladin/Protection is NOT in this
     // list: it has been supported since M10-D. Paladin/Retribution is NOT in
-    // it either, since M11-A5; Paladin/Holy stands in as the Paladin miss.
+    // it either, since M11-A5, and Paladin/Holy is not since HEAL-B1P: every Paladin
+    // specialization is supported. Druid/Restoration, registered INTERNAL_ONLY,
+    // stands in as the internal-only miss.
     for (const [className, specName] of [
       ["Rogue", "Outlaw"],
       ["Rogue", "Subtlety"],
       // Evoker/Augmentation is NOT in this list since M13-F; Devastation is the Evoker miss.
       ["Evoker", "Devastation"],
       ["Warrior", "Arms"],
-      ["Paladin", "Holy"],
+      ["Druid", "Restoration"],
       ["Priest", "Discipline"],
     ]) {
       const { analyze, ingest, deps } = spies(className, specName);

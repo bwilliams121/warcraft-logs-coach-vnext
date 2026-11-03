@@ -1,9 +1,13 @@
-# Mistweaver Monk (HEAL-B1, INTERNAL_ONLY)
+# Mistweaver Monk (HEAL-B1; PUBLIC since HEAL-B1P)
 
 A healer specialization evaluator on the healer architecture Restoration
-Shaman proved (M12-D, HEAL-A). Registered INTERNAL_ONLY: a public request
-cannot reach it. Its public shape and promotion are HEAL-B1P's. It is not an
-APL specialization: there is no SimulationCraft authority and no APL artifact.
+Shaman proved (M12-D, HEAL-A). Registered INTERNAL_ONLY in HEAL-B1 and PUBLIC
+since HEAL-B1P, after passing the healer promotion gate
+(`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) on the canonical
+fight's Mistweaver Monk (b1PmaKrd6CDfzngc fight 48, actor 9: three Invoke Yu'lon and two Restoral casts, the
+listing COMPLETE). It publishes `healerFindings` through the shared healer view
+(`src/findings/healer-view-projection.ts`). It is not an APL specialization:
+there is no SimulationCraft authority and no APL artifact.
 
 ## Registration
 
@@ -55,3 +59,10 @@ the pinned row only. The identity subject (gtKb2xHn87pNcFfW fight 22, actor
 17) appears in a committed fight context; the committed Brewmaster capture
 holds a Life Cocoon cast by another Mistweaver, an external cooldown this
 data does not identify.
+
+## Real evidence (HEAL-B1P)
+
+`tests/evidence/artifacts/wcl-events/wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-{0-180,180-345}.json`:
+every cast and begincast sourced by or targeting actor 9 over the whole fight,
+cut from the retained M11-E2 capture (no new Warcraft Logs request). CASTS is
+granted for actor 9 only.

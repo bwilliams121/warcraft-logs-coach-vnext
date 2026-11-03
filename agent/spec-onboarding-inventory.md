@@ -63,15 +63,15 @@ never assumed.
   "asOf": "2026-11-03",
   "rosterSource": "src/data/game/spec-roster.json",
   "playableTotal": 40,
-  "public": 7,
-  "internalOnly": 3,
+  "public": 9,
+  "internalOnly": 1,
   "foundation": 0,
   "blocked": 0,
   "deferred": 0,
   "notStarted": 30,
-  "publiclySupportedPercent": 17.5,
-  "terminallyDispositionedPercent": 17.5,
-  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman became PUBLIC with HEAL-AP (registered INTERNAL_ONLY in HEAL-A; binds no pinned authority; publishes healerFindings) after passing the healer promotion gate (tests/contracts/heal-ap-healer-promotion-gate.test.ts). Holy Paladin, Restoration Druid and Mistweaver Monk are INTERNAL_ONLY since HEAL-B1 (registered on Restoration Shaman's healer architecture, binding no pinned authority); their public promotion is HEAL-B1P. Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution), ONB-S2 (shared variable combining operations), ONB-S4 (shared cast and channel decision anchor), ONB-S5 (shared pooling and wait semantics) and ONB-S6 (shared pet actor mapping) change no specialization's state."
+  "publiclySupportedPercent": 22.5,
+  "terminallyDispositionedPercent": 22.5,
+  "notes": "Augmentation Evoker became PUBLIC with M13-F (#36). Restoration Shaman became PUBLIC with HEAL-AP (registered INTERNAL_ONLY in HEAL-A; binds no pinned authority; publishes healerFindings) after passing the healer promotion gate (tests/contracts/heal-ap-healer-promotion-gate.test.ts). Holy Paladin, Restoration Druid and Mistweaver Monk were registered INTERNAL_ONLY in HEAL-B1 (on Restoration Shaman's healer architecture, binding no pinned authority). HEAL-B1P promoted Holy Paladin and Mistweaver Monk PUBLIC after each passed the healer promotion gate on its whole-fight casts in b1PmaKrd6CDfzngc fight 48 (cut from the retained M11-E2 capture, no new request). Restoration Druid stays INTERNAL_ONLY: no committed or retained capture holds one of its events, so it cannot meet the gate; its evidence gap is recorded on ONB-EV. Shared foundations (src/healing, src/support, the M14 comparison facts) are never counted. ONB-S1 (shared precombat variable execution), ONB-S2 (shared variable combining operations), ONB-S4 (shared cast and channel decision anchor), ONB-S5 (shared pooling and wait semantics) and ONB-S6 (shared pet actor mapping) change no specialization's state."
 }
 ```
 
@@ -89,9 +89,9 @@ The percentages are `public / playableTotal` and
 | `monk/brewmaster` | TANK | PUBLIC | COMMITTED | M11-C (terminal) |
 | `evoker/augmentation` | UNKNOWN (support) | PUBLIC | COMMITTED (M13-A, M13-D certified) | M13-A–M13-F (terminal) |
 | `shaman/restoration` | HEALER | PUBLIC | COMMITTED (M12-D archive, fight 48, actor 122) | M12-D, HEAL-A, HEAL-AP (terminal) |
-| `paladin/holy` | HEALER | INTERNAL_ONLY | RETAINED_RAW (fight 48 actor 1, class verified Paladin; committed casts only in the filtered M13-A capture, actor 5) | HEAL-B1, HEAL-B1P |
-| `druid/restoration` | HEALER | INTERNAL_ONLY | CONTEXT_ONLY (gtKb fight 22 actor 2) | HEAL-B1, HEAL-B1P |
-| `monk/mistweaver` | HEALER | INTERNAL_ONLY | RETAINED_RAW (fight 48 actor 9; no committed cast) | HEAL-B1, HEAL-B1P |
+| `paladin/holy` | HEALER | PUBLIC | COMMITTED (HEAL-B1P archive, fight 48, actor 1, whole-fight casts) | HEAL-B1, HEAL-B1P (terminal) |
+| `druid/restoration` | HEALER | INTERNAL_ONLY | CONTEXT_ONLY (gtKb fight 22 actor 2; no event capture: cannot meet the healer promotion gate, gap recorded on ONB-EV) | HEAL-B1, HEAL-B1P (not promoted), ONB-EV |
+| `monk/mistweaver` | HEALER | PUBLIC | COMMITTED (HEAL-B1P archive, fight 48, actor 9, whole-fight casts) | HEAL-B1, HEAL-B1P (terminal) |
 | `priest/holy` | HEALER | NOT_STARTED | RETAINED_RAW (fight 48 "Holy", class to verify) | HEAL-B2, HEAL-B2P |
 | `priest/discipline` | HEALER | NOT_STARTED | CONTEXT_ONLY | HEAL-B3, HEAL-B3P |
 | `evoker/preservation` | UNKNOWN (healer) | NOT_STARTED | CONTEXT_ONLY | HEAL-B4, HEAL-B4P |

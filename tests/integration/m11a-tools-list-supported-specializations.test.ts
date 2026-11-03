@@ -70,12 +70,12 @@ describe("the deployed composition binds the derived supported-specialization se
     }
   });
 
-  it("the sentence names Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin, Restoration Shaman and Retribution Paladin and nothing else", async () => {
+  it("the sentence names Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Mistweaver Monk, Protection Paladin, Restoration Shaman and Retribution Paladin and nothing else", async () => {
     // The reviewed snapshot, seen through the wire rather than the constant.
     const tools = await toolsList();
     const analyze = tools.find((candidate) => candidate.name === ANALYZE_TOOL_NAME);
     expect(analyze?.description).toContain(
-      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Mistweaver Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
     );
     // M11-B12: Blood's limits paragraph is composed through the same seam,
     // on both tools, and names the validated hero tree rather than a rotation.

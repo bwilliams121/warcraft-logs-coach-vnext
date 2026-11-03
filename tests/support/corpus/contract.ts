@@ -380,11 +380,11 @@ export const OWNING_LAYERS = {
   SPEC_AUGMENTATION_EVOKER: ["src/specs/evoker/augmentation/"],
   /** HEAL-A. The INTERNAL_ONLY Restoration Shaman healer evaluator and nothing else. */
   SPEC_RESTORATION_SHAMAN: ["src/specs/shaman/restoration/"],
-  /** HEAL-B1. The INTERNAL_ONLY Holy Paladin healer evaluator and nothing else. */
+  /** HEAL-B1; PUBLIC since HEAL-B1P. The Holy Paladin healer evaluator and nothing else. */
   SPEC_HOLY_PALADIN: ["src/specs/paladin/holy/"],
   /** HEAL-B1. The INTERNAL_ONLY Restoration Druid healer evaluator and nothing else. */
   SPEC_RESTORATION_DRUID: ["src/specs/druid/restoration/"],
-  /** HEAL-B1. The INTERNAL_ONLY Mistweaver Monk healer evaluator and nothing else. */
+  /** HEAL-B1; PUBLIC since HEAL-B1P. The Mistweaver Monk healer evaluator and nothing else. */
   SPEC_MISTWEAVER_MONK: ["src/specs/monk/mistweaver/"],
   APPLICATION_SERVICE: ["src/services/", "src/runtime/"],
   PUBLIC_CONTRACT: ["src/contracts/", "src/api/", "src/mcp/"],
@@ -3221,7 +3221,7 @@ export const ASSERTION_KINDS = {
       "Through the production catalog's internal lookup (PUBLIC since HEAL-AP, so the public lookup finds the same row), the Restoration Shaman registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
   },
 
-  // ---- SPEC_HOLY_PALADIN (HEAL-B1, INTERNAL_ONLY) ---------------------
+  // ---- SPEC_HOLY_PALADIN (HEAL-B1; PUBLIC since HEAL-B1P) --------------
   //
   // A healer registration on Restoration Shaman's architecture, driven the
   // same way: through the production catalog's INTERNAL lookup and
@@ -3255,7 +3255,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "Through the production catalog's internal lookup, the INTERNAL_ONLY Holy Paladin registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
+      "Through the production catalog's internal lookup (PUBLIC since HEAL-B1P, so the public lookup finds the same row), the Holy Paladin registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
   },
 
   // ---- SPEC_RESTORATION_DRUID (HEAL-B1, INTERNAL_ONLY) ---------------------
@@ -3295,7 +3295,7 @@ export const ASSERTION_KINDS = {
       "Through the production catalog's internal lookup, the INTERNAL_ONLY Restoration Druid registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
   },
 
-  // ---- SPEC_MISTWEAVER_MONK (HEAL-B1, INTERNAL_ONLY) ---------------------
+  // ---- SPEC_MISTWEAVER_MONK (HEAL-B1; PUBLIC since HEAL-B1P) --------------
   //
   // A healer registration on Restoration Shaman's architecture, driven the
   // same way: through the production catalog's INTERNAL lookup and
@@ -3329,7 +3329,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "Through the production catalog's internal lookup, the INTERNAL_ONLY Mistweaver Monk registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
+      "Through the production catalog's internal lookup (PUBLIC since HEAL-B1P, so the public lookup finds the same row), the Mistweaver Monk registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
   },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------

@@ -18,12 +18,16 @@
  *     23  Paladin / Retribution   likewise
  *     25  Rogue / Assassination   likewise
  *     12  Warrior / Arms          SPEC_NOT_SUPPORTED — no analyzer exists
- *     17  Monk / Mistweaver       SPEC_NOT_SUPPORTED — the same class as the
- *                                 promoted specialization, never routed to it
+ *     17  Monk / Mistweaver       the same class as the promoted
+ *                                 specialization, never routed to it; since
+ *                                 HEAL-B1P routed to its OWN healer analyzer,
+ *                                 which states nothing for a subject this
+ *                                 evidence states no specialization for
  *
  * Nothing is relabelled and no event is manufactured. Until M11-C4j actor 4's
  * cell here was SPEC_NOT_SUPPORTED; that is the one intended raid-night delta
- * of the promotion.
+ * of the promotion. Until HEAL-B1P actor 17's cell was SPEC_NOT_SUPPORTED;
+ * that is the one intended delta of that promotion.
  */
 
 import { describe, expect, it } from "vitest";
@@ -218,10 +222,12 @@ describe("a mixed roster of real gtKb fight-22 participants over the Brewmaster 
       [RETRIBUTION_PALADIN_ANALYZER_ID]: 1,
       [BLOOD_DEATH_KNIGHT_ANALYZER_ID]: 1,
       [BREWMASTER_MONK_ANALYZER_ID]: 1,
+      // HEAL-B1P: the Mistweaver reaches its own healer analyzer, never Brewmaster's.
+      "monk-mistweaver-healer-findings": 1,
     });
   });
 
-  it("preserves each player's kind, status and specialization truthfully; neither the Warrior nor the Mistweaver routes anywhere", async () => {
+  it("preserves each player's kind, status and specialization truthfully; the Warrior routes nowhere and the Mistweaver only to its own analyzer", async () => {
     const { ports } = portsFor(ROSTER);
     const run = await runNight({ reportCode: REPORT_CODE, fightIds: [FIGHT_ID] }, ports);
     if (!run.ok) throw new Error(run.error.code);
@@ -241,22 +247,28 @@ describe("a mixed roster of real gtKb fight-22 participants over the Brewmaster 
       expect(cell.status).toBe("PROFILE_NOT_RESOLVED");
     }
 
-    for (const [sourceId, specName] of [
-      [ARMS, "Arms"],
-      [MISTWEAVER, "Mistweaver"],
-    ] as const) {
-      const cell = cellOf(cells, sourceId);
-      expect(cell.kind).toBe("NOT_ANALYZED");
-      if (cell.kind !== "NOT_ANALYZED") continue;
-      expect(cell.specName).toBe(specName);
-      expect(cell.status).toBe("SPEC_NOT_SUPPORTED");
-      expect(cell.detail).toContain("no gameplay analysis was attempted");
+    const arms = cellOf(cells, ARMS);
+    expect(arms.kind).toBe("NOT_ANALYZED");
+    if (arms.kind === "NOT_ANALYZED") {
+      expect(arms.specName).toBe("Arms");
+      expect(arms.status).toBe("SPEC_NOT_SUPPORTED");
+      expect(arms.detail).toContain("no gameplay analysis was attempted");
+    }
+    // The opener core states no friendly specialization, so the Mistweaver's
+    // own registration refuses to assume one: never SPEC_NOT_SUPPORTED, never
+    // ANALYZED, never a healer finding.
+    const mistweaver = cellOf(cells, MISTWEAVER);
+    expect(mistweaver.kind).toBe("NOT_ANALYZED");
+    if (mistweaver.kind === "NOT_ANALYZED") {
+      expect(mistweaver.specName).toBe("Mistweaver");
+      expect(mistweaver.status).toBe("INSUFFICIENT_EVIDENCE");
     }
 
     expect(coverage).toMatchObject({
       cellsTotal: 6,
       cellsAnalyzed: 1,
-      cellsSpecNotSupported: 2,
+      cellsSpecNotSupported: 1,
+      cellsInsufficientEvidence: 1,
       cellsProfileNotResolved: 3,
       eligibleDecisionsTotal: 15,
       matchTotal: 5,

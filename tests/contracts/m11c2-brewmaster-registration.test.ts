@@ -89,7 +89,7 @@ import { corpusFight, corpusState } from "../support/corpus/fight.js";
 const PIN = "33622e9d1662ff0e451691edf85a6b49cc9d11d9";
 const BREWMASTER_GTKB = "wcl-brewmaster-monk-gtkb-opener";
 const BREWMASTER = 4;
-const FIVE_PUBLIC = [
+const NINE_PUBLIC = [
   "rogue/assassination",
   "paladin/protection",
   "paladin/retribution",
@@ -97,6 +97,8 @@ const FIVE_PUBLIC = [
   "monk/brewmaster",
   "evoker/augmentation",
   "shaman/restoration",
+  "paladin/holy",
+  "monk/mistweaver",
 ];
 
 const SOURCES: Record<string, string> = import.meta.glob("../../src/**/*.ts", {
@@ -129,9 +131,9 @@ describe("identity and partition", () => {
     // through M11-C4i, and the five sites moved in one reviewed edit.
     expect(isSpecId("monk/brewmaster")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
-    // The internal-only half never holds Brewmaster again; it held Restoration Shaman in HEAL-A, was empty from HEAL-AP, and holds the three HEAL-B1 healers.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["paladin/holy", "druid/restoration", "monk/mistweaver"]);
-    expect([...PUBLIC_SPEC_IDS]).toEqual(FIVE_PUBLIC);
+    // The internal-only half never holds Brewmaster again; it held Restoration Shaman in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, and holds Restoration Druid alone since HEAL-B1P.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration"]);
+    expect([...PUBLIC_SPEC_IDS]).toEqual(NINE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
     expect(SUPPORTED_SPEC_IDENTITIES).toHaveProperty("monk/brewmaster");
@@ -139,7 +141,12 @@ describe("identity and partition", () => {
       ok: true,
       specId: "monk/brewmaster",
     });
-    for (const specName of ["Mistweaver", "Windwalker"]) {
+    // Mistweaver resolves to itself since HEAL-B1P, never to Brewmaster.
+    expect(resolveSpecIdentity({ className: "Monk", specName: "Mistweaver" })).toEqual({
+      ok: true,
+      specId: "monk/mistweaver",
+    });
+    for (const specName of ["Windwalker"]) {
       expect(resolveSpecIdentity({ className: "Monk", specName }), specName).toMatchObject({
         ok: false,
         reason: "UNSUPPORTED_SPECIALIZATION",
@@ -168,16 +175,16 @@ describe("identity and partition", () => {
     expect(analyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG)).toBe(
       internalAnalyzerForSpec("monk/brewmaster", PRODUCTION_CATALOG),
     );
-    expect(publicAnalyzers(PRODUCTION_CATALOG).map((row) => row.specId)).toEqual(FIVE_PUBLIC);
-    expect(ENABLED_ANALYZERS.map((row) => row.specId)).toEqual(FIVE_PUBLIC);
+    expect(publicAnalyzers(PRODUCTION_CATALOG).map((row) => row.specId)).toEqual(NINE_PUBLIC);
+    expect(ENABLED_ANALYZERS.map((row) => row.specId)).toEqual(NINE_PUBLIC);
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
       BREWMASTER_MONK_ANALYZER_ID,
     );
     // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Holy Paladin, Mistweaver Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(7);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(9);
     expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       BREWMASTER_MONK_REGISTRATION.publicLimits,
     );

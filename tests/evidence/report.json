@@ -22,6 +22,34 @@
       "sha256": "52454331935981afbc1d74ba1289470f9f43f513d90861365e7c2cbb9c97b3c3"
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
+      "byteLength": 114638,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "b659b3a50fa69a5b8f656f94fa274076f6632e91704aa9797e3970aa79ab9d4a"
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345",
+      "byteLength": 103702,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "0176e86ea80a367cf1d6cd0af21a22d64a260b770f16a8e932ab6873f1b5cd47"
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180",
+      "byteLength": 95593,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "2a8dcd41809f4a2510e8972349d2efd401531d2d699c488d815b9ee4a51f1cb8"
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345",
+      "byteLength": 89764,
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "provenanceKind": "SANITIZED_CAPTURE",
+      "sha256": "dfb4ca995c252e35bf7e7e29bed6e8b99d3b3a38a2867deb901affb89396a46f"
+    },
+    {
       "artifactId": "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-0-180",
       "byteLength": 62043,
       "payloadKind": "WCL_EVENT_ARRAY",
@@ -423,8 +451,8 @@
   ],
   "byLayer": [
     {
-      "assertions": 33,
-      "cases": 11,
+      "assertions": 45,
+      "cases": 15,
       "failed": 0,
       "kindsExercised": [
         "NORMALIZATION.ACTOR_EVENT_CENSUS",
@@ -435,7 +463,7 @@
       ],
       "notExecuted": 0,
       "owningLayer": "NORMALIZATION",
-      "passed": 33
+      "passed": 45
     },
     {
       "assertions": 9,
@@ -524,6 +552,102 @@
       "caseId": "normalization.b1pm-friendly-players-seg-75500-77000-normalizes-whole-and-in-order",
       "owningLayer": "NORMALIZATION",
       "referencedArtifactIds": ["wcl-b1pm-fight-48-friendly-players.seg-75500-77000"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-holy-paladin-1-casts-seg-0-180-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-holy-paladin-1-casts-seg-180-345-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-holy-paladin-1-casts.seg-180-345"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-mistweaver-monk-9-casts-seg-0-180-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-0-180"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "ordinal": 0,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "ordinal": 1,
+          "status": "PASSED"
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "ordinal": 2,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "normalization.b1pm-mistweaver-monk-9-casts-seg-180-345-normalizes-whole-and-in-order",
+      "owningLayer": "NORMALIZATION",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-180-345"]
     },
     {
       "artifactId": "wcl-b1pm-fight-48-restoration-shaman-122-casts.seg-0-180",
@@ -887,15 +1011,15 @@
   "runtime": "WORKERD",
   "selection": "ALL",
   "totals": {
-    "artifactBytes": 18695532,
-    "artifacts": 60,
-    "assertions": 42,
-    "cases": 16,
+    "artifactBytes": 19099229,
+    "artifacts": 64,
+    "assertions": 54,
+    "cases": 20,
     "declared": 0,
-    "executable": 42,
+    "executable": 54,
     "failed": 0,
     "largestArtifactBytes": 499916,
     "notExecuted": 0,
-    "passed": 42
+    "passed": 54
   }
 }

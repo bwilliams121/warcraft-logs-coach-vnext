@@ -127,6 +127,18 @@ is two compact `--actor-slice` segments (119,216 bytes) of the same capture.
   retained.
 - The bundle, with the committed fight context as its catalog, is what the
   Restoration Shaman evaluator's real-evidence tests read.
+
+**HEAL-B1P evidence.** `wcl-b1pm-fight-48-holy-paladin-1-casts.seg-*` and
+`wcl-b1pm-fight-48-mistweaver-monk-9-casts.seg-*` are four compact
+`--actor-slice` segments (403,697 bytes) of the same capture, cut exactly as
+M12-D's.
+
+- Each pair covers the whole fight: every `cast` and `begincast` sourced by or
+  targeting actor 1 (the canonical Holy Paladin) or actor 9 (the canonical
+  Mistweaver Monk).
+- They grant CASTS for their own actor only. Pets' own casts are not retained.
+- Each bundle, with the committed fight context as its catalog, is a healer
+  promotion gate subject (`tests/contracts/heal-ap-healer-promotion-gate.test.ts`).
 - Ordinary archive growth, pinned in the same test. No new Warcraft Logs
   request was made.
 

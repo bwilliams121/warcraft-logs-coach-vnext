@@ -74,24 +74,27 @@ describe("the supported identities", () => {
     expect(outcome("Warrior", "Blood")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
-  it("resolves Monk/Brewmaster to monk/brewmaster (M11-C4j), and no other Monk specialization", () => {
+  it("resolves Monk/Brewmaster to monk/brewmaster (M11-C4j) and Monk/Mistweaver to monk/mistweaver (HEAL-B1P), and no other Monk specialization", () => {
     // The canonical module identity (`wclClassName`/`wclSpecName` of
     // BREWMASTER_MONK_MODULE), under the same normalization as the others.
     expect(outcome("Monk", "Brewmaster")).toBe("monk/brewmaster");
     expect(outcome("monk", "brewmaster")).toBe("monk/brewmaster");
     expect(outcome("  Monk ", " Brewmaster")).toBe("monk/brewmaster");
     expect(outcome("MONK", "BREWMASTER")).toBe("monk/brewmaster");
-    // The same class never stands for the promoted specialization, and no
+    // HEAL-B1P: Mistweaver resolves only to itself.
+    expect(outcome("Monk", "Mistweaver")).toBe("monk/mistweaver");
+    expect(outcome(" monk ", "MISTWEAVER")).toBe("monk/mistweaver");
+    // The same class never stands for a promoted specialization, and no
     // repair makes a near-miss supported.
-    expect(outcome("Monk", "Mistweaver")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Monk", "Windwalker")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Monk", "Mist weaver")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Monk", "Brew master")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Monk", "Brewmasterr")).toBe("UNSUPPORTED_SPECIALIZATION");
     // Right spec name, wrong class.
     expect(outcome("Paladin", "Brewmaster")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
-  it("recognizes exactly seven specializations", () => {
+  it("recognizes exactly nine specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
@@ -102,6 +105,8 @@ describe("the supported identities", () => {
       "monk/brewmaster",
       "evoker/augmentation",
       "shaman/restoration",
+      "paladin/holy",
+      "monk/mistweaver",
     ]);
   });
 
@@ -114,10 +119,13 @@ describe("the supported identities", () => {
 
   it("does not let one Paladin specialization stand for another", () => {
     // Same class, different spec: each supported Paladin spec resolves only to
-    // itself, a Holy Paladin is neither, and there is no nearest-match.
+    // itself (Holy since HEAL-B1P), and there is no nearest-match.
     expect(outcome("Paladin", "Retribution")).toBe("paladin/retribution");
     expect(outcome("Paladin", "Protection")).toBe("paladin/protection");
-    expect(outcome("Paladin", "Holy")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Paladin", "Holy")).toBe("paladin/holy");
+    expect(outcome("Paladin", "Holyy")).toBe("UNSUPPORTED_SPECIALIZATION");
+    // Right spec name, wrong class: a Holy Priest is not a Holy Paladin.
+    expect(outcome("Priest", "Holy")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Paladin", "Protection ")).toBe("paladin/protection");
     expect(outcome("Paladin", "Protectionn")).toBe("UNSUPPORTED_SPECIALIZATION");
     expect(outcome("Paladin", "Retributionn")).toBe("UNSUPPORTED_SPECIALIZATION");
@@ -196,8 +204,11 @@ describe("no unsupported identity falls through to a supported specialization", 
     // The other two Rogue specs — the nearest misses, sharing a class.
     ["Rogue", "Outlaw"],
     ["Rogue", "Subtlety"],
-    // The remaining Paladin spec — the nearest miss for both Paladin specs.
-    ["Paladin", "Holy"],
+    // Holy, with the class another Holy specialization belongs to (HEAL-B1P
+    // made Paladin/Holy supported, so it is no longer a nearest miss here).
+    ["Priest", "Holy"],
+    // Restoration Druid: registered INTERNAL_ONLY, never publicly resolvable.
+    ["Druid", "Restoration"],
     // The canonical captured unsupported identity: A7R6 fight 7, actor 4.
     ["Warrior", "Arms"],
     // Other real specs.
