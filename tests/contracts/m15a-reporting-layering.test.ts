@@ -54,7 +54,9 @@ describe("finding prioritization's place in the tree", () => {
       "src/reporting/aggregation-config.ts",
       "src/reporting/fight-report.ts",
       "src/reporting/finding-record.ts",
+      "src/reporting/impact-estimators.ts",
       "src/reporting/prioritization.ts",
+      "src/reporting/priority-labels.ts",
       "src/reporting/restatement.ts",
       "src/reporting/tldr.ts",
     ]);

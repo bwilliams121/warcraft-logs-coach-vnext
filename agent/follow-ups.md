@@ -29,6 +29,38 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M15-C: what non-numeric prioritization does not establish
+
+**Raised:** M15-C (2026-11-03).
+
+- **Not published.** The priority labels and the estimator hook are
+  internal (`src/reporting/priority-labels.ts`, `impact-estimators.ts`), and
+  nothing outside `src/reporting/` imports them. Showing a label in the TLDR
+  or report is an additive public contract change and its own reviewed
+  tranche. It must keep the label's meaning ("where to look first") and must
+  not add any numeric key.
+- **No real fight reaches HIGH or MEDIUM.** On the committed Blood fight every
+  prioritized item is LOW: no adapter yet proves the authority's alternative
+  actionable (DECISION_PROVEN_ACTIONABLE). The HIGH and MEDIUM rules are
+  proven only on synthetic records.
+- **Severity is not declared by any producer.** The label states
+  `producerSeverity: NOT_DECLARED`. A producer-owned severity would need a
+  restated-record field, a reviewed adapter rule, and a label rule that
+  never reads magnitude, damage or comparison behavior.
+- **The pattern threshold is still the M15-A default (3)**, not validated on
+  real logs. Because HIGH needs a PATTERN, it inherits that follow-up
+  ("After M15-A").
+- **No numeric estimator exists.** A future one must pass
+  `buildImpactEstimatorRegistry` (authority, supported specs, builds and
+  categories, evidence requirements, BOUNDED_INTERVAL uncertainty, units,
+  provenance, no overlapping cells). It also needs an established build
+  input, which no producer passes today, so it would resolve UNKNOWN
+  `BUILD_NOT_ESTABLISHED` until one does.
+- **Final scoring (M15-E) stays deferred until ONB-Z.** Labels are not a
+  score input and carry no weight.
+
+---
+
 ## After M15-F: what the final coverage disclosure does not establish
 
 **Raised:** M15-F (2026-11-02).
