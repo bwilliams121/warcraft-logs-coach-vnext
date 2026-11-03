@@ -6513,13 +6513,13 @@ const BREWMASTER_CASES = [
     },
   ),
 
-  // ---- SPEC_RESTORATION_SHAMAN (HEAL-A, INTERNAL_ONLY) ---------------------
+  // ---- SPEC_RESTORATION_SHAMAN (HEAL-A; PUBLIC since HEAL-AP) -------------
   kase(
     "spec-restoration-shaman.unstated-subject-yields-no-healer-finding",
     PP,
     "SPEC_RESTORATION_SHAMAN",
     "src/specs/shaman/restoration/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
-    "Through the production catalog's internal lookup, the Restoration Shaman registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED.",
+    "Through the production catalog (both lookups find the same row since HEAL-AP), the Restoration Shaman registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED.",
     [
       a("SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT", {
         actorId: TANK,
@@ -6550,24 +6550,24 @@ const BREWMASTER_CASES = [
     },
   ),
   kase(
-    "application-service.restoration-shaman-registration-is-internal-only",
+    "application-service.restoration-shaman-registration-is-public-since-heal-ap",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-    "The validated production catalog carries the Restoration Shaman registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve shaman/restoration, so no public request can select it.",
+    "RE-PINNED AT HEAL-AP, INVERTING THE HEAL-A CASE. The validated production catalog carries the Restoration Shaman registration PUBLIC, in either catalog order: both lookups find the same row, and the public identity table resolves Shaman/Restoration to shaman/restoration, so a public request selects it. The five public sites moved together in one reviewed edit (the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure), with the registration's healer view.",
     [
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "shaman/restoration",
         expected: {
           internalAnalyzerId: "shaman-restoration-healer-findings",
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: "shaman-restoration-healer-findings",
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Its healer findings have no reviewed public shape yet (HEAL-AP), so registration changes what internal evaluation derives, not what a public request can reach.",
+    "Promotion changed reachability, not analysis: the registration still binds no pinned authority and is never ANALYZED; what a public request now receives is its healer findings (healerFindings), never an HPS ranking, an inferred assignment or a cooldown-quality verdict.",
     {
       related: [
         "tests/contracts/m10a-registry-integrity.test.ts",
@@ -12971,19 +12971,19 @@ const PREP_CASES = [
     },
   ),
   kase(
-    "application-service.unsupported-shaman-reports-real-health-potion-and-healthstone",
+    "application-service.restoration-shaman-reports-real-health-potion-and-healthstone",
     PREP_SHAMAN_ARTIFACT,
     "APPLICATION_SERVICE",
-    "src/services/analysis-service.ts unsupportedSpec (PREP-2); src/analysis/preparation/consumable-status.ts; src/data/game/preparation-consumables.json",
-    "Over a 20 s window, the unsupported Shaman's real Healthstone and Silvermoon Health Potion are complete OBSERVED counts of one each; the combat potion is UNKNOWN (the window is shorter than the longest combat-potion buff, so a potion taken before it could be hidden), never zero.",
+    "src/services/analysis-service.ts (PREP-2 preparation beside the selected analyzer); src/analysis/preparation/consumable-status.ts; src/data/game/preparation-consumables.json",
+    "RE-PINNED AT HEAL-AP (this case was the unsupported-Shaman preparation proof until Restoration Shaman became public). Over a 20 s window, the Restoration Shaman's real Healthstone and Silvermoon Health Potion are complete OBSERVED counts of one each; the combat potion is UNKNOWN (the window is shorter than the longest combat-potion buff, so a potion taken before it could be hidden), never zero. The public request now dispatches the Restoration Shaman registration at its derived FULL_RAID scope; this slice carries no fight context, so the subject's specialization is not stated and the gameplay status is INSUFFICIENT_EVIDENCE, while preparation, which never depends on the specialization evaluator, reports exactly the same consumables.",
     [
       a("APPLICATION_SERVICE.FIGHT_ANALYSIS", {
         subject: { actorId: PREP_SHAMAN, className: "Shaman", specName: "Restoration" },
         expected: {
-          status: "SPEC_NOT_SUPPORTED",
-          specId: null,
-          analyzerId: null,
-          scope: "PLAYER_CONTEXT",
+          status: "INSUFFICIENT_EVIDENCE",
+          specId: "shaman/restoration",
+          analyzerId: "shaman-restoration-healer-findings",
+          scope: "FULL_RAID",
           preparation: {
             healthPotion: { countState: "OBSERVED", count: 1, uses: [prep_use(1234768, "IN_FIGHT")] },
             healthstone: { countState: "OBSERVED", count: 1, uses: [prep_use(6262, "IN_FIGHT")] },

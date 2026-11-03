@@ -9,8 +9,9 @@
  * - COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION resolve
  *   NO_PINNED_AUTHORITY_FOR_DOMAIN from the registration's own access, nothing
  *   can bind them, and the result is never ANALYZED;
- * - the public lookup never selects it: a public request for a Restoration
- *   Shaman is SPEC_NOT_SUPPORTED and dispatches nothing;
+ * - since HEAL-AP the public lookup selects it: a public request for a
+ *   Restoration Shaman dispatches it once, at FULL_RAID (the public shape is
+ *   pinned in tests/integration/heal-ap-restoration-shaman-public.test.ts);
  * - over the real M12-D subject, the internal path yields exactly the
  *   evaluator's result under the preflight identity, and its finding set:
  *   - no plan: ASSIGNMENT is NO_AUTHORITY_AVAILABLE and there is no
@@ -152,14 +153,20 @@ const planOf = (
 const PLAN_AUTHORITY = { kind: "USER_PROVIDED_RAID_PLAN", format: "STRUCTURED", label: "heal-a test plan" };
 
 describe("the registration row", () => {
-  it("is the listed INTERNAL_ONLY row: the public lookup and the public identity table never reach it", () => {
+  it("is the listed row, PUBLIC since HEAL-AP: the public lookup and the identity table reach it", () => {
     const registration = registrationOf();
     expect(ANALYZER_REGISTRATIONS.filter((row) => row === RESTORATION_SHAMAN_REGISTRATION)).toHaveLength(1);
     expect(registration.analyzerId).toBe(RESTORATION_SHAMAN_ANALYZER_ID);
-    expect(registration.exposure).toBe("INTERNAL_ONLY");
-    expect(analyzerForSpec(RESTORATION_SHAMAN_SPEC_ID, PRODUCTION_CATALOG)).toBeNull();
-    expect(resolveSpecIdentity({ className: "Shaman", specName: "Restoration" }).ok).toBe(false);
-    expect(registration.publicLimits).toEqual({ analysis: "", raidNight: "" });
+    expect(registration.exposure).toBe("PUBLIC");
+    expect(analyzerForSpec(RESTORATION_SHAMAN_SPEC_ID, PRODUCTION_CATALOG)?.analyzerId).toBe(
+      RESTORATION_SHAMAN_ANALYZER_ID,
+    );
+    expect(resolveSpecIdentity({ className: "Shaman", specName: "Restoration" })).toEqual({
+      ok: true,
+      specId: RESTORATION_SHAMAN_SPEC_ID,
+    });
+    expect(registration.publicLimits.analysis).toContain("HEALER FINDINGS ONLY");
+    expect(registration.publicLimits.raidNight).toContain("no healer findings");
   });
 
   it("declares the three provider-less healer families from REQUIRED_INPUTS, and binds nothing", () => {
@@ -234,10 +241,11 @@ describe("the registration row", () => {
       } as never),
     ).toThrow();
     expect(RESTORATION_SHAMAN_REGISTRATION.supportObservationView).toBeUndefined();
+    expect(RESTORATION_SHAMAN_REGISTRATION.healerView).toBeTypeOf("function");
   });
 });
 
-describe("the public path never reaches it", () => {
+describe("the public path reaches it (HEAL-AP)", () => {
   const fight = m5d2Fight();
   const identity = (className: string, specName: string): FightIdentity => ({
     report: { code: fight.report.code, revision: fight.report.revision, startTime: 0, endTime: 1 },
@@ -253,8 +261,9 @@ describe("the public path never reaches it", () => {
     player: { sourceId: M5D2_ACTOR, name: "Fixtureplayer", className, specName },
   });
 
-  it("a public request for a Restoration Shaman is SPEC_NOT_SUPPORTED and dispatches no analyzer", async () => {
+  it("a public request for a Restoration Shaman dispatches the registration once, never as SPEC_NOT_SUPPORTED", async () => {
     const counted = countedProductionCatalog();
+    const scopes: string[] = [];
     const result = await analyzeFight(D2_REQUEST, {
       env: MCP_TEST_ENV,
       registry: counted.registry,
@@ -263,13 +272,22 @@ describe("the public path never reaches it", () => {
         identity: identity("Shaman", "Restoration"),
         rateLimit: undefined,
       }),
-      ingest: async () => ({ ok: true, fight: m5d2Fight(), rateLimit: undefined }),
+      ingest: async (request) => {
+        scopes.push(request.scope);
+        return { ok: true, fight: m5d2Fight(), rateLimit: undefined };
+      },
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.analysis.analysis.status).toBe("SPEC_NOT_SUPPORTED");
-    expect(result.analysis.specId).toBeNull();
-    for (const [analyzerId, calls] of Object.entries(counted.calls)) expect(calls, analyzerId).toBe(0);
+    expect(result.analysis.specId).toBe(RESTORATION_SHAMAN_SPEC_ID);
+    expect(scopes).toEqual(["FULL_RAID"]);
+    for (const [analyzerId, calls] of Object.entries(counted.calls)) {
+      expect(calls, analyzerId).toBe(analyzerId === RESTORATION_SHAMAN_ANALYZER_ID ? 1 : 0);
+    }
+    // The fixture's actor is not a stated Restoration Shaman, so nothing is
+    // evaluated, and the document says so rather than carrying an empty set.
+    expect(result.analysis.analysis.status).toBe("INSUFFICIENT_EVIDENCE");
+    expect(result.analysis.healerFindings?.assessment).toBe("NOT_ASSESSED");
   });
 
   it("the service hands the selected analyzer the request's plan untouched, and null without one", async () => {

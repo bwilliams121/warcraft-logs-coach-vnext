@@ -1,12 +1,15 @@
-# Restoration Shaman (M12-D; registered INTERNAL_ONLY in HEAL-A)
+# Restoration Shaman (M12-D; registered in HEAL-A; PUBLIC since HEAL-AP)
 
 The first healer specialization evaluator. Owner decision 2026-10-31
 (`agent/autopilot-queue.md` "M12-D").
 
-It is **registered INTERNAL_ONLY** since HEAL-A (`registration.ts`,
-`shaman/restoration` in `INTERNAL_ONLY_SPEC_IDS`) and has no public surface:
-the public lookup never selects it, and a public request for a Restoration
-Shaman is still `SPEC_NOT_SUPPORTED`. It is not an APL specialization: there
+It was registered INTERNAL_ONLY in HEAL-A and is **PUBLIC since HEAL-AP**
+(`shaman/restoration` in `PUBLIC_SPEC_IDS`), after passing the healer
+promotion gate (`tests/contracts/heal-ap-healer-promotion-gate.test.ts`). A
+public request for a Restoration Shaman dispatches the registration at
+FULL_RAID; the document is `AUTHORITY_NOT_AVAILABLE` (or
+`INSUFFICIENT_EVIDENCE`) and carries `healerFindings`, built by
+`healer-view.ts` from the finding set. It is not an APL specialization: there
 is no SimulationCraft authority and no APL artifact.
 
 ## Registration (HEAL-A)

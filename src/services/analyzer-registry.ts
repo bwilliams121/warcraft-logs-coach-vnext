@@ -66,6 +66,7 @@ import type {
   SpecAnalysisInput,
   UnanalyzedEnvelope,
 } from "../findings/analysis-envelope.js";
+import type { HealerViewOutcome } from "../findings/healer-view.js";
 import type { SupportObservationOutcome } from "../findings/support-observation-view.js";
 import { providerMayGovern } from "../findings/authority-domain.js";
 import { validateCapabilities, type CapabilityDefectRecord } from "../findings/decision-capability.js";
@@ -428,9 +429,8 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Seven rows: six PUBLIC (all PUBLIC from M13-F until HEAL-A; Augmentation
- * Evoker was INTERNAL_ONLY in M13-E) and, since HEAL-A, Restoration Shaman
- * INTERNAL_ONLY. A publicly unsupported
+ * Seven rows, all PUBLIC since HEAL-AP (Augmentation Evoker was INTERNAL_ONLY
+ * in M13-E, Restoration Shaman in HEAL-A). A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
  * internal lookup and tests, and is never selected for a public request —
@@ -449,7 +449,7 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   BREWMASTER_MONK_REGISTRATION,
   // INTERNAL_ONLY from M13-E; PUBLIC since M13-F. Binds no authority: never ANALYZED, publishes support observations.
   AUGMENTATION_EVOKER_REGISTRATION,
-  // INTERNAL_ONLY since HEAL-A: the first healer row. Binds no pinned authority; no public shape yet (HEAL-AP).
+  // INTERNAL_ONLY from HEAL-A; PUBLIC since HEAL-AP. The first healer row: binds no pinned authority, publishes healer findings.
   RESTORATION_SHAMAN_REGISTRATION,
 ]);
 
@@ -660,6 +660,32 @@ export function supportObservationViewOf(
   return registration.supportObservationView === undefined
     ? null
     : registration.supportObservationView(analysis);
+}
+
+/**
+ * The owning registration's healer view of an UNANALYZED result (HEAL-AP), or
+ * `null` when that registration publishes none.
+ *
+ * Found and ownership-checked exactly as `supportObservationViewOf` is. `null`
+ * means only "this registration has no healer findings to publish" — it is
+ * never an empty finding set.
+ */
+export function healerViewOf(
+  catalog: ValidatedAnalyzerCatalog,
+  analysis: UnanalyzedEnvelope,
+): HealerViewOutcome | null {
+  const registration = requireValidated(catalog).find((candidate) => candidate.specId === analysis.specId);
+  if (registration === undefined) {
+    throw new AnalyzerCatalogIntegrityError([
+      {
+        defect: "UNKNOWN_SPEC_ID",
+        analyzerId: null,
+        detail: `an analysis for '${String(analysis.specId)}' has no registration in this catalog`,
+      },
+    ]);
+  }
+  assertAnalysisOwnership(registration, analysis);
+  return registration.healerView === undefined ? null : registration.healerView(analysis);
 }
 
 export type AnalyzerRun =

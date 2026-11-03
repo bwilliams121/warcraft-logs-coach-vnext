@@ -119,6 +119,8 @@ export const TLDR_DISCLOSURES = [
   "DAMAGE_DIAGNOSIS_NOT_ASSESSED",
   "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
   "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
+  "HEALER_FINDINGS_NOT_SUMMARIZED",
+  "RAID_COOLDOWN_PLAN_NOT_SUMMARIZED",
 ] as const;
 export type TldrDisclosure = (typeof TLDR_DISCLOSURES)[number];
 
@@ -127,25 +129,47 @@ export type TldrDisclosure = (typeof TLDR_DISCLOSURES)[number];
  * (M15-F). The TLDR and the report do not summarize them, and say so, so a
  * reader never takes the summary for everything the document carries:
  *
- *   SUPPORT_OBSERVATIONS  observed support facts (M13-F); no verdict exists
- *   RAID_COOLDOWN_PLAN    the supplied plan (M12-E); never evaluated
+ *   SUPPORT_OBSERVATIONS           observed support facts (M13-F); no verdict exists
+ *   RAID_COOLDOWN_PLAN             the supplied plan (M12-E), not evaluated
+ *   HEALER_FINDINGS                healer findings (HEAL-AP): plan execution and
+ *                                  observed cooldown use, no healing-quality verdict
+ *   RAID_COOLDOWN_PLAN_EVALUATED   the supplied plan, whose assignments the
+ *                                  healer findings judged (HEAL-AP)
  */
-export const UNSUMMARIZED_BLOCKS = ["SUPPORT_OBSERVATIONS", "RAID_COOLDOWN_PLAN"] as const;
+export const UNSUMMARIZED_BLOCKS = [
+  "SUPPORT_OBSERVATIONS",
+  "RAID_COOLDOWN_PLAN",
+  "HEALER_FINDINGS",
+  "RAID_COOLDOWN_PLAN_EVALUATED",
+] as const;
 export type UnsummarizedBlock = (typeof UNSUMMARIZED_BLOCKS)[number];
 
-const UNSUMMARIZED_DISCLOSURES: Readonly<Record<UnsummarizedBlock, TldrDisclosure>> = {
+const UNSUMMARIZED_DISCLOSURES: Readonly<Record<UnsummarizedBlock, UnsummarizedDisclosure>> = {
   SUPPORT_OBSERVATIONS: "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
   RAID_COOLDOWN_PLAN: "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
+  HEALER_FINDINGS: "HEALER_FINDINGS_NOT_SUMMARIZED",
+  RAID_COOLDOWN_PLAN_EVALUATED: "RAID_COOLDOWN_PLAN_NOT_SUMMARIZED",
 };
 
+/** The unsummarized-block disclosures, in `TLDR_DISCLOSURES` order. */
+export const UNSUMMARIZED_DISCLOSURE_ORDER = [
+  "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
+  "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
+  "HEALER_FINDINGS_NOT_SUMMARIZED",
+  "RAID_COOLDOWN_PLAN_NOT_SUMMARIZED",
+] as const satisfies readonly TldrDisclosure[];
+export type UnsummarizedDisclosure = (typeof UNSUMMARIZED_DISCLOSURE_ORDER)[number];
+
 /** The sentence each unsummarized-block disclosure adds, shared by the TLDR lines and the report markdown. */
-export const UNSUMMARIZED_SENTENCES: Readonly<
-  Record<"SUPPORT_OBSERVATIONS_NOT_SUMMARIZED" | "RAID_COOLDOWN_PLAN_NOT_EVALUATED", string>
-> = {
+export const UNSUMMARIZED_SENTENCES: Readonly<Record<UnsummarizedDisclosure, string>> = {
   SUPPORT_OBSERVATIONS_NOT_SUMMARIZED:
     "Support observations are published separately as observed facts and are not summarized here; they judge no recipient and no timing.",
   RAID_COOLDOWN_PLAN_NOT_EVALUATED:
     "The supplied raid cooldown plan was not evaluated; nothing is claimed about any assignment.",
+  HEALER_FINDINGS_NOT_SUMMARIZED:
+    "Healer findings are published separately and are not summarized here; they rank no healing and judge no cooldown choice.",
+  RAID_COOLDOWN_PLAN_NOT_SUMMARIZED:
+    "The supplied raid cooldown plan's assignments were judged in the healer findings, which are not summarized here.",
 };
 
 export const TLDR_NOT_ASSESSED_REASONS = [
@@ -531,10 +555,7 @@ export function summarizeFindings(
     lines.push(
       `Damage diagnosis: ${plural(diagnosisState.statements, "statement links", "statements link")} rejected decisions to a proven difference; see diagnosis.`,
     );
-  for (const disclosure of [
-    "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
-    "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
-  ] as const)
+  for (const disclosure of UNSUMMARIZED_DISCLOSURE_ORDER)
     if (held.has(disclosure)) lines.push(UNSUMMARIZED_SENTENCES[disclosure]);
 
   return {

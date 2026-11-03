@@ -82,6 +82,7 @@ import {
 } from "./decision-capability.js";
 import type { ObservedDecisionView } from "./observed-decision-view.js";
 import { isSpecId, type SpecId } from "./spec-id.js";
+import type { HealerViewOutcome } from "./healer-view.js";
 import type { SupportObservationOutcome } from "./support-observation-view.js";
 
 /** What a specialization writes down about who it is. */
@@ -161,6 +162,9 @@ export interface SpecModuleDefinition<TAnalysis extends SpecAnalysisEnvelope> {
   /** See `AnalyzerDefinition.supportObservationView` (M13-F). Optional; omitted means none. */
   readonly supportObservationView?:
     ((analysis: Exclude<TAnalysis, { status: "ANALYZED" }>) => SupportObservationOutcome) | undefined;
+  /** See `AnalyzerDefinition.healerView` (HEAL-AP). Optional; omitted means none. */
+  readonly healerView?:
+    ((analysis: Exclude<TAnalysis, { status: "ANALYZED" }>) => HealerViewOutcome) | undefined;
   readonly limitsProse: PublicLimitsProse;
   /**
    * Spec-owned supplemental analyses. Optional; omitted means none. See the
@@ -271,6 +275,7 @@ export function defineSpecModule<TAnalysis extends SpecAnalysisEnvelope>(
     ...(definition.supportObservationView === undefined
       ? {}
       : { supportObservationView: definition.supportObservationView }),
+    ...(definition.healerView === undefined ? {} : { healerView: definition.healerView }),
   });
 
   return Object.freeze({

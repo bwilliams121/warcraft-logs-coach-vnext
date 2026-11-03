@@ -91,7 +91,7 @@ describe("the supported identities", () => {
     expect(outcome("Paladin", "Brewmaster")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
-  it("recognizes exactly six specializations", () => {
+  it("recognizes exactly seven specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
@@ -101,6 +101,7 @@ describe("the supported identities", () => {
       "deathknight/blood",
       "monk/brewmaster",
       "evoker/augmentation",
+      "shaman/restoration",
     ]);
   });
 

@@ -182,15 +182,15 @@ function keysOf(value: unknown, into = new Set<string>()): Set<string> {
 }
 
 describe("the production catalog", () => {
-  it("is exactly the six PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F) plus the INTERNAL_ONLY Restoration Shaman (HEAL-A), and both lookups answer alike for every public one", () => {
+  it("is exactly the seven PUBLIC registrations (Blood since M11-B12, Brewmaster since M11-C4j, Augmentation since M13-F, Restoration Shaman since HEAL-AP), and both lookups answer alike for every public one", () => {
     expect(ANALYZER_REGISTRATIONS).toHaveLength(7);
-    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(6);
-    expect(
-      ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY").map((row) => row.specId),
-    ).toEqual(["shaman/restoration"]);
-    // HEAL-A: the INTERNAL_ONLY row is invisible to the public lookup.
-    expect(analyzerForSpec("shaman/restoration", PRODUCTION_CATALOG)).toBeNull();
-    expect(internalAnalyzerForSpec("shaman/restoration", PRODUCTION_CATALOG)?.exposure).toBe("INTERNAL_ONLY");
+    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "PUBLIC")).toHaveLength(7);
+    expect(ANALYZER_REGISTRATIONS.filter((row) => row.exposure === "INTERNAL_ONLY")).toEqual([]);
+    // The Restoration Shaman row was INTERNAL_ONLY in HEAL-A; both lookups now find it.
+    expect(analyzerForSpec("shaman/restoration", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
+    expect(internalAnalyzerForSpec("shaman/restoration", PRODUCTION_CATALOG)).toBe(
+      analyzerForSpec("shaman/restoration", PRODUCTION_CATALOG),
+    );
     // The Augmentation row was INTERNAL_ONLY in M13-E; both lookups now find it.
     expect(analyzerForSpec("evoker/augmentation", PRODUCTION_CATALOG)?.exposure).toBe("PUBLIC");
     expect(internalAnalyzerForSpec("evoker/augmentation", PRODUCTION_CATALOG)).toBe(

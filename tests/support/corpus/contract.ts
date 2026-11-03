@@ -3209,7 +3209,7 @@ export const ASSERTION_KINDS = {
     runtime: "ANY",
     requiresAuthority: false,
     description:
-      "Through the production catalog's internal lookup, the INTERNAL_ONLY Restoration Shaman registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established. The public lookup never selects it.",
+      "Through the production catalog's internal lookup (PUBLIC since HEAL-AP, so the public lookup finds the same row), the Restoration Shaman registration derives this ingestion scope, resolves each declared healer family from its own authority access exactly so (it binds nothing), and returns exactly this unanalyzed status for the actor — never ANALYZED, and never a healer finding for a subject whose identity is not established.",
   },
 
   // ---- SHARED_DECISION_ENGINE ---------------------------------------------
@@ -3488,7 +3488,17 @@ export const ASSERTION_KINDS = {
           .strict(),
         expected: z
           .object({
-            status: z.enum(["ANALYZED", "SPEC_NOT_SUPPORTED"]),
+            /**
+             * HEAL-AP widened this with the two unanalyzed statuses an
+             * authority-free public registration returns, so a public healer
+             * subject is pinned as what it is, never as unsupported.
+             */
+            status: z.enum([
+              "ANALYZED",
+              "SPEC_NOT_SUPPORTED",
+              "AUTHORITY_NOT_AVAILABLE",
+              "INSUFFICIENT_EVIDENCE",
+            ]),
             specId: z.string().nullable(),
             analyzerId: z.string().nullable(),
             /** `null` when no analyzer ran and nothing was retrieved. */

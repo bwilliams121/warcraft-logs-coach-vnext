@@ -616,15 +616,27 @@ describe("M5-A and M5-B are untouched by execution lane", () => {
     // It is an assignment outcome, not a member of the actionability
     // vocabulary (still two members, pinned in m5b). The exact literal, in
     // that one file, carrying that one reason, is all the exception admits.
+    //
+    // HEAL-AP adds the one place that PUBLISHES that outcome: the public
+    // contract's healer assignment schema, exactly once, as a literal whose
+    // actionability is pinned NOT_EVALUATED. It stays an assignment outcome on
+    // the wire, never an actionability status.
     const ASSIGNMENT_OUTCOME = '"ASSIGNMENT_NOT_ACTIONABLE"';
     const ASSIGNMENT_EVALUATOR = "src/specs/shaman/restoration/evaluator.ts";
+    const PUBLIC_CONTRACT = "src/contracts/analysis-contract.ts";
     const evaluator = codeOf(ASSIGNMENT_EVALUATOR);
     expect(evaluator).toContain(ASSIGNMENT_OUTCOME);
     expect(evaluator).toContain('reason: "ENCOUNTER_ENDED_BEFORE_WINDOW"');
     expect(evaluator).toContain("fightEndReportTimeMs");
+    const contract = codeOf(PUBLIC_CONTRACT);
+    expect(contract.split(`outcome: z.literal(${ASSIGNMENT_OUTCOME})`)).toHaveLength(2);
+    expect(contract.split(ASSIGNMENT_OUTCOME)).toHaveLength(2);
     for (const path of filesUnder("src")) {
       const raw = codeOf(path);
-      const code = path === ASSIGNMENT_EVALUATOR ? raw.split(ASSIGNMENT_OUTCOME).join("") : raw;
+      const code =
+        path === ASSIGNMENT_EVALUATOR || path === PUBLIC_CONTRACT
+          ? raw.split(ASSIGNMENT_OUTCOME).join("")
+          : raw;
       expect(code, `${path} declares NOT_ACTIONABLE`).not.toContain("NOT_ACTIONABLE");
       expect(code, `${path} declares PROVEN_NOT_ACTIONABLE`).not.toContain("PROVEN_NOT_ACTIONABLE");
     }

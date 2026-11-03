@@ -74,6 +74,7 @@ export const PUBLIC_SPEC_IDS = [
   "deathknight/blood",
   "monk/brewmaster",
   "evoker/augmentation",
+  "shaman/restoration",
 ] as const satisfies readonly SpecId[];
 
 type ListedSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -285,6 +286,11 @@ export const IdentitySchema = z
  * `gameplaySupported: true` keeps its one meaning — a registered analyzer ran
  * — and is never "its gameplay was assessed": the status and the TLDR's
  * GAMEPLAY_NOT_ANALYZED say that no decision was evaluated.
+ *
+ * `shaman/restoration` joined in HEAL-AP, also under `analysis/1` and on the
+ * same terms: no pinned decision authority, so its documents are
+ * AUTHORITY_NOT_AVAILABLE (or INSUFFICIENT_EVIDENCE) and carry the optional
+ * `healerFindings` block.
  */
 export const SpecializationSchema = z
   .object({
@@ -626,6 +632,8 @@ export const PUBLIC_PLAN_NOT_EVALUATED_REASONS = [
   "PLAN_NOT_FOR_THIS_FIGHT",
   "ENCOUNTER_BINDING_UNKNOWN",
   "NO_PUBLIC_ASSIGNMENT_EVALUATOR",
+  /** HEAL-AP: a healer registration ran but assessed nothing for the subject (`healerFindings` says why). */
+  "SUBJECT_NOT_ASSESSED",
 ] as const;
 
 /**
@@ -639,9 +647,11 @@ export const PUBLIC_PLAN_NOT_EVALUATED_REASONS = [
  * MISMATCHED plan is not applied, and UNKNOWN means the fight reported no
  * difficulty.
  *
- * `assignmentEvaluation` is always NOT_EVALUATED in this schema: no public
- * analyzer evaluates assignments yet. A supplied plan therefore says nothing
- * about whether any assignment was met, missed, early or late.
+ * `assignmentEvaluation` is NOT_EVALUATED, with the reason, unless a public
+ * healer registration judged the subject's entries (HEAL-AP): then it is
+ * EVALUATED_IN_HEALER_FINDINGS, and every result is in the same document's
+ * `healerFindings`, citing the plan. The disclosure itself never says whether
+ * any assignment was met, missed, early or late.
  */
 export const RaidCooldownPlanDisclosureSchema = z
   .object({
@@ -657,12 +667,15 @@ export const RaidCooldownPlanDisclosureSchema = z
     encounterBinding: z.enum(["MATCHED", "MISMATCHED", "UNKNOWN"]),
     assignmentCount: z.number().int().nonnegative(),
     importDiagnostics: tallyOf(PUBLIC_PLAN_IMPORT_DIAGNOSTIC_CODES),
-    assignmentEvaluation: z
-      .object({
-        state: z.literal("NOT_EVALUATED"),
-        reason: z.enum(PUBLIC_PLAN_NOT_EVALUATED_REASONS),
-      })
-      .strict(),
+    assignmentEvaluation: z.discriminatedUnion("state", [
+      z
+        .object({
+          state: z.literal("NOT_EVALUATED"),
+          reason: z.enum(PUBLIC_PLAN_NOT_EVALUATED_REASONS),
+        })
+        .strict(),
+      z.object({ state: z.literal("EVALUATED_IN_HEALER_FINDINGS") }).strict(),
+    ]),
   })
   .strict();
 
@@ -900,6 +913,13 @@ export const PUBLIC_TLDR_DISCLOSURES = [
   "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
   /** M15-F: the document carries `raidCooldownPlan`; its assignments were not evaluated. */
   "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
+  /**
+   * HEAL-AP: the document carries `healerFindings`, which neither the TLDR nor
+   * the report summarizes. No healing-quality verdict exists in it.
+   */
+  "HEALER_FINDINGS_NOT_SUMMARIZED",
+  /** HEAL-AP: the document carries `raidCooldownPlan`, judged in `healerFindings`, which is not summarized. */
+  "RAID_COOLDOWN_PLAN_NOT_SUMMARIZED",
 ] as const;
 
 /** Why no TLDR was built. The rest of the document stands; nothing is summarized. */
@@ -1760,6 +1780,299 @@ export const SupportObservationsSchema = z.discriminatedUnion("assessment", [
 ]);
 
 // ---------------------------------------------------------------------------
+// Healer findings (HEAL-AP)
+// ---------------------------------------------------------------------------
+
+/** Why no healer finding was built. Nothing is claimed about the player. */
+export const PUBLIC_HEALER_NOT_ASSESSED_REASONS = [
+  "SUBJECT_SPECIALIZATION_NOT_STATED",
+  "IDENTITY_REFUSED",
+  "RUNTIME_DATA_UNAVAILABLE",
+] as const;
+
+/** The completeness-gate reasons, as the shared absence gate states them. */
+export const PUBLIC_HEALER_EVIDENCE_REASONS = [
+  "CAPABILITY_UNVERIFIED",
+  "CAPABILITY_NOT_OBSERVABLE",
+  "INSUFFICIENT_COVERAGE",
+  "INSUFFICIENT_SCOPE",
+  "NO_OBSERVATION",
+  "UNSUPPORTED_DERIVATION",
+  "AMBIGUOUS_INITIAL_STATE",
+  "NON_MONOTONIC_TIME",
+] as const;
+
+/** Why ASSIGNMENT has no standard for this fight. */
+export const PUBLIC_HEALER_ASSIGNMENT_NO_AUTHORITY_REASONS = [
+  "NO_RAID_COOLDOWN_PLAN",
+  "PLAN_NOT_FOR_THIS_FIGHT",
+] as const;
+
+/**
+ * Why one plan entry for the player could not be judged against the plan.
+ * Each is a limit of the evidence or of the reviewed identity data, never a
+ * player failure.
+ */
+export const PUBLIC_HEALER_ASSIGNMENT_UNKNOWN_REASONS = [
+  "ASSIGNMENT_INVALID",
+  "PLAYER_NOT_RESOLVED",
+  "PLANNED_TIME_UNRESOLVED",
+  "WINDOW_OUTSIDE_FIGHT",
+  "READINESS_NOT_ESTABLISHED",
+  "UNIDENTIFIED_SUBJECT_CAST",
+  "ABILITY_NOT_REGISTERED",
+  ...PUBLIC_HEALER_EVIDENCE_REASONS,
+] as const;
+
+/** Why the cooldown-use list may be missing uses. */
+export const PUBLIC_HEALER_COOLDOWN_LISTING_REASONS = [
+  ...PUBLIC_HEALER_EVIDENCE_REASONS,
+  "UNIDENTIFIED_SUBJECT_CAST",
+] as const;
+
+/** The caller's plan an ASSIGNMENT result rests on: identity only, never its content. */
+const HealerPlanAuthoritySchema = z
+  .object({
+    kind: z.literal("USER_PROVIDED_RAID_PLAN"),
+    format: z.enum(["STRUCTURED", "TIMELINE_NOTE"]),
+    label: z.string().nullable(),
+  })
+  .strict();
+
+const HealerAssignmentCategorySchema = z.discriminatedUnion("resolution", [
+  z
+    .object({
+      category: z.literal("ASSIGNMENT"),
+      resolution: z.literal("NO_AUTHORITY_AVAILABLE"),
+      reason: z.enum(PUBLIC_HEALER_ASSIGNMENT_NO_AUTHORITY_REASONS),
+    })
+    .strict(),
+  z
+    .object({
+      category: z.literal("ASSIGNMENT"),
+      resolution: z.literal("UNKNOWN"),
+      authority: HealerPlanAuthoritySchema,
+      reason: z.literal("ENCOUNTER_BINDING_UNKNOWN"),
+    })
+    .strict(),
+  z
+    .object({
+      category: z.literal("ASSIGNMENT"),
+      resolution: z.literal("EVALUATED_AGAINST_PLAN"),
+      authority: HealerPlanAuthoritySchema,
+      /** Plan entries for other players: counted, never evaluated here. */
+      assignmentsForOtherPlayers: z.number().int().nonnegative(),
+    })
+    .strict(),
+]);
+
+const HealerCooldownCategorySchema = z
+  .object({
+    category: z.literal("COOLDOWN"),
+    resolution: z.literal("OBSERVED"),
+    authority: z.literal("WCL_OBSERVED_FACT"),
+    /** Only COMPLETE makes an empty `cooldownUses` "no identified cooldown was used". */
+    listing: z.discriminatedUnion("completeness", [
+      z.object({ completeness: z.literal("COMPLETE") }).strict(),
+      z
+        .object({
+          completeness: z.literal("UNKNOWN"),
+          reason: z.enum(PUBLIC_HEALER_COOLDOWN_LISTING_REASONS),
+        })
+        .strict(),
+    ]),
+  })
+  .strict();
+
+const HealerDecisionCategorySchema = z
+  .object({
+    category: z.literal("HEALING_DECISION"),
+    resolution: z.literal("NO_AUTHORITY_AVAILABLE"),
+    reason: z.literal("NO_APPROVED_PER_CAST_HEALER_MODEL"),
+  })
+  .strict();
+
+const HealerWindowSchema = z
+  .object({ fromReportTimeMs: z.number(), toReportTimeMs: z.number() })
+  .strict()
+  .refine((window) => window.fromReportTimeMs <= window.toReportTimeMs, "window bounds out of order");
+
+/**
+ * One plan entry for the player, judged against the plan. The two outcomes
+ * carry exactly the actionability their evidence supports: MET rests on the
+ * player's own cast of the ability in the window (positive actionability, the
+ * cast as evidence); the encounter-ended outcome rests on the completed
+ * fight's end and evaluates no actionability. Anything the evidence cannot
+ * decide is UNKNOWN with the reason, and there is no missed, early or late
+ * outcome in this schema.
+ */
+const HealerAssignmentSchema = z
+  .object({
+    findingId: z.string().min(1),
+    assignmentId: z.string().min(1),
+    abilityGameId: z.number().int().positive(),
+    result: z.union([
+      z
+        .object({
+          resolution: z.literal("OUTCOME"),
+          outcome: z.literal("ASSIGNMENT_MET"),
+          window: HealerWindowSchema,
+          actionability: z
+            .object({
+              actionability: z.literal("PROVEN_ACTIONABLE_BY_OBSERVED_EXECUTION"),
+              abilityGameId: z.number().int().positive(),
+              position: z.number().int().nonnegative(),
+              evidence: EvidenceLocatorSchema,
+            })
+            .strict(),
+        })
+        .strict(),
+      z
+        .object({
+          resolution: z.literal("OUTCOME"),
+          outcome: z.literal("ASSIGNMENT_NOT_ACTIONABLE"),
+          window: HealerWindowSchema,
+          actionability: z.object({ actionability: z.literal("NOT_EVALUATED") }).strict(),
+        })
+        .strict(),
+      z
+        .object({
+          resolution: z.literal("UNKNOWN"),
+          reason: z.enum(PUBLIC_HEALER_ASSIGNMENT_UNKNOWN_REASONS),
+        })
+        .strict(),
+    ]),
+    evidence: z.array(EvidenceLocatorSchema),
+  })
+  .strict();
+
+/** Whether a list is every item. UNKNOWN says what kept it from being complete. */
+const HealerSpanListingSchema = z.discriminatedUnion("completeness", [
+  z.object({ completeness: z.literal("COMPLETE") }).strict(),
+  z
+    .object({
+      completeness: z.literal("UNKNOWN"),
+      beyondFightEdge: z.boolean(),
+      uncoveredActors: z.array(
+        z.object({ actorId: z.number().int(), reason: z.enum(PUBLIC_HEALER_EVIDENCE_REASONS) }).strict(),
+      ),
+      unidentifiedHitsInSpan: z.number().int().nonnegative(),
+    })
+    .strict(),
+]);
+
+const HealerReceivedCoverageSchema = z.discriminatedUnion("completeness", [
+  z.object({ completeness: z.literal("COMPLETE") }).strict(),
+  z.object({ completeness: z.literal("UNKNOWN"), reason: z.enum(PUBLIC_HEALER_EVIDENCE_REASONS) }).strict(),
+]);
+
+/**
+ * One observed healing-cooldown use: a fact with no verdict field. Its
+ * healing context lists the damage episodes overlapping the reporting span
+ * after the cast, each with its own coverage, and per hit player the COUNT of
+ * healing and absorb events from the subject (never an amount, never a rate),
+ * with that player's coverage. ROSTER_NOT_IN_SCOPE says nothing about overlap.
+ */
+const HealerCooldownUseSchema = z
+  .object({
+    findingId: z.string().min(1),
+    abilityGameId: z.number().int().positive(),
+    reportTimeMs: z.number(),
+    position: z.number().int().nonnegative(),
+    evidence: z.array(EvidenceLocatorSchema).min(1),
+    healingContext: z.discriminatedUnion("context", [
+      z.object({ context: z.literal("ROSTER_NOT_IN_SCOPE") }).strict(),
+      z
+        .object({
+          context: z.literal("RECONSTRUCTED"),
+          spanMs: z.number().int().nonnegative(),
+          listing: HealerSpanListingSchema,
+          episodes: z.array(
+            z
+              .object({
+                abilityGameId: z.number().int(),
+                firstHitMs: z.number(),
+                lastHitMs: z.number(),
+                coverage: HealerSpanListingSchema,
+                players: z.array(
+                  z
+                    .object({
+                      actorId: z.number().int(),
+                      observedEntriesFromSubject: z.number().int().nonnegative(),
+                      healing: HealerReceivedCoverageSchema,
+                      absorbs: HealerReceivedCoverageSchema,
+                    })
+                    .strict(),
+                ),
+              })
+              .strict(),
+          ),
+        })
+        .strict(),
+    ]),
+  })
+  .strict();
+
+/**
+ * The healer findings of a healer specialization (HEAL-AP; Restoration
+ * Shaman). Three categories, always all three, in order:
+ *
+ * - ASSIGNMENT: NO_AUTHORITY_AVAILABLE without a plan for this fight (no
+ *   assignment is ever inferred); UNKNOWN when the plan's binding cannot be
+ *   established; EVALUATED_AGAINST_PLAN, citing the caller's plan, with one
+ *   `assignments` entry per plan entry for the player;
+ * - COOLDOWN: observed uses (`WCL_OBSERVED_FACT`) with the listing's
+ *   completeness; no verdict field exists;
+ * - HEALING_DECISION: NO_AUTHORITY_AVAILABLE, no approved per-cast model.
+ *
+ * `evaluatesHealingQuality` and `evaluatesPlanQuality` are pinned `false`:
+ * nothing here ranks healing, reports HPS, says a cooldown should or should
+ * not have been used, or judges the plan. Present only on documents of a
+ * registration that publishes healer findings, beside an unanalyzed status:
+ * its presence never makes the document a complete assessment.
+ */
+export const HealerFindingsSchema = z.discriminatedUnion("assessment", [
+  z
+    .object({
+      assessment: z.literal("ASSESSED"),
+      revision: z.literal("healer-view/1"),
+      identityData: z
+        .object({
+          authority: z.literal("RUNTIME_GAME_DATA"),
+          datasetId: z.string().min(1),
+          artifactRevision: z.string().min(1),
+        })
+        .strict(),
+      evaluatesHealingQuality: z.literal(false),
+      evaluatesPlanQuality: z.literal(false),
+      categories: z.tuple([
+        HealerAssignmentCategorySchema,
+        HealerCooldownCategorySchema,
+        HealerDecisionCategorySchema,
+      ]),
+      assignments: z.array(HealerAssignmentSchema),
+      cooldownUses: z.array(HealerCooldownUseSchema),
+    })
+    .strict()
+    .superRefine((block, context) => {
+      // An assignment result exists only under a plan the category was judged against.
+      if (block.assignments.length > 0 && block.categories[0].resolution !== "EVALUATED_AGAINST_PLAN") {
+        context.addIssue({
+          code: "custom",
+          message: `assignment results exist while ASSIGNMENT is ${block.categories[0].resolution}`,
+        });
+      }
+    }),
+  z
+    .object({
+      assessment: z.literal("NOT_ASSESSED"),
+      revision: z.literal("healer-view/1"),
+      reason: z.enum(PUBLIC_HEALER_NOT_ASSESSED_REASONS),
+    })
+    .strict(),
+]);
+
+// ---------------------------------------------------------------------------
 // The result
 // ---------------------------------------------------------------------------
 
@@ -1871,6 +2184,8 @@ function unanalyzedSupportResult<T extends "AUTHORITY_NOT_AVAILABLE" | "INSUFFIC
       status: z.literal(status),
       detail: z.string().min(1),
       supportObservations: SupportObservationsSchema.optional(),
+      /** HEAL-AP: likewise a healer registration's `healerFindings`. Optional; same rule. */
+      healerFindings: HealerFindingsSchema.optional(),
     })
     .strict();
 }
@@ -1907,3 +2222,4 @@ export type PublicDiagnosis = z.infer<typeof DiagnosisSchema>;
 export type PublicTldr = z.infer<typeof TldrSchema>;
 export type PublicReport = z.infer<typeof ReportSchema>;
 export type PublicSupportObservations = z.infer<typeof SupportObservationsSchema>;
+export type PublicHealerFindings = z.infer<typeof HealerFindingsSchema>;

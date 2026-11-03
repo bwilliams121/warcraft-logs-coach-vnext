@@ -177,14 +177,16 @@ describe("population: every ordinary M11 specialization exactly once, no healer,
       expect(listed, key).not.toContain(key);
     }
     // The pre-M11 public set is exactly the production public set minus what
-    // M11 has promoted so far, and Augmentation Evoker (M13-F, outside this
-    // inventory), so this constant cannot silently drift.
+    // M11 has promoted so far, Augmentation Evoker (M13-F, outside this
+    // inventory) and Restoration Shaman (HEAL-AP, a healer, outside it too),
+    // so this constant cannot silently drift.
     for (const key of PRE_M11_PUBLIC) expect(PUBLIC_SPEC_IDS as readonly string[]).toContain(key);
     expect((PUBLIC_SPEC_IDS as readonly string[]).filter((id) => !PRE_M11_PUBLIC.includes(id))).toEqual([
       "paladin/retribution",
       "deathknight/blood",
       "monk/brewmaster",
       "evoker/augmentation",
+      "shaman/restoration",
     ]);
   });
 

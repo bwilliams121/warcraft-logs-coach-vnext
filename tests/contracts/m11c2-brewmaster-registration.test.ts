@@ -96,6 +96,7 @@ const FIVE_PUBLIC = [
   "deathknight/blood",
   "monk/brewmaster",
   "evoker/augmentation",
+  "shaman/restoration",
 ];
 
 const SOURCES: Record<string, string> = import.meta.glob("../../src/**/*.ts", {
@@ -128,8 +129,8 @@ describe("identity and partition", () => {
     // through M11-C4i, and the five sites moved in one reviewed edit.
     expect(isSpecId("monk/brewmaster")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
-    // The internal-only half never holds Brewmaster again; since HEAL-A it holds Restoration Shaman.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["shaman/restoration"]);
+    // The internal-only half never holds Brewmaster again; it held Restoration Shaman in HEAL-A and is empty since HEAL-AP.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(FIVE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
@@ -174,9 +175,9 @@ describe("identity and partition", () => {
     );
     // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(6);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(7);
     expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       BREWMASTER_MONK_REGISTRATION.publicLimits,
     );

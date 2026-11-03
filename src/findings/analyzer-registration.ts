@@ -76,6 +76,7 @@ import {
 } from "./decision-capability.js";
 import type { ObservedDecisionView } from "./observed-decision-view.js";
 import type { SpecId } from "./spec-id.js";
+import type { HealerViewOutcome } from "./healer-view.js";
 import type { SupportObservationOutcome } from "./support-observation-view.js";
 import type { AnalyzerRequirement } from "../services/ingestion-scope.js";
 
@@ -141,6 +142,14 @@ export interface AnalyzerDefinition<TAnalysis extends SpecAnalysisEnvelope> {
    */
   readonly supportObservationView?:
     ((analysis: Exclude<TAnalysis, { status: "ANALYZED" }>) => SupportObservationOutcome) | undefined;
+  /**
+   * The spec-owned projection of an UNANALYZED result's healer findings
+   * (HEAL-AP). Optional; omitted means the registration publishes none. Only a
+   * healer registration supplies one, and it is the only way shared code reads
+   * that payload.
+   */
+  readonly healerView?:
+    ((analysis: Exclude<TAnalysis, { status: "ANALYZED" }>) => HealerViewOutcome) | undefined;
 }
 
 /** The registration as orchestration holds it: envelope-typed, authority-closed, frozen. */
@@ -168,6 +177,8 @@ export interface AnalyzerRegistration {
   readonly observedDecisionView: (analysis: AnalyzedEnvelope) => ObservedDecisionView;
   /** See `AnalyzerDefinition.supportObservationView`. Absent when the registration publishes none. */
   readonly supportObservationView?: ((analysis: UnanalyzedEnvelope) => SupportObservationOutcome) | undefined;
+  /** See `AnalyzerDefinition.healerView`. Absent when the registration publishes none. */
+  readonly healerView?: ((analysis: UnanalyzedEnvelope) => HealerViewOutcome) | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -341,6 +352,7 @@ export function snapshotRegistration(registration: AnalyzerRegistration): Analyz
     ...(registration.supportObservationView === undefined
       ? {}
       : { supportObservationView: registration.supportObservationView }),
+    ...(registration.healerView === undefined ? {} : { healerView: registration.healerView }),
   });
 }
 
@@ -367,6 +379,7 @@ export function defineAnalyzerRegistration<TAnalysis extends SpecAnalysisEnvelop
       resolveAuthorityForDomain(declaredDomains, bindings, domain),
   });
   const supportView = definition.supportObservationView;
+  const healerView = definition.healerView;
 
   const registration: AnalyzerRegistration = Object.freeze({
     analyzerId: definition.analyzerId,
@@ -402,6 +415,15 @@ export function defineAnalyzerRegistration<TAnalysis extends SpecAnalysisEnvelop
           supportObservationView: (analysis: UnanalyzedEnvelope): SupportObservationOutcome => {
             assertAnalysisOwnership(registration, analysis);
             return supportView(analysis as Exclude<TAnalysis, { status: "ANALYZED" }>);
+          },
+        }),
+    ...(healerView === undefined
+      ? {}
+      : {
+          // HEAL-AP: the same boundary again, for a healer's unanalyzed payload.
+          healerView: (analysis: UnanalyzedEnvelope): HealerViewOutcome => {
+            assertAnalysisOwnership(registration, analysis);
+            return healerView(analysis as Exclude<TAnalysis, { status: "ANALYZED" }>);
           },
         }),
   });

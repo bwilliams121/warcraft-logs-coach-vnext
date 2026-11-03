@@ -44,6 +44,7 @@ import {
   type TldrInput,
 } from "../reporting/tldr.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import type { HealerViewOutcome } from "../findings/healer-view.js";
 import type { SupportObservationOutcome } from "../findings/support-observation-view.js";
 import type { IngestionFailureReason } from "../wcl/ingest-fight.js";
 import type { FightIdentity, PreflightPort, WclFailureReason } from "../wcl/types.js";
@@ -52,6 +53,7 @@ import {
   analyzerForSpec,
   catalogFor,
   describeCatalogDefects,
+  healerViewOf,
   observedDecisionViewOf,
   runAnalyzer,
   specNotSupported,
@@ -73,6 +75,7 @@ import {
 } from "./result.js";
 import {
   discloseRaidCooldownPlan,
+  withHealerAssignmentEvaluation,
   type RaidCooldownPlanDisclosure,
 } from "./raid-cooldown-plan-disclosure.js";
 import { resolveSpecIdentity } from "./spec-identity.js";
@@ -567,8 +570,9 @@ export async function analyzeFight(
   // ---- the caller's raid cooldown plan, disclosed on every result (M12-E) ----
   //
   // Input facts only: what was received and whether it binds to this fight.
-  // No PUBLIC analyzer consumes a plan, so nothing here evaluates one. The plan
-  // is still handed to the selected analyzer below, untouched (HEAL-A).
+  // Nothing here evaluates the plan. It is handed to the selected analyzer
+  // below, untouched (HEAL-A), and the disclosure records afterwards whether a
+  // public healer registration judged it (HEAL-AP).
   const planDisclosure =
     parsed.request.raidCooldownPlan === null
       ? null
@@ -741,6 +745,23 @@ export async function analyzeFight(
       "The selected analyzer's support observations could not be given their public form, so no analysis was published.",
     );
   }
+  // HEAL-AP: likewise the registration's healer view, and what it means for
+  // the plan disclosure. A view that cannot publish, or that contradicts the
+  // disclosure about the same plan, is an internal defect, never a quieter
+  // document.
+  let healerFindings: HealerViewOutcome | null;
+  let planAfterAnalysis: RaidCooldownPlanDisclosure | null;
+  try {
+    healerFindings = analysis.status === "ANALYZED" ? null : healerViewOf(catalog.catalog, analysis);
+    planAfterAnalysis =
+      planDisclosure === null ? null : withHealerAssignmentEvaluation(planDisclosure, healerFindings);
+  } catch {
+    return serviceFailure(
+      "INTERNAL_ERROR",
+      "The selected analyzer's healer findings could not be given their public form, so no analysis was published.",
+    );
+  }
+  const planEvaluated = planAfterAnalysis?.assignmentEvaluation.state === "EVALUATED_IN_HEALER_FINDINGS";
 
   // ---- M14-F: the reviewed diagnosis projection, after and beside the result ----
   const diagnosis =
@@ -770,7 +791,12 @@ export async function analyzeFight(
     // M15-F: what the document carries beside them that they do not restate.
     unsummarized: [
       ...(supportObservations === null ? [] : (["SUPPORT_OBSERVATIONS"] as const)),
-      ...(planDisclosure === null ? [] : (["RAID_COOLDOWN_PLAN"] as const)),
+      ...(healerFindings === null ? [] : (["HEALER_FINDINGS"] as const)),
+      ...(planAfterAnalysis === null
+        ? []
+        : planEvaluated
+          ? (["RAID_COOLDOWN_PLAN_EVALUATED"] as const)
+          : (["RAID_COOLDOWN_PLAN"] as const)),
     ],
   });
 
@@ -782,9 +808,10 @@ export async function analyzeFight(
     analysis,
     observedDecisions,
     preparation: { state: "ASSESSED", report: preparation },
-    ...withPlan(planDisclosure),
+    ...withPlan(planAfterAnalysis),
     ...(diagnosis === null ? {} : { diagnosis }),
     ...(supportObservations === null ? {} : { supportObservations }),
+    ...(healerFindings === null ? {} : { healerFindings }),
     ...presentation,
   };
 

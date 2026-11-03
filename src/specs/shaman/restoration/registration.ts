@@ -1,5 +1,5 @@
 /**
- * Restoration Shaman's analyzer registration (HEAL-A, INTERNAL_ONLY).
+ * Restoration Shaman's analyzer registration (HEAL-A; PUBLIC since HEAL-AP).
  *
  * THIS IS WHERE RESTORATION SHAMAN STATES WHAT IT IS, AND THE ONLY PLACE.
  *
@@ -37,8 +37,24 @@
  *                               unusable: nothing was evaluated.
  *
  * The payload rides on an unanalyzed envelope. Shared orchestration reads only
- * `status`, `specId` and `detail` of it. There is no public shape yet: the
- * healer public result shape and promotion gate are HEAL-AP's.
+ * `status`, `specId` and `detail` of it, plus — since HEAL-AP — the HEALER
+ * VIEW this registration builds from it (`healer-view.ts`): the finding set
+ * and the facts each finding rests on, its reviewed public shape
+ * (`healerFindings`).
+ *
+ * PUBLIC SINCE HEAL-AP, AND WHAT THAT CHANGED. The five-site edit (the
+ * partition, the public contract's `specId` enum, the identity table, the
+ * `satisfies PublicSpecId` on `spec.ts`, and `exposure` below) plus the view.
+ * Reachability, not analysis: a public request for a Shaman/Restoration
+ * identity dispatches this row, derives FULL_RAID from its declared
+ * requirement, and receives exactly the result the internal lookup produced.
+ * It passed the healer promotion gate
+ * (`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) first.
+ *
+ * ENVELOPE STATUS, PUBLICLY (HEAL-AP). AUTHORITY_NOT_AVAILABLE keeps its one
+ * meaning, "no PINNED decision authority", including when assignment findings
+ * were judged against a supplied plan: those findings cite the plan in
+ * `healerFindings`, and the plan disclosure says EVALUATED_IN_HEALER_FINDINGS.
  *
  * IDENTITY. The facade is handed `SpecAnalysisInput`, which carries no
  * preflight identity. The evaluator's gate is fed the normalized fight's own
@@ -71,6 +87,7 @@ import {
   type StateRequirements,
 } from "../../../findings/decision-capability.js";
 import type { HealerFindingSet } from "../../../findings/healer-finding.js";
+import type { HealerViewOutcome } from "../../../findings/healer-view.js";
 import type { ObservedDecisionView } from "../../../findings/observed-decision-view.js";
 import { defineSpecModule, type SpecModule } from "../../../findings/spec-module.js";
 import {
@@ -83,6 +100,7 @@ import {
   type RestorationShamanInput,
 } from "./evaluator.js";
 import { restorationShamanHealerFindings } from "./healer-findings.js";
+import { restorationShamanHealerView } from "./healer-view.js";
 import {
   RESTORATION_SHAMAN_ANALYZER_ID,
   RESTORATION_SHAMAN_DISPLAY_NAME,
@@ -248,7 +266,8 @@ export function analyzeRestorationShaman(
           "No pinned decision authority governs Restoration Shaman decisions: per-cast healing choice has no " +
           "approved model and healing-cooldown use is reported as observed facts only. Assignment execution is " +
           "judged only against a supplied raid cooldown plan that binds this fight, and each such result cites " +
-          "that plan; without one, assignments are not evaluated. This is not an assessment of the player.",
+          "that plan; without one, assignments are not evaluated. The results are reported in healerFindings; " +
+          "this is not an assessment of the player.",
         healerFindings: { assessment: "ASSESSED", set: restorationShamanHealerFindings(evaluation, plan) },
       };
   }
@@ -267,7 +286,44 @@ function noObservedDecisionView(analysis: never): ObservedDecisionView {
 }
 
 /**
- * The Restoration Shaman specialization module (HEAL-A, INTERNAL_ONLY).
+ * The view of this registration's own result (HEAL-AP): the finding set and
+ * the facts each finding rests on. Shared code reads nothing else of the
+ * payload. NOT_ASSESSED passes through with its reason, never as an empty set.
+ */
+export function restorationShamanHealerViewOf(analysis: RestorationShamanAnalysis): HealerViewOutcome {
+  const outcome = analysis.healerFindings;
+  if (outcome.assessment === "NOT_ASSESSED") return { assessment: "NOT_ASSESSED", reason: outcome.reason };
+  if (analysis.evaluation?.state !== "EVALUATED") {
+    throw new Error("A Restoration Shaman finding set exists without an evaluated result.");
+  }
+  return { assessment: "ASSESSED", view: restorationShamanHealerView(analysis.evaluation, outcome.set) };
+}
+
+/**
+ * What the public tool descriptions say about Restoration Shaman (HEAL-AP).
+ * It is observation and plan-execution only, and the prose says so first.
+ */
+export const RESTORATION_SHAMAN_LIMITS = Object.freeze({
+  analysis: [
+    "Restoration Shaman analysis reports HEALER FINDINGS ONLY, in healerFindings. ASSIGNMENT: with a supplied",
+    "raidCooldownPlan that binds this fight, each of the player's plan entries for an identified healing cooldown",
+    "(Spirit Link Totem, Ascendance, Healing Tide Totem) is ASSIGNMENT_MET when the player's own cast lies in",
+    "the planned window, an outcome naming the encounter's end when the completed encounter ended before the window opened, and",
+    "UNKNOWN otherwise, with the reason: with no cast in the window, readiness is not established.",
+    "Without a plan, ASSIGNMENT is NO_AUTHORITY_AVAILABLE and no assignment is inferred. COOLDOWN: each observed",
+    "healing-cooldown use, with the damage episodes overlapping it and their coverage, as facts with no verdict.",
+    "HEALING_DECISION: per-cast spell choice has no approved model and is NO_AUTHORITY_AVAILABLE. The status is",
+    "AUTHORITY_NOT_AVAILABLE (no pinned decision authority). It does not rank healing, report HPS, judge whether a",
+    "cooldown should have been used, or judge the plan. A fact the evidence cannot establish is UNKNOWN.",
+  ].join("\n"),
+  raidNight: [
+    "Restoration Shaman cells evaluate no gameplay decision (AUTHORITY_NOT_AVAILABLE): a raid night carries no",
+    "raid cooldown plan, and the cells carry no healer findings.",
+  ].join("\n"),
+});
+
+/**
+ * The Restoration Shaman specialization module (HEAL-A; PUBLIC since HEAL-AP).
  */
 export const RESTORATION_SHAMAN_MODULE: SpecModule = defineSpecModule({
   identity: {
@@ -277,14 +333,14 @@ export const RESTORATION_SHAMAN_MODULE: SpecModule = defineSpecModule({
     wclClassName: RESTORATION_SHAMAN_WCL_CLASS_NAME,
     wclSpecName: RESTORATION_SHAMAN_WCL_SPEC_NAME,
   },
-  exposure: "INTERNAL_ONLY",
+  exposure: "PUBLIC",
   capabilities: RESTORATION_SHAMAN_CAPABILITIES,
   authorityBindings: RESTORATION_SHAMAN_AUTHORITY_BINDINGS,
-  // No public description: INTERNAL_ONLY. The public prose is HEAL-AP's.
-  limitsProse: Object.freeze({ analysis: "", raidNight: "" }),
+  limitsProse: RESTORATION_SHAMAN_LIMITS,
   supplementalAnalyses: [],
   analyze: (input, authority): RestorationShamanAnalysis => analyzeRestorationShaman(input, authority),
   observedDecisionView: noObservedDecisionView,
+  healerView: (analysis) => restorationShamanHealerViewOf(analysis),
 });
 
 /** The row the production catalog lists. The module owns it. */

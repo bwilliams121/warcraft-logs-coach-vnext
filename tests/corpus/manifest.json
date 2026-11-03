@@ -5318,11 +5318,11 @@
       ]
     },
     {
-      "caseId": "application-service.restoration-shaman-registration-is-internal-only",
+      "caseId": "application-service.restoration-shaman-registration-is-public-since-heal-ap",
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "APPLICATION_SERVICE",
       "contractUnderTest": "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-      "purpose": "The validated production catalog carries the Restoration Shaman registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve shaman/restoration, so no public request can select it.",
+      "purpose": "RE-PINNED AT HEAL-AP, INVERTING THE HEAL-A CASE. The validated production catalog carries the Restoration Shaman registration PUBLIC, in either catalog order: both lookups find the same row, and the public identity table resolves Shaman/Restoration to shaman/restoration, so a public request selects it. The five public sites moved together in one reviewed edit (the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure), with the registration's healer view.",
       "assertions": [
         {
           "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
@@ -5330,16 +5330,16 @@
             "specId": "shaman/restoration",
             "expected": {
               "internalAnalyzerId": "shaman-restoration-healer-findings",
-              "publicAnalyzerId": null,
-              "exposure": "INTERNAL_ONLY",
-              "identityResolvesPublicly": false
+              "publicAnalyzerId": "shaman-restoration-healer-findings",
+              "exposure": "PUBLIC",
+              "identityResolvesPublicly": true
             }
           }
         }
       ],
       "rationale": {
         "basis": ["OWNED_CONTRACT"],
-        "text": "Its healer findings have no reviewed public shape yet (HEAL-AP), so registration changes what internal evaluation derives, not what a public request can reach."
+        "text": "Promotion changed reachability, not analysis: the registration still binds no pinned authority and is never ANALYZED; what a public request now receives is its healer findings (healerFindings), never an HPS ranking, an inferred assignment or a cooldown-quality verdict."
       },
       "authority": null,
       "limitations": [],
@@ -5347,6 +5347,66 @@
         "tests/contracts/m10a-registry-integrity.test.ts",
         "tests/contracts/m10d-public-registration.test.ts"
       ]
+    },
+    {
+      "caseId": "application-service.restoration-shaman-reports-real-health-potion-and-healthstone",
+      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "owningLayer": "APPLICATION_SERVICE",
+      "contractUnderTest": "src/services/analysis-service.ts (PREP-2 preparation beside the selected analyzer); src/analysis/preparation/consumable-status.ts; src/data/game/preparation-consumables.json",
+      "purpose": "RE-PINNED AT HEAL-AP (this case was the unsupported-Shaman preparation proof until Restoration Shaman became public). Over a 20 s window, the Restoration Shaman's real Healthstone and Silvermoon Health Potion are complete OBSERVED counts of one each; the combat potion is UNKNOWN (the window is shorter than the longest combat-potion buff, so a potion taken before it could be hidden), never zero. The public request now dispatches the Restoration Shaman registration at its derived FULL_RAID scope; this slice carries no fight context, so the subject's specialization is not stated and the gameplay status is INSUFFICIENT_EVIDENCE, while preparation, which never depends on the specialization evaluator, reports exactly the same consumables.",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "params": {
+            "subject": {
+              "actorId": 122,
+              "className": "Shaman",
+              "specName": "Restoration"
+            },
+            "expected": {
+              "status": "INSUFFICIENT_EVIDENCE",
+              "specId": "shaman/restoration",
+              "analyzerId": "shaman-restoration-healer-findings",
+              "scope": "FULL_RAID",
+              "preparation": {
+                "healthPotion": {
+                  "countState": "OBSERVED",
+                  "count": 1,
+                  "uses": [
+                    {
+                      "spellId": 1234768,
+                      "timing": "IN_FIGHT"
+                    }
+                  ]
+                },
+                "healthstone": {
+                  "countState": "OBSERVED",
+                  "count": 1,
+                  "uses": [
+                    {
+                      "spellId": 6262,
+                      "timing": "IN_FIGHT"
+                    }
+                  ]
+                },
+                "combatPotion": {
+                  "countState": "UNKNOWN",
+                  "observedAtLeast": 0,
+                  "reasonCodes": ["FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF"],
+                  "uses": []
+                }
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
+        "text": "The health potion and Healthstone are cast-only facts, complete under the slice's CASTS grant for actor 122 over its window. The combat potion needs the window to outlast the longest combat-potion buff; it does not, so the producer reports UNKNOWN with that reason and a lower bound of zero rather than an observed zero."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/preparation/consumable-status.test.ts"]
     },
     {
       "caseId": "application-service.retribution-paladin-subject-is-analyzed-under-player-context",
@@ -5452,66 +5512,6 @@
         "tests/unit/preparation/consumable-status.test.ts",
         "tests/contracts/preparation-service.test.ts"
       ]
-    },
-    {
-      "caseId": "application-service.unsupported-shaman-reports-real-health-potion-and-healthstone",
-      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
-      "owningLayer": "APPLICATION_SERVICE",
-      "contractUnderTest": "src/services/analysis-service.ts unsupportedSpec (PREP-2); src/analysis/preparation/consumable-status.ts; src/data/game/preparation-consumables.json",
-      "purpose": "Over a 20 s window, the unsupported Shaman's real Healthstone and Silvermoon Health Potion are complete OBSERVED counts of one each; the combat potion is UNKNOWN (the window is shorter than the longest combat-potion buff, so a potion taken before it could be hidden), never zero.",
-      "assertions": [
-        {
-          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
-          "params": {
-            "subject": {
-              "actorId": 122,
-              "className": "Shaman",
-              "specName": "Restoration"
-            },
-            "expected": {
-              "status": "SPEC_NOT_SUPPORTED",
-              "specId": null,
-              "analyzerId": null,
-              "scope": "PLAYER_CONTEXT",
-              "preparation": {
-                "healthPotion": {
-                  "countState": "OBSERVED",
-                  "count": 1,
-                  "uses": [
-                    {
-                      "spellId": 1234768,
-                      "timing": "IN_FIGHT"
-                    }
-                  ]
-                },
-                "healthstone": {
-                  "countState": "OBSERVED",
-                  "count": 1,
-                  "uses": [
-                    {
-                      "spellId": 6262,
-                      "timing": "IN_FIGHT"
-                    }
-                  ]
-                },
-                "combatPotion": {
-                  "countState": "UNKNOWN",
-                  "observedAtLeast": 0,
-                  "reasonCodes": ["FIGHT_SHORTER_THAN_LONGEST_COMBAT_POTION_BUFF"],
-                  "uses": []
-                }
-              }
-            }
-          }
-        }
-      ],
-      "rationale": {
-        "basis": ["VALIDATED_EVIDENCE", "OWNED_CONTRACT"],
-        "text": "The health potion and Healthstone are cast-only facts, complete under the slice's CASTS grant for actor 122 over its window. The combat potion needs the window to outlast the longest combat-potion buff; it does not, so the producer reports UNKNOWN with that reason and a lower bound of zero rather than an observed zero."
-      },
-      "authority": null,
-      "limitations": [],
-      "relatedTests": ["tests/unit/preparation/consumable-status.test.ts"]
     },
     {
       "caseId": "application-service.unsupported-spec-runs-no-analyzer-and-retrieves-for-preparation-only",
@@ -22977,7 +22977,7 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "owningLayer": "SPEC_RESTORATION_SHAMAN",
       "contractUnderTest": "src/specs/shaman/restoration/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
-      "purpose": "Through the production catalog's internal lookup, the Restoration Shaman registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED.",
+      "purpose": "Through the production catalog (both lookups find the same row since HEAL-AP), the Restoration Shaman registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED.",
       "assertions": [
         {
           "kind": "SPEC_RESTORATION_SHAMAN.REGISTRATION_RESULT",

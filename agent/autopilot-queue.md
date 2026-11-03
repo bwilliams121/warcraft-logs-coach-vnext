@@ -1054,8 +1054,10 @@ authority or evidence condition.
        and no cooldown-quality verdict without a plan;
      - corpus and archive assertions and cross-spec isolation.
 
-   The healer public gate is defined by HEAL-AP from these requirements.
-   Healer followers meet it; they never meet a weakened gate.
+   The healer public gate is defined by HEAL-AP from these requirements
+   (`tests/contracts/heal-ap-healer-promotion-gate.test.ts`; see
+   agent/architecture.md "HEAL-AP"). Healer followers meet it; they never
+   meet a weakened gate.
 4. **The public tranche.** A public entry ("public") is the separate,
    reviewed PUBLIC promotion: the promotion gate that applies to its
    analyzer kind (rotational, or the HEAL-AP healer gate), public contract,
@@ -1226,11 +1228,13 @@ them.
 ### HEAL-A: Restoration Shaman registration and healer finding shape (internal)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: none
 branch: autopilot/heal-a
 wcl: NONE
 publicContract: NONE
+pr: 45
+mergeSha: 3fce84754a4cdd53efcd37809f85b3eed8e5abeb
 ```
 
 **Direction.** `agent/follow-ups.md` "After M12-D" (not registered, not
@@ -1252,8 +1256,9 @@ finding shape.
 ### HEAL-AP: Restoration Shaman public promotion
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: HEAL-A
+branch: autopilot/heal-ap
 wcl: NONE
 publicContract: EXPECTED
 ```
