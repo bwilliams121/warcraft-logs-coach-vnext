@@ -723,9 +723,13 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // Paladin and Mistweaver Monk through the healer gate; Restoration Druid
     // has no retained evidence. HEAL-B2 added Holy Priest, and HEAL-B2P
     // promoted it through the healer gate. HEAL-B3 added Discipline Priest,
-    // HEAL-B4 Preservation Evoker, and HEAL-B4P promoted that through the healer gate.
+    // HEAL-B4 Preservation Evoker, and HEAL-B4P promoted that through the healer gate. ONB-A1 added Havoc Demon Hunter.
     // The synthetic module below still exercises the branch.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
+      "druid/restoration",
+      "priest/discipline",
+      "demonhunter/havoc",
+    ]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
   });

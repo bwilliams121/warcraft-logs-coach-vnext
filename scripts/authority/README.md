@@ -527,6 +527,31 @@ for byte from the current extractor — they predate M11-B2 adding POWER_RUNE
 and POWER_RUNIC_POWER to the shared enumerator list and carry only POWER_MANA
 and POWER_HOLY_POWER. That drift is recorded, not fixed.
 
+## ONB-A1 — Havoc Demon Hunter
+
+`demonhunter-havoc` targets on the GCD, talent, ability-cooldown and usability extractors, and the
+APL artifact through the M11-D2-C batch path.
+
+```bash
+node scripts/authority/extract-simc-apl.mjs --targets demonhunter-havoc \
+  --source-root <root> --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 \
+  --out-dir <dir> --extracted-on 2026-11-03
+node scripts/authority/extract-simc-gcd.mjs --target demonhunter-havoc \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-03   # --file-<key> for each source
+node scripts/authority/extract-simc-talents.mjs --target demonhunter-havoc \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-03   # --file-<key> for each source
+node scripts/authority/extract-simc-ability-cooldowns.mjs --target demonhunter-havoc \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-03   # --local-<key> for each source
+node scripts/authority/extract-simc-usability-authority.mjs --target demonhunter-havoc \
+  --sha 33622e9d1662ff0e451691edf85a6b49cc9d11d9 --extracted-on 2026-11-03   # --local-<key> for each source
+npx prettier --write src/data/game/demonhunter-havoc-*.json src/simc/data/demonhunter-havoc.apl.json
+```
+
+Two class-neutral extractor additions, neither changing an earlier target's output: a usability target
+may name its own class module and declare a source absent (`sourceOverrides`), and may declare that the
+class-module cost claims do not hold (`classCostClaimsDoNotHold`), so the artifact records none and a
+base-cost bound is refused.
+
 ## M11-D2-C — pinned batch preflight for eight Cohort A/B targets
 
 Extraction infrastructure only. No artifact for these targets is committed,

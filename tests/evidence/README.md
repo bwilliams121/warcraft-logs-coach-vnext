@@ -154,6 +154,17 @@ exactly as HEAL-B1P's.
 - Ordinary archive growth, pinned in `tests/unit/m11c4e-evidence-archive.test.ts`.
   No new Warcraft Logs request was made.
 
+**ONB-A1 evidence.** `wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90` is one compact
+`--actor-slice` segment (364,068 bytes) of the M11-E2 capture.
+
+- Every `cast`, `begincast`, `combatantinfo`, aura transition and `resourcechange` sourced by or
+  targeting actor 18, the fight's Havoc Demon Hunter, over the fight's first 90 s of 345 s.
+- It grants CASTS, AURAS, RESOURCES and COMBATANT_INFO for actor 18 over that range, and each grant is
+  whole: no event of those families in the range is omitted.
+- Only that window is committed: the whole fight is about 1.3 MB and the archive had 0.39 MB left under
+  its notice line. The line is not raised silently (agent/follow-ups.md "After ONB-A1").
+- Ordinary archive growth, pinned in the same test. No new Warcraft Logs request was made.
+
 **HEAL-B4P evidence.** `wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-*` is
 three compact `--actor-slice` segments (123,153 bytes) of the three adjoining
 retained captures of gtKb fight 22 (M9-C2 opener, M11-C4, M11-C4b), each

@@ -102,7 +102,8 @@ describe("the committed corpus loads", () => {
     // HEAL-B2: two cases for the INTERNAL_ONLY Holy Priest registration.
     // HEAL-B3: two cases for the INTERNAL_ONLY Discipline Priest registration.
     // HEAL-B4: two cases for the INTERNAL_ONLY Preservation Evoker registration.
-    expect(loaded.cases).toHaveLength(199);
+    // ONB-A1: two cases for the INTERNAL_ONLY Havoc Demon Hunter registration.
+    expect(loaded.cases).toHaveLength(201);
     expect(loaded.coverage.declared).toBe(0);
   });
 

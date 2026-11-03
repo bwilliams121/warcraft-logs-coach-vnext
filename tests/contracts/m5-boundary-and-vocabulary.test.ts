@@ -235,6 +235,11 @@ describe("M5 invents no combat state", () => {
     // aura, queried only under a corroborated wire id (none today). Its
     // companion test is tests/unit/m11c2-brewmaster-bindings.test.ts.
     "src/specs/monk/brewmaster/aura-bindings.ts",
+    // ONB-A1: Havoc's buff atoms under pinned, wire-corroborated identities, FALSE only
+    // from M4's EXACT INACTIVE or a producing talent proven absent, with an edge inside
+    // the skew window read from before it only for the action's own pinned effect.
+    // Its companion test is tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts.
+    "src/specs/demonhunter/havoc/aura-bindings.ts",
   ] as const;
 
   const AURA_READING_MODULE = AURA_READING_MODULES[0];
@@ -451,6 +456,9 @@ describe("M5 forms no unearned verdict", () => {
       // M11-C2: the fifth (INTERNAL_ONLY) specialization's facade and domain vocabulary.
       "src/specs/monk/brewmaster/observed-analysis.ts",
       "src/specs/monk/brewmaster/domains.ts",
+      // ONB-A1: the specialization's facade and domain vocabulary.
+      "src/specs/demonhunter/havoc/observed-analysis.ts",
+      "src/specs/demonhunter/havoc/domains.ts",
     ];
     for (const path of M5_FILES) {
       const code = codeOf(path);

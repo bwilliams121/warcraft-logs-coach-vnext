@@ -1,0 +1,456 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DEMONHUNTER_HAVOC_USABILITY_AUTHORITY",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/data_enums.hh",
+        "sha256": "25a88c629f3d4ebb4ac966f3927307b28f756cf9cef9482dc77a79b197873ea4",
+        "byteLength": 75791
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/action/action.cpp",
+        "sha256": "b04a5f1e942c21ac7db3125f23247d3aecf6fc6701eb6d6c1350f0bb7a762e92",
+        "byteLength": 175059
+      },
+      {
+        "path": "engine/class_modules/sc_demon_hunter.cpp",
+        "sha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "byteLength": 459885
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "classId": 12,
+    "className": "Demon Hunter",
+    "specId": 577,
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "method": "MACHINE_EXTRACTED_DBC_RECORD",
+    "effectTargetingEnumerators": {
+      "T_UNIT_CASTER": 1,
+      "T_UNIT_TARGET_ENEMY": 6,
+      "T_DESTINATION_TARGET_ENEMY": 53,
+      "T_UNIT_CONE_CASTER_TO_DESTINATION_ENEMY": 104
+    },
+    "channelAttributeBits": {
+      "SX_CHANNELED": 34,
+      "SX_CHANNELED_2": 38
+    },
+    "targetModeRule": "ENEMY_UNIT_TARGET: max range > 0 and some effect's targeting_1 is T_UNIT_TARGET_ENEMY. ENEMY_TARGET_DESTINATION: max range > 0, no effect targets T_UNIT_TARGET_ENEMY, and some effect's targeting_1 is T_DESTINATION_TARGET_ENEMY. UNTARGETED: anything else (a cone, a caster-centred area, max range 0).",
+    "applicabilityNote": "Not version-gated at runtime, for the same reason as the other pinned datasets: CombatFight exposes no client-build key. The build is recorded for traceability."
+  },
+  "costFormulaChecks": [
+    {
+      "claim": "ACTION_COST_FORMULA",
+      "source": "engine/action/action.cpp",
+      "finding": "action_t::cost() computes ( base + bc.flat_add + cost_flat_modifier() ) * bc.pct_mul * cost_pct_multiplier(), and clamps a negative result to 0"
+    },
+    {
+      "claim": "BASE_COST_FLAT_MODIFIER_ONLY_SUBTRACTS_A_REDUCTION",
+      "source": "engine/action/action.cpp",
+      "finding": "action_t::cost_flat_modifier() returns -player->current.resource_reduction[ school ]"
+    },
+    {
+      "claim": "BASE_COST_PCT_MULTIPLIER_IS_ONE",
+      "source": "engine/action/action.cpp",
+      "finding": "action_t::cost_pct_multiplier() returns 1.0"
+    },
+    {
+      "claim": "RESOURCE_REDUCTION_CHANGES_ONLY_IN_NON_NEGATIVE_AMOUNTS",
+      "source": "engine/player/player.cpp",
+      "finding": "player_t::cost_reduction_gain / cost_reduction_loss return early on a non-positive amount, and they are the only four writes to current.resource_reduction"
+    },
+    {
+      "claim": "USABLE_MOVING_RULE",
+      "source": "engine/action/action.cpp",
+      "finding": "action_t::usable_moving() is false for a cast time, a channel, or a range in (0, 5], and true otherwise (the norgannons_sagacity exception only widens it)"
+    }
+  ],
+  "spells": [
+    {
+      "simcToken": "reavers_glaive",
+      "spellId": 442294,
+      "displayNameEn": "Reaver's Glaive",
+      "minRangeYd": 0,
+      "maxRangeYd": 40,
+      "coneDegrees": 0,
+      "castTimeMs": 0,
+      "channeled": false,
+      "gcdMs": 1500,
+      "effectTargeting": [
+        {
+          "index": 0,
+          "type": 2,
+          "subtype": 0,
+          "targeting1": 6,
+          "targeting2": 0
+        },
+        {
+          "index": 1,
+          "type": 30,
+          "subtype": 0,
+          "targeting1": 1,
+          "targeting2": 0
+        }
+      ],
+      "targetMode": "ENEMY_UNIT_TARGET",
+      "movementRestriction": "USABLE_WHILE_MOVING",
+      "category": 0,
+      "categorySiblingSpellIds": [],
+      "powerRows": [],
+      "costModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_COST_MODIFIERS",
+        "effectRowsExamined": 53234,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER"
+        ],
+        "propertiesChecked": ["14:P_RESOURCE_COST_1", "34:P_RESOURCE_COST_2", "39:P_RESOURCE_COST_3"],
+        "rule": "Every effect row of every spell in the pinned table: A_ADD_FLAT/PCT_MODIFIER (107/108) whose misc_value1 is the resource-cost property of one of this spell's power rows, owned by a spell of the same class family whose effect class flags intersect this spell's; and the LABEL variants (218/219) whose misc_value2 is one of this spell's labels. A superset of what the passive parser and the action-effect parser can apply, so a row absent here cannot modify the cost.",
+        "modifiers": []
+      }
+    },
+    {
+      "simcToken": "annihilation",
+      "spellId": 201427,
+      "displayNameEn": "Annihilation",
+      "minRangeYd": 0,
+      "maxRangeYd": 5,
+      "coneDegrees": 60,
+      "castTimeMs": 0,
+      "channeled": false,
+      "gcdMs": 1500,
+      "effectTargeting": [
+        {
+          "index": 0,
+          "type": 3,
+          "subtype": 0,
+          "targeting1": 6,
+          "targeting2": 0
+        },
+        {
+          "index": 1,
+          "type": 64,
+          "subtype": 0,
+          "targeting1": 1,
+          "targeting2": 0
+        },
+        {
+          "index": 2,
+          "type": 64,
+          "subtype": 0,
+          "targeting1": 1,
+          "targeting2": 0
+        }
+      ],
+      "targetMode": "ENEMY_UNIT_TARGET",
+      "movementRestriction": "NOT_USABLE_WHILE_MOVING",
+      "category": 0,
+      "categorySiblingSpellIds": [],
+      "powerRows": [
+        {
+          "powerRowIndex": 0,
+          "powerType": 17,
+          "cost": 40,
+          "costMax": 0,
+          "auraSpellId": 0
+        }
+      ],
+      "costModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_COST_MODIFIERS",
+        "effectRowsExamined": 53234,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER"
+        ],
+        "propertiesChecked": ["14:P_RESOURCE_COST_1", "34:P_RESOURCE_COST_2", "39:P_RESOURCE_COST_3"],
+        "rule": "Every effect row of every spell in the pinned table: A_ADD_FLAT/PCT_MODIFIER (107/108) whose misc_value1 is the resource-cost property of one of this spell's power rows, owned by a spell of the same class family whose effect class flags intersect this spell's; and the LABEL variants (218/219) whose misc_value2 is one of this spell's labels. A superset of what the passive parser and the action-effect parser can apply, so a row absent here cannot modify the cost.",
+        "modifiers": [
+          {
+            "spellId": 278736,
+            "displayNameEn": "Thirsting Blades",
+            "effectId": 734635,
+            "effectIndex": 1,
+            "subtype": 107,
+            "subtypeName": "A_ADD_FLAT_MODIFIER",
+            "property": 14,
+            "powerRowIndex": 0,
+            "kind": "FLAT",
+            "value": -1,
+            "matchedBy": "CLASS_FLAGS",
+            "direction": "DECREASES"
+          }
+        ]
+      }
+    },
+    {
+      "simcToken": "chaos_strike",
+      "spellId": 162794,
+      "displayNameEn": "Chaos Strike",
+      "minRangeYd": 0,
+      "maxRangeYd": 5,
+      "coneDegrees": 60,
+      "castTimeMs": 0,
+      "channeled": false,
+      "gcdMs": 1500,
+      "effectTargeting": [
+        {
+          "index": 0,
+          "type": 3,
+          "subtype": 0,
+          "targeting1": 6,
+          "targeting2": 0
+        },
+        {
+          "index": 1,
+          "type": 64,
+          "subtype": 0,
+          "targeting1": 6,
+          "targeting2": 0
+        },
+        {
+          "index": 2,
+          "type": 64,
+          "subtype": 0,
+          "targeting1": 6,
+          "targeting2": 0
+        }
+      ],
+      "targetMode": "ENEMY_UNIT_TARGET",
+      "movementRestriction": "NOT_USABLE_WHILE_MOVING",
+      "category": 0,
+      "categorySiblingSpellIds": [],
+      "powerRows": [
+        {
+          "powerRowIndex": 0,
+          "powerType": 17,
+          "cost": 40,
+          "costMax": 0,
+          "auraSpellId": 0
+        }
+      ],
+      "costModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_COST_MODIFIERS",
+        "effectRowsExamined": 53234,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER"
+        ],
+        "propertiesChecked": ["14:P_RESOURCE_COST_1", "34:P_RESOURCE_COST_2", "39:P_RESOURCE_COST_3"],
+        "rule": "Every effect row of every spell in the pinned table: A_ADD_FLAT/PCT_MODIFIER (107/108) whose misc_value1 is the resource-cost property of one of this spell's power rows, owned by a spell of the same class family whose effect class flags intersect this spell's; and the LABEL variants (218/219) whose misc_value2 is one of this spell's labels. A superset of what the passive parser and the action-effect parser can apply, so a row absent here cannot modify the cost.",
+        "modifiers": [
+          {
+            "spellId": 278736,
+            "displayNameEn": "Thirsting Blades",
+            "effectId": 734635,
+            "effectIndex": 1,
+            "subtype": 107,
+            "subtypeName": "A_ADD_FLAT_MODIFIER",
+            "property": 14,
+            "powerRowIndex": 0,
+            "kind": "FLAT",
+            "value": -1,
+            "matchedBy": "CLASS_FLAGS",
+            "direction": "DECREASES"
+          }
+        ]
+      }
+    },
+    {
+      "simcToken": "essence_break",
+      "spellId": 258860,
+      "displayNameEn": "Essence Break",
+      "minRangeYd": 0,
+      "maxRangeYd": 10,
+      "coneDegrees": 80,
+      "castTimeMs": 0,
+      "channeled": false,
+      "gcdMs": 1500,
+      "effectTargeting": [
+        {
+          "index": 0,
+          "type": 2,
+          "subtype": 0,
+          "targeting1": 104,
+          "targeting2": 0
+        },
+        {
+          "index": 1,
+          "type": 3,
+          "subtype": 0,
+          "targeting1": 0,
+          "targeting2": 0
+        }
+      ],
+      "targetMode": "UNTARGETED",
+      "movementRestriction": "USABLE_WHILE_MOVING",
+      "category": 0,
+      "categorySiblingSpellIds": [],
+      "powerRows": [],
+      "costModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_COST_MODIFIERS",
+        "effectRowsExamined": 53234,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER"
+        ],
+        "propertiesChecked": ["14:P_RESOURCE_COST_1", "34:P_RESOURCE_COST_2", "39:P_RESOURCE_COST_3"],
+        "rule": "Every effect row of every spell in the pinned table: A_ADD_FLAT/PCT_MODIFIER (107/108) whose misc_value1 is the resource-cost property of one of this spell's power rows, owned by a spell of the same class family whose effect class flags intersect this spell's; and the LABEL variants (218/219) whose misc_value2 is one of this spell's labels. A superset of what the passive parser and the action-effect parser can apply, so a row absent here cannot modify the cost.",
+        "modifiers": []
+      }
+    },
+    {
+      "simcToken": "eye_beam",
+      "spellId": 198013,
+      "displayNameEn": "Eye Beam",
+      "minRangeYd": 0,
+      "maxRangeYd": 20,
+      "coneDegrees": 0,
+      "castTimeMs": 0,
+      "channeled": true,
+      "gcdMs": 1500,
+      "effectTargeting": [
+        {
+          "index": 0,
+          "type": 6,
+          "subtype": 23,
+          "targeting1": 1,
+          "targeting2": 0
+        },
+        {
+          "index": 1,
+          "type": 6,
+          "subtype": 33,
+          "targeting1": 1,
+          "targeting2": 0
+        },
+        {
+          "index": 2,
+          "type": 6,
+          "subtype": 4,
+          "targeting1": 1,
+          "targeting2": 0
+        },
+        {
+          "index": 3,
+          "type": 6,
+          "subtype": 85,
+          "targeting1": 1,
+          "targeting2": 0
+        },
+        {
+          "index": 4,
+          "type": 6,
+          "subtype": 4,
+          "targeting1": 1,
+          "targeting2": 0
+        },
+        {
+          "index": 5,
+          "type": 6,
+          "subtype": 77,
+          "targeting1": 1,
+          "targeting2": 0
+        }
+      ],
+      "targetMode": "UNTARGETED",
+      "movementRestriction": "NOT_USABLE_WHILE_MOVING",
+      "category": 1582,
+      "categorySiblingSpellIds": [452497],
+      "powerRows": [
+        {
+          "powerRowIndex": 0,
+          "powerType": 17,
+          "cost": 30,
+          "costMax": 0,
+          "auraSpellId": 0
+        }
+      ],
+      "costModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_COST_MODIFIERS",
+        "effectRowsExamined": 53234,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER"
+        ],
+        "propertiesChecked": ["14:P_RESOURCE_COST_1", "34:P_RESOURCE_COST_2", "39:P_RESOURCE_COST_3"],
+        "rule": "Every effect row of every spell in the pinned table: A_ADD_FLAT/PCT_MODIFIER (107/108) whose misc_value1 is the resource-cost property of one of this spell's power rows, owned by a spell of the same class family whose effect class flags intersect this spell's; and the LABEL variants (218/219) whose misc_value2 is one of this spell's labels. A superset of what the passive parser and the action-effect parser can apply, so a row absent here cannot modify the cost.",
+        "modifiers": []
+      }
+    },
+    {
+      "simcToken": "felblade",
+      "spellId": 232893,
+      "displayNameEn": "Felblade",
+      "minRangeYd": 0,
+      "maxRangeYd": 15,
+      "coneDegrees": 0,
+      "castTimeMs": 0,
+      "channeled": false,
+      "gcdMs": 500,
+      "effectTargeting": [
+        {
+          "index": 0,
+          "type": 3,
+          "subtype": 0,
+          "targeting1": 6,
+          "targeting2": 0
+        }
+      ],
+      "targetMode": "ENEMY_UNIT_TARGET",
+      "movementRestriction": "USABLE_WHILE_MOVING",
+      "category": 0,
+      "categorySiblingSpellIds": [],
+      "powerRows": [],
+      "costModifierCensus": {
+        "method": "MACHINE_CENSUS_OF_COST_MODIFIERS",
+        "effectRowsExamined": 53234,
+        "subtypesChecked": [
+          "107:A_ADD_FLAT_MODIFIER",
+          "108:A_ADD_PCT_MODIFIER",
+          "218:A_ADD_PCT_LABEL_MODIFIER",
+          "219:A_ADD_FLAT_LABEL_MODIFIER"
+        ],
+        "propertiesChecked": ["14:P_RESOURCE_COST_1", "34:P_RESOURCE_COST_2", "39:P_RESOURCE_COST_3"],
+        "rule": "Every effect row of every spell in the pinned table: A_ADD_FLAT/PCT_MODIFIER (107/108) whose misc_value1 is the resource-cost property of one of this spell's power rows, owned by a spell of the same class family whose effect class flags intersect this spell's; and the LABEL variants (218/219) whose misc_value2 is one of this spell's labels. A superset of what the passive parser and the action-effect parser can apply, so a row absent here cannot modify the cost.",
+        "modifiers": []
+      }
+    }
+  ]
+}

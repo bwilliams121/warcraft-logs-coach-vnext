@@ -1,0 +1,319 @@
+{
+  "artifactVersion": 1,
+  "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+  "artifactRevision": "simc-33622e9d-1",
+  "spec": {
+    "className": "demonhunter",
+    "specName": "havoc"
+  },
+  "entryListName": "default",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "branch": "midnight",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "commitDate": "UNKNOWN",
+    "sourcePath": "engine/class_modules/apl/apl_demon_hunter.cpp",
+    "sourceSha256": "c95ab0af6cfce46c64304903a7e8c65417beb01ff69f661beb727b9e23b4b389",
+    "sourceByteLength": 56505,
+    "regionStartMarker": "//havoc_apl_start",
+    "regionEndMarker": "//havoc_apl_end",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "regionSha256": "ee8c3c24abed354f3dcad01daa794aa5f17ae2e12c7a8990e8067186b064fb56",
+    "livePtrPolicy": "PTR_MARKERS_EMPTY",
+    "dispatchSource": {
+      "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+      "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0"
+    }
+  },
+  "lists": [
+    {
+      "listName": "default",
+      "receiverIdentifier": "default_",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "auto_attack",
+          "comment": null,
+          "sourceLine": 283
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "retarget_auto_attack,line_cd=1,target_if=min:debuff.burning_wound.remains,if=talent.burning_wound&active_dot.burning_wound<(spell_targets>?3)&variable.tab_target_burning_wound",
+          "comment": "Default auto attack to spread Burning Wound, use tab_target_burning_wound=0 to spread with Throw Glaive instead",
+          "sourceLine": 284
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "retarget_auto_attack,line_cd=1,target_if=min:!target.is_boss,if=talent.burning_wound&active_dot.burning_wound=(spell_targets>?3)&variable.tab_target_burning_wound",
+          "comment": null,
+          "sourceLine": 285
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "immolation_aura,if=talent.violent_transformation&talent.a_fire_inside&cooldown.metamorphosis.remains<gcd.max*3",
+          "comment": null,
+          "sourceLine": 286
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "metamorphosis,if=(!talent.chaotic_transformation|!cooldown.blade_dance.up&cooldown.eye_beam.remains>8)&!action.death_sweep.demonsurge_available&!action.annihilation.demonsurge_available",
+          "comment": null,
+          "sourceLine": 287
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "the_hunt,if=(!talent.eternal_hunt|cooldown.eye_beam.remains<10&cooldown.metamorphosis.remains>15|!cooldown.eye_beam.up&cooldown.metamorphosis.up|!hero_tree.felscarred)&!buff.reavers_glaive.up",
+          "comment": "actions+=/metamorphosis,if=!talent.chaotic_transformation|!cooldown.blade_dance.up&!cooldown.eye_beam.up",
+          "sourceLine": 288
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "vengeful_retreat,use_off_gcd=1,if=gcd.remains<0.3&cooldown.metamorphosis.remains&cooldown.eye_beam.remains<gcd.max*0.3&!buff.initiative.up|cooldown.metamorphosis.up&cooldown.eye_beam.remains&cooldown.blade_dance.remains&!buff.eternal_hunt.up",
+          "comment": null,
+          "sourceLine": 289
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "call_action_list,name=items",
+          "comment": null,
+          "sourceLine": 290
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "pick_up_fragment,type=all,use_off_gcd=1,if=fury<=40",
+          "comment": null,
+          "sourceLine": 291
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "reavers_glaive,if=buff.rending_strike.down&buff.glaive_flurry.down",
+          "comment": null,
+          "sourceLine": 292
+        },
+        {
+          "priorityOrdinal": 10,
+          "actionStringVerbatim": "annihilation,if=buff.rending_strike.up&buff.glaive_flurry.down&debuff.reavers_mark.stack<2|buff.rending_strike.up&active_enemies>=2",
+          "comment": null,
+          "sourceLine": 293
+        },
+        {
+          "priorityOrdinal": 11,
+          "actionStringVerbatim": "essence_break,if=action.death_sweep.demonsurge_available|action.annihilation.demonsurge_available",
+          "comment": null,
+          "sourceLine": 294
+        },
+        {
+          "priorityOrdinal": 12,
+          "actionStringVerbatim": "death_sweep,if=debuff.essence_break.up|action.death_sweep.demonsurge_available",
+          "comment": null,
+          "sourceLine": 295
+        },
+        {
+          "priorityOrdinal": 13,
+          "actionStringVerbatim": "annihilation,if=debuff.essence_break.up|action.annihilation.demonsurge_available",
+          "comment": null,
+          "sourceLine": 296
+        },
+        {
+          "priorityOrdinal": 14,
+          "actionStringVerbatim": "throw_glaive,if=active_enemies>1&talent.burning_wound&!talent.screaming_brutality&active_dot.burning_wound<(spell_targets>?3)&!variable.tab_target_burning_wound",
+          "comment": null,
+          "sourceLine": 297
+        },
+        {
+          "priorityOrdinal": 15,
+          "actionStringVerbatim": "immolation_aura,if=talent.a_fire_inside&talent.burning_wound&(charges=2|full_recharge_time<gcd.max*2)",
+          "comment": null,
+          "sourceLine": 298
+        },
+        {
+          "priorityOrdinal": 16,
+          "actionStringVerbatim": "eye_beam",
+          "comment": null,
+          "sourceLine": 299
+        },
+        {
+          "priorityOrdinal": 17,
+          "actionStringVerbatim": "immolation_aura,,if=action.immolation_aura.demonsurge_available&buff.demonsurge.remains<gcd.max",
+          "comment": null,
+          "sourceLine": 300
+        },
+        {
+          "priorityOrdinal": 18,
+          "actionStringVerbatim": "felblade,if=buff.inertia_trigger.up",
+          "comment": null,
+          "sourceLine": 301
+        },
+        {
+          "priorityOrdinal": 19,
+          "actionStringVerbatim": "essence_break,if=cooldown.eye_beam.remains>4",
+          "comment": null,
+          "sourceLine": 302
+        },
+        {
+          "priorityOrdinal": 20,
+          "actionStringVerbatim": "death_sweep",
+          "comment": null,
+          "sourceLine": 303
+        },
+        {
+          "priorityOrdinal": 21,
+          "actionStringVerbatim": "blade_dance",
+          "comment": null,
+          "sourceLine": 304
+        },
+        {
+          "priorityOrdinal": 22,
+          "actionStringVerbatim": "immolation_aura,if=active_enemies>1&(talent.a_fire_inside|talent.burning_wound)",
+          "comment": null,
+          "sourceLine": 305
+        },
+        {
+          "priorityOrdinal": 23,
+          "actionStringVerbatim": "annihilation",
+          "comment": null,
+          "sourceLine": 306
+        },
+        {
+          "priorityOrdinal": 24,
+          "actionStringVerbatim": "felblade,if=hero_tree.felscarred&fury<=100",
+          "comment": null,
+          "sourceLine": 307
+        },
+        {
+          "priorityOrdinal": 25,
+          "actionStringVerbatim": "chaos_strike",
+          "comment": null,
+          "sourceLine": 308
+        },
+        {
+          "priorityOrdinal": 26,
+          "actionStringVerbatim": "felblade",
+          "comment": null,
+          "sourceLine": 309
+        },
+        {
+          "priorityOrdinal": 27,
+          "actionStringVerbatim": "immolation_aura",
+          "comment": null,
+          "sourceLine": 310
+        },
+        {
+          "priorityOrdinal": 28,
+          "actionStringVerbatim": "arcane_torrent",
+          "comment": null,
+          "sourceLine": 311
+        }
+      ]
+    },
+    {
+      "listName": "precombat",
+      "receiverIdentifier": "precombat",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "snapshot_stats",
+          "comment": null,
+          "sourceLine": 272
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "variable,name=tab_target_burning_wound,op=reset,default=1",
+          "comment": null,
+          "sourceLine": 273
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "variable,name=rg_ds,default=0,op=reset",
+          "comment": null,
+          "sourceLine": 274
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "variable,name=trinket1_special,value=0",
+          "comment": null,
+          "sourceLine": 275
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "variable,name=trinket2_special,value=0",
+          "comment": null,
+          "sourceLine": 276
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "variable,name=trinket1_crit,value=!variable.trinket1_special&trinket.1.has_cooldown&trinket.1.has_use_damage&!trinket.1.is.font_of_venomous_rage",
+          "comment": null,
+          "sourceLine": 277
+        },
+        {
+          "priorityOrdinal": 6,
+          "actionStringVerbatim": "variable,name=trinket2_crit,value=!variable.trinket2_special&trinket.2.has_cooldown&trinket.2.has_use_damage&!trinket.1.is.font_of_venomous_rage",
+          "comment": null,
+          "sourceLine": 278
+        },
+        {
+          "priorityOrdinal": 7,
+          "actionStringVerbatim": "variable,name=trinket1_steroids,value=!variable.trinket1_special&trinket.1.has_cooldown&trinket.1.has_use_buff",
+          "comment": null,
+          "sourceLine": 279
+        },
+        {
+          "priorityOrdinal": 8,
+          "actionStringVerbatim": "variable,name=trinket2_steroids,value=!variable.trinket2_special&trinket.2.has_cooldown&trinket.2.has_use_buff",
+          "comment": null,
+          "sourceLine": 280
+        },
+        {
+          "priorityOrdinal": 9,
+          "actionStringVerbatim": "immolation_aura",
+          "comment": null,
+          "sourceLine": 281
+        }
+      ]
+    },
+    {
+      "listName": "items",
+      "receiverIdentifier": "items",
+      "actions": [
+        {
+          "priorityOrdinal": 0,
+          "actionStringVerbatim": "potion,use_off_gcd=1,if=cooldown.metamorphosis.up&(cooldown.eye_beam.up|!talent.chaotic_transformation)|fight_remains<=30",
+          "comment": null,
+          "sourceLine": 313
+        },
+        {
+          "priorityOrdinal": 1,
+          "actionStringVerbatim": "use_item,slot=trinket1,use_off_gcd=1,if=variable.trinket1_steroids&(!variable.trinket2_special|trinket.2.cooldown.remains>20)|fight_remains<15",
+          "comment": null,
+          "sourceLine": 314
+        },
+        {
+          "priorityOrdinal": 2,
+          "actionStringVerbatim": "use_item,slot=trinket1,use_off_gcd=1,if=variable.trinket1_crit&(buff.initiative.up|!talent.initiative)&(!variable.trinket2_special|trinket.2.cooldown.remains>20)|fight_remains<15",
+          "comment": null,
+          "sourceLine": 315
+        },
+        {
+          "priorityOrdinal": 3,
+          "actionStringVerbatim": "use_item,name=font_of_venomous_rage,if=buff.initiative.up&buff.initiative.remains>2&(!buff.metamorphosis.up|fight_remains<buff.metamorphosis.remains)&!debuff.essence_break.up|fight_remains<19",
+          "comment": null,
+          "sourceLine": 316
+        },
+        {
+          "priorityOrdinal": 4,
+          "actionStringVerbatim": "use_item,slot=trinket2,use_off_gcd=1,if=variable.trinket2_steroids&(!variable.trinket1_special|trinket.1.cooldown.remains>20)|fight_remains<15",
+          "comment": null,
+          "sourceLine": 317
+        },
+        {
+          "priorityOrdinal": 5,
+          "actionStringVerbatim": "use_item,slot=trinket2,use_off_gcd=1,if=variable.trinket2_crit&(buff.initiative.up|!talent.initiative)&(!variable.trinket1_special|trinket.1.cooldown.remains>20)|fight_remains<15",
+          "comment": null,
+          "sourceLine": 318
+        }
+      ]
+    }
+  ]
+}

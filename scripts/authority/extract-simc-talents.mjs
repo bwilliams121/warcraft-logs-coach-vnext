@@ -684,8 +684,141 @@ const MONK_BREWMASTER_TARGET = {
   apexTraits: true,
 };
 
+/**
+ * The Havoc Demon Hunter profile (ONB-A1).
+ *
+ * `requiredTalents` are (a) the talents the pinned Havoc list reads as
+ * `talent.<name>`, (b) the talents an action of that list is built on (an action
+ * on `not_found()` is background, action.cpp:541-549), and (c) the talents that
+ * gate a buff or a background copy the analyzer reads.
+ *
+ * DELIBERATELY ABSENT, each a duplicate name the extractor refuses to pick
+ * between:
+ *
+ *   violent_transformation  rows 117509 (Fel-Scarred, sub-tree 34) and 136622
+ *                           (Void-Scarred, sub-tree 126), both listing spec 577.
+ *   eternal_hunt            three tiers at one node, read by the module as
+ *                           eternal_hunt_1/2/3 (:11041-11043).
+ *
+ * The specialization answers `violent_transformation` only from a RESOLVED hero
+ * tree, and leaves `eternal_hunt` unbound.
+ */
+const DEMONHUNTER_HAVOC_TARGET = {
+  datasetId: "SIMC_TRAIT_DEMONHUNTER_HAVOC_TALENTS",
+  classId: 12,
+  specId: 577,
+  defaultOut: "src/data/game/demonhunter-havoc-talents.json",
+  wclIdSpaceNote:
+    "A Warcraft Logs combatantinfo talentTree entry is { id, rank, nodeID }. The same equivalence M10-C, M11-A4, " +
+    "M11-B2 and M11-C2 recorded — `id` equals trait_data_t::id_trait_node_entry and `nodeID` equals " +
+    "trait_data_t::id_node — is corroborated for Havoc by the retained fight-48 subject: all 76 of its entries are " +
+    "pinned rows of class 12 at their own nodes.",
+  requiredTalents: [
+    {
+      simcName: "burning_wound",
+      displayNameEn: "Burning Wound",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11019 talent.havoc.burning_wound = find_talent_spell( SPECIALIZATION, "Burning Wound" ); the pinned list reads talent.burning_wound',
+    },
+    {
+      simcName: "a_fire_inside",
+      displayNameEn: "A Fire Inside",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11039 talent.havoc.a_fire_inside = find_talent_spell( SPECIALIZATION, "A Fire Inside" ); the pinned list reads talent.a_fire_inside',
+    },
+    {
+      simcName: "chaotic_transformation",
+      displayNameEn: "Chaotic Transformation",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11010 talent.havoc.chaotic_transformation = find_talent_spell( SPECIALIZATION, "Chaotic Transformation" ); the pinned list reads talent.chaotic_transformation, and metamorphosis_t::execute resets Eye Beam and Blade Dance under it (:5008-5012)',
+    },
+    {
+      simcName: "screaming_brutality",
+      displayNameEn: "Screaming Brutality",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11038 talent.havoc.screaming_brutality = find_talent_spell( SPECIALIZATION, "Screaming Brutality" ); the pinned list reads talent.screaming_brutality, and Blade Dance and Death Sweep execute a background Throw Glaive under it (:7354-7357, :7406-7409)',
+    },
+    {
+      simcName: "initiative",
+      displayNameEn: "Initiative",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11002 talent.havoc.initiative = find_talent_spell( SPECIALIZATION, "Initiative" ); the pinned items list reads talent.initiative',
+    },
+    {
+      simcName: "inertia",
+      displayNameEn: "Inertia",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11015 talent.havoc.inertia = find_talent_spell( SPECIALIZATION, "Inertia" ); it gates buff.inertia_trigger, which the pinned list reads; its sibling at the node is Exergy',
+    },
+    {
+      simcName: "eye_beam",
+      displayNameEn: "Eye Beam",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:10985 talent.havoc.eye_beam = find_talent_spell( SPECIALIZATION, "Eye Beam" ); eye_beam_t is built on it (:4095-4096)',
+    },
+    {
+      simcName: "essence_break",
+      displayNameEn: "Essence Break",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11034 talent.havoc.essence_break = find_talent_spell( SPECIALIZATION, "Essence Break" ); essence_break_t is built on it (:7804-7805)',
+    },
+    {
+      simcName: "the_hunt",
+      displayNameEn: "The Hunt",
+      tree: "SPECIALIZATION",
+      binding:
+        'sc_demon_hunter.cpp:11024 talent.havoc.the_hunt = find_talent_spell( SPECIALIZATION, "The Hunt" ); the_hunt_t is built on it for Havoc (:5612, :11290)',
+    },
+    {
+      simcName: "felblade",
+      displayNameEn: "Felblade",
+      tree: "CLASS",
+      binding:
+        'sc_demon_hunter.cpp:10869 talent.demon_hunter.felblade = find_talent_spell( CLASS, "Felblade" ); felblade_t is built on it (:7875-7876)',
+    },
+    {
+      simcName: "vengeful_retreat",
+      displayNameEn: "Vengeful Retreat",
+      tree: "CLASS",
+      binding:
+        'sc_demon_hunter.cpp:10868 talent.demon_hunter.vengeful_retreat = find_talent_spell( CLASS, "Vengeful Retreat" ); vengeful_retreat_t is built on it (:8588-8589)',
+    },
+    {
+      simcName: "art_of_the_glaive",
+      displayNameEn: "Art of the Glaive",
+      tree: "HERO",
+      binding:
+        'sc_demon_hunter.cpp:11110 talent.aldrachi_reaver.art_of_the_glaive = find_talent_spell( HERO, "Art of the Glaive" ); reavers_glaive_t is built on the spell looked up through it (:8431-8432, :11317)',
+    },
+    {
+      simcName: "demonsurge",
+      displayNameEn: "Demonsurge",
+      tree: "HERO",
+      binding:
+        'sc_demon_hunter.cpp:11156 talent.scarred.demonsurge = find_talent_spell( HERO, "Demonsurge" ); action.<x>.demonsurge_available is the constant 0 without it (:2676-2686)',
+    },
+  ],
+  heroTrees: [
+    // `__trait_sub_tree_data`: Fel-Scarred is sub-tree 34 and Aldrachi Reaver 35,
+    // both class 12. `hero_tree.felscarred` resolves through
+    // trait_data_t::get_hero_tree_id( "felscarred" ), which tokenizes the
+    // sub-tree name (trait_data.cpp:225-238; util.cpp:3234 drops the '-').
+    { simcName: "felscarred", subTreeId: 34 },
+    { simcName: "aldrachi_reaver", subTreeId: 35 },
+  ],
+};
+
 export const TARGETS = {
   "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
+  "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
   "monk-brewmaster": MONK_BREWMASTER_TARGET,
   "paladin-retribution": PALADIN_RETRIBUTION_TARGET,
   "rogue-assassination": ROGUE_ASSASSINATION_TARGET,

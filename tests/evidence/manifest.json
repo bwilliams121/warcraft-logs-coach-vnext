@@ -324,6 +324,101 @@
       }
     },
     {
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "path": "artifacts/wcl-events/wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90.json",
+      "encoding": "JSON",
+      "payloadKind": "WCL_EVENT_ARRAY",
+      "sha256": "537cec3319f0815adbb359c33039d593397fbdf67ee72f3855b40aa3de5c78f0",
+      "byteLength": 364068,
+      "provenance": {
+        "kind": "SANITIZED_CAPTURE",
+        "parentArtifactId": null,
+        "source": {
+          "reportCode": "b1PmaKrd6CDfzngc",
+          "fightId": 48,
+          "reportRevision": 51,
+          "sourceActorId": 15,
+          "encounterId": 3455,
+          "difficulty": 5,
+          "capturedOn": "2026-10-06",
+          "gameVersion": 1,
+          "logVersion": 17,
+          "ingestionScope": "PLAYER_CONTEXT",
+          "query": {
+            "dataType": "All",
+            "hostilityType": "OMITTED",
+            "actorFilter": "NONE",
+            "includeResources": true,
+            "limit": 10000,
+            "startTimeMs": 7436292,
+            "endTimeMs": 7781469
+          },
+          "completeness": {
+            "eventsReturned": 271011,
+            "pagesRetrieved": 28,
+            "nextPageTimestamp": null,
+            "state": "COMPLETE",
+            "evidence": "Twenty-eight pages (twenty-seven of 10,000–10,048 events and a terminal 781), the last with nextPageTimestamp null: the whole fight was retrieved inside the 100-page cap. Each page's requestedStartTime equals the previous page's nextPageTimestamp. The first event is the encounterstart at 7,436,292 = the fight start and the last the encounterend at 7,781,469 = the fight end. The context request read revision 51 before page 1 and REPORT_REVISION_QUERY after the last page read 51 (.probe/m11e2/request-count.json). An offline replay of these bytes through production ingestFightCore reported every observable category COMPLETE with no decode degradation."
+          },
+          "captureTooling": {
+            "name": ".probe/m11e2/capture.probe.ts (temporary, gitignored; gated on E1.1 CI GREEN) driving src/wcl/token-provider.ts, graphql-client.ts and the production query documents",
+            "revision": "UNAVAILABLE",
+            "invocation": "R2–R29 whole-fight window: EVENTS_QUERY over [7,436,292 .. 7,781,469] (fight start .. fight end) at limit 10,000 with resources, no actor filter, hostilityType omitted; bounded to 100 pages in .probe/m11e2/capture-plan.md before running, run once by hand on 2026-10-06 (30 requests in total for the whole capture, bound 102)"
+          },
+          "rawCaptureRetained": false,
+          "rawCaptureLocation": ".probe/m11e2/pages.json — gitignored, not retained in the repository",
+          "reportRevisionAfterCapture": 51
+        },
+        "transformations": [
+          {
+            "kind": "SUBSET_SELECTION",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "node scripts/sanitize-probe.mjs .probe/m11e2/pages.json ../../../evidence/artifacts/wcl-events/wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90.json --actor-slice 18 7526292 --from 7436291 --families cast,begincast,combatantinfo,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange --compact"
+            },
+            "detail": "The twenty-eight page records concatenated in page order, then the --actor-slice predicate for actor 18: every event whose sourceID or targetID is 18, with --from 7436291 (exclusive), the inclusive bound 7526292 and the families cast,begincast,combatantinfo,applybuff,refreshbuff,removebuff,applybuffstack,removebuffstack,applydebuff,refreshdebuff,removedebuff,applydebuffstack,removedebuffstack,resourcechange.",
+            "invalidates": ["ABSENCE_PROOF", "CROSS_EVENT_CONTINUITY", "PAGINATION_BEHAVIOUR"]
+          },
+          {
+            "kind": "CREDENTIAL_SHAPE_SCAN",
+            "tooling": {
+              "name": "scripts/sanitize-probe.mjs",
+              "revision": "sanitize-probe-8",
+              "invocation": "implicit on every write"
+            },
+            "detail": "The slicer refuses to write output containing a credential-shaped value. Nothing was found and nothing was changed.",
+            "invalidates": []
+          }
+        ],
+        "retainedCoverage": {
+          "grants": [
+            {
+              "categories": ["CASTS", "AURAS", "RESOURCES", "COMBATANT_INFO"],
+              "actorScope": [18],
+              "ranges": [
+                {
+                  "fromReportTimeMs": 7436292,
+                  "toReportTimeMs": 7526292
+                }
+              ]
+            }
+          ],
+          "basis": "The retained families are complete for actor 18 over [7,436,292 .. 7,526,292] by the predicate 'every event of a retained family whose sourceID or targetID is 18' over a capture retrieved COMPLETE with no actor filter."
+        },
+        "retainedFor": "ONB-A1: the Havoc Demon Hunter's real decisions over the first 90 s of the canonical fight: the casts it judges, its own PRE_COST Fury, the aura transitions the Reaver's Glaive priority reads and the build they run under.",
+        "limitations": [
+          "The fight's first 90 s of 345 s: it grants no coverage outside its range, and the whole-fight measurement in agent/architecture.md is reproduced from the retained capture, not from these bytes.",
+          "Resources are the snapshot on each retained cast and every resourcechange of actor 18; nothing here replays Fury between casts, and the analyzer reads only the decision cast's own snapshot.",
+          "No damage, heal or absorb event is retained, so nothing here says whether a target was hit or what a cast did.",
+          "Actor 18 only. No targetability, phase or enemy state is retained, so nothing here proves an action was actionable in the encounter.",
+          "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+          "No actor or player names are present; identities are numeric ids only.",
+          "gameVersion 1 / logVersion 17 only."
+        ]
+      }
+    },
+    {
       "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
       "path": "artifacts/wcl-events/wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180.json",
       "encoding": "JSON",
@@ -7620,6 +7715,36 @@
       "relatedTests": ["tests/unit/sanitize-probe.test.ts", "tests/unit/healing/damage-episodes.test.ts"]
     },
     {
+      "caseId": "normalization.b1pm-havoc-demon-hunter-18-decisions-seg-0-90-normalizes-whole-and-in-order",
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "owningLayer": "NORMALIZATION",
+      "contractUnderTest": "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+      "purpose": "The 1721-event segment of actor 18 (fight +0 s .. +90 s) normalizes with every raw type recognised and its input order preserved.",
+      "assertions": [
+        {
+          "kind": "NORMALIZATION.EVENT_COUNT_PRESERVED",
+          "params": {
+            "expectedEventCount": 1721
+          }
+        },
+        {
+          "kind": "NORMALIZATION.INPUT_ORDER_PRESERVED",
+          "params": {}
+        },
+        {
+          "kind": "NORMALIZATION.ALL_TYPES_RECOGNISED",
+          "params": {}
+        }
+      ],
+      "rationale": {
+        "basis": ["VALIDATED_EVIDENCE"],
+        "text": "The census is of the segment, never of the fight: exactly the retained families sourced by or targeting actor 18 in its range."
+      },
+      "authority": null,
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"]
+    },
+    {
       "caseId": "normalization.b1pm-holy-paladin-1-casts-seg-0-180-normalizes-whole-and-in-order",
       "artifactId": "wcl-b1pm-fight-48-holy-paladin-1-casts.seg-0-180",
       "owningLayer": "NORMALIZATION",
@@ -8776,6 +8901,195 @@
         "tests/contracts/m11c2-brewmaster-evaluator.test.ts",
         "tests/unit/m11c2-brewmaster-bindings.test.ts"
       ]
+    },
+    {
+      "caseId": "spec-havoc-demon-hunter.annihilation-with-reavers-glaive-proven-usable-is-rejected",
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "contractUnderTest": "src/specs/demonhunter/havoc/observed-analysis.ts; first-gcd-adapter.ts; positive-usability.ts; aura-bindings.ts",
+      "purpose": "The FIRST resolved Annihilation REJECTED in report-time order: Reaver's Glaive's buff has been up past the reaction tolerance, Rending Strike and Glaive Flurry are proven down, and the scan selects default[9] with every usability dimension proven.",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
+          "params": {
+            "actorId": 18,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 7473830,
+              "abilityGameId": 201427
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityToken": "reavers_glaive",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "unresolvedAt": null,
+              "selectedEntry": "default[9] reavers_glaive",
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "CONDITION_NOT_PROVEN_FALSE"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A real REJECTED driven by state and authority: a positive proof that the higher-priority action was available, never the absence of one."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+          "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+          "every buff transition on actor 18 sourced by actor 18, in canonical order"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"]
+    },
+    {
+      "caseId": "spec-havoc-demon-hunter.chaos-strike-with-reavers-glaive-proven-usable-is-rejected",
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "contractUnderTest": "src/specs/demonhunter/havoc/observed-analysis.ts; first-gcd-adapter.ts; positive-usability.ts; aura-bindings.ts",
+      "purpose": "The FIRST resolved Chaos Strike REJECTED in report-time order: the same proof on a second token, so the discrimination does not rest on one action.",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
+          "params": {
+            "actorId": 18,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 7513346,
+              "abilityGameId": 162794
+            },
+            "expected": {
+              "outcome": "REJECTED",
+              "basis": "AUTHORITY_SELECTED_DIFFERENT_TOKEN",
+              "authorityToken": "reavers_glaive",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "unresolvedAt": null,
+              "selectedEntry": "default[9] reavers_glaive",
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "UNCONDITIONAL_ENTRY"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A second distinct observed token resolves REJECTED on the same rule."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+          "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+          "every buff transition on actor 18 sourced by actor 18, in canonical order"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"]
+    },
+    {
+      "caseId": "spec-havoc-demon-hunter.the-coverage-disclosure-over-the-retained-window",
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "contractUnderTest": "src/specs/demonhunter/havoc/observed-analysis.ts summarizeHavocDemonHunterDecisions",
+      "purpose": "Over the retained first 90 s: 76 eligible decisions, 7 MATCH, 4 REJECTED, 65 UNKNOWN, every UNKNOWN naming the entry that stopped it, and 252 casts excluded by name. Most UNKNOWNs stop at The Hunt (default[5]), whose pinned cooldown is contradicted by the wire and is therefore never bounded.",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY",
+          "params": {
+            "actorId": 18,
+            "expected": {
+              "eligibleDecisions": 76,
+              "match": 7,
+              "rejected": 4,
+              "unknown": 65,
+              "exclusions": {
+                "MELEE_SWING": 103,
+                "NON_GCD_ACTION": 12,
+                "EXECUTION_LANE_NOT_ESTABLISHED": 121,
+                "OUTSIDE_FIRST_SLICE": 16
+              },
+              "unresolvedAt": {
+                "DIVERGENT_GCD_OUTCOMES @ default[4] metamorphosis": 6,
+                "DIVERGENT_GCD_OUTCOMES @ default[5] the_hunt": 54,
+                "DIVERGENT_GCD_OUTCOMES @ default[9] reavers_glaive": 4,
+                "DIVERGENT_GCD_OUTCOMES @ default[10] annihilation": 1
+              }
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "UNKNOWN coverage must be measured: every UNKNOWN names the entry that stopped it, so the narrow surface cannot be mistaken for a clean bill of health."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+          "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+          "every buff transition on actor 18 sourced by actor 18, in canonical order"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"]
+    },
+    {
+      "caseId": "spec-havoc-demon-hunter.the-first-resolved-reavers-glaive-matches",
+      "artifactId": "wcl-b1pm-fight-48-havoc-demon-hunter-18-decisions.seg-0-90",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "contractUnderTest": "src/specs/demonhunter/havoc/observed-analysis.ts; first-gcd-adapter.ts; positive-usability.ts; aura-bindings.ts",
+      "purpose": "The FIRST resolved Reaver's Glaive in report-time order, chosen by that rule: the scan steps past Metamorphosis on its proven cooldown and past The Hunt's gate on the proven buff, and selects default[9], the entry the player pressed.",
+      "assertions": [
+        {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
+          "params": {
+            "actorId": 18,
+            "targetActorId": null,
+            "observedCast": {
+              "reportTimeMs": 7454441,
+              "abilityGameId": 442294
+            },
+            "expected": {
+              "outcome": "MATCH",
+              "basis": "AUTHORITY_SELECTION_MATCHED_OBSERVED_TOKEN",
+              "authorityToken": "reavers_glaive",
+              "selectionPrecision": "EXACT_ENTRY",
+              "decisiveBlocker": null,
+              "rawBlocker": null,
+              "unresolvedAt": null,
+              "selectedEntry": "default[9] reavers_glaive",
+              "unselectabilityProven": false,
+              "unselectabilityRefusal": "CONDITION_NOT_PROVEN_FALSE"
+            }
+          }
+        }
+      ],
+      "rationale": {
+        "basis": ["PINNED_AUTHORITY", "VALIDATED_EVIDENCE"],
+        "text": "A real, identity-paired MATCH from SANITIZED_CAPTURE: the buffs its own cast applies in the same millisecond are read from before their edge, or every Reaver's Glaive would prove itself unselectable."
+      },
+      "authority": {
+        "authorityId": "SIMC_APL_DEMONHUNTER_HAVOC",
+        "artifactRevision": "simc-33622e9d-1",
+        "requiredStateEvidence": [
+          "the combatantinfo at 7,436,292 for actor 18 (specID 577)",
+          "every COMPLETE cast by actor 18 in the bundle, in canonical order",
+          "every buff transition on actor 18 sourced by actor 18, in canonical order"
+        ]
+      },
+      "limitations": [],
+      "relatedTests": ["tests/unit/specs/onb-a1-havoc-demon-hunter.test.ts"]
     }
   ]
 }

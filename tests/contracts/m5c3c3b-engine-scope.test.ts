@@ -115,6 +115,8 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
   const BLOOD_ADAPTER_PATH = "src/specs/deathknight/blood/first-gcd-adapter.ts";
   /** M11-C2: the Brewmaster Monk adapter, the fifth and only other wiring of the engine. */
   const BREWMASTER_ADAPTER_PATH = "src/specs/monk/brewmaster/first-gcd-adapter.ts";
+  /** ONB-A1: the Havoc Demon Hunter adapter. */
+  const HAVOC_ADAPTER_PATH = "src/specs/demonhunter/havoc/first-gcd-adapter.ts";
 
   it("wires the engine into exactly one adapter module per specialization tree", () => {
     const wiring = filesUnder("src/specs").filter((path) =>
@@ -126,6 +128,7 @@ describe("the Rogue adapter lives in the spec layer, and only there", () => {
         RETRIBUTION_ADAPTER_PATH,
         BLOOD_ADAPTER_PATH,
         BREWMASTER_ADAPTER_PATH,
+        HAVOC_ADAPTER_PATH,
         ADAPTER_PATH,
       ].sort(),
     );

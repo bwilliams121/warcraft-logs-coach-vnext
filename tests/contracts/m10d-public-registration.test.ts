@@ -68,7 +68,11 @@ describe("the five sites agree", () => {
       "priest/holy",
       "evoker/preservation",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
+      "druid/restoration",
+      "priest/discipline",
+      "demonhunter/havoc",
+    ]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -139,6 +143,7 @@ describe("the five sites agree", () => {
       ["priest/holy", "PUBLIC"],
       ["priest/discipline", "INTERNAL_ONLY"],
       ["evoker/preservation", "PUBLIC"],
+      ["demonhunter/havoc", "INTERNAL_ONLY"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -239,6 +244,7 @@ describe("the complete-catalog helper", () => {
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
       "evoker-preservation-healer-findings": 0,
+      "demonhunter-havoc-observed-decisions": 0,
     });
   });
 });

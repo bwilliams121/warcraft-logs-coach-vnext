@@ -632,13 +632,22 @@
       "passed": 1
     },
     {
-      "assertions": 23,
-      "cases": 19,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "passed": 1
+    },
+    {
+      "assertions": 24,
+      "cases": 20,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 23
+      "passed": 24
     },
     {
       "assertions": 14,
@@ -742,6 +751,20 @@
       ],
       "authority": null,
       "caseId": "application-service.discipline-priest-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.havoc-demon-hunter-registration-is-internal-only",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
@@ -5277,6 +5300,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_HAVOC_DEMON_HUNTER.SPEC_GATE",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-havoc-demon-hunter.the-facade-refuses-every-other-specialization",
+      "owningLayer": "SPEC_HAVOC_DEMON_HUNTER",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_HOLY_PALADIN.REGISTRATION_RESULT",
           "ordinal": 0,
           "status": "PASSED"
@@ -7196,6 +7233,7 @@
   ],
   "pinnedAuthorities": {
     "SIMC_APL_DEATHKNIGHT_BLOOD": "simc-33622e9d-1",
+    "SIMC_APL_DEMONHUNTER_HAVOC": "simc-33622e9d-1",
     "SIMC_APL_MONK_BREWMASTER": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_PROTECTION": "simc-33622e9d-1",
     "SIMC_APL_PALADIN_RETRIBUTION": "simc-33622e9d-1",
@@ -7208,13 +7246,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 794,
-    "cases": 199,
+    "assertions": 796,
+    "cases": 201,
     "declared": 0,
-    "executable": 794,
+    "executable": 796,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 794
+    "passed": 796
   }
 }

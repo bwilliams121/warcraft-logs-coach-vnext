@@ -698,8 +698,130 @@ const MONK_BREWMASTER_TARGET = {
   aliasGroups: {},
 };
 
+/**
+ * The Havoc Demon Hunter target (ONB-A1): the two cooldowns whose lower bound
+ * lets a scan step past `default[4]` and `default[5]`.
+ *
+ *   metamorphosis  120,000 ms on record 191427. The log never reports 191427: it
+ *                  reports the leap's impact 200166, after the press. Anchoring on
+ *                  that later event is the specialization's job and it subtracts
+ *                  a reviewed margin (`demonhunter-havoc-cooldowns.ts`).
+ *   the_hunt       90,000 ms on record 370965.
+ *
+ * DELIBERATELY NOT PINNED, each for a reason read at the pin:
+ *
+ *   - eye_beam: its own execute shortens it by Cycle of Hatred's stack value
+ *     (:4040), Essence Break shortens it under the set bonus (:7827), and
+ *     Metamorphosis resets it (:5010). The committed fight shows gaps of 6.9 s.
+ *   - blade_dance / death_sweep: reset 500 ms after use under Eternal Hunt
+ *     (:7298-7302) and by Metamorphosis (:5011). The committed fight shows gaps
+ *     of 0.9 s.
+ *   - essence_break: shortened by Eye Beam and itself under the set bonus (:4048,
+ *     :7820).
+ *   - immolation_aura: a charge system whose charges A Fire Inside changes, reset
+ *     by Metamorphosis under Violent Transformation (:5016).
+ *   - felblade, vengeful_retreat: reset by Vengeful Retreat under Unhindered
+ *     Assault (:8631); charges changed at runtime (:9936).
+ *
+ * Both pinned abilities declare in-combat mutations that a Havoc Demon Hunter
+ * cannot reach; each carries a CAST or AURA signature, so if one is ever observed
+ * the lower bound is withdrawn rather than trusted.
+ */
+const DEMONHUNTER_HAVOC_TARGET = {
+  datasetId: "SIMC_DBC_DEMONHUNTER_HAVOC_ABILITY_COOLDOWNS",
+  classId: 12,
+  className: "Demon Hunter",
+  specId: 577,
+  defaultOut: "src/data/game/demonhunter-havoc-cooldowns.json",
+  sourceOverrides: {
+    classModule: "engine/class_modules/sc_demon_hunter.cpp",
+    specModule: null,
+    classHeader: null,
+  },
+  moduleConventions: {
+    moduleLabel: "sc_demon_hunter.cpp",
+    rechargeRateMechanism: null,
+    hastedCooldownMember: null,
+  },
+  abilities: [
+    {
+      simcToken: "metamorphosis",
+      abilityGameId: 191427,
+      aliasGroup: null,
+      createAction:
+        'sc_demon_hunter.cpp:9749-9750 if ( name == "metamorphosis" ) return new metamorphosis_t( this, options_str )',
+      specBinding:
+        'sc_demon_hunter.cpp:4902-4903 metamorphosis_t : base_t( "metamorphosis", p, p->spec.metamorphosis ); :10787 for Havoc spec.metamorphosis = find_class_spell( "Metamorphosis" )',
+      actionStruct: { file: "classModule", name: "metamorphosis_t" },
+      cooldownHandle: "cooldown.metamorphosis",
+      cooldownName: "metamorphosis",
+      /**
+       * metamorphosis_t::update_ready overrides the base only while
+       * buff.untethered_rage is up (:5064-5076) and reset() rewrites the charge
+       * count to the DBC's (:5078-5084). Untethered Rage is a Vengeance talent, so
+       * a Havoc Demon Hunter always takes the base path.
+       */
+      knownStructCooldownReferences: {
+        count: 5,
+        note: "update_ready named four times in the Untethered Rage path a Havoc Demon Hunter never takes (:4963, :5064, :5067, :5074) and cooldown->charges re-read from the DBC in reset() (:5082)",
+      },
+      knownDynamicMutations: [
+        {
+          member: "adjust",
+          site: "world_killer_t::impact, in its DEMON_HUNTER_VENGEANCE case (sc_demon_hunter.cpp:6646-6648)",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "CAST_BY_ACTOR",
+            abilityGameIds: [1221150],
+            basis:
+              "A Vengeance branch of an Annihilator meteor. A Havoc Demon Hunter never reaches it. The Annihilator's Collapsing Star 1221150 is carried as the cast that would withdraw the bound if an Annihilator action were ever observed on this actor.",
+          },
+        },
+        {
+          member: "adjust_max_charges",
+          site: "buff.untethered_rage stack change callback (sc_demon_hunter.cpp:10096-10099)",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "AURA_APPLICATION_ON_ACTOR",
+            abilityGameId: 1270476,
+            basis:
+              "Untethered Rage is looked up through talent.vengeance.untethered_rage_1 (:11279): a Vengeance talent a Havoc Demon Hunter cannot take. An application of 1270476 on this actor would withdraw the bound.",
+          },
+        },
+      ],
+    },
+    {
+      simcToken: "the_hunt",
+      abilityGameId: 370965,
+      aliasGroup: null,
+      createAction:
+        'sc_demon_hunter.cpp:9759-9760 if ( name == "the_hunt" ) return new the_hunt_t( this, options_str )',
+      specBinding:
+        'sc_demon_hunter.cpp:5612 the_hunt_t : the_hunt_base_t( "the_hunt", p, p->spec.the_hunt, o ); :11290 for Havoc spec.the_hunt = talent.havoc.the_hunt',
+      actionStruct: { file: "classModule", name: "the_hunt_t" },
+      cooldownHandle: "cooldown.the_hunt",
+      cooldownName: "the_hunt",
+      knownDynamicMutations: [
+        {
+          member: "reset",
+          site: "collapsing_star_t::execute under Demonic Intensity at 12.1.5 or later (sc_demon_hunter.cpp:6572-6575)",
+          effect: "RESET_TO_READY",
+          observableSignature: {
+            kind: "CAST_BY_ACTOR",
+            abilityGameIds: [1221150],
+            basis:
+              "collapsing_star_t is a Devourer action a Havoc Demon Hunter is never granted, and the pinned client is 12.1.0. A completed 1221150 by the actor would withdraw the bound.",
+          },
+        },
+      ],
+    },
+  ],
+  aliasGroups: {},
+};
+
 export const TARGETS = {
   "deathknight-blood": DEATHKNIGHT_BLOOD_TARGET,
+  "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
   "monk-brewmaster": MONK_BREWMASTER_TARGET,
   "paladin-protection": PALADIN_PROTECTION_TARGET,
   "paladin-retribution": PALADIN_RETRIBUTION_TARGET,
@@ -1281,7 +1403,8 @@ export function dynamicPolicyChecks(ability, loaded, traits, conventions = undef
   require(declared.length === 0
     ? "NO_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN"
     : "ONLY_DECLARED_ADJUST_RESET_OR_START_NAMES_THIS_COOLDOWN", "every '->adjust(', '->reset(', '->start(' and '->adjust_recharge_multiplier(' receiver in the module", namesIt.length ===
-    declared.length, `${String(mutators.length)} mutation site(s) in the module; receivers: ${[...new Set(mutators)].join(", ")}; ` +
+    declared.filter((known) => known.member !== "adjust_max_charges")
+      .length, `${String(mutators.length)} mutation site(s) in the module; receivers: ${[...new Set(mutators)].join(", ")}; ` +
     (declared.length === 0
       ? "none names this cooldown"
       : `exactly ${String(declared.length)} name(s) this cooldown, each declared: ${declared.map((known) => `${known.member}() in ${known.site}`).join("; ")}`));

@@ -186,6 +186,19 @@ export const SUPPORTED_ACTION_OPTION_KEYS = [
  */
 export const UNSUPPORTED_TARGETING_OPTION_KEYS = ["cycle_targets", "target_if", "max_cycle_targets"] as const;
 
+/**
+ * Option keys one named action reads for itself (ONB-A1), and that mean nothing on
+ * any other action, so they are scoped to the token rather than admitted globally.
+ *
+ *   `pick_up_fragment`  `type` and `mode` choose WHICH soul fragment is walked to
+ *                       (sc_demon_hunter.cpp:5133-5145). The action has no target and
+ *                       its readiness only asks that one exists, so neither option
+ *                       changes what any condition is about.
+ */
+export const TOKEN_SCOPED_ACTION_OPTION_KEYS: Readonly<Record<string, readonly string[]>> = Object.freeze({
+  pick_up_fragment: Object.freeze(["type", "mode"]),
+});
+
 /** Classifies one option key. Never reads its value. */
 export function actionOptionSupport(optionKey: string): ActionOptionSupport {
   if ((SUPPORTED_ACTION_OPTION_KEYS as readonly string[]).includes(optionKey)) return "SUPPORTED";
@@ -546,6 +559,7 @@ function deriveAction(listName: string, action: AuthorityArtifactAction): AplAct
   const actionOptionKeys = deriveActionOptionKeys(action.actionStringVerbatim);
   const unsupportedOptions: { optionKey: string; support: Exclude<ActionOptionSupport, "SUPPORTED"> }[] = [];
   for (const optionKey of actionOptionKeys) {
+    if (token !== null && TOKEN_SCOPED_ACTION_OPTION_KEYS[token]?.includes(optionKey) === true) continue;
     const support = actionOptionSupport(optionKey);
     if (support !== "SUPPORTED") unsupportedOptions.push({ optionKey, support });
   }

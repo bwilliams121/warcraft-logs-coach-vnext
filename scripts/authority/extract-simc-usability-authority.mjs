@@ -117,7 +117,38 @@ const MONK_BREWMASTER_TARGET = {
   ],
 };
 
-export const TARGETS = { "monk-brewmaster": MONK_BREWMASTER_TARGET };
+/**
+ * The Havoc Demon Hunter profile (ONB-A1): the one candidate the positive
+ * usability wiring reads, Reaver's Glaive, and the corroborating GCD spells a
+ * decision cast can be.
+ */
+const DEMONHUNTER_HAVOC_TARGET = {
+  datasetId: "SIMC_DBC_DEMONHUNTER_HAVOC_USABILITY_AUTHORITY",
+  classId: 12,
+  className: "Demon Hunter",
+  specId: 577,
+  defaultOut: "src/data/game/demonhunter-havoc-usability-authority.json",
+  sourceOverrides: {
+    classModule: "engine/class_modules/sc_demon_hunter.cpp",
+    classHeader: null,
+  },
+  // sc_demon_hunter.cpp overrides cost() five times, so no base-cost bound is ever
+  // claimed for Havoc. Reaver's Glaive has no power row and needs none.
+  classCostClaimsDoNotHold: true,
+  spells: [
+    { simcToken: "reavers_glaive", spellId: 442294 },
+    { simcToken: "annihilation", spellId: 201427 },
+    { simcToken: "chaos_strike", spellId: 162794 },
+    { simcToken: "essence_break", spellId: 258860 },
+    { simcToken: "eye_beam", spellId: 198013 },
+    { simcToken: "felblade", spellId: 232893 },
+  ],
+};
+
+export const TARGETS = {
+  "monk-brewmaster": MONK_BREWMASTER_TARGET,
+  "demonhunter-havoc": DEMONHUNTER_HAVOC_TARGET,
+};
 
 function fail(message) {
   console.error(`EXTRACTION FAILED: ${message}`);
@@ -258,7 +289,14 @@ async function main() {
 
   const loaded = {};
   const sources = [];
-  for (const [key, path] of Object.entries(SOURCES)) {
+  // A target may name a different class module, and declare a source ABSENT (a
+  // class with one module has no class header); that source loads as empty text.
+  const SOURCE_PATHS = { ...SOURCES, ...(target.sourceOverrides ?? {}) };
+  for (const [key, path] of Object.entries(SOURCE_PATHS)) {
+    if (path === null) {
+      loaded[key] = "";
+      continue;
+    }
     const buffer = await loadSource(args, key, path);
     loaded[key] = buffer.toString("utf8");
     sources.push({
@@ -368,14 +406,18 @@ async function main() {
     (player.match(/resource_reduction\[[^\]]*\]\s*[-+]?=/g) ?? []).length ===
       4, "player_t::cost_reduction_gain / cost_reduction_loss return early on a non-positive amount, and they are the only four writes to current.resource_reduction");
   const module = `${loaded.classModule}\n${loaded.classHeader}`;
-  for (const [claim, needle] of [
-    ["CLASS_MODULE_OVERRIDES_NO_COST", "cost() const override"],
-    ["CLASS_MODULE_OVERRIDES_NO_COST_FLAT_MODIFIER", "cost_flat_modifier"],
-    ["CLASS_MODULE_OVERRIDES_NO_COST_PCT_MULTIPLIER", "cost_pct_multiplier"],
-    ["CLASS_MODULE_CALLS_NO_APPLY_AFFECTING_AURA", "apply_affecting_aura"],
-  ]) {
+  // A class module that DOES override cost records no claim: costCannotExceedBase
+  // then refuses a base-cost bound for it, which is the honest answer.
+  for (const [claim, needle] of target.classCostClaimsDoNotHold === true
+    ? []
+    : [
+        ["CLASS_MODULE_OVERRIDES_NO_COST", "cost() const override"],
+        ["CLASS_MODULE_OVERRIDES_NO_COST_FLAT_MODIFIER", "cost_flat_modifier"],
+        ["CLASS_MODULE_OVERRIDES_NO_COST_PCT_MULTIPLIER", "cost_pct_multiplier"],
+        ["CLASS_MODULE_CALLS_NO_APPLY_AFFECTING_AURA", "apply_affecting_aura"],
+      ]) {
     const hits = module.split(needle).length - 1;
-    require(claim, `${SOURCES.classModule}, ${SOURCES.classHeader}`, hits ===
+    require(claim, `${SOURCE_PATHS.classModule}, ${SOURCE_PATHS.classHeader ?? "(no class header)"}`, hits ===
       0, `${String(hits)} occurrence(s) of '${needle}'`);
   }
   require("USABLE_MOVING_RULE", SOURCES.actionModule, /bool action_t::usable_moving\(\) const[\s\S]{0,300}if \( execute_time\(\) > 0_ms \)\s*return false;\s*if \( channeled \)\s*return false;\s*if \( range > 0 && range <= 5 \)\s*return false;\s*return true;/.test(

@@ -82,6 +82,7 @@ import { HOLY_PALADIN_REGISTRATION } from "../specs/paladin/holy/registration.js
 import { PROTECTION_PALADIN_REGISTRATION } from "../specs/paladin/protection/registration.js";
 import { RETRIBUTION_PALADIN_REGISTRATION } from "../specs/paladin/retribution/registration.js";
 import { DISCIPLINE_PRIEST_REGISTRATION } from "../specs/priest/discipline/registration.js";
+import { HAVOC_DEMON_HUNTER_REGISTRATION } from "../specs/demonhunter/havoc/registration.js";
 import { HOLY_PRIEST_REGISTRATION } from "../specs/priest/holy/registration.js";
 import { ASSASSINATION_REGISTRATION } from "../specs/rogue/assassination/registration.js";
 import { RESTORATION_SHAMAN_REGISTRATION } from "../specs/shaman/restoration/registration.js";
@@ -435,11 +436,12 @@ export function requireValidatedCatalog(
 /**
  * Every registration this build carries, as written by the specializations.
  *
- * Thirteen rows: eleven PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
+ * Fourteen rows: eleven PUBLIC (Augmentation Evoker was INTERNAL_ONLY in M13-E,
  * Restoration Shaman in HEAL-A, Holy Paladin and Mistweaver Monk in HEAL-B1,
- * Holy Priest in HEAL-B2, Preservation Evoker in HEAL-B4) and two INTERNAL_ONLY:
- * since HEAL-B1, Restoration Druid, which HEAL-B1P did not promote, and since
- * HEAL-B3, Discipline Priest, which HEAL-B3P could not promote.
+ * Holy Priest in HEAL-B2, Preservation Evoker in HEAL-B4) and three INTERNAL_ONLY:
+ * since HEAL-B1, Restoration Druid, which HEAL-B1P did not promote, since HEAL-B3,
+ * Discipline Priest, which HEAL-B3P could not promote, and since ONB-A1, Havoc Demon
+ * Hunter, whose public promotion is ONB-A1P.
  * A publicly unsupported
  * specialization is represented by ABSENCE from the PUBLIC set — an
  * INTERNAL_ONLY row, when one exists, is in the catalog and reachable by
@@ -474,6 +476,9 @@ export const ANALYZER_REGISTRATIONS: readonly AnalyzerRegistration[] = Object.fr
   // INTERNAL_ONLY from HEAL-B4; PUBLIC since HEAL-B4P. A healer row on the same architecture whose identified
   // cooldowns are checked against empowered casts.
   PRESERVATION_EVOKER_REGISTRATION,
+  // INTERNAL_ONLY since ONB-A1: Cohort A's representative, an observed-decision row bound to the pinned Havoc
+  // list. No public shape yet (ONB-A1P).
+  HAVOC_DEMON_HUNTER_REGISTRATION,
 ]);
 
 /**

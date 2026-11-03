@@ -247,7 +247,7 @@
     {
       "specId": "demonhunter/havoc",
       "cohort": "B_INSTANT_TARGET_GATED",
-      "currentAnalyzerStatus": "UNREGISTERED",
+      "currentAnalyzerStatus": "INTERNAL_ONLY",
       "realEvidenceStatus": "LOCAL_RAW_EVIDENCE_ONLY",
       "authorityAuditStatus": "AUTHORITY_AUDITED",
       "deepDiveInventoryStatus": "SPECIFIC_QUESTIONS_IDENTIFIED",

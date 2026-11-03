@@ -48,7 +48,12 @@ describe("coverage is measured from the corpus", () => {
       );
     }
     // Every registered kind is exercised by at least one committed case.
-    expect(report.byLayer.flatMap((layer) => layer.kindsRegisteredButUnused)).toEqual([]);
+    // ONB-A1: Havoc's two decision kinds run in the evidence archive, because its only
+    // real evidence is archive-sized. Every other registered kind runs here.
+    expect(report.byLayer.flatMap((layer) => layer.kindsRegisteredButUnused)).toEqual([
+      "SPEC_HAVOC_DEMON_HUNTER.DECISION_COVERAGE",
+      "SPEC_HAVOC_DEMON_HUNTER.COVERAGE_SUMMARY",
+    ]);
   });
 
   it("names the artifacts that retain coverage, and only those", async () => {

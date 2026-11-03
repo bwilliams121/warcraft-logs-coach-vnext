@@ -1,0 +1,384 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_DEMONHUNTER_HAVOC_GCD_SEMANTICS",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/class_spells.inc",
+        "sha256": "85ad0bcec9885423576d8945c74f1de212fe039bfee54bc725d1024509ae389b",
+        "byteLength": 36917
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      },
+      {
+        "path": "engine/dbc/spell_data.hpp",
+        "sha256": "ef81b1bb9a64f0605256b8889b55fff338229ecdb477a37f4a44bd487e5a390a",
+        "byteLength": 28307
+      },
+      {
+        "path": "engine/class_modules/sc_demon_hunter.cpp",
+        "sha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "byteLength": 459885
+      },
+      {
+        "path": "engine/dbc/generated/racial_spells.inc",
+        "sha256": "7c92532ba14cb1ac346cac873600075172e4ed8bb9e81a1b1c6278b6cb6fb129",
+        "byteLength": 15514
+      },
+      {
+        "path": "engine/player/player.cpp",
+        "sha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "byteLength": 546677
+      },
+      {
+        "path": "engine/player/consumable.cpp",
+        "sha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "byteLength": 31244
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "clientDataHotfixDate": "2026-09-10",
+    "clientDataHotfixBuild": 69587,
+    "clientDataHotfixHash": "98097f989dd3ee389dab97854be2a62f0f0b00c62d442668ea45332c6a2cd720",
+    "gcdFieldName": "_gcd",
+    "gcdFieldUnits": "MILLISECONDS",
+    "abilityDataMethod": "MACHINE_EXTRACTED_DBC_RECORD",
+    "extractedOn": "2026-11-03",
+    "extractorVersion": 1,
+    "applicabilityNote": "Not version-gated at runtime. CombatFight exposes no client-build key, and gameVersion/logVersion are Warcraft Logs parser keys, not the World of Warcraft client build — comparing either against 12.1.0.69587 would be a gate that always passes while appearing rigorous. The build is recorded for traceability; a client build moving is a regeneration trigger for a human, not a runtime condition."
+  },
+  "abilities": [
+    {
+      "abilityGameId": 162794,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Chaos Strike"
+    },
+    {
+      "abilityGameId": 185123,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Throw Glaive"
+    },
+    {
+      "abilityGameId": 188499,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Blade Dance"
+    },
+    {
+      "abilityGameId": 191427,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Metamorphosis"
+    },
+    {
+      "abilityGameId": 198013,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Eye Beam"
+    },
+    {
+      "abilityGameId": 198793,
+      "baseGcdMs": 0,
+      "displayNameEn": "Vengeful Retreat"
+    },
+    {
+      "abilityGameId": 200166,
+      "baseGcdMs": 0,
+      "displayNameEn": "Metamorphosis"
+    },
+    {
+      "abilityGameId": 201427,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Annihilation"
+    },
+    {
+      "abilityGameId": 202719,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Arcane Torrent"
+    },
+    {
+      "abilityGameId": 210152,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Death Sweep"
+    },
+    {
+      "abilityGameId": 213243,
+      "baseGcdMs": 0,
+      "displayNameEn": "Felblade"
+    },
+    {
+      "abilityGameId": 232893,
+      "baseGcdMs": 500,
+      "displayNameEn": "Felblade"
+    },
+    {
+      "abilityGameId": 258860,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Essence Break"
+    },
+    {
+      "abilityGameId": 258920,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Immolation Aura"
+    },
+    {
+      "abilityGameId": 370965,
+      "baseGcdMs": 1500,
+      "displayNameEn": "The Hunt"
+    },
+    {
+      "abilityGameId": 370966,
+      "baseGcdMs": 0,
+      "displayNameEn": "The Hunt"
+    },
+    {
+      "abilityGameId": 442294,
+      "baseGcdMs": 1500,
+      "displayNameEn": "Reaver's Glaive"
+    }
+  ],
+  "tokenBindings": [
+    {
+      "simcToken": "immolation_aura",
+      "candidateAbilityGameIds": [258920],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / immolation_aura_t",
+        "startLine": 9747,
+        "endLine": 9748,
+        "sourceNote": "create_action dispatches \"immolation_aura\" to immolation_aura_t, built on p->spell.immolation_aura at sc_demon_hunter.cpp:4802-4803; spell.immolation_aura = find_class_spell( \"Immolation Aura\" ) at :10769. class_spells.inc row { 12, 0, 258920 } confirms the id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "metamorphosis",
+      "candidateAbilityGameIds": [191427],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / metamorphosis_t",
+        "startLine": 9749,
+        "endLine": 9750,
+        "sourceNote": "create_action dispatches \"metamorphosis\" to metamorphosis_t, built on p->spec.metamorphosis at sc_demon_hunter.cpp:4902-4903; for Havoc spec.metamorphosis = find_class_spell( \"Metamorphosis\" ) at :10787, class_spells.inc row { 12, 0, 191427 }. The log reports the leap's impact 200166 as a cast and never 191427, so this binding names the action, not the wire id.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "the_hunt",
+      "candidateAbilityGameIds": [370965],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / the_hunt_t",
+        "startLine": 9759,
+        "endLine": 9760,
+        "sourceNote": "create_action dispatches \"the_hunt\" to the_hunt_t, built on p->spec.the_hunt at sc_demon_hunter.cpp:5612; for Havoc spec.the_hunt = talent.havoc.the_hunt at :11290, find_talent_spell( SPECIALIZATION, \"The Hunt\" ) at :11024, whose Havoc trait row carries spell 370965.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "vengeful_retreat",
+      "candidateAbilityGameIds": [198793],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / vengeful_retreat_t",
+        "startLine": 9812,
+        "endLine": 9813,
+        "sourceNote": "create_action dispatches \"vengeful_retreat\" to vengeful_retreat_t, built on p->talent.demon_hunter.vengeful_retreat at sc_demon_hunter.cpp:8588-8589; talent.demon_hunter.vengeful_retreat = find_talent_spell( CLASS, \"Vengeful Retreat\" ) at :10868, trait row spell 198793. The DBC record carries _gcd 0.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "reavers_glaive",
+      "candidateAbilityGameIds": [442294],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / reavers_glaive_t",
+        "startLine": 9816,
+        "endLine": 9817,
+        "sourceNote": "create_action dispatches \"reavers_glaive\" to reavers_glaive_t, built on p->hero_spec.reavers_glaive at sc_demon_hunter.cpp:8431-8432; for Havoc hero_spec.reavers_glaive = talent_spell_lookup( talent.aldrachi_reaver.art_of_the_glaive, 442294 ) at :11317. ready() requires buff.reavers_glaive up (:8461-8464).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "annihilation",
+      "candidateAbilityGameIds": [201427],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / annihilation_t",
+        "startLine": 9792,
+        "endLine": 9793,
+        "sourceNote": "create_action dispatches \"annihilation\" to annihilation_t, built on p->spec.annihilation at sc_demon_hunter.cpp:7677-7678; spec.annihilation = find_spell( 201427, DEMON_HUNTER_HAVOC ) at :10837. ready() requires buff.metamorphosis up (:7699-7705).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "essence_break",
+      "candidateAbilityGameIds": [258860],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / essence_break_t",
+        "startLine": 9798,
+        "endLine": 9799,
+        "sourceNote": "create_action dispatches \"essence_break\" to essence_break_t, built on p->talent.havoc.essence_break at sc_demon_hunter.cpp:7804-7805; talent.havoc.essence_break = find_talent_spell( SPECIALIZATION, \"Essence Break\" ) at :11034, trait row spell 258860.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "death_sweep",
+      "candidateAbilityGameIds": [210152],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / death_sweep_t",
+        "startLine": 9800,
+        "endLine": 9801,
+        "sourceNote": "create_action dispatches \"death_sweep\" to death_sweep_t, built on p->spec.death_sweep at sc_demon_hunter.cpp:7365-7366; spec.death_sweep = find_spell( 210152, DEMON_HUNTER_HAVOC ) at :10844. ready() requires buff.metamorphosis up (:7412-7418).",
+        "crossCheck": "NONE_FIND_SPELL_LITERAL"
+      }
+    },
+    {
+      "simcToken": "throw_glaive",
+      "candidateAbilityGameIds": [185123],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / throw_glaive_t",
+        "startLine": 9810,
+        "endLine": 9811,
+        "sourceNote": "create_action dispatches \"throw_glaive\" to throw_glaive_t, built on p->spell.throw_glaive at sc_demon_hunter.cpp:8309-8311; for Havoc spell.throw_glaive = find_class_spell( \"Throw Glaive\" ) at :10781, class_spells.inc row { 12, 0, 185123 }. Background copies under Screaming Brutality execute on the same spell (:7354-7357, :7406-7409), so a logged 185123 does not prove a press.",
+        "crossCheck": "CLASS_SPELLS"
+      }
+    },
+    {
+      "simcToken": "eye_beam",
+      "candidateAbilityGameIds": [198013],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / eye_beam_t",
+        "startLine": 9739,
+        "endLine": 9740,
+        "sourceNote": "create_action dispatches \"eye_beam\" to eye_beam_t, built on p->talent.havoc.eye_beam at sc_demon_hunter.cpp:4095-4096; talent.havoc.eye_beam = find_talent_spell( SPECIALIZATION, \"Eye Beam\" ) at :10985, trait row spell 198013.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "felblade",
+      "candidateAbilityGameIds": [232893],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / felblade_t",
+        "startLine": 9802,
+        "endLine": 9803,
+        "sourceNote": "create_action dispatches \"felblade\" to felblade_t, built on p->talent.demon_hunter.felblade at sc_demon_hunter.cpp:7875-7876; talent.demon_hunter.felblade = find_talent_spell( CLASS, \"Felblade\" ) at :10869, the Havoc trait row carrying spell 232893.",
+        "crossCheck": "NONE_TALENT_BOUND"
+      }
+    },
+    {
+      "simcToken": "blade_dance",
+      "candidateAbilityGameIds": [188499],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / blade_dance_t",
+        "startLine": 9794,
+        "endLine": 9795,
+        "sourceNote": "create_action dispatches \"blade_dance\" to blade_dance_t, built on p->spec.blade_dance at sc_demon_hunter.cpp:7315-7316; spec.blade_dance = find_specialization_spell( \"Blade Dance\" ) at :10838. ready() is false while buff.metamorphosis is up (:7342-7347).",
+        "crossCheck": "NONE_SPECIALIZATION_SPELL"
+      }
+    },
+    {
+      "simcToken": "chaos_strike",
+      "candidateAbilityGameIds": [162794],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "demon_hunter_t::create_action / chaos_strike_t",
+        "startLine": 9796,
+        "endLine": 9797,
+        "sourceNote": "create_action dispatches \"chaos_strike\" to chaos_strike_t, built on p->spec.chaos_strike at sc_demon_hunter.cpp:7638-7640; spec.chaos_strike = find_specialization_spell( \"Chaos Strike\" ) at :10841. ready() is false while buff.metamorphosis is up (:7662-7669).",
+        "crossCheck": "NONE_SPECIALIZATION_SPELL"
+      }
+    },
+    {
+      "simcToken": "arcane_torrent",
+      "candidateAbilityGameIds": [202719],
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_CONTROL_FLOW",
+        "sourcePath": "engine/player/player.cpp",
+        "sourceSha256": "50a804d0f63d7bffd7b9eeb89a6de054b1767c3202133c765b1b893987940a5c",
+        "symbol": "player_t::create_action / arcane_torrent_t",
+        "startLine": 11056,
+        "endLine": 11057,
+        "sourceNote": "player_t::create_action dispatches \"arcane_torrent\" to arcane_torrent_t, built on p->find_racial_spell( \"Arcane Torrent\" ) at player.cpp:9051. racial_spells.inc row { 0x0200 (Blood Elf), 0x00000800 (Demon Hunter), 202719 } is the only row a Demon Hunter can resolve. OUTSIDE the rotational decision domain (racial action).",
+        "crossCheck": "NONE_RACE_BOUND"
+      }
+    }
+  ],
+  "metaActionLanes": [
+    {
+      "simcToken": "auto_attack",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "auto_attack_t::auto_attack_t",
+        "line": 7006,
+        "sourceNote": "auto_attack_t is built on the spell-less demon_hunter_attack_t( \"auto_attack\", p, spell_data_t::nil() ) base (sc_demon_hunter.cpp:7002-7003) and its constructor assigns trigger_gcd = timespan_t::zero() at :7006."
+      }
+    },
+    {
+      "simcToken": "pick_up_fragment",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/class_modules/sc_demon_hunter.cpp",
+        "sourceSha256": "62a1b4ace1d7e658ad293023fbb67c2b669a3c52415ee2d5a1c08d5b63c867b0",
+        "symbol": "pick_up_fragment_t::pick_up_fragment_t",
+        "line": 5146,
+        "sourceNote": "pick_up_fragment_t is built on spell_data_t::nil() (sc_demon_hunter.cpp:5133-5134) and its constructor assigns trigger_gcd = timespan_t::zero() at :5146. It is simulated movement and has no spell or log event of its own."
+      }
+    },
+    {
+      "simcToken": "potion",
+      "triggerGcdMs": 0,
+      "binding": {
+        "method": "HAND_REVIEWED_CPP_TRIGGER_GCD",
+        "sourcePath": "engine/player/consumable.cpp",
+        "sourceSha256": "1a2ad7ed821bcda3f7b588e0d1e8caf5f8e027f1ad83312886965dca4f6ee941",
+        "symbol": "dbc_consumable_base_t::dbc_consumable_base_t",
+        "line": 804,
+        "sourceNote": "potion_t (consumable.cpp:428) derives from dbc_consumable_base_t, whose constructor (consumable.cpp:791) assigns trigger_gcd = timespan_t::zero(). OUTSIDE the rotational decision domain (consumable)."
+      }
+    }
+  ]
+}
