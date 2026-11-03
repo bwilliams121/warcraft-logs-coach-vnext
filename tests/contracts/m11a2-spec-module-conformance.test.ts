@@ -338,7 +338,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the five public modules and the INTERNAL_ONLY Augmentation module, each with zero supplemental analyses", () => {
+  it("is exactly the six public modules, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -357,8 +357,8 @@ describe("what the tree exports today", () => {
       ]),
     ).toEqual([
       ["BLOOD_DEATH_KNIGHT_MODULE", "deathknight/blood", "PUBLIC", 0],
-      // M13-E: INTERNAL_ONLY, binding no decision authority.
-      ["AUGMENTATION_EVOKER_MODULE", "evoker/augmentation", "INTERNAL_ONLY", 0],
+      // M13-E: INTERNAL_ONLY, binding no decision authority; PUBLIC since M13-F.
+      ["AUGMENTATION_EVOKER_MODULE", "evoker/augmentation", "PUBLIC", 0],
       ["BREWMASTER_MONK_MODULE", "monk/brewmaster", "PUBLIC", 0],
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],

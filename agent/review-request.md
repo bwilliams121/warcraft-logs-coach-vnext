@@ -4,153 +4,176 @@ Rolling file: overwritten for each review cycle.
 
 ## Tranche
 
-M13-E: Augmentation evaluator orchestration and registration (internal).
-Autopilot queue entry M13-E. Branch `autopilot/m13-e`, from main at 423cb48.
+M13-F: Public Augmentation support observations. Autopilot queue entry M13-F.
+Branch `autopilot/m13-f`, from main at cda0e09.
 
-- **Direction.** Queue entry M13-E and follow-ups "After M13-A" (not
-  registered): register the Augmentation evaluator for internal analysis, its
-  declared FULL_RAID requirement flowing into the DERIVED ingestion scope;
-  results stay internal; SUPPORT_TARGETING stays NO_AUTHORITY_AVAILABLE; no
-  targeting model; remove the unregistered-tree exceptions in the
-  cross-spec-isolation guards.
-- **Public contract: NONE.** No change under `src/contracts/`, `src/api/` or
-  `src/mcp/`. No public document, raid-night cell or MCP description changes.
+- **Direction.** Queue entry M13-F; follow-ups "After M13-E" (no public shape;
+  "when M13-F makes it reachable, the service derives FULL_RAID from the same
+  requirement"); the M13-E comments in `spec-id.ts` and `registration.ts`
+  ("its public shape is M13-F; until then the id stays here"); and the M13-E
+  gate test ("this gate can never make it publishable as an observed-decision
+  analyzer. Its public shape is M13-F's, not this gate's").
 - **Warcraft Logs: NONE.** No request, probe or probe config was run.
-- **Queue bookkeeping.** M13-D (#34, 423cb48) recorded MERGED; M13-E is
+- **Queue bookkeeping.** M13-E (#35, cda0e09) recorded MERGED; M13-F is
   PR_OPEN with its branch. Every other tranche the supervisor listed was
   already recorded MERGED with the same PR and SHA (verified).
 
-## The problem
+## Public contract change (EXPECTED), precisely
 
-The registration model was built for observed-decision verification:
+All under `warcraft-logs-coach.analysis/1`, additive (no field removed, no enum
+narrowed, no field changes meaning):
 
-- an ANALYZED envelope must cite a decision authority its registration binds
-  (`RESULT_CITES_FOREIGN_AUTHORITY`);
-- a capability's domain had to be an `AuthorityDomain`, i.e. one a provider
-  could bind;
-- every registered tree owned an APL artifact.
+1. **`specialization.specId` enum widened** with `evoker/augmentation`
+   (`src/contracts/analysis-contract.ts` `PUBLIC_SPEC_IDS`), the same additive
+   widening as Protection, Retribution, Blood and Brewmaster.
+2. **New optional `supportObservations` block**, admitted ONLY on
+   `AUTHORITY_NOT_AVAILABLE` and `INSUFFICIENT_EVIDENCE` documents
+   (`SupportObservationsSchema`); `ANALYZED`, `SPEC_NOT_SUPPORTED` and
+   `PROFILE_NOT_RESOLVED` refuse it. Emitted only by a registration that
+   publishes support observations (Augmentation). Shapes:
+   - `ASSESSED`: `revision: "support-observations/1"`, `authority:
+     WCL_OBSERVED_FACT`, `identityData {authority: RUNTIME_GAME_DATA,
+     datasetId, artifactRevision}`, `evaluatesSupportQuality: false`
+     (literal), `supportDecisions` (≥1), `allyBuffs`, `selfBuffs`,
+     `supportCasts`.
+   - `NOT_ASSESSED`: `revision`, `reason` ∈ SUBJECT_SPECIALIZATION_NOT_STATED,
+     IDENTITY_REFUSED, RUNTIME_DATA_UNAVAILABLE.
+   - `supportDecisions`: per family, ONLY NO_AUTHORITY_AVAILABLE (with its
+     pinned reason) or, for SUPPORT_TARGETING, UNKNOWN (`modelId`, `missing
+     {recipientActorId, evidenceCategory, reason}`). No evaluated variant
+     exists, so no recipient-quality or timing conclusion can be expressed.
+   - Every list carries completeness (`COMPLETE` / `OBSERVED_ONLY` /
+     `UNKNOWN` with reason); a support time is `AT_LEAST` (ms + ≥1 caveat) or
+     `UNKNOWN` (caveats, no number); survival is positive-only
+     (`NO_DEATH_OBSERVED`, never "alive"); cooldown identity carries
+     `REVIEWED_SUBSET`. No `state` key (the contract reserves it).
+   - New frozen vocabularies: `PUBLIC_SUPPORT_*` (not-assessed reasons,
+     evidence reasons = `UNKNOWN_REASONS`, unobserved-bound reasons,
+     continuity reasons, window/cast listing reasons, specialization-unknown
+     reasons, actor types, cooldown criteria, support-time caveats, evidence
+     categories = `EVIDENCE_CATEGORIES`).
+3. **Document changes for an Evoker/Augmentation identity**: previously
+   `SPEC_NOT_SUPPORTED` with `specId: null`; now `AUTHORITY_NOT_AVAILABLE` (or
+   `INSUFFICIENT_EVIDENCE`), `specId: evoker/augmentation`, `analyzerId:
+   evoker-augmentation-support-observations`, `gameplaySupported: true`
+   (unchanged meaning: an analyzer ran), plus `supportObservations`. TLDR
+   and report: `GAMEPLAY_NOT_ANALYZED` headline/disclosure (unchanged code).
+4. **MCP tool descriptions** (`src/mcp` text derived from the catalog, no
+   code change there): the supported-specializations sentence now names
+   Augmentation Evoker, and its author-written limits paragraph (analysis and
+   raid-night) says it is observation-only, evaluates no decision, never
+   judges a recipient or timing, and does not score.
+5. **Raid night**: an Evoker cell is now dispatched (AUTHORITY_NOT_AVAILABLE,
+   no decisions, no support block). Other players' cells are unchanged (see
+   change 5 below).
 
-The Augmentation evaluator has no decision authority at all, so it could not
-be registered, and `AUGMENTATION_EVOKER_REQUIRED_INPUTS` (FULL_RAID) reached
-no scope derivation.
+No other specialization's document changes. No file under `src/api/` or
+`src/mcp/` changed.
 
 ## What changed
 
-1. **Provider-less decision domains** (`src/findings/authority-domain.ts`).
-   - `PROVIDERLESS_DOMAINS` = SUPPORT_TARGETING, SUPPORT_TIMING (CLAUDE.md
-     "Decision Categories"); `DecisionDomain` = `AuthorityDomain` ∪ those.
-   - A capability may declare one: `DecisionCapability<TDomain>` defaults to
-     `AuthorityDomain`, so no existing specialization's types, payloads or
-     corpus outputs change. Registrations hold the wide type.
-   - Nothing can bind one. A binding's `domain` stays `AuthorityDomain`;
-     `PROVIDER_DOMAIN_COMPATIBILITY` is unchanged (SIMC_APL →
-     OFFENSIVE_ROTATION only); a forged binding fails catalog validation
-     (`PROVIDER_DOMAIN_INCOMPATIBLE`); `resolveAuthorityForDomain` answers
-     `NO_PINNED_AUTHORITY_FOR_DOMAIN` for a declared provider-less domain
-     whatever the bindings say.
-   - Kept OUT of `AUTHORITY_DOMAINS`, which each specialization's per-domain
-     results enumerate, so no tank/Ret payload grew support rows.
-2. **The registration** (`src/specs/evoker/augmentation/registration.ts`,
-   new; INTERNAL_ONLY; `evoker/augmentation` added to `SpecId` and
-   `INTERNAL_ONLY_SPEC_IDS`, not to `PUBLIC_SPEC_IDS`, the identity table or
-   the contract enum).
-   - Two capabilities (SUPPORT_TARGETING, SUPPORT_TIMING), both built FROM
-     `AUGMENTATION_EVOKER_REQUIRED_INPUTS` (FULL_RAID; ACTORS, CASTS, AURAS,
-     DEATHS; no resources; NO_TARGET). The requirement is derived FULL_RAID;
-     `deriveIngestionScopeFor([registration, PREPARATION])` = FULL_RAID with
-     the Augmentation analyzer contributing. No bindings.
-   - Result: an UNANALYZED envelope with a spec-owned payload (`domains` read
-     from the registration's own access, `subjectSpecialization`,
-     `evaluation`).
-     - `AUTHORITY_NOT_AVAILABLE`: the evaluator ran; no support decision has a
-       standard, so none was evaluated; the observations ride along.
-     - `INSUFFICIENT_EVIDENCE`: no stated specialization (a pet, an unlisted
-       actor), a refused identity, or unusable pinned data. No fact.
-     - Never ANALYZED: there is no decision authority to cite, and runtime game
-       data (support-ability identities) is never presented as one. No
-       observed-decision view (throws rather than returning an empty view).
-   - Identity: `SpecAnalysisInput` has no preflight identity, so the facade
-     feeds the evaluator's existing gate the fight's report code and fight id
-     and the subject's M13-B `friendlySpecializations` entry, the same
-     `friendlySpecs` entry preflight reads. The evaluator input type is
-     narrowed to the fields the gate reads (`AugmentationSubjectIdentity`;
-     `FightIdentity` still satisfies it, evaluator unchanged otherwise).
-3. **Catalog.** `ANALYZER_REGISTRATIONS` lists the row (six rows, five
-   PUBLIC). `analyzerForSpec` never selects it.
-4. **Guards.** The `evoker/augmentation` unregistered-tree exception is
-   removed from `m11a2-cross-spec-isolation` and `m10a-cross-spec-isolation`.
-   `m11a2` names it as the one registered tree with no APL artifact
-   (`AUTHORITY_FREE_REGISTERED_TREES`, asserted to be registered and to own
-   no APL); every other registered tree still owns exactly one.
-5. **Corpus.** New owning layer `SPEC_AUGMENTATION_EVOKER` (`SPEC_LAYER_OF`
-   total over `SpecId`), assertion kind
-   `SPEC_AUGMENTATION_EVOKER.REGISTRATION_RESULT` (NO_AUTHORITY_AVAILABLE
-   class; driven through the internal lookup and `runAnalyzer`), and two
-   cases: the registration over an unstated subject (FULL_RAID derived, both
-   families NO_PINNED, INSUFFICIENT_EVIDENCE, no evaluator result) and
-   `APPLICATION_SERVICE.INTERNAL_REGISTRATION` (internal yes, public null,
-   identity unresolved). Manifest regenerated; `report.json` rewritten from
-   the workerd execution (185 cases / 780 assertions).
-6. **Docs.** Architecture "M13-E"; follow-ups "After M13-E" (and the M13-A /
-   M13-B bullets it resolves); the Augmentation README; `spec-id.ts` and
-   registry headers.
+1. **Five-site promotion** (`spec-id.ts` partition — internal-only set empty
+   again; contract enum; identity table; `satisfies PublicSpecId` in
+   `spec.ts`; `exposure: "PUBLIC"`). Reachability only: facade, evaluator and
+   result unchanged; the service derives FULL_RAID from the registration's
+   declared requirement ∪ preparation's (proven live).
+2. **Support-observation view** (`src/findings/support-observation-view.ts`,
+   new): the unanalyzed counterpart of the observed-decision view. Optional
+   `supportObservationView` on `AnalyzerDefinition` / `AnalyzerRegistration`
+   / `SpecModuleDefinition`, wrapped with the ownership check like the
+   decision view, copied by `snapshotRegistration`.
+   `supportObservationViewOf(catalog, analysis)` in the registry finds the
+   owner, checks ownership, returns `null` when none is published.
+3. **Augmentation adapter** (`src/specs/evoker/augmentation/support-observation-view.ts`,
+   new): field-for-field copy of the evaluator's result. Throws on
+   `ALLY_STATE_SUFFICIENT` (no public form for a model's conclusions). Reads
+   the support primitives' types THROUGH the evaluator, so `src/support/` and
+   the recipient-cooldown registry keep their single named consumer.
+4. **Service / contract / projection.** `FightAnalysis.supportObservations`
+   (optional) set from the view on unanalyzed results; a throwing view →
+   `INTERNAL_ERROR`, never a quieter document. Schema and field-by-field
+   projection as above.
+5. **Raid night per-player breadth** (`raid-night-service.ts`). Each focused
+   view's scope is now derived from THAT player's analyzer requirement ∪
+   preparation (preparation alone when unanalyzable) — the single-fight
+   derivation — instead of the fight-level union. Without this an Evoker in
+   a fight would have widened every other player's view to FULL_RAID. For
+   every other specialization the value is the same PLAYER_CONTEXT as before.
+   Owned-pet evidence keeps its fight-level union (unchanged; follow-up).
+6. **Promotion-evidence gate scope** (test-owned). PUBLIC mode evaluates
+   PUBLIC registrations that bind a decision authority. A registration that
+   binds none can never return an ANALYZED result that passes ownership, so
+   it publishes no decision; the exempt set is pinned to exactly
+   Augmentation, with only provider-less domains, every one
+   NO_PINNED_AUTHORITY_FOR_DOMAIN, and a support view.
+7. **Corpus**: the M13-E app-service case is re-pinned
+   (`…-is-public-since-m13-f`: both lookups the same row, PUBLIC, identity
+   resolves) and the Augmentation spec executor now requires the public
+   lookup to find the same row. Report regenerated (one caseId line).
+8. **Docs**: architecture "M13-F", follow-ups "After M13-F" (+ resolved
+   bullets in After M13-E / After M13-A), Augmentation README, queue.
 
 ## Tests
 
-- New `tests/unit/specs/augmentation-evoker-registration.test.ts` (12):
-  - the row, its capabilities from REQUIRED_INPUTS, no bindings, derived
-    FULL_RAID requirement and scope derivation;
-  - support families NO_PINNED, OFFENSIVE_ROTATION DOMAIN_NOT_DECLARED; a
-    forged SUPPORT_TARGETING binding refused by the catalog and ignored by
-    resolution; the view throws;
-  - real M13-A Evoker (archive) through the internal path:
-    AUTHORITY_NOT_AVAILABLE whose `evaluation` deep-equals the evaluator's
-    under a preflight identity; SUPPORT_TARGETING NO_AUTHORITY_AVAILABLE;
-  - negatives: another stated specialization → IDENTITY_REFUSED
-    NOT_THIS_SPECIALIZATION; a pet → NOT_IN_FRIENDLY_ROSTER, no evaluation;
-    unusable data → INSUFFICIENT_EVIDENCE; a PUBLIC request for an
-    Augmentation Evoker → SPEC_NOT_SUPPORTED, 0 Augmentation runs, only
-    PLAYER_CONTEXT retrieved.
-- Existing tests updated because the catalog/partition genuinely changed (no
-  assertion weakened; several strengthened with the internal row's absence
-  from public lookups):
-  - partition pins (`m10a-spec-partition`, `m10d-public-registration`,
-    `m11b2`, `m11c2`, `m11-promotion-evidence-gate`, which also now reports
-    Augmentation's internal readiness: not ready, by design);
-  - catalog snapshots (`m10a-registry-integrity`, `m10c-protection-authority-binding`,
-    `m11a-registration-list-complete`, `m11a2-spec-module-conformance` with
-    the M13-A archive identity evidence, `m11a2-spec-roster` 35 → 34,
-    `m10d-public-second-registration-invariance`);
-  - exhaustive call maps in the public transport and raid-night tests gain
-    `evoker-augmentation-support-observations: 0`;
-  - corpus pins (cases 183 → 185, assertions 778 → 780, layers, executor ring).
+- New `tests/integration/m13f-augmentation-public-observations.test.ts` (12):
+  real M13-A Evoker through the real service and BOTH transports — one
+  dispatch per transport, FULL_RAID both times, REST ≡ MCP, schema-valid,
+  AUTHORITY_NOT_AVAILABLE, no decisions/coverage; supportObservations equal
+  the adapter's projection of the evaluator's own result; both families
+  NO_AUTHORITY_AVAILABLE; every ally-buff listing OBSERVED_ONLY on the real
+  capture; support time never exact, UNKNOWN never numeric; TLDR/report
+  GAMEPLAY_NOT_ANALYZED, PARTIAL; no verdict words, no `state` key, no
+  internal revisions. Negatives: contextless capture → INSUFFICIENT_EVIDENCE
+  + NOT_ASSESSED (never an empty list); ALLY_STATE_SUFFICIENT → adapter
+  throws and a throwing view → INTERNAL_ERROR; a declared model missing ally
+  state → UNKNOWN with what is missing, and the two refusals cannot share a
+  shape; the schema refuses evaluated/quality-bearing decisions,
+  `evaluatesSupportQuality: true`, numeric UNKNOWN, caveat-less AT_LEAST,
+  and the block on other statuses; vocabularies pinned to internal arrays.
+- New `tests/regression/m13f-mixed-raid-night.test.ts` (2): Brewmaster cell
+  identical alone and beside an Evoker, and each analyzer handed its OWN
+  breadth (Brewmaster PLAYER_CONTEXT, Augmentation FULL_RAID) — this
+  assertion FAILS on the pre-M13-F raid-night code (verified by reverting);
+  Evoker cell not ANALYZED, night schema-valid.
+- Updated because the partition genuinely changed (no assertion weakened):
+  partition/identity/enum pins, catalog snapshots, injected catalogs now
+  carry the sixth public row (the validator requires every public id),
+  requirement lists gain the FULL_RAID Augmentation entry, supported-sentence
+  pins, `analysis-composition-refusals` uses Evoker/Devastation as the Evoker
+  miss, the M13-E registration test now proves the public dispatch
+  (1 run, FULL_RAID, AUTHORITY_NOT_AVAILABLE + supportObservations), the
+  m6a projection-imports pin adds the shared view module.
 
 ## Validation
 
-- `npx tsc --noEmit`: clean. `npx prettier --check .`: clean.
+- `npx tsc --noEmit`: clean. `npx prettier --check` on changed files: clean.
   `git diff --check`: clean.
-- Focused: the new registration test, the Augmentation evaluator test, all
-  of `tests/contracts` and the corpus unit tests pass.
-- `npm run test:corpus`: PASSED (two byte-identical workerd runs, committed
-  report matches). `npm run test:evidence`: PASSED (unchanged).
-- Full `npx vitest run`: 11740/11761. Every failure is a default-5 s timeout
-  under machine load (STACK_TRACE_ERROR) plus the known load-dependent
-  `runner-service-queue` W; rerun with `--testTimeout=180000` all pass except
-  `m9b-corpus-harness` (Protection) and `runner-service-queue` W, which pass
-  alone (the same pair noted in M13-D and M15-D).
+- `npm run test:corpus`: PASSED (report regenerated; one caseId line).
+- Every previously failing file rerun in isolation: pass, except
+  default-5 s timeouts.
+- Full `npx vitest run`: 11782/11800. All 18 failures are default-5 s
+  timeouts (STACK_TRACE_ERROR) in heavy files (m10d projections, m7f
+  raid-night, m8g, m9b harness, simulation runner).
+- Baseline: the same full run on a clean `git archive origin/main` tree on
+  this machine: 11737 passed, 24 failed, all the same default-5 s timeouts —
+  a superset of this branch's 18 (the branch adds no new failing test).
+- `npm run test:evidence`: PASSED (unchanged).
+- Full run with `--testTimeout=180000`: 11799/11800. The one failure is the
+  `m9b-corpus-harness` Protection timeout already noted in M13-D and M15-D,
+  which passes when run alone (it did here).
 
 ## Decisions for the reviewer
 
-1. **Provider-less domains instead of widening `AUTHORITY_DOMAINS`.** Adding
-   the support families to `AUTHORITY_DOMAINS` would add two
-   DOMAIN_NOT_DECLARED rows to every tank and Retribution payload and rewrite
-   their corpus expectations, for questions those analyzers are never asked.
-   A separate, never-bindable vocabulary keeps authority per decision
-   category without touching other specializations.
-2. **AUTHORITY_NOT_AVAILABLE, not ANALYZED.** The envelope status summarizes
-   decision authority; with none for either family the honest status is
-   AUTHORITY_NOT_AVAILABLE, and the observations are carried as facts in the
-   payload. Making ANALYZED authority-optional would weaken the ownership
-   check every other registration relies on.
-3. **Identity from `friendlySpecializations`.** Same source and roster rules
-   as preflight; refused or unstated identity yields no fact, never a default.
+1. **Promotion, not a side channel.** The M13-E code and follow-ups name
+   M13-F as the step that makes the registration reachable and moves the id.
+   A side channel (keeping SPEC_NOT_SUPPORTED and running an internal-only
+   registration for a public request) would break the tested invariant that
+   no public request runs an INTERNAL_ONLY row.
+2. **Gate scoped by authority binding.** The gates measure decisions; a
+   registration with no binding cannot publish one. Scoping by binding (and
+   pinning the exempt set by name) keeps every decision analyzer gated.
+3. **No new TLDR/report content.** They already disclose
+   GAMEPLAY_NOT_ANALYZED for this status; summarizing support facts there is
+   presentation work (follow-up), and must never rank them as findings.
+4. **`gameplaySupported: true`** keeps its documented meaning (an analyzer
+   ran); the status, TLDR and detail state that no decision was evaluated.

@@ -1,13 +1,13 @@
 /**
  * Augmentation Evoker's identity and declared inputs (M13-A; registered
- * INTERNAL_ONLY since M13-E).
+ * INTERNAL_ONLY in M13-E; PUBLIC since M13-F).
  *
  * The Warcraft Logs class and specialization strings are the ones the
  * committed M13-A fight context records for its subject (`subType` "Evoker",
  * `friendlySpecs` "Augmentation").
  */
 
-import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
+import type { PublicSpecId } from "../../../findings/spec-id.js";
 
 /**
  * `/2` (M13-B): each ally window carries its recipient's stated specialization.
@@ -17,11 +17,10 @@ import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
 export const AUGMENTATION_EVOKER_EVALUATOR_REVISION = "augmentation-evoker-evaluator/3" as const;
 
 /**
- * The internal id (M13-E). `InternalOnlySpecId`: the registration is
- * INTERNAL_ONLY, so no public request, raid-night cell, REST or MCP response
- * can select it or name it.
+ * The id. `PublicSpecId` since M13-F (it was `InternalOnlySpecId` in M13-E):
+ * the compile-time side of the exposure, one of the five promotion sites.
  */
-export const AUGMENTATION_EVOKER_SPEC_ID = "evoker/augmentation" satisfies InternalOnlySpecId;
+export const AUGMENTATION_EVOKER_SPEC_ID = "evoker/augmentation" satisfies PublicSpecId;
 
 export const AUGMENTATION_EVOKER_ANALYZER_ID = "evoker-augmentation-support-observations";
 

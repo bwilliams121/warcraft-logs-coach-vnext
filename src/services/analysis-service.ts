@@ -44,6 +44,7 @@ import {
   type TldrInput,
 } from "../reporting/tldr.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import type { SupportObservationOutcome } from "../findings/support-observation-view.js";
 import type { IngestionFailureReason } from "../wcl/ingest-fight.js";
 import type { FightIdentity, PreflightPort, WclFailureReason } from "../wcl/types.js";
 import { parseAnalysisRequest } from "./analysis-request.js";
@@ -54,6 +55,7 @@ import {
   observedDecisionViewOf,
   runAnalyzer,
   specNotSupported,
+  supportObservationViewOf,
   type AnalyzerRegistration,
 } from "./analyzer-registry.js";
 import { assessConsumableStatus } from "../analysis/preparation/consumable-status.js";
@@ -722,6 +724,20 @@ export async function analyzeFight(
   // describes, by the registration that produced it.
   const observedDecisions =
     analysis.status === "ANALYZED" ? observedDecisionViewOf(catalog.catalog, analysis) : null;
+  // M13-F: likewise the registration's support-observation view of an
+  // unanalyzed result, when it publishes one. Copied, never read here.
+  // A view that refuses to publish (a shape it has no public form for) is an
+  // internal defect reported as one, never a quieter document without it.
+  let supportObservations: SupportObservationOutcome | null;
+  try {
+    supportObservations =
+      analysis.status === "ANALYZED" ? null : supportObservationViewOf(catalog.catalog, analysis);
+  } catch {
+    return serviceFailure(
+      "INTERNAL_ERROR",
+      "The selected analyzer's support observations could not be given their public form, so no analysis was published.",
+    );
+  }
 
   // ---- M14-F: the reviewed diagnosis projection, after and beside the result ----
   const diagnosis =
@@ -760,6 +776,7 @@ export async function analyzeFight(
     preparation: { state: "ASSESSED", report: preparation },
     ...withPlan(planDisclosure),
     ...(diagnosis === null ? {} : { diagnosis }),
+    ...(supportObservations === null ? {} : { supportObservations }),
     ...presentation,
   };
 

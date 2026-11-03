@@ -45,6 +45,22 @@ import type {
 import type { EvidenceLocator } from "../engine/evidence/locator.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { requirePublicSpecId } from "../findings/spec-id.js";
+import {
+  SUPPORT_OBSERVATIONS_REVISION,
+  type SupportAllyWindowRecord,
+  type SupportCooldownIdentityRecord,
+  type SupportCooldownOverlapRecord,
+  type SupportDecisionRecord,
+  type SupportObservationOutcome,
+  type SupportProvenAmountRecord,
+  type SupportRecipientRecord,
+  type SupportSpanRecord,
+  type SupportSurvivalRecord,
+  type SupportTimedEvidenceRecord,
+  type SupportWindowBoundRecord,
+  type SupportWindowListingRecord,
+  type SupportWindowRecord,
+} from "../findings/support-observation-view.js";
 import type {
   ConsumableStatus,
   ConsumableUnknownReason,
@@ -213,6 +229,272 @@ function projectIdentity(analysis: FightAnalysis): PublicIdentity {
       specName: identity.player.specName,
     },
     data: { logVersion: identity.data.logVersion, gameVersion: identity.data.gameVersion },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Support observations (M13-F), field for field from the registration's view
+// ---------------------------------------------------------------------------
+
+function projectSpan(span: SupportSpanRecord) {
+  return {
+    fromReportTimeMs: span.fromReportTimeMs,
+    toReportTimeMs: span.toReportTimeMs,
+    upperBound: span.upperBound,
+  };
+}
+
+function projectBound(bound: SupportWindowBoundRecord) {
+  return bound.observation === "OBSERVED"
+    ? {
+        observation: bound.observation,
+        reportTimeMs: bound.reportTimeMs,
+        rawType: bound.rawType,
+        evidence: projectLocator(bound.evidence),
+      }
+    : { observation: bound.observation, reason: bound.reason };
+}
+
+function projectRecipient(recipient: SupportRecipientRecord) {
+  if (recipient.catalog === "NOT_IN_CATALOG") {
+    return { actorId: recipient.actorId, instanceId: recipient.instanceId, catalog: recipient.catalog };
+  }
+  const { ownership } = recipient;
+  return {
+    actorId: recipient.actorId,
+    instanceId: recipient.instanceId,
+    catalog: recipient.catalog,
+    actorType: recipient.actorType,
+    subType: recipient.subType,
+    ownership:
+      ownership.kind === "OWNED_BY"
+        ? { kind: ownership.kind, ownerActorId: ownership.ownerActorId }
+        : { kind: ownership.kind },
+    isSupporter: recipient.isSupporter,
+  };
+}
+
+function projectSupportWindow(window: SupportWindowRecord) {
+  return {
+    recipient: projectRecipient(window.recipient),
+    start: projectBound(window.start),
+    end: projectBound(window.end),
+    activeObservations: window.activeObservations.map(projectLocator),
+    observedSpan: projectSpan(window.observedSpan),
+    continuity:
+      window.continuity.continuity === "ESTABLISHED"
+        ? { continuity: window.continuity.continuity }
+        : { continuity: window.continuity.continuity, reason: window.continuity.reason },
+    activeSpan: window.activeSpan === null ? null : projectSpan(window.activeSpan),
+  };
+}
+
+function projectTimedEvidence(entry: SupportTimedEvidenceRecord) {
+  return {
+    reportTimeMs: entry.reportTimeMs,
+    atSpanBound: entry.atSpanBound,
+    evidence: projectLocator(entry.evidence),
+  };
+}
+
+function projectCooldownIdentity(identity: SupportCooldownIdentityRecord) {
+  switch (identity.identification) {
+    case "IDENTIFIED":
+      return {
+        identification: identity.identification,
+        rosterKey: identity.rosterKey,
+        abilityGameIds: [...identity.abilityGameIds],
+        coverage: identity.coverage,
+        criterion: identity.criterion,
+        datasetId: identity.datasetId,
+        artifactRevision: identity.artifactRevision,
+      };
+    case "UNKNOWN":
+      return identity.reason === "SPECIALIZATION_NOT_ESTABLISHED"
+        ? {
+            identification: identity.identification,
+            reason: identity.reason,
+            specializationReason: identity.specializationReason,
+          }
+        : { identification: identity.identification, reason: identity.reason };
+    case "UNSUPPORTED":
+      return {
+        identification: identity.identification,
+        reason: identity.reason,
+        className: identity.className,
+        specName: identity.specName,
+      };
+    default:
+      return assertNever(identity);
+  }
+}
+
+function projectSurvival(survival: SupportSurvivalRecord) {
+  const { inSpan, nextDeathAfterEnd: next } = survival;
+  return {
+    inSpan:
+      inSpan.observation === "DEATH_OBSERVED_IN_SPAN"
+        ? { observation: inSpan.observation, deaths: inSpan.deaths.map(projectTimedEvidence) }
+        : { observation: inSpan.observation },
+    nextDeathAfterEnd:
+      next.observation === "OBSERVED"
+        ? {
+            observation: next.observation,
+            reportTimeMs: next.reportTimeMs,
+            msAfterObservedEnd: next.msAfterObservedEnd,
+            evidence: projectLocator(next.evidence),
+          }
+        : { observation: next.observation },
+  };
+}
+
+function projectCooldownOverlap(overlap: SupportCooldownOverlapRecord) {
+  switch (overlap.overlap) {
+    case "NO_COOLDOWN_IDENTITY":
+      return { overlap: overlap.overlap };
+    case "CONTINUITY_NOT_ESTABLISHED":
+      return { overlap: overlap.overlap, reason: overlap.reason };
+    case "LISTED": {
+      const { listing } = overlap;
+      return {
+        overlap: overlap.overlap,
+        casts: overlap.casts.map((cast) => ({
+          ...projectTimedEvidence(cast),
+          abilityGameId: cast.abilityGameId,
+        })),
+        listing:
+          listing.completeness === "COMPLETE"
+            ? { completeness: listing.completeness }
+            : "unidentifiedCasts" in listing
+              ? {
+                  completeness: listing.completeness,
+                  reason: listing.reason,
+                  unidentifiedCasts: listing.unidentifiedCasts,
+                  unattributedCasts: listing.unattributedCasts,
+                }
+              : { completeness: listing.completeness, reason: listing.reason },
+      };
+    }
+    default:
+      return assertNever(overlap);
+  }
+}
+
+function projectProvenAmount(amount: SupportProvenAmountRecord) {
+  return amount.bound === "AT_LEAST"
+    ? { bound: amount.bound, ms: amount.ms, caveats: [...amount.caveats] }
+    : { bound: amount.bound, caveats: [...amount.caveats] };
+}
+
+function projectWindowListing(listing: SupportWindowListingRecord) {
+  return listing.completeness === "COMPLETE"
+    ? { completeness: listing.completeness }
+    : { completeness: listing.completeness, reason: listing.reason };
+}
+
+function projectSupportDecision(decision: SupportDecisionRecord) {
+  return decision.authorityStatus === "NO_AUTHORITY_AVAILABLE"
+    ? { category: decision.category, authorityStatus: decision.authorityStatus, reason: decision.reason }
+    : {
+        category: decision.category,
+        authorityStatus: decision.authorityStatus,
+        modelId: decision.modelId,
+        missing: {
+          recipientActorId: decision.missing.recipientActorId,
+          evidenceCategory: decision.missing.evidenceCategory,
+          reason: decision.missing.reason,
+        },
+      };
+}
+
+/**
+ * The registration's support-observation view (M13-F), field for field.
+ * Nothing is derived, ranked or judged here; the vocabulary is validated by
+ * the final parse, so a value outside the frozen public enums fails closed.
+ */
+function projectSupportObservations(outcome: SupportObservationOutcome) {
+  if (outcome.assessment === "NOT_ASSESSED") {
+    return {
+      assessment: outcome.assessment,
+      revision: SUPPORT_OBSERVATIONS_REVISION,
+      reason: outcome.reason,
+    };
+  }
+  const { view } = outcome;
+  return {
+    assessment: outcome.assessment,
+    revision: view.revision,
+    authority: "WCL_OBSERVED_FACT",
+    identityData: {
+      authority: "RUNTIME_GAME_DATA",
+      datasetId: view.identityData.datasetId,
+      artifactRevision: view.identityData.artifactRevision,
+    },
+    evaluatesSupportQuality: false,
+    supportDecisions: view.supportDecisions.map(projectSupportDecision),
+    allyBuffs: view.allyBuffs.map((buff) => ({
+      ability: buff.ability,
+      auraAbilityGameId: buff.auraAbilityGameId,
+      listing: projectWindowListing(buff.listing),
+      ambiguousTransitions: buff.ambiguousTransitions,
+      windows: buff.windows.map((window: SupportAllyWindowRecord) => ({
+        ...projectSupportWindow(window),
+        recipientSpecialization:
+          window.recipientSpecialization.specification === "STATED"
+            ? {
+                specification: window.recipientSpecialization.specification,
+                className: window.recipientSpecialization.className,
+                specName: window.recipientSpecialization.specName,
+              }
+            : {
+                specification: window.recipientSpecialization.specification,
+                reason: window.recipientSpecialization.reason,
+              },
+        recipientCooldownIdentity: projectCooldownIdentity(window.recipientCooldownIdentity),
+        survival: projectSurvival(window.survival),
+        cooldownOverlap: projectCooldownOverlap(window.cooldownOverlap),
+      })),
+      supportTime: {
+        anyRecipient: projectProvenAmount(buff.supportTime.anyRecipient),
+        byRecipient: buff.supportTime.byRecipient.map((row) => ({
+          actorId: row.actorId,
+          instanceId: row.instanceId,
+          windows: row.windows,
+          proven: projectProvenAmount(row.proven),
+        })),
+        peakConcurrentWindows:
+          buff.supportTime.peakConcurrentWindows.bound === "AT_LEAST"
+            ? {
+                bound: buff.supportTime.peakConcurrentWindows.bound,
+                count: buff.supportTime.peakConcurrentWindows.count,
+              }
+            : { bound: buff.supportTime.peakConcurrentWindows.bound },
+      },
+    })),
+    selfBuffs: view.selfBuffs.map((buff) => ({
+      ability: buff.ability,
+      auraAbilityGameId: buff.auraAbilityGameId,
+      listing: projectWindowListing(buff.listing),
+      ambiguousTransitions: buff.ambiguousTransitions,
+      windows: buff.windows.map(projectSupportWindow),
+    })),
+    supportCasts: {
+      listing:
+        view.supportCasts.listing.completeness === "COMPLETE"
+          ? { completeness: view.supportCasts.listing.completeness }
+          : {
+              completeness: view.supportCasts.listing.completeness,
+              reason: view.supportCasts.listing.reason,
+              unidentifiedCasts: view.supportCasts.listing.unidentifiedCasts,
+              unattributedCasts: view.supportCasts.listing.unattributedCasts,
+            },
+      casts: view.supportCasts.casts.map((cast) => ({
+        ability: cast.ability,
+        abilityGameId: cast.abilityGameId,
+        reportTimeMs: cast.reportTimeMs,
+        evidence: projectLocator(cast.evidence),
+      })),
+    },
   };
 }
 
@@ -646,13 +928,24 @@ export function projectAnalysisResult(analysis: FightAnalysis): PublicAnalysisRe
     // listed individually rather than grouped so that a future status with
     // different content cannot be absorbed silently by a catch-all branch.
     case "SPEC_NOT_SUPPORTED":
-    case "AUTHORITY_NOT_AVAILABLE":
     case "PROFILE_NOT_RESOLVED":
+      return PublicAnalysisResultSchema.parse({
+        ...common,
+        status: result.status,
+        detail: result.detail,
+      });
+
+    // M13-F: these two may also carry the registration's support
+    // observations, copied from its view only when the service built one.
+    case "AUTHORITY_NOT_AVAILABLE":
     case "INSUFFICIENT_EVIDENCE":
       return PublicAnalysisResultSchema.parse({
         ...common,
         status: result.status,
         detail: result.detail,
+        ...(analysis.supportObservations === undefined
+          ? {}
+          : { supportObservations: projectSupportObservations(analysis.supportObservations) }),
       });
 
     default:

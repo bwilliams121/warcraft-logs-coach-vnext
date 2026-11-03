@@ -82,6 +82,7 @@ import {
 } from "./decision-capability.js";
 import type { ObservedDecisionView } from "./observed-decision-view.js";
 import { isSpecId, type SpecId } from "./spec-id.js";
+import type { SupportObservationOutcome } from "./support-observation-view.js";
 
 /** What a specialization writes down about who it is. */
 export interface SpecIdentityDefinition {
@@ -157,6 +158,9 @@ export interface SpecModuleDefinition<TAnalysis extends SpecAnalysisEnvelope> {
   readonly observedDecisionView: (
     analysis: Extract<TAnalysis, { status: "ANALYZED" }>,
   ) => ObservedDecisionView;
+  /** See `AnalyzerDefinition.supportObservationView` (M13-F). Optional; omitted means none. */
+  readonly supportObservationView?:
+    ((analysis: Exclude<TAnalysis, { status: "ANALYZED" }>) => SupportObservationOutcome) | undefined;
   readonly limitsProse: PublicLimitsProse;
   /**
    * Spec-owned supplemental analyses. Optional; omitted means none. See the
@@ -264,6 +268,9 @@ export function defineSpecModule<TAnalysis extends SpecAnalysisEnvelope>(
     }),
     analyze: definition.analyze,
     observedDecisionView: definition.observedDecisionView,
+    ...(definition.supportObservationView === undefined
+      ? {}
+      : { supportObservationView: definition.supportObservationView }),
   });
 
   return Object.freeze({

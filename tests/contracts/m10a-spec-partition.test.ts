@@ -45,14 +45,16 @@ describe("the known specialization ids are exactly partitioned", () => {
     for (const id of PUBLIC_SPEC_IDS) expect(INTERNAL_ONLY_SPEC_IDS as readonly string[]).not.toContain(id);
   });
 
-  it("Assassination, both Paladins, Blood Death Knight and Brewmaster Monk are public", () => {
+  it("Assassination, both Paladins, Blood Death Knight, Brewmaster Monk and Augmentation Evoker are public", () => {
     expect(PUBLIC_SPEC_IDS).toEqual([
       "rogue/assassination",
       "paladin/protection",
       "paladin/retribution",
       "deathknight/blood",
       "monk/brewmaster",
+      "evoker/augmentation",
     ]);
+    expect(isPublicSpecId("evoker/augmentation")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
     expect(isSpecId("monk/brewmaster")).toBe(true);
     expect(isPublicSpecId("rogue/assassination")).toBe(true);
@@ -64,17 +66,19 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set holds exactly Augmentation Evoker since M13-E, and it is never public", () => {
+  it("the internal-only set is empty again since M13-F promoted Augmentation Evoker", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
     // Blood Death Knight measurement slice from M11-B2, was empty again from
     // M11-B12, held the Brewmaster Monk measurement slice from M11-C2, was
-    // empty again from M11-C4j, and holds Augmentation Evoker since M13-E: the
-    // first registration with no decision authority (support observations).
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["evoker/augmentation"]);
+    // empty again from M11-C4j, held Augmentation Evoker in M13-E (the first
+    // registration with no decision authority), and is empty again since
+    // M13-F, which published its support observations.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
     expect(isSpecId("evoker/augmentation")).toBe(true);
-    expect(isPublicSpecId("evoker/augmentation")).toBe(false);
-    expect(() => requirePublicSpecId("evoker/augmentation")).toThrow(InternalSpecExposureError);
+    expect(requirePublicSpecId("evoker/augmentation")).toBe("evoker/augmentation");
+    // The narrowing boundary still refuses a name that is no specialization at all.
+    expect(() => requirePublicSpecId("warrior/arms" as never)).toThrow(InternalSpecExposureError);
     for (const id of PUBLIC_SPEC_IDS) expect(isPublicSpecId(id), id).toBe(true);
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
   });

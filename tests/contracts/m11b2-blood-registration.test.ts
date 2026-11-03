@@ -106,7 +106,7 @@ describe("identity and partition", () => {
     expect(isPublicSpecId("deathknight/blood")).toBe(true);
     // The internal-only half never holds Blood; it held Brewmaster Monk from
     // M11-C2 until M11-C4j, and holds Augmentation Evoker since M13-E.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["evoker/augmentation"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(requirePublicSpecId("deathknight/blood")).toBe("deathknight/blood");
@@ -136,6 +136,7 @@ describe("identity and partition", () => {
       "paladin/retribution",
       "deathknight/blood",
       "monk/brewmaster",
+      "evoker/augmentation",
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.specId)).toContain("deathknight/blood");
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
@@ -143,9 +144,9 @@ describe("identity and partition", () => {
     );
     // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(5);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(6);
     expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       BLOOD_DEATH_KNIGHT_REGISTRATION.publicLimits,
     );

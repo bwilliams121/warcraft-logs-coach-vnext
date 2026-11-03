@@ -91,7 +91,7 @@ describe("the supported identities", () => {
     expect(outcome("Paladin", "Brewmaster")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
-  it("recognizes exactly five specializations", () => {
+  it("recognizes exactly six specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
@@ -100,7 +100,15 @@ describe("the supported identities", () => {
       "paladin/retribution",
       "deathknight/blood",
       "monk/brewmaster",
+      "evoker/augmentation",
     ]);
+  });
+
+  it("resolves Evoker/Augmentation to evoker/augmentation (M13-F), and no other Evoker specialization", () => {
+    expect(outcome("Evoker", "Augmentation")).toBe("evoker/augmentation");
+    expect(outcome(" evoker ", "AUGMENTATION")).toBe("evoker/augmentation");
+    expect(outcome("Evoker", "Devastation")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Evoker", "Preservation")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
   it("does not let one Paladin specialization stand for another", () => {
@@ -192,7 +200,7 @@ describe("no unsupported identity falls through to a supported specialization", 
     // The canonical captured unsupported identity: A7R6 fight 7, actor 4.
     ["Warrior", "Arms"],
     // Other real specs.
-    ["Evoker", "Augmentation"],
+    ["Evoker", "Devastation"],
     ["Priest", "Discipline"],
     ["Death Knight", "Blood"],
     ["Warrior", "Fury"],

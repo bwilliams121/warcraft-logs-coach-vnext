@@ -263,19 +263,56 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After M13-F: what the public Augmentation support observations do not establish
+
+**Raised:** M13-F (2026-11-02).
+
+- **Observations, never a verdict.** `supportObservations` has no field for a
+  recipient-quality or timing conclusion. Publishing one needs an approved,
+  machine-usable model of that decision AND its own reviewed public shape; the
+  adapter refuses `ALLY_STATE_SUFFICIENT` until then.
+- **Production fights carry no certified coverage** (After M13-D), so on a
+  live request every ally-buff listing is expected to be OBSERVED_ONLY and
+  support time a lower bound or UNKNOWN. The wire says so; nothing upgrades it.
+- **Raid-night cells carry no support observations.** An Evoker cell is
+  AUTHORITY_NOT_AVAILABLE with its limits prose. A raid-night support block
+  would need its own reviewed cell shape.
+- **The TLDR and the report present no support facts.** They disclose
+  GAMEPLAY_NOT_ANALYZED; the facts are in `supportObservations` only. Whether
+  the report should summarize them is presentation work (M15-F at the earliest)
+  and must never rank them as findings.
+- **"Supported specializations" now names Augmentation Evoker.** The MCP
+  limits paragraph states it is observation-only. The sentence itself is
+  derived from the PUBLIC set and carries no per-specialization qualifier.
+- **Raid-night breadth is per player; owned-pet evidence is not.** Each focused
+  view's scope is now the player's own requirement plus preparation's.
+  `ownedPetEvidence` still takes the fight-level union, as before M13-F. Making
+  it per player too would change existing cells where a pet-evidence analyzer
+  shares a fight, and needs its own review.
+- **The promotion gates are scoped to authority-binding registrations.** A
+  PUBLIC registration that binds no authority is exempt because it can publish
+  no decision. If such a registration ever gains a binding, the gates apply to
+  it automatically.
+- **m9a's import scanner reads single-line imports only.** Observed in
+  M13-F: `tests/contracts/m9a-corpus-layering.test.ts` matches
+  `import … from` on one line, so a multi-line import (the Augmentation
+  evaluator's `src/support/` imports) is never seen, and its `support/`
+  token (meant for `tests/support/`) flags a single-line import of
+  `src/support/` as test machinery. M13-F avoided the import rather than
+  changing the guard; fixing the scanner is its own small change. The
+  m13a support-layering scanner spans lines and is unaffected.
+
+---
+
 ## After M13-E: what the Augmentation registration does not establish
 
 **Raised:** M13-E (2026-11-02).
 
-- **No public shape.** The registration is INTERNAL_ONLY and its support
-  facts ride on an unanalyzed envelope's payload that no projector reads.
-  Publishing them is M13-F: a reviewed public shape, with coverage
-  disclosure, UNKNOWN and NO_AUTHORITY_AVAILABLE preserved on the wire.
-- **No internal service entry.** The application service selects only
-  PUBLIC registrations, so the derived FULL_RAID scope is proven through the
-  registry, `deriveIngestionScopeFor` and the corpus, not through a live
-  `analyzeFight` run. When M13-F makes it reachable, the service derives
-  FULL_RAID from the same requirement.
+- **No public shape.** Resolved by M13-F (`supportObservations`, through the
+  registration's support-observation view; see "After M13-F").
+- **No internal service entry.** Resolved by M13-F: the registration is
+  PUBLIC, and a live `analyzeFight` run derives FULL_RAID from its declared
+  requirement.
 - **Production fights carry no certified coverage** (After M13-D), so over a
   production FULL_RAID ingestion the facts' listings and continuity rest on
   category coverage alone.
@@ -372,7 +409,7 @@ current total (5,748,495 bytes), with what each row buys.
 
 - **Not registered, not published.** Registration resolved by M13-E
   (INTERNAL_ONLY, FULL_RAID derived from `AUGMENTATION_EVOKER_REQUIRED_INPUTS`;
-  see "After M13-E"). A public shape for support observations is M13-F.
+  see "After M13-E"); published by M13-F (see "After M13-F").
 - **No coverage on the real evidence.** Partly resolved by M13-D (table
   certificates; see "After M13-D"). The category grants are still withheld.
 - **No recipient cooldown identity.** Resolved for the six pinned

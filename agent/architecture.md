@@ -10925,6 +10925,100 @@ registered tree with no APL artifact. The corpus gained the
 `SPEC_AUGMENTATION_EVOKER` layer and two cases (the registration's result for
 an unstated subject; its internal-only lookups).
 
+## M13-F — Public Augmentation support observations
+
+Milestone 13 (autopilot queue entry M13-F). Public contract: EXPECTED. No
+Warcraft Logs request.
+
+**The question.** Expose the trustworthy observable Augmentation support facts
+through the ONE application service, so REST and MCP carry identical
+semantics, without ever exposing a recipient-quality conclusion and without
+the report reading as a complete assessment of the Evoker.
+
+**Reachability: the five-site promotion.** `evoker/augmentation` moved to
+`PUBLIC_SPEC_IDS` by the same reviewed edit as every earlier promotion: the
+partition, the public contract's `specId` enum, the identity table, the
+`satisfies PublicSpecId` on `spec.ts`, and the registration's `exposure`. The
+internal-only set is empty again. A public request for an Evoker/Augmentation
+identity now dispatches the registration, and the service derives FULL_RAID
+from its declared requirement (unioned with preparation's), exactly as M13-E
+anticipated. Promotion changed reachability, not analysis: the facade, the
+evaluator and its result are unchanged.
+
+**The promotion-evidence gates do not apply to it, by construction.** The
+observation and discrimination gates measure observed DECISIONS. A
+registration that binds no decision authority can never return an ANALYZED
+result that passes ownership (`RESULT_CITES_FOREIGN_AUTHORITY`), so it
+publishes no decision and the gates have nothing to measure. The gate test
+therefore evaluates PUBLIC registrations that bind an authority, and pins the
+exempt set to exactly Augmentation, with only provider-less domains, every
+domain resolving `NO_PINNED_AUTHORITY_FOR_DOMAIN`, and a support-observation
+view. Any future row that binds an authority is gated as before.
+
+**The support-observation view** (`src/findings/support-observation-view.ts`).
+The unanalyzed counterpart of the observed-decision view: shared vocabulary,
+plain data, supplied by the REGISTRATION through an optional
+`supportObservationView` adapter the specialization owns
+(`src/specs/evoker/augmentation/support-observation-view.ts`). Shared code
+reads nothing else of the payload. `supportObservationViewOf` in the registry
+finds the owning registration and checks ownership first, exactly as
+`observedDecisionViewOf` does; `null` means only "this registration publishes
+none". The adapter reads its types through the evaluator, so `src/support/`
+keeps its one named consumer.
+
+- `supportDecisions` has only two shapes per family: NO_AUTHORITY_AVAILABLE
+  (with its reason) and UNKNOWN (a declared model, the recipient and evidence
+  category missing). There is no evaluated variant. `ALLY_STATE_SUFFICIENT`
+  (a model that could be applied) has no public form: the adapter throws, and
+  the service returns INTERNAL_ERROR rather than a quieter document.
+- Everything else is copied field by field: ally buff windows with recipient
+  identity, stated specialization, reviewed-cooldown lookup (`REVIEWED_SUBSET`),
+  positive-only survival, cooldown overlap with its listing completeness;
+  proven support time (`AT_LEAST` with caveats, or `UNKNOWN` with no number);
+  the Evoker's own windows; every support-ability cast with its listing
+  completeness. Ambiguous transitions are a count. The registry's internal
+  detail message and the primitives' revisions are not published.
+- No key named `state` (the contract reserves it); discriminators are
+  `observation`, `continuity`, `completeness`, `identification`, `overlap`,
+  `specification`, `bound` and `authorityStatus`.
+
+**The wire** (`analysis/1`, additive). `supportObservations` is optional and
+admitted only on AUTHORITY_NOT_AVAILABLE and INSUFFICIENT_EVIDENCE; the other
+unanalyzed variants and ANALYZED refuse it. ASSESSED carries `authority:
+WCL_OBSERVED_FACT`, `identityData.authority: RUNTIME_GAME_DATA`,
+`evaluatesSupportQuality: false` (a literal) and at least one support
+decision; NOT_ASSESSED carries the reason no fact was reconstructed
+(`SUBJECT_SPECIALIZATION_NOT_STATED`, `IDENTITY_REFUSED`,
+`RUNTIME_DATA_UNAVAILABLE`). Every vocabulary is a frozen enum validated by
+the final parse.
+
+**Coverage disclosure.** The document is AUTHORITY_NOT_AVAILABLE (result
+state PARTIAL), the TLDR headline and the report's coverage say
+GAMEPLAY_NOT_ANALYZED, `capability.partialCoverageIsExpected` holds, and the
+detail says the facts are not an assessment of the player. Every list carries
+its completeness, so OBSERVED_ONLY or UNKNOWN reaches the reader.
+`gameplaySupported: true` keeps its meaning (a registered analyzer ran).
+
+**Raid night: per-player breadth.** A raid night analyzes every present player
+over one shared, actor-unfiltered core. Before M13-F each focused view took
+the fight-level union of the selected analyzers' scopes; with an Evoker
+present that union is FULL_RAID, so a neighbour's registration would have
+widened every other player's view. Each focused view is now derived from that
+player's OWN analyzer requirement plus preparation's (preparation alone for an
+unanalyzable player), the same derivation the single-fight service makes. For
+every specialization other than Augmentation that is the same PLAYER_CONTEXT
+as before. Owned-pet evidence keeps its fight-level union, unchanged. Raid-night
+cells carry no support observations: an Evoker cell is AUTHORITY_NOT_AVAILABLE
+and its limits prose says so.
+
+**Real evidence.** The M13-A Evoker (M13AAUGAAAAAAAAA fight 1, actor 1)
+through the service and both transports: FULL_RAID retrieval, one dispatch per
+transport, identical REST and MCP documents, AUTHORITY_NOT_AVAILABLE, both
+support families NO_AUTHORITY_AVAILABLE, and every ally-buff listing
+OBSERVED_ONLY with support time never exact. The same capture without its
+fight context gives INSUFFICIENT_EVIDENCE with NOT_ASSESSED
+(SUBJECT_SPECIALIZATION_NOT_STATED).
+
 ## M14-A — Comparison timing alignment foundation (post-hoc)
 
 Milestone 14 (autopilot queue entry M14-A). Public contract: NONE. No

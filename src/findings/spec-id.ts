@@ -30,8 +30,8 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS ONE MEMBER AGAIN SINCE M13-E (Augmentation
- * Evoker; see the set below). Before that it held one member from M11-C2. It was empty
+ * THE INTERNAL-ONLY SET IS EMPTY AGAIN SINCE M13-F, which promoted Augmentation
+ * Evoker (it held that one member from M13-E). Before that it held one member from M11-C2. It was empty
  * from M10-D (Protection public) until M11-A4 (Retribution arrived internal),
  * empty again from M11-A5 until M11-B2 (Blood Death Knight arrived internal),
  * and empty again from M11-B12 (Blood moved to the public half after ten
@@ -77,6 +77,7 @@ export const PUBLIC_SPEC_IDS = Object.freeze([
   "paladin/retribution",
   "deathknight/blood",
   "monk/brewmaster",
+  "evoker/augmentation",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -129,13 +130,13 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * SUPPORT_TIMING, are provider-less (`authority-domain.ts`), so every
  * analysis it returns is AUTHORITY_NOT_AVAILABLE (or INSUFFICIENT_EVIDENCE)
  * carrying its observable support facts, never ANALYZED. It is registered so
- * its FULL_RAID requirement is derived like every other analyzer's. Its
- * public shape for those facts is a separate tranche (M13-F); until then the
- * id stays here.
+ * its FULL_RAID requirement is derived like every other analyzer's. M13-F
+ * moved it to `PUBLIC_SPEC_IDS` by the same five-site edit, together with the
+ * reviewed public shape of those facts (`supportObservations`). It is the
+ * first public row that is never ANALYZED, so the decision-evidence promotion
+ * gates do not apply to it: it publishes no decision. The set is empty again.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
-  "evoker/augmentation",
-] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

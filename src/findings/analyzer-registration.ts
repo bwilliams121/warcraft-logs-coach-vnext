@@ -56,7 +56,12 @@
  * UNKNOWN, and the services refuse it before any projection or aggregation.
  */
 
-import type { AnalyzedEnvelope, SpecAnalysisEnvelope, SpecAnalysisInput } from "./analysis-envelope.js";
+import type {
+  AnalyzedEnvelope,
+  SpecAnalysisEnvelope,
+  SpecAnalysisInput,
+  UnanalyzedEnvelope,
+} from "./analysis-envelope.js";
 import {
   resolveAuthorityForDomain,
   type AuthorityAccess,
@@ -71,6 +76,7 @@ import {
 } from "./decision-capability.js";
 import type { ObservedDecisionView } from "./observed-decision-view.js";
 import type { SpecId } from "./spec-id.js";
+import type { SupportObservationOutcome } from "./support-observation-view.js";
 import type { AnalyzerRequirement } from "../services/ingestion-scope.js";
 
 export type AnalyzerExposure = "INTERNAL_ONLY" | "PUBLIC";
@@ -127,6 +133,14 @@ export interface AnalyzerDefinition<TAnalysis extends SpecAnalysisEnvelope> {
   readonly observedDecisionView: (
     analysis: Extract<TAnalysis, { status: "ANALYZED" }>,
   ) => ObservedDecisionView;
+  /**
+   * The spec-owned projection of an UNANALYZED result's support observations
+   * (M13-F). Optional; omitted means the registration publishes none. Only a
+   * registration whose support decisions have no authority supplies one, and
+   * it is the only way shared code reads that payload.
+   */
+  readonly supportObservationView?:
+    ((analysis: Exclude<TAnalysis, { status: "ANALYZED" }>) => SupportObservationOutcome) | undefined;
 }
 
 /** The registration as orchestration holds it: envelope-typed, authority-closed, frozen. */
@@ -152,6 +166,8 @@ export interface AnalyzerRegistration {
   /** Runs the facade with this registration's authority. Never a lower-level evaluator. */
   readonly analyze: (input: SpecAnalysisInput) => SpecAnalysisEnvelope;
   readonly observedDecisionView: (analysis: AnalyzedEnvelope) => ObservedDecisionView;
+  /** See `AnalyzerDefinition.supportObservationView`. Absent when the registration publishes none. */
+  readonly supportObservationView?: ((analysis: UnanalyzedEnvelope) => SupportObservationOutcome) | undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -322,6 +338,9 @@ export function snapshotRegistration(registration: AnalyzerRegistration): Analyz
     authority,
     analyze: registration.analyze,
     observedDecisionView: registration.observedDecisionView,
+    ...(registration.supportObservationView === undefined
+      ? {}
+      : { supportObservationView: registration.supportObservationView }),
   });
 }
 
@@ -347,6 +366,7 @@ export function defineAnalyzerRegistration<TAnalysis extends SpecAnalysisEnvelop
     forDomain: (domain: Parameters<AuthorityAccess["forDomain"]>[0]) =>
       resolveAuthorityForDomain(declaredDomains, bindings, domain),
   });
+  const supportView = definition.supportObservationView;
 
   const registration: AnalyzerRegistration = Object.freeze({
     analyzerId: definition.analyzerId,
@@ -374,6 +394,16 @@ export function defineAnalyzerRegistration<TAnalysis extends SpecAnalysisEnvelop
       assertAnalysisOwnership(registration, analysis);
       return definition.observedDecisionView(analysis as Extract<TAnalysis, { status: "ANALYZED" }>);
     },
+    ...(supportView === undefined
+      ? {}
+      : {
+          // The same boundary as the decision view: ownership first, then the
+          // registration's own adapter over its own unanalyzed payload.
+          supportObservationView: (analysis: UnanalyzedEnvelope): SupportObservationOutcome => {
+            assertAnalysisOwnership(registration, analysis);
+            return supportView(analysis as Exclude<TAnalysis, { status: "ANALYZED" }>);
+          },
+        }),
   });
   return registration;
 }

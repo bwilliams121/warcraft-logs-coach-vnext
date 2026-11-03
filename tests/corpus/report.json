@@ -612,7 +612,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.augmentation-evoker-registration-is-internal-only",
+      "caseId": "application-service.augmentation-evoker-registration-is-public-since-m13-f",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },

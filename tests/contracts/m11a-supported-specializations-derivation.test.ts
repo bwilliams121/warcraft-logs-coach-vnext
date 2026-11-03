@@ -48,14 +48,15 @@ const TOOL_SOURCES: Record<string, string> = import.meta.glob("../../src/mcp/too
 });
 
 describe("the production sentence", () => {
-  it("is the reviewed snapshot for the five public specializations", () => {
+  it("is the reviewed snapshot for the six public specializations", () => {
     // Reviewed, not the rule. The third specialization became public in
-    // M11-A5, the fourth in M11-B12 and the fifth in M11-C4j; each time this line changed in the
+    // M11-A5, the fourth in M11-B12, the fifth in M11-C4j and the sixth
+    // (Augmentation Evoker, support observations only) in M13-F; each time this line changed in the
     // same commit as the five-site move, as the previous snapshot said it
     // would. The display names are in code-point order, which is why Blood
     // Death Knight sits second and not last.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
     );
   });
 

@@ -95,6 +95,7 @@ const FIVE_PUBLIC = [
   "paladin/retribution",
   "deathknight/blood",
   "monk/brewmaster",
+  "evoker/augmentation",
 ];
 
 const SOURCES: Record<string, string> = import.meta.glob("../../src/**/*.ts", {
@@ -128,7 +129,7 @@ describe("identity and partition", () => {
     expect(isSpecId("monk/brewmaster")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
     // Since M13-E the internal-only half holds Augmentation Evoker, never Brewmaster.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["evoker/augmentation"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(FIVE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");
@@ -173,9 +174,9 @@ describe("identity and partition", () => {
     );
     // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(5);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(6);
     expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       BREWMASTER_MONK_REGISTRATION.publicLimits,
     );

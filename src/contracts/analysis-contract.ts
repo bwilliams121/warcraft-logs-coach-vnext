@@ -73,6 +73,7 @@ export const PUBLIC_SPEC_IDS = [
   "paladin/retribution",
   "deathknight/blood",
   "monk/brewmaster",
+  "evoker/augmentation",
 ] as const satisfies readonly SpecId[];
 
 type ListedSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -276,6 +277,14 @@ export const IdentitySchema = z
  * widened this enum and NOTHING ELSE: no outcome, basis, blocker, exclusion
  * reason, status or capability value moved for Blood; M11-C4j likewise for
  * Brewmaster.
+ *
+ * `evoker/augmentation` joined in M13-F, also under `analysis/1`, with one
+ * difference stated plainly: its registration binds NO decision authority,
+ * so its documents are never ANALYZED. They are AUTHORITY_NOT_AVAILABLE (or
+ * INSUFFICIENT_EVIDENCE) and carry the optional `supportObservations` block.
+ * `gameplaySupported: true` keeps its one meaning — a registered analyzer ran
+ * — and is never "its gameplay was assessed": the status and the TLDR's
+ * GAMEPLAY_NOT_ANALYZED say that no decision was evaluated.
  */
 export const SpecializationSchema = z
   .object({
@@ -1275,6 +1284,475 @@ export const ReportSchema = z.discriminatedUnion("assessment", [
 ]);
 
 // ---------------------------------------------------------------------------
+// Support observations (M13-F)
+// ---------------------------------------------------------------------------
+
+/** Why no support fact was reconstructed. Nothing is claimed about support. */
+export const PUBLIC_SUPPORT_NOT_ASSESSED_REASONS = [
+  "SUBJECT_SPECIALIZATION_NOT_STATED",
+  "IDENTITY_REFUSED",
+  "RUNTIME_DATA_UNAVAILABLE",
+] as const;
+
+/** The shared evidence-gate vocabulary (`UNKNOWN_REASONS`). Every one is a stated limit, never a negative. */
+export const PUBLIC_SUPPORT_EVIDENCE_REASONS = [
+  "CAPABILITY_UNVERIFIED",
+  "CAPABILITY_NOT_OBSERVABLE",
+  "INSUFFICIENT_COVERAGE",
+  "INSUFFICIENT_SCOPE",
+  "NO_OBSERVATION",
+  "UNSUPPORTED_DERIVATION",
+  "AMBIGUOUS_INITIAL_STATE",
+  "NON_MONOTONIC_TIME",
+] as const;
+
+/** Why a buff window's start or end was not observed. */
+export const PUBLIC_SUPPORT_UNOBSERVED_BOUND_REASONS = [
+  "FIRST_OBSERVED_TRANSITION_IS_NOT_AN_APPLICATION",
+  "NO_REMOVAL_OBSERVED",
+  "REAPPLIED_WITHOUT_OBSERVED_REMOVAL",
+] as const;
+
+/** Why a window is not proven continuously active between its observations. */
+export const PUBLIC_SUPPORT_CONTINUITY_REASONS = [
+  ...PUBLIC_SUPPORT_EVIDENCE_REASONS,
+  "AMBIGUOUS_TRANSITION_INSIDE",
+  "UNPROVEN_STACK_REMOVAL_INSIDE",
+] as const;
+
+/** Why a window list may be missing windows. */
+export const PUBLIC_SUPPORT_WINDOW_LISTING_REASONS = [
+  ...PUBLIC_SUPPORT_EVIDENCE_REASONS,
+  "AMBIGUOUS_TRANSITIONS",
+] as const;
+
+/** Why the support-cast list may be missing casts. */
+export const PUBLIC_SUPPORT_CAST_LISTING_REASONS = [
+  ...PUBLIC_SUPPORT_EVIDENCE_REASONS,
+  "UNIDENTIFIED_SUBJECT_CAST",
+  "UNATTRIBUTED_CAST",
+] as const;
+
+/** Why a recipient's Warcraft Logs-stated specialization is not established. */
+export const PUBLIC_SUPPORT_SPECIALIZATION_UNKNOWN_REASONS = [
+  "NOT_STATED",
+  "ROSTER_NOT_ALIGNED",
+  "DUPLICATE_PARTICIPANT",
+  "NOT_IN_CATALOG",
+  "AMBIGUOUS_ACTOR_ID",
+  "NOT_A_PLAYER",
+  "ACTOR_RECORD_MALFORMED",
+  "IDENTITY_UNUSABLE",
+  "NOT_IN_FRIENDLY_ROSTER",
+] as const;
+
+export const PUBLIC_SUPPORT_ACTOR_TYPES = ["PLAYER", "PET", "NPC", "UNKNOWN"] as const;
+
+/** How a reviewed recipient cooldown entered the reviewed subset. */
+export const PUBLIC_SUPPORT_COOLDOWN_CRITERIA = [
+  "PINNED_COOLDOWN_AT_LEAST_60S",
+  "REVIEWED_HEALING_COOLDOWN",
+] as const;
+
+/** Why a proven support time may be less than the truth. */
+export const PUBLIC_SUPPORT_TIME_CAVEATS = [
+  "INITIAL_STATE_NOT_RESOLVED",
+  "LISTING_OBSERVED_ONLY",
+  "UNOBSERVED_WINDOW_BOUND",
+  "CONTINUITY_NOT_ESTABLISHED",
+] as const;
+
+/** Evidence categories a recipient-quality model could require (`EVIDENCE_CATEGORIES`). */
+export const PUBLIC_SUPPORT_EVIDENCE_CATEGORIES = [
+  "CASTS",
+  "AURAS",
+  "RESOURCES",
+  "DAMAGE",
+  "HEALING",
+  "ABSORBS",
+  "DEATHS",
+  "INTERRUPTS",
+  "DISPELS",
+  "SUMMONS",
+  "COMBATANT_INFO",
+  "ACTORS",
+  "ABILITIES",
+  "ENCOUNTER_PHASES",
+  "TARGETABILITY",
+  "TALENTS",
+  "GEAR",
+] as const;
+
+const SupportSpanSchema = z
+  .object({
+    fromReportTimeMs: z.number(),
+    toReportTimeMs: z.number(),
+    upperBound: z.enum(["INCLUSIVE", "EXCLUSIVE"]),
+  })
+  .strict();
+
+const SupportWindowBoundSchema = z.discriminatedUnion("observation", [
+  z
+    .object({
+      observation: z.literal("OBSERVED"),
+      reportTimeMs: z.number(),
+      rawType: z.string().min(1),
+      evidence: EvidenceLocatorSchema,
+    })
+    .strict(),
+  z
+    .object({
+      observation: z.literal("NOT_OBSERVED"),
+      reason: z.enum(PUBLIC_SUPPORT_UNOBSERVED_BOUND_REASONS),
+    })
+    .strict(),
+]);
+
+const SupportRecipientSchema = z.discriminatedUnion("catalog", [
+  z
+    .object({
+      actorId: z.number().int(),
+      instanceId: z.number().int().nullable(),
+      catalog: z.literal("NOT_IN_CATALOG"),
+    })
+    .strict(),
+  z
+    .object({
+      actorId: z.number().int(),
+      instanceId: z.number().int().nullable(),
+      catalog: z.literal("LISTED"),
+      actorType: z.enum(PUBLIC_SUPPORT_ACTOR_TYPES),
+      /** The catalog's class string for a player, verbatim. */
+      subType: z.string().nullable(),
+      ownership: z.discriminatedUnion("kind", [
+        z.object({ kind: z.literal("NOT_A_PET") }).strict(),
+        z.object({ kind: z.literal("OWNED_BY"), ownerActorId: z.number().int() }).strict(),
+        z.object({ kind: z.literal("OWNER_NOT_STATED") }).strict(),
+      ]),
+      isSupporter: z.boolean(),
+    })
+    .strict(),
+]);
+
+const supportWindowFields = {
+  recipient: SupportRecipientSchema,
+  start: SupportWindowBoundSchema,
+  end: SupportWindowBoundSchema,
+  /** Refreshes and stack changes inside the window, as evidence only. */
+  activeObservations: z.array(EvidenceLocatorSchema),
+  /** Earliest to latest observed transition: active only AT those instants unless continuity is ESTABLISHED. */
+  observedSpan: SupportSpanSchema,
+  continuity: z.discriminatedUnion("continuity", [
+    z.object({ continuity: z.literal("ESTABLISHED") }).strict(),
+    z
+      .object({
+        continuity: z.literal("NOT_ESTABLISHED"),
+        reason: z.enum(PUBLIC_SUPPORT_CONTINUITY_REASONS),
+      })
+      .strict(),
+  ]),
+  /** The only span proven continuously active; null unless continuity is ESTABLISHED. */
+  activeSpan: SupportSpanSchema.nullable(),
+};
+
+const SupportTimedEvidenceSchema = z
+  .object({
+    reportTimeMs: z.number(),
+    /** Same report millisecond as a span bound: which came first is not known. */
+    atSpanBound: z.boolean(),
+    evidence: EvidenceLocatorSchema,
+  })
+  .strict();
+
+/**
+ * One buff window on one ally, with what was observed of the ally during it.
+ * Deaths are positive-only (`NO_DEATH_OBSERVED` is never "alive"), and the
+ * cooldown casts are of a REVIEWED SUBSET (never "no cooldown was used").
+ */
+const SupportAllyWindowSchema = z
+  .object({
+    ...supportWindowFields,
+    recipientSpecialization: z.discriminatedUnion("specification", [
+      z
+        .object({
+          specification: z.literal("STATED"),
+          className: z.string().min(1),
+          specName: z.string().min(1),
+        })
+        .strict(),
+      z
+        .object({
+          specification: z.literal("UNKNOWN"),
+          reason: z.enum(PUBLIC_SUPPORT_SPECIALIZATION_UNKNOWN_REASONS),
+        })
+        .strict(),
+    ]),
+    recipientCooldownIdentity: z.union([
+      z
+        .object({
+          identification: z.literal("IDENTIFIED"),
+          rosterKey: z.string().min(1),
+          abilityGameIds: z.array(z.number().int().positive()).min(1),
+          coverage: z.literal("REVIEWED_SUBSET"),
+          criterion: z.enum(PUBLIC_SUPPORT_COOLDOWN_CRITERIA),
+          datasetId: z.string().min(1),
+          artifactRevision: z.string().min(1),
+        })
+        .strict(),
+      z
+        .object({
+          identification: z.literal("UNKNOWN"),
+          reason: z.literal("SPECIALIZATION_NOT_ESTABLISHED"),
+          specializationReason: z.enum(PUBLIC_SUPPORT_SPECIALIZATION_UNKNOWN_REASONS),
+        })
+        .strict(),
+      z.object({ identification: z.literal("UNKNOWN"), reason: z.literal("REGISTRY_UNAVAILABLE") }).strict(),
+      z
+        .object({
+          identification: z.literal("UNSUPPORTED"),
+          reason: z.literal("NO_REVIEWED_COOLDOWN_IDENTITY"),
+          className: z.string().min(1),
+          specName: z.string().min(1),
+        })
+        .strict(),
+    ]),
+    survival: z
+      .object({
+        inSpan: z.discriminatedUnion("observation", [
+          z
+            .object({
+              observation: z.literal("DEATH_OBSERVED_IN_SPAN"),
+              deaths: z.array(SupportTimedEvidenceSchema).min(1),
+            })
+            .strict(),
+          z.object({ observation: z.literal("NO_DEATH_OBSERVED") }).strict(),
+        ]),
+        nextDeathAfterEnd: z.discriminatedUnion("observation", [
+          z
+            .object({
+              observation: z.literal("OBSERVED"),
+              reportTimeMs: z.number(),
+              msAfterObservedEnd: z.number().positive(),
+              evidence: EvidenceLocatorSchema,
+            })
+            .strict(),
+          z.object({ observation: z.literal("NONE_OBSERVED") }).strict(),
+          z.object({ observation: z.literal("END_NOT_OBSERVED") }).strict(),
+        ]),
+      })
+      .strict(),
+    cooldownOverlap: z.discriminatedUnion("overlap", [
+      z.object({ overlap: z.literal("NO_COOLDOWN_IDENTITY") }).strict(),
+      z
+        .object({
+          overlap: z.literal("CONTINUITY_NOT_ESTABLISHED"),
+          reason: z.enum(PUBLIC_SUPPORT_CONTINUITY_REASONS),
+        })
+        .strict(),
+      z
+        .object({
+          overlap: z.literal("LISTED"),
+          casts: z.array(
+            SupportTimedEvidenceSchema.extend({ abilityGameId: z.number().int().positive() }).strict(),
+          ),
+          listing: z.union([
+            z.object({ completeness: z.literal("COMPLETE") }).strict(),
+            z
+              .object({
+                completeness: z.literal("OBSERVED_ONLY"),
+                reason: z.enum(PUBLIC_SUPPORT_EVIDENCE_REASONS),
+              })
+              .strict(),
+            z
+              .object({
+                completeness: z.literal("OBSERVED_ONLY"),
+                reason: z.literal("AMBIGUOUS_CASTS"),
+                unidentifiedCasts: z.number().int().nonnegative(),
+                unattributedCasts: z.number().int().nonnegative(),
+              })
+              .strict(),
+          ]),
+        })
+        .strict(),
+    ]),
+  })
+  .strict();
+
+const SupportWindowListingSchema = z.discriminatedUnion("completeness", [
+  z.object({ completeness: z.literal("COMPLETE") }).strict(),
+  z
+    .object({
+      completeness: z.literal("OBSERVED_ONLY"),
+      reason: z.enum(PUBLIC_SUPPORT_WINDOW_LISTING_REASONS),
+    })
+    .strict(),
+]);
+
+/** A lower bound, or nothing proven. UNKNOWN carries no number, so it is never "0 ms". */
+const SupportProvenAmountSchema = z.discriminatedUnion("bound", [
+  z
+    .object({
+      bound: z.literal("AT_LEAST"),
+      ms: z.number().nonnegative(),
+      caveats: z.array(z.enum(PUBLIC_SUPPORT_TIME_CAVEATS)).min(1),
+    })
+    .strict(),
+  z
+    .object({
+      bound: z.literal("UNKNOWN"),
+      caveats: z.array(z.enum(PUBLIC_SUPPORT_TIME_CAVEATS)).min(1),
+    })
+    .strict(),
+]);
+
+const SupportAllyBuffSchema = z
+  .object({
+    /** The specialization's own ability token. */
+    ability: z.string().min(1),
+    auraAbilityGameId: z.number().int().positive(),
+    listing: SupportWindowListingSchema,
+    /** Transitions that might be the supporter's but cannot be attributed. Never counted as support. */
+    ambiguousTransitions: z.number().int().nonnegative(),
+    windows: z.array(SupportAllyWindowSchema),
+    supportTime: z
+      .object({
+        anyRecipient: SupportProvenAmountSchema,
+        byRecipient: z.array(
+          z
+            .object({
+              actorId: z.number().int(),
+              instanceId: z.number().int().nullable(),
+              windows: z.number().int().positive(),
+              proven: SupportProvenAmountSchema,
+            })
+            .strict(),
+        ),
+        peakConcurrentWindows: z.discriminatedUnion("bound", [
+          z.object({ bound: z.literal("AT_LEAST"), count: z.number().int().nonnegative() }).strict(),
+          z.object({ bound: z.literal("UNKNOWN") }).strict(),
+        ]),
+      })
+      .strict(),
+  })
+  .strict();
+
+const SupportSelfBuffSchema = z
+  .object({
+    ability: z.string().min(1),
+    auraAbilityGameId: z.number().int().positive(),
+    listing: SupportWindowListingSchema,
+    ambiguousTransitions: z.number().int().nonnegative(),
+    windows: z.array(z.object(supportWindowFields).strict()),
+  })
+  .strict();
+
+/**
+ * Why each support decision family was not evaluated. Only the two refusals
+ * exist: NO_AUTHORITY_AVAILABLE (no standard) and UNKNOWN (a standard without
+ * the evidence to apply it). There is no evaluated variant, so a
+ * recipient-quality or timing conclusion cannot be expressed here.
+ */
+export const SupportDecisionSchema = z.union([
+  z
+    .object({
+      category: z.literal("SUPPORT_TARGETING"),
+      authorityStatus: z.literal("NO_AUTHORITY_AVAILABLE"),
+      reason: z.literal("NO_APPROVED_RECIPIENT_QUALITY_MODEL"),
+    })
+    .strict(),
+  z
+    .object({
+      category: z.literal("SUPPORT_TARGETING"),
+      authorityStatus: z.literal("UNKNOWN"),
+      modelId: z.string().min(1),
+      missing: z
+        .object({
+          recipientActorId: z.number().int(),
+          evidenceCategory: z.enum(PUBLIC_SUPPORT_EVIDENCE_CATEGORIES),
+          reason: z.enum(PUBLIC_SUPPORT_EVIDENCE_REASONS),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      category: z.literal("SUPPORT_TIMING"),
+      authorityStatus: z.literal("NO_AUTHORITY_AVAILABLE"),
+      reason: z.literal("NO_APPROVED_SUPPORT_TIMING_STANDARD"),
+    })
+    .strict(),
+]);
+
+/**
+ * Observed support facts of a support specialization whose support decisions
+ * have no authority (M13-F; Augmentation Evoker). Observations
+ * (`WCL_OBSERVED_FACT`) read with pinned identity data
+ * (`RUNTIME_GAME_DATA`), never a verdict:
+ *
+ * - `evaluatesSupportQuality` is pinned `false`: nothing here says a
+ *   recipient, a timing or an uptime was good, bad, right or wrong;
+ * - every list carries its own completeness: OBSERVED_ONLY or UNKNOWN means
+ *   items may be missing, and only COMPLETE permits reading an absence;
+ * - an UNKNOWN amount carries no number.
+ *
+ * Present only on documents of a registration that publishes support
+ * observations, beside an unanalyzed status: it is never a gameplay
+ * analysis, and its presence never makes the document a complete assessment.
+ */
+export const SupportObservationsSchema = z.discriminatedUnion("assessment", [
+  z
+    .object({
+      assessment: z.literal("ASSESSED"),
+      revision: z.literal("support-observations/1"),
+      authority: z.literal("WCL_OBSERVED_FACT"),
+      identityData: z
+        .object({
+          authority: z.literal("RUNTIME_GAME_DATA"),
+          datasetId: z.string().min(1),
+          artifactRevision: z.string().min(1),
+        })
+        .strict(),
+      evaluatesSupportQuality: z.literal(false),
+      supportDecisions: z.array(SupportDecisionSchema).min(1),
+      allyBuffs: z.array(SupportAllyBuffSchema),
+      selfBuffs: z.array(SupportSelfBuffSchema),
+      supportCasts: z
+        .object({
+          listing: z.discriminatedUnion("completeness", [
+            z.object({ completeness: z.literal("COMPLETE") }).strict(),
+            z
+              .object({
+                completeness: z.literal("UNKNOWN"),
+                reason: z.enum(PUBLIC_SUPPORT_CAST_LISTING_REASONS),
+                unidentifiedCasts: z.number().int().nonnegative(),
+                unattributedCasts: z.number().int().nonnegative(),
+              })
+              .strict(),
+          ]),
+          casts: z.array(
+            z
+              .object({
+                ability: z.string().min(1),
+                abilityGameId: z.number().int().positive(),
+                reportTimeMs: z.number(),
+                evidence: EvidenceLocatorSchema,
+              })
+              .strict(),
+          ),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      assessment: z.literal("NOT_ASSESSED"),
+      revision: z.literal("support-observations/1"),
+      reason: z.enum(PUBLIC_SUPPORT_NOT_ASSESSED_REASONS),
+    })
+    .strict(),
+]);
+
+// ---------------------------------------------------------------------------
 // The result
 // ---------------------------------------------------------------------------
 
@@ -1372,10 +1850,28 @@ function unanalyzedResult<T extends (typeof PUBLIC_ANALYSIS_STATUSES)[number]>(s
     .strict();
 }
 
+/**
+ * The two statuses a support registration returns (M13-F) also admit its
+ * `supportObservations`. Observed facts, like `preparation`: no decision, no
+ * coverage denominator, nothing a reader can take for "no mistakes found".
+ * Optional, so adding it is not a version change (the rule above); emitted
+ * only by a registration that publishes support observations.
+ */
+function unanalyzedSupportResult<T extends "AUTHORITY_NOT_AVAILABLE" | "INSUFFICIENT_EVIDENCE">(status: T) {
+  return z
+    .object({
+      ...commonFields,
+      status: z.literal(status),
+      detail: z.string().min(1),
+      supportObservations: SupportObservationsSchema.optional(),
+    })
+    .strict();
+}
+
 export const SpecNotSupportedResultSchema = unanalyzedResult("SPEC_NOT_SUPPORTED");
-export const AuthorityNotAvailableResultSchema = unanalyzedResult("AUTHORITY_NOT_AVAILABLE");
+export const AuthorityNotAvailableResultSchema = unanalyzedSupportResult("AUTHORITY_NOT_AVAILABLE");
 export const ProfileNotResolvedResultSchema = unanalyzedResult("PROFILE_NOT_RESOLVED");
-export const InsufficientEvidenceResultSchema = unanalyzedResult("INSUFFICIENT_EVIDENCE");
+export const InsufficientEvidenceResultSchema = unanalyzedSupportResult("INSUFFICIENT_EVIDENCE");
 
 /**
  * The public analysis result.
@@ -1403,3 +1899,4 @@ export type PublicEvidenceLocator = z.infer<typeof EvidenceLocatorSchema>;
 export type PublicDiagnosis = z.infer<typeof DiagnosisSchema>;
 export type PublicTldr = z.infer<typeof TldrSchema>;
 export type PublicReport = z.infer<typeof ReportSchema>;
+export type PublicSupportObservations = z.infer<typeof SupportObservationsSchema>;

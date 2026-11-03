@@ -616,11 +616,13 @@ Warcraft Logs table results under the existing M11-G2 coverage rules.
 ### M13-E: Augmentation evaluator orchestration and registration (internal)
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: M13-C, M13-D
 branch: autopilot/m13-e
 wcl: NONE
 publicContract: NONE
+pr: 35
+mergeSha: cda0e0957712ed6a46a65b360ebe729b1218a7a7
 ```
 
 **Direction.** `agent/follow-ups.md` "After M13-A" (not registered, not
@@ -640,11 +642,18 @@ published): registering needs FULL_RAID derivation from
 ### M13-F: Public Augmentation support observations
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: M13-E
+branch: autopilot/m13-f
 wcl: NONE
 publicContract: EXPECTED
 ```
+
+**Owner resolution (2026-11-02).** M13-F attempt 1 stopped for the owner
+because the local Codex CLI login had been revoked (401 `token_revoked`), so
+the required local review could not run. The owner re-authenticated Codex,
+and a live read-only Codex request succeeded. Resume M13-F from its existing
+branch: local review, commit, PR, CI.
 
 **Scope.** Expose the trustworthy observable Augmentation support facts
 through the shared application service, so REST and MCP get identical
