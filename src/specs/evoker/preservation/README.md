@@ -1,9 +1,13 @@
-# Preservation Evoker (HEAL-B4, INTERNAL_ONLY)
+# Preservation Evoker (HEAL-B4; PUBLIC since HEAL-B4P)
 
 A healer specialization evaluator on the healer architecture Restoration
 Shaman proved (M12-D, HEAL-A) and HEAL-B1 repeated, and its own
-representative. Registered INTERNAL_ONLY: a public request cannot reach it.
-Its public shape and promotion are HEAL-B4P's. It is not an APL
+representative. Registered INTERNAL_ONLY in HEAL-B4 and PUBLIC since HEAL-B4P,
+after passing the healer promotion gate
+(`tests/contracts/heal-ap-healer-promotion-gate.test.ts`) on the Preservation
+Evoker of gtKb2xHn87pNcFfW fight 22 (actor 15: three Stasis casts and one
+Rewind, the listing COMPLETE). It publishes `healerFindings` through the shared
+healer view (`src/findings/healer-view-projection.ts`). It is not an APL
 specialization: there is no SimulationCraft authority and no APL artifact.
 
 ## Registration
@@ -94,3 +98,14 @@ Observed in committed evidence: the Preservation Evoker of the M13-A capture
 288,323) and Rewind at 284,626. That capture is filtered, so its listing is
 UNKNOWN, never "these were all". No committed capture holds a Dream Flight
 cast.
+
+## Real evidence (HEAL-B4P)
+
+`tests/evidence/artifacts/wcl-events/wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-{0-20,20-165,165-285}.json`:
+every cast, begincast and empower envelope sourced by or targeting actor 15
+over the whole fight, cut from the three adjoining retained captures of that
+fight (M9-C2 opener, M11-C4, M11-C4b; no new Warcraft Logs request). CASTS is
+granted for actor 15 only. Actor 15 casts Stasis at 2,418,645, 2,516,125 and
+2,625,623 and Rewind at 2,515,073. Its three Stasis releases (370564, at
+2,445,251, 2,539,064 and 2,652,153) are never uses. None of its empower
+envelopes names an identified ability, and its Dream Breaths are not uses.

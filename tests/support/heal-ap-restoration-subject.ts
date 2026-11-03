@@ -5,7 +5,9 @@
  * the public tests drive it through. HEAL-B1P: the same composition for the
  * fight's Holy Paladin (actor 1) and Mistweaver Monk (actor 9), whose
  * whole-fight cast segments were cut from the same capture. HEAL-B2P: the same
- * for the fight's Holy Priest (actor 2).
+ * for the fight's Holy Priest (actor 2). HEAL-B4P: the same composition for the
+ * Preservation Evoker of gtKb2xHn87pNcFfW fight 22 (actor 15), the one retained
+ * whole fight that holds one; its context is the regression corpus's.
  *
  * Nothing here is fetched. The two fights are the same capture: `fight` at its
  * retrieved PLAYER_CONTEXT breadth, and `rostered` with the committed fight
@@ -44,6 +46,11 @@ export const HOLY_PRIEST_SUBJECT_ACTOR = 2;
 export const DIVINE_HYMN = 64843;
 export const APOTHEOSIS = 200183;
 export const FLASH_HEAL = 2061;
+/** HEAL-B4P: gtKb fight 22's Preservation Evoker and its identified healing cooldowns. */
+export const PRESERVATION_SUBJECT_ACTOR = 15;
+export const REWIND = 363534;
+export const STASIS = 370537;
+export const DREAM_BREATH = 355936;
 
 const segmentsOf = (slug: string, actorId: number) => [
   `wcl-b1pm-fight-48-${slug}-${String(actorId)}-casts.seg-0-180`,
@@ -96,14 +103,32 @@ export async function loadHolyPriestSubject(): Promise<RestorationSubject> {
   });
 }
 
+/** HEAL-B4P: gtKb fight 22's Preservation Evoker, composed as the Restoration Shaman is. */
+export async function loadPreservationSubject(): Promise<RestorationSubject> {
+  return await loadCanonicalHealerSubject({
+    actorId: PRESERVATION_SUBJECT_ACTOR,
+    segments: [
+      "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20",
+      "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165",
+      "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285",
+    ],
+    pseudonym: "Subjectevoker",
+    contextArtifactId: "wcl-fight-context-gtkb-fight-22",
+  });
+}
+
 async function loadCanonicalHealerSubject(subjectOf: {
   readonly actorId: number;
   readonly segments: readonly string[];
   readonly pseudonym: string;
+  readonly contextArtifactId?: string;
 }): Promise<RestorationSubject> {
   const loaded = await loadCommittedEvidenceArchive();
   if (!loaded.ok) throw new Error(loaded.errors.map((error) => error.message).join("\n"));
-  const context = loaded.archive.referenceableArtifacts.find((entry) => entry.record.artifactId === CONTEXT);
+  const contextId = subjectOf.contextArtifactId ?? CONTEXT;
+  const context = loaded.archive.referenceableArtifacts.find(
+    (entry) => entry.record.artifactId === contextId,
+  );
   if (context === undefined) throw new Error("no fight context");
   const row = (
     context.json as {
@@ -121,7 +146,7 @@ async function loadCanonicalHealerSubject(subjectOf: {
     }
   ).reportData.report.fights[0];
   if (row === undefined) throw new Error("no fight row");
-  const composed = bundleOf(loaded.archive, subjectOf.segments, [], { catalogArtifactId: CONTEXT }).fight;
+  const composed = bundleOf(loaded.archive, subjectOf.segments, [], { catalogArtifactId: contextId }).fight;
   // The archive's names are sanitized pseudonyms ("Actor122"), which a public
   // plan cannot name: the request parser accepts letters only. The subject's
   // pseudonym is replaced by another, letters-only and unique in the roster.

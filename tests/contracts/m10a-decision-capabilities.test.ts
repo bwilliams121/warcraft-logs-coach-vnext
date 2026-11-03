@@ -105,7 +105,7 @@ describe("the ingestion requirement is derived from the declaration", () => {
     expect(both.contributingAnalyzers).toEqual([fixture.analyzerId]);
   });
 
-  it("the build's public requirement set is the ten public analyzers' derived requirements", () => {
+  it("the build's public requirement set is the eleven public analyzers' derived requirements", () => {
     expect(ENABLED_ANALYSIS_REQUIREMENTS).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
@@ -158,6 +158,11 @@ describe("the ingestion requirement is derived from the declaration", () => {
       }, // HEAL-B2P: Holy Priest, FULL_RAID by its declared healer inputs, no resources.
       {
         analyzerId: "priest-holy-healer-findings",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
+      }, // HEAL-B4P: Preservation Evoker, FULL_RAID by its declared healer inputs, no resources.
+      {
+        analyzerId: "evoker-preservation-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
       },

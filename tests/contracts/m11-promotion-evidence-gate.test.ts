@@ -224,9 +224,9 @@ describe("the gate's inputs", () => {
  * A registration that binds none can never return an ANALYZED result that
  * passes ownership (an ANALYZED envelope must cite an authority its
  * registration binds: RESULT_CITES_FOREIGN_AUTHORITY), so it publishes no
- * decision and has nothing for these gates to measure. Five such rows exist
+ * decision and has nothing for these gates to measure. Six such rows exist
  * (Augmentation Evoker since M13-F; Restoration Shaman since HEAL-AP, Holy
- * Paladin and Mistweaver Monk since HEAL-B1P, and Holy Priest since HEAL-B2P,
+ * Paladin and Mistweaver Monk since HEAL-B1P, Holy Priest since HEAL-B2P, and Preservation Evoker since HEAL-B4P,
  * which the separate healer promotion gate governs); see the describe block
  * after PUBLIC mode.
  */
@@ -237,13 +237,14 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
     (row) => row.exposure === "PUBLIC" && bindsDecisionAuthority(row),
   );
 
-  it("evaluates exactly the PUBLIC partition, less the five registrations that bind no decision authority", () => {
+  it("evaluates exactly the PUBLIC partition, less the six registrations that bind no decision authority", () => {
     const exempt: readonly string[] = [
       "evoker/augmentation",
       "shaman/restoration",
       "paladin/holy",
       "monk/mistweaver",
       "priest/holy",
+      "evoker/preservation",
     ];
     expect(publicRegistrations.map((row) => row.specId).sort()).toEqual(
       [...PUBLIC_SPEC_IDS].filter((id) => !exempt.includes(id)).sort(),
@@ -611,7 +612,7 @@ describe("M11-C4j: Brewmaster Monk passes BOTH global gates in PUBLIC mode, on t
   });
 });
 
-describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P: a PUBLIC registration that binds no decision authority publishes no decision, so these gates do not apply", () => {
+describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P / HEAL-B4P: a PUBLIC registration that binds no decision authority publishes no decision, so these gates do not apply", () => {
   const exempt = PRODUCTION_CATALOG.registrations.filter(
     (row) => row.exposure === "PUBLIC" && !bindsDecisionAuthority(row),
   );
@@ -621,20 +622,27 @@ describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P: a PUBLIC registration that bind
     return row;
   };
 
-  it("is exactly Augmentation Evoker and the four public healers, each declaring only provider-less domains", () => {
+  it("is exactly Augmentation Evoker and the five public healers, each declaring only provider-less domains", () => {
     expect(exempt.map((row) => row.specId)).toEqual([
       "evoker/augmentation",
       "shaman/restoration",
       "paladin/holy",
       "monk/mistweaver",
       "priest/holy",
+      "evoker/preservation",
     ]);
     expect(
       rowOf("evoker/augmentation")
         .capabilities.map((capability) => capability.domain)
         .sort(),
     ).toEqual(["SUPPORT_TARGETING", "SUPPORT_TIMING"]);
-    for (const healer of ["shaman/restoration", "paladin/holy", "monk/mistweaver", "priest/holy"]) {
+    for (const healer of [
+      "shaman/restoration",
+      "paladin/holy",
+      "monk/mistweaver",
+      "priest/holy",
+      "evoker/preservation",
+    ]) {
       expect(rowOf(healer).capabilities.map((capability) => capability.domain)).toEqual([
         "COOLDOWN_ASSIGNMENT",
         "HEALING_COOLDOWN",
@@ -651,7 +659,13 @@ describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P: a PUBLIC registration that bind
     // Augmentation, healer findings for each healer, never both.
     expect(typeof rowOf("evoker/augmentation").supportObservationView).toBe("function");
     expect(rowOf("evoker/augmentation").healerView).toBeUndefined();
-    for (const healer of ["shaman/restoration", "paladin/holy", "monk/mistweaver", "priest/holy"]) {
+    for (const healer of [
+      "shaman/restoration",
+      "paladin/holy",
+      "monk/mistweaver",
+      "priest/holy",
+      "evoker/preservation",
+    ]) {
       expect(typeof rowOf(healer).healerView, healer).toBe("function");
       expect(rowOf(healer).supportObservationView, healer).toBeUndefined();
     }
@@ -662,9 +676,9 @@ describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P: a PUBLIC registration that bind
     // every PUBLIC row with a healer view to its own real-evidence gate, and
     // fails when one has no pinned gate subject. Exemption here is never
     // exemption from evidence. HEAL-B1P: Holy Paladin and Mistweaver Monk each
-    // have a pinned gate subject there; HEAL-B2P: Holy Priest too.
+    // have a pinned gate subject there; HEAL-B2P: Holy Priest too; HEAL-B4P: Preservation Evoker too.
     expect(exempt.filter((candidate) => candidate.healerView !== undefined).map((row) => row.specId)).toEqual(
-      ["shaman/restoration", "paladin/holy", "monk/mistweaver", "priest/holy"],
+      ["shaman/restoration", "paladin/holy", "monk/mistweaver", "priest/holy", "evoker/preservation"],
     );
   });
 
@@ -690,6 +704,7 @@ describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P: a PUBLIC registration that bind
       "paladin/holy",
       "monk/mistweaver",
       "priest/holy",
+      "evoker/preservation",
     ] as const) {
       const readiness = evaluate(tiers, specId, "PUBLIC", publicPairing(specId));
       expect(readiness.qualifyingAssertions, specId).toEqual([]);
@@ -708,13 +723,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // Paladin and Mistweaver Monk through the healer gate; Restoration Druid
     // has no retained evidence. HEAL-B2 added Holy Priest, and HEAL-B2P
     // promoted it through the healer gate. HEAL-B3 added Discipline Priest,
-    // and HEAL-B4 Preservation Evoker.
+    // HEAL-B4 Preservation Evoker, and HEAL-B4P promoted that through the healer gate.
     // The synthetic module below still exercises the branch.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
-      "druid/restoration",
-      "priest/discipline",
-      "evoker/preservation",
-    ]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
   });

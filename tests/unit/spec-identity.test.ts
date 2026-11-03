@@ -94,7 +94,7 @@ describe("the supported identities", () => {
     expect(outcome("Paladin", "Brewmaster")).toBe("UNSUPPORTED_SPECIALIZATION");
   });
 
-  it("recognizes exactly ten specializations", () => {
+  it("recognizes exactly eleven specializations", () => {
     // Pinned. This table is the entire definition of "which specializations this
     // build recognizes", and it should be impossible to grow by accident.
     expect(Object.keys(SUPPORTED_SPEC_IDENTITIES)).toEqual([
@@ -108,14 +108,15 @@ describe("the supported identities", () => {
       "paladin/holy",
       "monk/mistweaver",
       "priest/holy",
+      "evoker/preservation",
     ]);
   });
 
-  it("resolves Evoker/Augmentation to evoker/augmentation (M13-F), and no other Evoker specialization", () => {
+  it("resolves Evoker/Augmentation (M13-F) and Evoker/Preservation (HEAL-B4P) each to its own id, and no other Evoker specialization", () => {
     expect(outcome("Evoker", "Augmentation")).toBe("evoker/augmentation");
     expect(outcome(" evoker ", "AUGMENTATION")).toBe("evoker/augmentation");
     expect(outcome("Evoker", "Devastation")).toBe("UNSUPPORTED_SPECIALIZATION");
-    expect(outcome("Evoker", "Preservation")).toBe("UNSUPPORTED_SPECIALIZATION");
+    expect(outcome("Evoker", "Preservation")).toBe("evoker/preservation");
   });
 
   it("does not let one Paladin specialization stand for another", () => {
@@ -218,8 +219,6 @@ describe("no unsupported identity falls through to a supported specialization", 
     ["Warrior", "Arms"],
     // Other real specs.
     ["Evoker", "Devastation"],
-    // Preservation Evoker: registered INTERNAL_ONLY since HEAL-B4, never publicly resolvable.
-    ["Evoker", "Preservation"],
     // Discipline Priest: registered INTERNAL_ONLY since HEAL-B3, never publicly resolvable.
     ["Priest", "Discipline"],
     ["Death Knight", "Blood"],

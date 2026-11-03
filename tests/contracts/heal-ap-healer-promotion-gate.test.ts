@@ -50,7 +50,9 @@
  * INTERNAL_ONLY. HEAL-B2P added Holy Priest the same way (actor 2, cut from
  * the same capture). HEAL-B3P added no subject: no committed or retained
  * capture holds a Discipline Priest's whole-fight casts, so it stays
- * INTERNAL_ONLY.
+ * INTERNAL_ONLY. HEAL-B4P added Preservation Evoker the same way on another
+ * whole fight (gtKb fight 22 actor 15, cut from its three adjoining retained
+ * captures).
  */
 
 import { beforeAll, describe, expect, it } from "vitest";
@@ -70,6 +72,7 @@ import {
   AVENGING_WRATH,
   CHAIN_HEAL,
   DIVINE_HYMN,
+  DREAM_BREATH,
   FLASH_HEAL,
   HOLY_PALADIN_SUBJECT_ACTOR,
   HOLY_PRIEST_SUBJECT_ACTOR,
@@ -78,14 +81,18 @@ import {
   loadHolyPaladinSubject,
   loadHolyPriestSubject,
   loadMistweaverSubject,
+  loadPreservationSubject,
   loadRestorationSubject,
   MISTWEAVER_SUBJECT_ACTOR,
+  PRESERVATION_SUBJECT_ACTOR,
   requestPlan,
   RESTORAL,
   RESTORATION_SUBJECT_ACTOR,
   restorationIdentityFor,
   restorationRunner,
+  REWIND,
   SPIRIT_LINK_TOTEM,
+  STASIS,
   VIVIFY,
   type RestorationSubject,
 } from "../support/heal-ap-restoration-subject.js";
@@ -203,6 +210,29 @@ const HEALER_GATE_SUBJECTS: readonly HealerGateSubject[] = [
           { name: subject.name, abilityId: DIVINE_HYMN, atReportTimeMs: 7_790_000, toleranceMs: 2_000 },
           // An ability the specialization does not identify.
           { name: subject.name, abilityId: FLASH_HEAL, atReportTimeMs: 7_500_000, toleranceMs: 2_000 },
+        ],
+      };
+    },
+  },
+  {
+    specId: "evoker/preservation",
+    className: "Evoker",
+    specName: "Preservation",
+    actorId: PRESERVATION_SUBJECT_ACTOR,
+    identified: [REWIND, STASIS],
+    load: async () => {
+      const subject: RestorationSubject = await loadPreservationSubject();
+      return {
+        ...subject,
+        entries: [
+          // Around the real Rewind cast at 2,515,073.
+          { name: subject.name, abilityId: REWIND, atReportTimeMs: 2_515_000, toleranceMs: 2_000 },
+          // Rewind, where the subject did not cast it (its only cast is 2,515,073).
+          { name: subject.name, abilityId: REWIND, atReportTimeMs: 2_600_000, toleranceMs: 3_000 },
+          // After the completed encounter's end (2,699,832).
+          { name: subject.name, abilityId: STASIS, atReportTimeMs: 2_710_000, toleranceMs: 2_000 },
+          // An ability the specialization does not identify: an empowered spell the subject really cast (2,444,195).
+          { name: subject.name, abilityId: DREAM_BREATH, atReportTimeMs: 2_444_000, toleranceMs: 2_000 },
         ],
       };
     },

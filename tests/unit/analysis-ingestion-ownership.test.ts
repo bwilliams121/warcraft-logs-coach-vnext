@@ -188,6 +188,9 @@ const PRODUCTION_MISTWEAVER: RegisteredAnalyzer = productionRegistrationFor("mon
  */
 const PRODUCTION_HOLY_PRIEST: RegisteredAnalyzer = productionRegistrationFor("priest/holy");
 
+/** The production Preservation Evoker row, unmodified. PUBLIC since HEAL-B4P; it declares FULL_RAID too. */
+const PRODUCTION_PRESERVATION: RegisteredAnalyzer = productionRegistrationFor("evoker/preservation");
+
 function deps(registry: readonly RegisteredAnalyzer[], ingest: CombatIngestionPort): AnalysisServiceDeps {
   return { env: ENV, preflight: PREFLIGHT, ingest, registry };
 }
@@ -211,6 +214,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         ingest,
       ),
@@ -240,6 +244,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         first,
       ),
@@ -258,6 +263,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         second,
       ),
@@ -287,6 +293,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         production,
       ),
@@ -305,6 +312,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         widened,
       ),
@@ -331,6 +339,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         FIXTURE_INGEST,
       ),
@@ -357,6 +366,7 @@ describe("an unselected analyzer has no influence on this request", () => {
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         FIXTURE_INGEST,
       ),
@@ -393,6 +403,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         ingest,
       ),
@@ -423,6 +434,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         ingest,
       ),
@@ -453,6 +465,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
             PRODUCTION_HOLY_PALADIN,
             PRODUCTION_MISTWEAVER,
             PRODUCTION_HOLY_PRIEST,
+            PRODUCTION_PRESERVATION,
           ],
           ingest,
         ),
@@ -480,6 +493,7 @@ describe("resource inclusion is declared by the analyzer, not by the service", (
           PRODUCTION_HOLY_PALADIN,
           PRODUCTION_MISTWEAVER,
           PRODUCTION_HOLY_PRIEST,
+          PRODUCTION_PRESERVATION,
         ],
         ingest,
       ),

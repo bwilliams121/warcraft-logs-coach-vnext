@@ -284,6 +284,11 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
         analyzerId: "priest-holy-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
+      }, // HEAL-B4P: Preservation Evoker, FULL_RAID by its declared healer inputs, no resources.
+      {
+        analyzerId: "evoker-preservation-healer-findings",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
       },
     ]);
   });

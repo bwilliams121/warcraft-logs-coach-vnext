@@ -811,7 +811,7 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.preservation-evoker-registration-is-internal-only",
+      "caseId": "application-service.preservation-evoker-registration-is-public-since-heal-b4p",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },

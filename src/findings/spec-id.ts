@@ -30,9 +30,9 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS THREE MEMBERS SINCE HEAL-B4 (Restoration Druid,
- * Discipline Priest and Preservation Evoker). It held the first two from
- * HEAL-B3. It held Restoration Druid alone from HEAL-B2P, which
+ * THE INTERNAL-ONLY SET HOLDS TWO MEMBERS SINCE HEAL-B4P (Restoration Druid and
+ * Discipline Priest), which promoted Preservation Evoker. It held those three
+ * from HEAL-B4, and the first two from HEAL-B3. It held Restoration Druid alone from HEAL-B2P, which
  * promoted Holy Priest. It held two from HEAL-B2 (Restoration Druid and
  * Holy Priest), and Restoration Druid alone from HEAL-B1P, which promoted
  * Holy Paladin and Mistweaver Monk. It held three from HEAL-B1
@@ -105,6 +105,7 @@ export const PUBLIC_SPEC_IDS = Object.freeze([
   "paladin/holy",
   "monk/mistweaver",
   "priest/holy",
+  "evoker/preservation",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -204,13 +205,15 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * same architecture and its own representative: its reviewed healing-cooldown
  * identity data (Rewind, Dream Flight, Stasis) names no empowered spell, and
  * its evaluator refuses to read a cast as a use when the evidence shows the
- * ability empowered. Its roster role stays UNKNOWN, as pinned. Its public
- * shape and promotion are HEAL-B4P's; until then the id stays here.
+ * ability empowered. Its roster role stays UNKNOWN, as pinned. HEAL-B4P moved
+ * it to `PUBLIC_SPEC_IDS` by the same five-site edit, with the shared healer
+ * view, after it passed the healer promotion gate on real evidence (its
+ * whole-fight casts in gtKb2xHn87pNcFfW fight 22, cut from the retained
+ * captures).
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
   "priest/discipline",
-  "evoker/preservation",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

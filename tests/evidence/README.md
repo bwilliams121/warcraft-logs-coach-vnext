@@ -154,6 +154,21 @@ exactly as HEAL-B1P's.
 - Ordinary archive growth, pinned in `tests/unit/m11c4e-evidence-archive.test.ts`.
   No new Warcraft Logs request was made.
 
+**HEAL-B4P evidence.** `wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-*` is
+three compact `--actor-slice` segments (123,153 bytes) of the three adjoining
+retained captures of gtKb fight 22 (M9-C2 opener, M11-C4, M11-C4b), each
+retrieved COMPLETE with no actor filter at revision 22.
+
+- Together they cover the whole fight: every `cast`, `begincast`,
+  `empowerstart` and `empowerend` sourced by or targeting actor 15, the
+  fight's Preservation Evoker. The envelopes are retained because that
+  evaluator's contradiction check reads them.
+- They grant CASTS for actor 15 only.
+- The bundle, with the regression corpus's fight context as its catalog, is the
+  healer promotion gate's Preservation Evoker subject.
+- Ordinary archive growth, pinned in the same test. No new Warcraft Logs request
+  was made.
+
 ## Server-filtered event streams (M13-A)
 
 A source query may be `FILTERED_EVENT_STREAMS`: several event streams of one

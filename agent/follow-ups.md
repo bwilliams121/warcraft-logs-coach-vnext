@@ -433,12 +433,55 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-B4P: what the public Preservation Evoker does not establish
+
+**Raised:** HEAL-B4P (2026-11-03).
+
+- **Restoration Druid's promotion needs no new request, and is not queued.**
+  HEAL-B1P's census read M11-E2, M10-B, M10-C5 and M11-C4f. It did not read the
+  retained M9-C2, M11-C4 and M11-C4b captures, which together hold gtKb fight 22
+  whole with no actor filter. That fight's Restoration Druid (actor 2,
+  `friendlySpecs` Restoration, combatantinfo specID 105) has 384 cast and
+  begincast events there, including 740 (Tranquility) twice and 391528 (Convoke
+  the Spirits) five times. "No retained evidence" in HEAL-B1P's and HEAL-B1's
+  prose, the partition tests' comments and the README is wrong. This tranche
+  corrects the inventory and ONB-EV and promotes nothing else: a queue entry for
+  Restoration Druid is the owner's roadmap call. It would be HEAL-B4P's shape
+  (three segments, the same context), and it also has to decide how its choice
+  node reads.
+- **The HEAL-B3P conclusion stands.** gtKb fight 22's `friendlySpecs` has no
+  Discipline, so these captures do not change it.
+- **Real healing context is never COMPLETE for it.** As for the other public
+  healers ("After HEAL-AP", "After HEAL-B1P"): the committed subject has casts
+  and empower envelopes only, so the overlap listing with the roster declared is
+  UNKNOWN. Unchanged.
+- **A real contradiction has never been observed.** No actor in the retained
+  captures has an empower envelope on an identified ability, so
+  `RUNTIME_DATA_CONTRADICTED` is pinned on synthetic events only. Its public
+  reason exists so the outcome is not published as data that was unavailable.
+  The envelopes behind it stay internal.
+- **Dream Flight has no observed cast in committed evidence.** The subject
+  selected Stasis on the choice node. Dream Flight's identity still rests on its
+  pinned row.
+- **Role stays UNKNOWN.** Public promotion did not change the roster role, and
+  the healer gate does not read it ("After HEAL-B4").
+- **The pseudonym is re-labelled for the public plan** (`Subjectevoker`), as
+  HEAL-AP's and HEAL-B1P's; actor id and events untouched.
+- **The registration facade is now copied in five public healers.** HEAL-B4P
+  added the same view adapter and limits prose; the shared healer registration
+  helper ("After HEAL-B2P") remains its own reviewed refactor.
+
+---
+
 ## After HEAL-B4: what the internal Preservation Evoker registration does not establish
 
 **Raised:** HEAL-B4 (2026-11-03).
 
 - **It cannot pass the healer promotion gate on committed evidence
-  (HEAL-B4P).** The gate needs a real subject with a COMPLETE use listing, at
+  (HEAL-B4P).** Resolved by HEAL-B4P, and this item was wrong twice: the raw
+  M11-C4f pages do hold two Stasis casts by actor 17 (still only 165 s of the
+  fight), and the census missed gtKb fight 22, whose three adjoining retained
+  captures hold actor 15 whole. It passed every gate check on that cut. The gate needs a real subject with a COMPLETE use listing, at
   least one use, and a met and a not-met plan entry over those uses. The M13-A
   Preservation Evoker's three uses sit in a filtered capture whose listing is
   UNKNOWN; fight 48 (the retained M11-E2 capture) has no Preservation Evoker;

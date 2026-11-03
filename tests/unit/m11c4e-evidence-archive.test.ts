@@ -174,6 +174,18 @@ const HEALB2P_EVIDENCE: Readonly<Record<string, number>> = {
 };
 const HEALB2P_BYTES = Object.values(HEALB2P_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
 /**
+ * HEAL-B4P: gtKb fight 22's Preservation Evoker's (actor 15) casts, begincasts
+ * and empower envelopes over the whole fight, three compact segments of its
+ * three adjoining retained captures, for the healer promotion gate. Ordinary
+ * archive growth (123,153 bytes), named and pinned like HEAL-B1P.
+ */
+const HEALB4P_EVIDENCE: Readonly<Record<string, number>> = {
+  "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-0-20": 8413,
+  "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-165-285": 54781,
+  "wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-20-165": 59959,
+};
+const HEALB4P_BYTES = Object.values(HEALB4P_EVIDENCE).reduce((sum, bytes) => sum + bytes, 0);
+/**
  * M13-A: the one bounded Augmentation Evoker capture (owner grant
  * 2026-11-01): the sanitized fight context and the two merged segments of its
  * three server-filtered streams, which grant nothing. Ordinary archive growth
@@ -273,13 +285,15 @@ describe("the committed evidence archive", () => {
       // M11-G4-1: the canonical report's region.
       ...Object.keys(M11G4_EVIDENCE),
       // M13-A: the Augmentation Evoker capture's segments and fight context.
+      // HEAL-B4P: the Preservation Evoker's cast segments ("g4" < "gt" < "m").
+      ...Object.keys(HEALB4P_EVIDENCE),
       ...Object.keys(M13A_EVIDENCE),
       // M13-D: the certification tables of the M13-A fight.
       ...Object.keys(M13D_EVIDENCE),
     ]);
     // M12-B added one normalization census per raid damage segment, M12-D one per cast
-    // segment, M13-A one per merged support segment, HEAL-B1P and HEAL-B2P one per cast segment.
-    expect(loaded.archive.cases).toHaveLength(22);
+    // segment, M13-A one per merged support segment, HEAL-B1P, HEAL-B2P and HEAL-B4P one per cast segment.
+    expect(loaded.archive.cases).toHaveLength(25);
     // Accounting is per root: the archive counts its own bytes only.
     expect(loaded.archive.totalArtifactBytes).toBe(
       308961 +
@@ -293,6 +307,7 @@ describe("the committed evidence archive", () => {
         M12D_BYTES +
         HEALB1P_BYTES +
         HEALB2P_BYTES +
+        HEALB4P_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
@@ -305,6 +320,7 @@ describe("the committed evidence archive", () => {
       ...M12D_EVIDENCE,
       ...HEALB1P_EVIDENCE,
       ...HEALB2P_EVIDENCE,
+      ...HEALB4P_EVIDENCE,
       ...M13A_EVIDENCE,
       ...M13D_EVIDENCE,
     })) {
@@ -342,7 +358,8 @@ describe("the committed evidence archive", () => {
     // 62,316 bytes of ordinary certification tables: 18,724,542. HEAL-B1P adds
     // 403,697 bytes of ordinary Holy Paladin and Mistweaver Monk cast evidence:
     // 19,128,239. HEAL-B2P adds 137,685 bytes of ordinary Holy Priest cast
-    // evidence: 19,265,924.
+    // evidence: 19,265,924. HEAL-B4P adds 123,153 bytes of ordinary Preservation
+    // Evoker cast evidence: 19,389,077.
     expect(M11G1_BYTES).toBe(364631);
     expect(M11G2_BYTES).toBe(12162150);
     expect(M11G4_BYTES).toBe(206);
@@ -352,6 +369,7 @@ describe("the committed evidence archive", () => {
     expect(M13D_BYTES).toBe(62316);
     expect(HEALB1P_BYTES).toBe(403697);
     expect(HEALB2P_BYTES).toBe(137685);
+    expect(HEALB4P_BYTES).toBe(123153);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(
       4537019 +
         M11G1_BYTES +
@@ -361,10 +379,11 @@ describe("the committed evidence archive", () => {
         M12D_BYTES +
         HEALB1P_BYTES +
         HEALB2P_BYTES +
+        HEALB4P_BYTES +
         M13A_BYTES +
         M13D_BYTES,
     );
-    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19265924);
+    expect(loaded.archive.totalArtifactBytes + frameBytes).toBe(19389077);
     expect(loaded.archive.totalArtifactBytes + frameBytes).toBeGreaterThan(EVIDENCE_ARCHIVE_NOTICE_BYTES);
     // The regression corpus's own ceiling is untouched by the archive.
     expect(MAX_CORPUS_BYTES).toBe(6 * 1024 * 1024);

@@ -1,6 +1,6 @@
 /**
  * HEAL-B4: the Preservation Evoker evaluator and its registration
- * (INTERNAL_ONLY), over what is specific to it. The cases every healer
+ * (INTERNAL_ONLY in HEAL-B4, PUBLIC since HEAL-B4P), over what is specific to it. The cases every healer
  * evaluator and registration shares (identity refusals, no-plan
  * NO_AUTHORITY_AVAILABLE, plan outcomes, coverage gaps, roster scope,
  * exposure) run it through the HEAL-B1 parametrized files, which list
@@ -27,6 +27,11 @@
  *   and 272,401 and Rewind at 284,626, checked against the raw segment bytes;
  *   the capture is filtered, so the listing is UNKNOWN (INSUFFICIENT_COVERAGE),
  *   never "these were all";
+ * - HEAL-B4P: the Preservation Evoker of gtKb fight 22 (actor 15) over its
+ *   whole-fight casts (cut from the retained captures, no actor filter): three
+ *   Stasis and one Rewind, the listing COMPLETE; its Stasis releases and its
+ *   empowered Dream Breaths are never uses, and no envelope names an identified
+ *   ability on the raw bytes;
  * - the M13-A Augmentation Evoker (actor 1) is refused: the class alone is
  *   not the specialization.
  */
@@ -47,6 +52,7 @@ import {
   SUPPORTED_TYPE_CONTRACTS,
 } from "../../../src/engine/normalization/supported-families.js";
 import { createCombatState } from "../../../src/engine/state/combat-state.js";
+import { PUBLIC_HEALER_NOT_ASSESSED_REASONS } from "../../../src/contracts/analysis-contract.js";
 import type { HealerFindingSet } from "../../../src/findings/healer-finding.js";
 import type { RaidCooldownPlan } from "../../../src/raid-plan/raid-cooldown-plan.js";
 import {
@@ -59,6 +65,7 @@ import {
   analyzePreservationEvoker,
   PRESERVATION_EVOKER_MODULE,
   PRESERVATION_EVOKER_REGISTRATION,
+  preservationEvokerHealerViewOf,
   type PreservationEvokerAnalysis,
 } from "../../../src/specs/evoker/preservation/registration.js";
 import { loadCommittedEvidenceArchive } from "../../support/corpus/evidence-archive.js";
@@ -107,7 +114,7 @@ describe("ROLE: the pinned roster's UNKNOWN is carried, never replaced by a gues
     });
     expect(PRESERVATION_EVOKER_MODULE.identity.role).toBe("UNKNOWN");
     expect(PRESERVATION_EVOKER_MODULE.identity.simcSpecId).toBe(1468);
-    expect(PRESERVATION_EVOKER_MODULE.exposure).toBe("INTERNAL_ONLY");
+    expect(PRESERVATION_EVOKER_MODULE.exposure).toBe("PUBLIC");
   });
 });
 
@@ -422,6 +429,56 @@ describe("the Preservation Evoker registration over committed real evidence", ()
       ["COOLDOWN", "WCL_OBSERVED_FACT"],
     ]);
     expect(JSON.stringify(analysis)).not.toMatch(/MISSED|wrong|incorrect|mistake|should/i);
+  });
+
+  it("gtKb fight 22 Preservation Evoker (actor 15) over its whole-fight casts (HEAL-B4P): four uses, a COMPLETE listing, and no release or empowered cast is a use", async () => {
+    const loaded = await loadCommittedEvidenceArchive();
+    if (!loaded.ok) throw new Error(loaded.errors.map((error) => error.message).join("\n"));
+    const segments = ["seg-0-20", "seg-20-165", "seg-165-285"].map(
+      (segment) => `wcl-gtkb-fight-22-preservation-evoker-15-casts.${segment}`,
+    );
+    const whole = bundleOf(loaded.archive, segments, [], {
+      catalogArtifactId: "wcl-fight-context-gtkb-fight-22",
+    }).fight;
+    // The raw bytes: what the listing must not count, and what the check must not fire on.
+    const raw = segments
+      .map((segment) => readFileSync(`tests/evidence/artifacts/wcl-events/${segment}.json`, "utf8"))
+      .join("");
+    const count = (pattern: RegExp) => [...raw.matchAll(pattern)].length;
+    const CAST_OF = (id: number) =>
+      new RegExp(`"type":"cast","sourceID":15,[^{}]*"abilityGameID":${String(id)}[,}]`, "g");
+    expect(count(CAST_OF(STASIS_RELEASE))).toBe(3);
+    expect(count(CAST_OF(DREAM_BREATH))).toBeGreaterThan(0);
+    expect(count(/"type":"empowerstart","sourceID":15,/g)).toBe(25);
+    expect(
+      count(/"type":"empower(start|end)","sourceID":15,[^{}]*"abilityGameID":(363534|359816|370537)[,}]/g),
+    ).toBe(0);
+
+    const analysis = internalRun(whole, 15);
+    expect(analysis.status).toBe("AUTHORITY_NOT_AVAILABLE");
+    const evaluation = analysis.evaluation;
+    if (evaluation?.state !== "EVALUATED") throw new Error("not evaluated");
+    expect(evaluation.cooldowns.uses.map((use) => [use.cast.abilityGameId, use.cast.reportTimeMs])).toEqual([
+      [STASIS, 2_418_645],
+      [REWIND, 2_515_073],
+      [STASIS, 2_516_125],
+      [STASIS, 2_625_623],
+    ]);
+    // The cut is from captures retrieved with no actor filter: these are all of them.
+    expect(evaluation.cooldowns.listing).toMatchObject({ state: "COMPLETE" });
+    expect(setOf(analysis).categories[1]).toMatchObject({ listing: { completeness: "COMPLETE" } });
+    expect(JSON.stringify(analysis)).not.toMatch(/MISSED|wrong|incorrect|mistake|should/i);
+  });
+
+  it("the public view passes a contradiction through as NOT_ASSESSED with its reason, and the public schema accepts it (HEAL-B4P)", () => {
+    const contradicted = {
+      healerFindings: { assessment: "NOT_ASSESSED", reason: "RUNTIME_DATA_CONTRADICTED" },
+    } as unknown as PreservationEvokerAnalysis;
+    expect(preservationEvokerHealerViewOf(contradicted)).toEqual({
+      assessment: "NOT_ASSESSED",
+      reason: "RUNTIME_DATA_CONTRADICTED",
+    });
+    expect(PUBLIC_HEALER_NOT_ASSESSED_REASONS).toContain("RUNTIME_DATA_CONTRADICTED");
   });
 
   it("the M13-A Augmentation Evoker (actor 1) is refused: the class alone is not the specialization", () => {

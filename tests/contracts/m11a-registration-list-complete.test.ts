@@ -261,7 +261,7 @@ describe("what the tree registers today", () => {
       ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
       ["src/specs/druid/restoration/registration.ts", "RESTORATION_DRUID_REGISTRATION", "INTERNAL_ONLY"],
       ["src/specs/evoker/augmentation/registration.ts", "AUGMENTATION_EVOKER_REGISTRATION", "PUBLIC"],
-      ["src/specs/evoker/preservation/registration.ts", "PRESERVATION_EVOKER_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/evoker/preservation/registration.ts", "PRESERVATION_EVOKER_REGISTRATION", "PUBLIC"],
       ["src/specs/monk/brewmaster/registration.ts", "BREWMASTER_MONK_REGISTRATION", "PUBLIC"],
       ["src/specs/monk/mistweaver/registration.ts", "MISTWEAVER_MONK_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/holy/registration.ts", "HOLY_PALADIN_REGISTRATION", "PUBLIC"],

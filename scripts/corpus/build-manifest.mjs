@@ -6823,13 +6823,13 @@ const BREWMASTER_CASES = [
       ],
     },
   ),
-  // ---- SPEC_PRESERVATION_EVOKER (HEAL-B4, INTERNAL_ONLY) ---------------------------
+  // ---- SPEC_PRESERVATION_EVOKER (HEAL-B4; PUBLIC since HEAL-B4P) --------------------
   kase(
     "spec-preservation-evoker.unstated-subject-yields-no-healer-finding",
     PP,
     "SPEC_PRESERVATION_EVOKER",
     "src/specs/evoker/preservation/registration.ts (facade, capabilities, bindings); src/services/analyzer-registry.ts internalAnalyzerForSpec, runAnalyzer",
-    "Through the production catalog's internal lookup, the INTERNAL_ONLY Preservation Evoker registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
+    "Through the production catalog (both lookups find the same row since HEAL-B4P), the Preservation Evoker registration derives FULL_RAID from its declared healer capabilities, resolves COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN and HEALING_DECISION to NO_PINNED_AUTHORITY_FOR_DOMAIN from its own authority access (it binds nothing), and, for actor 7 of this artifact — whose fight carries no stated friendly specialization — returns INSUFFICIENT_EVIDENCE with the identity refused as NOT_IN_FRIENDLY_ROSTER, no evaluator result and no healer finding set: nothing is evaluated for a subject whose identity is not established, and nothing is ANALYZED. The public lookup finds nothing.",
     [
       a("SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT", {
         actorId: TANK,
@@ -6860,24 +6860,24 @@ const BREWMASTER_CASES = [
     },
   ),
   kase(
-    "application-service.preservation-evoker-registration-is-internal-only",
+    "application-service.preservation-evoker-registration-is-public-since-heal-b4p",
     PP,
     "APPLICATION_SERVICE",
     "src/services/analyzer-registry.ts internalAnalyzerForSpec, analyzerForSpec; spec-identity.ts",
-    "The validated production catalog carries the Preservation Evoker registration for the INTERNAL lookup only, INTERNAL_ONLY, in either catalog order; the public lookup finds nothing and the public identity table does not resolve Evoker/Preservation, so no public request can select it.",
+    "RE-PINNED AT HEAL-B4P, INVERTING THE HEAL-B4 CASE. The validated production catalog carries the Preservation Evoker registration PUBLIC, in either catalog order: both lookups find the same row, and the public identity table resolves Evoker/Preservation to evoker/preservation, so a public request selects it. The five public sites moved together in one reviewed edit (the partition, the public contract's specId enum, the identity table, the `satisfies PublicSpecId` on spec.ts, and the registration's exposure), with the registration's healer view, after the healer promotion gate passed on gtKb fight 22's Preservation Evoker.",
     [
       a("APPLICATION_SERVICE.INTERNAL_REGISTRATION", {
         specId: "evoker/preservation",
         expected: {
           internalAnalyzerId: "evoker-preservation-healer-findings",
-          publicAnalyzerId: null,
-          exposure: "INTERNAL_ONLY",
-          identityResolvesPublicly: false,
+          publicAnalyzerId: "evoker-preservation-healer-findings",
+          exposure: "PUBLIC",
+          identityResolvesPublicly: true,
         },
       }),
     ],
     ["OWNED_CONTRACT"],
-    "Preservation Evoker is registered INTERNAL_ONLY in HEAL-B4 and its public promotion is HEAL-B4P's: registration changes what internal evaluation derives, not what a public request can reach.",
+    "Promotion changed reachability, not analysis: the registration still binds no pinned authority and is never ANALYZED; what a public request now receives is its healer findings (healerFindings), never an HPS ranking, an inferred assignment or a cooldown-quality verdict.",
     {
       related: [
         "tests/contracts/m10a-registry-integrity.test.ts",
@@ -12505,6 +12505,141 @@ const HEALB1P_EVIDENCE_CASES = HEALB1P_SUBJECTS.flatMap((subject) =>
 );
 
 // --------------------------------------------------------------------------
+// HEAL-B4P (2026-11-03): the healer promotion gate's real subject for
+// Preservation Evoker. Every cast, begincast and empower envelope sourced by or
+// targeting gtKb fight 22's Preservation Evoker (actor 15) over the whole
+// fight, cut from the three adjoining captures of that fight (M9-C2 opener,
+// M11-C4, M11-C4b), each retrieved COMPLETE with no actor filter at revision
+// 22. The empower envelopes are retained because the evaluator's contradiction
+// check reads them. No new Warcraft Logs request was made.
+// --------------------------------------------------------------------------
+
+const HEALB4P_ACTOR = 15;
+const HEALB4P_SEGMENT = (from, to) =>
+  `wcl-gtkb-fight-22-preservation-evoker-15-casts.seg-${String(from)}-${String(to)}`;
+const HEALB4P_FAMILIES = "cast,begincast,empowerstart,empowerend";
+// [seconds from, to, exclusive --from, inclusive bound, events, casts, begincasts, empowerstarts, empowerends, sourced by the subject, raw capture, its event count, its page wording, its source]
+const HEALB4P_SEGMENTS = [
+  [
+    0,
+    20,
+    HP_START - 1,
+    HP_END,
+    26,
+    20,
+    1,
+    2,
+    3,
+    23,
+    ".probe/m9c2-opener-pages.json",
+    "18,318",
+    "two pages, terminal",
+    HIGH_OPENER_SOURCE,
+  ],
+  [
+    20,
+    165,
+    GTKB_EXT_START,
+    GTKB_EXT_END,
+    181,
+    144,
+    11,
+    13,
+    13,
+    167,
+    ".probe/m11c4-pages.json",
+    "118,289",
+    "twelve pages, terminal, revision 22 before and after",
+    GTKB_EXT_SOURCE,
+  ],
+  [
+    165,
+    285,
+    GTKB_FULL_START,
+    GTKB_FULL_END,
+    160,
+    133,
+    7,
+    10,
+    10,
+    149,
+    ".probe/m11c4b-pages.json",
+    "91,236",
+    "ten pages, terminal, revision 22 before and after",
+    GTKB_FULL_SOURCE,
+  ],
+];
+
+function healb4p_segment([
+  fromS,
+  toS,
+  fromMs,
+  toMs,
+  count,
+  casts,
+  begincasts,
+  starts,
+  ends,
+  sourced,
+  raw,
+  total,
+  pages,
+  source,
+]) {
+  const file = HEALB4P_SEGMENT(fromS, toS);
+  return artifact(file, wcl(file), {
+    root: "EVIDENCE",
+    kind: "SANITIZED_CAPTURE",
+    source,
+    transformations: [
+      selection(
+        `node scripts/sanitize-probe.mjs ${raw} ../../../evidence/artifacts/wcl-events/${file}.json --actor-slice 15 ${String(toMs)} --from ${String(fromMs)} --families ${HEALB4P_FAMILIES} --compact`,
+        `The page envelopes concatenated in page order (${pages}), then the --actor-slice predicate for actor 15: every event whose sourceID or targetID is 15, with --from ${String(fromMs)} (exclusive) and the bound ${String(toMs)} (inclusive), restricted by --families to cast, begincast, empowerstart and empowerend. In place and order preserved; written as compact JSON (--compact). ${String(count)} of ${total} events: ${String(casts)} casts, ${String(begincasts)} begincasts, ${String(starts)} empowerstarts and ${String(ends)} empowerends; ${String(sourced)} sourced by actor 15, the rest targeting it.`,
+        ACTOR_SLICE_INVALIDATIONS,
+      ).with_revision(SLICER_REVISION_8),
+      credential_scan(SLICER_REVISION_8),
+    ],
+    grants: [
+      {
+        categories: ["CASTS"],
+        actorScope: [HEALB4P_ACTOR],
+        ranges: [{ fromReportTimeMs: fromMs + 1, toReportTimeMs: toMs }],
+      },
+    ],
+    coverageBasis: `CASTS is complete for actor 15 over [${(fromMs + 1).toLocaleString("en-US")} .. ${toMs.toLocaleString("en-US")}] by the predicate 'every cast, begincast or empower envelope actor 15 sources or is targeted by, with timestamp in that range' over a window the capture retrieved COMPLETE with NO actor filter (${pages}). No other category is granted: auras, healing, damage, absorbs, resources, summons and deaths are excluded families, and nothing is granted to any other actor, pets included. The segment is one part of a three-part bundle, joined by adjacency, that spans the whole fight.`,
+    retainedFor:
+      "HEAL-B4P: the Preservation Evoker's real casts over a whole fight (fight 22 is the only retained capture that holds one whole), so the healer promotion gate's observations (three Stasis casts and one Rewind) and the COMPLETE coverage behind 'these are all of them' are proven on Warcraft Logs bytes, alongside the committed fight context that states the player's class and specialization. The empower envelopes are the input of the evaluator's contradiction check.",
+    limitations: [
+      "One segment of the whole fight: on its own it grants no coverage outside its range; only the composed bundle covers the fight.",
+      "Casts, begincasts and empower envelopes only: no aura, heal, damage, absorb, summon, resource or death event is retained, so nothing here says when an aura was active, what a cast healed, or whether the player was alive.",
+      "Actor 15 only: any pet's own casts are not retained.",
+      "Compact JSON: no whitespace between tokens; the parsed payload is what the capture returned, keys in capture order.",
+      NO_NAMES,
+      VERSION_SCOPE,
+    ],
+  });
+}
+
+const HEALB4P_EVIDENCE_ARTIFACTS = HEALB4P_SEGMENTS.map(healb4p_segment);
+const HEALB4P_EVIDENCE_CASES = HEALB4P_SEGMENTS.map(([fromS, toS, , , count]) =>
+  kase(
+    `normalization.gtkb-preservation-evoker-15-casts-seg-${String(fromS)}-${String(toS)}-normalizes-whole-and-in-order`,
+    HEALB4P_SEGMENT(fromS, toS),
+    "NORMALIZATION",
+    "src/engine/normalization/event-normalizer.ts; supported-families.ts; scripts/sanitize-probe.mjs --actor-slice --from --families",
+    `The ${String(count)}-event cast-and-empower segment of actor 15 (fight +${String(fromS)} s .. +${String(toS)} s) normalizes with every raw type recognised and every event kept in capture order.`,
+    [
+      a("NORMALIZATION.EVENT_COUNT_PRESERVED", { expectedEventCount: count }),
+      a("NORMALIZATION.INPUT_ORDER_PRESERVED", {}),
+      a("NORMALIZATION.ALL_TYPES_RECOGNISED", {}),
+    ],
+    ["VALIDATED_EVIDENCE"],
+    "The census is of the segment, never of the fight: exactly the cast, begincast and empower events sourced by or targeting actor 15 in its range, and nothing else.",
+    { related: ["tests/contracts/heal-ap-healer-promotion-gate.test.ts"] },
+  ),
+);
+
+// --------------------------------------------------------------------------
 // M13-A (2026-11-02): the ONE bounded Augmentation Evoker capture (owner grant
 // 2026-11-01, agent/autopilot-queue.md "M13-A"). Subject chosen by a fixed
 // neutral order recorded before looking (.probe/m13a/capture-plan.md): the
@@ -13566,6 +13701,7 @@ const manifest = EVIDENCE_ROOT
         ...M12B_EVIDENCE_ARTIFACTS,
         ...M12D_EVIDENCE_ARTIFACTS,
         ...HEALB1P_EVIDENCE_ARTIFACTS,
+        ...HEALB4P_EVIDENCE_ARTIFACTS,
         ...M13A_EVIDENCE_ARTIFACTS,
         ...M13D_EVIDENCE_ARTIFACTS,
       ].sort(byId("artifactId")),
@@ -13574,6 +13710,7 @@ const manifest = EVIDENCE_ROOT
         ...M12B_EVIDENCE_CASES,
         ...M12D_EVIDENCE_CASES,
         ...HEALB1P_EVIDENCE_CASES,
+        ...HEALB4P_EVIDENCE_CASES,
         ...M13A_EVIDENCE_CASES,
       ].sort(byId("caseId")),
     }

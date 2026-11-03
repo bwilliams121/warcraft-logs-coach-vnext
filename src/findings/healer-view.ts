@@ -134,7 +134,11 @@ export type HealerViewOutcome =
   | { readonly assessment: "ASSESSED"; readonly view: HealerView }
   | {
       readonly assessment: "NOT_ASSESSED";
-      readonly reason: "SUBJECT_SPECIALIZATION_NOT_STATED" | "IDENTITY_REFUSED" | "RUNTIME_DATA_UNAVAILABLE";
+      readonly reason:
+        | "SUBJECT_SPECIALIZATION_NOT_STATED"
+        | "IDENTITY_REFUSED"
+        | "RUNTIME_DATA_UNAVAILABLE"
+        | "RUNTIME_DATA_CONTRADICTED";
     };
 
 /** Whether the view's ASSIGNMENT category was judged against the supplied plan. */

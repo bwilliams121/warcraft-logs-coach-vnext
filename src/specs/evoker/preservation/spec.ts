@@ -1,6 +1,6 @@
 /**
  * Preservation Evoker's identity and declared inputs (HEAL-B4, registered
- * INTERNAL_ONLY).
+ * INTERNAL_ONLY; PUBLIC since HEAL-B4P).
  *
  * The Warcraft Logs class and specialization strings are the ones the
  * committed fight contexts record for the identity subjects (the M13-A fight
@@ -16,12 +16,16 @@
  * or asserts a role.
  */
 
-import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
+import type { PublicSpecId } from "../../../findings/spec-id.js";
 
 export const PRESERVATION_EVOKER_EVALUATOR_REVISION = "preservation-evoker-evaluator/1" as const;
 
-/** The id. `InternalOnlySpecId`: the compile-time side of the exposure. */
-export const PRESERVATION_EVOKER_SPEC_ID = "evoker/preservation" satisfies InternalOnlySpecId;
+/**
+ * The id. `PublicSpecId` since HEAL-B4P (it was `InternalOnlySpecId` in
+ * HEAL-B4): the compile-time side of the exposure, one of the five promotion
+ * sites.
+ */
+export const PRESERVATION_EVOKER_SPEC_ID = "evoker/preservation" satisfies PublicSpecId;
 
 export const PRESERVATION_EVOKER_ANALYZER_ID = "evoker-preservation-healer-findings";
 
