@@ -12198,6 +12198,136 @@ ONB-S5").
 decision changes. ONB-C1 (Feral) and ONB-C2 (Outlaw) supply the resolver for
 their resource and own what pooling means for their findings.
 
+## ONB-S6 — Shared pet actor mapping for pet-driven APL state
+
+Autopilot queue entry ONB-S6. Internal shared engine only: no public contract
+change, no specialization module changes, no Warcraft Logs request.
+
+**Question.** "Which Warcraft Logs actors are SimulationCraft pet X, and was
+an instance of X present at instant t (how many)?" Pet-heavy APLs
+(Demonology, Unholy, Beast Mastery) read `pet.X.active`, pet counts and
+pet-scoped auras. Before this tranche nothing mapped an engine pet to a log
+actor (follow-ups "After M11-G3-1").
+
+**Where.** `src/engine/game-state/pets/pet-state.ts`,
+`buildPetState({ state, ownerActorId, profile })`. It imports only engine
+modules. The specialization supplies a frozen `PetMappingProfile`
+(`definePetMappingProfile`, which throws on a malformed profile). Per entity:
+
+- `simcName`: the name the pinned APL addresses.
+- `wclGameIds`: the `ReportActor.gameID`s it is.
+- `minLifetimeMs`: a proven lower bound on one instance's life from its
+  summon (it cannot be killed, dismissed or otherwise end sooner), or `null`.
+- `maxLifetimeMs`: a proven upper bound, every extension included, or `null`.
+- `instancesBeginWithSummon`: reviewed, every instance starts with a `summon`
+  event.
+- `provenance`.
+
+`src/simc/expression/pet-atoms.ts` turns the answers into the binding for a
+spec-declared atom (`petPresenceAtom`, `petCountAtom`). Its input types are
+structural, so `src/simc` still imports nothing from `src/engine`. Which atom
+a pet answer feeds is the specialization's decision.
+
+**Ownership and mapping.**
+
+- An actor is the owner's pet only by WCL `petOwner`
+  (`CombatActor.petOwnerActorId`). It is never inferred from a summon source,
+  a name or timing (`actors.ts`, unchanged).
+- An entity maps to the owned actors of its listed gameIDs. Two entities
+  listing one gameID are both `AMBIGUOUS`, and every answer about them is
+  UNKNOWN (`ENTITY_MAPPING_AMBIGUOUS`). That is a log property, not a profile
+  defect.
+- A catalog actor of a listed gameID with no stated owner could be the
+  owner's. It blocks absence and count ceilings for that entity
+  (`OWNERSHIP_NOT_STATED`). An owned actor with no gameID blocks them for
+  every entity.
+- Owned actors that no entity lists are disclosed, never assigned.
+
+**No future evidence (O2).** Every answer about t reads only events stamped
+at or before t. A later observation never raises, or otherwise changes, the
+answer at t. So no "seen before and after t" bracketing. The tests prove that
+appending later events leaves every query surface unchanged.
+
+**Throughout the millisecond.** Same-millisecond order is not proven
+(M11-G2), so every answer about t holds whatever that order. A summon stamped
+t never makes t PRESENT.
+
+**PRESENT.** Identity is the full ActorRef. An instance is PRESENT at t only
+when all of these hold:
+
+- `minLifetimeMs` is pinned;
+- its single summon at or before t lies strictly before t;
+- t < summon + min;
+- no positive death of it lies in [summon, t];
+- up to t, it has no cast before that summon or after summon + max, and no
+  null instance id beside numbered ones on its actor.
+
+The summon is cited. A cast or damage it sources never proves presence on its
+own. Dead NPCs source delayed damage for up to 32 s (M11-ED), and a cast
+proves only its own millisecond. A death never proves absence, because
+resurrection is not decoded.
+
+**No unobserved instance.** With a maximum lifetime D, an instance present at
+t was summoned in [t − D, t]. `NOT_PRESENT` and a count ceiling need every
+such summon to have been seen:
+
+- profile: summon start pinned (else `INSTANCE_START_NOT_PINNED`) and D
+  pinned (else `LIFETIME_BOUND_NOT_PINNED`);
+- t − D is not before the pull (else `PRE_PULL_INSTANCE_POSSIBLE`);
+- SUMMONS coverage COMPLETE over [t − D, t] for the owner and every mapped
+  actor (the shared absence gate's reason otherwise);
+- no owner-sourced summon in that window targets an actor without a usable
+  catalog gameID, and no unstated-owner candidate exists
+  (`OWNERSHIP_NOT_STATED`);
+- no cast at or before t contradicts D (`LIFETIME_BOUND_CONTRADICTED`). That
+  is a cast by a key with no summon of it in the D before the cast, where
+  that stretch is after the pull and fully covered.
+
+Then a key with no summon in [t − D, t] is `NOT_PRESENT`, and the entity is
+`NOT_PRESENT` when no key has one. While any condition fails, no key is
+`NOT_PRESENT`, and `instancesAt` reports `unobservedKeysPossible`.
+
+A non-monotonic canonical order refuses every pet query, PRESENT and counts
+included (`NON_MONOTONIC_TIME`), as `temporal.ts` requires of every
+timestamp-addressed question.
+
+**Counts.** `instanceCountAt` returns:
+
+- `EXACT` when every key with a summon in the window is decided and no
+  unobserved instance is possible;
+- `BOUNDED [atLeast, atLeast + undecided]` when some of those keys are
+  undecided;
+- `BOUNDED [atLeast, —]` (no ceiling) when an unobserved instance is
+  possible, or one key has two summons in the window
+  (`INSTANCE_IDENTITY_AMBIGUOUS`).
+
+As atoms these become `KNOWN_NUMBER`, `ONE_OF_NUMBERS` and `BOUNDED_NUMBER`.
+An undecided presence binds nothing, so the evaluator enumerates it. Neither
+ever becomes false or zero.
+
+**Pet-scoped auras.** No new aura model. `instancesAt` names the keys
+observed up to t, and the specialization queries `state.auras` on them.
+
+**Retained evidence, measured with test profiles** (b1PmaKrd6CDfzngc fight
+48, focus 15; the lifetimes are not game data):
+
+- Ghoul (47): three instances, one summon each. Another player's Ghoul (41)
+  is not mapped. With test lifetimes of 30 s minimum and 61 s maximum, at
+  one-second samples:
+  - 90 PRESENT;
+  - 159 NOT_PRESENT;
+  - 65 undecided;
+  - 31 blocked as pre-pull inside the first 61 s.
+- Blood Beast (45): four instances, each ending in a positive death. Actor
+  142 is a Blood Beast whose owner WCL did not state, so absence is never
+  claimed: 20 PRESENT and 325 `OWNERSHIP_NOT_STATED`.
+- Rune Weapon (44), listed by two test entities, is AMBIGUOUS throughout.
+- Warband Bank Convergence (224) is owned and unclassified.
+
+**No consumer yet.** No registered specialization builds a pet state, so no
+public decision changes. ONB-X4 (Demonology), ONB-X5 (Unholy) and ONB-T2
+(Beast Mastery) supply reviewed profiles and own what their pet atoms mean.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and
