@@ -433,6 +433,56 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-B3: what the internal Discipline Priest registration does not establish
+
+**Raised:** HEAL-B3 (2026-11-03).
+
+- **It cannot pass the healer promotion gate on committed evidence
+  (HEAL-B3P).** The gate needs a real subject with a COMPLETE use listing, at
+  least one use, and a met and a not-met plan entry over those uses. The M13-A
+  Discipline Priest's three uses sit in a filtered capture whose listing is
+  UNKNOWN, and the canonical fight 48 (the retained M11-E2 raw capture) has no
+  Discipline Priest. Unlike HEAL-B1P and HEAL-B2P, no offline cut can supply
+  one. HEAL-B3P therefore needs authorized new evidence (ONB-EV, an owner
+  decision about a Warcraft Logs request), or stays INTERNAL_ONLY with its gap
+  recorded exactly as Restoration Druid's is. Never a weaker gate.
+- **Its public Atonement shape is undecided.** The Atonement facts are attached
+  to the evaluation, not to the shared healer finding set or view. HEAL-B3P
+  (publicContract EXPECTED) must decide whether and how they are published, and
+  what the healer gate requires of them (at least one observed Atonement
+  heal under a COMPLETE healing listing, presumably).
+- **No committed capture holds an Atonement heal event.** The heal id (81751)
+  is corroborated only by a committed fight context's ability table ("Atonement",
+  type 2); the healing-as-reported list is exercised on synthetic events and,
+  on real evidence, only as an UNKNOWN empty list (the G2 query excluded heals).
+  Its first real COMPLETE listing must be checked against the raw bytes,
+  including whether Warcraft Logs ever reports an Atonement heal sourced by a
+  pet.
+- **Same-name spells are unreviewed.** 94472, 451577 and 451769 are pinned rows
+  named "Atonement" whose meaning is not reviewed; an event of one of them from
+  the subject makes the listing UNKNOWN. If real logs show one of them is
+  routinely sourced by Discipline Priests (for example a hero-talent variant),
+  reviewing it is a data change, never a parser default.
+- **No Atonement interval.** Removals are not listed and no uptime or
+  concurrent-Atonement count is claimed: the pinned data carries no duration and
+  a removal may be attributed elsewhere. An interval model would need the M4
+  aura-state semantics plus fight-termination rules, and its own review.
+- **The selection is narrow.** Power Word: Barrier, Ultimate Penitence and
+  Evangelism only. Pain Suppression is an external; Shadowfiend and Mindbender
+  are pet summons whose healing arrives through Atonement; Archangel and the
+  hero-tree spells are not healing cooldowns by this selection. Power Word:
+  Barrier has no observed cast in committed evidence (identified from its row
+  and its choice-node pairing with an observed Ultimate Penitence). Widening is
+  a reviewed data change.
+- **The registration facade is copied a sixth time.** Discipline's evaluation
+  differs from the other healers' (two datasets, the Atonement facts), but its
+  registration facade is the same shape, the identity strings and seams aside.
+  The shared healer registration helper ("After HEAL-B2P") is still its own
+  reviewed refactor; HEAL-B3 is its own representative and, as recorded there,
+  was not required to share it.
+
+---
+
 ## After HEAL-B2P: what the public Holy Priest does not establish
 
 **Raised:** HEAL-B2P (2026-11-03).

@@ -106,7 +106,7 @@ function classPrefixOfModule(resolved: string): string | null {
 }
 
 describe("the sweep has something to sweep", () => {
-  it("finds the Assassination tree, the two Paladin trees, the Blood Death Knight tree, since M11-C2 the Brewmaster Monk tree, since M12-D the Restoration Shaman evaluator tree (registered since HEAL-A) , since M13-A, the Augmentation Evoker tree (registered since M13-E) and, since HEAL-B1, the Holy Paladin, Restoration Druid and Mistweaver Monk healer trees, and since HEAL-B2 the Holy Priest healer tree", () => {
+  it("finds the Assassination tree, the two Paladin trees, the Blood Death Knight tree, since M11-C2 the Brewmaster Monk tree, since M12-D the Restoration Shaman evaluator tree (registered since HEAL-A) , since M13-A, the Augmentation Evoker tree (registered since M13-E) and, since HEAL-B1, the Holy Paladin, Restoration Druid and Mistweaver Monk healer trees, and since HEAL-B2 the Holy Priest healer tree, and since HEAL-B3 the Discipline Priest healer tree", () => {
     const trees = new Set(SPEC_FILES.map(specTreeOf).filter((tree): tree is string => tree !== null));
     expect([...trees].sort()).toEqual([
       "src/specs/deathknight/blood",
@@ -117,6 +117,7 @@ describe("the sweep has something to sweep", () => {
       "src/specs/paladin/holy",
       "src/specs/paladin/protection",
       "src/specs/paladin/retribution",
+      "src/specs/priest/discipline",
       "src/specs/priest/holy",
       "src/specs/rogue/assassination",
       "src/specs/shaman/restoration",
@@ -128,6 +129,7 @@ describe("the sweep has something to sweep", () => {
     expect(existsSync("src/specs/druid/restoration/registration.ts")).toBe(true);
     expect(existsSync("src/specs/monk/mistweaver/registration.ts")).toBe(true);
     expect(existsSync("src/specs/priest/holy/registration.ts")).toBe(true);
+    expect(existsSync("src/specs/priest/discipline/registration.ts")).toBe(true);
     expect(existsSync("src/specs/paladin/retribution/registration.ts")).toBe(true);
   });
 
@@ -201,6 +203,7 @@ describe("shared code reaches specializations only through the registration boun
       "src/specs/paladin/holy/registration.js",
       "src/specs/paladin/protection/registration.js",
       "src/specs/paladin/retribution/registration.js",
+      "src/specs/priest/discipline/registration.js",
       "src/specs/priest/holy/registration.js",
       "src/specs/rogue/assassination/registration.js",
       "src/specs/shaman/restoration/registration.js",

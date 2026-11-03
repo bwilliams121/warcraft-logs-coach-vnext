@@ -12766,6 +12766,106 @@ row.
 would rewrite four reviewed registrations; it is recorded as its own
 refactor in agent/follow-ups.md "After HEAL-B2P".
 
+## HEAL-B3 — Discipline Priest (internal, own representative)
+
+Autopilot queue entry HEAL-B3. Public contract: NONE. No Warcraft Logs
+request: committed evidence and the pinned SimulationCraft data only. The
+M12-D verdict-category limits and the M12-E plan semantics apply unchanged.
+
+**The problem.** Discipline heals substantially through damage: an ally
+carrying the Atonement buff is healed when the priest deals damage. The shared
+healing primitives represent healing as heal events and cooldown casts; they
+say nothing about Atonement, and per-cast judgement of it (enough Atonements?
+the right damage spell as a heal?) has no approved model.
+
+**The decision.** Model only what Warcraft Logs reports, in the specialization
+(CLAUDE.md "Specialization-Owned Evaluation"), and leave everything else
+UNKNOWN. No shared primitive was added: the facts are a filter over normalized
+events plus the shared actor-global absence gate, and which ids are Atonement
+and whose sources count are Discipline's.
+
+**The tree** (`src/specs/priest/discipline/`, revision
+`discipline-priest-evaluator/1`): a healer on the HEAL-B1 architecture. It
+consumes the shared cooldown-use facts, plan rules, finding-set restatement and
+artifact reader unchanged, and owns:
+
+- its identity gate (stated Priest/Discipline, and a Priest player in the
+  master data; Holy and Shadow refused as NOT_THIS_SPECIALIZATION);
+- its healing-cooldown identity data
+  (`src/data/game/priest-discipline-healing-cooldowns.{json,ts}`), verbatim
+  specialization-tree rows of the pinned `trait_data.inc` (commit 33622e9d,
+  client data 12.1.0.69587), class 5, spec 256: Power Word: Barrier 62618 and
+  Ultimate Penitence 421453 on choice node 82564, Evangelism 472433 on a NORMAL
+  node. Pain Suppression (an external), Shadowfiend and Mindbender (pet
+  summons), Archangel and the hero-tree spells are not identified;
+- its Atonement identity data
+  (`src/data/game/priest-discipline-atonement.{json,ts}`): every
+  `sc_spell_data.inc` row named "Atonement" at the same commit, verbatim. The
+  ATONEMENT_BUFF (194384, observed in committed evidence) and ATONEMENT_HEAL
+  (81751, named in a committed fight context's ability table) are a
+  hand-reviewed selection; the other four rows (81749, the talent; 94472;
+  451577; 451769) are SAME_NAME_UNIDENTIFIED. The loader checks each row's name
+  and id and that exactly one buff and one heal are named. No duration, amount
+  or transfer rate is claimed;
+- that its stated pets count as its sources, for cooldown overlap and for
+  Atonement;
+- its registration: the HEAL-B1 shape (three provider-less families declared
+  from `DISCIPLINE_PRIEST_REQUIRED_INPUTS`, FULL_RAID derived, no binding,
+  never ANALYZED, AUTHORITY_NOT_AVAILABLE when evaluated and
+  INSUFFICIENT_EVIDENCE otherwise, no healer view and no public prose). Its
+  declared categories add AURAS to the healer set: the Atonement buff is an
+  aura on an ally.
+
+**The Atonement observation** (`./atonement.ts`), attached to the evaluation as
+`atonement` (`category: ATONEMENT`, `authority: WCL_OBSERVED_FACT`). It is not
+a decision category, not a declared family and not a finding: the finding set
+stays the shared three-category healer set, unchanged.
+
+- APPLICATIONS: each `applybuff`/`refreshbuff` of 194384 whose reported source
+  is one of the player's sources, inside the encounter, with its locator, and a
+  per-target count. Direction is Warcraft Logs' own source and target. Stack changes
+  (`applybuffstack`) are not applications. Removals
+  are not listed: no active interval, uptime or concurrent-target count is
+  claimed (CLAUDE.md "Aura State").
+- HEALING AS REPORTED: each `heal` of 81751 from the same sources, with its
+  locator, and a per-target count. That Warcraft Logs attributes the heal to
+  this source and to Atonement is the whole of the attribution it reports.
+  Counts only (raw `amount` meaning is follow-up M1).
+- DAMAGE LINK: always UNKNOWN (`DAMAGE_EVENT_LINK_NOT_REPORTED`). Warcraft Logs
+  does not say which damage event produced which Atonement heal, and it is
+  never reconstructed from timestamps.
+- Each list's listing is COMPLETE only when its category (AURAS, HEALING)
+  passes the ACTOR-GLOBAL gate over the whole encounter (an Atonement may land
+  on any ally, so only `null` actor scope vouches for the list), no event of
+  the identified id has no source, and no event of the same family from the
+  player's sources has no ability id or a SAME_NAME_UNIDENTIFIED id. Otherwise
+  it is UNKNOWN with the first failing reason and the counts, and the observed
+  events are kept. An empty list is "none" only when COMPLETE.
+
+**Reachability.** `priest/discipline` is in `INTERNAL_ONLY_SPEC_IDS` (now
+`druid/restoration`, `priest/discipline`). `analyzerForSpec` never selects it,
+the identity table does not resolve Priest/Discipline, and a public request
+stays SPEC_NOT_SUPPORTED. The catalog has twelve rows. The corpus gained one
+layer (`SPEC_DISCIPLINE_PRIEST`) and two cases, the pair every internal healer
+added. The `m12a` healing-consumer list names the evaluator; `atonement.ts`
+does not read `src/healing/`.
+
+**Real evidence** (committed, checked against the raw bytes):
+
+- the M13-A Discipline Priest (actor 9): Evangelism at 190,592 and 281,877 and
+  Ultimate Penitence at 232,488. The capture is filtered, so every listing is
+  UNKNOWN and the overlap is ROSTER_NOT_IN_SCOPE;
+- the stated Discipline Priest of the G2 cohort246 fight 33 capture (actor
+  88): seven Atonement applications onto that capture's subject (actor 7). The
+  capture is a PLAYER_CONTEXT capture of actor 7 whose query excluded heal
+  events, so the application listing and the empty healing listing are UNKNOWN
+  (INSUFFICIENT_COVERAGE), never "these were all" or "no Atonement healing".
+
+No committed or retained capture holds a Discipline Priest's whole-fight casts
+or an Atonement heal event (fight 48 has no Discipline Priest), so HEAL-B3P
+cannot pass the healer promotion gate on committed evidence; see
+agent/follow-ups.md "After HEAL-B3".
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

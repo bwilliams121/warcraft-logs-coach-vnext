@@ -205,6 +205,7 @@ const EXECUTOR_RING = [
   "support/corpus/executors/spec-augmentation-evoker.ts",
   "support/corpus/executors/spec-blood-death-knight.ts",
   "support/corpus/executors/spec-brewmaster-monk.ts",
+  "support/corpus/executors/spec-discipline-priest.ts",
   "support/corpus/executors/spec-holy-paladin.ts",
   "support/corpus/executors/spec-holy-priest.ts",
   "support/corpus/executors/spec-mistweaver-monk.ts",

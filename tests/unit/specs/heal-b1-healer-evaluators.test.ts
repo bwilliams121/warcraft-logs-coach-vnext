@@ -1,6 +1,8 @@
 /**
  * HEAL-B1: the Holy Paladin, Restoration Druid and Mistweaver Monk evaluators,
- * and since HEAL-B2 the Holy Priest evaluator.
+ * since HEAL-B2 the Holy Priest evaluator, and since HEAL-B3 the Discipline
+ * Priest evaluator (its Atonement observation is pinned in
+ * tests/unit/specs/heal-b3-discipline-priest.test.ts).
  *
  * Each is run through the same cases, because each must keep the M12-D
  * verdict-category limits on its own identity and its own data:
@@ -38,6 +40,7 @@ import type { RaidCooldownAssignment, RaidCooldownPlan } from "../../../src/raid
 import { evaluateRestorationDruid } from "../../../src/specs/druid/restoration/evaluator.js";
 import { evaluateMistweaverMonk } from "../../../src/specs/monk/mistweaver/evaluator.js";
 import { evaluateHolyPaladin } from "../../../src/specs/paladin/holy/evaluator.js";
+import { evaluateDisciplinePriest } from "../../../src/specs/priest/discipline/evaluator.js";
 import { evaluateHolyPriest } from "../../../src/specs/priest/holy/evaluator.js";
 import type { EvidenceCategory } from "../../../src/wcl/evidence-capability.js";
 import { observableCategory, partialCategory, syntheticFight } from "../../support/synthetic-fight.js";
@@ -152,6 +155,18 @@ const CASES: readonly Case[] = [
     cooldownA: 64843, // Divine Hymn
     cooldownB: 200183, // Apotheosis
     notACooldown: 47788, // Guardian Spirit: an external, not identified
+    otherClassName: "Paladin",
+  },
+  {
+    label: "Discipline Priest",
+    evaluate: evaluateDisciplinePriest as unknown as Evaluate,
+    revision: "discipline-priest-evaluator/1",
+    className: "Priest",
+    specName: "Discipline",
+    datasetId: "SIMC_DBC_PRIEST_DISCIPLINE_HEALING_COOLDOWNS",
+    cooldownA: 472433, // Evangelism
+    cooldownB: 62618, // Power Word: Barrier
+    notACooldown: 33206, // Pain Suppression: an external, not identified
     otherClassName: "Paladin",
   },
 ];

@@ -151,6 +151,15 @@ const IDENTITY_EVIDENCE: Readonly<Record<string, IdentityEvidence>> = {
     sourceId: 2,
     archive: true,
   },
+  // HEAL-B3: actor 9 of the M13-A fight context, the Discipline Priest the
+  // committed evidence archive context reports (also actor 88 of the G2
+  // cohort246 fight 33 context).
+  "priest/discipline": {
+    artifactId: "wcl-m13a-fight-context-aug1-fight-1",
+    fightId: 1,
+    sourceId: 9,
+    archive: true,
+  },
 };
 
 const ARCHIVE_GRAPHQL: Record<string, string> = import.meta.glob("../evidence/artifacts/wcl-graphql/*.json", {
@@ -366,7 +375,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the nine public modules and two INTERNAL_ONLY healer modules (Restoration Druid since HEAL-B1, Holy Priest since HEAL-B2), each with zero supplemental analyses", () => {
+  it("is exactly the ten public modules and two INTERNAL_ONLY healer modules (Restoration Druid since HEAL-B1, Discipline Priest since HEAL-B3), each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -395,6 +404,8 @@ describe("what the tree exports today", () => {
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       // HEAL-B2: a fourth healer on the same architecture, INTERNAL_ONLY.
+      // HEAL-B3: a healer on the same architecture that also reports observed Atonement, INTERNAL_ONLY.
+      ["DISCIPLINE_PRIEST_MODULE", "priest/discipline", "INTERNAL_ONLY", 0],
       ["HOLY_PRIEST_MODULE", "priest/holy", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
       // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.

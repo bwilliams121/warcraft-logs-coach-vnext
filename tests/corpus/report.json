@@ -614,13 +614,22 @@
       "passed": 1
     },
     {
-      "assertions": 21,
-      "cases": 17,
+      "assertions": 1,
+      "cases": 1,
+      "failed": 0,
+      "kindsExercised": ["SPEC_DISCIPLINE_PRIEST.REGISTRATION_RESULT"],
+      "notExecuted": 0,
+      "owningLayer": "SPEC_DISCIPLINE_PRIEST",
+      "passed": 1
+    },
+    {
+      "assertions": 22,
+      "cases": 18,
       "failed": 0,
       "kindsExercised": ["APPLICATION_SERVICE.FIGHT_ANALYSIS", "APPLICATION_SERVICE.INTERNAL_REGISTRATION"],
       "notExecuted": 0,
       "owningLayer": "APPLICATION_SERVICE",
-      "passed": 21
+      "passed": 22
     },
     {
       "assertions": 14,
@@ -712,6 +721,20 @@
       "caseId": "application-service.derives-player-context-scope-and-selects-the-assassination-analyzer",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-assassination-d2-decision-corpus"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.discipline-priest-registration-is-internal-only",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
     },
     {
       "artifactId": "wcl-assassination-high-parse-opener",
@@ -5217,6 +5240,20 @@
       "artifactId": "wcl-protection-paladin-a7r6-opener",
       "assertions": [
         {
+          "kind": "SPEC_DISCIPLINE_PRIEST.REGISTRATION_RESULT",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "spec-discipline-priest.unstated-subject-yields-no-healer-finding",
+      "owningLayer": "SPEC_DISCIPLINE_PRIEST",
+      "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-protection-paladin-a7r6-opener",
+      "assertions": [
+        {
           "kind": "SPEC_HOLY_PALADIN.REGISTRATION_RESULT",
           "ordinal": 0,
           "status": "PASSED"
@@ -7134,13 +7171,13 @@
   "totals": {
     "artifactBytes": 5748495,
     "artifacts": 52,
-    "assertions": 790,
-    "cases": 195,
+    "assertions": 792,
+    "cases": 197,
     "declared": 0,
-    "executable": 790,
+    "executable": 792,
     "failed": 0,
     "largestArtifactBytes": 427886,
     "notExecuted": 0,
-    "passed": 790
+    "passed": 792
   }
 }

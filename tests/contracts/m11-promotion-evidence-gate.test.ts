@@ -699,7 +699,7 @@ describe("M13-F / HEAL-AP / HEAL-B1P / HEAL-B2P: a PUBLIC registration that bind
 });
 
 describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("the production INTERNAL_ONLY registration is exactly Restoration Druid, and the partition agrees", () => {
+  it("the production INTERNAL_ONLY registrations are exactly Restoration Druid and Discipline Priest, and the partition agrees", () => {
     // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
     // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it;
     // Augmentation Evoker held it in M13-E until M13-F promoted it; Restoration
@@ -707,9 +707,9 @@ describe("INTERNAL_ONLY mode — reported, never failed, paired against the modu
     // three healers on its architecture here, and HEAL-B1P promoted Holy
     // Paladin and Mistweaver Monk through the healer gate; Restoration Druid
     // has no retained evidence. HEAL-B2 added Holy Priest, and HEAL-B2P
-    // promoted it through the healer gate. The synthetic module below still
-    // exercises the branch.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration"]);
+    // promoted it through the healer gate. HEAL-B3 added Discipline Priest.
+    // The synthetic module below still exercises the branch.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
     const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
     expect(internal.map((row) => row.specId)).toEqual([...INTERNAL_ONLY_SPEC_IDS]);
   });

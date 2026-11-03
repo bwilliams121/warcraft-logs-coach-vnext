@@ -168,7 +168,8 @@ const REGISTERED_TREES: readonly SpecTree[] = TREES.filter(
  * artifact. Named exactly; each must be a registered tree. The one-APL-per-tree
  * count below applies to every other registered tree. HEAL-A added Restoration
  * Shaman, the first healer registration, HEAL-B1 the three healer
- * registrations on its architecture, and HEAL-B2 Holy Priest.
+ * registrations on its architecture, HEAL-B2 Holy Priest, and HEAL-B3
+ * Discipline Priest.
  */
 const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = [
   "evoker/augmentation",
@@ -177,6 +178,7 @@ const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = [
   "druid/restoration",
   "monk/mistweaver",
   "priest/holy",
+  "priest/discipline",
 ];
 
 const ROSTER = (() => {

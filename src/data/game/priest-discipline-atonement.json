@@ -1,0 +1,67 @@
+{
+  "artifactVersion": 1,
+  "datasetId": "SIMC_DBC_PRIEST_DISCIPLINE_ATONEMENT",
+  "artifactRevision": "simc-33622e9d-1",
+  "provenance": {
+    "repository": "https://github.com/simulationcraft/simc",
+    "commitSha": "33622e9d1662ff0e451691edf85a6b49cc9d11d9",
+    "sources": [
+      {
+        "path": "engine/dbc/generated/sc_spell_data.inc",
+        "sha256": "d8e3d1970520f2161de6d5a59aa5ea0e7c81eaef14c6bc980d5a208ed33b4c62",
+        "byteLength": 29513214
+      },
+      {
+        "path": "engine/dbc/generated/client_data_version.inc",
+        "sha256": "226a0e619d6de3ff901652aa16ab4770c0acf26e6db5ae691ee8e026e1eac293",
+        "byteLength": 525
+      }
+    ],
+    "clientDataWowVersion": "12.1.0.69587",
+    "classId": 5,
+    "className": "Priest",
+    "specId": 256,
+    "specName": "Discipline",
+    "extractedOn": "2026-11-03",
+    "method": "EXTRACTED_VERBATIM_FROM_PINNED_SPELL_ROWS",
+    "methodNote": "Every sc_spell_data.inc row named \"Atonement\" at the pinned commit (six rows), each verbatim without its trailing effect-id comment. Which id is the Atonement BUFF and which the Atonement HEAL is a hand-reviewed selection, recorded per entry and corroborated by committed Warcraft Logs evidence; every other same-name row is listed as SAME_NAME_UNIDENTIFIED, so an aura or healing event of one of them sourced by the subject makes a listing UNKNOWN instead of being silently dropped. Nothing about duration, amount, transfer rate or target cap is claimed."
+  },
+  "spells": [
+    {
+      "abilityGameId": 194384,
+      "pinnedSpellRow": "{ \"Atonement\"                         ,  194384, 2, 0.000000, 0.000000, 0.000000, 0x0000000000000000, 0x00000010, 0, 0, 0, 1, 0, 0, 0.000000, 60.000000,       0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0.000000, 0.000000, 15000, 0, 0, 0, 0x0000000000000000, 0, 0.000000,  0, 0x00000000, 0x00000000, 0, { 327680, 131072, 268, 0, 4096, 0, 4, 0, 0, 0, 0, 0, 0, 33554433, 256, 0, 0 }, { 0, 0, 1073741824, 0 }, 6, { 0, 0 }, { 0, 0 }, 0x00000000, 0,   0,  0, 0, 0, 0, 0, 3, 0, 0, 3 }",
+      "role": "ATONEMENT_BUFF",
+      "note": "The buff a Discipline Priest applies to an ally. Observed as applybuff/removebuff of 194384 sourced by the stated Discipline Priest (actor 88) onto actor 7 in the committed G2 capture wcl-g2-cohort246-f33-owned-pets (fight 33)."
+    },
+    {
+      "abilityGameId": 81751,
+      "pinnedSpellRow": "{ \"Atonement\"                         ,   81751, 2, 0.000000, 0.000000, 0.000000, 0x0000000000000000, 0x00000010, 0, 0, 0, 1, 0, 0, 0.000000, 50000.000000,       0, 0, 0, 0, 0, 0, 0,    0, 1, 0, 0.000000, 0.000000, 0, 0, 0, 0, 0x0000000000000000, 0, 0.000000,  0, 0x00000000, 0x00000000, 0, { 151060480, 1056, 537411588, 1073742336, 32768, 393224, 0, 0, 32, 2048, 4194304, 67108864, 0, 67108867, 0, 0, 0 }, { 0, 0, 1024, 0 }, 6, { 0, 0 }, { 0, 0 }, 0x80000000, 0,   0,  0, 0, 0, 0, 0, 1, 0, 0, 3 }",
+      "role": "ATONEMENT_HEAL",
+      "note": "The heal Warcraft Logs reports for Atonement, sourced by the priest. Named \"Atonement\" (type 2) in the committed fight context wcl-g2-fight-context-cohort246-fight-33's ability table; no committed event capture yet holds one."
+    },
+    {
+      "abilityGameId": 81749,
+      "pinnedSpellRow": "{ \"Atonement\"                         ,   81749, 1, 0.000000, 0.000000, 0.000000, 0x0000000000000000, 0x00000010, 0, 0, 0, 0, 0, 0, 0.000000, 0.000000,       0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0.000000, 0.000000, 0, 0, 100, 0, 0x0000000000050000, 0, 0.000000,  0, 0x00000000, 0x00000000, 0, { 208, 0, 0, 67108864, 0, 0, 0, 0, 0, 0, 0, 8, 0, 1, 4, 0, 0 }, { 0, 8, 0, 0 }, 6, { 0, 0 }, { 0, 0 }, 0x00000000, 0,   0,  0, 0, 0, 0, 0, 2, 0, 0, 3 }",
+      "role": "SAME_NAME_UNIDENTIFIED",
+      "note": "The specialization-tree talent (trait_data.inc node 82594). A passive; not an aura or heal this dataset identifies."
+    },
+    {
+      "abilityGameId": 94472,
+      "pinnedSpellRow": "{ \"Atonement\"                         ,   94472, 2, 0.000000, 0.000000, 0.000000, 0x0000000000000000, 0x00000010, 0, 0, 0, 1, 0, 0, 0.000000, 50000.000000,       0, 0, 0, 0, 0, 0, 0,    0, 1, 0, 0.000000, 0.000000, 0, 0, 0, 0, 0x0000000000000000, 0, 0.000000,  0, 0x00000000, 0x00000000, 0, { 151060480, 1056, 540676, 1073742336, 32768, 393224, 0, 0, 0, 2048, 4194304, 67108864, 0, 67108867, 0, 0, 0 }, { 0, 0, 1024, 0 }, 6, { 0, 0 }, { 0, 0 }, 0x80000000, 0,   0,  0, 0, 0, 0, 0, 1, 0, 0, 3 }",
+      "role": "SAME_NAME_UNIDENTIFIED",
+      "note": "A same-name heal row whose meaning is not reviewed."
+    },
+    {
+      "abilityGameId": 451577,
+      "pinnedSpellRow": "{ \"Atonement\"                         ,  451577, 2, 0.000000, 0.000000, 0.000000, 0x0000000000000000, 0x00000010, 0, 0, 0, 1, 0, 0, 0.000000, 60.000000,       0, 0, 0, 0, 0, 0, 0,    0, 0, 0, 0.000000, 0.000000, 15000, 0, 0, 0, 0x0000000000000000, 0, 0.000000,  0, 0x00000000, 0x00000000, 0, { 327680, 131072, 268, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 33554433, 0, 0, 0 }, { 0, 0, 0, 0 }, 0, { 524288, 0 }, { 0, 0 }, 0x00000000, 0,   0,  0, 0, 0, 0, 0, 3, 0, 0, 0 }",
+      "role": "SAME_NAME_UNIDENTIFIED",
+      "note": "A same-name aura row whose meaning is not reviewed."
+    },
+    {
+      "abilityGameId": 451769,
+      "pinnedSpellRow": "{ \"Atonement\"                         ,  451769, 2, 0.000000, 0.000000, 0.000000, 0x0000000000000000, 0x00000010, 0, 0, 0, 1, 0, 0, 0.000000, 50000.000000,       0, 0, 0, 0, 0, 0, 0,    0, 1, 0, 0.000000, 0.000000, 0, 0, 0, 0, 0x0000000000000000, 0, 0.000000,  0, 0x00000000, 0x00000000, 0, { 151060480, 1056, 537411588, 1073742336, 32768, 393224, 0, 0, 32, 2048, 4194304, 67108864, 0, 67108867, 0, 0, 0 }, { 0, 0, 0, 0 }, 0, { 0, 0 }, { 0, 0 }, 0x80000000, 0,   0,  0, 0, 0, 0, 0, 1, 0, 0, 0 }",
+      "role": "SAME_NAME_UNIDENTIFIED",
+      "note": "A same-name heal row whose meaning is not reviewed."
+    }
+  ]
+}
