@@ -1779,11 +1779,11 @@ shared pet mapping (ONB-S6, tests/unit/onb-s6-pet-state.test.ts):
   atoms                                        -> UNKNOWN presence unbound (enumerated); counts KNOWN / ONE_OF / BOUNDED
   real Blood 15 (fight 48)                     -> Ghoul 47 settled; Blood Beast blocked by unstated owner 142; Rune Weapon AMBIGUOUS
 healer registration and finding shape (HEAL-A, tests/unit/specs/restoration-shaman-registration.test.ts, tests/unit/healer-finding.test.ts):
-  registration                                 -> INTERNAL_ONLY; public lookup null; Shaman/Restoration not in the identity table
+  registration                                 -> PUBLIC since HEAL-AP; public lookup and identity table resolve it
   declared families                            -> COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN, HEALING_DECISION; all NO_PINNED_AUTHORITY_FOR_DOMAIN
   forged binding on a healer family            -> PROVIDER_DOMAIN_INCOMPATIBLE; resolution still NO_PINNED_AUTHORITY_FOR_DOMAIN
   requirement                                  -> DERIVED FULL_RAID from RESTORATION_SHAMAN_REQUIRED_INPUTS
-  public request for a Restoration Shaman      -> SPEC_NOT_SUPPORTED; no analyzer dispatched
+  public request for a Restoration Shaman      -> dispatched once at FULL_RAID (HEAL-AP); unstated subject NOT_ASSESSED
   request plan                                 -> handed to the selected analyzer untouched; null without one
   real 122, no plan                            -> AUTHORITY_NOT_AVAILABLE; ASSIGNMENT NO_AUTHORITY_AVAILABLE, no assignment finding; 4 COOLDOWN facts
   real 122, plan for this fight                -> MET (cast evidence, positive actionability), UNKNOWN READINESS, outcome after kill, UNKNOWN ABILITY_NOT_REGISTERED
@@ -1792,6 +1792,19 @@ healer registration and finding shape (HEAL-A, tests/unit/specs/restoration-sham
   other spec / pet / unusable data             -> INSUFFICIENT_EVIDENCE; NOT_ASSESSED, never an empty finding set
   negative controls                            -> no HPS, rank, score, "should" or cooldown-quality field
   finding set invariants                       -> three categories in order; ASSIGNMENT finding only under a plan it cites; COOLDOWN only when OBSERVED
+healer public shape and healer promotion gate (HEAL-AP, tests/integration/heal-ap-restoration-shaman-public.test.ts, tests/contracts/heal-ap-healer-promotion-gate.test.ts):
+  REST and MCP, real 122 with a bound plan     -> identical documents; one dispatch each at FULL_RAID; AUTHORITY_NOT_AVAILABLE
+  healerFindings                               -> the registration's view, field for field; MET then the encounter-ended outcome
+  plan disclosure, bound plan judged           -> EVALUATED_IN_HEALER_FINDINGS; TLDR/report HEALER_FINDINGS_ + RAID_COOLDOWN_PLAN_NOT_SUMMARIZED, never _NOT_EVALUATED
+  refusing or contradicting healer view        -> INTERNAL_ERROR, never a quieter document
+  schema                                       -> MET only with PROVEN actionability; encounter-ended only NOT_EVALUATED; no miss/early/late; no result without a plan; quality flags false
+  gate coverage                                -> every PUBLIC row with a healer view has a pinned real subject
+  gate OBSERVATIONS                            -> COOLDOWN OBSERVED COMPLETE; every use the subject's own completed cast
+  gate ASSIGNMENT + DISCRIMINATION             -> a real MET proven by a listed use in the window; a not-met identified entry on the same evidence
+  gate MISSING PLAN                            -> NO_AUTHORITY_AVAILABLE (none / other fight), UNKNOWN (unprovable binding); no assignment result
+  gate IDENTITY                                -> other spec IDENTITY_REFUSED (+ SUBJECT_NOT_ASSESSED); unstated SUBJECT_SPECIALIZATION_NOT_STATED
+  gate COMPLETENESS                            -> CASTS withdrawn: listing and cast-less entry UNKNOWN CAPABILITY_UNVERIFIED; PLAYER_CONTEXT: ROSTER_NOT_IN_SCOPE
+  gate NEGATIVE CONTROLS                       -> no hps/amount/total/rank/score/confidence/quality/state/status key; no verdict word
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

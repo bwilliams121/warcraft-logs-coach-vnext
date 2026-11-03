@@ -346,7 +346,7 @@ describe("the supplemental seam is not wired to any transport, service, contract
 });
 
 describe("what the tree exports today", () => {
-  it("is exactly the six public modules and, since HEAL-A, the INTERNAL_ONLY Restoration Shaman module, each with zero supplemental analyses", () => {
+  it("is exactly the seven public modules, each with zero supplemental analyses", () => {
     // A reviewed snapshot, not the rule: every proof above is per module and
     // count-independent. The third module (M11-A4) first changed this line
     // WITHOUT the five-site identity move — INTERNAL_ONLY, carrying the
@@ -371,8 +371,8 @@ describe("what the tree exports today", () => {
       ["PROTECTION_PALADIN_MODULE", "paladin/protection", "PUBLIC", 0],
       ["RETRIBUTION_PALADIN_MODULE", "paladin/retribution", "PUBLIC", 0],
       ["ASSASSINATION_MODULE", "rogue/assassination", "PUBLIC", 0],
-      // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority.
-      ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "INTERNAL_ONLY", 0],
+      // HEAL-A: the first healer, INTERNAL_ONLY, binding no pinned decision authority; PUBLIC since HEAL-AP.
+      ["RESTORATION_SHAMAN_MODULE", "shaman/restoration", "PUBLIC", 0],
     ]);
   });
 

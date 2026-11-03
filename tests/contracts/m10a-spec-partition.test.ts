@@ -45,7 +45,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     for (const id of PUBLIC_SPEC_IDS) expect(INTERNAL_ONLY_SPEC_IDS as readonly string[]).not.toContain(id);
   });
 
-  it("Assassination, both Paladins, Blood Death Knight, Brewmaster Monk and Augmentation Evoker are public", () => {
+  it("Assassination, both Paladins, Blood Death Knight, Brewmaster Monk, Augmentation Evoker and Restoration Shaman are public", () => {
     expect(PUBLIC_SPEC_IDS).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -53,7 +53,9 @@ describe("the known specialization ids are exactly partitioned", () => {
       "deathknight/blood",
       "monk/brewmaster",
       "evoker/augmentation",
+      "shaman/restoration",
     ]);
+    expect(isPublicSpecId("shaman/restoration")).toBe(true);
     expect(isPublicSpecId("evoker/augmentation")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
     expect(isSpecId("monk/brewmaster")).toBe(true);
@@ -66,19 +68,19 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set holds Restoration Shaman since HEAL-A", () => {
+  it("the internal-only set is empty again since HEAL-AP", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
     // Blood Death Knight measurement slice from M11-B2, was empty again from
     // M11-B12, held the Brewmaster Monk measurement slice from M11-C2, was
     // empty again from M11-C4j, held Augmentation Evoker in M13-E (the first
     // registration with no decision authority), was empty again from M13-F,
-    // which published its support observations, and holds Restoration Shaman
-    // (the first healer registration) since HEAL-A.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["shaman/restoration"]);
+    // which published its support observations, held Restoration Shaman (the
+    // first healer registration) in HEAL-A, and is empty again since HEAL-AP,
+    // which published its healer findings.
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual([]);
     expect(isSpecId("shaman/restoration")).toBe(true);
-    expect(isPublicSpecId("shaman/restoration")).toBe(false);
-    expect(() => requirePublicSpecId("shaman/restoration")).toThrow(InternalSpecExposureError);
+    expect(requirePublicSpecId("shaman/restoration")).toBe("shaman/restoration");
     expect(isSpecId("evoker/augmentation")).toBe(true);
     expect(requirePublicSpecId("evoker/augmentation")).toBe("evoker/augmentation");
     // The narrowing boundary still refuses a name that is no specialization at all.

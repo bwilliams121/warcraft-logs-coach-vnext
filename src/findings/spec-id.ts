@@ -30,9 +30,10 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS ONE MEMBER AGAIN SINCE HEAL-A (Restoration
- * Shaman). It was empty from M13-F, which promoted Augmentation Evoker (it
- * held that one member from M13-E). Before that it held one member from M11-C2. It was empty
+ * THE INTERNAL-ONLY SET IS EMPTY AGAIN SINCE HEAL-AP, which promoted
+ * Restoration Shaman (it held that one member from HEAL-A). It was empty from
+ * M13-F, which promoted Augmentation Evoker (it held that one member from
+ * M13-E). Before that it held one member from M11-C2. It was empty
  * from M10-D (Protection public) until M11-A4 (Retribution arrived internal),
  * empty again from M11-A5 until M11-B2 (Blood Death Knight arrived internal),
  * and empty again from M11-B12 (Blood moved to the public half after ten
@@ -81,6 +82,7 @@ export const PUBLIC_SPEC_IDS = Object.freeze([
   "deathknight/blood",
   "monk/brewmaster",
   "evoker/augmentation",
+  "shaman/restoration",
 ] as const satisfies readonly SpecId[]);
 
 export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
@@ -145,12 +147,12 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * families (COOLDOWN_ASSIGNMENT, HEALING_COOLDOWN, HEALING_DECISION) are
  * provider-less, so it is never ANALYZED. Its assignment execution is judged
  * only against a caller-supplied raid cooldown plan, and its results take the
- * shared healer finding shape (`healer-finding.ts`). Its public result shape
- * and healer promotion gate are HEAL-AP's; until then the id stays here.
+ * shared healer finding shape (`healer-finding.ts`). HEAL-AP moved it to
+ * `PUBLIC_SPEC_IDS` by the same five-site edit, together with the reviewed
+ * healer public result shape (`healerFindings`) and after the healer
+ * promotion gate passed on real evidence. The set is empty again.
  */
-export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
-  "shaman/restoration",
-] as const satisfies readonly SpecId[]);
+export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];
 

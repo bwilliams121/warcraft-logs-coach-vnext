@@ -3,7 +3,8 @@
  *
  * - The raid night's disclosure codes are declared in the contract and pinned
  *   equal to the aggregation domain's; the single-fight TLDR/report codes
- *   gained exactly the two unsummarized-block codes, appended.
+ *   gained exactly the two unsummarized-block codes, appended, and HEAL-AP
+ *   appended two more after them.
  * - The schema can only express a PARTIAL, non-empty disclosure: no other
  *   scope, no empty list, no unknown code, and nowhere to put a score.
  */
@@ -34,13 +35,20 @@ describe("the vocabularies", () => {
     expect(RAID_NIGHT_DISCLOSURE_REVISION).toBe(VALID.revision);
   });
 
-  it("the single-fight codes equal the reporting module's, and M15-F only appended two", () => {
+  it("the single-fight codes equal the reporting module's; M15-F appended two and HEAL-AP two more", () => {
     expect([...PUBLIC_TLDR_DISCLOSURES]).toEqual([...TLDR_DISCLOSURES]);
-    expect(PUBLIC_TLDR_DISCLOSURES.slice(-2)).toEqual([
+    expect(PUBLIC_TLDR_DISCLOSURES.slice(-4)).toEqual([
       "SUPPORT_OBSERVATIONS_NOT_SUMMARIZED",
       "RAID_COOLDOWN_PLAN_NOT_EVALUATED",
+      "HEALER_FINDINGS_NOT_SUMMARIZED",
+      "RAID_COOLDOWN_PLAN_NOT_SUMMARIZED",
     ]);
-    expect([...UNSUMMARIZED_BLOCKS]).toEqual(["SUPPORT_OBSERVATIONS", "RAID_COOLDOWN_PLAN"]);
+    expect([...UNSUMMARIZED_BLOCKS]).toEqual([
+      "SUPPORT_OBSERVATIONS",
+      "RAID_COOLDOWN_PLAN",
+      "HEALER_FINDINGS",
+      "RAID_COOLDOWN_PLAN_EVALUATED",
+    ]);
   });
 });
 

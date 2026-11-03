@@ -66,9 +66,11 @@
  *                  nothing by itself.
  *
  * Since M13-F, PUBLIC mode covers the PUBLIC registrations that bind a
- * decision authority. One that binds none (Augmentation Evoker) can publish
- * no decision, so there is nothing for these gates to measure; it is pinned
- * as exempt below, by name, domains and view.
+ * decision authority. One that binds none (Augmentation Evoker; Restoration
+ * Shaman since HEAL-AP) can publish no decision, so there is nothing for these
+ * gates to measure; each is pinned as exempt below, by name, domains and view.
+ * A healer row is instead held to the healer promotion gate
+ * (`heal-ap-healer-promotion-gate.test.ts`), unchanged rules here.
  *
  * TWO EVIDENCE ROOTS (M11-C4e)
  *
@@ -222,8 +224,10 @@ describe("the gate's inputs", () => {
  * A registration that binds none can never return an ANALYZED result that
  * passes ownership (an ANALYZED envelope must cite an authority its
  * registration binds: RESULT_CITES_FOREIGN_AUTHORITY), so it publishes no
- * decision and has nothing for these gates to measure. Exactly one such row
- * exists (Augmentation Evoker); see the describe block after PUBLIC mode.
+ * decision and has nothing for these gates to measure. Two such rows exist
+ * (Augmentation Evoker since M13-F, Restoration Shaman since HEAL-AP, which
+ * the separate healer promotion gate governs); see the describe block after
+ * PUBLIC mode.
  */
 const bindsDecisionAuthority = (row: AnalyzerRegistration): boolean => row.authorityBindings.length > 0;
 
@@ -232,9 +236,9 @@ describe("PUBLIC mode — every public registration is backed by real, resolved,
     (row) => row.exposure === "PUBLIC" && bindsDecisionAuthority(row),
   );
 
-  it("evaluates exactly the PUBLIC partition, less the one registration that binds no decision authority", () => {
+  it("evaluates exactly the PUBLIC partition, less the two registrations that bind no decision authority", () => {
     expect(publicRegistrations.map((row) => row.specId).sort()).toEqual(
-      [...PUBLIC_SPEC_IDS].filter((id) => id !== "evoker/augmentation").sort(),
+      [...PUBLIC_SPEC_IDS].filter((id) => id !== "evoker/augmentation" && id !== "shaman/restoration").sort(),
     );
   });
 
@@ -599,85 +603,87 @@ describe("M11-C4j: Brewmaster Monk passes BOTH global gates in PUBLIC mode, on t
   });
 });
 
-describe("M13-F: a PUBLIC registration that binds no decision authority publishes no decision, so the gates do not apply", () => {
+describe("M13-F / HEAL-AP: a PUBLIC registration that binds no decision authority publishes no decision, so these gates do not apply", () => {
   const exempt = PRODUCTION_CATALOG.registrations.filter(
     (row) => row.exposure === "PUBLIC" && !bindsDecisionAuthority(row),
   );
+  const rowOf = (specId: string): AnalyzerRegistration => {
+    const row = exempt.find((candidate) => candidate.specId === specId);
+    if (row === undefined) throw new Error(`no exempt row for ${specId}`);
+    return row;
+  };
 
-  it("is exactly Augmentation Evoker, which declares only provider-less support domains", () => {
-    expect(exempt.map((row) => row.specId)).toEqual(["evoker/augmentation"]);
-    for (const row of exempt) {
-      expect(row.capabilities.map((capability) => capability.domain).sort()).toEqual([
-        "SUPPORT_TARGETING",
-        "SUPPORT_TIMING",
-      ]);
-      // Every declared domain resolves to no authority from the row's own access.
-      for (const capability of row.capabilities) {
-        expect(row.authority.forDomain(capability.domain).outcome).toBe("NO_PINNED_AUTHORITY_FOR_DOMAIN");
-      }
-      // It publishes support observations instead, through its own view.
-      expect(typeof row.supportObservationView).toBe("function");
-    }
-  });
-
-  it("an ANALYZED result from it could never pass ownership: it binds no authority to cite", () => {
-    const [row] = exempt;
-    if (row === undefined) throw new Error("no exempt row");
-    const forged = {
-      status: "ANALYZED",
-      specId: row.specId,
-      authority: { authorityId: "SIMC_APL_EVOKER_AUGMENTATION", artifactRevision: "forged" },
-    } as unknown as Parameters<AnalyzerRegistration["observedDecisionView"]>[0];
-    expect(() => row.observedDecisionView(forged)).toThrow();
-  });
-
-  it("its decision readiness is empty by design, and that is not a gate failure", async () => {
-    // The same search as PUBLIC mode, reported: no corpus case can show it a
-    // decision coverage, because it has no decision. Its public content is
-    // `supportObservations`, which the M13-F contract tests own.
-    const tiers = await tiersPromise;
-    const readiness = evaluate(tiers, "evoker/augmentation", "PUBLIC", publicPairing("evoker/augmentation"));
-    expect(readiness.qualifyingAssertions).toEqual([]);
-    expect(readiness.evidenceReady).toBe(false);
-  });
-});
-
-describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
-  it("the one production INTERNAL_ONLY registration since HEAL-A is Restoration Shaman, and the partition agrees", () => {
-    // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
-    // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it;
-    // Augmentation Evoker held it in M13-E until M13-F promoted it; it was
-    // empty until HEAL-A registered Restoration Shaman here. The synthetic
-    // module below still exercises the branch.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["shaman/restoration"]);
-    const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
-    expect(internal.map((row) => row.specId)).toEqual(["shaman/restoration"]);
-  });
-
-  it("Restoration Shaman binds no decision authority, so no rotational gate could qualify it (HEAL-A)", async () => {
-    // A healer has no SimulationCraft authority: its healer public gate is
-    // HEAL-AP's, separate from this one. Here it is reported, never failed.
-    const [row] = PRODUCTION_CATALOG.registrations.filter(
-      (candidate) => candidate.exposure === "INTERNAL_ONLY",
-    );
-    if (row === undefined) throw new Error("no INTERNAL_ONLY row");
-    expect(bindsDecisionAuthority(row)).toBe(false);
-    expect(row.capabilities.map((capability) => capability.domain)).toEqual([
+  it("is exactly Augmentation Evoker and Restoration Shaman, each declaring only provider-less domains", () => {
+    expect(exempt.map((row) => row.specId)).toEqual(["evoker/augmentation", "shaman/restoration"]);
+    expect(
+      rowOf("evoker/augmentation")
+        .capabilities.map((capability) => capability.domain)
+        .sort(),
+    ).toEqual(["SUPPORT_TARGETING", "SUPPORT_TIMING"]);
+    expect(rowOf("shaman/restoration").capabilities.map((capability) => capability.domain)).toEqual([
       "COOLDOWN_ASSIGNMENT",
       "HEALING_COOLDOWN",
       "HEALING_DECISION",
     ]);
-    for (const capability of row.capabilities) {
-      expect(row.authority.forDomain(capability.domain).outcome).toBe("NO_PINNED_AUTHORITY_FOR_DOMAIN");
+    for (const row of exempt) {
+      // Every declared domain resolves to no authority from the row's own access.
+      for (const capability of row.capabilities) {
+        expect(row.authority.forDomain(capability.domain).outcome).toBe("NO_PINNED_AUTHORITY_FOR_DOMAIN");
+      }
     }
-    const tiers = await tiersPromise;
-    const module = MODULES.find((candidate) => candidate.identity.specId === "shaman/restoration");
-    if (module === undefined) throw new Error("no Restoration Shaman module");
-    const readiness = evaluate(tiers, "shaman/restoration", "INTERNAL_ONLY", internalPairing(module));
-    expect(readiness.qualifyingAssertions).toEqual([]);
-    expect(readiness.evidenceReady).toBe(false);
+    // Each publishes its own unanalyzed view instead: support observations for
+    // Augmentation, healer findings for Restoration Shaman, never both.
+    expect(typeof rowOf("evoker/augmentation").supportObservationView).toBe("function");
+    expect(rowOf("evoker/augmentation").healerView).toBeUndefined();
+    expect(typeof rowOf("shaman/restoration").healerView).toBe("function");
+    expect(rowOf("shaman/restoration").supportObservationView).toBeUndefined();
   });
 
+  it("a healer row is exempt from THESE gates only: the healer promotion gate governs it", () => {
+    // HEAL-AP: tests/contracts/heal-ap-healer-promotion-gate.test.ts holds
+    // every PUBLIC row with a healer view to its own real-evidence gate, and
+    // fails when one has no pinned gate subject. Exemption here is never
+    // exemption from evidence.
+    for (const row of exempt.filter((candidate) => candidate.healerView !== undefined)) {
+      expect(row.specId).toBe("shaman/restoration");
+    }
+  });
+
+  it("an ANALYZED result from either could never pass ownership: it binds no authority to cite", () => {
+    for (const row of exempt) {
+      const forged = {
+        status: "ANALYZED",
+        specId: row.specId,
+        authority: { authorityId: "SIMC_APL_FORGED", artifactRevision: "forged" },
+      } as unknown as Parameters<AnalyzerRegistration["observedDecisionView"]>[0];
+      expect(() => row.observedDecisionView(forged), row.specId).toThrow();
+    }
+  });
+
+  it("their decision readiness is empty by design, and that is not a gate failure", async () => {
+    // The same search as PUBLIC mode, reported: no corpus case can show either
+    // a decision coverage, because neither has a decision. Their public content
+    // is `supportObservations` (M13-F tests) and `healerFindings` (HEAL-AP tests).
+    const tiers = await tiersPromise;
+    for (const specId of ["evoker/augmentation", "shaman/restoration"] as const) {
+      const readiness = evaluate(tiers, specId, "PUBLIC", publicPairing(specId));
+      expect(readiness.qualifyingAssertions, specId).toEqual([]);
+      expect(readiness.evidenceReady, specId).toBe(false);
+    }
+  });
+});
+
+describe("INTERNAL_ONLY mode — reported, never failed, paired against the module's own WCL identity", () => {
+  it("there is no production INTERNAL_ONLY registration since HEAL-AP, and the partition agrees", () => {
+    // Blood Death Knight held this half from M11-B2 until M11-B12 promoted
+    // it; Brewmaster Monk held it from M11-C2 until M11-C4j promoted it;
+    // Augmentation Evoker held it in M13-E until M13-F promoted it; Restoration
+    // Shaman held it in HEAL-A until HEAL-AP promoted it. The synthetic module
+    // below still exercises the branch.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
+    const internal = PRODUCTION_CATALOG.registrations.filter((row) => row.exposure === "INTERNAL_ONLY");
+    expect(internal).toEqual([]);
+  });
   it("the internal pairing finds nothing for Brewmaster Monk now that the identity table resolves it (M11-C4j)", async () => {
     // The mirror of the Blood and Retribution cases: the internal pairing
     // REQUIRES the public table to refuse the identity, and the table now

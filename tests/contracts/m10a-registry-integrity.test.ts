@@ -51,6 +51,7 @@ import { RETRIBUTION_PALADIN_REGISTRATION } from "../../src/specs/paladin/retrib
 import { BLOOD_DEATH_KNIGHT_REGISTRATION } from "../../src/specs/deathknight/blood/registration.js";
 import { BREWMASTER_MONK_REGISTRATION } from "../../src/specs/monk/brewmaster/registration.js";
 import { AUGMENTATION_EVOKER_REGISTRATION } from "../../src/specs/evoker/augmentation/registration.js";
+import { RESTORATION_SHAMAN_REGISTRATION } from "../../src/specs/shaman/restoration/registration.js";
 import { RETRIBUTION_PALADIN_ANALYZER_ID } from "../../src/specs/paladin/retribution/spec.js";
 import { MCP_TEST_ENV } from "../support/analysis-transports.js";
 import { analyzedFightAnalysis } from "../support/aggregation-fixture.js";
@@ -85,7 +86,7 @@ describe("the production catalog", () => {
     expect(validateAnalyzerCatalog(ANALYZER_REGISTRATIONS).ok).toBe(true);
   });
 
-  it("carries six PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j) and Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) — and, since HEAL-A, Restoration Shaman INTERNAL_ONLY", () => {
+  it("carries seven PUBLIC registrations — Assassination, both Paladins, Blood Death Knight (since M11-B12), Brewmaster Monk (since M11-C4j), Augmentation Evoker (INTERNAL_ONLY in M13-E, PUBLIC since M13-F) and Restoration Shaman (INTERNAL_ONLY in HEAL-A, PUBLIC since HEAL-AP)", () => {
     expect(
       PRODUCTION_CATALOG.registrations.map((registration) => [
         registration.analyzerId,
@@ -99,14 +100,13 @@ describe("the production catalog", () => {
       ["deathknight-blood-observed-decisions", "deathknight/blood", "PUBLIC"],
       ["monk-brewmaster-observed-decisions", "monk/brewmaster", "PUBLIC"],
       ["evoker-augmentation-support-observations", "evoker/augmentation", "PUBLIC"],
-      ["shaman-restoration-healer-findings", "shaman/restoration", "INTERNAL_ONLY"],
+      ["shaman-restoration-healer-findings", "shaman/restoration", "PUBLIC"],
     ]);
     // The public set is DERIVED from the rows' exposure, never hand-listed:
-    // all six rows from M13-F until HEAL-A (Augmentation was the INTERNAL_ONLY
-    // row in M13-E), six of seven since HEAL-A, and the derivation is what drops
-    // the INTERNAL_ONLY Restoration Shaman row.
+    // six of seven rows in HEAL-A (Restoration Shaman was INTERNAL_ONLY), and
+    // all seven since HEAL-AP.
     expect(ENABLED_ANALYZERS).toEqual(publicAnalyzers(PRODUCTION_CATALOG));
-    expect(ENABLED_ANALYZERS).toHaveLength(6);
+    expect(ENABLED_ANALYZERS).toHaveLength(7);
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.specId)).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -114,6 +114,7 @@ describe("the production catalog", () => {
       "deathknight/blood",
       "monk/brewmaster",
       "evoker/augmentation",
+      "shaman/restoration",
     ]);
   });
 
@@ -224,6 +225,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
       BLOOD_DEATH_KNIGHT_REGISTRATION,
       BREWMASTER_MONK_REGISTRATION,
       AUGMENTATION_EVOKER_REGISTRATION,
+      RESTORATION_SHAMAN_REGISTRATION,
     ];
     const validated = requireValidatedCatalog(rows);
 
@@ -235,7 +237,7 @@ describe("a validated catalog cannot be mutated into an invalid one", () => {
     expect(analyzerForSpec("paladin/protection", validated)?.exposure).toBe("PUBLIC");
     expect(analyzerForSpec("paladin/protection", validated)?.requirement.includeResources).toBe(true);
     expect(analyzerForSpec("paladin/protection", validated)?.authorityBindings).toHaveLength(1);
-    expect(validated.registrations).toHaveLength(6);
+    expect(validated.registrations).toHaveLength(7);
     // And re-validating the mutated rows now refuses them: a duplicate, and a
     // demoted Protection row that leaves the public set incomplete.
     const defects = defectsOf(rows);
@@ -271,6 +273,7 @@ describe("every lookup requires a validated catalog", () => {
     BLOOD_DEATH_KNIGHT_REGISTRATION,
     BREWMASTER_MONK_REGISTRATION,
     AUGMENTATION_EVOKER_REGISTRATION,
+    RESTORATION_SHAMAN_REGISTRATION,
   ];
   const DUPLICATE_ANALYZER = [
     ASSASSINATION_REGISTRATION,
@@ -285,6 +288,7 @@ describe("every lookup requires a validated catalog", () => {
     BLOOD_DEATH_KNIGHT_REGISTRATION,
     BREWMASTER_MONK_REGISTRATION,
     AUGMENTATION_EVOKER_REGISTRATION,
+    RESTORATION_SHAMAN_REGISTRATION,
   ];
   const AUTHORITY_MISMATCH = [
     {
@@ -373,6 +377,7 @@ describe("the public set is one promise across the partition, the identity table
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         BREWMASTER_MONK_REGISTRATION,
         AUGMENTATION_EVOKER_REGISTRATION,
+        RESTORATION_SHAMAN_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -381,6 +386,7 @@ describe("the public set is one promise across the partition, the identity table
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         BREWMASTER_MONK_REGISTRATION,
         AUGMENTATION_EVOKER_REGISTRATION,
+        RESTORATION_SHAMAN_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -389,6 +395,7 @@ describe("the public set is one promise across the partition, the identity table
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         BREWMASTER_MONK_REGISTRATION,
         AUGMENTATION_EVOKER_REGISTRATION,
+        RESTORATION_SHAMAN_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -397,6 +404,7 @@ describe("the public set is one promise across the partition, the identity table
         { ...BLOOD_DEATH_KNIGHT_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
         BREWMASTER_MONK_REGISTRATION,
         AUGMENTATION_EVOKER_REGISTRATION,
+        RESTORATION_SHAMAN_REGISTRATION,
       ],
       [
         ASSASSINATION_REGISTRATION,
@@ -413,6 +421,16 @@ describe("the public set is one promise across the partition, the identity table
         BLOOD_DEATH_KNIGHT_REGISTRATION,
         BREWMASTER_MONK_REGISTRATION,
         { ...AUGMENTATION_EVOKER_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
+        RESTORATION_SHAMAN_REGISTRATION,
+      ],
+      [
+        ASSASSINATION_REGISTRATION,
+        PROTECTION_PALADIN_REGISTRATION,
+        RETRIBUTION_PALADIN_REGISTRATION,
+        BLOOD_DEATH_KNIGHT_REGISTRATION,
+        BREWMASTER_MONK_REGISTRATION,
+        AUGMENTATION_EVOKER_REGISTRATION,
+        { ...RESTORATION_SHAMAN_REGISTRATION, exposure: "INTERNAL_ONLY" as const },
       ],
     ]) {
       const defects = defectsOf(demoted);
@@ -423,6 +441,7 @@ describe("the public set is one promise across the partition, the identity table
 
   it("lookup is independent of registration order", () => {
     const reversed = requireValidatedCatalog([
+      RESTORATION_SHAMAN_REGISTRATION,
       AUGMENTATION_EVOKER_REGISTRATION,
       BREWMASTER_MONK_REGISTRATION,
       BLOOD_DEATH_KNIGHT_REGISTRATION,
@@ -453,6 +472,7 @@ describe("the public set is one promise across the partition, the identity table
         "deathknight/blood",
         "monk/brewmaster",
         "evoker/augmentation",
+        "shaman/restoration",
       ].sort(),
     );
     expect(analyzerForSpec("evoker/augmentation", reversed)?.analyzerId).toBe(
@@ -460,15 +480,14 @@ describe("the public set is one promise across the partition, the identity table
     );
   });
 
-  it("the INTERNAL_ONLY Restoration Shaman row cannot be flipped PUBLIC, and is invisible to the public lookup (HEAL-A)", () => {
-    expect(analyzerForSpec("shaman/restoration")).toBeNull();
-    expect(internalAnalyzerForSpec("shaman/restoration")?.exposure).toBe("INTERNAL_ONLY");
-    const flipped = ANALYZER_REGISTRATIONS.map((registration) =>
-      registration.specId === "shaman/restoration"
-        ? { ...registration, exposure: "PUBLIC" as const }
-        : registration,
+  it("the Restoration Shaman row is public since HEAL-AP, and a catalog without it is refused", () => {
+    expect(analyzerForSpec("shaman/restoration")?.analyzerId).toBe("shaman-restoration-healer-findings");
+    expect(internalAnalyzerForSpec("shaman/restoration")?.exposure).toBe("PUBLIC");
+    const without = ANALYZER_REGISTRATIONS.filter(
+      (registration) => registration.specId !== "shaman/restoration",
     );
-    expect(defectsOf(flipped)).toContain("PUBLIC_EXPOSURE_OF_INTERNAL_SPEC");
+    expect(defectsOf(without)).toContain("PUBLIC_SET_DISAGREES_WITH_PARTITION");
+    expect(defectsOf(without)).toContain("PUBLIC_SET_DISAGREES_WITH_IDENTITY_TABLE");
   });
 
   it("a PUBLIC row for an unknown id is still refused by name", () => {

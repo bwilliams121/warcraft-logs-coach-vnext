@@ -14,6 +14,7 @@ import type { DiagnosisOutcome } from "../diagnosis/diagnosis.js";
 import type { SpecAnalysisEnvelope } from "../findings/analysis-envelope.js";
 import type { SpecId } from "../findings/finding.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
+import type { HealerViewOutcome } from "../findings/healer-view.js";
 import type { SupportObservationOutcome } from "../findings/support-observation-view.js";
 import type { FightReport } from "../reporting/fight-report.js";
 import type { FightTldr } from "../reporting/tldr.js";
@@ -243,6 +244,13 @@ export interface FightAnalysis {
    * none was reconstructed. Absent for every other registration and status.
    */
   readonly supportObservations?: SupportObservationOutcome;
+  /**
+   * The registration's own healer view of an UNANALYZED result (HEAL-AP).
+   * Present exactly when the selected registration publishes one (Restoration
+   * Shaman): ASSESSED with the findings, or NOT_ASSESSED with why none was
+   * built. Absent for every other registration and status.
+   */
+  readonly healerFindings?: HealerViewOutcome;
   /**
    * The TLDR (M15-B), built LAST, from the restated findings of the view and
    * the preparation report plus the coverage, by `src/reporting/`. It edits

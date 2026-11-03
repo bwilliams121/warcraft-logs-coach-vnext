@@ -12408,6 +12408,96 @@ from both cross-spec-isolation guards (the list is empty), and `m11a2` names
 the tree as a second registered tree with no APL artifact. The corpus gained
 the `SPEC_RESTORATION_SHAMAN` layer and two cases.
 
+## HEAL-AP — Restoration Shaman public promotion and the healer promotion gate
+
+Autopilot queue entry HEAL-AP. Public contract: EXPECTED (additive under
+`analysis/1`). No Warcraft Logs request: the committed M12-D archive only.
+
+**Reachability: the five-site promotion.** `shaman/restoration` moved to
+`PUBLIC_SPEC_IDS` by the same reviewed edit as every earlier promotion: the
+partition, the public contract's `specId` enum, the identity table, the
+`satisfies PublicSpecId` on `spec.ts`, and the registration's `exposure`. The
+internal-only set is empty again. A public Shaman/Restoration request now
+dispatches the registration, and the service derives FULL_RAID from its
+declared requirement (unioned with preparation's). The facade, evaluator and
+finding set are unchanged.
+
+**The healer view** (`src/findings/healer-view.ts`). The healer counterpart of
+the support-observation view: shared plain data, supplied by the REGISTRATION
+through an optional `healerView` adapter the specialization owns
+(`src/specs/shaman/restoration/healer-view.ts`), found and ownership-checked
+by `healerViewOf` exactly as `supportObservationViewOf` is. It restates the
+HEAL-A finding set and joins each finding to the evaluator's own facts: an
+assignment outcome's planned window, and each cooldown use's overlapping
+damage episodes with their coverage and per-player COUNT of subject healing
+and absorb events (never an amount). A finding it cannot join throws.
+Discriminators are `resolution`, `completeness`, `actionability` and
+`context`: no `state` and no `status` key.
+
+**The wire** (`healerFindings`, optional, admitted only on
+AUTHORITY_NOT_AVAILABLE and INSUFFICIENT_EVIDENCE). ASSESSED carries
+`identityData.authority: RUNTIME_GAME_DATA`, `evaluatesHealingQuality: false`
+and `evaluatesPlanQuality: false` (literals), the three categories as a
+tuple, `assignments` and `cooldownUses`. The assignment schema admits exactly
+what the evaluator can prove: ASSIGNMENT_MET only with PROVEN actionability
+(the cast), ASSIGNMENT_NOT_ACTIONABLE only with NOT_EVALUATED actionability,
+or UNKNOWN with a frozen reason. There is no miss, early, late or
+plan-quality outcome, and a refinement refuses any assignment result unless
+ASSIGNMENT is EVALUATED_AGAINST_PLAN. NOT_ASSESSED carries the HEAL-A reason.
+
+**Envelope status, decided.** AUTHORITY_NOT_AVAILABLE keeps its one public
+meaning, "no pinned decision authority", including when assignments were
+judged against a supplied plan. The plan is request input, not a pinned
+artifact, so ANALYZED (which cites one) stays impossible. What the plan
+produced is said where it belongs:
+
+- the plan disclosure's `assignmentEvaluation` gains
+  `{ state: EVALUATED_IN_HEALER_FINDINGS }` and the NOT_EVALUATED reason
+  `SUBJECT_NOT_ASSESSED`. `withHealerAssignmentEvaluation` decides it after
+  the analyzer ran: binding first (mismatched or unknown keep their reasons),
+  then no healer view (NO_PUBLIC_ASSIGNMENT_EVALUATOR), a NOT_ASSESSED view
+  (SUBJECT_NOT_ASSESSED), or a view that judged the plan. A view and a
+  disclosure that disagree are an INTERNAL_ERROR, never a quieter document;
+- the TLDR and report disclose `HEALER_FINDINGS_NOT_SUMMARIZED`, and, for a
+  judged plan, `RAID_COOLDOWN_PLAN_NOT_SUMMARIZED` in place of
+  `RAID_COOLDOWN_PLAN_NOT_EVALUATED`, which would be false. The headline stays
+  GAMEPLAY_NOT_ANALYZED and `assessmentScope` PARTIAL.
+
+The m5c1 actionability sweep admits `"ASSIGNMENT_NOT_ACTIONABLE"` in one more
+file, the public contract, exactly once, as an assignment outcome whose
+actionability is pinned NOT_EVALUATED.
+
+**The healer promotion gate** (`tests/contracts/heal-ap-healer-promotion-gate.test.ts`).
+Separate from the rotational gates, which stay unchanged and now pin two
+exempt rows (Augmentation, Restoration Shaman). Every PUBLIC registration with
+a healer view must have a pinned real-evidence subject, and through the public
+service on it:
+
+- OBSERVATIONS: COOLDOWN OBSERVED and COMPLETE, at least one use, each the
+  subject's own completed cast in the capture;
+- ASSIGNMENT: at least one ASSIGNMENT_MET whose proof is one of those uses,
+  inside the window; DISCRIMINATION: on the same evidence, at least one entry
+  of an identified cooldown that is not met; not-met outcomes evaluate no
+  actionability; the disclosure says EVALUATED_IN_HEALER_FINDINGS;
+- MISSING PLAN: no plan and another fight's plan are NO_AUTHORITY_AVAILABLE
+  with no assignment result; an unprovable binding is UNKNOWN;
+- IDENTITY: another stated specialization and an unstated subject are
+  NOT_ASSESSED with the reason (and SUBJECT_NOT_ASSESSED on the disclosure);
+- COMPLETENESS: withdrawn CASTS coverage makes the listing and a cast-less
+  entry UNKNOWN with the coverage reason, never READINESS_NOT_ESTABLISHED;
+  PLAYER_CONTEXT breadth is ROSTER_NOT_IN_SCOPE;
+- NEGATIVE CONTROLS: no HPS, amount, total, rank, score, confidence, quality,
+  `state` or `status` key; no verdict word; a cooldown use has facts only;
+  HEALING_DECISION NO_AUTHORITY_AVAILABLE.
+
+The real subject passes. Its public plan names a re-labelled pseudonym (the
+archive's sanitized names are not letters-only; actor ids and events are
+untouched; "After HEAL-AP").
+
+**Raid night.** Per-player scope (M13-F) means a Restoration Shaman widens
+only its own focused view to FULL_RAID. Its cell is AUTHORITY_NOT_AVAILABLE
+and carries no healer findings and no plan.
+
 ## AUTOPILOT — the local project supervisor (tooling)
 
 **Status:** implemented (2026-10-31), owner request. This is tooling and

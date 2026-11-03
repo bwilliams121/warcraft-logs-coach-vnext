@@ -1,13 +1,13 @@
 /**
  * Restoration Shaman's identity and declared inputs (M12-D; registered
- * INTERNAL_ONLY in HEAL-A).
+ * INTERNAL_ONLY in HEAL-A; PUBLIC since HEAL-AP).
  *
  * The Warcraft Logs class and specialization strings are the ones the
  * committed fight context records for the canonical subject (b1PmaKrd6CDfzngc
  * fight 48, actor 122: `subType` "Shaman", `friendlySpecs` "Restoration").
  */
 
-import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
+import type { PublicSpecId } from "../../../findings/spec-id.js";
 
 /**
  * `/2` (HEAL-A): when the subject's own name is not known, every unresolved
@@ -15,8 +15,12 @@ import type { InternalOnlySpecId } from "../../../findings/spec-id.js";
  */
 export const RESTORATION_SHAMAN_EVALUATOR_REVISION = "restoration-shaman-evaluator/2" as const;
 
-/** The id. `InternalOnlySpecId` until a public promotion (HEAL-AP). */
-export const RESTORATION_SHAMAN_SPEC_ID = "shaman/restoration" satisfies InternalOnlySpecId;
+/**
+ * The id. `PublicSpecId` since HEAL-AP (it was `InternalOnlySpecId` in
+ * HEAL-A): the compile-time side of the exposure, one of the five promotion
+ * sites.
+ */
+export const RESTORATION_SHAMAN_SPEC_ID = "shaman/restoration" satisfies PublicSpecId;
 
 export const RESTORATION_SHAMAN_ANALYZER_ID = "shaman-restoration-healer-findings";
 

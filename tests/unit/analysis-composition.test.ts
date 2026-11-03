@@ -231,8 +231,8 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
     // A different question from "what should THIS request retrieve". It
     // describes what the deployment supports, and the service is deliberately
     // not given it.
-    // Six public analyzers since M13-F, each deriving its requirement from its
-    // own capabilities (Augmentation FULL_RAID, from its support inputs).
+    // Seven public analyzers since HEAL-AP, each deriving its requirement from its
+    // own capabilities (Augmentation and Restoration Shaman FULL_RAID, from their inputs).
     expect(ENABLED_ANALYZERS.map((analyzer) => analyzer.requirement)).toEqual([
       {
         analyzerId: "rogue-assassination-observed-decisions",
@@ -262,6 +262,11 @@ describe("ingestion is requested from the analyzer's declared requirement", () =
       // M13-F: Augmentation Evoker, FULL_RAID by its declared support inputs, no resources.
       {
         analyzerId: "evoker-augmentation-support-observations",
+        requiredScope: "FULL_RAID",
+        includeResources: false,
+      },
+      {
+        analyzerId: "shaman-restoration-healer-findings",
         requiredScope: "FULL_RAID",
         includeResources: false,
       },

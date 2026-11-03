@@ -85,6 +85,7 @@ export const SUPPORTED_SPEC_IDENTITIES: Readonly<Record<string, SpecId>> = Objec
   "deathknight/blood": "deathknight/blood",
   "monk/brewmaster": "monk/brewmaster",
   "evoker/augmentation": "evoker/augmentation",
+  "shaman/restoration": "shaman/restoration",
 });
 
 /**

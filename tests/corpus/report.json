@@ -734,9 +734,23 @@
         }
       ],
       "authority": null,
-      "caseId": "application-service.restoration-shaman-registration-is-internal-only",
+      "caseId": "application-service.restoration-shaman-registration-is-public-since-heal-ap",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-protection-paladin-a7r6-opener"]
+    },
+    {
+      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
+      "assertions": [
+        {
+          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
+          "ordinal": 0,
+          "status": "PASSED"
+        }
+      ],
+      "authority": null,
+      "caseId": "application-service.restoration-shaman-reports-real-health-potion-and-healthstone",
+      "owningLayer": "APPLICATION_SERVICE",
+      "referencedArtifactIds": ["wcl-b1pm-fight-48-shaman-122-health-consumables-20s"]
     },
     {
       "artifactId": "wcl-retribution-paladin-a7r6-rotational-45s",
@@ -770,20 +784,6 @@
       "caseId": "application-service.unsupported-mage-reports-a-real-prepull-combat-potion",
       "owningLayer": "APPLICATION_SERVICE",
       "referencedArtifactIds": ["wcl-b1pm-fight-48-mage-121-prepull-65s"]
-    },
-    {
-      "artifactId": "wcl-b1pm-fight-48-shaman-122-health-consumables-20s",
-      "assertions": [
-        {
-          "kind": "APPLICATION_SERVICE.FIGHT_ANALYSIS",
-          "ordinal": 0,
-          "status": "PASSED"
-        }
-      ],
-      "authority": null,
-      "caseId": "application-service.unsupported-shaman-reports-real-health-potion-and-healthstone",
-      "owningLayer": "APPLICATION_SERVICE",
-      "referencedArtifactIds": ["wcl-b1pm-fight-48-shaman-122-health-consumables-20s"]
     },
     {
       "artifactId": "wcl-assassination-d2-decision-corpus",

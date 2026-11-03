@@ -1,11 +1,11 @@
 /**
- * SPEC_RESTORATION_SHAMAN executors (HEAL-A): the INTERNAL_ONLY Restoration
- * Shaman registration, as orchestration holds it.
+ * SPEC_RESTORATION_SHAMAN executors (HEAL-A; PUBLIC since HEAL-AP): the
+ * Restoration Shaman registration, as orchestration holds it.
  *
  * Driven through the production catalog's internal lookup and `runAnalyzer`,
  * so what is pinned is the registration row — its derived requirement, its
  * own authority access and its ownership-checked result — not a direct call
- * to the evaluator. The public lookup is asserted to find nothing.
+ * to the evaluator. Since HEAL-AP the public lookup must find the SAME row.
  */
 
 import {
@@ -34,10 +34,11 @@ export function registrationResult(
       actual: { registered: false },
     });
   }
-  if (analyzerForSpec(SPEC_ID, PRODUCTION_CATALOG) !== null) {
-    return fail("the public lookup selects the INTERNAL_ONLY Restoration Shaman registration", {
-      expected: { publicAnalyzer: null },
-      actual: { publicAnalyzer: registration.analyzerId },
+  const publicRow = analyzerForSpec(SPEC_ID, PRODUCTION_CATALOG);
+  if (publicRow !== registration) {
+    return fail("the public lookup does not select the same Restoration Shaman registration", {
+      expected: { publicAnalyzer: registration.analyzerId },
+      actual: { publicAnalyzer: publicRow?.analyzerId ?? null },
     });
   }
   const run = runAnalyzer(registration, {

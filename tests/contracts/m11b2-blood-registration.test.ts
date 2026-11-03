@@ -105,9 +105,9 @@ describe("identity and partition", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
     expect(isPublicSpecId("deathknight/blood")).toBe(true);
     // The internal-only half never holds Blood; it held Brewmaster Monk from
-    // M11-C2 until M11-C4j, Augmentation Evoker in M13-E, and holds
-    // Restoration Shaman since HEAL-A.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["shaman/restoration"]);
+    // M11-C2 until M11-C4j, Augmentation Evoker in M13-E, Restoration Shaman
+    // in HEAL-A, and is empty again since HEAL-AP.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("deathknight/blood");
     expect(requirePublicSpecId("deathknight/blood")).toBe("deathknight/blood");
@@ -138,6 +138,7 @@ describe("identity and partition", () => {
       "deathknight/blood",
       "monk/brewmaster",
       "evoker/augmentation",
+      "shaman/restoration",
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.specId)).toContain("deathknight/blood");
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toContain(
@@ -145,9 +146,9 @@ describe("identity and partition", () => {
     );
     // The public prose is DERIVED from the PUBLIC set and moved with it.
     expect(SUPPORTED_SPECIALIZATIONS_SENTENCE).toBe(
-      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin and Retribution Paladin.",
+      "Supported specializations: Assassination Rogue, Augmentation Evoker, Blood Death Knight, Brewmaster Monk, Protection Paladin, Restoration Shaman and Retribution Paladin.",
     );
-    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(6);
+    expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toHaveLength(7);
     expect(PUBLIC_SPECIALIZATION_DESCRIPTIONS.limits).toContainEqual(
       BLOOD_DEATH_KNIGHT_REGISTRATION.publicLimits,
     );

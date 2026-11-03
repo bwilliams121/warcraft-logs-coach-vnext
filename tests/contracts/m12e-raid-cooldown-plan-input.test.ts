@@ -196,11 +196,17 @@ describe("the service discloses a supplied plan and evaluates none of it", () =>
     });
   });
 
-  it("the tool description says a plan is never inferred and never evaluated here", () => {
+  it("the tool description says a plan is never inferred, and is judged only in healerFindings (HEAL-AP)", () => {
     const description = analyzeToolDescription(PUBLIC_SPECIALIZATION_DESCRIPTIONS);
     expect(description).toContain("none is ever inferred when it is absent");
-    expect(description).toContain("assignmentEvaluation is always NOT_EVALUATED");
-    expect(description).toContain("NOT say whether any assignment was met, missed, early or late");
+    expect(description).toContain("Its assignmentEvaluation is NOT_EVALUATED, with the reason, unless");
+    expect(description).toContain("then it is EVALUATED_IN_HEALER_FINDINGS and");
+    expect(description).toContain("every result is in healerFindings, citing the plan");
+    expect(description).toContain("Only a plan bound to this fight is applied");
+    expect(description).toContain(
+      "the disclosure itself never says whether an assignment was met, missed, early or late",
+    );
+    expect(description).not.toContain("assignmentEvaluation is always NOT_EVALUATED");
   });
 });
 

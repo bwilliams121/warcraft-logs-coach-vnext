@@ -43,6 +43,15 @@ import type {
   DiagnosisOutcome,
 } from "../diagnosis/diagnosis.js";
 import type { EvidenceLocator } from "../engine/evidence/locator.js";
+import type { HealerCategoryResolution, RaidPlanAuthorityRef } from "../findings/healer-finding.js";
+import {
+  HEALER_VIEW_REVISION,
+  type HealerAssignmentRecord,
+  type HealerCooldownUseRecord,
+  type HealerReceivedCoverageRecord,
+  type HealerSpanListingRecord,
+  type HealerViewOutcome,
+} from "../findings/healer-view.js";
 import type { ObservedDecisionView } from "../findings/observed-decision-view.js";
 import { requirePublicSpecId } from "../findings/spec-id.js";
 import {
@@ -498,6 +507,150 @@ function projectSupportObservations(outcome: SupportObservationOutcome) {
   };
 }
 
+function projectHealerSpanListing(listing: HealerSpanListingRecord) {
+  return listing.completeness === "COMPLETE"
+    ? { completeness: listing.completeness }
+    : {
+        completeness: listing.completeness,
+        beyondFightEdge: listing.beyondFightEdge,
+        uncoveredActors: listing.uncoveredActors.map((actor) => ({
+          actorId: actor.actorId,
+          reason: actor.reason,
+        })),
+        unidentifiedHitsInSpan: listing.unidentifiedHitsInSpan,
+      };
+}
+
+function projectHealerReceivedCoverage(coverage: HealerReceivedCoverageRecord) {
+  return coverage.completeness === "COMPLETE"
+    ? { completeness: coverage.completeness }
+    : { completeness: coverage.completeness, reason: coverage.reason };
+}
+
+function projectHealerCategory(category: HealerCategoryResolution) {
+  switch (category.resolution) {
+    case "NO_AUTHORITY_AVAILABLE":
+      return { category: category.category, resolution: category.resolution, reason: category.reason };
+    case "UNKNOWN":
+      return {
+        category: category.category,
+        resolution: category.resolution,
+        authority: projectPlanAuthority(category.authority),
+        reason: category.reason,
+      };
+    case "EVALUATED_AGAINST_PLAN":
+      return {
+        category: category.category,
+        resolution: category.resolution,
+        authority: projectPlanAuthority(category.authority),
+        assignmentsForOtherPlayers: category.assignmentsForOtherPlayers,
+      };
+    case "OBSERVED":
+      return {
+        category: category.category,
+        resolution: category.resolution,
+        authority: category.authority,
+        listing:
+          category.listing.completeness === "COMPLETE"
+            ? { completeness: category.listing.completeness }
+            : { completeness: category.listing.completeness, reason: category.listing.reason },
+      };
+    default:
+      return assertNever(category);
+  }
+}
+
+function projectPlanAuthority(authority: RaidPlanAuthorityRef) {
+  return { kind: authority.kind, format: authority.format, label: authority.label };
+}
+
+function projectHealerAssignment(record: HealerAssignmentRecord) {
+  const { result } = record;
+  return {
+    findingId: record.findingId,
+    assignmentId: record.assignmentId,
+    abilityGameId: record.abilityGameId,
+    result:
+      result.resolution === "UNKNOWN"
+        ? { resolution: result.resolution, reason: result.reason }
+        : {
+            resolution: result.resolution,
+            outcome: result.outcome,
+            window: {
+              fromReportTimeMs: result.window.fromReportTimeMs,
+              toReportTimeMs: result.window.toReportTimeMs,
+            },
+            actionability:
+              result.actionability.actionability === "NOT_EVALUATED"
+                ? { actionability: result.actionability.actionability }
+                : {
+                    actionability: result.actionability.actionability,
+                    abilityGameId: result.actionability.abilityGameId,
+                    position: result.actionability.position,
+                    evidence: projectLocator(result.actionability.evidence),
+                  },
+          },
+    evidence: record.evidence.map(projectLocator),
+  };
+}
+
+function projectHealerCooldownUse(record: HealerCooldownUseRecord) {
+  const context = record.healingContext;
+  return {
+    findingId: record.findingId,
+    abilityGameId: record.abilityGameId,
+    reportTimeMs: record.reportTimeMs,
+    position: record.position,
+    evidence: record.evidence.map(projectLocator),
+    healingContext:
+      context.context === "ROSTER_NOT_IN_SCOPE"
+        ? { context: context.context }
+        : {
+            context: context.context,
+            spanMs: context.spanMs,
+            listing: projectHealerSpanListing(context.listing),
+            episodes: context.episodes.map((episode) => ({
+              abilityGameId: episode.abilityGameId,
+              firstHitMs: episode.firstHitMs,
+              lastHitMs: episode.lastHitMs,
+              coverage: projectHealerSpanListing(episode.coverage),
+              players: episode.players.map((player) => ({
+                actorId: player.actorId,
+                observedEntriesFromSubject: player.observedEntriesFromSubject,
+                healing: projectHealerReceivedCoverage(player.healing),
+                absorbs: projectHealerReceivedCoverage(player.absorbs),
+              })),
+            })),
+          },
+  };
+}
+
+/**
+ * The registration's healer view (HEAL-AP), field for field. Nothing is
+ * derived, ranked or judged here; the vocabulary is validated by the final
+ * parse, so a value outside the frozen public enums fails closed.
+ */
+function projectHealerFindings(outcome: HealerViewOutcome) {
+  if (outcome.assessment === "NOT_ASSESSED") {
+    return { assessment: outcome.assessment, revision: HEALER_VIEW_REVISION, reason: outcome.reason };
+  }
+  const { view } = outcome;
+  return {
+    assessment: outcome.assessment,
+    revision: view.revision,
+    identityData: {
+      authority: "RUNTIME_GAME_DATA",
+      datasetId: view.identityData.datasetId,
+      artifactRevision: view.identityData.artifactRevision,
+    },
+    evaluatesHealingQuality: false,
+    evaluatesPlanQuality: false,
+    categories: view.categories.map(projectHealerCategory),
+    assignments: view.assignments.map(projectHealerAssignment),
+    cooldownUses: view.cooldownUses.map(projectHealerCooldownUse),
+  };
+}
+
 /** The supplied plan's disclosure, field for field (M12-E). */
 function projectRaidCooldownPlan(plan: RaidCooldownPlanDisclosure) {
   return {
@@ -510,10 +663,10 @@ function projectRaidCooldownPlan(plan: RaidCooldownPlanDisclosure) {
     encounterBinding: plan.encounterBinding,
     assignmentCount: plan.assignmentCount,
     importDiagnostics: plan.importDiagnostics.map((row) => ({ key: row.code, count: row.count })),
-    assignmentEvaluation: {
-      state: plan.assignmentEvaluation.state,
-      reason: plan.assignmentEvaluation.reason,
-    },
+    assignmentEvaluation:
+      plan.assignmentEvaluation.state === "NOT_EVALUATED"
+        ? { state: plan.assignmentEvaluation.state, reason: plan.assignmentEvaluation.reason }
+        : { state: plan.assignmentEvaluation.state },
   } as const;
 }
 
@@ -946,6 +1099,9 @@ export function projectAnalysisResult(analysis: FightAnalysis): PublicAnalysisRe
         ...(analysis.supportObservations === undefined
           ? {}
           : { supportObservations: projectSupportObservations(analysis.supportObservations) }),
+        ...(analysis.healerFindings === undefined
+          ? {}
+          : { healerFindings: projectHealerFindings(analysis.healerFindings) }),
       });
 
     default:

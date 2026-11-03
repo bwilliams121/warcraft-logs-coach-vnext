@@ -54,7 +54,7 @@ function defectsOf(rows: readonly AnalyzerRegistration[]): readonly string[] {
 }
 
 describe("the five sites agree", () => {
-  it("public partition: the six public ids since M13-F; internal-only: Restoration Shaman since HEAL-A (Augmentation Evoker held it in M13-E)", () => {
+  it("public partition: the seven public ids since HEAL-AP; internal-only: empty again (Augmentation Evoker held it in M13-E, Restoration Shaman in HEAL-A)", () => {
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -62,8 +62,9 @@ describe("the five sites agree", () => {
       "deathknight/blood",
       "monk/brewmaster",
       "evoker/augmentation",
+      "shaman/restoration",
     ]);
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["shaman/restoration"]);
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([]);
     expect([...SPEC_IDS].sort()).toEqual([...PUBLIC_SPEC_IDS, ...INTERNAL_ONLY_SPEC_IDS].sort());
   });
 
@@ -79,6 +80,7 @@ describe("the five sites agree", () => {
       ["deathknight/blood", "deathknight/blood"],
       ["monk/brewmaster", "monk/brewmaster"],
       ["evoker/augmentation", "evoker/augmentation"],
+      ["shaman/restoration", "shaman/restoration"],
     ]);
   });
 
@@ -87,7 +89,7 @@ describe("the five sites agree", () => {
     expect(PUBLIC_SPEC_IDS as readonly string[]).toContain(PROTECTION_PALADIN_SPEC_ID);
   });
 
-  it("the registration is PUBLIC and the catalog carries exactly six enabled analyzers", () => {
+  it("the registration is PUBLIC and the catalog carries exactly seven enabled analyzers", () => {
     expect(PROTECTION_PALADIN_REGISTRATION.exposure).toBe("PUBLIC");
     expect(ASSASSINATION_REGISTRATION.exposure).toBe("PUBLIC");
     // M11-A4 put a third, INTERNAL_ONLY row in the catalog, NOT among the
@@ -105,7 +107,8 @@ describe("the five sites agree", () => {
     // move with its support-observation view. It publishes no decision, so
     // the decision-evidence gates do not apply to it. HEAL-A put a seventh,
     // INTERNAL_ONLY row in — Restoration Shaman, the first healer — NOT among
-    // the enabled analyzers.
+    // the enabled analyzers, and HEAL-AP made it PUBLIC by the same move with
+    // its healer view, after the healer promotion gate passed.
     expect(ANALYZER_REGISTRATIONS.map((row) => [row.specId, row.exposure])).toEqual([
       ["rogue/assassination", "PUBLIC"],
       ["paladin/protection", "PUBLIC"],
@@ -113,7 +116,7 @@ describe("the five sites agree", () => {
       ["deathknight/blood", "PUBLIC"],
       ["monk/brewmaster", "PUBLIC"],
       ["evoker/augmentation", "PUBLIC"],
-      ["shaman/restoration", "INTERNAL_ONLY"],
+      ["shaman/restoration", "PUBLIC"],
     ]);
     expect(ENABLED_ANALYZERS.map((row) => row.analyzerId)).toEqual([
       ASSASSINATION_REGISTRATION.analyzerId,
@@ -122,6 +125,7 @@ describe("the five sites agree", () => {
       "deathknight-blood-observed-decisions",
       "monk-brewmaster-observed-decisions",
       "evoker-augmentation-support-observations",
+      "shaman-restoration-healer-findings",
     ]);
     expect(ENABLED_ANALYSIS_REQUIREMENTS.map((requirement) => requirement.analyzerId)).toEqual(
       ENABLED_ANALYZERS.map((row) => row.analyzerId),

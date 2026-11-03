@@ -433,23 +433,54 @@ current total (5,748,495 bytes), with what each row buys.
 
 ---
 
+## After HEAL-AP: what the public Restoration Shaman does not establish
+
+**Raised:** HEAL-AP (2026-11-03).
+
+- **The public real-evidence plan uses a re-labelled pseudonym.** The
+  committed archive's names are sanitized (`Actor122`), and a public plan
+  accepts letters only, so the healer gate and the transport test rename the
+  subject's pseudonym (`Subjectshaman`, unique in the roster; the actor id and
+  every event untouched) before the request names it. No real public plan
+  names a real player in any committed fight.
+- **Real healing context is never COMPLETE.** The committed subject has
+  PLAYER_CONTEXT cast-only evidence: at its retrieved breadth every use is
+  `ROSTER_NOT_IN_SCOPE`, and with the roster declared the overlap listing is
+  UNKNOWN (no roster DAMAGE coverage). A COMPLETE real overlap needs a
+  FULL_RAID capture of a healer fight: an ONB-EV / owner decision.
+- **The real outcome set is MET, the encounter-ended outcome and UNKNOWN.**
+  MISSED, EARLY and LATE are still unreachable ("After M12-D"), and the
+  public schema has no field for them. Adding one is a schema change and a
+  cooldown-readiness review, never a relabelling of UNKNOWN.
+- **The TLDR and report do not summarize healer findings.** They disclose
+  `HEALER_FINDINGS_NOT_SUMMARIZED` (and `RAID_COOLDOWN_PLAN_NOT_SUMMARIZED`
+  when the plan was judged). A reviewed reporting adapter for healer findings
+  is its own tranche.
+- **Raid-night cells carry no healer findings and no plan.** A Restoration
+  Shaman cell is AUTHORITY_NOT_AVAILABLE; its limits prose says so.
+- **The disclosure and the healer view must agree.** A healer view that judged
+  a plan the disclosure does not bind, or did not judge one it binds, is an
+  INTERNAL_ERROR (`withHealerAssignmentEvaluation`). Both read the same
+  encounter id and difficulty, so a mismatch is a defect, not a fight state.
+
+---
+
 ## After HEAL-A: what the Restoration Shaman registration does not establish
 
 **Raised:** HEAL-A (2026-11-03).
 
-- **No public shape and no healer gate.** The healer finding set reaches no
-  projector, and a public request for a Restoration Shaman is still
-  SPEC_NOT_SUPPORTED. HEAL-AP defines the public result shape and the healer
-  promotion gate.
-- **The envelope status for a plan-evaluated result.** Internally it is
-  `AUTHORITY_NOT_AVAILABLE` ("no pinned decision authority") even when
-  assignment findings were judged against a supplied plan. What a public
-  reader sees for that case is a public-meaning question for HEAL-AP; a
-  consumer must read the finding set, never the status alone.
+- **No public shape and no healer gate.** Resolved by HEAL-AP:
+  `healerFindings` and `tests/contracts/heal-ap-healer-promotion-gate.test.ts`
+  (see "After HEAL-AP").
+- **The envelope status for a plan-evaluated result.** Decided in HEAL-AP:
+  `AUTHORITY_NOT_AVAILABLE` keeps its one meaning ("no pinned decision
+  authority") publicly too. Plan-judged results are in `healerFindings`, each
+  citing the plan, and the plan disclosure says EVALUATED_IN_HEALER_FINDINGS.
+  A consumer must read the finding set, never the status alone.
 - **The plan reaches every selected analyzer.** `SpecAnalysisInput` carries
-  the request's plan to whichever public analyzer runs; none reads it. The
-  disclosure stays `NO_PUBLIC_ASSIGNMENT_EVALUATOR` until a public healer
-  consumes it.
+  the request's plan to whichever public analyzer runs; only Restoration
+  Shaman reads it. For every other analyzer the disclosure stays
+  `NO_PUBLIC_ASSIGNMENT_EVALUATOR`.
 - **Raid-night cells carry no plan.** A raid-night request has no plan field,
   so a future public healer cell would be ASSIGNMENT NO_AUTHORITY_AVAILABLE.
 - **Real coverage is unchanged.** The real M12-D subject still has
@@ -598,10 +629,9 @@ current total (5,748,495 bytes), with what each row buys.
   `PLANNED_TIME_UNRESOLVED`. Only `FIGHT_RELATIVE` entries can be judged.
   This is the largest coverage gap, and building the map needs committed
   phase evidence for each mapped encounter.
-- **No assignment is evaluated publicly.** The disclosure always says
-  `NOT_EVALUATED` / `NO_PUBLIC_ASSIGNMENT_EVALUATOR`, until a healer
-  evaluator is registered ("After M12-D", first bullet). Publishing its
-  verdicts needs a public assignment-result shape.
+- **No assignment is evaluated publicly.** Resolved by HEAL-AP for
+  Restoration Shaman: its results are `healerFindings`, and the disclosure
+  says EVALUATED_IN_HEALER_FINDINGS (see "After HEAL-AP").
 - **Difficulty is a Warcraft Logs id.** Accepting "MYTHIC" needs a reviewed
   difficulty-name authority (the same gap that blocks the raid `fight_style`
   binding, M11-F).
@@ -627,7 +657,7 @@ current total (5,748,495 bytes), with what each row buys.
 
 - **Not registered, not published.** Registration resolved by HEAL-A
   (INTERNAL_ONLY, FULL_RAID derived, the shared healer finding shape; see
-  "After HEAL-A"). Publication is HEAL-AP's.
+  "After HEAL-A"). Published by HEAL-AP (see "After HEAL-AP").
 - **No plan input.** Superseded by M12-E: the evaluator consumes the shared
   normalized `RaidCooldownPlan`, which a request can supply. Since HEAL-A the
   registration reads it from `SpecAnalysisInput.raidCooldownPlan`.

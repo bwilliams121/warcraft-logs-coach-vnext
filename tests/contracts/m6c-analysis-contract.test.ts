@@ -126,12 +126,13 @@ describe("the public vocabularies match the internal ones exactly", () => {
     expect([...PUBLIC_USABILITY_PROVENANCES]).toEqual(["OBSERVED_EXECUTION", "NOT_ESTABLISHED"]);
   });
 
-  it("publishes exactly the six supported specializations", () => {
+  it("publishes exactly the seven supported specializations", () => {
     // Widened in M10-D, again in M11-A5 and again in M11-B12 under
     // analysis/1: growing this enum is how supported specializations arrive,
     // and narrowing it is what would need a version. M11-B12 widened this
     // enum and nothing else. M13-F appended evoker/augmentation, whose
-    // documents are never ANALYZED (support observations only).
+    // documents are never ANALYZED (support observations only). HEAL-AP
+    // appended shaman/restoration, likewise never ANALYZED (healer findings).
     expect([...PUBLIC_SPEC_IDS]).toEqual([
       "rogue/assassination",
       "paladin/protection",
@@ -139,6 +140,7 @@ describe("the public vocabularies match the internal ones exactly", () => {
       "deathknight/blood",
       "monk/brewmaster",
       "evoker/augmentation",
+      "shaman/restoration",
     ]);
   });
 

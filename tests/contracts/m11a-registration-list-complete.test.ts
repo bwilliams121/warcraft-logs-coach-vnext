@@ -236,7 +236,7 @@ describe("the production catalog and the tree name the same registrations", () =
 // ---------------------------------------------------------------------------
 
 describe("what the tree registers today", () => {
-  it("is exactly Assassination Rogue, the two Paladins, Blood Death Knight, Brewmaster Monk and Augmentation Evoker, all PUBLIC, and Restoration Shaman INTERNAL_ONLY", () => {
+  it("is exactly Assassination Rogue, the two Paladins, Blood Death Knight, Brewmaster Monk, Augmentation Evoker and Restoration Shaman, all PUBLIC", () => {
     // A reviewed list, not the rule: the rules above scale to any number of
     // registrations. This snapshot exists so that a new registration module
     // is a VISIBLE change to this file, reviewed alongside the five-site
@@ -248,7 +248,8 @@ describe("what the tree registers today", () => {
     // the next cohort's measurement and became PUBLIC at M11-C4j; Augmentation
     // arrived INTERNAL_ONLY at M13-E, binding no decision authority, and became
     // PUBLIC at M13-F with its support-observation view; Restoration Shaman
-    // arrived INTERNAL_ONLY at HEAL-A as the first healer registration.
+    // arrived INTERNAL_ONLY at HEAL-A as the first healer registration and became
+    // PUBLIC at HEAL-AP with its healer view.
     expect(DISCOVERED.map((found) => [found.path, found.exportName, found.registration.exposure])).toEqual([
       ["src/specs/deathknight/blood/registration.ts", "BLOOD_DEATH_KNIGHT_REGISTRATION", "PUBLIC"],
       ["src/specs/evoker/augmentation/registration.ts", "AUGMENTATION_EVOKER_REGISTRATION", "PUBLIC"],
@@ -256,7 +257,7 @@ describe("what the tree registers today", () => {
       ["src/specs/paladin/protection/registration.ts", "PROTECTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/paladin/retribution/registration.ts", "RETRIBUTION_PALADIN_REGISTRATION", "PUBLIC"],
       ["src/specs/rogue/assassination/registration.ts", "ASSASSINATION_REGISTRATION", "PUBLIC"],
-      ["src/specs/shaman/restoration/registration.ts", "RESTORATION_SHAMAN_REGISTRATION", "INTERNAL_ONLY"],
+      ["src/specs/shaman/restoration/registration.ts", "RESTORATION_SHAMAN_REGISTRATION", "PUBLIC"],
     ]);
   });
 });
