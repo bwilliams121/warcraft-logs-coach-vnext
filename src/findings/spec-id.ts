@@ -30,8 +30,9 @@
  * (`src/services/spec-identity.ts`) does not resolve to it and no PUBLIC
  * analyzer is registered for it.
  *
- * THE INTERNAL-ONLY SET HOLDS TWO MEMBERS SINCE HEAL-B3 (Restoration Druid and
- * Discipline Priest). It held Restoration Druid alone from HEAL-B2P, which
+ * THE INTERNAL-ONLY SET HOLDS THREE MEMBERS SINCE HEAL-B4 (Restoration Druid,
+ * Discipline Priest and Preservation Evoker). It held the first two from
+ * HEAL-B3. It held Restoration Druid alone from HEAL-B2P, which
  * promoted Holy Priest. It held two from HEAL-B2 (Restoration Druid and
  * Holy Priest), and Restoration Druid alone from HEAL-B1P, which promoted
  * Holy Paladin and Mistweaver Monk. It held three from HEAL-B1
@@ -73,7 +74,8 @@ export type SpecId =
   | "druid/restoration"
   | "monk/mistweaver"
   | "priest/holy"
-  | "priest/discipline";
+  | "priest/discipline"
+  | "evoker/preservation";
 
 export const SPEC_IDS = Object.freeze([
   "rogue/assassination",
@@ -88,6 +90,7 @@ export const SPEC_IDS = Object.freeze([
   "monk/mistweaver",
   "priest/holy",
   "priest/discipline",
+  "evoker/preservation",
 ] as const satisfies readonly SpecId[]);
 
 /** The specializations a public transport may name. */
@@ -194,11 +197,20 @@ export type PublicSpecId = (typeof PUBLIC_SPEC_IDS)[number];
  * architecture and its own representative: besides its reviewed
  * healing-cooldown identity data (Power Word: Barrier, Ultimate Penitence,
  * Evangelism) it reports its observed Atonement as facts. Its public shape
- * and promotion are HEAL-B3P's; until then the id stays here.
+ * and promotion are HEAL-B3P's; HEAL-B3P could not promote it (no committed or
+ * retained capture holds its whole-fight casts), so the id stays here.
+ *
+ * Preservation Evoker arrived here in HEAL-B4, a healer registration on the
+ * same architecture and its own representative: its reviewed healing-cooldown
+ * identity data (Rewind, Dream Flight, Stasis) names no empowered spell, and
+ * its evaluator refuses to read a cast as a use when the evidence shows the
+ * ability empowered. Its roster role stays UNKNOWN, as pinned. Its public
+ * shape and promotion are HEAL-B4P's; until then the id stays here.
  */
 export const INTERNAL_ONLY_SPEC_IDS = Object.freeze([
   "druid/restoration",
   "priest/discipline",
+  "evoker/preservation",
 ] as const satisfies readonly SpecId[]);
 
 export type InternalOnlySpecId = (typeof INTERNAL_ONLY_SPEC_IDS)[number];

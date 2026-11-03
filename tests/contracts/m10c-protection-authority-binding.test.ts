@@ -182,7 +182,7 @@ describe("cross-spec authority access is refused structurally", () => {
     expect(Object.isFrozen(PROTECTION_PALADIN_REGISTRATION.authority)).toBe(true);
   });
 
-  it("the production catalog holds the twelve registrations, each citing only its own authority (Augmentation and the six healers none)", () => {
+  it("the production catalog holds the thirteen registrations, each citing only its own authority (Augmentation and the seven healers none)", () => {
     const cited = PRODUCTION_CATALOG.registrations.map((registration) => [
       registration.specId,
       registration.authorityBindings.map((binding) => binding.authorityId),
@@ -208,6 +208,8 @@ describe("cross-spec authority access is refused structurally", () => {
       ["priest/holy", []],
       // HEAL-B3: Discipline Priest binds nothing either.
       ["priest/discipline", []],
+      // HEAL-B4: Preservation Evoker binds nothing either.
+      ["evoker/preservation", []],
     ]);
   });
 });

@@ -35,6 +35,7 @@ import * as restorationDruid from "./executors/spec-restoration-druid.js";
 import * as mistweaver from "./executors/spec-mistweaver-monk.js";
 import * as holyPriest from "./executors/spec-holy-priest.js";
 import * as disciplinePriest from "./executors/spec-discipline-priest.js";
+import * as preservationEvoker from "./executors/spec-preservation-evoker.js";
 import * as sharedEngine from "./executors/shared-decision-engine.js";
 import * as transport from "./executors/wcl-transport.js";
 
@@ -643,6 +644,12 @@ export async function executeAssertion(
       return holyPriest.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
     case "SPEC_DISCIPLINE_PRIEST.REGISTRATION_RESULT":
       return disciplinePriest.registrationResult(corpus, artifact, params as ParamsOf<typeof assertion.kind>);
+    case "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT":
+      return preservationEvoker.registrationResult(
+        corpus,
+        artifact,
+        params as ParamsOf<typeof assertion.kind>,
+      );
     case "APPLICATION_SERVICE.INTERNAL_REGISTRATION":
       return applicationService.internalRegistration(params as ParamsOf<typeof assertion.kind>);
     case "PUBLIC_CONTRACT.REST_MCP_PARITY":
@@ -763,6 +770,7 @@ export const EXECUTABLE_KINDS: readonly AssertionKind[] = [
   "SPEC_MISTWEAVER_MONK.REGISTRATION_RESULT",
   "SPEC_HOLY_PRIEST.REGISTRATION_RESULT",
   "SPEC_DISCIPLINE_PRIEST.REGISTRATION_RESULT",
+  "SPEC_PRESERVATION_EVOKER.REGISTRATION_RESULT",
   "APPLICATION_SERVICE.INTERNAL_REGISTRATION",
   "PUBLIC_CONTRACT.REST_MCP_PARITY",
 ];

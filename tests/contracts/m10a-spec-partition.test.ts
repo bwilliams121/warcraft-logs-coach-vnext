@@ -73,7 +73,7 @@ describe("the known specialization ids are exactly partitioned", () => {
     expect(isSpecId("deathknight/blood")).toBe(true);
   });
 
-  it("the internal-only set holds Restoration Druid, the one HEAL-B1 healer HEAL-B1P did not promote, and Discipline Priest since HEAL-B3", () => {
+  it("the internal-only set holds Restoration Druid, the one HEAL-B1 healer HEAL-B1P did not promote, Discipline Priest since HEAL-B3, and Preservation Evoker since HEAL-B4", () => {
     // Deliberate and pinned. The set was empty from M10-D to M11-A3, held
     // Retribution Paladin from M11-A4, was empty again from M11-A5, held the
     // Blood Death Knight measurement slice from M11-B2, was empty again from
@@ -86,9 +86,10 @@ describe("the known specialization ids are exactly partitioned", () => {
     // Druid and Mistweaver Monk from HEAL-B1, and holds Restoration Druid alone
     // since HEAL-B1P, which promoted the other two (no retained evidence holds
     // a Restoration Druid event, so it cannot meet the healer gate). HEAL-B2
-    // added Holy Priest, which HEAL-B2P promoted. HEAL-B3 added Discipline
+    // added Holy Priest, which HEAL-B2P promoted. HEAL-B4 added Preservation
+    // Evoker, whose public promotion is HEAL-B4P. HEAL-B3 added Discipline
     // Priest, whose public promotion is HEAL-B3P.
-    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["druid/restoration", "priest/discipline"]);
+    expect(INTERNAL_ONLY_SPEC_IDS).toEqual(["druid/restoration", "priest/discipline", "evoker/preservation"]);
     for (const id of INTERNAL_ONLY_SPEC_IDS) {
       expect(isSpecId(id), id).toBe(true);
       expect(isPublicSpecId(id), id).toBe(false);

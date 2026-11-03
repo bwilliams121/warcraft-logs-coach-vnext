@@ -60,6 +60,7 @@ describe("every Node-executable layer of the corpus executes clean", () => {
       "SPEC_MISTWEAVER_MONK",
       "SPEC_HOLY_PRIEST",
       "SPEC_DISCIPLINE_PRIEST",
+      "SPEC_PRESERVATION_EVOKER",
       "APPLICATION_SERVICE",
     ]);
   });

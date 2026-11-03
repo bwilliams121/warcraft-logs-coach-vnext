@@ -169,7 +169,7 @@ const REGISTERED_TREES: readonly SpecTree[] = TREES.filter(
  * count below applies to every other registered tree. HEAL-A added Restoration
  * Shaman, the first healer registration, HEAL-B1 the three healer
  * registrations on its architecture, HEAL-B2 Holy Priest, and HEAL-B3
- * Discipline Priest.
+ * Discipline Priest, and HEAL-B4 Preservation Evoker.
  */
 const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = [
   "evoker/augmentation",
@@ -179,6 +179,7 @@ const AUTHORITY_FREE_REGISTERED_TREES: readonly string[] = [
   "monk/mistweaver",
   "priest/holy",
   "priest/discipline",
+  "evoker/preservation",
 ];
 
 const ROSTER = (() => {

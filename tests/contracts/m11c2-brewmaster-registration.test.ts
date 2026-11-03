@@ -132,8 +132,12 @@ describe("identity and partition", () => {
     // through M11-C4i, and the five sites moved in one reviewed edit.
     expect(isSpecId("monk/brewmaster")).toBe(true);
     expect(isPublicSpecId("monk/brewmaster")).toBe(true);
-    // The internal-only half never holds Brewmaster again; it held Restoration Shaman in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, held Restoration Druid alone from HEAL-B1P, held it and Holy Priest from HEAL-B2, held Restoration Druid alone again from HEAL-B2P, and holds it and Discipline Priest since HEAL-B3.
-    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual(["druid/restoration", "priest/discipline"]);
+    // The internal-only half never holds Brewmaster again; it held Restoration Shaman in HEAL-A, was empty from HEAL-AP, held the three HEAL-B1 healers, held Restoration Druid alone from HEAL-B1P, held it and Holy Priest from HEAL-B2, held Restoration Druid alone again from HEAL-B2P, held it and Discipline Priest from HEAL-B3, and holds those two and Preservation Evoker since HEAL-B4.
+    expect([...INTERNAL_ONLY_SPEC_IDS]).toEqual([
+      "druid/restoration",
+      "priest/discipline",
+      "evoker/preservation",
+    ]);
     expect([...PUBLIC_SPEC_IDS]).toEqual(NINE_PUBLIC);
     expect(CONTRACT_PUBLIC_SPEC_IDS as readonly string[]).toContain("monk/brewmaster");
     expect(requirePublicSpecId("monk/brewmaster")).toBe("monk/brewmaster");

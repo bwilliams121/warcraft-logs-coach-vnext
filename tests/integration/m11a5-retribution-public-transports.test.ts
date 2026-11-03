@@ -172,6 +172,7 @@ describe("REST: a real Retribution Paladin identity resolves publicly", () => {
       "monk-mistweaver-healer-findings": 0,
       "priest-holy-healer-findings": 0,
       "priest-discipline-healer-findings": 0,
+      "evoker-preservation-healer-findings": 0,
     });
     const parsed = PublicAnalysisResultSchema.safeParse(rest.body);
     expect(parsed.success).toBe(true);

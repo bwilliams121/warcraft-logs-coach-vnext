@@ -202,6 +202,7 @@ describe("there is nowhere to branch on a specialization or write a judgement", 
  * HEAL-B2 names one more the same way: the Holy Priest evaluator. HEAL-B3
  * names the Discipline Priest evaluator; its Atonement observation
  * (`src/specs/priest/discipline/atonement.ts`) does not read this domain.
+ * HEAL-B4 names the Preservation Evoker evaluator.
  */
 const HEALING_CONSUMERS = [
   "src/specs/shaman/restoration/evaluator.ts",
@@ -210,6 +211,7 @@ const HEALING_CONSUMERS = [
   "src/specs/monk/mistweaver/evaluator.ts",
   "src/specs/priest/holy/evaluator.ts",
   "src/specs/priest/discipline/evaluator.ts",
+  "src/specs/evoker/preservation/evaluator.ts",
 ];
 
 describe("only the named consumers read it", () => {

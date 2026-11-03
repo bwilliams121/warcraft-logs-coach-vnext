@@ -101,7 +101,8 @@ describe("the committed corpus loads", () => {
     // Druid and Mistweaver Monk registrations.
     // HEAL-B2: two cases for the INTERNAL_ONLY Holy Priest registration.
     // HEAL-B3: two cases for the INTERNAL_ONLY Discipline Priest registration.
-    expect(loaded.cases).toHaveLength(197);
+    // HEAL-B4: two cases for the INTERNAL_ONLY Preservation Evoker registration.
+    expect(loaded.cases).toHaveLength(199);
     expect(loaded.coverage.declared).toBe(0);
   });
 

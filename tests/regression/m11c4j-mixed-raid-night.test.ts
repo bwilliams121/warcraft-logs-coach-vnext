@@ -179,6 +179,7 @@ const NO_CALLS = {
   "monk-mistweaver-healer-findings": 0,
   "priest-holy-healer-findings": 0,
   "priest-discipline-healer-findings": 0,
+  "evoker-preservation-healer-findings": 0,
 };
 
 describe("a Brewmaster Monk alone", () => {

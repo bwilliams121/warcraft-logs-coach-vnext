@@ -5,10 +5,13 @@
  * PUBLIC since HEAL-B2P (its real-evidence checks are
  * tests/unit/specs/heal-b2-holy-priest.test.ts); and, since HEAL-B3, the
  * INTERNAL_ONLY Discipline Priest registration (its real-evidence and
- * Atonement checks are tests/unit/specs/heal-b3-discipline-priest.test.ts).
+ * Atonement checks are tests/unit/specs/heal-b3-discipline-priest.test.ts);
+ * and, since HEAL-B4, the INTERNAL_ONLY Preservation Evoker registration (its
+ * real-evidence and empowered-cast checks are
+ * tests/unit/specs/heal-b4-preservation-evoker.test.ts).
  *
  * What is pinned per registration:
- * - Restoration Druid and Discipline Priest are listed INTERNAL_ONLY rows; the public lookup, the
+ * - Restoration Druid, Discipline Priest and Preservation Evoker are listed INTERNAL_ONLY rows; the public lookup, the
  *   public identity table and a public request never reach it. Holy Paladin,
  *   Mistweaver Monk and Holy Priest are listed PUBLIC rows: both lookups find the same
  *   row, the identity table resolves them, a public request dispatches them
@@ -54,6 +57,8 @@ import { deriveIngestionScopeFor } from "../../../src/services/ingestion-scope.j
 import { resolveSpecIdentity } from "../../../src/services/spec-identity.js";
 import { RESTORATION_DRUID_REGISTRATION } from "../../../src/specs/druid/restoration/registration.js";
 import { RESTORATION_DRUID_REQUIRED_INPUTS } from "../../../src/specs/druid/restoration/spec.js";
+import { PRESERVATION_EVOKER_REGISTRATION } from "../../../src/specs/evoker/preservation/registration.js";
+import { PRESERVATION_EVOKER_REQUIRED_INPUTS } from "../../../src/specs/evoker/preservation/spec.js";
 import { MISTWEAVER_MONK_REGISTRATION } from "../../../src/specs/monk/mistweaver/registration.js";
 import { MISTWEAVER_MONK_REQUIRED_INPUTS } from "../../../src/specs/monk/mistweaver/spec.js";
 import { HOLY_PALADIN_REGISTRATION } from "../../../src/specs/paladin/holy/registration.js";
@@ -153,6 +158,16 @@ const CASES: readonly Case[] = [
     className: "Priest",
     specName: "Discipline",
     required: DISCIPLINE_PRIEST_REQUIRED_INPUTS,
+    exposure: "INTERNAL_ONLY",
+  },
+  {
+    label: "Preservation Evoker",
+    specId: "evoker/preservation",
+    registration: PRESERVATION_EVOKER_REGISTRATION,
+    analyzerId: "evoker-preservation-healer-findings",
+    className: "Evoker",
+    specName: "Preservation",
+    required: PRESERVATION_EVOKER_REQUIRED_INPUTS,
     exposure: "INTERNAL_ONLY",
   },
 ];
@@ -389,6 +404,7 @@ describe("the internal path over committed real evidence", () => {
       "monk/mistweaver",
       "priest/holy",
       "priest/discipline",
+      "evoker/preservation",
     ] as const) {
       const analysis = internalRun(specId, m13a, 5);
       expect(analysis.status).toBe("INSUFFICIENT_EVIDENCE");
