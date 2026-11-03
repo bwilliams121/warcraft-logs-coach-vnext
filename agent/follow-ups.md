@@ -834,7 +834,29 @@ the most of the remaining M11 population (`agent/m11-a3-authority-audit.md`
   cooldown remainder as a bare truth or multiply `gcd`.
 - **Cast/channel decision anchors.** Every caster's decision point is its
   `begincast`; the shared observed-decision model anchors on `cast`. Blocks
-  the first slice of eleven specializations.
+  the first slice of eleven specializations. **Resolved (shared plumbing) in
+  ONB-S4** (`buildCastTimeline`, agent/architecture.md "ONB-S4"). What
+  remains:
+  - No specialization consumes it yet. Each Cohort D representative supplies
+    its own `CastAnchorProfile` (reviewed execution, cast time, channel bound)
+    and decides what the anchor means for its decisions.
+  - Empowered casts (`empowerstart` / `empowerend`, Evoker) are not modelled.
+    Their anchor needs its own wire review.
+  - The end of a channel is never observed directly. A specialization could
+    bound it from its channel aura's removal. Until then, occupancy inside a
+    channel is UNKNOWN.
+  - A hard cast begun before the pull stays UNKNOWN, because CASTS coverage
+    starts at the pull. A prepull begin is observed but cannot be proven the
+    latest.
+  - Without a proven positive cast time, back-to-back casts of one spell
+    whose next begin shares the completion's millisecond are ambiguous. The
+    retained Restoration Shaman has 49 of 85 Chain Heals in that state. A
+    caster that can exclude instant-cast procs resolves them.
+  - `NOT_CASTING` needs complete cast coverage from the pull, and an
+    unreviewed ability makes the window before it UNKNOWN. A specialization
+    must review every ability it casts, trinkets and potions included.
+  - Pushback and cast slows are not modelled. The anchor is the observed
+    begin and never a computed one when a begin is observed.
 - **Charge state, target count (with evidence, never a default), generic
   in-scan `variable` execution, pets.** Named for completeness; each is
   spec-blocking for some cohort and none has a design yet.

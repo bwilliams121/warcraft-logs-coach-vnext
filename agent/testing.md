@@ -1729,6 +1729,23 @@ fight report (M15-D, tests/unit/m15d-fight-report.test.ts, contracts/m15d-report
   refused record / unreviewed word / bad config / inconsistent coverage -> NOT_ASSESSED with its reason, never part of a report
   real Blood fight                             -> counts equal the view's coverage; heart_strike pattern first; 0 actionable; 224 UNKNOWN carried
   public projection                            -> schema-valid, equals the internal report, entries locate published decisions; nothing else changes
+cast and channel decision anchor (ONB-S4, tests/unit/onb-s4-cast-decision-anchor.test.ts):
+  instant                                      -> INSTANT_COMPLETION at the cast; no span
+  hard cast                                    -> OBSERVED_BEGINCAST; CASTING over [begin, completion); no fake idle inside
+  re-begin / begin with no completion          -> latest begin pairs; earlier begin INTERRUPTED (UNKNOWN when a page may hide it)
+  missing begincast, complete coverage         -> BEGINCAST_NOT_OBSERVED, never inferred instant
+  missing begincast, incomplete coverage       -> DERIVED_FROM_COMPLETION only with an exact cast time; haste unknown / proc -> CAST_TIME_UNKNOWN
+  derived start vs observed evidence           -> before previous completion / start or completion inside / overlap -> CONFLICT; covered -> NOT_OBSERVED
+  begin only some placements pair              -> PAIRING_NOT_PROVEN; occupancy after the completion UNKNOWN to the next start, both orders
+  same-ms begin and completion                 -> order-invariant (both orders equal); POSITIVE resolves, UNKNOWN cast time -> AMBIGUOUS
+  proven instant with same-ms begin            -> INSTANT_COMPLETION, begin consumed; earlier begin abandoned
+  two begins / two completions in one ms       -> BEGINCAST_PAIRING_AMBIGUOUS
+  other begin or channel start mid-cast        -> CAST_EVIDENCE_CONFLICT; off-GCD instant mid-cast does not break pairing
+  channel                                      -> CHANNEL_START; occupancy inside UNKNOWN (never CASTING, never NOT_CASTING) to bound / next start
+  begin on a reviewed instant or channel       -> CAST_EVIDENCE_CONFLICT
+  unreviewed ability / non-monotonic fight     -> EXECUTION_NOT_REVIEWED, window before it UNKNOWN / NON_MONOTONIC_TIME
+  NOT_CASTING                                  -> only with COMPLETE cast coverage from the pull; missing page / UNVERIFIED -> UNKNOWN
+  real Mage 121 / Restoration Shaman 122       -> Arcane Missiles cast-only; pinned pair / ambiguity / interrupted counts
 simulation runner (M11-G3-1, tests/unit/simulation/*.test.ts, contracts/m11g3-simulation-layering.test.ts):
   smuggled key (actions, input, json2, ...)    -> JOB_REJECTED at every object level (B)
   directive / path / $(…) / space in an id     -> JOB_REJECTED (C)

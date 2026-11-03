@@ -1108,11 +1108,13 @@ combat.
 ### ONB-S2: Shared APL variable combining operations
 
 ```autopilot
-status: PR_OPEN
+status: MERGED
 dependsOn: ONB-S1
 branch: autopilot/onb-s2
 wcl: NONE
 publicContract: NONE
+pr: 41
+mergeSha: d0ebe223bdd89fb10dbdac31afa07e8e1bec7d51
 ```
 
 **Direction.** `agent/follow-ups.md` "After M11-D3-C2" (combining
@@ -1139,8 +1141,9 @@ ownerDecision: Whether, and on what evidence, the analyzer may model the enemy s
 ### ONB-S4: Shared cast and channel decision anchor
 
 ```autopilot
-status: READY
+status: PR_OPEN
 dependsOn: none
+branch: autopilot/onb-s4
 wcl: NONE
 publicContract: NONE
 ```
