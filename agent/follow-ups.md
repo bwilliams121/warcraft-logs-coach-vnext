@@ -1857,10 +1857,45 @@ action sees the previous scan's assignments; each scan here starts from the
 unknown incoming value instead. Carrying them would put variable values into
 the first-GCD state key.
 
-**Combining operations.** `add`, `sub`, `mul`, `div`, `pow`, `mod`, `min`,
-`max`, `floor`, `ceil` and `cycling_variable` are not modelled. In Cohorts A/B
-only Devourer's `void_ray_count` (`op=add`) is in combat. Vengeance's
-in-combat programme combines `%`, `ceil` and charges and stays out of reach.
+**Combining operations.** Resolved in ONB-S2 (`combineVariableValue`,
+agent/architecture.md "Since ONB-S2"). What remains:
+
+- `cycling_variable` stays UNKNOWN until an enemy-set authority exists
+  (ONB-S3): Vengeance's `dung_pull_ttd` and Affliction's `min_agony`.
+- Expression division `%` and unary minus do not parse, so Vengeance's
+  in-combat `ceil` programme (`value=...%variable.frac_souls`) stays UNKNOWN.
+  Its `ceil` lines are also on variables with no `add`..`max` line, so they
+  stay UNKNOWN (`CONSTANT_FOLDING`) until an expression `is_constant` rule
+  can prove those variables unfoldable.
+- A proven lower bound is not carried through combining arithmetic, and two
+  finite sets are not paired; `pow` beyond an exact safe-integer result is
+  UNKNOWN. Each only withholds a value.
+- Devourer's `void_ray_count` resolves (KNOWN 0) only where metamorphosis is
+  proven down, so its reset runs; with metamorphosis up the add reads the
+  unknown incoming value. Balance's precombat `on_use_trinket` sums read
+  unparsed `trinket.*` and stay UNKNOWN.
+- `op=report` is still not modelled.
+- **Constant-variable folding (found in ONB-S2, predates it).** At the
+  iteration-1 reset, a variable whose every action is constant takes the
+  value it held at the end of iteration 0 as a constant
+  (action_variable.cpp:25-78, player.cpp:6694-6697). Its reads fold to that
+  constant (player.cpp:11959-11963) and its lines leave the foreground list
+  (variable.cpp:174-187). So in iterations after the first, a read between
+  two writes of such a variable sees the folded value, not the earlier
+  write. The scan model reads the earlier write. `add` to `max` are never
+  constant (variable.cpp:202-205), so a variable with one of those lines is
+  never folded; `floor`, `ceil` and `reset` are constant when every other
+  line is (:216-221). ONB-S2 executes `floor` and `ceil` only on a variable
+  proven never folded (`neverFoldedVariables`), so they do not widen the
+  gap; `set`, `setif` and `reset` still read as unfolded. A variable with ONE
+  constant write folds to that write's value, which is what the model reads
+  after it. The divergence needs two or more constant writes with a read
+  between them. Audit of the
+  five pinned public authorities (ONB-S2): the only variable with more than
+  one write is Assassination's `trinket_sync_slot`, two precombat lines with
+  no read between them, so no public decision is affected. A fix needs a
+  rule matching SimulationCraft's expression `is_constant`, and it belongs
+  before an onboarding representative that has such a variable.
 
 ## After M9-C: evidence the corpus still lacks
 

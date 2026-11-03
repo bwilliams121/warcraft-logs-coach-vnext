@@ -65,6 +65,7 @@ import {
 import {
   establishedVariableDefaults,
   executeVariableLine,
+  neverFoldedVariables,
   type VariableExecutionRecord,
 } from "./variable-execution.js";
 
@@ -154,6 +155,7 @@ export function executePrecombatVariables(
   }
 
   const defaults = establishedVariableDefaults(authority);
+  const neverFolded = neverFoldedVariables(authority);
   const base = precombatBindings(bindings);
   const steps: PrecombatStep[] = [];
   let state: ScanVariables = { values: new Map(defaults), tainted: false };
@@ -182,7 +184,7 @@ export function executePrecombatVariables(
     }
     const lineBindings: AtomBindings = { ...base, scanVariables: state };
     const gate = evaluateCondition(action, lineBindings);
-    const execution = executeVariableLine(action, gate, lineBindings, state, defaults);
+    const execution = executeVariableLine(action, gate, lineBindings, state, defaults, neverFolded);
     // Either the walk reached this line, or an earlier harmful action stopped it.
     const next = mayHaveStopped ? joinScanVariables(state, execution.state, lineBindings) : execution.state;
     // A line that did not run still names a precombat variable: its value is

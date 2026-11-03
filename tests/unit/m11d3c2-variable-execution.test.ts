@@ -9,8 +9,9 @@
  *     default — so a read before this scan's assignment sees an earlier scan's
  *     value, which this project does not have: UNKNOWN, never 0
  *
- * Modelled: `set`, `setif`, `reset`. Anything else that changes a value makes
- * it UNKNOWN; nothing about an unknown value refuses the scan.
+ * Modelled: `set`, `setif`, `reset` (and, since ONB-S2, the combining
+ * operations). Anything else that changes a value makes it UNKNOWN; nothing
+ * about an unknown value refuses the scan.
  *
  * The central invariant, as before: uncertainty is UNKNOWN, never REJECTED.
  */
@@ -266,10 +267,9 @@ describe("executing one variable line", () => {
   it("every operation not modelled makes the variable UNKNOWN, never a refusal", () => {
     const prior = withScanVariable(initialScanVariables(), "x", knownNumber(1));
     for (const line of [
-      "variable,name=x,op=add,value=1",
-      "variable,name=x,op=sub,value=1",
-      "variable,name=x,op=max,value=4",
-      "variable,name=x,op=floor",
+      // RE-POINTED at ONB-S2: `add`, `sub`, `max` and `floor` are modelled
+      // there (tests/unit/onb-s2-variable-combining.test.ts); over this known
+      // prior they now give exact values. `cycling_variable` still is not.
       "cycling_variable,name=x,op=add,value=1",
       "variable,name=x,value=3,delay=2",
       // RE-POINTED at M11-D3-C3: `line_cd=` on a variable is pinned to change
@@ -777,9 +777,16 @@ describe("no false REJECTED", () => {
         "divergent worlds",
         ["variable,name=x,value=1", `variable,name=x,value=3,if=${UNDECIDED}`, "y,if=variable.x>2", "z"],
       ],
+      // RE-POINTED at ONB-S2: `op=add` over a known 3 is now an exact 4, so the
+      // unmodelled case is `cycling_variable`, and a combining operation over
+      // the unknown incoming value takes the old case's place.
       [
         "unmodelled operation",
-        ["variable,name=x,value=3", "variable,name=x,op=add,value=1", "y,if=variable.x>2", "z"],
+        ["variable,name=x,value=3", "cycling_variable,name=x,op=add,value=1", "y,if=variable.x>2", "z"],
+      ],
+      [
+        "combining over the unknown incoming value",
+        ["variable,name=x,op=add,value=1", "y,if=variable.x>2", "z"],
       ],
       ["unsupported value syntax", ["variable,name=x,value=combo_points%2", "y,if=variable.x>2", "z"]],
     ];

@@ -273,8 +273,14 @@ describe("ONB-S1 precombat execution", () => {
   });
 
   it("an unmodelled precombat operation is UNKNOWN, never the default", () => {
+    // RE-POINTED at ONB-S2: `op=add,value=1` over a known 1 is now an exact 2
+    // (tests/unit/onb-s2-variable-combining.test.ts); an operand that reads
+    // pre-pull state keeps this case UNKNOWN.
     const lists = [
-      { listName: "precombat", actions: ["variable,name=x,value=1", "variable,name=x,op=add,value=1"] },
+      {
+        listName: "precombat",
+        actions: ["variable,name=x,value=1", "variable,name=x,op=add,value=combo_points"],
+      },
       { listName: "default", actions: ["y,if=variable.x>=1", "z"] },
     ];
     expect(carriedValue(carryOf(lists), "x")?.state).toBe("UNKNOWN_NUMBER");

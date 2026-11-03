@@ -4608,7 +4608,8 @@ earlier scan's value — history this project does not have — and reads UNKNOW
 never 0 and never the line's `default=`.
 
 - Modelled: `set` (default), `setif`, `reset` — the operations that do not
-  read the stored value. Every other operation, `cycling_variable`, and a line
+  read the stored value (the combining operations since ONB-S2, below).
+  Every other operation, `cycling_variable`, and a line
   with an option outside `name value op if default condition value_else`
   (`delay=`, `line_cd=`, …) makes the variable UNKNOWN. A malformed line taints
   every variable. None of these refuses the scan: an unknown value is not a
@@ -4688,6 +4689,49 @@ action.cpp:1841-1842). A value persists until a variable action writes it.
   variables sits in a condition that also contains unparsed `trinket.*` or
   `fight_remains`, so no public decision changes; Blood, Brewmaster and
   Protection have no precombat variable.
+
+*Since ONB-S2* the combining operations are executed, in combat scans and in
+precombat alike (`combineVariableValue`, `src/simc/variable-execution.ts`).
+Pinned (variable.cpp:269-311, on doubles): `add`/`sub`/`mul` are `current op=
+v`; `div` and `mod` by zero set 0, else `/=` and `std::fmod`; `pow` is
+`std::pow`; `min`/`max` take `v` only when strictly below/above the current
+value; `floor`/`ceil` are `util::floor`/`util::ceil` with `decplaces` 0
+(util.hpp:308-309, util.cpp:3131-3136, 3161-3166) and read no `value=`.
+
+- The current value is the value just before the line (this scan's
+  assignment, a carried precombat value or established default, else the
+  unknown incoming value). An operand of unknown value — current or `value=` —
+  yields UNKNOWN, never the default and never zero. So a combining line on a
+  variable no earlier line of the scan or of precombat established is UNKNOWN.
+- A proven lower bound is not carried through (UNKNOWN). A finite set maps
+  member by member against an EXACT operand; two sets are never paired, since
+  their members' worlds may exclude each other (`value=variable.x` reads the
+  same unresolved value twice).
+- The known result is the double SimulationCraft computes: IEEE `+ - * /` are
+  correctly rounded and `fmod` is exact (JavaScript `%`). `pow` is computed
+  only when the exact result is a safe integer (integer base, non-negative
+  integer exponent), because C libraries do not all round it correctly; any
+  other `pow`, and any non-finite input or result, is UNKNOWN.
+- Constant folding: from iteration 1 SimulationCraft folds a variable whose
+  every action is constant to its end-of-iteration-0 value
+  (player.cpp:6694-6697, action_variable.cpp:30-78, player.cpp:11959-11963,
+  variable.cpp:174-187). `add` to `max` are never constant
+  (variable.cpp:202-205); `floor`, `ceil` and `reset` are constant whenever
+  every other line is (:216-221). So `floor` and `ceil` execute only on a
+  variable `neverFoldedVariables(authority)` proves unfoldable — one named
+  `add`..`max` line with a `value=` anywhere in the authority. Elsewhere they
+  write UNKNOWN (`NOT_MODELLED / CONSTANT_FOLDING`). The same folding of
+  `set`/`setif`/`reset` variables predates ONB-S2 and is recorded in
+  `agent/follow-ups.md`.
+- `cycling_variable` stays UNKNOWN for every operation: it repeats the
+  operation once per enemy in the target list whenever the sim has more than
+  one non-sleeping target (variable.cpp:369-391, action.cpp:1729-1770), with
+  `target` bound to each, so both the count and the per-target values depend
+  on the enemy set, which has no authority (TARGET_COUNT, ONB-S3).
+- `op=report` is still not modelled (UNKNOWN).
+- Public re-measure: none of the five pinned public authorities has a
+  combining or `cycling_variable` line (pinned by test), so no public decision
+  changes.
 
 *Since M11-D3-C3* the nested scan reads `line_cd=` as READINESS
 (`src/simc/line-cooldown.ts`). Pinned: every APL LINE is its own `action_t`

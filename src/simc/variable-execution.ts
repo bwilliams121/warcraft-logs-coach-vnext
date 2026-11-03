@@ -30,10 +30,28 @@
  * WHAT IS MODELLED
  *
  * `set`, `setif` and `reset` — the three operations whose result does not
- * depend on the value already stored, so they need no history. Everything
- * else that can change a value — the combining operations, `cycling_variable`,
- * a line with an option outside the supported set (`delay=` gates readiness
- * on a cooldown; `target_if=` on a target) — makes the variable UNKNOWN.
+ * depend on the value already stored, so they need no history.
+ *
+ * The combining operations (ONB-S2) — `add`, `sub`, `mul`, `div`, `pow`,
+ * `mod`, `min`, `max`, `floor` and `ceil` — read the value as it is just
+ * before the line (`variableValueBeforeWrite`: this scan's assignment, a
+ * carried precombat value, else the unknown incoming value) and combine it
+ * with the line's `value=` under the pinned double semantics
+ * (`combineVariableValue`). An operand of unknown value yields UNKNOWN, never
+ * a guessed value: a combining line on a variable no earlier line of this
+ * scan or of precombat established reads an earlier scan's value, which this
+ * project does not have. `floor` and `ceil` are executed only on a variable
+ * SimulationCraft can never fold to a constant (`neverFoldedVariables`);
+ * elsewhere they write UNKNOWN.
+ *
+ * Everything else that can change a value — `cycling_variable`, a line with
+ * an option outside the supported set (`delay=` gates readiness on a
+ * cooldown; `target_if=` on a target) — makes the variable UNKNOWN.
+ * `cycling_variable` executes its operation once per enemy in the action's
+ * target list whenever the sim has more than one non-sleeping target
+ * (variable.cpp:369-391, action.cpp:1729-1770), with `target` bound to each in
+ * turn — so both the number of executions and every per-target value depend on
+ * the enemy set, which no authority here establishes (TARGET_COUNT, ONB-S3).
  *
  * `line_cd=` IS supported, and as nothing (M11-D3-C3): a variable line's
  * timer is never started. `variable_t::execute` runs inline in
@@ -64,6 +82,7 @@ import {
   evaluateSimcMagnitude,
   joinNumericBindings,
   knownNumber,
+  oneOfNumbers,
   variableValueBeforeWrite,
   unknownNumber,
   withScanVariable,
@@ -80,7 +99,7 @@ export type VariableExecutionRecord =
       /** A modelled operation ran. `executed` is UNDECIDED when `if=` was not settled: the value is the join. */
       readonly kind: "ASSIGNED";
       readonly name: string;
-      readonly operation: "SET" | "SETIF" | "RESET";
+      readonly operation: "SET" | "SETIF" | "RESET" | CombiningOperation;
       readonly executed: "PROVEN" | "UNDECIDED";
       readonly value: NumericBinding;
     }
@@ -95,7 +114,12 @@ export type VariableExecutionRecord =
       readonly kind: "NOT_MODELLED";
       readonly name: string | null;
       readonly reason:
-        "OPERATION" | "CYCLING_VARIABLE" | "UNMODELLED_OPTION" | "MALFORMED_LINE" | "MISSING_EXPRESSION";
+        | "OPERATION"
+        | "CYCLING_VARIABLE"
+        | "CONSTANT_FOLDING"
+        | "UNMODELLED_OPTION"
+        | "MALFORMED_LINE"
+        | "MISSING_EXPRESSION";
     };
 
 /** The option keys a modelled `variable` line may carry. */
@@ -132,6 +156,144 @@ const KNOWN_OPERATIONS: readonly string[] = [
 
 /** Operations whose constructor does not require `value=` (variable.cpp:74-76). */
 const VALUELESS_OPERATIONS: readonly string[] = ["floor", "ceil", "reset", "print", "report"];
+
+/** The operations that combine with the CURRENT value (ONB-S2). */
+export type CombiningOperation =
+  "ADD" | "SUB" | "MUL" | "DIV" | "POW" | "MOD" | "MIN" | "MAX" | "FLOOR" | "CEIL";
+
+const COMBINING_OPERATIONS: ReadonlyMap<string, CombiningOperation> = new Map([
+  ["add", "ADD"],
+  ["sub", "SUB"],
+  ["mul", "MUL"],
+  ["div", "DIV"],
+  ["pow", "POW"],
+  ["mod", "MOD"],
+  ["min", "MIN"],
+  ["max", "MAX"],
+  ["floor", "FLOOR"],
+  ["ceil", "CEIL"],
+]);
+
+/** `floor` and `ceil` read no `value=`: the constructor never parses one (variable.cpp:135-136). */
+const UNARY_COMBINING_OPERATIONS: readonly CombiningOperation[] = ["FLOOR", "CEIL"];
+
+/**
+ * The value a combining line leaves (ONB-S2): `operation` applied to the
+ * variable's value just before the line and the line's `value=` magnitude
+ * (`null` for `floor` and `ceil`, which read none).
+ *
+ * THE PINNED ARITHMETIC (variable.cpp:269-311, all on doubles)
+ *
+ *   add, sub, mul   `current += v`, `-= v`, `*= v`
+ *   div             `v == 0` sets the value to 0; else `current /= v`
+ *   mod             `v == 0` sets the value to 0; else `std::fmod(current, v)`
+ *                   (the value expression is evaluated twice; an expression
+ *                   reads the same state both times, so it is one value)
+ *   pow             `std::pow(current, v)`
+ *   min, max        `std::min(current, v)`, `std::max(current, v)`: `v` when
+ *                   `v < current` (min) or `current < v` (max), else `current`
+ *   floor, ceil     `util::floor(current)`, `util::ceil(current)`, whose
+ *                   default `decplaces` is 0 (util.hpp:308-309) — `::floor`
+ *                   and `::ceil` (util.cpp:3131-3136, 3161-3166)
+ *
+ * IEEE-754 makes `+ - * /` correctly rounded and `fmod` exact, so the double
+ * here is the double SimulationCraft computes; JavaScript's `%` is C's `fmod`.
+ * `pow` is not correctly rounded by every C library, so only an exponentiation
+ * whose exact result is a safe integer (integer base, non-negative integer
+ * exponent) is computed; any other is UNKNOWN (`STATE_NOT_MODELLED`). A
+ * non-finite input or result is UNKNOWN too, never Infinity or NaN.
+ *
+ * WHAT THE INPUTS MAY BE
+ *
+ *   UNKNOWN in either        UNKNOWN, with that input's reason — never a
+ *                            guessed value
+ *   BOUNDED in either        UNKNOWN (`STATE_NOT_MODELLED`): carrying a bound
+ *                            through `mul`, `div` or `pow` needs sign reasoning
+ *                            not done here, as for expression arithmetic
+ *   exact or ONE_OF          the operation applied member by member. At most
+ *                            ONE side may be a set: each member is then one
+ *                            world's exact value, and its image is that world's
+ *                            result. Two sets would mean pairing members whose
+ *                            worlds may exclude each other — `op=add,
+ *                            value=variable.x` reads the same unresolved value
+ *                            twice — which would manufacture values, so it is
+ *                            UNKNOWN (`STATE_NOT_MODELLED`)
+ */
+export function combineVariableValue(
+  operation: CombiningOperation,
+  current: NumericBinding,
+  operand: NumericBinding | null,
+): NumericBinding {
+  const unary = UNARY_COMBINING_OPERATIONS.includes(operation);
+  if (current.state === "UNKNOWN_NUMBER") return current;
+  if (!unary) {
+    if (operand === null) return unknownNumber("STATE_NOT_MODELLED");
+    if (operand.state === "UNKNOWN_NUMBER") return operand;
+  }
+  const left = exactMembers(current);
+  const right = unary ? [0] : operand === null ? null : exactMembers(operand);
+  if (left === null || right === null) return unknownNumber("STATE_NOT_MODELLED");
+  if (left.length > 1 && right.length > 1) return unknownNumber("STATE_NOT_MODELLED");
+
+  const results: number[] = [];
+  for (const x of left) {
+    for (const v of right) {
+      const result = pinnedCombination(operation, x, v);
+      if (result === null) return unknownNumber("STATE_NOT_MODELLED");
+      results.push(result);
+    }
+  }
+  const set = [current, operand].find((binding) => binding?.state === "ONE_OF_NUMBERS");
+  return oneOfNumbers(results, set?.state === "ONE_OF_NUMBERS" ? set.reason : "STATE_NOT_ESTABLISHED");
+}
+
+function exactMembers(binding: NumericBinding): readonly number[] | null {
+  if (binding.state === "KNOWN_NUMBER") return [binding.value];
+  if (binding.state === "ONE_OF_NUMBERS") return binding.values;
+  return null;
+}
+
+/** One exact application, or `null` where the pinned double cannot be reproduced. */
+function pinnedCombination(operation: CombiningOperation, current: number, v: number): number | null {
+  if (!Number.isFinite(current) || !Number.isFinite(v)) return null;
+  const result = ((): number | null => {
+    switch (operation) {
+      case "ADD":
+        return current + v;
+      case "SUB":
+        return current - v;
+      case "MUL":
+        return current * v;
+      case "DIV":
+        return v === 0 ? 0 : current / v;
+      case "MOD":
+        return v === 0 ? 0 : current % v;
+      case "POW":
+        return exactIntegerPower(current, v);
+      case "MIN":
+        return v < current ? v : current;
+      case "MAX":
+        return current < v ? v : current;
+      case "FLOOR":
+        return Math.floor(current);
+      case "CEIL":
+        return Math.ceil(current);
+    }
+  })();
+  return result !== null && Number.isFinite(result) ? result : null;
+}
+
+/** `base ** exponent` when it is an exactly representable safe integer, else `null`. */
+function exactIntegerPower(base: number, exponent: number): number | null {
+  if (!Number.isInteger(base) || !Number.isInteger(exponent) || exponent < 0) return null;
+  if (!Number.isSafeInteger(base)) return null;
+  // |base| >= 2 passes 2^53 by exponent 54, so no larger exponent is computed.
+  if (Math.abs(base) >= 2 && exponent > 53) return null;
+  if (exponent > 53) return base === 0 ? 0 : base === 1 || exponent % 2 === 0 ? 1 : -1;
+  const exact = BigInt(base) ** BigInt(exponent);
+  const limit = BigInt(Number.MAX_SAFE_INTEGER);
+  return exact > limit || exact < -limit ? null : Number(exact);
+}
 
 /**
  * Every variable's `default_value_`, keyed by lower-cased name (ONB-S1).
@@ -200,6 +362,50 @@ export function establishedVariableDefaults(authority: AplAuthority): ReadonlyMa
 
 const defaultsByAuthority = new WeakMap<AplAuthority, ReadonlyMap<string, NumericBinding>>();
 
+/**
+ * The variables SimulationCraft can NEVER fold to a constant, lower-cased
+ * (ONB-S2).
+ *
+ * Pinned: at the iteration-1 reset, a variable whose every non-background
+ * action is constant takes the value it ended iteration 0 with as a constant
+ * (player.cpp:6694-6697, action_variable.cpp:30-78); its reads fold to it
+ * (player.cpp:11959-11963) and its lines leave the foreground lists
+ * (variable.cpp:174-187). `add` to `max` are never constant
+ * (variable.cpp:202-205), so a variable with one such line — named, with a
+ * `value=`, so the constructor keeps it (variable.cpp:52-98) — never folds.
+ * `floor`, `ceil` and `reset` are constant whenever every other line is
+ * (variable.cpp:216-221), so a variable written only by them and by `set` /
+ * `setif` lines may fold, and a read between two of its writes may see the
+ * folded value rather than the earlier write. Deciding which `set` values are
+ * constant needs SimulationCraft's expression `is_constant`, which is not
+ * modelled, so only this structural proof is used.
+ */
+export function neverFoldedVariables(authority: AplAuthority): ReadonlySet<string> {
+  const cached = neverFoldedByAuthority.get(authority);
+  if (cached !== undefined) return cached;
+  const names = new Set<string>();
+  for (const action of authority.actions) {
+    if (action.entryKind !== "VARIABLE_ASSIGNMENT") continue;
+    const structure = parseAplLine(action.actionStringVerbatim);
+    if (!structure.balanced || structure.malformedSegments.length > 0) continue;
+    const written = (key: string) => structure.options.filter((option) => option.key === key);
+    const name = written("name");
+    const ops = written("op");
+    const values = written("value");
+    // One reading only: a repeated option is not used as proof.
+    if (name.length !== 1 || ops.length !== 1 || values.length !== 1) continue;
+    const combining = COMBINING_OPERATIONS.get((ops[0]?.value ?? "").toLowerCase());
+    if (combining === undefined || UNARY_COMBINING_OPERATIONS.includes(combining)) continue;
+    const rawName = name[0]?.value ?? "";
+    if (rawName.length === 0 || (values[0]?.value ?? "").length === 0) continue;
+    names.add(rawName.toLowerCase());
+  }
+  neverFoldedByAuthority.set(authority, names);
+  return names;
+}
+
+const neverFoldedByAuthority = new WeakMap<AplAuthority, ReadonlySet<string>>();
+
 /** The authority's list names in SimulationCraft's construction order (player.cpp:526-559). */
 export function constructionOrder(authority: AplAuthority): readonly string[] {
   const names = [...new Set(authority.artifact.lists.map((list) => list.listName))];
@@ -217,6 +423,11 @@ export function constructionOrder(authority: AplAuthority): readonly string[] {
  * (`establishedVariableDefaults`): what `op=reset` restores. Without them a
  * reset restores the line's own `default=`, which is the pinned value only
  * when that line constructed the variable.
+ *
+ * `neverFolded` is `neverFoldedVariables(authority)` (ONB-S2). `floor` and
+ * `ceil` are executed only on a variable in it; on any other — or without the
+ * set — they write UNKNOWN (`CONSTANT_FOLDING`), because SimulationCraft may
+ * fold that variable to a constant.
  */
 export function executeVariableLine(
   action: AplAction,
@@ -224,6 +435,7 @@ export function executeVariableLine(
   bindings: AtomBindings,
   state: ScanVariables,
   defaults?: ReadonlyMap<string, NumericBinding>,
+  neverFolded?: ReadonlySet<string>,
 ): { readonly state: ScanVariables; readonly record: VariableExecutionRecord } {
   const structure = parseAplLine(action.actionStringVerbatim);
   const names = structure.options.filter((option) => option.key === "name").map((option) => option.value);
@@ -280,8 +492,20 @@ export function executeVariableLine(
   };
 
   let assigned: NumericBinding;
-  let modelled: "SET" | "SETIF" | "RESET";
-  if (operation === "set") {
+  let modelled: "SET" | "SETIF" | "RESET" | CombiningOperation;
+  const combining = COMBINING_OPERATIONS.get(operation);
+  if (combining !== undefined) {
+    // The value as it is just before this line: this scan's, a carried
+    // precombat value, or the unknown incoming value (ONB-S2).
+    const unary = UNARY_COMBINING_OPERATIONS.includes(combining);
+    // `floor` and `ceil` can be constant, so their variable may be folded:
+    // executed only where a never-constant line proves it is not.
+    if (unary && neverFolded?.has(name) !== true) return notModelled("CONSTANT_FOLDING");
+    const operand = unary ? null : magnitude(option("value"));
+    if (!unary && operand === null) return notModelled("MISSING_EXPRESSION");
+    assigned = combineVariableValue(combining, variableValueBeforeWrite(bindings, name), operand);
+    modelled = combining;
+  } else if (operation === "set") {
     const value = magnitude(option("value"));
     if (value === null) return notModelled("MISSING_EXPRESSION");
     assigned = value;
@@ -320,8 +544,9 @@ export function executeVariableLine(
   }
 
   // `set`, `setif` and `reset` REPLACE the value, so a proven execution reads
-  // nothing that came before it. An undecided `if=` leaves both worlds:
-  // assigned, or the value as it was — this scan's, else the spec's initial.
+  // nothing that came before it; a combining operation already read it. An
+  // undecided `if=` leaves both worlds: assigned, or the value as it was —
+  // this scan's, else the spec's initial.
   const value =
     executed === "PROVEN"
       ? assigned
